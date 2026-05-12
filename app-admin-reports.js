@@ -31,6 +31,8 @@ function initAdminReportModal() {
   var calculationGroupStatusEls = modal ? modal.querySelectorAll("[data-admin-report-calc-status]") : null;
   var calculationsCashInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-cash]") : null;
   var calculationsWinLossInputs = modal ? modal.querySelectorAll("[data-admin-report-calc-winloss]") : null;
+  var calculationsArchiveBtn = document.getElementById("adminReportCalcArchiveBtn");
+  var calculationsArchiveEl = document.getElementById("adminReportCalcArchive");
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWinLossTotalEl = document.getElementById("adminReportCalcWinLossTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
@@ -59,6 +61,8 @@ function initAdminReportModal() {
   var figuresAgentsPaidInput = document.getElementById("adminReportFiguresAgentsPaid");
   var figuresExtrasEl = document.getElementById("adminReportFiguresExtras");
   var figuresAddFieldBtn = document.getElementById("adminReportFiguresAddField");
+  var figuresApproxRakebackEnabledInput = document.getElementById("adminReportFiguresApproxRakebackEnabled");
+  var figuresApproxRakebackEl = document.getElementById("adminReportFiguresApproxRakeback");
   var figuresGrandTotalEl = document.getElementById("adminReportFiguresGrandTotal");
   var editingReportId = null;
   var editingReport = null;
@@ -76,8 +80,11 @@ function initAdminReportModal() {
   var rakebackDraftNeedsMigration = false;
   var rakebackDragState = null;
   var rakebackWeekArchiveOpen = {};
+  var rakebackWeekRoomArchiveOpen = {};
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
+  var calculationArchiveOpen = false;
+  var calculationReportsCache = [];
   var figuresRakeTotal = 0;
   var figuresPercentTotal = 0;
   var figuresSavedLocked = false;
@@ -441,6 +448,8 @@ function initAdminReportModal() {
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
       var rowStamp = getRakebackRowEntryAddedAt(row, index);
       if (!Number.isFinite(rowStamp)) return;
+      var archived = isRakebackEntryArchivedByStamp(rowStamp);
+      if (rakebackArchiveMode ? !archived : archived) return;
       var room = getRakebackRowRoom(row);
       var roomAmount = Math.round(getRakebackRowAmount(row));
       var rakeback = getRakebackReportAmount(room, roomAmount);
@@ -972,7 +981,7 @@ function initAdminReportModal() {
 
   function removeRakebackDateSeparators() {
     if (!rakebackBody) return;
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator]")).forEach(function (row) {
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator],[data-rakeback-week-room-tabs]")).forEach(function (row) {
       row.parentNode.removeChild(row);
     });
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-week-hidden]")).forEach(function (row) {
@@ -1010,6 +1019,26 @@ function initAdminReportModal() {
         var roomAmount = Math.round(getRakebackRowAmount(row));
         totals.rake += getRakebackRowCalculationBase(row);
         totals.rakeback += getRakebackReportAmount(room, roomAmount);
+      });
+    });
+    return totals;
+  }
+
+  function getRakebackWeekRoomTotals(groups, weekStart) {
+    var totals = {};
+    RAKEBACK_ROOMS.forEach(function (room) {
+      totals[room] = { rake: 0, rakeback: 0, count: 0 };
+    });
+    (groups || []).forEach(function (group) {
+      (group && group.rows ? group.rows : []).forEach(function (row, index) {
+        var rowStamp = getRakebackRowBoundEntryAddedAt(row, index);
+        if (!Number.isFinite(rowStamp) || getRakebackWeekStart(rowStamp) !== weekStart) return;
+        var room = normalizeRakebackRoom(getRakebackRowRoom(row));
+        if (!totals[room]) totals[room] = { rake: 0, rakeback: 0, count: 0 };
+        var roomAmount = Math.round(getRakebackRowAmount(row));
+        totals[room].rake += getRakebackRowCalculationBase(row);
+        totals[room].rakeback += getRakebackReportAmount(room, roomAmount);
+        totals[room].count += 1;
       });
     });
     return totals;
@@ -1056,6 +1085,38 @@ function initAdminReportModal() {
     return tr;
   }
 
+  function createRakebackWeekRoomTabs(weekStart, roomTotals) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var wrap = document.createElement("div");
+    var weekKey = String(weekStart);
+    tr.className = "admin-report-rakeback-week-room-tabs";
+    tr.setAttribute("data-rakeback-week-room-tabs", "");
+    td.colSpan = 7;
+    wrap.className = "admin-report-rakeback-week-room-tabs__grid";
+    RAKEBACK_ROOMS.forEach(function (room) {
+      var key = weekKey + "|" + room;
+      var open = rakebackWeekRoomArchiveOpen[key] !== false;
+      var totals = roomTotals && roomTotals[room] ? roomTotals[room] : { rake: 0, rakeback: 0, count: 0 };
+      var button = document.createElement("button");
+      var label = document.createElement("span");
+      var meta = document.createElement("small");
+      button.type = "button";
+      button.className = "admin-report-rakeback-week-room-tabs__button";
+      button.setAttribute("data-rakeback-week-room-toggle", key);
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+      button.classList.toggle("admin-report-rakeback-week-room-tabs__button--empty", !totals.count);
+      label.textContent = getRakebackRoomLabel(room);
+      meta.textContent = "Рейк " + formatReportRubleNumber(totals.rake) + " · РБ " + formatReportRubleNumber(totals.rakeback);
+      button.appendChild(label);
+      button.appendChild(meta);
+      wrap.appendChild(button);
+    });
+    td.appendChild(wrap);
+    tr.appendChild(td);
+    return tr;
+  }
+
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
     if (!rakebackBody || (mode !== "created" && mode !== "standard")) return;
@@ -1081,6 +1142,7 @@ function initAdminReportModal() {
     });
     var lastKey = "";
     var lastWeekKey = "";
+    var handledWeekKeys = {};
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
@@ -1088,17 +1150,49 @@ function initAdminReportModal() {
       var weekStart = getRakebackWeekStart(stamp);
       if (Number.isFinite(weekStart) && Number.isFinite(currentWeekStart) && weekStart < currentWeekStart) {
         var weekKey = String(weekStart);
+        if (handledWeekKeys[weekKey]) return;
+        handledWeekKeys[weekKey] = true;
         var open = rakebackWeekArchiveOpen[weekKey] === true;
         if (weekKey !== lastWeekKey) {
           lastWeekKey = weekKey;
           rakebackBody.insertBefore(createRakebackWeekSeparator(weekStart, getRakebackWeekGroupTotals(weekGroups[weekKey] ? weekGroups[weekKey].groups : [], weekStart), open), group.rows[0]);
         }
-        group.rows.forEach(function (row) {
-          if (!open) {
-            row.hidden = true;
-            row.setAttribute("data-rakeback-week-hidden", "1");
+        var weekGroupsList = weekGroups[weekKey] ? weekGroups[weekKey].groups : [];
+        if (!open) {
+          weekGroupsList.forEach(function (weekGroup) {
+            (weekGroup.rows || []).forEach(function (row) {
+              row.hidden = true;
+              row.setAttribute("data-rakeback-week-hidden", "1");
+            });
+          });
+          return;
+        }
+        var anchor = null;
+        for (var wi = weekGroupsList.length - 1; wi >= 0 && !anchor; wi--) {
+          var rows = weekGroupsList[wi] && weekGroupsList[wi].rows ? weekGroupsList[wi].rows : [];
+          for (var ri = rows.length - 1; ri >= 0; ri--) {
+            if (rows[ri] && rows[ri].parentNode === rakebackBody) {
+              anchor = rows[ri].nextSibling;
+              break;
+            }
           }
+        }
+        var fragment = document.createDocumentFragment();
+        fragment.appendChild(createRakebackWeekRoomTabs(weekStart, getRakebackWeekRoomTotals(weekGroupsList, weekStart)));
+        RAKEBACK_ROOMS.forEach(function (room) {
+          var roomOpen = rakebackWeekRoomArchiveOpen[weekKey + "|" + room] !== false;
+          weekGroupsList.forEach(function (weekGroup) {
+            var keyRow = getRakebackGroupKeyRow(weekGroup.rows || []);
+            if (normalizeRakebackRoom(getRakebackRowRoom(keyRow)) !== room) return;
+            (weekGroup.rows || []).forEach(function (row) {
+              row.hidden = !roomOpen;
+              if (!roomOpen) row.setAttribute("data-rakeback-week-hidden", "1");
+              else row.removeAttribute("data-rakeback-week-hidden");
+              fragment.appendChild(row);
+            });
+          });
         });
+        rakebackBody.insertBefore(fragment, anchor);
         return;
       }
       var key = getRakebackMoscowDayKey(stamp);
@@ -1354,6 +1448,18 @@ function initAdminReportModal() {
         numberEl.hidden = isAddon;
         numberEl.textContent = visible && !isAddon ? String(++visibleIndex) : "";
       }
+    });
+  }
+
+  function syncRakebackVisibleRowNumbers() {
+    if (!rakebackBody) return;
+    var visibleIndex = 0;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      var numberEl = row.querySelector("[data-rakeback-row-number]");
+      if (!numberEl) return;
+      var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
+      numberEl.hidden = isAddon;
+      numberEl.textContent = !row.hidden && !isAddon ? String(++visibleIndex) : "";
     });
   }
 
@@ -1747,6 +1853,7 @@ function initAdminReportModal() {
     if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
     insertRakebackDateSeparators();
+    syncRakebackVisibleRowNumbers();
     var collected = collectRakebackRows(false, false).filter(function (row) {
       var archived = isRakebackCollectedRowArchived(row);
       return rakebackArchiveMode ? archived : !archived;
@@ -1996,6 +2103,16 @@ function initAdminReportModal() {
       start: start,
       end: end,
       label: formatReportWeekBoundary(start) + " – " + formatReportWeekBoundary(end),
+    };
+  }
+
+  function getCalculationWeekMetaFromStart(start) {
+    start = Number(start);
+    if (!Number.isFinite(start)) return getCalculationWeekMeta();
+    return {
+      start: start,
+      end: start + REPORT_WEEK_MS - 1,
+      label: formatReportWeekBoundary(start) + " – " + formatReportWeekBoundary(start + REPORT_WEEK_MS - 1),
     };
   }
 
@@ -2333,6 +2450,32 @@ function initAdminReportModal() {
     return total;
   }
 
+  function getFiguresExtraRakeTotal() {
+    var total = 0;
+    if (!figuresExtrasEl) return total;
+    figuresExtrasEl.querySelectorAll("[data-admin-report-figures-extra-rake]").forEach(function (input) {
+      total += parseReportNumber(input ? input.value : "");
+    });
+    return total;
+  }
+
+  function getApproxFiguresRakebackAmount() {
+    return -(Math.max(0, parseReportNumber(figuresRakeTotal) - getFiguresExtraRakeTotal()) * 30 / 100);
+  }
+
+  function syncFiguresExtraRow(row) {
+    if (!row) return;
+    var rakeInput = row.querySelector("[data-admin-report-figures-extra-rake]");
+    var percentInput = row.querySelector("[data-admin-report-figures-extra-percent]");
+    var amountInput = row.querySelector("[data-admin-report-figures-extra-amount]");
+    if (!amountInput) return;
+    var rakeRaw = rakeInput ? String(rakeInput.value || "").trim() : "";
+    var percentRaw = percentInput ? String(percentInput.value || "").trim() : "";
+    if (!rakeRaw && !percentRaw) return;
+    var amount = parseReportNumber(rakeRaw) * parseReportNumber(percentRaw) / 100;
+    amountInput.value = amount ? formatReportInputNumber(amount) : "";
+  }
+
   function formatReportNegativeDisplay(value) {
     var n = parseReportNumber(value);
     if (!n) return formatReportRubleNumber(0);
@@ -2342,12 +2485,17 @@ function initAdminReportModal() {
   function updateFiguresTotals() {
     figuresRakeTotal = 0;
     figuresPercentTotal = 0;
+    if (figuresExtrasEl) {
+      figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra").forEach(syncFiguresExtraRow);
+    }
     if (figuresRakeInputs && figuresRakeInputs.length) {
       figuresRakeInputs.forEach(function (input, index) {
         var rake = parseReportNumber(input ? input.value : "");
+        var multiplier = parseReportNumber(input ? input.getAttribute("data-admin-report-figures-multiplier") : "");
+        var rakeAmount = rake * (multiplier || 1);
         var rate = parseReportNumber(input ? input.getAttribute("data-admin-report-figures-rate") : "");
-        var percent = -(rake * rate / 100);
-        figuresRakeTotal += rake;
+        var percent = -(rakeAmount * rate / 100);
+        figuresRakeTotal += rakeAmount;
         figuresPercentTotal += percent;
         var out = figuresPercentOutputs && figuresPercentOutputs[index] ? figuresPercentOutputs[index] : null;
         if (out) out.textContent = formatReportRubleNumber(percent);
@@ -2361,6 +2509,9 @@ function initAdminReportModal() {
     if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
     if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
     if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
+    var approxRakeback = getApproxFiguresRakebackAmount();
+    var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
+    if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
     if (figuresGrandTotalEl) {
       var grand =
         figuresRakeTotal +
@@ -2371,7 +2522,8 @@ function initAdminReportModal() {
         parseReportNumber(figuresRomanPaidInput ? figuresRomanPaidInput.value : "") +
         parseReportNumber(figuresWinLossInput ? figuresWinLossInput.value : "") -
         parseReportNumber(figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "") -
-        getFiguresExtraAmountTotal();
+        getFiguresExtraAmountTotal() +
+        (includeApproxRakeback ? approxRakeback : 0);
       figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
     }
     updateCalculationGrandTotal();
@@ -2412,11 +2564,44 @@ function initAdminReportModal() {
     return totals;
   }
 
+  function renderCalculationArchive(items) {
+    if (!calculationsArchiveEl) return;
+    calculationsArchiveEl.hidden = !calculationArchiveOpen;
+    if (calculationsArchiveBtn) calculationsArchiveBtn.setAttribute("aria-pressed", calculationArchiveOpen ? "true" : "false");
+    if (!calculationArchiveOpen) return;
+    var currentWeek = getCalculationWeekMeta();
+    var previousWeek = getCalculationWeekMetaFromStart(currentWeek.start - REPORT_WEEK_MS);
+    var totals = sumCalculationReports(items || [], previousWeek);
+    var hasAny = Object.keys(totals).some(function (key) {
+      return parseReportNumber(totals[key]) !== 0;
+    });
+    calculationsArchiveEl.innerHTML =
+      '<details class="admin-report-calculations__archive-details" open>' +
+        '<summary class="admin-report-calculations__archive-summary">Неделя ' + escapeReportHtml(previousWeek.label) + "</summary>" +
+        '<div class="admin-report-calculations__archive-inner">' +
+          (hasAny ? (
+            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Депозиты за неделю</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.deposit)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Бонусы</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.bonuses)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Рейкбек</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.rakeback)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов игроками</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.cashout)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов Эксчип бот</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.botExchipCashout)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>ЗП</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.anyaSalary)) + "</output></div>"
+          ) : '<p class="admin-report-calculations__archive-empty">За прошлую неделю расчетов пока нет.</p>') +
+        "</div>" +
+      "</details>";
+  }
+
+  function setCalculationArchiveOpen(open) {
+    calculationArchiveOpen = !!open;
+    renderCalculationArchive(calculationReportsCache);
+  }
+
   function loadCalculationsReports() {
     if (!canViewCalculationsReports()) return;
     var week = getCalculationWeekMeta();
     if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
     setCalculationTotalsText({});
+    renderCalculationArchive(calculationReportsCache);
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
@@ -2424,16 +2609,20 @@ function initAdminReportModal() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var items = (data && data.ok && data.reports) ? data.reports : [];
+        calculationReportsCache = Array.isArray(items) ? items : [];
         setCalculationTotalsText(sumCalculationReports(items, week));
+        renderCalculationArchive(calculationReportsCache);
       })
       .catch(function () {
+        calculationReportsCache = [];
         setCalculationTotalsText({});
+        renderCalculationArchive([]);
       });
   }
 
   function bindFiguresExtraInputs(scope) {
     if (!scope) return;
-    scope.querySelectorAll("[data-admin-report-figures-extra-amount]").forEach(function (input) {
+    scope.querySelectorAll("[data-admin-report-figures-extra-rake],[data-admin-report-figures-extra-percent],[data-admin-report-figures-extra-amount]").forEach(function (input) {
       input.addEventListener("input", updateFiguresTotals);
       input.addEventListener("change", updateFiguresTotals);
     });
@@ -2550,8 +2739,15 @@ function initAdminReportModal() {
     if (figuresExtrasEl) {
       figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra").forEach(function (row) {
         var name = row.querySelector("[data-admin-report-figures-extra-name]");
+        var rake = row.querySelector("[data-admin-report-figures-extra-rake]");
+        var percent = row.querySelector("[data-admin-report-figures-extra-percent]");
         var amount = row.querySelector("[data-admin-report-figures-extra-amount]");
-        extras.push({ name: name ? name.value : "", amount: amount ? amount.value : "" });
+        extras.push({
+          name: name ? name.value : "",
+          rake: rake ? rake.value : "",
+          percent: percent ? percent.value : "",
+          amount: amount ? amount.value : "",
+        });
       });
     }
     return {
@@ -2561,6 +2757,7 @@ function initAdminReportModal() {
       romanPaid: figuresRomanPaidInput ? figuresRomanPaidInput.value : "",
       winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
       agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
+      approxRakebackEnabled: !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked),
       extras: extras,
     };
   }
@@ -2606,14 +2803,19 @@ function initAdminReportModal() {
     if (figuresRomanPaidInput) figuresRomanPaidInput.value = draft.romanPaid != null ? draft.romanPaid : "";
     if (figuresWinLossInput) figuresWinLossInput.value = draft.winLoss != null ? draft.winLoss : "";
     if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
+    if (figuresApproxRakebackEnabledInput) figuresApproxRakebackEnabledInput.checked = draft.approxRakebackEnabled === true;
     var extras = Array.isArray(draft.extras) ? draft.extras : [];
     ensureFiguresExtraRows(extras.length || 1);
     if (figuresExtrasEl) {
       figuresExtrasEl.querySelectorAll(".admin-report-calculations__field--extra").forEach(function (row, index) {
         var extra = extras[index] || {};
         var name = row.querySelector("[data-admin-report-figures-extra-name]");
+        var rake = row.querySelector("[data-admin-report-figures-extra-rake]");
+        var percent = row.querySelector("[data-admin-report-figures-extra-percent]");
         var amount = row.querySelector("[data-admin-report-figures-extra-amount]");
         if (name) name.value = extra.name != null ? extra.name : "";
+        if (rake) rake.value = extra.rake != null ? extra.rake : "";
+        if (percent) percent.value = extra.percent != null ? extra.percent : "";
         if (amount) amount.value = extra.amount != null ? extra.amount : "";
       });
     }
@@ -3350,7 +3552,7 @@ function initAdminReportModal() {
       input.addEventListener("change", updateFiguresTotals);
     });
   }
-  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput].forEach(function (input) {
+  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput].forEach(function (input) {
     if (!input) return;
     input.addEventListener("input", updateFiguresTotals);
     input.addEventListener("change", updateFiguresTotals);
@@ -3373,6 +3575,11 @@ function initAdminReportModal() {
   }
   if (figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
   if (figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
+  if (calculationsArchiveBtn) {
+    calculationsArchiveBtn.addEventListener("click", function () {
+      setCalculationArchiveOpen(!calculationArchiveOpen);
+    });
+  }
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
@@ -3494,6 +3701,14 @@ function initAdminReportModal() {
         e.preventDefault();
         var weekKey = weekToggle.getAttribute("data-rakeback-week-toggle") || "";
         if (weekKey) rakebackWeekArchiveOpen[weekKey] = !rakebackWeekArchiveOpen[weekKey];
+        syncRakebackTable({ skipSort: true });
+        return;
+      }
+      var weekRoomToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-week-room-toggle]") : null;
+      if (weekRoomToggle) {
+        e.preventDefault();
+        var weekRoomKey = weekRoomToggle.getAttribute("data-rakeback-week-room-toggle") || "";
+        if (weekRoomKey) rakebackWeekRoomArchiveOpen[weekRoomKey] = rakebackWeekRoomArchiveOpen[weekRoomKey] === false;
         syncRakebackTable({ skipSort: true });
         return;
       }

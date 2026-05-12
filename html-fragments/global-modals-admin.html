@@ -389,34 +389,42 @@
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" data-admin-report-calc-save="week" title="Сохранить неделю" aria-label="Сохранить неделю">✓</button>
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" data-admin-report-calc-edit="week" title="Редактировать неделю" aria-label="Редактировать неделю" hidden>✎</button>
+                      <button type="button" class="admin-report-calculations__archive-btn" id="adminReportCalcArchiveBtn" aria-pressed="false">Архив</button>
                       <span class="admin-report-calculations__status" data-admin-report-calc-status="week"></span>
                     </div>
                   </div>
                   <p class="admin-report-calculations__week" id="adminReportCalcWeekLabel"></p>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                    <span>Депозиты за неделю</span>
-                    <output id="adminReportCalcDeposit">0</output>
+                  <div class="admin-report-calculations__week-grid">
+                    <div class="admin-report-calculations__week-col">
+                      <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                        <span>Депозиты за неделю</span>
+                        <output id="adminReportCalcDeposit">0</output>
+                      </div>
+                      <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                        <span>Бонусы</span>
+                        <output id="adminReportCalcBonuses">0</output>
+                      </div>
+                      <div class="admin-report-calculations__field admin-report-calculations__field--positive">
+                        <span>Рейкбек</span>
+                        <output id="adminReportCalcRakeback">0</output>
+                      </div>
+                    </div>
+                    <div class="admin-report-calculations__week-col">
+                      <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                        <span>Итого рейк</span>
+                        <output id="adminReportCalcRakeTotal">0</output>
+                      </div>
+                      <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                        <span>Выводов игроками</span>
+                        <output id="adminReportCalcCashout">0</output>
+                      </div>
+                      <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                        <span>Выводов Эксчип бот</span>
+                        <output id="adminReportCalcBotExchipCashout">0</output>
+                      </div>
+                    </div>
                   </div>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                    <span>Бонусы</span>
-                    <output id="adminReportCalcBonuses">0</output>
-                  </div>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--positive">
-                    <span>Рейкбек</span>
-                    <output id="adminReportCalcRakeback">0</output>
-                  </div>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                    <span>Итого рейк</span>
-                    <output id="adminReportCalcRakeTotal">0</output>
-                  </div>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                    <span>Выводов игроками</span>
-                    <output id="adminReportCalcCashout">0</output>
-                  </div>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                    <span>Выводов Эксчип бот</span>
-                    <output id="adminReportCalcBotExchipCashout">0</output>
-                  </div>
+                  <div class="admin-report-calculations__archive" id="adminReportCalcArchive" hidden></div>
                 </section>
                 <div class="admin-report-calculations__field admin-report-calculations__field--grand">
                   <span>Полное итого</span>
@@ -445,12 +453,12 @@
                   </label>
                   <label class="admin-report-calculations__field admin-report-calculations__field--triple">
                     <span>Рейк Suprema</span>
-                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="18" placeholder="0" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="18" data-admin-report-figures-multiplier="115" placeholder="0" />
                     <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
                   </label>
                   <label class="admin-report-calculations__field admin-report-calculations__field--triple">
                     <span>Рейк PPpoker</span>
-                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="15" placeholder="0" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-rake data-admin-report-figures-rate="15" data-admin-report-figures-multiplier="115" placeholder="0" />
                     <output class="admin-report-calculations__percent" data-admin-report-figures-percent>0</output>
                   </label>
                   <div class="admin-report-calculations__field admin-report-calculations__field--total">
@@ -522,7 +530,7 @@
                   <span>ЗП</span>
                   <output id="adminReportFiguresSalary">0</output>
                 </div>
-                <label class="admin-report-calculations__field">
+                <label class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--visual-minus">
                   <span>Роман выдал</span>
                   <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRomanPaid" placeholder="0" />
                 </label>
@@ -535,12 +543,22 @@
                   <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresAgentsPaid" placeholder="0" />
                 </label>
                 <div class="admin-report-calculations__extras" id="adminReportFiguresExtras">
-                  <label class="admin-report-calculations__field admin-report-calculations__field--extra">
+                  <label class="admin-report-calculations__field admin-report-calculations__field--extra admin-report-calculations__field--negative admin-report-calculations__field--visual-minus">
                     <input type="text" class="admin-report-calculations__input admin-report-calculations__input--name" data-admin-report-figures-extra-name placeholder="Название поля" />
-                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-extra-amount placeholder="0" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-extra-rake placeholder="Рейк" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-extra-percent placeholder="%" />
+                    <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-figures-extra-amount placeholder="РБ" />
                   </label>
                 </div>
                 <button type="button" class="admin-report-calculations__add" id="adminReportFiguresAddField">Добавить поле</button>
+                <label class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--checkbox-total">
+                  <span>Примерный рейкбек</span>
+                  <span class="admin-report-calculations__checkbox-wrap">
+                    <input type="checkbox" id="adminReportFiguresApproxRakebackEnabled" />
+                    <span aria-hidden="true"></span>
+                  </span>
+                  <output id="adminReportFiguresApproxRakeback">0</output>
+                </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--grand">
                   <span>Итого цифры</span>
                   <output id="adminReportFiguresGrandTotal">0</output>
