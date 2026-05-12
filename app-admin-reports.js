@@ -87,6 +87,7 @@ function initAdminReportModal() {
   var rakebackDragState = null;
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
+  var manualRakebackInputTouched = false;
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
   var calculationReportsCache = [];
@@ -1091,6 +1092,33 @@ function initAdminReportModal() {
     return tr;
   }
 
+  function createRakebackTemplateSeparator() {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var span = document.createElement("span");
+    tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
+    tr.setAttribute("data-rakeback-date-separator", "");
+    td.colSpan = 7;
+    span.textContent = "Пустые записи недели";
+    td.appendChild(span);
+    tr.appendChild(td);
+    return tr;
+  }
+
+  function isRakebackCarryForwardPlaceholderRow(row) {
+    if (!row || row.getAttribute("data-rakeback-carry-forward") !== "1") return false;
+    if (isRakebackRowAccounted(row)) return false;
+    if (row.getAttribute("data-rakeback-explicit-zero-rake") === "1") return false;
+    var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
+    return rake === 0 && Math.round(getRakebackRowAmount(row)) === 0;
+  }
+
+  function isRakebackCarryForwardPlaceholderGroup(group) {
+    var keyRow = getRakebackGroupKeyRow(group && group.rows ? group.rows : []);
+    return isRakebackCarryForwardPlaceholderRow(keyRow);
+  }
+
   function createRakebackWeekSeparator(weekStart, totals, open) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -1177,6 +1205,7 @@ function initAdminReportModal() {
     var visibleGroups = getRakebackVisibleGroups();
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
+      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group)) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var weekStart = getRakebackWeekStart(stamp);
@@ -1194,8 +1223,20 @@ function initAdminReportModal() {
     var lastKey = "";
     var lastWeekKey = "";
     var handledWeekKeys = {};
+    var templateSeparatorInserted = false;
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
+      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group)) {
+        group.rows.forEach(function (row) {
+          row.removeAttribute("data-rakeback-row-section-date");
+          row.removeAttribute("data-rakeback-row-day-key");
+        });
+        if (!templateSeparatorInserted) {
+          templateSeparatorInserted = true;
+          rakebackBody.insertBefore(createRakebackTemplateSeparator(), group.rows[0]);
+        }
+        return;
+      }
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var weekStart = getRakebackWeekStart(stamp);
@@ -1840,6 +1881,7 @@ function initAdminReportModal() {
 
   function getReportStoredRakebackTotal(report) {
     if (report && report.rakeback === "") return 0;
+    if (report && report.rakeback != null) return parseReportNumber(report.rakeback);
     if (report && Array.isArray(report.rakebackRows) && report.rakebackRows.length) {
       return sumRakebackReportRows(report.rakebackRows);
     }
@@ -1961,7 +2003,7 @@ function initAdminReportModal() {
     if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = rakebackArchiveMode ? "Итого архив" : "Итого " + getRakebackRoomLabel(activeRakebackRoom);
     if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = rakebackArchiveMode ? formatRakebackSummaryPair(rakeTotal, total) : formatRakebackSummaryPair(activeTotal.rake, activeTotal.report);
     if (rakebackTotalEl) rakebackTotalEl.textContent = formatRakebackSummaryPair(rakeTotal, total);
-    if (rakebackTotalInput) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
+    if (rakebackTotalInput && !manualRakebackInputTouched) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
     if (rakebackTotalsModal && !rakebackTotalsModal.hidden) renderRakebackTotalsModal();
     updateFiguresTotals();
     showRakebackStatus("");
@@ -3723,6 +3765,14 @@ function initAdminReportModal() {
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
+  if (rakebackTotalInput) {
+    rakebackTotalInput.addEventListener("input", function () {
+      manualRakebackInputTouched = true;
+    });
+    rakebackTotalInput.addEventListener("change", function () {
+      manualRakebackInputTouched = true;
+    });
+  }
   if (rakebackRefreshBtn) {
     rakebackRefreshBtn.addEventListener("click", function () {
       loadSharedRakebackDraftRows({ force: true, showStatus: true });
@@ -4088,6 +4138,8 @@ function initAdminReportModal() {
     syncRakebackTable();
     var rakebackRows = getUnaccountedRakebackReportRows();
     var rakebackTotal = sumRakebackReportRows(rakebackRows);
+    var manualRakebackTotal = getVal("adminReportRakeback");
+    var reportRakebackTotal = manualRakebackInputTouched ? manualRakebackTotal : rakebackTotal;
     var extraRows = modal.querySelectorAll(".admin-report-extra-row");
     var extraFields = [];
     var extraTotal = 0;
@@ -4121,7 +4173,7 @@ function initAdminReportModal() {
       transfers: getVal("adminReportTransfers"),
       ret: getVal("adminReportReturn"),
       sergeyMarina: getVal("adminReportSergeyMarina"),
-      rakeback: Math.round(rakebackTotal * 100) / 100,
+      rakeback: Math.round(reportRakebackTotal * 100) / 100,
       rakebackRows: rakebackRows,
       extraFields: extraFields
     };
@@ -4145,6 +4197,7 @@ function initAdminReportModal() {
 
   function fillReportForm(report, options) {
     options = options || {};
+    manualRakebackInputTouched = !!(report && report.rakeback != null && report.rakeback !== "");
     if (!report) {
       setFormVal("adminReportDeposit", "");
       setFormVal("adminReportCashout", "");
