@@ -1119,7 +1119,7 @@ function initAdminReportModal() {
 
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
-    if (!rakebackBody || (mode !== "created" && mode !== "standard")) return;
+    if (!rakebackBody || (!rakebackArchiveMode && mode !== "created" && mode !== "standard")) return;
     var dayGroups = {};
     var weekGroups = {};
     var currentWeekStart = getCurrentRakebackWeekStart();
