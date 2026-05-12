@@ -798,7 +798,7 @@ function initAdminReportModal() {
 
   function normalizeRakebackSortMode(mode) {
     mode = String(mode || DEFAULT_RAKEBACK_SORT_MODE);
-    return /^(standard|created|color|rake|percent)$/.test(mode) ? mode : DEFAULT_RAKEBACK_SORT_MODE;
+    return /^(standard|created|created_percent|color|rake|percent)$/.test(mode) ? mode : DEFAULT_RAKEBACK_SORT_MODE;
   }
 
   function getRakebackSortStorageKey() {
@@ -1198,7 +1198,7 @@ function initAdminReportModal() {
 
   function insertRakebackDateSeparators() {
     var mode = getRakebackSortMode();
-    if (!rakebackBody || (!rakebackArchiveMode && mode !== "created" && mode !== "standard")) return;
+    if (!rakebackBody || (!rakebackArchiveMode && mode !== "created" && mode !== "created_percent" && mode !== "standard")) return;
     var dayGroups = {};
     var weekGroups = {};
     var currentWeekStart = getCurrentRakebackWeekStart();
@@ -1380,6 +1380,13 @@ function initAdminReportModal() {
         if (!diff) diff = a.standardAt - b.standardAt;
       } else if (mode === "standard") {
         diff = a.standardAt - b.standardAt;
+      } else if (mode === "created_percent") {
+        var aDayKey = getRakebackMoscowDayKey(a.entryAddedAt);
+        var bDayKey = getRakebackMoscowDayKey(b.entryAddedAt);
+        diff = bDayKey.localeCompare(aDayKey);
+        if (!diff) diff = parseReportNumber((b.keyRow.querySelector("[data-rakeback-percent]") || {}).value) - parseReportNumber((a.keyRow.querySelector("[data-rakeback-percent]") || {}).value);
+        if (!diff) diff = b.entryAddedAt - a.entryAddedAt;
+        if (!diff) diff = a.standardAt - b.standardAt;
       } else if (mode === "created") {
         diff = b.entryAddedAt - a.entryAddedAt;
         if (!diff) diff = a.standardAt - b.standardAt;
@@ -1529,7 +1536,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
-    syncRakebackTable();
+    syncRakebackTable({ skipSort: true });
   }
 
   function setRakebackArchiveMode(active) {
@@ -1545,7 +1552,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", rakebackArchiveMode ? "true" : "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = rakebackArchiveMode;
-    syncRakebackTable();
+    syncRakebackTable({ skipSort: true });
   }
 
   function syncRakebackRoomVisibility() {
@@ -2251,6 +2258,10 @@ function initAdminReportModal() {
     };
   }
 
+  function getCalculationArchiveMinWeekStart() {
+    return weekStartMsForReport(Date.UTC(2026, 4, 13, 9, 0, 0));
+  }
+
   function getCalculationDraftKey() {
     var week = getCalculationWeekMeta();
     return "poker_admin_report_calculations_draft:" + String(week.start || "current");
@@ -2470,6 +2481,14 @@ function initAdminReportModal() {
 
   function loadLocalRakebackDraftRows() {
     fillRakebackTable(readRakebackDraftRows(), "");
+  }
+
+  function refreshLocalRakebackView() {
+    if (rakebackBody && rakebackBody.querySelector("[data-rakeback-row]")) {
+      syncRakebackTable({ skipSort: true });
+      return;
+    }
+    loadLocalRakebackDraftRows();
   }
 
   function runAdminReportAfterPaint(fn) {
@@ -2818,6 +2837,7 @@ function initAdminReportModal() {
   function renderCalculationArchive(items) {
     if (!calculationsArchiveEl) return;
     var currentWeek = getCalculationWeekMeta();
+    var minArchiveWeekStart = getCalculationArchiveMinWeekStart();
     var source = Array.isArray(items) ? items : [];
     var weekStarts = {};
     source.forEach(function (report) {
@@ -2825,6 +2845,7 @@ function initAdminReportModal() {
       if (!t || t >= currentWeek.start) return;
       var weekStart = weekStartMsForReport(t);
       if (!Number.isFinite(weekStart)) return;
+      if (weekStart < minArchiveWeekStart) return;
       weekStarts[String(weekStart)] = weekStart;
     });
     var sortedWeekStarts = Object.keys(weekStarts).map(function (key) {
@@ -3797,7 +3818,7 @@ function initAdminReportModal() {
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
-          loadLocalRakebackDraftRows();
+          refreshLocalRakebackView();
         }
         if (name === "sent") loadSentReports();
         if (name === "calculations") loadCalculationsReports();
