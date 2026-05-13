@@ -87,6 +87,7 @@ function initAdminReportModal() {
   var rakebackDragState = null;
   var rakebackDeferredSyncSeq = 0;
   var rakebackSummaryTimer = null;
+  var rakebackSearchRefreshTimer = null;
   var rakebackLazyTemplateRows = [];
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
@@ -1815,6 +1816,10 @@ function initAdminReportModal() {
   function refreshRakebackVisibleView(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    if (rakebackSearchRefreshTimer) {
+      clearTimeout(rakebackSearchRefreshTimer);
+      rakebackSearchRefreshTimer = null;
+    }
     removeRakebackGeneratedRows();
     dehydrateRakebackLazyTemplateRows({ keepSearchMatches: true });
     hydrateRakebackLazyTemplateRowsForSearch();
@@ -1824,6 +1829,22 @@ function initAdminReportModal() {
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
+  }
+
+  function scheduleRakebackSearchRefresh() {
+    if (!rakebackBody) return;
+    removeRakebackGeneratedRows();
+    if (!getRakebackSearchQuery()) dehydrateRakebackLazyTemplateRows();
+    syncRakebackRoomVisibility();
+    syncRakebackVisibleRowNumbers();
+    renderRakebackSummaryFromCache();
+    if (rakebackSearchRefreshTimer) clearTimeout(rakebackSearchRefreshTimer);
+    rakebackSearchRefreshTimer = setTimeout(function () {
+      rakebackSearchRefreshTimer = null;
+      runAdminReportAfterPaint(function () {
+        refreshRakebackVisibleView({ fastSummary: true });
+      });
+    }, 220);
   }
 
   function showRakebackStatus(message) {
@@ -4301,13 +4322,11 @@ function initAdminReportModal() {
     });
   }
   if (rakebackSearchInput) {
-    rakebackSearchInput.addEventListener("input", function () {
-      refreshRakebackVisibleView({ fastSummary: true });
-    });
+    rakebackSearchInput.addEventListener("input", scheduleRakebackSearchRefresh);
     rakebackSearchInput.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       rakebackSearchInput.value = "";
-      refreshRakebackVisibleView({ fastSummary: true });
+      scheduleRakebackSearchRefresh();
     });
   }
   if (rakebackSortSelect) {
