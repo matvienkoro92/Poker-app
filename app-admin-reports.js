@@ -92,6 +92,7 @@ function initAdminReportModal() {
   var calculationCashTotal = 0;
   var calculationWeekTotals = {};
   var calculationReportsCache = [];
+  var calculationsDraftHydrated = false;
   var figuresRakeTotal = 0;
   var figuresPercentTotal = 0;
   var issuedRakebackReportRakeTotal = 0;
@@ -3247,6 +3248,16 @@ function initAdminReportModal() {
     }
   }
 
+  function hydrateCalculationsDraftOnce() {
+    if (calculationsDraftHydrated) return;
+    calculationsDraftHydrated = true;
+    var loaded = loadCalculationsDraft();
+    if (!loaded) {
+      updateCalculationCashTotal();
+      updateFiguresTotals();
+    }
+  }
+
   function saveCalculationsDraft(group) {
     group = group || "cash";
     try {
@@ -3903,15 +3914,9 @@ function initAdminReportModal() {
     var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = formatAdminReportDateLabel(info.label);
     applySavedRakebackSortMode();
-    loadCalculationsDraft();
-    updateCalculationCashTotal();
-    updateFiguresTotals();
+    calculationsDraftHydrated = false;
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
-    runAdminReportAfterPaint(function () {
-      if (!modal || modal.getAttribute("aria-hidden") === "true" || editingReportId) return;
-      loadLocalRakebackDraftRows();
-    });
   }
   btn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
@@ -3944,7 +3949,10 @@ function initAdminReportModal() {
           runAdminReportAfterPaint(refreshLocalRakebackView);
         }
         if (name === "sent") runAdminReportAfterPaint(loadSentReports);
-        if (name === "calculations") runAdminReportAfterPaint(loadCalculationsReports);
+        if (name === "calculations") runAdminReportAfterPaint(function () {
+          hydrateCalculationsDraftOnce();
+          loadCalculationsReports();
+        });
       });
     });
   }
