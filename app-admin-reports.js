@@ -2382,9 +2382,11 @@ function initAdminReportModal() {
       if (!raw && window.localStorage) raw = window.localStorage.getItem(getLegacyRakebackDraftKey());
       if (!raw) return { rows: [], deletedTemplates: [] };
       var parsed = JSON.parse(raw);
+      var deletedTemplates = normalizeRakebackDeletedTemplates(parsed && parsed.deletedTemplates);
+      var rows = parsed && Array.isArray(parsed.rows) ? parsed.rows.filter(hasRakebackStoredEntryData) : [];
       return {
-        rows: parsed && Array.isArray(parsed.rows) ? parsed.rows.filter(hasRakebackStoredEntryData) : [],
-        deletedTemplates: normalizeRakebackDeletedTemplates(parsed && parsed.deletedTemplates),
+        rows: filterDeletedRakebackStoredRows(rows, deletedTemplates),
+        deletedTemplates: deletedTemplates,
         updatedAt: parsed && parsed.updatedAt ? String(parsed.updatedAt) : "",
       };
     } catch (e) {
