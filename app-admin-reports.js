@@ -988,6 +988,7 @@ function initAdminReportModal() {
 
   function hasRakebackRowEntryTimeData(row) {
     if (!row) return false;
+    if (Number.isFinite(parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || ""))) return true;
     return row.getAttribute("data-rakeback-saved") === "1" ||
       isRakebackRowAccounted(row);
   }
@@ -1991,7 +1992,14 @@ function initAdminReportModal() {
       return getRakebackRowRoom(row) === targetRoom && !isRakebackRowInArchive(row, 0);
     });
     if (hasRoomRow) return;
-    rakebackBody.appendChild(createRakebackRow({ kind: "base", room: targetRoom }));
+    var now = Date.now();
+    rakebackBody.appendChild(createRakebackRow({
+      kind: "base",
+      room: targetRoom,
+      createdAt: now,
+      entryAddedAt: now,
+      editing: true,
+    }));
   }
 
   function isRakebackRowFilled(row) {
