@@ -2428,7 +2428,6 @@ function initAdminReportModal() {
     Array.prototype.slice.call(rows || []).forEach(function (row) {
       var room = getRakebackRowRoom(row);
       var playerId = getRakebackRowPlayerId(row);
-      if (!isRakebackTemplateId(room, playerId)) return;
       var key = getRakebackTemplateKey(room, playerId);
       if (!key || byKey[key]) return;
       byKey[key] = {
