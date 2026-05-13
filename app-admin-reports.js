@@ -1183,6 +1183,12 @@ function initAdminReportModal() {
     return isRakebackCarryForwardPlaceholderRow(keyRow);
   }
 
+  function isRakebackTodayPlaceholderGroup(group, fallbackIndex) {
+    if (!isRakebackCarryForwardPlaceholderGroup(group)) return false;
+    var stamp = getRakebackGroupEntryAddedAt(group, fallbackIndex);
+    return Number.isFinite(stamp) && getRakebackMoscowDayKey(stamp) === getRakebackMoscowDayKey(Date.now());
+  }
+
   function createRakebackWeekSeparator(weekStart, totals, open) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -1269,7 +1275,7 @@ function initAdminReportModal() {
     var visibleGroups = getRakebackVisibleGroups();
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
-      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group)) return;
+      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group) && !isRakebackTodayPlaceholderGroup(group, index)) return;
       var stamp = getRakebackGroupEntryAddedAt(group, index);
       if (!Number.isFinite(stamp)) return;
       var weekStart = getRakebackWeekStart(stamp);
@@ -1290,7 +1296,7 @@ function initAdminReportModal() {
     var templateGroups = [];
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
-      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group)) {
+      if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group) && !isRakebackTodayPlaceholderGroup(group, index)) {
         group.rows.forEach(function (row) {
           row.removeAttribute("data-rakeback-row-section-date");
           row.removeAttribute("data-rakeback-row-day-key");
