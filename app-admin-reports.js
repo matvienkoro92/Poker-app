@@ -2310,6 +2310,16 @@ function initAdminReportModal() {
     return { label: meta.weekday + ", " + meta.date, weekday: wdl, date: meta.date, iso: new Date(effTs).toISOString() };
   }
 
+  function getAdminReportAppVersionLabel() {
+    var version = document.documentElement ? document.documentElement.getAttribute("data-app-version") : "";
+    return version ? "v" + String(version).trim() : "";
+  }
+
+  function formatAdminReportDateLabel(label) {
+    var version = getAdminReportAppVersionLabel();
+    return version ? String(label || "").trim() + " · " + version : String(label || "").trim();
+  }
+
   function mskDateFromReportTs(ts) {
     return new Date(ts + REPORT_MSK_SHIFT_MS);
   }
@@ -3795,7 +3805,8 @@ function initAdminReportModal() {
               if (dateEl) {
                 var effEd = reportEffectiveTimestampMs(report);
                 var metaEd = formatRuWeekdayDateFromTs(effEd);
-                dateEl.textContent = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
+                var editDateLabel = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
+                dateEl.textContent = formatAdminReportDateLabel(editDateLabel);
               }
             });
           });
@@ -3890,7 +3901,7 @@ function initAdminReportModal() {
     editingReport = null;
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
     var info = getShiftReportDateInfo();
-    if (dateEl) dateEl.textContent = info.label;
+    if (dateEl) dateEl.textContent = formatAdminReportDateLabel(info.label);
     applySavedRakebackSortMode();
     loadCalculationsDraft();
     updateCalculationCashTotal();
