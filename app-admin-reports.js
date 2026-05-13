@@ -3855,10 +3855,10 @@ function initAdminReportModal() {
         setActiveTab(name);
         if (name === "rakeback") {
           applySavedRakebackSortMode();
-          refreshLocalRakebackView();
+          runAdminReportAfterPaint(refreshLocalRakebackView);
         }
-        if (name === "sent") loadSentReports();
-        if (name === "calculations") loadCalculationsReports();
+        if (name === "sent") runAdminReportAfterPaint(loadSentReports);
+        if (name === "calculations") runAdminReportAfterPaint(loadCalculationsReports);
       });
     });
   }
@@ -4397,7 +4397,6 @@ function initAdminReportModal() {
   }
 }
 window.pokerInitAdminReportModal = initAdminReportModal;
-initAdminReportModal();
 
 function initBroadcastReportsModal() {
   var btn = document.getElementById("adminBroadcastReportsBtn");
@@ -4420,4 +4419,14 @@ function initBroadcastReportsModal() {
   if (backdrop) backdrop.addEventListener("click", closeModal);
 }
 window.pokerInitBroadcastReportsModal = initBroadcastReportsModal;
-initBroadcastReportsModal();
+function initAdminReportModalsRuntime() {
+  initAdminReportModal();
+  initBroadcastReportsModal();
+}
+initAdminReportModalsRuntime();
+if (
+  typeof window.pokerEnsureGlobalModalsHtml === "function" &&
+  (!document.getElementById("adminReportModal") || !document.getElementById("broadcastReportsModal"))
+) {
+  window.pokerEnsureGlobalModalsHtml().then(initAdminReportModalsRuntime).catch(function () {});
+}

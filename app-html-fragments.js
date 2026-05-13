@@ -157,11 +157,7 @@
       } catch (eEagerGlobalModals) {}
     }
     function schedule() {
-      if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(run, { timeout: 900 });
-        return;
-      }
-      setTimeout(run, 120);
+      setTimeout(run, 0);
     }
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", schedule, { once: true });
