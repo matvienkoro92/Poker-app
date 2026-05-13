@@ -2575,6 +2575,7 @@ function initAdminReportModal() {
     if (options.showStatus) showRakebackStatus("Обновляю…");
     if (rakebackRefreshBtn) rakebackRefreshBtn.disabled = true;
     var localDraft = readRakebackDraftData();
+    var visibleRowsBeforeRefresh = collectRakebackRows(false);
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
     var shouldUploadLocalDraft = false;
@@ -2588,6 +2589,7 @@ function initAdminReportModal() {
         var serverRows = serverDraft && Array.isArray(serverDraft.rows) ? serverDraft.rows : [];
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
         var localRows = localDraft.rows || [];
+        if (!localRows.length && visibleRowsBeforeRefresh.length) localRows = visibleRowsBeforeRefresh;
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
         var serverUpdatedAt = parseRakebackTimeValue(serverDraft && serverDraft.updatedAt);
         var localUpdatedAt = parseRakebackTimeValue(localDraft.updatedAt);
