@@ -776,6 +776,21 @@ function initAdminReportModal() {
     return room && playerId ? room + "\u0000" + playerId : "";
   }
 
+  function isDeletedRakebackTemplateRow(data) {
+    if (!data) return false;
+    var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
+    if (kind === "addon") return false;
+    if (data.accounted || data.reportedAt || data.reportId) return false;
+    if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return false;
+    if (parseReportNumber(data.rake) !== 0 ||
+      parseReportNumber(data.roomAmount) !== 0 ||
+      parseReportNumber(data.chipAmount) !== 0 ||
+      parseReportNumber(data.amount) !== 0) {
+      return false;
+    }
+    return data.carryForward === true || data.templateCarryForward === true || isRakebackTemplateLikeData(data);
+  }
+
   function filterDeletedRakebackStoredRows(rows, deletedTemplates) {
     var deletedMap = {};
     normalizeRakebackDeletedTemplates(deletedTemplates).forEach(function (item) {
@@ -784,7 +799,7 @@ function initAdminReportModal() {
     });
     return (Array.isArray(rows) ? rows : []).filter(function (row) {
       var key = getRakebackDeletedRowKey(row);
-      return !key || !deletedMap[key];
+      return !key || !deletedMap[key] || !isDeletedRakebackTemplateRow(row);
     });
   }
 
