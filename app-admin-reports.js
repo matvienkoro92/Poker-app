@@ -1809,7 +1809,7 @@ function initAdminReportModal() {
 
   function canAddRakebackAddon(row) {
     if (!row) return false;
-    return row.getAttribute("data-rakeback-saved") === "1" && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
+    return !!getRakebackRowPlayerId(row) && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
   }
 
   function updateRakebackRowActions(row) {
@@ -2206,12 +2206,18 @@ function initAdminReportModal() {
     baseRow.setAttribute("data-rakeback-group", groupId);
     var roomSelect = baseRow.querySelector("[data-rakeback-room]");
     var idInput = baseRow.querySelector("[data-rakeback-player-id]");
+    var percentInput = baseRow.querySelector("[data-rakeback-percent]");
+    var discountInput = baseRow.querySelector("[data-rakeback-discount15]");
+    var entryAddedAt = getRakebackRowEntryAddedAtForSave(baseRow) || Date.now();
     var addon = createRakebackRow({
       kind: "addon",
       groupId: groupId,
       room: roomSelect && roomSelect.value ? roomSelect.value : "P21",
       playerId: idInput && idInput.value ? idInput.value : "",
-      entryAddedAt: Date.now(),
+      percent: percentInput && percentInput.value ? percentInput.value : "",
+      discount15: !!(discountInput && discountInput.checked),
+      entryAddedAt: entryAddedAt,
+      editing: true,
     });
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     var anchor = baseRow;
@@ -2220,7 +2226,7 @@ function initAdminReportModal() {
     });
     if (anchor.nextSibling) rakebackBody.insertBefore(addon, anchor.nextSibling);
     else rakebackBody.appendChild(addon);
-    syncRakebackTable();
+    syncRakebackTable({ skipSort: true });
     var rakeInput = addon.querySelector("[data-rakeback-rake]");
     if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
   }
@@ -4240,9 +4246,16 @@ function initAdminReportModal() {
       }
       var addAddonBtn = e.target && e.target.closest ? e.target.closest("[data-rakeback-add-addon]") : null;
       if (addAddonBtn) {
+        e.preventDefault();
+        e.stopPropagation();
         var addonBaseRow = addAddonBtn.closest("[data-rakeback-row]");
-        if (!canAddRakebackAddon(addonBaseRow)) return;
+        if (!canAddRakebackAddon(addonBaseRow)) {
+          showRakebackStatusBriefly("Для подзаписи нужны ID и рейк");
+          return;
+        }
         markRakebackDraftLocalEdit();
+        ensureRakebackEntryAddedAt(addonBaseRow, true);
+        setRakebackRowSaved(addonBaseRow, true);
         addRakebackAddonRow(addonBaseRow);
         saveRakebackDraftRows();
         showRakebackStatus("Подзапись добавлена");
