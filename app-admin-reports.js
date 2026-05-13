@@ -1976,6 +1976,7 @@ function initAdminReportModal() {
 
   function ensureRakebackBaseRow(room) {
     if (!rakebackBody) return;
+    if (rakebackArchiveMode) return;
     var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
     if (targetRoom === "P21") ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS));
     if (targetRoom === "X") ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS));
@@ -1987,7 +1988,7 @@ function initAdminReportModal() {
       getRakebackRowStandardAt(row, index);
     });
     var hasRoomRow = rows.some(function (row) {
-      return getRakebackRowRoom(row) === targetRoom;
+      return getRakebackRowRoom(row) === targetRoom && !isRakebackRowInArchive(row, 0);
     });
     if (hasRoomRow) return;
     rakebackBody.appendChild(createRakebackRow({ kind: "base", room: targetRoom }));
