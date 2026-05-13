@@ -709,6 +709,25 @@ function initAdminReportModal() {
     ].join("|");
   }
 
+  function getRakebackDeletedRowKey(data) {
+    if (!data) return "";
+    var room = normalizeRakebackRoom(data.room || "P21");
+    var playerId = String(data.playerId || data.id || "").trim();
+    return room && playerId ? room + "\u0000" + playerId : "";
+  }
+
+  function filterDeletedRakebackStoredRows(rows, deletedTemplates) {
+    var deletedMap = {};
+    normalizeRakebackDeletedTemplates(deletedTemplates).forEach(function (item) {
+      var key = getRakebackDeletedRowKey(item);
+      if (key) deletedMap[key] = true;
+    });
+    return (Array.isArray(rows) ? rows : []).filter(function (row) {
+      var key = getRakebackDeletedRowKey(row);
+      return !key || !deletedMap[key];
+    });
+  }
+
   function mergeRakebackDraftRows(serverRows, localRows) {
     var merged = Array.isArray(serverRows) ? serverRows.filter(Boolean).slice() : [];
     var seen = {};
@@ -2404,10 +2423,11 @@ function initAdminReportModal() {
     try {
       if (!window.localStorage) return;
       var normalizedDeleted = normalizeRakebackDeletedTemplates(deletedTemplates != null ? deletedTemplates : readRakebackDeletedTemplates());
+      var filteredRows = filterDeletedRakebackStoredRows(rows || [], normalizedDeleted);
       var normalizedUpdatedAt = updatedAt ? String(updatedAt) : "";
-      if ((rows && rows.length) || normalizedDeleted.length) {
+      if ((filteredRows && filteredRows.length) || normalizedDeleted.length) {
         window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({
-          rows: rows || [],
+          rows: filteredRows || [],
           deletedTemplates: normalizedDeleted,
           updatedAt: normalizedUpdatedAt,
           savedAt: Date.now()
@@ -2541,6 +2561,7 @@ function initAdminReportModal() {
         var localRows = localDraft.rows || [];
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
         var rows = serverRows.length ? mergeRakebackDraftRows(serverRows, localRows) : localRows;
+        rows = filterDeletedRakebackStoredRows(rows, deletedTemplates);
         shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length);
         saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
         fillRakebackTable(rows, "");
