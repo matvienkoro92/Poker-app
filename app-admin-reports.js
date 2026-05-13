@@ -85,6 +85,7 @@ function initAdminReportModal() {
   var savingRakebackDraft = false;
   var rakebackDraftNeedsMigration = false;
   var rakebackDragState = null;
+  var rakebackDeferredSyncSeq = 0;
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
   var manualRakebackInputTouched = false;
@@ -687,6 +688,44 @@ function initAdminReportModal() {
       parseReportNumber(data.roomAmount) !== 0 ||
       parseReportNumber(data.chipAmount) !== 0 ||
       parseReportNumber(data.amount) !== 0;
+  }
+
+  function getRakebackStoredRowMergeKey(data) {
+    if (!data) return "";
+    var room = normalizeRakebackRoom(data.room || "P21");
+    var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
+    var playerId = String(data.playerId || data.id || "").trim();
+    var stamp = getFirstRakebackTimeValue([data.entryAddedAt, data.firstAddedAt, data.reportedAt, data.createdAt, data.addedAt, data.created], NaN);
+    var dayKey = Number.isFinite(stamp) ? getRakebackMoscowDayKey(stamp) : "";
+    return [
+      room,
+      kind,
+      playerId,
+      dayKey,
+      String(Math.round(parseReportNumber(data.rake) * 100) / 100),
+      String(Math.round(parseReportNumber(data.percent) * 100) / 100),
+      data.discount15 || data.subtract15 ? "15" : "",
+      data.groupId || "",
+    ].join("|");
+  }
+
+  function mergeRakebackDraftRows(serverRows, localRows) {
+    var merged = Array.isArray(serverRows) ? serverRows.filter(Boolean).slice() : [];
+    var seen = {};
+    merged.forEach(function (row) {
+      var key = getRakebackStoredRowMergeKey(row);
+      if (key) seen[key] = true;
+    });
+    (Array.isArray(localRows) ? localRows : []).forEach(function (row) {
+      if (!row || !hasRakebackStoredEntryData(row)) return;
+      if (row.carryForward === true || row.templateCarryForward === true) return;
+      if (isRakebackTemplateLikeData(row)) return;
+      var key = getRakebackStoredRowMergeKey(row);
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      merged.push(row);
+    });
+    return merged;
   }
 
   function createRakebackRow(data) {
@@ -1537,7 +1576,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
-    syncRakebackTable({ skipSort: true });
+    scheduleRakebackTableSync({ skipSort: true });
   }
 
   function setRakebackArchiveMode(active) {
@@ -1553,7 +1592,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", rakebackArchiveMode ? "true" : "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = rakebackArchiveMode;
-    syncRakebackTable({ skipSort: true });
+    scheduleRakebackTableSync({ skipSort: true });
   }
 
   function syncRakebackRoomVisibility() {
@@ -1584,6 +1623,14 @@ function initAdminReportModal() {
       var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
       numberEl.hidden = isAddon;
       numberEl.textContent = !row.hidden && !isAddon ? String(++visibleIndex) : "";
+    });
+  }
+
+  function scheduleRakebackTableSync(options) {
+    var seq = ++rakebackDeferredSyncSeq;
+    runAdminReportAfterPaint(function () {
+      if (seq !== rakebackDeferredSyncSeq) return;
+      syncRakebackTable(options || { skipSort: true });
     });
   }
 
@@ -2494,7 +2541,7 @@ function initAdminReportModal() {
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
         var localRows = localDraft.rows || [];
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
-        var rows = serverRows.length ? serverRows : localRows;
+        var rows = serverRows.length ? mergeRakebackDraftRows(serverRows, localRows) : localRows;
         shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length);
         saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
         fillRakebackTable(rows, "");
