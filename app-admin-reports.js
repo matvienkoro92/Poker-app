@@ -86,6 +86,7 @@ function initAdminReportModal() {
   var rakebackDraftNeedsMigration = false;
   var rakebackDragState = null;
   var rakebackDeferredSyncSeq = 0;
+  var rakebackSummaryTimer = null;
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
   var manualRakebackInputTouched = false;
@@ -100,6 +101,9 @@ function initAdminReportModal() {
   var calculationGroupLocks = { cash: false, week: false, rake: false, winloss: false };
   var calculationsStatusTimer = null;
   var figuresStatusTimer = null;
+  var calculationCashUpdateTimer = null;
+  var calculationGrandUpdateTimer = null;
+  var figuresTotalsUpdateTimer = null;
   var sentReportsLoadedAt = 0;
   var sentReportsLoading = false;
   var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -1985,6 +1989,10 @@ function initAdminReportModal() {
   }
 
   function updateRakebackSummaryTotals() {
+    if (rakebackSummaryTimer) {
+      clearTimeout(rakebackSummaryTimer);
+      rakebackSummaryTimer = null;
+    }
     var allRows = collectRakebackRows(false, false);
     issuedRakebackReportRakeTotal = allRows.filter(function (row) {
       return row && !isRakebackCollectedRowArchived(row);
@@ -2024,6 +2032,14 @@ function initAdminReportModal() {
     updateFiguresTotals({ syncExtras: false });
     showRakebackStatus("");
     return reportRakebackTotal;
+  }
+
+  function scheduleRakebackSummaryTotals() {
+    if (rakebackSummaryTimer) clearTimeout(rakebackSummaryTimer);
+    rakebackSummaryTimer = setTimeout(function () {
+      rakebackSummaryTimer = null;
+      runAdminReportAfterPaint(updateRakebackSummaryTotals);
+    }, 160);
   }
 
   function getReportStoredRakebackTotal(report) {
@@ -2668,6 +2684,10 @@ function initAdminReportModal() {
   }
 
   function updateCalculationCashTotal() {
+    if (calculationCashUpdateTimer) {
+      clearTimeout(calculationCashUpdateTimer);
+      calculationCashUpdateTimer = null;
+    }
     var total = 0;
     if (calculationsCashInputs && calculationsCashInputs.length) {
       calculationsCashInputs.forEach(function (input) {
@@ -2677,6 +2697,14 @@ function initAdminReportModal() {
     calculationCashTotal = total;
     if (calculationsCashTotalEl) calculationsCashTotalEl.textContent = formatReportRubleNumber(total);
     updateCalculationGrandTotal();
+  }
+
+  function scheduleCalculationCashTotal() {
+    if (calculationCashUpdateTimer) clearTimeout(calculationCashUpdateTimer);
+    calculationCashUpdateTimer = setTimeout(function () {
+      calculationCashUpdateTimer = null;
+      updateCalculationCashTotal();
+    }, 80);
   }
 
   function getCalculationRoomWinLossTotal() {
@@ -2690,6 +2718,10 @@ function initAdminReportModal() {
   }
 
   function updateCalculationGrandTotal() {
+    if (calculationGrandUpdateTimer) {
+      clearTimeout(calculationGrandUpdateTimer);
+      calculationGrandUpdateTimer = null;
+    }
     if (!calculationsGrandTotalEl) return;
     var totals = calculationWeekTotals || {};
     var roomWinLossTotal = getCalculationRoomWinLossTotal();
@@ -2705,6 +2737,14 @@ function initAdminReportModal() {
     if (calculationsWinLossTotalEl) calculationsWinLossTotalEl.textContent = formatReportRubleNumber(roomWinLossTotal);
     if (calculationsRakeTotalEl) calculationsRakeTotalEl.textContent = formatReportNegativeDisplay(figuresRakeTotal);
     calculationsGrandTotalEl.textContent = formatReportRubleNumber(grand);
+  }
+
+  function scheduleCalculationGrandTotal() {
+    if (calculationGrandUpdateTimer) clearTimeout(calculationGrandUpdateTimer);
+    calculationGrandUpdateTimer = setTimeout(function () {
+      calculationGrandUpdateTimer = null;
+      updateCalculationGrandTotal();
+    }, 80);
   }
 
   function getFiguresExtraAmountTotal() {
@@ -2773,6 +2813,10 @@ function initAdminReportModal() {
   }
 
   function updateFiguresTotals(options) {
+    if (figuresTotalsUpdateTimer) {
+      clearTimeout(figuresTotalsUpdateTimer);
+      figuresTotalsUpdateTimer = null;
+    }
     options = options || {};
     figuresRakeTotal = 0;
     figuresPercentTotal = 0;
@@ -2826,6 +2870,14 @@ function initAdminReportModal() {
       figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
     }
     updateCalculationGrandTotal();
+  }
+
+  function scheduleFiguresTotals(options) {
+    if (figuresTotalsUpdateTimer) clearTimeout(figuresTotalsUpdateTimer);
+    figuresTotalsUpdateTimer = setTimeout(function () {
+      figuresTotalsUpdateTimer = null;
+      updateFiguresTotals(options || { syncExtras: false });
+    }, 80);
   }
 
   function setCalculationTotalsText(totals) {
@@ -3005,7 +3057,7 @@ function initAdminReportModal() {
     scope.querySelectorAll("[data-admin-report-figures-extra-rake],[data-admin-report-figures-extra-percent],[data-admin-report-figures-extra-amount]").forEach(function (input) {
       input.addEventListener("input", function (e) {
         syncFiguresExtraRow(e.target && e.target.closest ? e.target.closest(".admin-report-calculations__field--extra") : null);
-        updateFiguresTotals({ syncExtras: false });
+        scheduleFiguresTotals({ syncExtras: false });
       });
       input.addEventListener("change", function (e) {
         syncFiguresExtraRow(e.target && e.target.closest ? e.target.closest(".admin-report-calculations__field--extra") : null);
@@ -3958,25 +4010,25 @@ function initAdminReportModal() {
   }
   if (calculationsCashInputs && calculationsCashInputs.length) {
     calculationsCashInputs.forEach(function (input) {
-      input.addEventListener("input", updateCalculationCashTotal);
+      input.addEventListener("input", scheduleCalculationCashTotal);
       input.addEventListener("change", updateCalculationCashTotal);
     });
   }
   if (calculationsWinLossInputs && calculationsWinLossInputs.length) {
     calculationsWinLossInputs.forEach(function (input) {
-      input.addEventListener("input", updateCalculationGrandTotal);
+      input.addEventListener("input", scheduleCalculationGrandTotal);
       input.addEventListener("change", updateCalculationGrandTotal);
     });
   }
   if (figuresRakeInputs && figuresRakeInputs.length) {
     figuresRakeInputs.forEach(function (input) {
-      input.addEventListener("input", function () { updateFiguresTotals({ syncExtras: false }); });
+      input.addEventListener("input", function () { scheduleFiguresTotals({ syncExtras: false }); });
       input.addEventListener("change", function () { updateFiguresTotals({ syncExtras: false }); });
     });
   }
   [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput, figuresApproxRomanRakeInput].forEach(function (input) {
     if (!input) return;
-    input.addEventListener("input", function () { updateFiguresTotals({ syncExtras: false }); });
+    input.addEventListener("input", function () { scheduleFiguresTotals({ syncExtras: false }); });
     input.addEventListener("change", function () { updateFiguresTotals({ syncExtras: false }); });
   });
   if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
@@ -4108,7 +4160,7 @@ function initAdminReportModal() {
       syncExplicitZeroRakeMarker(e.target);
       var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
       syncRakebackRowGroupDisplay(inputRow);
-      updateRakebackSummaryTotals();
+      scheduleRakebackSummaryTotals();
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("change", function (e) {
