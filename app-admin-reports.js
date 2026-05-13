@@ -1606,7 +1606,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
-    scheduleRakebackTableSync({ skipSort: true });
+    refreshRakebackVisibleView({ fastSummary: true });
   }
 
   function setRakebackArchiveMode(active) {
@@ -1622,7 +1622,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", rakebackArchiveMode ? "true" : "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = rakebackArchiveMode;
-    scheduleRakebackTableSync({ skipSort: true });
+    refreshRakebackVisibleView();
   }
 
   function syncRakebackRoomVisibility() {
@@ -1662,6 +1662,44 @@ function initAdminReportModal() {
       if (seq !== rakebackDeferredSyncSeq) return;
       syncRakebackTable(options || { skipSort: true });
     });
+  }
+
+  function removeRakebackGeneratedRows() {
+    if (!rakebackBody) return;
+    removeRakebackDateSeparators();
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
+      row.parentNode.removeChild(row);
+    });
+  }
+
+  function renderRakebackSummaryFromCache() {
+    if (!rakebackRoomTotals) return false;
+    var activeTotal = rakebackRoomTotals[activeRakebackRoom] || { display: 0, report: 0, rake: 0 };
+    var total = 0;
+    var rakeTotal = 0;
+    RAKEBACK_ROOMS.forEach(function (room) {
+      var item = rakebackRoomTotals[room] || { report: 0, rake: 0 };
+      total += parseReportNumber(item.report);
+      rakeTotal += parseReportNumber(item.rake);
+    });
+    if (rakebackSummaryEl) rakebackSummaryEl.hidden = rakebackArchiveMode;
+    if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = rakebackArchiveMode ? "Итого архив" : "Итого " + getRakebackRoomLabel(activeRakebackRoom);
+    if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = rakebackArchiveMode ? formatRakebackSummaryPair(rakeTotal, total) : formatRakebackSummaryPair(activeTotal.rake, activeTotal.report);
+    if (rakebackTotalEl) rakebackTotalEl.textContent = formatRakebackSummaryPair(rakeTotal, total);
+    showRakebackStatus("");
+    return true;
+  }
+
+  function refreshRakebackVisibleView(options) {
+    if (!rakebackBody) return 0;
+    options = options || {};
+    ensureRakebackBaseRow(activeRakebackRoom);
+    removeRakebackGeneratedRows();
+    syncRakebackRoomVisibility();
+    insertRakebackDateSeparators();
+    syncRakebackVisibleRowNumbers();
+    if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
+    return updateRakebackSummaryTotals();
   }
 
   function showRakebackStatus(message) {
@@ -1838,11 +1876,11 @@ function initAdminReportModal() {
     }
   }
 
-  function getRakebackPreviousRake(row) {
+  function getRakebackPreviousRake(row, groupRows) {
     if (!rakebackBody || !row || row.getAttribute("data-rakeback-kind") !== "addon") return 0;
     var groupId = row.getAttribute("data-rakeback-group") || "";
     var previousRake = 0;
-    var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var rows = Array.isArray(groupRows) ? groupRows : Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     for (var i = 0; i < rows.length; i++) {
       var current = rows[i];
       if (current === row) break;
@@ -1853,19 +1891,20 @@ function initAdminReportModal() {
     return previousRake;
   }
 
-  function getRakebackRowCalculationBase(row) {
+  function getRakebackRowCalculationBase(row, previousRake) {
     if (!row) return 0;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
-    if (row.getAttribute("data-rakeback-kind") === "addon") return rake - getRakebackPreviousRake(row);
+    if (row.getAttribute("data-rakeback-kind") === "addon") return rake - (arguments.length > 1 ? parseReportNumber(previousRake) : getRakebackPreviousRake(row));
     return rake;
   }
 
-  function getRakebackRowAmount(row) {
+  function getRakebackRowAmount(row, previousRake) {
     if (!row) return 0;
     var percentInput = row.querySelector("[data-rakeback-percent]");
     var discountInput = row.querySelector("[data-rakeback-discount15]");
-    var amount = getRakebackRowCalculationBase(row) * parseReportNumber(percentInput ? percentInput.value : "") / 100;
+    var base = arguments.length > 1 ? getRakebackRowCalculationBase(row, previousRake) : getRakebackRowCalculationBase(row);
+    var amount = base * parseReportNumber(percentInput ? percentInput.value : "") / 100;
     if (discountInput && discountInput.checked) amount *= 0.85;
     return amount;
   }
@@ -1874,6 +1913,7 @@ function initAdminReportModal() {
     if (!row) return;
     var rows = getRakebackGroupRows(row);
     var base = getRakebackGroupKeyRow(rows);
+    var previousRake = 0;
     rows.forEach(function (current) {
       if (current !== base && base) {
         var baseRoom = base.querySelector("[data-rakeback-room]");
@@ -1887,9 +1927,11 @@ function initAdminReportModal() {
       var amountEl = current.querySelector("[data-rakeback-amount]");
       var restEl = current.querySelector("[data-rakeback-rest]");
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
-      if (restEl) restEl.textContent = formatRakebackCellNumber(rake - getRakebackPreviousRake(current));
-      if (amountEl) amountEl.textContent = formatRakebackAmountCell(getRakebackRowAmount(current));
+      var rowPreviousRake = current.getAttribute("data-rakeback-kind") === "addon" ? previousRake : 0;
+      if (restEl) restEl.textContent = formatRakebackCellNumber(rake - rowPreviousRake);
+      if (amountEl) amountEl.textContent = formatRakebackAmountCell(getRakebackRowAmount(current, rowPreviousRake));
       updateRakebackRowActions(current);
+      previousRake = rake;
     });
   }
 
@@ -1938,6 +1980,7 @@ function initAdminReportModal() {
   function collectRakebackRows(includeEmpty, currentOwnerOnly) {
     if (!rakebackBody) return [];
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var previousRakeByGroup = {};
     return rows.map(function (row) {
       var roomSelect = row.querySelector("[data-rakeback-room]");
       var idInput = row.querySelector("[data-rakeback-player-id]");
@@ -1948,7 +1991,10 @@ function initAdminReportModal() {
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var percent = parseReportNumber(percentInput ? percentInput.value : "");
-      var roomAmount = Math.round(getRakebackRowAmount(row));
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
+      var previousRake = kind === "addon" ? parseReportNumber(previousRakeByGroup[groupId]) : 0;
+      var roomAmount = Math.round(getRakebackRowAmount(row, previousRake));
       var amount = getRakebackReportAmount(room, roomAmount);
       var reportedAmount = getRakebackRowReportedAmount(row, amount);
       var discount15 = !!(discountInput && discountInput.checked);
@@ -1957,13 +2003,14 @@ function initAdminReportModal() {
       var saved = row.getAttribute("data-rakeback-saved") === "1";
       var accounted = isRakebackRowAccounted(row);
       var filled = rake !== 0 || percent !== 0 || roomAmount !== 0 || explicitZeroRake || carryForward || accounted;
+      previousRakeByGroup[groupId] = rake;
       if (!includeEmpty && !filled) return null;
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (currentOwnerOnly && !isCurrentRakebackReportOwner(ownerId)) return null;
       var color = normalizeRakebackRowColor(row.getAttribute("data-rakeback-row-color") || "");
       return {
-        groupId: row.getAttribute("data-rakeback-group") || "",
-        kind: row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base",
+        groupId: groupId,
+        kind: kind,
         room: room,
         playerId: playerId,
         rake: rake,
@@ -2026,7 +2073,9 @@ function initAdminReportModal() {
     var rakeTotal = collected.reduce(function (sum, row) {
       return sum + getRakebackReportAmount(row.room, parseReportNumber(row.rake));
     }, 0);
-    var reportRakebackTotal = sumRakebackReportRows(getUnaccountedRakebackReportRows());
+    var reportRakebackTotal = sumRakebackReportRows(allRows.filter(function (row) {
+      return row && isCurrentRakebackReportOwner(row.ownerId) && !row.accounted && hasRakebackReportValue(row) && !isRakebackCollectedRowArchived(row);
+    }));
     var activeTotal = roomTotals[activeRakebackRoom] || { display: 0, report: 0, rake: 0 };
     rakebackRoomTotals = roomTotals;
     if (rakebackSummaryEl) rakebackSummaryEl.hidden = rakebackArchiveMode;
@@ -2097,10 +2146,7 @@ function initAdminReportModal() {
     if (!rakebackBody) return 0;
     options = options || {};
     ensureRakebackBaseRow(activeRakebackRoom);
-    removeRakebackDateSeparators();
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
-      row.parentNode.removeChild(row);
-    });
+    removeRakebackGeneratedRows();
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
@@ -2115,6 +2161,7 @@ function initAdminReportModal() {
       }
       if (row.getAttribute("data-rakeback-kind") !== "addon" && !baseByGroup[groupId]) baseByGroup[groupId] = row;
     });
+    var previousRakeByGroup = {};
     rows.forEach(function (row) {
       var groupId = row.getAttribute("data-rakeback-group") || "";
       var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
@@ -2132,13 +2179,14 @@ function initAdminReportModal() {
       var amountEl = row.querySelector("[data-rakeback-amount]");
       var restEl = row.querySelector("[data-rakeback-rest]");
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
+      var previousRake = kind === "addon" ? parseReportNumber(previousRakeByGroup[groupId]) : 0;
       if (restEl) {
-        var previousRake = getRakebackPreviousRake(row);
         restEl.textContent = formatRakebackCellNumber(rake - previousRake);
       }
-      var amount = getRakebackRowAmount(row);
+      var amount = getRakebackRowAmount(row, previousRake);
       if (amountEl) amountEl.textContent = formatRakebackAmountCell(amount);
       updateRakebackRowActions(row);
+      previousRakeByGroup[groupId] = rake;
     });
     if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
@@ -4103,11 +4151,13 @@ function initAdminReportModal() {
     });
   }
   if (rakebackSearchInput) {
-    rakebackSearchInput.addEventListener("input", syncRakebackRoomVisibility);
+    rakebackSearchInput.addEventListener("input", function () {
+      refreshRakebackVisibleView({ fastSummary: true });
+    });
     rakebackSearchInput.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       rakebackSearchInput.value = "";
-      syncRakebackRoomVisibility();
+      refreshRakebackVisibleView({ fastSummary: true });
     });
   }
   if (rakebackSortSelect) {
