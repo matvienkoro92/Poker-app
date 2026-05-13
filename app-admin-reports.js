@@ -2562,7 +2562,13 @@ function initAdminReportModal() {
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
         var localRows = localDraft.rows || [];
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
-        var rows = serverRows.length ? mergeRakebackDraftRows(serverRows, localRows) : localRows;
+        var serverUpdatedAt = parseRakebackTimeValue(serverDraft && serverDraft.updatedAt);
+        var localUpdatedAt = parseRakebackTimeValue(localDraft.updatedAt);
+        var shouldMergeLocalRows = !Number.isFinite(serverUpdatedAt) ||
+          (Number.isFinite(localUpdatedAt) && localUpdatedAt > serverUpdatedAt);
+        var rows = serverRows.length
+          ? (shouldMergeLocalRows ? mergeRakebackDraftRows(serverRows, localRows) : serverRows)
+          : localRows;
         rows = filterDeletedRakebackStoredRows(rows, deletedTemplates);
         shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length);
         saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
