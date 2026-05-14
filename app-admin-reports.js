@@ -782,6 +782,58 @@ function initAdminReportModal() {
     return room && playerId ? room + "\u0000" + playerId : "";
   }
 
+  function getRakebackDeletedStoredRowKey(data) {
+    if (!data) return "";
+    var groupId = String(data.groupId || "").trim();
+    var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
+    var room = normalizeRakebackRoom(data.room || "P21");
+    var playerId = String(data.playerId || data.id || "").trim();
+    if (!groupId || !room || !playerId) return "";
+    return [
+      groupId,
+      kind,
+      room,
+      playerId,
+      String(data.reportId || "").trim(),
+      String(data.reportedAt || "").trim(),
+    ].join("|");
+  }
+
+  function normalizeRakebackDeletedRows(items) {
+    var seen = {};
+    var out = [];
+    if (!Array.isArray(items)) return out;
+    items.forEach(function (item) {
+      if (!item) return;
+      var room = normalizeRakebackRoom(item.room || "P21");
+      var playerId = String(item.playerId || item.id || "").trim();
+      var groupId = String(item.groupId || "").trim();
+      var kind = item.kind === "addon" || item.isAddon ? "addon" : "base";
+      var key = getRakebackDeletedStoredRowKey({
+        groupId: groupId,
+        kind: kind,
+        room: room,
+        playerId: playerId,
+        reportId: item.reportId || "",
+        reportedAt: item.reportedAt || "",
+      });
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      out.push({
+        groupId: groupId,
+        kind: kind,
+        room: room,
+        playerId: playerId,
+        reportId: item.reportId || "",
+        reportedAt: item.reportedAt || "",
+        ownerId: item.ownerId || item.authorId || "",
+        deletedAt: item.deletedAt || Date.now(),
+        deletedBy: item.deletedBy || getCurrentRakebackOwnerId(),
+      });
+    });
+    return out;
+  }
+
   function isDeletedRakebackTemplateRow(data) {
     if (!data) return false;
     var kind = data.kind === "addon" || data.isAddon ? "addon" : "base";
@@ -797,13 +849,20 @@ function initAdminReportModal() {
     return data.carryForward === true || data.templateCarryForward === true || isRakebackTemplateLikeData(data);
   }
 
-  function filterDeletedRakebackStoredRows(rows, deletedTemplates) {
+  function filterDeletedRakebackStoredRows(rows, deletedTemplates, deletedRows) {
     var deletedMap = {};
     normalizeRakebackDeletedTemplates(deletedTemplates).forEach(function (item) {
       var key = getRakebackDeletedRowKey(item);
       if (key) deletedMap[key] = true;
     });
+    var deletedRowsMap = {};
+    normalizeRakebackDeletedRows(deletedRows).forEach(function (item) {
+      var key = getRakebackDeletedStoredRowKey(item);
+      if (key) deletedRowsMap[key] = true;
+    });
     return (Array.isArray(rows) ? rows : []).filter(function (row) {
+      var storedKey = getRakebackDeletedStoredRowKey(row);
+      if (storedKey && deletedRowsMap[storedKey]) return false;
       var key = getRakebackDeletedRowKey(row);
       return !key || !deletedMap[key] || !isDeletedRakebackTemplateRow(row);
     });
@@ -2707,17 +2766,19 @@ function initAdminReportModal() {
     try {
       var raw = window.localStorage ? window.localStorage.getItem(getRakebackDraftKey()) : "";
       if (!raw && window.localStorage) raw = window.localStorage.getItem(getLegacyRakebackDraftKey());
-      if (!raw) return { rows: [], deletedTemplates: [] };
+      if (!raw) return { rows: [], deletedTemplates: [], deletedRows: [] };
       var parsed = JSON.parse(raw);
       var deletedTemplates = normalizeRakebackDeletedTemplates(parsed && parsed.deletedTemplates);
+      var deletedRows = normalizeRakebackDeletedRows(parsed && parsed.deletedRows);
       var rows = parsed && Array.isArray(parsed.rows) ? parsed.rows.filter(hasRakebackStoredEntryData) : [];
       return {
-        rows: filterDeletedRakebackStoredRows(rows, deletedTemplates),
+        rows: filterDeletedRakebackStoredRows(rows, deletedTemplates, deletedRows),
         deletedTemplates: deletedTemplates,
+        deletedRows: deletedRows,
         updatedAt: parsed && parsed.updatedAt ? String(parsed.updatedAt) : "",
       };
     } catch (e) {
-      return { rows: [], deletedTemplates: [] };
+      return { rows: [], deletedTemplates: [], deletedRows: [] };
     }
   }
 
@@ -2727,6 +2788,10 @@ function initAdminReportModal() {
 
   function readRakebackDeletedTemplates() {
     return readRakebackDraftData().deletedTemplates;
+  }
+
+  function readRakebackDeletedRows() {
+    return readRakebackDraftData().deletedRows || [];
   }
 
   function getRakebackDeletedTemplateMap() {
@@ -2748,16 +2813,18 @@ function initAdminReportModal() {
       : payload;
   }
 
-  function saveLocalRakebackDraftRows(rows, deletedTemplates, updatedAt) {
+  function saveLocalRakebackDraftRows(rows, deletedTemplates, updatedAt, deletedRows) {
     try {
       if (!window.localStorage) return;
       var normalizedDeleted = normalizeRakebackDeletedTemplates(deletedTemplates != null ? deletedTemplates : readRakebackDeletedTemplates());
-      var filteredRows = filterDeletedRakebackStoredRows(rows || [], normalizedDeleted);
+      var normalizedDeletedRows = normalizeRakebackDeletedRows(deletedRows != null ? deletedRows : readRakebackDeletedRows());
+      var filteredRows = filterDeletedRakebackStoredRows(rows || [], normalizedDeleted, normalizedDeletedRows);
       var normalizedUpdatedAt = updatedAt ? String(updatedAt) : "";
-      if ((filteredRows && filteredRows.length) || normalizedDeleted.length) {
+      if ((filteredRows && filteredRows.length) || normalizedDeleted.length || normalizedDeletedRows.length) {
         window.localStorage.setItem(getRakebackDraftKey(), JSON.stringify({
           rows: filteredRows || [],
           deletedTemplates: normalizedDeleted,
+          deletedRows: normalizedDeletedRows,
           updatedAt: normalizedUpdatedAt,
           savedAt: Date.now()
         }));
@@ -2769,14 +2836,46 @@ function initAdminReportModal() {
 
   function rememberDeletedRakebackTemplates(rows) {
     var current = readRakebackDeletedTemplates();
+    var currentDeletedRows = readRakebackDeletedRows();
     var byKey = {};
+    var deletedRowsByKey = {};
     current.forEach(function (item) {
       var key = getRakebackTemplateKey(item.room, item.playerId);
       if (key) byKey[key] = item;
     });
+    currentDeletedRows.forEach(function (item) {
+      var key = getRakebackDeletedStoredRowKey(item);
+      if (key) deletedRowsByKey[key] = item;
+    });
     Array.prototype.slice.call(rows || []).forEach(function (row) {
       var room = getRakebackRowRoom(row);
       var playerId = getRakebackRowPlayerId(row);
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
+      var reportId = row.getAttribute("data-rakeback-report-id") || "";
+      var reportedAt = row.getAttribute("data-rakeback-reported-at") || "";
+      var ownerId = row.getAttribute("data-rakeback-owner") || "";
+      var deletedRowKey = getRakebackDeletedStoredRowKey({
+        groupId: groupId,
+        kind: kind,
+        room: room,
+        playerId: playerId,
+        reportId: reportId,
+        reportedAt: reportedAt,
+      });
+      if (deletedRowKey && !deletedRowsByKey[deletedRowKey]) {
+        deletedRowsByKey[deletedRowKey] = {
+          groupId: groupId,
+          kind: kind,
+          room: normalizeRakebackRoom(room),
+          playerId: playerId,
+          reportId: reportId,
+          reportedAt: reportedAt,
+          ownerId: ownerId,
+          deletedAt: Date.now(),
+          deletedBy: getCurrentRakebackOwnerId(),
+        };
+      }
       var key = getRakebackTemplateKey(room, playerId);
       if (!key || byKey[key]) return;
       byKey[key] = {
@@ -2791,7 +2890,12 @@ function initAdminReportModal() {
       var key = data ? getRakebackTemplateKey(data.room, data.playerId) : "";
       return !key || !byKey[key];
     });
-    saveLocalRakebackDraftRows(collectRakebackRows(false), Object.keys(byKey).map(function (key) { return byKey[key]; }));
+    saveLocalRakebackDraftRows(
+      collectRakebackRows(false),
+      Object.keys(byKey).map(function (key) { return byKey[key]; }),
+      "",
+      Object.keys(deletedRowsByKey).map(function (key) { return deletedRowsByKey[key]; })
+    );
   }
 
   function saveRakebackDraftRowsNow(force) {
@@ -2804,7 +2908,8 @@ function initAdminReportModal() {
     rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     var deletedTemplates = readRakebackDeletedTemplates();
-    saveLocalRakebackDraftRows(rows, deletedTemplates);
+    var deletedRows = readRakebackDeletedRows();
+    saveLocalRakebackDraftRows(rows, deletedTemplates, "", deletedRows);
     var base = getAdminReportApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     savingRakebackDraft = true;
@@ -2813,6 +2918,7 @@ function initAdminReportModal() {
       date: "shared",
       rakebackRows: rows,
       deletedTemplates: deletedTemplates,
+      deletedRows: deletedRows,
       allowAccountedRakebackOverwrite: canManageAllRakebackRows(),
     });
     fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
@@ -2824,7 +2930,7 @@ function initAdminReportModal() {
       .then(function (data) {
         if (data && data.ok && data.rakebackDraft && Array.isArray(data.rakebackDraft.rows)) {
           rakebackDraftLocalEditUntil = 0;
-          saveLocalRakebackDraftRows(data.rakebackDraft.rows, data.rakebackDraft.deletedTemplates || deletedTemplates, data.rakebackDraft.updatedAt);
+          saveLocalRakebackDraftRows(data.rakebackDraft.rows, data.rakebackDraft.deletedTemplates || deletedTemplates, data.rakebackDraft.updatedAt, data.rakebackDraft.deletedRows || deletedRows);
         }
       })
       .catch(function () {
@@ -2893,9 +2999,11 @@ function initAdminReportModal() {
         var serverDraft = data && data.ok && data.rakebackDraft ? data.rakebackDraft : null;
         var serverRows = serverDraft && Array.isArray(serverDraft.rows) ? serverDraft.rows : [];
         var serverDeletedTemplates = serverDraft ? normalizeRakebackDeletedTemplates(serverDraft.deletedTemplates) : [];
+        var serverDeletedRows = serverDraft ? normalizeRakebackDeletedRows(serverDraft.deletedRows) : [];
         var localRows = localDraft.rows || [];
         if (!localRows.length && visibleRowsBeforeRefresh.length) localRows = visibleRowsBeforeRefresh;
         var deletedTemplates = serverDeletedTemplates.length ? serverDeletedTemplates : (localDraft.deletedTemplates || []);
+        var deletedRows = serverDeletedRows.length ? serverDeletedRows : (localDraft.deletedRows || []);
         var serverUpdatedAt = parseRakebackTimeValue(serverDraft && serverDraft.updatedAt);
         var localUpdatedAt = parseRakebackTimeValue(localDraft.updatedAt);
         var shouldMergeLocalRows = !Number.isFinite(serverUpdatedAt) ||
@@ -2903,9 +3011,9 @@ function initAdminReportModal() {
         var rows = serverRows.length
           ? (shouldMergeLocalRows ? mergeRakebackDraftRows(serverRows, localRows) : serverRows)
           : localRows;
-        rows = filterDeletedRakebackStoredRows(rows, deletedTemplates);
-        shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length);
-        saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt);
+        rows = filterDeletedRakebackStoredRows(rows, deletedTemplates, deletedRows);
+        shouldUploadLocalDraft = !serverRows.length && !serverDeletedTemplates.length && !serverDeletedRows.length && (!!localRows.length || !!(localDraft.deletedTemplates || []).length || !!(localDraft.deletedRows || []).length);
+        saveLocalRakebackDraftRows(rows, deletedTemplates, serverDraft && serverDraft.updatedAt, deletedRows);
         fillRakebackTable(rows, "");
         rakebackDraftLocalEditUntil = 0;
         if (options.showStatus) showRakebackStatusBriefly("Обновлено");
