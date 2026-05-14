@@ -2865,10 +2865,6 @@ function initAdminReportModal() {
     rakebackBody.appendChild(fragment);
     if (list.length > 200) {
       syncRakebackTable({ skipSort: true, deferDecorations: true, fastSummary: true });
-      runAdminReportWhenIdle(function () {
-        if (!rakebackBody || getRakebackSearchQuery()) return;
-        syncRakebackTable({ skipSort: true, deferDecorations: true });
-      }, 2500);
     } else {
       syncRakebackTable();
     }
