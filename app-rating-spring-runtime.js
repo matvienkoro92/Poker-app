@@ -54,6 +54,7 @@ function updateSpringRatingHomePromoStats() {
       return;
     }
     var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
+    var mayTot = document.getElementById("springRatingViewMayTotal");
     var aprTot = document.getElementById("springRatingHomePromoAprilTotal");
     var marTot = document.getElementById("springRatingHomePromoMarchTotal");
     var aprView = document.getElementById("springRatingViewAprilTotal");
@@ -63,6 +64,9 @@ function updateSpringRatingHomePromoStats() {
     var w3 = document.getElementById("springRatingHomePromoMarchW3");
     var w4 = document.getElementById("springRatingHomePromoMarchW4");
     var w5 = document.getElementById("springRatingHomePromoMarchW5");
+    var maySum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MAY_PROMO_TOTAL_DATES !== "undefined" ? SPRING_HOME_MAY_PROMO_TOTAL_DATES : []);
+    var mayText = maySum > 0 ? fmt(maySum) + " ₽" : "—";
+    if (mayTot) mayTot.textContent = mayText;
     var aprSum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_APRIL_PROMO_TOTAL_DATES !== "undefined" ? SPRING_HOME_APRIL_PROMO_TOTAL_DATES : []);
     var aprText = aprSum > 0 ? fmt(aprSum) + " ₽" : "—";
     if (aprTot) aprTot.textContent = aprText;
@@ -95,9 +99,10 @@ function updateSpringRatingHomePromoStats() {
 }
 
 function renderSpringRatingViewTotalsWeeks() {
+  var mayHost = document.getElementById("springRatingViewMayWeeks");
   var aprilHost = document.getElementById("springRatingViewAprilWeeks");
   var marchHost = document.getElementById("springRatingViewMarchWeeks");
-  if (!aprilHost || !marchHost) return;
+  if (!mayHost || !aprilHost || !marchHost) return;
   if (typeof getSpringRatingWeekTopSumForDates !== "function") return;
   var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
   function escNick(s) {
@@ -145,6 +150,7 @@ function renderSpringRatingViewTotalsWeeks() {
       "</details>"
     );
   }
+  var mayBlocks = typeof SPRING_VIEW_MAY_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MAY_WEEK_BLOCKS : [];
   var aprBlocks = typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [];
   var marBlocks = typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [];
   var marchAllSeen = {};
@@ -158,8 +164,11 @@ function renderSpringRatingViewTotalsWeeks() {
       }
     });
   });
-  aprilHost.innerHTML = aprBlocks.map(function (b) {
-    return weekDetailsHtml(b, true, false);
+  mayHost.innerHTML = mayBlocks.map(function (b, i) {
+    return weekDetailsHtml(b, i === 0, false);
+  }).join("");
+  aprilHost.innerHTML = aprBlocks.map(function (b, i) {
+    return weekDetailsHtml(b, i === 0, false);
   }).join("");
   var marchMonthHtml = marchAllDates.length
     ? weekDetailsHtml({ label: "Итого за март", dates: marchAllDates }, true, true)

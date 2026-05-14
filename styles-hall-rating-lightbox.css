@@ -1278,8 +1278,10 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   }
 
   .view--active[data-view="spring-rating"] .spring-rating-view-totals__april-head,
+  .view--active[data-view="spring-rating"] .spring-rating-view-totals__month-head,
   .view--active[data-view="spring-rating"] .spring-rating-view-totals__month-summary,
   html.app-view-spring-rating .spring-rating-view-totals__april-head,
+  html.app-view-spring-rating .spring-rating-view-totals__month-head,
   html.app-view-spring-rating .spring-rating-view-totals__month-summary {
     gap: 6px;
     padding-bottom: 7px;
@@ -1743,4 +1745,3 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .winter-rating__date-table-wrap .winter-rating__table tr.winter-rating__tr--reward-high td {
   background-color: rgba(34, 197, 94, 0.35);
 }
-
