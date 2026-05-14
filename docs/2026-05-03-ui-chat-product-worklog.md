@@ -52,6 +52,20 @@
   - Emoji composer focus сохраняется при действиях.
   - Добавлен Player CRM admin workspace.
   - Chat composer bottom behavior стабилизирован в актуальном HEAD `920740f`.
+- `2.591-2.695` - закрывающий chat composer/emoji/keyboard блок:
+  - Emoji-only insert/send больше не поднимает закрытый composer и keyboard.
+  - `send` из нижнего composer не поднимает поле вверх, независимо от того, отправляется emoji-only, обычный текст или смешанное сообщение.
+  - Composer поднимается вверх только по явному focus/touch на textarea, когда пользователь собирается печатать.
+  - Первый focus, быстрый reopen после закрытия и native keyboard reopen защищены от stale cleanup timers и implicit blur.
+  - Первый tap по свободной зоне при открытом emoji picker закрывает только picker; следующий внешний tap уже может снять focus.
+  - Emoji picker перестал улетать наверх, должен помещаться во viewport и нормально скроллиться на узких экранах.
+  - iOS safe-area/resting reserve проверен для узких экранов: composer не должен прятаться под системной строкой.
+  - Личный chat header перестал мигать Poker21 ID: ID кешируется и не очищается partial/empty refresh или typing state.
+  - Desktop composer lift восстановлен отдельной веткой, чтобы mobile guards не ломали обычный browser сценарий.
+
+## Chronology Note
+
+Этот worklog намеренно хранит работу 2026-05-03 - 2026-05-05 как уже завершенную. После `ee27448` / `2.695` в истории проекта уже идут отдельные направления: chat send polling, lazy/module split, CRM dashboard, Poker21 binding/profile, admin reports/rakeback и новые данные рейтинга. Поэтому пункты выше - baseline для будущих правок, а не текущий список открытых задач.
 
 ## Product Invariants
 
@@ -126,7 +140,7 @@
 
 ## Remaining Risks
 
-- iOS PWA keyboard/composer остается самым чувствительным местом: маленькие изменения scroll/root cleanup могут возвращать bounce или потерю фокуса.
+- iOS PWA keyboard/composer остается самым чувствительным местом, но baseline `2.591-2.695` считается закрытым: новые изменения должны проверять сохранение инвариантов focus/reopen/send/emoji/safe-area, а не возвращать старые конфликты.
 - В рабочем дереве могут оставаться пользовательские незакоммиченные изменения; документационные/версионные коммиты нужно stage-ить точечно.
 - Некоторые visual fixes касаются общей gold theme, поэтому после каждого изменения нужно смотреть не один экран, а home/chat/download/profile/rating вместе.
 - Player CRM добавляет админскую поверхность: следующие правки должны не смешивать CRM state с обычным пользовательским profile/chat state.

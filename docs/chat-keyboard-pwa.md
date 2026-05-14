@@ -276,9 +276,82 @@
 - Admin status сам по себе не является причиной показывать debug-панель.
 - Если похожая красная панель снова появляется у пользователя, первым делом проверять `shouldShowChatKeyboardDebugPanel()` и `isChatKeyboardDebugAllowedEnvironment()` в `app-chat-lifecycle.js`, а не CSS.
 
+## Завершенный Блок 2026-05-03 - 2026-05-05: Composer, Emoji, Keyboard
+
+Этот блок фиксирует уже закрытую работу после старого состояния `2.572`. Его важно читать как исторический baseline: после него в git-истории уже пошли отдельные треки CRM, module split/lazy loading, Poker21 binding, admin reports/rakeback и обновления рейтинга. Новые правки не должны снова трактовать эти пункты как открытые TODO.
+
+### Что Закрыто
+
+- Emoji-only ввод больше не поднимает закрытый composer и не открывает keyboard, если в поле нет обычного текста.
+- `send` больше не является причиной подъема composer: если keyboard закрыта и пользователь отправляет emoji-only, текст или смешанное сообщение из нижнего состояния, composer остается внизу.
+- Composer поднимается только от явного намерения печатать: touch/focus на textarea или восстановление реальной native keyboard session.
+- Первый фокус в поле ввода восстановлен: composer должен подниматься сразу, даже после предыдущего закрытия keyboard или после быстрого повторного открытия.
+- Быстрый reopen защищен от старых cleanup timers: отложенный dismiss/root-scroll cleanup не должен закрывать keyboard, если уже началась новая сессия открытия.
+- Клик по emoji picker и emoji controls считается частью composer chrome. Он не должен воровать focus у textarea и не должен закрывать native keyboard.
+- Первый клик по свободной зоне при открытом emoji picker закрывает только picker и оставляет composer/keyboard в текущем состоянии. Второй внешний клик уже может снять focus.
+- Emoji picker закреплен как нижнее overlay-окно рядом с composer: он не должен улетать наверх, выпадать за viewport или ломать scroll на узких iPhone.
+- На узких iOS экранах composer держит safe-area/resting reserve и не уезжает под системную строку.
+- Лента сообщений сохраняет bottom-affinity при focus/open: если пользователь находится у низа или вернулся к низу после ручного scroll, keyboard pad поднимает ленту вместе с composer.
+- Desktop/browser composer lift тоже восстановлен отдельно от iOS PWA ветки.
+- В личном чате Poker21 ID в шапке стабилизирован: partial/empty `fastOpen`, typing state и быстрые refresh не должны заставлять ID то появляться, то исчезать.
+
+### Версии И Коммиты
+
+- `96ec564` / `2.591` - emoji controls сохраняют keyboard focus.
+- `743db03` / `2.595` - стабилизация focus composer после пользовательской проверки на версии `2.595`.
+- `f270bf9` / `2.600` - iOS docking composer, safe-area/resting reserve и соседние visual fixes.
+- `d2cab58` / `2.601` - первая расширенная защита iOS keyboard focus.
+- `5853d95` / `2.602` - запрет лишнего scroll во время открытия keyboard.
+- `ba7322c` / `2.603` - разделение focus conflicts: send не поднимает composer, а явный focus поднимает.
+- `3a12b6a` / `2.604` - защита быстрого reopen от старых cleanup timers.
+- `cefa0f6` / `2.606` - стабильный Poker21 ID в header личного чата.
+- `8b0f48d` / `2.607` - корректный dismiss composer в iOS PWA.
+- `d75ddae` / `2.608` - opening keyboard и обновление notification sound без поломки keyboard session.
+- `dc5c0d7` / `2.610` - cleanup не закрывает keyboard при reopen.
+- `bc4091b` / `2.611` - дополнительная защита race при iOS PWA reopen.
+- `61a0edc` / `2.616` - первый open keyboard/composer после входа в чат.
+- `73e5a0a` / `2.621` - keyboard после scrolled feed и возврата к низу.
+- `2235398` / `2.625` - stale cleanup не перебивает активную iOS PWA keyboard session.
+- `cd5c4ca` / `2.662` - Keyboard Lab закреплен в footer для нормальной диагностики.
+- `4c9a2de` / `2.680` - desktop composer lift восстановлен отдельно от mobile guards.
+- `c3f9c4d` / `2.692` - стабилизация native keyboard reopen.
+- `83b966d` / `2.693` - восстановлен первый lift composer.
+- `c642e42` / `2.694` - rescue для implicit blur composer.
+- `ee27448` / `2.695` - внешний tap по emoji закрывает picker без подъема composer и без первого dismiss keyboard.
+
+### Соседний Theme Блок
+
+Рядом с chat keyboard работой закрывался visual/theme хвост, который тоже не является открытой задачей:
+
+- `c7fbfbb` / `2.492` - gold tabbar стал непрозрачным.
+- `cc130f2` / `2.542` - chat composer и gold rating button.
+- `0dcdd92` / `2.544` - Telegram home принудительно входит в gold theme.
+- `1c54f54` / `2.549`, `a6f5000` / `2.550`, `4696ab1` / `2.552`, `7c519e9` / `2.553` - выравнивание gold/dark-blue фонов, блоков и tabbar icons.
+- `a2bbadd` / `2.556` - light theme contrast.
+- `72952a7` / `2.558` - cashout gold theme приведена к download.
+- `9e6f888` / `2.559`, `7cc506b` / `2.562`, `2b7f7b6` / `2.566` - единый home background, легкий shimmer и активный цвет tabbar.
+
+### Финальные Инварианты После `2.695`
+
+- Не поднимать composer из `send`; подъем разрешен только от явного focus/touch intent или подтвержденной native keyboard session.
+- Не считать emoji-only значимым текстом для lift/autosize. Emoji остаются содержимым сообщения, но не должны будить закрытую keyboard.
+- Не вызывать root-scroll cleanup в первые кадры открытия keyboard и не запускать старый cleanup, если появился новый open intent.
+- Emoji picker, attach controls, context menu и scroll-bottom controls входят в composer chrome для hit-test/pointer-dismiss.
+- Внешний tap при открытом emoji picker сначала закрывает picker; dismiss textarea/keyboard начинается только со следующего внешнего tap.
+- Header личного чата хранит последний известный Poker21 ID и не очищает его из-за partial/empty refresh.
+
+### Проверки
+
+- `npm run check:syntax`;
+- `npm run smoke`;
+- `npm run smoke:visual`;
+- `git diff --check`;
+- ручные iOS сценарии: первый focus, закрытие/open/reopen без паузы, emoji-only insert/send, text send из нижнего composer, emoji picker outside tap, scrolled feed -> focus, narrow iPhone safe-area, личный чат с Poker21 ID в header;
+- `npm run smoke:nav` на момент этих правок мог падать на unrelated hidden asset/images, поэтому его результат нужно читать отдельно от keyboard/composer фиксов.
+
 ## Следующий Шаг
 
-Если проблема повторяется после `2.572`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту:
+Если похожая проблема повторяется после `2.695`, использовать расширенный скрин `Keyboard Lab` и принять решение по факту, не откатывая закрытые инварианты выше:
 
 - если `hKb/bKb = 0` — чинить ранний trigger keyboard-state;
 - если `chatCmp position != fixed` — чинить selector/cascade;

@@ -109,11 +109,13 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Чатовые dialogs и lifecycle защищены lazy-loading smoke-проверками.
 - По iOS PWA keyboard/chat composer добавлена отдельная документация `chat-keyboard-pwa.md` и расширенная диагностика `Keyboard Lab`: теперь видны классы keyboard-state, CSS-переменные, header/messages/composer rect/computed styles и root/shell scroll.
 - В `chat-keyboard-pwa.md` добавлен блок `2026-05-03: Resting Composer, Re-Armed Bottom Follow, Emoji Height`: зафиксированы правила для закрытого composer state, tap outside dismiss, возврата к низу после ручного scroll up/down, emoji-only высоты textarea и ручного version bump перед push.
+- В `chat-keyboard-pwa.md` добавлен закрытый исторический блок `2026-05-03 - 2026-05-05: Composer, Emoji, Keyboard`: версии `2.591-2.695` фиксируют, что emoji-only не поднимает закрытый composer, `send` не поднимает keyboard, первый focus/reopen снова поднимает composer, emoji picker закрывается первым внешним tap без dismiss keyboard, узкие iOS safe-area покрыты, а Poker21 ID в шапке ЛС стабилен.
 - Серия правок от 2026-05-01 задокументирована в `2026-05-01-stability-worklog.md`: первый фокус, выезд keyboard/composer, задержки кликов, видимость отчетов только админам и повторная инициализация rating top wins после lazy hydration.
 - Серия Telegram/chat правок от 2026-05-03 задокументирована в `2026-05-03-telegram-chat-worklog.md`: composer focus после отправки, hit-area back-кнопок, dark-gold Telegram theme, кликабельность инструкции, быстрые dialog metadata, DM header hydration и отступ chat header под нативную кнопку `Закрыть`.
 - Серия raffle/chat-stability правок от 2026-05-03 задокументирована в `2026-05-03-raffles-chat-stability.md`: admin delete/cancel теперь не зависят от ложного `Telegram.WebApp` в PWA, admin-запросы используют PWA/auth body, stale fallback listeners очищаются при reinit, загрузка розыгрышей сначала показывает активный блок, а тяжелый completed archive/leaders рендерится отложенно.
-- Серия продуктовых/UI правок до версии `2.572` задокументирована в `2026-05-03-ui-chat-product-worklog.md`: профиль, первый скролл главной, download/freerolls, friends, темы, газета, spring rating, raffles/admin, Player CRM и актуальная стабилизация chat composer.
+- Серия продуктовых/UI правок до версии `2.695` задокументирована в `2026-05-03-ui-chat-product-worklog.md`: профиль, первый скролл главной, download/freerolls, friends, темы, газета, spring rating, raffles/admin, Player CRM и закрытая стабилизация chat composer/emoji/keyboard.
 - Красная chat keyboard debug-панель больше не должна появляться у игроков/админов в production только из-за старого `localStorage`: включение разрешено на localhost или явным `?chatKeyboardDebug=1`, а production runtime очищает старый флаг.
+- После закрытия chat keyboard блока работа ушла дальше: CRM/dashboard, module split/lazy loading, Poker21 binding/profile, admin reports/rakeback и новые spring rating data уже идут в истории после него.
 
 ### UI Polish
 
@@ -130,12 +132,13 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Стартовые скрипты ограничены избирательно: основные сценарии eager, редкие тяжелые домены догружаются по входу в раздел.
 - Backend Redis-доступ централизован.
 - Критичные пользовательские маршруты закреплены smoke-тестами.
+- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`; дальнейшие изменения должны сохранять его инварианты, а не начинать расследование с устаревшего состояния `2.572`.
 
 ## Что осталось
 
 ### P1
 
-- Закончить стабилизацию iOS PWA chat keyboard по метрикам из `Keyboard Lab`, а не визуально: проверить, что `chat-keyboard-open`, fixed header, composer bottom и root-scroll включаются в одном сценарии.
+- Поддерживать iOS PWA chat keyboard по метрикам из `Keyboard Lab` при новых регрессиях: закрытый baseline `2.591-2.695` уже зафиксирован, поэтому проверять нужно сохранение инвариантов focus/reopen/send/emoji/safe-area.
 - Продолжить HTML split:
   - `cashout`;
   - `schedule`;
