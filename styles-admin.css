@@ -1530,9 +1530,38 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-refresh-btn:hover {
   background: rgba(246, 211, 145, 0.14);
 }
+.admin-report-rakeback-refresh-btn--attention:not(:disabled) {
+  animation: adminReportRakebackRefreshPulse 1.35s ease-in-out infinite;
+  border-color: rgba(255, 231, 176, 0.9);
+  background: linear-gradient(180deg, rgba(255, 231, 176, 0.2), rgba(202, 161, 84, 0.13));
+}
 .admin-report-rakeback-refresh-btn:disabled {
   opacity: 0.55;
   cursor: default;
+}
+@keyframes adminReportRakebackRefreshPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.18),
+      0 0 0 rgba(246, 211, 145, 0);
+    filter: brightness(1);
+  }
+  45% {
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.22),
+      0 0 18px rgba(255, 231, 176, 0.58),
+      0 0 0 4px rgba(246, 211, 145, 0.13);
+    filter: brightness(1.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-report-rakeback-refresh-btn--attention:not(:disabled) {
+    animation: none;
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.18),
+      0 0 16px rgba(255, 231, 176, 0.48);
+  }
 }
 .admin-report-rakeback-search,
 .admin-report-rakeback-sort {

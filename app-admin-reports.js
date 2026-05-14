@@ -4240,7 +4240,9 @@ function initAdminReportModal() {
     });
   }
   if (rakebackRefreshBtn) {
+    rakebackRefreshBtn.classList.add("admin-report-rakeback-refresh-btn--attention");
     rakebackRefreshBtn.addEventListener("click", function () {
+      rakebackRefreshBtn.classList.remove("admin-report-rakeback-refresh-btn--attention");
       loadSharedRakebackDraftRows({ force: true, showStatus: true });
     });
   }
