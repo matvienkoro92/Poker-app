@@ -1429,6 +1429,54 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 40
         }
       ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 23273,
+          "points": 135
+        },
+        {
+          "nick": "Simple",
+          "place": 4,
+          "reward": 4760,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Simple",
+          "place": 2,
+          "reward": 6708,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 6,
+          "reward": 1472,
+          "points": 50
+        }
+      ]
     }
   ],
   "09.05.2026": [
@@ -1495,6 +1543,96 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 3,
           "reward": 2000,
           "points": 90
+        }
+      ]
+    },
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 10,
+          "reward": 6688,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 2,
+          "reward": 3066,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 7470,
+          "points": 90
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 4,
+          "reward": 1994,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "SHR MAGIC 800K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 3,
+          "reward": 39016,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 10415,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 7,
+          "reward": 1081,
+          "points": 40
         }
       ]
     }

@@ -369,6 +369,9 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-07-05-2026-league2-micro-200-14h.jpg",
     "rating-compressed-preview/rating-07-05-2026-league2-plo5-pko-18h.jpg"
   ],
+  "08.05.2026": [
+    "rating-compressed-preview/rating-08-05-2026-league2-plo4-20k-16h.jpg"
+  ],
   "09.05.2026": [
     "rating-compressed-preview/rating-09-05-2026-league2-energetik-22h.jpg",
     "rating-compressed-preview/rating-09-05-2026-league2-tournament-rebuy-14h.jpg"
