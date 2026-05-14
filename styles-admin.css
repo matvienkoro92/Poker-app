@@ -1680,6 +1680,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   width: 192px;
 }
 .admin-report-rakeback-discount-cell {
+  position: relative;
   text-align: center;
   vertical-align: middle;
 }
