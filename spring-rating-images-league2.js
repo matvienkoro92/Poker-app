@@ -380,6 +380,7 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-10-05-2026-league2-tournament-plo4-20h.jpg"
   ],
   "11.05.2026": [
+    "rating-compressed-preview/rating-11-05-2026-league2-dv-plo5-12h.jpg",
     "rating-compressed-preview/rating-11-05-2026-league2-ok-17h.jpg",
     "rating-compressed-preview/rating-11-05-2026-league2-energetik-22h.jpg"
   ],
@@ -388,7 +389,8 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-12-05-2026-league2-tournir-vtornika-18h.jpg"
   ],
   "13.05.2026": [
-    "rating-13-05-2026-league2-ok-17h.jpg",
-    "rating-13-05-2026-league2-tournir-sredy-18h.jpg"
+    "rating-compressed-preview/rating-13-05-2026-league2-bounty-200-14h.jpg",
+    "rating-compressed-preview/rating-13-05-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-13-05-2026-league2-tournir-sredy-18h.jpg"
   ]
 };

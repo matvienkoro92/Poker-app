@@ -1780,9 +1780,83 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "reward": 0
         }
       ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Simple",
+          "place": 3,
+          "reward": 16027,
+          "points": 90
+        },
+        {
+          "nick": "nikola233",
+          "place": 40,
+          "reward": 700,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 0,
+          "reward": 350,
+          "points": 0
+        }
+      ]
     }
   ],
   "11.05.2026": [
+    {
+      "time": "08:00",
+      "name": "Bali Yana 20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 2,
+          "reward": 246,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 3,
+          "reward": 4165,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 4,
+          "reward": 5293,
+          "points": 70
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 7,
+          "reward": 2790,
+          "points": 40
+        }
+      ]
+    },
     {
       "time": "17:00",
       "name": "OK🏦",
@@ -1859,6 +1933,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
       ]
     },
     {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 1,
+          "reward": 42726,
+          "points": 135
+        }
+      ]
+    },
+    {
       "time": "22:00",
       "name": "EnergetikTournament",
       "buyin": 200,
@@ -1896,6 +1984,54 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
   ],
   "12.05.2026": [
     {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 1,
+          "reward": 7952,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 7,
+          "reward": 4402,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 1,
+          "reward": 27029,
+          "points": 135
+        },
+        {
+          "nick": "outsider",
+          "place": 28,
+          "reward": 87,
+          "points": 0
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -1927,6 +2063,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "nick": "COBRA",
           "place": 11,
           "reward": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Syndicate",
+          "place": 2,
+          "reward": 8802,
+          "points": 110
         }
       ]
     },
@@ -2041,9 +2191,43 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coonie Lee",
+          "place": 2,
+          "reward": 26059,
+          "points": 110
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 7,
+          "reward": 8533,
+          "points": 40
+        }
+      ]
     }
   ],
   "13.05.2026": [
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 10896,
+          "points": 135
+        }
+      ]
+    },
     {
       "time": "12:00",
       "name": "DV Rebuy",
@@ -2069,6 +2253,38 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "nick": "FrankL",
           "place": 13,
           "reward": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Annie1609",
+          "place": 3,
+          "reward": 3854,
+          "points": 90
+        },
+        {
+          "nick": "МВД",
+          "place": 15,
+          "reward": 1816,
+          "points": 0
+        },
+        {
+          "nick": "ABevege",
+          "place": 12,
+          "reward": 696,
+          "points": 0
+        },
+        {
+          "nick": "Бэха",
+          "place": 36,
+          "reward": 319,
+          "points": 0
         }
       ]
     },
@@ -2135,6 +2351,58 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "nick": "AliPetuhov",
           "place": 15,
           "reward": 1050
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Freeroll 1 MLN",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Sindel44",
+          "place": 1,
+          "reward": 220000,
+          "points": 135
+        },
+        {
+          "nick": "MEVRIK",
+          "place": 18,
+          "reward": 6000,
+          "points": 0
+        },
+        {
+          "nick": "ЕвгенКа",
+          "place": 26,
+          "reward": 3600,
+          "points": 0
+        },
+        {
+          "nick": "WhiskeyClub",
+          "place": 37,
+          "reward": 3100,
+          "points": 0
+        },
+        {
+          "nick": "B551OB",
+          "place": 49,
+          "reward": 3100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "MINI SHR 500K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 5,
+          "reward": 97922,
+          "points": 60
         }
       ]
     },
