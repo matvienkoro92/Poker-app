@@ -2212,7 +2212,6 @@ function initAdminReportModal() {
 
   function canAddRakebackAddon(row) {
     if (!row) return false;
-    if (row.getAttribute("data-rakeback-kind") === "addon") return false;
     return !!getRakebackRowPlayerId(row) && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
   }
 
