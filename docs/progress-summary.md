@@ -154,6 +154,20 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Красная chat keyboard debug-панель больше не должна появляться у игроков/админов в production только из-за старого `localStorage`: включение разрешено на localhost или явным `?chatKeyboardDebug=1`, а production runtime очищает старый флаг.
 - После закрытия chat keyboard/delivery блока работа ушла дальше: CRM/dashboard, module split/lazy loading, Poker21 binding/profile, admin reports/rakeback и новые spring rating data уже идут в истории после него.
 - Закрытый module split/lazy loading/guard блок от 2026-05-06 отдельно описан в `2026-05-06-engineering-splits-guards-worklog.md`; после него в истории уже идут Poker21/debug/admin/rating изменения, поэтому этот этап считается baseline, а не текущей задачей.
+- Закрытый фикс доступа к главному чату от 2026-05-07 отдельно описан в `2026-05-07-chat-club-access-worklog.md`: после modal fragments админская модалка снова стабильно обрабатывает `Принять`/`Отклонить`/`Закрыть`, а бейдж заявок использует filtered count только по `tg_*`/`vk_*`.
+- Закрытый admin reports/rakeback блок от 2026-05-08 отдельно описан в `2026-05-08-admin-reports-rakeback-worklog.md`: крупные вкладки `Отчет`/`Рейкбек`/`Отправленные`, общая live-таблица рейкбека, связанные доп. строки, `-15%`, остатки подзаписей, manager-scoped итоги для отправки отчета, mobile fit, backend/Telegram summary и desktop prewarm кнопки `Отчет`.
+- Закрытый chat delivery/Redis-cost блок от 2026-05-14 отдельно описан в `2026-05-14-chat-delivery-cost-worklog.md`: `mode=updates` больше не пересобирает contacts meta, presence вынесен отдельно, loaders coalesce/abort устаревшие запросы, сообщения используют compact `usersById`, а contacts rev читается через cheap Redis counters. Этот этап идет после прежнего `2.696-2.698` delivery baseline и считается новой закрытой отправной точкой.
+
+### Admin Reports / Rakeback - 2026-05-08
+
+- Закрытый слой админского отчета идет после Poker21/debug и до handoff/chat delivery работ, чтобы не выглядеть свежей незакрытой задачей.
+- В модалке отчета закреплены крупные вкладки `Форма`, `Рейкбек`, `Отправленные`.
+- Вкладка `Рейкбек` получила строки `Рум / Айди / Рейк / Процент / Рейкбек`, выбор рума из `Покер21`, `Х`, `Супрема`, `PP`, авторасчет `Рейк * Процент / 100` и связанные доп. строки к той же группе.
+- Последующая стабилизация этого же исторического слоя сделала рейкбек-таблицу общей для админов, но отчетные итоги персональными по `ownerId`: введенное Викой попадает только в отчет Вики, Аней - только в отчет Ани, Романом - только в отчет Романа.
+- Недельные итоги рейкбека считаются по группам и попадают в отправленные отчеты, копирование недельной сводки и backend/Telegram summary.
+- Desktop-кнопка `Отчет` ускорена через parallel fragment/script prewarm в `app-html-fragments.js`.
+- Поздний follow-up этого же закрытого блока зафиксирован в worklog: итоги разделены по активной вкладке и `Итого по всем румам`, фишечные румы пересчитываются через множители (`Хпокер *100`, `Супрема/PPpoker *115`), значения `РБ` округляются до целых, сохраненный ID копируется кликом с кратким статусом, а для `Покер21`/`Хпокер`/`Супрема`/`PPpoker` добавлены пустые ID-шаблоны для дозаполнения.
+- Блок был запушен в `main` коммитом `195349f Improve admin report rakeback tab`; последующие version/cache bump-ы уже относятся к более поздним работам.
 
 ### UI Polish
 
@@ -172,8 +186,10 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Server chat handler и несколько крупных frontend entrypoints уже разрезаны на thin wrappers/runtime/helpers.
 - Новые direct `window.*` globals и startup/runtime budget regressions ловятся smoke-проверками.
 - Критичные пользовательские маршруты закреплены smoke-тестами.
-- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`, а chat delivery/open freshness - закрытый baseline до `2.698`; дальнейшие изменения должны сохранять эти инварианты, а не начинать расследование с устаревшего состояния `2.572`.
+- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`; ранний chat delivery/open freshness baseline закрыт до `2.698`, а последующий delivery/Redis-cost baseline закрыт до `2.738` в `2026-05-15-chat-delivery-cost-worklog.md`.
 - Закрытый инженерный baseline 2026-05-06 описан отдельно; после него в истории уже идут Poker21/debug/admin/rating работы.
+- Текущий handoff от 2026-05-14 добавлен в `2026-05-14-current-handoff.md`: он связывает старые закрытые слои CRM/PWA/Poker21/engineering в правильном порядке и отделяет их от более поздних admin reports/rating направлений.
+- Закрытый admin reports/rakeback слой от 2026-05-08 описан отдельно и уже стоит до последующих handoff/chat delivery записей.
 
 ## Что осталось
 

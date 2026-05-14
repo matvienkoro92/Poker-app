@@ -16,6 +16,7 @@
 - Исправлен поиск пользователя по username в `lib/api-handlers/users.js`: `DT_IDS_KEY` импортирован, profile-ключи читаются через актуальный account id.
 - Исправлен `scripts/copy-to-public.js`: в `public/` попадают локальные скрипты из `index.html`, включая `telegram-web-app.js`, `poker-tasks-data.js`, `app-*.js` и `peerjs.min.js`.
 - Зафиксированы identity-инварианты для `dtId`, `tg_...`, `vk_...`, `ID...`, legacy-ключей и aliases вроде `tg_roman` в `docs/identity-invariants.md`.
+- Закрыт chat delivery/Redis-cost baseline до PWA `2.738`: `mode=updates` больше не пересобирает contacts meta на каждый poll, presence вынесен в отдельный cadence, startup запросы coalesced, message payload умеет compact `usersById`, а Redis-схема получила дешевый `poker_app:chat_updates_rev`.
 
 ## P1
 

@@ -12,6 +12,21 @@ Optional metadata (`mail`, `user_app_id`) can be retried only as compatibility f
 
 Follow-up from May 9, 2026: a real production bind succeeded only after the backend retried `user_app_id` with the stable app account id (`dtId`, for example `ID400800`). Poker21 rejected the same clean 6-character key with the Telegram numeric `user_app_id` (`Binding failed`). Therefore `dtId` is a required bind fallback, especially for PWA/email profiles.
 
+## Closed production follow-up from 2026-05-09
+
+This follow-up is intentionally recorded inside the May 8 Poker21 worklog because it finished the same production-debug thread. Later worklogs, including the May 14 handoff and chat delivery/cost work, happened after this block.
+
+- Confirmed the successful production bind path with `dtId` as the required `user_app_id` fallback.
+- Removed the old `Проверить по почте` user path from the unlinked profile UI. Key-based bind is the user-facing path.
+- Hid the Poker21 key input after a profile is already linked.
+- Changed the linked `Обновить` behavior to refresh by key instead of email. The frontend now sends the saved/local `ciphertext` on refresh, matching the first bind payload.
+- Added local PWA key persistence after successful bind as a fallback for profiles where the server-side saved key was missing. Unbind clears that local key.
+- Made `POKERPLUS_STORAGE_SECRET` optional for saving the key: when it is missing, storage encryption falls back to `POKERPLUS_SECRET_KEY`.
+- Kept saved cached Poker21 data visible when a live refresh fails, with a user-facing warning instead of blanking the profile.
+- Added the separate `Хендс` stat card and backend hands aliases.
+- Hid the balance card from the profile UI for now, even though normalized balance/gold can still be stored.
+- Changed the hidden-stat message styling from yellow/gold to red.
+
 ## Current binding algorithm
 
 Frontend sends the user-entered key to our backend as:
@@ -99,6 +114,17 @@ If the Poker21 account is not linked, the app must not show a Poker21 level or p
 
 The status block is hidden/unlinked until a real Poker21 binding exists. A user with no linked Poker21 account has no Poker21 level in our app.
 
+## Home fish card status addendum
+
+This addendum belongs to the May 8 Poker21/debug layer, before later admin-report and chat-delivery work.
+
+- The fish card on the home screen uses the current user's `/api/users` Poker21 state.
+- It waits for Telegram/PWA auth credentials before deciding that the user is unlinked.
+- If the profile is linked, the home fish card shows `Уровень X`.
+- If the profile is not linked after auth is available, it shows `Привяжите Poker21`.
+- A later transient request failure must not downgrade an already linked card back to `Привяжите Poker21`.
+- This was closed and pushed as `1b2c7e6 Refresh home Poker21 fish status after auth`.
+
 ## Stats behavior
 
 Poker21 can return dated/stat period counters:
@@ -179,7 +205,7 @@ In that case, send Poker21 the safe attempt matrix from logs and ask which exact
 - `lib/api-handlers/users.js`
   - Current-user/profile Poker21 verification and status payload.
 - `app-profile-pokerplus.js`
-  - Profile UI, bind/refresh/unbind buttons, stats rendering, status sync.
+  - Profile UI, bind/refresh/unbind buttons, saved-key refresh, local PWA key fallback, stats rendering, status sync.
 - `docs/pokerplus-integration-for-vendor.md`
   - Integration details for Poker21/PokerPlus API behavior.
 
@@ -192,5 +218,9 @@ In that case, send Poker21 the safe attempt matrix from logs and ask which exact
 - Email and Telegram ID are only fallbacks/metadata for compatibility.
 - `dtId` is the final `user_app_id` fallback and can be the required id for Poker21 Mini App key binding.
 - No linked Poker21 account means no Poker21 level.
+- A linked Poker21 account should refresh by saved key, not by email.
+- A linked Poker21 profile should not show a key input unless the user unbinds and binds again.
 - Negative Poker21 stats should be visible.
+- Poker21 `Хендс` is a first-class stat card; missing values show `—`.
+- Poker21 balance is intentionally not rendered in the profile UI for now.
 - Unbind should clear stale local data even when Poker21 says no remote binding exists.

@@ -53,7 +53,9 @@
 
 - `app-profile.js` — профиль, Poker21/PokerPlus данные, аватар, статус, друзья и настройки видимости.
 - `app-visitors-admin.js`, `app-section-views.js` — eager-админ/section bootstrap.
-- `app-admin-reports.js`, `app-share-stats.js`, `app-tracking-links.js`, `app-auth-debug.js` — админские модалки, догружаются по первому клику.
+- `app-admin-reports.js` — админский отчет: форма, отправленные отчеты, вкладка `Рейкбек`, общая live-таблица строк/доп. строк, owner-scoped итоги для отправки отчета, submit/edit/copy flow.
+- `app-html-fragments.js` — среди прочего прогревает admin report fragments/scripts, чтобы desktop-кнопка `Отчет` открывала модалку без заметной задержки.
+- `app-share-stats.js`, `app-tracking-links.js`, `app-auth-debug.js` — остальные админские модалки, догружаются по первому клику.
 
 ## CSS
 
@@ -83,7 +85,7 @@
 - `styles-hall-main.css` — зал славы: toolbar, panels, albums, shame board, seasonal rating cards и game-adjacent surfaces.
 - `styles-hall-footer.css` — footer meta, visitor counters и visitor admin shortcut.
 - `styles-hall-prelude.css` — legacy chat/rating хвост перед hall rules.
-- `styles-admin.css` — visitors/reports/tracking/share admin modals.
+- `styles-admin.css` — visitors/reports/tracking/share admin modals, включая крупные вкладки админского отчета, segmented rakeback room tabs и mobile rakeback table/summary layout.
 - `styles-profile.css` — profile CSS entrypoint; только `@import`, порядок менять осторожно.
 - `styles-profile-core-avatar.css` — profile shell, tabs, hero, avatar и chat display name controls.
 - `styles-profile-poker21.css` — Poker21 visibility, email/auth binding, stats и responsive profile layouts.

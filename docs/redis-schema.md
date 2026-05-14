@@ -37,6 +37,7 @@
 | `poker_app:chat_thread_meta:<redisKey>` | HASH | chat | Индекс последнего сообщения: время, id, preview. |
 | `poker_app:chat_thread_msg_index:<redisKey>` | HASH | chat | Быстрый поиск сообщения по id. |
 | `poker_app:chat_thread_poll_gen` | HASH | chat | Ревизии long-poll тредов. |
+| `poker_app:chat_updates_rev` | HASH | chat | Дешевые contacts revisions для `mode=updates`: `contacts:<userId>` и `general`. |
 | `poker_app:chat_seen_cursor` | HASH | chat | Прочитано до: `viewerId|peerId -> ISO`. |
 | `poker_app:chat_general_seen` | HASH | chat | Прочитано до для главного чата. |
 | `poker_app:chat_unread:<viewerId>` | HASH | chat | Непрочитанные по peer/group. |
@@ -106,6 +107,19 @@
 | `poker_app:crm_campaign_events:<campaignId>` | LIST JSON | `player-crm-push-event.js` | Последние события открытия push-кампании из service worker. |
 | `poker_app:crm_campaign_open_users:<campaignId>` | SET | `player-crm-push-event.js` | Уникальные аккаунты, открывшие push-кампанию. |
 | `poker_app:crm_imports` | LIST JSON | `player-crm.js` | Метаданные последних импортов CRM-событий. |
+
+## Admin Reports
+
+| Key | Type | Owner | Purpose |
+| --- | --- | --- | --- |
+| `poker_app:admin_report_shifts` | LIST JSON | `admin-report-shifts.js` | Отправленные отчеты админов за смену. |
+| `poker_app:admin_report_rakeback_draft:shared` | STRING JSON | `admin-report-shifts.js` | Общий live-черновик вкладки `Рейкбек`; строки хранят `ownerId`, чтобы общий просмотр не смешивал персональные итоги отчетов. |
+
+### Admin Report Invariants
+
+- Вкладка `Рейкбек` может быть общей для админов, но отчетные суммы должны считаться по `ownerId` текущего менеджера.
+- Сохранение черновика рейкбека должно merge-ить строки по владельцам, а не перетирать чужие строки безусловным `SET`.
+- Legacy-строки без `ownerId` не должны воскрешаться после удаления/сохранения.
 
 ## Legacy / Audit Notes
 
