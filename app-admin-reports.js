@@ -559,11 +559,17 @@ function initAdminReportModal() {
 
   function markRakebackCell(cell, copied) {
     if (!rakebackBody || !cell) return;
+    var skipCellHighlight = cell.classList && cell.classList.contains("admin-report-rakeback-discount-cell");
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-cell-selected],[data-rakeback-cell-copied]")).forEach(function (td) {
       if (td === cell) return;
       td.removeAttribute("data-rakeback-cell-selected");
       td.removeAttribute("data-rakeback-cell-copied");
     });
+    if (skipCellHighlight) {
+      cell.removeAttribute("data-rakeback-cell-selected");
+      cell.removeAttribute("data-rakeback-cell-copied");
+      return;
+    }
     cell.setAttribute("data-rakeback-cell-selected", "1");
     if (copied) cell.setAttribute("data-rakeback-cell-copied", "1");
     else cell.removeAttribute("data-rakeback-cell-copied");
