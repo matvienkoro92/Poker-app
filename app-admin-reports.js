@@ -2087,6 +2087,7 @@ function initAdminReportModal() {
 
   function canAddRakebackAddon(row) {
     if (!row) return false;
+    if (row.getAttribute("data-rakeback-kind") === "addon") return false;
     return !!getRakebackRowPlayerId(row) && isRakebackRowFilled(row) && hasRakebackRakeValue(row);
   }
 
@@ -2129,7 +2130,9 @@ function initAdminReportModal() {
     if (!row) return 0;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
-    if (row.getAttribute("data-rakeback-kind") === "addon") return rake - (arguments.length > 1 ? parseReportNumber(previousRake) : getRakebackPreviousRake(row));
+    if (row.getAttribute("data-rakeback-kind") === "addon") {
+      return Math.max(0, rake - (arguments.length > 1 ? parseReportNumber(previousRake) : getRakebackPreviousRake(row)));
+    }
     return rake;
   }
 
@@ -2162,7 +2165,7 @@ function initAdminReportModal() {
       var restEl = current.querySelector("[data-rakeback-rest]");
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var rowPreviousRake = current.getAttribute("data-rakeback-kind") === "addon" ? previousRake : 0;
-      if (restEl) restEl.textContent = formatRakebackCellNumber(rake - rowPreviousRake);
+      if (restEl) restEl.textContent = formatRakebackCellNumber(Math.max(0, rake - rowPreviousRake));
       if (amountEl) amountEl.textContent = formatRakebackAmountCell(getRakebackRowAmount(current, rowPreviousRake));
       updateRakebackRowActions(current);
       previousRake = rake;
@@ -2418,7 +2421,7 @@ function initAdminReportModal() {
       var rake = parseReportNumber(rakeInput ? rakeInput.value : "");
       var previousRake = kind === "addon" ? parseReportNumber(previousRakeByGroup[groupId]) : 0;
       if (restEl) {
-        restEl.textContent = formatRakebackCellNumber(rake - previousRake);
+        restEl.textContent = formatRakebackCellNumber(Math.max(0, rake - previousRake));
       }
       var amount = getRakebackRowAmount(row, previousRake);
       if (amountEl) amountEl.textContent = formatRakebackAmountCell(amount);
