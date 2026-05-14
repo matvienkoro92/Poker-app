@@ -2048,12 +2048,8 @@ function initAdminReportModal() {
     return updateRakebackSummaryTotals();
   }
 
-  function scheduleRakebackSearchRefresh() {
+  function applyRakebackSearchRefresh() {
     if (!rakebackBody) return;
-    if (rakebackSearchRefreshTimer) {
-      clearTimeout(rakebackSearchRefreshTimer);
-      rakebackSearchRefreshTimer = null;
-    }
     removeRakebackGeneratedRows();
     if (getRakebackSearchQuery()) {
       ensureRakebackSearchTemplateRows();
@@ -2066,6 +2062,20 @@ function initAdminReportModal() {
     if (!getRakebackSearchQuery()) insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
     renderRakebackSummaryFromCache();
+  }
+
+  function scheduleRakebackSearchRefresh(options) {
+    if (!rakebackBody) return;
+    options = options || {};
+    if (rakebackSearchRefreshTimer) {
+      clearTimeout(rakebackSearchRefreshTimer);
+      rakebackSearchRefreshTimer = null;
+    }
+    var delay = options.immediate ? 0 : 120;
+    rakebackSearchRefreshTimer = setTimeout(function () {
+      rakebackSearchRefreshTimer = null;
+      runAdminReportAfterPaint(applyRakebackSearchRefresh);
+    }, delay);
   }
 
   function showRakebackStatus(message) {
@@ -4646,7 +4656,7 @@ function initAdminReportModal() {
     rakebackSearchInput.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       rakebackSearchInput.value = "";
-      scheduleRakebackSearchRefresh();
+      scheduleRakebackSearchRefresh({ immediate: true });
     });
   }
   if (rakebackSortSelect) {
