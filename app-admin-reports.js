@@ -1204,6 +1204,12 @@ function initAdminReportModal() {
     return isRakebackEntryArchivedByStamp(stamp);
   }
 
+  function isRakebackGroupInArchive(group, fallbackIndex) {
+    if (isRakebackCarryForwardPlaceholderGroup(group)) return false;
+    var stamp = getRakebackGroupEntryAddedAt(group, fallbackIndex);
+    return isRakebackEntryArchivedByStamp(stamp);
+  }
+
   function isRakebackCollectedRowArchived(row) {
     var stamp = parseRakebackTimeValue(row && row.entryAddedAt);
     return isRakebackEntryArchivedByStamp(stamp);
@@ -1891,23 +1897,40 @@ function initAdminReportModal() {
     if (!rakebackBody) return;
     var searchQuery = getRakebackSearchQuery();
     var visibleIndex = 0;
+    var groups = [];
+    var byGroup = {};
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
-      var matchesRoom = rakebackArchiveMode || getRakebackRowRoomFast(row) === activeRakebackRoom;
-      var matchesSearch = !searchQuery || getRakebackRowPlayerIdFast(row).indexOf(searchQuery) !== -1;
+      var groupId = row.getAttribute("data-rakeback-group") || ("__row_" + index);
+      if (!byGroup[groupId]) {
+        byGroup[groupId] = { groupId: groupId, rows: [], index: index };
+        groups.push(byGroup[groupId]);
+      }
+      byGroup[groupId].rows.push(row);
+    });
+    groups.forEach(function (group, index) {
+      var keyRow = getRakebackGroupKeyRow(group.rows);
+      var matchesRoom = rakebackArchiveMode || getRakebackRowRoomFast(keyRow) === activeRakebackRoom;
+      var matchesSearch = !searchQuery || group.rows.some(function (row) {
+        return getRakebackRowPlayerIdFast(row).indexOf(searchQuery) !== -1;
+      });
       var visible = false;
       if (matchesRoom && matchesSearch) {
-        var archived = isRakebackRowInArchive(row, index);
+        var archived = isRakebackGroupInArchive(group, index);
         visible = rakebackArchiveMode ? archived : !archived;
       }
       var hidden = !visible;
-      if (row.hidden !== hidden) row.hidden = hidden;
-      var numberEl = row.querySelector("[data-rakeback-row-number]");
-      if (numberEl) {
-        var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
-        var nextNumber = visible && !isAddon ? String(++visibleIndex) : "";
-        if (numberEl.hidden !== isAddon) numberEl.hidden = isAddon;
-        if (numberEl.textContent !== nextNumber) numberEl.textContent = nextNumber;
-      }
+      group.rows.forEach(function (row) {
+        if (row.hidden !== hidden) row.hidden = hidden;
+      });
+      group.rows.forEach(function (row) {
+        var numberEl = row.querySelector("[data-rakeback-row-number]");
+        if (numberEl) {
+          var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
+          var nextNumber = visible && row === keyRow && !isAddon ? String(++visibleIndex) : "";
+          if (numberEl.hidden !== isAddon) numberEl.hidden = isAddon;
+          if (numberEl.textContent !== nextNumber) numberEl.textContent = nextNumber;
+        }
+      });
     });
   }
 
@@ -2261,6 +2284,7 @@ function initAdminReportModal() {
         var id = current.querySelector("[data-rakeback-player-id]");
         if (room && baseRoom) room.value = baseRoom.value;
         if (id && baseId) id.value = baseId.value;
+        syncRakebackRowLookupAttrs(current);
       }
       var rakeInput = current.querySelector("[data-rakeback-rake]");
       var amountEl = current.querySelector("[data-rakeback-amount]");
@@ -2493,6 +2517,7 @@ function initAdminReportModal() {
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
       getRakebackRowStandardAt(row, index);
+      syncRakebackRowLookupAttrs(row);
     });
     var baseByGroup = {};
     rows.forEach(function (row) {
@@ -2515,6 +2540,7 @@ function initAdminReportModal() {
         var id = row.querySelector("[data-rakeback-player-id]");
         if (room && baseRoom) room.value = baseRoom.value;
         if (id && baseId) id.value = baseId.value;
+        syncRakebackRowLookupAttrs(row);
       }
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
