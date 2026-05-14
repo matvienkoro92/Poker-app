@@ -1727,15 +1727,18 @@ function initAdminReportModal() {
   function getRakebackVisibleGroups() {
     if (!rakebackBody) return [];
     var groups = [];
-    var seen = {};
+    var byGroup = {};
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
-      if (row.hidden) return;
       var groupId = row.getAttribute("data-rakeback-group") || "";
-      if (!groupId || seen[groupId]) return;
-      seen[groupId] = true;
-      groups.push({ groupId: groupId, rows: getRakebackGroupRows(row) });
+      if (!groupId) return;
+      if (!byGroup[groupId]) {
+        byGroup[groupId] = { groupId: groupId, rows: [], visible: false };
+        groups.push(byGroup[groupId]);
+      }
+      byGroup[groupId].rows.push(row);
+      if (!row.hidden) byGroup[groupId].visible = true;
     });
-    return groups;
+    return groups.filter(function (group) { return group.visible; });
   }
 
   function syncRakebackStandardOrder() {
@@ -1951,23 +1954,22 @@ function initAdminReportModal() {
 
   function scheduleRakebackSearchRefresh() {
     if (!rakebackBody) return;
+    if (rakebackSearchRefreshTimer) {
+      clearTimeout(rakebackSearchRefreshTimer);
+      rakebackSearchRefreshTimer = null;
+    }
     removeRakebackGeneratedRows();
     if (getRakebackSearchQuery()) {
       ensureRakebackSearchTemplateRows();
       hydrateRakebackLazyTemplateRowsForSearch();
     } else {
       dehydrateRakebackLazyTemplateRows();
+      ensureRakebackBaseRow(activeRakebackRoom);
     }
     syncRakebackRoomVisibility();
+    if (!getRakebackSearchQuery()) insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
     renderRakebackSummaryFromCache();
-    if (rakebackSearchRefreshTimer) clearTimeout(rakebackSearchRefreshTimer);
-    rakebackSearchRefreshTimer = setTimeout(function () {
-      rakebackSearchRefreshTimer = null;
-      runAdminReportAfterPaint(function () {
-        refreshRakebackVisibleView({ fastSummary: true });
-      });
-    }, 220);
   }
 
   function showRakebackStatus(message) {
