@@ -1298,7 +1298,7 @@ function initAdminReportModal() {
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
       var data = getRakebackLazyTemplateDomData(row);
       if (!data) return;
-      if (options.keepSearchMatches && query.length >= 3 && data.room === activeRakebackRoom && String(data.playerId).toLowerCase().indexOf(query) !== -1) return;
+      if (options.keepSearchMatches && query && data.room === activeRakebackRoom && String(data.playerId).toLowerCase().indexOf(query) !== -1) return;
       moved.push(data);
       if (row.parentNode) row.parentNode.removeChild(row);
     });
@@ -1310,7 +1310,7 @@ function initAdminReportModal() {
   function hydrateRakebackLazyTemplateRowsForSearch() {
     if (!rakebackBody) return false;
     var query = getRakebackSearchQuery();
-    if (!query || query.length < 3) return false;
+    if (!query) return false;
     var deletedTemplates = getRakebackDeletedTemplateMap();
     var existing = {};
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
@@ -1852,7 +1852,8 @@ function initAdminReportModal() {
   function scheduleRakebackSearchRefresh() {
     if (!rakebackBody) return;
     removeRakebackGeneratedRows();
-    if (!getRakebackSearchQuery()) dehydrateRakebackLazyTemplateRows();
+    if (getRakebackSearchQuery()) hydrateRakebackLazyTemplateRowsForSearch();
+    else dehydrateRakebackLazyTemplateRows();
     syncRakebackRoomVisibility();
     syncRakebackVisibleRowNumbers();
     renderRakebackSummaryFromCache();
