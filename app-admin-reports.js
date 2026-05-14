@@ -1458,9 +1458,11 @@ function initAdminReportModal() {
         if (handledWeekKeys[weekKey]) return;
         handledWeekKeys[weekKey] = true;
         var open = rakebackWeekArchiveOpen[weekKey] === true;
+        var weekSeparator = null;
         if (weekKey !== lastWeekKey) {
           lastWeekKey = weekKey;
-          rakebackBody.insertBefore(createRakebackWeekSeparator(weekStart, getRakebackWeekGroupTotals(weekGroups[weekKey] ? weekGroups[weekKey].groups : [], weekStart), open), group.rows[0]);
+          weekSeparator = createRakebackWeekSeparator(weekStart, getRakebackWeekGroupTotals(weekGroups[weekKey] ? weekGroups[weekKey].groups : [], weekStart), open);
+          rakebackBody.insertBefore(weekSeparator, group.rows[0]);
         }
         var weekGroupsList = weekGroups[weekKey] ? weekGroups[weekKey].groups : [];
         if (!open) {
@@ -1472,16 +1474,8 @@ function initAdminReportModal() {
           });
           return;
         }
-        var anchor = null;
-        for (var wi = weekGroupsList.length - 1; wi >= 0 && !anchor; wi--) {
-          var rows = weekGroupsList[wi] && weekGroupsList[wi].rows ? weekGroupsList[wi].rows : [];
-          for (var ri = rows.length - 1; ri >= 0; ri--) {
-            if (rows[ri] && rows[ri].parentNode === rakebackBody) {
-              anchor = rows[ri].nextSibling;
-              break;
-            }
-          }
-        }
+        var marker = document.createComment("rakeback-week-details");
+        rakebackBody.insertBefore(marker, weekSeparator ? weekSeparator.nextSibling : group.rows[0]);
         var fragment = document.createDocumentFragment();
         var weekTotals = getRakebackWeekGroupTotals(weekGroupsList, weekStart);
         fragment.appendChild(createRakebackWeekRoomTabs(weekStart, getRakebackWeekRoomTotals(weekGroupsList, weekStart)));
@@ -1514,7 +1508,8 @@ function initAdminReportModal() {
             });
           });
         });
-        rakebackBody.insertBefore(fragment, anchor);
+        rakebackBody.insertBefore(fragment, marker);
+        if (marker.parentNode) marker.parentNode.removeChild(marker);
         return;
       }
       var key = getRakebackMoscowDayKey(stamp);
