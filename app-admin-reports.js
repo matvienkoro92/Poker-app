@@ -1322,7 +1322,7 @@ function initAdminReportModal() {
     rakebackLazyTemplateRows.forEach(function (row) {
       var data = normalizeRakebackLazyTemplateData(row);
       var key = data ? getRakebackTemplateKey(data.room, data.playerId) : "";
-      if (!data || !key || deletedTemplates[key]) return;
+      if (!data || !key || (deletedTemplates[key] && !isRakebackTemplateId(data.room, data.playerId))) return;
       if (data.room !== activeRakebackRoom || existing[key] || String(data.playerId).toLowerCase().indexOf(query) === -1) {
         remaining.push(data);
         return;
@@ -1338,10 +1338,11 @@ function initAdminReportModal() {
   function ensureRakebackSearchTemplateRows() {
     if (!rakebackBody || rakebackArchiveMode || !getRakebackSearchQuery()) return false;
     var targetRoom = normalizeRakebackRoom(activeRakebackRoom || "P21");
-    if (targetRoom === "P21") return ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS));
-    if (targetRoom === "X") return ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS));
-    if (targetRoom === "PP") return ensureRakebackTemplateRows("PP", getRakebackTemplateIdsForCurrentWeek("PP", PP_RAKEBACK_TEMPLATE_IDS));
-    if (targetRoom === "Supr") return ensureRakebackTemplateRows("Supr", getRakebackTemplateIdsForCurrentWeek("Supr", SUPR_RAKEBACK_TEMPLATE_IDS));
+    var options = { includeDeletedTemplates: true };
+    if (targetRoom === "P21") return ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS), options);
+    if (targetRoom === "X") return ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS), options);
+    if (targetRoom === "PP") return ensureRakebackTemplateRows("PP", getRakebackTemplateIdsForCurrentWeek("PP", PP_RAKEBACK_TEMPLATE_IDS), options);
+    if (targetRoom === "Supr") return ensureRakebackTemplateRows("Supr", getRakebackTemplateIdsForCurrentWeek("Supr", SUPR_RAKEBACK_TEMPLATE_IDS), options);
     return false;
   }
 
@@ -1970,8 +1971,9 @@ function initAdminReportModal() {
     return ids;
   }
 
-  function ensureRakebackTemplateRows(room, playerIds) {
+  function ensureRakebackTemplateRows(room, playerIds, options) {
     if (!rakebackBody || !Array.isArray(playerIds) || !playerIds.length) return false;
+    options = options || {};
     var normalizedRoom = normalizeRakebackRoom(room);
     var deletedTemplates = getRakebackDeletedTemplateMap();
     var previousWeekDefaults = getRakebackTemplateDefaultsFromPreviousWeek(normalizedRoom);
@@ -1991,7 +1993,7 @@ function initAdminReportModal() {
     });
     var addedTemplates = [];
     playerIds.forEach(function (playerId) {
-      if (deletedTemplates[getRakebackTemplateKey(normalizedRoom, playerId)]) return;
+      if (!options.includeDeletedTemplates && deletedTemplates[getRakebackTemplateKey(normalizedRoom, playerId)]) return;
       if (existingIds[playerId]) return;
       addedTemplates.push({
         kind: "base",
