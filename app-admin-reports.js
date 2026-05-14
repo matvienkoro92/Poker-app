@@ -887,6 +887,13 @@ function initAdminReportModal() {
 
   function dedupeRakebackTemplateRows(rows) {
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
+    var groupHasAddon = {};
+    list.forEach(function (row) {
+      if (!row) return;
+      var groupId = String(row.groupId || "").trim();
+      if (!groupId) return;
+      if (row.kind === "addon" || row.isAddon) groupHasAddon[groupId] = true;
+    });
     var realByKey = {};
     list.forEach(function (row) {
       if (!row || isRakebackEmptyTemplateDuplicateRow(row)) return;
@@ -898,6 +905,8 @@ function initAdminReportModal() {
     var templateSeen = {};
     return list.filter(function (row) {
       if (!row || !isRakebackEmptyTemplateDuplicateRow(row)) return !!row;
+      var groupId = String(row.groupId || "").trim();
+      if (groupId && groupHasAddon[groupId]) return true;
       var key = getRakebackTemplateKey(row.room || "P21", row.playerId || row.id || "");
       if (!key) return true;
       if (realByKey[key]) return false;
@@ -1836,8 +1845,35 @@ function initAdminReportModal() {
     rakebackSearchDetachedRows = [];
   }
 
+  function ensureRakebackVisibleAddonBaseRows() {
+    if (!rakebackBody) return;
+    var allRows = getRakebackAllDataRows();
+    var baseByGroup = {};
+    allRows.forEach(function (row) {
+      if (!row || row.getAttribute("data-rakeback-kind") === "addon") return;
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      if (groupId && !baseByGroup[groupId]) baseByGroup[groupId] = row;
+    });
+    getRakebackDomRows().forEach(function (row) {
+      if (!row || row.hidden || row.getAttribute("data-rakeback-kind") !== "addon") return;
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      var base = groupId ? baseByGroup[groupId] : null;
+      if (!base || base === row) return;
+      base.hidden = false;
+      syncRakebackRowLookupAttrs(base);
+      var rowBeforeBase = base.parentNode === rakebackBody &&
+        typeof base.compareDocumentPosition === "function" &&
+        typeof Node !== "undefined" &&
+        (base.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_PRECEDING);
+      if (base.parentNode !== rakebackBody || rowBeforeBase) {
+        rakebackBody.insertBefore(base, row);
+      }
+    });
+  }
+
   function suspendRakebackDomRows() {
     if (!rakebackBody) return;
+    restoreRakebackSearchDetachedRows();
     removeRakebackGeneratedRows();
     var rows = getRakebackDomRows();
     if (!rows.length) return;
@@ -2136,6 +2172,7 @@ function initAdminReportModal() {
     hydrateRakebackLazyTemplateRowsForSearch();
     ensureRakebackBaseRow(activeRakebackRoom);
     syncRakebackRoomVisibility();
+    ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
@@ -2173,6 +2210,7 @@ function initAdminReportModal() {
     }
     removeRakebackGeneratedRows();
     syncRakebackRoomVisibility();
+    ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
@@ -2223,11 +2261,13 @@ function initAdminReportModal() {
       });
       rakebackBody.appendChild(visibleFragment);
       rakebackSearchDetachedRows = detachedRows;
+      ensureRakebackVisibleAddonBaseRows();
     } else {
       restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
       ensureRakebackBaseRow(activeRakebackRoom);
       syncRakebackRoomVisibility();
+      ensureRakebackVisibleAddonBaseRows();
       insertRakebackDateSeparators();
       syncRakebackVisibleRowNumbers();
     }
@@ -2772,6 +2812,7 @@ function initAdminReportModal() {
     });
     if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
+    ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
