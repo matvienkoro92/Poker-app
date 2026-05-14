@@ -1138,6 +1138,7 @@ function initAdminReportModal() {
       row.parentNode.removeChild(row);
     });
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-week-hidden]")).forEach(function (row) {
+      row.hidden = false;
       row.removeAttribute("data-rakeback-week-hidden");
     });
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row-section-date]")).forEach(function (row) {
