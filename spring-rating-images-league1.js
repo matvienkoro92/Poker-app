@@ -574,10 +574,15 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-05-05-2026-league1-night-magic-23h.jpg"
   ],
   "06.05.2026": [
-    "rating-compressed-preview/rating-06-05-2026-league1-dv-rebuy-12h.jpg"
+    "rating-compressed-preview/rating-06-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-06-05-2026-league1-magic-500-22h.jpg",
+    "rating-compressed-preview/rating-06-05-2026-league1-night-magic-23h.jpg"
   ],
   "07.05.2026": [
-    "rating-compressed-preview/rating-07-05-2026-league1-tournir-chetverga-18h.jpg"
+    "rating-compressed-preview/rating-07-05-2026-league1-sbounty-00h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league1-dv-turbo-10h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league1-tournir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league1-nlh-knockout-21h.jpg"
   ],
   "08.05.2026": [
     "rating-compressed-preview/rating-08-05-2026-league1-dv-rebuy-12h.jpg",

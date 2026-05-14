@@ -357,10 +357,17 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-05-05-2026-league2-plo4-20k-16h.jpg"
   ],
   "06.05.2026": [
+    "rating-compressed-preview/rating-06-05-2026-league2-deep-night-02h.jpg",
+    "rating-compressed-preview/rating-06-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-06-05-2026-league2-bounty-200-14h.jpg",
     "rating-compressed-preview/rating-06-05-2026-league2-tournir-sredy-18h.jpg"
   ],
   "07.05.2026": [
-    "rating-compressed-preview/rating-07-05-2026-league2-tournament-rebuy-14h.jpg"
+    "rating-compressed-preview/rating-07-05-2026-league2-deep-night-02h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league2-dv-plo5-12h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league2-micro-200-14h.jpg",
+    "rating-compressed-preview/rating-07-05-2026-league2-plo5-pko-18h.jpg"
   ],
   "09.05.2026": [
     "rating-compressed-preview/rating-09-05-2026-league2-energetik-22h.jpg",

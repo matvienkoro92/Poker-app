@@ -1105,6 +1105,88 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 4590,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 3,
+          "reward": 2005,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Dimon80",
+          "place": 5,
+          "reward": 3168,
+          "points": 60
+        },
+        {
+          "nick": "Malek3084",
+          "place": 16,
+          "reward": 542,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "kream89",
+          "place": 8,
+          "reward": 6227,
+          "points": 30
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 21,
+          "reward": 537,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 2,
+          "reward": 50357,
+          "points": 110
+        }
+      ]
     }
   ],
   "07.05.2026": [
@@ -1157,6 +1239,140 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 2,
           "reward": 1500,
           "points": 110
+        }
+      ]
+    },
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 11369,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sherhan54",
+          "place": 3,
+          "reward": 2122,
+          "points": 90
+        },
+        {
+          "nick": "Бабник",
+          "place": 6,
+          "reward": 438,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 36055,
+          "points": 135
+        },
+        {
+          "nick": "Фокс",
+          "place": 5,
+          "reward": 6602,
+          "points": 60
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 18,
+          "reward": 834,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "хер вам))))",
+          "place": 8,
+          "reward": 898,
+          "points": 30
+        },
+        {
+          "nick": "xx🏛xx",
+          "place": 0,
+          "reward": 118,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Micro 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 1,
+          "reward": 21034,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 14,
+          "reward": 215,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "PLO5 - PKO 200k",
+      "buyin": 25000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 2,
+          "reward": 35646,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 11444,
+          "points": 70
+        },
+        {
+          "nick": "хер вам))))",
+          "place": 0,
+          "reward": 1700,
+          "points": 0
         }
       ]
     }
