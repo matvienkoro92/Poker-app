@@ -89,6 +89,92 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 60
         }
       ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "comotd",
+          "place": 1,
+          "reward": 9853,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 1,
+          "reward": 15634,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 4,
+          "reward": 2226,
+          "points": 70
+        },
+        {
+          "nick": "cap888881",
+          "place": 15,
+          "reward": 721,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 6983,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам))))",
+          "place": 8,
+          "reward": 4638,
+          "points": 30
+        },
+        {
+          "nick": "Уебан.",
+          "place": 9,
+          "reward": 3827,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 34,
+          "reward": 2050,
+          "points": 0
+        },
+        {
+          "nick": "МВД",
+          "place": 84,
+          "reward": 700,
+          "points": 0
+        }
+      ]
     }
   ],
   "02.05.2026": [
