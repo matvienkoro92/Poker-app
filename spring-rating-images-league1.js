@@ -504,5 +504,9 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-26-04-2026-league1-kg-plo6-09h.jpg",
     "rating-26-04-2026-league1-new-hot-pko-15h.jpg",
     "rating-26-04-2026-league1-holdem-6plus-16h.jpg"
+  ],
+  "13.05.2026": [
+    "rating-13-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-13-05-2026-league1-hok-19h.jpg"
   ]
 };

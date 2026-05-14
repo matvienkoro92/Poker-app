@@ -12,6 +12,7 @@ const DATA_FILES = [
   "spring-rating-meta.js",
   "spring-rating-data-march.js",
   "spring-rating-data-april.js",
+  "spring-rating-data-may.js",
   "spring-rating-data.js",
   "winter-rating-data.js",
 ].map((file) => path.join(ROOT, file));

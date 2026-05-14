@@ -307,5 +307,9 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "26.04.2026": [
     "rating-26-04-2026-league2-mok-7max-21h.jpg"
+  ],
+  "13.05.2026": [
+    "rating-13-05-2026-league2-ok-17h.jpg",
+    "rating-13-05-2026-league2-tournir-sredy-18h.jpg"
   ]
 };
