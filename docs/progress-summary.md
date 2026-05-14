@@ -34,6 +34,19 @@
 
 `index.html` теперь содержит легкие hosts с `data-html-fragment`, а тяжелая разметка догружается при входе в раздел, idle-гидрации основных экранов или при первом открытии модалок.
 
+Позже, в закрытом инженерном блоке 2026-05-06, дополнительно вынесены secondary/utility fragments:
+
+- `html-fragments/bonus-game.html`;
+- `html-fragments/cooler-game.html`;
+- `html-fragments/plasterer-game.html`;
+- `html-fragments/learn-play-hub.html`;
+- `html-fragments/poker-tasks.html`;
+- `html-fragments/cashout.html`;
+- `html-fragments/streams.html`;
+- `html-fragments/schedule.html`.
+
+`global-modals.html` после этого не хранит весь тяжелый modal tail внутри одного файла: media/admin/home/chat-rating/access вынесены в отдельные подфрагменты и гидрируются через `app-html-fragments.js`.
+
 ### App.js Split
 
 `app.js` сокращен до тонкого bootstrap/orchestration слоя.
@@ -47,6 +60,17 @@
 - `app-shared-helpers.js` — shared helpers: textarea autosize, boot overlay network state, member-id hints.
 - `app-home-init.js` — theme, radio, start button, raffle badge, home/task click listeners.
 - `app-pwa-open-handlers.js` — PWA install/share, auth event retry, open-from-push и foreground visibility sync.
+- `app-popstate-recovery.js` — popstate/body scroll-lock recovery.
+- `app-shell-bootstrap.js` — shell-ready bootstrap for rating, gazette/tasks, chat, visitor counter and shows.
+- `app-visitor-id.js` / `app-visitor-id.module.mjs` — visitor id runtime and first ES module bridge.
+
+Дополнительно закрыт слой thin entrypoints:
+
+- `app-home-planner.js` делегирует в `app-home-planner-runtime.js`, access logic вынесена в `app-home-planner-access.js`.
+- `app-pwa-auth.js` делегирует в `app-pwa-auth-runtime.js`, mode и overlay вынесены в `app-pwa-auth-mode.js` и `app-pwa-auth-overlay.js`.
+- `app-player-crm.js` делегирует в `app-player-crm-runtime.js`, registrations и viewport shell вынесены в отдельные модули.
+- `app-player-crm-formatters.js` получил ES module bridge `app-player-crm-formatters.module.mjs`.
+- `lib/api-handlers/chat.js` стал wrapper'ом на `lib/api-handlers/chat-runtime.js`; display label, profile status/lookups и read receipts вынесены в `lib/chat-*.js`.
 
 Smoke закрепляет, что эти домены больше не возвращаются в `app.js`.
 
@@ -59,8 +83,9 @@ Smoke закрепляет, что эти домены больше не воз�
   - что root CSS-файлы реально импортируются;
   - что rating entrypoint больше не импортирует learning/games/raffles/download;
   - что build output содержит все CSS imports.
+- Закрытый слой 2026-05-06 вынес home/rating promo late CSS в `styles-home-rating-promo-legacy.css` и `styles-home-rating-promo-late.css`, а shared touch targets - в `styles-layout-touch-targets.css`.
 
-Оставшиеся CSS-риски: поздние `after/prelude/overrides` файлы и legacy home/download selector tail, который еще требует selector-level split.
+Оставшиеся CSS-риски: поздние `after/prelude/overrides` файлы и отдельные legacy selector tails, если новые домены снова начнут использовать общие override-хвосты.
 
 ### Redis Layer
 
@@ -92,6 +117,15 @@ Smoke закрепляет, что эти домены больше не воз�
 
 CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run smoke`, `npm run check:syntax` и build.
 
+### Engineering Guards - 2026-05-06
+
+- `global-deps-manifest.json` покрывает явные browser global exports/consumers.
+- `global-deps-window-baseline.json` фиксирует legacy direct `window.*` globals, существовавшие на момент закрытия этапа.
+- Smoke теперь ловит новый прямой `window.name = ...` / `window["name"] = ...`, если он не описан в `global-deps-manifest.json`.
+- Baseline не должен расти от новых фич: новые globals нужно либо описывать в manifest, либо убирать через modules/local state.
+- Smoke держит budgets для startup и крупных runtime-файлов и показывает конкретные числа при пробитии лимита.
+- Подробности этапа закреплены в `2026-05-06-engineering-splits-guards-worklog.md`.
+
 ### Assets/Public
 
 - Проведен asset audit.
@@ -119,6 +153,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Серия PWA/CRM/theme/profile правок от 2026-05-05 задокументирована в `2026-05-05-pwa-crm-theme-profile-worklog.md`: desktop PWA composer не поднимается после отправки, периодные CRM-карточки считают новые bot/push подписки за период, уровни/рыбка открывают профиль без закрытия родительской модалки, Poker21 profile state не показывает фейковый level без реальных данных, а night theme очищена от dark-gold/green/blue визуальных артефактов. Этот блок считается закрытым историческим этапом перед последующей работой по Poker21/debug, chat keyboard baseline, admin reports/rakeback и spring rating data.
 - Красная chat keyboard debug-панель больше не должна появляться у игроков/админов в production только из-за старого `localStorage`: включение разрешено на localhost или явным `?chatKeyboardDebug=1`, а production runtime очищает старый флаг.
 - После закрытия chat keyboard/delivery блока работа ушла дальше: CRM/dashboard, module split/lazy loading, Poker21 binding/profile, admin reports/rakeback и новые spring rating data уже идут в истории после него.
+- Закрытый module split/lazy loading/guard блок от 2026-05-06 отдельно описан в `2026-05-06-engineering-splits-guards-worklog.md`; после него в истории уже идут Poker21/debug/admin/rating изменения, поэтому этот этап считается baseline, а не текущей задачей.
 
 ### UI Polish
 
@@ -134,39 +169,40 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Первый DOM стал легче за счет HTML fragments.
 - Стартовые скрипты ограничены избирательно: основные сценарии eager, редкие тяжелые домены догружаются по входу в раздел.
 - Backend Redis-доступ централизован.
+- Server chat handler и несколько крупных frontend entrypoints уже разрезаны на thin wrappers/runtime/helpers.
+- Новые direct `window.*` globals и startup/runtime budget regressions ловятся smoke-проверками.
 - Критичные пользовательские маршруты закреплены smoke-тестами.
 - Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`, а chat delivery/open freshness - закрытый baseline до `2.698`; дальнейшие изменения должны сохранять эти инварианты, а не начинать расследование с устаревшего состояния `2.572`.
+- Закрытый инженерный baseline 2026-05-06 описан отдельно; после него в истории уже идут Poker21/debug/admin/rating работы.
 
 ## Что осталось
 
 ### P1
 
 - Поддерживать iOS PWA chat keyboard по метрикам из `Keyboard Lab` при новых регрессиях: закрытый baseline `2.591-2.695` уже зафиксирован, поэтому проверять нужно сохранение инвариантов focus/reopen/send/emoji/safe-area.
-- Продолжить HTML split:
-  - `cashout`;
-  - `schedule`;
-  - `streams`;
-  - `poker-tasks` / games views;
-  - большие части `global-modals.html` разнести по modal fragments.
-- Дочистить `app.js`:
-  - visitor tracking;
-  - early rating/lightbox bootstrap;
-  - popstate/bootstrap orchestration.
+- Постепенно переводить legacy direct `window.*` globals из `global-deps-window-baseline.json` в ES modules/domain APIs.
+- Дорезать `app-chat-lifecycle.js`: open-conversation glue, view-state/bootstrap coordinator и оставшиеся runtime-связки.
+- Разделить iOS/PWA keyboard dock на pure metric/core, DOM adapter и narrow smoke/unit tests.
+- Продолжить split крупных runtime-файлов: PWA auth, player CRM, home planner, rating view adapter, chat runtime.
+- Двигать `app-view-router.js` к более явной route registration модели.
 
 ### P2
 
 - CSS cleanup:
-  - уменьшить `after/prelude/overrides`;
-  - продолжить selector-level split legacy home/download tail;
+  - не давать новым доменам возвращаться в late override tails;
+  - продолжить selector-level split оставшихся legacy хвостов;
   - добавить visual smoke еще на несколько экранов.
 - Assets:
-  - добавить smoke на максимальный размер отдельного asset;
-  - продолжить проверку unused images/media после следующих HTML fragments.
+  - держать individual/public asset budgets в smoke;
+  - продолжить проверку unused images/media после следующих fragment/screen changes.
+- Server API:
+  - дальше выделять commands/side-effects в `player-crm`, `raffles` и chat route handlers;
+  - держать contract tests рядом с high-risk auth/chat/push/rating flows.
 
 ## Рекомендуемый порядок следующих работ
 
-1. Вынести `cashout`, `schedule`, `streams` в HTML fragments.
-2. Продолжить selector-level CSS split legacy home/download tail.
-3. Дочистить implicit globals до ES modules по доменам.
-4. Дочистить `app.js` до почти чистого bootstrap.
+1. Сокращать legacy `window.*` baseline по доменам, начиная с chat/auth/router/rating.
+2. Дорезать `app-chat-lifecycle.js` и keyboard dock.
+3. Продолжить split runtime-файлов и server API handlers.
+4. Поддерживать startup/runtime budgets без поднятия лимитов.
 5. Усилить продуктовую аналитику: funnel, retention, admin CRM reports.

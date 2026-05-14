@@ -36,8 +36,25 @@ Manifests:
 - `js-manifest.json`: app module ownership by domain.
 - `css-manifest.json`: style ownership by domain.
 - `global-deps-manifest.json`: explicit browser global exports/consumers by domain.
+- `global-deps-window-baseline.json`: historical baseline of direct `window.*` globals that existed before the May 6 engineering guard. Do not add new feature globals here; add real exports/consumers to `global-deps-manifest.json` or remove the global.
 
-All manifests are copied to `public/` and checked by `npm run smoke`.
+Runtime manifests are copied to `public/` and checked by `npm run smoke`. The window baseline is smoke-only documentation for legacy debt and does not need to ship.
+
+## Engineering Budgets
+
+`npm run smoke` also enforces startup/runtime budgets so the app fails loudly when it starts growing back into the old shape.
+
+Current static budgets:
+
+- `index.html`: max `100 KB`.
+- Eager scripts in `index.html`: max `152`.
+- Lazy scripts in `index.html`: max `25`.
+- `app-pwa-auth-runtime.js`: max `76 KB`, `1700` lines.
+- `app-player-crm-runtime.js`: max `80 KB`, `1680` lines.
+- `app-home-planner-runtime.js`: max `76 KB`, `1780` lines.
+- `lib/api-handlers/chat-runtime.js`: max `60 KB`, `1450` lines.
+
+If a budget fails, prefer splitting/lazy-loading first. Raise the limit only when the new weight is intentional and documented.
 
 ## JS Domains
 
