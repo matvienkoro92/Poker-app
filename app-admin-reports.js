@@ -91,6 +91,7 @@ function initAdminReportModal() {
   var rakebackSearchRefreshTimer = null;
   var rakebackDecorationTimer = null;
   var rakebackDecorationSeq = 0;
+  var rakebackSearchDetachedRows = [];
   var rakebackLazyTemplateRows = [];
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
@@ -1398,7 +1399,7 @@ function initAdminReportModal() {
     if (!query) return false;
     var deletedTemplates = getRakebackDeletedTemplateMap();
     var existing = {};
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+    getRakebackAllDataRows().forEach(function (row) {
       var key = getRakebackTemplateKey(getRakebackRowRoom(row), getRakebackRowPlayerId(row));
       if (key) existing[key] = true;
     });
@@ -1432,7 +1433,7 @@ function initAdminReportModal() {
       var key = data ? getRakebackTemplateKey(data.room, data.playerId) : "";
       if (key) existing[key] = true;
     });
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+    getRakebackAllDataRows().forEach(function (row) {
       var key = getRakebackTemplateKey(getRakebackRowRoom(row), getRakebackRowPlayerId(row));
       if (key) existing[key] = true;
     });
@@ -1743,6 +1744,60 @@ function initAdminReportModal() {
     return sortedRows;
   }
 
+  function getRakebackDomRows() {
+    return rakebackBody ? Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")) : [];
+  }
+
+  function ensureRakebackSearchOrder(rows) {
+    var maxOrder = -1;
+    (rows || []).forEach(function (row) {
+      var order = Number(row && row.getAttribute("data-rakeback-search-order"));
+      if (Number.isFinite(order)) maxOrder = Math.max(maxOrder, order);
+    });
+    (rows || []).forEach(function (row) {
+      if (!row || row.getAttribute("data-rakeback-search-order") !== null) return;
+      maxOrder += 1;
+      row.setAttribute("data-rakeback-search-order", String(maxOrder));
+    });
+  }
+
+  function getRakebackAllDataRows() {
+    var rows = getRakebackDomRows();
+    (rakebackSearchDetachedRows || []).forEach(function (row) {
+      if (row && rows.indexOf(row) === -1) rows.push(row);
+    });
+    ensureRakebackSearchOrder(rows);
+    return rows.sort(function (a, b) {
+      return Number(a.getAttribute("data-rakeback-search-order")) - Number(b.getAttribute("data-rakeback-search-order"));
+    });
+  }
+
+  function getRakebackGroupsFromRows(rows) {
+    var groups = [];
+    var byGroup = {};
+    (rows || []).forEach(function (row, index) {
+      var groupId = row.getAttribute("data-rakeback-group") || ("__row_" + index);
+      if (!byGroup[groupId]) {
+        byGroup[groupId] = { groupId: groupId, rows: [], index: index };
+        groups.push(byGroup[groupId]);
+      }
+      byGroup[groupId].rows.push(row);
+    });
+    return groups;
+  }
+
+  function restoreRakebackSearchDetachedRows() {
+    if (!rakebackBody || !rakebackSearchDetachedRows.length) return;
+    var rows = getRakebackAllDataRows();
+    var fragment = document.createDocumentFragment();
+    rows.forEach(function (row) {
+      row.hidden = false;
+      fragment.appendChild(row);
+    });
+    rakebackBody.appendChild(fragment);
+    rakebackSearchDetachedRows = [];
+  }
+
   function getRakebackGroupRows(row) {
     if (!rakebackBody || !row) return [];
     var groupId = row.getAttribute("data-rakeback-group") || "";
@@ -1886,6 +1941,10 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
+    if (getRakebackSearchQuery()) {
+      scheduleRakebackSearchRefresh({ immediate: true });
+      return;
+    }
     refreshRakebackFilterView({ fastSummary: true, deferDecorations: true });
   }
 
@@ -2001,6 +2060,7 @@ function initAdminReportModal() {
   function refreshRakebackVisibleView(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    restoreRakebackSearchDetachedRows();
     if (rakebackSearchRefreshTimer) {
       clearTimeout(rakebackSearchRefreshTimer);
       rakebackSearchRefreshTimer = null;
@@ -2035,6 +2095,12 @@ function initAdminReportModal() {
   function refreshRakebackFilterView(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    if (getRakebackSearchQuery()) {
+      scheduleRakebackSearchRefresh({ immediate: true });
+      if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
+      return 0;
+    }
+    restoreRakebackSearchDetachedRows();
     if (rakebackSearchRefreshTimer) {
       clearTimeout(rakebackSearchRefreshTimer);
       rakebackSearchRefreshTimer = null;
@@ -2051,16 +2117,54 @@ function initAdminReportModal() {
   function applyRakebackSearchRefresh() {
     if (!rakebackBody) return;
     removeRakebackGeneratedRows();
-    if (getRakebackSearchQuery()) {
+    var query = getRakebackSearchQuery();
+    if (query) {
       ensureRakebackSearchTemplateRows();
       hydrateRakebackLazyTemplateRowsForSearch();
+      var rows = getRakebackAllDataRows();
+      var groups = getRakebackGroupsFromRows(rows);
+      var visibleFragment = document.createDocumentFragment();
+      var detachedFragment = document.createDocumentFragment();
+      var detachedRows = [];
+      var visibleIndex = 0;
+      groups.forEach(function (group, index) {
+        var keyRow = getRakebackGroupKeyRow(group.rows);
+        var matchesRoom = rakebackArchiveMode || getRakebackRowRoomFast(keyRow) === activeRakebackRoom;
+        var matchesSearch = group.rows.some(function (row) {
+          return getRakebackRowPlayerIdFast(row).indexOf(query) !== -1;
+        });
+        var visible = false;
+        if (matchesRoom && matchesSearch) {
+          var archived = isRakebackGroupInArchive(group, index);
+          visible = rakebackArchiveMode ? archived : !archived;
+        }
+        group.rows.forEach(function (row) {
+          if (!visible) {
+            detachedRows.push(row);
+            detachedFragment.appendChild(row);
+            return;
+          }
+          row.hidden = false;
+          var numberEl = row.querySelector("[data-rakeback-row-number]");
+          if (numberEl) {
+            var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
+            var nextNumber = row === keyRow && !isAddon ? String(++visibleIndex) : "";
+            if (numberEl.hidden !== isAddon) numberEl.hidden = isAddon;
+            if (numberEl.textContent !== nextNumber) numberEl.textContent = nextNumber;
+          }
+          visibleFragment.appendChild(row);
+        });
+      });
+      rakebackBody.appendChild(visibleFragment);
+      rakebackSearchDetachedRows = detachedRows;
     } else {
+      restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
       ensureRakebackBaseRow(activeRakebackRoom);
+      syncRakebackRoomVisibility();
+      insertRakebackDateSeparators();
+      syncRakebackVisibleRowNumbers();
     }
-    syncRakebackRoomVisibility();
-    if (!getRakebackSearchQuery()) insertRakebackDateSeparators();
-    syncRakebackVisibleRowNumbers();
     renderRakebackSummaryFromCache();
   }
 
@@ -2071,7 +2175,7 @@ function initAdminReportModal() {
       clearTimeout(rakebackSearchRefreshTimer);
       rakebackSearchRefreshTimer = null;
     }
-    var delay = options.immediate ? 0 : 120;
+    var delay = options.immediate ? 0 : 220;
     rakebackSearchRefreshTimer = setTimeout(function () {
       rakebackSearchRefreshTimer = null;
       runAdminReportAfterPaint(applyRakebackSearchRefresh);
@@ -2282,7 +2386,7 @@ function initAdminReportModal() {
     if (!rakebackBody || !row || row.getAttribute("data-rakeback-kind") !== "addon") return 0;
     var groupId = row.getAttribute("data-rakeback-group") || "";
     var previousRake = 0;
-    var rows = Array.isArray(groupRows) ? groupRows : Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var rows = Array.isArray(groupRows) ? groupRows : getRakebackAllDataRows();
     for (var i = 0; i < rows.length; i++) {
       var current = rows[i];
       if (current === row) break;
@@ -2384,7 +2488,7 @@ function initAdminReportModal() {
 
   function collectRakebackRows(includeEmpty, currentOwnerOnly) {
     if (!rakebackBody) return [];
-    var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
+    var rows = getRakebackAllDataRows();
     var previousRakeByGroup = {};
     return rows.map(function (row) {
       var roomSelect = row.querySelector("[data-rakeback-room]");
@@ -2530,7 +2634,7 @@ function initAdminReportModal() {
     if (!rakebackBody) return;
     var parsedReportedAt = parseRakebackTimeValue(reportedAtOverride);
     var reportedAt = Number.isFinite(parsedReportedAt) ? new Date(parsedReportedAt).toISOString() : new Date().toISOString();
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+    getRakebackAllDataRows().forEach(function (row) {
       var ownerId = row.getAttribute("data-rakeback-owner") || "";
       if (!isCurrentRakebackReportOwner(ownerId)) return;
       if (!isRakebackRowFilled(row)) return;
@@ -2550,6 +2654,7 @@ function initAdminReportModal() {
   function syncRakebackTable(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    restoreRakebackSearchDetachedRows();
     removeRakebackGeneratedRows();
     dehydrateRakebackLazyTemplateRows({ keepSearchMatches: true });
     ensureRakebackSearchTemplateRows();
@@ -2609,6 +2714,7 @@ function initAdminReportModal() {
     if (!rakebackBody) return;
     rakebackDraftNeedsMigration = false;
     rakebackLazyTemplateRows = [];
+    rakebackSearchDetachedRows = [];
     rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
