@@ -1291,20 +1291,7 @@ function initAdminReportModal() {
 
   function dehydrateRakebackLazyTemplateRows(options) {
     if (!rakebackBody) return false;
-    options = options || {};
-    var query = getRakebackSearchQuery();
-    if (query && !options.keepSearchMatches) return false;
-    var moved = [];
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
-      var data = getRakebackLazyTemplateDomData(row);
-      if (!data) return;
-      if (options.keepSearchMatches && query && data.room === activeRakebackRoom && String(data.playerId).toLowerCase().indexOf(query) !== -1) return;
-      moved.push(data);
-      if (row.parentNode) row.parentNode.removeChild(row);
-    });
-    if (!moved.length) return false;
-    rememberRakebackLazyTemplateRows(moved);
-    return true;
+    return false;
   }
 
   function hydrateRakebackLazyTemplateRowsForSearch() {
@@ -2022,11 +2009,11 @@ function initAdminReportModal() {
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       if (playerId) existingIds[playerId] = true;
     });
-    var addedTemplates = [];
+    var added = false;
     playerIds.forEach(function (playerId) {
       if (!options.includeDeletedTemplates && deletedTemplates[getRakebackTemplateKey(normalizedRoom, playerId)]) return;
       if (existingIds[playerId]) return;
-      addedTemplates.push({
+      rakebackBody.appendChild(createRakebackRow({
         kind: "base",
         room: normalizedRoom,
         playerId: playerId,
@@ -2034,11 +2021,12 @@ function initAdminReportModal() {
         discount15: previousWeekDefaults[playerId] ? previousWeekDefaults[playerId].discount15 : false,
         carryForward: true,
         createdAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
-      });
+        entryAddedAt: Date.now(),
+      }));
       existingIds[playerId] = true;
+      added = true;
     });
-    rememberRakebackLazyTemplateRows(addedTemplates);
-    return !!addedTemplates.length;
+    return added;
   }
 
   function ensureRakebackBaseRow(room) {
@@ -2440,13 +2428,10 @@ function initAdminReportModal() {
     rakebackLazyTemplateRows = [];
     rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
-    rememberRakebackLazyTemplateRows(list);
-    list = list.filter(function (row) { return !isRakebackLazyTemplateData(row); });
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
       list = [{ kind: "base", room: "P21", playerId: "", rake: legacyRakeback, percent: 100 }];
     }
     if (!list.length) {
-      rakebackBody.appendChild(createRakebackRow({ kind: "base" }));
       syncRakebackTable();
       return;
     }
