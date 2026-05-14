@@ -505,6 +505,66 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-26-04-2026-league1-new-hot-pko-15h.jpg",
     "rating-26-04-2026-league1-holdem-6plus-16h.jpg"
   ],
+  "27.04.2026": [
+    "rating-compressed-preview/rating-27-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-27-04-2026-league1-tournir-ponedelnika-18h.jpg"
+  ],
+  "28.04.2026": [
+    "rating-compressed-preview/rating-28-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-28-04-2026-league1-hok-19h.jpg"
+  ],
+  "29.04.2026": [
+    "rating-compressed-preview/rating-29-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-29-04-2026-league1-hok-19h.jpg"
+  ],
+  "30.04.2026": [
+    "rating-compressed-preview/rating-30-04-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-30-04-2026-league1-tournir-chetverga-18h.jpg"
+  ],
+  "01.05.2026": [
+    "rating-compressed-preview/rating-01-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-01-05-2026-league1-friday-progressive-18h.jpg"
+  ],
+  "02.05.2026": [
+    "rating-compressed-preview/rating-02-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-02-05-2026-league1-hok-19h.jpg"
+  ],
+  "03.05.2026": [
+    "rating-compressed-preview/rating-03-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-voskresnyj-turnir-18h.jpg"
+  ],
+  "04.05.2026": [
+    "rating-compressed-preview/rating-04-05-2026-league1-tournir-ponedelnika-18h.jpg"
+  ],
+  "05.05.2026": [
+    "rating-compressed-preview/rating-05-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-05-05-2026-league1-hok-19h.jpg"
+  ],
+  "06.05.2026": [
+    "rating-compressed-preview/rating-06-05-2026-league1-dv-rebuy-12h.jpg"
+  ],
+  "07.05.2026": [
+    "rating-compressed-preview/rating-07-05-2026-league1-tournir-chetverga-18h.jpg"
+  ],
+  "08.05.2026": [
+    "rating-compressed-preview/rating-08-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-08-05-2026-league1-friday-progressive-18h.jpg"
+  ],
+  "09.05.2026": [
+    "rating-compressed-preview/rating-09-05-2026-league1-hok-19h.jpg"
+  ],
+  "10.05.2026": [
+    "rating-compressed-preview/rating-10-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-10-05-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-10-05-2026-league1-classic-tournament-21h.jpg"
+  ],
+  "11.05.2026": [
+    "rating-compressed-preview/rating-11-05-2026-league1-tournir-ponedelnika-18h.jpg"
+  ],
+  "12.05.2026": [
+    "rating-compressed-preview/rating-12-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-12-05-2026-league1-hok-19h.jpg"
+  ],
   "13.05.2026": [
     "rating-13-05-2026-league1-dv-rebuy-12h.jpg",
     "rating-13-05-2026-league1-hok-19h.jpg"
