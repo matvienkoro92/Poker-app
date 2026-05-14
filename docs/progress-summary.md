@@ -186,7 +186,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Server chat handler и несколько крупных frontend entrypoints уже разрезаны на thin wrappers/runtime/helpers.
 - Новые direct `window.*` globals и startup/runtime budget regressions ловятся smoke-проверками.
 - Критичные пользовательские маршруты закреплены smoke-тестами.
-- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`; ранний chat delivery/open freshness baseline закрыт до `2.698`, а последующий delivery/Redis-cost baseline закрыт до `2.738` в `2026-05-15-chat-delivery-cost-worklog.md`.
+- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`; ранний chat delivery/open freshness baseline закрыт до `2.698`, а последующий delivery/Redis-cost baseline закрыт до `2.738` в `2026-05-14-chat-delivery-cost-worklog.md`.
 - Закрытый инженерный baseline 2026-05-06 описан отдельно; после него в истории уже идут Poker21/debug/admin/rating работы.
 - Текущий handoff от 2026-05-14 добавлен в `2026-05-14-current-handoff.md`: он связывает старые закрытые слои CRM/PWA/Poker21/engineering в правильном порядке и отделяет их от более поздних admin reports/rating направлений.
 - Закрытый admin reports/rakeback слой от 2026-05-08 описан отдельно и уже стоит до последующих handoff/chat delivery записей.

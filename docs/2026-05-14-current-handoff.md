@@ -12,7 +12,7 @@
 6. `2026-05-07-chat-club-access-worklog.md` - точечный слой после modal fragments: кликабельная модалка доступа к главному чату, approve/reject/close handlers и filtered pending count.
 7. `2026-05-08-poker21-debug-summary.md` - более поздний Poker21 слой: key-first binding, dtId fallback, refresh/unbind, status/stats contract и диагностика следующих ошибок.
 8. `2026-05-08-admin-reports-rakeback-worklog.md` - закрытый слой по админскому отчету после Poker21/debug: крупные вкладки, третья вкладка `Рейкбек`, live-черновик общей таблицы, строки/доп. строки, персональные итоги по менеджерам, недельные итоги, backend payload/Telegram summary и desktop prewarm кнопки `Отчет`.
-9. `2026-05-15-chat-delivery-cost-worklog.md` - более поздний закрытый chat delivery/Redis-cost слой: unified updates без self-hit, presence split, request coalescing, compact `usersById` payload и дешевые Redis revision counters.
+9. `2026-05-14-chat-delivery-cost-worklog.md` - более поздний закрытый chat delivery/Redis-cost слой: unified updates без self-hit, presence split, request coalescing, compact `usersById` payload и дешевые Redis revision counters.
 10. Более поздние незакоммиченные изменения после этих документов относятся к последующим направлениям. Их не нужно смешивать с базовыми CRM/chat/admin worklog-ами.
 
 ## Что уже сделано и считается baseline
@@ -89,5 +89,5 @@
 - Для закрытого слоя admin reports/rakeback от 2026-05-08: `2026-05-08-admin-reports-rakeback-worklog.md`.
 - Для инженерной нарезки и smoke guards: `2026-05-06-engineering-splits-guards-worklog.md`.
 - Для закрытого фикса доступа к главному чату после modal fragments: `2026-05-07-chat-club-access-worklog.md`.
-- Для закрытого chat delivery/Redis-cost baseline: `2026-05-15-chat-delivery-cost-worklog.md`.
+- Для закрытого chat delivery/Redis-cost baseline: `2026-05-14-chat-delivery-cost-worklog.md`.
 - Для новых admin reports/rating работ после 2026-05-14 лучше завести отдельный dated worklog, а не дописывать старые baseline-документы.
