@@ -78,6 +78,7 @@ function initAdminReportModal() {
   var rakebackArchiveMode = false;
   var rakebackRoomTotals = {};
   var rakebackDraftSaveTimer = null;
+  var rakebackDraftSaveIdle = null;
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var rakebackDraftLocalEditUntil = 0;
@@ -88,6 +89,8 @@ function initAdminReportModal() {
   var rakebackDeferredSyncSeq = 0;
   var rakebackSummaryTimer = null;
   var rakebackSearchRefreshTimer = null;
+  var rakebackDecorationTimer = null;
+  var rakebackDecorationSeq = 0;
   var rakebackLazyTemplateRows = [];
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
@@ -1744,9 +1747,18 @@ function initAdminReportModal() {
     if (!rakebackBody || !row) return [];
     var groupId = row.getAttribute("data-rakeback-group") || "";
     if (!groupId) return [row];
-    return Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).filter(function (candidate) {
-      return candidate.getAttribute("data-rakeback-group") === groupId;
-    });
+    var rows = [row];
+    var prev = row.previousElementSibling;
+    while (prev && prev.hasAttribute("data-rakeback-row") && prev.getAttribute("data-rakeback-group") === groupId) {
+      rows.unshift(prev);
+      prev = prev.previousElementSibling;
+    }
+    var next = row.nextElementSibling;
+    while (next && next.hasAttribute("data-rakeback-row") && next.getAttribute("data-rakeback-group") === groupId) {
+      rows.push(next);
+      next = next.nextElementSibling;
+    }
+    return rows;
   }
 
   function getRakebackVisibleGroups() {
@@ -1874,7 +1886,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
-    refreshRakebackFilterView({ fastSummary: true });
+    refreshRakebackFilterView({ fastSummary: true, deferDecorations: true });
   }
 
   function setRakebackArchiveMode(active) {
@@ -1957,6 +1969,11 @@ function initAdminReportModal() {
 
   function removeRakebackGeneratedRows() {
     if (!rakebackBody) return;
+    rakebackDecorationSeq += 1;
+    if (rakebackDecorationTimer) {
+      clearTimeout(rakebackDecorationTimer);
+      rakebackDecorationTimer = null;
+    }
     removeRakebackDateSeparators();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-total-row]")).forEach(function (row) {
       row.parentNode.removeChild(row);
@@ -1994,10 +2011,25 @@ function initAdminReportModal() {
     hydrateRakebackLazyTemplateRowsForSearch();
     ensureRakebackBaseRow(activeRakebackRoom);
     syncRakebackRoomVisibility();
-    insertRakebackDateSeparators();
+    if (options.deferDecorations) scheduleRakebackDecorations();
+    else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
+  }
+
+  function scheduleRakebackDecorations() {
+    if (!rakebackBody) return;
+    var seq = ++rakebackDecorationSeq;
+    if (rakebackDecorationTimer) clearTimeout(rakebackDecorationTimer);
+    rakebackDecorationTimer = setTimeout(function () {
+      rakebackDecorationTimer = null;
+      runAdminReportAfterPaint(function () {
+        if (seq !== rakebackDecorationSeq) return;
+        insertRakebackDateSeparators();
+        syncRakebackVisibleRowNumbers();
+      });
+    }, 80);
   }
 
   function refreshRakebackFilterView(options) {
@@ -2009,7 +2041,8 @@ function initAdminReportModal() {
     }
     removeRakebackGeneratedRows();
     syncRakebackRoomVisibility();
-    insertRakebackDateSeparators();
+    if (options.deferDecorations) scheduleRakebackDecorations();
+    else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2973,6 +3006,10 @@ function initAdminReportModal() {
       clearTimeout(rakebackDraftSaveTimer);
       rakebackDraftSaveTimer = null;
     }
+    if (rakebackDraftSaveIdle) {
+      cancelAdminReportIdle(rakebackDraftSaveIdle);
+      rakebackDraftSaveIdle = null;
+    }
     rakebackDraftMutationSeq += 1;
     var rows = collectRakebackRows(false);
     var deletedTemplates = readRakebackDeletedTemplates();
@@ -3012,7 +3049,19 @@ function initAdminReportModal() {
   function saveRakebackDraftRows() {
     rakebackDraftMutationSeq += 1;
     if (rakebackDraftSaveTimer) clearTimeout(rakebackDraftSaveTimer);
-    rakebackDraftSaveTimer = setTimeout(saveRakebackDraftRowsNow, 450);
+    if (rakebackDraftSaveIdle) {
+      cancelAdminReportIdle(rakebackDraftSaveIdle);
+      rakebackDraftSaveIdle = null;
+    }
+    var seq = rakebackDraftMutationSeq;
+    rakebackDraftSaveTimer = setTimeout(function () {
+      rakebackDraftSaveTimer = null;
+      rakebackDraftSaveIdle = runAdminReportWhenIdle(function () {
+        rakebackDraftSaveIdle = null;
+        if (seq !== rakebackDraftMutationSeq) return;
+        saveRakebackDraftRowsNow();
+      }, 2000);
+    }, 700);
   }
 
   function focusRakebackRow(row) {
@@ -3120,6 +3169,25 @@ function initAdminReportModal() {
       return;
     }
     setTimeout(fn, 0);
+  }
+
+  function runAdminReportWhenIdle(fn, timeout) {
+    if (typeof fn !== "function") return null;
+    var ric = typeof window !== "undefined" ? window["requestIdleCallback"] : null;
+    if (typeof ric === "function") {
+      return { type: "idle", id: ric(fn, { timeout: timeout || 1500 }) };
+    }
+    return { type: "timeout", id: setTimeout(fn, 0) };
+  }
+
+  function cancelAdminReportIdle(handle) {
+    if (!handle) return;
+    var cancelIdle = typeof window !== "undefined" ? window["cancelIdleCallback"] : null;
+    if (handle.type === "idle" && typeof cancelIdle === "function") {
+      cancelIdle(handle.id);
+    } else {
+      clearTimeout(handle.id);
+    }
   }
 
   function setActiveTab(name) {
