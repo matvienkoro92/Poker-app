@@ -343,7 +343,8 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "03.05.2026": [
     "rating-compressed-preview/rating-03-05-2026-league2-energetik-22h.jpg",
-    "rating-compressed-preview/rating-03-05-2026-league2-ok-17h.jpg"
+    "rating-compressed-preview/rating-03-05-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league2-plo4-20k-16h.jpg"
   ],
   "04.05.2026": [
     "rating-compressed-preview/rating-04-05-2026-league2-tournament-rebuy-14h.jpg"

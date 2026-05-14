@@ -540,11 +540,21 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
   ],
   "02.05.2026": [
     "rating-compressed-preview/rating-02-05-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-02-05-2026-league1-hok-19h.jpg"
+    "rating-compressed-preview/rating-02-05-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-02-05-2026-league1-holdem-6plus-16h.jpg",
+    "rating-compressed-preview/rating-02-05-2026-league1-lucky-777-gtd-18h.jpg",
+    "rating-compressed-preview/rating-02-05-2026-league1-nlh-knockout-21h.jpg",
+    "rating-compressed-preview/rating-02-05-2026-league1-night-magic-23h.jpg"
   ],
   "03.05.2026": [
     "rating-compressed-preview/rating-03-05-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-03-05-2026-league1-voskresnyj-turnir-18h.jpg"
+    "rating-compressed-preview/rating-03-05-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-sbounty-00h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-tai-7-ko-06h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-dv-main-13h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-holdem-6plus-16h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-main-2mln-18h.jpg",
+    "rating-compressed-preview/rating-03-05-2026-league1-nlh-knockout-21h.jpg"
   ],
   "04.05.2026": [
     "rating-compressed-preview/rating-04-05-2026-league1-tournir-ponedelnika-18h.jpg"

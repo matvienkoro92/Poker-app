@@ -317,6 +317,80 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "16:00",
+      "name": "HOLDEM 6+ GTD 30K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 1,
+          "reward": 24100,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "LUCKY 777 GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 9,
+          "reward": 9333,
+          "points": 0
+        },
+        {
+          "nick": "Alesha",
+          "place": 28,
+          "reward": 3933,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 1,
+          "reward": 52561,
+          "points": 135
+        },
+        {
+          "nick": "cap888881",
+          "place": 0,
+          "reward": 3050,
+          "points": 0
+        },
+        {
+          "nick": "Syndicate",
+          "place": 31,
+          "reward": 1700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 7,
+          "reward": 1215,
+          "points": 40
+        }
+      ]
     }
   ],
   "03.05.2026": [
@@ -433,6 +507,134 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 3,
           "reward": 2440,
           "points": 90
+        }
+      ]
+    },
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 11496,
+          "points": 70
+        },
+        {
+          "nick": "AndrushaMorf",
+          "place": 3,
+          "reward": 8508,
+          "points": 90
+        },
+        {
+          "nick": "odna.pluha",
+          "place": 9,
+          "reward": 659,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 3223,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV MAIN 800K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 15,
+          "reward": 5997,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "HOLDEM 6+ GTD 30K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 3,
+          "reward": 6235,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 2,
+          "reward": 4697,
+          "points": 110
+        },
+        {
+          "nick": "cap888881",
+          "place": 5,
+          "reward": 1905,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "MAIN 2 MLN GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фокс",
+          "place": 4,
+          "reward": 147006,
+          "points": 70
+        },
+        {
+          "nick": "Syndicate",
+          "place": 40,
+          "reward": 3550,
+          "points": 0
+        },
+        {
+          "nick": "ggdsgg",
+          "place": 65,
+          "reward": 2600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 1,
+          "reward": 39365,
+          "points": 135
         }
       ]
     }
