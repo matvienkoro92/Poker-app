@@ -980,6 +980,7 @@ function initAdminReportModal() {
       if (roomSelect) roomSelect.disabled = true;
       if (idInput) idInput.readOnly = true;
     }
+    syncRakebackRowLookupAttrs(tr);
     applyRakebackRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
     setRakebackRowSaved(tr, data.editing === true && !accountedData ? false : true);
     return tr;
@@ -989,6 +990,24 @@ function initAdminReportModal() {
     if (!row) return "P21";
     var roomSelect = row.querySelector("[data-rakeback-room]");
     return normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : row.getAttribute("data-rakeback-room") || "P21");
+  }
+
+  function syncRakebackRowLookupAttrs(row) {
+    if (!row) return;
+    var roomSelect = row.querySelector("[data-rakeback-room]");
+    var idInput = row.querySelector("[data-rakeback-player-id]");
+    row.setAttribute("data-rakeback-room-current", normalizeRakebackRoom(roomSelect && roomSelect.value ? roomSelect.value : row.getAttribute("data-rakeback-room") || "P21"));
+    row.setAttribute("data-rakeback-player-id-current", idInput && idInput.value ? String(idInput.value).trim().toLowerCase() : "");
+  }
+
+  function getRakebackRowRoomFast(row) {
+    return normalizeRakebackRoom(row && row.getAttribute("data-rakeback-room-current") || getRakebackRowRoom(row));
+  }
+
+  function getRakebackRowPlayerIdFast(row) {
+    if (!row) return "";
+    var cached = row.getAttribute("data-rakeback-player-id-current");
+    return cached != null ? cached : getRakebackRowPlayerId(row);
   }
 
   function getRakebackSearchQuery() {
@@ -1849,7 +1868,7 @@ function initAdminReportModal() {
       rakebackArchiveBtn.setAttribute("aria-pressed", "false");
     }
     if (rakebackAddBtn) rakebackAddBtn.hidden = false;
-    refreshRakebackVisibleView({ fastSummary: true });
+    refreshRakebackFilterView({ fastSummary: true });
   }
 
   function setRakebackArchiveMode(active) {
@@ -1873,16 +1892,21 @@ function initAdminReportModal() {
     var searchQuery = getRakebackSearchQuery();
     var visibleIndex = 0;
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row, index) {
-      var archived = isRakebackRowInArchive(row, index);
-      var matchesRoom = getRakebackRowRoom(row) === activeRakebackRoom;
-      var matchesSearch = !searchQuery || getRakebackRowPlayerId(row).indexOf(searchQuery) !== -1;
-      var visible = rakebackArchiveMode ? (archived && matchesSearch) : (matchesRoom && matchesSearch && !archived);
-      row.hidden = !visible;
+      var matchesRoom = rakebackArchiveMode || getRakebackRowRoomFast(row) === activeRakebackRoom;
+      var matchesSearch = !searchQuery || getRakebackRowPlayerIdFast(row).indexOf(searchQuery) !== -1;
+      var visible = false;
+      if (matchesRoom && matchesSearch) {
+        var archived = isRakebackRowInArchive(row, index);
+        visible = rakebackArchiveMode ? archived : !archived;
+      }
+      var hidden = !visible;
+      if (row.hidden !== hidden) row.hidden = hidden;
       var numberEl = row.querySelector("[data-rakeback-row-number]");
       if (numberEl) {
         var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
-        numberEl.hidden = isAddon;
-        numberEl.textContent = visible && !isAddon ? String(++visibleIndex) : "";
+        var nextNumber = visible && !isAddon ? String(++visibleIndex) : "";
+        if (numberEl.hidden !== isAddon) numberEl.hidden = isAddon;
+        if (numberEl.textContent !== nextNumber) numberEl.textContent = nextNumber;
       }
     });
   }
@@ -1894,8 +1918,9 @@ function initAdminReportModal() {
       var numberEl = row.querySelector("[data-rakeback-row-number]");
       if (!numberEl) return;
       var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
-      numberEl.hidden = isAddon;
-      numberEl.textContent = !row.hidden && !isAddon ? String(++visibleIndex) : "";
+      var nextNumber = !row.hidden && !isAddon ? String(++visibleIndex) : "";
+      if (numberEl.hidden !== isAddon) numberEl.hidden = isAddon;
+      if (numberEl.textContent !== nextNumber) numberEl.textContent = nextNumber;
     });
   }
 
@@ -1945,6 +1970,21 @@ function initAdminReportModal() {
     ensureRakebackSearchTemplateRows();
     hydrateRakebackLazyTemplateRowsForSearch();
     ensureRakebackBaseRow(activeRakebackRoom);
+    syncRakebackRoomVisibility();
+    insertRakebackDateSeparators();
+    syncRakebackVisibleRowNumbers();
+    if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
+    return updateRakebackSummaryTotals();
+  }
+
+  function refreshRakebackFilterView(options) {
+    if (!rakebackBody) return 0;
+    options = options || {};
+    if (rakebackSearchRefreshTimer) {
+      clearTimeout(rakebackSearchRefreshTimer);
+      rakebackSearchRefreshTimer = null;
+    }
+    removeRakebackGeneratedRows();
     syncRakebackRoomVisibility();
     insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
@@ -2112,6 +2152,7 @@ function initAdminReportModal() {
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
       getRakebackRowStandardAt(row, index);
+      syncRakebackRowLookupAttrs(row);
     });
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom && !isRakebackRowInArchive(row, 0);
@@ -4578,6 +4619,9 @@ function initAdminReportModal() {
       markRakebackDraftLocalEdit();
       syncExplicitZeroRakeMarker(e.target);
       var inputRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
+      if (inputRow && e.target && e.target.matches && e.target.matches("[data-rakeback-player-id],[data-rakeback-room]")) {
+        syncRakebackRowLookupAttrs(inputRow);
+      }
       syncRakebackRowGroupDisplay(inputRow);
       scheduleRakebackSummaryTotals();
       saveRakebackDraftRows();
@@ -4586,6 +4630,9 @@ function initAdminReportModal() {
       markRakebackDraftLocalEdit();
       var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
       syncExplicitZeroRakeMarker(e.target);
+      if (changeRow && e.target && e.target.matches && e.target.matches("[data-rakeback-player-id],[data-rakeback-room]")) {
+        syncRakebackRowLookupAttrs(changeRow);
+      }
       if (e.target && e.target.matches && e.target.matches("[data-rakeback-percent]") && parseReportNumber(e.target.value) === 0) {
         e.target.value = "";
       }
