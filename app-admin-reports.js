@@ -1336,8 +1336,39 @@ function initAdminReportModal() {
   }
 
   function ensureRakebackSearchTemplateRows() {
-    if (!rakebackBody || rakebackArchiveMode || !getRakebackSearchQuery()) return false;
+    if (!rakebackBody || rakebackArchiveMode) return false;
+    var query = getRakebackSearchQuery();
+    if (!query) return false;
     var targetRoom = normalizeRakebackRoom(activeRakebackRoom || "P21");
+    var ids = getRakebackTemplateIdsForCurrentWeek(targetRoom, getRakebackTemplateIdsForRoom(targetRoom));
+    var existing = {};
+    rakebackLazyTemplateRows.forEach(function (row) {
+      var data = normalizeRakebackLazyTemplateData(row);
+      var key = data ? getRakebackTemplateKey(data.room, data.playerId) : "";
+      if (key) existing[key] = true;
+    });
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+      var key = getRakebackTemplateKey(getRakebackRowRoom(row), getRakebackRowPlayerId(row));
+      if (key) existing[key] = true;
+    });
+    var added = false;
+    ids.forEach(function (playerId) {
+      playerId = String(playerId || "").trim();
+      var key = getRakebackTemplateKey(targetRoom, playerId);
+      if (!playerId || existing[key] || playerId.toLowerCase().indexOf(query) === -1) return;
+      rakebackBody.appendChild(createRakebackRow({
+        kind: "base",
+        room: targetRoom,
+        playerId: playerId,
+        carryForward: true,
+        templateCarryForward: true,
+        createdAt: Date.now(),
+        entryAddedAt: Date.now(),
+      }));
+      existing[key] = true;
+      added = true;
+    });
+    if (added) return true;
     var options = { includeDeletedTemplates: true };
     if (targetRoom === "P21") return ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS), options);
     if (targetRoom === "X") return ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS), options);
