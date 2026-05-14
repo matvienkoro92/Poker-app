@@ -92,6 +92,7 @@ function initAdminReportModal() {
   var rakebackDecorationTimer = null;
   var rakebackDecorationSeq = 0;
   var rakebackSearchDetachedRows = [];
+  var rakebackSuspendedRows = [];
   var rakebackLazyTemplateRows = [];
   var rakebackWeekArchiveOpen = {};
   var rakebackWeekRoomArchiveOpen = {};
@@ -1766,6 +1767,9 @@ function initAdminReportModal() {
     (rakebackSearchDetachedRows || []).forEach(function (row) {
       if (row && rows.indexOf(row) === -1) rows.push(row);
     });
+    (rakebackSuspendedRows || []).forEach(function (row) {
+      if (row && rows.indexOf(row) === -1) rows.push(row);
+    });
     ensureRakebackSearchOrder(rows);
     return rows.sort(function (a, b) {
       return Number(a.getAttribute("data-rakeback-search-order")) - Number(b.getAttribute("data-rakeback-search-order"));
@@ -1796,6 +1800,32 @@ function initAdminReportModal() {
     });
     rakebackBody.appendChild(fragment);
     rakebackSearchDetachedRows = [];
+  }
+
+  function suspendRakebackDomRows() {
+    if (!rakebackBody) return;
+    removeRakebackGeneratedRows();
+    var rows = getRakebackDomRows();
+    if (!rows.length) return;
+    ensureRakebackSearchOrder(rows);
+    var fragment = document.createDocumentFragment();
+    rows.forEach(function (row) {
+      fragment.appendChild(row);
+    });
+    rakebackSuspendedRows = rows;
+  }
+
+  function restoreRakebackSuspendedRows() {
+    if (!rakebackBody || !rakebackSuspendedRows.length) return;
+    var rows = rakebackSuspendedRows.slice().sort(function (a, b) {
+      return Number(a.getAttribute("data-rakeback-search-order")) - Number(b.getAttribute("data-rakeback-search-order"));
+    });
+    var fragment = document.createDocumentFragment();
+    rows.forEach(function (row) {
+      fragment.appendChild(row);
+    });
+    rakebackBody.appendChild(fragment);
+    rakebackSuspendedRows = [];
   }
 
   function getRakebackGroupRows(row) {
@@ -2060,6 +2090,7 @@ function initAdminReportModal() {
   function refreshRakebackVisibleView(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    restoreRakebackSuspendedRows();
     restoreRakebackSearchDetachedRows();
     if (rakebackSearchRefreshTimer) {
       clearTimeout(rakebackSearchRefreshTimer);
@@ -2095,6 +2126,7 @@ function initAdminReportModal() {
   function refreshRakebackFilterView(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    restoreRakebackSuspendedRows();
     if (getRakebackSearchQuery()) {
       scheduleRakebackSearchRefresh({ immediate: true });
       if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
@@ -2654,6 +2686,7 @@ function initAdminReportModal() {
   function syncRakebackTable(options) {
     if (!rakebackBody) return 0;
     options = options || {};
+    restoreRakebackSuspendedRows();
     restoreRakebackSearchDetachedRows();
     removeRakebackGeneratedRows();
     dehydrateRakebackLazyTemplateRows({ keepSearchMatches: true });
@@ -2705,8 +2738,13 @@ function initAdminReportModal() {
     });
     if (!options.skipSort) rows = sortRakebackRows(rows);
     syncRakebackRoomVisibility();
-    insertRakebackDateSeparators();
+    if (options.deferDecorations) scheduleRakebackDecorations();
+    else insertRakebackDateSeparators();
     syncRakebackVisibleRowNumbers();
+    if (options.fastSummary && renderRakebackSummaryFromCache()) {
+      scheduleRakebackSummaryTotals();
+      return 0;
+    }
     return updateRakebackSummaryTotals();
   }
 
@@ -2715,6 +2753,7 @@ function initAdminReportModal() {
     rakebackDraftNeedsMigration = false;
     rakebackLazyTemplateRows = [];
     rakebackSearchDetachedRows = [];
+    rakebackSuspendedRows = [];
     rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
@@ -2724,6 +2763,7 @@ function initAdminReportModal() {
       syncRakebackTable();
       return;
     }
+    var fragment = document.createDocumentFragment();
     list.forEach(function (row) {
       var tr = createRakebackRow({
         groupId: row.groupId || "",
@@ -2744,10 +2784,19 @@ function initAdminReportModal() {
         reportedAt: row.reportedAt || "",
         reportId: row.reportId || "",
       });
-      rakebackBody.appendChild(tr);
+      fragment.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
     });
-    syncRakebackTable();
+    rakebackBody.appendChild(fragment);
+    if (list.length > 200) {
+      syncRakebackTable({ skipSort: true, deferDecorations: true, fastSummary: true });
+      runAdminReportWhenIdle(function () {
+        if (!rakebackBody || getRakebackSearchQuery()) return;
+        syncRakebackTable({ skipSort: true, deferDecorations: true });
+      }, 2500);
+    } else {
+      syncRakebackTable();
+    }
     if (rakebackDraftNeedsMigration && !editingReportId) saveRakebackDraftRowsNow(true);
   }
 
@@ -3219,7 +3268,10 @@ function initAdminReportModal() {
     if (options.showStatus) showRakebackStatus("Обновляю…");
     if (rakebackRefreshBtn) rakebackRefreshBtn.disabled = true;
     var localDraft = readRakebackDraftData();
-    var visibleRowsBeforeRefresh = collectRakebackRows(false);
+    var visibleRowsBeforeRefresh = [];
+    if (!(localDraft.rows || []).length && (rakebackBody && rakebackBody.querySelector("[data-rakeback-row]"))) {
+      visibleRowsBeforeRefresh = collectRakebackRows(false);
+    }
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
     var shouldUploadLocalDraft = false;
@@ -3268,6 +3320,11 @@ function initAdminReportModal() {
   }
 
   function refreshLocalRakebackView() {
+    if (rakebackSuspendedRows.length) {
+      restoreRakebackSuspendedRows();
+      syncRakebackTable({ skipSort: true });
+      return;
+    }
     if (rakebackBody && rakebackBody.querySelector("[data-rakeback-row]")) {
       syncRakebackTable({ skipSort: true });
       return;
@@ -3310,6 +3367,7 @@ function initAdminReportModal() {
     if (!tabs || !panels) return;
     if (name === "sent" && !canViewSentReports()) name = "form";
     if (name === "calculations" && !canViewCalculationsReports()) name = "form";
+    if (name !== "rakeback") suspendRakebackDomRows();
     tabs.forEach(function (tab) {
       var isActive = tab.getAttribute("data-admin-report-tab") === name;
       tab.classList.toggle("admin-report-tab--active", isActive);
@@ -4611,6 +4669,7 @@ function initAdminReportModal() {
   }
 
   function closeModal() {
+    suspendRakebackDomRows();
     modal.setAttribute("aria-hidden", "true");
     closeRakebackTotalsModal();
     if (document.documentElement) document.documentElement.classList.remove("admin-report-modal-open");

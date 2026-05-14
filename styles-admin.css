@@ -62,6 +62,9 @@
   background: #05070d;
   isolation: isolate;
 }
+#adminReportModal[aria-hidden="true"] {
+  display: none;
+}
 #adminReportModal .share-stats-admin-modal__backdrop {
   background: #05070d;
 }
