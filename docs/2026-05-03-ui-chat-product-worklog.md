@@ -62,10 +62,17 @@
   - iOS safe-area/resting reserve проверен для узких экранов: composer не должен прятаться под системной строкой.
   - Личный chat header перестал мигать Poker21 ID: ID кешируется и не очищается partial/empty refresh или typing state.
   - Desktop composer lift восстановлен отдельной веткой, чтобы mobile guards не ломали обычный browser сценарий.
+- `2.696-2.698` - закрывающий блок chat delivery/bandwidth/open freshness:
+  - `POST /api/chat` для general, DM и group возвращает свежий `pollRev` вместе с сохраненным `message`.
+  - После успешной отправки general/personal больше не делает обязательный полный `GET` ленты: клиент заменяет optimistic bubble на persisted message из ответа, обновляет локальный cache/render и не гоняет собственное сообщение через polling.
+  - Открытие диалога больше не показывает старую переписку из disk-cache или старого RAM-cache: быстрый snapshot рисуется только если он live/recent, иначе лента ждет первый актуальный сетевой ответ.
+  - Добавлен multiplex long-poll `mode=updates`: один висящий запрос следит за активным thread и contacts meta, заменяя параллельные `waitForChange` запросы thread + contacts.
+  - Существующие `loadGeneral`, `loadMessages` и `loadContacts` остались точками применения данных; `updates` только сообщает, какие scopes изменились. Это уменьшает bandwidth/headers без переписывания merge/render pipeline.
+  - Если у клиента еще нет ревизии thread или contacts, `updates` сам инициирует обычную загрузку соответствующего scope и только потом уходит в wait.
 
 ## Chronology Note
 
-Этот worklog намеренно хранит работу 2026-05-03 - 2026-05-05 как уже завершенную. После `ee27448` / `2.695` в истории проекта уже идут отдельные направления: chat send polling, lazy/module split, CRM dashboard, Poker21 binding/profile, admin reports/rakeback и новые данные рейтинга. Поэтому пункты выше - baseline для будущих правок, а не текущий список открытых задач.
+Этот worklog намеренно хранит работу 2026-05-03 - 2026-05-05 как уже завершенную. После `930f5b6` / `2.698` в истории проекта уже идут отдельные направления: lazy/module split, CRM dashboard, Poker21 binding/profile, admin reports/rakeback и новые данные рейтинга. Поэтому пункты выше - baseline для будущих правок, а не текущий список открытых задач.
 
 ## Product Invariants
 

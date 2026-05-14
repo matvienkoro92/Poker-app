@@ -9,13 +9,14 @@
 ### Frontend Startup
 
 - Чат, весенний рейтинг, рыбка/игры и розыгрыши остаются eager, чтобы основные клубные сценарии открывались без догрузки JS.
-- В `app-lazy-loader.js` закреплен доменный lazy-loading для более редких тяжелых разделов: зал славы, видеоуроки/«Научиться играть», equilator, streams, club tasks, player CRM и часть админ-модалок.
-- Зимний рейтинг остается ленивым по DOM через `html-fragments/winter-rating.html`; общий JS/data рейтинга грузится сразу, потому что им пользуется весенний рейтинг.
+- В `app-lazy-loader.js` закреплен доменный lazy-loading для более редких тяжелых разделов: зал славы, видеоуроки/«Научиться играть», equilator, streams, club tasks, player CRM, зимний рейтинг и часть админ-модалок.
+- Зимний рейтинг переведен в архивный lazy state: DOM грузится через `html-fragments/winter-rating.html`, а `app-rating-winter-runtime.js` и `winter-rating-data.js` лежат в lazy-домене `rating-winter`. Общий view adapter остается eager, потому что им пользуется весенний рейтинг.
 - Smoke проверяет переходы:
   - `home -> chat -> download -> cashout -> profile -> home -> raffles -> spring-rating`;
   - наличие DOM после lazy HTML hydration;
   - попадание lazy-файлов в `public`.
 - Стартовый root JS-count удерживается в лимите для Telegram WebView.
+- С 2026-05-06 smoke дополнительно держит static budgets: `index.html <= 100 KB`, eager scripts `<= 152`, lazy scripts `<= 25`, плюс line/byte budgets для крупных runtime-файлов.
 
 ### HTML Fragments
 
@@ -110,12 +111,14 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - По iOS PWA keyboard/chat composer добавлена отдельная документация `chat-keyboard-pwa.md` и расширенная диагностика `Keyboard Lab`: теперь видны классы keyboard-state, CSS-переменные, header/messages/composer rect/computed styles и root/shell scroll.
 - В `chat-keyboard-pwa.md` добавлен блок `2026-05-03: Resting Composer, Re-Armed Bottom Follow, Emoji Height`: зафиксированы правила для закрытого composer state, tap outside dismiss, возврата к низу после ручного scroll up/down, emoji-only высоты textarea и ручного version bump перед push.
 - В `chat-keyboard-pwa.md` добавлен закрытый исторический блок `2026-05-03 - 2026-05-05: Composer, Emoji, Keyboard`: версии `2.591-2.695` фиксируют, что emoji-only не поднимает закрытый composer, `send` не поднимает keyboard, первый focus/reopen снова поднимает composer, emoji picker закрывается первым внешним tap без dismiss keyboard, узкие iOS safe-area покрыты, а Poker21 ID в шапке ЛС стабилен.
+- В `2026-05-03-ui-chat-product-worklog.md` добавлен закрытый исторический блок `2.696-2.698` по chat delivery/bandwidth/open freshness: post-send refetch убран при наличии persisted message, старые snapshots больше не мигают при входе в диалог, а thread + contacts meta long-poll объединены в один `mode=updates`.
 - Серия правок от 2026-05-01 задокументирована в `2026-05-01-stability-worklog.md`: первый фокус, выезд keyboard/composer, задержки кликов, видимость отчетов только админам и повторная инициализация rating top wins после lazy hydration.
 - Серия Telegram/chat правок от 2026-05-03 задокументирована в `2026-05-03-telegram-chat-worklog.md`: composer focus после отправки, hit-area back-кнопок, dark-gold Telegram theme, кликабельность инструкции, быстрые dialog metadata, DM header hydration и отступ chat header под нативную кнопку `Закрыть`.
 - Серия raffle/chat-stability правок от 2026-05-03 задокументирована в `2026-05-03-raffles-chat-stability.md`: admin delete/cancel теперь не зависят от ложного `Telegram.WebApp` в PWA, admin-запросы используют PWA/auth body, stale fallback listeners очищаются при reinit, загрузка розыгрышей сначала показывает активный блок, а тяжелый completed archive/leaders рендерится отложенно.
 - Серия продуктовых/UI правок до версии `2.695` задокументирована в `2026-05-03-ui-chat-product-worklog.md`: профиль, первый скролл главной, download/freerolls, friends, темы, газета, spring rating, raffles/admin, Player CRM и закрытая стабилизация chat composer/emoji/keyboard.
+- Серия PWA/CRM/theme/profile правок от 2026-05-05 задокументирована в `2026-05-05-pwa-crm-theme-profile-worklog.md`: desktop PWA composer не поднимается после отправки, периодные CRM-карточки считают новые bot/push подписки за период, уровни/рыбка открывают профиль без закрытия родительской модалки, Poker21 profile state не показывает фейковый level без реальных данных, а night theme очищена от dark-gold/green/blue визуальных артефактов. Этот блок считается закрытым историческим этапом перед последующей работой по Poker21/debug, chat keyboard baseline, admin reports/rakeback и spring rating data.
 - Красная chat keyboard debug-панель больше не должна появляться у игроков/админов в production только из-за старого `localStorage`: включение разрешено на localhost или явным `?chatKeyboardDebug=1`, а production runtime очищает старый флаг.
-- После закрытия chat keyboard блока работа ушла дальше: CRM/dashboard, module split/lazy loading, Poker21 binding/profile, admin reports/rakeback и новые spring rating data уже идут в истории после него.
+- После закрытия chat keyboard/delivery блока работа ушла дальше: CRM/dashboard, module split/lazy loading, Poker21 binding/profile, admin reports/rakeback и новые spring rating data уже идут в истории после него.
 
 ### UI Polish
 
@@ -132,7 +135,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Стартовые скрипты ограничены избирательно: основные сценарии eager, редкие тяжелые домены догружаются по входу в раздел.
 - Backend Redis-доступ централизован.
 - Критичные пользовательские маршруты закреплены smoke-тестами.
-- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`; дальнейшие изменения должны сохранять его инварианты, а не начинать расследование с устаревшего состояния `2.572`.
+- Chat keyboard/composer зона имеет отдельный закрытый baseline до `2.695`, а chat delivery/open freshness - закрытый baseline до `2.698`; дальнейшие изменения должны сохранять эти инварианты, а не начинать расследование с устаревшего состояния `2.572`.
 
 ## Что осталось
 
