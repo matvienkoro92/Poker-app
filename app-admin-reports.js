@@ -2383,6 +2383,7 @@ function initAdminReportModal() {
     options = options || {};
     removeRakebackGeneratedRows();
     dehydrateRakebackLazyTemplateRows({ keepSearchMatches: true });
+    ensureRakebackSearchTemplateRows();
     hydrateRakebackLazyTemplateRowsForSearch();
     ensureRakebackBaseRow(activeRakebackRoom);
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
