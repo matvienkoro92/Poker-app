@@ -862,6 +862,15 @@ function initAdminReportModal() {
     if (!Number.isFinite(entryAddedAt) && hasInitialEntryData) {
       entryAddedAt = getFirstRakebackTimeValue([data.addedAt, data.reportedAt], createdAtIsTemplate ? Date.now() : createdAt);
     }
+    if ((data.carryForward === true || data.templateCarryForward === true) &&
+      !explicitZeroRake &&
+      !accountedData &&
+      parseReportNumber(data.rake) === 0 &&
+      parseReportNumber(data.roomAmount) === 0 &&
+      parseReportNumber(data.chipAmount) === 0 &&
+      parseReportNumber(data.amount) === 0) {
+      entryAddedAt = NaN;
+    }
     if (templateLikeData) entryAddedAt = NaN;
     tr.className = "admin-report-rakeback-row" + (kind === "addon" ? " admin-report-rakeback-row--addon" : "");
     tr.setAttribute("data-rakeback-row", "");
@@ -1009,6 +1018,7 @@ function initAdminReportModal() {
 
   function hasRakebackRowEntryTimeData(row) {
     if (!row) return false;
+    if (isRakebackCarryForwardPlaceholderRow(row)) return false;
     if (Number.isFinite(parseRakebackTimeValue(row.getAttribute("data-rakeback-entry-added-at") || ""))) return true;
     return row.getAttribute("data-rakeback-saved") === "1" ||
       isRakebackRowAccounted(row);
@@ -1111,6 +1121,7 @@ function initAdminReportModal() {
   }
 
   function isRakebackRowInArchive(row, fallbackIndex) {
+    if (isRakebackCarryForwardPlaceholderRow(row)) return false;
     var stamp = getRakebackRowBoundEntryAddedAt(row, fallbackIndex);
     return isRakebackEntryArchivedByStamp(stamp);
   }
@@ -2021,7 +2032,6 @@ function initAdminReportModal() {
         discount15: previousWeekDefaults[playerId] ? previousWeekDefaults[playerId].discount15 : false,
         carryForward: true,
         createdAt: getRakebackTemplateCreatedAt(normalizedRoom, playerId),
-        entryAddedAt: Date.now(),
       }));
       existingIds[playerId] = true;
       added = true;
