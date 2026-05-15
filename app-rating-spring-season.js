@@ -22,11 +22,11 @@ var SPRING_HOME_APRIL_PROMO_TOTAL_DATES = SPRING_HOME_APRIL_DAYS_1_5
   .concat(SPRING_HOME_APRIL_DAYS_27_30);
 /** Май: первая длинная неделя и текущая неделя месяца */
 var SPRING_HOME_MAY_DAYS_1_9 = ["01.05.2026", "02.05.2026", "03.05.2026", "04.05.2026", "05.05.2026", "06.05.2026", "07.05.2026", "08.05.2026", "09.05.2026"];
-var SPRING_HOME_MAY_DAYS_10_14 = ["10.05.2026", "11.05.2026", "12.05.2026", "13.05.2026", "14.05.2026"];
-var SPRING_HOME_MAY_PROMO_TOTAL_DATES = SPRING_HOME_MAY_DAYS_1_9.concat(SPRING_HOME_MAY_DAYS_10_14);
+var SPRING_HOME_MAY_DAYS_10_13 = ["10.05.2026", "11.05.2026", "12.05.2026", "13.05.2026"];
+var SPRING_HOME_MAY_PROMO_TOTAL_DATES = SPRING_HOME_MAY_DAYS_1_9.concat(SPRING_HOME_MAY_DAYS_10_13);
 /** Экран рейтинга весны: недели внутри раскрывающихся «Апрель» / «Март · итоги» */
 var SPRING_VIEW_MAY_WEEK_BLOCKS = [
-  { label: "10—14 мая", dates: SPRING_HOME_MAY_DAYS_10_14 },
+  { label: "10—13 мая", dates: SPRING_HOME_MAY_DAYS_10_13 },
   { label: "1—9 мая", dates: SPRING_HOME_MAY_DAYS_1_9 }
 ];
 var SPRING_VIEW_APRIL_WEEK_BLOCKS = [
