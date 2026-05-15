@@ -14,6 +14,7 @@ function normalizeWinterNick(n) {
   if (lower === "фокс") return "Фокс";
   if (lower === "waaarr" || lower === "waaar" || lower === "waaaar") return "Waaar";
   if (lower === "andrushamorf" || lower === "4ezzi") return "FrankL";
+  if (/^хер вам\)+$/.test(lower)) return "хер вам)))))";
   return n;
 }
 function normalizeWinterNickForFinalTable(n) {
