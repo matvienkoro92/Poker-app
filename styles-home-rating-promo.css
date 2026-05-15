@@ -546,6 +546,15 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   background: rgba(246, 211, 145, 0.16);
   color: #fff6d6;
 }
+.winter-rating-week-top-modal__list .winter-rating-week-top-modal__nick-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #ffe9aa;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .winter-rating.spring-rating .spring-rating-view-week--march-month {
   margin-bottom: 4px;
   box-shadow: none;
@@ -602,6 +611,9 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   background: rgba(254, 243, 199, 0.96);
   border-color: rgba(180, 83, 9, 0.68);
   color: #431407;
+}
+[data-theme="light"] .winter-rating-week-top-modal__list .winter-rating-week-top-modal__nick-text {
+  color: #7c2d12;
 }
 @media (max-width: 430px) {
   html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,

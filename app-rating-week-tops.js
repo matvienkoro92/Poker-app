@@ -584,10 +584,9 @@ function pokerInitWinterRatingWeekTops() {
         listEl.innerHTML = rows.map(function (r, i) {
           var nick = r && r.nick != null ? String(r.nick) : "—";
           var nickEsc = escapePreview(nick);
-          var nickAttr = nickEsc;
           var reward = r && r.totalReward != null ? r.totalReward : r && r.reward != null ? r.reward : 0;
           var sum = typeof formatRewardRound === "function" ? formatRewardRound(reward) : String(Math.round(Number(reward) || 0));
-          return "<div class=\"winter-rating__week-top-item\"><span class=\"winter-rating__week-top-num\">" + (i + 1) + ".</span><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button><span class=\"winter-rating__week-top-reward\">" + sum + " ₽</span></div>";
+          return "<div class=\"winter-rating__week-top-item\"><span class=\"winter-rating__week-top-num\">" + (i + 1) + ".</span><span class=\"winter-rating-week-top-modal__nick-text\">" + nickEsc + "</span><span class=\"winter-rating__week-top-reward\">" + sum + " ₽</span></div>";
         }).join("");
       }
       if (prizeInfo) {
