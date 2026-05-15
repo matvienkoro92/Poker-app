@@ -83,7 +83,8 @@
   background: rgba(212, 175, 55, 0.2);
 }
 .winter-rating-player-modal__back {
-  margin: 0 0 14px;
+  flex: 0 0 auto;
+  margin: 0;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 [data-theme="light"] .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
@@ -100,18 +101,23 @@
 .winter-rating-player-modal__header-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 10px;
   margin-bottom: 14px;
+  padding-right: 42px;
   flex-wrap: wrap;
 }
 .winter-rating-player-modal__title {
+  flex: 1 1 128px;
   margin: 0;
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.01em;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .winter-rating-player-modal__toolbar {
   display: flex;
