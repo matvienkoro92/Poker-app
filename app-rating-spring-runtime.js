@@ -158,8 +158,9 @@ function renderSpringRatingViewTotalsWeeks() {
     var sumList = listHtml(sumRows);
     var winList = listHtml(winRows);
     var openAttr = openWeeks ? " open" : "";
-    var sumTitle = monthTotals ? "Топ суммарный выигрыш за март" : "Топ суммарный выигрыш за неделю";
-    var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month" : "");
+    var sumTitle = monthTotals ? "Итого суммарный выигрыш за месяц" : "Топ суммарный выигрыш за неделю";
+    var winTitle = monthTotals ? "Итого топ за 1 турнир за месяц" : "Топ занос за 1 турнир";
+    var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month spring-rating-view-week--month-total" : "");
     return (
       "<details class=\"" + detailClass + "\"" + openAttr + ">" +
       "<summary class=\"spring-rating-view-week__summary\">" +
@@ -174,7 +175,7 @@ function renderSpringRatingViewTotalsWeeks() {
       moreButtonHtml(sumRows) +
       "</div>" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
-      "<h4 class=\"winter-rating__past-week-title\">Топ занос за 1 турнир</h4>" +
+      "<h4 class=\"winter-rating__past-week-title\">" + winTitle + "</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + winList + "</ul>" +
       moreButtonHtml(winRows) +
       "</div>" +
@@ -187,26 +188,42 @@ function renderSpringRatingViewTotalsWeeks() {
   var mayBlocks = typeof SPRING_VIEW_MAY_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MAY_WEEK_BLOCKS : [];
   var aprBlocks = typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [];
   var marBlocks = typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [];
-  var marchAllSeen = {};
-  var marchAllDates = [];
-  marBlocks.forEach(function (blk) {
-    if (!Array.isArray(blk.dates)) return;
-    blk.dates.forEach(function (d) {
-      if (d && !marchAllSeen[d]) {
-        marchAllSeen[d] = 1;
-        marchAllDates.push(d);
-      }
+  function collectMonthDates(blocks) {
+    var seen = {};
+    var dates = [];
+    blocks.forEach(function (blk) {
+      if (!Array.isArray(blk.dates)) return;
+      blk.dates.forEach(function (d) {
+        if (d && !seen[d]) {
+          seen[d] = 1;
+          dates.push(d);
+        }
+      });
     });
-  });
-  mayHost.innerHTML = mayBlocks.map(function (b, i) {
-    return weekDetailsHtml(b, i === 0, false);
-  }).join("");
-  aprilHost.innerHTML = aprBlocks.map(function (b, i) {
-    return weekDetailsHtml(b, i === 0, false);
-  }).join("");
-  var marchMonthHtml = marchAllDates.length
-    ? weekDetailsHtml({ label: "Итого за март", dates: marchAllDates }, true, true)
+    return dates;
+  }
+  var mayAllDates = collectMonthDates(mayBlocks);
+  var aprAllDates = collectMonthDates(aprBlocks);
+  var marchAllDates = collectMonthDates(marBlocks);
+  var mayMonthHtml = mayAllDates.length
+    ? weekDetailsHtml({ label: "Итого", dates: mayAllDates }, false, true)
     : "";
+  var aprMonthHtml = aprAllDates.length
+    ? weekDetailsHtml({ label: "Итого", dates: aprAllDates }, false, true)
+    : "";
+  var marchMonthHtml = marchAllDates.length
+    ? weekDetailsHtml({ label: "Итого", dates: marchAllDates }, false, true)
+    : "";
+  mayHost.innerHTML =
+    mayMonthHtml +
+    mayBlocks.map(function (b, i) {
+      return weekDetailsHtml(b, i === 0, false);
+    }).join("");
+  aprilHost.innerHTML =
+    aprMonthHtml +
+    aprBlocks.map(function (b, i) {
+      return weekDetailsHtml(b, i === 0, false);
+    }).join("");
   marchHost.innerHTML =
     marchMonthHtml +
     marBlocks
