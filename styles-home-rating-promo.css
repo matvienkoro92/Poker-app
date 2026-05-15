@@ -511,6 +511,41 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   padding-bottom: 7px;
   border-bottom: 1px solid rgba(226, 232, 240, 0.16);
 }
+.winter-rating.spring-rating .spring-rating-view-week__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.16);
+}
+.winter-rating.spring-rating .spring-rating-view-week__card-head .winter-rating__past-week-title {
+  min-width: 0;
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.winter-rating.spring-rating .spring-rating-view-week__top10-btn {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid rgba(246, 211, 145, 0.62);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+  color: #ffe9aa;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(246, 211, 145, 0.1);
+}
+.winter-rating.spring-rating .spring-rating-view-week__top10-btn:hover,
+.winter-rating.spring-rating .spring-rating-view-week__top10-btn:focus-visible {
+  border-color: rgba(255, 233, 170, 0.86);
+  background: rgba(246, 211, 145, 0.16);
+  color: #fff6d6;
+}
 .winter-rating.spring-rating .spring-rating-view-week--march-month {
   margin-bottom: 4px;
   box-shadow: none;
@@ -555,6 +590,18 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 }
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
   border-bottom-color: rgba(100, 116, 139, 0.18);
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn {
+  background: rgba(255, 251, 235, 0.92);
+  color: #7c2d12;
+  border-color: rgba(217, 119, 6, 0.5);
+  box-shadow: none;
+}
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn:hover,
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn:focus-visible {
+  background: rgba(254, 243, 199, 0.96);
+  border-color: rgba(180, 83, 9, 0.68);
+  color: #431407;
 }
 @media (max-width: 430px) {
   html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,
