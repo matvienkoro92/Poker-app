@@ -85,8 +85,33 @@ function pokerInitWinterRatingWeekTops() {
   var currentModalDates = null;
   var currentModalLinkType = null;
   var februaryDatesCache = null;
+  var singleTopWinterLoadPromise = null;
+  var singleTopWinterLoadAttempted = false;
   function escapePreview(s) {
     return String(s).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function hasSingleTopWinterTournamentData() {
+    return typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" &&
+      WINTER_RATING_TOURNAMENTS_BY_DATE &&
+      Object.keys(WINTER_RATING_TOURNAMENTS_BY_DATE).length > 0;
+  }
+  function ensureSingleTopWinterTournamentData() {
+    if (hasSingleTopWinterTournamentData() || typeof window.pokerEnsureScriptDomains !== "function") return false;
+    if (singleTopWinterLoadPromise) return true;
+    if (singleTopWinterLoadAttempted) return false;
+    singleTopWinterLoadAttempted = true;
+    if (!singleTopWinterLoadPromise) {
+      singleTopWinterLoadPromise = Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter"]))
+        .then(function () {
+          singleTopWinterLoadPromise = null;
+          updateButtonPreviews();
+        })
+        .catch(function () {
+          singleTopWinterLoadPromise = null;
+          updateButtonPreviews();
+        });
+    }
+    return true;
   }
   function previewHtml(top, max) {
     max = max || 3;
@@ -235,9 +260,11 @@ function pokerInitWinterRatingWeekTops() {
     var hasMainSingleTop = singleTopSummary && singleTopList;
     var hasHallSingleTop = hallFameSingleTopSummary && hallFameSingleTopList;
     if (hasMainSingleTop || hasHallSingleTop) {
-      var fullSingleTop = getSingleTopWins(null, 15);
       var singleTopTitleText = "Топ выигрышей за один турнир (2026)";
-      var listHtml = buildSimpleSingleTopListHtml(fullSingleTop);
+      var isLoadingWinterSingleTop = ensureSingleTopWinterTournamentData();
+      var listHtml = isLoadingWinterSingleTop
+        ? '<li class="winter-rating__single-top-item">Загружаю январь и февраль…</li>'
+        : buildSimpleSingleTopListHtml(getSingleTopWins(null, 15));
       if (hasMainSingleTop) {
         singleTopSummary.textContent = singleTopTitleText;
         singleTopList.innerHTML = listHtml;
