@@ -277,6 +277,56 @@ function winterRatingDateKeyToStamp(dateStr) {
   return (y * 10000 + m * 100 + d) || 0;
 }
 
+function shouldLoadWinterRatingPlayerHistory(options) {
+  if (typeof isSpringRatingMode !== "function" || !isSpringRatingMode()) return false;
+  return !(options && Array.isArray(options.onlyDates) && options.onlyDates.length);
+}
+
+function hasWinterRatingPlayerHistoryData() {
+  return typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" || typeof WINTER_RATING_BY_DATE !== "undefined";
+}
+
+function copyWinterRatingPlayerOptions(options) {
+  var out = {};
+  options = options || {};
+  Object.keys(options).forEach(function (key) {
+    out[key] = options[key];
+  });
+  return out;
+}
+
+function ensureWinterRatingPlayerHistoryData(options) {
+  if (!shouldLoadWinterRatingPlayerHistory(options) || hasWinterRatingPlayerHistoryData()) return Promise.resolve(true);
+  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(true);
+  return Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter"]));
+}
+
+function getWinterRatingPlayerMonthLabel(monthKey) {
+  var monthNames = { "12": "Декабрь", "01": "Январь", "02": "Февраль", "03": "Март", "04": "Апрель", "05": "Май", "06": "Июнь", "07": "Июль", "08": "Август", "09": "Сентябрь", "10": "Октябрь", "11": "Ноябрь" };
+  var parts = String(monthKey || "").split(".");
+  return monthNames[parts[0]] || String(monthKey || "");
+}
+
+function syncWinterRatingPlayerMonthOptions(monthSelect, summary) {
+  if (!monthSelect) return;
+  var months = {};
+  (Array.isArray(summary) ? summary : []).forEach(function (row) {
+    var parts = String(row && row.date || "").split(".");
+    if (parts.length === 3) months[parts[1] + "." + parts[2]] = true;
+  });
+  var keys = Object.keys(months).sort(function (a, b) {
+    var ap = a.split(".");
+    var bp = b.split(".");
+    return ((parseInt(ap[1], 10) || 0) * 12 + (parseInt(ap[0], 10) || 0)) -
+      ((parseInt(bp[1], 10) || 0) * 12 + (parseInt(bp[0], 10) || 0));
+  });
+  var html = '<option value="all">Турниры за все время</option>';
+  keys.forEach(function (key) {
+    html += '<option value="' + escapeHtmlRating(key) + '">' + escapeHtmlRating(getWinterRatingPlayerMonthLabel(key)) + '</option>';
+  });
+  monthSelect.innerHTML = html;
+}
+
 function getWinterRatingPlayerSummary(nick) {
   nick = normalizeWinterNick(nick);
   var dateSet = {};
@@ -495,6 +545,16 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
 
 function openWinterRatingPlayerModal(nick, options) {
   options = options || {};
+  if (shouldLoadWinterRatingPlayerHistory(options) && !options.__winterHistoryEnsured && !hasWinterRatingPlayerHistoryData()) {
+    var deferredOptions = copyWinterRatingPlayerOptions(options);
+    deferredOptions.__winterHistoryEnsured = true;
+    ensureWinterRatingPlayerHistoryData(options).then(function () {
+      openWinterRatingPlayerModal(nick, deferredOptions);
+    }).catch(function () {
+      openWinterRatingPlayerModal(nick, deferredOptions);
+    });
+    return;
+  }
   var modal = document.getElementById("winterRatingPlayerModal");
   if (modal) initWinterRatingPlayerModal();
   var titleEl = modal && modal.querySelector(".winter-rating-player-modal__title");
@@ -518,6 +578,7 @@ function openWinterRatingPlayerModal(nick, options) {
   modal._winterPlayerModalTableExpanded = false;
   modal._winterPlayerModalShowPoints = !useGazetteStyle;
   modal._winterPlayerModalNick = normalizeWinterNick(nick);
+  syncWinterRatingPlayerMonthOptions(monthSelect, summary);
   if (monthSelect) monthSelect.value = "all";
   var leagueWrap = document.getElementById("winterRatingPlayerModalLeagueWrap");
   var leagueSelect = document.getElementById("winterRatingPlayerModalLeague");
@@ -545,19 +606,28 @@ function openWinterRatingPlayerModal(nick, options) {
 
 function openWinterRatingPlayerModalReady(nick, options) {
   if (!nick) return;
+  options = options || {};
+  function openReadyModal() {
+    var nextOptions = copyWinterRatingPlayerOptions(options);
+    if (shouldLoadWinterRatingPlayerHistory(options)) nextOptions.__winterHistoryEnsured = true;
+    openWinterRatingPlayerModal(nick, nextOptions);
+  }
+  function ensureHistoryAndOpen() {
+    ensureWinterRatingPlayerHistoryData(options).then(openReadyModal).catch(openReadyModal);
+  }
   if (document.getElementById("winterRatingPlayerModal")) {
-    openWinterRatingPlayerModal(nick, options);
+    ensureHistoryAndOpen();
     return;
   }
   if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
     Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
-      openWinterRatingPlayerModal(nick, options);
+      ensureHistoryAndOpen();
     }).catch(function () {
-      openWinterRatingPlayerModal(nick, options);
+      ensureHistoryAndOpen();
     });
     return;
   }
-  openWinterRatingPlayerModal(nick, options);
+  ensureHistoryAndOpen();
 }
 
 function closeWinterRatingPlayerModal() {
