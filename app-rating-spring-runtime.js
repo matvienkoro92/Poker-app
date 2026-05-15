@@ -108,51 +108,44 @@ function renderSpringRatingViewTotalsWeeks() {
   function escNick(s) {
     return typeof escapeHtmlRating === "function" ? escapeHtmlRating(s) : String(s == null ? "" : s).replace(/</g, "&lt;");
   }
-  function escAttr(s) {
-    return escNick(s).replace(/"/g, "&quot;");
-  }
-  function top10Button(kind, label, dates) {
-    var safeLabel = escAttr(label || "");
-    var safeDates = escAttr((Array.isArray(dates) ? dates : []).join(","));
-    var title = kind === "wins" ? "Показать топ-10 заносов" : "Показать топ-10 суммарных выигрышей";
-    return (
-      "<button type=\"button\" class=\"spring-rating-view-week__top10-btn\" " +
-      "data-spring-rating-week-top-kind=\"" + kind + "\" " +
-      "data-spring-rating-week-top-label=\"" + safeLabel + "\" " +
-      "data-spring-rating-week-top-dates=\"" + safeDates + "\" " +
-      "aria-label=\"" + title + ": " + safeLabel + "\">Топ-10</button>"
-    );
-  }
-  function weekTopHead(title, kind, label, dates) {
-    return (
-      "<div class=\"spring-rating-view-week__card-head\">" +
-      "<h4 class=\"winter-rating__past-week-title\">" + title + "</h4>" +
-      top10Button(kind, label, dates) +
-      "</div>"
-    );
-  }
-  function bindSpringRatingWeekTop10Buttons(host) {
-    if (!host || host.getAttribute("data-spring-rating-week-top-bound") === "1") return;
-    host.setAttribute("data-spring-rating-week-top-bound", "1");
+  function bindSpringRatingWeekMoreButtons(host) {
+    if (!host || host.getAttribute("data-spring-rating-week-more-bound") === "1") return;
+    host.setAttribute("data-spring-rating-week-more-bound", "1");
     host.addEventListener("click", function (e) {
-      var btn = e.target && e.target.closest ? e.target.closest("[data-spring-rating-week-top-kind]") : null;
+      var btn = e.target && e.target.closest ? e.target.closest("[data-spring-rating-week-more]") : null;
       if (!btn || !host.contains(btn)) return;
       e.preventDefault();
       e.stopPropagation();
-      var dates = String(btn.getAttribute("data-spring-rating-week-top-dates") || "")
-        .split(",")
-        .map(function (s) { return s.trim(); })
-        .filter(Boolean);
-      openSpringRatingWeekTop10Modal(
-        btn.getAttribute("data-spring-rating-week-top-kind") || "sum",
-        btn.getAttribute("data-spring-rating-week-top-label") || "",
-        dates
-      );
+      var wrap = btn.closest ? btn.closest(".winter-rating__past-week-wrap") : null;
+      if (!wrap) return;
+      var expanded = btn.getAttribute("aria-expanded") !== "true";
+      var extraRows = wrap.querySelectorAll(".spring-rating-view-week__extra-item");
+      for (var i = 0; i < extraRows.length; i++) extraRows[i].hidden = !expanded;
+      btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+      btn.textContent = expanded ? "Скрыть" : "Еще";
     });
   }
-  bindSpringRatingWeekTop10Buttons(mayHost);
-  bindSpringRatingWeekTop10Buttons(aprilHost);
-  bindSpringRatingWeekTop10Buttons(marchHost);
+  bindSpringRatingWeekMoreButtons(mayHost);
+  bindSpringRatingWeekMoreButtons(aprilHost);
+  bindSpringRatingWeekMoreButtons(marchHost);
+  function rowsFromTopData(data) {
+    if (data && Array.isArray(data.top10) && data.top10.length) return data.top10;
+    if (data && Array.isArray(data.top3)) return data.top3;
+    return [];
+  }
+  function listHtml(rows) {
+    if (!rows.length) return "<li class=\"winter-rating__single-top-item\">—</li>";
+    return rows.slice(0, 10).map(function (r, i) {
+      var extraClass = i >= 3 ? " spring-rating-view-week__extra-item" : "";
+      var hiddenAttr = i >= 3 ? " hidden" : "";
+      return "<li class=\"winter-rating__single-top-item" + extraClass + "\"" + hiddenAttr + ">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
+    }).join("");
+  }
+  function moreButtonHtml(rows) {
+    return rows.length > 3
+      ? "<button type=\"button\" class=\"spring-rating-view-week__more-btn\" data-spring-rating-week-more aria-expanded=\"false\">Еще</button>"
+      : "";
+  }
   function weekDetailsHtml(block, openWeeks, monthTotals) {
     var dates = block.dates;
     if (!Array.isArray(dates)) dates = [];
@@ -160,20 +153,13 @@ function renderSpringRatingViewTotalsWeeks() {
     var winData = getSpringRatingWeekTopWinsForDates(dates);
     var totalWeek = sumData.totalWeek > 0 ? sumData.totalWeek : 0;
     var totalText = totalWeek > 0 ? fmt(totalWeek) + " ₽" : "—";
-    var sumList = sumData.top3 && sumData.top3.length
-      ? sumData.top3.map(function (r, i) {
-          return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
-        }).join("")
-      : "<li class=\"winter-rating__single-top-item\">—</li>";
-    var winList = winData.top3 && winData.top3.length
-      ? winData.top3.map(function (r, i) {
-          return "<li class=\"winter-rating__single-top-item\">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
-        }).join("")
-      : "<li class=\"winter-rating__single-top-item\">—</li>";
+    var sumRows = rowsFromTopData(sumData);
+    var winRows = rowsFromTopData(winData);
+    var sumList = listHtml(sumRows);
+    var winList = listHtml(winRows);
     var openAttr = openWeeks ? " open" : "";
     var sumTitle = monthTotals ? "Топ суммарный выигрыш за март" : "Топ суммарный выигрыш за неделю";
     var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month" : "");
-    var label = block.label || "";
     return (
       "<details class=\"" + detailClass + "\"" + openAttr + ">" +
       "<summary class=\"spring-rating-view-week__summary\">" +
@@ -183,12 +169,14 @@ function renderSpringRatingViewTotalsWeeks() {
       "<div class=\"spring-rating-view-week__inner\">" +
       "<div class=\"winter-rating__past-week-row\">" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
-      weekTopHead(sumTitle, "sum", label, dates) +
+      "<h4 class=\"winter-rating__past-week-title\">" + sumTitle + "</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + sumList + "</ul>" +
+      moreButtonHtml(sumRows) +
       "</div>" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
-      weekTopHead("Топ занос за 1 турнир", "wins", label, dates) +
+      "<h4 class=\"winter-rating__past-week-title\">Топ занос за 1 турнир</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + winList + "</ul>" +
+      moreButtonHtml(winRows) +
       "</div>" +
       "</div>" +
       "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">Всего выиграно игроками: " + totalText + "</p>" +
@@ -299,33 +287,6 @@ function getSpringRatingWeekTopWinsForDates(allowedDates) {
   });
   allWins.sort(function (a, b) { return b.reward - a.reward; });
   return { top3: allWins.slice(0, 3), top10: allWins.slice(0, 10), totalWeek: totalWeek };
-}
-
-function openSpringRatingWeekTop10Modal(kind, label, dates) {
-  if (!Array.isArray(dates)) dates = [];
-  var data = kind === "wins" ? getSpringRatingWeekTopWinsForDates(dates) : getSpringRatingWeekTopSumForDates(dates);
-  var rows = data && Array.isArray(data.top10) ? data.top10 : data && Array.isArray(data.top3) ? data.top3 : [];
-  var titleBase = kind === "wins" ? "Топ-10 заносов за 1 турнир" : "Топ-10 суммарных выигрышей";
-  var title = label ? titleBase + " · " + label : titleBase;
-  rows = rows.slice(0, 10).map(function (r) {
-    return { nick: r.nick, reward: r.reward };
-  });
-  function openNow() {
-    if (typeof window.openWinterRatingWeekTopCustomModal !== "function" && typeof window.pokerInitWinterRatingWeekTops === "function") {
-      window.pokerInitWinterRatingWeekTops();
-    }
-    if (typeof window.openWinterRatingWeekTopCustomModal !== "function") return false;
-    window.openWinterRatingWeekTopCustomModal(title, rows, {
-      dates: dates.slice(),
-      limit: 10,
-      linkType: "spring-week"
-    });
-    return true;
-  }
-  if (openNow()) return;
-  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
-    Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(openNow).catch(function () {});
-  }
 }
 
 function getSpringRatingPastWeekTopSum() {

@@ -511,49 +511,25 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
   padding-bottom: 7px;
   border-bottom: 1px solid rgba(226, 232, 240, 0.16);
 }
-.winter-rating.spring-rating .spring-rating-view-week__card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.16);
-}
-.winter-rating.spring-rating .spring-rating-view-week__card-head .winter-rating__past-week-title {
-  min-width: 0;
-  margin: 0;
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-.winter-rating.spring-rating .spring-rating-view-week__top10-btn {
-  flex: 0 0 auto;
-  min-height: 28px;
-  padding: 5px 10px;
+.winter-rating.spring-rating .spring-rating-view-week__more-btn {
+  margin-top: 8px;
+  min-height: 30px;
+  padding: 6px 12px;
   border: 1px solid rgba(246, 211, 145, 0.62);
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.42);
   color: #ffe9aa;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(246, 211, 145, 0.1);
 }
-.winter-rating.spring-rating .spring-rating-view-week__top10-btn:hover,
-.winter-rating.spring-rating .spring-rating-view-week__top10-btn:focus-visible {
+.winter-rating.spring-rating .spring-rating-view-week__more-btn:hover,
+.winter-rating.spring-rating .spring-rating-view-week__more-btn:focus-visible {
   border-color: rgba(255, 233, 170, 0.86);
   background: rgba(246, 211, 145, 0.16);
   color: #fff6d6;
-}
-.winter-rating-week-top-modal__list .winter-rating-week-top-modal__nick-text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  color: #ffe9aa;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .winter-rating.spring-rating .spring-rating-view-week--march-month {
   margin-bottom: 4px;
@@ -600,20 +576,17 @@ html.app-view-home .home-welcome-outline .features--home-rating-on-border .sprin
 [data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week .winter-rating__past-week-title {
   border-bottom-color: rgba(100, 116, 139, 0.18);
 }
-[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn {
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__more-btn {
   background: rgba(255, 251, 235, 0.92);
   color: #7c2d12;
   border-color: rgba(217, 119, 6, 0.5);
   box-shadow: none;
 }
-[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn:hover,
-[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__top10-btn:focus-visible {
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__more-btn:hover,
+[data-theme="light"] .winter-rating.spring-rating .spring-rating-view-week__more-btn:focus-visible {
   background: rgba(254, 243, 199, 0.96);
   border-color: rgba(180, 83, 9, 0.68);
   color: #431407;
-}
-[data-theme="light"] .winter-rating-week-top-modal__list .winter-rating-week-top-modal__nick-text {
-  color: #7c2d12;
 }
 @media (max-width: 430px) {
   html.app-view-home .home-welcome-outline .features--home-rating-on-border .spring-rating-home-promo-action-row,

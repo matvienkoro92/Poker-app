@@ -79,10 +79,9 @@ function pokerInitWinterRatingWeekTops() {
   var modalBackdrop = document.getElementById("winterRatingWeekTopModalBackdrop");
   var shareBtn = document.getElementById("winterRatingWeekTopShareBtn");
   var prizeInfo = document.getElementById("winterRatingWeekTopPrizeInfo");
-  var hasWeekTopModal = !!(modal && modalTitle && listEl);
-  var hasWeekTopControls = !!(pastBtn && currentBtn && pastPreview && currentPreview && hasWeekTopModal);
+  var hasWeekTopControls = !!(pastBtn && currentBtn && pastPreview && currentPreview && modal && modalTitle && listEl);
   var hasSingleTopTarget = !!((singleTopSummary && singleTopList) || (hallFameSingleTopSummary && hallFameSingleTopList));
-  if (!hasWeekTopControls && !hasSingleTopTarget && !hasWeekTopModal) return;
+  if (!hasWeekTopControls && !hasSingleTopTarget) return;
   var currentModalDates = null;
   var currentModalLinkType = null;
   var februaryDatesCache = null;
@@ -568,35 +567,6 @@ function pokerInitWinterRatingWeekTops() {
         if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
         else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
       }
-    };
-  }
-  if (hasWeekTopModal) {
-    window.openWinterRatingWeekTopCustomModal = function (title, rows, options) {
-      options = options || {};
-      rows = Array.isArray(rows) ? rows.slice(0, Math.max(1, Number(options.limit) || rows.length || 1)) : [];
-      currentModalDates = Array.isArray(options.dates) ? options.dates : null;
-      currentModalLinkType = options.linkType || "custom";
-      modalTitle.textContent = title || "Топ";
-      listEl.classList.remove("winter-rating-week-top-modal__list--with-prize");
-      if (!rows.length) {
-        listEl.innerHTML = "<p class=\"winter-rating__week-top-empty\">Нет данных за выбранный период.</p>";
-      } else {
-        listEl.innerHTML = rows.map(function (r, i) {
-          var nick = r && r.nick != null ? String(r.nick) : "—";
-          var nickEsc = escapePreview(nick);
-          var reward = r && r.totalReward != null ? r.totalReward : r && r.reward != null ? r.reward : 0;
-          var sum = typeof formatRewardRound === "function" ? formatRewardRound(reward) : String(Math.round(Number(reward) || 0));
-          return "<div class=\"winter-rating__week-top-item\"><span class=\"winter-rating__week-top-num\">" + (i + 1) + ".</span><span class=\"winter-rating-week-top-modal__nick-text\">" + nickEsc + "</span><span class=\"winter-rating__week-top-reward\">" + sum + " ₽</span></div>";
-        }).join("");
-      }
-      if (prizeInfo) {
-        prizeInfo.style.display = "none";
-        prizeInfo.setAttribute("aria-hidden", "true");
-      }
-      var shareRow = shareBtn ? shareBtn.closest(".winter-rating-week-top-modal__share-row") : null;
-      if (shareRow) shareRow.style.display = "none";
-      modal.setAttribute("aria-hidden", "false");
-      if (document.body) document.body.style.overflow = "hidden";
     };
   }
   function closeModal() {
