@@ -435,6 +435,7 @@ function initAdminReportModal() {
         escapeReportHtml: escapeReportHtml,
         formatReportRubleNumber: formatReportRubleNumber,
         formatRuWeekdayDateFromTs: formatRuWeekdayDateFromTs,
+        getReportStoredRakebackTotal: getReportStoredRakebackTotal,
         mergeReportExtrasIntoMap: mergeReportExtrasIntoMap,
         reportBusinessTimestampMs: reportBusinessTimestampMs,
         reportEffectiveTimestampMs: reportEffectiveTimestampMs,

@@ -22,6 +22,7 @@
     var buildReportDetailHtml = helpers.buildReportDetailHtml;
     var mergeReportExtrasIntoMap = helpers.mergeReportExtrasIntoMap;
     var formatReportRubleNumber = helpers.formatReportRubleNumber;
+    var getReportStoredRakebackTotal = helpers.getReportStoredRakebackTotal;
 
     function canViewSentReports() {
       return call(callbacks.canView) !== false;
