@@ -2510,6 +2510,7 @@ function initAdminReportModal() {
     hydrateRakebackLazyTemplateRowsForSearch();
     renderRakebackDeferredRowsForActiveRoom(25);
     ensureRakebackBaseRow(activeRakebackRoom);
+    clearRakebackSeedRowsWhenTemplatesExist();
     syncRakebackRoomVisibility();
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
@@ -2550,6 +2551,7 @@ function initAdminReportModal() {
     removeRakebackGeneratedRows();
     renderRakebackDeferredRowsForActiveRoom(25);
     ensureRakebackBaseRow(activeRakebackRoom);
+    clearRakebackSeedRowsWhenTemplatesExist();
     syncRakebackRoomVisibility();
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
@@ -2609,6 +2611,7 @@ function initAdminReportModal() {
       restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
       ensureRakebackBaseRow(activeRakebackRoom);
+      clearRakebackSeedRowsWhenTemplatesExist();
       syncRakebackRoomVisibility();
       ensureRakebackVisibleAddonBaseRows();
       insertRakebackDateSeparators();
@@ -2780,10 +2783,8 @@ function initAdminReportModal() {
     if (rakebackArchiveMode) return;
     var targetRoom = normalizeRakebackRoom(room || activeRakebackRoom || "P21");
     var templateOptions = { limit: 25 };
-    if (targetRoom === "P21") ensureRakebackTemplateRows("P21", getRakebackTemplateIdsForCurrentWeek("P21", P21_RAKEBACK_TEMPLATE_IDS), templateOptions);
-    if (targetRoom === "X") ensureRakebackTemplateRows("X", getRakebackTemplateIdsForCurrentWeek("X", X_RAKEBACK_TEMPLATE_IDS), templateOptions);
-    if (targetRoom === "PP") ensureRakebackTemplateRows("PP", getRakebackTemplateIdsForCurrentWeek("PP", PP_RAKEBACK_TEMPLATE_IDS), templateOptions);
-    if (targetRoom === "Supr") ensureRakebackTemplateRows("Supr", getRakebackTemplateIdsForCurrentWeek("Supr", SUPR_RAKEBACK_TEMPLATE_IDS), templateOptions);
+    var templateIds = getRakebackTemplateIdsForCurrentWeek(targetRoom, getRakebackTemplateIdsForRoom(targetRoom));
+    if (templateIds.length) ensureRakebackTemplateRows(targetRoom, templateIds, templateOptions);
     var rows = getRakebackAllDataRows();
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
@@ -2792,8 +2793,12 @@ function initAdminReportModal() {
     });
     var hasRoomRow = rows.some(function (row) {
       return getRakebackRowRoom(row) === targetRoom && !isRakebackRowInArchive(row, 0);
+    }) || rakebackDeferredRows.some(function (row) {
+      var data = normalizeRakebackStoredRowData(row);
+      return data.room === targetRoom && !isRakebackStoredRowArchived(data);
     });
     if (hasRoomRow) return;
+    if (templateIds.length) return;
     var now = Date.now();
     rakebackBody.appendChild(createRakebackRow({
       kind: "base",
@@ -3268,6 +3273,7 @@ function initAdminReportModal() {
     hydrateRakebackLazyTemplateRowsForSearch();
     renderRakebackDeferredRowsForActiveRoom(25);
     ensureRakebackBaseRow(activeRakebackRoom);
+    clearRakebackSeedRowsWhenTemplatesExist();
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     rows.forEach(function (row, index) {
       getRakebackRowCreatedAt(row, index);
@@ -3951,18 +3957,41 @@ function initAdminReportModal() {
     if (!rakebackBody) return false;
     var rows = Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]"));
     if (!rows.length) return false;
-    var onlyInitialEmptyRows = rows.every(function (row) {
-      if (!row || row.getAttribute("data-rakeback-group") || row.getAttribute("data-rakeback-owner")) return false;
+    var initialEmptyRows = rows.filter(function (row) {
+      if (!row || row.getAttribute("data-rakeback-kind") === "addon") return false;
+      if (row.getAttribute("data-rakeback-carry-forward") === "1" ||
+        row.getAttribute("data-rakeback-saved") === "1" ||
+        row.getAttribute("data-rakeback-accounted") === "1") return false;
       var idInput = row.querySelector("[data-rakeback-player-id]");
       var rakeInput = row.querySelector("[data-rakeback-rake]");
       var percentInput = row.querySelector("[data-rakeback-percent]");
+      var discountInput = row.querySelector("[data-rakeback-discount15]");
       return !String(idInput && idInput.value ? idInput.value : "").trim() &&
         parseReportNumber(rakeInput ? rakeInput.value : "") === 0 &&
-        parseReportNumber(percentInput ? percentInput.value : "") === 0;
+        parseReportNumber(percentInput ? percentInput.value : "") === 0 &&
+        !(discountInput && discountInput.checked);
     });
-    if (!onlyInitialEmptyRows) return false;
-    rakebackBody.innerHTML = "";
+    if (!initialEmptyRows.length) return false;
+    if (initialEmptyRows.length === rows.length) rakebackBody.innerHTML = "";
+    else initialEmptyRows.forEach(function (row) { row.remove(); });
     return true;
+  }
+
+  function hasRakebackTemplateRowsForActiveRoom() {
+    var targetRoom = normalizeRakebackRoom(activeRakebackRoom || "P21");
+    var renderedHasTemplate = getRakebackAllDataRows().some(function (row) {
+      return row && getRakebackRowRoom(row) === targetRoom && row.getAttribute("data-rakeback-carry-forward") === "1";
+    });
+    if (renderedHasTemplate) return true;
+    return rakebackDeferredRows.some(function (row) {
+      var data = normalizeRakebackStoredRowData(row);
+      return data.room === targetRoom && data.carryForward === true && !isRakebackStoredRowArchived(data);
+    });
+  }
+
+  function clearRakebackSeedRowsWhenTemplatesExist() {
+    if (!hasRakebackTemplateRowsForActiveRoom()) return false;
+    return clearInitialRakebackSeedRows();
   }
 
   function refreshLocalRakebackView() {
