@@ -1358,6 +1358,16 @@
       "consumedBy": [
         "app-admin-reports.js"
       ]
+    },
+    {
+      "name": "AdminReportCalculationsLogic",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-calculations-logic.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
     }
   ]
 }

@@ -152,6 +152,7 @@
         "app-admin-reports-sent.js",
         "app-admin-reports-rakeback-data.js",
         "app-admin-reports-rakeback.js",
+        "app-admin-reports-calculations-logic.js",
         "app-admin-reports-calculations.js",
         "app-admin-broadcast-reports.js",
         "app-admin-reports.js"

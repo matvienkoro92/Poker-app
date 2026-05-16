@@ -109,8 +109,6 @@
       call(callbacks.loadReports);
     }
 
-    bind();
-
     return {
       bind: bind,
       open: open,
