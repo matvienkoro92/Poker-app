@@ -3947,16 +3947,13 @@ function initAdminReportModal() {
     clearInitialRakebackSeedRows();
     if (rakebackSuspendedRows.length) {
       syncRakebackTable({ skipSort: true });
-      scheduleSharedRakebackDraftLoad({ showStatus: false });
       return;
     }
     if (rakebackBody && rakebackBody.querySelector("[data-rakeback-row]")) {
       syncRakebackTable({ skipSort: true });
-      scheduleSharedRakebackDraftLoad({ showStatus: false });
       return;
     }
     loadLocalRakebackDraftRows();
-    scheduleSharedRakebackDraftLoad({ force: true, showStatus: false });
   }
 
   function runAdminReportAfterPaint(fn) {
