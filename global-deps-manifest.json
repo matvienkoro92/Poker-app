@@ -1368,6 +1368,26 @@
       "consumedBy": [
         "app-admin-reports.js"
       ]
+    },
+    {
+      "name": "AdminReportFormLogic",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-form-logic.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportLegacy",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-legacy.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
     }
   ]
 }
