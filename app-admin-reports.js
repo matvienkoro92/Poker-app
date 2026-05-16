@@ -94,6 +94,8 @@ function initAdminReportModal() {
   var rakebackSearchRefreshTimer = null;
   var rakebackDecorationTimer = null;
   var rakebackDecorationSeq = 0;
+  var rakebackInlineDateTimer = null;
+  var rakebackInlineDateSeq = 0;
   var rakebackRefreshAttentionDismissed = false;
   var rakebackSearchDetachedRows = [];
   var rakebackSuspendedRows = [];
@@ -1412,12 +1414,12 @@ function initAdminReportModal() {
 
   function clearRakebackInlineAddedDates() {
     if (!rakebackBody) return;
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-added-date]")).forEach(function (el) {
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-inline-added-date]")).forEach(function (row) {
+      var el = row.querySelector("[data-rakeback-added-date]");
+      if (!el) return;
       el.textContent = "";
       el.hidden = true;
       el.removeAttribute("title");
-    });
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-inline-added-date]")).forEach(function (row) {
       row.removeAttribute("data-rakeback-inline-added-date");
     });
   }
@@ -1451,9 +1453,21 @@ function initAdminReportModal() {
     });
   }
 
+  function scheduleRakebackInlineAddedDates() {
+    if (!rakebackBody) return;
+    var seq = ++rakebackInlineDateSeq;
+    if (rakebackInlineDateTimer) clearTimeout(rakebackInlineDateTimer);
+    rakebackInlineDateTimer = setTimeout(function () {
+      rakebackInlineDateTimer = null;
+      runAdminReportAfterPaint(function () {
+        if (seq !== rakebackInlineDateSeq) return;
+        syncRakebackInlineAddedDates();
+      });
+    }, 120);
+  }
+
   function removeRakebackDateSeparators() {
     if (!rakebackBody) return;
-    clearRakebackInlineAddedDates();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator],[data-rakeback-week-room-tabs]")).forEach(function (row) {
       row.parentNode.removeChild(row);
     });
@@ -2377,7 +2391,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    syncRakebackInlineAddedDates();
+    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2392,7 +2406,7 @@ function initAdminReportModal() {
       runAdminReportAfterPaint(function () {
         if (seq !== rakebackDecorationSeq) return;
         insertRakebackDateSeparators();
-        syncRakebackInlineAddedDates();
+        scheduleRakebackInlineAddedDates();
         syncRakebackVisibleRowNumbers();
       });
     }, 80);
@@ -2417,7 +2431,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    syncRakebackInlineAddedDates();
+    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2467,7 +2481,7 @@ function initAdminReportModal() {
       rakebackBody.appendChild(visibleFragment);
       rakebackSearchDetachedRows = detachedRows;
       ensureRakebackVisibleAddonBaseRows();
-      syncRakebackInlineAddedDates();
+      scheduleRakebackInlineAddedDates();
     } else {
       restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
@@ -3094,7 +3108,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    syncRakebackInlineAddedDates();
+    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) {
       scheduleRakebackSummaryTotals();
