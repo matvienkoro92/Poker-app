@@ -149,6 +149,9 @@
   border-collapse: collapse;
   font-size: 13px;
 }
+.schedule-table--event-stack {
+  min-width: 720px;
+}
 .schedule-table th,
 .schedule-table td {
   padding: 10px 8px;
@@ -184,8 +187,96 @@
 [data-theme="light"] .schedule-table tbody tr:nth-child(even) {
   background: rgba(255, 251, 247, 0.6);
 }
+.schedule-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+.schedule-tag--month {
+  background: rgba(14, 165, 233, 0.18);
+  color: #bae6fd;
+  border: 1px solid rgba(56, 189, 248, 0.36);
+}
+.schedule-tag--week {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.38);
+}
+.schedule-tag--satellite {
+  background: rgba(45, 212, 191, 0.14);
+  color: #99f6e4;
+  border: 1px solid rgba(45, 212, 191, 0.34);
+}
+.schedule-row--major td {
+  font-weight: 650;
+}
+.schedule-row--satellite td {
+  background: rgba(20, 184, 166, 0.08);
+  color: rgba(226, 232, 240, 0.94);
+}
+.schedule-row--satellite td:nth-child(3) {
+  font-weight: 700;
+}
+[data-theme="light"] .schedule-tag--month {
+  background: rgba(224, 242, 254, 0.95);
+  color: #0369a1;
+  border-color: rgba(14, 165, 233, 0.28);
+}
+[data-theme="light"] .schedule-tag--week {
+  background: rgba(254, 243, 199, 0.95);
+  color: #92400e;
+  border-color: rgba(217, 119, 6, 0.28);
+}
+[data-theme="light"] .schedule-tag--satellite {
+  background: rgba(204, 251, 241, 0.95);
+  color: #0f766e;
+  border-color: rgba(20, 184, 166, 0.28);
+}
+[data-theme="light"] .schedule-row--satellite td {
+  background: rgba(240, 253, 250, 0.82);
+  color: var(--text);
+}
 
-/* Турнир дня — выделенная секция и таблица */
+.schedule-section--month-tournaments {
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.14), rgba(20, 184, 166, 0.1));
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.14);
+}
+.schedule-section--month-tournaments .schedule-section__title {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.schedule-table-wrap--month-tournaments {
+  border: 2px solid rgba(56, 189, 248, 0.44);
+  background: rgba(15, 23, 42, 0.7);
+}
+.schedule-section--month-tournaments .schedule-table th {
+  background: rgba(14, 165, 233, 0.24);
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+}
+[data-theme="light"] .schedule-section--month-tournaments {
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.9), rgba(240, 253, 250, 0.86));
+  border-color: rgba(14, 165, 233, 0.36);
+}
+[data-theme="light"] .schedule-table-wrap--month-tournaments {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(14, 165, 233, 0.36);
+}
+[data-theme="light"] .schedule-section--month-tournaments .schedule-table th {
+  background: rgba(186, 230, 253, 0.68);
+  color: var(--text);
+}
+
+/* Турнир недели — выделенная секция и таблица */
 .schedule-section--week-tournament {
   padding: 16px;
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(15, 23, 42, 0.12));
@@ -271,13 +362,16 @@
   font-weight: 600;
 }
 .schedule-row--freeroll td {
-  background: rgba(34, 197, 94, 0.08);
+  background: rgba(22, 163, 74, 0.22) !important;
+  color: #dcfce7;
+  font-weight: 700;
 }
 [data-theme="light"] .schedule-row--today td {
   background: rgba(255, 237, 213, 0.95) !important;
 }
 [data-theme="light"] .schedule-row--freeroll td {
-  background: rgba(220, 252, 231, 0.55);
+  background: rgba(187, 247, 208, 0.78) !important;
+  color: #14532d;
 }
 .schedule-tournament-day-trophy-inline {
   display: inline-block;
