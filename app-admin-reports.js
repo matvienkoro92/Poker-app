@@ -120,6 +120,7 @@ function initAdminReportModal() {
   var calculationCashUpdateTimer = null;
   var calculationGrandUpdateTimer = null;
   var figuresTotalsUpdateTimer = null;
+  var calculationsModule = null;
   var sentReportsLoadedAt = 0;
   var sentReportsLoading = false;
   var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -248,6 +249,47 @@ function initAdminReportModal() {
         PP: PP_RAKEBACK_TEMPLATE_IDS,
       },
       activeRoom: activeRakebackRoom,
+    })
+    : null;
+  calculationsModule = window.AdminReportCalculationsTab && typeof window.AdminReportCalculationsTab.init === "function"
+    ? window.AdminReportCalculationsTab.init({
+      modal: modal,
+      elements: {
+        root: calculationsRoot,
+        cashInputs: calculationsCashInputs,
+        winLossInputs: calculationsWinLossInputs,
+        rakeInputs: figuresRakeInputs,
+        romanPaidInput: figuresRomanPaidInput,
+        winLossInput: figuresWinLossInput,
+        agentsPaidInput: figuresAgentsPaidInput,
+        approxEnabledInput: figuresApproxRakebackEnabledInput,
+        approxRateInputs: figuresApproxRateInputs,
+        approxRomanRakeInput: figuresApproxRomanRakeInput,
+        extrasEl: figuresExtrasEl,
+        addFieldBtn: figuresAddFieldBtn,
+        groupSaveBtns: calculationGroupSaveBtns,
+        groupEditBtns: calculationGroupEditBtns,
+        figuresSaveBtn: figuresSaveBtn,
+        figuresEditBtn: figuresEditBtn,
+      },
+      callbacks: {
+        addExtraField: addFiguresExtraField,
+        bindExtraInputs: bindFiguresExtraInputs,
+        editDraft: editCalculationsDraft,
+        editFiguresDraft: editFiguresDraft,
+        hydrateDraftOnce: hydrateCalculationsDraftOnce,
+        loadReports: loadCalculationsReports,
+        resetHydration: function () { calculationsDraftHydrated = false; },
+        saveDraft: saveCalculationsDraft,
+        saveDraftQuiet: saveCalculationsDraftQuiet,
+        saveFiguresDraft: saveFiguresDraft,
+        scheduleCashTotal: scheduleCalculationCashTotal,
+        scheduleFiguresTotals: scheduleFiguresTotals,
+        scheduleGrandTotal: scheduleCalculationGrandTotal,
+        updateCashTotal: updateCalculationCashTotal,
+        updateFiguresTotals: updateFiguresTotals,
+        updateGrandTotal: updateCalculationGrandTotal,
+      },
     })
     : null;
 
@@ -5565,7 +5607,8 @@ function initAdminReportModal() {
     var info = getShiftReportDateInfo();
     if (dateEl) dateEl.textContent = formatAdminReportDateLabel(info.label);
     if (!rakebackModule) applySavedRakebackSortMode();
-    calculationsDraftHydrated = false;
+    if (calculationsModule) calculationsModule.reset();
+    else calculationsDraftHydrated = false;
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     syncRakebackAccessControls();
@@ -5609,36 +5652,39 @@ function initAdminReportModal() {
         }
         if (name === "sent") runAdminReportAfterPaint(loadSentReports);
         if (name === "calculations") runAdminReportAfterPaint(function () {
-          hydrateCalculationsDraftOnce();
-          loadCalculationsReports();
+          if (calculationsModule) calculationsModule.open();
+          else {
+            hydrateCalculationsDraftOnce();
+            loadCalculationsReports();
+          }
         });
       });
     });
   }
-  if (calculationsCashInputs && calculationsCashInputs.length) {
+  if (!calculationsModule && calculationsCashInputs && calculationsCashInputs.length) {
     calculationsCashInputs.forEach(function (input) {
       input.addEventListener("input", scheduleCalculationCashTotal);
       input.addEventListener("change", updateCalculationCashTotal);
     });
   }
-  if (calculationsWinLossInputs && calculationsWinLossInputs.length) {
+  if (!calculationsModule && calculationsWinLossInputs && calculationsWinLossInputs.length) {
     calculationsWinLossInputs.forEach(function (input) {
       input.addEventListener("input", scheduleCalculationGrandTotal);
       input.addEventListener("change", updateCalculationGrandTotal);
     });
   }
-  if (figuresRakeInputs && figuresRakeInputs.length) {
+  if (!calculationsModule && figuresRakeInputs && figuresRakeInputs.length) {
     figuresRakeInputs.forEach(function (input) {
       input.addEventListener("input", function () { scheduleFiguresTotals({ syncExtras: false }); });
       input.addEventListener("change", function () { updateFiguresTotals({ syncExtras: false }); });
     });
   }
-  [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput, figuresApproxRomanRakeInput].forEach(function (input) {
+  if (!calculationsModule) [figuresRomanPaidInput, figuresWinLossInput, figuresAgentsPaidInput, figuresApproxRakebackEnabledInput, figuresApproxRomanRakeInput].forEach(function (input) {
     if (!input) return;
     input.addEventListener("input", function () { scheduleFiguresTotals({ syncExtras: false }); });
     input.addEventListener("change", function () { updateFiguresTotals({ syncExtras: false }); });
   });
-  if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
+  if (!calculationsModule && figuresApproxRateInputs && figuresApproxRateInputs.length) {
     figuresApproxRateInputs.forEach(function (input) {
       if (!input) return;
       input.addEventListener("change", function () {
@@ -5647,27 +5693,27 @@ function initAdminReportModal() {
       });
     });
   }
-  if (figuresApproxRomanRakeInput) {
+  if (!calculationsModule && figuresApproxRomanRakeInput) {
     figuresApproxRomanRakeInput.addEventListener("change", saveCalculationsDraftQuiet);
   }
-  bindFiguresExtraInputs(figuresExtrasEl);
-  if (figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
-  if (calculationGroupSaveBtns && calculationGroupSaveBtns.length) {
+  if (!calculationsModule) bindFiguresExtraInputs(figuresExtrasEl);
+  if (!calculationsModule && figuresAddFieldBtn) figuresAddFieldBtn.addEventListener("click", addFiguresExtraField);
+  if (!calculationsModule && calculationGroupSaveBtns && calculationGroupSaveBtns.length) {
     calculationGroupSaveBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         saveCalculationsDraft(btn.getAttribute("data-admin-report-calc-save") || "cash");
       });
     });
   }
-  if (calculationGroupEditBtns && calculationGroupEditBtns.length) {
+  if (!calculationsModule && calculationGroupEditBtns && calculationGroupEditBtns.length) {
     calculationGroupEditBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         editCalculationsDraft(btn.getAttribute("data-admin-report-calc-edit") || "cash");
       });
     });
   }
-  if (figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
-  if (figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
+  if (!calculationsModule && figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
+  if (!calculationsModule && figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   if (addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
