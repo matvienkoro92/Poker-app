@@ -1287,7 +1287,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-summary__row--room {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
 }
 .admin-report-rakeback-summary__row--room .admin-report-rakeback-summary__label {
@@ -1512,7 +1512,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-toolbar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr) minmax(0, 1fr);
   align-items: end;
   gap: 10px;
   margin: 10px 0 8px;
@@ -2265,6 +2265,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-add-row-btn {
   margin: 0;
   flex: 0 0 auto;
+  align-self: end;
 }
 @media (max-width: 560px) {
   .share-stats-admin-modal {
@@ -2292,7 +2293,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     min-height: 32px;
   }
   .admin-report-rakeback-toolbar {
-    grid-template-columns: minmax(92px, auto) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(84px, auto) auto minmax(0, 1fr) minmax(0, 1fr);
     margin: 8px 0 6px;
     gap: 6px;
   }
