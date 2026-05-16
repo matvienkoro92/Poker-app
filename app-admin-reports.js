@@ -1119,7 +1119,7 @@ function initAdminReportModal() {
     }
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /><span class="admin-report-rakeback-added-date" data-rakeback-added-date hidden></span></td>' +
       '<td>' +
         (kind === "addon"
           ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
@@ -1402,8 +1402,58 @@ function initAdminReportModal() {
     return date;
   }
 
+  function formatRakebackInlineAddedDate(ts) {
+    var key = getRakebackMoscowDayKey(ts);
+    var parts = key.split("-");
+    if (parts.length !== 3) return "";
+    var currentYear = getRakebackMoscowDayKey(Date.now()).split("-")[0];
+    return parts[2] + "." + parts[1] + (parts[0] !== currentYear ? "." + parts[0].slice(2) : "");
+  }
+
+  function clearRakebackInlineAddedDates() {
+    if (!rakebackBody) return;
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-added-date]")).forEach(function (el) {
+      el.textContent = "";
+      el.hidden = true;
+      el.removeAttribute("title");
+    });
+    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-inline-added-date]")).forEach(function (row) {
+      row.removeAttribute("data-rakeback-inline-added-date");
+    });
+  }
+
+  function syncRakebackInlineAddedDates() {
+    if (!rakebackBody) return;
+    clearRakebackInlineAddedDates();
+    getRakebackVisibleGroups().forEach(function (group) {
+      var rows = group && group.rows ? group.rows : [];
+      if (rows.length < 2) return;
+      var latestStamp = rows.reduce(function (max, row, index) {
+        var stamp = getRakebackRowBoundEntryAddedAt(row, index);
+        return Number.isFinite(stamp) ? Math.max(max, stamp) : max;
+      }, -Infinity);
+      if (!Number.isFinite(latestStamp)) return;
+      var latestKey = getRakebackMoscowDayKey(latestStamp);
+      rows.forEach(function (row, index) {
+        if (!row || row.hidden) return;
+        var stamp = getRakebackRowBoundEntryAddedAt(row, index);
+        if (!Number.isFinite(stamp)) return;
+        var key = getRakebackMoscowDayKey(stamp);
+        if (!key || key === latestKey) return;
+        var badge = row.querySelector("[data-rakeback-added-date]");
+        var label = formatRakebackInlineAddedDate(stamp);
+        if (!badge || !label) return;
+        row.setAttribute("data-rakeback-inline-added-date", "1");
+        badge.textContent = label;
+        badge.title = "Добавлено: " + getRakebackDateSeparatorLabel(stamp);
+        badge.hidden = false;
+      });
+    });
+  }
+
   function removeRakebackDateSeparators() {
     if (!rakebackBody) return;
+    clearRakebackInlineAddedDates();
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator],[data-rakeback-week-room-tabs]")).forEach(function (row) {
       row.parentNode.removeChild(row);
     });
@@ -2327,6 +2377,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
+    syncRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2341,6 +2392,7 @@ function initAdminReportModal() {
       runAdminReportAfterPaint(function () {
         if (seq !== rakebackDecorationSeq) return;
         insertRakebackDateSeparators();
+        syncRakebackInlineAddedDates();
         syncRakebackVisibleRowNumbers();
       });
     }, 80);
@@ -2365,6 +2417,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
+    syncRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2414,6 +2467,7 @@ function initAdminReportModal() {
       rakebackBody.appendChild(visibleFragment);
       rakebackSearchDetachedRows = detachedRows;
       ensureRakebackVisibleAddonBaseRows();
+      syncRakebackInlineAddedDates();
     } else {
       restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
@@ -3040,6 +3094,7 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
+    syncRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) {
       scheduleRakebackSummaryTotals();
@@ -3128,7 +3183,7 @@ function initAdminReportModal() {
     var idInput = baseRow.querySelector("[data-rakeback-player-id]");
     var percentInput = baseRow.querySelector("[data-rakeback-percent]");
     var discountInput = baseRow.querySelector("[data-rakeback-discount15]");
-    var entryAddedAt = getRakebackRowEntryAddedAtForSave(baseRow) || Date.now();
+    var entryAddedAt = Date.now();
     var addon = createRakebackRow({
       kind: "addon",
       groupId: groupId,

@@ -1719,6 +1719,29 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-row--addon .admin-report-rakeback-input--id {
   padding-left: 7px;
 }
+.admin-report-rakeback-added-date {
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 17px;
+  padding: 1px 5px;
+  border: 1px solid rgba(246, 211, 145, 0.5);
+  border-radius: 999px;
+  background: rgba(8, 9, 14, 0.86);
+  color: #ffe7b0;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+.admin-report-rakeback-added-date[hidden] {
+  display: none !important;
+}
 .admin-report-rakeback-discount-control {
   position: relative;
   display: inline-flex;
