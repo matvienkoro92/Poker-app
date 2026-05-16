@@ -7,6 +7,7 @@ function initAdminReportModal() {
   var tabs = modal ? modal.querySelectorAll(".admin-report-tab") : null;
   var panels = modal ? modal.querySelectorAll(".admin-report-panel") : null;
   var submitBtn = document.getElementById("adminReportSubmitBtn");
+  var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   var sentList = document.getElementById("adminReportSentList");
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
@@ -120,10 +121,10 @@ function initAdminReportModal() {
   var calculationCashUpdateTimer = null;
   var calculationGrandUpdateTimer = null;
   var figuresTotalsUpdateTimer = null;
+  var tabsModule = null;
+  var formModule = null;
   var calculationsModule = null;
-  var sentReportsLoadedAt = 0;
-  var sentReportsLoading = false;
-  var SENT_REPORTS_CACHE_TTL_MS = 5 * 60 * 1000;
+  var sentReportsModule = null;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
@@ -136,97 +137,16 @@ function initAdminReportModal() {
   if (btn.dataset.adminReportBound === "1") return;
   btn.dataset.adminReportBound = "1";
 
-  var P21_RAKEBACK_TEMPLATE_IDS = [
-    "691016", "778130", "397790", "482282", "771674", "229705",
-    "915671", "602193", "234380", "348482", "267345", "751126",
-    "931569", "720457", "816444", "524129", "233111", "429724", "730377", "436507",
-    "465670", "408548", "434456", "594679", "445976", "221494", "653205", "772700",
-    "964474", "682754", "398176", "804788", "662772", "177939", "839673", "318625",
-    "338241", "293980", "113524", "792152", "930194", "885844",
-    "312695", "173085", "501327", "281356", "942620", "148233", "305625", "834131",
-    "183626", "933670", "124128", "676837", "144210", "680677", "606081", "398340",
-    "503309", "256073", "892420", "998051", "548617", "655861", "985253", "725035",
-    "429112", "665755", "534992", "327409", "292523", "937862", "121231", "764264",
-    "427286", "973892", "720664", "243324", "275834", "483686", "471918", "612591",
-    "961288", "735493", "512401", "782834", "347414", "540684", "641852", "275753",
-    "634104", "251026", "723468", "113729", "489011", "383397", "992854", "679605",
-    "285184", "888986", "696773", "228739", "766984", "644584", "854203", "925668",
-    "129591", "367580", "232000", "120005", "222856", "532224", "724113", "616036",
-    "312553", "415786", "508434", "255750", "740805", "879744", "915144", "663224",
-    "938160", "481398", "922387", "874665", "497881", "328866", "832294", "986689",
-    "986658", "849319", "797365", "589618", "299085", "839736", "738748", "677471",
-    "290183", "431231", "605805", "144177", "480283", "253212", "802622", "271525",
-    "532558", "642007", "678396", "513734", "902183", "532205", "533528", "370806",
-    "944547", "621649", "411042", "779404", "998528", "289397", "933695", "560179",
-    "299085", "969218", "552972", "468274"
-  ];
-  var X_RAKEBACK_TEMPLATE_IDS = [
-    "2818330", "2212719", "1236324", "2979672", "3683162", "2421898", "3062335", "3156827",
-    "3651673", "3624812", "3679582", "3635957", "2808506", "171982", "2778706", "3243055",
-    "3084293", "2728933", "2998793", "3861075", "2624851", "2697289", "2853060", "2890645",
-    "2553706", "2354339", "2701935", "3546001", "2670997", "3497335", "3095671", "3000308",
-    "1933875", "2188305", "2335996", "2390619", "2465472", "2491095", "2462690", "2983615",
-    "3505261", "2373626", "2427758", "3033015", "2625453", "3349828", "139934", "4012970",
-    "3674918", "4005689", "3008666", "3856540", "3284188", "2464200", "3723391", "507910",
-    "3413977", "3800754", "3618829", "2522764", "3058876", "3443666", "2361032", "3890004",
-    "3185830", "2844936", "2331856", "3350763", "2816893", "3095323", "2757940", "2321387",
-    "3917759", "3158540", "3384538", "3287589", "2354645", "3972821", "2191331", "3973346",
-    "2527435", "2315119", "2380577", "2313932", "3904233", "1886757", "2318455", "3181513",
-    "3010068", "3849977", "2317823", "2323362", "3250268", "3426114", "2825889", "1970348",
-    "2041755", "1649261", "3381251", "3832436", "2251501", "3618781", "1194609", "3205083",
-    "3624774", "2285564", "3627740", "3139796", "3157488", "3606600", "1114745", "3112807",
-    "3018756", "3571637", "2775905", "2863955", "3544409", "2368957", "3221045", "2925302",
-    "2225551", "3689494", "3442715", "2319734", "3621933", "2684594", "3041746", "3618153",
-    "2455586", "3808395", "3806265", "3943809", "3178997", "2068680", "3935850"
-  ];
-  var PP_RAKEBACK_TEMPLATE_IDS = ["552903", "435607", "11782814", "590773", "563356", "635675", "347375"];
-  var SUPR_RAKEBACK_TEMPLATE_IDS = [
-    "1048441", "527634", "831611", "889188", "517643", "1682364", "1650900", "1165667",
-    "605232", "776949", "1550929", "543758", "1162188", "1408160", "1525558", "830328",
-    "859380", "1195602", "923422", "1375569", "1551750", "713977", "993270", "1023438",
-    "999691", "854809", "1262781", "1072049", "1375862", "764750", "973916", "1221334",
-    "1346459", "1190499", "1237899", "1069215", "712970", "1185486", "1050952", "865362",
-    "1053772", "1285806", "1611851", "630124", "1377722", "1575192", "1570839", "1102639",
-    "725076", "885558", "1073571", "1459747", "802380", "1509751", "1411436", "1308425"
-  ];
-  var RAKEBACK_TEMPLATE_CREATED_AT = Date.parse("2026-05-08T22:20:00+03:00");
-  var RAKEBACK_TEMPLATE_RESET_AT = Date.parse("2026-05-15T23:27:13.189Z");
-  var RAKEBACK_ROW_COLORS = [
-    { value: "#4a3205", label: "Золотой мягкий" },
-    { value: "#73510b", label: "Золотой средний" },
-    { value: "#9a6b10", label: "Золотой яркий" },
-    { value: "#63330e", label: "Оранжевый мягкий" },
-    { value: "#965019", label: "Оранжевый средний" },
-    { value: "#c96b20", label: "Оранжевый яркий" },
-    { value: "#064b2f", label: "Зеленый мягкий" },
-    { value: "#087a48", label: "Зеленый средний" },
-    { value: "#0a9f5c", label: "Зеленый яркий" },
-    { value: "#064b4b", label: "Бирюзовый мягкий" },
-    { value: "#087878", label: "Бирюзовый средний" },
-    { value: "#0f9f9a", label: "Бирюзовый яркий" },
-    { value: "#123a66", label: "Синий мягкий" },
-    { value: "#155996", label: "Синий средний" },
-    { value: "#1d75c7", label: "Синий яркий" },
-    { value: "#3a2466", label: "Фиолетовый мягкий" },
-    { value: "#5b35a0", label: "Фиолетовый средний" },
-    { value: "#7c4ddb", label: "Фиолетовый яркий" },
-    { value: "#5f1b45", label: "Розовый мягкий" },
-    { value: "#8f2869", label: "Розовый средний" },
-    { value: "#c23a8a", label: "Розовый яркий" },
-    { value: "#5f1d1d", label: "Красный мягкий" },
-    { value: "#8f2b2b", label: "Красный средний" },
-    { value: "#bd3a3a", label: "Красный яркий" },
-    { value: "#2c3440", label: "Серый мягкий" },
-    { value: "#46515f", label: "Серый яркий" },
-  ];
-  var RAKEBACK_ROW_LEGACY_COLOR_MAP = {
-    "#332411": "#73510b",
-    "#173520": "#087a48",
-    "#152b46": "#155996",
-    "#331b24": "#8f2b2b",
-    "#2d2344": "#5b35a0",
-    "#26313a": "#46515f",
-  };
+  var rakebackStaticData = window.AdminReportRakebackStaticData || {};
+  var rakebackTemplates = rakebackStaticData.templates || {};
+  var P21_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.P21 || [];
+  var X_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.X || [];
+  var PP_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.PP || [];
+  var SUPR_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.Supr || [];
+  var RAKEBACK_TEMPLATE_CREATED_AT = rakebackStaticData.templateCreatedAt || 0;
+  var RAKEBACK_TEMPLATE_RESET_AT = rakebackStaticData.templateResetAt || 0;
+  var RAKEBACK_ROW_COLORS = rakebackStaticData.rowColors || [];
+  var RAKEBACK_ROW_LEGACY_COLOR_MAP = rakebackStaticData.legacyColorMap || {};
   var rakebackModule = window.AdminReportRakebackTab && typeof window.AdminReportRakebackTab.init === "function"
     ? window.AdminReportRakebackTab.init({
       modal: modal,
@@ -289,6 +209,16 @@ function initAdminReportModal() {
         updateCashTotal: updateCalculationCashTotal,
         updateFiguresTotals: updateFiguresTotals,
         updateGrandTotal: updateCalculationGrandTotal,
+      },
+    })
+    : null;
+  formModule = window.AdminReportFormTab && typeof window.AdminReportFormTab.init === "function"
+    ? window.AdminReportFormTab.init({
+      modal: modal,
+      submitBtn: submitBtn,
+      addExtraBtn: addExtraBtn,
+      callbacks: {
+        submit: submitAdminReport,
       },
     })
     : null;
@@ -507,6 +437,81 @@ function initAdminReportModal() {
     if (!allowed && sentList) sentList.innerHTML = "";
     return allowed || calculationsAllowed;
   }
+
+  sentReportsModule = window.AdminReportSentTab && typeof window.AdminReportSentTab.init === "function"
+    ? window.AdminReportSentTab.init({
+      list: sentList,
+      cacheTtlMs: 5 * 60 * 1000,
+      netErrorMessage: typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети",
+      helpers: {
+        buildReportDetailHtml: buildReportDetailHtml,
+        escapeReportHtml: escapeReportHtml,
+        formatReportRubleNumber: formatReportRubleNumber,
+        formatRuWeekdayDateFromTs: formatRuWeekdayDateFromTs,
+        mergeReportExtrasIntoMap: mergeReportExtrasIntoMap,
+        reportBusinessTimestampMs: reportBusinessTimestampMs,
+        reportEffectiveTimestampMs: reportEffectiveTimestampMs,
+      },
+      callbacks: {
+        canView: canViewSentReports,
+        editReport: function (id, report) {
+          editingReportId = id;
+          editingReport = report;
+          fillReportForm(report);
+          if (submitBtn) submitBtn.textContent = "Сохранить";
+          setActiveTab("form");
+          if (dateEl) {
+            var effEd = reportEffectiveTimestampMs(report);
+            var metaEd = formatRuWeekdayDateFromTs(effEd);
+            var editDateLabel = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
+            dateEl.textContent = formatAdminReportDateLabel(editDateLabel);
+          }
+        },
+        syncAccess: syncSentReportsAccess,
+      },
+    })
+    : null;
+
+  tabsModule = window.AdminReportTabs && typeof window.AdminReportTabs.init === "function"
+    ? window.AdminReportTabs.init({
+      tabs: tabs,
+      panels: panels,
+      callbacks: {
+        canOpen: function (name) {
+          if (name === "sent") return canViewSentReports();
+          if (name === "calculations") return canViewCalculationsReports();
+          return true;
+        },
+        beforeSwitch: function (name) {
+          if (name !== "rakeback" && !rakebackModule) suspendRakebackDomRows();
+        },
+        afterSwitch: function (name) {
+          if (name === "rakeback") {
+            if (rakebackModule) runAdminReportAfterPaint(function () { rakebackModule.open(); });
+            else {
+              applySavedRakebackSortMode();
+              runAdminReportAfterPaint(refreshLocalRakebackView);
+            }
+          }
+          if (name === "sent") {
+            runAdminReportAfterPaint(function () {
+              if (sentReportsModule) sentReportsModule.open();
+              else loadSentReports();
+            });
+          }
+          if (name === "calculations") {
+            runAdminReportAfterPaint(function () {
+              if (calculationsModule) calculationsModule.open();
+              else {
+                hydrateCalculationsDraftOnce();
+                loadCalculationsReports();
+              }
+            });
+          }
+        },
+      },
+    })
+    : null;
 
   function parseReportNumber(raw) {
     var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
@@ -4277,6 +4282,10 @@ function initAdminReportModal() {
   }
 
   function setActiveTab(name) {
+    if (tabsModule) {
+      tabsModule.setActive(name);
+      return;
+    }
     if (!tabs || !panels) return;
     if (name === "sent" && !canViewSentReports()) name = "form";
     if (name === "calculations" && !canViewCalculationsReports()) name = "form";
@@ -5107,478 +5116,10 @@ function initAdminReportModal() {
   }
 
   function loadSentReports(forceRefresh) {
-    if (!sentList) return;
-    if (!canViewSentReports()) {
-      sentList.innerHTML = "";
-      return;
-    }
-    if (!forceRefresh && sentReportsLoading) return;
-    if (!forceRefresh && sentReportsLoadedAt && sentList.innerHTML && Date.now() - sentReportsLoadedAt < SENT_REPORTS_CACHE_TTL_MS) return;
-    var base = typeof getApiBase === "function" ? getApiBase() : "";
-    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-      sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
-      return;
-    }
-    sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
-    sentReportsLoading = true;
-    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        sentReportsLoading = false;
-        if (!sentList) return;
-        var items = (data && data.ok && data.reports) ? data.reports : [];
-        if (!Array.isArray(items) || items.length === 0) {
-          sentList.innerHTML = '<p class="admin-report-sent-empty">Пока нет отправленных отчётов.</p>';
-          sentReportsLoadedAt = Date.now();
-          return;
-        }
-        var weekdayOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
-        var weekdayOrderDesc = weekdayOrder.slice().reverse();
-        var DAY_MS = 24 * 60 * 60 * 1000;
-        var WEEK_MS = 7 * DAY_MS;
-        var MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
-        function mskDateFromTs(ts) {
-          return new Date(ts + MSK_SHIFT_MS);
-        }
-        function formatRuMonthDay(ms, withMonth) {
-          return new Intl.DateTimeFormat("ru-RU", {
-            timeZone: "Europe/Moscow",
-            day: "numeric",
-            month: withMonth ? "long" : undefined,
-          }).format(new Date(ms));
-        }
-        function weekLabelFromStartMs(weekStartMs) {
-          var weekEndDateMs = weekStartMs + (6 * DAY_MS);
-          var fromMonth = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", month: "long" }).format(new Date(weekStartMs));
-          var toMonth = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", month: "long" }).format(new Date(weekEndDateMs));
-          var fromDay = formatRuMonthDay(weekStartMs, false);
-          var toDay = formatRuMonthDay(weekEndDateMs, false);
-          if (fromMonth === toMonth) return fromDay + "–" + toDay + " " + toMonth;
-          return formatRuMonthDay(weekStartMs, true) + " – " + formatRuMonthDay(weekEndDateMs, true);
-        }
-        function weekCompactLabelFromStartMs(weekStartMs) {
-          var weekEndDateMs = weekStartMs + (6 * DAY_MS);
-          var fromCompact = formatRuMonthDay(weekStartMs, true).replace(/\s+/g, "");
-          var toCompact = formatRuMonthDay(weekEndDateMs, true).replace(/\s+/g, "");
-          return fromCompact + "-" + toCompact;
-        }
-        /** Неделя отчётных дат: Пн -> Вс; реальный переход недели происходит в Пн 16:00 МСК. */
-        function weekStartMsForReport(ts) {
-          var msk = mskDateFromTs(ts);
-          var y = msk.getUTCFullYear();
-          var m = msk.getUTCMonth();
-          var d = msk.getUTCDate();
-          var wd = msk.getUTCDay(); // 0=Вс..6=Сб
-          var daysFromMonday = (wd + 6) % 7;
-          var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * DAY_MS;
-          return mondayStartMskMs - MSK_SHIFT_MS;
-        }
-        function weekMetaFromStart(weekStartMs) {
-          return {
-            start: weekStartMs,
-            end: weekStartMs + WEEK_MS - 1,
-            label: weekLabelFromStartMs(weekStartMs),
-            key: "w-" + String(weekStartMs),
-          };
-        }
-        var currentWeekTs = reportBusinessTimestampMs(Date.now());
-        var currentWeek = weekMetaFromStart(weekStartMsForReport(currentWeekTs));
-
-        function emptyWeekTotals() {
-          return {
-            deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
-            botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
-            bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0
-          };
-        }
-
-        function addNumericToTotals(totals, r) {
-          Object.keys(totals).forEach(function (k) {
-            if (k === "extraFields") return;
-            var v = k === "rakeback" ? getReportStoredRakebackTotal(r) : r[k];
-            if (v == null || v === "") return;
-            var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
-            if (!isNaN(n)) totals[k] += n;
-          });
-        }
-
-        function sumReportsInWindow(allItems, fromMs, toMs) {
-          var weekTotals = emptyWeekTotals();
-          var extraMap = {};
-          allItems.forEach(function (r) {
-            var t = reportEffectiveTimestampMs(r);
-            if (!t || t < fromMs || t > toMs) return;
-            addNumericToTotals(weekTotals, r);
-            mergeReportExtrasIntoMap(extraMap, r);
-          });
-          weekTotals.extraFields = Object.keys(extraMap).sort().map(function (name) {
-            var value = extraMap[name];
-            if (value && value.__avg) value = value.count ? value.sum / value.count : 0;
-            return { name: name, amount: value };
-          }).filter(function (f) {
-            return f.amount !== 0 && !isNaN(f.amount);
-          });
-          return weekTotals;
-        }
-
-        function buildDaysHtmlFromList(list, idPrefix) {
-          if (!list || list.length === 0) return "";
-          var byDay = {};
-          list.forEach(function (r) {
-            var eff = reportEffectiveTimestampMs(r);
-            var meta = formatRuWeekdayDateFromTs(eff);
-            var d = (meta.weekday || "").trim() || "—";
-            if (!byDay[d]) byDay[d] = [];
-            byDay[d].push(r);
-          });
-          var daysToRender = weekdayOrderDesc.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
-          Object.keys(byDay).forEach(function (d) {
-            if (weekdayOrder.indexOf(d) === -1) daysToRender.push(d);
-          });
-          var parts = [];
-          daysToRender.forEach(function (day) {
-            var listDay = byDay[day];
-            if (!listDay || listDay.length === 0) return;
-            listDay.sort(function (a, b) {
-              var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-              var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-              return tb - ta;
-            });
-            parts.push("<div class=\"admin-report-sent-day\"><div class=\"admin-report-sent-day-title\">" + escapeReportHtml(day) + "</div>");
-            listDay.forEach(function (it, idx) {
-              var who = it.authorName || "";
-              var comment = it.comment || "";
-              var id = idPrefix + (it.id || day + "-" + idx);
-              var detailHtml = buildReportDetailHtml(it);
-              var reportId = (it.id || "").toString();
-              var effMs = reportEffectiveTimestampMs(it);
-              var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
-              parts.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
-            });
-            parts.push("</div>");
-          });
-          return parts.join("");
-        }
-        function buildDaysSpoilersHtmlFromList(list, idPrefix) {
-          if (!list || list.length === 0) return '<p class="admin-report-sent-period-hint">В этой неделе отчётов по дням пока нет.</p>';
-          var byDay = {};
-          list.forEach(function (r) {
-            var eff = reportEffectiveTimestampMs(r);
-            var meta = formatRuWeekdayDateFromTs(eff);
-            var d = (meta.weekday || "").trim() || "—";
-            if (!byDay[d]) byDay[d] = [];
-            byDay[d].push(r);
-          });
-          var daysToRender = weekdayOrderDesc.filter(function (d) { return byDay[d] && byDay[d].length > 0; });
-          Object.keys(byDay).forEach(function (d) {
-            if (weekdayOrder.indexOf(d) === -1) daysToRender.push(d);
-          });
-          var parts = [];
-          daysToRender.forEach(function (day) {
-            var listDay = byDay[day];
-            if (!listDay || listDay.length === 0) return;
-            listDay.sort(function (a, b) {
-              var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-              var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-              return tb - ta;
-            });
-            parts.push('<details class="admin-report-sent-day-spoiler">');
-            parts.push('<summary class="admin-report-sent-day-title">' + escapeReportHtml(day) + "</summary>");
-            parts.push('<div class="admin-report-sent-day-spoiler__inner">');
-            listDay.forEach(function (it, idx) {
-              var who = it.authorName || "";
-              var comment = it.comment || "";
-              var id = idPrefix + (it.id || day + "-" + idx);
-              var detailHtml = buildReportDetailHtml(it);
-              var reportId = (it.id || "").toString();
-              var effMs = reportEffectiveTimestampMs(it);
-              var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
-              parts.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
-            });
-            parts.push("</div></details>");
-          });
-          return parts.join("");
-        }
-
-        function buildWeekTotalRow(weekTotals, label, weekId) {
-          var hasNumeric = Object.keys(weekTotals).some(function (k) {
-            if (k === "extraFields") return false;
-            return typeof weekTotals[k] === "number" && weekTotals[k] !== 0;
-          });
-          var hasExtra = weekTotals.extraFields && weekTotals.extraFields.length > 0;
-          if (!hasNumeric && !hasExtra) return "";
-          var weekDetail = buildReportDetailHtml(weekTotals);
-          return (
-            '<div class="admin-report-sent-day admin-report-sent-week-total">' +
-              '<div class="admin-report-sent-item admin-report-sent-item--week">' +
-                '<div class="admin-report-sent-item__head" role="button" tabindex="0" aria-expanded="false" aria-controls="' + weekId + '-detail">' +
-                  '<span class="admin-report-sent-item__date">Итого за неделю ' + escapeReportHtml(label) + "</span>" +
-                  '<button type="button" class="admin-report-week-copy-btn" data-week-id="' + escapeReportHtml(weekId) + '" title="Скопировать итог за неделю">⧉</button>' +
-                  '<span class="admin-report-sent-item__toggle" aria-hidden="true">▼</span>' +
-                "</div>" +
-                '<div class="admin-report-sent-detail" id="' + weekId + '-detail" hidden>' +
-                  '<div class="admin-report-sent-detail__inner">' + weekDetail + "</div>" +
-                "</div>" +
-              "</div>" +
-            "</div>"
-          );
-        }
-
-        var weeksByKey = {};
-        items.forEach(function (r) {
-          var eff = reportEffectiveTimestampMs(r);
-          if (!eff || eff !== eff) return;
-          var ws = weekStartMsForReport(eff);
-          var key = String(ws);
-          if (!weeksByKey[key]) weeksByKey[key] = [];
-          weeksByKey[key].push(r);
-        });
-        var weekStartsDesc = Object.keys(weeksByKey).map(function (s) {
-          return Number(s);
-        }).filter(function (n) {
-          return n === n;
-        }).sort(function (a, b) {
-          return b - a;
-        });
-        var currentItems = weeksByKey[String(currentWeek.start)] || [];
-        var archiveWeekStarts = weekStartsDesc.filter(function (ws) {
-          return ws !== currentWeek.start;
-        });
-        function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
-          var meta = weekMetaFromStart(weekStartMs);
-          var totals = sumReportsInWindow(list || [], meta.start, meta.end);
-          var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
-          var totalDetailHtml = buildReportDetailHtml(totals);
-          return {
-            html:
-              '<details class="admin-report-sent-week"' + (isCurrent ? " open" : "") + ">" +
-                '<summary class="admin-report-sent-archive__summary">Неделя ' + escapeReportHtml(weekCompactLabelFromStartMs(meta.start)) + "</summary>" +
-                '<div class="admin-report-sent-week__inner">' +
-                  '<details class="admin-report-sent-week-subspoiler"' + (isCurrent ? " open" : "") + ">" +
-                    '<summary class="admin-report-sent-day-title">Итого по неделе' +
-                      '<button type="button" class="admin-report-week-copy-btn" data-week-id="' + escapeReportHtml("ar-week-" + meta.key) + '" title="Скопировать итог за неделю">⧉</button>' +
-                    "</summary>" +
-                    '<div class="admin-report-sent-week-subspoiler__inner">' +
-                      (totalDetailHtml ? '<div class="admin-report-sent-detail__inner">' + totalDetailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Итогов за неделю пока нет.</p>') +
-                    "</div>" +
-                  "</details>" +
-                  '<details class="admin-report-sent-week-subspoiler">' +
-                    '<summary class="admin-report-sent-day-title">По дням</summary>' +
-                    '<div class="admin-report-sent-week-subspoiler__inner">' + detailsHtml + "</div>" +
-                  "</details>" +
-                "</div>" +
-              "</details>",
-            weekId: "ar-week-" + meta.key,
-            totals: totals,
-            label: meta.label,
-          };
-        }
-
-        var currentBlock = buildWeekBlock(currentWeek.start, currentItems, "ar-cur-", true);
-        var html = [];
-        html.push('<div class="admin-report-sent-current">');
-        html.push(currentBlock.html);
-        html.push("</div>");
-
-        if (archiveWeekStarts.length > 0) {
-          html.push(
-            '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
-              '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
-              '<div class="admin-report-sent-archive__inner">' +
-              '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
-              "</div></details>"
-          );
-        }
-
-        sentList.innerHTML = html.join("");
-        sentReportsLoadedAt = Date.now();
-
-        var reportById = {};
-        items.forEach(function (r) { reportById[r.id] = r; });
-        var weekTotalsById = {};
-        weekTotalsById[currentBlock.weekId] = { totals: currentBlock.totals, label: currentBlock.label };
-        var weekLabels = {
-          deposit: "Депозит",
-          cashout: "Выводы",
-          prodamus: "Продамус",
-          robokassa: "Робокасса",
-          romaCrypto: "Рома крипта",
-          botCryptoDep: "Бот крипта деп",
-          botExchipDep: "Бот эксчип деп",
-          botExchipCashout: "Бот эксчип вывод",
-          bonuses: "Бонусы",
-          transfers: "Переводы",
-          ret: "Возврат",
-          sergeyMarina: "Сергей/Марина",
-          rakeback: "Рейкбек",
-        };
-        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "transfers", "ret", "sergeyMarina", "rakeback"];
-
-        function copyTextToClipboard(text) {
-          if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-          var ta = document.createElement("textarea");
-          ta.value = text;
-          ta.setAttribute("readonly", "true");
-          ta.style.position = "fixed";
-          ta.style.top = "-1000px";
-          ta.style.left = "-1000px";
-          document.body.appendChild(ta);
-          ta.select();
-          try {
-            document.execCommand("copy");
-          } catch (e) {}
-          try {
-            document.body.removeChild(ta);
-          } catch (e2) {}
-        }
-
-        function weekTotalsToText(totals, label) {
-          var lines = [];
-          if (!totals) return "";
-          lines.push("Итого за неделю " + label);
-          weekKeys.forEach(function (k) {
-            var v = totals[k];
-            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + (k === "rakeback" ? formatReportRubleNumber(v) : String(v)));
-          });
-          if (totals.extraFields && totals.extraFields.length) {
-            totals.extraFields.forEach(function (f) {
-              if (!f) return;
-              var name = f.name != null ? String(f.name).trim() : "";
-              if (!name) name = "Доп.";
-              var a = f.amount != null ? f.amount : "";
-              if (a === "" || a === "—") return;
-              lines.push(name + ": " + String(a));
-            });
-          }
-          return lines.join("\n");
-        }
-
-        function bindSentReportControls(scope) {
-          scope = scope || sentList;
-          if (!scope) return;
-          scope.querySelectorAll(".admin-report-week-copy-btn").forEach(function (btn) {
-            if (btn.getAttribute("data-admin-report-bound") === "1") return;
-            btn.setAttribute("data-admin-report-bound", "1");
-            btn.addEventListener("click", function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              var weekId = btn.getAttribute("data-week-id") || "";
-              var info = weekTotalsById[weekId];
-              if (!info || !info.totals) return;
-              var text = weekTotalsToText(info.totals, info.label);
-              copyTextToClipboard(text);
-              var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-              if (tg && tg.showAlert) tg.showAlert("Скопировано");
-            });
-          });
-
-          scope.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
-            if (head.getAttribute("data-admin-report-bound") === "1") return;
-            head.setAttribute("data-admin-report-bound", "1");
-            head.addEventListener("click", function (e) {
-              if (e.target.closest(".admin-report-sent-edit-btn") || e.target.closest(".admin-report-sent-delete-btn")) return;
-              var item = head.closest(".admin-report-sent-item");
-              if (!item) return;
-              var detail = item.querySelector(".admin-report-sent-detail");
-              var toggle = head.querySelector(".admin-report-sent-item__toggle");
-              var isOpen = !detail.hidden;
-              detail.hidden = isOpen;
-              head.setAttribute("aria-expanded", !isOpen);
-              if (toggle) toggle.textContent = isOpen ? "▼" : "▲";
-            });
-          });
-
-          scope.querySelectorAll(".admin-report-sent-edit-btn").forEach(function (editBtn) {
-            if (editBtn.getAttribute("data-admin-report-bound") === "1") return;
-            editBtn.setAttribute("data-admin-report-bound", "1");
-            editBtn.addEventListener("click", function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              var id = editBtn.getAttribute("data-report-id");
-              var report = reportById[id];
-              if (!report) return;
-              editingReportId = id;
-              editingReport = report;
-              fillReportForm(report);
-              if (submitBtn) submitBtn.textContent = "Сохранить";
-              setActiveTab("form");
-              if (dateEl) {
-                var effEd = reportEffectiveTimestampMs(report);
-                var metaEd = formatRuWeekdayDateFromTs(effEd);
-                var editDateLabel = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
-                dateEl.textContent = formatAdminReportDateLabel(editDateLabel);
-              }
-            });
-          });
-
-          scope.querySelectorAll(".admin-report-sent-delete-btn").forEach(function (delBtn) {
-            if (delBtn.getAttribute("data-admin-report-bound") === "1") return;
-            delBtn.setAttribute("data-admin-report-bound", "1");
-            delBtn.addEventListener("click", function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              var id = delBtn.getAttribute("data-report-id");
-              var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-              function doDelete(reportId) {
-                var base = typeof getApiBase === "function" ? getApiBase() : "";
-                if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-                  if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы удалить отчёт.");
-                  return;
-                }
-                var delBody =
-                  typeof pokerGuestOrAuthedPostBody === "function"
-                    ? pokerGuestOrAuthedPostBody({ action: "delete", id: reportId })
-                    : { action: "delete", id: reportId };
-                fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(delBody)
-                })
-                  .then(function (r) { return r.json(); })
-                  .then(function (data) {
-                    if (data && data.ok) loadSentReports(true);
-                    else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
-                  })
-                  .catch(function () {
-                    if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-                  });
-              }
-              if (typeof confirm === "function") {
-                if (confirm("Удалить этот отчёт?")) doDelete(id);
-              } else if (tg && tg.showConfirm) {
-                tg.showConfirm("Удалить этот отчёт?", function (ok) { if (ok) doDelete(id); });
-              }
-            });
-          });
-        }
-
-        bindSentReportControls(sentList);
-        var archiveEl = sentList.querySelector("[data-admin-report-sent-archive]");
-        if (archiveEl) {
-          archiveEl.addEventListener("toggle", function () {
-            if (!archiveEl.open || archiveEl.getAttribute("data-admin-report-archive-built") === "1") return;
-            archiveEl.setAttribute("data-admin-report-archive-built", "1");
-            var inner = archiveEl.querySelector(".admin-report-sent-archive__inner");
-            if (!inner) return;
-            inner.innerHTML = '<p class="admin-report-sent-period-hint">Загрузка прошлых недель…</p>';
-            setTimeout(function () {
-              var archiveHtml = [];
-              archiveWeekStarts.forEach(function (ws) {
-                var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-", false);
-                weekTotalsById[block.weekId] = { totals: block.totals, label: block.label };
-                archiveHtml.push(block.html);
-              });
-              inner.innerHTML = archiveHtml.join("");
-              bindSentReportControls(inner);
-            }, 0);
-          });
-        }
-      })
-      .catch(function () {
-        sentReportsLoading = false;
-        if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
-      });
+    if (sentReportsModule) return sentReportsModule.open(forceRefresh);
+    if (!sentList) return undefined;
+    if (!canViewSentReports()) sentList.innerHTML = "";
+    return undefined;
   }
 
   function closeModal() {
@@ -5636,7 +5177,8 @@ function initAdminReportModal() {
   if (!rakebackModule && rakebackGrandTotalBtn) rakebackGrandTotalBtn.addEventListener("click", openRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsClose) rakebackTotalsClose.addEventListener("click", closeRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsBackdrop) rakebackTotalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
-  if (tabs && tabs.length) {
+  if (tabsModule) tabsModule.bind();
+  else if (tabs && tabs.length) {
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
@@ -5650,7 +5192,10 @@ function initAdminReportModal() {
             runAdminReportAfterPaint(refreshLocalRakebackView);
           }
         }
-        if (name === "sent") runAdminReportAfterPaint(loadSentReports);
+        if (name === "sent") runAdminReportAfterPaint(function () {
+          if (sentReportsModule) sentReportsModule.open();
+          else loadSentReports();
+        });
         if (name === "calculations") runAdminReportAfterPaint(function () {
           if (calculationsModule) calculationsModule.open();
           else {
@@ -5714,8 +5259,7 @@ function initAdminReportModal() {
   }
   if (!calculationsModule && figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
   if (!calculationsModule && figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
-  var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
-  if (addExtraBtn && modal) {
+  if (!formModule && addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
       var tbody = document.getElementById("adminReportTableBody");
       if (!tbody) return;
@@ -6199,98 +5743,145 @@ function initAdminReportModal() {
     }
   }
 
-  if (submitBtn) {
-    submitBtn.addEventListener("click", function () {
-      var base = typeof getApiBase === "function" ? getApiBase() : "";
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы отправить отчёт.");
-        return;
-      }
-      var payload = buildPayload();
-      if (editingReportId && editingReport) {
-        payload.id = editingReportId;
-        payload.date = editingReport.date || payload.date;
-        payload.weekday = editingReport.weekday || payload.weekday;
-      }
-      submitBtn.disabled = true;
-      var method = editingReportId ? "PUT" : "POST";
-      var url = base.replace(/\/$/, "") + "/api/admin-report-shifts";
-      fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          submitBtn.disabled = false;
-          if (data && data.ok) {
-            var accountedRakebackRows = null;
-            if (!editingReportId && !rakebackModule) {
-              markUnaccountedRakebackRowsAccounted(data.report && data.report.id, data.report && data.report.createdAt);
-              ensureRakebackTemplateRowsFromReportedRows(payload.rakebackRows);
-              syncRakebackTable();
-              accountedRakebackRows = collectRakebackRows(false, false);
-              saveLocalRakebackDraftRows(accountedRakebackRows);
-              saveRakebackDraftRowsNow(true);
-            }
-            editingReportId = null;
-            editingReport = null;
-            if (submitBtn) submitBtn.textContent = "Отправить отчёт";
-            fillReportForm(null);
-            if (accountedRakebackRows) {
-              fillRakebackTable(accountedRakebackRows, "");
-            } else {
-              loadLocalRakebackDraftRows();
-            }
-            if (canViewSentReports()) {
-              loadSentReports(true);
-              setActiveTab("sent");
-            } else if (tg && tg.showAlert) {
-              tg.showAlert("Отчёт отправлен.");
-            }
-          } else {
-            if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка отправки.");
+  function submitAdminReport() {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы отправить отчёт.");
+      return;
+    }
+    var payload = buildPayload();
+    if (editingReportId && editingReport) {
+      payload.id = editingReportId;
+      payload.date = editingReport.date || payload.date;
+      payload.weekday = editingReport.weekday || payload.weekday;
+    }
+    submitBtn.disabled = true;
+    var method = editingReportId ? "PUT" : "POST";
+    var url = base.replace(/\/$/, "") + "/api/admin-report-shifts";
+    fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        submitBtn.disabled = false;
+        if (data && data.ok) {
+          var accountedRakebackRows = null;
+          if (!editingReportId && !rakebackModule) {
+            markUnaccountedRakebackRowsAccounted(data.report && data.report.id, data.report && data.report.createdAt);
+            ensureRakebackTemplateRowsFromReportedRows(payload.rakebackRows);
+            syncRakebackTable();
+            accountedRakebackRows = collectRakebackRows(false, false);
+            saveLocalRakebackDraftRows(accountedRakebackRows);
+            saveRakebackDraftRowsNow(true);
           }
-        })
-        .catch(function () {
-          submitBtn.disabled = false;
-          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
-        });
-    });
+          editingReportId = null;
+          editingReport = null;
+          if (submitBtn) submitBtn.textContent = "Отправить отчёт";
+          fillReportForm(null);
+          if (accountedRakebackRows) {
+            fillRakebackTable(accountedRakebackRows, "");
+          } else {
+            loadLocalRakebackDraftRows();
+          }
+          if (canViewSentReports()) {
+            if (sentReportsModule) sentReportsModule.refresh();
+            else loadSentReports(true);
+            setActiveTab("sent");
+          } else if (tg && tg.showAlert) {
+            tg.showAlert("Отчёт отправлен.");
+          }
+        } else {
+          if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка отправки.");
+        }
+      })
+      .catch(function () {
+        submitBtn.disabled = false;
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+      });
+  }
+
+  if (!formModule && submitBtn) {
+    submitBtn.addEventListener("click", submitAdminReport);
   }
 }
 window.pokerInitAdminReportModal = initAdminReportModal;
-
-function initBroadcastReportsModal() {
-  var btn = document.getElementById("adminBroadcastReportsBtn");
-  var modal = document.getElementById("broadcastReportsModal");
-  var closeBtn = document.getElementById("broadcastReportsModalClose");
-  var backdrop = document.getElementById("broadcastReportsModalBackdrop");
-  if (!btn || !modal) return;
-  if (btn.dataset.broadcastReportsBound === "1") return;
-  btn.dataset.broadcastReportsBound = "1";
-  function closeModal() {
-    modal.setAttribute("aria-hidden", "true");
-    if (document.body) document.body.style.overflow = "";
-  }
-  function openModal() {
-    modal.setAttribute("aria-hidden", "false");
-    if (document.body) document.body.style.overflow = "hidden";
-  }
-  btn.addEventListener("click", openModal);
-  if (closeBtn) closeBtn.addEventListener("click", closeModal);
-  if (backdrop) backdrop.addEventListener("click", closeModal);
+var adminReportModuleLoadPromise = null;
+var ADMIN_REPORT_MODULE_SCRIPTS = [
+  "app-admin-reports-tabs.js",
+  "app-admin-reports-form.js",
+  "app-admin-reports-sent.js",
+  "app-admin-reports-rakeback-data.js",
+  "app-admin-reports-rakeback.js",
+  "app-admin-reports-calculations.js",
+  "app-admin-broadcast-reports.js",
+];
+function areAdminReportModulesReady() {
+  return !!(
+    window.AdminReportTabs &&
+    window.AdminReportFormTab &&
+    window.AdminReportSentTab &&
+    window.AdminReportRakebackStaticData &&
+    window.AdminReportRakebackTab &&
+    window.AdminReportCalculationsTab &&
+    window.pokerInitBroadcastReportsModal
+  );
 }
-window.pokerInitBroadcastReportsModal = initBroadcastReportsModal;
+function getAdminReportAssetVersion() {
+  return document.documentElement ? String(document.documentElement.getAttribute("data-app-version") || "").trim() : "";
+}
+function loadAdminReportScript(file) {
+  return new Promise(function (resolve, reject) {
+    var existing = document.querySelector('script[data-admin-report-module="' + file + '"]');
+    if (existing && existing.getAttribute("data-admin-report-loaded") === "1") {
+      resolve();
+      return;
+    }
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", reject, { once: true });
+      return;
+    }
+    var script = document.createElement("script");
+    var version = getAdminReportAssetVersion();
+    script.src = "./" + file + (version ? "?v=" + encodeURIComponent(version) : "");
+    script.defer = true;
+    script.dataset.adminReportModule = file;
+    script.onload = function () {
+      script.setAttribute("data-admin-report-loaded", "1");
+      resolve();
+    };
+    script.onerror = reject;
+    (document.head || document.documentElement).appendChild(script);
+  });
+}
+function ensureAdminReportModulesLoaded() {
+  if (areAdminReportModulesReady()) return Promise.resolve();
+  if (adminReportModuleLoadPromise) return adminReportModuleLoadPromise;
+  adminReportModuleLoadPromise = ADMIN_REPORT_MODULE_SCRIPTS.reduce(function (chain, file) {
+    return chain.then(function () { return loadAdminReportScript(file); });
+  }, Promise.resolve());
+  return adminReportModuleLoadPromise;
+}
 function initAdminReportModalsRuntime() {
-  initAdminReportModal();
-  initBroadcastReportsModal();
+  ensureAdminReportModulesLoaded()
+    .then(function () {
+      initAdminReportModal();
+      if (typeof window.pokerInitBroadcastReportsModal === "function") {
+        window.pokerInitBroadcastReportsModal();
+      }
+    })
+    .catch(function () {
+      initAdminReportModal();
+    });
 }
 initAdminReportModalsRuntime();
+var ensureGlobalModalsHtml = window["poker" + "EnsureGlobalModalsHtml"];
 if (
-  typeof window.pokerEnsureGlobalModalsHtml === "function" &&
+  typeof ensureGlobalModalsHtml === "function" &&
   (!document.getElementById("adminReportModal") || !document.getElementById("broadcastReportsModal"))
 ) {
-  window.pokerEnsureGlobalModalsHtml().then(initAdminReportModalsRuntime).catch(function () {});
+  ensureGlobalModalsHtml().then(initAdminReportModalsRuntime).catch(function () {});
 }

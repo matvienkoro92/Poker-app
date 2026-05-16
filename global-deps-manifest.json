@@ -1288,6 +1288,76 @@
       "consumedBy": [
         "app-player-crm-runtime.js"
       ]
+    },
+    {
+      "name": "AdminReportTabs",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-tabs.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportFormTab",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-form.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportSentTab",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-sent.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportRakebackStaticData",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-rakeback-data.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportRakebackTab",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-rakeback.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "AdminReportCalculationsTab",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports-calculations.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "pokerInitBroadcastReportsModal",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-broadcast-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
     }
   ]
 }
