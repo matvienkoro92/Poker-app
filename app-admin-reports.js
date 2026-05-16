@@ -79,6 +79,7 @@ function initAdminReportModal() {
   var rakebackRoomTotals = {};
   var rakebackDraftSaveTimer = null;
   var rakebackDraftSaveIdle = null;
+  var rakebackDraftLoadIdle = null;
   var rakebackStatusClearTimer = null;
   var rakebackDraftMutationSeq = 0;
   var rakebackDraftLocalEditUntil = 0;
@@ -3120,15 +3121,15 @@ function initAdminReportModal() {
   function fillRakebackTable(rows, legacyRakeback) {
     if (!rakebackBody) return;
     rakebackDraftNeedsMigration = false;
-    rakebackLazyTemplateRows = [];
-    rakebackSearchDetachedRows = [];
-    rakebackSuspendedRows = [];
-    rakebackBody.innerHTML = "";
     var list = Array.isArray(rows) ? rows.filter(Boolean) : [];
     if (!list.length && legacyRakeback != null && legacyRakeback !== "" && parseReportNumber(legacyRakeback) !== 0) {
       list = [{ kind: "base", room: "P21", playerId: "", rake: legacyRakeback, percent: 100 }];
     }
     if (!list.length) {
+      rakebackLazyTemplateRows = [];
+      rakebackSearchDetachedRows = [];
+      rakebackSuspendedRows = [];
+      rakebackBody.innerHTML = "";
       syncRakebackTable();
       return;
     }
@@ -3156,7 +3157,10 @@ function initAdminReportModal() {
       fragment.appendChild(tr);
       if (row.saved) setRakebackRowSaved(tr, true);
     });
-    rakebackBody.appendChild(fragment);
+    rakebackLazyTemplateRows = [];
+    rakebackSearchDetachedRows = [];
+    rakebackSuspendedRows = [];
+    rakebackBody.replaceChildren(fragment);
     if (list.length > 200) {
       syncRakebackTable({ skipSort: true, deferDecorations: true, fastSummary: true });
     } else {
@@ -3640,6 +3644,10 @@ function initAdminReportModal() {
 
   function loadSharedRakebackDraftRows(options) {
     options = options || {};
+    if (rakebackDraftLoadIdle) {
+      cancelAdminReportIdle(rakebackDraftLoadIdle);
+      rakebackDraftLoadIdle = null;
+    }
     var focusedInRakeback = rakebackBody && document.activeElement && rakebackBody.contains(document.activeElement);
     var focusedInRakebackControl = focusedInRakeback && document.activeElement && document.activeElement.matches && document.activeElement.matches("input,select,textarea");
     if (!options.force && focusedInRakebackControl) return;
@@ -3713,6 +3721,17 @@ function initAdminReportModal() {
       });
   }
 
+  function scheduleSharedRakebackDraftLoad(options) {
+    if (!canSyncSharedRakebackDraft()) return;
+    if (rakebackDraftLoadIdle) cancelAdminReportIdle(rakebackDraftLoadIdle);
+    runAdminReportAfterPaint(function () {
+      rakebackDraftLoadIdle = runAdminReportWhenIdle(function () {
+        rakebackDraftLoadIdle = null;
+        loadSharedRakebackDraftRows(options || { showStatus: false });
+      }, 1800);
+    });
+  }
+
   function loadLocalRakebackDraftRows() {
     clearStaleRakebackLocalDraftAfterTemplateReset();
     var rows = readRakebackDraftRows();
@@ -3744,16 +3763,16 @@ function initAdminReportModal() {
     if (rakebackSuspendedRows.length) {
       restoreRakebackSuspendedRows();
       syncRakebackTable({ skipSort: true });
-      if (canSyncSharedRakebackDraft()) loadSharedRakebackDraftRows({ showStatus: false });
+      scheduleSharedRakebackDraftLoad({ showStatus: false });
       return;
     }
     if (rakebackBody && rakebackBody.querySelector("[data-rakeback-row]")) {
       syncRakebackTable({ skipSort: true });
-      if (canSyncSharedRakebackDraft()) loadSharedRakebackDraftRows({ showStatus: false });
+      scheduleSharedRakebackDraftLoad({ showStatus: false });
       return;
     }
     loadLocalRakebackDraftRows();
-    if (canSyncSharedRakebackDraft()) loadSharedRakebackDraftRows({ force: true, showStatus: false });
+    scheduleSharedRakebackDraftLoad({ force: true, showStatus: false });
   }
 
   function runAdminReportAfterPaint(fn) {
