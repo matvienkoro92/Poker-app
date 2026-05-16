@@ -56,6 +56,20 @@ function pokerGetMskDowAndMinutes(now) {
   };
 }
 
+function pokerGetFreerollItemDeltaMinutes(item, msk) {
+  if (!item || !msk) return Infinity;
+  var itemMinutes = Number(item.hour || 0) * 60 + Number(item.minute || 0);
+  if (item.daily) {
+    var dailyDelta = itemMinutes - msk.minutes;
+    if (dailyDelta < 0) dailyDelta += 1440;
+    return dailyDelta;
+  }
+  var dayDelta = (Number(item.dow) - msk.dow + 7) % 7;
+  var totalDelta = dayDelta * 1440 + (itemMinutes - msk.minutes);
+  if (totalDelta < 0) totalDelta += 7 * 1440;
+  return totalDelta;
+}
+
 function pokerFindNextFreerollItem(items, now) {
   items = Array.isArray(items) ? items : HOME_FREEROLL_SCHEDULE;
   if (!items.length) return null;
@@ -63,16 +77,7 @@ function pokerFindNextFreerollItem(items, now) {
   var best = null;
   var bestDelta = Infinity;
   items.forEach(function (item) {
-    var itemMinutes = Number(item.hour || 0) * 60 + Number(item.minute || 0);
-    var totalDelta;
-    if (item.daily) {
-      totalDelta = itemMinutes - msk.minutes;
-      if (totalDelta < 0) totalDelta += 1440;
-    } else {
-      var dayDelta = (Number(item.dow) - msk.dow + 7) % 7;
-      totalDelta = dayDelta * 1440 + (itemMinutes - msk.minutes);
-      if (totalDelta < 0) totalDelta += 7 * 1440;
-    }
+    var totalDelta = pokerGetFreerollItemDeltaMinutes(item, msk);
     if (totalDelta < bestDelta) {
       bestDelta = totalDelta;
       best = item;
@@ -117,11 +122,20 @@ function renderHomeFreerollSchedule() {
   if (!el) return;
   el.innerHTML = "";
   var nextIndex = -1;
+  var displayItems = HOME_FREEROLL_SCHEDULE.slice();
   try {
-    var nextItem = pokerFindNextFreerollItem(HOME_FREEROLL_SCHEDULE, new Date());
+    var now = new Date();
+    var msk = pokerGetMskDowAndMinutes(now);
+    var nextItem = pokerFindNextFreerollItem(HOME_FREEROLL_SCHEDULE, now);
     nextIndex = HOME_FREEROLL_SCHEDULE.indexOf(nextItem);
+    displayItems.sort(function (a, b) {
+      var deltaA = pokerGetFreerollItemDeltaMinutes(a, msk);
+      var deltaB = pokerGetFreerollItemDeltaMinutes(b, msk);
+      if (deltaA !== deltaB) return deltaA - deltaB;
+      return HOME_FREEROLL_SCHEDULE.indexOf(a) - HOME_FREEROLL_SCHEDULE.indexOf(b);
+    });
   } catch (eNextFreeroll) {}
-  HOME_FREEROLL_SCHEDULE.forEach(function (item) {
+  displayItems.forEach(function (item) {
     var row = document.createElement("div");
     row.className = "home-freeroll-schedule__row";
     row.setAttribute("role", "button");
