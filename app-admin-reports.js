@@ -95,8 +95,6 @@ function initAdminReportModal() {
   var rakebackSearchRefreshTimer = null;
   var rakebackDecorationTimer = null;
   var rakebackDecorationSeq = 0;
-  var rakebackInlineDateTimer = null;
-  var rakebackInlineDateSeq = 0;
   var rakebackRefreshAttentionDismissed = false;
   var rakebackSearchDetachedRows = [];
   var rakebackSuspendedRows = [];
@@ -1122,7 +1120,7 @@ function initAdminReportModal() {
     }
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + getRakebackRoomOptions(data.room || "P21") + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /><span class="admin-report-rakeback-added-date" data-rakeback-added-date hidden></span></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" /></td>' +
       '<td>' +
         (kind === "addon"
           ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
@@ -1405,68 +1403,6 @@ function initAdminReportModal() {
     return date;
   }
 
-  function formatRakebackInlineAddedDate(ts) {
-    var key = getRakebackMoscowDayKey(ts);
-    var parts = key.split("-");
-    if (parts.length !== 3) return "";
-    var currentYear = getRakebackMoscowDayKey(Date.now()).split("-")[0];
-    return parts[2] + "." + parts[1] + (parts[0] !== currentYear ? "." + parts[0].slice(2) : "");
-  }
-
-  function clearRakebackInlineAddedDates() {
-    if (!rakebackBody) return;
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-inline-added-date]")).forEach(function (row) {
-      var el = row.querySelector("[data-rakeback-added-date]");
-      if (!el) return;
-      el.textContent = "";
-      el.hidden = true;
-      el.removeAttribute("title");
-      row.removeAttribute("data-rakeback-inline-added-date");
-    });
-  }
-
-  function syncRakebackInlineAddedDates() {
-    if (!rakebackBody) return;
-    clearRakebackInlineAddedDates();
-    getRakebackVisibleGroups().forEach(function (group) {
-      var rows = group && group.rows ? group.rows : [];
-      if (rows.length < 2) return;
-      var latestStamp = rows.reduce(function (max, row, index) {
-        var stamp = getRakebackRowBoundEntryAddedAt(row, index);
-        return Number.isFinite(stamp) ? Math.max(max, stamp) : max;
-      }, -Infinity);
-      if (!Number.isFinite(latestStamp)) return;
-      var latestKey = getRakebackMoscowDayKey(latestStamp);
-      rows.forEach(function (row, index) {
-        if (!row || row.hidden) return;
-        var stamp = getRakebackRowBoundEntryAddedAt(row, index);
-        if (!Number.isFinite(stamp)) return;
-        var key = getRakebackMoscowDayKey(stamp);
-        if (!key || key === latestKey) return;
-        var badge = row.querySelector("[data-rakeback-added-date]");
-        var label = formatRakebackInlineAddedDate(stamp);
-        if (!badge || !label) return;
-        row.setAttribute("data-rakeback-inline-added-date", "1");
-        badge.textContent = label;
-        badge.title = "Добавлено: " + getRakebackDateSeparatorLabel(stamp);
-        badge.hidden = false;
-      });
-    });
-  }
-
-  function scheduleRakebackInlineAddedDates() {
-    if (!rakebackBody) return;
-    var seq = ++rakebackInlineDateSeq;
-    if (rakebackInlineDateTimer) clearTimeout(rakebackInlineDateTimer);
-    rakebackInlineDateTimer = setTimeout(function () {
-      rakebackInlineDateTimer = null;
-      runAdminReportAfterPaint(function () {
-        if (seq !== rakebackInlineDateSeq) return;
-        syncRakebackInlineAddedDates();
-      });
-    }, 120);
-  }
-
   function removeRakebackDateSeparators() {
     if (!rakebackBody) return;
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-date-separator],[data-rakeback-week-separator],[data-rakeback-week-room-tabs]")).forEach(function (row) {
@@ -1475,10 +1411,6 @@ function initAdminReportModal() {
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-week-hidden]")).forEach(function (row) {
       row.hidden = false;
       row.removeAttribute("data-rakeback-week-hidden");
-    });
-    Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row-section-date]")).forEach(function (row) {
-      row.removeAttribute("data-rakeback-row-section-date");
-      row.removeAttribute("data-rakeback-row-day-key");
     });
   }
 
@@ -1832,10 +1764,6 @@ function initAdminReportModal() {
     visibleGroups.forEach(function (group, index) {
       if (!group || !group.rows || !group.rows.length) return;
       if (!rakebackArchiveMode && isRakebackCarryForwardPlaceholderGroup(group) && !isRakebackTodayPlaceholderGroup(group, index)) {
-        group.rows.forEach(function (row) {
-          row.removeAttribute("data-rakeback-row-section-date");
-          row.removeAttribute("data-rakeback-row-day-key");
-        });
         templateGroups.push(group);
         return;
       }
@@ -1902,17 +1830,6 @@ function initAdminReportModal() {
         return;
       }
       var key = getRakebackMoscowDayKey(stamp);
-      var hasAddonRows = group.rows.some(function (row) {
-        return row && row.getAttribute("data-rakeback-kind") === "addon";
-      });
-      group.rows.forEach(function (row, rowIndex) {
-        var rowStamp = getRakebackRowBoundEntryAddedAt(row, rowIndex);
-        var rowKey = Number.isFinite(rowStamp) ? getRakebackMoscowDayKey(rowStamp) : "";
-        if (rowKey) row.setAttribute("data-rakeback-row-day-key", rowKey);
-        else row.removeAttribute("data-rakeback-row-day-key");
-        if (hasAddonRows && rowKey === key) row.setAttribute("data-rakeback-row-section-date", "1");
-        else row.removeAttribute("data-rakeback-row-section-date");
-      });
       if (key === lastKey) return;
       lastKey = key;
       rakebackBody.insertBefore(createRakebackDateSeparator(getRakebackDateSeparatorLabel(stamp), getRakebackDateGroupTotals(dayGroups[key] ? dayGroups[key].groups : [], key)), group.rows[0]);
@@ -2392,7 +2309,6 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2407,7 +2323,6 @@ function initAdminReportModal() {
       runAdminReportAfterPaint(function () {
         if (seq !== rakebackDecorationSeq) return;
         insertRakebackDateSeparators();
-        scheduleRakebackInlineAddedDates();
         syncRakebackVisibleRowNumbers();
       });
     }, 80);
@@ -2432,7 +2347,6 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) return 0;
     return updateRakebackSummaryTotals();
@@ -2482,7 +2396,6 @@ function initAdminReportModal() {
       rakebackBody.appendChild(visibleFragment);
       rakebackSearchDetachedRows = detachedRows;
       ensureRakebackVisibleAddonBaseRows();
-      scheduleRakebackInlineAddedDates();
     } else {
       restoreRakebackSearchDetachedRows();
       dehydrateRakebackLazyTemplateRows();
@@ -3109,7 +3022,6 @@ function initAdminReportModal() {
     ensureRakebackVisibleAddonBaseRows();
     if (options.deferDecorations) scheduleRakebackDecorations();
     else insertRakebackDateSeparators();
-    scheduleRakebackInlineAddedDates();
     syncRakebackVisibleRowNumbers();
     if (options.fastSummary && renderRakebackSummaryFromCache()) {
       scheduleRakebackSummaryTotals();
@@ -3201,7 +3113,7 @@ function initAdminReportModal() {
     var idInput = baseRow.querySelector("[data-rakeback-player-id]");
     var percentInput = baseRow.querySelector("[data-rakeback-percent]");
     var discountInput = baseRow.querySelector("[data-rakeback-discount15]");
-    var entryAddedAt = Date.now();
+    var entryAddedAt = getRakebackRowEntryAddedAtForSave(baseRow) || Date.now();
     var addon = createRakebackRow({
       kind: "addon",
       groupId: groupId,
