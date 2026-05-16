@@ -1189,6 +1189,27 @@ function initAdminReportModal() {
     };
   }
 
+  function isRakebackStoredCarryForwardPlaceholder(data) {
+    if (!data || data.carryForward !== true) return false;
+    if (data.accounted || data.reportedAt || data.reportId) return false;
+    if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return false;
+    return parseReportNumber(data.rake) === 0 &&
+      parseReportNumber(data.roomAmount) === 0 &&
+      parseReportNumber(data.chipAmount) === 0 &&
+      parseReportNumber(data.amount) === 0;
+  }
+
+  function getRakebackStoredRowEntryStamp(data) {
+    data = normalizeRakebackStoredRowData(data);
+    return getFirstRakebackTimeValue([data.entryAddedAt, data.firstAddedAt, data.reportedAt, data.createdAt], NaN);
+  }
+
+  function isRakebackStoredRowArchived(data) {
+    data = normalizeRakebackStoredRowData(data);
+    if (isRakebackStoredCarryForwardPlaceholder(data)) return false;
+    return isRakebackEntryArchivedByStamp(getRakebackStoredRowEntryStamp(data));
+  }
+
   function getRakebackRowRoom(row) {
     if (!row) return "P21";
     var roomSelect = row.querySelector("[data-rakeback-room]");
@@ -2715,14 +2736,14 @@ function initAdminReportModal() {
     });
     rakebackDeferredRows.forEach(function (row) {
       var data = normalizeRakebackStoredRowData(row);
-      if (data && data.room === normalizedRoom && data.playerId) existingIds[data.playerId] = true;
+      if (data && data.room === normalizedRoom && data.playerId && !isRakebackStoredRowArchived(data)) existingIds[data.playerId] = true;
     });
     var existingRenderedCount = 0;
     getRakebackAllDataRows().forEach(function (row, index) {
       if (getRakebackRowRoom(row) !== normalizedRoom) return;
-      existingRenderedCount += 1;
       var stamp = getRakebackRowBoundEntryAddedAt(row, index);
       if (Number.isFinite(stamp) && Number.isFinite(currentWeekStart) && getRakebackWeekStart(stamp) < currentWeekStart) return;
+      existingRenderedCount += 1;
       var idInput = row.querySelector("[data-rakeback-player-id]");
       var playerId = idInput && idInput.value ? String(idInput.value).trim() : "";
       if (playerId) existingIds[playerId] = true;
@@ -3325,7 +3346,9 @@ function initAdminReportModal() {
     var deferredList = [];
     list.forEach(function (row) {
       var data = normalizeRakebackStoredRowData(row);
-      if (rakebackArchiveMode || (normalizeRakebackRoom(data.room || "P21") === targetRoom && renderList.length < 25)) renderList.push(data);
+      var sameRoom = normalizeRakebackRoom(data.room || "P21") === targetRoom;
+      var archived = isRakebackStoredRowArchived(data);
+      if ((rakebackArchiveMode ? archived : !archived) && sameRoom && renderList.length < 25) renderList.push(data);
       else deferredList.push(data);
     });
     var fragment = document.createDocumentFragment();
