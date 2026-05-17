@@ -47,19 +47,131 @@
       var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
       return Number.isFinite(n) ? n : 0;
     };
+    function parseReportNumber(value) {
+      var n = typeof value === "number" ? value : parseFloat(String(value != null ? value : "").replace(",", "."));
+      return Number.isFinite(n) ? n : 0;
+    }
+    function normalizeReportDetailName(name) {
+      return String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+    function isReportManualRakebackFieldName(name) {
+      return normalizeReportDetailName(name) === "рейкбек";
+    }
+    function isReportAnyaSalaryFieldName(name) {
+      var normalized = normalizeReportDetailName(name);
+      return normalized === "аня зп" || normalized === "аня зарплата";
+    }
+    function getReportExtraEntries(report) {
+      var entries = [];
+      if (Array.isArray(report && report.extraFields)) {
+        report.extraFields.forEach(function (field) {
+          if (!field || !(field.name || field.amount != null && field.amount !== "")) return;
+          entries.push({ name: field.name || "Доп", value: field.amount != null ? field.amount : "" });
+        });
+      } else if (report && (report.extraName || report.extraAmount != null)) {
+        entries.push({ name: report.extraName || "Доп", value: report.extraAmount != null ? report.extraAmount : "" });
+      }
+      return entries;
+    }
+    function getReportAnyaSalaryTotal(report) {
+      return getReportExtraEntries(report).reduce(function (sum, extra) {
+        return isReportAnyaSalaryFieldName(extra.name) ? sum + parseReportNumber(extra.value) : sum;
+      }, 0);
+    }
     var buildReportDetailHtml = helpers.buildReportDetailHtml || function (report) {
-      var labels = [
-        ["deposit", "Депозит"], ["cashout", "Выводы"], ["prodamus", "Продамус"], ["robokassa", "Робокасса"],
-        ["romaCrypto", "Рома крипта"], ["botCryptoDep", "Бот крипта деп"], ["botExchipDep", "Бот эксчип деп"],
-        ["botExchipCashout", "Бот эксчип вывод"], ["bonuses", "Бонусы"], ["transfers", "Переводы"], ["ret", "Возврат"],
-        ["sergeyMarina", "Сергей/Марина"], ["rakeback", "Рейкбек"],
-      ];
-      return '<div class="admin-report-sent-detail__field-block">' + labels.map(function (row) {
-        var value = row[0] === "rakeback" ? getReportStoredRakebackTotal(report) : report && report[row[0]];
-        if (value == null || value === "") return "";
-        return '<div class="admin-report-sent-detail__field-block-row"><span class="admin-report-sent-detail__label">' +
-          escapeReportHtml(row[1]) + '</span><span class="admin-report-sent-detail__value">' + escapeReportHtml(value) + "</span></div>";
-      }).join("") + "</div>";
+      report = report || {};
+      var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
+      var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "sergeyMarina"];
+      var parts = [];
+      function hasReportValue(value) {
+        return value != null && value !== "" && (typeof value !== "number" || value !== 0);
+      }
+      function buildDetailBlock(className, entries) {
+        if (!entries.length) return "";
+        return '<div class="admin-report-sent-detail__field-block ' + className + '">' + entries.map(function (entry) {
+          return '<div class="admin-report-sent-detail__field-block-row">' +
+            '<span class="admin-report-sent-detail__label">' + escapeReportHtml(entry.label) + "</span>" +
+            '<span class="admin-report-sent-detail__value">' + escapeReportHtml(entry.value) + "</span>" +
+          "</div>";
+        }).join("") + "</div>";
+      }
+      var childParts = [];
+      var childTotal = 0;
+      depositChildren.forEach(function (key) {
+        if (!hasReportValue(report[key])) return;
+        childTotal += parseReportNumber(report[key]);
+        childParts.push(
+          '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--' + escapeReportHtml(key) + '">' +
+            '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(labels[key]) + "</span>" +
+            '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(report[key]) + "</span>" +
+          "</div>"
+        );
+      });
+      var anyaSalaryTotal = getReportAnyaSalaryTotal(report);
+      if (anyaSalaryTotal !== 0) {
+        childTotal += anyaSalaryTotal;
+        childParts.push(
+          '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--anya-salary">' +
+            '<span class="admin-report-sent-detail__deposit-child-label">Аня ЗП</span>' +
+            '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(anyaSalaryTotal)) + "</span>" +
+          "</div>"
+        );
+      }
+      if (childParts.length) {
+        var depositValue = hasReportValue(report.deposit) ? parseReportNumber(report.deposit) : 0;
+        childParts.push(
+          '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--summary">' +
+            '<span class="admin-report-sent-detail__deposit-child-label">Итого</span>' +
+            '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(childTotal)) + "</span>" +
+          "</div>" +
+          '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--summary">' +
+            '<span class="admin-report-sent-detail__deposit-child-label">Разница с депозитом</span>' +
+            '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(formatReportRubleNumber(depositValue - childTotal)) + "</span>" +
+          "</div>"
+        );
+      }
+      if (hasReportValue(report.deposit) || childParts.length) {
+        parts.push(
+          '<div class="admin-report-sent-detail__deposit-group">' +
+            '<div class="admin-report-sent-detail__deposit-main">' +
+              '<span class="admin-report-sent-detail__label">Депозит</span>' +
+              '<span class="admin-report-sent-detail__value">' + escapeReportHtml(hasReportValue(report.deposit) ? report.deposit : 0) + "</span>" +
+            "</div>" +
+            (childParts.length ? '<div class="admin-report-sent-detail__deposit-subcolumn">' + childParts.join("") + "</div>" : "") +
+          "</div>"
+        );
+      }
+      var expenseEntries = [];
+      var otherEntries = [];
+      var calcEntries = [];
+      var anyaEntries = [];
+      function pushEntry(list, label, value, roundValue) {
+        if (!hasReportValue(value)) return;
+        list.push({ label: label, value: roundValue ? formatReportRubleNumber(value) : String(value) });
+      }
+      if (hasReportValue(report.botExchipDep) || hasReportValue(report.botExchipCashout)) {
+        var exchipDep = parseReportNumber(report.botExchipDep);
+        var exchipCashout = parseReportNumber(report.botExchipCashout);
+        calcEntries.push({
+          label: "Итого Эксчип",
+          value: formatReportRubleNumber(exchipDep) + " - " + formatReportRubleNumber(exchipCashout) + " = " + formatReportRubleNumber(exchipDep - exchipCashout),
+        });
+      }
+      pushEntry(expenseEntries, labels.bonuses, report.bonuses, false);
+      pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(report), true);
+      pushEntry(otherEntries, labels.botExchipCashout, report.botExchipCashout, false);
+      pushEntry(otherEntries, labels.transfers, report.transfers, false);
+      pushEntry(otherEntries, labels.ret, report.ret, false);
+      getReportExtraEntries(report).forEach(function (extra) {
+        if (isReportManualRakebackFieldName(extra.name)) return;
+        var entry = { label: extra.name, value: String(extra.value) };
+        if (isReportAnyaSalaryFieldName(extra.name)) anyaEntries.push(entry);
+        else otherEntries.push(entry);
+      });
+      parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
+      parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(anyaEntries)));
+      parts.push(buildDetailBlock("admin-report-sent-detail__field-block--other", otherEntries));
+      return parts.join("");
     };
     var mergeReportExtrasIntoMap = helpers.mergeReportExtrasIntoMap || function (map, report) {
       if (!map || !report || !Array.isArray(report.extraFields)) return map;
@@ -73,6 +185,11 @@
 
     function canViewSentReports() {
       return call(callbacks.canView) !== false;
+    }
+
+    function appendQueryParam(url, name, value) {
+      var sep = String(url || "").indexOf("?") === -1 ? "?" : "&";
+      return String(url || "") + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
     }
 
   function loadSentReports(forceRefresh) {
@@ -92,16 +209,24 @@
     sentReportsLoading = true;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     var fetchReports = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
-    fetchReports(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q, { cache: "no-store" }, 15000)
+    function buildReportsUrl(scope) {
+      var url = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
+      return scope ? appendQueryParam(url, "scope", scope) : url;
+    }
+    function fetchReportsForScope(scope) {
+      return fetchReports(buildReportsUrl(scope), { cache: "no-store" }, 15000)
       .then(function (r) {
         if (!r || !r.ok) throw new Error("admin-report-shifts " + (r && r.status ? r.status : "failed"));
         return r.json();
-      })
+      });
+    }
+    fetchReportsForScope("currentWeek")
       .then(function (data) {
         sentReportsLoading = false;
         if (!sentList) return;
         var items = (data && data.ok && data.reports) ? data.reports : [];
-        if (!Array.isArray(items) || items.length === 0) {
+        var hasArchive = !!(data && data.hasArchive);
+        if ((!Array.isArray(items) || items.length === 0) && !hasArchive) {
           sentList.innerHTML = '<p class="admin-report-sent-empty">Пока нет отправленных отчётов.</p>';
           sentReportsLoadedAt = Date.now();
           return;
@@ -298,26 +423,29 @@
           );
         }
 
-        var weeksByKey = {};
-        items.forEach(function (r) {
-          var eff = reportEffectiveTimestampMs(r);
-          if (!eff || eff !== eff) return;
-          var ws = weekStartMsForReport(eff);
-          var key = String(ws);
-          if (!weeksByKey[key]) weeksByKey[key] = [];
-          weeksByKey[key].push(r);
-        });
-        var weekStartsDesc = Object.keys(weeksByKey).map(function (s) {
-          return Number(s);
-        }).filter(function (n) {
-          return n === n;
-        }).sort(function (a, b) {
-          return b - a;
-        });
+        function groupReportsByWeek(list) {
+          var grouped = {};
+          (Array.isArray(list) ? list : []).forEach(function (r) {
+            var eff = reportEffectiveTimestampMs(r);
+            if (!eff || eff !== eff) return;
+            var ws = weekStartMsForReport(eff);
+            var key = String(ws);
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(r);
+          });
+          return grouped;
+        }
+        function sortedWeekStarts(grouped) {
+          return Object.keys(grouped || {}).map(function (s) {
+            return Number(s);
+          }).filter(function (n) {
+            return n === n;
+          }).sort(function (a, b) {
+            return b - a;
+          });
+        }
+        var weeksByKey = groupReportsByWeek(items);
         var currentItems = weeksByKey[String(currentWeek.start)] || [];
-        var archiveWeekStarts = weekStartsDesc.filter(function (ws) {
-          return ws !== currentWeek.start;
-        });
         function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(list || [], meta.start, meta.end);
@@ -354,7 +482,7 @@
         html.push(currentBlock.html);
         html.push("</div>");
 
-        if (archiveWeekStarts.length > 0) {
+        if (hasArchive) {
           html.push(
             '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
               '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
@@ -525,16 +653,29 @@
             var inner = archiveEl.querySelector(".admin-report-sent-archive__inner");
             if (!inner) return;
             inner.innerHTML = '<p class="admin-report-sent-period-hint">Загрузка прошлых недель…</p>';
-            setTimeout(function () {
+            fetchReportsForScope("archive").then(function (archiveData) {
+              var archiveItems = (archiveData && archiveData.ok && Array.isArray(archiveData.reports)) ? archiveData.reports : [];
+              if (!archiveItems.length) {
+                inner.innerHTML = '<p class="admin-report-sent-period-hint">Прошлых недель пока нет.</p>';
+                return;
+              }
+              archiveItems.forEach(function (report) {
+                if (report && report.id) reportById[report.id] = report;
+              });
+              var archiveWeeksByKey = groupReportsByWeek(archiveItems);
+              var archiveWeekStarts = sortedWeekStarts(archiveWeeksByKey);
               var archiveHtml = [];
               archiveWeekStarts.forEach(function (ws) {
-                var block = buildWeekBlock(ws, weeksByKey[String(ws)] || [], "ar-arch-", false);
+                var block = buildWeekBlock(ws, archiveWeeksByKey[String(ws)] || [], "ar-arch-", false);
                 weekTotalsById[block.weekId] = { totals: block.totals, label: block.label };
                 archiveHtml.push(block.html);
               });
               inner.innerHTML = archiveHtml.join("");
               bindSentReportControls(inner);
-            }, 0);
+            }).catch(function () {
+              archiveEl.removeAttribute("data-admin-report-archive-built");
+              if (inner) inner.innerHTML = '<p class="admin-report-sent-period-hint">Не удалось загрузить прошлые недели.</p>';
+            });
           });
         }
       })

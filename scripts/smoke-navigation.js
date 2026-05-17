@@ -141,6 +141,31 @@ async function main() {
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const adminReportRequestScopes = [];
+    const smokeCurrentReport = {
+      id: "smoke-current-report",
+      createdAt: new Date().toISOString(),
+      authorName: "Smoke",
+      deposit: 1000,
+      cashout: 250,
+      prodamus: 120,
+      robokassa: 80,
+      botExchipDep: 300,
+      botExchipCashout: 70,
+      bonuses: 40,
+      transfers: 15,
+      rakeback: 25,
+      extraFields: [{ name: "Аня ЗП", amount: 10 }],
+    };
+    const smokeArchiveReport = {
+      id: "smoke-archive-report",
+      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      authorName: "Archive",
+      deposit: 500,
+      cashout: 100,
+      bonuses: 20,
+      rakeback: 5,
+    };
     let releaseAdminReportCore;
     let holdAdminReportCore = true;
     const adminReportCoreGate = new Promise((resolve) => {
@@ -155,11 +180,22 @@ async function main() {
       await route.continue();
     });
     await page.route(/\/api\/admin-report-shifts(?:\?|$)/, async (route) => {
+      const url = route.request().url();
+      const scope = new URL(url).searchParams.get("scope") || "all";
+      adminReportRequestScopes.push(scope);
       await new Promise((resolve) => setTimeout(resolve, 120));
+      const reports = scope === "archive"
+        ? [smokeArchiveReport]
+        : [smokeCurrentReport];
       await route.fulfill({
         status: 200,
         contentType: "application/json; charset=utf-8",
-        body: JSON.stringify({ ok: true, reports: [] }),
+        body: JSON.stringify({
+          ok: true,
+          scope,
+          hasArchive: scope === "currentWeek",
+          reports,
+        }),
       });
     });
     const errors = [];
@@ -266,12 +302,17 @@ async function main() {
       const earlySentState = await page.evaluate(() => {
         const list = document.getElementById("adminReportSentList");
         const activePanel = document.querySelector(".admin-report-panel--active");
+        const archiveHint = document.querySelector("[data-admin-report-sent-archive] .admin-report-sent-period-hint");
         return {
           openDelayMs: 0,
           text: list ? String(list.textContent || "").trim() : "",
           activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
           sentModule: typeof window.AdminReportSentTab,
           sentScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-sent.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+          hasDepositGroup: !!document.querySelector(".admin-report-sent-detail__deposit-group"),
+          hasCalcBlock: !!document.querySelector(".admin-report-sent-detail__field-block--calc"),
+          hasDangerBlock: !!document.querySelector(".admin-report-sent-detail__field-block--danger"),
+          archiveHint: archiveHint ? String(archiveHint.textContent || "").trim() : "",
         };
       });
       earlySentState.openDelayMs = earlySentOpenDelayMs;
@@ -280,6 +321,18 @@ async function main() {
       if (!earlySentState.text || /Загрузка/.test(earlySentState.text)) throw new Error("admin report sent tab is stuck loading before core");
       if (earlySentState.sentModule !== "object") throw new Error("admin report sent module did not load before core");
       if (!earlySentState.sentScriptLoaded) throw new Error("admin report sent script was not priority-loaded before core");
+      if (!earlySentState.hasDepositGroup || !earlySentState.hasCalcBlock || !earlySentState.hasDangerBlock) {
+        throw new Error("admin report sent shell lost highlighted detail sections before core");
+      }
+      if (!/Откройте/.test(earlySentState.archiveHint)) throw new Error("admin report archive did not stay as a lazy hint before click");
+      if (adminReportRequestScopes.includes("archive")) throw new Error("admin report archive loaded before the archive block was opened");
+      await page.locator("[data-admin-report-sent-archive] > summary").click();
+      await page.waitForFunction(() => {
+        const inner = document.querySelector("[data-admin-report-sent-archive] .admin-report-sent-archive__inner");
+        const text = inner ? String(inner.textContent || "").trim() : "";
+        return !!(text && !/Загрузка/.test(text) && /Archive|Итого/.test(text));
+      }, null, { timeout: 1800 });
+      if (!adminReportRequestScopes.includes("archive")) throw new Error("admin report archive was not loaded after opening the archive block");
       holdAdminReportCore = false;
       releaseAdminReportCore();
       await page.waitForFunction(() => typeof window.pokerOpenAdminReportModal === "function", null, { timeout: 4500 });
