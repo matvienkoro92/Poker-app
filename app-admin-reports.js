@@ -1974,8 +1974,28 @@ function initAdminReportModal() {
     return callLegacyModule("cancelAdminReportIdle", arguments);
   }
 
+  function fallbackSetActiveTab(name) {
+    var activeName = String(name || "form");
+    if (activeName === "sent" && !canViewSentReports()) activeName = "form";
+    if (activeName === "calculations" && !canViewCalculationsReports()) activeName = "form";
+    if (tabs && tabs.length) {
+      tabs.forEach(function (tab) {
+        var selected = tab.getAttribute("data-admin-report-tab") === activeName;
+        tab.classList.toggle("admin-report-tab--active", selected);
+      });
+    }
+    if (panels && panels.length) {
+      panels.forEach(function (panel) {
+        var selected = panel.getAttribute("data-admin-report-panel") === activeName;
+        panel.classList.toggle("admin-report-panel--active", selected);
+      });
+    }
+    return activeName;
+  }
+
   function setActiveTab() {
-    return callLegacyModule("setActiveTab", arguments);
+    var result = callLegacyModule("setActiveTab", arguments);
+    return result === undefined ? fallbackSetActiveTab(arguments[0]) : result;
   }
 
   function escapeReportHtml(s) {
@@ -3493,7 +3513,11 @@ function ensureAdminReportModulesLoaded() {
   if (areAdminReportModulesReady()) return Promise.resolve();
   if (adminReportModuleLoadPromise) return adminReportModuleLoadPromise;
   adminReportModuleLoadPromise = ADMIN_REPORT_MODULE_SCRIPTS.reduce(function (chain, file) {
-    return chain.then(function () { return loadAdminReportScript(file); });
+    return chain.then(function () {
+      return loadAdminReportScript(file).catch(function () {
+        return undefined;
+      });
+    });
   }, Promise.resolve());
   return adminReportModuleLoadPromise;
 }
