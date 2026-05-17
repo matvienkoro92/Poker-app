@@ -126,7 +126,6 @@ function initAdminReportModal() {
   var rakebackAccessCache = null;
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
-  btn.dataset.adminReportBound = "1";
 
   var rakebackStaticData = window.AdminReportRakebackStaticData || {};
   var rakebackTemplates = rakebackStaticData.templates || {};
@@ -2475,6 +2474,7 @@ function initAdminReportModal() {
     syncRakebackAccessControls();
   }
   btn.addEventListener("click", openModal);
+  btn.dataset.adminReportBound = "1";
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
   if (rakebackTotalInput) {
@@ -3453,7 +3453,6 @@ function initAdminReportModal() {
   }
 
 }
-window.pokerInitAdminReportModal = initAdminReportModal;
 var adminReportModuleLoadPromise = null;
 var ADMIN_REPORT_MODULE_SCRIPTS = [
   "app-admin-reports-tabs.js",
@@ -3533,6 +3532,7 @@ function initAdminReportModalsRuntime() {
       initAdminReportModal();
     });
 }
+window.pokerInitAdminReportModal = initAdminReportModalsRuntime;
 initAdminReportModalsRuntime();
 var ensureGlobalModalsHtml = window["poker" + "EnsureGlobalModalsHtml"];
 if (
