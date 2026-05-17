@@ -2473,6 +2473,10 @@ function initAdminReportModal() {
     fillReportForm(null, { skipRakeback: true });
     syncRakebackAccessControls();
   }
+  window.pokerOpenAdminReportModal = function () {
+    openModal();
+    return true;
+  };
   btn.addEventListener("click", openModal);
   btn.dataset.adminReportBound = "1";
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
@@ -3521,7 +3525,8 @@ function ensureAdminReportModulesLoaded() {
   return adminReportModuleLoadPromise;
 }
 function initAdminReportModalsRuntime() {
-  return ensureAdminReportModulesLoaded()
+  initAdminReportModal();
+  ensureAdminReportModulesLoaded()
     .then(function () {
       initAdminReportModal();
       if (typeof window.pokerInitBroadcastReportsModal === "function") {
@@ -3533,6 +3538,7 @@ function initAdminReportModalsRuntime() {
       initAdminReportModal();
       return true;
     });
+  return true;
 }
 window.pokerInitAdminReportModal = initAdminReportModalsRuntime;
 initAdminReportModalsRuntime();

@@ -214,12 +214,62 @@
       : null;
   }
 
+  function isAdminReportButtonTarget(target) {
+    return !!(target && target.closest && target.closest("#adminReportBtn"));
+  }
+
+  function closeAdminReportShellModal() {
+    var modal = document.getElementById("adminReportModal");
+    if (modal) modal.setAttribute("aria-hidden", "true");
+    if (document.documentElement) document.documentElement.classList.remove("admin-report-modal-open");
+    if (document.body) {
+      document.body.classList.remove("admin-report-modal-open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  function bindAdminReportShellModal() {
+    var modal = document.getElementById("adminReportModal");
+    if (!modal || modal.dataset.adminReportShellBound === "1") return;
+    modal.dataset.adminReportShellBound = "1";
+    var closeBtn = document.getElementById("adminReportModalClose");
+    var backdrop = document.getElementById("adminReportModalBackdrop");
+    if (closeBtn) closeBtn.addEventListener("click", closeAdminReportShellModal);
+    if (backdrop) backdrop.addEventListener("click", closeAdminReportShellModal);
+  }
+
+  function openAdminReportShellModal() {
+    var modal = document.getElementById("adminReportModal");
+    if (!modal) return false;
+    bindAdminReportShellModal();
+    modal.setAttribute("aria-hidden", "false");
+    if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
+    if (document.body) {
+      document.body.classList.add("admin-report-modal-open");
+      document.body.style.overflow = "hidden";
+    }
+    return true;
+  }
+
+  function openAdminReportShellWhenReady() {
+    if (document.getElementById("adminReportModal")) return Promise.resolve(openAdminReportShellModal());
+    var host = document.getElementById("globalModalsFragmentHost");
+    if (!host || typeof window.pokerEnsureGlobalModalsHtml !== "function") return Promise.resolve(false);
+    return Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+      .then(function () {
+        return openAdminReportShellModal();
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
   function finishTargetPrewarm(target) {
-    if (!target || !target.closest || !target.closest("#adminReportBtn")) return Promise.resolve(true);
+    if (!isAdminReportButtonTarget(target)) return Promise.resolve(true);
     try {
       var adminReportInit = window["poker" + "InitAdminReportModal"];
       if (typeof adminReportInit === "function") {
-        return Promise.resolve(adminReportInit()).then(function () { return true; });
+        adminReportInit();
       }
     } catch (eAdminReportInit) {}
     return Promise.resolve(true);
@@ -263,7 +313,13 @@
   }
 
   function openPrewarmedGlobalModalTarget(target, originalTarget) {
-    if (target && target.closest && target.closest("#adminReportBtn")) {
+    if (isAdminReportButtonTarget(target)) {
+      try {
+        var openAdminReportModal = window.pokerOpenAdminReportModal;
+        if (typeof openAdminReportModal === "function") {
+          return !!openAdminReportModal();
+        }
+      } catch (eAdminReportDirectOpen) {}
       try {
         var adminReportEv = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });
         adminReportEv.__pokerLazyRedispatched = true;
@@ -340,8 +396,26 @@
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();
+      var shellOpened = false;
+      var adminReportShellPromise = isAdminReportButtonTarget(target)
+        ? openAdminReportShellWhenReady().then(function (opened) {
+          shellOpened = !!opened;
+          return opened;
+        })
+        : Promise.resolve(false);
+      adminReportShellPromise.catch(function () {});
       prewarmGlobalModalTarget(target).then(function () {
+        if (isAdminReportButtonTarget(target) && shellOpened) {
+          var modal = document.getElementById("adminReportModal");
+          if (!modal || modal.getAttribute("aria-hidden") !== "false") {
+            return;
+          }
+        }
         openPrewarmedGlobalModalTarget(target, originalTarget);
+      }).catch(function () {
+        if (isAdminReportButtonTarget(target) && shellOpened) {
+          return;
+        }
       });
     },
     true

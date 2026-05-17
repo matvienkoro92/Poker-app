@@ -141,6 +141,12 @@ async function main() {
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.route(/\/app-admin-reports(?:-[^/?]+)?\.js(?:\?|$)/, async (route) => {
+      const url = route.request().url();
+      const isCore = /\/app-admin-reports\.js(?:\?|$)/.test(url);
+      await new Promise((resolve) => setTimeout(resolve, isCore ? 1600 : 700));
+      await route.continue();
+    });
     const errors = [];
     page.on("pageerror", (err) => errors.push(String((err && (err.stack || err.message)) || err)));
 
@@ -205,6 +211,8 @@ async function main() {
     await page.evaluate(() => {
       const close = document.querySelector("#hallFishRatingModal [data-hall-fish-close]");
       if (close) close.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      const modal = document.getElementById("hallFishRatingModal");
+      if (modal) modal.remove();
     });
 
     const route = ["chat", "download", "cashout", "profile", "home", "player-crm", "home", "bonus-game", "home", "raffles", "spring-rating"];
@@ -333,6 +341,50 @@ async function main() {
     if (loadedDomainScripts.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime loaded during spring navigation");
     if (loadedDomainScripts.has("winter-rating-data.js")) throw new Error("winter rating data loaded during spring navigation");
 
+    await clickVisibleOrSetView(page, "home");
+    await page.waitForFunction(() => document.body.getAttribute("data-view") === "home", null, { timeout: 4000 });
+    await page.evaluate(() => {
+      const fishModal = document.getElementById("hallFishRatingModal");
+      if (fishModal) fishModal.remove();
+      window.__pokerTelegramAuth = {
+        status: "verified",
+        adminReportAccess: true,
+        user: { id: 388008256, username: "roman1787443", first_name: "Smoke" },
+      };
+      const btn = document.getElementById("adminReportBtn");
+      if (!btn) throw new Error("admin report button is missing");
+      btn.classList.remove("header-admin-report--hidden");
+      btn.hidden = false;
+      btn.disabled = false;
+      btn.removeAttribute("aria-hidden");
+    });
+    const reportClickStartedAt = Date.now();
+    await page.locator("#adminReportBtn").click();
+    await page.waitForFunction(() => {
+      const modal = document.getElementById("adminReportModal");
+      return !!(modal && modal.getAttribute("aria-hidden") === "false");
+    }, null, { timeout: 1200 });
+    const reportOpenDelayMs = Date.now() - reportClickStartedAt;
+    await page.waitForFunction(() => {
+      const btn = document.getElementById("adminReportBtn");
+      return typeof window.pokerOpenAdminReportModal === "function" &&
+        !!(btn && btn.dataset.adminReportBound === "1") &&
+        Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports");
+    }, null, { timeout: 4500 });
+    const reportState = await page.evaluate(() => ({
+      open: !!(document.getElementById("adminReportModal") && document.getElementById("adminReportModal").getAttribute("aria-hidden") === "false"),
+      directOpen: typeof window.pokerOpenAdminReportModal,
+      bound: document.getElementById("adminReportBtn")?.dataset.adminReportBound || "",
+      loadedCore: Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports"),
+    }));
+    reportState.openDelayMs = reportOpenDelayMs;
+    if (!reportState.open) throw new Error("admin report modal did not open from the home button");
+    if (reportState.openDelayMs > 1400) throw new Error(`admin report modal opened too slowly: ${reportState.openDelayMs}ms`);
+    if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
+    if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
+    if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
+    await page.locator("#adminReportModalClose").click();
+
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
     await page.waitForFunction(() => document.body.getAttribute("data-view") === "winter-rating", null, { timeout: 4000 }).catch(() => {});
     views.push({
@@ -369,7 +421,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

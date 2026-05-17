@@ -124,6 +124,16 @@
       ]
     },
     {
+      "name": "pokerOpenAdminReportModal",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
       "name": "pokerInitPlayerCrm",
       "domain": "playerCrm",
       "exportedBy": [

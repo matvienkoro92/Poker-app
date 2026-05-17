@@ -50,36 +50,58 @@ function toVersionedResource(file) {
   return clean;
 }
 
-function bumpHtmlRef(htmlText, resource, version) {
+function collectHtmlVersionedResources(htmlText) {
+  const out = new Set();
+  const re = /\b(?:href|src)=["']\.\/([^"']+\.(?:css|js))(?:\?v=[^"']+)?["']/gi;
+  let match;
+  while ((match = re.exec(htmlText))) {
+    const clean = String(match[1] || "").replace(/\\/g, "/");
+    if (clean && !clean.includes("/")) out.add(clean);
+  }
+  return out;
+}
+
+function collectCssImportResources(cssText) {
+  const out = new Set();
+  const re = /@import\s+url\(["']?\.\/([^"')?#]+\.css)(?:\?v=[^"')?#]+)?["']?\)/gi;
+  let match;
+  while ((match = re.exec(cssText))) {
+    const clean = String(match[1] || "").replace(/\\/g, "/");
+    if (clean) out.add(clean);
+  }
+  return out;
+}
+
+function bumpHtmlRef(htmlText, resource, next) {
   const escaped = escapeRegExp(resource);
   const withVersion = new RegExp(`((?:href|src)="\\.\\/${escaped})\\?v=[^"#]+(")`, "g");
   let changed = false;
   let nextText = htmlText.replace(withVersion, function (_match, start, end) {
     changed = true;
-    return start + "?v=" + version + end;
+    return `${start}?v=${next}${end}`;
   });
   if (changed) return { text: nextText, changed: true };
   const withoutVersion = new RegExp(`((?:href|src)="\\.\\/${escaped})(")`, "g");
   nextText = nextText.replace(withoutVersion, function (_match, start, end) {
     changed = true;
-    return start + "?v=" + version + end;
+    return `${start}?v=${next}${end}`;
   });
   return { text: nextText, changed };
 }
 
-function bumpCssImport(cssText, resource, version) {
+function bumpCssImport(cssText, resource, next) {
   const escaped = escapeRegExp(resource);
   const withVersion = new RegExp(`(@import\\s+url\\(["']?\\.\\/${escaped})\\?v=[^"')?#]+(["']?\\))`, "g");
   let changed = false;
   let nextText = cssText.replace(withVersion, function (_match, start, end) {
     changed = true;
-    return start + "?v=" + version + end;
+    return `${start}?v=${next}${end}`;
   });
   if (changed) return { text: nextText, changed: true };
   const withoutVersion = new RegExp(`(@import\\s+url\\(["']?\\.\\/${escaped})(["']?\\))`, "g");
   nextText = nextText.replace(withoutVersion, function (_match, start, end) {
     changed = true;
-    return start + "?v=" + version + end;
+    return `${start}?v=${next}${end}`;
   });
   return { text: nextText, changed };
 }
@@ -107,9 +129,11 @@ changedFiles.forEach((file) => {
   const resource = toVersionedResource(file);
   if (resource) versionTargets.add(resource);
 });
+collectHtmlVersionedResources(html).forEach((resource) => versionTargets.add(resource));
 let stylesChanged = versionTargets.has("styles.css");
 if (fs.existsSync(stylesPath)) {
   let styles = fs.readFileSync(stylesPath, "utf8");
+  collectCssImportResources(styles).forEach((resource) => versionTargets.add(resource));
   Array.from(versionTargets).forEach((resource) => {
     if (resource === "styles.css" || !resource.endsWith(".css")) return;
     const result = bumpCssImport(styles, resource, next);
