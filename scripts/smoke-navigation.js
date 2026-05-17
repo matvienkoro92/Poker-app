@@ -141,10 +141,16 @@ async function main() {
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    let releaseAdminReportCore;
+    let holdAdminReportCore = true;
+    const adminReportCoreGate = new Promise((resolve) => {
+      releaseAdminReportCore = resolve;
+    });
     await page.route(/\/app-admin-reports(?:-[^/?]+)?\.js(?:\?|$)/, async (route) => {
       const url = route.request().url();
       const isCore = /\/app-admin-reports\.js(?:\?|$)/.test(url);
       const isSent = /\/app-admin-reports-sent\.js(?:\?|$)/.test(url);
+      if (isCore && holdAdminReportCore) await adminReportCoreGate;
       await new Promise((resolve) => setTimeout(resolve, isCore ? 1600 : isSent ? 120 : 1400));
       await route.continue();
     });
@@ -202,6 +208,83 @@ async function main() {
     if (initialHeavy.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime should be lazy before winter navigation");
     if (initialHeavy.has("winter-rating-data.js")) throw new Error("winter rating data should be lazy before winter navigation");
     if (initialLazy.hiddenImages.length) throw new Error("hidden section images loaded before navigation: " + initialLazy.hiddenImages.join(", "));
+
+    {
+      await page.evaluate(() => {
+        window.__pokerTelegramAuth = {
+          status: "verified",
+          adminReportAccess: true,
+          user: { id: 388008256, username: "roman1787443", first_name: "Smoke" },
+        };
+        window.pokerApiHasCredential = function () { return true; };
+        window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
+        const btn = document.getElementById("adminReportBtn");
+        if (!btn) throw new Error("admin report button is missing");
+        btn.classList.remove("header-admin-report--hidden");
+        btn.hidden = false;
+        btn.disabled = false;
+        btn.removeAttribute("aria-hidden");
+      });
+      const earlyReportClickStartedAt = Date.now();
+      await page.locator("#adminReportBtn").click();
+      await page.waitForFunction(() => {
+        const modal = document.getElementById("adminReportModal");
+        return !!(modal && modal.getAttribute("aria-hidden") === "false");
+      }, null, { timeout: 1200 });
+      const earlyReportOpenDelayMs = Date.now() - earlyReportClickStartedAt;
+      const earlyReportShellState = await page.evaluate(() => {
+        const calcTab = document.querySelector("[data-admin-report-tab='calculations']");
+        const sentTab = document.querySelector("[data-admin-report-tab='sent']");
+        const activePanel = document.querySelector(".admin-report-panel--active");
+        return {
+          calculationsExists: !!calcTab,
+          calculationsHidden: calcTab ? calcTab.hidden : true,
+          sentExists: !!sentTab,
+          sentHidden: sentTab ? sentTab.hidden : true,
+          directOpen: typeof window.pokerOpenAdminReportModal,
+          activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+        };
+      });
+      earlyReportShellState.openDelayMs = earlyReportOpenDelayMs;
+      if (earlyReportShellState.openDelayMs > 1400) throw new Error(`admin report instant shell opened too slowly: ${earlyReportShellState.openDelayMs}ms`);
+      if (earlyReportShellState.directOpen === "function") throw new Error("admin report core loaded before instant shell assertions");
+      if (!earlyReportShellState.calculationsExists || earlyReportShellState.calculationsHidden) {
+        throw new Error("admin report calculations tab is hidden before the core module loads");
+      }
+      if (!earlyReportShellState.sentExists || earlyReportShellState.sentHidden) {
+        throw new Error("admin report sent tab is hidden before the core module loads");
+      }
+
+      const earlySentClickStartedAt = Date.now();
+      await page.locator("[data-admin-report-tab='sent']").click();
+      await page.waitForFunction(() => {
+        const list = document.getElementById("adminReportSentList");
+        const text = list ? String(list.textContent || "").trim() : "";
+        return !!(text && !/Загрузка/.test(text));
+      }, null, { timeout: 1800 });
+      const earlySentOpenDelayMs = Date.now() - earlySentClickStartedAt;
+      const earlySentState = await page.evaluate(() => {
+        const list = document.getElementById("adminReportSentList");
+        const activePanel = document.querySelector(".admin-report-panel--active");
+        return {
+          openDelayMs: 0,
+          text: list ? String(list.textContent || "").trim() : "",
+          activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+          sentModule: typeof window.AdminReportSentTab,
+          sentScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-sent.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+        };
+      });
+      earlySentState.openDelayMs = earlySentOpenDelayMs;
+      if (earlySentState.openDelayMs > 1600) throw new Error(`admin report sent shell loaded too slowly before core: ${earlySentState.openDelayMs}ms`);
+      if (earlySentState.activePanel !== "sent") throw new Error("admin report sent tab did not become active before core");
+      if (!earlySentState.text || /Загрузка/.test(earlySentState.text)) throw new Error("admin report sent tab is stuck loading before core");
+      if (earlySentState.sentModule !== "object") throw new Error("admin report sent module did not load before core");
+      if (!earlySentState.sentScriptLoaded) throw new Error("admin report sent script was not priority-loaded before core");
+      holdAdminReportCore = false;
+      releaseAdminReportCore();
+      await page.waitForFunction(() => typeof window.pokerOpenAdminReportModal === "function", null, { timeout: 4500 });
+      await page.locator("#adminReportModalClose").click();
+    }
 
     await page.locator("#hallFishRatingBtn").click();
     await page.waitForFunction(() => {
@@ -376,24 +459,25 @@ async function main() {
       return !!(modal && modal.getAttribute("aria-hidden") === "false");
     }, null, { timeout: 1200 });
     const reportOpenDelayMs = Date.now() - reportClickStartedAt;
-    await page.waitForFunction(() => {
-      const btn = document.getElementById("adminReportBtn");
-      return typeof window.pokerOpenAdminReportModal === "function" &&
-        !!(btn && btn.dataset.adminReportBound === "1") &&
-        Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports");
-    }, null, { timeout: 4500 });
-    const reportState = await page.evaluate(() => ({
-      open: !!(document.getElementById("adminReportModal") && document.getElementById("adminReportModal").getAttribute("aria-hidden") === "false"),
-      directOpen: typeof window.pokerOpenAdminReportModal,
-      bound: document.getElementById("adminReportBtn")?.dataset.adminReportBound || "",
-      loadedCore: Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports"),
-    }));
-    reportState.openDelayMs = reportOpenDelayMs;
-    if (!reportState.open) throw new Error("admin report modal did not open from the home button");
-    if (reportState.openDelayMs > 1400) throw new Error(`admin report modal opened too slowly: ${reportState.openDelayMs}ms`);
-    if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
-    if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
-    if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
+    const reportShellState = await page.evaluate(() => {
+      const calcTab = document.querySelector("[data-admin-report-tab='calculations']");
+      const sentTab = document.querySelector("[data-admin-report-tab='sent']");
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      return {
+        calculationsExists: !!calcTab,
+        calculationsHidden: calcTab ? calcTab.hidden : true,
+        sentExists: !!sentTab,
+        sentHidden: sentTab ? sentTab.hidden : true,
+        directOpen: typeof window.pokerOpenAdminReportModal,
+        activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+      };
+    });
+    if (!reportShellState.calculationsExists || reportShellState.calculationsHidden) {
+      throw new Error("admin report calculations tab is hidden in the instant shell");
+    }
+    if (!reportShellState.sentExists || reportShellState.sentHidden) {
+      throw new Error("admin report sent tab is hidden in the instant shell");
+    }
 
     const sentClickStartedAt = Date.now();
     await page.locator("[data-admin-report-tab='sent']").click();
@@ -420,6 +504,27 @@ async function main() {
     if (!sentState.text || /Загрузка/.test(sentState.text)) throw new Error("admin report sent tab is stuck loading");
     if (sentState.sentModule !== "object") throw new Error("admin report sent module did not load");
     if (!sentState.sentScriptLoaded) throw new Error("admin report sent script was not priority-loaded");
+
+    holdAdminReportCore = false;
+    releaseAdminReportCore();
+    await page.waitForFunction(() => {
+      const btn = document.getElementById("adminReportBtn");
+      return typeof window.pokerOpenAdminReportModal === "function" &&
+        !!(btn && btn.dataset.adminReportBound === "1") &&
+        Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports");
+    }, null, { timeout: 4500 });
+    const reportState = await page.evaluate(() => ({
+      open: !!(document.getElementById("adminReportModal") && document.getElementById("adminReportModal").getAttribute("aria-hidden") === "false"),
+      directOpen: typeof window.pokerOpenAdminReportModal,
+      bound: document.getElementById("adminReportBtn")?.dataset.adminReportBound || "",
+      loadedCore: Array.from(document.scripts || []).some((script) => /app-admin-reports\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "admin-reports"),
+    }));
+    reportState.openDelayMs = reportOpenDelayMs;
+    if (!reportState.open) throw new Error("admin report modal did not open from the home button");
+    if (reportState.openDelayMs > 1400) throw new Error(`admin report modal opened too slowly: ${reportState.openDelayMs}ms`);
+    if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
+    if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
+    if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
     await page.locator("#adminReportModalClose").click();
 
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
@@ -458,7 +563,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportState, sentState, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

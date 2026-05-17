@@ -3,6 +3,8 @@
 (function () {
   var loading = Object.create(null);
   var nestedFragmentLoading = Object.create(null);
+  var adminReportShellScriptPromises = Object.create(null);
+  var adminReportSentShellModule = null;
 
   function findFragmentHost(viewName) {
     var view = String(viewName || "").trim();
@@ -218,6 +220,212 @@
     return !!(target && target.closest && target.closest("#adminReportBtn"));
   }
 
+  function getAdminReportShellUsers() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var auth = window.__pokerTelegramAuth || null;
+      if (auth) users.push(auth);
+      if (auth && auth.user) users.push(auth.user);
+    } catch (eAuth) {}
+    try {
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec) users.push(rec);
+      if (rec && rec.user) users.push(rec.user);
+    } catch (eRec) {}
+    return users;
+  }
+
+  function adminReportShellIdentityMatches(users, idsList, usernamesList, emailsList) {
+    var idsAllowed = Array.isArray(idsList) ? idsList : [];
+    var usernamesAllowed = Array.isArray(usernamesList) ? usernamesList : [];
+    var emailsAllowed = Array.isArray(emailsList) ? emailsList : [];
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i] || {};
+      var ids = [u.id, u.memberId, u.telegramId, u.telegram_id, u.uid, u.userId, u.user_id];
+      for (var j = 0; j < ids.length; j++) {
+        var rawId = ids[j] != null ? String(ids[j]).replace(/^tg_/, "").trim() : "";
+        if (idsAllowed.indexOf(rawId) >= 0) return true;
+      }
+      var names = [u.username, u.telegramUsername, u.pwaUsername];
+      for (var k = 0; k < names.length; k++) {
+        var username = names[k] != null ? String(names[k]).replace(/^@+/, "").trim().toLowerCase() : "";
+        if (usernamesAllowed.indexOf(username) >= 0) return true;
+      }
+      var emails = [u.email, u.pwaEmail, u.mail];
+      for (var m = 0; m < emails.length; m++) {
+        var email = emails[m] != null ? String(emails[m]).trim().toLowerCase() : "";
+        if (emailsAllowed.indexOf(email) >= 0) return true;
+      }
+    }
+    return false;
+  }
+
+  function canViewAdminReportSentShell() {
+    try {
+      var auth = window.__pokerTelegramAuth || null;
+      if (auth && (auth.adminAccess === true || auth.adminReportAccess === true)) return true;
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && (rec.adminAccess === true || rec.adminReportAccess === true)) return true;
+    } catch (eAuth) {}
+    return adminReportShellIdentityMatches(
+      getAdminReportShellUsers(),
+      ["388008256", "2144406710", "1897001087"],
+      ["roman1787443", "roman1_matvienko"],
+      ["matvienkoro92@gmail.com"]
+    );
+  }
+
+  function canViewAdminReportCalculationsShell() {
+    return adminReportShellIdentityMatches(
+      getAdminReportShellUsers(),
+      ["388008256", "2144406710"],
+      ["roman1787443", "roman1_matvienko"],
+      ["matvienkoro92@gmail.com"]
+    );
+  }
+
+  function setAdminReportShellTab(name) {
+    var modal = document.getElementById("adminReportModal");
+    if (!modal) return "form";
+    var sentAllowed = canViewAdminReportSentShell();
+    var calculationsAllowed = canViewAdminReportCalculationsShell();
+    var activeName = String(name || "form");
+    if (activeName === "sent" && !sentAllowed) activeName = "form";
+    if (activeName === "calculations" && !calculationsAllowed) activeName = "form";
+    Array.prototype.slice.call(modal.querySelectorAll(".admin-report-tab")).forEach(function (tab) {
+      var tabName = tab.getAttribute("data-admin-report-tab") || "form";
+      if (tabName === "sent") tab.hidden = !sentAllowed;
+      if (tabName === "calculations") tab.hidden = !calculationsAllowed;
+      var selected = tabName === activeName;
+      tab.classList.toggle("admin-report-tab--active", selected);
+      tab.setAttribute("aria-selected", selected ? "true" : "false");
+    });
+    Array.prototype.slice.call(modal.querySelectorAll(".admin-report-panel")).forEach(function (panel) {
+      var panelName = panel.getAttribute("data-admin-report-panel") || "form";
+      if (panelName === "sent") panel.hidden = !sentAllowed;
+      else if (panelName === "calculations") panel.hidden = !calculationsAllowed;
+      else panel.hidden = false;
+      panel.classList.toggle("admin-report-panel--active", panelName === activeName);
+    });
+    return activeName;
+  }
+
+  function syncAdminReportShellAccess() {
+    var modal = document.getElementById("adminReportModal");
+    if (!modal) return false;
+    var sentAllowed = canViewAdminReportSentShell();
+    var calculationsAllowed = canViewAdminReportCalculationsShell();
+    Array.prototype.slice.call(modal.querySelectorAll(".admin-report-tab")).forEach(function (tab) {
+      var tabName = tab.getAttribute("data-admin-report-tab") || "";
+      if (tabName === "sent") tab.hidden = !sentAllowed;
+      if (tabName === "calculations") tab.hidden = !calculationsAllowed;
+    });
+    Array.prototype.slice.call(modal.querySelectorAll(".admin-report-panel")).forEach(function (panel) {
+      var panelName = panel.getAttribute("data-admin-report-panel") || "";
+      if (panelName === "sent") panel.hidden = !sentAllowed;
+      if (panelName === "calculations") panel.hidden = !calculationsAllowed;
+    });
+    var activePanel = modal.querySelector(".admin-report-panel--active");
+    var activeName = activePanel ? activePanel.getAttribute("data-admin-report-panel") : "form";
+    if ((activeName === "sent" && !sentAllowed) || (activeName === "calculations" && !calculationsAllowed)) {
+      setAdminReportShellTab("form");
+    }
+    return sentAllowed || calculationsAllowed;
+  }
+
+  function getAdminReportShellAssetVersion() {
+    return document.documentElement ? String(document.documentElement.getAttribute("data-app-version") || "").trim() : "";
+  }
+
+  function loadAdminReportShellScript(file) {
+    file = String(file || "").trim();
+    if (!file) return Promise.resolve(false);
+    if (file === "app-admin-reports-sent.js" && window.AdminReportSentTab && typeof window.AdminReportSentTab.init === "function") {
+      return Promise.resolve(true);
+    }
+    if (adminReportShellScriptPromises[file]) return adminReportShellScriptPromises[file];
+    adminReportShellScriptPromises[file] = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[data-admin-report-module="' + file + '"]');
+      if (existing && existing.getAttribute("data-admin-report-loaded") === "1") {
+        resolve(true);
+        return;
+      }
+      if (existing) {
+        existing.addEventListener("load", function () { resolve(true); }, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+      var script = document.createElement("script");
+      var version = getAdminReportShellAssetVersion();
+      script.src = "./" + file + (version ? "?v=" + encodeURIComponent(version) : "");
+      script.async = true;
+      script.dataset.adminReportModule = file;
+      script.onload = function () {
+        script.setAttribute("data-admin-report-loaded", "1");
+        resolve(true);
+      };
+      script.onerror = function () {
+        delete adminReportShellScriptPromises[file];
+        reject(new Error("Failed to load script " + file));
+      };
+      (document.head || document.documentElement).appendChild(script);
+    });
+    return adminReportShellScriptPromises[file];
+  }
+
+  function openAdminReportSentShell(forceRefresh) {
+    var sentList = document.getElementById("adminReportSentList");
+    if (!sentList) return Promise.resolve(false);
+    if (!canViewAdminReportSentShell()) {
+      sentList.innerHTML = '<p class="admin-report-sent-empty">Нет доступа к отправленным отчётам.</p>';
+      return Promise.resolve(false);
+    }
+    var existingModule = adminReportSentShellModule || null;
+    if (existingModule && typeof existingModule.open === "function") {
+      return Promise.resolve(existingModule.open(forceRefresh));
+    }
+    sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
+    return loadAdminReportShellScript("app-admin-reports-sent.js")
+      .then(function () {
+        if (!window.AdminReportSentTab || typeof window.AdminReportSentTab.init !== "function") {
+          throw new Error("AdminReportSentTab is not available");
+        }
+        if (!adminReportSentShellModule) {
+          adminReportSentShellModule = window.AdminReportSentTab.init({
+            list: sentList,
+            cacheTtlMs: 5 * 60 * 1000,
+            netErrorMessage: window.POKER_NET_ERR || "Ошибка сети",
+            callbacks: {
+              canView: canViewAdminReportSentShell,
+              editReport: function () {},
+              syncAccess: syncAdminReportShellAccess,
+            },
+          });
+        }
+        return adminReportSentShellModule.open(forceRefresh);
+      })
+      .catch(function () {
+        if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
+        return false;
+      });
+  }
+
+  function prewarmAdminReportSentShell() {
+    if (!canViewAdminReportSentShell()) return;
+    var sentList = document.getElementById("adminReportSentList");
+    if (!sentList || String(sentList.innerHTML || "").trim()) return;
+    openAdminReportSentShell(false).catch(function () {});
+  }
+
   function closeAdminReportShellModal() {
     var modal = document.getElementById("adminReportModal");
     if (modal) modal.setAttribute("aria-hidden", "true");
@@ -236,18 +444,33 @@
     var backdrop = document.getElementById("adminReportModalBackdrop");
     if (closeBtn) closeBtn.addEventListener("click", closeAdminReportShellModal);
     if (backdrop) backdrop.addEventListener("click", closeAdminReportShellModal);
+    modal.addEventListener("click", function (e) {
+      var fullReportOpener = window.pokerOpenAdminReportModal;
+      if (typeof fullReportOpener === "function") return;
+      var tab = e.target && e.target.closest ? e.target.closest("[data-admin-report-tab]") : null;
+      if (!tab || !modal.contains(tab)) return;
+      var name = tab.getAttribute("data-admin-report-tab") || "form";
+      if (name === "sent" && !canViewAdminReportSentShell()) return;
+      if (name === "calculations" && !canViewAdminReportCalculationsShell()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var activeName = setAdminReportShellTab(name);
+      if (activeName === "sent") openAdminReportSentShell(false).catch(function () {});
+    });
   }
 
   function openAdminReportShellModal() {
     var modal = document.getElementById("adminReportModal");
     if (!modal) return false;
     bindAdminReportShellModal();
+    syncAdminReportShellAccess();
     modal.setAttribute("aria-hidden", "false");
     if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
     if (document.body) {
       document.body.classList.add("admin-report-modal-open");
       document.body.style.overflow = "hidden";
     }
+    setTimeout(prewarmAdminReportSentShell, 0);
     return true;
   }
 

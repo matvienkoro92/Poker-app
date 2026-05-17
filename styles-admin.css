@@ -470,6 +470,13 @@
   top: calc(env(safe-area-inset-top, 0px) + 10px);
   right: 14px;
 }
+#adminReportModal .admin-report-date {
+  min-height: 36px;
+  padding-right: 52px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
 #app:has(#adminReportModal[aria-hidden="false"]) ~ .bottom-nav,
 html.admin-report-modal-open .bottom-nav,
 body.admin-report-modal-open .bottom-nav {

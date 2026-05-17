@@ -128,6 +128,69 @@ function initAdminReportModal() {
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") return;
 
+  function collectAdminReportIdentityCandidates() {
+    var users = [];
+    try {
+      var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        users.push(window.Telegram.WebApp.initDataUnsafe.user);
+      }
+    } catch (eTg) {}
+    try {
+      var authUser = window.__pokerTelegramAuth && window.__pokerTelegramAuth.user ? window.__pokerTelegramAuth.user : null;
+      if (authUser) users.push(authUser);
+    } catch (eAuthUser) {}
+    try {
+      var recUser = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (recUser && recUser.user) users.push(recUser.user);
+    } catch (eRecUser) {}
+    return users;
+  }
+
+  function isKnownAdminUserForReportButton(user) {
+    if (!user) return false;
+    var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+    if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+    var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
+    if (username === "roman1_matvienko") return true;
+    var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
+    return email === "matvienkoro92@gmail.com";
+  }
+
+  function isLocalAdminReportDevHost() {
+    try {
+      return !!(window.location && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"));
+    } catch (eHost) {}
+    return false;
+  }
+
+  function canOpenAdminReportModal() {
+    if (isLocalAdminReportDevHost()) return true;
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.adminAccess === true) return true;
+      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      if (rec && rec.adminAccess === true) return true;
+    } catch (eAuth) {}
+    var users = collectAdminReportIdentityCandidates();
+    for (var i = 0; i < users.length; i++) {
+      if (isKnownAdminUserForReportButton(users[i])) return true;
+    }
+    return false;
+  }
+
+  function syncAdminReportButtonVisibility() {
+    var allowed = canOpenAdminReportModal();
+    btn.classList.toggle("header-admin-report--hidden", !allowed);
+    btn.toggleAttribute("aria-hidden", !allowed);
+    btn.disabled = !allowed;
+    return allowed;
+  }
+  syncAdminReportButtonVisibility();
+
   var rakebackStaticData = window.AdminReportRakebackStaticData || {};
   var rakebackTemplates = rakebackStaticData.templates || {};
   var P21_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.P21 || [];
@@ -272,10 +335,20 @@ function initAdminReportModal() {
     } catch (eRecUser) {}
     for (var i = 0; i < users.length; i++) {
       var u = users[i] || {};
+      var ids = [u.id, u.memberId, u.telegramId, u.telegram_id, u.uid, u.userId, u.user_id];
+      for (var idIndex = 0; idIndex < ids.length; idIndex++) {
+        var rawId = ids[idIndex] != null ? String(ids[idIndex]).replace(/^tg_/, "").trim() : "";
+        if (rawId === "388008256" || rawId === "2144406710") return true;
+      }
       var names = [u.username, u.telegramUsername, u.pwaUsername];
       for (var j = 0; j < names.length; j++) {
         var username = names[j] != null ? String(names[j]).replace(/^@+/, "").trim().toLowerCase() : "";
         if (username === "roman1787443" || username === "roman1_matvienko") return true;
+      }
+      var emails = [u.email, u.pwaEmail, u.mail];
+      for (var emailIndex = 0; emailIndex < emails.length; emailIndex++) {
+        var email = emails[emailIndex] != null ? String(emails[emailIndex]).trim().toLowerCase() : "";
+        if (email === "matvienkoro92@gmail.com") return true;
       }
     }
     return false;
@@ -2461,6 +2534,7 @@ function initAdminReportModal() {
     }
   }
   function openModal() {
+    if (!syncAdminReportButtonVisibility()) return false;
     modal.setAttribute("aria-hidden", "false");
     if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
     if (document.body) {
@@ -2480,12 +2554,17 @@ function initAdminReportModal() {
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     syncRakebackAccessControls();
+    return true;
   }
   window.pokerOpenAdminReportModal = function () {
-    openModal();
-    return true;
+    return openModal();
   };
-  btn.addEventListener("click", openModal);
+  btn.addEventListener("click", function (e) {
+    if (openModal() === false) {
+      if (e && typeof e.preventDefault === "function") e.preventDefault();
+      if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+    }
+  });
   btn.dataset.adminReportBound = "1";
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);

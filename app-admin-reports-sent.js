@@ -15,14 +15,61 @@
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
-    var escapeReportHtml = helpers.escapeReportHtml;
-    var reportBusinessTimestampMs = helpers.reportBusinessTimestampMs;
-    var reportEffectiveTimestampMs = helpers.reportEffectiveTimestampMs;
-    var formatRuWeekdayDateFromTs = helpers.formatRuWeekdayDateFromTs;
-    var buildReportDetailHtml = helpers.buildReportDetailHtml;
-    var mergeReportExtrasIntoMap = helpers.mergeReportExtrasIntoMap;
-    var formatReportRubleNumber = helpers.formatReportRubleNumber;
-    var getReportStoredRakebackTotal = helpers.getReportStoredRakebackTotal;
+    var escapeReportHtml = helpers.escapeReportHtml || function (value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    };
+    var reportBusinessTimestampMs = helpers.reportBusinessTimestampMs || function (value) {
+      var n = value != null ? Number(value) : Date.now();
+      return Number.isFinite(n) ? n : Date.now();
+    };
+    var reportEffectiveTimestampMs = helpers.reportEffectiveTimestampMs || function (report) {
+      var raw = report && report.createdAt ? Date.parse(report.createdAt) : 0;
+      return Number.isFinite(raw) && raw > 0 ? raw : Date.now();
+    };
+    var formatRuWeekdayDateFromTs = helpers.formatRuWeekdayDateFromTs || function (ts) {
+      var d = new Date(ts || Date.now());
+      return {
+        weekday: new Intl.DateTimeFormat("ru-RU", { weekday: "long", timeZone: "Europe/Moscow" }).format(d).replace(/^./, function (c) { return c.toUpperCase(); }),
+        date: new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" }).format(d),
+      };
+    };
+    var formatReportRubleNumber = helpers.formatReportRubleNumber || function (value) {
+      var n = typeof value === "number" ? value : parseFloat(String(value != null ? value : "").replace(",", "."));
+      if (!Number.isFinite(n)) n = 0;
+      return Math.round(n).toLocaleString("ru-RU") + " ₽";
+    };
+    var getReportStoredRakebackTotal = helpers.getReportStoredRakebackTotal || function (report) {
+      var v = report && report.rakeback != null ? report.rakeback : 0;
+      var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
+      return Number.isFinite(n) ? n : 0;
+    };
+    var buildReportDetailHtml = helpers.buildReportDetailHtml || function (report) {
+      var labels = [
+        ["deposit", "Депозит"], ["cashout", "Выводы"], ["prodamus", "Продамус"], ["robokassa", "Робокасса"],
+        ["romaCrypto", "Рома крипта"], ["botCryptoDep", "Бот крипта деп"], ["botExchipDep", "Бот эксчип деп"],
+        ["botExchipCashout", "Бот эксчип вывод"], ["bonuses", "Бонусы"], ["transfers", "Переводы"], ["ret", "Возврат"],
+        ["sergeyMarina", "Сергей/Марина"], ["rakeback", "Рейкбек"],
+      ];
+      return '<div class="admin-report-sent-detail__field-block">' + labels.map(function (row) {
+        var value = row[0] === "rakeback" ? getReportStoredRakebackTotal(report) : report && report[row[0]];
+        if (value == null || value === "") return "";
+        return '<div class="admin-report-sent-detail__field-block-row"><span class="admin-report-sent-detail__label">' +
+          escapeReportHtml(row[1]) + '</span><span class="admin-report-sent-detail__value">' + escapeReportHtml(value) + "</span></div>";
+      }).join("") + "</div>";
+    };
+    var mergeReportExtrasIntoMap = helpers.mergeReportExtrasIntoMap || function (map, report) {
+      if (!map || !report || !Array.isArray(report.extraFields)) return map;
+      report.extraFields.forEach(function (field) {
+        if (!field || !field.name) return;
+        var n = typeof field.amount === "number" ? field.amount : parseFloat(String(field.amount || "").replace(",", "."));
+        if (Number.isFinite(n)) map[field.name] = (map[field.name] || 0) + n;
+      });
+      return map;
+    };
 
     function canViewSentReports() {
       return call(callbacks.canView) !== false;
