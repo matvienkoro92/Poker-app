@@ -472,13 +472,15 @@
         fragment.appendChild(createSharedRow(row, index));
       });
       if (ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
-      ids.forEach(function (id, index) {
-        fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index, !templateRowsOpen));
-      });
+      if (templateRowsOpen) {
+        ids.forEach(function (id, index) {
+          fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index, false));
+        });
+      }
       body.replaceChildren(fragment);
       syncRoomTabs();
       syncControls();
-      return ids.length + visibleShared.length;
+      return (templateRowsOpen ? ids.length : 0) + visibleShared.length;
     }
 
     function bind() {

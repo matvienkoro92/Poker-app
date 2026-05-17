@@ -3670,27 +3670,30 @@
         rakebackSearchDetachedRows = [];
         removeRakebackGeneratedRows();
         var ids = getRakebackTemplateIdsForCurrentWeek(activeRakebackRoom, getRakebackTemplateIdsForRoom(activeRakebackRoom));
+        var templateRowsOpen = readRakebackTemplateSpoilerOpen();
         var fragment = document.createDocumentFragment();
-        ids.forEach(function (playerId) {
-          playerId = String(playerId || "").trim();
-          if (!playerId) return;
-          fragment.appendChild(createRakebackRow({
-            kind: "base",
-            room: activeRakebackRoom,
-            playerId: playerId,
-            carryForward: true,
-            templateCarryForward: true,
-            createdAt: getRakebackTemplateCreatedAt(activeRakebackRoom, playerId),
-            editing: true,
-          }));
-        });
+        if (ids.length) fragment.appendChild(createRakebackTemplateSeparator(templateRowsOpen));
+        if (templateRowsOpen) {
+          ids.forEach(function (playerId) {
+            playerId = String(playerId || "").trim();
+            if (!playerId) return;
+            fragment.appendChild(createRakebackRow({
+              kind: "base",
+              room: activeRakebackRoom,
+              playerId: playerId,
+              carryForward: true,
+              templateCarryForward: true,
+              createdAt: getRakebackTemplateCreatedAt(activeRakebackRoom, playerId),
+              editing: true,
+            }));
+          });
+        }
         rakebackBody.replaceChildren(fragment);
         syncRakebackRoomVisibility();
-        insertRakebackDateSeparators();
         syncRakebackVisibleRowNumbers();
         syncRakebackAccessControls();
         updateRakebackSummaryTotals();
-        return ids.length;
+        return templateRowsOpen ? ids.length : 0;
       }
 
       function loadLocalRakebackDraftRows() {

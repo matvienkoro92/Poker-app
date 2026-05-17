@@ -3111,7 +3111,8 @@ function initAdminReportModal() {
         e.preventDefault();
         var templateRowsOpen = templateToggle.getAttribute("aria-expanded") !== "true";
         saveRakebackTemplateSpoilerOpen(templateRowsOpen);
-        syncRakebackTable({ skipSort: true });
+        if (RAKEBACK_TEMPLATE_ONLY_MODE && !rakebackModule) renderRakebackTemplateOnlyView();
+        else syncRakebackTable({ skipSort: true });
         return;
       }
       var weekToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-week-toggle]") : null;
