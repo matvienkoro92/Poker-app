@@ -225,6 +225,16 @@
     return Promise.resolve(true);
   }
 
+  function isAdminReportTargetReady(target) {
+    return !!(
+      target &&
+      target.closest &&
+      target.closest("#adminReportBtn") &&
+      target.dataset &&
+      target.dataset.adminReportBound === "1"
+    );
+  }
+
   function prewarmGlobalModalTarget(target) {
     if (!target) return Promise.resolve(false);
     if (target.__pokerGlobalModalPrewarmPromise) return target.__pokerGlobalModalPrewarmPromise;
@@ -250,6 +260,27 @@
         throw err;
       });
     return target.__pokerGlobalModalPrewarmPromise;
+  }
+
+  function openPrewarmedGlobalModalTarget(target, originalTarget) {
+    if (target && target.closest && target.closest("#adminReportBtn")) {
+      try {
+        var adminReportEv = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });
+        adminReportEv.__pokerLazyRedispatched = true;
+        target.dispatchEvent(adminReportEv);
+        return true;
+      } catch (eAdminReportClick) {}
+    }
+    try {
+      if (originalTarget && originalTarget.dispatchEvent) {
+        var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });
+        ev.__pokerLazyRedispatched = true;
+        originalTarget.dispatchEvent(ev);
+      } else if (target && typeof target.click === "function") {
+        target.click();
+      }
+    } catch (eClick) {}
+    return false;
   }
 
   window.pokerPrewarmGlobalModalTarget = prewarmGlobalModalTarget;
@@ -299,6 +330,7 @@
       if (e.__pokerLazyRedispatched) return;
       var target = e.target ? findGlobalModalClickTarget(e.target) : null;
       if (!target) return;
+      if (isAdminReportTargetReady(target)) return;
       var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
       var needsLazyScripts = false;
       try {
@@ -309,15 +341,7 @@
       e.preventDefault();
       e.stopPropagation();
       prewarmGlobalModalTarget(target).then(function () {
-        try {
-          if (originalTarget && originalTarget.dispatchEvent) {
-            var ev = new MouseEvent("click", { bubbles: true, cancelable: true, view: window });
-            ev.__pokerLazyRedispatched = true;
-            originalTarget.dispatchEvent(ev);
-          } else {
-            target.click();
-          }
-        } catch (eClick) {}
+        openPrewarmedGlobalModalTarget(target, originalTarget);
       });
     },
     true
