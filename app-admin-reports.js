@@ -112,6 +112,10 @@ function initAdminReportModal() {
   var formModule = null;
   var calculationsModule = null;
   var sentReportsModule = null;
+  var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
+  var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
+  var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
+  var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
@@ -884,20 +888,114 @@ function initAdminReportModal() {
   }
 
   function callLegacyModule(method, args) {
-    var mod = getLegacyModule();
-    return mod && typeof mod[method] === "function" ? mod[method].apply(mod, args || []) : undefined;
+    try {
+      var mod = getLegacyModule();
+      return mod && typeof mod[method] === "function" ? mod[method].apply(mod, args || []) : undefined;
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  function fallbackParseReportNumber(raw) {
+    var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(/\s+/g, "").replace("₽", "").replace(",", "."));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fallbackFormatReportNumber(n) {
+    var num = fallbackParseReportNumber(n);
+    if (!num) return "0";
+    var rounded = Math.round(num * 100) / 100;
+    return String(rounded).replace(".", ",");
+  }
+
+  function fallbackFormatReportInputNumber(n) {
+    var num = fallbackParseReportNumber(n);
+    if (!num) return "";
+    var rounded = Math.round(num * 100) / 100;
+    return String(rounded);
+  }
+
+  function fallbackFormatReportRubleNumber(n) {
+    var num = fallbackParseReportNumber(n);
+    if (!num) return "0";
+    return String(Math.round(num));
+  }
+
+  function fallbackSumRakebackReportRows(rows) {
+    return (Array.isArray(rows) ? rows : []).reduce(function (sum, row) {
+      return sum + fallbackParseReportNumber(row && row.amount);
+    }, 0);
+  }
+
+  function fallbackMoscowPartsFromTs(ts) {
+    var date = new Date(ts);
+    var parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Moscow",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+    var out = {};
+    parts.forEach(function (part) {
+      if (part.type !== "literal") out[part.type] = part.value;
+    });
+    return { y: out.year, m: out.month, d: out.day };
+  }
+
+  function fallbackReportBusinessTimestampMs(raw) {
+    raw = raw == null ? Date.now() : Number(raw);
+    if (!Number.isFinite(raw)) raw = Date.now();
+    var p = fallbackMoscowPartsFromTs(raw - REPORT_DAY_CUTOFF_MS);
+    return new Date(p.y + "-" + p.m + "-" + p.d + "T12:00:00+03:00").getTime();
+  }
+
+  function fallbackReportEffectiveTimestampMs(r) {
+    var raw = r && r.createdAt ? new Date(r.createdAt).getTime() : NaN;
+    if (!r || !r.createdAt || raw !== raw) return raw;
+    return fallbackReportBusinessTimestampMs(raw);
+  }
+
+  function fallbackFormatRuWeekdayDateFromTs(ts) {
+    if (ts !== ts) return { weekday: "", date: "" };
+    var cap = function (s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; };
+    var wd = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "long" }).format(new Date(ts));
+    var dd = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(ts));
+    return { weekday: cap(wd), date: dd };
+  }
+
+  function fallbackWeekStartMsForReport(ts) {
+    var msk = new Date(ts + REPORT_MSK_SHIFT_MS);
+    var y = msk.getUTCFullYear();
+    var m = msk.getUTCMonth();
+    var d = msk.getUTCDate();
+    var wd = msk.getUTCDay();
+    var daysFromMonday = (wd + 6) % 7;
+    var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * REPORT_DAY_MS;
+    return mondayStartMskMs - REPORT_MSK_SHIFT_MS;
+  }
+
+  function fallbackFormatReportWeekBoundary(ms) {
+    return new Intl.DateTimeFormat("ru-RU", {
+      timeZone: "Europe/Moscow",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date(ms));
   }
 
   function parseReportNumber() {
-    return callLegacyModule("parseReportNumber", arguments);
+    var value = callLegacyModule("parseReportNumber", arguments);
+    return value !== undefined ? value : fallbackParseReportNumber(arguments[0]);
   }
 
   function formatReportNumber() {
-    return callLegacyModule("formatReportNumber", arguments);
+    var value = callLegacyModule("formatReportNumber", arguments);
+    return value !== undefined ? value : fallbackFormatReportNumber(arguments[0]);
   }
 
   function formatReportInputNumber() {
-    return callLegacyModule("formatReportInputNumber", arguments);
+    var value = callLegacyModule("formatReportInputNumber", arguments);
+    return value !== undefined ? value : fallbackFormatReportInputNumber(arguments[0]);
   }
 
   function formatRakebackCellNumber() {
@@ -909,7 +1007,8 @@ function initAdminReportModal() {
   }
 
   function formatReportRubleNumber() {
-    return callLegacyModule("formatReportRubleNumber", arguments);
+    var value = callLegacyModule("formatReportRubleNumber", arguments);
+    return value !== undefined ? value : fallbackFormatReportRubleNumber(arguments[0]);
   }
 
   function getRakebackRoomLabel() {
@@ -1625,7 +1724,17 @@ function initAdminReportModal() {
   }
 
   function getReportStoredRakebackTotal() {
-    return callLegacyModule("getReportStoredRakebackTotal", arguments);
+    var value = callLegacyModule("getReportStoredRakebackTotal", arguments);
+    var report = arguments[0];
+    var rowsTotal = report && Array.isArray(report.rakebackRows) && report.rakebackRows.length
+      ? fallbackSumRakebackReportRows(report.rakebackRows)
+      : 0;
+    if (value !== undefined && !(value === 0 && rowsTotal && report && (report.rakeback == null || report.rakeback === ""))) return value;
+    if (rowsTotal && report && (report.rakeback == null || report.rakeback === "")) return rowsTotal;
+    if (value !== undefined) return value;
+    if (report && report.rakeback != null && report.rakeback !== "") return fallbackParseReportNumber(report.rakeback);
+    if (rowsTotal) return rowsTotal;
+    return fallbackParseReportNumber(report && report.rakeback);
   }
 
   function hasRakebackReportValue() {
@@ -1669,23 +1778,32 @@ function initAdminReportModal() {
   }
 
   function moscowPartsFromTs() {
-    return callLegacyModule("moscowPartsFromTs", arguments);
+    var value = callLegacyModule("moscowPartsFromTs", arguments);
+    return value !== undefined ? value : fallbackMoscowPartsFromTs(arguments[0]);
   }
 
   function reportBusinessTimestampMs() {
-    return callLegacyModule("reportBusinessTimestampMs", arguments);
+    var value = callLegacyModule("reportBusinessTimestampMs", arguments);
+    return value !== undefined ? value : fallbackReportBusinessTimestampMs(arguments[0]);
   }
 
   function reportEffectiveTimestampMs() {
-    return callLegacyModule("reportEffectiveTimestampMs", arguments);
+    var value = callLegacyModule("reportEffectiveTimestampMs", arguments);
+    return value !== undefined ? value : fallbackReportEffectiveTimestampMs(arguments[0]);
   }
 
   function formatRuWeekdayDateFromTs() {
-    return callLegacyModule("formatRuWeekdayDateFromTs", arguments);
+    var value = callLegacyModule("formatRuWeekdayDateFromTs", arguments);
+    return value !== undefined ? value : fallbackFormatRuWeekdayDateFromTs(arguments[0]);
   }
 
   function getShiftReportDateInfo() {
-    return callLegacyModule("getShiftReportDateInfo", arguments);
+    var value = callLegacyModule("getShiftReportDateInfo", arguments);
+    if (value !== undefined) return value;
+    var effTs = fallbackReportBusinessTimestampMs(Date.now());
+    var meta = fallbackFormatRuWeekdayDateFromTs(effTs);
+    var wdl = meta.weekday.toLowerCase();
+    return { label: meta.weekday + ", " + meta.date, weekday: wdl, date: meta.date, iso: new Date(effTs).toISOString() };
   }
 
   function getAdminReportAppVersionLabel() {
@@ -1697,23 +1815,37 @@ function initAdminReportModal() {
   }
 
   function mskDateFromReportTs() {
-    return callLegacyModule("mskDateFromReportTs", arguments);
+    var value = callLegacyModule("mskDateFromReportTs", arguments);
+    return value !== undefined ? value : new Date(arguments[0] + REPORT_MSK_SHIFT_MS);
   }
 
   function weekStartMsForReport() {
-    return callLegacyModule("weekStartMsForReport", arguments);
+    var value = callLegacyModule("weekStartMsForReport", arguments);
+    return value !== undefined ? value : fallbackWeekStartMsForReport(arguments[0]);
   }
 
   function formatReportWeekBoundary() {
-    return callLegacyModule("formatReportWeekBoundary", arguments);
+    var value = callLegacyModule("formatReportWeekBoundary", arguments);
+    return value !== undefined ? value : fallbackFormatReportWeekBoundary(arguments[0]);
   }
 
   function getCalculationWeekMeta() {
-    return callLegacyModule("getCalculationWeekMeta", arguments);
+    var value = callLegacyModule("getCalculationWeekMeta", arguments);
+    if (value !== undefined) return value;
+    var info = getShiftReportDateInfo();
+    var baseTs = info && info.iso ? new Date(info.iso).getTime() : Date.now();
+    if (baseTs !== baseTs) baseTs = Date.now();
+    var start = fallbackWeekStartMsForReport(baseTs);
+    var end = start + REPORT_WEEK_MS - 1;
+    return { start: start, end: end, label: fallbackFormatReportWeekBoundary(start) + " – " + fallbackFormatReportWeekBoundary(end) };
   }
 
   function getCalculationWeekMetaFromStart() {
-    return callLegacyModule("getCalculationWeekMetaFromStart", arguments);
+    var value = callLegacyModule("getCalculationWeekMetaFromStart", arguments);
+    if (value !== undefined) return value;
+    var start = Number(arguments[0]);
+    if (!Number.isFinite(start)) return getCalculationWeekMeta();
+    return { start: start, end: start + REPORT_WEEK_MS - 1, label: fallbackFormatReportWeekBoundary(start) + " – " + fallbackFormatReportWeekBoundary(start + REPORT_WEEK_MS - 1) };
   }
 
   function getCalculationArchiveMinWeekStart() {
