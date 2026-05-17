@@ -577,6 +577,7 @@ async function main() {
       window.getApiBase = function () { return window.location.origin; };
       document.getElementById("app")?.setAttribute("data-api-base", window.location.origin);
       window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
+      window.localStorage?.removeItem("poker_admin_report_rakeback_templates_open");
       const btn = document.getElementById("adminReportBtn");
       if (!btn) throw new Error("admin report button is missing");
       btn.classList.remove("header-admin-report--hidden");
@@ -615,10 +616,20 @@ async function main() {
     try {
       await page.waitForFunction(() => {
         const activePanel = document.querySelector(".admin-report-panel--active");
+        const toggle = document.querySelector("[data-rakeback-template-toggle]");
+        const templateRows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"));
         const ids = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]"))
           .map((input) => String(input.value || "").trim())
           .filter(Boolean);
-        return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "rakeback" && ids.length > 20 && ids.includes("691016"));
+        return !!(
+          activePanel &&
+          activePanel.getAttribute("data-admin-report-panel") === "rakeback" &&
+          toggle &&
+          toggle.getAttribute("aria-expanded") === "false" &&
+          templateRows.length > 20 &&
+          templateRows.every((row) => row.getAttribute("data-rakeback-template-collapsed") === "1") &&
+          ids.includes("691016")
+        );
       }, null, { timeout: 4200 });
     } catch (rakebackWaitErr) {
       const rakebackDebugState = await page.evaluate(() => ({
@@ -626,6 +637,9 @@ async function main() {
         modalShellBound: document.getElementById("adminReportModal")?.dataset.adminReportShellBound || "",
         statusText: document.getElementById("adminReportRakebackStatus")?.textContent || "",
         rowText: document.getElementById("adminReportRakebackTableBody")?.textContent || "",
+        templateToggleExpanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
+        templateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]").length,
+        hiddenTemplateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-collapsed='1']").length,
         ids: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]")).map((input) => String(input.value || "").trim()).filter(Boolean).slice(0, 8),
         dataGlobal: typeof window.AdminReportRakebackStaticData,
         tabGlobal: typeof window.AdminReportRakebackTab,
@@ -646,11 +660,15 @@ async function main() {
       const ids = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]"))
         .map((input) => String(input.value || "").trim())
         .filter(Boolean);
+      const templateToggle = document.querySelector("[data-rakeback-template-toggle]");
       return {
         activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
         rowCount: ids.length,
         firstId: ids[0] || "",
         hasTemplateId: ids.includes("691016"),
+        templateToggleExpanded: templateToggle ? templateToggle.getAttribute("aria-expanded") : "",
+        templateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]").length,
+        hiddenTemplateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-collapsed='1']").length,
         dataScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback-data.js" && script.getAttribute("data-admin-report-loaded") === "1"),
         tabScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback.js" && script.getAttribute("data-admin-report-loaded") === "1"),
       };
@@ -659,8 +677,29 @@ async function main() {
     if (rakebackShellState.rowCount <= 20 || !rakebackShellState.hasTemplateId) {
       throw new Error("admin report rakeback shell did not insert template rows: " + JSON.stringify(rakebackShellState));
     }
+    if (rakebackShellState.templateToggleExpanded !== "false" || rakebackShellState.hiddenTemplateRows !== rakebackShellState.templateRows) {
+      throw new Error("admin report rakeback template spoiler is not collapsed by default: " + JSON.stringify(rakebackShellState));
+    }
     if (!rakebackShellState.dataScriptLoaded || !rakebackShellState.tabScriptLoaded) {
       throw new Error("admin report rakeback shell did not priority-load template scripts: " + JSON.stringify(rakebackShellState));
+    }
+    await page.locator("[data-rakeback-template-toggle]").click();
+    await page.waitForFunction(() => {
+      const toggle = document.querySelector("[data-rakeback-template-toggle]");
+      return !!(
+        toggle &&
+        toggle.getAttribute("aria-expanded") === "true" &&
+        !document.querySelector("#adminReportRakebackTableBody [data-rakeback-template-collapsed='1']")
+      );
+    }, null, { timeout: 1200 });
+    const rakebackSpoilerState = await page.evaluate(() => ({
+      expanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
+      storageValue: window.localStorage?.getItem("poker_admin_report_rakeback_templates_open") || "",
+      visibleTemplateRows: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"))
+        .filter((row) => getComputedStyle(row).display !== "none").length,
+    }));
+    if (rakebackSpoilerState.expanded !== "true" || rakebackSpoilerState.storageValue !== "1" || rakebackSpoilerState.visibleTemplateRows <= 20) {
+      throw new Error("admin report rakeback template spoiler did not open persistently: " + JSON.stringify(rakebackSpoilerState));
     }
     const rakebackDraftSaveResponse = page.waitForResponse((response) => {
       return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";

@@ -125,7 +125,16 @@ function initAdminReportModal() {
   var RAKEBACK_REFRESH_ACCESS_IDS = ["388008256", "2144406710"];
   var RAKEBACK_REFRESH_ACCESS_USERNAMES = ["roman1787443", "roman1_matvienko"];
   var RAKEBACK_REFRESH_ACCESS_EMAILS = ["matvienkoro92@gmail.com"];
+  var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
   var rakebackAccessCache = null;
+
+  function saveRakebackTemplateSpoilerOpen(open) {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return;
+      window.localStorage.setItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY, open ? "1" : "0");
+    } catch (e) {}
+  }
+
   function bindAdminReportSubmitShellFallback() {
     if (formModule || !submitBtn || document.documentElement.dataset.adminReportSubmitShellBound === "1") return false;
     document.documentElement.dataset.adminReportSubmitShellBound = "1";
@@ -3097,6 +3106,14 @@ function initAdminReportModal() {
       if (focusCell && focusCell.closest("[data-rakeback-row]")) markRakebackCell(focusCell, false);
     });
     rakebackBody.addEventListener("click", function (e) {
+      var templateToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-template-toggle]") : null;
+      if (templateToggle) {
+        e.preventDefault();
+        var templateRowsOpen = templateToggle.getAttribute("aria-expanded") !== "true";
+        saveRakebackTemplateSpoilerOpen(templateRowsOpen);
+        syncRakebackTable({ skipSort: true });
+        return;
+      }
       var weekToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-week-toggle]") : null;
       if (weekToggle) {
         e.preventDefault();

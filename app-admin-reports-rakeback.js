@@ -7,6 +7,23 @@
     Supr: "Супрема",
     PP: "PPpoker",
   };
+  var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
+
+  function readRakebackTemplateSpoilerOpen() {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return false;
+      return window.localStorage.getItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function saveRakebackTemplateSpoilerOpen(open) {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return;
+      window.localStorage.setItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY, open ? "1" : "0");
+    } catch (e) {}
+  }
 
   function normalizeRoom(room) {
     room = String(room || "P21").trim();
@@ -73,13 +90,23 @@
     }).join("");
   }
 
-  function createTemplateSeparator() {
+  function createTemplateSeparator(open) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
+    var btn = document.createElement("button");
+    var span = document.createElement("span");
     tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
     tr.setAttribute("data-rakeback-generated", "1");
     td.colSpan = 7;
-    td.textContent = "Пустые записи недели";
+    btn.type = "button";
+    btn.className = "admin-report-rakeback-template-toggle";
+    btn.setAttribute("data-rakeback-template-toggle", "");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.setAttribute("aria-label", open ? "Скрыть пустые записи недели" : "Показать пустые записи недели");
+    btn.title = open ? "Скрыть шаблоны" : "Показать шаблоны";
+    span.textContent = "Пустые записи недели";
+    btn.appendChild(span);
+    td.appendChild(btn);
     tr.appendChild(td);
     return tr;
   }
@@ -137,15 +164,17 @@
     return tr;
   }
 
-  function createTemplateRow(room, playerId, index) {
+  function createTemplateRow(room, playerId, index, collapsed) {
     var tr = document.createElement("tr");
     tr.className = "admin-report-rakeback-row admin-report-rakeback-row--saved";
     tr.setAttribute("data-rakeback-row", "");
+    tr.setAttribute("data-rakeback-template-row", "1");
     tr.setAttribute("data-rakeback-kind", "base");
     tr.setAttribute("data-rakeback-carry-forward", "1");
     tr.setAttribute("data-rakeback-saved", "1");
     tr.setAttribute("data-rakeback-room-current", room);
     tr.setAttribute("data-rakeback-player-id-current", String(playerId || "").toLowerCase());
+    if (collapsed) tr.setAttribute("data-rakeback-template-collapsed", "1");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room disabled>' + createRoomOptions(room) + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки">' + String(index + 1) + '</span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" readonly value="' + escapeHtml(playerId) + '" /></td>' +
@@ -180,6 +209,7 @@
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var templates = config.templates || {};
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
+    var templateRowsOpen = readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
     var bound = false;
     var sharedRows = [];
@@ -441,9 +471,9 @@
       visibleShared.forEach(function (row, index) {
         fragment.appendChild(createSharedRow(row, index));
       });
-      if (ids.length) fragment.appendChild(createTemplateSeparator());
+      if (ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
       ids.forEach(function (id, index) {
-        fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index));
+        fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index, !templateRowsOpen));
       });
       body.replaceChildren(fragment);
       syncRoomTabs();
@@ -516,6 +546,14 @@
           scheduleSave();
         });
         body.addEventListener("click", function (event) {
+          var templateToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-template-toggle]") : null;
+          if (templateToggle) {
+            event.preventDefault();
+            templateRowsOpen = templateToggle.getAttribute("aria-expanded") !== "true";
+            saveRakebackTemplateSpoilerOpen(templateRowsOpen);
+            render();
+            return;
+          }
           var removeBtn = event.target && event.target.closest ? event.target.closest("[data-rakeback-remove]") : null;
           if (!removeBtn) return;
           var row = removeBtn.closest("[data-rakeback-shared-row]");

@@ -35,6 +35,17 @@
         return String(Math.round(num));
       }
 
+      var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
+
+      function readRakebackTemplateSpoilerOpen() {
+        try {
+          if (typeof window === "undefined" || !window.localStorage) return false;
+          return window.localStorage.getItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY) === "1";
+        } catch (e) {
+          return false;
+        }
+      }
+
       function getRakebackRoomLabel(room) {
         var normalized = normalizeRakebackRoom(room);
         if (normalized === "X") return "Хпокер";
@@ -1146,15 +1157,23 @@
         return tr;
       }
 
-      function createRakebackTemplateSeparator() {
+      function createRakebackTemplateSeparator(open) {
         var tr = document.createElement("tr");
         var td = document.createElement("td");
+        var btn = document.createElement("button");
         var span = document.createElement("span");
         tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
         tr.setAttribute("data-rakeback-date-separator", "");
         td.colSpan = 7;
+        btn.type = "button";
+        btn.className = "admin-report-rakeback-template-toggle";
+        btn.setAttribute("data-rakeback-template-toggle", "");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.setAttribute("aria-label", open ? "Скрыть пустые записи недели" : "Показать пустые записи недели");
+        btn.title = open ? "Скрыть шаблоны" : "Показать шаблоны";
         span.textContent = "Пустые записи недели";
-        td.appendChild(span);
+        btn.appendChild(span);
+        td.appendChild(btn);
         tr.appendChild(td);
         return tr;
       }
@@ -1474,9 +1493,13 @@
         });
         if (templateGroups.length) {
           var templateFragment = document.createDocumentFragment();
-          templateFragment.appendChild(createRakebackTemplateSeparator());
+          var templateRowsOpen = readRakebackTemplateSpoilerOpen();
+          templateFragment.appendChild(createRakebackTemplateSeparator(templateRowsOpen));
           templateGroups.forEach(function (group) {
             (group.rows || []).forEach(function (row) {
+              row.setAttribute("data-rakeback-template-row", "1");
+              if (templateRowsOpen) row.removeAttribute("data-rakeback-template-collapsed");
+              else row.setAttribute("data-rakeback-template-collapsed", "1");
               templateFragment.appendChild(row);
             });
           });
