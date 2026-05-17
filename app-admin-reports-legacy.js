@@ -38,12 +38,7 @@
       var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
 
       function readRakebackTemplateSpoilerOpen() {
-        try {
-          if (typeof window === "undefined" || !window.localStorage) return false;
-          return window.localStorage.getItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY) === "1";
-        } catch (e) {
-          return false;
-        }
+        return false;
       }
 
       function getRakebackRoomLabel(room) {

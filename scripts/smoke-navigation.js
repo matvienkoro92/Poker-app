@@ -614,7 +614,7 @@ async function main() {
       window.getApiBase = function () { return window.location.origin; };
       document.getElementById("app")?.setAttribute("data-api-base", window.location.origin);
       window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
-      window.localStorage?.removeItem("poker_admin_report_rakeback_templates_open");
+      window.localStorage?.setItem("poker_admin_report_rakeback_templates_open", "1");
       const btn = document.getElementById("adminReportBtn");
       if (!btn) throw new Error("admin report button is missing");
       btn.classList.remove("header-admin-report--hidden");
@@ -726,6 +726,20 @@ async function main() {
       throw new Error("admin report rakeback shell did not priority-load the tab script: " + JSON.stringify(rakebackShellState));
     }
     await page.locator("[data-rakeback-template-toggle]").click();
+    await page.waitForFunction(() => {
+      const statusText = document.getElementById("adminReportRakebackStatus")?.textContent || "";
+      const toggle = document.querySelector("[data-rakeback-template-toggle]");
+      return !!(toggle && toggle.getAttribute("aria-expanded") === "true" && /Загружаю шаблоны/.test(statusText));
+    }, null, { timeout: 1500 });
+    const rakebackProgressState = await page.evaluate(() => ({
+      expanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
+      statusText: document.getElementById("adminReportRakebackStatus")?.textContent || "",
+      visibleTemplateRows: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"))
+        .filter((row) => getComputedStyle(row).display !== "none").length,
+    }));
+    if (rakebackProgressState.expanded !== "true" || !/Загружаю шаблоны/.test(rakebackProgressState.statusText)) {
+      throw new Error("admin report rakeback template spoiler did not show loading progress: " + JSON.stringify(rakebackProgressState));
+    }
     await page.waitForFunction(() => {
       const toggle = document.querySelector("[data-rakeback-template-toggle]");
       return !!(

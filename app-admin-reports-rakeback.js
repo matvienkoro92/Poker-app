@@ -10,12 +10,7 @@
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
 
   function readRakebackTemplateSpoilerOpen() {
-    try {
-      if (typeof window === "undefined" || !window.localStorage) return false;
-      return window.localStorage.getItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY) === "1";
-    } catch (e) {
-      return false;
-    }
+    return false;
   }
 
   function saveRakebackTemplateSpoilerOpen(open) {
@@ -241,6 +236,7 @@
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
     var templatesLoading = false;
     var templatesLoadPromise = null;
+    var templateStreamSeq = 0;
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
     var templateRowsOpen = readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
@@ -288,7 +284,6 @@
         })
         .then(function (data) {
           updateTemplates(data && data.templates ? data.templates : data);
-          if (options.showStatus) setStatus("");
           return true;
         })
         .catch(function () {
@@ -304,6 +299,39 @@
           return result;
         });
       return templatesLoadPromise;
+    }
+
+    function scheduleTemplateStreamStep(fn) {
+      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(fn);
+      } else {
+        setTimeout(fn, 16);
+      }
+    }
+
+    function streamTemplateRows(ids, startIndex, seq) {
+      ids = Array.isArray(ids) ? ids : [];
+      var total = ids.length;
+      var index = 0;
+      if (!body || seq !== templateStreamSeq || !templateRowsOpen || archiveMode) return;
+      if (!total) {
+        setStatus("Шаблонов нет");
+        return;
+      }
+      setStatus("Загружаю шаблоны… 0 / " + total, true);
+      function step() {
+        if (!body || seq !== templateStreamSeq || !templateRowsOpen || archiveMode) return;
+        var id = ids[index];
+        if (id) body.appendChild(createTemplateRow(activeRoom, id, startIndex + index, false));
+        index += 1;
+        setStatus("Загружаю шаблоны… " + index + " / " + total, true);
+        if (index < total) {
+          scheduleTemplateStreamStep(step);
+          return;
+        }
+        setStatus("Шаблоны загружены: " + total);
+      }
+      scheduleTemplateStreamStep(step);
     }
 
     function getSearchQuery() {
@@ -364,6 +392,12 @@
           }
         }, 1800);
       }
+    }
+
+    function clearTemplateStatus() {
+      if (!statusEl) return;
+      var text = String(statusEl.textContent || "");
+      if (/шаблон/i.test(text)) setStatus("");
     }
 
     function normalizeDraftRows(rows) {
@@ -529,6 +563,8 @@
 
     function render() {
       if (!body) return 0;
+      templateStreamSeq += 1;
+      var streamSeq = templateStreamSeq;
       activeRoom = normalizeRoom(activeRoom);
       if (archiveMode) {
         var archiveFragment = document.createDocumentFragment();
@@ -547,6 +583,7 @@
       visibleShared.forEach(function (row, index) {
         fragment.appendChild(createSharedRow(row, index));
       });
+      if (!templateRowsOpen) clearTemplateStatus();
       if (templatesMayExist || templatesLoading || ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
       if (templateRowsOpen && !templatesLoaded) {
         loadTemplatesIfNeeded({ showStatus: true }).then(function () {
@@ -554,11 +591,12 @@
         });
       }
       if (templateRowsOpen && templatesLoaded) {
-        ids.forEach(function (id, index) {
-          fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index, false));
-        });
+        setStatus("Загружаю шаблоны… 0 / " + ids.length, true);
       }
       body.replaceChildren(fragment);
+      if (templateRowsOpen && templatesLoaded) {
+        streamTemplateRows(ids, visibleShared.length, streamSeq);
+      }
       syncRoomTabs();
       syncControls();
       return (templateRowsOpen ? ids.length : 0) + visibleShared.length;
