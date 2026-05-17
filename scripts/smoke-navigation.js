@@ -412,6 +412,14 @@ async function main() {
       if (!adminReportRequestScopes.includes("archive")) throw new Error("admin report archive was not loaded after opening the archive block");
 
       await page.locator("[data-admin-report-tab='rakeback']").click();
+      const earlyRakebackImmediateState = await page.evaluate(() => ({
+        activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+        loadingText: /Загружаю шаблоны/.test(document.getElementById("adminReportRakebackStatus")?.textContent || ""),
+        seedRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-row]:not([data-rakeback-template-row]):not([data-rakeback-shared-row])").length,
+      }));
+      if (earlyRakebackImmediateState.activePanel !== "rakeback" || earlyRakebackImmediateState.loadingText || earlyRakebackImmediateState.seedRows !== 0) {
+        throw new Error("admin report rakeback shell showed a loading placeholder before core: " + JSON.stringify(earlyRakebackImmediateState));
+      }
       await page.waitForFunction(() => {
         const activePanel = document.querySelector(".admin-report-panel--active");
         const toggle = document.querySelector("[data-rakeback-template-toggle]");
@@ -634,6 +642,14 @@ async function main() {
     }
 
     await page.locator("[data-admin-report-tab='rakeback']").click();
+    const rakebackImmediateState = await page.evaluate(() => ({
+      activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+      loadingText: /Загружаю шаблоны/.test(document.getElementById("adminReportRakebackStatus")?.textContent || ""),
+      seedRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-row]:not([data-rakeback-template-row]):not([data-rakeback-shared-row])").length,
+    }));
+    if (rakebackImmediateState.activePanel !== "rakeback" || rakebackImmediateState.loadingText || rakebackImmediateState.seedRows !== 0) {
+      throw new Error("admin report rakeback shell showed a loading placeholder: " + JSON.stringify(rakebackImmediateState));
+    }
     try {
       await page.waitForFunction(() => {
         const activePanel = document.querySelector(".admin-report-panel--active");

@@ -514,8 +514,11 @@
     var body = document.getElementById("adminReportRakebackTableBody");
     var statusEl = document.getElementById("adminReportRakebackStatus");
     if (statusEl && !adminReportRakebackShellModule) {
-      statusEl.hidden = false;
-      statusEl.textContent = "Загружаю шаблоны…";
+      statusEl.hidden = true;
+      statusEl.textContent = "";
+    }
+    if (body && !adminReportRakebackShellModule) {
+      body.replaceChildren();
     }
     return Promise.all([
       loadAdminReportShellScript("app-admin-reports-rakeback-data.js"),
