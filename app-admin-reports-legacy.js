@@ -468,8 +468,15 @@
 
       function hasRakebackStoredEntryData(data) {
         if (!data) return false;
-        if (data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) return true;
+        var playerId = String(data.playerId || data.id || "").trim();
+        if ((data.rakeZero === true || data.explicitZeroRake === true || data.zeroRake === true) && playerId) return true;
         if (data.accounted || data.reportedAt || data.reportId) return true;
+        if (!playerId &&
+          parseReportNumber(data.rake) === 0 &&
+          parseReportNumber(data.percent) === 0 &&
+          parseReportNumber(data.roomAmount) === 0 &&
+          parseReportNumber(data.chipAmount) === 0 &&
+          parseReportNumber(data.amount) === 0) return false;
         return parseReportNumber(data.rake) !== 0 ||
           parseReportNumber(data.percent) !== 0 ||
           parseReportNumber(data.roomAmount) !== 0 ||
@@ -2439,14 +2446,6 @@
         });
         if (hasRoomRow) return;
         if (templateIds.length) return;
-        var now = Date.now();
-        rakebackBody.appendChild(createRakebackRow({
-          kind: "base",
-          room: targetRoom,
-          createdAt: now,
-          entryAddedAt: now,
-          editing: true,
-        }));
       }
 
       function isRakebackRowFilled(row) {

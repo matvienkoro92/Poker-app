@@ -53,6 +53,15 @@
     return String(Math.round(n * 100) / 100);
   }
 
+  function hasSharedDraftRowData(row) {
+    if (!row) return false;
+    if (String(row.playerId || row.id || "").trim()) return true;
+    if (parseNumber(row.rake) !== 0) return true;
+    if (parseNumber(row.percent) !== 0) return true;
+    if (parseNumber(row.amount) !== 0 || parseNumber(row.roomAmount) !== 0) return true;
+    return !!(row.discount15 || row.subtract15);
+  }
+
   function getApiBaseSafe() {
     var fn = window && window["getApiBase"];
     return typeof fn === "function" ? String(fn() || "").replace(/\/$/, "") : "";
@@ -310,7 +319,7 @@
           amount: row.amount != null ? row.amount : "",
         };
       }).filter(function (row) {
-        return row.kind !== "addon";
+        return row.kind !== "addon" && hasSharedDraftRowData(row);
       });
     }
 
@@ -401,7 +410,7 @@
       collectRows().forEach(function (row) {
         if (row && row.groupId) byGroup[row.groupId] = row;
       });
-      return Object.keys(byGroup).map(function (key) { return byGroup[key]; });
+      return Object.keys(byGroup).map(function (key) { return byGroup[key]; }).filter(hasSharedDraftRowData);
     }
 
     function syncRoomTabs() {
@@ -529,7 +538,6 @@
           render();
           var firstInput = body && body.querySelector("[data-rakeback-shared-row] [data-rakeback-player-id]");
           if (firstInput && typeof firstInput.focus === "function") firstInput.focus();
-          saveSharedDraftNow(true);
         };
       }
       if (body) {

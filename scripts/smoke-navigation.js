@@ -705,17 +705,21 @@ async function main() {
     if (rakebackSpoilerState.expanded !== "true" || rakebackSpoilerState.storageValue !== "1" || !rakebackSpoilerState.hasTemplateId || rakebackSpoilerState.visibleTemplateRows <= 20) {
       throw new Error("admin report rakeback template spoiler did not open persistently: " + JSON.stringify(rakebackSpoilerState));
     }
+    await page.locator("#adminReportRakebackAddBtn").click();
+    const sharedRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row]").first();
+    await sharedRow.locator("[data-rakeback-player-id]").fill("smoke-shared");
     const rakebackDraftSaveResponse = page.waitForResponse((response) => {
       return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
     }, { timeout: 2500 });
-    await page.locator("#adminReportRakebackAddBtn").click();
+    await sharedRow.locator("[data-rakeback-rake]").fill("10");
+    await sharedRow.locator("[data-rakeback-percent]").fill("50");
     await rakebackDraftSaveResponse;
     await page.locator("#adminReportRakebackSearch").fill("smoke-shared");
     await page.locator("#adminReportRakebackSearch").fill("");
     await page.locator("#adminReportRakebackRefreshBtn").click();
     await page.waitForFunction(() => {
       return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row] [data-rakeback-player-id]"))
-        .some((input) => String(input.value || "").trim() === "");
+        .some((input) => String(input.value || "").trim() === "smoke-shared");
     }, null, { timeout: 2500 });
     const rakebackSharedState = await page.evaluate(() => {
       const addBtn = document.getElementById("adminReportRakebackAddBtn");
