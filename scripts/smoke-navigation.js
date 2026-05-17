@@ -410,9 +410,30 @@ async function main() {
         return !!(text && !/Загрузка/.test(text) && /Archive|Итого/.test(text));
       }, null, { timeout: 1800 });
       if (!adminReportRequestScopes.includes("archive")) throw new Error("admin report archive was not loaded after opening the archive block");
+
+      await page.locator("[data-admin-report-tab='rakeback']").click();
+      await page.waitForFunction(() => {
+        const activePanel = document.querySelector(".admin-report-panel--active");
+        const toggle = document.querySelector("[data-rakeback-template-toggle]");
+        return !!(
+          activePanel &&
+          activePanel.getAttribute("data-admin-report-panel") === "rakeback" &&
+          toggle &&
+          toggle.getAttribute("aria-expanded") === "false"
+        );
+      }, null, { timeout: 4200 });
       holdAdminReportCore = false;
       releaseAdminReportCore();
       await page.waitForFunction(() => typeof window.pokerOpenAdminReportModal === "function", null, { timeout: 4500 });
+      await page.waitForFunction(() => {
+        const activePanel = document.querySelector(".admin-report-panel--active");
+        const statusText = document.getElementById("adminReportRakebackStatus")?.textContent || "";
+        return !!(
+          activePanel &&
+          activePanel.getAttribute("data-admin-report-panel") === "rakeback" &&
+          !/Загружаю шаблоны/.test(statusText)
+        );
+      }, null, { timeout: 1800 });
       await page.locator("#adminReportModalClose").click();
     }
 

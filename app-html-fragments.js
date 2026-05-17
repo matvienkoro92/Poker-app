@@ -743,10 +743,7 @@
       adminReportShellPromise.catch(function () {});
       prewarmGlobalModalTarget(target).then(function () {
         if (isAdminReportButtonTarget(target) && shellOpened) {
-          var modal = document.getElementById("adminReportModal");
-          if (!modal || modal.getAttribute("aria-hidden") !== "false") {
-            return;
-          }
+          return;
         }
         openPrewarmedGlobalModalTarget(target, originalTarget);
       }).catch(function () {
