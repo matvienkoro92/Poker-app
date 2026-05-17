@@ -3521,15 +3521,17 @@ function ensureAdminReportModulesLoaded() {
   return adminReportModuleLoadPromise;
 }
 function initAdminReportModalsRuntime() {
-  ensureAdminReportModulesLoaded()
+  return ensureAdminReportModulesLoaded()
     .then(function () {
       initAdminReportModal();
       if (typeof window.pokerInitBroadcastReportsModal === "function") {
         window.pokerInitBroadcastReportsModal();
       }
+      return true;
     })
     .catch(function () {
       initAdminReportModal();
+      return true;
     });
 }
 window.pokerInitAdminReportModal = initAdminReportModalsRuntime;

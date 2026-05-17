@@ -214,6 +214,17 @@
       : null;
   }
 
+  function finishTargetPrewarm(target) {
+    if (!target || !target.closest || !target.closest("#adminReportBtn")) return Promise.resolve(true);
+    try {
+      var adminReportInit = window["poker" + "InitAdminReportModal"];
+      if (typeof adminReportInit === "function") {
+        return Promise.resolve(adminReportInit()).then(function () { return true; });
+      }
+    } catch (eAdminReportInit) {}
+    return Promise.resolve(true);
+  }
+
   function prewarmGlobalModalTarget(target) {
     if (!target) return Promise.resolve(false);
     if (target.__pokerGlobalModalPrewarmPromise) return target.__pokerGlobalModalPrewarmPromise;
@@ -229,7 +240,7 @@
       scriptPromise = Promise.resolve(window.pokerEnsureGlobalModalScriptsForTarget(target));
     }
     target.__pokerGlobalModalPrewarmPromise = Promise.all([htmlPromise, scriptPromise])
-      .then(function () { return true; })
+      .then(function () { return finishTargetPrewarm(target); })
       .catch(function (err) {
         try {
           delete target.__pokerGlobalModalPrewarmPromise;
