@@ -111,6 +111,7 @@ function initAdminReportModal() {
   var tabsModule = null;
   var formModule = null;
   var calculationsModule = null;
+  var calculationsModuleLoadPromise = null;
   var sentReportsModule = null;
   var sentReportsModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
@@ -276,6 +277,88 @@ function initAdminReportModal() {
       },
     })
     : null;
+
+  function ensureCalculationsModule() {
+    if (calculationsModule) return calculationsModule;
+    if (!window.AdminReportCalculationsTab || typeof window.AdminReportCalculationsTab.init !== "function") return null;
+    calculationsModule = window.AdminReportCalculationsTab.init({
+      modal: modal,
+      elements: {
+        root: calculationsRoot,
+        cashInputs: calculationsCashInputs,
+        winLossInputs: calculationsWinLossInputs,
+        rakeInputs: figuresRakeInputs,
+        romanPaidInput: figuresRomanPaidInput,
+        winLossInput: figuresWinLossInput,
+        agentsPaidInput: figuresAgentsPaidInput,
+        approxEnabledInput: figuresApproxRakebackEnabledInput,
+        approxRateInputs: figuresApproxRateInputs,
+        approxRomanRakeInput: figuresApproxRomanRakeInput,
+        extrasEl: figuresExtrasEl,
+        addFieldBtn: figuresAddFieldBtn,
+        groupSaveBtns: calculationGroupSaveBtns,
+        groupEditBtns: calculationGroupEditBtns,
+        figuresSaveBtn: figuresSaveBtn,
+        figuresEditBtn: figuresEditBtn,
+      },
+      callbacks: {
+        addExtraField: addFiguresExtraField,
+        bindExtraInputs: bindFiguresExtraInputs,
+        editDraft: editCalculationsDraft,
+        editFiguresDraft: editFiguresDraft,
+        hydrateDraftOnce: hydrateCalculationsDraftOnce,
+        loadReports: loadCalculationsReports,
+        resetHydration: resetCalculationsHydration,
+        saveDraft: saveCalculationsDraft,
+        saveDraftQuiet: saveCalculationsDraftQuiet,
+        saveFiguresDraft: saveFiguresDraft,
+        scheduleCashTotal: scheduleCalculationCashTotal,
+        scheduleFiguresTotals: scheduleFiguresTotals,
+        scheduleGrandTotal: scheduleCalculationGrandTotal,
+        updateCashTotal: updateCalculationCashTotal,
+        updateFiguresTotals: updateFiguresTotals,
+        updateGrandTotal: updateCalculationGrandTotal,
+      },
+    });
+    return calculationsModule;
+  }
+
+  function ensureCalculationsModuleLoaded() {
+    if (calculationsModule && window.AdminReportCalculationsLogic) return Promise.resolve(calculationsModule);
+    if (calculationsModuleLoadPromise) return calculationsModuleLoadPromise;
+    calculationsModuleLoadPromise = Promise.all([
+      loadAdminReportScript("app-admin-reports-calculations-logic.js"),
+      loadAdminReportScript("app-admin-reports-calculations.js"),
+    ])
+      .then(function () {
+        calculationsModuleLoadPromise = null;
+        return ensureCalculationsModule();
+      })
+      .catch(function (err) {
+        calculationsModuleLoadPromise = null;
+        throw err;
+      });
+    return calculationsModuleLoadPromise;
+  }
+
+  function openCalculationsReports() {
+    if (calculationsModule && window.AdminReportCalculationsLogic) {
+      calculationsModule.open();
+      return;
+    }
+    ensureCalculationsModuleLoaded()
+      .then(function (mod) {
+        if (mod && typeof mod.open === "function") mod.open();
+        else {
+          hydrateCalculationsDraftOnce();
+          loadCalculationsReports();
+        }
+      })
+      .catch(function () {
+        hydrateCalculationsDraftOnce();
+        loadCalculationsReports();
+      });
+  }
 
   function canViewSentReports() {
     try {
@@ -572,11 +655,7 @@ function initAdminReportModal() {
           }
           if (name === "calculations") {
             runAdminReportAfterPaint(function () {
-              if (calculationsModule) calculationsModule.open();
-              else {
-                hydrateCalculationsDraftOnce();
-                loadCalculationsReports();
-              }
+              openCalculationsReports();
             });
           }
         },
@@ -2108,6 +2187,9 @@ function initAdminReportModal() {
       calculationCashTotal: 0,
       calculationWeekTotals: {},
       calculationReportsCache: [],
+      calculationArchiveReportsCache: [],
+      calculationArchiveLoading: false,
+      calculationArchiveLoaded: false,
       calculationsDraftHydrated: false,
       figuresRakeTotal: 0,
       figuresPercentTotal: 0,
@@ -2638,11 +2720,7 @@ function initAdminReportModal() {
           else loadSentReports();
         });
         if (name === "calculations") runAdminReportAfterPaint(function () {
-          if (calculationsModule) calculationsModule.open();
-          else {
-            hydrateCalculationsDraftOnce();
-            loadCalculationsReports();
-          }
+          openCalculationsReports();
         });
       });
     });

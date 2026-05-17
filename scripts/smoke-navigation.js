@@ -588,6 +588,29 @@ async function main() {
     if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
     if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
     if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
+    const currentWeekRequestsBeforeCalc = adminReportRequestScopes.filter((scope) => scope === "currentWeek").length;
+    await page.locator("[data-admin-report-tab='calculations']").click();
+    await page.waitForFunction(() => {
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      const deposit = document.getElementById("adminReportCalcDeposit");
+      return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "calculations" && deposit && !/^0(?:\s*₽)?$/.test(String(deposit.textContent || "").trim()));
+    }, null, { timeout: 1800 });
+    const calculationsState = await page.evaluate(() => {
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      return {
+        activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+        deposit: document.getElementById("adminReportCalcDeposit")?.textContent || "",
+        bonuses: document.getElementById("adminReportCalcBonuses")?.textContent || "",
+        rakeback: document.getElementById("adminReportCalcRakeback")?.textContent || "",
+        cashout: document.getElementById("adminReportCalcCashout")?.textContent || "",
+        botExchipCashout: document.getElementById("adminReportCalcBotExchipCashout")?.textContent || "",
+      };
+    });
+    if (calculationsState.activePanel !== "calculations") throw new Error("admin report calculations tab did not become active");
+    if (!/1\s*000|1000/.test(calculationsState.deposit)) throw new Error("admin report calculations did not load sent report deposits");
+    if (adminReportRequestScopes.filter((scope) => scope === "currentWeek").length <= currentWeekRequestsBeforeCalc) {
+      throw new Error("admin report calculations did not request the current week report scope");
+    }
     await page.locator("#adminReportModalClose").click();
 
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
@@ -626,7 +649,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, calculationsState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

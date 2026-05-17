@@ -347,27 +347,63 @@
         }).join("");
       }
 
+      function appendCalculationQueryParam(url, name, value) {
+        var sep = String(url || "").indexOf("?") === -1 ? "?" : "&";
+        return String(url || "") + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
+      }
+
+      function fetchCalculationReports(base, q, scope) {
+        var url = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
+        if (scope) url = appendCalculationQueryParam(url, "scope", scope);
+        var fetchReports = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
+        return fetchReports(url, { cache: "no-store" }, 15000)
+          .then(function (r) {
+            if (!r || !r.ok) throw new Error("admin-report-shifts " + (r && r.status ? r.status : "failed"));
+            return r.json();
+          });
+      }
+
+      function loadCalculationArchiveReports(base, q) {
+        if (!calculationsArchiveEl || calculationArchiveLoading || calculationArchiveLoaded) return;
+        calculationArchiveLoading = true;
+        fetchCalculationReports(base, q, "archive")
+          .then(function (data) {
+            calculationArchiveLoading = false;
+            calculationArchiveLoaded = true;
+            var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
+            calculationArchiveReportsCache = items;
+            renderCalculationArchive(calculationArchiveReportsCache);
+          })
+          .catch(function () {
+            calculationArchiveLoading = false;
+          });
+      }
+
       function loadCalculationsReports() {
         if (!canViewCalculationsReports()) return;
         var week = getCalculationWeekMeta();
         if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
-        setCalculationTotalsText({});
-        renderCalculationArchive(calculationReportsCache);
+        var currentCache = Array.isArray(calculationReportsCache) ? calculationReportsCache : [];
+        setCalculationTotalsText(currentCache.length ? sumCalculationReports(currentCache, week) : {});
+        renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
         if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
         var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-        fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
-          .then(function (r) { return r.json(); })
+        fetchCalculationReports(base, q, "currentWeek")
           .then(function (data) {
-            var items = (data && data.ok && data.reports) ? data.reports : [];
+            var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
             calculationReportsCache = Array.isArray(items) ? items : [];
-            setCalculationTotalsText(sumCalculationReports(items, week));
-            renderCalculationArchive(calculationReportsCache);
+            setCalculationTotalsText(sumCalculationReports(calculationReportsCache, week));
+            if (data && data.hasArchive) loadCalculationArchiveReports(base, q);
+            else {
+              calculationArchiveLoaded = true;
+              calculationArchiveReportsCache = [];
+              renderCalculationArchive([]);
+            }
           })
           .catch(function () {
-            calculationReportsCache = [];
-            setCalculationTotalsText({});
-            renderCalculationArchive([]);
+            if (!currentCache.length) setCalculationTotalsText({});
+            renderCalculationArchive(calculationArchiveReportsCache);
           });
       }
 
