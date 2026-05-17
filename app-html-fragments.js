@@ -468,6 +468,18 @@
     };
   }
 
+  function hasAdminReportRakebackShellTemplates() {
+    var templates = getAdminReportRakebackShellTemplates();
+    return !!(templates.P21.length || templates.X.length || templates.Supr.length || templates.PP.length);
+  }
+
+  function loadAdminReportRakebackShellTemplates() {
+    return loadAdminReportShellScript("app-admin-reports-rakeback-data.js")
+      .then(function () {
+        return getAdminReportRakebackShellTemplates();
+      });
+  }
+
   function getAdminReportRakebackShellActiveRoom() {
     var activeTab = document.querySelector(".admin-report-rakeback-room-tab--active[data-rakeback-room-tab], .admin-report-rakeback-room-tab[aria-selected='true'][data-rakeback-room-tab]");
     return activeTab ? activeTab.getAttribute("data-rakeback-room-tab") : "P21";
@@ -497,6 +509,9 @@
       statusEl: document.getElementById("adminReportRakebackStatus"),
       summaryEl: modal ? modal.querySelector(".admin-report-rakeback-summary") : null,
       templates: getAdminReportRakebackShellTemplates(),
+      templatesLoaded: hasAdminReportRakebackShellTemplates(),
+      templatesMayExist: true,
+      loadTemplates: loadAdminReportRakebackShellTemplates,
       activeRoom: getAdminReportRakebackShellActiveRoom(),
     });
     if (archiveBtn) {
@@ -520,10 +535,7 @@
     if (body && !adminReportRakebackShellModule) {
       body.replaceChildren();
     }
-    return Promise.all([
-      loadAdminReportShellScript("app-admin-reports-rakeback-data.js"),
-      loadAdminReportShellScript("app-admin-reports-rakeback.js"),
-    ]).then(function () {
+    return loadAdminReportShellScript("app-admin-reports-rakeback.js").then(function () {
       var module = initAdminReportRakebackShellModule();
       var count = module.open();
       if (statusEl) {
@@ -534,9 +546,9 @@
     }).catch(function () {
       if (statusEl) {
         statusEl.hidden = false;
-        statusEl.textContent = "Не удалось загрузить шаблоны рейкбека.";
+        statusEl.textContent = "Не удалось загрузить рейкбек.";
       } else if (body && !body.querySelector("[data-rakeback-row]")) {
-        body.innerHTML = '<tr class="admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates" data-rakeback-generated="1"><td colspan="7">Не удалось загрузить шаблоны рейкбека.</td></tr>';
+        body.innerHTML = '<tr class="admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates" data-rakeback-generated="1"><td colspan="7">Не удалось загрузить рейкбек.</td></tr>';
       }
       return 0;
     });

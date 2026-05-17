@@ -430,6 +430,14 @@ async function main() {
           toggle.getAttribute("aria-expanded") === "false"
         );
       }, null, { timeout: 4200 });
+      const earlyCollapsedRakebackState = await page.evaluate(() => ({
+        dataScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback-data.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+        templateDataHasId: !!(window.AdminReportRakebackStaticData?.templates?.P21 || []).includes("691016"),
+        templateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]").length,
+      }));
+      if (earlyCollapsedRakebackState.dataScriptLoaded || earlyCollapsedRakebackState.templateDataHasId || earlyCollapsedRakebackState.templateRows !== 0) {
+        throw new Error("admin report rakeback loaded template data while collapsed before core: " + JSON.stringify(earlyCollapsedRakebackState));
+      }
       holdAdminReportCore = false;
       releaseAdminReportCore();
       await page.waitForFunction(() => typeof window.pokerOpenAdminReportModal === "function", null, { timeout: 4500 });
@@ -619,7 +627,7 @@ async function main() {
     await page.waitForFunction(() => {
       const modal = document.getElementById("adminReportModal");
       return !!(modal && modal.getAttribute("aria-hidden") === "false");
-    }, null, { timeout: 1200 });
+    }, null, { timeout: 4200 });
     const reportOpenDelayMs = Date.now() - reportClickStartedAt;
     const reportShellState = await page.evaluate(() => {
       const calcTab = document.querySelector("[data-admin-report-tab='calculations']");
@@ -655,14 +663,12 @@ async function main() {
         const activePanel = document.querySelector(".admin-report-panel--active");
         const toggle = document.querySelector("[data-rakeback-template-toggle]");
         const templateRows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"));
-        const dataIds = window.AdminReportRakebackStaticData?.templates?.P21 || [];
         return !!(
           activePanel &&
           activePanel.getAttribute("data-admin-report-panel") === "rakeback" &&
           toggle &&
           toggle.getAttribute("aria-expanded") === "false" &&
-          templateRows.length === 0 &&
-          dataIds.includes("691016")
+          templateRows.length === 0
         );
       }, null, { timeout: 4200 });
     } catch (rakebackWaitErr) {
@@ -710,14 +716,14 @@ async function main() {
       };
     });
     if (rakebackShellState.activePanel !== "rakeback") throw new Error("admin report rakeback shell tab did not become active");
-    if (!rakebackShellState.templateDataHasId) {
-      throw new Error("admin report rakeback shell did not load template data: " + JSON.stringify(rakebackShellState));
+    if (rakebackShellState.dataScriptLoaded || rakebackShellState.templateDataHasId || rakebackShellState.hasTemplateId) {
+      throw new Error("admin report rakeback shell loaded template data while the spoiler was collapsed: " + JSON.stringify(rakebackShellState));
     }
     if (rakebackShellState.templateToggleExpanded !== "false" || rakebackShellState.templateRows !== 0 || rakebackShellState.hiddenTemplateRows !== 0) {
       throw new Error("admin report rakeback template spoiler did not skip collapsed row rendering: " + JSON.stringify(rakebackShellState));
     }
-    if (!rakebackShellState.dataScriptLoaded || !rakebackShellState.tabScriptLoaded) {
-      throw new Error("admin report rakeback shell did not priority-load template scripts: " + JSON.stringify(rakebackShellState));
+    if (!rakebackShellState.tabScriptLoaded) {
+      throw new Error("admin report rakeback shell did not priority-load the tab script: " + JSON.stringify(rakebackShellState));
     }
     await page.locator("[data-rakeback-template-toggle]").click();
     await page.waitForFunction(() => {
@@ -730,16 +736,17 @@ async function main() {
           .some((input) => String(input.value || "").trim() === "691016") &&
         !document.querySelector("#adminReportRakebackTableBody [data-rakeback-template-collapsed='1']")
       );
-    }, null, { timeout: 1200 });
+    }, null, { timeout: 4200 });
     const rakebackSpoilerState = await page.evaluate(() => ({
       expanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
       storageValue: window.localStorage?.getItem("poker_admin_report_rakeback_templates_open") || "",
       hasTemplateId: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]"))
         .some((input) => String(input.value || "").trim() === "691016"),
+      dataScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback-data.js" && script.getAttribute("data-admin-report-loaded") === "1"),
       visibleTemplateRows: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"))
         .filter((row) => getComputedStyle(row).display !== "none").length,
     }));
-    if (rakebackSpoilerState.expanded !== "true" || rakebackSpoilerState.storageValue !== "1" || !rakebackSpoilerState.hasTemplateId || rakebackSpoilerState.visibleTemplateRows <= 20) {
+    if (rakebackSpoilerState.expanded !== "true" || rakebackSpoilerState.storageValue !== "1" || !rakebackSpoilerState.dataScriptLoaded || !rakebackSpoilerState.hasTemplateId || rakebackSpoilerState.visibleTemplateRows <= 20) {
       throw new Error("admin report rakeback template spoiler did not open persistently: " + JSON.stringify(rakebackSpoilerState));
     }
     await page.locator("#adminReportRakebackAddBtn").click();

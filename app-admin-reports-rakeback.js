@@ -25,6 +25,26 @@
     } catch (e) {}
   }
 
+  function normalizeTemplateMap(source) {
+    source = source || {};
+    return {
+      P21: Array.isArray(source.P21) ? source.P21 : [],
+      X: Array.isArray(source.X) ? source.X : [],
+      Supr: Array.isArray(source.Supr) ? source.Supr : [],
+      PP: Array.isArray(source.PP) ? source.PP : [],
+    };
+  }
+
+  function hasAnyTemplateIds(source) {
+    var templates = normalizeTemplateMap(source);
+    return !!(templates.P21.length || templates.X.length || templates.Supr.length || templates.PP.length);
+  }
+
+  function readWindowTemplateMap() {
+    var staticData = window.AdminReportRakebackStaticData || {};
+    return normalizeTemplateMap(staticData.templates || {});
+  }
+
   function normalizeRoom(room) {
     room = String(room || "P21").trim();
     if (room === "Poker21" || room === "Покер21") return "P21";
@@ -216,7 +236,11 @@
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
-    var templates = config.templates || {};
+    var templates = normalizeTemplateMap(config.templates || {});
+    var templatesLoaded = config.templatesLoaded === true || hasAnyTemplateIds(templates);
+    var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
+    var templatesLoading = false;
+    var templatesLoadPromise = null;
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
     var templateRowsOpen = readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
@@ -237,6 +261,49 @@
         seen[id] = true;
         return true;
       });
+    }
+
+    function updateTemplates(nextTemplates) {
+      templates = normalizeTemplateMap(nextTemplates || readWindowTemplateMap());
+      templatesLoaded = true;
+      templatesMayExist = templatesMayExist || hasAnyTemplateIds(templates);
+      return templates;
+    }
+
+    function loadTemplatesIfNeeded(options) {
+      options = options || {};
+      if (templatesLoaded) return Promise.resolve(true);
+      if (templatesLoadPromise) return templatesLoadPromise;
+      var loader = typeof config.loadTemplates === "function" ? config.loadTemplates : null;
+      if (!loader) {
+        updateTemplates(readWindowTemplateMap());
+        return Promise.resolve(true);
+      }
+      templatesLoading = true;
+      if (options.showStatus) setStatus("Загружаю шаблоны…", true);
+      syncControls();
+      templatesLoadPromise = Promise.resolve()
+        .then(function () {
+          return loader();
+        })
+        .then(function (data) {
+          updateTemplates(data && data.templates ? data.templates : data);
+          if (options.showStatus) setStatus("");
+          return true;
+        })
+        .catch(function () {
+          if (options.showStatus) setStatus("Не удалось загрузить шаблоны");
+          templateRowsOpen = false;
+          saveRakebackTemplateSpoilerOpen(false);
+          return false;
+        })
+        .then(function (result) {
+          templatesLoading = false;
+          templatesLoadPromise = null;
+          syncControls();
+          return result;
+        });
+      return templatesLoadPromise;
     }
 
     function getSearchQuery() {
@@ -472,16 +539,21 @@
         return 0;
       }
       var query = getSearchQuery();
-      var ids = getTemplateIds(activeRoom).filter(function (id) {
+      var ids = templatesLoaded ? getTemplateIds(activeRoom).filter(function (id) {
         return !query || id.toLowerCase().indexOf(query) !== -1;
-      });
+      }) : [];
       var visibleShared = getVisibleSharedRows();
       var fragment = document.createDocumentFragment();
       visibleShared.forEach(function (row, index) {
         fragment.appendChild(createSharedRow(row, index));
       });
-      if (ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
-      if (templateRowsOpen) {
+      if (templatesMayExist || templatesLoading || ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
+      if (templateRowsOpen && !templatesLoaded) {
+        loadTemplatesIfNeeded({ showStatus: true }).then(function () {
+          render();
+        });
+      }
+      if (templateRowsOpen && templatesLoaded) {
         ids.forEach(function (id, index) {
           fragment.appendChild(createTemplateRow(activeRoom, id, visibleShared.length + index, false));
         });
@@ -561,6 +633,13 @@
             event.preventDefault();
             templateRowsOpen = templateToggle.getAttribute("aria-expanded") !== "true";
             saveRakebackTemplateSpoilerOpen(templateRowsOpen);
+            if (templateRowsOpen && !templatesLoaded) {
+              render();
+              loadTemplatesIfNeeded({ showStatus: true }).then(function () {
+                render();
+              });
+              return;
+            }
             render();
             return;
           }

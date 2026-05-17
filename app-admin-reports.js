@@ -170,8 +170,7 @@ function initAdminReportModal() {
 
   function createLazyRakebackModuleInstance() {
     if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") return false;
-    var staticData = window.AdminReportRakebackStaticData || {};
-    var templates = staticData.templates || {};
+    refreshRakebackStaticData();
     return window.AdminReportRakebackTab.init({
       modal: modal,
       body: rakebackBody,
@@ -186,12 +185,10 @@ function initAdminReportModal() {
       roomTotalEl: rakebackRoomTotalEl,
       statusEl: rakebackStatusEl,
       summaryEl: rakebackSummaryEl,
-      templates: {
-        P21: templates.P21 || [],
-        X: templates.X || [],
-        Supr: templates.Supr || [],
-        PP: templates.PP || [],
-      },
+      templates: getRakebackTemplateConfig(),
+      templatesLoaded: hasRakebackTemplateData(),
+      templatesMayExist: true,
+      loadTemplates: loadRakebackStaticTemplateData,
       activeRoom: activeRakebackRoom,
     });
   }
@@ -301,16 +298,71 @@ function initAdminReportModal() {
   }
   syncAdminReportButtonVisibility();
 
-  var rakebackStaticData = window.AdminReportRakebackStaticData || {};
-  var rakebackTemplates = rakebackStaticData.templates || {};
-  var P21_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.P21 || [];
-  var X_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.X || [];
-  var PP_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.PP || [];
-  var SUPR_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.Supr || [];
-  var RAKEBACK_TEMPLATE_CREATED_AT = rakebackStaticData.templateCreatedAt || 0;
-  var RAKEBACK_TEMPLATE_RESET_AT = rakebackStaticData.templateResetAt || 0;
-  var RAKEBACK_ROW_COLORS = rakebackStaticData.rowColors || [];
-  var RAKEBACK_ROW_LEGACY_COLOR_MAP = rakebackStaticData.legacyColorMap || {};
+  var rakebackStaticData = {};
+  var rakebackTemplates = {};
+  var P21_RAKEBACK_TEMPLATE_IDS = [];
+  var X_RAKEBACK_TEMPLATE_IDS = [];
+  var PP_RAKEBACK_TEMPLATE_IDS = [];
+  var SUPR_RAKEBACK_TEMPLATE_IDS = [];
+  var RAKEBACK_TEMPLATE_CREATED_AT = 0;
+  var RAKEBACK_TEMPLATE_RESET_AT = 0;
+  var RAKEBACK_ROW_COLORS = [];
+  var RAKEBACK_ROW_LEGACY_COLOR_MAP = {};
+
+  function getRakebackTemplateConfig() {
+    return {
+      P21: P21_RAKEBACK_TEMPLATE_IDS,
+      X: X_RAKEBACK_TEMPLATE_IDS,
+      Supr: SUPR_RAKEBACK_TEMPLATE_IDS,
+      PP: PP_RAKEBACK_TEMPLATE_IDS,
+    };
+  }
+
+  function hasRakebackTemplateData() {
+    return !!(
+      P21_RAKEBACK_TEMPLATE_IDS.length ||
+      X_RAKEBACK_TEMPLATE_IDS.length ||
+      PP_RAKEBACK_TEMPLATE_IDS.length ||
+      SUPR_RAKEBACK_TEMPLATE_IDS.length
+    );
+  }
+
+  function syncLegacyRakebackStaticScope() {
+    if (!legacyScope) return;
+    legacyScope.rakebackStaticData = rakebackStaticData;
+    legacyScope.rakebackTemplates = rakebackTemplates;
+    legacyScope.P21_RAKEBACK_TEMPLATE_IDS = P21_RAKEBACK_TEMPLATE_IDS;
+    legacyScope.X_RAKEBACK_TEMPLATE_IDS = X_RAKEBACK_TEMPLATE_IDS;
+    legacyScope.PP_RAKEBACK_TEMPLATE_IDS = PP_RAKEBACK_TEMPLATE_IDS;
+    legacyScope.SUPR_RAKEBACK_TEMPLATE_IDS = SUPR_RAKEBACK_TEMPLATE_IDS;
+    legacyScope.RAKEBACK_TEMPLATE_CREATED_AT = RAKEBACK_TEMPLATE_CREATED_AT;
+    legacyScope.RAKEBACK_TEMPLATE_RESET_AT = RAKEBACK_TEMPLATE_RESET_AT;
+    legacyScope.RAKEBACK_ROW_COLORS = RAKEBACK_ROW_COLORS;
+    legacyScope.RAKEBACK_ROW_LEGACY_COLOR_MAP = RAKEBACK_ROW_LEGACY_COLOR_MAP;
+  }
+
+  function refreshRakebackStaticData() {
+    rakebackStaticData = window.AdminReportRakebackStaticData || {};
+    rakebackTemplates = rakebackStaticData.templates || {};
+    P21_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.P21 || [];
+    X_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.X || [];
+    PP_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.PP || [];
+    SUPR_RAKEBACK_TEMPLATE_IDS = rakebackTemplates.Supr || [];
+    RAKEBACK_TEMPLATE_CREATED_AT = rakebackStaticData.templateCreatedAt || 0;
+    RAKEBACK_TEMPLATE_RESET_AT = rakebackStaticData.templateResetAt || 0;
+    RAKEBACK_ROW_COLORS = rakebackStaticData.rowColors || [];
+    RAKEBACK_ROW_LEGACY_COLOR_MAP = rakebackStaticData.legacyColorMap || {};
+    syncLegacyRakebackStaticScope();
+    return getRakebackTemplateConfig();
+  }
+
+  function loadRakebackStaticTemplateData() {
+    return loadAdminReportScript("app-admin-reports-rakeback-data.js").then(function () {
+      return refreshRakebackStaticData();
+    });
+  }
+
+  refreshRakebackStaticData();
   var rakebackModule = createLazyRakebackModuleInstance() || null;
   calculationsModule = window.AdminReportCalculationsTab && typeof window.AdminReportCalculationsTab.init === "function"
     ? window.AdminReportCalculationsTab.init({
@@ -751,6 +803,7 @@ function initAdminReportModal() {
     : null;
 
   var legacyModule = null;
+  var legacyScope = null;
 
   function createLegacyScope() {
     var winFetch = typeof window !== "undefined" ? window.fetch : null;
@@ -1120,6 +1173,8 @@ function initAdminReportModal() {
       get: function () { return issuedRakebackReportRakeTotal; },
       set: function (value) { issuedRakebackReportRakeTotal = value; }
     });
+    legacyScope = scope;
+    syncLegacyRakebackStaticScope();
     return scope;
   }
 
@@ -3805,7 +3860,6 @@ var ADMIN_REPORT_MODULE_SCRIPTS = [
   "app-admin-reports-form.js",
   "app-admin-reports-form-logic.js",
   "app-admin-reports-sent.js",
-  "app-admin-reports-rakeback-data.js",
   "app-admin-reports-legacy.js",
   "app-admin-reports-rakeback.js",
   "app-admin-reports-calculations-logic.js",
@@ -3818,7 +3872,6 @@ function areAdminReportModulesReady() {
     window.AdminReportFormTab &&
     window.AdminReportFormLogic &&
     window.AdminReportSentTab &&
-    window.AdminReportRakebackStaticData &&
     window.AdminReportLegacy &&
     window.AdminReportRakebackTab &&
     window.AdminReportCalculationsLogic &&
