@@ -12,8 +12,10 @@
         syncRakebackTable();
         var rakebackRows = getUnaccountedRakebackReportRows();
         var rakebackTotal = sumRakebackReportRows(rakebackRows);
+        if (!isFinite(rakebackTotal)) rakebackTotal = 0;
         var manualRakebackTotal = getVal("adminReportRakeback");
         var reportRakebackTotal = manualRakebackInputTouched ? manualRakebackTotal : rakebackTotal;
+        if (!isFinite(reportRakebackTotal)) reportRakebackTotal = 0;
         var extraRows = modal.querySelectorAll(".admin-report-extra-row");
         var extraFields = [];
         var extraTotal = 0;
@@ -145,12 +147,21 @@
       }
 
       function submitAdminReport() {
-        var base = typeof getApiBase === "function" ? getApiBase() : "";
+        var winGetApiBase = window && window.getApiBase;
+        var base = typeof getApiBase === "function"
+          ? getApiBase()
+          : (typeof winGetApiBase === "function" ? winGetApiBase() : "");
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        var winCredentialCheck = window && window.pokerApiHasCredential;
+        var hasCredential = typeof pokerApiHasCredential === "function"
+          ? pokerApiHasCredential()
+          : !!(typeof winCredentialCheck === "function" && winCredentialCheck());
+        if (!base || !hasCredential) {
           if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA), чтобы отправить отчёт.");
           return;
         }
+        var winFetch = window && window.fetch;
+        var requestFetch = typeof winFetch === "function" ? winFetch.bind(window) : fetch;
         var payload = buildPayload();
         if (editingReportId && editingReport) {
           payload.id = editingReportId;
@@ -160,7 +171,7 @@
         submitBtn.disabled = true;
         var method = editingReportId ? "PUT" : "POST";
         var url = base.replace(/\/$/, "") + "/api/admin-report-shifts";
-        fetch(url, {
+        requestFetch(url, {
           method: method,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)

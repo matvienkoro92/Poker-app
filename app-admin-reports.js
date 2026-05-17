@@ -126,6 +126,39 @@ function initAdminReportModal() {
   var RAKEBACK_REFRESH_ACCESS_USERNAMES = ["roman1787443", "roman1_matvienko"];
   var RAKEBACK_REFRESH_ACCESS_EMAILS = ["matvienkoro92@gmail.com"];
   var rakebackAccessCache = null;
+  function bindAdminReportSubmitShellFallback() {
+    if (formModule || !submitBtn || document.documentElement.dataset.adminReportSubmitShellBound === "1") return false;
+    document.documentElement.dataset.adminReportSubmitShellBound = "1";
+    submitBtn.dataset.adminReportSubmitShellBound = "1";
+    var runSubmit = function (target) {
+      if (target.disabled) return;
+      if (window.AdminReportFormLogic && typeof window.AdminReportFormLogic.init === "function") {
+        submitAdminReport();
+        return;
+      }
+      target.disabled = true;
+      ensureAdminReportModulesLoaded()
+        .then(function () {
+          target.disabled = false;
+          submitAdminReport();
+        })
+        .catch(function () {
+          target.disabled = false;
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
+    };
+    submitBtn.onclick = function () {
+      runSubmit(submitBtn);
+    };
+    document.addEventListener("click", function (event) {
+      var target = event && event.target && event.target.closest ? event.target.closest("#adminReportSubmitBtn") : null;
+      if (!target) return;
+      runSubmit(target);
+    }, true);
+    return true;
+  }
+
   function upgradeLazyRakebackModuleIfReady() {
     if (!modal || modal.dataset.adminReportRakebackLazyModuleUpgraded === "1") return false;
     if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") return false;
@@ -177,6 +210,7 @@ function initAdminReportModal() {
 
   if (!btn || !modal) return;
   if (btn.dataset.adminReportBound === "1") {
+    bindAdminReportSubmitShellFallback();
     upgradeLazyRakebackModuleIfReady();
     return;
   }
@@ -718,6 +752,9 @@ function initAdminReportModal() {
   var legacyModule = null;
 
   function createLegacyScope() {
+    var winFetch = typeof window !== "undefined" ? window.fetch : null;
+    var winSetTimeout = typeof window !== "undefined" ? window.setTimeout : null;
+    var winClearTimeout = typeof window !== "undefined" ? window.clearTimeout : null;
     var scope = {
       btn: btn,
       modal: modal,
@@ -933,9 +970,9 @@ function initAdminReportModal() {
       window: typeof window !== "undefined" ? window : undefined,
       document: typeof document !== "undefined" ? document : undefined,
       navigator: typeof navigator !== "undefined" ? navigator : undefined,
-      fetch: typeof fetch !== "undefined" ? fetch : undefined,
-      setTimeout: typeof setTimeout !== "undefined" ? setTimeout : undefined,
-      clearTimeout: typeof clearTimeout !== "undefined" ? clearTimeout : undefined,
+      fetch: typeof winFetch === "function" ? winFetch.bind(window) : undefined,
+      setTimeout: typeof winSetTimeout === "function" ? winSetTimeout.bind(window) : undefined,
+      clearTimeout: typeof winClearTimeout === "function" ? winClearTimeout.bind(window) : undefined,
       Date: typeof Date !== "undefined" ? Date : undefined,
       Intl: typeof Intl !== "undefined" ? Intl : undefined,
       Promise: typeof Promise !== "undefined" ? Promise : undefined,
@@ -2900,6 +2937,7 @@ function initAdminReportModal() {
       tbody.insertBefore(clone, template.nextSibling);
     });
   }
+  bindAdminReportSubmitShellFallback();
   if (rakebackAddBtn) {
     if (!rakebackModule) rakebackAddBtn.addEventListener("click", addRakebackBaseRow);
   }
@@ -3245,6 +3283,7 @@ function initAdminReportModal() {
   var formLogicModule = null;
 
   function createFormLogicScope() {
+    var winFetch = typeof window !== "undefined" ? window.fetch : null;
     var scope = {
       btn: btn,
       modal: modal,
@@ -3694,7 +3733,7 @@ function initAdminReportModal() {
       openModal: openModal,
       window: typeof window !== "undefined" ? window : undefined,
       document: typeof document !== "undefined" ? document : undefined,
-      fetch: typeof fetch !== "undefined" ? fetch : undefined,
+      fetch: typeof winFetch === "function" ? winFetch.bind(window) : undefined,
       JSON: typeof JSON !== "undefined" ? JSON : undefined,
       Math: typeof Math !== "undefined" ? Math : undefined,
       String: typeof String !== "undefined" ? String : undefined,

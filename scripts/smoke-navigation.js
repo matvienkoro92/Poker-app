@@ -168,6 +168,7 @@ async function main() {
     };
     let releaseAdminReportCore;
     let holdAdminReportCore = true;
+    const submittedAdminReports = [];
     const adminReportCoreGate = new Promise((resolve) => {
       releaseAdminReportCore = resolve;
     });
@@ -181,6 +182,34 @@ async function main() {
     });
     await page.route(/\/api\/admin-report-shifts(?:\?|$)/, async (route) => {
       const url = route.request().url();
+      const method = route.request().method();
+      const corsHeaders = {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods": "GET,POST,PUT,OPTIONS",
+        "access-control-allow-headers": "content-type",
+      };
+      if (method === "OPTIONS") {
+        await route.fulfill({
+          status: 204,
+          headers: corsHeaders,
+          body: "",
+        });
+        return;
+      }
+      if (method === "POST" || method === "PUT") {
+        const payload = JSON.parse(route.request().postData() || "{}");
+        submittedAdminReports.push(payload);
+        await route.fulfill({
+          status: 200,
+          headers: corsHeaders,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({
+            ok: true,
+            report: Object.assign({ id: "smoke-submitted-report", createdAt: new Date().toISOString() }, payload),
+          }),
+        });
+        return;
+      }
       const scope = new URL(url).searchParams.get("scope") || "all";
       adminReportRequestScopes.push(scope);
       await new Promise((resolve) => setTimeout(resolve, 120));
@@ -189,6 +218,7 @@ async function main() {
         : [smokeCurrentReport];
       await route.fulfill({
         status: 200,
+        headers: corsHeaders,
         contentType: "application/json; charset=utf-8",
         body: JSON.stringify({
           ok: true,
@@ -199,7 +229,19 @@ async function main() {
       });
     });
     const errors = [];
+    const adminReportRequests = [];
     page.on("pageerror", (err) => errors.push(String((err && (err.stack || err.message)) || err)));
+    page.on("request", (request) => {
+      if (/\/api\/admin-report-shifts/.test(request.url())) {
+        adminReportRequests.push({ method: request.method(), url: request.url() });
+      }
+    });
+    page.on("requestfailed", (request) => {
+      if (/\/api\/admin-report-shifts/.test(request.url())) {
+        const failure = request.failure();
+        adminReportRequests.push({ method: request.method(), url: request.url(), failed: failure && failure.errorText });
+      }
+    });
 
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(120);
@@ -253,6 +295,8 @@ async function main() {
           user: { id: 388008256, username: "roman1787443", first_name: "Smoke" },
         };
         window.pokerApiHasCredential = function () { return true; };
+        window.getApiBase = function () { return window.location.origin; };
+        document.getElementById("app")?.setAttribute("data-api-base", window.location.origin);
         window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
         const btn = document.getElementById("adminReportBtn");
         if (!btn) throw new Error("admin report button is missing");
@@ -502,6 +546,8 @@ async function main() {
         user: { id: 388008256, username: "roman1787443", first_name: "Smoke" },
       };
       window.pokerApiHasCredential = function () { return true; };
+      window.getApiBase = function () { return window.location.origin; };
+      document.getElementById("app")?.setAttribute("data-api-base", window.location.origin);
       window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
       const btn = document.getElementById("adminReportBtn");
       if (!btn) throw new Error("admin report button is missing");
@@ -588,6 +634,43 @@ async function main() {
     if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
     if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
     if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
+    await page.locator("[data-admin-report-tab='form']").click();
+    await page.locator("#adminReportDeposit").fill("321");
+    const submitResponse = page.waitForResponse((response) => {
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+    }, { timeout: 2500 });
+    await page.locator("#adminReportSubmitBtn").click();
+    try {
+      await submitResponse;
+    } catch (submitWaitErr) {
+      const submitDebugState = await page.evaluate(() => ({
+        activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+        depositInput: document.getElementById("adminReportDeposit")?.value || "",
+        submitDisabled: !!document.getElementById("adminReportSubmitBtn")?.disabled,
+        submitShellBound: document.getElementById("adminReportSubmitBtn")?.dataset.adminReportSubmitShellBound || "",
+        documentSubmitShellBound: document.documentElement.dataset.adminReportSubmitShellBound || "",
+        formLogicLoaded: typeof window.AdminReportFormLogic,
+        hasCredential: typeof window.pokerApiHasCredential === "function" ? window.pokerApiHasCredential() : null,
+        apiBase: typeof window.getApiBase === "function" ? window.getApiBase() : "",
+        appApiBase: document.getElementById("app")?.getAttribute("data-api-base") || "",
+      }));
+      throw new Error("admin report submit POST response was not observed: " + JSON.stringify(submitDebugState) + "\nRequests:\n" + JSON.stringify(adminReportRequests) + "\nPage errors:\n" + errors.join("\n"));
+    }
+    await page.waitForTimeout(500);
+    const submittedReportState = await page.evaluate(() => ({
+      activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+      depositInput: document.getElementById("adminReportDeposit")?.value || "",
+      submitDisabled: !!document.getElementById("adminReportSubmitBtn")?.disabled,
+      submitShellBound: document.getElementById("adminReportSubmitBtn")?.dataset.adminReportSubmitShellBound || "",
+      documentSubmitShellBound: document.documentElement.dataset.adminReportSubmitShellBound || "",
+      formLogicLoaded: typeof window.AdminReportFormLogic,
+      hasCredential: typeof window.pokerApiHasCredential === "function" ? window.pokerApiHasCredential() : null,
+      apiBase: typeof window.getApiBase === "function" ? window.getApiBase() : "",
+    }));
+    if (!submittedAdminReports.length) throw new Error("admin report submit button did not send a report: " + JSON.stringify(submittedReportState) + "\nRequests:\n" + JSON.stringify(adminReportRequests) + "\nPage errors:\n" + errors.join("\n"));
+    if (submittedAdminReports[submittedAdminReports.length - 1].deposit !== 321) throw new Error("admin report submit payload lost deposit value");
+    if (submittedReportState.activePanel !== "sent") throw new Error("admin report submit did not switch to sent reports: " + JSON.stringify(submittedReportState));
+    if (submittedReportState.depositInput) throw new Error("admin report form was not cleared after submit");
     const currentWeekRequestsBeforeCalc = adminReportRequestScopes.filter((scope) => scope === "currentWeek").length;
     await page.locator("[data-admin-report-tab='calculations']").click();
     await page.waitForFunction(() => {
