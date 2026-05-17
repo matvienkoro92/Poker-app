@@ -159,12 +159,11 @@ function initAdminReportModal() {
     return true;
   }
 
-  function upgradeLazyRakebackModuleIfReady() {
-    if (!modal || modal.dataset.adminReportRakebackLazyModuleUpgraded === "1") return false;
+  function createLazyRakebackModuleInstance() {
     if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") return false;
     var staticData = window.AdminReportRakebackStaticData || {};
     var templates = staticData.templates || {};
-    var module = window.AdminReportRakebackTab.init({
+    return window.AdminReportRakebackTab.init({
       modal: modal,
       body: rakebackBody,
       addBtn: rakebackAddBtn,
@@ -186,6 +185,21 @@ function initAdminReportModal() {
       },
       activeRoom: activeRakebackRoom,
     });
+  }
+
+  function ensureLazyRakebackModule() {
+    if (rakebackModule && typeof rakebackModule.open === "function") return rakebackModule;
+    var module = createLazyRakebackModuleInstance();
+    if (module) rakebackModule = module;
+    return rakebackModule;
+  }
+
+  function upgradeLazyRakebackModuleIfReady() {
+    if (!modal) return false;
+    if (modal.dataset.adminReportRakebackLazyModuleUpgraded === "1" && rakebackModule) return false;
+    var module = ensureLazyRakebackModule();
+    if (!module) return false;
+    var shouldBind = modal.dataset.adminReportRakebackLazyModuleUpgraded !== "1";
     modal.dataset.adminReportRakebackLazyModuleUpgraded = "1";
     if (rakebackArchiveBtn) {
       rakebackArchiveBtn.onclick = function () {
@@ -193,7 +207,7 @@ function initAdminReportModal() {
         module.setArchiveMode(nextArchiveMode);
       };
     }
-    if (tabs && tabs.length) {
+    if (shouldBind && tabs && tabs.length) {
       tabs.forEach(function (tab) {
         if (tab.getAttribute("data-admin-report-tab") !== "rakeback") return;
         tab.addEventListener("click", function () {
@@ -288,30 +302,7 @@ function initAdminReportModal() {
   var RAKEBACK_TEMPLATE_RESET_AT = rakebackStaticData.templateResetAt || 0;
   var RAKEBACK_ROW_COLORS = rakebackStaticData.rowColors || [];
   var RAKEBACK_ROW_LEGACY_COLOR_MAP = rakebackStaticData.legacyColorMap || {};
-  var rakebackModule = window.AdminReportRakebackTab && typeof window.AdminReportRakebackTab.init === "function"
-    ? window.AdminReportRakebackTab.init({
-      modal: modal,
-      body: rakebackBody,
-      addBtn: rakebackAddBtn,
-      archiveBtn: rakebackArchiveBtn,
-      refreshBtn: rakebackRefreshBtn,
-      roomTabs: rakebackRoomTabs,
-      searchInput: rakebackSearchInput,
-      sortSelect: rakebackSortSelect,
-      totalEl: rakebackTotalEl,
-      roomTotalLabelEl: rakebackRoomTotalLabelEl,
-      roomTotalEl: rakebackRoomTotalEl,
-      statusEl: rakebackStatusEl,
-      summaryEl: rakebackSummaryEl,
-      templates: {
-        P21: P21_RAKEBACK_TEMPLATE_IDS,
-        X: X_RAKEBACK_TEMPLATE_IDS,
-        Supr: SUPR_RAKEBACK_TEMPLATE_IDS,
-        PP: PP_RAKEBACK_TEMPLATE_IDS,
-      },
-      activeRoom: activeRakebackRoom,
-    })
-    : null;
+  var rakebackModule = createLazyRakebackModuleInstance() || null;
   calculationsModule = window.AdminReportCalculationsTab && typeof window.AdminReportCalculationsTab.init === "function"
     ? window.AdminReportCalculationsTab.init({
       modal: modal,
@@ -727,7 +718,8 @@ function initAdminReportModal() {
         },
         afterSwitch: function (name) {
           if (name === "rakeback") {
-            if (rakebackModule) runAdminReportAfterPaint(function () { rakebackModule.open(); });
+            var activeRakebackModule = ensureLazyRakebackModule();
+            if (activeRakebackModule) runAdminReportAfterPaint(function () { activeRakebackModule.open(); });
             else {
               applySavedRakebackSortMode();
               runAdminReportAfterPaint(refreshLocalRakebackView);
@@ -2798,7 +2790,8 @@ function initAdminReportModal() {
         if (name === "calculations" && !canViewCalculationsReports()) return;
         setActiveTab(name);
         if (name === "rakeback") {
-          if (rakebackModule) runAdminReportAfterPaint(function () { rakebackModule.open(); });
+          var activeRakebackModule = ensureLazyRakebackModule();
+          if (activeRakebackModule) runAdminReportAfterPaint(function () { activeRakebackModule.open(); });
           else {
             applySavedRakebackSortMode();
             runAdminReportAfterPaint(refreshLocalRakebackView);

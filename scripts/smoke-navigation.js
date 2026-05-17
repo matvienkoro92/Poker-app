@@ -169,6 +169,8 @@ async function main() {
     let releaseAdminReportCore;
     let holdAdminReportCore = true;
     const submittedAdminReports = [];
+    const submittedRakebackDrafts = [];
+    let smokeRakebackDraft = { rows: [], updatedAt: null };
     const adminReportCoreGate = new Promise((resolve) => {
       releaseAdminReportCore = resolve;
     });
@@ -198,6 +200,23 @@ async function main() {
       }
       if (method === "POST" || method === "PUT") {
         const payload = JSON.parse(route.request().postData() || "{}");
+        if (payload.action === "rakeback_draft_save") {
+          submittedRakebackDrafts.push(payload);
+          smokeRakebackDraft = {
+            rows: Array.isArray(payload.rakebackRows) ? payload.rakebackRows : [],
+            deletedTemplates: [],
+            deletedRows: [],
+            updatedAt: new Date().toISOString(),
+            updatedBy: "smoke",
+          };
+          await route.fulfill({
+            status: 200,
+            headers: corsHeaders,
+            contentType: "application/json; charset=utf-8",
+            body: JSON.stringify({ ok: true, rakebackDraft: smokeRakebackDraft }),
+          });
+          return;
+        }
         submittedAdminReports.push(payload);
         await route.fulfill({
           status: 200,
@@ -211,6 +230,15 @@ async function main() {
         return;
       }
       const scope = new URL(url).searchParams.get("scope") || "all";
+      if (new URL(url).searchParams.get("rakebackDraft") === "1") {
+        await route.fulfill({
+          status: 200,
+          headers: corsHeaders,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({ ok: true, rakebackDraft: smokeRakebackDraft }),
+        });
+        return;
+      }
       adminReportRequestScopes.push(scope);
       await new Promise((resolve) => setTimeout(resolve, 120));
       const reports = scope === "archive"
@@ -583,6 +611,91 @@ async function main() {
       throw new Error("admin report sent tab is hidden in the instant shell");
     }
 
+    await page.locator("[data-admin-report-tab='rakeback']").click();
+    try {
+      await page.waitForFunction(() => {
+        const activePanel = document.querySelector(".admin-report-panel--active");
+        const ids = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]"))
+          .map((input) => String(input.value || "").trim())
+          .filter(Boolean);
+        return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "rakeback" && ids.length > 20 && ids.includes("691016"));
+      }, null, { timeout: 4200 });
+    } catch (rakebackWaitErr) {
+      const rakebackDebugState = await page.evaluate(() => ({
+        activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+        modalShellBound: document.getElementById("adminReportModal")?.dataset.adminReportShellBound || "",
+        statusText: document.getElementById("adminReportRakebackStatus")?.textContent || "",
+        rowText: document.getElementById("adminReportRakebackTableBody")?.textContent || "",
+        ids: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]")).map((input) => String(input.value || "").trim()).filter(Boolean).slice(0, 8),
+        dataGlobal: typeof window.AdminReportRakebackStaticData,
+        tabGlobal: typeof window.AdminReportRakebackTab,
+        directOpen: typeof window.pokerOpenAdminReportModal,
+        scripts: Array.from(document.scripts || [])
+          .map((script) => ({
+            name: (script.src || "").split("/").pop().split("?")[0],
+            module: script.getAttribute("data-admin-report-module") || "",
+            loaded: script.getAttribute("data-admin-report-loaded") || "",
+            lazy: script.getAttribute("data-poker-lazy-loaded-from") || "",
+          }))
+          .filter((script) => /admin-reports/.test(script.name || script.module)),
+      }));
+      throw new Error("admin report rakeback shell templates did not render: " + JSON.stringify(rakebackDebugState) + "\nPage errors:\n" + errors.join("\n"));
+    }
+    const rakebackShellState = await page.evaluate(() => {
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      const ids = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-player-id]"))
+        .map((input) => String(input.value || "").trim())
+        .filter(Boolean);
+      return {
+        activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+        rowCount: ids.length,
+        firstId: ids[0] || "",
+        hasTemplateId: ids.includes("691016"),
+        dataScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback-data.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+        tabScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+      };
+    });
+    if (rakebackShellState.activePanel !== "rakeback") throw new Error("admin report rakeback shell tab did not become active");
+    if (rakebackShellState.rowCount <= 20 || !rakebackShellState.hasTemplateId) {
+      throw new Error("admin report rakeback shell did not insert template rows: " + JSON.stringify(rakebackShellState));
+    }
+    if (!rakebackShellState.dataScriptLoaded || !rakebackShellState.tabScriptLoaded) {
+      throw new Error("admin report rakeback shell did not priority-load template scripts: " + JSON.stringify(rakebackShellState));
+    }
+    const rakebackDraftSaveResponse = page.waitForResponse((response) => {
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+    }, { timeout: 2500 });
+    await page.locator("#adminReportRakebackAddBtn").click();
+    await rakebackDraftSaveResponse;
+    await page.locator("#adminReportRakebackSearch").fill("smoke-shared");
+    await page.locator("#adminReportRakebackSearch").fill("");
+    await page.locator("#adminReportRakebackRefreshBtn").click();
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row] [data-rakeback-player-id]"))
+        .some((input) => String(input.value || "").trim() === "");
+    }, null, { timeout: 2500 });
+    const rakebackSharedState = await page.evaluate(() => {
+      const addBtn = document.getElementById("adminReportRakebackAddBtn");
+      const refreshBtn = document.getElementById("adminReportRakebackRefreshBtn");
+      const sharedRows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      return {
+        addVisible: !!(addBtn && !addBtn.hidden),
+        addDisabled: !!(addBtn && addBtn.disabled),
+        refreshVisible: !!(refreshBtn && !refreshBtn.hidden),
+        refreshDisabled: !!(refreshBtn && refreshBtn.disabled),
+        sharedRows: sharedRows.length,
+      };
+    });
+    if (!rakebackSharedState.addVisible || rakebackSharedState.addDisabled) {
+      throw new Error("admin report rakeback add button is not usable: " + JSON.stringify(rakebackSharedState));
+    }
+    if (!rakebackSharedState.refreshVisible) {
+      throw new Error("admin report rakeback refresh button is missing: " + JSON.stringify(rakebackSharedState));
+    }
+    if (!submittedRakebackDrafts.length || !(submittedRakebackDrafts[submittedRakebackDrafts.length - 1].rakebackRows || []).length) {
+      throw new Error("admin report rakeback add button did not save shared draft");
+    }
+
     const sentClickStartedAt = Date.now();
     await page.locator("[data-admin-report-tab='sent']").click();
     await page.waitForFunction(() => {
@@ -756,7 +869,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, calculationsState, rakebackArchiveState, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, rakebackShellState, rakebackSharedState, reportState, sentState, calculationsState, rakebackArchiveState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

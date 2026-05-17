@@ -5,6 +5,7 @@
   var nestedFragmentLoading = Object.create(null);
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
+  var adminReportRakebackShellModule = null;
 
   function findFragmentHost(viewName) {
     var view = String(viewName || "").trim();
@@ -456,6 +457,88 @@
     openAdminReportSentShell(false).catch(function () {});
   }
 
+  function getAdminReportRakebackShellTemplates() {
+    var staticData = window.AdminReportRakebackStaticData || {};
+    var templates = staticData.templates || {};
+    return {
+      P21: templates.P21 || [],
+      X: templates.X || [],
+      Supr: templates.Supr || [],
+      PP: templates.PP || [],
+    };
+  }
+
+  function getAdminReportRakebackShellActiveRoom() {
+    var activeTab = document.querySelector(".admin-report-rakeback-room-tab--active[data-rakeback-room-tab], .admin-report-rakeback-room-tab[aria-selected='true'][data-rakeback-room-tab]");
+    return activeTab ? activeTab.getAttribute("data-rakeback-room-tab") : "P21";
+  }
+
+  function initAdminReportRakebackShellModule() {
+    if (adminReportRakebackShellModule && typeof adminReportRakebackShellModule.open === "function") {
+      return adminReportRakebackShellModule;
+    }
+    if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") {
+      throw new Error("AdminReportRakebackTab is not available");
+    }
+    var modal = document.getElementById("adminReportModal");
+    var archiveBtn = document.getElementById("adminReportRakebackArchiveBtn");
+    adminReportRakebackShellModule = window.AdminReportRakebackTab.init({
+      modal: modal,
+      body: document.getElementById("adminReportRakebackTableBody"),
+      addBtn: document.getElementById("adminReportRakebackAddBtn"),
+      archiveBtn: archiveBtn,
+      refreshBtn: document.getElementById("adminReportRakebackRefreshBtn"),
+      roomTabs: modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : [],
+      searchInput: document.getElementById("adminReportRakebackSearch"),
+      sortSelect: document.getElementById("adminReportRakebackSort"),
+      totalEl: document.getElementById("adminReportRakebackTotal"),
+      roomTotalLabelEl: document.getElementById("adminReportRakebackRoomTotalLabel"),
+      roomTotalEl: document.getElementById("adminReportRakebackRoomTotal"),
+      statusEl: document.getElementById("adminReportRakebackStatus"),
+      summaryEl: modal ? modal.querySelector(".admin-report-rakeback-summary") : null,
+      templates: getAdminReportRakebackShellTemplates(),
+      activeRoom: getAdminReportRakebackShellActiveRoom(),
+    });
+    if (archiveBtn) {
+      archiveBtn.onclick = function () {
+        var nextArchiveMode = !(adminReportRakebackShellModule &&
+          typeof adminReportRakebackShellModule.isArchiveMode === "function" &&
+          adminReportRakebackShellModule.isArchiveMode());
+        adminReportRakebackShellModule.setArchiveMode(nextArchiveMode);
+      };
+    }
+    return adminReportRakebackShellModule;
+  }
+
+  function openAdminReportRakebackShell() {
+    var body = document.getElementById("adminReportRakebackTableBody");
+    var statusEl = document.getElementById("adminReportRakebackStatus");
+    if (statusEl && !adminReportRakebackShellModule) {
+      statusEl.hidden = false;
+      statusEl.textContent = "Загружаю шаблоны…";
+    }
+    return Promise.all([
+      loadAdminReportShellScript("app-admin-reports-rakeback-data.js"),
+      loadAdminReportShellScript("app-admin-reports-rakeback.js"),
+    ]).then(function () {
+      var module = initAdminReportRakebackShellModule();
+      var count = module.open();
+      if (statusEl) {
+        statusEl.hidden = true;
+        statusEl.textContent = "";
+      }
+      return count;
+    }).catch(function () {
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "Не удалось загрузить шаблоны рейкбека.";
+      } else if (body && !body.querySelector("[data-rakeback-row]")) {
+        body.innerHTML = '<tr class="admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates" data-rakeback-generated="1"><td colspan="7">Не удалось загрузить шаблоны рейкбека.</td></tr>';
+      }
+      return 0;
+    });
+  }
+
   function closeAdminReportShellModal() {
     var modal = document.getElementById("adminReportModal");
     if (modal) modal.setAttribute("aria-hidden", "true");
@@ -475,17 +558,18 @@
     if (closeBtn) closeBtn.addEventListener("click", closeAdminReportShellModal);
     if (backdrop) backdrop.addEventListener("click", closeAdminReportShellModal);
     modal.addEventListener("click", function (e) {
-      var fullReportOpener = window.pokerOpenAdminReportModal;
-      if (typeof fullReportOpener === "function") return;
       var tab = e.target && e.target.closest ? e.target.closest("[data-admin-report-tab]") : null;
       if (!tab || !modal.contains(tab)) return;
       var name = tab.getAttribute("data-admin-report-tab") || "form";
+      var fullReportOpener = window.pokerOpenAdminReportModal;
+      if (typeof fullReportOpener === "function" && name !== "rakeback") return;
       if (name === "sent" && !canViewAdminReportSentShell()) return;
       if (name === "calculations" && !canViewAdminReportCalculationsShell()) return;
       e.preventDefault();
       e.stopPropagation();
       var activeName = setAdminReportShellTab(name);
       if (activeName === "sent") openAdminReportSentShell(false).catch(function () {});
+      if (activeName === "rakeback") openAdminReportRakebackShell().catch(function () {});
     });
   }
 
