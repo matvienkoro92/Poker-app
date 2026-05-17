@@ -425,8 +425,10 @@ function initAdminReportModal() {
     return allowed || calculationsAllowed;
   }
 
-  sentReportsModule = window.AdminReportSentTab && typeof window.AdminReportSentTab.init === "function"
-    ? window.AdminReportSentTab.init({
+  function ensureSentReportsModule() {
+    if (sentReportsModule) return sentReportsModule;
+    if (!window.AdminReportSentTab || typeof window.AdminReportSentTab.init !== "function") return null;
+    sentReportsModule = window.AdminReportSentTab.init({
       list: sentList,
       cacheTtlMs: 5 * 60 * 1000,
       netErrorMessage: typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети",
@@ -457,8 +459,11 @@ function initAdminReportModal() {
         },
         syncAccess: syncSentReportsAccess,
       },
-    })
-    : null;
+    });
+    return sentReportsModule;
+  }
+
+  sentReportsModule = ensureSentReportsModule();
 
   tabsModule = window.AdminReportTabs && typeof window.AdminReportTabs.init === "function"
     ? window.AdminReportTabs.init({
@@ -1816,7 +1821,16 @@ function initAdminReportModal() {
   }
 
   function runAdminReportAfterPaint() {
-    return callLegacyModule("runAdminReportAfterPaint", arguments);
+    var mod = getLegacyModule();
+    if (mod && typeof mod.runAdminReportAfterPaint === "function") {
+      return mod.runAdminReportAfterPaint.apply(mod, arguments);
+    }
+    var fn = arguments[0];
+    if (typeof fn !== "function") return undefined;
+    if (typeof requestAnimationFrame === "function") {
+      return requestAnimationFrame(function () { fn(); });
+    }
+    return setTimeout(fn, 0);
   }
 
   function runAdminReportWhenIdle() {
@@ -2255,10 +2269,24 @@ function initAdminReportModal() {
   }
 
   function loadSentReports(forceRefresh) {
-    if (sentReportsModule) return sentReportsModule.open(forceRefresh);
+    var mod = ensureSentReportsModule();
+    if (mod) return mod.open(forceRefresh);
     if (!sentList) return undefined;
-    if (!canViewSentReports()) sentList.innerHTML = "";
-    return undefined;
+    if (!canViewSentReports()) {
+      sentList.innerHTML = '<p class="admin-report-sent-empty">Нет доступа к отправленным отчётам.</p>';
+      return undefined;
+    }
+    sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
+    return ensureAdminReportModulesLoaded()
+      .then(function () {
+        var loadedMod = ensureSentReportsModule();
+        if (loadedMod) return loadedMod.open(forceRefresh);
+        if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось открыть отправленные отчёты.</p>';
+        return undefined;
+      })
+      .catch(function () {
+        if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
+      });
   }
 
   function closeModal() {
@@ -2343,6 +2371,22 @@ function initAdminReportModal() {
           }
         });
       });
+    });
+  }
+  if (modal && modal.dataset.adminReportSentLoadGuardBound !== "1") {
+    modal.dataset.adminReportSentLoadGuardBound = "1";
+    modal.addEventListener("click", function (e) {
+      var target = e.target && e.target.closest ? e.target.closest("[data-admin-report-tab]") : null;
+      if (!target || target.getAttribute("data-admin-report-tab") !== "sent") return;
+      var run = function () {
+        if (!sentList || String(sentList.innerHTML || "").trim()) return;
+        loadSentReports();
+      };
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(function () { setTimeout(run, 0); });
+      } else {
+        setTimeout(run, 0);
+      }
     });
   }
   if (!calculationsModule && calculationsCashInputs && calculationsCashInputs.length) {

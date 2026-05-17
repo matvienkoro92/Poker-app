@@ -31,7 +31,7 @@
   function loadSentReports(forceRefresh) {
     if (!sentList) return;
     if (!canViewSentReports()) {
-      sentList.innerHTML = "";
+      sentList.innerHTML = '<p class="admin-report-sent-empty">Нет доступа к отправленным отчётам.</p>';
       return;
     }
     if (!forceRefresh && sentReportsLoading) return;
