@@ -119,7 +119,7 @@
 
     function syncRoomTabs() {
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
-        var selected = normalizeRoom(tab.getAttribute("data-rakeback-room-tab")) === activeRoom;
+        var selected = !archiveMode && normalizeRoom(tab.getAttribute("data-rakeback-room-tab")) === activeRoom;
         tab.classList.toggle("admin-report-rakeback-room-tab--active", selected);
         tab.setAttribute("aria-selected", selected ? "true" : "false");
       });

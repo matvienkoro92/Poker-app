@@ -126,8 +126,60 @@ function initAdminReportModal() {
   var RAKEBACK_REFRESH_ACCESS_USERNAMES = ["roman1787443", "roman1_matvienko"];
   var RAKEBACK_REFRESH_ACCESS_EMAILS = ["matvienkoro92@gmail.com"];
   var rakebackAccessCache = null;
+  function upgradeLazyRakebackModuleIfReady() {
+    if (!modal || modal.dataset.adminReportRakebackLazyModuleUpgraded === "1") return false;
+    if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") return false;
+    var staticData = window.AdminReportRakebackStaticData || {};
+    var templates = staticData.templates || {};
+    var module = window.AdminReportRakebackTab.init({
+      modal: modal,
+      body: rakebackBody,
+      addBtn: rakebackAddBtn,
+      archiveBtn: rakebackArchiveBtn,
+      refreshBtn: rakebackRefreshBtn,
+      roomTabs: rakebackRoomTabs,
+      searchInput: rakebackSearchInput,
+      sortSelect: rakebackSortSelect,
+      totalEl: rakebackTotalEl,
+      roomTotalLabelEl: rakebackRoomTotalLabelEl,
+      roomTotalEl: rakebackRoomTotalEl,
+      statusEl: rakebackStatusEl,
+      summaryEl: rakebackSummaryEl,
+      templates: {
+        P21: templates.P21 || [],
+        X: templates.X || [],
+        Supr: templates.Supr || [],
+        PP: templates.PP || [],
+      },
+      activeRoom: activeRakebackRoom,
+    });
+    modal.dataset.adminReportRakebackLazyModuleUpgraded = "1";
+    if (rakebackArchiveBtn) {
+      rakebackArchiveBtn.onclick = function () {
+        var nextArchiveMode = !(module && typeof module.isArchiveMode === "function" && module.isArchiveMode());
+        module.setArchiveMode(nextArchiveMode);
+      };
+    }
+    if (tabs && tabs.length) {
+      tabs.forEach(function (tab) {
+        if (tab.getAttribute("data-admin-report-tab") !== "rakeback") return;
+        tab.addEventListener("click", function () {
+          runAdminReportAfterPaint(function () { module.open(); });
+        });
+      });
+    }
+    var activePanel = modal.querySelector(".admin-report-panel--active");
+    if (activePanel && activePanel.getAttribute("data-admin-report-panel") === "rakeback") {
+      module.open();
+    }
+    return true;
+  }
+
   if (!btn || !modal) return;
-  if (btn.dataset.adminReportBound === "1") return;
+  if (btn.dataset.adminReportBound === "1") {
+    upgradeLazyRakebackModuleIfReady();
+    return;
+  }
 
   function collectAdminReportIdentityCandidates() {
     var users = [];
@@ -2741,6 +2793,49 @@ function initAdminReportModal() {
       }
     });
   }
+
+  function createRakebackArchiveFallbackRow() {
+    var row = document.createElement("tr");
+    var cell = document.createElement("td");
+    row.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
+    row.setAttribute("data-rakeback-generated", "1");
+    cell.colSpan = 7;
+    cell.textContent = "Архив пока пуст";
+    row.appendChild(cell);
+    return row;
+  }
+
+  function syncRakebackTemplateArchiveFallback(active) {
+    if (!RAKEBACK_TEMPLATE_ONLY_MODE || rakebackModule) return;
+    rakebackArchiveMode = !!active;
+    if (rakebackRoomTabs && rakebackRoomTabs.length) {
+      rakebackRoomTabs.forEach(function (tab) {
+        var selected = !rakebackArchiveMode && normalizeRakebackRoom(tab.getAttribute("data-rakeback-room-tab")) === normalizeRakebackRoom(activeRakebackRoom);
+        tab.classList.toggle("admin-report-rakeback-room-tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+    }
+    if (rakebackArchiveBtn) {
+      rakebackArchiveBtn.hidden = false;
+      rakebackArchiveBtn.disabled = false;
+      rakebackArchiveBtn.classList.toggle("admin-report-rakeback-archive-tab--active", rakebackArchiveMode);
+      rakebackArchiveBtn.setAttribute("aria-pressed", rakebackArchiveMode ? "true" : "false");
+      rakebackArchiveBtn.setAttribute("title", rakebackArchiveMode ? "Показать текущую неделю" : "Архив");
+      rakebackArchiveBtn.setAttribute("aria-label", rakebackArchiveMode ? "Показать текущую неделю" : "Архив");
+    }
+    if (rakebackStatusEl) {
+      rakebackStatusEl.hidden = !rakebackArchiveMode;
+      rakebackStatusEl.textContent = rakebackArchiveMode ? "Архив пока пуст" : "";
+    }
+    if (rakebackRoomTotalLabelEl && rakebackArchiveMode) rakebackRoomTotalLabelEl.textContent = "Итого архив";
+    if (rakebackRoomTotalEl && rakebackArchiveMode) rakebackRoomTotalEl.textContent = "0 / 0";
+    if (rakebackTotalEl && rakebackArchiveMode) rakebackTotalEl.textContent = "0 / 0";
+    if (rakebackBody && rakebackArchiveMode) {
+      var fragment = document.createDocumentFragment();
+      fragment.appendChild(createRakebackArchiveFallbackRow());
+      rakebackBody.replaceChildren(fragment);
+    }
+  }
   if (!calculationsModule && calculationsCashInputs && calculationsCashInputs.length) {
     calculationsCashInputs.forEach(function (input) {
       input.addEventListener("input", scheduleCalculationCashTotal);
@@ -2821,7 +2916,8 @@ function initAdminReportModal() {
     });
   }
   if (rakebackArchiveBtn) {
-    rakebackArchiveBtn.addEventListener("click", function () {
+    rakebackArchiveBtn.dataset.adminReportRakebackArchiveBound = "1";
+    rakebackArchiveBtn.onclick = function () {
       if (rakebackModule && typeof rakebackModule.isArchiveMode === "function") {
         rakebackArchiveMode = rakebackModule.isArchiveMode();
       }
@@ -2832,7 +2928,8 @@ function initAdminReportModal() {
         return;
       }
       setRakebackArchiveMode(nextArchiveMode);
-    });
+      syncRakebackTemplateArchiveFallback(nextArchiveMode);
+    };
   }
   if (rakebackSearchInput) {
     if (!rakebackModule) rakebackSearchInput.addEventListener("input", scheduleRakebackSearchRefresh);

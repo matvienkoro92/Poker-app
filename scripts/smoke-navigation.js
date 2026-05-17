@@ -611,6 +611,30 @@ async function main() {
     if (adminReportRequestScopes.filter((scope) => scope === "currentWeek").length <= currentWeekRequestsBeforeCalc) {
       throw new Error("admin report calculations did not request the current week report scope");
     }
+    await page.locator("[data-admin-report-tab='rakeback']").click();
+    await page.waitForFunction(() => {
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "rakeback");
+    }, null, { timeout: 1800 });
+    await page.locator("#adminReportRakebackArchiveBtn").click();
+    await page.waitForFunction(() => {
+      const archiveBtn = document.getElementById("adminReportRakebackArchiveBtn");
+      return !!(archiveBtn && archiveBtn.getAttribute("aria-pressed") === "true");
+    }, null, { timeout: 1800 });
+    const rakebackArchiveState = await page.evaluate(() => {
+      const archiveBtn = document.getElementById("adminReportRakebackArchiveBtn");
+      return {
+        archivePressed: archiveBtn ? archiveBtn.getAttribute("aria-pressed") : "",
+        archiveActive: !!(archiveBtn && archiveBtn.classList.contains("admin-report-rakeback-archive-tab--active")),
+        selectedRoomTabs: Array.from(document.querySelectorAll(".admin-report-rakeback-room-tab[aria-selected='true']")).map((tab) => tab.textContent || ""),
+      };
+    });
+    if (rakebackArchiveState.archivePressed !== "true" || !rakebackArchiveState.archiveActive) {
+      throw new Error("admin report rakeback archive button did not show active state");
+    }
+    if (rakebackArchiveState.selectedRoomTabs.length) {
+      throw new Error("admin report rakeback room tab stayed selected while archive is active");
+    }
     await page.locator("#adminReportModalClose").click();
 
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
@@ -649,7 +673,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, calculationsState, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportShellState, reportState, sentState, calculationsState, rakebackArchiveState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
