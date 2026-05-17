@@ -393,16 +393,17 @@ function initAdminReportModal() {
 
   function syncRakebackAccessControls() {
     if (rakebackModule) {
+      if (typeof rakebackModule.isArchiveMode === "function") rakebackArchiveMode = rakebackModule.isArchiveMode();
       rakebackModule.syncAccessControls();
       return;
     }
     syncRakebackRefreshButtonAccess();
     syncRakebackAddButtonAccess();
     if (RAKEBACK_TEMPLATE_ONLY_MODE && rakebackArchiveBtn) {
-      rakebackArchiveBtn.hidden = true;
-      rakebackArchiveBtn.disabled = true;
-      rakebackArchiveBtn.classList.remove("admin-report-rakeback-archive-tab--active");
-      rakebackArchiveBtn.setAttribute("aria-pressed", "false");
+      rakebackArchiveBtn.hidden = false;
+      rakebackArchiveBtn.disabled = false;
+      rakebackArchiveBtn.classList.toggle("admin-report-rakeback-archive-tab--active", rakebackArchiveMode);
+      rakebackArchiveBtn.setAttribute("aria-pressed", rakebackArchiveMode ? "true" : "false");
     }
     if (!rakebackBody) return;
     Array.prototype.slice.call(rakebackBody.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
@@ -2601,8 +2602,17 @@ function initAdminReportModal() {
     });
   }
   if (rakebackArchiveBtn) {
-    if (!rakebackModule) rakebackArchiveBtn.addEventListener("click", function () {
-      setRakebackArchiveMode(!rakebackArchiveMode);
+    rakebackArchiveBtn.addEventListener("click", function () {
+      if (rakebackModule && typeof rakebackModule.isArchiveMode === "function") {
+        rakebackArchiveMode = rakebackModule.isArchiveMode();
+      }
+      var nextArchiveMode = !rakebackArchiveMode;
+      rakebackArchiveMode = nextArchiveMode;
+      if (rakebackModule && typeof rakebackModule.setArchiveMode === "function") {
+        rakebackModule.setArchiveMode(nextArchiveMode);
+        return;
+      }
+      setRakebackArchiveMode(nextArchiveMode);
     });
   }
   if (rakebackSearchInput) {

@@ -44,6 +44,17 @@
     return tr;
   }
 
+  function createArchiveEmptyRow() {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
+    tr.setAttribute("data-rakeback-generated", "1");
+    td.colSpan = 7;
+    td.textContent = "Архив пока пуст";
+    tr.appendChild(td);
+    return tr;
+  }
+
   function createTemplateRow(room, playerId, index) {
     var tr = document.createElement("tr");
     tr.className = "admin-report-rakeback-row admin-report-rakeback-row--saved";
@@ -87,6 +98,7 @@
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var templates = config.templates || {};
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
+    var archiveMode = false;
     var bound = false;
 
     function getTemplateIds(room) {
@@ -114,21 +126,27 @@
     }
 
     function syncControls() {
-      [refreshBtn, addBtn, archiveBtn].forEach(function (btn) {
+      [refreshBtn, addBtn].forEach(function (btn) {
         if (!btn) return;
         btn.hidden = true;
         btn.disabled = true;
         btn.classList.remove("admin-report-rakeback-refresh-btn--attention");
-        btn.classList.remove("admin-report-rakeback-archive-tab--active");
-        if (btn === archiveBtn) btn.setAttribute("aria-pressed", "false");
       });
+      if (archiveBtn) {
+        archiveBtn.hidden = false;
+        archiveBtn.disabled = false;
+        archiveBtn.classList.toggle("admin-report-rakeback-archive-tab--active", archiveMode);
+        archiveBtn.setAttribute("aria-pressed", archiveMode ? "true" : "false");
+        archiveBtn.setAttribute("title", archiveMode ? "Показать текущую неделю" : "Архив");
+        archiveBtn.setAttribute("aria-label", archiveMode ? "Показать текущую неделю" : "Архив");
+      }
       if (sortSelect) sortSelect.disabled = false;
       if (summaryEl) summaryEl.hidden = false;
       if (statusEl) {
-        statusEl.hidden = true;
-        statusEl.textContent = "";
+        statusEl.hidden = !archiveMode;
+        statusEl.textContent = archiveMode ? "Архив пока пуст" : "";
       }
-      if (roomTotalLabelEl) roomTotalLabelEl.textContent = "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
+      if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       if (roomTotalEl) roomTotalEl.textContent = "0 / 0";
       if (totalEl) totalEl.textContent = "0 / 0";
     }
@@ -136,6 +154,14 @@
     function render() {
       if (!body) return 0;
       activeRoom = normalizeRoom(activeRoom);
+      if (archiveMode) {
+        var archiveFragment = document.createDocumentFragment();
+        archiveFragment.appendChild(createArchiveEmptyRow());
+        body.replaceChildren(archiveFragment);
+        syncRoomTabs();
+        syncControls();
+        return 0;
+      }
       var query = getSearchQuery();
       var ids = getTemplateIds(activeRoom).filter(function (id) {
         return !query || id.toLowerCase().indexOf(query) !== -1;
@@ -157,6 +183,7 @@
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
         tab.addEventListener("click", function () {
           activeRoom = normalizeRoom(tab.getAttribute("data-rakeback-room-tab"));
+          archiveMode = false;
           render();
         });
       });
@@ -174,6 +201,11 @@
     bind();
     syncControls();
 
+    function setArchiveMode(active) {
+      archiveMode = !!active;
+      return render();
+    }
+
     return {
       bind: bind,
       close: function () {},
@@ -181,9 +213,10 @@
       fillTable: render,
       getActiveRoom: function () { return activeRoom; },
       getUnaccountedRows: function () { return []; },
+      isArchiveMode: function () { return archiveMode; },
       open: render,
       render: render,
-      setArchiveMode: render,
+      setArchiveMode: setArchiveMode,
       setRoom: function (room) {
         activeRoom = normalizeRoom(room);
         return render();
