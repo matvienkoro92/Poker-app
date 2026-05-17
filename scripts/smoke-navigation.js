@@ -295,10 +295,15 @@ async function main() {
       await page.locator("[data-admin-report-tab='sent']").click();
       await page.waitForFunction(() => {
         const list = document.getElementById("adminReportSentList");
+        const activePanel = document.querySelector(".admin-report-panel--active");
         const text = list ? String(list.textContent || "").trim() : "";
-        return !!(text && !/Загрузка/.test(text));
+        return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "sent" && /Текущая неделя|Неделя/.test(text) && !/Загрузка/.test(text));
       }, null, { timeout: 1800 });
       const earlySentOpenDelayMs = Date.now() - earlySentClickStartedAt;
+      await page.waitForFunction(() => {
+        return typeof window.AdminReportSentTab === "object" &&
+          !!document.querySelector(".admin-report-sent-detail__deposit-group");
+      }, null, { timeout: 1800 });
       const earlySentState = await page.evaluate(() => {
         const list = document.getElementById("adminReportSentList");
         const activePanel = document.querySelector(".admin-report-panel--active");
@@ -536,10 +541,15 @@ async function main() {
     await page.locator("[data-admin-report-tab='sent']").click();
     await page.waitForFunction(() => {
       const list = document.getElementById("adminReportSentList");
+      const activePanel = document.querySelector(".admin-report-panel--active");
       const text = list ? String(list.textContent || "").trim() : "";
-      return !!(text && !/Загрузка/.test(text));
+      return !!(activePanel && activePanel.getAttribute("data-admin-report-panel") === "sent" && /Текущая неделя|Неделя/.test(text) && !/Загрузка/.test(text));
     }, null, { timeout: 1800 });
     const sentOpenDelayMs = Date.now() - sentClickStartedAt;
+    await page.waitForFunction(() => {
+      return typeof window.AdminReportSentTab === "object" &&
+        !!document.querySelector(".admin-report-sent-detail__deposit-group");
+    }, null, { timeout: 1800 });
     const sentState = await page.evaluate(() => {
       const list = document.getElementById("adminReportSentList");
       const activePanel = document.querySelector(".admin-report-panel--active");

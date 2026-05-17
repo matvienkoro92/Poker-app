@@ -14,6 +14,8 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v1";
+    var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var escapeReportHtml = helpers.escapeReportHtml || function (value) {
       return String(value == null ? "" : value)
@@ -192,6 +194,96 @@
       return String(url || "") + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
     }
 
+    function readSentReportsHtmlCache() {
+      try {
+        if (!window.localStorage) return null;
+        var raw = window.localStorage.getItem(SENT_REPORTS_HTML_CACHE_KEY);
+        if (!raw) return null;
+        var cached = JSON.parse(raw);
+        if (!cached || !cached.html || !cached.savedAt) return null;
+        if (Date.now() - Number(cached.savedAt) > SENT_REPORTS_HTML_CACHE_TTL_MS) return null;
+        return cached;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeSentReportsHtmlCache(html) {
+      try {
+        if (!window.localStorage || !html) return;
+        window.localStorage.setItem(SENT_REPORTS_HTML_CACHE_KEY, JSON.stringify({
+          savedAt: Date.now(),
+          html: String(html),
+        }));
+      } catch (e) {}
+    }
+
+    function clearSentReportsHtmlCache() {
+      try {
+        if (window.localStorage) window.localStorage.removeItem(SENT_REPORTS_HTML_CACHE_KEY);
+      } catch (e) {}
+    }
+
+    function bindCachedSentReportToggles(scope) {
+      scope = scope || sentList;
+      if (!scope) return;
+      scope.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
+        if (head.getAttribute("data-admin-report-cache-bound") === "1") return;
+        head.setAttribute("data-admin-report-cache-bound", "1");
+        head.addEventListener("click", function (e) {
+          if (e.target.closest(".admin-report-sent-edit-btn") || e.target.closest(".admin-report-sent-delete-btn") || e.target.closest(".admin-report-week-copy-btn")) return;
+          var item = head.closest(".admin-report-sent-item");
+          if (!item) return;
+          var detail = item.querySelector(".admin-report-sent-detail");
+          var toggle = head.querySelector(".admin-report-sent-item__toggle");
+          if (!detail) return;
+          var isOpen = !detail.hidden;
+          detail.hidden = isOpen;
+          head.setAttribute("aria-expanded", !isOpen);
+          if (toggle) toggle.textContent = isOpen ? "▼" : "▲";
+        });
+      });
+    }
+
+    function renderSentReportsHtmlCache() {
+      if (!sentList) return false;
+      var cached = readSentReportsHtmlCache();
+      if (!cached || !cached.html) return false;
+      sentList.innerHTML = cached.html;
+      bindCachedSentReportToggles(sentList);
+      return true;
+    }
+
+    function buildSentReportsLoadingShellHtml() {
+      return (
+        '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
+          '<details class="admin-report-sent-week" open>' +
+            '<summary class="admin-report-sent-archive__summary">Текущая неделя</summary>' +
+            '<div class="admin-report-sent-week__inner">' +
+              '<details class="admin-report-sent-week-subspoiler" open>' +
+                '<summary class="admin-report-sent-day-title">Итого по неделе</summary>' +
+                '<div class="admin-report-sent-week-subspoiler__inner">' +
+                  '<p class="admin-report-sent-period-hint">Обновляю текущую неделю…</p>' +
+                "</div>" +
+              "</details>" +
+              '<details class="admin-report-sent-week-subspoiler">' +
+                '<summary class="admin-report-sent-day-title">По дням</summary>' +
+                '<div class="admin-report-sent-week-subspoiler__inner">' +
+                  '<p class="admin-report-sent-period-hint">Дни появятся сразу после ответа сервера.</p>' +
+                "</div>" +
+              "</details>" +
+            "</div>" +
+          "</details>" +
+        "</div>" +
+        '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
+          '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
+          '<div class="admin-report-sent-archive__inner">' +
+            '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
+          "</div>" +
+        "</details>"
+      );
+    }
+
   function loadSentReports(forceRefresh) {
     if (!sentList) return;
     if (!canViewSentReports()) {
@@ -205,7 +297,8 @@
       sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
       return;
     }
-    sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
+    var renderedFastCache = !forceRefresh && renderSentReportsHtmlCache();
+    if (!renderedFastCache) sentList.innerHTML = buildSentReportsLoadingShellHtml();
     sentReportsLoading = true;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     var fetchReports = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
@@ -493,6 +586,7 @@
         }
 
         sentList.innerHTML = html.join("");
+        writeSentReportsHtmlCache(sentList.innerHTML);
         sentReportsLoadedAt = Date.now();
 
         var reportById = {};
@@ -628,7 +722,10 @@
                 })
                   .then(function (r) { return r.json(); })
                   .then(function (data) {
-                    if (data && data.ok) loadSentReports(true);
+                    if (data && data.ok) {
+                      clearSentReportsHtmlCache();
+                      loadSentReports(true);
+                    }
                     else if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось удалить.");
                   })
                   .catch(function () {
@@ -681,7 +778,7 @@
       })
       .catch(function () {
         sentReportsLoading = false;
-        if (sentList) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
+        if (sentList && !renderedFastCache) sentList.innerHTML = '<p class="admin-report-sent-empty">Ошибка загрузки. Попробуйте позже.</p>';
       });
   }
 

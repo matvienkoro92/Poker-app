@@ -382,6 +382,36 @@
     return adminReportShellScriptPromises[file];
   }
 
+  function buildAdminReportSentShellLoadingHtml() {
+    return (
+      '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
+        '<details class="admin-report-sent-week" open>' +
+          '<summary class="admin-report-sent-archive__summary">Текущая неделя</summary>' +
+          '<div class="admin-report-sent-week__inner">' +
+            '<details class="admin-report-sent-week-subspoiler" open>' +
+              '<summary class="admin-report-sent-day-title">Итого по неделе</summary>' +
+              '<div class="admin-report-sent-week-subspoiler__inner">' +
+                '<p class="admin-report-sent-period-hint">Обновляю текущую неделю…</p>' +
+              "</div>" +
+            "</details>" +
+            '<details class="admin-report-sent-week-subspoiler">' +
+              '<summary class="admin-report-sent-day-title">По дням</summary>' +
+              '<div class="admin-report-sent-week-subspoiler__inner">' +
+                '<p class="admin-report-sent-period-hint">Дни появятся сразу после ответа сервера.</p>' +
+              "</div>" +
+            "</details>" +
+          "</div>" +
+        "</details>" +
+      "</div>" +
+      '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
+        '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
+        '<div class="admin-report-sent-archive__inner">' +
+          '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
+        "</div>" +
+      "</details>"
+    );
+  }
+
   function openAdminReportSentShell(forceRefresh) {
     var sentList = document.getElementById("adminReportSentList");
     if (!sentList) return Promise.resolve(false);
@@ -393,7 +423,7 @@
     if (existingModule && typeof existingModule.open === "function") {
       return Promise.resolve(existingModule.open(forceRefresh));
     }
-    sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
+    sentList.innerHTML = buildAdminReportSentShellLoadingHtml();
     return loadAdminReportShellScript("app-admin-reports-sent.js")
       .then(function () {
         if (!window.AdminReportSentTab || typeof window.AdminReportSentTab.init !== "function") {
