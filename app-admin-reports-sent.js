@@ -44,8 +44,12 @@
     sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
     sentReportsLoading = true;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q)
-      .then(function (r) { return r.json(); })
+    var fetchReports = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
+    fetchReports(base.replace(/\/$/, "") + "/api/admin-report-shifts" + q, { cache: "no-store" }, 15000)
+      .then(function (r) {
+        if (!r || !r.ok) throw new Error("admin-report-shifts " + (r && r.status ? r.status : "failed"));
+        return r.json();
+      })
       .then(function (data) {
         sentReportsLoading = false;
         if (!sentList) return;

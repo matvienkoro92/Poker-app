@@ -112,6 +112,7 @@ function initAdminReportModal() {
   var formModule = null;
   var calculationsModule = null;
   var sentReportsModule = null;
+  var sentReportsModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
   var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -2429,7 +2430,14 @@ function initAdminReportModal() {
       return undefined;
     }
     sentList.innerHTML = '<p class="admin-report-sent-empty">Загрузка…</p>';
-    return ensureAdminReportModulesLoaded()
+    if (!sentReportsModuleLoadPromise) {
+      sentReportsModuleLoadPromise = loadAdminReportScript("app-admin-reports-sent.js")
+        .catch(function (err) {
+          sentReportsModuleLoadPromise = null;
+          throw err;
+        });
+    }
+    return sentReportsModuleLoadPromise
       .then(function () {
         var loadedMod = ensureSentReportsModule();
         if (loadedMod) return loadedMod.open(forceRefresh);

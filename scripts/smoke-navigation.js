@@ -144,8 +144,17 @@ async function main() {
     await page.route(/\/app-admin-reports(?:-[^/?]+)?\.js(?:\?|$)/, async (route) => {
       const url = route.request().url();
       const isCore = /\/app-admin-reports\.js(?:\?|$)/.test(url);
-      await new Promise((resolve) => setTimeout(resolve, isCore ? 1600 : 700));
+      const isSent = /\/app-admin-reports-sent\.js(?:\?|$)/.test(url);
+      await new Promise((resolve) => setTimeout(resolve, isCore ? 1600 : isSent ? 120 : 1400));
       await route.continue();
+    });
+    await page.route(/\/api\/admin-report-shifts(?:\?|$)/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({ ok: true, reports: [] }),
+      });
     });
     const errors = [];
     page.on("pageerror", (err) => errors.push(String((err && (err.stack || err.message)) || err)));
@@ -351,6 +360,8 @@ async function main() {
         adminReportAccess: true,
         user: { id: 388008256, username: "roman1787443", first_name: "Smoke" },
       };
+      window.pokerApiHasCredential = function () { return true; };
+      window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
       const btn = document.getElementById("adminReportBtn");
       if (!btn) throw new Error("admin report button is missing");
       btn.classList.remove("header-admin-report--hidden");
@@ -383,6 +394,32 @@ async function main() {
     if (reportState.directOpen !== "function") throw new Error("admin report direct opener is not available");
     if (reportState.bound !== "1") throw new Error("admin report button was not bound after lazy load");
     if (!reportState.loadedCore) throw new Error("admin report core script was not lazy-loaded by the home button");
+
+    const sentClickStartedAt = Date.now();
+    await page.locator("[data-admin-report-tab='sent']").click();
+    await page.waitForFunction(() => {
+      const list = document.getElementById("adminReportSentList");
+      const text = list ? String(list.textContent || "").trim() : "";
+      return !!(text && !/Загрузка/.test(text));
+    }, null, { timeout: 1800 });
+    const sentOpenDelayMs = Date.now() - sentClickStartedAt;
+    const sentState = await page.evaluate(() => {
+      const list = document.getElementById("adminReportSentList");
+      const activePanel = document.querySelector(".admin-report-panel--active");
+      return {
+        openDelayMs: 0,
+        text: list ? String(list.textContent || "").trim() : "",
+        activePanel: activePanel ? activePanel.getAttribute("data-admin-report-panel") : "",
+        sentModule: typeof window.AdminReportSentTab,
+        sentScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-sent.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+      };
+    });
+    sentState.openDelayMs = sentOpenDelayMs;
+    if (sentState.openDelayMs > 1600) throw new Error(`admin report sent tab loaded too slowly: ${sentState.openDelayMs}ms`);
+    if (sentState.activePanel !== "sent") throw new Error("admin report sent tab did not become active");
+    if (!sentState.text || /Загрузка/.test(sentState.text)) throw new Error("admin report sent tab is stuck loading");
+    if (sentState.sentModule !== "object") throw new Error("admin report sent module did not load");
+    if (!sentState.sentScriptLoaded) throw new Error("admin report sent script was not priority-loaded");
     await page.locator("#adminReportModalClose").click();
 
     const winterVia = await clickVisibleOrSetView(page, "winter-rating");
@@ -421,7 +458,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportState, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, reportState, sentState, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
