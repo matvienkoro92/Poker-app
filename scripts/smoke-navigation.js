@@ -450,6 +450,19 @@ async function main() {
           !/Загружаю шаблоны/.test(statusText)
         );
       }, null, { timeout: 1800 });
+      await page.locator("#adminReportRakebackAddBtn").click();
+      await page.waitForFunction(() => {
+        return document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length === 1;
+      }, null, { timeout: 1200 });
+      const earlyRakebackAddState = await page.evaluate(() => ({
+        sharedRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length,
+        templateToggles: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-toggle]").length,
+        templateSeparators: document.querySelectorAll("#adminReportRakebackTableBody .admin-report-rakeback-date-separator--templates").length,
+        rowText: document.getElementById("adminReportRakebackTableBody")?.textContent || "",
+      }));
+      if (earlyRakebackAddState.sharedRows !== 1 || earlyRakebackAddState.templateToggles !== 1 || earlyRakebackAddState.templateSeparators !== 1) {
+        throw new Error("admin report rakeback add created duplicate template separators: " + JSON.stringify(earlyRakebackAddState));
+      }
       await page.locator("#adminReportModalClose").click();
     }
 

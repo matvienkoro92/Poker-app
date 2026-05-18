@@ -169,9 +169,12 @@ function initAdminReportModal() {
   }
 
   function createLazyRakebackModuleInstance() {
+    if (window.__adminReportRakebackShellModule && typeof window.__adminReportRakebackShellModule.open === "function") {
+      return window.__adminReportRakebackShellModule;
+    }
     if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") return false;
     refreshRakebackStaticData();
-    return window.AdminReportRakebackTab.init({
+    var module = window.AdminReportRakebackTab.init({
       modal: modal,
       body: rakebackBody,
       addBtn: rakebackAddBtn,
@@ -191,6 +194,8 @@ function initAdminReportModal() {
       loadTemplates: loadRakebackStaticTemplateData,
       activeRoom: activeRakebackRoom,
     });
+    window.__adminReportRakebackShellModule = module;
+    return module;
   }
 
   function ensureLazyRakebackModule() {

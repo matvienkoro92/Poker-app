@@ -625,6 +625,33 @@
     function bind() {
       if (bound) return;
       bound = true;
+      function addSharedRowFromButton(event) {
+        if (event) {
+          if (typeof event.preventDefault === "function") event.preventDefault();
+          if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
+          else if (typeof event.stopPropagation === "function") event.stopPropagation();
+        }
+        if (archiveMode) return;
+        var now = Date.now();
+        var row = {
+          groupId: "shell_" + now + "_" + Math.random().toString(16).slice(2),
+          kind: "base",
+          room: activeRoom,
+          playerId: "",
+          rake: 0,
+          rakeZero: true,
+          percent: 0,
+          discount15: false,
+          saved: true,
+          createdAt: now,
+          standardAt: now,
+          entryAddedAt: now,
+        };
+        sharedRows.unshift(row);
+        render();
+        var firstInput = body && body.querySelector("[data-rakeback-shared-row] [data-rakeback-player-id]");
+        if (firstInput && typeof firstInput.focus === "function") firstInput.focus();
+      }
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
         tab.addEventListener("click", function () {
           activeRoom = normalizeRoom(tab.getAttribute("data-rakeback-room-tab"));
@@ -647,28 +674,11 @@
         };
       }
       if (addBtn) {
-        addBtn.onclick = function () {
-          if (archiveMode) return;
-          var now = Date.now();
-          var row = {
-            groupId: "shell_" + now + "_" + Math.random().toString(16).slice(2),
-            kind: "base",
-            room: activeRoom,
-            playerId: "",
-            rake: 0,
-            rakeZero: true,
-            percent: 0,
-            discount15: false,
-            saved: true,
-            createdAt: now,
-            standardAt: now,
-            entryAddedAt: now,
-          };
-          sharedRows.unshift(row);
-          render();
-          var firstInput = body && body.querySelector("[data-rakeback-shared-row] [data-rakeback-player-id]");
-          if (firstInput && typeof firstInput.focus === "function") firstInput.focus();
-        };
+        addBtn.onclick = null;
+        if (addBtn.dataset.adminReportRakebackShellAddBound !== "1") {
+          addBtn.dataset.adminReportRakebackShellAddBound = "1";
+          addBtn.addEventListener("click", addSharedRowFromButton, true);
+        }
       }
       if (body) {
         body.addEventListener("input", function (event) {

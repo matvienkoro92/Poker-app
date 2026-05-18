@@ -533,6 +533,10 @@
     if (adminReportRakebackShellModule && typeof adminReportRakebackShellModule.open === "function") {
       return adminReportRakebackShellModule;
     }
+    if (window.__adminReportRakebackShellModule && typeof window.__adminReportRakebackShellModule.open === "function") {
+      adminReportRakebackShellModule = window.__adminReportRakebackShellModule;
+      return adminReportRakebackShellModule;
+    }
     if (!window.AdminReportRakebackTab || typeof window.AdminReportRakebackTab.init !== "function") {
       throw new Error("AdminReportRakebackTab is not available");
     }
@@ -559,6 +563,7 @@
       templatesOpen: window.__adminReportRakebackTemplateOpenRequested === true,
       activeRoom: getAdminReportRakebackShellActiveRoom(),
     });
+    window.__adminReportRakebackShellModule = adminReportRakebackShellModule;
     if (archiveBtn) {
       archiveBtn.onclick = function () {
         var nextArchiveMode = !(adminReportRakebackShellModule &&
