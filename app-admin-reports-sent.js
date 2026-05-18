@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v3";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v4";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
