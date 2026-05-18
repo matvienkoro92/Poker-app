@@ -3169,8 +3169,29 @@
         return new Date(p.y + "-" + p.m + "-" + p.d + "T12:00:00+03:00").getTime();
       }
 
+      function reportStoredDateTimestampMs(r) {
+        var raw = String(r && r.date || "").trim();
+        if (!raw) return NaN;
+        var match = raw.match(/^(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?$/);
+        if (!match) return NaN;
+        var day = Number(match[1]);
+        var month = Number(match[2]);
+        var year = match[3] ? Number(match[3]) : NaN;
+        if (!Number.isFinite(year)) {
+          var created = r && r.createdAt ? new Date(r.createdAt).getTime() : NaN;
+          year = Number.isFinite(created)
+            ? Number(new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", year: "numeric" }).format(new Date(created)))
+            : new Date().getFullYear();
+        }
+        if (year < 100) year += 2000;
+        if (!day || !month || month < 1 || month > 12) return NaN;
+        return new Date(year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0") + "T12:00:00+03:00").getTime();
+      }
+
       /** Отчётный день переключается в 16:00 МСК: до 16:00 идёт предыдущая дата. */
       function reportEffectiveTimestampMs(r) {
+        var stored = reportStoredDateTimestampMs(r);
+        if (Number.isFinite(stored)) return stored;
         var raw = r && r.createdAt ? new Date(r.createdAt).getTime() : NaN;
         if (!r || !r.createdAt || raw !== raw) return raw;
         return reportBusinessTimestampMs(raw);

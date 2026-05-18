@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v1";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v2";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var escapeReportHtml = helpers.escapeReportHtml || function (value) {
@@ -52,6 +52,51 @@
     function parseReportNumber(value) {
       var n = typeof value === "number" ? value : parseFloat(String(value != null ? value : "").replace(",", "."));
       return Number.isFinite(n) ? n : 0;
+    }
+    function capitalizeWord(value) {
+      var text = String(value || "").trim();
+      return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+    }
+    function parseStoredReportDateMs(report) {
+      var raw = String(report && report.date || "").trim();
+      if (!raw) return NaN;
+      var match = raw.match(/^(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?$/);
+      if (!match) return NaN;
+      var day = Number(match[1]);
+      var month = Number(match[2]);
+      var year = match[3] ? Number(match[3]) : NaN;
+      if (!Number.isFinite(year)) {
+        var created = report && report.createdAt ? new Date(report.createdAt).getTime() : NaN;
+        year = Number.isFinite(created)
+          ? Number(new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", year: "numeric" }).format(new Date(created)))
+          : new Date().getFullYear();
+      }
+      if (year < 100) year += 2000;
+      if (!day || !month || month < 1 || month > 12) return NaN;
+      return Date.UTC(year, month - 1, day, 12, 0, 0, 0) - (3 * 60 * 60 * 1000);
+    }
+    function getReportDayMeta(report) {
+      var storedTs = parseStoredReportDateMs(report);
+      if (Number.isFinite(storedTs)) {
+        var storedDate = String(report && report.date || "").trim();
+        var storedWeekday = capitalizeWord(report && report.weekday);
+        var formatted = formatRuWeekdayDateFromTs(storedTs);
+        return {
+          timestamp: storedTs,
+          weekday: storedWeekday || formatted.weekday || "",
+          date: storedDate || formatted.date || "",
+        };
+      }
+      var eff = reportEffectiveTimestampMs(report);
+      var meta = formatRuWeekdayDateFromTs(eff);
+      return {
+        timestamp: eff,
+        weekday: meta.weekday || "",
+        date: meta.date || String(report && report.date || "").trim(),
+      };
+    }
+    function getReportDayTimestamp(report) {
+      return getReportDayMeta(report).timestamp;
     }
     function normalizeReportDetailName(name) {
       return String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -398,7 +443,7 @@
           var weekTotals = emptyWeekTotals();
           var extraMap = {};
           allItems.forEach(function (r) {
-            var t = reportEffectiveTimestampMs(r);
+            var t = getReportDayTimestamp(r);
             if (!t || t < fromMs || t > toMs) return;
             addNumericToTotals(weekTotals, r);
             mergeReportExtrasIntoMap(extraMap, r);
@@ -417,8 +462,7 @@
           if (!list || list.length === 0) return "";
           var byDay = {};
           list.forEach(function (r) {
-            var eff = reportEffectiveTimestampMs(r);
-            var meta = formatRuWeekdayDateFromTs(eff);
+            var meta = getReportDayMeta(r);
             var d = (meta.weekday || "").trim() || "—";
             if (!byDay[d]) byDay[d] = [];
             byDay[d].push(r);
@@ -443,8 +487,7 @@
               var id = idPrefix + (it.id || day + "-" + idx);
               var detailHtml = buildReportDetailHtml(it);
               var reportId = (it.id || "").toString();
-              var effMs = reportEffectiveTimestampMs(it);
-              var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
+              var dispDate = getReportDayMeta(it).date || it.date || "";
               parts.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
             });
             parts.push("</div>");
@@ -455,8 +498,7 @@
           if (!list || list.length === 0) return '<p class="admin-report-sent-period-hint">В этой неделе отчётов по дням пока нет.</p>';
           var byDay = {};
           list.forEach(function (r) {
-            var eff = reportEffectiveTimestampMs(r);
-            var meta = formatRuWeekdayDateFromTs(eff);
+            var meta = getReportDayMeta(r);
             var d = (meta.weekday || "").trim() || "—";
             if (!byDay[d]) byDay[d] = [];
             byDay[d].push(r);
@@ -483,8 +525,7 @@
               var id = idPrefix + (it.id || day + "-" + idx);
               var detailHtml = buildReportDetailHtml(it);
               var reportId = (it.id || "").toString();
-              var effMs = reportEffectiveTimestampMs(it);
-              var dispDate = formatRuWeekdayDateFromTs(effMs).date || it.date || "";
+              var dispDate = getReportDayMeta(it).date || it.date || "";
               parts.push("<div class=\"admin-report-sent-item\" data-report-id=\"" + escapeReportHtml(reportId) + "\"><div class=\"admin-report-sent-item__head\" role=\"button\" tabindex=\"0\" aria-expanded=\"false\" aria-controls=\"" + id + "-detail\"><span class=\"admin-report-sent-item__date\">" + escapeReportHtml(dispDate) + "</span><span class=\"admin-report-sent-item__who\">" + escapeReportHtml(who) + "</span><span class=\"admin-report-sent-item__actions\"><button type=\"button\" class=\"admin-report-sent-edit-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Редактировать\">✎</button><button type=\"button\" class=\"admin-report-sent-delete-btn\" data-report-id=\"" + escapeReportHtml(reportId) + "\" title=\"Удалить\">✕</button></span><span class=\"admin-report-sent-item__toggle\" aria-hidden=\"true\">▼</span></div><div class=\"admin-report-sent-detail\" id=\"" + id + "-detail\" hidden><div class=\"admin-report-sent-detail__inner\">" + (comment ? "<div class=\"admin-report-sent-detail__row\"><span class=\"admin-report-sent-detail__label\">Комментарий</span><span class=\"admin-report-sent-detail__value\">" + escapeReportHtml(comment) + "</span></div>" : "") + detailHtml + "</div></div></div>");
             });
             parts.push("</div></details>");
@@ -519,7 +560,7 @@
         function groupReportsByWeek(list) {
           var grouped = {};
           (Array.isArray(list) ? list : []).forEach(function (r) {
-            var eff = reportEffectiveTimestampMs(r);
+            var eff = getReportDayTimestamp(r);
             if (!eff || eff !== eff) return;
             var ws = weekStartMsForReport(eff);
             var key = String(ws);
