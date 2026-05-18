@@ -14,9 +14,11 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v2";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v3";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
+    var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
+    var SENT_REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
     var escapeReportHtml = helpers.escapeReportHtml || function (value) {
       return String(value == null ? "" : value)
         .replace(/&/g, "&amp;")
@@ -24,13 +26,26 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
     };
+    function fallbackReportBusinessTimestampMs(value) {
+      var raw = value != null ? Number(value) : Date.now();
+      if (!Number.isFinite(raw)) raw = Date.now();
+      var shifted = new Date(raw - SENT_REPORT_DAY_CUTOFF_MS + SENT_REPORT_MSK_SHIFT_MS);
+      return Date.UTC(
+        shifted.getUTCFullYear(),
+        shifted.getUTCMonth(),
+        shifted.getUTCDate(),
+        12,
+        0,
+        0,
+        0
+      ) - SENT_REPORT_MSK_SHIFT_MS;
+    }
     var reportBusinessTimestampMs = helpers.reportBusinessTimestampMs || function (value) {
-      var n = value != null ? Number(value) : Date.now();
-      return Number.isFinite(n) ? n : Date.now();
+      return fallbackReportBusinessTimestampMs(value);
     };
     var reportEffectiveTimestampMs = helpers.reportEffectiveTimestampMs || function (report) {
       var raw = report && report.createdAt ? Date.parse(report.createdAt) : 0;
-      return Number.isFinite(raw) && raw > 0 ? raw : Date.now();
+      return Number.isFinite(raw) && raw > 0 ? reportBusinessTimestampMs(raw) : fallbackReportBusinessTimestampMs(Date.now());
     };
     var formatRuWeekdayDateFromTs = helpers.formatRuWeekdayDateFromTs || function (ts) {
       var d = new Date(ts || Date.now());
@@ -73,7 +88,7 @@
       }
       if (year < 100) year += 2000;
       if (!day || !month || month < 1 || month > 12) return NaN;
-      return Date.UTC(year, month - 1, day, 12, 0, 0, 0) - (3 * 60 * 60 * 1000);
+      return Date.UTC(year, month - 1, day, 12, 0, 0, 0) - SENT_REPORT_MSK_SHIFT_MS;
     }
     function getReportDayMeta(report) {
       var storedTs = parseStoredReportDateMs(report);
