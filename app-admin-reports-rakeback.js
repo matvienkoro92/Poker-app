@@ -236,9 +236,10 @@
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
     var templatesLoading = false;
     var templatesLoadPromise = null;
+    var templatesLoadStatusTimer = null;
     var templateStreamSeq = 0;
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
-    var templateRowsOpen = readRakebackTemplateSpoilerOpen();
+    var templateRowsOpen = config.templatesOpen === true || readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
     var bound = false;
     var sharedRows = [];
@@ -276,7 +277,7 @@
         return Promise.resolve(true);
       }
       templatesLoading = true;
-      if (options.showStatus) setStatus("Загружаю шаблоны…", true);
+      if (options.showStatus) startTemplateLoadStatusTicker();
       syncControls();
       templatesLoadPromise = Promise.resolve()
         .then(function () {
@@ -295,10 +296,29 @@
         .then(function (result) {
           templatesLoading = false;
           templatesLoadPromise = null;
+          stopTemplateLoadStatusTicker();
           syncControls();
           return result;
         });
       return templatesLoadPromise;
+    }
+
+    function startTemplateLoadStatusTicker() {
+      var startedAt = Date.now();
+      stopTemplateLoadStatusTicker();
+      function tick() {
+        if (!templatesLoading || templatesLoaded) return;
+        var elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        setStatus(elapsed > 0 ? "Загружаю шаблоны… " + elapsed + " сек" : "Загружаю шаблоны…", true);
+        templatesLoadStatusTimer = setTimeout(tick, 1000);
+      }
+      tick();
+    }
+
+    function stopTemplateLoadStatusTicker() {
+      if (!templatesLoadStatusTimer) return;
+      clearTimeout(templatesLoadStatusTimer);
+      templatesLoadStatusTimer = null;
     }
 
     function scheduleTemplateStreamStep(fn) {
@@ -673,9 +693,6 @@
             saveRakebackTemplateSpoilerOpen(templateRowsOpen);
             if (templateRowsOpen && !templatesLoaded) {
               render();
-              loadTemplatesIfNeeded({ showStatus: true }).then(function () {
-                render();
-              });
               return;
             }
             render();
@@ -721,6 +738,11 @@
       render: render,
       saveSharedDraft: saveSharedDraftNow,
       setArchiveMode: setArchiveMode,
+      setTemplateRowsOpen: function (open) {
+        templateRowsOpen = !!open;
+        saveRakebackTemplateSpoilerOpen(templateRowsOpen);
+        return render();
+      },
       setRoom: function (room) {
         activeRoom = normalizeRoom(room);
         return render();

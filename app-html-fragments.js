@@ -369,6 +369,9 @@
       var version = getAdminReportShellAssetVersion();
       script.src = "./" + file + (version ? "?v=" + encodeURIComponent(version) : "");
       script.async = true;
+      if (/^app-admin-reports-rakeback(?:-data)?\.js$/.test(file)) {
+        try { script.fetchPriority = "high"; } catch (eFetchPriority) {}
+      }
       script.dataset.adminReportModule = file;
       script.onload = function () {
         script.setAttribute("data-admin-report-loaded", "1");
@@ -485,6 +488,47 @@
     return activeTab ? activeTab.getAttribute("data-rakeback-room-tab") : "P21";
   }
 
+  function buildAdminReportRakebackShellPlaceholderHtml(open) {
+    return (
+      '<tr class="admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates" data-rakeback-generated="1" data-rakeback-shell-placeholder="1">' +
+        '<td colspan="7">' +
+          '<button type="button" class="admin-report-rakeback-template-toggle" data-rakeback-template-toggle data-rakeback-shell-placeholder-toggle aria-expanded="' + (open ? "true" : "false") + '" aria-label="' + (open ? "Скрыть пустые записи недели" : "Показать пустые записи недели") + '" title="' + (open ? "Скрыть шаблоны" : "Показать шаблоны") + '">' +
+            "<span>Пустые записи недели</span>" +
+          "</button>" +
+        "</td>" +
+      "</tr>"
+    );
+  }
+
+  function renderAdminReportRakebackShellPlaceholder(open) {
+    var body = document.getElementById("adminReportRakebackTableBody");
+    if (!body) return false;
+    body.innerHTML = buildAdminReportRakebackShellPlaceholderHtml(open);
+    return true;
+  }
+
+  function bindAdminReportRakebackShellPlaceholder() {
+    var body = document.getElementById("adminReportRakebackTableBody");
+    if (!body || body.dataset.rakebackShellPlaceholderBound === "1") return;
+    body.dataset.rakebackShellPlaceholderBound = "1";
+    body.addEventListener("click", function (event) {
+      var toggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-shell-placeholder-toggle]") : null;
+      if (!toggle || !body.contains(toggle)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      window.__adminReportRakebackTemplateOpenRequested = true;
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", "Скрыть пустые записи недели");
+      toggle.setAttribute("title", "Скрыть шаблоны");
+      var statusEl = document.getElementById("adminReportRakebackStatus");
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "Загружаю шаблоны…";
+      }
+      openAdminReportRakebackShell().catch(function () {});
+    });
+  }
+
   function initAdminReportRakebackShellModule() {
     if (adminReportRakebackShellModule && typeof adminReportRakebackShellModule.open === "function") {
       return adminReportRakebackShellModule;
@@ -512,6 +556,7 @@
       templatesLoaded: hasAdminReportRakebackShellTemplates(),
       templatesMayExist: true,
       loadTemplates: loadAdminReportRakebackShellTemplates,
+      templatesOpen: window.__adminReportRakebackTemplateOpenRequested === true,
       activeRoom: getAdminReportRakebackShellActiveRoom(),
     });
     if (archiveBtn) {
@@ -528,17 +573,22 @@
   function openAdminReportRakebackShell() {
     var body = document.getElementById("adminReportRakebackTableBody");
     var statusEl = document.getElementById("adminReportRakebackStatus");
+    var openRequested = window.__adminReportRakebackTemplateOpenRequested === true;
     if (statusEl && !adminReportRakebackShellModule) {
-      statusEl.hidden = true;
-      statusEl.textContent = "";
+      statusEl.hidden = !openRequested;
+      statusEl.textContent = openRequested ? "Загружаю шаблоны…" : "";
     }
     if (body && !adminReportRakebackShellModule) {
-      body.replaceChildren();
+      renderAdminReportRakebackShellPlaceholder(openRequested);
+      bindAdminReportRakebackShellPlaceholder();
     }
     return loadAdminReportShellScript("app-admin-reports-rakeback.js").then(function () {
       var module = initAdminReportRakebackShellModule();
+      if (window.__adminReportRakebackTemplateOpenRequested === true && module && typeof module.setTemplateRowsOpen === "function") {
+        module.setTemplateRowsOpen(true);
+      }
       var count = module.open();
-      if (statusEl) {
+      if (statusEl && !/шаблон/i.test(String(statusEl.textContent || ""))) {
         statusEl.hidden = true;
         statusEl.textContent = "";
       }
