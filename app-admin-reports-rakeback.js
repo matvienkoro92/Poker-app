@@ -688,13 +688,17 @@
       }));
     }
 
-    function getVisibleSharedRows() {
+    function getSharedRowsForTotal(room) {
       var query = getSearchQuery();
       return orderSharedRowsForDisplay(sharedRows.filter(function (row) {
-        if (normalizeRoom(row.room) !== activeRoom) return false;
+        if (room && normalizeRoom(row.room) !== normalizeRoom(room)) return false;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         return !query || playerId.indexOf(query) !== -1;
       }));
+    }
+
+    function getVisibleSharedRows() {
+      return getSharedRowsForTotal(activeRoom);
     }
 
     function getFinalRakeTotal(rows) {
@@ -709,6 +713,20 @@
       return groupOrder.reduce(function (sum, key) {
         return sum + parseNumber(finalRakeByGroup[key]);
       }, 0);
+    }
+
+    function getRakebackTotals(rows) {
+      rows = Array.isArray(rows) ? rows : [];
+      return {
+        rake: getFinalRakeTotal(rows),
+        amount: rows.reduce(function (sum, row) {
+          var roomAmount = row.roomAmount != null && row.roomAmount !== ""
+            ? parseNumber(row.roomAmount)
+            : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+          var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
+          return sum + amount;
+        }, 0),
+      };
     }
 
     function getPulledTemplateIdSet(room) {
@@ -1113,16 +1131,11 @@
       }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       var visibleShared = archiveMode ? [] : getVisibleSharedRows();
-      var totalRake = getFinalRakeTotal(visibleShared);
-      var totalAmount = visibleShared.reduce(function (sum, row) {
-        var roomAmount = row.roomAmount != null && row.roomAmount !== ""
-          ? parseNumber(row.roomAmount)
-          : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
-        var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
-        return sum + amount;
-      }, 0);
-      if (roomTotalEl) roomTotalEl.textContent = String(Math.round(totalRake)) + " / " + String(Math.round(totalAmount));
-      if (totalEl) totalEl.textContent = String(Math.round(totalRake)) + " / " + String(Math.round(totalAmount));
+      var allShared = archiveMode ? [] : getSharedRowsForTotal();
+      var roomTotals = getRakebackTotals(visibleShared);
+      var allTotals = getRakebackTotals(allShared);
+      if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
+      if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
     }
 
     function render() {

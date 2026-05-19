@@ -186,6 +186,21 @@ async function main() {
         entryAddedAt: Date.now() - 1000,
         amount: 3.5,
         roomAmount: 3.5,
+      }, {
+        groupId: "smoke-other-room-rakeback",
+        kind: "base",
+        room: "X",
+        playerId: "smoke-x-room",
+        rake: 20,
+        percent: 10,
+        discount15: false,
+        saved: true,
+        ownerId: "388008256",
+        createdAt: Date.now() - 900,
+        standardAt: Date.now() - 900,
+        entryAddedAt: Date.now() - 900,
+        amount: 200,
+        roomAmount: 2,
       }],
       updatedAt: new Date(Date.now() - 1000).toISOString(),
       updatedBy: "smoke",
@@ -917,6 +932,11 @@ async function main() {
       const addBtn = document.getElementById("adminReportRakebackAddBtn");
       const refreshBtn = document.getElementById("adminReportRakebackRefreshBtn");
       const sharedRows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const parseTotal = (id) => {
+        const text = document.getElementById(id)?.textContent || "";
+        const [rake, amount] = String(text).split("/").map((part) => Number(String(part || "").trim()) || 0);
+        return { rake, amount };
+      };
       const finalRakeByGroup = {};
       const groupOrder = [];
       let naiveRake = 0;
@@ -928,15 +948,18 @@ async function main() {
         finalRakeByGroup[groupId] = rake;
       });
       const expectedFinalRake = groupOrder.reduce((sum, groupId) => sum + (Number(finalRakeByGroup[groupId]) || 0), 0);
-      const totalText = document.getElementById("adminReportRakebackRoomTotal")?.textContent || "";
-      const renderedRake = Number(String(totalText).split("/")[0].trim()) || 0;
+      const roomTotal = parseTotal("adminReportRakebackRoomTotal");
+      const allTotal = parseTotal("adminReportRakebackTotal");
       return {
         addVisible: !!(addBtn && !addBtn.hidden),
         addDisabled: !!(addBtn && addBtn.disabled),
         refreshVisible: !!(refreshBtn && !refreshBtn.hidden),
         refreshDisabled: !!(refreshBtn && refreshBtn.disabled),
         sharedRows: sharedRows.length,
-        renderedRake,
+        renderedRake: roomTotal.rake,
+        renderedAmount: roomTotal.amount,
+        renderedAllRake: allTotal.rake,
+        renderedAllAmount: allTotal.amount,
         expectedFinalRake,
         naiveRake,
       };
@@ -949,6 +972,9 @@ async function main() {
     }
     if (rakebackSharedState.renderedRake !== Math.round(rakebackSharedState.expectedFinalRake) || rakebackSharedState.renderedRake === Math.round(rakebackSharedState.naiveRake)) {
       throw new Error("admin report rakeback total rake did not use final group rake: " + JSON.stringify(rakebackSharedState));
+    }
+    if (rakebackSharedState.renderedAllRake !== rakebackSharedState.renderedRake + 20 || rakebackSharedState.renderedAllAmount !== rakebackSharedState.renderedAmount + 200) {
+      throw new Error("admin report rakeback all-room total did not include hidden room rows: " + JSON.stringify(rakebackSharedState));
     }
     if (!submittedRakebackDrafts.length || !(submittedRakebackDrafts[submittedRakebackDrafts.length - 1].rakebackRows || []).length) {
       throw new Error("admin report rakeback add button did not save shared draft");
