@@ -860,6 +860,35 @@ async function main() {
       return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon'] [data-rakeback-player-id]"))
         .some((input) => String(input.value || "").trim() === "smoke-shared");
     }, null, { timeout: 1500 });
+    const rakebackAddonDateState = await page.evaluate(() => {
+      function pad(value) {
+        return value < 10 ? "0" + value : String(value);
+      }
+      const addon = document.querySelector("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']");
+      const groupId = addon?.getAttribute("data-rakeback-group") || "";
+      const base = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"))
+        .find((row) => row.getAttribute("data-rakeback-group") === groupId && row.getAttribute("data-rakeback-kind") !== "addon");
+      const baseDate = base?.querySelector("[data-rakeback-entry-date]")?.value || "";
+      const addonDate = addon?.querySelector("[data-rakeback-entry-date]");
+      const date = baseDate ? new Date(baseDate + "T12:00:00") : new Date();
+      date.setDate(date.getDate() + 1);
+      const nextValue = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join("-");
+      if (addonDate) {
+        addonDate.value = nextValue;
+        addonDate.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      const badge = addon?.querySelector("[data-rakeback-date-badge]");
+      return {
+        baseDate,
+        nextValue,
+        badgeVisible: !!(badge && !badge.hidden),
+        badgeText: badge?.textContent || "",
+        entryAddedAt: addon?.getAttribute("data-rakeback-entry-added-at") || "",
+      };
+    });
+    if (!rakebackAddonDateState.badgeVisible || !rakebackAddonDateState.badgeText) {
+      throw new Error("admin report rakeback addon date badge did not show next-day marker: " + JSON.stringify(rakebackAddonDateState));
+    }
     const addonRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']").first();
     await addonRow.locator("[data-rakeback-rake]").fill("25");
     const rakebackAddonSaveResponse = page.waitForResponse((response) => {
@@ -871,6 +900,11 @@ async function main() {
     const savedSmokeRows = (lastRakebackDraft.rakebackRows || []).filter((row) => String(row && row.playerId || "").trim() === "smoke-shared");
     if (!savedSmokeRows.some((row) => row.kind === "addon") || !savedSmokeRows.some((row) => row.kind !== "addon")) {
       throw new Error("admin report rakeback addon save did not submit base and addon rows: " + JSON.stringify(lastRakebackDraft));
+    }
+    const savedSmokeBase = savedSmokeRows.find((row) => row.kind !== "addon");
+    const savedSmokeAddon = savedSmokeRows.find((row) => row.kind === "addon");
+    if (!savedSmokeBase || !savedSmokeAddon || String(savedSmokeBase.entryAddedAt || "") === String(savedSmokeAddon.entryAddedAt || "")) {
+      throw new Error("admin report rakeback addon save did not preserve distinct addon date: " + JSON.stringify(lastRakebackDraft));
     }
     await page.locator("#adminReportRakebackSearch").fill("smoke-shared");
     await page.locator("#adminReportRakebackSearch").fill("");

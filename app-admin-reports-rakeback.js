@@ -68,6 +68,48 @@
     return String(Math.round(n * 100) / 100);
   }
 
+  function normalizeTimeValue(raw, fallback) {
+    var fallbackValue = fallback != null ? fallback : Date.now();
+    if (raw == null || raw === "") return fallbackValue;
+    var direct = typeof raw === "number" ? raw : Number(raw);
+    if (isFinite(direct) && direct > 0) return direct;
+    var parsed = Date.parse(String(raw));
+    return isFinite(parsed) ? parsed : fallbackValue;
+  }
+
+  function padDatePart(value) {
+    value = Number(value) || 0;
+    return value < 10 ? "0" + value : String(value);
+  }
+
+  function formatEntryDateLabel(raw) {
+    var date = new Date(normalizeTimeValue(raw));
+    return padDatePart(date.getDate()) + "." + padDatePart(date.getMonth() + 1);
+  }
+
+  function getDateInputValue(raw) {
+    var date = new Date(normalizeTimeValue(raw));
+    return [
+      date.getFullYear(),
+      padDatePart(date.getMonth() + 1),
+      padDatePart(date.getDate()),
+    ].join("-");
+  }
+
+  function getTimeFromDateInput(value, fallback) {
+    var parts = String(value || "").split("-").map(function (part) { return Number(part); });
+    if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return normalizeTimeValue(fallback);
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0).getTime();
+  }
+
+  function isSameEntryDate(a, b) {
+    var left = new Date(normalizeTimeValue(a));
+    var right = new Date(normalizeTimeValue(b));
+    return left.getFullYear() === right.getFullYear() &&
+      left.getMonth() === right.getMonth() &&
+      left.getDate() === right.getDate();
+  }
+
   function getRakebackRoomMultiplier(room) {
     room = normalizeRoom(room);
     if (room === "X") return 100;
@@ -255,6 +297,30 @@
     if (removeBtn) removeBtn.disabled = !!busy;
   }
 
+  function updateSharedRowDateBadge(row, baseEntryAt) {
+    if (!row) return;
+    var badge = row.querySelector("[data-rakeback-date-badge]");
+    var label = row.querySelector("[data-rakeback-date-label]");
+    var input = row.querySelector("[data-rakeback-entry-date]");
+    if (!badge || !label || !input) return;
+    var entryAt = normalizeTimeValue(row.getAttribute("data-rakeback-entry-added-at") || row.getAttribute("data-rakeback-created-at"));
+    var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
+    var saved = row.getAttribute("data-rakeback-saved") === "1";
+    var show = kind !== "addon" || !saved || !isSameEntryDate(entryAt, baseEntryAt || entryAt);
+    label.textContent = formatEntryDateLabel(entryAt);
+    input.value = getDateInputValue(entryAt);
+    badge.hidden = !show;
+    row.setAttribute("data-rakeback-entry-date-visible", show ? "1" : "0");
+  }
+
+  function applySharedRowDateInput(row) {
+    if (!row) return;
+    var input = row.querySelector("[data-rakeback-entry-date]");
+    if (!input) return;
+    var value = getTimeFromDateInput(input.value, row.getAttribute("data-rakeback-entry-added-at") || row.getAttribute("data-rakeback-created-at"));
+    row.setAttribute("data-rakeback-entry-added-at", String(value));
+  }
+
   function setSharedRowSaved(row, saved, busy) {
     if (!row) return;
     saved = saved !== false;
@@ -263,6 +329,11 @@
     row.setAttribute("data-rakeback-saved", saved ? "1" : "0");
     row.querySelectorAll("input").forEach(function (input) {
       if (input.hasAttribute("data-rakeback-discount15")) {
+        input.disabled = saved || !!busy;
+        return;
+      }
+      if (input.hasAttribute("data-rakeback-entry-date")) {
+        input.readOnly = saved;
         input.disabled = saved || !!busy;
         return;
       }
@@ -304,6 +375,9 @@
     var groupId = String(data.groupId || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2))).trim();
     var saved = data.saved !== false;
     var persisted = data.persisted === true || saved;
+    var entryAt = normalizeTimeValue(data.entryAddedAt || data.firstAddedAt || data.createdAt || Date.now());
+    var standardAt = normalizeTimeValue(data.standardAt || data.createdAt || entryAt, entryAt);
+    var createdAt = normalizeTimeValue(data.createdAt || data.addedAt || data.created || entryAt, entryAt);
     var tr = document.createElement("tr");
     tr.className = "admin-report-rakeback-row" +
       (saved ? " admin-report-rakeback-row--saved" : "") +
@@ -314,15 +388,15 @@
     tr.setAttribute("data-rakeback-group", groupId);
     tr.setAttribute("data-rakeback-saved", saved ? "1" : "0");
     tr.setAttribute("data-rakeback-persisted", persisted ? "1" : "0");
-    tr.setAttribute("data-rakeback-created-at", String(data.createdAt || Date.now()));
-    tr.setAttribute("data-rakeback-standard-at", String(data.standardAt || data.createdAt || Date.now()));
-    tr.setAttribute("data-rakeback-entry-added-at", String(data.entryAddedAt || data.createdAt || Date.now()));
+    tr.setAttribute("data-rakeback-created-at", String(createdAt));
+    tr.setAttribute("data-rakeback-standard-at", String(standardAt));
+    tr.setAttribute("data-rakeback-entry-added-at", String(entryAt));
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || "");
     tr.setAttribute("data-rakeback-report-id", data.reportId || "");
     tr.setAttribute("data-rakeback-reported-at", data.reportedAt || "");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><label class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="date" data-rakeback-entry-date aria-label="Дата записи" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></label><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
       '<td>' + (kind === "addon"
         ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
         : '<input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
@@ -336,6 +410,7 @@
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     syncSharedRowAmount(tr);
+    updateSharedRowDateBadge(tr, data.baseEntryAt || entryAt);
     setSharedRowSaved(tr, saved, false);
     return tr;
   }
@@ -645,6 +720,7 @@
       if (!body) return sharedRows.slice();
       var previousRakeByGroup = {};
       return Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]")).map(function (row) {
+        applySharedRowDateInput(row);
         var roomSelect = row.querySelector("[data-rakeback-room]");
         var idInput = row.querySelector("[data-rakeback-player-id]");
         var rakeInput = row.querySelector("[data-rakeback-rake]");
@@ -950,13 +1026,17 @@
       if (!body) return;
       var rows = Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]"));
       var baseByGroup = {};
+      var baseEntryByGroup = {};
       rows.forEach(function (row) {
         if (row.getAttribute("data-rakeback-kind") !== "addon") {
-          baseByGroup[row.getAttribute("data-rakeback-group") || ""] = row;
+          var groupId = row.getAttribute("data-rakeback-group") || "";
+          baseByGroup[groupId] = row;
+          baseEntryByGroup[groupId] = row.getAttribute("data-rakeback-entry-added-at") || row.getAttribute("data-rakeback-created-at") || Date.now();
         }
       });
       var previousRakeByGroup = {};
       rows.forEach(function (row) {
+        applySharedRowDateInput(row);
         var groupId = row.getAttribute("data-rakeback-group") || "";
         if (row.getAttribute("data-rakeback-kind") === "addon" && baseByGroup[groupId]) {
           var baseRoom = baseByGroup[groupId].querySelector("[data-rakeback-room]");
@@ -966,6 +1046,7 @@
           if (baseRoom && roomSelect) roomSelect.value = baseRoom.value;
           if (baseId && idInput) idInput.value = baseId.value;
         }
+        updateSharedRowDateBadge(row, baseEntryByGroup[groupId] || row.getAttribute("data-rakeback-entry-added-at"));
         syncSharedRowAmount(row, row.getAttribute("data-rakeback-kind") === "addon" ? previousRakeByGroup[groupId] : 0);
         var rakeInput = row.querySelector("[data-rakeback-rake]");
         previousRakeByGroup[groupId] = parseNumber(rakeInput ? rakeInput.value : "");
@@ -1053,9 +1134,20 @@
       var visibleShared = getVisibleSharedRows();
       var fragment = document.createDocumentFragment();
       var baseIndex = 0;
+      var baseEntryByGroup = {};
       visibleShared.forEach(function (row, index) {
-        if (getSharedRowKind(row) !== "addon") baseIndex += 1;
-        fragment.appendChild(createSharedRow(row, Math.max(0, baseIndex - 1)));
+        var groupId = String(row.groupId || "").trim();
+        if (getSharedRowKind(row) !== "addon") {
+          baseIndex += 1;
+          baseEntryByGroup[groupId] = row.entryAddedAt || row.createdAt || row.standardAt || Date.now();
+        }
+        var renderRow = row;
+        if (getSharedRowKind(row) === "addon") {
+          renderRow = {};
+          Object.keys(row).forEach(function (key) { renderRow[key] = row[key]; });
+          renderRow.baseEntryAt = baseEntryByGroup[groupId] || row.entryAddedAt || row.createdAt || Date.now();
+        }
+        fragment.appendChild(createSharedRow(renderRow, Math.max(0, baseIndex - 1)));
       });
       if (!templateRowsOpen) clearTemplateStatus();
       if (templatesMayExist || templatesLoading || ids.length) fragment.appendChild(createTemplateSeparator(templateRowsOpen));
@@ -1312,6 +1404,7 @@
             var editRow = editBtn.closest("[data-rakeback-shared-row]");
             if (!editRow) return;
             setSharedRowSaved(editRow, false, false);
+            syncSharedGroupRows();
             sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
             setStatus("Редактирование включено", true);
             var editInput = editRow.querySelector("[data-rakeback-rake]") || editRow.querySelector("[data-rakeback-player-id]");

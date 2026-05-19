@@ -1726,11 +1726,56 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-row-number[hidden] {
   display: none !important;
 }
+.admin-report-rakeback-date-badge {
+  position: absolute;
+  left: 29px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 43px;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid rgba(246, 211, 145, 0.32);
+  border-radius: 999px;
+  background: rgba(246, 211, 145, 0.1);
+  color: #ffe7b0;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-date-badge[hidden] {
+  display: none !important;
+}
+.admin-report-rakeback-date-badge input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.admin-report-rakeback-date-badge input:disabled {
+  cursor: default;
+}
 .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
   padding-left: 31px;
 }
+.admin-report-rakeback-row[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-input--id {
+  padding-left: 78px;
+}
 .admin-report-rakeback-row--addon .admin-report-rakeback-input--id {
   padding-left: 7px;
+}
+.admin-report-rakeback-row--addon .admin-report-rakeback-date-badge {
+  left: 8px;
+}
+.admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-input--id {
+  padding-left: 61px;
 }
 .admin-report-rakeback-discount-control {
   position: relative;
@@ -2454,11 +2499,27 @@ button.admin-report-rakeback-summary__row:focus-visible {
     height: 16px;
     font-size: 9px;
   }
+  .admin-report-rakeback-date-badge {
+    left: 21px;
+    min-width: 34px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 8px;
+  }
   .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
     padding-left: 22px;
   }
+  .admin-report-rakeback-row[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-input--id {
+    padding-left: 58px;
+  }
   .admin-report-rakeback-row--addon .admin-report-rakeback-input--id {
     padding-left: 4px;
+  }
+  .admin-report-rakeback-row--addon .admin-report-rakeback-date-badge {
+    left: 4px;
+  }
+  .admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-input--id {
+    padding-left: 41px;
   }
   .admin-report-rakeback-discount {
     width: 100%;
