@@ -2336,6 +2336,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
   border-color: transparent;
   background: rgba(246, 211, 145, 0.05);
 }
+.admin-report-rakeback-row[data-rakeback-template-default-saved="1"]:not([data-rakeback-template-default-dirty="1"]) [data-rakeback-percent] {
+  border-color: transparent;
+  background: rgba(246, 211, 145, 0.05);
+  color: var(--text-muted);
+}
+.admin-report-rakeback-row[data-rakeback-template-default-saved="1"]:not([data-rakeback-template-default-dirty="1"]) .admin-report-rakeback-discount-box {
+  opacity: 0.72;
+}
 .admin-report-rakeback-week-total-row td {
   background: rgba(246, 211, 145, 0.1);
   border-bottom-color: rgba(246, 211, 145, 0.24);
