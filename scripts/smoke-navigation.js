@@ -932,6 +932,51 @@ async function main() {
       return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row] [data-rakeback-player-id]"))
         .some((input) => String(input.value || "").trim() === "smoke-shared");
     }, null, { timeout: 2500 });
+    await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const base = rows.find((row) => {
+        return row.getAttribute("data-rakeback-kind") !== "addon" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared";
+      });
+      base?.querySelector("[data-rakeback-add-addon]")?.click();
+    });
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim();
+      });
+    }, null, { timeout: 1000 });
+    await page.evaluate(() => {
+      const blankAddon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim();
+      });
+      blankAddon?.querySelector("[data-rakeback-remove]")?.click();
+    });
+    await page.waitForFunction(() => {
+      return !Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim();
+      });
+    }, null, { timeout: 1000 });
+    const rakebackAddonDeleteState = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const base = rows.find((row) => row.getAttribute("data-rakeback-kind") !== "addon" && String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared");
+      const group = base?.getAttribute("data-rakeback-group") || "";
+      const addons = rows.filter((row) => row.getAttribute("data-rakeback-kind") === "addon" && String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared");
+      return {
+        group,
+        addonCount: addons.length,
+        blankAddonCount: addons.filter((row) => !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim()).length,
+        wrongGroupCount: addons.filter((row) => row.getAttribute("data-rakeback-group") !== group).length,
+      };
+    });
+    if (rakebackAddonDeleteState.blankAddonCount !== 0 || rakebackAddonDeleteState.wrongGroupCount !== 0 || rakebackAddonDeleteState.addonCount < 1) {
+      throw new Error("admin report rakeback addon delete moved or kept an addon row: " + JSON.stringify(rakebackAddonDeleteState));
+    }
     const rakebackSharedState = await page.evaluate(() => {
       const addBtn = document.getElementById("adminReportRakebackAddBtn");
       const refreshBtn = document.getElementById("adminReportRakebackRefreshBtn");

@@ -139,7 +139,7 @@
     var groupId = String(row.groupId || "").trim();
     if (!groupId) return "";
     if (getSharedRowKind(row) !== "addon") return groupId + "|base";
-    return groupId + "|addon|" + String(row.entryAddedAt || row.createdAt || row.standardAt || row.playerId || "").trim();
+    return groupId + "|addon|" + String(row.createdAt || row.standardAt || row.entryAddedAt || row.playerId || "").trim();
   }
 
   function getSharedRowServerKey(row) {
@@ -478,6 +478,8 @@
     var sharedAutoLoadRetryCount = 0;
     var saving = false;
     var loading = false;
+    var locallyDeletedRowKeys = {};
+    var locallyDeletedGroupIds = {};
 
     function getTemplateIds(room) {
       var ids = templates[normalizeRoom(room)] || [];
@@ -747,6 +749,30 @@
       return includeEmptyUnsaved && row.saved === false;
     }
 
+    function isLocallyDeletedSharedRow(row) {
+      if (!row) return false;
+      var groupId = String(row.groupId || "").trim();
+      if (groupId && locallyDeletedGroupIds[groupId]) return true;
+      var key = getSharedRowLocalKey(row);
+      return !!(key && locallyDeletedRowKeys[key]);
+    }
+
+    function filterLocallyDeletedSharedRows(rows) {
+      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return !isLocallyDeletedSharedRow(row);
+      });
+    }
+
+    function markSharedRowDeleted(row, kind, localKey) {
+      if (!row) return;
+      var groupId = row.getAttribute("data-rakeback-group") || "";
+      if (kind === "addon") {
+        if (localKey) locallyDeletedRowKeys[localKey] = true;
+        return;
+      }
+      if (groupId) locallyDeletedGroupIds[groupId] = true;
+    }
+
     function collectRows(options) {
       options = options || {};
       if (!body) return sharedRows.slice();
@@ -961,7 +987,7 @@
         body: JSON.stringify(buildAuthBody(payload)),
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
-          sharedRows = mergeRowsWithLocalUnsaved(normalizeDraftRows(data.rakebackDraft.rows), localRows);
+          sharedRows = mergeRowsWithLocalUnsaved(filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows)), localRows);
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
           render();
           if (showStatus) setStatus("Сохранено");
@@ -999,7 +1025,7 @@
           if (options.showStatus) setStatus("Уже актуально");
           return true;
         }
-        sharedRows = mergeRowsWithLocalUnsaved(normalizeDraftRows(draft && draft.rows), mergeSharedRowsFromDom({ includeEmptyUnsaved: true }));
+        sharedRows = mergeRowsWithLocalUnsaved(filterLocallyDeletedSharedRows(normalizeDraftRows(draft && draft.rows)), mergeSharedRowsFromDom({ includeEmptyUnsaved: true }));
         sharedUpdatedAt = draft && draft.updatedAt ? draft.updatedAt : sharedUpdatedAt;
         render();
         if (options.showStatus) setStatus("Обновлено");
@@ -1048,6 +1074,8 @@
         if (row && key) byKey[key] = row;
       });
       return Object.keys(byKey).map(function (key) { return byKey[key]; }).filter(function (row) {
+        return !isLocallyDeletedSharedRow(row);
+      }).filter(function (row) {
         return !options.savedOnly || row.saved === true;
       }).filter(function (row) {
         return shouldKeepRow(row, options.includeEmptyUnsaved);
@@ -1454,6 +1482,7 @@
           var localKey = getSharedDomRowLocalKey(row);
           var serverKey = getSharedDomRowServerKey(row);
           var persisted = row.getAttribute("data-rakeback-persisted") === "1";
+          markSharedRowDeleted(row, kind, localKey);
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
             if (kind === "addon") return getSharedRowLocalKey(item) !== localKey;
             return String(item.groupId || "") !== groupId;
