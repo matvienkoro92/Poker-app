@@ -459,6 +459,26 @@ async function testProfileUserLookup(redis) {
   redis.h("poker_app:visitor_personal").set("ID100002", "public bio");
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:pokerplus_user_ids").set("ID100002", "P21-1002");
+  redis.h("poker_app:pokerplus_stats_visible").set("ID100002", "1");
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({
+    totalCounter: {
+      fee: 100,
+      hands: 200,
+      winnings: 300,
+      bb: 4.5,
+      ofcWinnings: 40,
+      mttRound: 6,
+      mttWinnings: 70,
+      mttCount: 8,
+      mttItmCount: 3,
+      mttFirstCount: 1,
+      sngRound: 9,
+      sngWinnings: 80,
+      sngCount: 10,
+      sngItmCount: 4,
+      sngFirstCount: 2,
+    },
+  }));
 
   let r = await call(users, req("GET", { pwaSession: s.user, userId: "ID100002" }));
   assert.strictEqual(r.statusCode, 200, "profile user lookup succeeds");
@@ -467,6 +487,28 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.userName, "@peer", "lookup returns username");
   assert.strictEqual(r.body.p21Id, "P21-1002", "lookup returns PokerPlus id");
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
+  assert.strictEqual(r.body.pokerPlusStatsVisible, true, "lookup returns visible PokerPlus stats flag");
+  assert.deepStrictEqual(
+    r.body.pokerPlusStats,
+    {
+      fee: 100,
+      hands: 200,
+      bb: 4.5,
+      winnings: 300,
+      ofcWinnings: 40,
+      mttRound: 6,
+      mttWinnings: 70,
+      mttCount: 8,
+      mttItmCount: 3,
+      mttFirstCount: 1,
+      sngRound: 9,
+      sngWinnings: 80,
+      sngCount: 10,
+      sngItmCount: 4,
+      sngFirstCount: 2,
+    },
+    "lookup exposes extended public PokerPlus stats",
+  );
 }
 
 async function testPokerPlusKeyBindFallbackMatrix(redis) {
@@ -749,9 +791,40 @@ async function testPokerPlusCounterHandsAliases(redis) {
               message: "success",
               data: {
                 Id: "P21-HANDS",
-                today_counter: { fee: 10, hand_count: 77 },
-                week_counter: { fee: 20, hands_count: 177 },
-                total_counter: { fee: 30, played_hands: 277 },
+                today_counter: {
+                  fee: 10,
+                  hand_count: 77,
+                  mtt_count: 2,
+                  mtt_itm_count: 1,
+                  mtt_1st_count: 0,
+                  sng_count: 3,
+                  sng_itm_count: 2,
+                  sng_1st_count: 1,
+                },
+                week_counter: {
+                  fee: 20,
+                  hands_count: 177,
+                  mtt_round: 8,
+                  sng_round: 9,
+                  ofc_winnings: 5,
+                },
+                total_counter: {
+                  fee: 30,
+                  played_hands: 277,
+                  mtt_round: 576,
+                  mtt_winnings: -37756.64,
+                  sng_round: 55,
+                  sng_winnings: 1018,
+                  winnings: 993750.55,
+                  bb: 83.97,
+                  ofc_winnings: 1804.26,
+                  mtt_count: 4,
+                  mtt_itm_count: 3,
+                  mtt_1st_count: 2,
+                  sng_count: 6,
+                  sng_itm_count: 5,
+                  sng_1st_count: 1,
+                },
               },
               code: 0,
             };
@@ -771,8 +844,29 @@ async function testPokerPlusCounterHandsAliases(redis) {
   const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
   const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "");
   assert.strictEqual(profile.todayCounter.hands, 77, "today counter accepts hand_count as hands");
+  assert.strictEqual(profile.todayCounter.mttCount, 2, "today counter accepts mtt_count");
+  assert.strictEqual(profile.todayCounter.mttItmCount, 1, "today counter accepts mtt_itm_count");
+  assert.strictEqual(profile.todayCounter.mttFirstCount, 0, "today counter accepts mtt_1st_count");
+  assert.strictEqual(profile.todayCounter.sngCount, 3, "today counter accepts sng_count");
+  assert.strictEqual(profile.todayCounter.sngItmCount, 2, "today counter accepts sng_itm_count");
+  assert.strictEqual(profile.todayCounter.sngFirstCount, 1, "today counter accepts sng_1st_count");
   assert.strictEqual(profile.weekCounter.hands, 177, "week counter accepts hands_count as hands");
+  assert.strictEqual(profile.weekCounter.mttRound, 8, "week counter accepts mtt_round");
+  assert.strictEqual(profile.weekCounter.sngRound, 9, "week counter accepts sng_round");
+  assert.strictEqual(profile.weekCounter.ofcWinnings, 5, "week counter accepts ofc_winnings");
   assert.strictEqual(profile.totalCounter.hands, 277, "total counter accepts played_hands as hands");
+  assert.strictEqual(profile.totalCounter.mttRound, 576, "total counter stores mtt_round");
+  assert.strictEqual(profile.totalCounter.mttWinnings, -37756.64, "total counter stores mtt_winnings");
+  assert.strictEqual(profile.totalCounter.sngRound, 55, "total counter stores sng_round");
+  assert.strictEqual(profile.totalCounter.sngWinnings, 1018, "total counter stores sng_winnings");
+  assert.strictEqual(profile.totalCounter.bb, 83.97, "total counter stores bb");
+  assert.strictEqual(profile.totalCounter.ofcWinnings, 1804.26, "total counter stores ofc_winnings");
+  assert.strictEqual(profile.totalCounter.mttCount, 4, "total counter stores mtt_count");
+  assert.strictEqual(profile.totalCounter.mttItmCount, 3, "total counter stores mtt_itm_count");
+  assert.strictEqual(profile.totalCounter.mttFirstCount, 2, "total counter stores mtt_1st_count");
+  assert.strictEqual(profile.totalCounter.sngCount, 6, "total counter stores sng_count");
+  assert.strictEqual(profile.totalCounter.sngItmCount, 5, "total counter stores sng_itm_count");
+  assert.strictEqual(profile.totalCounter.sngFirstCount, 1, "total counter stores sng_1st_count");
 }
 
 async function testPokerPlusKeyPersistsWithoutStorageSecret(redis) {

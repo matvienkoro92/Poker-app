@@ -38,6 +38,11 @@ function initProfilePokerPlus() {
   var statsVisibleYes = document.getElementById("profilePokerPlusStatsVisibleYes");
   var statsVisibleNo = document.getElementById("profilePokerPlusStatsVisibleNo");
   var statsVisibilityState = document.getElementById("profilePokerPlusStatsVisibilityState");
+  var statsDateFilter = document.getElementById("profilePokerPlusStatsDateFilter");
+  var statsDateFromInput = document.getElementById("profilePokerPlusStatsDateFrom");
+  var statsDateToInput = document.getElementById("profilePokerPlusStatsDateTo");
+  var statsDateResetBtn = document.getElementById("profilePokerPlusStatsDateResetBtn");
+  var statsDateState = document.getElementById("profilePokerPlusStatsDateState");
   var statusLinkHint = document.getElementById("profileStatusLinkHint");
   var profileStatusProgressText = document.getElementById("profileStatusProgressText");
   var profileStatusTitle = document.getElementById("profileStatusTitle");
@@ -75,6 +80,7 @@ function initProfilePokerPlus() {
   var pokerPlusAccountId = "";
   var pokerPlusPostTimeoutCheckSeq = 0;
   var pokerPlusLastSyncedAt = 0;
+  var pokerPlusLastStatsProfile = null;
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
 
   function setFeedback(text, tone) {
@@ -311,6 +317,11 @@ function initProfilePokerPlus() {
     return n > 0 ? "good" : "bad";
   }
 
+  function pokerPlusStatHasNonZeroNumber(value) {
+    var n = Number(value);
+    return isFinite(n) && n !== 0;
+  }
+
   function pokerPlusPickStat(total, camelKey, snakeKey) {
     if (!total || typeof total !== "object") return null;
     if (total[camelKey] != null && total[camelKey] === total[camelKey]) return total[camelKey];
@@ -320,7 +331,34 @@ function initProfilePokerPlus() {
 
   function pokerPlusCounterHasValue(total) {
     if (!total || typeof total !== "object") return false;
-    var keys = ["fee", "hands", "winnings", "mttWinnings", "mtt_winnings", "sngWinnings", "sng_winnings", "bb", "ofcWinnings", "ofc_winnings"];
+    var keys = [
+      "fee",
+      "hands",
+      "winnings",
+      "bb",
+      "ofcWinnings",
+      "ofc_winnings",
+      "mttRound",
+      "mtt_round",
+      "mttWinnings",
+      "mtt_winnings",
+      "mttCount",
+      "mtt_count",
+      "mttItmCount",
+      "mtt_itm_count",
+      "mttFirstCount",
+      "mtt_1st_count",
+      "sngRound",
+      "sng_round",
+      "sngWinnings",
+      "sng_winnings",
+      "sngCount",
+      "sng_count",
+      "sngItmCount",
+      "sng_itm_count",
+      "sngFirstCount",
+      "sng_1st_count",
+    ];
     for (var i = 0; i < keys.length; i += 1) {
       var v = total[keys[i]];
       if (v != null && v === v && String(v).trim() !== "") return true;
@@ -336,7 +374,34 @@ function initProfilePokerPlus() {
       p.weekCounter || p.week_counter,
       p.totalCounter || p.total_counter,
     ];
-    var keys = ["fee", "hands", "winnings", "mttWinnings", "mtt_winnings", "sngWinnings", "sng_winnings", "bb", "ofcWinnings", "ofc_winnings"];
+    var keys = [
+      "fee",
+      "hands",
+      "winnings",
+      "bb",
+      "ofcWinnings",
+      "ofc_winnings",
+      "mttRound",
+      "mtt_round",
+      "mttWinnings",
+      "mtt_winnings",
+      "mttCount",
+      "mtt_count",
+      "mttItmCount",
+      "mtt_itm_count",
+      "mttFirstCount",
+      "mtt_1st_count",
+      "sngRound",
+      "sng_round",
+      "sngWinnings",
+      "sng_winnings",
+      "sngCount",
+      "sng_count",
+      "sngItmCount",
+      "sng_itm_count",
+      "sngFirstCount",
+      "sng_1st_count",
+    ];
     var hasValue = false;
     for (var c = 0; c < counters.length; c += 1) {
       var counter = counters[c];
@@ -370,15 +435,34 @@ function initProfilePokerPlus() {
     var metrics = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
+    var bbStat = pokerPlusPickStat(total, "bb", "bb");
+    var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
+    var mttRoundStat = pokerPlusPickStat(total, "mttRound", "mtt_round");
     var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
+    var mttCountStat = pokerPlusPickStat(total, "mttCount", "mtt_count");
+    var mttItmStat = pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count");
+    var mttFirstStat = pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count");
+    var sngRoundStat = pokerPlusPickStat(total, "sngRound", "sng_round");
     var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
+    var sngCountStat = pokerPlusPickStat(total, "sngCount", "sng_count");
+    var sngItmStat = pokerPlusPickStat(total, "sngItmCount", "sng_itm_count");
+    var sngFirstStat = pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count");
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
-    var hasAnyStat = pokerPlusCounterHasValue(total);
     if (includeEmptyCore || feeStat != null) metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
-    if (includeEmptyCore || hasAnyStat) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
+    if (includeEmptyCore || handsStat != null) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+    if (includeEmptyCore || bbStat != null) metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
+    if (includeEmptyCore || ofcStat != null) metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "OFC"));
     if (includeEmptyCore || mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
+    if (pokerPlusStatHasNonZeroNumber(mttRoundStat)) metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
+    if (pokerPlusStatHasNonZeroNumber(mttCountStat)) metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
+    if (pokerPlusStatHasNonZeroNumber(mttItmStat)) metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
+    if (pokerPlusStatHasNonZeroNumber(mttFirstStat)) metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
     if (includeEmptyCore || sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
+    if (pokerPlusStatHasNonZeroNumber(sngRoundStat)) metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
+    if (pokerPlusStatHasNonZeroNumber(sngCountStat)) metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
+    if (pokerPlusStatHasNonZeroNumber(sngItmStat)) metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
+    if (pokerPlusStatHasNonZeroNumber(sngFirstStat)) metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
     if (!metrics.length) return "";
     return (
       '<span class="profile-pokerplus-stats-period"><span class="profile-pokerplus-stats-period__title">' +
@@ -389,9 +473,94 @@ function initProfilePokerPlus() {
     );
   }
 
+  function pokerPlusStatsEmptyHtml(text) {
+    return '<span class="profile-pokerplus-stats-empty">' + escapeHtml(text || "Нет данных за выбранный период.") + "</span>";
+  }
+
+  function pokerPlusPad2(value) {
+    var n = Number(value) || 0;
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function pokerPlusLocalDateKey(date) {
+    var d = date instanceof Date ? date : new Date();
+    return d.getFullYear() + "-" + pokerPlusPad2(d.getMonth() + 1) + "-" + pokerPlusPad2(d.getDate());
+  }
+
+  function pokerPlusDateKeyIsValid(value) {
+    var raw = String(value || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+    var parts = raw.split("-");
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return pokerPlusLocalDateKey(d) === raw;
+  }
+
+  function pokerPlusDateKeyToDisplay(value) {
+    var raw = String(value || "").trim();
+    if (!pokerPlusDateKeyIsValid(raw)) return raw;
+    return raw.slice(8, 10) + "." + raw.slice(5, 7) + "." + raw.slice(0, 4);
+  }
+
+  function pokerPlusWeekStartDateKey() {
+    var d = new Date();
+    var day = d.getDay();
+    d.setDate(d.getDate() - ((day + 6) % 7));
+    return pokerPlusLocalDateKey(d);
+  }
+
+  function pokerPlusStatsDateSelection() {
+    var from = statsDateFromInput ? String(statsDateFromInput.value || "").trim() : "";
+    var to = statsDateToInput ? String(statsDateToInput.value || "").trim() : "";
+    if (!from && !to) return { mode: "all" };
+    if (!from || !to) return { mode: "error", message: "Выберите даты начала и окончания периода." };
+    if (!pokerPlusDateKeyIsValid(from) || !pokerPlusDateKeyIsValid(to)) return { mode: "error", message: "Проверьте выбранные даты." };
+    if (from > to) return { mode: "error", message: "Дата начала должна быть не позже даты окончания." };
+    return { mode: "range", from: from, to: to };
+  }
+
+  function setPokerPlusStatsDateState(text, tone) {
+    if (!statsDateState) return;
+    statsDateState.textContent = text || "";
+    statsDateState.hidden = !text;
+    statsDateState.classList.toggle("profile-pokerplus-stats-date-filter__state--warn", tone === "warn");
+  }
+
+  function syncPokerPlusStatsDateFilterBounds() {
+    var todayKey = pokerPlusLocalDateKey(new Date());
+    if (statsDateFromInput) statsDateFromInput.max = todayKey;
+    if (statsDateToInput) statsDateToInput.max = todayKey;
+  }
+
+  function pokerPlusSelectedStatsGroup(selection, today, week) {
+    var todayKey = pokerPlusLocalDateKey(new Date());
+    var weekStartKey = pokerPlusWeekStartDateKey();
+    if (selection.from === todayKey && selection.to === todayKey) {
+      return {
+        title: "Выбранный день",
+        counter: today,
+        state: "Период: " + pokerPlusDateKeyToDisplay(todayKey),
+      };
+    }
+    if (selection.from === weekStartKey && selection.to === todayKey) {
+      return {
+        title: "Выбранная неделя",
+        counter: week,
+        state: "Период: " + pokerPlusDateKeyToDisplay(weekStartKey) + " — " + pokerPlusDateKeyToDisplay(todayKey),
+      };
+    }
+    return {
+      title: "",
+      counter: null,
+      state: "Нет точной статистики за выбранные даты.",
+      warn: true,
+    };
+  }
+
   function renderPokerPlusStats(profileSource) {
     if (!statsValue) return;
     setProfileStatusLoading(false);
+    pokerPlusLastStatsProfile = profileSource && typeof profileSource === "object" ? profileSource : {};
+    syncPokerPlusStatsDateFilterBounds();
     var source = profileSource && typeof profileSource === "object" ? profileSource : {};
     var total = source.totalCounter && typeof source.totalCounter === "object" ? source.totalCounter : (source.total_counter && typeof source.total_counter === "object" ? source.total_counter : source);
     var today = source.todayCounter && typeof source.todayCounter === "object" ? source.todayCounter : (source.today_counter && typeof source.today_counter === "object" ? source.today_counter : null);
@@ -399,15 +568,39 @@ function initProfilePokerPlus() {
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     setProfileStatusFromRake(feeStat);
     var groups = [];
-    if (pokerPlusCounterHasValue(today)) groups.push(pokerPlusStatsGroupHtml("Сегодня", today, false));
-    if (pokerPlusCounterHasValue(week)) groups.push(pokerPlusStatsGroupHtml("Неделя", week, false));
-    if (pokerPlusCounterHasValue(total) || !groups.length) groups.push(pokerPlusStatsGroupHtml(groups.length ? "Всего" : "Статистика", total, !groups.length));
+    var selection = pokerPlusStatsDateSelection();
+    if (selection.mode === "error") {
+      groups.push(pokerPlusStatsEmptyHtml(selection.message));
+      setPokerPlusStatsDateState(selection.message, "warn");
+    } else if (selection.mode === "range") {
+      var selected = pokerPlusSelectedStatsGroup(selection, today, week);
+      if (selected.counter && pokerPlusCounterHasValue(selected.counter)) {
+        groups.push(pokerPlusStatsGroupHtml(selected.title, selected.counter, false));
+        setPokerPlusStatsDateState(selected.state, false);
+      } else {
+        groups.push(pokerPlusStatsEmptyHtml(selected.state));
+        setPokerPlusStatsDateState(selected.state, selected.warn ? "warn" : false);
+      }
+    } else {
+      if (pokerPlusCounterHasValue(today)) groups.push(pokerPlusStatsGroupHtml("Сегодня", today, false));
+      if (pokerPlusCounterHasValue(week)) groups.push(pokerPlusStatsGroupHtml("Неделя", week, false));
+      if (pokerPlusCounterHasValue(total) || !groups.length) groups.push(pokerPlusStatsGroupHtml(groups.length ? "Всего" : "Статистика", total, !groups.length));
+      setPokerPlusStatsDateState("", false);
+    }
     statsValue.innerHTML = groups.join("");
     if (statsRow) statsRow.hidden = false;
+    if (statsDateFilter) statsDateFilter.hidden = false;
+  }
+
+  function rerenderPokerPlusStatsDateFilter() {
+    if (pokerPlusLastStatsProfile) renderPokerPlusStats(pokerPlusLastStatsProfile);
   }
 
   function hidePokerPlusStats() {
     if (statsRow) statsRow.hidden = true;
+    if (statsDateFilter) statsDateFilter.hidden = true;
+    setPokerPlusStatsDateState("", false);
+    pokerPlusLastStatsProfile = null;
     setProfileStatusLoading(false);
   }
 
@@ -932,12 +1125,29 @@ function initProfilePokerPlus() {
       savePokerPlusStatsVisible(false);
     });
   }
+  if (statsDateFromInput && statsDateFromInput.dataset.bound !== "1") {
+    statsDateFromInput.dataset.bound = "1";
+    statsDateFromInput.addEventListener("change", rerenderPokerPlusStatsDateFilter);
+  }
+  if (statsDateToInput && statsDateToInput.dataset.bound !== "1") {
+    statsDateToInput.dataset.bound = "1";
+    statsDateToInput.addEventListener("change", rerenderPokerPlusStatsDateFilter);
+  }
+  if (statsDateResetBtn && statsDateResetBtn.dataset.bound !== "1") {
+    statsDateResetBtn.dataset.bound = "1";
+    statsDateResetBtn.addEventListener("click", function () {
+      if (statsDateFromInput) statsDateFromInput.value = "";
+      if (statsDateToInput) statsDateToInput.value = "";
+      rerenderPokerPlusStatsDateFilter();
+    });
+  }
   if (input.dataset.bound !== "1") {
     input.dataset.bound = "1";
     input.addEventListener("input", function () {
       input.value = String(input.value || "").replace(/\s+/g, "").slice(0, 64);
     });
   }
+  syncPokerPlusStatsDateFilterBounds();
   renderPokerPlusStatsVisibilityToggle(false);
   if (typeof loadCurrentProfileUserInfo === "function") {
     loadCurrentProfileUserInfo().then(function (data) {

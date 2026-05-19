@@ -220,6 +220,22 @@ if (chatUserModalEl) {
     if (isFinite(n) && n < 0) return "";
     return chatUserModalStatHtml(label, value, suffix);
   }
+  function chatUserModalOptionalStatHtml(label, value, suffix) {
+    if (value == null || value !== value || String(value).trim() === "") return "";
+    return chatUserModalStatHtml(label, value, suffix);
+  }
+  function chatUserModalOptionalNonNegativeStatHtml(label, value, suffix) {
+    if (value == null || value !== value || String(value).trim() === "") return "";
+    var n = Number(value);
+    if (isFinite(n) && n < 0) return "";
+    return chatUserModalStatHtml(label, value, suffix);
+  }
+  function chatUserModalOptionalNonZeroStatHtml(label, value, suffix) {
+    if (value == null || value !== value || String(value).trim() === "") return "";
+    var n = Number(value);
+    if (isFinite(n) && n === 0) return "";
+    return chatUserModalStatHtml(label, value, suffix);
+  }
   function renderChatUserModalPlayerStats(data) {
     if (!modalPlayerStats) return;
     if (!data || data.pokerPlusStatsVisible !== true) {
@@ -231,9 +247,19 @@ if (chatUserModalEl) {
     modalPlayerStats.innerHTML =
       chatUserModalStatHtml("Рейк", st.fee, "") +
       chatUserModalStatHtml("Раздачи", st.hands, "") +
+      chatUserModalOptionalStatHtml("BB", st.bb, "") +
       chatUserModalNonNegativeStatHtml("Кеш", st.winnings, "") +
+      chatUserModalOptionalNonNegativeStatHtml("OFC", st.ofcWinnings, "") +
       chatUserModalNonNegativeStatHtml("MTT", st.mttWinnings, "") +
-      chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "");
+      chatUserModalOptionalNonZeroStatHtml("MTT р.", st.mttRound, "") +
+      chatUserModalOptionalNonZeroStatHtml("MTT игр", st.mttCount, "") +
+      chatUserModalOptionalNonZeroStatHtml("MTT ITM", st.mttItmCount, "") +
+      chatUserModalOptionalNonZeroStatHtml("MTT 1-е", st.mttFirstCount, "") +
+      chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "") +
+      chatUserModalOptionalNonZeroStatHtml("SNG р.", st.sngRound, "") +
+      chatUserModalOptionalNonZeroStatHtml("SNG игр", st.sngCount, "") +
+      chatUserModalOptionalNonZeroStatHtml("SNG ITM", st.sngItmCount, "") +
+      chatUserModalOptionalNonZeroStatHtml("SNG 1-е", st.sngFirstCount, "");
   }
   function openChatUserModalById(id, name, avatarUrl) {
     var userName = name || "Игрок";
