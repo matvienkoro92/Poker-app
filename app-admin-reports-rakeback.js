@@ -704,21 +704,29 @@
 
     function getRakebackDateTotals(rows) {
       var dateMap = {};
-      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+      (Array.isArray(rows) ? rows : []).forEach(function (row, index) {
         if (!row || row.saved !== true) return;
         var stamp = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
         if (!stamp) return;
         var key = getDateInputValue(stamp);
-        if (!dateMap[key]) dateMap[key] = { key: key, stamp: stamp, amount: 0 };
-        dateMap[key].stamp = Math.max(dateMap[key].stamp, stamp);
+        if (!dateMap[key]) dateMap[key] = { key: key, stamp: stamp, amount: 0, finalRakeByGroup: {}, groupOrder: [] };
+        var day = dateMap[key];
+        day.stamp = Math.max(day.stamp, stamp);
+        var groupKey = String(row.groupId || "").trim() || ("row_" + index);
+        if (!Object.prototype.hasOwnProperty.call(day.finalRakeByGroup, groupKey)) day.groupOrder.push(groupKey);
+        day.finalRakeByGroup[groupKey] = getReportAmount(row.room, row.rake);
         var roomAmount = row.roomAmount != null && row.roomAmount !== ""
           ? parseNumber(row.roomAmount)
           : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
         var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
-        dateMap[key].amount += amount;
+        day.amount += amount;
       });
       return Object.keys(dateMap).map(function (key) {
-        return dateMap[key];
+        var day = dateMap[key];
+        day.rake = day.groupOrder.reduce(function (sum, groupKey) {
+          return sum + parseNumber(day.finalRakeByGroup[groupKey]);
+        }, 0);
+        return day;
       }).sort(function (a, b) {
         return b.stamp - a.stamp;
       });
@@ -737,7 +745,7 @@
       var dateHtml = dateRows.length ? '<div class="admin-report-rakeback-totals-modal__section-title">Итого по датам</div>' + dateRows.map(function (day) {
         return '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--date">' +
           '<span class="admin-report-rakeback-totals-modal__room">' + escapeHtml(formatEntryDateLabel(day.stamp)) + "</span>" +
-          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(String(Math.round(day.amount))) + "</span>" +
+          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(day.rake, day.amount)) + "</span>" +
         "</div>";
       }).join("") : "";
       totalsList.innerHTML = roomHtml + dateHtml;
