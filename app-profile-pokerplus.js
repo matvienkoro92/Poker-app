@@ -435,12 +435,10 @@ function initProfilePokerPlus() {
     var metrics = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
-    var mttRoundStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttRound", "mtt_round"));
     var mttStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttWinnings", "mtt_winnings"));
     var mttCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttCount", "mtt_count"));
     var mttItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count"));
     var mttFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count"));
-    var sngRoundStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngRound", "sng_round"));
     var sngStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngWinnings", "sng_winnings"));
     var sngCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngCount", "sng_count"));
     var sngItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngItmCount", "sng_itm_count"));
@@ -450,12 +448,10 @@ function initProfilePokerPlus() {
     if (includeEmptyCore || handsStat != null) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
-    metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
     metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
     metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
     metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
     metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
-    metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
     metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
     metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
     metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
