@@ -2119,6 +2119,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-variant-numeric: tabular-nums;
   box-sizing: border-box;
 }
+.admin-report-rakeback-rest--negative {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
 .admin-report-rakeback-discount {
   position: absolute;
   inset: 0;
@@ -2170,6 +2175,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 700;
   color: #ffe7b0;
   font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-amount--negative {
+  color: #fecaca;
 }
 .admin-report-rakeback-actions {
   position: relative;

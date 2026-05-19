@@ -148,7 +148,7 @@
     if (!groupId) return "";
     var kind = getSharedRowKind(row);
     var addonStamp = kind === "addon"
-      ? String(row.entryAddedAt || row.createdAt || row.standardAt || "").trim()
+      ? String(row.createdAt || row.entryAddedAt || row.standardAt || "").trim()
       : "";
     return [
       groupId,
@@ -253,11 +253,12 @@
     var discountInput = row.querySelector("[data-rakeback-discount15]");
     var amountEl = row.querySelector("[data-rakeback-amount]");
     var restEl = row.querySelector("[data-rakeback-rest]");
+    var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
     var rake = parseNumber(rakeInput ? rakeInput.value : "");
     var baseRake = rake;
     if (row.getAttribute("data-rakeback-kind") === "addon") {
       var previous = arguments.length > 1 ? parseNumber(previousRake) : getSharedDomPreviousRake(row);
-      baseRake = Math.max(0, rake - previous);
+      baseRake = hasRakeInputValue ? rake - previous : 0;
       if (restEl) restEl.textContent = baseRake ? String(Math.round(baseRake * 100) / 100) : "";
     } else if (restEl) {
       restEl.textContent = "";
@@ -268,6 +269,8 @@
     row.setAttribute("data-rakeback-room-amount", String(roomAmount || 0));
     row.setAttribute("data-rakeback-amount-value", String(getReportAmount(roomSelect && roomSelect.value ? roomSelect.value : "P21", roomAmount)));
     if (amountEl) amountEl.textContent = roomAmount ? String(roomAmount) : "";
+    if (restEl) restEl.classList.toggle("admin-report-rakeback-rest--negative", baseRake < 0);
+    if (amountEl) amountEl.classList.toggle("admin-report-rakeback-amount--negative", roomAmount < 0);
     return roomAmount;
   }
 
@@ -632,6 +635,9 @@
     }
 
     function rowTime(row) {
+      if (getSharedRowKind(row) === "addon") {
+        return parseRowTime(row, ["createdAt", "standardAt", "addedAt", "created", "entryAddedAt"]);
+      }
       return parseRowTime(row, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
     }
 
@@ -808,16 +814,18 @@
         var percentInput = row.querySelector("[data-rakeback-percent]");
         var discountInput = row.querySelector("[data-rakeback-discount15]");
         var room = normalizeRoom(roomSelect && roomSelect.value ? roomSelect.value : activeRoom);
+        var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
         var rake = parseNumber(rakeInput ? rakeInput.value : "");
         var percent = parseNumber(percentInput ? percentInput.value : "");
         var groupId = row.getAttribute("data-rakeback-group") || "";
         var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
         var previousRake = kind === "addon" ? parseNumber(previousRakeByGroup[groupId]) : 0;
-        var roomAmount = Math.max(0, rake - previousRake) * percent / 100;
+        var rakeDelta = kind === "addon" ? (hasRakeInputValue ? rake - previousRake : 0) : rake;
+        var roomAmount = rakeDelta * percent / 100;
         if (discountInput && discountInput.checked) roomAmount *= 0.85;
         roomAmount = Math.round(roomAmount * 100) / 100;
         var amount = getReportAmount(room, roomAmount);
-        previousRakeByGroup[groupId] = rake;
+        if (kind !== "addon" || hasRakeInputValue) previousRakeByGroup[groupId] = rake;
         return {
           groupId: groupId,
           kind: kind,
@@ -1154,7 +1162,10 @@
         updateSharedRowDateBadge(row, baseEntryByGroup[groupId] || row.getAttribute("data-rakeback-entry-added-at"));
         syncSharedRowAmount(row, row.getAttribute("data-rakeback-kind") === "addon" ? previousRakeByGroup[groupId] : 0);
         var rakeInput = row.querySelector("[data-rakeback-rake]");
-        previousRakeByGroup[groupId] = parseNumber(rakeInput ? rakeInput.value : "");
+        var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
+        if (row.getAttribute("data-rakeback-kind") !== "addon" || hasRakeInputValue) {
+          previousRakeByGroup[groupId] = parseNumber(rakeInput ? rakeInput.value : "");
+        }
       });
     }
 
@@ -1321,6 +1332,13 @@
           setStatus("Для подзаписи нужны ID и рейк", true);
           return;
         }
+        var previousAddonData = null;
+        orderSharedRowsForDisplay(localRows).forEach(function (row) {
+          if (String(row.groupId || "") === String(baseData.groupId || "") && getSharedRowKind(row) === "addon") {
+            previousAddonData = row;
+          }
+        });
+        var sourceData = previousAddonData || baseData;
         var now = Date.now();
         var addon = {
           groupId: baseData.groupId,
@@ -1329,14 +1347,14 @@
           playerId: baseData.playerId,
           rake: "",
           rakeZero: false,
-          percent: baseData.percent,
-          discount15: baseData.discount15,
+          percent: sourceData.percent,
+          discount15: sourceData.discount15,
           saved: false,
           persisted: false,
           ownerId: baseData.ownerId || "",
           createdAt: now,
-          standardAt: baseData.standardAt || baseData.createdAt || now,
-          entryAddedAt: now,
+          standardAt: now,
+          entryAddedAt: previousAddonData ? (previousAddonData.entryAddedAt || previousAddonData.createdAt || now) : now,
         };
         sharedRows = localRows.concat(addon);
         render();
