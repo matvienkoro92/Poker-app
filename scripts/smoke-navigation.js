@@ -170,7 +170,26 @@ async function main() {
     let holdAdminReportCore = true;
     const submittedAdminReports = [];
     const submittedRakebackDrafts = [];
-    let smokeRakebackDraft = { rows: [], updatedAt: null };
+    let smokeRakebackDraft = {
+      rows: [{
+        groupId: "smoke-existing-rakeback",
+        kind: "base",
+        room: "P21",
+        playerId: "smoke-existing",
+        rake: 7,
+        percent: 50,
+        discount15: false,
+        saved: true,
+        ownerId: "388008256",
+        createdAt: Date.now() - 1000,
+        standardAt: Date.now() - 1000,
+        entryAddedAt: Date.now() - 1000,
+        amount: 3.5,
+        roomAmount: 3.5,
+      }],
+      updatedAt: new Date(Date.now() - 1000).toISOString(),
+      updatedBy: "smoke",
+    };
     const adminReportCoreGate = new Promise((resolve) => {
       releaseAdminReportCore = resolve;
     });
@@ -202,8 +221,15 @@ async function main() {
         const payload = JSON.parse(route.request().postData() || "{}");
         if (payload.action === "rakeback_draft_save") {
           submittedRakebackDrafts.push(payload);
+          const incomingRows = Array.isArray(payload.rakebackRows) ? payload.rakebackRows : [];
+          const deleteIds = new Set(Array.isArray(payload.deleteRakebackGroupIds) ? payload.deleteRakebackGroupIds : []);
+          const existingRows = (smokeRakebackDraft.rows || []).filter((row) => !deleteIds.has(String(row && row.groupId || "")));
+          const byGroup = new Map(existingRows.map((row) => [String(row && row.groupId || ""), row]));
+          incomingRows.forEach((row) => {
+            byGroup.set(String(row && row.groupId || ""), row);
+          });
           smokeRakebackDraft = {
-            rows: Array.isArray(payload.rakebackRows) ? payload.rakebackRows : [],
+            rows: payload.rakebackPatch === true ? Array.from(byGroup.values()) : incomingRows,
             deletedTemplates: [],
             deletedRows: [],
             updatedAt: new Date().toISOString(),
@@ -444,15 +470,18 @@ async function main() {
       await page.waitForFunction(() => {
         const activePanel = document.querySelector(".admin-report-panel--active");
         const statusText = document.getElementById("adminReportRakebackStatus")?.textContent || "";
+        const hasExistingSharedRow = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row] [data-rakeback-player-id]"))
+          .some((input) => String(input.value || "").trim() === "smoke-existing");
         return !!(
           activePanel &&
           activePanel.getAttribute("data-admin-report-panel") === "rakeback" &&
-          !/Загружаю шаблоны/.test(statusText)
+          !/Загружаю шаблоны/.test(statusText) &&
+          hasExistingSharedRow
         );
       }, null, { timeout: 1800 });
       await page.locator("#adminReportRakebackAddBtn").click();
       await page.waitForFunction(() => {
-        return document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length === 1;
+        return document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length === 2;
       }, null, { timeout: 1200 });
       const earlyRakebackAddState = await page.evaluate(() => ({
         sharedRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length,
@@ -460,7 +489,7 @@ async function main() {
         templateSeparators: document.querySelectorAll("#adminReportRakebackTableBody .admin-report-rakeback-date-separator--templates").length,
         rowText: document.getElementById("adminReportRakebackTableBody")?.textContent || "",
       }));
-      if (earlyRakebackAddState.sharedRows !== 1 || earlyRakebackAddState.templateToggles !== 1 || earlyRakebackAddState.templateSeparators !== 1) {
+      if (earlyRakebackAddState.sharedRows !== 2 || earlyRakebackAddState.templateToggles !== 1 || earlyRakebackAddState.templateSeparators !== 1) {
         throw new Error("admin report rakeback add created duplicate template separators: " + JSON.stringify(earlyRakebackAddState));
       }
       await page.locator("#adminReportModalClose").click();
@@ -731,6 +760,9 @@ async function main() {
     if (rakebackShellState.activePanel !== "rakeback") throw new Error("admin report rakeback shell tab did not become active");
     if (rakebackShellState.hasTemplateId) {
       throw new Error("admin report rakeback shell rendered template data while the spoiler was collapsed: " + JSON.stringify(rakebackShellState));
+    }
+    if (rakebackShellState.rowCount !== 1 || rakebackShellState.firstId !== "smoke-existing") {
+      throw new Error("admin report rakeback shell did not auto-load shared draft rows: " + JSON.stringify(rakebackShellState));
     }
     if (rakebackShellState.templateToggleExpanded !== "false" || rakebackShellState.templateRows !== 0 || rakebackShellState.hiddenTemplateRows !== 0) {
       throw new Error("admin report rakeback template spoiler did not skip collapsed row rendering: " + JSON.stringify(rakebackShellState));

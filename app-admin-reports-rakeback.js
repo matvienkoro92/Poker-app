@@ -301,6 +301,8 @@
     var bound = false;
     var sharedRows = [];
     var sharedUpdatedAt = "";
+    var sharedAutoLoadStarted = false;
+    var sharedAutoLoadRetryCount = 0;
     var saving = false;
     var loading = false;
 
@@ -674,19 +676,20 @@
         if (options.showStatus) setStatus("Нет подключения для обновления");
         return Promise.resolve(false);
       }
+      var markBusy = options.background !== true;
       var q = getAuthQuery();
       q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
       if (sharedUpdatedAt && !options.force) q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
-      loading = true;
+      if (markBusy) loading = true;
       if (options.showStatus) setStatus("Обновляю…", true);
-      syncControls();
+      if (markBusy) syncControls();
       return requestJson(base + "/api/admin-report-shifts" + q).then(function (data) {
         var draft = data && data.ok ? data.rakebackDraft : null;
         if (draft && draft.notModified === true) {
           if (options.showStatus) setStatus("Уже актуально");
           return true;
         }
-        sharedRows = normalizeDraftRows(draft && draft.rows);
+        sharedRows = mergeRowsWithLocalUnsaved(normalizeDraftRows(draft && draft.rows), mergeSharedRowsFromDom({ includeEmptyUnsaved: true }));
         sharedUpdatedAt = draft && draft.updatedAt ? draft.updatedAt : sharedUpdatedAt;
         render();
         if (options.showStatus) setStatus("Обновлено");
@@ -695,10 +698,29 @@
         if (options.showStatus) setStatus("Не удалось обновить");
         return false;
       }).then(function (result) {
-        loading = false;
-        syncControls();
+        if (markBusy) {
+          loading = false;
+          syncControls();
+        }
         return result;
       });
+    }
+
+    function scheduleSharedDraftAutoload() {
+      if (sharedAutoLoadStarted || sharedUpdatedAt || archiveMode) return;
+      if (!getApiBaseSafe() || !hasApiCredentialSafe()) {
+        if (sharedAutoLoadRetryCount >= 3) return;
+        sharedAutoLoadRetryCount += 1;
+        setTimeout(scheduleSharedDraftAutoload, sharedAutoLoadRetryCount === 1 ? 350 : 900);
+        return;
+      }
+      sharedAutoLoadStarted = true;
+      setTimeout(function () {
+        loadSharedDraft({ background: true }).then(function (ok) {
+          if (ok) return;
+          sharedAutoLoadStarted = false;
+        });
+      }, 0);
     }
 
     function mergeSharedRowsFromDom(options) {
@@ -814,6 +836,12 @@
       syncRoomTabs();
       syncControls();
       return (templateRowsOpen ? ids.length : 0) + visibleShared.length;
+    }
+
+    function open() {
+      var count = render();
+      scheduleSharedDraftAutoload();
+      return count;
     }
 
     function bind() {
@@ -982,7 +1010,7 @@
         });
       },
       isArchiveMode: function () { return archiveMode; },
-      open: render,
+      open: open,
       loadSharedDraft: loadSharedDraft,
       render: render,
       saveSharedDraft: saveSharedDraftNow,
