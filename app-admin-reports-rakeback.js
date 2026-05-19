@@ -831,7 +831,7 @@
       }
       row.removeAttribute("data-rakeback-template-default-dirty");
       row.removeAttribute("data-rakeback-template-default-saving");
-      updateTemplateRowActions(row, loading || saving);
+      updateTemplateRowActions(row, loading);
     }
 
     function isTemplateDefaultAlreadySaved(row, draft) {
@@ -1612,12 +1612,12 @@
     function syncControls() {
       if (refreshBtn) {
         refreshBtn.hidden = false;
-        refreshBtn.disabled = loading || saving;
+        refreshBtn.disabled = loading;
         refreshBtn.classList.remove("admin-report-rakeback-refresh-btn--attention");
       }
       if (addBtn) {
         addBtn.hidden = false;
-        addBtn.disabled = archiveMode || loading || saving;
+        addBtn.disabled = archiveMode || loading;
       }
       if (archiveBtn) {
         archiveBtn.hidden = false;
@@ -1639,10 +1639,10 @@
       }
       if (body) {
         Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]")).forEach(function (row) {
-          setSharedRowSaved(row, row.getAttribute("data-rakeback-saved") === "1", loading || saving);
+          setSharedRowSaved(row, row.getAttribute("data-rakeback-saved") === "1", loading);
         });
         Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-template-row]")).forEach(function (row) {
-          updateTemplateRowActions(row, loading || saving);
+          updateTemplateRowActions(row, loading);
         });
       }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
@@ -1891,13 +1891,13 @@
         clearTemplateDefaultTimer(draft.room, draft.playerId);
         if (getRakebackNegativeField(templateRow)) {
           templateRow.removeAttribute("data-rakeback-template-default-dirty");
-          updateTemplateRowActions(templateRow, loading || saving);
+          updateTemplateRowActions(templateRow, loading);
           setStatus("Отрицательные значения сохранять нельзя", true);
           return;
         }
         if (draft.hasRakeInputValue) {
           templateRow.removeAttribute("data-rakeback-template-default-dirty");
-          updateTemplateRowActions(templateRow, loading || saving);
+          updateTemplateRowActions(templateRow, loading);
           return;
         }
         if (isTemplateDefaultAlreadySaved(templateRow, draft)) {
@@ -1906,7 +1906,7 @@
         }
         templateRow.setAttribute("data-rakeback-template-default-dirty", "1");
         templateRow.removeAttribute("data-rakeback-template-default-saved");
-        updateTemplateRowActions(templateRow, loading || saving);
+        updateTemplateRowActions(templateRow, loading);
         setStatus("Сохраняю шаблон…", true);
         var key = getTemplateDefaultKey(draft.room, draft.playerId);
         templateDefaultSaveTimers[key] = setTimeout(function () {
@@ -2045,7 +2045,7 @@
           if (!row) return;
           if (row.hasAttribute("data-rakeback-template-row")) {
             syncSharedRowAmount(row);
-            updateTemplateRowActions(row, loading || saving);
+            updateTemplateRowActions(row, loading);
             scheduleTemplateRowDefaultSave(row);
             return;
           }
@@ -2058,7 +2058,7 @@
           if (!row) return;
           if (row.hasAttribute("data-rakeback-template-row")) {
             syncSharedRowAmount(row);
-            updateTemplateRowActions(row, loading || saving);
+            updateTemplateRowActions(row, loading);
             scheduleTemplateRowDefaultSave(row);
             return;
           }
@@ -2085,7 +2085,7 @@
             if (colorRow.hasAttribute("data-rakeback-template-row")) {
               applySharedRowColor(colorRow, selectedColor);
               closeSharedRowColorMenus(body);
-              updateTemplateRowActions(colorRow, loading || saving);
+              updateTemplateRowActions(colorRow, loading);
               scheduleTemplateRowDefaultSave(colorRow);
               return;
             }
@@ -2218,7 +2218,7 @@
           var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
           if (kind === "addon" && !isLastSharedAddonDomRow(row)) {
             setStatus("Сначала удалите последнюю подзапись", true);
-            updateSharedRowActions(row, loading || saving);
+            updateSharedRowActions(row, loading);
             return;
           }
           var localKey = getSharedDomRowLocalKey(row);
