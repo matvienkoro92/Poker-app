@@ -1046,6 +1046,28 @@ async function main() {
           String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20";
       });
     }, null, { timeout: 1200 });
+    const middleDeleteDraftCount = submittedRakebackDrafts.length;
+    const middleAddonDeleteGuardState = await page.evaluate(() => {
+      const addons = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']"))
+        .filter((row) => String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared");
+      const orderBefore = addons.map((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim());
+      const previousAddon = addons.find((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "25");
+      const removeBtn = previousAddon?.querySelector("[data-rakeback-remove]");
+      const disabledBefore = !!(removeBtn && removeBtn.disabled);
+      const titleBefore = removeBtn?.getAttribute("title") || "";
+      if (removeBtn) {
+        removeBtn.disabled = false;
+        removeBtn.click();
+      }
+      const orderAfter = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']"))
+        .filter((row) => String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared")
+        .map((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim());
+      const statusText = document.getElementById("adminReportRakebackStatus")?.textContent || "";
+      return { disabledBefore, titleBefore, orderBefore, orderAfter, statusText };
+    });
+    if (!middleAddonDeleteGuardState.disabledBefore || !/последнюю подзапись/i.test(middleAddonDeleteGuardState.titleBefore) || middleAddonDeleteGuardState.orderBefore.join("|") !== middleAddonDeleteGuardState.orderAfter.join("|") || !/последнюю подзапись/i.test(middleAddonDeleteGuardState.statusText) || submittedRakebackDrafts.length !== middleDeleteDraftCount) {
+      throw new Error("admin report rakeback allowed deleting a middle addon: " + JSON.stringify(middleAddonDeleteGuardState));
+    }
     const baseOrderBeforePersistedAddonDelete = await page.evaluate(() => {
       return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"))
         .filter((row) => row.getAttribute("data-rakeback-kind") !== "addon")

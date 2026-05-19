@@ -245,6 +245,19 @@
     return previousRake;
   }
 
+  function isLastSharedAddonDomRow(row) {
+    if (!row || row.getAttribute("data-rakeback-kind") !== "addon") return true;
+    var groupId = row.getAttribute("data-rakeback-group") || "";
+    var rows = row.parentNode ? Array.prototype.slice.call(row.parentNode.querySelectorAll("[data-rakeback-shared-row]")) : [];
+    var lastAddon = null;
+    rows.forEach(function (current) {
+      if ((current.getAttribute("data-rakeback-group") || "") === groupId && current.getAttribute("data-rakeback-kind") === "addon") {
+        lastAddon = current;
+      }
+    });
+    return !lastAddon || lastAddon === row;
+  }
+
   function syncSharedRowAmount(row, previousRake) {
     if (!row) return 0;
     var roomSelect = row.querySelector("[data-rakeback-room]");
@@ -297,7 +310,12 @@
       addBtn.hidden = !canAdd;
       addBtn.disabled = !!busy || !canAdd;
     }
-    if (removeBtn) removeBtn.disabled = !!busy;
+    if (removeBtn) {
+      var removeLocked = kind === "addon" && !isLastSharedAddonDomRow(row);
+      removeBtn.disabled = !!busy || removeLocked;
+      removeBtn.setAttribute("title", removeLocked ? "Сначала удалите последнюю подзапись" : "Удалить строку");
+      removeBtn.setAttribute("aria-label", removeLocked ? "Сначала удалите последнюю подзапись" : "Удалить строку");
+    }
   }
 
   function updateSharedRowDateBadge(row, baseEntryAt) {
@@ -1544,6 +1562,11 @@
           if (!row) return;
           var groupId = row.getAttribute("data-rakeback-group") || "";
           var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
+          if (kind === "addon" && !isLastSharedAddonDomRow(row)) {
+            setStatus("Сначала удалите последнюю подзапись", true);
+            updateSharedRowActions(row, loading || saving);
+            return;
+          }
           var localKey = getSharedDomRowLocalKey(row);
           var serverKey = getSharedDomRowServerKey(row);
           var persisted = row.getAttribute("data-rakeback-persisted") === "1";
