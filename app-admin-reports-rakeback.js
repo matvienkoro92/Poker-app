@@ -293,6 +293,7 @@
     var templatesLoading = false;
     var templatesLoadPromise = null;
     var templatesLoadStatusTimer = null;
+    var templatesPreloadStarted = false;
     var templateStreamSeq = 0;
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
     var templateRowsOpen = config.templatesOpen === true || readRakebackTemplateSpoilerOpen();
@@ -384,11 +385,29 @@
       }
     }
 
+    function scheduleTemplatePreloadStep(fn) {
+      if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(fn, { timeout: 900 });
+      } else {
+        setTimeout(fn, 180);
+      }
+    }
+
+    function preloadTemplatesSoon() {
+      if (templatesLoaded || templatesLoading || templatesPreloadStarted || !templatesMayExist) return;
+      templatesPreloadStarted = true;
+      scheduleTemplatePreloadStep(function () {
+        loadTemplatesIfNeeded({ showStatus: false }).then(function () {
+          if (templateRowsOpen) render();
+        });
+      });
+    }
+
     function streamTemplateRows(ids, startIndex, seq) {
       ids = Array.isArray(ids) ? ids : [];
       var total = ids.length;
       var index = 0;
-      var batchSize = total > 240 ? 48 : 32;
+      var batchSize = total > 240 ? 96 : 80;
       if (!body || seq !== templateStreamSeq || !templateRowsOpen || archiveMode) return;
       if (!total) {
         setStatus("Шаблонов нет");
@@ -943,6 +962,7 @@
 
     bind();
     syncControls();
+    preloadTemplatesSoon();
 
     function setArchiveMode(active) {
       archiveMode = !!active;

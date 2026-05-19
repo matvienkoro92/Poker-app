@@ -6,6 +6,18 @@
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
   var adminReportRakebackShellModule = null;
+  var ADMIN_GLOBAL_MODAL_IDS = [
+    "visitorsAdminModal",
+    "visitorsBroadcastModal",
+    "adminPushBroadcastModal",
+    "adminChatPushAllModal",
+    "adminAuthDebugModal",
+    "shareStatsAdminModal",
+    "trackingLinksAdminModal",
+    "trackingLinksVisitorsModal",
+    "adminReportModal",
+    "broadcastReportsModal",
+  ];
 
   function findFragmentHost(viewName) {
     var view = String(viewName || "").trim();
@@ -81,12 +93,35 @@
     parent.removeChild(host);
   }
 
+  function isAdminGlobalModalFragment(src) {
+    return /(?:^|\/)global-modals-admin\.html(?:[?#].*)?$/.test(String(src || ""));
+  }
+
+  function hasAnyAdminGlobalModal() {
+    return ADMIN_GLOBAL_MODAL_IDS.some(function (id) {
+      return !!document.getElementById(id);
+    });
+  }
+
+  function removeExistingAdminGlobalModals(root) {
+    if (!root) return;
+    ADMIN_GLOBAL_MODAL_IDS.forEach(function (id) {
+      if (!document.getElementById(id)) return;
+      var node = root.querySelector ? root.querySelector("#" + id) : null;
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+    });
+  }
+
   function hydrateGlobalModalSubfragments(root) {
     var hosts = Array.prototype.slice.call(root.querySelectorAll("[data-global-modal-fragment]"));
     if (!hosts.length) return Promise.resolve(root);
     return Promise.all(hosts.map(function (host) {
       var src = String(host.getAttribute("data-global-modal-fragment") || "").trim();
       if (!src) return true;
+      if (isAdminGlobalModalFragment(src) && hasAnyAdminGlobalModal()) {
+        if (host.parentNode) host.parentNode.removeChild(host);
+        return true;
+      }
       return fetchNestedFragment(src).then(function (html) {
         replaceGlobalModalFragmentHost(host, html);
         return true;
@@ -136,6 +171,7 @@
         var wrap = document.createElement("div");
         wrap.innerHTML = html;
         return hydrateGlobalModalSubfragments(wrap).then(function () {
+          removeExistingAdminGlobalModals(wrap);
           var nodes = [];
           while (wrap.firstChild) nodes.push(wrap.removeChild(wrap.firstChild));
           nodes.forEach(function (node) {
@@ -146,6 +182,35 @@
           return true;
         });
       });
+    return loading[src];
+  };
+
+  window.pokerEnsureAdminReportModalHtml = function () {
+    if (document.getElementById("adminReportModal")) {
+      runFragmentHooks("global-modals");
+      return Promise.resolve(true);
+    }
+    var host = document.getElementById("globalModalsFragmentHost");
+    if (!host) return window.pokerEnsureGlobalModalsHtml();
+    var src = "./html-fragments/global-modals-admin.html";
+    if (!loading[src]) {
+      loading[src] = fetch(src, { cache: "no-store" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("Failed to load admin modal HTML fragment " + src + ": " + res.status);
+          return res.text();
+        })
+        .then(function (html) {
+          if (document.getElementById("adminReportModal")) return true;
+          var currentHost = document.getElementById("globalModalsFragmentHost");
+          var parent = currentHost ? currentHost.parentNode : document.body;
+          if (!parent) return false;
+          var wrap = document.createElement("div");
+          wrap.innerHTML = html;
+          while (wrap.firstChild) parent.insertBefore(wrap.firstChild, currentHost || null);
+          runFragmentHooks("global-modals");
+          return true;
+        });
+    }
     return loading[src];
   };
 
@@ -160,7 +225,11 @@
       } catch (eEagerGlobalModals) {}
     }
     function schedule() {
-      setTimeout(run, 0);
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(run, { timeout: 2600 });
+      } else {
+        setTimeout(run, 900);
+      }
     }
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", schedule, { once: true });
@@ -591,6 +660,7 @@
       renderAdminReportRakebackShellPlaceholder(openRequested);
       bindAdminReportRakebackShellPlaceholder();
     }
+    loadAdminReportRakebackShellTemplates().catch(function () {});
     return loadAdminReportShellScript("app-admin-reports-rakeback.js").then(function () {
       var module = initAdminReportRakebackShellModule();
       if (window.__adminReportRakebackTemplateOpenRequested === true && module && typeof module.setTemplateRowsOpen === "function") {
@@ -612,6 +682,7 @@
       return 0;
     });
   }
+  window.pokerOpenAdminReportRakebackShell = openAdminReportRakebackShell;
 
   function closeAdminReportShellModal() {
     var modal = document.getElementById("adminReportModal");
@@ -663,9 +734,11 @@
 
   function openAdminReportShellWhenReady() {
     if (document.getElementById("adminReportModal")) return Promise.resolve(openAdminReportShellModal());
-    var host = document.getElementById("globalModalsFragmentHost");
-    if (!host || typeof window.pokerEnsureGlobalModalsHtml !== "function") return Promise.resolve(false);
-    return Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+    var ensureAdminHtml = typeof window.pokerEnsureAdminReportModalHtml === "function"
+      ? window.pokerEnsureAdminReportModalHtml
+      : window.pokerEnsureGlobalModalsHtml;
+    if (typeof ensureAdminHtml !== "function") return Promise.resolve(false);
+    return Promise.resolve(ensureAdminHtml())
       .then(function () {
         return openAdminReportShellModal();
       })
@@ -718,7 +791,12 @@
       needsLazyScripts = typeof window.pokerHasGlobalModalScriptsForTarget === "function" && window.pokerHasGlobalModalScriptsForTarget(target);
     } catch (eModalScriptNeed) {}
     if (!hasGlobalModalsHost && !needsLazyScripts) return Promise.resolve(true);
-    var htmlPromise = Promise.resolve(hasGlobalModalsHost ? window.pokerEnsureGlobalModalsHtml() : true);
+    var ensureAdminHtml = isAdminReportButtonTarget(target) || isAdminBroadcastReportsButtonTarget(target)
+      ? window.pokerEnsureAdminReportModalHtml
+      : null;
+    var htmlPromise = Promise.resolve(hasGlobalModalsHost
+      ? (typeof ensureAdminHtml === "function" ? ensureAdminHtml() : window.pokerEnsureGlobalModalsHtml())
+      : true);
     var scriptPromise = Promise.resolve(true);
     if (typeof window.pokerEnsureGlobalModalScriptsForTarget === "function") {
       scriptPromise = Promise.resolve(window.pokerEnsureGlobalModalScriptsForTarget(target));

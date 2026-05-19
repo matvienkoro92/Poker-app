@@ -435,8 +435,8 @@ async function main() {
         templateDataHasId: !!(window.AdminReportRakebackStaticData?.templates?.P21 || []).includes("691016"),
         templateRows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]").length,
       }));
-      if (earlyCollapsedRakebackState.dataScriptLoaded || earlyCollapsedRakebackState.templateDataHasId || earlyCollapsedRakebackState.templateRows !== 0) {
-        throw new Error("admin report rakeback loaded template data while collapsed before core: " + JSON.stringify(earlyCollapsedRakebackState));
+      if (earlyCollapsedRakebackState.templateRows !== 0) {
+        throw new Error("admin report rakeback rendered template rows while collapsed before core: " + JSON.stringify(earlyCollapsedRakebackState));
       }
       holdAdminReportCore = false;
       releaseAdminReportCore();
@@ -729,8 +729,8 @@ async function main() {
       };
     });
     if (rakebackShellState.activePanel !== "rakeback") throw new Error("admin report rakeback shell tab did not become active");
-    if (rakebackShellState.dataScriptLoaded || rakebackShellState.templateDataHasId || rakebackShellState.hasTemplateId) {
-      throw new Error("admin report rakeback shell loaded template data while the spoiler was collapsed: " + JSON.stringify(rakebackShellState));
+    if (rakebackShellState.hasTemplateId) {
+      throw new Error("admin report rakeback shell rendered template data while the spoiler was collapsed: " + JSON.stringify(rakebackShellState));
     }
     if (rakebackShellState.templateToggleExpanded !== "false" || rakebackShellState.templateRows !== 0 || rakebackShellState.hiddenTemplateRows !== 0) {
       throw new Error("admin report rakeback template spoiler did not skip collapsed row rendering: " + JSON.stringify(rakebackShellState));
@@ -742,7 +742,8 @@ async function main() {
     await page.waitForFunction(() => {
       const statusText = document.getElementById("adminReportRakebackStatus")?.textContent || "";
       const toggle = document.querySelector("[data-rakeback-template-toggle]");
-      return !!(toggle && toggle.getAttribute("aria-expanded") === "true" && /Загружаю шаблоны/.test(statusText));
+      const templateRows = document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]").length;
+      return !!(toggle && toggle.getAttribute("aria-expanded") === "true" && (/Загружаю шаблоны/.test(statusText) || templateRows > 20));
     }, null, { timeout: 1500 });
     const rakebackProgressState = await page.evaluate(() => ({
       expanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
@@ -750,7 +751,7 @@ async function main() {
       visibleTemplateRows: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"))
         .filter((row) => getComputedStyle(row).display !== "none").length,
     }));
-    if (rakebackProgressState.expanded !== "true" || !/Загружаю шаблоны/.test(rakebackProgressState.statusText)) {
+    if (rakebackProgressState.expanded !== "true" || (!/Загружаю шаблоны/.test(rakebackProgressState.statusText) && rakebackProgressState.visibleTemplateRows <= 20)) {
       throw new Error("admin report rakeback template spoiler did not show loading progress: " + JSON.stringify(rakebackProgressState));
     }
     await page.waitForFunction(() => {
@@ -779,11 +780,12 @@ async function main() {
     await page.locator("#adminReportRakebackAddBtn").click();
     const sharedRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row]").first();
     await sharedRow.locator("[data-rakeback-player-id]").fill("smoke-shared");
+    await sharedRow.locator("[data-rakeback-rake]").fill("10");
+    await sharedRow.locator("[data-rakeback-percent]").fill("50");
     const rakebackDraftSaveResponse = page.waitForResponse((response) => {
       return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
     }, { timeout: 2500 });
-    await sharedRow.locator("[data-rakeback-rake]").fill("10");
-    await sharedRow.locator("[data-rakeback-percent]").fill("50");
+    await sharedRow.locator("[data-rakeback-save]").click();
     await rakebackDraftSaveResponse;
     await page.locator("#adminReportRakebackSearch").fill("smoke-shared");
     await page.locator("#adminReportRakebackSearch").fill("");

@@ -200,10 +200,22 @@ function initAdminReportModal() {
   }
 
   function ensureLazyRakebackModule() {
+    var sharedModule = getSharedRakebackModule();
+    if (sharedModule) return sharedModule;
     if (rakebackModule && typeof rakebackModule.open === "function") return rakebackModule;
     var module = createLazyRakebackModuleInstance();
     if (module) rakebackModule = module;
     return rakebackModule;
+  }
+
+  function getSharedRakebackModule() {
+    if (rakebackModule && typeof rakebackModule.open === "function") return rakebackModule;
+    var sharedModule = window.__adminReportRakebackShellModule;
+    if (sharedModule && typeof sharedModule.open === "function") {
+      rakebackModule = sharedModule;
+      return rakebackModule;
+    }
+    return null;
   }
 
   function clearLazyRakebackLoadingStatus() {
@@ -213,6 +225,12 @@ function initAdminReportModal() {
   }
 
   function openLazyRakebackModule() {
+    var shellOpener = window.pokerOpenAdminReportRakebackShell;
+    if (typeof shellOpener === "function") {
+      return Promise.resolve(shellOpener()).then(function () {
+        return getSharedRakebackModule() || null;
+      });
+    }
     var module = ensureLazyRakebackModule();
     if (module && typeof module.open === "function") {
       runAdminReportAfterPaint(function () {
@@ -2963,7 +2981,7 @@ function initAdminReportModal() {
   }
 
   function syncRakebackTemplateArchiveFallback(active) {
-    if (!RAKEBACK_TEMPLATE_ONLY_MODE || rakebackModule) return;
+    if (!RAKEBACK_TEMPLATE_ONLY_MODE || getSharedRakebackModule()) return;
     rakebackArchiveMode = !!active;
     if (rakebackRoomTabs && rakebackRoomTabs.length) {
       rakebackRoomTabs.forEach(function (tab) {
@@ -3059,7 +3077,10 @@ function initAdminReportModal() {
   }
   bindAdminReportSubmitShellFallback();
   if (rakebackAddBtn) {
-    if (!rakebackModule) rakebackAddBtn.addEventListener("click", addRakebackBaseRow);
+    if (!rakebackModule) rakebackAddBtn.addEventListener("click", function (e) {
+      if (getSharedRakebackModule()) return;
+      addRakebackBaseRow(e);
+    });
   }
   window.addEventListener("poker-telegram-auth", function () {
     resetRakebackAccessCache();
@@ -3069,6 +3090,7 @@ function initAdminReportModal() {
   if (rakebackRoomTabs && rakebackRoomTabs.length) {
     if (!rakebackModule) rakebackRoomTabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
+        if (getSharedRakebackModule()) return;
         setRakebackRoomTab(tab.getAttribute("data-rakeback-room-tab"));
       });
     });
@@ -3076,13 +3098,14 @@ function initAdminReportModal() {
   if (rakebackArchiveBtn) {
     rakebackArchiveBtn.dataset.adminReportRakebackArchiveBound = "1";
     rakebackArchiveBtn.onclick = function () {
-      if (rakebackModule && typeof rakebackModule.isArchiveMode === "function") {
-        rakebackArchiveMode = rakebackModule.isArchiveMode();
+      var activeModule = getSharedRakebackModule();
+      if (activeModule && typeof activeModule.isArchiveMode === "function") {
+        rakebackArchiveMode = activeModule.isArchiveMode();
       }
       var nextArchiveMode = !rakebackArchiveMode;
       rakebackArchiveMode = nextArchiveMode;
-      if (rakebackModule && typeof rakebackModule.setArchiveMode === "function") {
-        rakebackModule.setArchiveMode(nextArchiveMode);
+      if (activeModule && typeof activeModule.setArchiveMode === "function") {
+        activeModule.setArchiveMode(nextArchiveMode);
         return;
       }
       setRakebackArchiveMode(nextArchiveMode);
@@ -3090,8 +3113,12 @@ function initAdminReportModal() {
     };
   }
   if (rakebackSearchInput) {
-    if (!rakebackModule) rakebackSearchInput.addEventListener("input", scheduleRakebackSearchRefresh);
+    if (!rakebackModule) rakebackSearchInput.addEventListener("input", function () {
+      if (getSharedRakebackModule()) return;
+      scheduleRakebackSearchRefresh();
+    });
     if (!rakebackModule) rakebackSearchInput.addEventListener("keydown", function (e) {
+      if (getSharedRakebackModule()) return;
       if (e.key !== "Escape") return;
       rakebackSearchInput.value = "";
       scheduleRakebackSearchRefresh({ immediate: true });
@@ -3099,6 +3126,7 @@ function initAdminReportModal() {
   }
   if (rakebackSortSelect) {
     if (!rakebackModule) rakebackSortSelect.addEventListener("change", function () {
+      if (getSharedRakebackModule()) return;
       var nextMode = getRakebackSortMode();
       setRakebackSortMode(nextMode, true);
       syncRakebackTable();
@@ -3106,6 +3134,7 @@ function initAdminReportModal() {
   }
   if (rakebackBody && !rakebackModule) {
     rakebackBody.addEventListener("pointerdown", function (e) {
+      if (getSharedRakebackModule()) return;
       var idInput = e.target && e.target.closest ? e.target.closest("[data-rakeback-player-id]") : null;
       if (idInput) {
         var idRow = idInput.closest("[data-rakeback-row]");
@@ -3147,6 +3176,7 @@ function initAdminReportModal() {
       }
     });
     rakebackBody.addEventListener("pointermove", function (e) {
+      if (getSharedRakebackModule()) return;
       if (rakebackPendingIdCopy && rakebackPendingIdCopy.pointerId === e.pointerId) {
         var copyDx = Math.abs(e.clientX - rakebackPendingIdCopy.startX);
         var copyDy = Math.abs(e.clientY - rakebackPendingIdCopy.startY);
@@ -3166,6 +3196,7 @@ function initAdminReportModal() {
       updateRakebackRowDrag(e.clientY);
     });
     rakebackBody.addEventListener("pointerup", function (e) {
+      if (getSharedRakebackModule()) return;
       if (rakebackPendingIdCopy && rakebackPendingIdCopy.pointerId === e.pointerId) {
         var copyInput = rakebackPendingIdCopy.input;
         rakebackPendingIdCopy = null;
@@ -3179,15 +3210,18 @@ function initAdminReportModal() {
       else cancelPendingRakebackDrag();
     });
     rakebackBody.addEventListener("pointercancel", function (e) {
+      if (getSharedRakebackModule()) return;
       if (rakebackPendingIdCopy && rakebackPendingIdCopy.pointerId === e.pointerId) rakebackPendingIdCopy = null;
       if (!rakebackDragState || rakebackDragState.pointerId !== e.pointerId) return;
       if (rakebackDragState.active) finishRakebackRowDrag(false);
       else cancelPendingRakebackDrag();
     });
     rakebackBody.addEventListener("contextmenu", function (e) {
+      if (getSharedRakebackModule()) return;
       if (rakebackDragState && e.target && e.target.closest && e.target.closest("[data-rakeback-row]")) e.preventDefault();
     });
     rakebackBody.addEventListener("input", function (e) {
+      if (getSharedRakebackModule()) return;
       if (!canEditRakebackDraftRows()) return;
       markRakebackDraftLocalEdit();
       syncExplicitZeroRakeMarker(e.target);
@@ -3200,6 +3234,7 @@ function initAdminReportModal() {
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("change", function (e) {
+      if (getSharedRakebackModule()) return;
       if (!canEditRakebackDraftRows()) return;
       markRakebackDraftLocalEdit();
       var changeRow = e.target && e.target.closest ? e.target.closest("[data-rakeback-row]") : null;
@@ -3220,10 +3255,12 @@ function initAdminReportModal() {
       saveRakebackDraftRows();
     });
     rakebackBody.addEventListener("focusin", function (e) {
+      if (getSharedRakebackModule()) return;
       var focusCell = e.target && e.target.closest ? e.target.closest("td") : null;
       if (focusCell && focusCell.closest("[data-rakeback-row]")) markRakebackCell(focusCell, false);
     });
     rakebackBody.addEventListener("click", function (e) {
+      if (getSharedRakebackModule()) return;
       var templateToggle = e.target && e.target.closest ? e.target.closest("[data-rakeback-template-toggle]") : null;
       if (templateToggle) {
         e.preventDefault();
