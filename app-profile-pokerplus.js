@@ -317,11 +317,6 @@ function initProfilePokerPlus() {
     return n > 0 ? "good" : "bad";
   }
 
-  function pokerPlusStatHasNonZeroNumber(value) {
-    var n = Number(value);
-    return isFinite(n) && n !== 0;
-  }
-
   function pokerPlusPickStat(total, camelKey, snakeKey) {
     if (!total || typeof total !== "object") return null;
     if (total[camelKey] != null && total[camelKey] === total[camelKey]) return total[camelKey];
@@ -454,15 +449,15 @@ function initProfilePokerPlus() {
     if (includeEmptyCore || bbStat != null) metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
     if (includeEmptyCore || ofcStat != null) metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "OFC"));
     if (includeEmptyCore || mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
-    if (pokerPlusStatHasNonZeroNumber(mttRoundStat)) metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
-    if (pokerPlusStatHasNonZeroNumber(mttCountStat)) metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
-    if (pokerPlusStatHasNonZeroNumber(mttItmStat)) metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
-    if (pokerPlusStatHasNonZeroNumber(mttFirstStat)) metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
+    if (mttRoundStat != null) metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
+    if (mttCountStat != null) metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
+    if (mttItmStat != null) metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
+    if (mttFirstStat != null) metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
     if (includeEmptyCore || sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
-    if (pokerPlusStatHasNonZeroNumber(sngRoundStat)) metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
-    if (pokerPlusStatHasNonZeroNumber(sngCountStat)) metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
-    if (pokerPlusStatHasNonZeroNumber(sngItmStat)) metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
-    if (pokerPlusStatHasNonZeroNumber(sngFirstStat)) metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
+    if (sngRoundStat != null) metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
+    if (sngCountStat != null) metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
+    if (sngItmStat != null) metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
+    if (sngFirstStat != null) metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
     if (!metrics.length) return "";
     return (
       '<span class="profile-pokerplus-stats-period"><span class="profile-pokerplus-stats-period__title">' +
