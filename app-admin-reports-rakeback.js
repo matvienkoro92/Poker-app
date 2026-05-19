@@ -40,6 +40,93 @@
     return normalizeTemplateMap(staticData.templates || {});
   }
 
+  function getRakebackRowColors() {
+    var staticData = window.AdminReportRakebackStaticData || {};
+    var colors = Array.isArray(staticData.rowColors) ? staticData.rowColors : [];
+    if (colors.length) return colors;
+    return [
+      { value: "#73510b", label: "Золотой" },
+      { value: "#087a48", label: "Зеленый" },
+      { value: "#087878", label: "Бирюзовый" },
+      { value: "#155996", label: "Синий" },
+      { value: "#5b35a0", label: "Фиолетовый" },
+      { value: "#8f2b2b", label: "Красный" },
+    ];
+  }
+
+  function normalizeRakebackRowColor(color) {
+    var staticData = window.AdminReportRakebackStaticData || {};
+    var legacyMap = staticData.legacyColorMap || {};
+    var raw = String(color || "").trim().toLowerCase();
+    if (!raw) return "";
+    if (legacyMap[raw]) return legacyMap[raw];
+    var colors = getRakebackRowColors();
+    for (var i = 0; i < colors.length; i += 1) {
+      if (String(colors[i].value || "").toLowerCase() === raw) return colors[i].value;
+    }
+    return "";
+  }
+
+  function getRakebackRowColorButtons(selectedColor) {
+    selectedColor = normalizeRakebackRowColor(selectedColor);
+    var buttons = getRakebackRowColors().map(function (color) {
+      var value = normalizeRakebackRowColor(color.value);
+      var selected = value && value === selectedColor;
+      return '<button type="button" class="admin-report-rakeback-color-swatch" data-rakeback-color-value="' +
+        escapeHtml(value) +
+        '" title="' +
+        escapeHtml(color.label || "Цвет строки") +
+        '" aria-label="' +
+        escapeHtml(color.label || "Цвет строки") +
+        '"' +
+        (selected ? ' data-rakeback-color-selected="1"' : "") +
+        ' style="--rakeback-swatch:' +
+        escapeHtml(value) +
+        '"></button>';
+    });
+    buttons.push('<button type="button" class="admin-report-rakeback-color-swatch admin-report-rakeback-color-swatch--clear" data-rakeback-color-value="" title="Сбросить цвет" aria-label="Сбросить цвет">×</button>');
+    return buttons.join("");
+  }
+
+  function closeSharedRowColorMenus(root, exceptRow) {
+    var scope = root && root.querySelectorAll ? root : document;
+    Array.prototype.slice.call(scope.querySelectorAll("[data-rakeback-color-menu]")).forEach(function (menu) {
+      var row = menu.closest ? menu.closest("[data-rakeback-row]") : null;
+      if (exceptRow && row === exceptRow) return;
+      menu.hidden = true;
+    });
+  }
+
+  function applySharedRowColor(row, color) {
+    if (!row) return;
+    color = normalizeRakebackRowColor(color);
+    if (color) {
+      row.setAttribute("data-rakeback-row-color", color);
+      row.style.setProperty("--rakeback-row-bg", color);
+      row.style.setProperty("--rakeback-row-button-color", color);
+    } else {
+      row.removeAttribute("data-rakeback-row-color");
+      row.style.removeProperty("--rakeback-row-bg");
+      row.style.removeProperty("--rakeback-row-button-color");
+    }
+    var menu = row.querySelector("[data-rakeback-color-menu]");
+    if (menu) {
+      Array.prototype.slice.call(menu.querySelectorAll("[data-rakeback-color-value]")).forEach(function (btn) {
+        btn.toggleAttribute("data-rakeback-color-selected", normalizeRakebackRowColor(btn.getAttribute("data-rakeback-color-value")) === color);
+      });
+    }
+  }
+
+  function getSharedRowColorOrder(row) {
+    var color = normalizeRakebackRowColor(row && (row.color || row.rowColor || row.highlightColor));
+    var colors = getRakebackRowColors();
+    if (!color) return colors.length + 1;
+    for (var i = 0; i < colors.length; i += 1) {
+      if (colors[i].value === color) return i;
+    }
+    return colors.length + 1;
+  }
+
   function normalizeRoom(room) {
     room = String(room || "P21").trim();
     if (room === "Poker21" || room === "Покер21") return "P21";
@@ -159,6 +246,33 @@
       String(row.reportedAt || "").trim(),
       addonStamp,
     ].join("|");
+  }
+
+  function copyTextToClipboard(text) {
+    var value = String(text != null ? text : "").trim();
+    if (!value) return Promise.reject(new Error("empty"));
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(value);
+    }
+    return new Promise(function (resolve, reject) {
+      var textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        if (document.execCommand("copy")) resolve();
+        else reject(new Error("copy"));
+      } catch (err) {
+        reject(err);
+      } finally {
+        textarea.parentNode.removeChild(textarea);
+      }
+    });
   }
 
   function getApiBaseSafe() {
@@ -295,6 +409,7 @@
     var editBtn = row.querySelector("[data-rakeback-edit]");
     var addBtn = row.querySelector("[data-rakeback-add-addon]");
     var removeBtn = row.querySelector("[data-rakeback-remove]");
+    var colorBtn = row.querySelector("[data-rakeback-color-toggle]");
     if (saveBtn) {
       saveBtn.hidden = saved;
       saveBtn.disabled = !!busy;
@@ -315,6 +430,10 @@
       removeBtn.disabled = !!busy || removeLocked;
       removeBtn.setAttribute("title", removeLocked ? "Сначала удалите последнюю подзапись" : "Удалить строку");
       removeBtn.setAttribute("aria-label", removeLocked ? "Сначала удалите последнюю подзапись" : "Удалить строку");
+    }
+    if (colorBtn) {
+      colorBtn.hidden = false;
+      colorBtn.disabled = !!busy;
     }
   }
 
@@ -428,15 +547,19 @@
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку">✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--color" data-rakeback-color-toggle title="Изменить цвет строки" aria-label="Изменить цвет строки"><span class="admin-report-rakeback-color-dot" aria-hidden="true"></span></button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
+        '<div class="admin-report-rakeback-color-menu" data-rakeback-color-menu hidden>' + getRakebackRowColorButtons(data.color || data.rowColor || data.highlightColor || "") + "</div>" +
       "</td>";
     syncSharedRowAmount(tr);
     updateSharedRowDateBadge(tr, data.baseEntryAt || entryAt);
+    applySharedRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
     setSharedRowSaved(tr, saved, false);
     return tr;
   }
 
-  function createTemplateRow(room, playerId, index, collapsed) {
+  function createTemplateRow(room, playerId, index, collapsed, defaults) {
+    defaults = defaults || {};
     var tr = document.createElement("tr");
     tr.className = "admin-report-rakeback-row";
     tr.setAttribute("data-rakeback-row", "");
@@ -451,11 +574,11 @@
       '<td><select class="admin-report-rakeback-select" data-rakeback-room disabled>' + createRoomOptions(room) + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки">' + String(index + 1) + '</span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" readonly value="' + escapeHtml(playerId) + '" /></td>' +
       '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" /></td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" /></td>' +
-      '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%" /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
+      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" value="' + escapeHtml(formatInputNumber(defaults.percent)) + '" /></td>' +
+      '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%"' + (defaults.discount15 || defaults.subtract15 ? " checked" : "") + ' /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount></span></td>' +
       '<td class="admin-report-rakeback-actions">' +
-        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить шаблон в записи" aria-label="Сохранить шаблон в записи">✓</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить шаблон или запись" aria-label="Сохранить шаблон или запись">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись" hidden>+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку" hidden>×</button>' +
@@ -512,6 +635,36 @@
         seen[id] = true;
         return true;
       });
+    }
+
+    function isCarryForwardTemplateRow(row) {
+      if (!row || getSharedRowKind(row) === "addon") return false;
+      return row.carryForward === true || row.templateCarryForward === true;
+    }
+
+    function getTemplateDefaultRow(room, playerId) {
+      room = normalizeRoom(room);
+      playerId = String(playerId || "").trim().toLowerCase();
+      if (!playerId) return null;
+      for (var i = 0; i < sharedRows.length; i += 1) {
+        var row = sharedRows[i];
+        if (!isCarryForwardTemplateRow(row)) continue;
+        if (normalizeRoom(row.room) !== room) continue;
+        if (String(row.playerId || row.id || "").trim().toLowerCase() === playerId) return row;
+      }
+      return null;
+    }
+
+    function getEmptyGroupTemplateServerKey(room, playerId) {
+      return [
+        "",
+        "base",
+        normalizeRoom(room || "P21"),
+        String(playerId || "").trim(),
+        "",
+        "",
+        "",
+      ].join("|");
     }
 
     function updateTemplates(nextTemplates) {
@@ -618,7 +771,7 @@
         var limit = Math.min(index + batchSize, total);
         while (index < limit) {
           var id = ids[index];
-          if (id) fragment.appendChild(createTemplateRow(activeRoom, id, startIndex + index, false));
+          if (id) fragment.appendChild(createTemplateRow(activeRoom, id, startIndex + index, false, getTemplateDefaultRow(activeRoom, id)));
           index += 1;
         }
         if (fragment.childNodes.length) body.appendChild(fragment);
@@ -694,7 +847,7 @@
           return compareRowsByEntryDateDesc(a, b) || parseNumber(b.percent) - parseNumber(a.percent) || parseNumber(b.rake) - parseNumber(a.rake);
         }
         if (mode === "standard") return parseNumber(a.standardAt || a.createdAt) - parseNumber(b.standardAt || b.createdAt) || compareRowsByEntryDateDesc(a, b);
-        if (mode === "color") return rowAmount(b) - rowAmount(a) || compareRowsByEntryDateDesc(a, b);
+        if (mode === "color") return getSharedRowColorOrder(a) - getSharedRowColorOrder(b) || compareRowsByEntryDateDesc(a, b);
         return compareRowsByEntryDateDesc(a, b);
       });
     }
@@ -740,6 +893,7 @@
     function getSharedRowsForTotal(room) {
       var query = getSearchQuery();
       return orderSharedRowsForDisplay(sharedRows.filter(function (row) {
+        if (isCarryForwardTemplateRow(row)) return false;
         if (room && normalizeRoom(row.room) !== normalizeRoom(room)) return false;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         return !query || playerId.indexOf(query) !== -1;
@@ -783,6 +937,7 @@
       room = normalizeRoom(room);
       sharedRows.forEach(function (row) {
         if (!row || (row.saved !== true && row.persisted !== true) || getSharedRowKind(row) === "addon") return;
+        if (isCarryForwardTemplateRow(row)) return;
         if (normalizeRoom(row.room) !== room) return;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         if (playerId) set[playerId] = true;
@@ -861,6 +1016,7 @@
           entryAddedAt: row.getAttribute("data-rakeback-entry-added-at") || Date.now(),
           reportId: row.getAttribute("data-rakeback-report-id") || "",
           reportedAt: row.getAttribute("data-rakeback-reported-at") || "",
+          color: row.getAttribute("data-rakeback-row-color") || "",
           amount: amount,
           roomAmount: roomAmount,
         };
@@ -899,6 +1055,7 @@
         var roomAmount = row.roomAmount != null && row.roomAmount !== ""
           ? row.roomAmount
           : Math.round(parseNumber(rake) * parseNumber(percent) / 100 * (row.discount15 || row.subtract15 ? 0.85 : 1) * 100) / 100;
+        var carryForward = row.carryForward === true || row.templateCarryForward === true;
         return {
           groupId: String(row.groupId || "").trim() || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2)),
           kind: row.kind === "addon" ? "addon" : "base",
@@ -907,6 +1064,8 @@
           rake: rake,
           rakeZero: row.rakeZero === true || row.explicitZeroRake === true || row.zeroRake === true,
           percent: percent,
+          carryForward: carryForward,
+          templateCarryForward: carryForward,
           discount15: !!(row.discount15 || row.subtract15),
           saved: true,
           persisted: true,
@@ -916,6 +1075,7 @@
           entryAddedAt: row.entryAddedAt || row.firstAddedAt || row.createdAt || Date.now(),
           reportId: row.reportId || "",
           reportedAt: row.reportedAt || "",
+          color: normalizeRakebackRowColor(row.color || row.rowColor || row.highlightColor),
           amount: row.amount != null ? row.amount : getReportAmount(room, roomAmount),
           roomAmount: roomAmount,
         };
@@ -1016,6 +1176,24 @@
 
     function getSharedDomRowServerKey(row) {
       return getSharedRowServerKey(getSharedDomRowDataForKey(row));
+    }
+
+    function shouldCopyRakebackIdInput(input) {
+      if (!input) return false;
+      var row = input.closest("[data-rakeback-row]");
+      if (!row) return false;
+      if (!String(input.value || "").trim()) return false;
+      return input.readOnly || row.getAttribute("data-rakeback-saved") === "1" || row.hasAttribute("data-rakeback-template-row");
+    }
+
+    function copyRakebackIdInput(input) {
+      if (!shouldCopyRakebackIdInput(input)) return false;
+      copyTextToClipboard(input.value).then(function () {
+        setStatus("ID скопирован");
+      }).catch(function () {
+        setStatus("Не удалось скопировать ID", true);
+      });
+      return true;
     }
 
     function findSharedDomRowByLocalKey(key) {
@@ -1384,6 +1562,49 @@
         if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
       }
 
+      function saveTemplateRowDefaults(room, playerId, percent, discount15) {
+        var previousRows = sharedRows.slice();
+        var existingDefault = getTemplateDefaultRow(room, playerId);
+        var now = Date.now();
+        var row = {
+          groupId: existingDefault && existingDefault.groupId
+            ? existingDefault.groupId
+            : "shell_template_default_" + now + "_" + Math.random().toString(16).slice(2),
+          kind: "base",
+          room: room,
+          playerId: playerId,
+          rake: 0,
+          rakeZero: false,
+          percent: percent,
+          carryForward: true,
+          templateCarryForward: true,
+          discount15: !!discount15,
+          saved: true,
+          persisted: !!(existingDefault && existingDefault.persisted),
+          createdAt: existingDefault && existingDefault.createdAt ? existingDefault.createdAt : now,
+          standardAt: now,
+          entryAddedAt: now,
+          amount: 0,
+          roomAmount: 0,
+        };
+        var normalizedId = String(playerId || "").trim().toLowerCase();
+        sharedRows = [row].concat(mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
+          if (!isCarryForwardTemplateRow(item)) return true;
+          if (normalizeRoom(item.room) !== room) return true;
+          return String(item.playerId || item.id || "").trim().toLowerCase() !== normalizedId;
+        }));
+        render();
+        setStatus("Процент закреплен за шаблоном", true);
+        saveSharedDraftNow(true, {
+          upsertGroupIds: [row.groupId],
+          deleteRowKeys: [getEmptyGroupTemplateServerKey(room, playerId)],
+        }).then(function (ok) {
+          if (ok) return;
+          sharedRows = previousRows;
+          render();
+        });
+      }
+
       function saveTemplateRowAsShared(templateRow) {
         if (!templateRow || archiveMode) return;
         syncSharedRowAmount(templateRow);
@@ -1398,9 +1619,19 @@
           return;
         }
         var room = normalizeRoom(roomSelect && roomSelect.value ? roomSelect.value : activeRoom);
+        var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
         var rake = parseNumber(rakeInput ? rakeInput.value : "");
         var percent = parseNumber(percentInput ? percentInput.value : "");
-        var roomAmount = Math.round(rake * percent / 100 * (discountInput && discountInput.checked ? 0.85 : 1) * 100) / 100;
+        var discount15 = !!(discountInput && discountInput.checked);
+        if (!hasRakeInputValue) {
+          if (percent === 0 && !discount15) {
+            setStatus("Укажите рейк для записи или процент для шаблона", true);
+            return;
+          }
+          saveTemplateRowDefaults(room, playerId, percent, discount15);
+          return;
+        }
+        var roomAmount = Math.round(rake * percent / 100 * (discount15 ? 0.85 : 1) * 100) / 100;
         var now = Date.now();
         var row = {
           groupId: "shell_template_" + now + "_" + Math.random().toString(16).slice(2),
@@ -1410,7 +1641,7 @@
           rake: rake,
           rakeZero: rake === 0,
           percent: percent,
-          discount15: !!(discountInput && discountInput.checked),
+          discount15: discount15,
           saved: true,
           persisted: false,
           createdAt: now,
@@ -1468,7 +1699,7 @@
           if (row.hasAttribute("data-rakeback-template-row")) {
             syncSharedRowAmount(row);
             updateTemplateRowActions(row, loading || saving);
-            setStatus("Нажмите ✓, чтобы поднять шаблон в записи", true);
+            setStatus("✓ сохранит процент шаблона или запись с рейком", true);
             return;
           }
           syncSharedGroupRows();
@@ -1482,7 +1713,7 @@
           if (row.hasAttribute("data-rakeback-template-row")) {
             syncSharedRowAmount(row);
             updateTemplateRowActions(row, loading || saving);
-            setStatus("Нажмите ✓, чтобы поднять шаблон в записи", true);
+            setStatus("✓ сохранит процент шаблона или запись с рейком", true);
             return;
           }
           syncSharedGroupRows();
@@ -1492,6 +1723,45 @@
           if (row.getAttribute("data-rakeback-saved") !== "1") setStatus("Нажмите ✓, чтобы сохранить", true);
         });
         body.addEventListener("click", function (event) {
+          var idCopyInput = event.target && event.target.closest ? event.target.closest("[data-rakeback-player-id]") : null;
+          if (idCopyInput && copyRakebackIdInput(idCopyInput)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          var colorControl = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
+          if (!colorControl) closeSharedRowColorMenus(body);
+          var colorOption = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-value]") : null;
+          if (colorOption) {
+            event.preventDefault();
+            var colorRow = colorOption.closest("[data-rakeback-shared-row]");
+            if (!colorRow) return;
+            var colorGroupId = colorRow.getAttribute("data-rakeback-group") || "";
+            var savedColorRow = colorRow.getAttribute("data-rakeback-saved") === "1";
+            applySharedRowColor(colorRow, colorOption.getAttribute("data-rakeback-color-value") || "");
+            closeSharedRowColorMenus(body);
+            sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+            if (getSortMode() === "color") render();
+            if (savedColorRow) {
+              saveSharedDraftNow(true, { upsertGroupIds: [colorGroupId] });
+            } else {
+              syncControls();
+              setStatus("Нажмите ✓, чтобы сохранить", true);
+            }
+            return;
+          }
+          var colorToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-toggle]") : null;
+          if (colorToggle) {
+            event.preventDefault();
+            var toggleRow = colorToggle.closest("[data-rakeback-shared-row]");
+            if (!toggleRow) return;
+            var menu = toggleRow.querySelector("[data-rakeback-color-menu]");
+            if (!menu) return;
+            var willOpen = menu.hidden;
+            closeSharedRowColorMenus(body, toggleRow);
+            menu.hidden = !willOpen;
+            return;
+          }
           var templateToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-template-toggle]") : null;
           if (templateToggle) {
             event.preventDefault();

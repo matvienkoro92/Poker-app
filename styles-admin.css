@@ -1792,7 +1792,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 #adminReportModal .admin-report-rakeback-row--addon td {
   background: #101016;
 }
-#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td:nth-child(-n+5) {
+#adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td:not(.admin-report-rakeback-actions) {
   background: var(--rakeback-row-bg, #101016);
 }
 #adminReportModal .admin-report-rakeback-table td[data-rakeback-cell-selected],
@@ -2092,7 +2092,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
   opacity: 0.76;
   color: var(--text-muted);
 }
-.admin-report-rakeback-row--saved .admin-report-rakeback-input--id {
+.admin-report-rakeback-row--saved .admin-report-rakeback-input--id,
+.admin-report-rakeback-input--id[readonly] {
   cursor: pointer;
 }
 .admin-report-rakeback-rake-with-rest {
