@@ -231,6 +231,14 @@
     return carryForward && !!(row.discount15 || row.subtract15);
   }
 
+  function hasNegativeSharedDraftRowValue(row) {
+    if (!row) return false;
+    return parseNumber(row.rake) < 0 ||
+      parseNumber(row.percent) < 0 ||
+      parseNumber(row.amount) < 0 ||
+      parseNumber(row.roomAmount) < 0;
+  }
+
   function getSharedRowKind(row) {
     return row && (row.kind === "addon" || row.isAddon) ? "addon" : "base";
   }
@@ -407,12 +415,25 @@
     var roomAmount = baseRake * parseNumber(percentInput ? percentInput.value : "") / 100;
     if (discountInput && discountInput.checked) roomAmount *= 0.85;
     roomAmount = Math.round(roomAmount * 100) / 100;
+    row.setAttribute("data-rakeback-base-rake", String(baseRake || 0));
     row.setAttribute("data-rakeback-room-amount", String(roomAmount || 0));
     row.setAttribute("data-rakeback-amount-value", String(getReportAmount(roomSelect && roomSelect.value ? roomSelect.value : "P21", roomAmount)));
     if (amountEl) amountEl.textContent = roomAmount ? String(roomAmount) : "";
     if (restEl) restEl.classList.toggle("admin-report-rakeback-rest--negative", baseRake < 0);
     if (amountEl) amountEl.classList.toggle("admin-report-rakeback-amount--negative", roomAmount < 0);
     return roomAmount;
+  }
+
+  function getRakebackNegativeField(row) {
+    if (!row) return "";
+    var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var percentInput = row.querySelector("[data-rakeback-percent]");
+    if (rakeInput && String(rakeInput.value || "").trim() && parseNumber(rakeInput.value) < 0) return "рейк";
+    if (percentInput && String(percentInput.value || "").trim() && parseNumber(percentInput.value) < 0) return "процент";
+    if (parseNumber(row.getAttribute("data-rakeback-base-rake")) < 0) return "остаток";
+    if (parseNumber(row.getAttribute("data-rakeback-room-amount")) < 0 ||
+      parseNumber(row.getAttribute("data-rakeback-amount-value")) < 0) return "РБ";
+    return "";
   }
 
   function updateSharedRowActions(row, busy) {
@@ -430,9 +451,10 @@
     var hasPercentInputValue = !!(percentInput && String(percentInput.value || "").trim());
     var hasRakebackValue = parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
       parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
+    var negativeField = getRakebackNegativeField(row);
     if (saveBtn) {
       saveBtn.hidden = saved;
-      saveBtn.disabled = !!busy || !hasRakeInputValue || (!hasPercentInputValue && !hasRakebackValue);
+      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue || (!hasPercentInputValue && !hasRakebackValue);
     }
     if (editBtn) {
       editBtn.hidden = !saved;
@@ -441,7 +463,7 @@
     if (addBtn) {
       var idInput = row.querySelector("[data-rakeback-player-id]");
       var rakeInput = row.querySelector("[data-rakeback-rake]");
-      var canAdd = kind === "base" && saved && String(idInput && idInput.value || "").trim() && parseNumber(rakeInput ? rakeInput.value : "") !== 0;
+      var canAdd = kind === "base" && saved && !negativeField && String(idInput && idInput.value || "").trim() && parseNumber(rakeInput ? rakeInput.value : "") > 0;
       addBtn.hidden = !canAdd;
       addBtn.disabled = !!busy || !canAdd;
     }
@@ -520,9 +542,10 @@
     var colorBtn = row.querySelector("[data-rakeback-color-toggle]");
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
+    var negativeField = getRakebackNegativeField(row);
     if (saveBtn) {
       saveBtn.hidden = !hasRakeInputValue;
-      saveBtn.disabled = !!busy || !hasRakeInputValue;
+      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue;
     }
     if (editBtn) editBtn.hidden = true;
     if (addBtn) addBtn.hidden = true;
@@ -563,9 +586,9 @@
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><label class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="date" data-rakeback-entry-date aria-label="Дата записи" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></label><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
       '<td>' + (kind === "addon"
-        ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
-        : '<input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.percent)) + '" /></td>' +
+        ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
+        : '<input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
+      '<td><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.percent)) + '" /></td>' +
       '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%"' + (data.discount15 || data.subtract15 ? " checked" : "") + ' /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount></span></td>' +
       '<td class="admin-report-rakeback-actions">' +
@@ -606,8 +629,8 @@
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room disabled>' + createRoomOptions(room) + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки">' + String(index + 1) + '</span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" readonly value="' + escapeHtml(playerId) + '" /></td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" /></td>' +
-      '<td><input type="number" inputmode="decimal" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" value="' + escapeHtml(formatInputNumber(defaults.percent)) + '" /></td>' +
+      '<td><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" /></td>' +
+      '<td><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-percent enterkeyhint="next" value="' + escapeHtml(formatInputNumber(defaults.percent)) + '" /></td>' +
       '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%"' + (defaults.discount15 || defaults.subtract15 ? " checked" : "") + ' /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount></span></td>' +
       '<td class="admin-report-rakeback-actions">' +
@@ -1244,12 +1267,12 @@
       patch = patch || null;
       if (!patch) {
         return localRows.filter(function (row) {
-          return row && row.saved === true && hasSharedDraftRowData(row);
+          return row && row.saved === true && hasSharedDraftRowData(row) && !hasNegativeSharedDraftRowValue(row);
         });
       }
       var upsertSet = listToSet(patch.upsertGroupIds);
       return localRows.filter(function (row) {
-        return row && row.saved === true && hasSharedDraftRowData(row) && upsertSet[row.groupId];
+        return row && row.saved === true && hasSharedDraftRowData(row) && !hasNegativeSharedDraftRowValue(row) && upsertSet[row.groupId];
       });
     }
 
@@ -1762,6 +1785,12 @@
         var draft = getTemplateRowDraft(templateRow);
         if (!draft || !draft.playerId) return;
         clearTemplateDefaultTimer(draft.room, draft.playerId);
+        if (getRakebackNegativeField(templateRow)) {
+          templateRow.removeAttribute("data-rakeback-template-default-dirty");
+          updateTemplateRowActions(templateRow, loading || saving);
+          setStatus("Отрицательные значения сохранять нельзя", true);
+          return;
+        }
         if (draft.hasRakeInputValue) {
           templateRow.removeAttribute("data-rakeback-template-default-dirty");
           updateTemplateRowActions(templateRow, loading || saving);
@@ -1817,6 +1846,10 @@
         var percent = parseNumber(percentInput ? percentInput.value : "");
         var discount15 = !!(discountInput && discountInput.checked);
         var color = normalizeRakebackRowColor(templateRow.getAttribute("data-rakeback-row-color"));
+        if (getRakebackNegativeField(templateRow)) {
+          setStatus("Отрицательные значения сохранять нельзя", true);
+          return;
+        }
         if (!hasRakeInputValue) {
           if (percent === 0 && !discount15 && !color) {
             setStatus("Укажите рейк для записи или процент для шаблона", true);
@@ -1937,6 +1970,11 @@
               scheduleTemplateRowDefaultSave(colorRow);
               return;
             }
+            if (getRakebackNegativeField(colorRow)) {
+              closeSharedRowColorMenus(body);
+              setStatus("Отрицательные значения сохранять нельзя", true);
+              return;
+            }
             var colorGroupId = colorRow.getAttribute("data-rakeback-group") || "";
             var savedColorRow = colorRow.getAttribute("data-rakeback-saved") === "1";
             applySharedRowColor(colorRow, selectedColor);
@@ -2005,6 +2043,17 @@
               parseNumber(saveRow.getAttribute("data-rakeback-amount-value")) === 0) {
               setStatus("Заполните процент", true);
               if (percentInput && typeof percentInput.focus === "function") percentInput.focus();
+              return;
+            }
+            var negativeField = getRakebackNegativeField(saveRow);
+            if (negativeField) {
+              setStatus("Отрицательные значения сохранять нельзя", true);
+              var negativeInput = negativeField === "рейк"
+                ? rakeInput
+                : negativeField === "процент"
+                  ? percentInput
+                  : null;
+              if (negativeInput && typeof negativeInput.focus === "function") negativeInput.focus();
               return;
             }
             var saveGroupId = saveRow.getAttribute("data-rakeback-group") || "";
