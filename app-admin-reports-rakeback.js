@@ -708,7 +708,7 @@
         if (!row) return;
         var key = String(row.groupId || "").trim() || ("row_" + index);
         if (!Object.prototype.hasOwnProperty.call(finalRakeByGroup, key)) groupOrder.push(key);
-        finalRakeByGroup[key] = parseNumber(row.rake);
+        finalRakeByGroup[key] = getReportAmount(row.room, row.rake);
       });
       return groupOrder.reduce(function (sum, key) {
         return sum + parseNumber(finalRakeByGroup[key]);

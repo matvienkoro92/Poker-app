@@ -947,9 +947,11 @@ async function main() {
       sharedRows.forEach((row, index) => {
         const groupId = row.getAttribute("data-rakeback-group") || `row_${index}`;
         const rake = Number(row.querySelector("[data-rakeback-rake]")?.value || 0) || 0;
+        const room = row.querySelector("[data-rakeback-room]")?.value || "P21";
+        const multiplier = room === "X" ? 100 : (room === "Supr" || room === "PP" ? 115 : 1);
         naiveRake += rake;
         if (!Object.prototype.hasOwnProperty.call(finalRakeByGroup, groupId)) groupOrder.push(groupId);
-        finalRakeByGroup[groupId] = rake;
+        finalRakeByGroup[groupId] = Math.round(rake) * multiplier;
       });
       const expectedFinalRake = groupOrder.reduce((sum, groupId) => sum + (Number(finalRakeByGroup[groupId]) || 0), 0);
       const roomTotal = parseTotal("adminReportRakebackRoomTotal");
@@ -977,8 +979,21 @@ async function main() {
     if (rakebackSharedState.renderedRake !== Math.round(rakebackSharedState.expectedFinalRake) || rakebackSharedState.renderedRake === Math.round(rakebackSharedState.naiveRake)) {
       throw new Error("admin report rakeback total rake did not use final group rake: " + JSON.stringify(rakebackSharedState));
     }
-    if (rakebackSharedState.renderedAllRake !== rakebackSharedState.renderedRake + 20 || rakebackSharedState.renderedAllAmount !== rakebackSharedState.renderedAmount + 200) {
+    if (rakebackSharedState.renderedAllRake !== rakebackSharedState.renderedRake + 2000 || rakebackSharedState.renderedAllAmount !== rakebackSharedState.renderedAmount + 200) {
       throw new Error("admin report rakeback all-room total did not include hidden room rows: " + JSON.stringify(rakebackSharedState));
+    }
+    await page.locator("[data-rakeback-room-tab='X']").click();
+    await page.waitForFunction(() => {
+      const active = document.querySelector("[data-rakeback-room-tab='X']");
+      return !!(active && active.getAttribute("aria-selected") === "true");
+    }, null, { timeout: 1000 });
+    const rakebackXpokerTotalState = await page.evaluate(() => {
+      const text = document.getElementById("adminReportRakebackRoomTotal")?.textContent || "";
+      const [rake, amount] = String(text).split("/").map((part) => Number(String(part || "").trim()) || 0);
+      return { text, rake, amount };
+    });
+    if (rakebackXpokerTotalState.rake !== 2000 || rakebackXpokerTotalState.amount !== 200) {
+      throw new Error("admin report rakeback Xpoker total did not display rake in rubles: " + JSON.stringify(rakebackXpokerTotalState));
     }
     if (!submittedRakebackDrafts.length || !(submittedRakebackDrafts[submittedRakebackDrafts.length - 1].rakebackRows || []).length) {
       throw new Error("admin report rakeback add button did not save shared draft");
