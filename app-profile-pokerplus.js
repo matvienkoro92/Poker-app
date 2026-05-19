@@ -324,6 +324,11 @@ function initProfilePokerPlus() {
     return null;
   }
 
+  function pokerPlusStatOrZero(value) {
+    if (value == null || value !== value || String(value).trim() === "") return 0;
+    return value;
+  }
+
   function pokerPlusCounterHasValue(total) {
     if (!total || typeof total !== "object") return false;
     var keys = [
@@ -430,34 +435,30 @@ function initProfilePokerPlus() {
     var metrics = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
-    var bbStat = pokerPlusPickStat(total, "bb", "bb");
-    var ofcStat = pokerPlusPickStat(total, "ofcWinnings", "ofc_winnings");
-    var mttRoundStat = pokerPlusPickStat(total, "mttRound", "mtt_round");
-    var mttStat = pokerPlusPickStat(total, "mttWinnings", "mtt_winnings");
-    var mttCountStat = pokerPlusPickStat(total, "mttCount", "mtt_count");
-    var mttItmStat = pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count");
-    var mttFirstStat = pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count");
-    var sngRoundStat = pokerPlusPickStat(total, "sngRound", "sng_round");
-    var sngStat = pokerPlusPickStat(total, "sngWinnings", "sng_winnings");
-    var sngCountStat = pokerPlusPickStat(total, "sngCount", "sng_count");
-    var sngItmStat = pokerPlusPickStat(total, "sngItmCount", "sng_itm_count");
-    var sngFirstStat = pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count");
+    var mttRoundStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttRound", "mtt_round"));
+    var mttStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttWinnings", "mtt_winnings"));
+    var mttCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttCount", "mtt_count"));
+    var mttItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count"));
+    var mttFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count"));
+    var sngRoundStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngRound", "sng_round"));
+    var sngStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngWinnings", "sng_winnings"));
+    var sngCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngCount", "sng_count"));
+    var sngItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngItmCount", "sng_itm_count"));
+    var sngFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count"));
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     if (includeEmptyCore || feeStat != null) metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     if (includeEmptyCore || handsStat != null) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-    if (includeEmptyCore || bbStat != null) metrics.push(pokerPlusStatMetricHtml("BB", bbStat, pokerPlusStatTone(bbStat), "BB"));
-    if (includeEmptyCore || ofcStat != null) metrics.push(pokerPlusStatMetricHtml("OFC", ofcStat, pokerPlusStatTone(ofcStat), "OFC"));
-    if (includeEmptyCore || mttStat != null) metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
-    if (mttRoundStat != null) metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
-    if (mttCountStat != null) metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
-    if (mttItmStat != null) metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
-    if (mttFirstStat != null) metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
-    if (includeEmptyCore || sngStat != null) metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
-    if (sngRoundStat != null) metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
-    if (sngCountStat != null) metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
-    if (sngItmStat != null) metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
-    if (sngFirstStat != null) metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
+    metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
+    metrics.push(pokerPlusStatMetricHtml("MTT раунды", mttRoundStat, "", "R"));
+    metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
+    metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
+    metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
+    metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
+    metrics.push(pokerPlusStatMetricHtml("SNG раунды", sngRoundStat, "", "R"));
+    metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
+    metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
+    metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
     if (!metrics.length) return "";
     return (
       '<span class="profile-pokerplus-stats-period"><span class="profile-pokerplus-stats-period__title">' +
