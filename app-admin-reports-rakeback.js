@@ -440,6 +440,14 @@
     return "";
   }
 
+  function hasRakebackDomValue(row) {
+    if (!row) return false;
+    var amountEl = row.querySelector("[data-rakeback-amount]");
+    if (amountEl && String(amountEl.textContent || "").trim()) return true;
+    return parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
+      parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
+  }
+
   function updateSharedRowActions(row, busy) {
     if (!row) return;
     var saved = row.getAttribute("data-rakeback-saved") === "1";
@@ -453,12 +461,11 @@
     var percentInput = row.querySelector("[data-rakeback-percent]");
     var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
     var hasPercentInputValue = !!(percentInput && String(percentInput.value || "").trim());
-    var hasRakebackValue = parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
-      parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
+    var hasRakebackValue = hasRakebackDomValue(row);
     var negativeField = getRakebackNegativeField(row);
     if (saveBtn) {
       saveBtn.hidden = saved;
-      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue || (!hasPercentInputValue && !hasRakebackValue);
+      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue || !hasPercentInputValue || !hasRakebackValue;
     }
     if (editBtn) {
       editBtn.hidden = !saved;
@@ -546,10 +553,11 @@
     var colorBtn = row.querySelector("[data-rakeback-color-toggle]");
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
+    var hasRakebackValue = hasRakebackDomValue(row);
     var negativeField = getRakebackNegativeField(row);
     if (saveBtn) {
       saveBtn.hidden = !hasRakeInputValue;
-      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue;
+      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue || !hasRakebackValue;
     }
     if (editBtn) editBtn.hidden = true;
     if (addBtn) addBtn.hidden = true;
@@ -1980,6 +1988,11 @@
           saveTemplateRowDefaults(room, playerId, percent, discount15, { color: color });
           return;
         }
+        if (!hasRakebackDomValue(templateRow)) {
+          setStatus("Заполните процент, чтобы появился РБ", true);
+          if (percentInput && typeof percentInput.focus === "function") percentInput.focus();
+          return;
+        }
         var roomAmount = Math.round(rake * percent / 100 * (discount15 ? 0.85 : 1) * 100) / 100;
         var now = Date.now();
         var row = {
@@ -2175,10 +2188,8 @@
               if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
               return;
             }
-            if ((!percentInput || !String(percentInput.value || "").trim()) &&
-              parseNumber(saveRow.getAttribute("data-rakeback-room-amount")) === 0 &&
-              parseNumber(saveRow.getAttribute("data-rakeback-amount-value")) === 0) {
-              setStatus("Заполните процент", true);
+            if (!percentInput || !String(percentInput.value || "").trim() || !hasRakebackDomValue(saveRow)) {
+              setStatus("Заполните процент, чтобы появился РБ", true);
               if (percentInput && typeof percentInput.focus === "function") percentInput.focus();
               return;
             }
