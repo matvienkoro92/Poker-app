@@ -1190,6 +1190,16 @@
       if (groupId) locallyDeletedGroupIds[groupId] = true;
     }
 
+    function confirmSharedRowDelete(row, kind) {
+      if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+      var idInput = row && row.querySelector ? row.querySelector("[data-rakeback-player-id]") : null;
+      var playerId = String(idInput && idInput.value || "").trim();
+      var message = kind === "addon" ? "Удалить подзапись" : "Удалить запись";
+      if (playerId) message += " для ID " + playerId;
+      if (kind !== "addon") message += " и все ее подзаписи";
+      return window.confirm(message + "?");
+    }
+
     function collectRows(options) {
       options = options || {};
       if (!body) return sharedRows.slice();
@@ -2221,6 +2231,7 @@
             updateSharedRowActions(row, loading);
             return;
           }
+          if (!confirmSharedRowDelete(row, kind)) return;
           var localKey = getSharedDomRowLocalKey(row);
           var serverKey = getSharedDomRowServerKey(row);
           var persisted = row.getAttribute("data-rakeback-persisted") === "1";
