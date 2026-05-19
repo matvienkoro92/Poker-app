@@ -697,6 +697,20 @@
       }));
     }
 
+    function getFinalRakeTotal(rows) {
+      var finalRakeByGroup = {};
+      var groupOrder = [];
+      (Array.isArray(rows) ? rows : []).forEach(function (row, index) {
+        if (!row) return;
+        var key = String(row.groupId || "").trim() || ("row_" + index);
+        if (!Object.prototype.hasOwnProperty.call(finalRakeByGroup, key)) groupOrder.push(key);
+        finalRakeByGroup[key] = parseNumber(row.rake);
+      });
+      return groupOrder.reduce(function (sum, key) {
+        return sum + parseNumber(finalRakeByGroup[key]);
+      }, 0);
+    }
+
     function getPulledTemplateIdSet(room) {
       var set = {};
       room = normalizeRoom(room);
@@ -1099,7 +1113,7 @@
       }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       var visibleShared = archiveMode ? [] : getVisibleSharedRows();
-      var totalRake = visibleShared.reduce(function (sum, row) { return sum + parseNumber(row.rake); }, 0);
+      var totalRake = getFinalRakeTotal(visibleShared);
       var totalAmount = visibleShared.reduce(function (sum, row) {
         var roomAmount = row.roomAmount != null && row.roomAmount !== ""
           ? parseNumber(row.roomAmount)

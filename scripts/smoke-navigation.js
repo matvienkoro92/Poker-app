@@ -917,12 +917,28 @@ async function main() {
       const addBtn = document.getElementById("adminReportRakebackAddBtn");
       const refreshBtn = document.getElementById("adminReportRakebackRefreshBtn");
       const sharedRows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const finalRakeByGroup = {};
+      const groupOrder = [];
+      let naiveRake = 0;
+      sharedRows.forEach((row, index) => {
+        const groupId = row.getAttribute("data-rakeback-group") || `row_${index}`;
+        const rake = Number(row.querySelector("[data-rakeback-rake]")?.value || 0) || 0;
+        naiveRake += rake;
+        if (!Object.prototype.hasOwnProperty.call(finalRakeByGroup, groupId)) groupOrder.push(groupId);
+        finalRakeByGroup[groupId] = rake;
+      });
+      const expectedFinalRake = groupOrder.reduce((sum, groupId) => sum + (Number(finalRakeByGroup[groupId]) || 0), 0);
+      const totalText = document.getElementById("adminReportRakebackRoomTotal")?.textContent || "";
+      const renderedRake = Number(String(totalText).split("/")[0].trim()) || 0;
       return {
         addVisible: !!(addBtn && !addBtn.hidden),
         addDisabled: !!(addBtn && addBtn.disabled),
         refreshVisible: !!(refreshBtn && !refreshBtn.hidden),
         refreshDisabled: !!(refreshBtn && refreshBtn.disabled),
         sharedRows: sharedRows.length,
+        renderedRake,
+        expectedFinalRake,
+        naiveRake,
       };
     });
     if (!rakebackSharedState.addVisible || rakebackSharedState.addDisabled) {
@@ -930,6 +946,9 @@ async function main() {
     }
     if (!rakebackSharedState.refreshVisible) {
       throw new Error("admin report rakeback refresh button is missing: " + JSON.stringify(rakebackSharedState));
+    }
+    if (rakebackSharedState.renderedRake !== Math.round(rakebackSharedState.expectedFinalRake) || rakebackSharedState.renderedRake === Math.round(rakebackSharedState.naiveRake)) {
+      throw new Error("admin report rakeback total rake did not use final group rake: " + JSON.stringify(rakebackSharedState));
     }
     if (!submittedRakebackDrafts.length || !(submittedRakebackDrafts[submittedRakebackDrafts.length - 1].rakebackRows || []).length) {
       throw new Error("admin report rakeback add button did not save shared draft");
