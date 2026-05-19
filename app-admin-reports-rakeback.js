@@ -619,12 +619,39 @@
       return sortSelect && sortSelect.value ? String(sortSelect.value || "created") : "created";
     }
 
+    function parseRowTime(row, fields) {
+      row = row || {};
+      for (var i = 0; i < fields.length; i++) {
+        var raw = row[fields[i]];
+        var n = typeof raw === "number" ? raw : Number(raw);
+        if (isFinite(n) && n > 0) return n;
+        var parsed = raw ? Date.parse(String(raw)) : NaN;
+        if (isFinite(parsed)) return parsed;
+      }
+      return 0;
+    }
+
     function rowTime(row) {
-      var raw = row && (row.entryAddedAt || row.standardAt || row.createdAt || row.addedAt || row.created);
-      var n = typeof raw === "number" ? raw : Number(raw);
-      if (isFinite(n) && n > 0) return n;
-      var parsed = raw ? Date.parse(String(raw)) : NaN;
-      return isFinite(parsed) ? parsed : 0;
+      return parseRowTime(row, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
+    }
+
+    function rowEntryTime(row) {
+      return parseRowTime(row, ["entryAddedAt", "createdAt", "standardAt", "addedAt", "created"]);
+    }
+
+    function rowEntryDay(row) {
+      var time = rowEntryTime(row);
+      if (!time) return 0;
+      var date = new Date(time);
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    }
+
+    function compareRowsByEntryDateDesc(a, b) {
+      return rowEntryDay(b) - rowEntryDay(a) || rowTime(b) - rowTime(a) || rowEntryTime(b) - rowEntryTime(a);
+    }
+
+    function compareRowsByEntryDateAsc(a, b) {
+      return rowEntryDay(a) - rowEntryDay(b) || rowTime(a) - rowTime(b) || rowEntryTime(a) - rowEntryTime(b);
     }
 
     function rowAmount(row) {
@@ -637,14 +664,14 @@
     function sortRows(rows) {
       var mode = getSortMode();
       return rows.slice().sort(function (a, b) {
-        if (mode === "rake") return parseNumber(b.rake) - parseNumber(a.rake) || rowTime(b) - rowTime(a);
-        if (mode === "percent") return parseNumber(b.percent) - parseNumber(a.percent) || rowTime(b) - rowTime(a);
+        if (mode === "rake") return parseNumber(b.rake) - parseNumber(a.rake) || compareRowsByEntryDateDesc(a, b);
+        if (mode === "percent") return parseNumber(b.percent) - parseNumber(a.percent) || compareRowsByEntryDateDesc(a, b);
         if (mode === "created_percent") {
-          return rowTime(b) - rowTime(a) || parseNumber(b.percent) - parseNumber(a.percent) || parseNumber(b.rake) - parseNumber(a.rake);
+          return compareRowsByEntryDateDesc(a, b) || parseNumber(b.percent) - parseNumber(a.percent) || parseNumber(b.rake) - parseNumber(a.rake);
         }
-        if (mode === "standard") return parseNumber(a.standardAt || a.createdAt) - parseNumber(b.standardAt || b.createdAt) || rowTime(b) - rowTime(a);
-        if (mode === "color") return rowAmount(b) - rowAmount(a) || rowTime(b) - rowTime(a);
-        return rowTime(b) - rowTime(a);
+        if (mode === "standard") return parseNumber(a.standardAt || a.createdAt) - parseNumber(b.standardAt || b.createdAt) || compareRowsByEntryDateDesc(a, b);
+        if (mode === "color") return rowAmount(b) - rowAmount(a) || compareRowsByEntryDateDesc(a, b);
+        return compareRowsByEntryDateDesc(a, b);
       });
     }
 
@@ -667,9 +694,7 @@
         addonsByGroup[groupId].push(row);
       });
       Object.keys(addonsByGroup).forEach(function (groupId) {
-        addonsByGroup[groupId].sort(function (a, b) {
-          return rowTime(a) - rowTime(b);
-        });
+        addonsByGroup[groupId].sort(compareRowsByEntryDateAsc);
       });
       var ordered = [];
       sortRows(baseRows).forEach(function (row) {
@@ -685,9 +710,7 @@
           orphanAddons.push(addon);
         });
       });
-      return ordered.concat(orphanAddons.sort(function (a, b) {
-        return rowTime(a) - rowTime(b);
-      }));
+      return ordered.concat(orphanAddons.sort(compareRowsByEntryDateAsc));
     }
 
     function getSharedRowsForTotal(room) {
@@ -876,6 +899,8 @@
     }
 
     function mergeRowsWithLocalUnsaved(serverRows, localRows) {
+      serverRows = Array.isArray(serverRows) ? serverRows : [];
+      localRows = Array.isArray(localRows) ? localRows : [];
       var unsaved = (Array.isArray(localRows) ? localRows : []).filter(function (row) {
         return row && row.saved !== true;
       });
@@ -884,10 +909,30 @@
         var key = getSharedRowLocalKey(row);
         if (key) unsavedByKey[key] = true;
       });
-      return unsaved.concat((serverRows || []).filter(function (row) {
+      var serverByKey = {};
+      serverRows.forEach(function (row) {
         var key = getSharedRowLocalKey(row);
-        return !key || !unsavedByKey[key];
-      }));
+        if (key && !unsavedByKey[key]) serverByKey[key] = row;
+      });
+      var seen = {};
+      var merged = unsaved.slice();
+      unsaved.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (key) seen[key] = true;
+      });
+      localRows.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (!key || seen[key] || !serverByKey[key]) return;
+        merged.push(serverByKey[key]);
+        seen[key] = true;
+      });
+      serverRows.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (key && seen[key]) return;
+        merged.push(row);
+        if (key) seen[key] = true;
+      });
+      return merged;
     }
 
     function listToSet(list) {

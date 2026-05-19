@@ -977,6 +977,94 @@ async function main() {
     if (rakebackAddonDeleteState.blankAddonCount !== 0 || rakebackAddonDeleteState.wrongGroupCount !== 0 || rakebackAddonDeleteState.addonCount < 1) {
       throw new Error("admin report rakeback addon delete moved or kept an addon row: " + JSON.stringify(rakebackAddonDeleteState));
     }
+    await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const base = rows.find((row) => {
+        return row.getAttribute("data-rakeback-kind") !== "addon" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared";
+      });
+      base?.querySelector("[data-rakeback-add-addon]")?.click();
+    });
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim();
+      });
+    }, null, { timeout: 1000 });
+    await page.evaluate(() => {
+      const blankAddon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          !String(row.querySelector("[data-rakeback-rake]")?.value || "").trim();
+      });
+      const rakeInput = blankAddon?.querySelector("[data-rakeback-rake]");
+      if (rakeInput) {
+        rakeInput.value = "30";
+        rakeInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    const secondAddonSaveResponse = page.waitForResponse((response) => {
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+    }, { timeout: 2500 });
+    await page.evaluate(() => {
+      const addon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
+        return row.getAttribute("data-rakeback-saved") !== "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "30";
+      });
+      addon?.querySelector("[data-rakeback-save]")?.click();
+    });
+    await secondAddonSaveResponse;
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
+        return row.getAttribute("data-rakeback-saved") === "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "30";
+      });
+    }, null, { timeout: 1200 });
+    const baseOrderBeforePersistedAddonDelete = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"))
+        .filter((row) => row.getAttribute("data-rakeback-kind") !== "addon")
+        .map((row) => [
+          row.getAttribute("data-rakeback-group") || "",
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim(),
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim(),
+        ].join(":"));
+    });
+    const secondAddonDeleteResponse = page.waitForResponse((response) => {
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+    }, { timeout: 2500 });
+    await page.evaluate(() => {
+      const addon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
+        return row.getAttribute("data-rakeback-saved") === "1" &&
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "30";
+      });
+      addon?.querySelector("[data-rakeback-remove]")?.click();
+    });
+    await secondAddonDeleteResponse;
+    await page.waitForFunction(() => {
+      return !Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
+        return String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "30";
+      });
+    }, null, { timeout: 1200 });
+    const persistedAddonDeleteOrderState = await page.evaluate((beforeOrder) => {
+      const afterOrder = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"))
+        .filter((row) => row.getAttribute("data-rakeback-kind") !== "addon")
+        .map((row) => [
+          row.getAttribute("data-rakeback-group") || "",
+          String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim(),
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim(),
+        ].join(":"));
+      const remainingAddons = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']"))
+        .filter((row) => String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared").length;
+      return { beforeOrder, afterOrder, remainingAddons };
+    }, baseOrderBeforePersistedAddonDelete);
+    if (persistedAddonDeleteOrderState.remainingAddons < 1 || persistedAddonDeleteOrderState.beforeOrder.join("|") !== persistedAddonDeleteOrderState.afterOrder.join("|")) {
+      throw new Error("admin report rakeback persisted addon delete changed base row order: " + JSON.stringify(persistedAddonDeleteOrderState));
+    }
     const rakebackSharedState = await page.evaluate(() => {
       const addBtn = document.getElementById("adminReportRakebackAddBtn");
       const refreshBtn = document.getElementById("adminReportRakebackRefreshBtn");
