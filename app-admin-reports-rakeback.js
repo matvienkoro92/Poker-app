@@ -668,6 +668,11 @@
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var rakeHeaderEl = config.rakeHeaderEl || document.getElementById("adminReportRakebackRakeHeader");
     var amountHeaderEl = config.amountHeaderEl || document.getElementById("adminReportRakebackAmountHeader");
+    var grandTotalBtn = config.grandTotalBtn || config.rakebackGrandTotalBtn || document.getElementById("adminReportRakebackGrandTotalBtn");
+    var totalsModal = config.totalsModal || config.rakebackTotalsModal || document.getElementById("adminReportRakebackTotalsModal");
+    var totalsList = config.totalsList || config.rakebackTotalsList || document.getElementById("adminReportRakebackTotalsList");
+    var totalsClose = config.totalsClose || config.rakebackTotalsClose || document.getElementById("adminReportRakebackTotalsClose");
+    var totalsBackdrop = config.totalsBackdrop || config.rakebackTotalsBackdrop || document.getElementById("adminReportRakebackTotalsBackdrop");
     var templates = normalizeTemplateMap(config.templates || {});
     var templatesLoaded = config.templatesLoaded === true || hasAnyTemplateIds(templates);
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
@@ -685,6 +690,70 @@
       var suffix = !archiveMode && usesRakebackChipUnits(activeRoom) ? " (в фишках)" : "";
       if (rakeHeaderEl) rakeHeaderEl.textContent = "Рейк" + suffix;
       if (amountHeaderEl) amountHeaderEl.textContent = "РБ" + suffix;
+    }
+
+    function formatRakebackSummaryPair(rake, amount) {
+      return String(Math.round(parseNumber(rake))) + " / " + String(Math.round(parseNumber(amount)));
+    }
+
+    function getRakebackSavedRowsForTotals(room) {
+      return getSharedRowsForTotal(room).filter(function (row) {
+        return row && row.saved === true;
+      });
+    }
+
+    function getRakebackDateTotals(rows) {
+      var dateMap = {};
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        if (!row || row.saved !== true) return;
+        var stamp = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
+        if (!stamp) return;
+        var key = getDateInputValue(stamp);
+        if (!dateMap[key]) dateMap[key] = { key: key, stamp: stamp, amount: 0 };
+        dateMap[key].stamp = Math.max(dateMap[key].stamp, stamp);
+        var roomAmount = row.roomAmount != null && row.roomAmount !== ""
+          ? parseNumber(row.roomAmount)
+          : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+        var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
+        dateMap[key].amount += amount;
+      });
+      return Object.keys(dateMap).map(function (key) {
+        return dateMap[key];
+      }).sort(function (a, b) {
+        return b.stamp - a.stamp;
+      });
+    }
+
+    function renderRakebackTotalsModal() {
+      if (!totalsList) return;
+      var roomHtml = Object.keys(ROOM_LABELS).map(function (room) {
+        var totals = getRakebackTotals(getRakebackSavedRowsForTotals(room));
+        return '<div class="admin-report-rakeback-totals-modal__row">' +
+          '<span class="admin-report-rakeback-totals-modal__room">' + escapeHtml(ROOM_LABELS[room] || room) + "</span>" +
+          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(totals.rake, totals.amount)) + "</span>" +
+        "</div>";
+      }).join("");
+      var dateRows = getRakebackDateTotals(getRakebackSavedRowsForTotals());
+      var dateHtml = dateRows.length ? '<div class="admin-report-rakeback-totals-modal__section-title">Итого по датам</div>' + dateRows.map(function (day) {
+        return '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--date">' +
+          '<span class="admin-report-rakeback-totals-modal__room">' + escapeHtml(formatEntryDateLabel(day.stamp)) + "</span>" +
+          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(String(Math.round(day.amount))) + "</span>" +
+        "</div>";
+      }).join("") : "";
+      totalsList.innerHTML = roomHtml + dateHtml;
+    }
+
+    function openRakebackTotalsModal() {
+      if (!totalsModal) return;
+      renderRakebackTotalsModal();
+      totalsModal.hidden = false;
+      if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function closeRakebackTotalsModal() {
+      if (!totalsModal) return;
+      totalsModal.hidden = true;
+      if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "false");
     }
     var sharedRows = [];
     var sharedUpdatedAt = "";
@@ -1584,6 +1653,7 @@
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
       if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
+      if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
     }
 
     function render(options) {
@@ -1954,6 +2024,21 @@
           addBtn.addEventListener("click", addSharedRowFromButton, true);
         }
       }
+      if (grandTotalBtn && grandTotalBtn.dataset.adminReportRakebackTotalsBound !== "1") {
+        grandTotalBtn.dataset.adminReportRakebackTotalsBound = "1";
+        grandTotalBtn.addEventListener("click", function (event) {
+          event.preventDefault();
+          openRakebackTotalsModal();
+        });
+      }
+      if (totalsClose && totalsClose.dataset.adminReportRakebackTotalsCloseBound !== "1") {
+        totalsClose.dataset.adminReportRakebackTotalsCloseBound = "1";
+        totalsClose.addEventListener("click", closeRakebackTotalsModal);
+      }
+      if (totalsBackdrop && totalsBackdrop.dataset.adminReportRakebackTotalsCloseBound !== "1") {
+        totalsBackdrop.dataset.adminReportRakebackTotalsCloseBound = "1";
+        totalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
+      }
       if (body) {
         body.addEventListener("input", function (event) {
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row],[data-rakeback-template-row]") : null;
@@ -2165,7 +2250,7 @@
 
     return {
       bind: bind,
-      close: function () {},
+      close: closeRakebackTotalsModal,
       collectRows: collectRows,
       fillTable: render,
       getActiveRoom: function () { return activeRoom; },
