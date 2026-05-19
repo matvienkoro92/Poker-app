@@ -223,13 +223,30 @@ async function main() {
           submittedRakebackDrafts.push(payload);
           const incomingRows = Array.isArray(payload.rakebackRows) ? payload.rakebackRows : [];
           const deleteIds = new Set(Array.isArray(payload.deleteRakebackGroupIds) ? payload.deleteRakebackGroupIds : []);
-          const existingRows = (smokeRakebackDraft.rows || []).filter((row) => !deleteIds.has(String(row && row.groupId || "")));
-          const byGroup = new Map(existingRows.map((row) => [String(row && row.groupId || ""), row]));
+          const deleteRowKeys = new Set(Array.isArray(payload.deleteRakebackRowKeys) ? payload.deleteRakebackRowKeys : []);
+          const rowKey = (row) => {
+            const kind = row && row.kind === "addon" ? "addon" : "base";
+            return [
+              String(row && row.groupId || ""),
+              kind,
+              String(row && row.room || ""),
+              String(row && row.playerId || row && row.id || ""),
+              String(row && row.reportId || ""),
+              String(row && row.reportedAt || ""),
+              kind === "addon" ? String(row && (row.entryAddedAt || row.createdAt || row.standardAt) || "") : "",
+            ].join("|");
+          };
+          const existingRows = (smokeRakebackDraft.rows || []).filter((row) => {
+            if (deleteIds.has(String(row && row.groupId || ""))) return false;
+            const key = rowKey(row);
+            return !key || !deleteRowKeys.has(key);
+          });
+          const byRow = new Map(existingRows.map((row) => [rowKey(row), row]));
           incomingRows.forEach((row) => {
-            byGroup.set(String(row && row.groupId || ""), row);
+            byRow.set(rowKey(row), row);
           });
           smokeRakebackDraft = {
-            rows: payload.rakebackPatch === true ? Array.from(byGroup.values()) : incomingRows,
+            rows: payload.rakebackPatch === true ? Array.from(byRow.values()) : incomingRows,
             deletedTemplates: [],
             deletedRows: [],
             updatedAt: new Date().toISOString(),
@@ -819,6 +836,33 @@ async function main() {
     }, { timeout: 2500 });
     await sharedRow.locator("[data-rakeback-save]").click();
     await rakebackDraftSaveResponse;
+    await page.waitForFunction(() => {
+      const rows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const row = rows.find((item) => String(item.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" && item.getAttribute("data-rakeback-kind") !== "addon");
+      const add = row && row.querySelector("[data-rakeback-add-addon]");
+      return !!(add && !add.hidden && !add.disabled);
+    }, null, { timeout: 1800 });
+    await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]"));
+      const row = rows.find((item) => String(item.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" && item.getAttribute("data-rakeback-kind") !== "addon");
+      row?.querySelector("[data-rakeback-add-addon]")?.click();
+    });
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon'] [data-rakeback-player-id]"))
+        .some((input) => String(input.value || "").trim() === "smoke-shared");
+    }, null, { timeout: 1500 });
+    const addonRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']").first();
+    await addonRow.locator("[data-rakeback-rake]").fill("25");
+    const rakebackAddonSaveResponse = page.waitForResponse((response) => {
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+    }, { timeout: 2500 });
+    await addonRow.locator("[data-rakeback-save]").click();
+    await rakebackAddonSaveResponse;
+    const lastRakebackDraft = submittedRakebackDrafts[submittedRakebackDrafts.length - 1] || {};
+    const savedSmokeRows = (lastRakebackDraft.rakebackRows || []).filter((row) => String(row && row.playerId || "").trim() === "smoke-shared");
+    if (!savedSmokeRows.some((row) => row.kind === "addon") || !savedSmokeRows.some((row) => row.kind !== "addon")) {
+      throw new Error("admin report rakeback addon save did not submit base and addon rows: " + JSON.stringify(lastRakebackDraft));
+    }
     await page.locator("#adminReportRakebackSearch").fill("smoke-shared");
     await page.locator("#adminReportRakebackSearch").fill("");
     await page.locator("#adminReportRakebackRefreshBtn").click();
