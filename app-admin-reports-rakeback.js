@@ -424,10 +424,14 @@
     var removeBtn = row.querySelector("[data-rakeback-remove]");
     var colorBtn = row.querySelector("[data-rakeback-color-toggle]");
     var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var percentInput = row.querySelector("[data-rakeback-percent]");
     var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
+    var hasPercentInputValue = !!(percentInput && String(percentInput.value || "").trim());
+    var hasRakebackValue = parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
+      parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
     if (saveBtn) {
       saveBtn.hidden = saved;
-      saveBtn.disabled = !!busy || !hasRakeInputValue;
+      saveBtn.disabled = !!busy || !hasRakeInputValue || (!hasPercentInputValue && !hasRakebackValue);
     }
     if (editBtn) {
       editBtn.hidden = !saved;
@@ -1744,7 +1748,6 @@
         if (draft.hasRakeInputValue) {
           templateRow.removeAttribute("data-rakeback-template-default-dirty");
           updateTemplateRowActions(templateRow, loading || saving);
-          setStatus("Нажмите ✓, чтобы сохранить данные", true);
           return;
         }
         if (isTemplateDefaultAlreadySaved(templateRow, draft)) {
@@ -1877,7 +1880,6 @@
           syncSharedGroupRows();
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           syncControls();
-          if (row.getAttribute("data-rakeback-saved") !== "1") setStatus("Нажмите ✓, чтобы сохранить данные", true);
         });
         body.addEventListener("change", function (event) {
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row],[data-rakeback-template-row]") : null;
@@ -1892,7 +1894,6 @@
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           syncControls();
           if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
-          if (row.getAttribute("data-rakeback-saved") !== "1") setStatus("Нажмите ✓, чтобы сохранить данные", true);
         });
         body.addEventListener("click", function (event) {
           var idCopyInput = event.target && event.target.closest ? event.target.closest("[data-rakeback-player-id]") : null;
@@ -1918,7 +1919,6 @@
               saveSharedDraftNow(true, { upsertGroupIds: [colorGroupId] });
             } else {
               syncControls();
-              setStatus("Нажмите ✓, чтобы сохранить данные", true);
             }
             return;
           }
@@ -1961,6 +1961,7 @@
             syncSharedGroupRows();
             var idInput = saveRow.querySelector("[data-rakeback-player-id]");
             var rakeInput = saveRow.querySelector("[data-rakeback-rake]");
+            var percentInput = saveRow.querySelector("[data-rakeback-percent]");
             if (!idInput || !String(idInput.value || "").trim()) {
               setStatus("Заполните ID игрока", true);
               if (idInput && typeof idInput.focus === "function") idInput.focus();
@@ -1969,6 +1970,13 @@
             if (!rakeInput || !String(rakeInput.value || "").trim()) {
               setStatus("Заполните рейк", true);
               if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
+              return;
+            }
+            if ((!percentInput || !String(percentInput.value || "").trim()) &&
+              parseNumber(saveRow.getAttribute("data-rakeback-room-amount")) === 0 &&
+              parseNumber(saveRow.getAttribute("data-rakeback-amount-value")) === 0) {
+              setStatus("Заполните процент", true);
+              if (percentInput && typeof percentInput.focus === "function") percentInput.focus();
               return;
             }
             var saveGroupId = saveRow.getAttribute("data-rakeback-group") || "";
