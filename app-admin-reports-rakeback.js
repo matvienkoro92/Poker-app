@@ -1230,9 +1230,28 @@
       });
     }
 
+    function mergeServerRowWithLocalVisualState(serverRow, localRow) {
+      if (!serverRow || !localRow) return serverRow;
+      var serverColor = normalizeRakebackRowColor(serverRow.color || serverRow.rowColor || serverRow.highlightColor);
+      if (serverColor) return serverRow;
+      var localColor = normalizeRakebackRowColor(localRow.color || localRow.rowColor || localRow.highlightColor);
+      if (!localColor) return serverRow;
+      var merged = {};
+      Object.keys(serverRow).forEach(function (key) {
+        merged[key] = serverRow[key];
+      });
+      merged.color = localColor;
+      return merged;
+    }
+
     function mergeRowsWithLocalUnsaved(serverRows, localRows) {
       serverRows = Array.isArray(serverRows) ? serverRows : [];
       localRows = Array.isArray(localRows) ? localRows : [];
+      var localByKey = {};
+      localRows.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (key) localByKey[key] = row;
+      });
       var unsaved = (Array.isArray(localRows) ? localRows : []).filter(function (row) {
         return row && row.saved !== true;
       });
@@ -1255,13 +1274,13 @@
       localRows.forEach(function (row) {
         var key = getSharedRowLocalKey(row);
         if (!key || seen[key] || !serverByKey[key]) return;
-        merged.push(serverByKey[key]);
+        merged.push(mergeServerRowWithLocalVisualState(serverByKey[key], row));
         seen[key] = true;
       });
       serverRows.forEach(function (row) {
         var key = getSharedRowLocalKey(row);
         if (key && seen[key]) return;
-        merged.push(row);
+        merged.push(mergeServerRowWithLocalVisualState(row, localByKey[key]));
         if (key) seen[key] = true;
       });
       return merged;
