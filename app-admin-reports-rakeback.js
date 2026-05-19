@@ -636,7 +636,7 @@
 
     function rowTime(row) {
       if (getSharedRowKind(row) === "addon") {
-        return parseRowTime(row, ["createdAt", "standardAt", "addedAt", "created", "entryAddedAt"]);
+        return parseRowTime(row, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
       }
       return parseRowTime(row, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
     }
@@ -1338,8 +1338,10 @@
             previousAddonData = row;
           }
         });
-        var sourceData = previousAddonData || baseData;
         var now = Date.now();
+        var sourceData = previousAddonData || baseData;
+        var sourceOrderAt = parseRowTime(sourceData, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
+        var orderAt = previousAddonData ? Math.max(now, sourceOrderAt + 1) : now;
         var addon = {
           groupId: baseData.groupId,
           kind: "addon",
@@ -1353,7 +1355,7 @@
           persisted: false,
           ownerId: baseData.ownerId || "",
           createdAt: now,
-          standardAt: now,
+          standardAt: orderAt,
           entryAddedAt: previousAddonData ? (previousAddonData.entryAddedAt || previousAddonData.createdAt || now) : now,
         };
         sharedRows = localRows.concat(addon);
