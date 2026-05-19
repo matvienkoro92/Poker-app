@@ -221,6 +221,10 @@
     return !!(target && target.closest && target.closest("#adminReportBtn"));
   }
 
+  function isAdminBroadcastReportsButtonTarget(target) {
+    return !!(target && target.closest && target.closest("#adminBroadcastReportsBtn"));
+  }
+
   function getAdminReportShellUsers() {
     var users = [];
     try {
@@ -654,7 +658,6 @@
       document.body.classList.add("admin-report-modal-open");
       document.body.style.overflow = "hidden";
     }
-    setTimeout(prewarmAdminReportSentShell, 0);
     return true;
   }
 
@@ -672,6 +675,20 @@
   }
 
   function finishTargetPrewarm(target) {
+    if (isAdminBroadcastReportsButtonTarget(target)) {
+      return loadAdminReportShellScript("app-admin-broadcast-reports.js")
+        .then(function () {
+          try {
+            if (typeof window.pokerInitBroadcastReportsModal === "function") {
+              window.pokerInitBroadcastReportsModal();
+            }
+          } catch (eBroadcastInit) {}
+          return true;
+        })
+        .catch(function () {
+          return true;
+        });
+    }
     if (!isAdminReportButtonTarget(target)) return Promise.resolve(true);
     try {
       var adminReportInit = window["poker" + "InitAdminReportModal"];

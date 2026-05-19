@@ -114,6 +114,7 @@ function initAdminReportModal() {
   var calculationsModuleLoadPromise = null;
   var sentReportsModule = null;
   var sentReportsModuleLoadPromise = null;
+  var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
   var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -203,6 +204,52 @@ function initAdminReportModal() {
     var module = createLazyRakebackModuleInstance();
     if (module) rakebackModule = module;
     return rakebackModule;
+  }
+
+  function clearLazyRakebackLoadingStatus() {
+    if (!rakebackStatusEl || String(rakebackStatusEl.textContent || "") !== "Загружаю рейкбек…") return;
+    rakebackStatusEl.textContent = "";
+    rakebackStatusEl.hidden = true;
+  }
+
+  function openLazyRakebackModule() {
+    var module = ensureLazyRakebackModule();
+    if (module && typeof module.open === "function") {
+      runAdminReportAfterPaint(function () {
+        module.open();
+        clearLazyRakebackLoadingStatus();
+      });
+      return Promise.resolve(module);
+    }
+    if (rakebackStatusEl) {
+      rakebackStatusEl.hidden = false;
+      rakebackStatusEl.textContent = "Загружаю рейкбек…";
+    }
+    if (rakebackModuleLoadPromise) return rakebackModuleLoadPromise;
+    rakebackModuleLoadPromise = loadAdminReportScript("app-admin-reports-rakeback.js")
+      .then(function () {
+        rakebackModuleLoadPromise = null;
+        var loadedModule = ensureLazyRakebackModule();
+        if (loadedModule && typeof loadedModule.open === "function") {
+          runAdminReportAfterPaint(function () {
+            loadedModule.open();
+            clearLazyRakebackLoadingStatus();
+          });
+          return loadedModule;
+        }
+        applySavedRakebackSortMode();
+        runAdminReportAfterPaint(refreshLocalRakebackView);
+        return null;
+      })
+      .catch(function () {
+        rakebackModuleLoadPromise = null;
+        if (rakebackStatusEl) {
+          rakebackStatusEl.hidden = false;
+          rakebackStatusEl.textContent = "Не удалось загрузить рейкбек.";
+        }
+        return null;
+      });
+    return rakebackModuleLoadPromise;
   }
 
   function upgradeLazyRakebackModuleIfReady() {
@@ -784,12 +831,7 @@ function initAdminReportModal() {
         },
         afterSwitch: function (name) {
           if (name === "rakeback") {
-            var activeRakebackModule = ensureLazyRakebackModule();
-            if (activeRakebackModule) runAdminReportAfterPaint(function () { activeRakebackModule.open(); });
-            else {
-              applySavedRakebackSortMode();
-              runAdminReportAfterPaint(refreshLocalRakebackView);
-            }
+            openLazyRakebackModule();
           }
           if (name === "sent") {
             runAdminReportAfterPaint(function () {
@@ -2880,12 +2922,7 @@ function initAdminReportModal() {
         if (name === "calculations" && !canViewCalculationsReports()) return;
         setActiveTab(name);
         if (name === "rakeback") {
-          var activeRakebackModule = ensureLazyRakebackModule();
-          if (activeRakebackModule) runAdminReportAfterPaint(function () { activeRakebackModule.open(); });
-          else {
-            applySavedRakebackSortMode();
-            runAdminReportAfterPaint(refreshLocalRakebackView);
-          }
+          openLazyRakebackModule();
         }
         if (name === "sent") runAdminReportAfterPaint(function () {
           if (sentReportsModule) sentReportsModule.open();
@@ -3881,6 +3918,12 @@ function initAdminReportModal() {
 
 }
 var adminReportModuleLoadPromise = null;
+var adminReportStartupModuleLoadPromise = null;
+var ADMIN_REPORT_STARTUP_MODULE_SCRIPTS = [
+  "app-admin-reports-tabs.js",
+  "app-admin-reports-form.js",
+  "app-admin-broadcast-reports.js",
+];
 var ADMIN_REPORT_MODULE_SCRIPTS = [
   "app-admin-reports-tabs.js",
   "app-admin-reports-form.js",
@@ -3902,6 +3945,13 @@ function areAdminReportModulesReady() {
     window.AdminReportRakebackTab &&
     window.AdminReportCalculationsLogic &&
     window.AdminReportCalculationsTab &&
+    window.pokerInitBroadcastReportsModal
+  );
+}
+function areAdminReportStartupModulesReady() {
+  return !!(
+    window.AdminReportTabs &&
+    window.AdminReportFormTab &&
     window.pokerInitBroadcastReportsModal
   );
 }
@@ -3933,21 +3983,46 @@ function loadAdminReportScript(file) {
     (document.head || document.documentElement).appendChild(script);
   });
 }
+function loadAdminReportScriptList(files) {
+  return Promise.all(files.map(function (file) {
+    return loadAdminReportScript(file).catch(function () {
+      return undefined;
+    });
+  })).then(function () {
+    return true;
+  });
+}
+function ensureAdminReportStartupModulesLoaded() {
+  if (areAdminReportStartupModulesReady()) return Promise.resolve();
+  if (adminReportStartupModuleLoadPromise) return adminReportStartupModuleLoadPromise;
+  adminReportStartupModuleLoadPromise = loadAdminReportScriptList(ADMIN_REPORT_STARTUP_MODULE_SCRIPTS)
+    .then(function (result) {
+      adminReportStartupModuleLoadPromise = null;
+      return result;
+    })
+    .catch(function (err) {
+      adminReportStartupModuleLoadPromise = null;
+      throw err;
+    });
+  return adminReportStartupModuleLoadPromise;
+}
 function ensureAdminReportModulesLoaded() {
   if (areAdminReportModulesReady()) return Promise.resolve();
   if (adminReportModuleLoadPromise) return adminReportModuleLoadPromise;
-  adminReportModuleLoadPromise = ADMIN_REPORT_MODULE_SCRIPTS.reduce(function (chain, file) {
-    return chain.then(function () {
-      return loadAdminReportScript(file).catch(function () {
-        return undefined;
-      });
+  adminReportModuleLoadPromise = loadAdminReportScriptList(ADMIN_REPORT_MODULE_SCRIPTS)
+    .then(function (result) {
+      adminReportModuleLoadPromise = null;
+      return result;
+    })
+    .catch(function (err) {
+      adminReportModuleLoadPromise = null;
+      throw err;
     });
-  }, Promise.resolve());
   return adminReportModuleLoadPromise;
 }
 function initAdminReportModalsRuntime() {
   initAdminReportModal();
-  ensureAdminReportModulesLoaded()
+  ensureAdminReportStartupModulesLoaded()
     .then(function () {
       initAdminReportModal();
       if (typeof window.pokerInitBroadcastReportsModal === "function") {

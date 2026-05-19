@@ -68,6 +68,17 @@
     return String(Math.round(n * 100) / 100);
   }
 
+  function getRakebackRoomMultiplier(room) {
+    room = normalizeRoom(room);
+    if (room === "X") return 100;
+    if (room === "Supr" || room === "PP") return 115;
+    return 1;
+  }
+
+  function getReportAmount(room, roomAmount) {
+    return Math.round(parseNumber(roomAmount)) * getRakebackRoomMultiplier(room);
+  }
+
   function hasSharedDraftRowData(row) {
     if (!row) return false;
     if (String(row.playerId || row.id || "").trim()) return true;
@@ -148,28 +159,70 @@
 
   function syncSharedRowAmount(row) {
     if (!row) return 0;
+    var roomSelect = row.querySelector("[data-rakeback-room]");
     var rakeInput = row.querySelector("[data-rakeback-rake]");
     var percentInput = row.querySelector("[data-rakeback-percent]");
     var discountInput = row.querySelector("[data-rakeback-discount15]");
     var amountEl = row.querySelector("[data-rakeback-amount]");
-    var amount = parseNumber(rakeInput ? rakeInput.value : "") * parseNumber(percentInput ? percentInput.value : "") / 100;
-    if (discountInput && discountInput.checked) amount *= 0.85;
-    amount = Math.round(amount * 100) / 100;
-    if (amountEl) amountEl.textContent = amount ? String(amount) : "";
-    return amount;
+    var roomAmount = parseNumber(rakeInput ? rakeInput.value : "") * parseNumber(percentInput ? percentInput.value : "") / 100;
+    if (discountInput && discountInput.checked) roomAmount *= 0.85;
+    roomAmount = Math.round(roomAmount * 100) / 100;
+    row.setAttribute("data-rakeback-room-amount", String(roomAmount || 0));
+    row.setAttribute("data-rakeback-amount-value", String(getReportAmount(roomSelect && roomSelect.value ? roomSelect.value : "P21", roomAmount)));
+    if (amountEl) amountEl.textContent = roomAmount ? String(roomAmount) : "";
+    return roomAmount;
+  }
+
+  function updateSharedRowActions(row, busy) {
+    if (!row) return;
+    var saved = row.getAttribute("data-rakeback-saved") === "1";
+    var saveBtn = row.querySelector("[data-rakeback-save]");
+    var editBtn = row.querySelector("[data-rakeback-edit]");
+    var removeBtn = row.querySelector("[data-rakeback-remove]");
+    if (saveBtn) {
+      saveBtn.hidden = saved;
+      saveBtn.disabled = !!busy;
+    }
+    if (editBtn) {
+      editBtn.hidden = !saved;
+      editBtn.disabled = !!busy;
+    }
+    if (removeBtn) removeBtn.disabled = !!busy;
+  }
+
+  function setSharedRowSaved(row, saved, busy) {
+    if (!row) return;
+    saved = saved !== false;
+    row.classList.toggle("admin-report-rakeback-row--saved", saved);
+    row.setAttribute("data-rakeback-saved", saved ? "1" : "0");
+    row.querySelectorAll("input").forEach(function (input) {
+      if (input.hasAttribute("data-rakeback-discount15")) {
+        input.disabled = saved || !!busy;
+        return;
+      }
+      input.readOnly = saved;
+      input.disabled = !!busy;
+    });
+    row.querySelectorAll("select").forEach(function (select) {
+      select.disabled = saved || !!busy;
+    });
+    updateSharedRowActions(row, busy);
   }
 
   function createSharedRow(data, index) {
     data = data || {};
     var room = normalizeRoom(data.room || "P21");
     var groupId = String(data.groupId || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2))).trim();
+    var saved = data.saved !== false;
+    var persisted = data.persisted === true || saved;
     var tr = document.createElement("tr");
-    tr.className = "admin-report-rakeback-row admin-report-rakeback-row--saved";
+    tr.className = "admin-report-rakeback-row" + (saved ? " admin-report-rakeback-row--saved" : "");
     tr.setAttribute("data-rakeback-row", "");
     tr.setAttribute("data-rakeback-shared-row", "1");
     tr.setAttribute("data-rakeback-kind", "base");
     tr.setAttribute("data-rakeback-group", groupId);
-    tr.setAttribute("data-rakeback-saved", "1");
+    tr.setAttribute("data-rakeback-saved", saved ? "1" : "0");
+    tr.setAttribute("data-rakeback-persisted", persisted ? "1" : "0");
     tr.setAttribute("data-rakeback-created-at", String(data.createdAt || Date.now()));
     tr.setAttribute("data-rakeback-standard-at", String(data.standardAt || data.createdAt || Date.now()));
     tr.setAttribute("data-rakeback-entry-added-at", String(data.entryAddedAt || data.createdAt || Date.now()));
@@ -182,9 +235,12 @@
       '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%"' + (data.discount15 || data.subtract15 ? " checked" : "") + ' /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount></span></td>' +
       '<td class="admin-report-rakeback-actions">' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
+        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку">✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
       "</td>";
     syncSharedRowAmount(tr);
+    setSharedRowSaved(tr, saved, false);
     return tr;
   }
 
@@ -244,7 +300,6 @@
     var bound = false;
     var sharedRows = [];
     var sharedUpdatedAt = "";
-    var saveTimer = null;
     var saving = false;
     var loading = false;
 
@@ -333,6 +388,7 @@
       ids = Array.isArray(ids) ? ids : [];
       var total = ids.length;
       var index = 0;
+      var batchSize = total > 240 ? 48 : 32;
       if (!body || seq !== templateStreamSeq || !templateRowsOpen || archiveMode) return;
       if (!total) {
         setStatus("Шаблонов нет");
@@ -341,9 +397,14 @@
       setStatus("Загружаю шаблоны… 0 / " + total, true);
       function step() {
         if (!body || seq !== templateStreamSeq || !templateRowsOpen || archiveMode) return;
-        var id = ids[index];
-        if (id) body.appendChild(createTemplateRow(activeRoom, id, startIndex + index, false));
-        index += 1;
+        var fragment = document.createDocumentFragment();
+        var limit = Math.min(index + batchSize, total);
+        while (index < limit) {
+          var id = ids[index];
+          if (id) fragment.appendChild(createTemplateRow(activeRoom, id, startIndex + index, false));
+          index += 1;
+        }
+        if (fragment.childNodes.length) body.appendChild(fragment);
         setStatus("Загружаю шаблоны… " + index + " / " + total, true);
         if (index < total) {
           scheduleTemplateStreamStep(step);
@@ -358,16 +419,56 @@
       return searchInput && searchInput.value ? String(searchInput.value).trim().toLowerCase() : "";
     }
 
-    function getVisibleSharedRows() {
-      var query = getSearchQuery();
-      return sharedRows.filter(function (row) {
-        if (normalizeRoom(row.room) !== activeRoom) return false;
-        var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
-        return !query || playerId.indexOf(query) !== -1;
+    function getSortMode() {
+      return sortSelect && sortSelect.value ? String(sortSelect.value || "created") : "created";
+    }
+
+    function rowTime(row) {
+      var raw = row && (row.entryAddedAt || row.standardAt || row.createdAt || row.addedAt || row.created);
+      var n = typeof raw === "number" ? raw : Number(raw);
+      if (isFinite(n) && n > 0) return n;
+      var parsed = raw ? Date.parse(String(raw)) : NaN;
+      return isFinite(parsed) ? parsed : 0;
+    }
+
+    function rowAmount(row) {
+      if (!row) return 0;
+      if (row.roomAmount != null && row.roomAmount !== "") return parseNumber(row.roomAmount);
+      if (row.amount != null && row.amount !== "") return parseNumber(row.amount);
+      return parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+    }
+
+    function sortRows(rows) {
+      var mode = getSortMode();
+      return rows.slice().sort(function (a, b) {
+        if (mode === "rake") return parseNumber(b.rake) - parseNumber(a.rake) || rowTime(b) - rowTime(a);
+        if (mode === "percent") return parseNumber(b.percent) - parseNumber(a.percent) || rowTime(b) - rowTime(a);
+        if (mode === "created_percent") {
+          return rowTime(b) - rowTime(a) || parseNumber(b.percent) - parseNumber(a.percent) || parseNumber(b.rake) - parseNumber(a.rake);
+        }
+        if (mode === "standard") return parseNumber(a.standardAt || a.createdAt) - parseNumber(b.standardAt || b.createdAt) || rowTime(b) - rowTime(a);
+        if (mode === "color") return rowAmount(b) - rowAmount(a) || rowTime(b) - rowTime(a);
+        return rowTime(b) - rowTime(a);
       });
     }
 
-    function collectRows() {
+    function getVisibleSharedRows() {
+      var query = getSearchQuery();
+      return sortRows(sharedRows.filter(function (row) {
+        if (normalizeRoom(row.room) !== activeRoom) return false;
+        var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
+        return !query || playerId.indexOf(query) !== -1;
+      }));
+    }
+
+    function shouldKeepRow(row, includeEmptyUnsaved) {
+      if (!row) return false;
+      if (hasSharedDraftRowData(row)) return true;
+      return includeEmptyUnsaved && row.saved === false;
+    }
+
+    function collectRows(options) {
+      options = options || {};
       if (!body) return sharedRows.slice();
       return Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]")).map(function (row) {
         var roomSelect = row.querySelector("[data-rakeback-room]");
@@ -375,28 +476,34 @@
         var rakeInput = row.querySelector("[data-rakeback-rake]");
         var percentInput = row.querySelector("[data-rakeback-percent]");
         var discountInput = row.querySelector("[data-rakeback-discount15]");
+        var room = normalizeRoom(roomSelect && roomSelect.value ? roomSelect.value : activeRoom);
         var rake = parseNumber(rakeInput ? rakeInput.value : "");
         var percent = parseNumber(percentInput ? percentInput.value : "");
-        var amount = rake * percent / 100;
-        if (discountInput && discountInput.checked) amount *= 0.85;
-        amount = Math.round(amount * 100) / 100;
+        var roomAmount = rake * percent / 100;
+        if (discountInput && discountInput.checked) roomAmount *= 0.85;
+        roomAmount = Math.round(roomAmount * 100) / 100;
+        var amount = getReportAmount(room, roomAmount);
         return {
           groupId: row.getAttribute("data-rakeback-group") || "",
           kind: "base",
-          room: normalizeRoom(roomSelect && roomSelect.value ? roomSelect.value : activeRoom),
+          room: room,
           playerId: idInput && idInput.value ? String(idInput.value).trim() : "",
           rake: rake,
           rakeZero: rake === 0,
           percent: percent,
           discount15: !!(discountInput && discountInput.checked),
-          saved: true,
+          saved: row.getAttribute("data-rakeback-saved") === "1",
+          persisted: row.getAttribute("data-rakeback-persisted") === "1",
           ownerId: row.getAttribute("data-rakeback-owner") || "",
           createdAt: row.getAttribute("data-rakeback-created-at") || Date.now(),
           standardAt: row.getAttribute("data-rakeback-standard-at") || Date.now(),
           entryAddedAt: row.getAttribute("data-rakeback-entry-added-at") || Date.now(),
           amount: amount,
-          roomAmount: amount,
+          roomAmount: roomAmount,
         };
+      }).filter(function (row) {
+        if (options.savedOnly && row.saved !== true) return false;
+        return shouldKeepRow(row, options.includeEmptyUnsaved);
       });
     }
 
@@ -423,47 +530,107 @@
     function normalizeDraftRows(rows) {
       return (Array.isArray(rows) ? rows : []).map(function (row) {
         row = row || {};
+        var room = normalizeRoom(row.room || "P21");
+        var rake = row.rake != null ? row.rake : "";
+        var percent = row.percent != null ? row.percent : "";
+        var roomAmount = row.roomAmount != null && row.roomAmount !== ""
+          ? row.roomAmount
+          : Math.round(parseNumber(rake) * parseNumber(percent) / 100 * (row.discount15 || row.subtract15 ? 0.85 : 1) * 100) / 100;
         return {
           groupId: String(row.groupId || "").trim() || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2)),
           kind: row.kind === "addon" ? "addon" : "base",
-          room: normalizeRoom(row.room || "P21"),
+          room: room,
           playerId: row.playerId || row.id || "",
-          rake: row.rake != null ? row.rake : "",
+          rake: rake,
           rakeZero: row.rakeZero === true || row.explicitZeroRake === true || row.zeroRake === true,
-          percent: row.percent != null ? row.percent : "",
+          percent: percent,
           discount15: !!(row.discount15 || row.subtract15),
           saved: true,
+          persisted: true,
           ownerId: row.ownerId || row.authorId || "",
           createdAt: row.createdAt || row.addedAt || row.created || Date.now(),
           standardAt: row.standardAt || row.orderAt || row.sortAt || row.createdAt || Date.now(),
           entryAddedAt: row.entryAddedAt || row.firstAddedAt || row.createdAt || Date.now(),
-          amount: row.amount != null ? row.amount : "",
+          amount: row.amount != null ? row.amount : getReportAmount(room, roomAmount),
+          roomAmount: roomAmount,
         };
       }).filter(function (row) {
         return row.kind !== "addon" && hasSharedDraftRowData(row);
       });
     }
 
-    function saveSharedDraftNow(showStatus) {
+    function mergeRowsWithLocalUnsaved(serverRows, localRows) {
+      var unsaved = (Array.isArray(localRows) ? localRows : []).filter(function (row) {
+        return row && row.saved !== true;
+      });
+      var unsavedByGroup = {};
+      unsaved.forEach(function (row) {
+        if (row.groupId) unsavedByGroup[row.groupId] = true;
+      });
+      return unsaved.concat((serverRows || []).filter(function (row) {
+        return !row.groupId || !unsavedByGroup[row.groupId];
+      }));
+    }
+
+    function listToSet(list) {
+      var set = {};
+      (Array.isArray(list) ? list : []).forEach(function (item) {
+        var key = String(item || "").trim();
+        if (key) set[key] = true;
+      });
+      return set;
+    }
+
+    function getRowsForSave(localRows, patch) {
+      localRows = Array.isArray(localRows) ? localRows : [];
+      patch = patch || null;
+      if (!patch) {
+        return localRows.filter(function (row) {
+          return row && row.saved === true && hasSharedDraftRowData(row);
+        });
+      }
+      var upsertSet = listToSet(patch.upsertGroupIds);
+      return localRows.filter(function (row) {
+        return row && row.saved === true && hasSharedDraftRowData(row) && upsertSet[row.groupId];
+      });
+    }
+
+    function findSharedDomRowByGroupId(groupId) {
+      if (!body || !groupId) return null;
+      var rows = Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]"));
+      for (var i = 0; i < rows.length; i++) {
+        if ((rows[i].getAttribute("data-rakeback-group") || "") === groupId) return rows[i];
+      }
+      return null;
+    }
+
+    function saveSharedDraftNow(showStatus, patch) {
       var base = getApiBaseSafe();
       if (!base || !hasApiCredentialSafe()) {
         if (showStatus) setStatus("Нет подключения для сохранения");
         return Promise.resolve(false);
       }
-      sharedRows = mergeSharedRowsFromDom();
+      var localRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+      sharedRows = localRows;
+      var patchMode = !!(patch && ((patch.upsertGroupIds && patch.upsertGroupIds.length) || (patch.deleteGroupIds && patch.deleteGroupIds.length)));
+      var payload = {
+        action: "rakeback_draft_save",
+        date: "shared",
+        rakebackRows: getRowsForSave(localRows, patchMode ? patch : null),
+      };
+      if (patchMode) {
+        payload.rakebackPatch = true;
+        payload.deleteRakebackGroupIds = patch.deleteGroupIds || [];
+      }
       saving = true;
       syncControls();
       return requestJson(base + "/api/admin-report-shifts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildAuthBody({
-          action: "rakeback_draft_save",
-          date: "shared",
-          rakebackRows: sharedRows,
-        })),
+        body: JSON.stringify(buildAuthBody(payload)),
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
-          sharedRows = normalizeDraftRows(data.rakebackDraft.rows);
+          sharedRows = mergeRowsWithLocalUnsaved(normalizeDraftRows(data.rakebackDraft.rows), localRows);
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
           render();
           if (showStatus) setStatus("Сохранено");
@@ -479,14 +646,6 @@
         syncControls();
         return result;
       });
-    }
-
-    function scheduleSave() {
-      if (saveTimer) clearTimeout(saveTimer);
-      saveTimer = setTimeout(function () {
-        saveTimer = null;
-        saveSharedDraftNow(false);
-      }, 600);
     }
 
     function loadSharedDraft(options) {
@@ -523,15 +682,23 @@
       });
     }
 
-    function mergeSharedRowsFromDom() {
+    function mergeSharedRowsFromDom(options) {
+      options = options || {};
       var byGroup = {};
       sharedRows.forEach(function (row) {
+        if (!row || !row.groupId) return;
+        if (options.savedOnly && row.saved !== true) return;
+        if (!shouldKeepRow(row, options.includeEmptyUnsaved)) return;
+        byGroup[row.groupId] = row;
+      });
+      collectRows(options).forEach(function (row) {
         if (row && row.groupId) byGroup[row.groupId] = row;
       });
-      collectRows().forEach(function (row) {
-        if (row && row.groupId) byGroup[row.groupId] = row;
+      return Object.keys(byGroup).map(function (key) { return byGroup[key]; }).filter(function (row) {
+        return !options.savedOnly || row.saved === true;
+      }).filter(function (row) {
+        return shouldKeepRow(row, options.includeEmptyUnsaved);
       });
-      return Object.keys(byGroup).map(function (key) { return byGroup[key]; }).filter(hasSharedDraftRowData);
     }
 
     function syncRoomTabs() {
@@ -570,11 +737,19 @@
           statusEl.hidden = true;
         }
       }
+      if (body) {
+        Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]")).forEach(function (row) {
+          setSharedRowSaved(row, row.getAttribute("data-rakeback-saved") === "1", loading || saving);
+        });
+      }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       var visibleShared = archiveMode ? [] : getVisibleSharedRows();
       var totalRake = visibleShared.reduce(function (sum, row) { return sum + parseNumber(row.rake); }, 0);
       var totalAmount = visibleShared.reduce(function (sum, row) {
-        var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+        var roomAmount = row.roomAmount != null && row.roomAmount !== ""
+          ? parseNumber(row.roomAmount)
+          : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+        var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
         return sum + amount;
       }, 0);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(totalRake)) + " / " + String(Math.round(totalAmount));
@@ -642,7 +817,8 @@
           rakeZero: true,
           percent: 0,
           discount15: false,
-          saved: true,
+          saved: false,
+          persisted: false,
           createdAt: now,
           standardAt: now,
           entryAddedAt: now,
@@ -685,15 +861,18 @@
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row]") : null;
           if (!row) return;
           syncSharedRowAmount(row);
-          sharedRows = mergeSharedRowsFromDom();
-          scheduleSave();
+          sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+          syncControls();
+          if (row.getAttribute("data-rakeback-saved") !== "1") setStatus("Нажмите ✓, чтобы сохранить", true);
         });
         body.addEventListener("change", function (event) {
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row]") : null;
           if (!row) return;
           syncSharedRowAmount(row);
-          sharedRows = mergeSharedRowsFromDom();
-          scheduleSave();
+          sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+          syncControls();
+          if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
+          if (row.getAttribute("data-rakeback-saved") !== "1") setStatus("Нажмите ✓, чтобы сохранить", true);
         });
         body.addEventListener("click", function (event) {
           var templateToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-template-toggle]") : null;
@@ -708,16 +887,56 @@
             render();
             return;
           }
+          var saveBtn = event.target && event.target.closest ? event.target.closest("[data-rakeback-save]") : null;
+          if (saveBtn) {
+            event.preventDefault();
+            var saveRow = saveBtn.closest("[data-rakeback-shared-row]");
+            if (!saveRow) return;
+            syncSharedRowAmount(saveRow);
+            var idInput = saveRow.querySelector("[data-rakeback-player-id]");
+            if (!idInput || !String(idInput.value || "").trim()) {
+              setStatus("Заполните ID игрока", true);
+              if (idInput && typeof idInput.focus === "function") idInput.focus();
+              return;
+            }
+            var saveGroupId = saveRow.getAttribute("data-rakeback-group") || "";
+            var wasPersisted = saveRow.getAttribute("data-rakeback-persisted") === "1";
+            setSharedRowSaved(saveRow, true, false);
+            sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+            saveSharedDraftNow(true, { upsertGroupIds: [saveGroupId] }).then(function (ok) {
+              if (ok) return;
+              var failedRow = findSharedDomRowByGroupId(saveGroupId);
+              if (!failedRow) return;
+              failedRow.setAttribute("data-rakeback-persisted", wasPersisted ? "1" : "0");
+              setSharedRowSaved(failedRow, false, false);
+              sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+            });
+            return;
+          }
+          var editBtn = event.target && event.target.closest ? event.target.closest("[data-rakeback-edit]") : null;
+          if (editBtn) {
+            event.preventDefault();
+            var editRow = editBtn.closest("[data-rakeback-shared-row]");
+            if (!editRow) return;
+            setSharedRowSaved(editRow, false, false);
+            sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+            setStatus("Редактирование включено", true);
+            var editInput = editRow.querySelector("[data-rakeback-rake]") || editRow.querySelector("[data-rakeback-player-id]");
+            if (editInput && typeof editInput.focus === "function") editInput.focus();
+            return;
+          }
           var removeBtn = event.target && event.target.closest ? event.target.closest("[data-rakeback-remove]") : null;
           if (!removeBtn) return;
+          event.preventDefault();
           var row = removeBtn.closest("[data-rakeback-shared-row]");
           if (!row) return;
           var groupId = row.getAttribute("data-rakeback-group") || "";
-          sharedRows = mergeSharedRowsFromDom().filter(function (item) {
+          var persisted = row.getAttribute("data-rakeback-persisted") === "1";
+          sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
             return String(item.groupId || "") !== groupId;
           });
           render();
-          saveSharedDraftNow(true);
+          if (persisted) saveSharedDraftNow(true, { deleteGroupIds: [groupId] });
         });
       }
     }
@@ -737,7 +956,7 @@
       fillTable: render,
       getActiveRoom: function () { return activeRoom; },
       getUnaccountedRows: function () {
-        return collectRows().filter(function (row) {
+        return collectRows({ savedOnly: true }).filter(function (row) {
           if (!row || !String(row.playerId || "").trim()) return false;
           return parseNumber(row.rake) !== 0 || parseNumber(row.amount) !== 0 || row.rakeZero === true;
         });
