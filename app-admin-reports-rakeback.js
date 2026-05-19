@@ -1063,7 +1063,9 @@
     }
 
     function getRakebackTotals(rows) {
-      rows = Array.isArray(rows) ? rows : [];
+      rows = (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return row && row.saved === true;
+      });
       return {
         rake: getFinalRakeTotal(rows),
         amount: rows.reduce(function (sum, row) {
