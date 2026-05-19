@@ -215,6 +215,10 @@
     return 1;
   }
 
+  function usesRakebackChipUnits(room) {
+    return normalizeRoom(room) !== "P21";
+  }
+
   function getReportAmount(room, roomAmount) {
     return Math.round(parseNumber(roomAmount)) * getRakebackRoomMultiplier(room);
   }
@@ -662,6 +666,8 @@
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
+    var rakeHeaderEl = config.rakeHeaderEl || document.getElementById("adminReportRakebackRakeHeader");
+    var amountHeaderEl = config.amountHeaderEl || document.getElementById("adminReportRakebackAmountHeader");
     var templates = normalizeTemplateMap(config.templates || {});
     var templatesLoaded = config.templatesLoaded === true || hasAnyTemplateIds(templates);
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
@@ -674,6 +680,12 @@
     var templateRowsOpen = config.templatesOpen === true || readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
     var bound = false;
+
+    function syncRakebackHeaderLabels() {
+      var suffix = !archiveMode && usesRakebackChipUnits(activeRoom) ? " (в фишках)" : "";
+      if (rakeHeaderEl) rakeHeaderEl.textContent = "Рейк" + suffix;
+      if (amountHeaderEl) amountHeaderEl.textContent = "РБ" + suffix;
+    }
     var sharedRows = [];
     var sharedUpdatedAt = "";
     var sharedAutoLoadStarted = false;
@@ -1544,6 +1556,7 @@
         });
       }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
+      syncRakebackHeaderLabels();
       var visibleShared = archiveMode ? [] : getVisibleSharedRows();
       var allShared = archiveMode ? [] : getSharedRowsForTotal();
       var roomTotals = getRakebackTotals(visibleShared);
