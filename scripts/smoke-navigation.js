@@ -208,6 +208,7 @@ async function main() {
     const adminReportCoreGate = new Promise((resolve) => {
       releaseAdminReportCore = resolve;
     });
+    let slowSentRefreshAfterSubmit = false;
     await page.route(/\/app-admin-reports(?:-[^/?]+)?\.js(?:\?|$)/, async (route) => {
       const url = route.request().url();
       const isCore = /\/app-admin-reports\.js(?:\?|$)/.test(url);
@@ -276,6 +277,7 @@ async function main() {
           return;
         }
         submittedAdminReports.push(payload);
+        slowSentRefreshAfterSubmit = true;
         await route.fulfill({
           status: 200,
           headers: corsHeaders,
@@ -298,7 +300,9 @@ async function main() {
         return;
       }
       adminReportRequestScopes.push(scope);
-      await new Promise((resolve) => setTimeout(resolve, 120));
+      const responseDelay = scope === "currentWeek" && slowSentRefreshAfterSubmit ? 1800 : 120;
+      if (scope === "currentWeek" && slowSentRefreshAfterSubmit) slowSentRefreshAfterSubmit = false;
+      await new Promise((resolve) => setTimeout(resolve, responseDelay));
       const reports = scope === "archive"
         ? [smokeArchiveReport]
         : [smokeCurrentReport];
@@ -1063,10 +1067,14 @@ async function main() {
       formLogicLoaded: typeof window.AdminReportFormLogic,
       hasCredential: typeof window.pokerApiHasCredential === "function" ? window.pokerApiHasCredential() : null,
       apiBase: typeof window.getApiBase === "function" ? window.getApiBase() : "",
+      sentText: document.getElementById("adminReportSentList")?.textContent || "",
     }));
     if (!submittedAdminReports.length) throw new Error("admin report submit button did not send a report: " + JSON.stringify(submittedReportState) + "\nRequests:\n" + JSON.stringify(adminReportRequests) + "\nPage errors:\n" + errors.join("\n"));
     if (submittedAdminReports[submittedAdminReports.length - 1].deposit !== 321) throw new Error("admin report submit payload lost deposit value");
     if (submittedReportState.activePanel !== "sent") throw new Error("admin report submit did not switch to sent reports: " + JSON.stringify(submittedReportState));
+    if (/Обновляю текущую неделю|Дни появятся сразу после ответа сервера/.test(submittedReportState.sentText)) {
+      throw new Error("admin report sent force refresh replaced cached current week with a slow loading shell: " + JSON.stringify(submittedReportState));
+    }
     if (submittedReportState.depositInput) throw new Error("admin report form was not cleared after submit");
     const currentWeekRequestsBeforeCalc = adminReportRequestScopes.filter((scope) => scope === "currentWeek").length;
     await page.locator("[data-admin-report-tab='calculations']").click();

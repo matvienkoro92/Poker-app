@@ -314,6 +314,13 @@
       return true;
     }
 
+    function hasRenderedSentReportsContent() {
+      if (!sentList || !String(sentList.innerHTML || "").trim()) return false;
+      var text = String(sentList.textContent || "").trim();
+      if (!text) return false;
+      return !/Обновляю текущую неделю|Дни появятся сразу после ответа сервера|Ошибка загрузки|Не удалось загрузить/i.test(text);
+    }
+
     function buildSentReportsLoadingShellHtml() {
       return (
         '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
@@ -357,7 +364,9 @@
       sentList.innerHTML = '<p class="admin-report-sent-empty">Не удалось загрузить отчёты (войдите в Telegram или PWA).</p>';
       return;
     }
-    var renderedFastCache = !forceRefresh && renderSentReportsHtmlCache();
+    var keepRenderedContent = forceRefresh && hasRenderedSentReportsContent();
+    var renderedFastCache = renderSentReportsHtmlCache();
+    if (!renderedFastCache && keepRenderedContent) renderedFastCache = true;
     if (!renderedFastCache) sentList.innerHTML = buildSentReportsLoadingShellHtml();
     sentReportsLoading = true;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
