@@ -227,6 +227,7 @@
     if (rakeZero) return true;
     if (parseNumber(row.amount) !== 0 || parseNumber(row.roomAmount) !== 0) return true;
     if (carryForward && parseNumber(row.percent) !== 0) return true;
+    if (carryForward && normalizeRakebackRowColor(row.color || row.rowColor || row.highlightColor)) return true;
     return carryForward && !!(row.discount15 || row.subtract15);
   }
 
@@ -526,7 +527,10 @@
     if (editBtn) editBtn.hidden = true;
     if (addBtn) addBtn.hidden = true;
     if (removeBtn) removeBtn.hidden = true;
-    if (colorBtn) colorBtn.hidden = true;
+    if (colorBtn) {
+      colorBtn.hidden = false;
+      colorBtn.disabled = !!busy;
+    }
   }
 
   function createSharedRow(data, index) {
@@ -581,7 +585,8 @@
 
   function createTemplateRow(room, playerId, index, collapsed, defaults) {
     defaults = defaults || {};
-    var hasDefaults = parseNumber(defaults.percent) !== 0 || !!(defaults.discount15 || defaults.subtract15);
+    var defaultColor = normalizeRakebackRowColor(defaults.color || defaults.rowColor || defaults.highlightColor);
+    var hasDefaults = parseNumber(defaults.percent) !== 0 || !!(defaults.discount15 || defaults.subtract15) || !!defaultColor;
     var tr = document.createElement("tr");
     tr.className = "admin-report-rakeback-row";
     tr.setAttribute("data-rakeback-row", "");
@@ -595,6 +600,7 @@
       tr.setAttribute("data-rakeback-template-default-saved", "1");
       tr.setAttribute("data-rakeback-template-default-percent", String(parseNumber(defaults.percent)));
       tr.setAttribute("data-rakeback-template-default-discount", defaults.discount15 || defaults.subtract15 ? "1" : "0");
+      if (defaultColor) tr.setAttribute("data-rakeback-template-default-color", defaultColor);
     }
     if (collapsed) tr.setAttribute("data-rakeback-template-collapsed", "1");
     tr.innerHTML =
@@ -610,8 +616,10 @@
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись" hidden>+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку" hidden>×</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--color" data-rakeback-color-toggle title="Выделить цветом" aria-label="Выделить цветом" hidden><span class="admin-report-rakeback-color-dot" aria-hidden="true"></span></button>' +
+        '<div class="admin-report-rakeback-color-menu" data-rakeback-color-menu hidden>' + getRakebackRowColorButtons(defaultColor) + "</div>" +
       "</td>";
     syncSharedRowAmount(tr);
+    applySharedRowColor(tr, defaultColor);
     updateTemplateRowActions(tr, false);
     return tr;
   }
@@ -701,16 +709,21 @@
       return room + "|" + playerId;
     }
 
-    function setTemplateDefaultSaved(row, saved, percent, discount15) {
+    function setTemplateDefaultSaved(row, saved, percent, discount15, color) {
       if (!row) return;
       if (saved) {
+        color = normalizeRakebackRowColor(color);
         row.setAttribute("data-rakeback-template-default-saved", "1");
         if (percent != null) row.setAttribute("data-rakeback-template-default-percent", String(parseNumber(percent)));
         if (discount15 != null) row.setAttribute("data-rakeback-template-default-discount", discount15 ? "1" : "0");
+        if (color) row.setAttribute("data-rakeback-template-default-color", color);
+        else row.removeAttribute("data-rakeback-template-default-color");
+        applySharedRowColor(row, color);
       } else {
         row.removeAttribute("data-rakeback-template-default-saved");
         row.removeAttribute("data-rakeback-template-default-percent");
         row.removeAttribute("data-rakeback-template-default-discount");
+        row.removeAttribute("data-rakeback-template-default-color");
       }
       row.removeAttribute("data-rakeback-template-default-dirty");
       row.removeAttribute("data-rakeback-template-default-saving");
@@ -722,7 +735,8 @@
       if (row.getAttribute("data-rakeback-template-default-saved") !== "1") return false;
       var savedPercent = parseNumber(row.getAttribute("data-rakeback-template-default-percent"));
       var savedDiscount = row.getAttribute("data-rakeback-template-default-discount") === "1";
-      return savedPercent === draft.percent && savedDiscount === draft.discount15;
+      var savedColor = normalizeRakebackRowColor(row.getAttribute("data-rakeback-template-default-color"));
+      return savedPercent === draft.percent && savedDiscount === draft.discount15 && savedColor === draft.color;
     }
 
     function getTemplateRowDraft(row) {
@@ -738,6 +752,7 @@
         hasRakeInputValue: !!(rakeInput && String(rakeInput.value || "").trim()),
         percent: parseNumber(percentInput ? percentInput.value : ""),
         discount15: !!(discountInput && discountInput.checked),
+        color: normalizeRakebackRowColor(row.getAttribute("data-rakeback-row-color")),
       };
     }
 
@@ -1683,7 +1698,7 @@
             return;
           }
           sharedRows = previousRows;
-          if (sourceRow) setTemplateDefaultSaved(sourceRow, true, existingDefault && existingDefault.percent, !!(existingDefault && existingDefault.discount15));
+          if (sourceRow) setTemplateDefaultSaved(sourceRow, true, existingDefault && existingDefault.percent, !!(existingDefault && existingDefault.discount15), existingDefault && (existingDefault.color || existingDefault.rowColor || existingDefault.highlightColor));
           if (!options.skipRender) render();
           setStatus("Не удалось сохранить процент", true);
         });
@@ -1694,6 +1709,7 @@
         var previousRows = sharedRows.slice();
         var existingDefault = getTemplateDefaultRow(room, playerId);
         var sourceRow = options.sourceRow || findTemplateDomRow(room, playerId);
+        var color = normalizeRakebackRowColor(options.color != null ? options.color : sourceRow && sourceRow.getAttribute("data-rakeback-row-color"));
         var now = Date.now();
         var row = {
           groupId: existingDefault && existingDefault.groupId
@@ -1713,6 +1729,7 @@
           createdAt: existingDefault && existingDefault.createdAt ? existingDefault.createdAt : now,
           standardAt: now,
           entryAddedAt: now,
+          color: color,
           amount: 0,
           roomAmount: 0,
         };
@@ -1724,10 +1741,10 @@
         }));
         if (sourceRow) {
           sourceRow.setAttribute("data-rakeback-template-default-saving", "1");
-          setTemplateDefaultSaved(sourceRow, true, percent, discount15);
+          setTemplateDefaultSaved(sourceRow, true, percent, discount15, color);
         }
         if (!options.skipRender) render();
-        setStatus("Процент закреплен за шаблоном", true);
+        setStatus(color && parseNumber(percent) === 0 && !discount15 ? "Цвет закреплен за шаблоном" : "Процент закреплен за шаблоном", true);
         saveSharedDraftNow(options.showStatus !== false, {
           upsertGroupIds: [row.groupId],
           deleteRowKeys: [getEmptyGroupTemplateServerKey(room, playerId)],
@@ -1735,7 +1752,7 @@
         }).then(function (ok) {
           if (ok) return;
           sharedRows = previousRows;
-          if (sourceRow) setTemplateDefaultSaved(sourceRow, !!existingDefault, existingDefault && existingDefault.percent, !!(existingDefault && existingDefault.discount15));
+          if (sourceRow) setTemplateDefaultSaved(sourceRow, !!existingDefault, existingDefault && existingDefault.percent, !!(existingDefault && existingDefault.discount15), existingDefault && (existingDefault.color || existingDefault.rowColor || existingDefault.highlightColor));
           if (!options.skipRender) render();
           setStatus("Не удалось сохранить процент", true);
         });
@@ -1751,20 +1768,20 @@
           return;
         }
         if (isTemplateDefaultAlreadySaved(templateRow, draft)) {
-          setTemplateDefaultSaved(templateRow, true, draft.percent, draft.discount15);
+          setTemplateDefaultSaved(templateRow, true, draft.percent, draft.discount15, draft.color);
           return;
         }
         templateRow.setAttribute("data-rakeback-template-default-dirty", "1");
         templateRow.removeAttribute("data-rakeback-template-default-saved");
         updateTemplateRowActions(templateRow, loading || saving);
-        setStatus("Сохраняю процент шаблона…", true);
+        setStatus("Сохраняю шаблон…", true);
         var key = getTemplateDefaultKey(draft.room, draft.playerId);
         templateDefaultSaveTimers[key] = setTimeout(function () {
           delete templateDefaultSaveTimers[key];
           var currentRow = findTemplateDomRow(draft.room, draft.playerId) || templateRow;
           var current = getTemplateRowDraft(currentRow) || draft;
           if (!current.playerId || current.hasRakeInputValue) return;
-          if (current.percent === 0 && !current.discount15) {
+          if (current.percent === 0 && !current.discount15 && !current.color) {
             clearTemplateRowDefaults(current.room, current.playerId, {
               sourceRow: currentRow,
               skipRender: true,
@@ -1772,6 +1789,7 @@
             return;
           }
           saveTemplateRowDefaults(current.room, current.playerId, current.percent, current.discount15, {
+            color: current.color,
             sourceRow: currentRow,
             skipRender: true,
             showStatus: false,
@@ -1798,12 +1816,13 @@
         var rake = parseNumber(rakeInput ? rakeInput.value : "");
         var percent = parseNumber(percentInput ? percentInput.value : "");
         var discount15 = !!(discountInput && discountInput.checked);
+        var color = normalizeRakebackRowColor(templateRow.getAttribute("data-rakeback-row-color"));
         if (!hasRakeInputValue) {
-          if (percent === 0 && !discount15) {
+          if (percent === 0 && !discount15 && !color) {
             setStatus("Укажите рейк для записи или процент для шаблона", true);
             return;
           }
-          saveTemplateRowDefaults(room, playerId, percent, discount15);
+          saveTemplateRowDefaults(room, playerId, percent, discount15, { color: color });
           return;
         }
         var roomAmount = Math.round(rake * percent / 100 * (discount15 ? 0.85 : 1) * 100) / 100;
@@ -1822,6 +1841,7 @@
           createdAt: now,
           standardAt: now,
           entryAddedAt: now,
+          color: color,
           amount: getReportAmount(room, roomAmount),
           roomAmount: roomAmount,
         };
@@ -1907,11 +1927,19 @@
           var colorOption = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-value]") : null;
           if (colorOption) {
             event.preventDefault();
-            var colorRow = colorOption.closest("[data-rakeback-shared-row]");
+            var colorRow = colorOption.closest("[data-rakeback-shared-row],[data-rakeback-template-row]");
             if (!colorRow) return;
+            var selectedColor = colorOption.getAttribute("data-rakeback-color-value") || "";
+            if (colorRow.hasAttribute("data-rakeback-template-row")) {
+              applySharedRowColor(colorRow, selectedColor);
+              closeSharedRowColorMenus(body);
+              updateTemplateRowActions(colorRow, loading || saving);
+              scheduleTemplateRowDefaultSave(colorRow);
+              return;
+            }
             var colorGroupId = colorRow.getAttribute("data-rakeback-group") || "";
             var savedColorRow = colorRow.getAttribute("data-rakeback-saved") === "1";
-            applySharedRowColor(colorRow, colorOption.getAttribute("data-rakeback-color-value") || "");
+            applySharedRowColor(colorRow, selectedColor);
             closeSharedRowColorMenus(body);
             sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
             if (getSortMode() === "color") render();
@@ -1925,7 +1953,7 @@
           var colorToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-toggle]") : null;
           if (colorToggle) {
             event.preventDefault();
-            var toggleRow = colorToggle.closest("[data-rakeback-shared-row]");
+            var toggleRow = colorToggle.closest("[data-rakeback-shared-row],[data-rakeback-template-row]");
             if (!toggleRow) return;
             var menu = toggleRow.querySelector("[data-rakeback-color-menu]");
             if (!menu) return;
