@@ -29,6 +29,7 @@
       tabs.forEach(function (tab) {
         var isActive = tab.getAttribute("data-admin-report-tab") === activeName;
         tab.classList.toggle("admin-report-tab--active", isActive);
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
       });
       panels.forEach(function (panel) {
         var isActive = panel.getAttribute("data-admin-report-panel") === activeName;

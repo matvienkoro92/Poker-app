@@ -114,6 +114,7 @@ function initAdminReportModal() {
   var calculationsModuleLoadPromise = null;
   var sentReportsModule = null;
   var sentReportsModuleLoadPromise = null;
+  var sentReportsPrefetchStarted = false;
   var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
@@ -851,6 +852,10 @@ function initAdminReportModal() {
         },
         beforeSwitch: function (name) {
           if (name !== "rakeback" && !rakebackModule) suspendRakebackDomRows();
+          if (name === "sent") {
+            if (sentReportsModule) sentReportsModule.open();
+            else loadSentReports();
+          }
         },
         afterSwitch: function (name) {
           if (name === "rakeback") {
@@ -2370,6 +2375,7 @@ function initAdminReportModal() {
       tabs.forEach(function (tab) {
         var selected = tab.getAttribute("data-admin-report-tab") === activeName;
         tab.classList.toggle("admin-report-tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
       });
     }
     if (panels && panels.length) {
@@ -2870,6 +2876,33 @@ function initAdminReportModal() {
       });
   }
 
+  function canPrefetchSentReportsNow() {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    return !!(
+      sentList &&
+      canViewSentReports() &&
+      base &&
+      typeof pokerApiHasCredential === "function" &&
+      pokerApiHasCredential()
+    );
+  }
+
+  function prefetchSentReportsSoon() {
+    if (sentReportsPrefetchStarted || !canPrefetchSentReportsNow()) return false;
+    sentReportsPrefetchStarted = true;
+    var run = function () {
+      loadSentReports(false);
+    };
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(run, { timeout: 1200 });
+    } else if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(function () { setTimeout(run, 120); });
+    } else {
+      setTimeout(run, 120);
+    }
+    return true;
+  }
+
   function closeModal() {
     if (rakebackModule) rakebackModule.close();
     else suspendRakebackDomRows();
@@ -2902,11 +2935,13 @@ function initAdminReportModal() {
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     syncRakebackAccessControls();
+    prefetchSentReportsSoon();
     return true;
   }
   window.pokerOpenAdminReportModal = function () {
     return openModal();
   };
+  window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;
   btn.addEventListener("click", function (e) {
     if (openModal() === false) {
       if (e && typeof e.preventDefault === "function") e.preventDefault();
@@ -2943,6 +2978,10 @@ function initAdminReportModal() {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
         if (name === "sent" && !canViewSentReports()) return;
         if (name === "calculations" && !canViewCalculationsReports()) return;
+        if (name === "sent") {
+          if (sentReportsModule) sentReportsModule.open();
+          else loadSentReports();
+        }
         setActiveTab(name);
         if (name === "rakeback") {
           openLazyRakebackModule();
@@ -3964,6 +4003,7 @@ var adminReportStartupModuleLoadPromise = null;
 var ADMIN_REPORT_STARTUP_MODULE_SCRIPTS = [
   "app-admin-reports-tabs.js",
   "app-admin-reports-form.js",
+  "app-admin-reports-sent.js",
   "app-admin-broadcast-reports.js",
 ];
 var ADMIN_REPORT_MODULE_SCRIPTS = [
@@ -4069,6 +4109,9 @@ function initAdminReportModalsRuntime() {
       initAdminReportModal();
       if (typeof window.pokerInitBroadcastReportsModal === "function") {
         window.pokerInitBroadcastReportsModal();
+      }
+      if (typeof window.pokerPreloadAdminSentReports === "function") {
+        window.pokerPreloadAdminSentReports();
       }
       return true;
     })

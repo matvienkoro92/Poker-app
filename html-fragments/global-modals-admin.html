@@ -226,10 +226,10 @@
           <button type="button" class="share-stats-admin-modal__close" id="adminReportModalClose" aria-label="Закрыть">×</button>
           <p class="admin-report-date" id="adminReportDate"></p>
           <div class="admin-report-tabs" role="tablist">
-            <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form">Отчет</button>
-            <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback">Рейкбек</button>
-            <button type="button" class="admin-report-tab" data-admin-report-tab="sent">Отправленные</button>
-            <button type="button" class="admin-report-tab" data-admin-report-tab="calculations" hidden>Расчеты</button>
+            <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form" role="tab" aria-selected="true">Отчет</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback" role="tab" aria-selected="false">Рейкбек</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="sent" role="tab" aria-selected="false">Отправленные</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="calculations" role="tab" aria-selected="false" hidden>Расчеты</button>
           </div>
           <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
             <div class="admin-report-form-body" id="adminReportFormBody">
