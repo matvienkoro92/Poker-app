@@ -542,9 +542,9 @@ function initProfilePokerPlus() {
     mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
     mttMetrics.push(pokerPlusItmMetricHtml("MTT ITM", mttItmStat, mttCountStat));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
-    sngMetrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
+    sngMetrics.push(pokerPlusStatMetricHtml("Выигрыш", sngStat, pokerPlusStatTone(sngStat), "♦"));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
-    sngMetrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
+    sngMetrics.push(pokerPlusItmMetricHtml("SNG ITM", sngItmStat, sngCountStat));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
     sections.push(pokerPlusStatsSectionHtml("cash", "Кеш", cashMetrics));
     sections.push(pokerPlusStatsSectionHtml("mtt", "МТТ", mttMetrics));
