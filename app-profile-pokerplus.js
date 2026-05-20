@@ -714,7 +714,7 @@ function initProfilePokerPlus() {
       if (!inputEl) return;
       inputEl.min = minKey;
       inputEl.max = maxKey;
-      inputEl.disabled = !availableDates.length;
+      inputEl.disabled = false;
     });
     renderPokerPlusStatsAvailableDates(availableDates);
   }
@@ -722,14 +722,14 @@ function initProfilePokerPlus() {
   function pokerPlusSelectedStatsGroup(selection, today, week, source) {
     var todayKey = pokerPlusLocalDateKey(new Date());
     var weekStartKey = pokerPlusWeekStartDateKey();
-    if (selection.from === todayKey && selection.to === todayKey) {
+    if (selection.from === todayKey && selection.to === todayKey && pokerPlusCounterHasValue(today)) {
       return {
         title: "Выбранный день",
         counter: today,
         state: "Период: " + pokerPlusDateKeyToDisplay(todayKey),
       };
     }
-    if (selection.from === weekStartKey && selection.to === todayKey) {
+    if (selection.from === weekStartKey && selection.to === todayKey && pokerPlusCounterHasValue(week)) {
       return {
         title: "Выбранная неделя",
         counter: week,
