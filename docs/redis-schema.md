@@ -71,6 +71,7 @@
 | `poker_app:pokerplus_user_ids` | HASH `accountId -> pokerPlusUserId` | pokerplus | Binding. |
 | `poker_app:pokerplus_profiles` | HASH | pokerplus | Cached profile JSON. |
 | `poker_app:pokerplus_profiles_synced_at` | HASH | pokerplus | Sync timestamp. |
+| `poker_app:pokerplus_profile_snapshots:<accountId>` | HASH `YYYY-MM-DD -> JSON` | pokerplus | Daily Poker21 stats snapshots used for exact profile date ranges. |
 | `poker_app:pokerplus_emails` | HASH | pokerplus | Linked email. |
 | `poker_app:pokerplus_ciphertexts` | HASH | pokerplus | Encrypted service payload. |
 | `poker_app:pokerplus_telegram_values` | HASH | pokerplus | Linked Telegram values. |

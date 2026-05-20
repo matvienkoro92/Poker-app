@@ -208,6 +208,11 @@
                   </span>
                   <span class="profile-pokerplus-stats-visibility__state" id="profilePokerPlusStatsVisibilityState" aria-live="polite">Статистика скрыта от других игроков.</span>
                 </div>
+                <div class="profile-pokerplus-stats-tabs" id="profilePokerPlusStatsTabs" role="tablist" aria-label="Период статистики Poker21">
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="today" role="tab" aria-selected="true">Сегодня</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="false">Неделя</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="total" role="tab" aria-selected="false">Всего</button>
+                </div>
                 <div class="profile-pokerplus-stats-date-filter" id="profilePokerPlusStatsDateFilter">
                   <span class="profile-pokerplus-stats-date-filter__title">Период</span>
                   <label class="profile-pokerplus-stats-date-filter__field">
@@ -219,6 +224,7 @@
                     <input type="date" id="profilePokerPlusStatsDateTo" aria-label="Дата окончания периода статистики Poker21" />
                   </label>
                   <button type="button" class="profile-pokerplus-stats-date-filter__reset" id="profilePokerPlusStatsDateResetBtn">Сбросить</button>
+                  <span class="profile-pokerplus-stats-date-filter__available" id="profilePokerPlusStatsAvailableDates" aria-label="Доступные даты статистики Poker21" hidden></span>
                   <span class="profile-pokerplus-stats-date-filter__state" id="profilePokerPlusStatsDateState" aria-live="polite"></span>
                 </div>
                 <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">

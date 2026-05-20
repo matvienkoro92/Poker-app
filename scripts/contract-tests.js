@@ -841,7 +841,7 @@ async function testPokerPlusCounterHandsAliases(redis) {
     throw new Error("Unexpected fetch URL: " + u);
   };
 
-  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const { bindMiniAppPlayer, readPokerPlusProfile } = require(path.join(root, "lib", "pokerplus"));
   const profile = await bindMiniAppPlayer("ID100001", ["tg_1001"], "ABC123", "");
   assert.strictEqual(profile.todayCounter.hands, 77, "today counter accepts hand_count as hands");
   assert.strictEqual(profile.todayCounter.mttCount, 2, "today counter accepts mtt_count");
@@ -867,6 +867,11 @@ async function testPokerPlusCounterHandsAliases(redis) {
   assert.strictEqual(profile.totalCounter.sngCount, 6, "total counter stores sng_count");
   assert.strictEqual(profile.totalCounter.sngItmCount, 5, "total counter stores sng_itm_count");
   assert.strictEqual(profile.totalCounter.sngFirstCount, 1, "total counter stores sng_1st_count");
+  assert.ok(profile.statsSnapshots && profile.statsSnapshots.dates.length >= 1, "profile response includes Poker21 snapshot dates");
+  const snapshotDate = profile.statsSnapshots.dates[profile.statsSnapshots.dates.length - 1];
+  assert.strictEqual(profile.statsSnapshots.dailyCounters[snapshotDate].hands, 77, "snapshot stores today counter for date range filters");
+  const cached = await readPokerPlusProfile("ID100001");
+  assert.strictEqual(cached.statsSnapshots.dailyCounters[snapshotDate].fee, 10, "cached profile reads Poker21 snapshots");
 }
 
 async function testPokerPlusKeyPersistsWithoutStorageSecret(redis) {

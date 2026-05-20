@@ -38,10 +38,12 @@ function initProfilePokerPlus() {
   var statsVisibleYes = document.getElementById("profilePokerPlusStatsVisibleYes");
   var statsVisibleNo = document.getElementById("profilePokerPlusStatsVisibleNo");
   var statsVisibilityState = document.getElementById("profilePokerPlusStatsVisibilityState");
+  var statsPeriodTabs = Array.prototype.slice.call(document.querySelectorAll("[data-profile-pokerplus-stats-period]"));
   var statsDateFilter = document.getElementById("profilePokerPlusStatsDateFilter");
   var statsDateFromInput = document.getElementById("profilePokerPlusStatsDateFrom");
   var statsDateToInput = document.getElementById("profilePokerPlusStatsDateTo");
   var statsDateResetBtn = document.getElementById("profilePokerPlusStatsDateResetBtn");
+  var statsDateAvailable = document.getElementById("profilePokerPlusStatsAvailableDates");
   var statsDateState = document.getElementById("profilePokerPlusStatsDateState");
   var statusLinkHint = document.getElementById("profileStatusLinkHint");
   var profileStatusProgressText = document.getElementById("profileStatusProgressText");
@@ -81,6 +83,8 @@ function initProfilePokerPlus() {
   var pokerPlusPostTimeoutCheckSeq = 0;
   var pokerPlusLastSyncedAt = 0;
   var pokerPlusLastStatsProfile = null;
+  var pokerPlusStatsAvailableDateKeys = [];
+  var pokerPlusStatsActivePeriod = "today";
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
 
   function setFeedback(text, tone) {
@@ -324,6 +328,45 @@ function initProfilePokerPlus() {
     return null;
   }
 
+  var POKERPLUS_COUNTER_SUM_KEYS = [
+    ["fee", "fee"],
+    ["mttRound", "mtt_round"],
+    ["mttWinnings", "mtt_winnings"],
+    ["sngRound", "sng_round"],
+    ["sngWinnings", "sng_winnings"],
+    ["hands", "hands"],
+    ["winnings", "winnings"],
+    ["bb", "bb"],
+    ["ofcWinnings", "ofc_winnings"],
+    ["mttCount", "mtt_count"],
+    ["mttItmCount", "mtt_itm_count"],
+    ["mttFirstCount", "mtt_1st_count"],
+    ["sngCount", "sng_count"],
+    ["sngItmCount", "sng_itm_count"],
+    ["sngFirstCount", "sng_1st_count"],
+  ];
+
+  function pokerPlusCanonicalCounter(total) {
+    var out = {};
+    POKERPLUS_COUNTER_SUM_KEYS.forEach(function (keys) {
+      var value = pokerPlusPickStat(total, keys[0], keys[1]);
+      if (value == null || value !== value || String(value).trim() === "") return;
+      var n = Number(value);
+      if (isFinite(n)) out[keys[0]] = n;
+    });
+    return out;
+  }
+
+  function pokerPlusAddCounter(target, source) {
+    var normalized = pokerPlusCanonicalCounter(source);
+    POKERPLUS_COUNTER_SUM_KEYS.forEach(function (keys) {
+      var key = keys[0];
+      if (normalized[key] == null) return;
+      target[key] = (Number(target[key]) || 0) + normalized[key];
+    });
+    return target;
+  }
+
   function pokerPlusStatOrZero(value) {
     if (value == null || value !== value || String(value).trim() === "") return 0;
     return value;
@@ -493,6 +536,127 @@ function initProfilePokerPlus() {
     return raw.slice(8, 10) + "." + raw.slice(5, 7) + "." + raw.slice(0, 4);
   }
 
+  function pokerPlusDateKeyAddDays(value, days) {
+    if (!pokerPlusDateKeyIsValid(value)) return "";
+    var parts = String(value).split("-");
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    d.setDate(d.getDate() + (Number(days) || 0));
+    return pokerPlusLocalDateKey(d);
+  }
+
+  function pokerPlusDateKeysInRange(from, to) {
+    if (!pokerPlusDateKeyIsValid(from) || !pokerPlusDateKeyIsValid(to) || from > to) return [];
+    var out = [];
+    var current = from;
+    var guard = 0;
+    while (current && current <= to && guard < 740) {
+      out.push(current);
+      current = pokerPlusDateKeyAddDays(current, 1);
+      guard += 1;
+    }
+    return out;
+  }
+
+  function pokerPlusStatsSnapshots(source) {
+    var raw = source && typeof source === "object"
+      ? (source.statsSnapshots && typeof source.statsSnapshots === "object" ? source.statsSnapshots : source.stats_snapshots)
+      : null;
+    raw = raw && typeof raw === "object" ? raw : {};
+    var dailyRaw = raw.dailyCounters && typeof raw.dailyCounters === "object" ? raw.dailyCounters : raw.daily_counters;
+    dailyRaw = dailyRaw && typeof dailyRaw === "object" ? dailyRaw : {};
+    var dailyCounters = {};
+    var dates = [];
+    Object.keys(dailyRaw).forEach(function (date) {
+      if (!pokerPlusDateKeyIsValid(date)) return;
+      var counter = pokerPlusCanonicalCounter(dailyRaw[date]);
+      if (!Object.keys(counter).length) return;
+      dailyCounters[date] = counter;
+      if (dates.indexOf(date) === -1) dates.push(date);
+    });
+    (Array.isArray(raw.dates) ? raw.dates : []).forEach(function (date) {
+      var key = String(date || "").trim();
+      if (pokerPlusDateKeyIsValid(key) && dates.indexOf(key) === -1 && dailyCounters[key]) dates.push(key);
+    });
+    dates.sort();
+    return { dates: dates, dailyCounters: dailyCounters };
+  }
+
+  function pokerPlusStatsAvailableDates(source, todayCounter) {
+    var snapshots = pokerPlusStatsSnapshots(source);
+    var dates = snapshots.dates.slice();
+    var todayKey = pokerPlusLocalDateKey(new Date());
+    if (pokerPlusCounterHasValue(todayCounter) && dates.indexOf(todayKey) === -1) dates.push(todayKey);
+    dates.sort();
+    return dates;
+  }
+
+  function pokerPlusStatsAvailableDatesText(source, todayCounter) {
+    var dates = pokerPlusStatsAvailableDates(source, todayCounter);
+    if (!dates.length) return "";
+    if (dates.length === 1) return "Доступна дата: " + pokerPlusDateKeyToDisplay(dates[0]) + ".";
+    return "Доступны даты: " + pokerPlusDateKeyToDisplay(dates[0]) + " — " + pokerPlusDateKeyToDisplay(dates[dates.length - 1]) + ".";
+  }
+
+  function renderPokerPlusStatsAvailableDates(dates) {
+    if (!statsDateAvailable) return;
+    var list = Array.isArray(dates) ? dates.slice() : [];
+    statsDateAvailable.innerHTML = "";
+    statsDateAvailable.hidden = !list.length;
+    if (!list.length) return;
+    var selected = pokerPlusStatsDateSelection();
+    list.forEach(function (date) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "profile-pokerplus-stats-date-filter__date-btn";
+      btn.textContent = pokerPlusDateKeyToDisplay(date).slice(0, 5);
+      btn.setAttribute("aria-label", "Выбрать " + pokerPlusDateKeyToDisplay(date));
+      btn.dataset.profilePokerplusStatsDate = date;
+      if (selected.mode === "range" && selected.from <= date && date <= selected.to) {
+        btn.classList.add("profile-pokerplus-stats-date-filter__date-btn--active");
+      }
+      statsDateAvailable.appendChild(btn);
+    });
+  }
+
+  function applyPokerPlusStatsAvailableDate(date) {
+    if (!pokerPlusDateKeyIsValid(date) || pokerPlusStatsAvailableDateKeys.indexOf(date) === -1) return;
+    var from = statsDateFromInput ? String(statsDateFromInput.value || "").trim() : "";
+    var to = statsDateToInput ? String(statsDateToInput.value || "").trim() : "";
+    if (!from || (from && to && from !== to)) {
+      from = date;
+      to = date;
+    } else if (from && to && from === to && date !== from) {
+      if (date < from) {
+        to = from;
+        from = date;
+      } else {
+        to = date;
+      }
+    } else {
+      from = date;
+      to = date;
+    }
+    if (statsDateFromInput) statsDateFromInput.value = from;
+    if (statsDateToInput) statsDateToInput.value = to;
+    rerenderPokerPlusStatsDateFilter();
+  }
+
+  function pokerPlusSnapshotCounterForRange(source, selection, todayCounter) {
+    var dates = pokerPlusDateKeysInRange(selection && selection.from, selection && selection.to);
+    if (!dates.length) return null;
+    var snapshots = pokerPlusStatsSnapshots(source);
+    var todayKey = pokerPlusLocalDateKey(new Date());
+    var counter = {};
+    for (var i = 0; i < dates.length; i += 1) {
+      var date = dates[i];
+      var dayCounter = snapshots.dailyCounters[date];
+      if (!dayCounter && date === todayKey && pokerPlusCounterHasValue(todayCounter)) dayCounter = todayCounter;
+      if (!dayCounter || !pokerPlusCounterHasValue(dayCounter)) return null;
+      pokerPlusAddCounter(counter, dayCounter);
+    }
+    return counter;
+  }
+
   function pokerPlusWeekStartDateKey() {
     var d = new Date();
     var day = d.getDay();
@@ -507,6 +671,9 @@ function initProfilePokerPlus() {
     if (!from || !to) return { mode: "error", message: "Выберите даты начала и окончания периода." };
     if (!pokerPlusDateKeyIsValid(from) || !pokerPlusDateKeyIsValid(to)) return { mode: "error", message: "Проверьте выбранные даты." };
     if (from > to) return { mode: "error", message: "Дата начала должна быть не позже даты окончания." };
+    if (pokerPlusStatsAvailableDateKeys.length && (pokerPlusStatsAvailableDateKeys.indexOf(from) === -1 || pokerPlusStatsAvailableDateKeys.indexOf(to) === -1)) {
+      return { mode: "error", message: "Выберите даты из доступных для просмотра." };
+    }
     return { mode: "range", from: from, to: to };
   }
 
@@ -517,13 +684,42 @@ function initProfilePokerPlus() {
     statsDateState.classList.toggle("profile-pokerplus-stats-date-filter__state--warn", tone === "warn");
   }
 
-  function syncPokerPlusStatsDateFilterBounds() {
-    var todayKey = pokerPlusLocalDateKey(new Date());
-    if (statsDateFromInput) statsDateFromInput.max = todayKey;
-    if (statsDateToInput) statsDateToInput.max = todayKey;
+  function setPokerPlusStatsPeriodTabs(activePeriod) {
+    statsPeriodTabs.forEach(function (btn) {
+      var period = btn.dataset.profilePokerplusStatsPeriod || "";
+      var active = !!activePeriod && period === activePeriod;
+      btn.classList.toggle("profile-pokerplus-stats-tabs__btn--active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
   }
 
-  function pokerPlusSelectedStatsGroup(selection, today, week) {
+  function clearPokerPlusStatsDateInputs() {
+    if (statsDateFromInput) statsDateFromInput.value = "";
+    if (statsDateToInput) statsDateToInput.value = "";
+  }
+
+  function pokerPlusStatsPeriodInfo(period, today, week, total) {
+    if (period === "week") return { title: "Неделя", counter: week, empty: "Нет данных за неделю." };
+    if (period === "total") return { title: "Всего", counter: total, empty: "Нет общей статистики." };
+    return { title: "Сегодня", counter: today, empty: "Нет данных за сегодня." };
+  }
+
+  function syncPokerPlusStatsDateFilterBounds(source, todayCounter) {
+    var availableDates = pokerPlusStatsAvailableDates(source, todayCounter);
+    pokerPlusStatsAvailableDateKeys = availableDates.slice();
+    var todayKey = pokerPlusLocalDateKey(new Date());
+    var minKey = availableDates[0] || todayKey;
+    var maxKey = availableDates.length ? availableDates[availableDates.length - 1] : todayKey;
+    [statsDateFromInput, statsDateToInput].forEach(function (inputEl) {
+      if (!inputEl) return;
+      inputEl.min = minKey;
+      inputEl.max = maxKey;
+      inputEl.disabled = !availableDates.length;
+    });
+    renderPokerPlusStatsAvailableDates(availableDates);
+  }
+
+  function pokerPlusSelectedStatsGroup(selection, today, week, source) {
     var todayKey = pokerPlusLocalDateKey(new Date());
     var weekStartKey = pokerPlusWeekStartDateKey();
     if (selection.from === todayKey && selection.to === todayKey) {
@@ -540,10 +736,19 @@ function initProfilePokerPlus() {
         state: "Период: " + pokerPlusDateKeyToDisplay(weekStartKey) + " — " + pokerPlusDateKeyToDisplay(todayKey),
       };
     }
+    var snapshotCounter = pokerPlusSnapshotCounterForRange(source, selection, today);
+    if (snapshotCounter && pokerPlusCounterHasValue(snapshotCounter)) {
+      return {
+        title: selection.from === selection.to ? "Выбранный день" : "Выбранный период",
+        counter: snapshotCounter,
+        state: "Период: " + pokerPlusDateKeyToDisplay(selection.from) + " — " + pokerPlusDateKeyToDisplay(selection.to),
+      };
+    }
+    var availableText = pokerPlusStatsAvailableDatesText(source, today);
     return {
       title: "",
       counter: null,
-      state: "Нет точной статистики за выбранные даты.",
+      state: availableText ? "Нет сохранённых снимков за весь выбранный период. " + availableText : "Пока нет сохранённых снимков для выбора дат.",
       warn: true,
     };
   }
@@ -551,21 +756,23 @@ function initProfilePokerPlus() {
   function renderPokerPlusStats(profileSource) {
     if (!statsValue) return;
     setProfileStatusLoading(false);
-    pokerPlusLastStatsProfile = profileSource && typeof profileSource === "object" ? profileSource : {};
-    syncPokerPlusStatsDateFilterBounds();
     var source = profileSource && typeof profileSource === "object" ? profileSource : {};
+    pokerPlusLastStatsProfile = source;
     var total = source.totalCounter && typeof source.totalCounter === "object" ? source.totalCounter : (source.total_counter && typeof source.total_counter === "object" ? source.total_counter : source);
     var today = source.todayCounter && typeof source.todayCounter === "object" ? source.todayCounter : (source.today_counter && typeof source.today_counter === "object" ? source.today_counter : null);
     var week = source.weekCounter && typeof source.weekCounter === "object" ? source.weekCounter : (source.week_counter && typeof source.week_counter === "object" ? source.week_counter : null);
+    syncPokerPlusStatsDateFilterBounds(source, today);
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     setProfileStatusFromRake(feeStat);
     var groups = [];
     var selection = pokerPlusStatsDateSelection();
     if (selection.mode === "error") {
+      setPokerPlusStatsPeriodTabs("");
       groups.push(pokerPlusStatsEmptyHtml(selection.message));
       setPokerPlusStatsDateState(selection.message, "warn");
     } else if (selection.mode === "range") {
-      var selected = pokerPlusSelectedStatsGroup(selection, today, week);
+      setPokerPlusStatsPeriodTabs("");
+      var selected = pokerPlusSelectedStatsGroup(selection, today, week, source);
       if (selected.counter && pokerPlusCounterHasValue(selected.counter)) {
         groups.push(pokerPlusStatsGroupHtml(selected.title, selected.counter, false));
         setPokerPlusStatsDateState(selected.state, false);
@@ -574,9 +781,16 @@ function initProfilePokerPlus() {
         setPokerPlusStatsDateState(selected.state, selected.warn ? "warn" : false);
       }
     } else {
-      if (pokerPlusCounterHasValue(today)) groups.push(pokerPlusStatsGroupHtml("Сегодня", today, false));
-      if (pokerPlusCounterHasValue(week)) groups.push(pokerPlusStatsGroupHtml("Неделя", week, false));
-      if (pokerPlusCounterHasValue(total) || !groups.length) groups.push(pokerPlusStatsGroupHtml(groups.length ? "Всего" : "Статистика", total, !groups.length));
+      if (["today", "week", "total"].indexOf(pokerPlusStatsActivePeriod) === -1) pokerPlusStatsActivePeriod = "today";
+      setPokerPlusStatsPeriodTabs(pokerPlusStatsActivePeriod);
+      var periodInfo = pokerPlusStatsPeriodInfo(pokerPlusStatsActivePeriod, today, week, total);
+      if (periodInfo.counter && pokerPlusCounterHasValue(periodInfo.counter)) {
+        groups.push(pokerPlusStatsGroupHtml(periodInfo.title, periodInfo.counter, false));
+      } else if (pokerPlusStatsActivePeriod === "total") {
+        groups.push(pokerPlusStatsGroupHtml(periodInfo.title, total, true));
+      } else {
+        groups.push(pokerPlusStatsEmptyHtml(periodInfo.empty));
+      }
       setPokerPlusStatsDateState("", false);
     }
     statsValue.innerHTML = groups.join("");
@@ -591,7 +805,12 @@ function initProfilePokerPlus() {
   function hidePokerPlusStats() {
     if (statsRow) statsRow.hidden = true;
     if (statsDateFilter) statsDateFilter.hidden = true;
+    if (statsDateAvailable) {
+      statsDateAvailable.innerHTML = "";
+      statsDateAvailable.hidden = true;
+    }
     setPokerPlusStatsDateState("", false);
+    pokerPlusStatsAvailableDateKeys = [];
     pokerPlusLastStatsProfile = null;
     setProfileStatusLoading(false);
   }
@@ -1117,6 +1336,17 @@ function initProfilePokerPlus() {
       savePokerPlusStatsVisible(false);
     });
   }
+  statsPeriodTabs.forEach(function (btn) {
+    if (!btn || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", function () {
+      var period = btn.dataset.profilePokerplusStatsPeriod || "";
+      if (["today", "week", "total"].indexOf(period) === -1) return;
+      pokerPlusStatsActivePeriod = period;
+      clearPokerPlusStatsDateInputs();
+      rerenderPokerPlusStatsDateFilter();
+    });
+  });
   if (statsDateFromInput && statsDateFromInput.dataset.bound !== "1") {
     statsDateFromInput.dataset.bound = "1";
     statsDateFromInput.addEventListener("change", rerenderPokerPlusStatsDateFilter);
@@ -1131,6 +1361,14 @@ function initProfilePokerPlus() {
       if (statsDateFromInput) statsDateFromInput.value = "";
       if (statsDateToInput) statsDateToInput.value = "";
       rerenderPokerPlusStatsDateFilter();
+    });
+  }
+  if (statsDateAvailable && statsDateAvailable.dataset.bound !== "1") {
+    statsDateAvailable.dataset.bound = "1";
+    statsDateAvailable.addEventListener("click", function (event) {
+      var btn = event && event.target ? event.target.closest("[data-profile-pokerplus-stats-date]") : null;
+      if (!btn) return;
+      applyPokerPlusStatsAvailableDate(btn.dataset.profilePokerplusStatsDate || "");
     });
   }
   if (input.dataset.bound !== "1") {
