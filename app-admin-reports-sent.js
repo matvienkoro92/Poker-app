@@ -211,6 +211,12 @@
         if (!hasReportValue(value)) return;
         list.push({ label: label, value: roundValue ? formatReportRubleNumber(value) : String(value) });
       }
+      if (hasReportValue(report.botCryptoDep)) {
+        calcEntries.push({
+          label: "Итого Рунекс",
+          value: formatReportRubleNumber(report.botCryptoDep),
+        });
+      }
       if (hasReportValue(report.botExchipDep) || hasReportValue(report.botExchipCashout)) {
         var exchipDep = parseReportNumber(report.botExchipDep);
         var exchipCashout = parseReportNumber(report.botExchipCashout);

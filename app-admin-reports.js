@@ -2790,6 +2790,12 @@ function initAdminReportModal() {
       if (!hasReportValue(value)) return;
       list.push({ label: label, value: roundValue ? formatReportRubleNumber(value) : String(value) });
     }
+    if (hasReportValue(it.botCryptoDep)) {
+      calcEntries.push({
+        label: "Итого Рунекс",
+        value: formatReportRubleNumber(it.botCryptoDep),
+      });
+    }
     if (hasReportValue(it.botExchipDep) || hasReportValue(it.botExchipCashout)) {
       var exchipDep = parseReportNumber(it.botExchipDep);
       var exchipCashout = parseReportNumber(it.botExchipCashout);
