@@ -305,7 +305,7 @@ async function main() {
       await new Promise((resolve) => setTimeout(resolve, responseDelay));
       const reports = scope === "archive"
         ? [smokeArchiveReport]
-        : [smokeCurrentReport];
+        : (scope === "all" ? [smokeCurrentReport, smokeArchiveReport] : [smokeCurrentReport]);
       await route.fulfill({
         status: 200,
         headers: corsHeaders,
@@ -442,6 +442,7 @@ async function main() {
         const list = document.getElementById("adminReportSentList");
         const activePanel = document.querySelector(".admin-report-panel--active");
         const archiveHint = document.querySelector("[data-admin-report-sent-archive] .admin-report-sent-period-hint");
+        const monthHint = document.querySelector("[data-admin-report-sent-months] .admin-report-sent-period-hint");
         return {
           openDelayMs: 0,
           text: list ? String(list.textContent || "").trim() : "",
@@ -452,6 +453,7 @@ async function main() {
           hasCalcBlock: !!document.querySelector(".admin-report-sent-detail__field-block--calc"),
           hasDangerBlock: !!document.querySelector(".admin-report-sent-detail__field-block--danger"),
           archiveHint: archiveHint ? String(archiveHint.textContent || "").trim() : "",
+          monthHint: monthHint ? String(monthHint.textContent || "").trim() : "",
         };
       });
       earlySentState.openDelayMs = earlySentOpenDelayMs;
@@ -464,7 +466,16 @@ async function main() {
         throw new Error("admin report sent shell lost highlighted detail sections before core");
       }
       if (!/Откройте/.test(earlySentState.archiveHint)) throw new Error("admin report archive did not stay as a lazy hint before click");
+      if (!/Откройте/.test(earlySentState.monthHint)) throw new Error("admin report month totals did not stay as a lazy hint before click");
       if (adminReportRequestScopes.includes("archive")) throw new Error("admin report archive loaded before the archive block was opened");
+      if (adminReportRequestScopes.includes("all")) throw new Error("admin report month totals loaded before the month block was opened");
+      await page.locator("[data-admin-report-sent-months] > summary").click();
+      await page.waitForFunction(() => {
+        const inner = document.querySelector("[data-admin-report-sent-months] .admin-report-sent-months__inner");
+        const text = inner ? String(inner.textContent || "").trim() : "";
+        return !!(text && !/Загрузка/.test(text) && /Итого за месяц|Общий отч.т по дням/.test(text));
+      }, null, { timeout: 1800 });
+      if (!adminReportRequestScopes.includes("all")) throw new Error("admin report month totals were not loaded after opening the month block");
       await page.locator("[data-admin-report-sent-archive] > summary").click();
       await page.waitForFunction(() => {
         const inner = document.querySelector("[data-admin-report-sent-archive] .admin-report-sent-archive__inner");

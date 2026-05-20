@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v4";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v5";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -348,6 +348,12 @@
             "</div>" +
           "</details>" +
         "</div>" +
+        '<details class="admin-report-sent-months" data-admin-report-sent-months>' +
+          '<summary class="admin-report-sent-archive__summary admin-report-sent-months__summary">Итого по месяцам</summary>' +
+          '<div class="admin-report-sent-months__inner">' +
+            '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить месяцы.</p>' +
+          "</div>" +
+        "</details>" +
         '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
           '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
           '<div class="admin-report-sent-archive__inner">' +
@@ -608,6 +614,148 @@
             return b - a;
           });
         }
+        function dayStartMsForReport(ts) {
+          var msk = mskDateFromTs(ts);
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), msk.getUTCDate(), 0, 0, 0, 0) - MSK_SHIFT_MS;
+        }
+        function monthStartMsForReport(ts) {
+          var msk = mskDateFromTs(ts);
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), 1, 0, 0, 0, 0) - MSK_SHIFT_MS;
+        }
+        function nextMonthStartMs(monthStartMs) {
+          var msk = mskDateFromTs(monthStartMs);
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth() + 1, 1, 0, 0, 0, 0) - MSK_SHIFT_MS;
+        }
+        function monthLabelFromStartMs(monthStartMs) {
+          return capitalizeWord(new Intl.DateTimeFormat("ru-RU", {
+            timeZone: "Europe/Moscow",
+            month: "long",
+            year: "numeric",
+          }).format(new Date(monthStartMs)));
+        }
+        function dayLabelFromStartMs(dayStartMs) {
+          var date = formatRuMonthDay(dayStartMs, true);
+          var weekday = new Intl.DateTimeFormat("ru-RU", {
+            timeZone: "Europe/Moscow",
+            weekday: "long",
+          }).format(new Date(dayStartMs));
+          return capitalizeWord(date) + ", " + capitalizeWord(weekday);
+        }
+        function groupReportsByMonth(list) {
+          var grouped = {};
+          (Array.isArray(list) ? list : []).forEach(function (r) {
+            var eff = getReportDayTimestamp(r);
+            if (!eff || eff !== eff) return;
+            var ms = monthStartMsForReport(eff);
+            var key = String(ms);
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(r);
+          });
+          return grouped;
+        }
+        function sortedMonthStarts(grouped) {
+          return Object.keys(grouped || {}).map(function (s) {
+            return Number(s);
+          }).filter(function (n) {
+            return n === n;
+          }).sort(function (a, b) {
+            return b - a;
+          });
+        }
+        function groupReportsByDay(list) {
+          var grouped = {};
+          (Array.isArray(list) ? list : []).forEach(function (r) {
+            var eff = getReportDayTimestamp(r);
+            if (!eff || eff !== eff) return;
+            var ds = dayStartMsForReport(eff);
+            var key = String(ds);
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(r);
+          });
+          return grouped;
+        }
+        function buildMonthDayTotalsHtml(list, idPrefix) {
+          var daysByKey = groupReportsByDay(list);
+          var dayStarts = Object.keys(daysByKey).map(function (s) {
+            return Number(s);
+          }).filter(function (n) {
+            return n === n;
+          }).sort(function (a, b) {
+            return b - a;
+          });
+          if (!dayStarts.length) return '<p class="admin-report-sent-period-hint">За месяц пока нет отчётов по дням.</p>';
+          return dayStarts.map(function (dayStart) {
+            var dayList = daysByKey[String(dayStart)] || [];
+            var totals = sumReportsInWindow(dayList, dayStart, dayStart + DAY_MS - 1);
+            var detailHtml = buildReportDetailHtml(totals);
+            var id = idPrefix + "day-" + String(dayStart);
+            return (
+              '<details class="admin-report-sent-month-day">' +
+                '<summary class="admin-report-sent-month-day__summary">' +
+                  '<span class="admin-report-sent-month-day__label">' + escapeReportHtml(dayLabelFromStartMs(dayStart)) + "</span>" +
+                  '<span class="admin-report-sent-month-day__count">' + escapeReportHtml(String(dayList.length)) + "</span>" +
+                "</summary>" +
+                '<div class="admin-report-sent-month-day__inner" id="' + escapeReportHtml(id) + '">' +
+                  (detailHtml ? '<div class="admin-report-sent-detail__inner">' + detailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Нулевой день.</p>') +
+                "</div>" +
+              "</details>"
+            );
+          }).join("");
+        }
+        function buildMonthWeekTotalsHtml(list, idPrefix) {
+          var weeksByKeyForMonth = groupReportsByWeek(list);
+          var weekStarts = sortedWeekStarts(weeksByKeyForMonth);
+          if (!weekStarts.length) return '<p class="admin-report-sent-period-hint">В этом месяце недельных итогов пока нет.</p>';
+          return weekStarts.map(function (weekStart) {
+            var meta = weekMetaFromStart(weekStart);
+            var weekList = weeksByKeyForMonth[String(weekStart)] || [];
+            var totals = sumReportsInWindow(weekList, meta.start, meta.end);
+            var detailHtml = buildReportDetailHtml(totals);
+            var id = idPrefix + "week-" + String(weekStart);
+            return (
+              '<details class="admin-report-sent-month-week">' +
+                '<summary class="admin-report-sent-month-week__summary">Неделя ' + escapeReportHtml(weekCompactLabelFromStartMs(meta.start)) + "</summary>" +
+                '<div class="admin-report-sent-month-week__inner" id="' + escapeReportHtml(id) + '">' +
+                  (detailHtml ? '<div class="admin-report-sent-detail__inner">' + detailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Итогов за неделю пока нет.</p>') +
+                "</div>" +
+              "</details>"
+            );
+          }).join("");
+        }
+        function buildMonthsHtml(list, idPrefixBase) {
+          var monthsByKey = groupReportsByMonth(list);
+          var monthStarts = sortedMonthStarts(monthsByKey);
+          if (!monthStarts.length) return '<p class="admin-report-sent-period-hint">Месячных итогов пока нет.</p>';
+          return monthStarts.map(function (monthStart, idx) {
+            var monthList = monthsByKey[String(monthStart)] || [];
+            var monthEnd = nextMonthStartMs(monthStart) - 1;
+            var label = monthLabelFromStartMs(monthStart);
+            var totals = sumReportsInWindow(monthList, monthStart, monthEnd);
+            var totalDetailHtml = buildReportDetailHtml(totals);
+            var prefix = idPrefixBase + "month-" + String(monthStart) + "-";
+            return (
+              '<details class="admin-report-sent-month"' + (idx === 0 ? " open" : "") + ">" +
+                '<summary class="admin-report-sent-month__summary">' + escapeReportHtml(label) + "</summary>" +
+                '<div class="admin-report-sent-month__inner">' +
+                  '<details class="admin-report-sent-month-total" open>' +
+                    '<summary class="admin-report-sent-month-total__summary">Итого за месяц</summary>' +
+                    '<div class="admin-report-sent-month-total__inner">' +
+                      (totalDetailHtml ? '<div class="admin-report-sent-detail__inner">' + totalDetailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Итогов за месяц пока нет.</p>') +
+                    "</div>" +
+                  "</details>" +
+                  '<details class="admin-report-sent-month-days" open>' +
+                    '<summary class="admin-report-sent-month-days__summary">Общий отчёт по дням</summary>' +
+                    '<div class="admin-report-sent-month-days__inner">' + buildMonthDayTotalsHtml(monthList, prefix) + "</div>" +
+                  "</details>" +
+                  '<details class="admin-report-sent-month-weeks">' +
+                    '<summary class="admin-report-sent-month-weeks__summary">Недельные итоги месяца</summary>' +
+                    '<div class="admin-report-sent-month-weeks__inner">' + buildMonthWeekTotalsHtml(monthList, prefix) + "</div>" +
+                  "</details>" +
+                "</div>" +
+              "</details>"
+            );
+          }).join("");
+        }
         var weeksByKey = groupReportsByWeek(items);
         var currentItems = weeksByKey[String(currentWeek.start)] || [];
         function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
@@ -645,6 +793,13 @@
         html.push('<div class="admin-report-sent-current">');
         html.push(currentBlock.html);
         html.push("</div>");
+        html.push(
+          '<details class="admin-report-sent-months" data-admin-report-sent-months>' +
+            '<summary class="admin-report-sent-archive__summary admin-report-sent-months__summary">Итого по месяцам</summary>' +
+            '<div class="admin-report-sent-months__inner">' +
+              '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить месяцы.</p>' +
+            "</div></details>"
+        );
 
         if (hasArchive) {
           html.push(
@@ -813,6 +968,31 @@
         }
 
         bindSentReportControls(sentList);
+        var monthsEl = sentList.querySelector("[data-admin-report-sent-months]");
+        if (monthsEl) {
+          monthsEl.addEventListener("toggle", function () {
+            if (!monthsEl.open || monthsEl.getAttribute("data-admin-report-months-built") === "1") return;
+            monthsEl.setAttribute("data-admin-report-months-built", "1");
+            var inner = monthsEl.querySelector(".admin-report-sent-months__inner");
+            if (!inner) return;
+            inner.innerHTML = '<p class="admin-report-sent-period-hint">Загрузка месячных итогов…</p>';
+            fetchReportsForScope("all").then(function (monthData) {
+              var monthItems = (monthData && monthData.ok && Array.isArray(monthData.reports)) ? monthData.reports : [];
+              if (!monthItems.length) {
+                inner.innerHTML = '<p class="admin-report-sent-period-hint">Месячных итогов пока нет.</p>';
+                return;
+              }
+              monthItems.forEach(function (report) {
+                if (report && report.id) reportById[report.id] = report;
+              });
+              inner.innerHTML = buildMonthsHtml(monthItems, "ar-month-");
+              bindSentReportControls(inner);
+            }).catch(function () {
+              monthsEl.removeAttribute("data-admin-report-months-built");
+              if (inner) inner.innerHTML = '<p class="admin-report-sent-period-hint">Не удалось загрузить месячные итоги.</p>';
+            });
+          });
+        }
         var archiveEl = sentList.querySelector("[data-admin-report-sent-archive]");
         if (archiveEl) {
           archiveEl.addEventListener("toggle", function () {
