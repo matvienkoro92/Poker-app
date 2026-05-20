@@ -9,6 +9,7 @@
             <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Меню профиля">
               <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
+              <button type="button" class="profile-tabs__btn" id="profileSkillsTabBtn" data-profile-tab="skills" role="tab" aria-selected="false">Ваши навыки</button>
             </div>
             <p class="profile-loading-note profile-loading-note--hidden" id="profileLoadingNote" aria-live="polite">Загружаем профиль...</p>
             <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
@@ -262,6 +263,26 @@
                 <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profilePokerPlusFeedback" aria-live="polite"></span>
                 <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusRefreshBtn" hidden>Обновить</button>
                 <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusUnbindBtn" hidden>Отвязать</button>
+              </div>
+            </section>
+            <section class="profile-skills" id="profileSkillsSection" data-profile-skills-panel aria-labelledby="profileSkillsTitle">
+              <h2 class="profile-section__title profile-skills__title" id="profileSkillsTitle">Ваши навыки</h2>
+              <div class="profile-skills__character">
+                <img class="profile-skills__character-img" src="./assets/profile-pokerist.jpg" alt="Персонаж игрока" width="160" height="160" loading="lazy" decoding="async" />
+                <div class="profile-skills__slots" aria-label="Слоты навыков">
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                  <span class="profile-skills__slot" aria-hidden="true"></span>
+                </div>
+              </div>
+              <p class="profile-skills__points" id="profileSkillsPoints">Очков навыков: <span id="profileSkillsPointsValue">0</span></p>
+              <div class="profile-skills__list" aria-label="Навыки">
+                <span class="profile-skills__item" id="profileSkillComboBonus">Бонус за комбинацию</span>
+                <span class="profile-skills__item profile-skills__item--locked" id="profileSkillBubbleReturn">Возврат баблбою (закрыто)</span>
+                <span class="profile-skills__item profile-skills__item--locked" id="profileSkillBadBeatReturn">Возврат за переезд (закрыто)</span>
               </div>
             </section>
             <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true" data-profile-club-panel>

@@ -288,6 +288,87 @@
   color: var(--text-muted);
   line-height: 1.45;
 }
+.profile-skills {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+.profile-skills__title {
+  margin-bottom: 14px;
+}
+.profile-skills__character {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+}
+.profile-skills__character-img {
+  width: min(160px, 52vw);
+  height: min(160px, 52vw);
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(96, 165, 250, 0.42);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.34);
+}
+.profile-skills__slots {
+  display: grid;
+  grid-template-columns: repeat(6, 38px);
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+}
+.profile-skills__slot {
+  width: 38px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1px dashed rgba(148, 163, 184, 0.52);
+  background: rgba(15, 23, 42, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.profile-skills__points {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 900;
+}
+.profile-skills__list {
+  display: grid;
+  gap: 8px;
+}
+.profile-skills__item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.34);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.profile-skills__item--locked {
+  color: var(--text-muted);
+}
+[data-theme="light"] .profile-skills__character,
+[data-theme="light"] .profile-skills__item {
+  background: rgba(255, 247, 237, 0.78);
+  border-color: rgba(249, 115, 22, 0.18);
+}
+[data-theme="light"] .profile-skills__slot {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(249, 115, 22, 0.32);
+}
+@media (max-width: 420px) {
+  .profile-skills__slots {
+    grid-template-columns: repeat(3, 38px);
+  }
+}
 #profilePokerPlusText {
   white-space: pre-line;
 }

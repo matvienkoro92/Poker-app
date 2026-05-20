@@ -65,6 +65,8 @@
     setText("profileTitle", t.profileTitle);
     setText("profileClubTabBtn", t.profileClubTab);
     setText("profilePoker21TabBtn", t.profilePoker21Tab);
+    setText("profileSkillsTabBtn", t.profileSkillsTab);
+    setText("profileSkillsTitle", t.profileSkillsTab);
     setText("profileNameCaption", t.nameCaption);
     setText("profileSaveBtn", t.save);
     setText("profileEmailAuthTitle", t.emailLogin);

@@ -221,6 +221,13 @@ function initProfilePokerPlus() {
     return String(n < 0 ? Math.ceil(n) : Math.floor(n));
   }
 
+  function pokerPlusNumber(value) {
+    var raw = pokerPlusText(value);
+    if (!raw) return null;
+    var n = Number(String(raw).replace(/\s+/g, "").replace(",", "."));
+    return isFinite(n) ? n : null;
+  }
+
   function pokerPlusBool(value) {
     return value === true || value === 1 || value === "1" || value === "true";
   }
@@ -391,13 +398,27 @@ function initProfilePokerPlus() {
   }
 
   function pokerPlusPercentText(value, totalValue) {
-    var n = Number(value);
-    var total = Number(totalValue);
+    var raw = pokerPlusText(value);
+    var rawTotal = pokerPlusText(totalValue);
+    if (!raw || !rawTotal) return "—";
+    var n = Number(String(raw).replace(/\s+/g, "").replace(",", "."));
+    var total = Number(String(rawTotal).replace(/\s+/g, "").replace(",", "."));
     if (!isFinite(n) || !isFinite(total)) return "—";
     if (n <= 0 || total <= 0) return "0%";
     var percent = Math.min(100, Math.max(0, (n / total) * 100));
     var fixed = percent > 0 && percent < 10 ? percent.toFixed(1) : percent.toFixed(0);
-    return fixed.replace(/\.?0+$/, "") + "%";
+    return (fixed.indexOf(".") === -1 ? fixed : fixed.replace(/0+$/, "").replace(/\.$/, "")) + "%";
+  }
+
+  function pokerPlusTournamentCountStat(countValue, itmValue, firstValue) {
+    var count = pokerPlusNumber(countValue);
+    var itm = pokerPlusNumber(itmValue);
+    var first = pokerPlusNumber(firstValue);
+    var minCount = Math.max(0, itm != null ? Math.floor(itm) : 0, first != null ? Math.floor(first) : 0);
+    if (minCount > 0 && (count == null || count < minCount)) {
+      return { value: String(minCount) + "+", percentTotal: null };
+    }
+    return { value: countValue, percentTotal: countValue };
   }
 
   function pokerPlusItmMetricHtml(label, itmValue, totalValue) {
@@ -631,24 +652,26 @@ function initProfilePokerPlus() {
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
     var mttStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttWinnings", "mtt_winnings"));
-    var mttCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttCount", "mtt_count"));
-    var mttItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count"));
-    var mttFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count"));
+    var mttCountRaw = pokerPlusPickStat(total, "mttCount", "mtt_count");
+    var mttItmStat = pokerPlusPickStat(total, "mttItmCount", "mtt_itm_count");
+    var mttFirstStat = pokerPlusPickStat(total, "mttFirstCount", "mtt_1st_count");
+    var mttCountStat = pokerPlusTournamentCountStat(mttCountRaw, mttItmStat, mttFirstStat);
     var sngStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngWinnings", "sng_winnings"));
-    var sngCountStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngCount", "sng_count"));
-    var sngItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngItmCount", "sng_itm_count"));
-    var sngFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count"));
+    var sngCountRaw = pokerPlusPickStat(total, "sngCount", "sng_count");
+    var sngItmStat = pokerPlusPickStat(total, "sngItmCount", "sng_itm_count");
+    var sngFirstStat = pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count");
+    var sngCountStat = pokerPlusTournamentCountStat(sngCountRaw, sngItmStat, sngFirstStat);
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     if (includeEmptyCore || feeStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Раздач", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     mttMetrics.push(pokerPlusStatMetricHtml("Выигрыш", mttStat, pokerPlusStatTone(mttStat), "🏆"));
-    mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
-    mttMetrics.push(pokerPlusItmMetricHtml("MTT ITM", mttItmStat, mttCountStat));
+    mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat.value, "", "#"));
+    mttMetrics.push(pokerPlusItmMetricHtml("MTT ITM", mttItmStat, mttCountStat.percentTotal));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
     sngMetrics.push(pokerPlusStatMetricHtml("Выигрыш", sngStat, pokerPlusStatTone(sngStat), "♦"));
-    sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
-    sngMetrics.push(pokerPlusItmMetricHtml("SNG ITM", sngItmStat, sngCountStat));
+    sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat.value, "", "#"));
+    sngMetrics.push(pokerPlusItmMetricHtml("SNG ITM", sngItmStat, sngCountStat.percentTotal));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
     sections.push(pokerPlusStatsSectionHtml("cash", "Кеш", cashMetrics));
     sections.push(pokerPlusStatsSectionHtml("mtt", "МТТ", mttMetrics));

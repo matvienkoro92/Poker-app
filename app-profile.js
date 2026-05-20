@@ -1,10 +1,11 @@
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
-  var activeTab = tab === "poker21" ? "poker21" : "club";
+  var activeTab = tab === "poker21" || tab === "skills" ? tab : "club";
   if (root) {
     root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
-    root.classList.toggle("profile-view--tab-club", activeTab !== "poker21");
+    root.classList.toggle("profile-view--tab-skills", activeTab === "skills");
+    root.classList.toggle("profile-view--tab-club", activeTab === "club");
     root.dataset.profileActiveTab = activeTab;
   }
   tabs.forEach(function (btn) {
