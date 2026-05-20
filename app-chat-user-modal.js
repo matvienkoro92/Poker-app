@@ -230,30 +230,57 @@ if (chatUserModalEl) {
     if (isFinite(n) && n < 0) return "";
     return chatUserModalStatHtml(label, value, suffix);
   }
+  function chatUserModalBool(value) {
+    return value === true || value === 1 || value === "1" || value === "true";
+  }
+  function chatUserModalStatsVisibility(data) {
+    var visibility = data && data.pokerPlusStatsVisibility && typeof data.pokerPlusStatsVisibility === "object" ? data.pokerPlusStatsVisibility : null;
+    if (visibility) {
+      return {
+        cash: chatUserModalBool(visibility.cash),
+        mtt: chatUserModalBool(visibility.mtt),
+        sng: chatUserModalBool(visibility.sng),
+      };
+    }
+    var visible = data && data.pokerPlusStatsVisible === true;
+    return { cash: visible, mtt: visible, sng: visible };
+  }
   function renderChatUserModalPlayerStats(data) {
     if (!modalPlayerStats) return;
-    if (!data || data.pokerPlusStatsVisible !== true) {
+    var visibility = chatUserModalStatsVisibility(data);
+    if (!data || !visibility.cash && !visibility.mtt && !visibility.sng) {
       modalPlayerStats.innerHTML =
         '<p class="chat-user-modal__player-stats-private">Статистика данного игрока является приватной и доступна только секретным службам</p>';
       return;
     }
     var st = data.pokerPlusStats && typeof data.pokerPlusStats === "object" ? data.pokerPlusStats : {};
+    var html = "";
+    if (visibility.cash) {
+      html +=
+        chatUserModalStatHtml("Рейк", st.fee, "") +
+        chatUserModalStatHtml("Раздачи", st.hands, "") +
+        chatUserModalOptionalStatHtml("BB", st.bb, "") +
+        chatUserModalNonNegativeStatHtml("Кеш", st.winnings, "") +
+        chatUserModalOptionalNonNegativeStatHtml("OFC", st.ofcWinnings, "");
+    }
+    if (visibility.mtt) {
+      html +=
+        chatUserModalNonNegativeStatHtml("MTT", st.mttWinnings, "") +
+        chatUserModalOptionalStatHtml("MTT р.", st.mttRound, "") +
+        chatUserModalOptionalStatHtml("MTT игр", st.mttCount, "") +
+        chatUserModalOptionalStatHtml("MTT ITM", st.mttItmCount, "") +
+        chatUserModalOptionalStatHtml("MTT 1-е", st.mttFirstCount, "");
+    }
+    if (visibility.sng) {
+      html +=
+        chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "") +
+        chatUserModalOptionalStatHtml("SNG р.", st.sngRound, "") +
+        chatUserModalOptionalStatHtml("SNG игр", st.sngCount, "") +
+        chatUserModalOptionalStatHtml("SNG ITM", st.sngItmCount, "") +
+        chatUserModalOptionalStatHtml("SNG 1-е", st.sngFirstCount, "");
+    }
     modalPlayerStats.innerHTML =
-      chatUserModalStatHtml("Рейк", st.fee, "") +
-      chatUserModalStatHtml("Раздачи", st.hands, "") +
-      chatUserModalOptionalStatHtml("BB", st.bb, "") +
-      chatUserModalNonNegativeStatHtml("Кеш", st.winnings, "") +
-      chatUserModalOptionalNonNegativeStatHtml("OFC", st.ofcWinnings, "") +
-      chatUserModalNonNegativeStatHtml("MTT", st.mttWinnings, "") +
-      chatUserModalOptionalStatHtml("MTT р.", st.mttRound, "") +
-      chatUserModalOptionalStatHtml("MTT игр", st.mttCount, "") +
-      chatUserModalOptionalStatHtml("MTT ITM", st.mttItmCount, "") +
-      chatUserModalOptionalStatHtml("MTT 1-е", st.mttFirstCount, "") +
-      chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "") +
-      chatUserModalOptionalStatHtml("SNG р.", st.sngRound, "") +
-      chatUserModalOptionalStatHtml("SNG игр", st.sngCount, "") +
-      chatUserModalOptionalStatHtml("SNG ITM", st.sngItmCount, "") +
-      chatUserModalOptionalStatHtml("SNG 1-е", st.sngFirstCount, "");
+      html || '<p class="chat-user-modal__player-stats-private">Статистика данного игрока является приватной и доступна только секретным службам</p>';
   }
   function openChatUserModalById(id, name, avatarUrl) {
     var userName = name || "Игрок";

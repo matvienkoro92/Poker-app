@@ -84,7 +84,9 @@ function pokerApplyProfileUserInfo(data) {
     pokerWriteProfileStorage(POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY, tgUsername);
   } catch (eTgProfile) {}
   try {
-    if (data.pokerPlusStatsVisible != null && typeof window.pokerApplyPokerPlusStatsVisible === "function") {
+    if (data.pokerPlusStatsVisibility != null && typeof window.pokerApplyPokerPlusStatsVisibility === "function") {
+      window.pokerApplyPokerPlusStatsVisibility(data.pokerPlusStatsVisibility);
+    } else if (data.pokerPlusStatsVisible != null && typeof window.pokerApplyPokerPlusStatsVisible === "function") {
       window.pokerApplyPokerPlusStatsVisible(data.pokerPlusStatsVisible);
     }
   } catch (ePpStatsVisible) {}

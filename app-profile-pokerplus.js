@@ -35,9 +35,6 @@ function initProfilePokerPlus() {
   var lastIpValue = document.getElementById("profilePokerPlusLastIpValue");
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
-  var statsVisibleYes = document.getElementById("profilePokerPlusStatsVisibleYes");
-  var statsVisibleNo = document.getElementById("profilePokerPlusStatsVisibleNo");
-  var statsVisibilityState = document.getElementById("profilePokerPlusStatsVisibilityState");
   var statsPeriodTabs = Array.prototype.slice.call(document.querySelectorAll("[data-profile-pokerplus-stats-period]"));
   var statsDateFilter = document.getElementById("profilePokerPlusStatsDateFilter");
   var statsDateFromInput = document.getElementById("profilePokerPlusStatsDateFrom");
@@ -80,7 +77,9 @@ function initProfilePokerPlus() {
     "\u0443": "y",
     "\u0445": "x",
   };
-  var pokerPlusStatsVisibleToOthers = false;
+  var POKERPLUS_STATS_KINDS = ["cash", "mtt", "sng"];
+  var POKERPLUS_STATS_KIND_TITLES = { cash: "Кеш", mtt: "МТТ", sng: "СНГ" };
+  var pokerPlusStatsVisibilityToOthers = { cash: false, mtt: false, sng: false };
   var pokerPlusProfileLinked = false;
   var pokerPlusProfileLoading = false;
   var pokerPlusAccountId = "";
@@ -222,6 +221,50 @@ function initProfilePokerPlus() {
     return String(n < 0 ? Math.ceil(n) : Math.floor(n));
   }
 
+  function pokerPlusBool(value) {
+    return value === true || value === 1 || value === "1" || value === "true";
+  }
+
+  function pokerPlusStatsKindTitle(kind) {
+    return POKERPLUS_STATS_KIND_TITLES[kind] || "Статистика";
+  }
+
+  function pokerPlusStatsVisibilityAny(map) {
+    var source = map && typeof map === "object" ? map : {};
+    return POKERPLUS_STATS_KINDS.some(function (kind) {
+      return !!source[kind];
+    });
+  }
+
+  function normalizePokerPlusStatsVisibility(value) {
+    var map = {};
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      POKERPLUS_STATS_KINDS.forEach(function (kind) {
+        map[kind] = pokerPlusBool(value[kind]);
+      });
+      return map;
+    }
+    var visible = pokerPlusBool(value);
+    POKERPLUS_STATS_KINDS.forEach(function (kind) {
+      map[kind] = visible;
+    });
+    return map;
+  }
+
+  function clonePokerPlusStatsVisibility(map) {
+    return normalizePokerPlusStatsVisibility(map);
+  }
+
+  function pokerPlusStatsVisibilityEquals(a, b) {
+    return POKERPLUS_STATS_KINDS.every(function (kind) {
+      return !!(a && a[kind]) === !!(b && b[kind]);
+    });
+  }
+
+  function setPokerPlusStatsVisibilityMap(map) {
+    pokerPlusStatsVisibilityToOthers = normalizePokerPlusStatsVisibility(map);
+  }
+
   function renderPokerPlusBalance() {
     if (balanceRow) balanceRow.hidden = true;
     if (balanceValue) balanceValue.textContent = "—";
@@ -232,47 +275,74 @@ function initProfilePokerPlus() {
     }
   }
 
-  function renderPokerPlusStatsVisibilityToggle(saving) {
-    if (!statsVisibleYes || !statsVisibleNo) return;
-    statsVisibleYes.classList.toggle("profile-pokerplus-stats-visibility__btn--active", pokerPlusStatsVisibleToOthers);
-    statsVisibleNo.classList.toggle("profile-pokerplus-stats-visibility__btn--active", !pokerPlusStatsVisibleToOthers);
-    statsVisibleYes.setAttribute("aria-pressed", pokerPlusStatsVisibleToOthers ? "true" : "false");
-    statsVisibleNo.setAttribute("aria-pressed", pokerPlusStatsVisibleToOthers ? "false" : "true");
-    statsVisibleYes.disabled = !!saving;
-    statsVisibleNo.disabled = !!saving;
-    if (statsVisibilityState) {
-      statsVisibilityState.textContent = pokerPlusStatsVisibleToOthers
-        ? "Статистика доступна другим игрокам."
-        : "Статистика скрыта от других игроков.";
-      statsVisibilityState.classList.toggle("profile-pokerplus-stats-visibility__state--visible", pokerPlusStatsVisibleToOthers);
-      statsVisibilityState.classList.toggle("profile-pokerplus-stats-visibility__state--hidden", !pokerPlusStatsVisibleToOthers);
-    }
+  function pokerPlusStatsVisibilityStateText(kind, visible) {
+    return "Блок " + pokerPlusStatsKindTitle(kind) + (visible ? " доступен другим игрокам." : " скрыт от других игроков.");
+  }
+
+  function renderPokerPlusStatsVisibilityToggle(savingKind) {
+    if (!section) return;
+    var buttons = Array.prototype.slice.call(section.querySelectorAll("[data-profile-pokerplus-stats-kind][data-profile-pokerplus-stats-visible]"));
+    buttons.forEach(function (btn) {
+      var kind = btn.dataset.profilePokerplusStatsKind || "";
+      if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return;
+      var targetVisible = btn.dataset.profilePokerplusStatsVisible === "1";
+      var active = !!pokerPlusStatsVisibilityToOthers[kind] === targetVisible;
+      btn.classList.toggle("profile-pokerplus-stats-visibility__btn--active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+      btn.disabled = !!savingKind && savingKind === kind;
+    });
+    var states = Array.prototype.slice.call(section.querySelectorAll("[data-profile-pokerplus-stats-state]"));
+    states.forEach(function (stateEl) {
+      var kind = stateEl.dataset.profilePokerplusStatsState || "";
+      if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return;
+      var visible = !!pokerPlusStatsVisibilityToOthers[kind];
+      stateEl.textContent = pokerPlusStatsVisibilityStateText(kind, visible);
+      stateEl.classList.toggle("profile-pokerplus-stats-visibility__state--visible", visible);
+      stateEl.classList.toggle("profile-pokerplus-stats-visibility__state--hidden", !visible);
+    });
   }
 
   function applyPokerPlusStatsVisible(value) {
-    pokerPlusStatsVisibleToOthers = value === true || value === 1 || value === "1" || value === "true";
+    setPokerPlusStatsVisibilityMap(value);
+    renderPokerPlusStatsVisibilityToggle(false);
+  }
+
+  function applyPokerPlusStatsVisibility(value) {
+    setPokerPlusStatsVisibilityMap(value);
     renderPokerPlusStatsVisibilityToggle(false);
   }
 
   window.pokerApplyPokerPlusStatsVisible = applyPokerPlusStatsVisible;
+  window.pokerApplyPokerPlusStatsVisibility = applyPokerPlusStatsVisibility;
 
-  function savePokerPlusStatsVisible(value) {
-    var nextVisible = !!value;
-    if (nextVisible === pokerPlusStatsVisibleToOthers) return;
-    var prevVisible = pokerPlusStatsVisibleToOthers;
+  function savePokerPlusStatsVisible(kind, value) {
+    var nextMap = clonePokerPlusStatsVisibility(pokerPlusStatsVisibilityToOthers);
+    var savingKind = "";
+    if (arguments.length === 1) {
+      nextMap = normalizePokerPlusStatsVisibility(kind);
+    } else {
+      if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return;
+      savingKind = kind;
+      nextMap[kind] = !!value;
+    }
+    if (pokerPlusStatsVisibilityEquals(nextMap, pokerPlusStatsVisibilityToOthers)) return;
+    var prevMap = clonePokerPlusStatsVisibility(pokerPlusStatsVisibilityToOthers);
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    pokerPlusStatsVisibleToOthers = nextVisible;
-    renderPokerPlusStatsVisibilityToggle(true);
+    setPokerPlusStatsVisibilityMap(nextMap);
+    renderPokerPlusStatsVisibilityToggle(savingKind);
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({ pokerPlusStatsVisible: nextVisible })),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({
+        pokerPlusStatsVisibility: nextMap,
+        pokerPlusStatsVisible: pokerPlusStatsVisibilityAny(nextMap),
+      })),
     })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok) {
-          pokerPlusStatsVisibleToOthers = prevVisible;
+          setPokerPlusStatsVisibilityMap(prevMap);
           setFeedback((data && data.error) || "Не удалось сохранить видимость статистики.", true);
         } else {
           pokerProfileUserInfoCache = null;
@@ -281,7 +351,7 @@ function initProfilePokerPlus() {
         }
       })
       .catch(function () {
-        pokerPlusStatsVisibleToOthers = prevVisible;
+        setPokerPlusStatsVisibilityMap(prevMap);
         setFeedback(POKER_NET_ERR, true);
       })
       .finally(function () {
@@ -347,6 +417,38 @@ function initProfilePokerPlus() {
     );
   }
 
+  function pokerPlusStatsVisibilityHtml(kind, title) {
+    if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return "";
+    var visible = !!pokerPlusStatsVisibilityToOthers[kind];
+    var activeYes = visible ? " profile-pokerplus-stats-visibility__btn--active" : "";
+    var activeNo = visible ? "" : " profile-pokerplus-stats-visibility__btn--active";
+    return (
+      '<span class="profile-pokerplus-stats-visibility profile-pokerplus-stats-visibility--section" data-profile-pokerplus-stats-visibility-kind="' +
+      escapeHtml(kind) +
+      '"><span class="profile-pokerplus-stats-visibility__label">Показывать другим</span><span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать блок ' +
+      escapeHtml(title || pokerPlusStatsKindTitle(kind)) +
+      ' другим"><button type="button" class="profile-pokerplus-stats-visibility__btn' +
+      activeYes +
+      '" data-profile-pokerplus-stats-kind="' +
+      escapeHtml(kind) +
+      '" data-profile-pokerplus-stats-visible="1" aria-pressed="' +
+      (visible ? "true" : "false") +
+      '">Да</button><button type="button" class="profile-pokerplus-stats-visibility__btn' +
+      activeNo +
+      '" data-profile-pokerplus-stats-kind="' +
+      escapeHtml(kind) +
+      '" data-profile-pokerplus-stats-visible="0" aria-pressed="' +
+      (visible ? "false" : "true") +
+      '">Нет</button></span><span class="profile-pokerplus-stats-visibility__state' +
+      (visible ? " profile-pokerplus-stats-visibility__state--visible" : " profile-pokerplus-stats-visibility__state--hidden") +
+      '" data-profile-pokerplus-stats-state="' +
+      escapeHtml(kind) +
+      '" aria-live="polite">' +
+      escapeHtml(pokerPlusStatsVisibilityStateText(kind, visible)) +
+      "</span></span>"
+    );
+  }
+
   function pokerPlusStatsSectionHtml(kind, title, metrics) {
     if (!metrics || !metrics.length) return "";
     return (
@@ -356,7 +458,9 @@ function initProfilePokerPlus() {
       escapeHtml(title || "Статистика") +
       '</span><span class="profile-pokerplus-stats">' +
       metrics.join("") +
-      "</span></span>"
+      "</span>" +
+      pokerPlusStatsVisibilityHtml(kind || "default", title || "Статистика") +
+      "</span>"
     );
   }
 
@@ -917,6 +1021,7 @@ function initProfilePokerPlus() {
       setPokerPlusStatsDateState("", false);
     }
     statsValue.innerHTML = groups.join("");
+    renderPokerPlusStatsVisibilityToggle(false);
     if (statsRow) statsRow.hidden = false;
     if (statsDateFilter) statsDateFilter.hidden = pokerPlusStatsActivePeriod !== "range";
   }
@@ -1445,16 +1550,14 @@ function initProfilePokerPlus() {
     unbindBtn.dataset.bound = "1";
     unbindBtn.addEventListener("click", unbindPokerPlus);
   }
-  if (statsVisibleYes && statsVisibleYes.dataset.bound !== "1") {
-    statsVisibleYes.dataset.bound = "1";
-    statsVisibleYes.addEventListener("click", function () {
-      savePokerPlusStatsVisible(true);
-    });
-  }
-  if (statsVisibleNo && statsVisibleNo.dataset.bound !== "1") {
-    statsVisibleNo.dataset.bound = "1";
-    statsVisibleNo.addEventListener("click", function () {
-      savePokerPlusStatsVisible(false);
+  if (statsValue && statsValue.dataset.visibilityBound !== "1") {
+    statsValue.dataset.visibilityBound = "1";
+    statsValue.addEventListener("click", function (event) {
+      var btn = event && event.target ? event.target.closest("[data-profile-pokerplus-stats-kind][data-profile-pokerplus-stats-visible]") : null;
+      if (!btn || btn.disabled) return;
+      var kind = btn.dataset.profilePokerplusStatsKind || "";
+      if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return;
+      savePokerPlusStatsVisible(kind, btn.dataset.profilePokerplusStatsVisible === "1");
     });
   }
   statsPeriodTabs.forEach(function (btn) {
@@ -1518,7 +1621,8 @@ function initProfilePokerPlus() {
   renderPokerPlusStatsVisibilityToggle(false);
   if (typeof loadCurrentProfileUserInfo === "function") {
     loadCurrentProfileUserInfo().then(function (data) {
-      if (data && data.ok && data.pokerPlusStatsVisible != null) applyPokerPlusStatsVisible(data.pokerPlusStatsVisible);
+      if (data && data.ok && data.pokerPlusStatsVisibility != null) applyPokerPlusStatsVisibility(data.pokerPlusStatsVisibility);
+      else if (data && data.ok && data.pokerPlusStatsVisible != null) applyPokerPlusStatsVisible(data.pokerPlusStatsVisible);
     });
   }
   var initialState = syncVisibility();
