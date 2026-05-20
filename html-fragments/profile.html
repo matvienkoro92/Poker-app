@@ -212,19 +212,24 @@
                   <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="today" role="tab" aria-selected="true">Сегодня</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="false">Неделя</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="total" role="tab" aria-selected="false">Всего</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="range" role="tab" aria-selected="false">Период</button>
                 </div>
-                <div class="profile-pokerplus-stats-date-filter" id="profilePokerPlusStatsDateFilter">
-                  <span class="profile-pokerplus-stats-date-filter__title">Период</span>
-                  <label class="profile-pokerplus-stats-date-filter__field">
-                    <span>С</span>
-                    <input type="date" id="profilePokerPlusStatsDateFrom" aria-label="Дата начала периода статистики Poker21" />
-                  </label>
-                  <label class="profile-pokerplus-stats-date-filter__field">
-                    <span>По</span>
-                    <input type="date" id="profilePokerPlusStatsDateTo" aria-label="Дата окончания периода статистики Poker21" />
-                  </label>
-                  <button type="button" class="profile-pokerplus-stats-date-filter__reset" id="profilePokerPlusStatsDateResetBtn">Сбросить</button>
-                  <span class="profile-pokerplus-stats-date-filter__available" id="profilePokerPlusStatsAvailableDates" aria-label="Доступные даты статистики Poker21" hidden></span>
+                <div class="profile-pokerplus-stats-date-filter" id="profilePokerPlusStatsDateFilter" hidden>
+                  <input type="hidden" id="profilePokerPlusStatsDateFrom" />
+                  <input type="hidden" id="profilePokerPlusStatsDateTo" />
+                  <div class="profile-pokerplus-stats-date-filter__calendar" id="profilePokerPlusStatsCalendar">
+                    <div class="profile-pokerplus-stats-date-filter__calendar-head">
+                      <button type="button" class="profile-pokerplus-stats-date-filter__nav" id="profilePokerPlusStatsCalendarPrev" aria-label="Предыдущий месяц">‹</button>
+                      <span class="profile-pokerplus-stats-date-filter__title" id="profilePokerPlusStatsCalendarTitle">Период</span>
+                      <button type="button" class="profile-pokerplus-stats-date-filter__nav" id="profilePokerPlusStatsCalendarNext" aria-label="Следующий месяц">›</button>
+                    </div>
+                    <span class="profile-pokerplus-stats-date-filter__range" id="profilePokerPlusStatsCalendarRange">Выберите начало периода</span>
+                    <div class="profile-pokerplus-stats-date-filter__weekdays" aria-hidden="true">
+                      <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                    </div>
+                    <div class="profile-pokerplus-stats-date-filter__days" id="profilePokerPlusStatsCalendarDays"></div>
+                    <button type="button" class="profile-pokerplus-stats-date-filter__reset" id="profilePokerPlusStatsDateResetBtn">Сбросить период</button>
+                  </div>
                   <span class="profile-pokerplus-stats-date-filter__state" id="profilePokerPlusStatsDateState" aria-live="polite"></span>
                 </div>
                 <span class="profile-email-auth__value" id="profilePokerPlusStatsValue">
