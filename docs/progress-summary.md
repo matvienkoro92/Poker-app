@@ -156,6 +156,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Закрытый module split/lazy loading/guard блок от 2026-05-06 отдельно описан в `2026-05-06-engineering-splits-guards-worklog.md`; после него в истории уже идут Poker21/debug/admin/rating изменения, поэтому этот этап считается baseline, а не текущей задачей.
 - Закрытый фикс доступа к главному чату от 2026-05-07 отдельно описан в `2026-05-07-chat-club-access-worklog.md`: после modal fragments админская модалка снова стабильно обрабатывает `Принять`/`Отклонить`/`Закрыть`, а бейдж заявок использует filtered count только по `tg_*`/`vk_*`.
 - Закрытый admin reports/rakeback блок от 2026-05-08 отдельно описан в `2026-05-08-admin-reports-rakeback-worklog.md`: крупные вкладки `Отчет`/`Рейкбек`/`Отправленные`, общая live-таблица рейкбека, связанные доп. строки, `-15%`, остатки подзаписей, manager-scoped итоги для отправки отчета, mobile fit, backend/Telegram summary и desktop prewarm кнопки `Отчет`.
+- Поздний слой Poker21/profile/admin reports от 2026-05-20 отдельно описан в `2026-05-20-poker21-rakeback-worklog.md`: точные дневные снимки Poker21, компактные вкладки статистики, общий shared draft рейкбека, редактируемые шаблоны, цепочки подзаписей с датами, защита удаления не последней подзаписи, итоги `рейк / рейкбек`, lazy-загрузка отправленных отчетов и месячные итоги по дням.
 - Закрытый chat delivery/Redis-cost блок от 2026-05-14 отдельно описан в `2026-05-14-chat-delivery-cost-worklog.md`: `mode=updates` больше не пересобирает contacts meta, presence вынесен отдельно, loaders coalesce/abort устаревшие запросы, сообщения используют compact `usersById`, а contacts rev читается через cheap Redis counters. Этот этап идет после прежнего `2.696-2.698` delivery baseline и считается новой закрытой отправной точкой.
 
 ### Admin Reports / Rakeback - 2026-05-08
@@ -190,6 +191,7 @@ CI запускает `npm run test:contracts`, `npm run smoke:nav`, `npm run sm
 - Закрытый инженерный baseline 2026-05-06 описан отдельно; после него в истории уже идут Poker21/debug/admin/rating работы.
 - Текущий handoff от 2026-05-14 добавлен в `2026-05-14-current-handoff.md`: он связывает старые закрытые слои CRM/PWA/Poker21/engineering в правильном порядке и отделяет их от более поздних admin reports/rating направлений.
 - Закрытый admin reports/rakeback слой от 2026-05-08 описан отдельно и уже стоит до последующих handoff/chat delivery записей.
+- Закрытый Poker21/admin-rakeback слой от 2026-05-20 описан отдельно и считается актуальным baseline для будущих правок вкладок `Рейкбек` и `Отправленные`.
 
 ## Что осталось
 
