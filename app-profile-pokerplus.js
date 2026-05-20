@@ -320,6 +320,33 @@ function initProfilePokerPlus() {
     );
   }
 
+  function pokerPlusPercentText(value, totalValue) {
+    var n = Number(value);
+    var total = Number(totalValue);
+    if (!isFinite(n) || !isFinite(total)) return "—";
+    if (n <= 0 || total <= 0) return "0%";
+    var percent = Math.min(100, Math.max(0, (n / total) * 100));
+    var fixed = percent > 0 && percent < 10 ? percent.toFixed(1) : percent.toFixed(0);
+    return fixed.replace(/\.?0+$/, "") + "%";
+  }
+
+  function pokerPlusItmMetricHtml(label, itmValue, totalValue) {
+    var raw = pokerPlusText(itmValue);
+    var hasValue = !!raw;
+    var itmDisplay = hasValue ? pokerPlusWholeNumber(raw) : "—";
+    var percentDisplay = hasValue ? pokerPlusPercentText(itmValue, totalValue) : "—";
+    return (
+      '<span class="profile-pokerplus-stat profile-pokerplus-stat--detail"><span class="profile-pokerplus-stat__label">' +
+      escapeHtml(label) +
+      '</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">ITM</span></span><span class="profile-pokerplus-stat__lines">' +
+      '<span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Кол-во ITM:</span><span class="profile-pokerplus-stat__line-value">' +
+      escapeHtml(itmDisplay) +
+      '</span></span><span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Процент ITM:</span><span class="profile-pokerplus-stat__line-value">' +
+      escapeHtml(percentDisplay) +
+      "</span></span></span></span>"
+    );
+  }
+
   function pokerPlusStatsSectionHtml(kind, title, metrics) {
     if (!metrics || !metrics.length) return "";
     return (
@@ -511,9 +538,9 @@ function initProfilePokerPlus() {
     if (includeEmptyCore || feeStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Раздач", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-    mttMetrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
+    mttMetrics.push(pokerPlusStatMetricHtml("Выигрыш", mttStat, pokerPlusStatTone(mttStat), "🏆"));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
-    mttMetrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
+    mttMetrics.push(pokerPlusItmMetricHtml("MTT ITM", mttItmStat, mttCountStat));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
