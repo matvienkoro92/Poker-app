@@ -28,6 +28,7 @@ Historical worklogs, ordered by date:
 - `2026-05-08-admin-reports-rakeback-worklog.md` - closed admin report/rakeback layer: large report tabs, third `Рейкбек` tab, grouped/live shared rakeback rows, manager-scoped report totals, mobile fit, weekly totals, desktop report-button prewarm, May 9 mobile/fullscreen work, room totals, chip multipliers, copy feedback, and ID templates through app version `3.024`; placed before later handoff/chat work.
 - `2026-05-14-chat-delivery-cost-worklog.md` - closed chat delivery/Redis-cost baseline: presence split, request coalescing, compact `usersById` message payload, and cheap `chat_updates_rev` counters for `mode=updates`.
 - `2026-05-14-current-handoff.md` - ordered handoff for the current dialog: what is old closed baseline, what came after it, and where future CRM/Poker21/admin/rating work should continue.
+- `2026-05-20-poker21-rakeback-worklog.md` - closed Poker21 profile/admin rakeback layer: new Poker21 counters, exact date snapshots, profile period tabs, compact stats UI, rakeback row validation, template defaults/colors, totals by room/date, sent report preload, monthly totals, and Runex total.
 - `../CRON-SETUP.md` - cron setup notes.
 - `../CARD_COLORS.md` - card suit color convention used by the project.
 - `../assets/README.md` - asset folder naming notes.
