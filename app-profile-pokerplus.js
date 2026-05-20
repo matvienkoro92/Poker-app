@@ -656,9 +656,9 @@ function initProfilePokerPlus() {
     sections = sections.filter(Boolean);
     if (!sections.length) return "";
     return (
-      '<span class="profile-pokerplus-stats-period"><span class="profile-pokerplus-stats-period__title">' +
+      '<span class="profile-pokerplus-stats-period" data-profile-pokerplus-stats-title="' +
       escapeHtml(title || "Статистика") +
-      '</span><span class="profile-pokerplus-stats-period__sections">' +
+      '"><span class="profile-pokerplus-stats-period__sections">' +
       sections.join("") +
       "</span></span>"
     );
