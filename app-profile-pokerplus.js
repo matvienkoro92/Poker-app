@@ -320,6 +320,19 @@ function initProfilePokerPlus() {
     );
   }
 
+  function pokerPlusStatsSectionHtml(kind, title, metrics) {
+    if (!metrics || !metrics.length) return "";
+    return (
+      '<span class="profile-pokerplus-stats-section profile-pokerplus-stats-section--' +
+      escapeHtml(kind || "default") +
+      '"><span class="profile-pokerplus-stats-section__title">' +
+      escapeHtml(title || "Статистика") +
+      '</span><span class="profile-pokerplus-stats">' +
+      metrics.join("") +
+      "</span></span>"
+    );
+  }
+
   function pokerPlusStatTone(value) {
     var n = Number(value);
     if (!isFinite(n) || n === 0) return "";
@@ -480,7 +493,10 @@ function initProfilePokerPlus() {
 
   function pokerPlusStatsGroupHtml(title, totalSource, includeEmptyCore) {
     var total = totalSource && typeof totalSource === "object" ? totalSource : {};
-    var metrics = [];
+    var cashMetrics = [];
+    var mttMetrics = [];
+    var sngMetrics = [];
+    var sections = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
     var mttStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttWinnings", "mtt_winnings"));
@@ -492,23 +508,27 @@ function initProfilePokerPlus() {
     var sngItmStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngItmCount", "sng_itm_count"));
     var sngFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count"));
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
-    if (includeEmptyCore || feeStat != null) metrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
-    if (includeEmptyCore || handsStat != null) metrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
-    if (includeEmptyCore || winningsStat != null) metrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-    metrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
-    metrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
-    metrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
-    metrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
-    metrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
-    metrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
-    metrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
-    metrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
-    if (!metrics.length) return "";
+    if (includeEmptyCore || feeStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
+    if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
+    if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+    mttMetrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
+    mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
+    mttMetrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
+    mttMetrics.push(pokerPlusStatMetricHtml("MTT 1-е", mttFirstStat, "", "1"));
+    sngMetrics.push(pokerPlusStatMetricHtml("SNG", sngStat, pokerPlusStatTone(sngStat), "♦"));
+    sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat, "", "#"));
+    sngMetrics.push(pokerPlusStatMetricHtml("SNG ITM", sngItmStat, "", "ITM"));
+    sngMetrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
+    sections.push(pokerPlusStatsSectionHtml("cash", "Кеш", cashMetrics));
+    sections.push(pokerPlusStatsSectionHtml("mtt", "МТТ", mttMetrics));
+    sections.push(pokerPlusStatsSectionHtml("sng", "СНГ", sngMetrics));
+    sections = sections.filter(Boolean);
+    if (!sections.length) return "";
     return (
       '<span class="profile-pokerplus-stats-period"><span class="profile-pokerplus-stats-period__title">' +
       escapeHtml(title || "Статистика") +
-      '</span><span class="profile-pokerplus-stats">' +
-      metrics.join("") +
+      '</span><span class="profile-pokerplus-stats-period__sections">' +
+      sections.join("") +
       "</span></span>"
     );
   }
