@@ -509,8 +509,8 @@ function initProfilePokerPlus() {
     var sngFirstStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "sngFirstCount", "sng_1st_count"));
     var feeStat = pokerPlusPickStat(total, "fee", "fee");
     if (includeEmptyCore || feeStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
-    if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Хендс", handsStat, "", "♠"));
-    if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Кеш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
+    if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Раздач", handsStat, "", "♠"));
+    if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT", mttStat, pokerPlusStatTone(mttStat), "🏆"));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat, "", "#"));
     mttMetrics.push(pokerPlusStatMetricHtml("MTT ITM", mttItmStat, "", "ITM"));
