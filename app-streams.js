@@ -110,6 +110,8 @@ function initStreams() {
   var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
   var previewFullscreenBtn = document.getElementById("streamsPreviewFullscreenBtn");
   var remoteFullscreenBtn = document.getElementById("streamsRemoteFullscreenBtn");
+  var roleTabs = document.querySelectorAll("[data-streams-tab-target]");
+  var rolePanels = document.querySelectorAll("[data-streams-tab-panel]");
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
   if (!startBtn || !previewWrap || !previewVideo) return;
@@ -118,6 +120,26 @@ function initStreams() {
   function showAlert(msg) {
     if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
   }
+
+  function setStreamsRoleTab(name) {
+    name = name === "broadcast" ? "broadcast" : "watch";
+    Array.prototype.slice.call(roleTabs || []).forEach(function (tab) {
+      var isActive = tab.getAttribute("data-streams-tab-target") === name;
+      tab.classList.toggle("streams-role-tab--active", isActive);
+      tab.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    Array.prototype.slice.call(rolePanels || []).forEach(function (panel) {
+      panel.hidden = panel.getAttribute("data-streams-tab-panel") !== name;
+    });
+  }
+
+  Array.prototype.slice.call(roleTabs || []).forEach(function (tab) {
+    if (tab.__streamsRoleTabHandlerAttached) return;
+    tab.__streamsRoleTabHandlerAttached = true;
+    tab.addEventListener("click", function () {
+      setStreamsRoleTab(tab.getAttribute("data-streams-tab-target"));
+    });
+  });
 
   var directAppUrl =
     typeof buildMiniAppStartLink === "function"
@@ -238,6 +260,7 @@ function initStreams() {
     if (!roomId) return;
     attempt = attempt || 0;
     if (!watchBtn || !roomInput || !remoteWrap || !remoteVideo) return;
+    setStreamsRoleTab("watch");
     // Если пользователь/глубокая ссылка уже пытались смотреть и peer/call "завис",
     // старый объект может помешать повторному старту. Сбрасываем перед новой попыткой.
     if (streamsWatchCall) {
