@@ -176,6 +176,62 @@ function initStreams() {
     streamsBroadcastTimerEl.textContent = "Трансляция запущена: " + t;
   }
 
+  function resetBroadcastRuntime(btnText, destroyPeer) {
+    if (streamsBroadcastStream) {
+      try {
+        streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
+      } catch (eTracks) {}
+      streamsBroadcastStream = null;
+    }
+    if (destroyPeer && streamsBroadcastPeer) {
+      var peerToDestroy = streamsBroadcastPeer;
+      streamsBroadcastPeer = null;
+      try { peerToDestroy.destroy(); } catch (eDestroy) {}
+    } else {
+      streamsBroadcastPeer = null;
+    }
+    if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+    streamsBroadcastTimerInterval = null;
+    streamsBroadcastStartedAt = null;
+    if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "";
+    if (previewWrap) previewWrap.classList.add("streams-preview-wrap--hidden");
+    if (previewVideo) previewVideo.srcObject = null;
+    if (startBtn) {
+      startBtn.disabled = false;
+      if (btnText) startBtn.textContent = btnText;
+    }
+  }
+
+  function copyTextToClipboard(input, successMessage, failMessage) {
+    if (!input) return;
+    var text = String(input.value || "");
+    if (!text) {
+      showAlert("Ссылка ещё не готова.");
+      return;
+    }
+    function fallbackCopy() {
+      var copied = false;
+      try {
+        input.focus();
+        input.select();
+        if (typeof input.setSelectionRange === "function") input.setSelectionRange(0, text.length);
+        copied = !!(document.execCommand && document.execCommand("copy"));
+      } catch (eCopy) {
+        copied = false;
+      }
+      if (copied) showAlert(successMessage);
+      else showAlert(failMessage || "Не удалось скопировать ссылку. Скопируйте её вручную.");
+    }
+    var nav = window.navigator || null;
+    if (nav && nav.clipboard && nav.clipboard.writeText && window.isSecureContext) {
+      nav.clipboard.writeText(text).then(function () {
+        showAlert(successMessage);
+      }).catch(fallbackCopy);
+      return;
+    }
+    fallbackCopy();
+  }
+
   // Делаем стартер “смотреть” по комнате без зависимости от click-обработчика,
   // чтобы deep-link работал стабильно.
   function startStreamsWatchByRoomId(roomId, attempt) {
@@ -242,7 +298,8 @@ function initStreams() {
       if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
       if (remoteVideo) remoteVideo.srcObject = null;
       watchBtn.disabled = false;
-      streamsShowAlert("PeerJS ошибка: " + (err && (err.message || err.type)) || "сеть");
+      if (err && (err.type === "peer-unavailable" || err.type === "network")) streamsShowAlert("Трансляция недоступна. Проверьте код комнаты.");
+      else streamsShowAlert("PeerJS ошибка: " + (err && (err.message || err.type) || "сеть"));
     });
     peer.on("open", function () {
       var call = peer.call(roomId, createDummyMediaStream());
@@ -265,8 +322,16 @@ function initStreams() {
           window.__streamsWatchWatchdogTimer = null;
         }
         remoteVideo.srcObject = stream;
-        remoteVideo.muted = true;
-        try { remoteVideo.play(); } catch (e) {}
+        remoteVideo.muted = false;
+        remoteVideo.volume = 1;
+        try {
+          var playPromise = remoteVideo.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(function () {
+              streamsShowAlert("Нажмите Play на видео, чтобы включить звук трансляции.");
+            });
+          }
+        } catch (e) {}
         remoteWrap.classList.remove("streams-remote-wrap--hidden");
         watchBtn.disabled = false;
       });
@@ -280,15 +345,6 @@ function initStreams() {
         streamsWatchCall = null;
         watchBtn.disabled = false;
       });
-      call.on("error", function () {
-        if (window.__streamsWatchWatchdogTimer) {
-          clearTimeout(window.__streamsWatchWatchdogTimer);
-          window.__streamsWatchWatchdogTimer = null;
-        }
-        remoteWrap.classList.add("streams-remote-wrap--hidden");
-        watchBtn.disabled = false;
-        streamsWatchCall = null;
-      });
 
       // Watchdog: если соединение зависнет (без stream/error/close),
       // вернем пользователю управление.
@@ -300,14 +356,6 @@ function initStreams() {
         if (remoteVideo) remoteVideo.srcObject = null;
         streamsShowAlert("Трансляция не отвечает. Попробуйте ещё раз через 5–10 секунд.");
       }, 14000);
-    });
-    peer.on("error", function (err) {
-      remoteWrap.classList.add("streams-remote-wrap--hidden");
-      watchBtn.disabled = false;
-      streamsWatchCall = null;
-      if (err && (err.type === "peer-unavailable" || err.type === "network")) streamsShowAlert("Трансляция недоступна. Проверьте код комнаты.");
-      else streamsShowAlert("Ошибка: " + (err && (err.message || err.type)) || "сеть");
-      streamsWatchPeer = null;
     });
   }
 
@@ -328,17 +376,11 @@ function initStreams() {
   if (copyBrowserLinkBtn && browserLinkInput) {
     copyBrowserLinkBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      browserLinkInput.select();
-      try {
-        document.execCommand("copy");
-        showAlert("Ссылка скопирована. Вставьте её в адресную строку Chrome и откройте.");
-      } catch (e) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(browserLinkInput.value).then(function () {
-            showAlert("Ссылка скопирована. Вставьте её в адресную строку Chrome и откройте.");
-          }).catch(function () {});
-        }
-      }
+      copyTextToClipboard(
+        browserLinkInput,
+        "Ссылка скопирована. Вставьте её в адресную строку Chrome и откройте.",
+        "Не удалось скопировать ссылку. Скопируйте её вручную."
+      );
     });
   }
 
@@ -346,11 +388,12 @@ function initStreams() {
     startBtn.__streamsStartHandlerAttached = true;
     startBtn.addEventListener("click", function () {
     if (streamsBroadcastPeer || streamsBroadcastStream) return;
-    if (!navigator.mediaDevices) {
+    var mediaDevices = window.navigator && window.navigator.mediaDevices ? window.navigator.mediaDevices : null;
+    if (!mediaDevices) {
       showAlert("Трансляция недоступна: нет доступа к медиа-устройствам.");
       return;
     }
-    var getDisplayMedia = navigator.mediaDevices.getDisplayMedia || navigator.mediaDevices.webkitGetDisplayMedia;
+    var getDisplayMedia = mediaDevices.getDisplayMedia || mediaDevices.webkitGetDisplayMedia;
     if (!getDisplayMedia) {
       showAlert("Трансляция экрана недоступна в Safari и в приложении Telegram. Откройте мини-приложение в Chrome (Android) или в браузере на компьютере.");
       return;
@@ -359,47 +402,33 @@ function initStreams() {
       showAlert("Трансляция экрана работает только по HTTPS. Откройте страницу по ссылке https://…");
       return;
     }
+    var userRoomCode = broadcastRoomInput ? broadcastRoomInput.value.trim() : "";
+    var roomId = userRoomCode || randomStreamRoomId();
+    if (userRoomCode && !/^\d{6}$/.test(userRoomCode)) {
+      showAlert("Некорректный код комнаты. Нужны ровно 6 цифр.");
+      return;
+    }
+    if (broadcastRoomInput) broadcastRoomInput.value = roomId;
     startBtn.disabled = true;
     var btnText = startBtn.textContent;
     startBtn.textContent = "Запрос доступа к экрану…";
     // getDisplayMedia должен вызываться только синхронно из этого клика (или в первом .then от него).
     // Второй вызов после getUserMedia в .catch ломает требование «user gesture» в Chrome.
-    getDisplayMedia.call(navigator.mediaDevices, { video: true, audio: false })
+    getDisplayMedia.call(mediaDevices, { video: true, audio: false })
       .then(function (screenStream) {
         var combinedStream = new MediaStream();
         screenStream.getVideoTracks().forEach(function (t) { combinedStream.addTrack(t); });
-        return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (micStream) {
+        if (!mediaDevices.getUserMedia) return combinedStream;
+        return mediaDevices.getUserMedia({ audio: true }).then(function (micStream) {
           micStream.getAudioTracks().forEach(function (t) { combinedStream.addTrack(t); });
           return combinedStream;
         }).catch(function () { return combinedStream; });
       })
       .then(function (stream) {
         streamsBroadcastStream = stream;
-        var userRoomCode = broadcastRoomInput ? broadcastRoomInput.value.trim() : "";
-        var roomId = null;
-        if (userRoomCode) {
-          if (!/^\d{6}$/.test(userRoomCode)) {
-            // Код неверный: останавливаем захват, чтобы не оставлять активный stream.
-            try {
-              if (streamsBroadcastStream) streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
-            } catch (e) {}
-            streamsBroadcastStream = null;
-            startBtn.disabled = false;
-            startBtn.textContent = btnText;
-            showAlert("Некорректный код комнаты. Нужны ровно 6 цифр.");
-            return;
-          }
-          roomId = userRoomCode;
-        } else {
-          roomId = randomStreamRoomId();
-          if (broadcastRoomInput) broadcastRoomInput.value = roomId;
-        }
         var PeerJs = typeof Peer !== "undefined" ? Peer : null;
         if (!PeerJs) {
-          streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
-          streamsBroadcastStream = null;
-          startBtn.disabled = false;
-          startBtn.textContent = btnText;
+          resetBroadcastRuntime(btnText, true);
           showAlert("Библиотека PeerJS не загружена. Проверьте интернет и обновите страницу.");
           return;
         }
@@ -423,20 +452,11 @@ function initStreams() {
           if (streamsBroadcastStream) call.answer(streamsBroadcastStream);
         });
         peer.on("error", function (err) {
-          if (err.type !== "peer-unavailable") showAlert("Ошибка: " + (err.message || err.type || "сеть"));
+          resetBroadcastRuntime(btnText, false);
+          showAlert("Ошибка трансляции: " + (err && (err.message || err.type) || "сеть"));
         });
         peer.on("close", function () {
-          if (streamsBroadcastStream) {
-            streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
-            streamsBroadcastStream = null;
-          }
-          streamsBroadcastPeer = null;
-          if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
-          streamsBroadcastTimerInterval = null;
-          streamsBroadcastStartedAt = null;
-          if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "";
-          previewWrap.classList.add("streams-preview-wrap--hidden");
-          previewVideo.srcObject = null;
+          resetBroadcastRuntime(btnText, false);
         });
       })
       .catch(function (err) {
@@ -457,33 +477,15 @@ function initStreams() {
 
   if (stopBtn) {
     stopBtn.addEventListener("click", function () {
-      if (streamsBroadcastStream) streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
-      streamsBroadcastStream = null;
-      if (streamsBroadcastPeer) {
-        try { streamsBroadcastPeer.destroy(); } catch (e) {}
-        streamsBroadcastPeer = null;
-      }
-      if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
-      streamsBroadcastTimerInterval = null;
-      streamsBroadcastStartedAt = null;
+      resetBroadcastRuntime(null, true);
       if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "Трансляция остановлена";
-      previewWrap.classList.add("streams-preview-wrap--hidden");
-      previewVideo.srcObject = null;
     });
   }
 
   if (copyLinkBtn && shareLinkInput) {
     copyLinkBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      shareLinkInput.select();
-      try {
-        document.execCommand("copy");
-        showAlert("Ссылка скопирована");
-      } catch (e) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(shareLinkInput.value).then(function () { showAlert("Ссылка скопирована"); }).catch(function () {});
-        }
-      }
+      copyTextToClipboard(shareLinkInput, "Ссылка скопирована", "Не удалось скопировать ссылку. Скопируйте её вручную.");
     });
   }
 
