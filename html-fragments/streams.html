@@ -22,11 +22,12 @@
               </div>
               <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
                 <h2 class="streams-block__title">Запустить трансляцию</h2>
-                <p class="streams-block__hint">Для запуска откройте приложение в Chrome или браузере на компьютере. Экран и микрофон будут видны и слышны зрителям.</p>
+                <p class="streams-block__hint">Экран и микрофон увидят зрители. Если вы только смотрите стрим, используйте вкладку «Я смотрю стрим».</p>
                 <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
-                  <p class="streams-open-in-browser__text">Трансляция экрана не работает во встроенном браузере Telegram. Откройте приложение в Chrome или скопируйте ссылку:</p>
+                  <div class="streams-open-in-browser__label">Только для ведущего стрима</div>
+                  <p class="streams-open-in-browser__text">Если вы запускаете стрим, откройте эту страницу в Chrome или браузере на компьютере. Во встроенном Telegram нельзя выбрать экран.</p>
                   <div class="streams-link-row streams-open-in-browser__row">
-                    <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для открытия в браузере" />
+                    <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для ведущего стрима" />
                     <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>
                     <button type="button" class="streams-copy-btn" id="streamsCopyBrowserLinkBtn">Копировать</button>
                   </div>

@@ -723,6 +723,21 @@
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
 }
+.streams-open-in-browser__label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 8px;
+  padding: 4px 9px;
+  border: 1px solid rgba(250, 204, 21, 0.38);
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
 .streams-open-in-browser__text {
   margin: 0 0 8px;
   font-size: 13px;
