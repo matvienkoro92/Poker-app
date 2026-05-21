@@ -322,6 +322,9 @@
 .profile-pokerplus-panel[hidden] {
   display: none !important;
 }
+.profile-pokerplus-panel {
+  min-width: 0;
+}
 .profile-pokerplus-panel--skills .profile-skills {
   margin-top: 0;
   padding-top: 0;
@@ -586,6 +589,26 @@
   line-height: 1.08;
   text-align: center;
   letter-spacing: 0;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-view-tabs {
+  grid-column: 1 / -1;
+  order: 3;
+  align-self: start;
+  width: 100%;
+  margin: 4px 0 0;
+  z-index: 1;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsPanel {
+  display: contents;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsPanel[hidden] {
+  display: none !important;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusSkillsPanel {
+  grid-column: 1 / -1;
+  order: 5;
+  width: 100%;
+  z-index: 1;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
   display: none !important;
