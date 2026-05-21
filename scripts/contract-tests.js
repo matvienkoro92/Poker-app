@@ -813,6 +813,7 @@ async function testPokerPlusCounterHandsAliases(redis) {
                   played_hands: 277,
                   mtt_round: 576,
                   mtt_winnings: -37756.64,
+                  mtt_counted_winnings: 1280,
                   sng_round: 55,
                   sng_winnings: 1018,
                   winnings: 993750.55,
@@ -857,6 +858,7 @@ async function testPokerPlusCounterHandsAliases(redis) {
   assert.strictEqual(profile.totalCounter.hands, 277, "total counter accepts played_hands as hands");
   assert.strictEqual(profile.totalCounter.mttRound, 576, "total counter stores mtt_round");
   assert.strictEqual(profile.totalCounter.mttWinnings, -37756.64, "total counter stores mtt_winnings");
+  assert.strictEqual(profile.totalCounter.mttCountedWinnings, 1280, "total counter stores mtt_counted_winnings");
   assert.strictEqual(profile.totalCounter.sngRound, 55, "total counter stores sng_round");
   assert.strictEqual(profile.totalCounter.sngWinnings, 1018, "total counter stores sng_winnings");
   assert.strictEqual(profile.totalCounter.bb, 83.97, "total counter stores bb");

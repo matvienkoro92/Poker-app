@@ -161,6 +161,71 @@ async function installAdminReportMocks(page, options = {}) {
   });
 }
 
+function dateKeyFromNow(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + (Number(offsetDays) || 0));
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+async function installPokerPlusProfileMocks(page) {
+  const today = dateKeyFromNow(0);
+  const yesterday = dateKeyFromNow(-1);
+  const profile = {
+    linked: true,
+    pokerPlusUserId: "P21-SMOKE",
+    nickname: "Smoke",
+    totalCounter: {
+      fee: 10,
+      hands: 277,
+      winnings: 993750.55,
+      mttWinnings: 1084734,
+      mttCount: 4,
+      mttItmCount: 4,
+      mttFirstCount: 0,
+      sngWinnings: 1018,
+      sngCount: 6,
+      sngItmCount: 5,
+      sngFirstCount: 1,
+    },
+    todayCounter: {
+      mttWinnings: 125000,
+      mttCount: 2,
+      mttItmCount: 1,
+      mttFirstCount: 0,
+    },
+    weekCounter: {
+      mttWinnings: 300000,
+      mttCount: 4,
+      mttItmCount: 2,
+      mttFirstCount: 0,
+    },
+    statsSnapshots: {
+      dates: [yesterday, today],
+      dailyCounters: {
+        [yesterday]: { mttWinnings: 175000, mttCount: 2, mttItmCount: 1, mttFirstCount: 0 },
+        [today]: { mttWinnings: 125000, mttCount: 2, mttItmCount: 1, mttFirstCount: 0 },
+      },
+    },
+  };
+  await page.route(/\/api\/pokerplus-player(?:\?|$)/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ ok: true, linked: true, accountId: "SMOKE", pokerPlusUserId: "P21-SMOKE", profile }),
+    });
+  });
+  await page.route(/\/api\/(?:profile-info|profile-status|profile-personal|profile-visible-to-others|friends)(?:\?|$)/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ ok: true }),
+    });
+  });
+}
+
 async function enableVikaAdmin(page) {
   await page.evaluate(() => {
     window.__pokerTelegramAuth = {
@@ -185,6 +250,22 @@ async function enableVikaAdmin(page) {
   });
 }
 
+async function enableVerifiedProfile(page) {
+  await page.evaluate(() => {
+    window.__pokerTelegramAuth = {
+      status: "verified",
+      user: { id: 1897001087, first_name: "Smoke" },
+    };
+    window.pokerApiHasCredential = function () { return true; };
+    window.getApiBase = function () { return window.location.origin; };
+    window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
+    window.pokerGuestOrAuthedPostBody = function (extra) {
+      return Object.assign({ initData: "smoke" }, extra || {});
+    };
+    window.dispatchEvent(new CustomEvent("poker-telegram-auth"));
+  });
+}
+
 async function openRakebackTab(page) {
   await page.locator("#adminReportBtn").click();
   await page.waitForFunction(() => document.getElementById("adminReportModal")?.getAttribute("aria-hidden") === "false", null, { timeout: 5000 });
@@ -192,6 +273,20 @@ async function openRakebackTab(page) {
   await page.waitForFunction(() => {
     return document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") === "rakeback";
   }, null, { timeout: 5000 });
+}
+
+async function openProfilePoker21(page) {
+  await page.locator("[data-view-target='profile']").first().click();
+  await page.waitForSelector("#profileView", { timeout: 7000 });
+  await enableVerifiedProfile(page);
+  await page.locator("#profilePoker21TabBtn").click();
+  await page.waitForSelector("#profilePokerPlusSection.profile-pokerplus-card--linked", { timeout: 7000 });
+  await page.locator("[data-profile-pokerplus-stats-period='total']").click();
+  await page.waitForFunction(() => {
+    const section = document.querySelector(".profile-pokerplus-stats-section--mtt");
+    const active = (document.querySelector(".profile-pokerplus-stats-tabs__btn--active")?.textContent || "").trim();
+    return !!section && active === "Всего";
+  }, null, { timeout: 7000 });
 }
 
 async function checkLoad(browser) {
@@ -263,14 +358,46 @@ async function checkAdminRakeback(browser) {
   return state;
 }
 
+async function checkProfilePokerPlus(browser) {
+  const { page, pageErrors } = await newPage(browser);
+  await installPokerPlusProfileMocks(page);
+  await openIndex(page);
+  await page.waitForFunction(() => typeof window.pokerApiHasCredential === "function" && typeof window.getApiBase === "function", null, { timeout: 5000 });
+  await enableVerifiedProfile(page);
+  await openProfilePoker21(page);
+  const state = await page.evaluate(() => {
+    const mttSection = document.querySelector(".profile-pokerplus-stats-section--mtt");
+    const cards = Array.from(mttSection?.querySelectorAll(".profile-pokerplus-stat") || []);
+    const winningsCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш");
+    const countCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "MTT игр");
+    return {
+      totalValue: (winningsCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
+      totalRaw: (winningsCard?.querySelector(".profile-pokerplus-stat__raw")?.textContent || "").trim(),
+      contextLabel: (winningsCard?.querySelector(".profile-pokerplus-stat__context-label")?.textContent || "").trim(),
+      contextValue: (winningsCard?.querySelector(".profile-pokerplus-stat__context-value")?.textContent || "").trim(),
+      contextTitle: winningsCard?.querySelector(".profile-pokerplus-stat__context")?.getAttribute("title") || "",
+      hasContextClass: !!winningsCard?.classList.contains("profile-pokerplus-stat--with-context"),
+      countValue: (countCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
+      activePeriod: (document.querySelector(".profile-pokerplus-stats-tabs__btn--active")?.textContent || "").trim(),
+    };
+  });
+  await page.close();
+  if (state.totalValue !== "1.1M" || state.totalRaw !== "1084734" || state.contextLabel !== "Учтено:" || state.contextValue !== "300K" || !state.contextTitle.includes("300000") || !state.hasContextClass || state.countValue !== "4" || state.activePeriod !== "Всего") {
+    throw new Error("profile Poker21 counted MTT winnings smoke failed: " + JSON.stringify(state));
+  }
+  if (pageErrors.length) throw new Error("page errors during profile-pokerplus check:\n" + pageErrors.join("\n"));
+  return state;
+}
+
 const checks = {
   load: checkLoad,
   "admin-rakeback": checkAdminRakeback,
+  "profile-pokerplus": checkProfilePokerPlus,
 };
 
 async function main() {
   const requested = process.argv.slice(2);
-  const names = requested.length ? requested : ["load", "admin-rakeback"];
+  const names = requested.length ? requested : ["load", "admin-rakeback", "profile-pokerplus"];
   const unknown = names.filter((name) => !checks[name]);
   if (unknown.length) throw new Error("Unknown browser smoke check(s): " + unknown.join(", "));
 
