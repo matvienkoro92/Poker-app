@@ -1759,6 +1759,7 @@
           else if (typeof event.stopPropagation === "function") event.stopPropagation();
         }
         if (archiveMode) return;
+        if (searchInput && searchInput.value) searchInput.value = "";
         var now = Date.now();
         var row = {
           groupId: "shell_" + now + "_" + Math.random().toString(16).slice(2),

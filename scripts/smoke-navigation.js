@@ -865,7 +865,12 @@ async function main() {
     if (rakebackSpoilerState.expanded !== "true" || rakebackSpoilerState.storageValue !== "1" || !rakebackSpoilerState.dataScriptLoaded || !rakebackSpoilerState.hasTemplateId || !rakebackSpoilerState.templateEditable || rakebackSpoilerState.visibleTemplateRows <= 20) {
       throw new Error("admin report rakeback template spoiler did not open persistently: " + JSON.stringify(rakebackSpoilerState));
     }
+    await page.locator("#adminReportRakebackSearch").fill("no-visible-new-row");
     await page.locator("#adminReportRakebackAddBtn").click();
+    await page.waitForFunction(() => {
+      return !document.getElementById("adminReportRakebackSearch")?.value &&
+        document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length >= 2;
+    }, null, { timeout: 1500 });
     const sharedRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row]").first();
     await sharedRow.locator("[data-rakeback-player-id]").fill("smoke-shared");
     await sharedRow.locator("[data-rakeback-rake]").fill("10");
