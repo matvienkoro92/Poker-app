@@ -228,6 +228,14 @@ async function checkAdminRakeback(browser) {
     const dateInput = row?.querySelector("[data-rakeback-entry-date]");
     const idInputEl = row?.querySelector("[data-rakeback-player-id]");
     const badge = row?.querySelector("[data-rakeback-date-badge]");
+    const separator = document.querySelector("#adminReportRakebackTableBody .admin-report-rakeback-date-separator--entries");
+    const separatorStack = separator?.querySelector(".admin-report-rakeback-date-separator__stack");
+    const separatorDate = separator?.querySelector(".admin-report-rakeback-date-separator__date");
+    const separatorWeekday = separator?.querySelector(".admin-report-rakeback-date-separator__weekday");
+    const separatorDateStyle = separatorDate ? getComputedStyle(separatorDate) : null;
+    const separatorStackStyle = separatorStack ? getComputedStyle(separatorStack) : null;
+    const separatorDateRect = separatorDate ? separatorDate.getBoundingClientRect() : null;
+    const separatorWeekdayRect = separatorWeekday ? separatorWeekday.getBoundingClientRect() : null;
     return {
       dateType: dateInput?.type || "",
       dateTabIndex: dateInput?.getAttribute("tabindex") || "",
@@ -236,11 +244,20 @@ async function checkAdminRakeback(browser) {
       activeIsId: document.activeElement === idInputEl,
       dateInputs: document.querySelectorAll("#adminReportRakebackTableBody input[type='date']").length,
       rows: document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length,
+      separatorDateText: (separatorDate?.textContent || "").trim(),
+      separatorWeekdayText: (separatorWeekday?.textContent || "").trim(),
+      separatorStackDisplay: separatorStackStyle?.display || "",
+      separatorDateBorderTop: separatorDateStyle?.borderTopWidth || "",
+      separatorDateBackground: separatorDateStyle?.backgroundColor || "",
+      separatorHeaderInline: !!(separatorDateRect && separatorWeekdayRect && Math.abs(separatorDateRect.top - separatorWeekdayRect.top) <= 2),
     };
   });
   await page.close();
   if (state.dateInputs !== 0 || state.dateType !== "hidden" || state.badgePointer !== "none" || state.idValue !== "12345") {
     throw new Error("admin rakeback smoke failed: " + JSON.stringify(state));
+  }
+  if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent") || !state.separatorHeaderInline) {
+    throw new Error("admin rakeback date separator smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during admin-rakeback check:\n" + pageErrors.join("\n"));
   return state;
