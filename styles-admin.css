@@ -1750,22 +1750,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-size: 10px;
   font-weight: 800;
   line-height: 1;
-  cursor: pointer;
+  pointer-events: none;
   font-variant-numeric: tabular-nums;
 }
 .admin-report-rakeback-date-badge[hidden] {
   display: none !important;
 }
 .admin-report-rakeback-date-badge input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-.admin-report-rakeback-date-badge input:disabled {
-  cursor: default;
+  display: none;
 }
 .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
   padding-left: 31px;

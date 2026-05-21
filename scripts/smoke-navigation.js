@@ -871,6 +871,16 @@ async function main() {
       return !document.getElementById("adminReportRakebackSearch")?.value &&
         document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row]").length >= 2;
     }, null, { timeout: 1500 });
+    const rakebackDateInputState = await page.evaluate(() => {
+      const dateInputs = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-entry-date]"));
+      return {
+        dateInputCount: dateInputs.filter((input) => input.type === "date").length,
+        hiddenInputCount: dateInputs.filter((input) => input.type === "hidden").length,
+      };
+    });
+    if (rakebackDateInputState.dateInputCount !== 0 || rakebackDateInputState.hiddenInputCount < 1) {
+      throw new Error("admin report rakeback date badge must not expose a clickable date input: " + JSON.stringify(rakebackDateInputState));
+    }
     const sharedRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row]").first();
     await sharedRow.locator("[data-rakeback-player-id]").fill("smoke-shared");
     await sharedRow.locator("[data-rakeback-rake]").fill("10");
