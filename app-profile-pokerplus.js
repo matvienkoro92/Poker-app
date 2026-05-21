@@ -713,7 +713,7 @@ function initProfilePokerPlus() {
     if (includeEmptyCore || feeStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Рейк", feeStat, pokerPlusStatTone(feeStat), "%"));
     if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Раздач", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
-    mttMetrics.push(pokerPlusStatMetricHtml(opts.isTotalPeriod ? "Выигрыш за все время" : "Выигрыш", mttStat, pokerPlusStatTone(mttStat), "🏆", opts.isTotalPeriod ? { extraClass: "profile-pokerplus-stat--long-label" } : null));
+    mttMetrics.push(pokerPlusStatMetricHtml(opts.isTotalPeriod ? "Выигрыш в МТТ за все время" : "Выигрыш", mttStat, pokerPlusStatTone(mttStat), "🏆", opts.isTotalPeriod ? { extraClass: "profile-pokerplus-stat--long-label" } : null));
     if (opts.isTotalPeriod) {
       mttMetrics.push(pokerPlusStatMetricHtml("Выигрыш с момента ведения статистики", mttCountedWinnings, pokerPlusStatTone(mttCountedWinnings), "🏆", { extraClass: "profile-pokerplus-stat--long-label" }));
     }

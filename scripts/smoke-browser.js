@@ -368,7 +368,7 @@ async function checkProfilePokerPlus(browser) {
     const mttSection = document.querySelector(".profile-pokerplus-stats-section--mtt");
     const sngSection = document.querySelector(".profile-pokerplus-stats-section--sng");
     const cards = Array.from(mttSection?.querySelectorAll(".profile-pokerplus-stat") || []);
-    const lifetimeCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш за все время");
+    const lifetimeCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш в МТТ за все время");
     const countedCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш с момента ведения статистики");
     const countCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "MTT игр");
     const sngStyle = sngSection ? getComputedStyle(sngSection) : null;
@@ -389,7 +389,7 @@ async function checkProfilePokerPlus(browser) {
     };
   });
   await page.close();
-  if (state.lifetimeValue !== "1.1M" || state.lifetimeRaw !== "1084734" || state.countedValue !== "300K" || state.countedRaw !== "300000" || !state.lifetimeLongLabel || !state.countedLongLabel || state.cardOrder[0] !== "Выигрыш за все время" || state.cardOrder[1] !== "Выигрыш с момента ведения статистики" || state.cardOrder[2] !== "MTT игр" || state.countValue !== "4+" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
+  if (state.lifetimeValue !== "1.1M" || state.lifetimeRaw !== "1084734" || state.countedValue !== "300K" || state.countedRaw !== "300000" || !state.lifetimeLongLabel || !state.countedLongLabel || state.cardOrder[0] !== "Выигрыш в МТТ за все время" || state.cardOrder[1] !== "Выигрыш с момента ведения статистики" || state.cardOrder[2] !== "MTT игр" || state.countValue !== "4+" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
     throw new Error("profile Poker21 counted MTT winnings smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during profile-pokerplus check:\n" + pageErrors.join("\n"));
