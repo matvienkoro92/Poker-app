@@ -717,32 +717,21 @@
 .equilator-picker-close:hover { color: var(--text); border-color: var(--text-muted); }
 
 .streams-open-in-browser {
-  margin-bottom: 20px;
+  margin: 14px 0 20px;
   padding: 12px 14px;
   background: rgba(249, 115, 22, 0.1);
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
-}
-.streams-open-in-browser__label {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  margin-bottom: 8px;
-  padding: 4px 9px;
-  border: 1px solid rgba(250, 204, 21, 0.38);
-  border-radius: 999px;
-  background: rgba(250, 204, 21, 0.12);
-  color: #fde68a;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.15;
-  text-transform: uppercase;
 }
 .streams-open-in-browser__text {
   margin: 0 0 8px;
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.4;
+}
+.streams-open-in-browser__text strong {
+  color: #fde68a;
+  font-weight: 900;
 }
 .streams-open-in-browser .streams-link-row {
   margin-top: 0;

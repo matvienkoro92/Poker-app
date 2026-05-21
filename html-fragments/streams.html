@@ -23,19 +23,18 @@
               <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
                 <h2 class="streams-block__title">Запустить трансляцию</h2>
                 <p class="streams-block__hint">Экран и микрофон увидят зрители. Если вы только смотрите стрим, используйте вкладку «Я смотрю стрим».</p>
-                <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
-                  <div class="streams-open-in-browser__label">Только для ведущего стрима</div>
-                  <p class="streams-open-in-browser__text">Если вы запускаете стрим, откройте эту страницу в Chrome или браузере на компьютере. Во встроенном Telegram нельзя выбрать экран.</p>
-                  <div class="streams-link-row streams-open-in-browser__row">
-                    <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для ведущего стрима" />
-                    <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>
-                    <button type="button" class="streams-copy-btn" id="streamsCopyBrowserLinkBtn">Копировать</button>
-                  </div>
-                </div>
                 <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
                   <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
                 </div>
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
+                <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
+                  <p class="streams-open-in-browser__text"><strong>Стрим будет работать только в Chrome или браузере на компьютере.</strong> В браузере Telegram не будет работать. Можете воспользоваться ссылкой ниже, если нужно сменить браузер.</p>
+                  <div class="streams-link-row streams-open-in-browser__row">
+                    <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для смены браузера" />
+                    <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>
+                    <button type="button" class="streams-copy-btn" id="streamsCopyBrowserLinkBtn">Копировать</button>
+                  </div>
+                </div>
                 <div class="streams-preview-wrap streams-preview-wrap--hidden" id="streamsPreviewWrap">
                   <video id="streamsPreviewVideo" class="streams-preview-video" autoplay muted playsinline aria-label="Превью трансляции"></video>
                   <p class="streams-link-label">Ссылка для зрителей:</p>
