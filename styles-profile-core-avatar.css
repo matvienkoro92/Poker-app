@@ -122,7 +122,7 @@
 }
 .profile-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin: 12px 0 14px;
   padding: 4px;
@@ -159,11 +159,7 @@
   box-shadow: 0 10px 22px rgba(251, 146, 60, 0.22);
 }
 .view[data-view="profile"].profile-view--tab-club [data-profile-poker21-panel],
-.view[data-view="profile"].profile-view--tab-club [data-profile-skills-panel],
-.view[data-view="profile"].profile-view--tab-poker21 [data-profile-club-panel],
-.view[data-view="profile"].profile-view--tab-poker21 [data-profile-skills-panel],
-.view[data-view="profile"].profile-view--tab-skills [data-profile-club-panel],
-.view[data-view="profile"].profile-view--tab-skills [data-profile-poker21-panel] {
+.view[data-view="profile"].profile-view--tab-poker21 [data-profile-club-panel] {
   display: none !important;
 }
 [data-theme="light"] .profile-tabs {

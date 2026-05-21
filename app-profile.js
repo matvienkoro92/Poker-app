@@ -1,10 +1,9 @@
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
-  var activeTab = tab === "poker21" || tab === "skills" ? tab : "club";
+  var activeTab = tab === "poker21" ? tab : "club";
   if (root) {
     root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
-    root.classList.toggle("profile-view--tab-skills", activeTab === "skills");
     root.classList.toggle("profile-view--tab-club", activeTab === "club");
     root.dataset.profileActiveTab = activeTab;
   }
@@ -20,6 +19,40 @@ function setProfileTab(tab) {
       }, 0);
     } catch (eLazyPpProfile) {}
   }
+  if (activeTab === "poker21") initProfilePoker21Tabs();
+}
+
+function setProfilePoker21Tab(tab) {
+  var section = document.getElementById("profilePokerPlusSection");
+  var tabs = document.querySelectorAll("[data-profile-poker21-tab]");
+  var panels = document.querySelectorAll("[data-profile-poker21-tab-panel]");
+  var activeTab = tab === "skills" ? "skills" : "stats";
+  if (section && section.dataset) section.dataset.profilePoker21ActiveTab = activeTab;
+  tabs.forEach(function (btn) {
+    var isActive = btn.getAttribute("data-profile-poker21-tab") === activeTab;
+    btn.classList.toggle("profile-pokerplus-view-tabs__btn--active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+  panels.forEach(function (panel) {
+    var isActive = panel.getAttribute("data-profile-poker21-tab-panel") === activeTab;
+    panel.hidden = !isActive;
+  });
+}
+
+function initProfilePoker21Tabs() {
+  var section = document.getElementById("profilePokerPlusSection");
+  if (!section) return;
+  var tabs = document.querySelectorAll("[data-profile-poker21-tab]");
+  if (!tabs.length) return;
+  if (section.dataset.profilePoker21TabsBound !== "1") {
+    section.dataset.profilePoker21TabsBound = "1";
+    tabs.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        setProfilePoker21Tab(btn.getAttribute("data-profile-poker21-tab"));
+      });
+    });
+  }
+  setProfilePoker21Tab(section.dataset.profilePoker21ActiveTab || "stats");
 }
 
 function initProfileTabs() {
@@ -35,6 +68,7 @@ function initProfileTabs() {
       });
     });
   }
+  initProfilePoker21Tabs();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
     setTimeout(function () {

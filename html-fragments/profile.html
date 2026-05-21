@@ -9,7 +9,6 @@
             <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Меню профиля">
               <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
-              <button type="button" class="profile-tabs__btn" id="profileSkillsTabBtn" data-profile-tab="skills" role="tab" aria-selected="false">Ваши навыки</button>
             </div>
             <p class="profile-loading-note profile-loading-note--hidden" id="profileLoadingNote" aria-live="polite">Загружаем профиль...</p>
             <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
@@ -128,6 +127,11 @@
             </section>
             <section class="profile-email-auth" id="profilePokerPlusSection" hidden data-profile-poker21-panel>
               <h2 class="profile-section__title" id="profilePokerPlusTitle">Верификация через Poker21</h2>
+              <div class="profile-pokerplus-view-tabs" id="profilePokerPlusViewTabs" role="tablist" aria-label="Разделы профиля Poker21">
+                <button type="button" class="profile-pokerplus-view-tabs__btn profile-pokerplus-view-tabs__btn--active" id="profilePokerPlusStatsViewTab" data-profile-poker21-tab="stats" role="tab" aria-selected="true">Статистика</button>
+                <button type="button" class="profile-pokerplus-view-tabs__btn" id="profilePokerPlusSkillsViewTab" data-profile-poker21-tab="skills" role="tab" aria-selected="false">Навыки</button>
+              </div>
+              <div class="profile-pokerplus-panel" id="profilePokerPlusStatsPanel" data-profile-poker21-tab-panel="stats" role="tabpanel" aria-labelledby="profilePokerPlusStatsViewTab">
               <p class="profile-email-auth__text" id="profilePokerPlusText">Введите ключ из Poker21, чтобы привязать профиль. После привязки обновление будет идти по сохранённому ключу.</p>
               <div class="profile-email-auth__form" id="profilePokerPlusForm">
                 <input
@@ -264,25 +268,28 @@
                 <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusRefreshBtn" hidden>Обновить</button>
                 <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusUnbindBtn" hidden>Отвязать</button>
               </div>
-            </section>
-            <section class="profile-skills" id="profileSkillsSection" data-profile-skills-panel aria-labelledby="profileSkillsTitle">
-              <h2 class="profile-section__title profile-skills__title" id="profileSkillsTitle">Ваши навыки</h2>
-              <div class="profile-skills__character">
-                <img class="profile-skills__character-img" src="./assets/profile-pokerist.jpg" alt="Персонаж игрока" width="160" height="160" loading="lazy" decoding="async" />
-                <div class="profile-skills__slots" aria-label="Слоты навыков">
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                  <span class="profile-skills__slot" aria-hidden="true"></span>
-                </div>
               </div>
-              <p class="profile-skills__points" id="profileSkillsPoints">Очков навыков: <span id="profileSkillsPointsValue">0</span></p>
-              <div class="profile-skills__list" aria-label="Навыки">
-                <span class="profile-skills__item" id="profileSkillTournamentComboBonus">Бонусы за комбинации в турнирах</span>
-                <span class="profile-skills__item" id="profileSkillRakeback">Рейкбек</span>
-                <span class="profile-skills__item" id="profileSkillItmBonus">Бонус к ИТМ</span>
+              <div class="profile-pokerplus-panel profile-pokerplus-panel--skills" id="profilePokerPlusSkillsPanel" data-profile-poker21-tab-panel="skills" role="tabpanel" aria-labelledby="profilePokerPlusSkillsViewTab" hidden>
+                <section class="profile-skills" id="profileSkillsSection" aria-labelledby="profileSkillsTitle">
+                  <h2 class="profile-section__title profile-skills__title" id="profileSkillsTitle">Ваши навыки</h2>
+                  <div class="profile-skills__character">
+                    <img class="profile-skills__character-img" src="./assets/profile-pokerist.jpg" alt="Персонаж игрока" width="160" height="160" loading="lazy" decoding="async" />
+                    <div class="profile-skills__slots" aria-label="Слоты навыков">
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                      <span class="profile-skills__slot" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                  <p class="profile-skills__points" id="profileSkillsPoints">Очков навыков: <span id="profileSkillsPointsValue">0</span></p>
+                  <div class="profile-skills__list" aria-label="Навыки">
+                    <span class="profile-skills__item" id="profileSkillTournamentComboBonus">Бонусы за комбинации в турнирах</span>
+                    <span class="profile-skills__item" id="profileSkillRakeback">Рейкбек</span>
+                    <span class="profile-skills__item" id="profileSkillItmBonus">Бонус к ИТМ</span>
+                  </div>
+                </section>
               </div>
             </section>
             <div class="profile-chat-push profile-chat-push--hidden" id="profileChatPushRow" aria-hidden="true" data-profile-club-panel>
