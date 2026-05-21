@@ -50,6 +50,21 @@
   align-items: end;
   justify-content: flex-end;
 }
+.player-crm__hero-tools.player-crm__period-toolbar {
+  justify-content: flex-start;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(2, 6, 23, 0.18)),
+    rgba(15, 23, 42, 0.18);
+}
+[data-theme="light"] .player-crm__hero-tools.player-crm__period-toolbar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(241, 245, 249, 0.66)),
+    rgba(255, 255, 255, 0.7);
+}
 .player-crm__period,
 .player-crm__form-grid label,
 .player-crm__message-label {
@@ -261,6 +276,16 @@
   margin-bottom: 12px;
   --crm-stat-color: #c7a36a;
   --crm-stat-color-soft: rgba(199, 163, 106, 0.18);
+}
+.player-crm__current-stats {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  --crm-stat-color: #8fa3b8;
+  --crm-stat-color-soft: rgba(143, 163, 184, 0.16);
+}
+.player-crm__current-stats:empty {
+  display: none;
 }
 .player-crm__stats-grid {
   display: grid;

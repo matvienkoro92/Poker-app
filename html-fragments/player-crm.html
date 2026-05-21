@@ -5,46 +5,49 @@
       <div class="player-crm__hero-copy">
         <h2 class="player-crm__title" id="playerCrmTitle">CRM</h2>
       </div>
-      <div class="player-crm__hero-tools">
-        <label class="player-crm__period">
-          <span>Период</span>
-          <select id="playerCrmPeriodSelect">
-            <option value="all">За все время</option>
-            <option value="custom">Даты</option>
-            <option value="yesterday">Вчера</option>
-            <option value="last_month">Прошлый месяц</option>
-            <option value="current_month">Текущий месяц</option>
-            <option value="last_week">Прошлая неделя</option>
-            <option value="current_week">Текущая неделя</option>
-            <option value="90">90 дней</option>
-            <option value="30" selected>30 дней</option>
-            <option value="7">7 дней</option>
-          </select>
-        </label>
-        <label class="player-crm__period player-crm__date-field">
-          <span>С</span>
-          <span class="player-crm__date-control">
-            <input id="playerCrmDateFrom" type="date" inputmode="none" />
-            <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateFrom" aria-label="Выбрать дату начала">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-              </svg>
-            </button>
-          </span>
-        </label>
-        <label class="player-crm__period player-crm__date-field">
-          <span>По</span>
-          <span class="player-crm__date-control">
-            <input id="playerCrmDateTo" type="date" inputmode="none" />
-            <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateTo" aria-label="Выбрать дату окончания">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-              </svg>
-            </button>
-          </span>
-        </label>
-      </div>
     </header>
+
+    <div class="player-crm__current-stats" id="playerCrmCurrentStats"></div>
+
+    <div class="player-crm__hero-tools player-crm__period-toolbar">
+      <label class="player-crm__period">
+        <span>Период</span>
+        <select id="playerCrmPeriodSelect">
+          <option value="all">За все время</option>
+          <option value="custom">Даты</option>
+          <option value="yesterday">Вчера</option>
+          <option value="last_month">Прошлый месяц</option>
+          <option value="current_month">Текущий месяц</option>
+          <option value="last_week">Прошлая неделя</option>
+          <option value="current_week">Текущая неделя</option>
+          <option value="90">90 дней</option>
+          <option value="30" selected>30 дней</option>
+          <option value="7">7 дней</option>
+        </select>
+      </label>
+      <label class="player-crm__period player-crm__date-field">
+        <span>С</span>
+        <span class="player-crm__date-control">
+          <input id="playerCrmDateFrom" type="date" inputmode="none" />
+          <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateFrom" aria-label="Выбрать дату начала">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+            </svg>
+          </button>
+        </span>
+      </label>
+      <label class="player-crm__period player-crm__date-field">
+        <span>По</span>
+        <span class="player-crm__date-control">
+          <input id="playerCrmDateTo" type="date" inputmode="none" />
+          <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateTo" aria-label="Выбрать дату окончания">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+            </svg>
+          </button>
+        </span>
+      </label>
+    </div>
 
     <div class="player-crm__stats" id="playerCrmStats"></div>
 
