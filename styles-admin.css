@@ -1302,6 +1302,20 @@ button.admin-report-rakeback-summary__row:focus-visible {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
 }
+.admin-report-rakeback-summary__row--date {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(202, 161, 84, 0.2);
+}
+.admin-report-rakeback-summary__row--date .admin-report-rakeback-summary__label {
+  min-width: 0;
+  color: #ffe7b0;
+}
+.admin-report-rakeback-summary__row--date .admin-report-rakeback-summary__value {
+  text-align: right;
+}
 .admin-report-rakeback-summary__row--room .admin-report-rakeback-summary__label {
   min-width: 0;
 }

@@ -670,6 +670,8 @@
     var archiveBtn = config.archiveBtn || document.getElementById("adminReportRakebackArchiveBtn");
     var roomTabs = config.roomTabs || (modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : []);
     var totalEl = config.totalEl || document.getElementById("adminReportRakebackTotal");
+    var dateTotalLabelEl = config.dateTotalLabelEl || document.getElementById("adminReportRakebackDateTotalLabel");
+    var dateTotalEl = config.dateTotalEl || document.getElementById("adminReportRakebackDateTotal");
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
@@ -1677,6 +1679,10 @@
       var allShared = archiveMode ? [] : getSharedRowsForTotal();
       var roomTotals = getRakebackTotals(visibleShared);
       var allTotals = getRakebackTotals(allShared);
+      var dateTotals = getRakebackDateTotals(visibleShared);
+      var activeDateTotal = dateTotals.length ? dateTotals[0] : null;
+      if (dateTotalLabelEl) dateTotalLabelEl.textContent = activeDateTotal ? "Итого по дате " + formatEntryDateLabel(activeDateTotal.stamp) : "Итого по дате";
+      if (dateTotalEl) dateTotalEl.textContent = activeDateTotal ? formatRakebackSummaryPair(activeDateTotal.rake, activeDateTotal.amount) : "0 / 0";
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
       if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
       if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
