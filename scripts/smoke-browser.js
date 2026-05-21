@@ -369,16 +369,20 @@ async function checkProfilePokerPlus(browser) {
     const mttSection = document.querySelector(".profile-pokerplus-stats-section--mtt");
     const sngSection = document.querySelector(".profile-pokerplus-stats-section--sng");
     const cards = Array.from(mttSection?.querySelectorAll(".profile-pokerplus-stat") || []);
-    const winningsCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш");
+    const lifetimeCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш за все время");
+    const countedCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш с момента ведения статистики");
     const countCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "MTT игр");
     const sngStyle = sngSection ? getComputedStyle(sngSection) : null;
     return {
-      totalValue: (winningsCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
-      totalRaw: (winningsCard?.querySelector(".profile-pokerplus-stat__raw")?.textContent || "").trim(),
-      contextLabel: (winningsCard?.querySelector(".profile-pokerplus-stat__context-label")?.textContent || "").trim(),
-      contextValue: (winningsCard?.querySelector(".profile-pokerplus-stat__context-value")?.textContent || "").trim(),
-      contextTitle: winningsCard?.querySelector(".profile-pokerplus-stat__context")?.getAttribute("title") || "",
-      hasContextClass: !!winningsCard?.classList.contains("profile-pokerplus-stat--with-context"),
+      lifetimeLabel: (lifetimeCard?.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim(),
+      lifetimeValue: (lifetimeCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
+      lifetimeRaw: (lifetimeCard?.querySelector(".profile-pokerplus-stat__raw")?.textContent || "").trim(),
+      countedLabel: (countedCard?.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim(),
+      countedValue: (countedCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
+      countedRaw: (countedCard?.querySelector(".profile-pokerplus-stat__raw")?.textContent || "").trim(),
+      lifetimeLongLabel: !!lifetimeCard?.classList.contains("profile-pokerplus-stat--long-label"),
+      countedLongLabel: !!countedCard?.classList.contains("profile-pokerplus-stat--long-label"),
+      cardOrder: cards.map((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim()).slice(0, 3),
       countValue: (countCard?.querySelector(".profile-pokerplus-stat__value")?.textContent || "").trim(),
       activePeriod: (document.querySelector(".profile-pokerplus-stats-tabs__btn--active")?.textContent || "").trim(),
       sngColorVar: (sngStyle?.getPropertyValue("--profile-p21-section-rgb") || "").trim(),
@@ -386,7 +390,7 @@ async function checkProfilePokerPlus(browser) {
     };
   });
   await page.close();
-  if (state.totalValue !== "1.1M" || state.totalRaw !== "1084734" || state.contextLabel !== "Учтено:" || state.contextValue !== "300K" || !state.contextTitle.includes("300000") || !state.hasContextClass || state.countValue !== "4" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
+  if (state.lifetimeValue !== "1.1M" || state.lifetimeRaw !== "1084734" || state.countedValue !== "300K" || state.countedRaw !== "300000" || !state.lifetimeLongLabel || !state.countedLongLabel || state.cardOrder[0] !== "Выигрыш за все время" || state.cardOrder[1] !== "Выигрыш с момента ведения статистики" || state.cardOrder[2] !== "MTT игр" || state.countValue !== "4" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
     throw new Error("profile Poker21 counted MTT winnings smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during profile-pokerplus check:\n" + pageErrors.join("\n"));
