@@ -816,6 +816,13 @@
   color: var(--text-muted);
   line-height: 1.4;
 }
+.streams-room-guide {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
 .streams-btn {
   padding: 10px 16px;
   font-size: 15px;
