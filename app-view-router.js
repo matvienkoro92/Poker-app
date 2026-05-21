@@ -142,10 +142,10 @@ function pokerRenderPlayerCrmOpeningFallback() {
   var analytics = document.getElementById("playerCrmAnalytics");
   var statsText = stats && stats.textContent ? stats.textContent.trim() : "";
   var analyticsText = analytics && analytics.textContent ? analytics.textContent.trim() : "";
-  if (stats && (!statsText || /Загрузка CRM/i.test(statsText))) {
-    stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">CRM открывается. Данные появятся через несколько секунд.</div>";
+  if (stats && (!statsText || /Загрузка (?:CRM|дашборда)/i.test(statsText))) {
+    stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Дашборд открывается. Данные появятся через несколько секунд.</div>";
   }
-  if (analytics && (!analyticsText || /График загрузится после открытия CRM/i.test(analyticsText))) {
+  if (analytics && (!analyticsText || /График загрузится после открытия (?:CRM|дашборда)/i.test(analyticsText))) {
     analytics.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Готовим график и сводку игроков.</div>";
   }
 }
@@ -153,7 +153,7 @@ function pokerRenderPlayerCrmOpeningFallback() {
 function pokerRenderPlayerCrmOpenError(message) {
   var stats = document.getElementById("playerCrmStats");
   if (!stats) return;
-  stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + (message || "CRM не догрузилась. Закрой и открой раздел ещё раз.") + "</div>";
+  stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + (message || "Дашборд не догрузился. Закрой и открой раздел ещё раз.") + "</div>";
 }
 
 function pokerForcePlayerCrmVisible() {
@@ -434,7 +434,7 @@ window.pokerClosePlayerCrmStandalone = pokerClosePlayerCrmStandalone;
   document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   document.documentElement.classList.remove("app-view-vl-html-scroll");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* long-scroll без главной/CRM и без «Скачать»: прокрутка через body для старых длинных экранов. */
+  /* long-scroll без главной/дашборда и без «Скачать»: прокрутка через body для старых длинных экранов. */
   var longScrollInit =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
@@ -1176,7 +1176,7 @@ function setView(viewName, navOpts) {
     }
   }
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
-  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную/CRM сюда не включать. */
+  /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную/дашборд сюда не включать. */
   var longScroll =
     viewName === "learn-play-hub" ||
     viewName === "poker-tasks" ||
@@ -1470,7 +1470,7 @@ function pokerContinuePlayerCrmWarmOpen(openToken) {
     }).catch(function (err) {
       if (openToken !== playerCrmOpenToken) return;
       playerCrmOpenInFlight = false;
-      pokerRenderPlayerCrmOpenError("CRM открыта, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
+      pokerRenderPlayerCrmOpenError("Дашборд открыт, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
       if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm open", err);
     });
     return;
@@ -1487,13 +1487,13 @@ function pokerContinuePlayerCrmWarmOpen(openToken) {
         retryReady.then(function () {
           if (openToken === playerCrmOpenToken && window.__pokerPlayerCrmStandaloneOpen) pokerFinalizePlayerCrmDirectOpen();
         }).catch(function (err) {
-          if (idx === 4) pokerRenderPlayerCrmOpenError("CRM открыта, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
+          if (idx === 4) pokerRenderPlayerCrmOpenError("Дашборд открыт, но скрипты данных не загрузились. Обнови раздел через несколько секунд.");
           if (typeof console !== "undefined" && console.warn) console.warn("player CRM warm retry", err);
         });
         return;
       }
       if (idx === 4 && typeof window.pokerInitPlayerCrm !== "function") {
-        pokerRenderPlayerCrmOpenError("CRM открылась, но модуль данных не стартовал. Обнови приложение и открой CRM ещё раз.");
+        pokerRenderPlayerCrmOpenError("Дашборд открылся, но модуль данных не стартовал. Обнови приложение и открой дашборд ещё раз.");
       }
     }, delay);
   });

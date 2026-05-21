@@ -1571,8 +1571,8 @@ add("Large domain entrypoints stay thin after runtime split", () =>
   hasAll("html", [
     'data-crm-open="player-crm"',
     'data-crm-close="player-crm"',
-    "Загрузка CRM…",
-    "График загрузится после открытия CRM.",
+    "Загрузка дашборда…",
+    "График загрузится после открытия дашборда.",
   ]) &&
   hasAll("appPlayerCrmRuntime", [
     "function pokerInitPlayerCrm",

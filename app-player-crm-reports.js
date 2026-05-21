@@ -71,7 +71,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
     var chat = state.chatStats || {};
     return [
-      "CRM · График",
+      "Дашборд · График",
       "Период данных: " + periodLabel(),
       "Период графика: " + chartPeriodLabel(),
       "",
@@ -89,7 +89,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var rows = filteredPlayers();
     var visible = rows.slice(0, 15);
     return [
-      "CRM · Игроки",
+      "Дашборд · Игроки",
       "Период: " + periodLabel(),
       "Фильтр: " + (segmentByKey(state.filter).label || state.filter),
       "Найдено: " + intFmt(rows.length),
@@ -102,7 +102,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var rows = filteredRegistrations();
     var visible = rows.slice(0, 20);
     return [
-      "CRM · Зарегистрированные",
+      "Дашборд · Зарегистрированные",
       "Период: " + periodLabel(),
       "Показано: " + intFmt(rows.length),
       "Только Telegram: " + intFmt(registrationRowsByMethod("telegram").length),
@@ -121,7 +121,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var rows = filteredPokerPlusAccounts();
     var visible = rows.slice(0, 20);
     return [
-      "CRM · Poker21",
+      "Дашборд · Poker21",
       "Период: " + periodLabel(),
       "Показано: " + intFmt(rows.length),
       "",
@@ -135,7 +135,7 @@ function initPlayerCrmReportsRuntime(deps) {
 
   function buildSegmentsReport() {
     return [
-      "CRM · Сегменты",
+      "Дашборд · Сегменты",
       "Период: " + periodLabel(),
       "",
       segments.filter(function (s) { return s.key !== "all"; }).map(function (seg) {
@@ -155,7 +155,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var channel = channelEl ? channelEl.value : "bot";
     var players = segmentPlayers(segment);
     return [
-      "CRM · Рассылка",
+      "Дашборд · Рассылка",
       "Группа: " + (segmentByKey(segment).label || segment),
       "Канал: " + channelLabel(channel),
       "Получателей: " + intFmt(players.length),
@@ -176,7 +176,7 @@ function initPlayerCrmReportsRuntime(deps) {
 
   function sendCrmSectionData(section) {
     var text = buildCrmSectionReport(section || state.tab || "overview");
-    var title = (text.split("\n")[0] || "CRM данные").trim();
+    var title = (text.split("\n")[0] || "Данные дашборда").trim();
     if (navigator.share) {
       navigator.share({ title: title, text: text })
         .catch(function () { return copyTextToClipboard(text).then(function () { notifyCrmSend("Данные скопированы."); }); });

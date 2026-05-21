@@ -599,7 +599,7 @@ async function main() {
           const analytics = document.getElementById("playerCrmAnalytics");
           const statsText = stats ? String(stats.textContent || "").trim() : "";
           const analyticsText = analytics ? String(analytics.textContent || "").trim() : "";
-          return !/Загрузка CRM/i.test(statsText) && !/График загрузится после открытия CRM/i.test(analyticsText);
+          return !/Загрузка (?:CRM|дашборда)/i.test(statsText) && !/График загрузится после открытия (?:CRM|дашборда)/i.test(analyticsText);
         }, null, { timeout: 5000 });
         const crmState = await page.evaluate(() => {
           const root = document.getElementById("playerCrmView");

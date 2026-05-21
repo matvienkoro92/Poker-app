@@ -1,4 +1,4 @@
-// CRM игроков: компактная админ-панель для массового потока в переписке.
+// Дашборд игроков: компактная админ-панель для массового потока в переписке.
 (function () {
   var state = {
     loaded: false,
@@ -305,7 +305,7 @@
       "</div>" +
       "<div class=\"player-crm__timeline-item\"><strong>Заметка:</strong> " + esc(p.note) + "</div>" +
       "<div class=\"player-crm__edit\" data-crm-edit-player=\"" + esc(p.accountId || p.id) + "\">" +
-        "<h4 class=\"player-crm__edit-title\">CRM-поля</h4>" +
+        "<h4 class=\"player-crm__edit-title\">Поля дашборда</h4>" +
         "<div class=\"player-crm__form-grid\">" +
           "<label><span>Менеджер</span><input id=\"playerCrmEditManager\" value=\"" + esc(p.manager || "") + "\" /></label>" +
           "<label><span>Источник</span><input id=\"playerCrmEditSource\" value=\"" + esc(p.source || "") + "\" /></label>" +
@@ -877,7 +877,7 @@
       state.chatStats = null;
       state.permissions = null;
       state.source = "no-auth";
-      state.crmError = "CRM не загрузилась: нет авторизации. Войди по email владельца CRM.";
+      state.crmError = "Дашборд не загрузился: нет авторизации. Войди по email владельца дашборда.";
       state.loading = false;
       state.loadStartedAt = 0;
       state.loadingScope = "";
@@ -904,7 +904,7 @@
             return data;
           })
           .catch(function () {
-            return { ok: false, __httpOk: r.ok, __status: r.status, error: "CRM не вернула данные." };
+            return { ok: false, __httpOk: r.ok, __status: r.status, error: "Дашборд не вернул данные." };
           });
       })
       .then(function (data) {
@@ -936,8 +936,8 @@
         state.permissions = null;
         state.source = "error";
         state.crmError = error && error.name === "AbortError"
-          ? "CRM не загрузилась: API отвечает слишком долго. Попробуй открыть раздел ещё раз через несколько секунд."
-          : "CRM не загрузилась: ошибка сети или API.";
+          ? "Дашборд не загрузился: API отвечает слишком долго. Попробуй открыть раздел ещё раз через несколько секунд."
+          : "Дашборд не загрузился: ошибка сети или API.";
       })
       .then(function () {
         if (timeoutId) clearTimeout(timeoutId);
@@ -958,14 +958,14 @@
   function formatCrmLoadError(data) {
     data = data || {};
     if (data.__status === 403) {
-      return ((data.error || "CRM доступна только владельцам") + ". Если ты уже вошёл под нужной почтой, выйди и войди по email ещё раз.");
+      return ((data.error || "Дашборд доступен только владельцам") + ". Если ты уже вошёл под нужной почтой, выйди и войди по email ещё раз.");
     }
     var code = data.code ? " Код: " + String(data.code) + "." : "";
     var detail = data.details ? " Деталь: " + String(data.details) + "." : "";
     if (data.__status >= 500 || data.code) {
-      return "CRM не загрузилась: API упала при сборке данных." + code + detail;
+      return "Дашборд не загрузился: API упала при сборке данных." + code + detail;
     }
-    return (data.error || "CRM не загрузилась: API не вернул живые данные.") + code + detail;
+    return (data.error || "Дашборд не загрузился: API не вернул живые данные.") + code + detail;
   }
 
   function runBroadcast(action) {
