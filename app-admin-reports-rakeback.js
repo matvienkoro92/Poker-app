@@ -359,6 +359,20 @@
     return tr;
   }
 
+  function createEntryDateSeparator(entryAt) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var span = document.createElement("span");
+    tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--entries";
+    tr.setAttribute("data-rakeback-generated", "1");
+    tr.setAttribute("data-rakeback-entry-date-separator", "1");
+    td.colSpan = 7;
+    span.textContent = formatEntryDateLabel(entryAt);
+    td.appendChild(span);
+    tr.appendChild(td);
+    return tr;
+  }
+
   function createArchiveEmptyRow() {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -1715,17 +1729,24 @@
       var fragment = document.createDocumentFragment();
       var baseIndex = 0;
       var baseEntryByGroup = {};
+      var lastEntryDateKey = "";
       visibleShared.forEach(function (row, index) {
         var groupId = String(row.groupId || "").trim();
+        var entryAt = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
+        var entryDateKey = getDateInputValue(entryAt);
+        if (entryDateKey && entryDateKey !== lastEntryDateKey) {
+          fragment.appendChild(createEntryDateSeparator(entryAt));
+          lastEntryDateKey = entryDateKey;
+        }
         if (getSharedRowKind(row) !== "addon") {
           baseIndex += 1;
-          baseEntryByGroup[groupId] = row.entryAddedAt || row.createdAt || row.standardAt || Date.now();
+          baseEntryByGroup[groupId] = entryAt;
         }
         var renderRow = row;
         if (getSharedRowKind(row) === "addon") {
           renderRow = {};
           Object.keys(row).forEach(function (key) { renderRow[key] = row[key]; });
-          renderRow.baseEntryAt = baseEntryByGroup[groupId] || row.entryAddedAt || row.createdAt || Date.now();
+          renderRow.baseEntryAt = baseEntryByGroup[groupId] || entryAt;
         }
         fragment.appendChild(createSharedRow(renderRow, Math.max(0, baseIndex - 1)));
       });
