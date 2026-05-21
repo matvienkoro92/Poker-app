@@ -6,7 +6,7 @@
     heavyLoading: false,
     heavyLoadingScope: "",
     loadingScope: "",
-    tab: "overview",
+    tab: "stats",
     period: "30",
     dateFrom: "",
     dateTo: "",
@@ -1292,7 +1292,7 @@
     root.addEventListener("click", function (e) {
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
-        state.tab = tab.getAttribute("data-crm-tab") || "overview";
+        state.tab = tab.getAttribute("data-crm-tab") || "stats";
         syncTabs();
         return;
       }
