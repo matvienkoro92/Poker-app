@@ -1319,13 +1319,13 @@
   --profile-p21-section-soft: #bfdbfe;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-section--sng {
-  --profile-p21-section-rgb: 251, 113, 133;
-  --profile-p21-section-text: #fb7185;
-  --profile-p21-section-soft: #ffe4e6;
-  --profile-p21-section-bg-a: rgba(56, 13, 32, 0.9);
-  --profile-p21-section-bg-b: rgba(25, 10, 24, 0.78);
-  --profile-p21-section-card-bg-a: rgba(48, 12, 32, 0.94);
-  --profile-p21-section-card-bg-b: rgba(19, 10, 24, 0.9);
+  --profile-p21-section-rgb: 168, 85, 247;
+  --profile-p21-section-text: #c084fc;
+  --profile-p21-section-soft: #e9d5ff;
+  --profile-p21-section-bg-a: rgba(46, 16, 101, 0.9);
+  --profile-p21-section-bg-b: rgba(24, 10, 56, 0.78);
+  --profile-p21-section-card-bg-a: rgba(42, 17, 83, 0.94);
+  --profile-p21-section-card-bg-b: rgba(18, 10, 38, 0.9);
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-section__title {
   display: flex;
@@ -1824,10 +1824,10 @@
 }
 
 [data-theme="light"] #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-section--sng {
-  --profile-p21-section-text-light: #be123c;
-  --profile-p21-section-value-light: #9f1239;
-  --profile-p21-section-card-light-a: rgba(255, 241, 242, 0.96);
-  --profile-p21-section-card-light-b: rgba(255, 228, 230, 0.72);
+  --profile-p21-section-text-light: #7e22ce;
+  --profile-p21-section-value-light: #6b21a8;
+  --profile-p21-section-card-light-a: rgba(250, 245, 255, 0.96);
+  --profile-p21-section-card-light-b: rgba(233, 213, 255, 0.72);
 }
 
 [data-theme="light"] #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-section__title {
