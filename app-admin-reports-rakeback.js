@@ -359,16 +359,24 @@
     return tr;
   }
 
-  function createEntryDateSeparator(entryAt) {
+  function createEntryDateSeparator(entryAt, totalLabel) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
-    var span = document.createElement("span");
+    var stack = document.createElement("div");
+    var date = document.createElement("span");
+    var total = document.createElement("b");
     tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--entries";
     tr.setAttribute("data-rakeback-generated", "1");
     tr.setAttribute("data-rakeback-entry-date-separator", "1");
     td.colSpan = 7;
-    span.textContent = formatEntryDateLabel(entryAt);
-    td.appendChild(span);
+    stack.className = "admin-report-rakeback-date-separator__stack";
+    date.className = "admin-report-rakeback-date-separator__date";
+    total.className = "admin-report-rakeback-date-separator__total";
+    date.textContent = formatEntryDateLabel(entryAt);
+    total.textContent = totalLabel || "0 / 0";
+    stack.appendChild(date);
+    stack.appendChild(total);
+    td.appendChild(stack);
     tr.appendChild(td);
     return tr;
   }
@@ -684,8 +692,6 @@
     var archiveBtn = config.archiveBtn || document.getElementById("adminReportRakebackArchiveBtn");
     var roomTabs = config.roomTabs || (modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : []);
     var totalEl = config.totalEl || document.getElementById("adminReportRakebackTotal");
-    var dateTotalLabelEl = config.dateTotalLabelEl || document.getElementById("adminReportRakebackDateTotalLabel");
-    var dateTotalEl = config.dateTotalEl || document.getElementById("adminReportRakebackDateTotal");
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
@@ -1693,10 +1699,6 @@
       var allShared = archiveMode ? [] : getSharedRowsForTotal();
       var roomTotals = getRakebackTotals(visibleShared);
       var allTotals = getRakebackTotals(allShared);
-      var dateTotals = getRakebackDateTotals(visibleShared);
-      var activeDateTotal = dateTotals.length ? dateTotals[0] : null;
-      if (dateTotalLabelEl) dateTotalLabelEl.textContent = activeDateTotal ? "Итого по дате " + formatEntryDateLabel(activeDateTotal.stamp) : "Итого по дате";
-      if (dateTotalEl) dateTotalEl.textContent = activeDateTotal ? formatRakebackSummaryPair(activeDateTotal.rake, activeDateTotal.amount) : "0 / 0";
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
       if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
       if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
@@ -1729,13 +1731,18 @@
       var fragment = document.createDocumentFragment();
       var baseIndex = 0;
       var baseEntryByGroup = {};
+      var dateTotalsByKey = {};
       var lastEntryDateKey = "";
+      getRakebackDateTotals(visibleShared).forEach(function (day) {
+        if (day && day.key) dateTotalsByKey[day.key] = day;
+      });
       visibleShared.forEach(function (row, index) {
         var groupId = String(row.groupId || "").trim();
         var entryAt = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
         var entryDateKey = getDateInputValue(entryAt);
         if (entryDateKey && entryDateKey !== lastEntryDateKey) {
-          fragment.appendChild(createEntryDateSeparator(entryAt));
+          var dayTotal = dateTotalsByKey[entryDateKey];
+          fragment.appendChild(createEntryDateSeparator(entryAt, dayTotal ? formatRakebackSummaryPair(dayTotal.rake, dayTotal.amount) : "0 / 0"));
           lastEntryDateKey = entryDateKey;
         }
         if (getSharedRowKind(row) !== "addon") {
