@@ -714,7 +714,7 @@ function initProfilePokerPlus() {
     if (includeEmptyCore || handsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Раздач", handsStat, "", "♠"));
     if (includeEmptyCore || winningsStat != null) cashMetrics.push(pokerPlusStatMetricHtml("Выигрыш", winningsStat, pokerPlusStatTone(winningsStat), "⌁"));
     mttMetrics.push(pokerPlusStatMetricHtml(opts.isTotalPeriod ? "Выигрыш за все время" : "Выигрыш", mttStat, pokerPlusStatTone(mttStat), "🏆", opts.isTotalPeriod ? { extraClass: "profile-pokerplus-stat--long-label" } : null));
-    if (opts.isTotalPeriod && mttCountedWinnings != null && mttCountedWinnings === mttCountedWinnings && String(mttCountedWinnings).trim() !== "") {
+    if (opts.isTotalPeriod) {
       mttMetrics.push(pokerPlusStatMetricHtml("Выигрыш с момента ведения статистики", mttCountedWinnings, pokerPlusStatTone(mttCountedWinnings), "🏆", { extraClass: "profile-pokerplus-stat--long-label" }));
     }
     mttMetrics.push(pokerPlusStatMetricHtml("MTT игр", mttCountStat.value, "", "#"));
@@ -1089,8 +1089,7 @@ function initProfilePokerPlus() {
       if (pokerPlusStatsActivePeriod === "total") {
         periodOptions.isTotalPeriod = true;
         var countedMtt = pokerPlusCountedTournamentWinningsFromSnapshots(source, today, "mtt");
-        var totalMttCount = pokerPlusTournamentCountFloor(total, "mtt");
-        if (countedMtt && countedMtt.winnings != null && (!totalMttCount || countedMtt.count >= totalMttCount)) periodOptions.mttCountedWinnings = countedMtt.winnings;
+        if (countedMtt && countedMtt.winnings != null) periodOptions.mttCountedWinnings = countedMtt.winnings;
       }
       if (periodInfo.counter && pokerPlusCounterHasValue(periodInfo.counter)) {
         groups.push(pokerPlusStatsGroupHtml(periodInfo.title, periodInfo.counter, false, periodOptions));

@@ -182,7 +182,6 @@ async function installPokerPlusProfileMocks(page) {
       hands: 277,
       winnings: 993750.55,
       mttWinnings: 1084734,
-      mttCount: 4,
       mttItmCount: 4,
       mttFirstCount: 0,
       sngWinnings: 1018,
@@ -205,8 +204,8 @@ async function installPokerPlusProfileMocks(page) {
     statsSnapshots: {
       dates: [yesterday, today],
       dailyCounters: {
-        [yesterday]: { mttWinnings: 175000, mttCount: 2, mttItmCount: 1, mttFirstCount: 0 },
-        [today]: { mttWinnings: 125000, mttCount: 2, mttItmCount: 1, mttFirstCount: 0 },
+        [yesterday]: { mttWinnings: 175000, mttCount: 1, mttItmCount: 1, mttFirstCount: 0 },
+        [today]: { mttWinnings: 125000, mttCount: 1, mttItmCount: 1, mttFirstCount: 0 },
       },
     },
   };
@@ -390,7 +389,7 @@ async function checkProfilePokerPlus(browser) {
     };
   });
   await page.close();
-  if (state.lifetimeValue !== "1.1M" || state.lifetimeRaw !== "1084734" || state.countedValue !== "300K" || state.countedRaw !== "300000" || !state.lifetimeLongLabel || !state.countedLongLabel || state.cardOrder[0] !== "Выигрыш за все время" || state.cardOrder[1] !== "Выигрыш с момента ведения статистики" || state.cardOrder[2] !== "MTT игр" || state.countValue !== "4" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
+  if (state.lifetimeValue !== "1.1M" || state.lifetimeRaw !== "1084734" || state.countedValue !== "300K" || state.countedRaw !== "300000" || !state.lifetimeLongLabel || !state.countedLongLabel || state.cardOrder[0] !== "Выигрыш за все время" || state.cardOrder[1] !== "Выигрыш с момента ведения статистики" || state.cardOrder[2] !== "MTT игр" || state.countValue !== "4+" || state.activePeriod !== "Всего" || state.sngColorVar !== "168, 85, 247" || state.sngTextVar !== "#c084fc") {
     throw new Error("profile Poker21 counted MTT winnings smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during profile-pokerplus check:\n" + pageErrors.join("\n"));
