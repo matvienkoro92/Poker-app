@@ -10,6 +10,7 @@
   "scripts": {
     "build": "node scripts/copy-to-public.js",
     "smoke": "node scripts/smoke-checks.js",
+    "smoke:browser": "node scripts/smoke-browser.js",
     "smoke:nav": "node scripts/smoke-navigation.js",
     "smoke:visual": "node scripts/smoke-visual.js",
     "smoke:chat": "node scripts/smoke-chat-flows.js",
