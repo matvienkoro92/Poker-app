@@ -1852,7 +1852,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
 .admin-report-rakeback-date-separator--entries span {
   min-height: 24px;
@@ -1862,6 +1862,13 @@ button.admin-report-rakeback-summary__row:focus-visible {
   background: rgba(246, 211, 145, 0.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
   font-size: 12px;
+}
+.admin-report-rakeback-date-separator__weekday {
+  color: rgba(255, 231, 176, 0.72);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1;
 }
 .admin-report-rakeback-date-separator__total {
   color: #ffe7b0;

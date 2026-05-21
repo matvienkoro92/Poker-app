@@ -185,6 +185,13 @@
     return padDatePart(date.day) + "." + padDatePart(date.month);
   }
 
+  function formatEntryWeekdayLabel(raw) {
+    var date = getRakebackEntryDateParts(raw);
+    var weekdays = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+    var weekdayIndex = new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
+    return weekdays[weekdayIndex] || "";
+  }
+
   function getDateInputValue(raw) {
     var date = getRakebackEntryDateParts(raw);
     return [
@@ -364,6 +371,7 @@
     var td = document.createElement("td");
     var stack = document.createElement("div");
     var date = document.createElement("span");
+    var weekday = document.createElement("em");
     var total = document.createElement("b");
     tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--entries";
     tr.setAttribute("data-rakeback-generated", "1");
@@ -371,10 +379,13 @@
     td.colSpan = 7;
     stack.className = "admin-report-rakeback-date-separator__stack";
     date.className = "admin-report-rakeback-date-separator__date";
+    weekday.className = "admin-report-rakeback-date-separator__weekday";
     total.className = "admin-report-rakeback-date-separator__total";
     date.textContent = formatEntryDateLabel(entryAt);
+    weekday.textContent = formatEntryWeekdayLabel(entryAt);
     total.textContent = totalLabel || "0 / 0";
     stack.appendChild(date);
+    stack.appendChild(weekday);
     stack.appendChild(total);
     td.appendChild(stack);
     tr.appendChild(td);
