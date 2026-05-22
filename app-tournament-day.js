@@ -8,7 +8,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Magic MKO", buyin: "500₽", guarantee: "100 000₽" },
   { name: "Rebuy", buyin: "300₽", guarantee: "100 000₽" },
   { name: "Rebuy", buyin: "100₽", guarantee: "50 000₽" },
-  { name: "Нокаут Мистери", buyin: "1 000₽", guarantee: "150 000₽" },
+  { name: "Нокаут Мистери", buyin: "1 200₽", guarantee: "220 000₽" },
   { name: "Нокаут Прогрессив", buyin: "500₽", guarantee: "100 000₽" },
   { name: "Фриролл", buyin: "0₽ · R:500₽ / A:1 000₽", guarantee: "200 000₽" }
 ];

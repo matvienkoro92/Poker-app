@@ -86,6 +86,15 @@
   color: rgba(247, 234, 210, 0.82);
 }
 
+.daily-poker__prize small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
 .daily-poker__prize--royal {
   border-left-color: #facc15;
   background: linear-gradient(90deg, rgba(250, 204, 21, 0.18), rgba(15, 23, 42, 0.34));
@@ -95,6 +104,10 @@
 .daily-poker__prize--royal strong,
 .daily-poker__prize--royal span {
   color: #fde68a;
+}
+
+.daily-poker__prize--royal small {
+  color: rgba(254, 240, 138, 0.76);
 }
 
 .daily-poker__status-row {

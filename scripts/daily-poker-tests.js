@@ -108,9 +108,10 @@ function testAttemptEconomy() {
 
 function testRewardsAndLedger() {
   assert.strictEqual(rewardForHandRank("full_house", {}).ticketAmount, 500, "full house ticket 500");
-  assert.strictEqual(rewardForHandRank("four_of_a_kind", {}).ticketAmount, 1000, "four of a kind ticket 1000");
+  assert.strictEqual(rewardForHandRank("four_of_a_kind", {}).ticketAmount, 1200, "four of a kind ticket 1200");
   assert.strictEqual(rewardForHandRank("straight_flush", {}).ticketAmount, 3000, "straight flush ticket 3000");
   assert.strictEqual(rewardForHandRank("royal_flush", {}).ticketAmount, 10000, "royal flush ticket 10000");
+  assert.strictEqual(rewardForHandRank("four_of_a_kind", {}).title, "Билет на Нокаут Мистери 1 200 ₽", "four of a kind ticket title matches Thursday Mystery");
   assert.strictEqual(rewardForHandRank("straight_flush", {}).bonusAmount, 0, "straight flush is not paid as a flush");
   const promo = buildBonusLedgerEntry({
     userId: "ID100001",

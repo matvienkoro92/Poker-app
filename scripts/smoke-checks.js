@@ -1109,11 +1109,13 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     'schedule-section--week-tournament',
     "Турнир Недели Нокаут Меджик</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00",
     "Турниры дня в 18:00 МСК",
+    "<tr><td>Четверг</td><td>Нокаут Мистери</td><td>1 200₽</td><td>R:1 200₽</td><td>220 000₽</td><td>18:00</td></tr>",
     '<tr class="schedule-row--freeroll"><td>Суббота</td><td><span class="schedule-freeroll-name">Фриролл</span></td><td>0₽</td><td>R:500₽ / A:1 000₽</td><td>200 000₽</td><td>18:00</td></tr>',
     "<tr><td>PKO/MKO</td><td>300₽</td><td>R:300₽</td><td>25 000₽</td><td>17:00</td></tr>",
     "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
   ]) &&
   has("appTournamentDay", 'guarantee: "300 000₽"') &&
+  has("appTournamentDay", 'buyin: "1 200₽", guarantee: "220 000₽"') &&
   !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
   !has("scheduleFragment", "Rebuy (19:00)")
 );
