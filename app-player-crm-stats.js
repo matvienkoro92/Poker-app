@@ -199,7 +199,7 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     var currentSection =
       "<section class=\"player-crm__stats-section\" aria-label=\"Текущее состояние\">" +
-        "<div class=\"player-crm__stats-section-head\"><h3>Сейчас</h3><span>состояние базы</span></div>" +
+        "<div class=\"player-crm__stats-section-head\"><h3>За все время</h3><span>состояние базы</span></div>" +
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\">" + currentStats.map(currentCard).join("") + "</div>" +
       "</section>";
     if (currentEl) currentEl.innerHTML = currentSection;
