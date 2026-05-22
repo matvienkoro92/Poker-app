@@ -1487,6 +1487,7 @@
     var speedText = perSecond > 0 ? ", скорость " + perSecond.toLocaleString("ru-RU") + "/с" : "";
     var status = String(progress.status || "").trim();
     if (status === "building") return "Собираем аудиторию рассылки...";
+    if (status === "queued") return "Рассылка поставлена в очередь: 0 / " + intFmt(total) + ".";
     if (status === "failed") return "Рассылка остановилась: " + (progress.error || "ошибка отправки") + (progress.details ? " Детали: " + progress.details : "");
     var pctText = total > 0 ? " (" + Math.min(100, Math.round(processed / total * 100)) + "%)" : "";
     var prefix = status === "done" ? "Рассылка завершена" : "Отправляем";
@@ -1534,6 +1535,66 @@
       stopped = true;
       stopBroadcastProgressPolling();
     };
+  }
+
+  function processBroadcastJobStep(base, progressId) {
+    if (!base || !progressId) return Promise.resolve(null);
+    return fetch(base + "/api/player-crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postBodySafe({ action: "process_campaign_job", progressId: progressId })),
+    })
+      .then(function (r) { return r.json(); });
+  }
+
+  function driveBroadcastJob(base, progressId, totalFallback, out, stopProgress) {
+    var stopped = false;
+    function finish(progress, allowResume) {
+      stopped = true;
+      if (typeof stopProgress === "function") stopProgress();
+      if (progress && out) {
+        state.lastBroadcastProgress = progress;
+        renderBroadcastProgressResult(formatBroadcastProgress(progress, totalFallback), progress, allowResume === true);
+      }
+      loadCrmData();
+    }
+    function failWithProgress(message) {
+      fetchBroadcastProgress(base, progressId).then(function (progress) {
+        stopped = true;
+        if (typeof stopProgress === "function") stopProgress();
+        if (progress) {
+          state.lastBroadcastProgress = progress;
+          renderBroadcastProgressResult(message + " " + formatBroadcastProgress(progress, totalFallback), progress, true);
+        } else if (out) {
+          out.textContent = message;
+        }
+      });
+    }
+    function step() {
+      if (stopped || state.broadcastProgressId !== progressId) return;
+      processBroadcastJobStep(base, progressId)
+        .then(function (data) {
+          if (stopped || state.broadcastProgressId !== progressId) return;
+          var progress = data && data.progress ? data.progress : null;
+          if (progress) {
+            state.lastBroadcastProgress = progress;
+            if (out) renderBroadcastProgressResult(formatBroadcastProgress(progress, totalFallback), progress, progress.status === "failed");
+          }
+          if (!data || !data.ok) {
+            failWithProgress((data && data.error) || "Рассылка остановилась.");
+            return;
+          }
+          if (data.jobDone || (progress && progress.status === "done")) {
+            finish(progress, false);
+            return;
+          }
+          setTimeout(step, 250);
+        })
+        .catch(function () {
+          failWithProgress(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.");
+        });
+    }
+    setTimeout(step, 50);
   }
 
   function renderBroadcastImageAttachment() {
@@ -1815,6 +1876,7 @@
     var stopProgress = function () {};
     if (action === "send_campaign") {
       payload.progressId = makeBroadcastProgressId();
+      payload.asyncJob = true;
       stopProgress = startBroadcastProgressPolling(base, payload.progressId, targetCount, out);
     }
     fetch(base + "/api/player-crm", {
@@ -1824,6 +1886,14 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (data && data.ok && action === "send_campaign" && data.jobQueued && payload.progressId) {
+          if (data.progress) {
+            state.lastBroadcastProgress = data.progress;
+            renderBroadcastProgressResult(formatBroadcastProgress(data.progress, targetCount), data.progress, false);
+          }
+          driveBroadcastJob(base, payload.progressId, targetCount, out, stopProgress);
+          return;
+        }
         stopProgress();
         if (data && data.ok) {
           if (out) {

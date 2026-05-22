@@ -267,6 +267,7 @@ async function enableVerifiedProfile(page) {
 }
 
 async function installPlayerCrmMocks(page) {
+  let crmSmokeProgress = null;
   await page.route(/\/api\/player-crm(?:\?|$)/, async (route) => {
     const req = route.request();
     const headers = {
@@ -280,7 +281,66 @@ async function installPlayerCrmMocks(page) {
     }
     if (req.method() === "POST") {
       const payload = JSON.parse(req.postData() || "{}");
+      if (payload.action === "process_campaign_job") {
+        const total = crmSmokeProgress && crmSmokeProgress.total ? crmSmokeProgress.total : 1;
+        crmSmokeProgress = {
+          ...(crmSmokeProgress || {}),
+          status: "done",
+          total,
+          processed: total,
+          delivered: total,
+          notSent: 0,
+          sentBot: total,
+          sentPush: 0,
+          failed: 0,
+          pendingIds: [],
+          processedIds: ["ID1001"].slice(0, total),
+          sentIds: ["ID1001"].slice(0, total),
+          perSecond: 10,
+        };
+        await route.fulfill({
+          status: 200,
+          headers,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({ ok: true, jobDone: true, progressId: payload.progressId, progress: crmSmokeProgress }),
+        });
+        return;
+      }
       const isTest = payload.action === "test_campaign";
+      if (payload.action === "send_campaign" && payload.asyncJob) {
+        const ids = Array.isArray(payload.audienceIds) ? payload.audienceIds : [];
+        crmSmokeProgress = {
+          status: "queued",
+          campaignId: "crm_smoke",
+          total: ids.length,
+          processed: 0,
+          delivered: 0,
+          notSent: ids.length,
+          sentBot: 0,
+          sentPush: 0,
+          failed: 0,
+          pendingIds: ids,
+          allIds: ids,
+          processedIds: [],
+          sentIds: [],
+          perSecond: 0,
+        };
+        await route.fulfill({
+          status: 200,
+          headers,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({
+            ok: true,
+            jobQueued: true,
+            id: "crm_smoke",
+            progressId: payload.progressId,
+            audience: ids.length,
+            hasImage: !!payload.imageDataUrl,
+            progress: crmSmokeProgress,
+          }),
+        });
+        return;
+      }
       await route.fulfill({
         status: 200,
         headers,
@@ -300,6 +360,16 @@ async function installPlayerCrmMocks(page) {
           buttonText: payload.buttonText || "",
           buttonUrl: payload.buttonUrl || "",
         }),
+      });
+      return;
+    }
+    const url = new URL(req.url());
+    if (url.searchParams.get("campaignProgressId") && crmSmokeProgress) {
+      await route.fulfill({
+        status: 200,
+        headers,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({ ok: true, progressId: url.searchParams.get("campaignProgressId"), progress: crmSmokeProgress }),
       });
       return;
     }
@@ -552,9 +622,18 @@ async function checkCrmBroadcastPreview(browser) {
   const testState = await page.evaluate(() => ({
     testResult: document.getElementById("playerCrmBroadcastResult")?.textContent.replace(/\s+/g, " ").trim() || "",
   }));
+  page.on("dialog", async (dialog) => dialog.accept());
+  await page.locator("#playerCrmBroadcastSendBtn").click();
+  await page.waitForFunction(() => {
+    const result = document.getElementById("playerCrmBroadcastResult");
+    return result && result.textContent.includes("Рассылка завершена");
+  }, null, { timeout: 7000 });
+  const sendState = await page.evaluate(() => ({
+    sendResult: document.getElementById("playerCrmBroadcastResult")?.textContent.replace(/\s+/g, " ").trim() || "",
+  }));
   await page.close();
-  const state = { ...previewState, ...testState };
-  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || !state.audienceText.includes("1 получателей") || !state.audienceText.includes("пачка 1/1") || !state.batchSummary.includes("Пачка 1/1") || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть акцию") || !state.modalText.includes("Пачка1/1") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да")) {
+  const state = { ...previewState, ...testState, ...sendState };
+  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || !state.audienceText.includes("1 получателей") || !state.audienceText.includes("пачка 1/1") || !state.batchSummary.includes("Пачка 1/1") || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть акцию") || !state.modalText.includes("Пачка1/1") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да") || !state.sendResult.includes("Рассылка завершена") || !state.sendResult.includes("Доставлено 1")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));
