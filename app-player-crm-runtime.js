@@ -1619,6 +1619,7 @@
             out.textContent = action === "test_campaign"
               ? "Тест отправлен Роману @Roman1787443: бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + "."
               : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+            if (data.warning) out.textContent += " Предупреждение: " + data.warning;
           }
           loadCrmData();
         } else if (out) {
