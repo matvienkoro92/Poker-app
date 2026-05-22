@@ -187,8 +187,9 @@
 }
 .player-crm__tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(92px, 1fr));
   gap: 6px;
+  overflow-x: auto;
   margin: 0 0 12px;
   padding: 5px;
   border: 1px solid rgba(167, 139, 92, 0.24);
@@ -1726,7 +1727,7 @@ button.player-crm__stat:focus-visible,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .player-crm__tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(92px, 1fr));
   }
   .player-crm__stat-value {
     font-size: 19px;
