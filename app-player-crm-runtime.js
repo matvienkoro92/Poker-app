@@ -1426,7 +1426,18 @@
     var out = document.getElementById("playerCrmBroadcastResult");
     if (!out) return;
     var pendingIds = progress && Array.isArray(progress.pendingIds) ? progress.pendingIds : [];
+    var status = String(progress && progress.status || "").trim();
+    var progressId = String((progress && (progress.progressId || progress.jobId)) || state.broadcastProgressId || "").trim();
     var html = "<div>" + esc(text || "") + "</div>";
+    if (progress && progress.asyncJob && progressId && status !== "done" && status !== "canceled" && status !== "failed") {
+      html += "<div class=\"player-crm__send-result-actions\">";
+      if (status === "paused") {
+        html += "<button type=\"button\" class=\"player-crm__primary-btn\" data-crm-resume-job>Продолжить</button>";
+      } else {
+        html += "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-pause-job>Пауза</button>";
+      }
+      html += "<button type=\"button\" class=\"player-crm__danger-btn\" data-crm-cancel-job>Отменить</button></div>";
+    }
     if (allowResume && pendingIds.length) {
       html += "<div class=\"player-crm__send-result-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-resume-broadcast>Дослать оставшимся: " + esc(intFmt(pendingIds.length)) + "</button></div>";
     }
@@ -1488,6 +1499,8 @@
     var status = String(progress.status || "").trim();
     if (status === "building") return "Собираем аудиторию рассылки...";
     if (status === "queued") return "Рассылка поставлена в очередь: 0 / " + intFmt(total) + ".";
+    if (status === "paused") return "Рассылка на паузе: обработано " + intFmt(processed) + " / " + intFmt(total) + ". Доставлено " + intFmt(delivered) + ", осталось " + intFmt(notSent) + ".";
+    if (status === "canceled") return "Рассылка отменена: обработано " + intFmt(processed) + " / " + intFmt(total) + ". Доставлено " + intFmt(delivered) + ", не отправлено " + intFmt(notSent) + ".";
     if (status === "throttled") {
       var waitSeconds = Number(progress.retryAfterSeconds) || 0;
       if (progress.cooldownUntil) waitSeconds = Math.max(waitSeconds, Math.ceil((Date.parse(progress.cooldownUntil) - Date.now()) / 1000));
@@ -1553,6 +1566,45 @@
       .then(function (r) { return r.json(); });
   }
 
+  function controlBroadcastJob(command) {
+    var progress = state.lastBroadcastProgress || {};
+    var progressId = String(progress.progressId || progress.jobId || state.broadcastProgressId || "").trim();
+    var out = document.getElementById("playerCrmBroadcastResult");
+    var base = getApiBaseSafe();
+    if (!base || !progressId) {
+      if (out) out.textContent = "Не найден активный ID рассылки.";
+      return;
+    }
+    fetch(base + "/api/player-crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postBodySafe({ action: "control_campaign_job", progressId: progressId, command: command })),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          if (out) out.textContent = (data && data.error) || "Не удалось управлять рассылкой.";
+          return;
+        }
+        var nextProgress = data.progress || null;
+        if (nextProgress) {
+          state.lastBroadcastProgress = nextProgress;
+          renderBroadcastProgressResult(formatBroadcastProgress(nextProgress, nextProgress.total), nextProgress, false);
+        }
+        if (command === "pause" || command === "cancel") {
+          stopBroadcastProgressPolling();
+          return;
+        }
+        if (command === "resume") {
+          var stopProgress = startBroadcastProgressPolling(base, progressId, nextProgress && nextProgress.total, out);
+          driveBroadcastJob(base, progressId, nextProgress && nextProgress.total, out, stopProgress);
+        }
+      })
+      .catch(function () {
+        if (out) out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
+      });
+  }
+
   function driveBroadcastJob(base, progressId, totalFallback, out, stopProgress) {
     var stopped = false;
     function finish(progress, allowResume) {
@@ -1585,6 +1637,10 @@
           if (progress) {
             state.lastBroadcastProgress = progress;
             if (out) renderBroadcastProgressResult(formatBroadcastProgress(progress, totalFallback), progress, progress.status === "failed");
+          }
+          if (progress && (progress.status === "paused" || progress.status === "canceled")) {
+            finish(progress, false);
+            return;
           }
           if (!data || !data.ok) {
             failWithProgress((data && data.error) || "Рассылка остановилась.");
@@ -2461,6 +2517,20 @@
       }
       if (e.target.closest("[data-crm-resume-broadcast]")) {
         resumeBroadcastRemaining();
+        return;
+      }
+      if (e.target.closest("[data-crm-pause-job]")) {
+        controlBroadcastJob("pause");
+        return;
+      }
+      if (e.target.closest("[data-crm-resume-job]")) {
+        controlBroadcastJob("resume");
+        return;
+      }
+      if (e.target.closest("[data-crm-cancel-job]")) {
+        if (!window.confirm || window.confirm("Отменить текущую рассылку? Уже отправленные сообщения останутся доставленными.")) {
+          controlBroadcastJob("cancel");
+        }
         return;
       }
     });
