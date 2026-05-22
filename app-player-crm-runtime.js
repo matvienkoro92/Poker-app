@@ -1488,6 +1488,12 @@
     var status = String(progress.status || "").trim();
     if (status === "building") return "Собираем аудиторию рассылки...";
     if (status === "queued") return "Рассылка поставлена в очередь: 0 / " + intFmt(total) + ".";
+    if (status === "throttled") {
+      var waitSeconds = Number(progress.retryAfterSeconds) || 0;
+      if (progress.cooldownUntil) waitSeconds = Math.max(waitSeconds, Math.ceil((Date.parse(progress.cooldownUntil) - Date.now()) / 1000));
+      var waitText = waitSeconds > 0 ? " Пауза " + formatBroadcastDuration(waitSeconds) + "." : " Скоро продолжим.";
+      return "Telegram ограничил скорость отправки." + waitText + " Уже обработано " + intFmt(processed) + " / " + intFmt(total) + ". Доставлено " + intFmt(delivered) + ", осталось " + intFmt(notSent) + ".";
+    }
     if (status === "failed") return "Рассылка остановилась: " + (progress.error || "ошибка отправки") + (progress.details ? " Детали: " + progress.details : "");
     var pctText = total > 0 ? " (" + Math.min(100, Math.round(processed / total * 100)) + "%)" : "";
     var prefix = status === "done" ? "Рассылка завершена" : "Отправляем";
@@ -1588,7 +1594,13 @@
             finish(progress, false);
             return;
           }
-          setTimeout(step, 250);
+          var nextDelay = 250;
+          if (progress && progress.status === "throttled") {
+            var waitMs = Number(progress.retryAfterSeconds) > 0 ? Number(progress.retryAfterSeconds) * 1000 : 1000;
+            if (progress.cooldownUntil) waitMs = Math.max(waitMs, Date.parse(progress.cooldownUntil) - Date.now());
+            nextDelay = Math.max(1000, Math.min(120000, waitMs + 250));
+          }
+          setTimeout(step, nextDelay);
         })
         .catch(function () {
           failWithProgress(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.");
