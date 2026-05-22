@@ -200,6 +200,11 @@ function initPlayerCrmReportsRuntime(deps) {
   function campaignStatusLabel(value) {
     var s = String(value || "").trim();
     if (s === "sent") return "Отправлена";
+    if (s === "queued") return "В очереди";
+    if (s === "sending") return "Отправляется";
+    if (s === "throttled") return "Пауза Telegram";
+    if (s === "paused") return "Пауза";
+    if (s === "canceled") return "Отменена";
     if (s === "draft") return "Черновик";
     if (s === "test") return "Тест";
     if (s === "test_failed") return "Тест не ушёл";
@@ -215,7 +220,7 @@ function initPlayerCrmReportsRuntime(deps) {
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__campaigns-table\"><thead><tr>" +
-      "<th>Дата</th><th>Статус</th><th>Канал</th><th>Аудитория</th><th>Получатель</th><th>Бот отправлено</th><th>Push доставлено</th><th>Открыто</th><th>Клики</th><th>Уник.</th><th>Ошибки</th><th>ID</th>" +
+      "<th>Дата</th><th>Статус</th><th>Канал</th><th>Аудитория</th><th>Получатель</th><th>Бот</th><th>Push</th><th>Push открыли</th><th>Push клики</th><th>Кнопка</th><th>В приложение</th><th>Активн.</th><th>Депозиты</th><th>Рег.</th><th>Ошибки</th><th>Трек</th><th>ID</th>" +
       "</tr></thead><tbody>" + rows.map(function (campaign) {
         return "<tr>" +
           "<td>" + esc(campaignDateLabel(campaign && campaign.createdAt)) + "</td>" +
@@ -227,8 +232,13 @@ function initPlayerCrmReportsRuntime(deps) {
           "<td>" + esc(intFmt(campaign && campaign.sentPush)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.pushOpens)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.pushClicks)) + "</td>" +
-          "<td>" + esc(intFmt(campaign && campaign.pushOpenUsers)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.buttonClicks)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.appVisits)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.activeVisitors)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.postCampaignDeposits)) + "</td>" +
+          "<td>" + esc(intFmt(campaign && campaign.postCampaignRegistrations)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.failed)) + "</td>" +
+          "<td>" + esc(campaign && campaign.trackingLinkId ? "ref_" + campaign.trackingLinkId : "—") + "</td>" +
           "<td>" + esc(campaign && campaign.id ? campaign.id : "—") + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";

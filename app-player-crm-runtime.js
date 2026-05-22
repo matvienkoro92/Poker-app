@@ -682,11 +682,72 @@
     var sel = document.getElementById("playerCrmBroadcastSegment");
     var el = document.getElementById("playerCrmBroadcastAudience");
     var key = sel ? sel.value : state.filter;
-    var players = segmentPlayers(key);
+    var basePlayers = segmentPlayers(key);
+    var filters = broadcastInnerFilterValues();
+    var players = applyBroadcastInnerFilters(basePlayers, filters);
     var batch = readBroadcastBatch(players);
-    if (el) el.textContent = intFmt(players.length) + " получателей · " + batch.label;
+    if (el) {
+      var filterLabel = filters.length && basePlayers.length !== players.length
+        ? "после фильтров " + intFmt(players.length) + " из " + intFmt(basePlayers.length)
+        : intFmt(players.length) + " получателей";
+      el.textContent = filterLabel + " · " + batch.label;
+    }
     renderBroadcastBatchSummary(batch);
     return players;
+  }
+
+  function broadcastInnerFilterValues() {
+    var wrap = document.getElementById("playerCrmBroadcastFilters");
+    if (!wrap) return [];
+    return Array.prototype.slice.call(wrap.querySelectorAll("input[type=\"checkbox\"]:checked"))
+      .map(function (el) { return String(el.value || "").trim(); })
+      .filter(Boolean);
+  }
+
+  function broadcastDaysValue(value) {
+    var n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function broadcastLastTouchMs(player) {
+    var touches = Array.isArray(player && player.touches) ? player.touches : [];
+    for (var i = 0; i < touches.length; i += 1) {
+      var ms = Date.parse((touches[i] && (touches[i].at || touches[i].createdAt)) || "");
+      if (Number.isFinite(ms)) return ms;
+    }
+    return 0;
+  }
+
+  function broadcastMatchesInnerFilter(player, filter) {
+    var p = player || {};
+    var channels = p.channels || {};
+    if (filter === "bot_only") return !!channels.bot;
+    if (filter === "push_no_bot") return !!channels.push && !channels.bot;
+    if (filter === "has_deposit") {
+      var deposits = p.deposits || {};
+      var key = state.period === "custom" ? "custom" : String(state.period || "30");
+      return (Number(deposits[key]) || 0) > 0 || (Number(deposits.all) || 0) > 0;
+    }
+    if (filter === "no_touch_24h") {
+      var lastTouch = broadcastLastTouchMs(p);
+      if (!lastTouch) return true;
+      return Date.now() - lastTouch >= 24 * 3600000;
+    }
+    if (filter === "inactive_30d") {
+      var values = [p.lastMessageDays, p.lastDepositDays, p.lastTouchDays].map(broadcastDaysValue).filter(function (n) { return n != null; });
+      if (!values.length) return true;
+      return Math.min.apply(null, values) >= 30;
+    }
+    return true;
+  }
+
+  function applyBroadcastInnerFilters(players, filters) {
+    var selected = Array.isArray(filters) ? filters.filter(Boolean) : [];
+    var list = Array.isArray(players) ? players : [];
+    if (!selected.length) return list;
+    return list.filter(function (player) {
+      return selected.every(function (filter) { return broadcastMatchesInnerFilter(player, filter); });
+    });
   }
 
   function playerBroadcastId(player) {
@@ -1897,7 +1958,8 @@
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
-    var players = segmentPlayers(segment);
+    var innerFilters = resumeIds.length ? [] : broadcastInnerFilterValues();
+    var players = applyBroadcastInnerFilters(segmentPlayers(segment), innerFilters);
     var batch = readBroadcastBatch(players);
     var allAudienceIds = players.map(playerBroadcastId).filter(Boolean);
     var sendAllBatches = options.allBatches === true && !resumeIds.length;
@@ -1949,6 +2011,7 @@
       text: text,
       period: state.period === "custom" ? "30" : state.period,
       range: requestRange(),
+      innerFilters: innerFilters,
     };
     if (action !== "test_campaign") {
       payload.audienceIds = audienceIds;
@@ -1969,6 +2032,7 @@
       payload.force = true;
     }
     if (options.force === true) payload.force = true;
+    if (options.ackDuplicate === true) payload.ackDuplicate = true;
     var imagePayload = broadcastImagePayload();
     Object.keys(imagePayload).forEach(function (key) {
       payload[key] = imagePayload[key];
@@ -2012,6 +2076,12 @@
             if (data.warning) out.textContent += " Предупреждение: " + data.warning;
           }
           loadCrmData();
+        } else if (data && data.code === "crm_campaign_duplicate_today" && data.requiresAck && action === "send_campaign") {
+          if (out) out.textContent = (data.warning || data.error || "Эта аудитория уже получала похожую рассылку сегодня.") + " Подтверди, если нужно отправить повторно.";
+          var ack = window.confirm ? window.confirm((data.warning || data.error || "Эта аудитория уже получала похожую рассылку сегодня.") + "\n\nВсе равно отправить?") : false;
+          if (ack) {
+            runBroadcast(action, Object.assign({}, options, { ackDuplicate: true, skipConfirm: true }));
+          }
         } else if (out) {
           var errorText = data && data.error ? data.error : "Не удалось подготовить рассылку.";
           if (data && data.details) errorText += " Детали: " + data.details;
@@ -2704,6 +2774,12 @@
     });
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
     if (broadcastSegment) broadcastSegment.addEventListener("change", function () {
+      var batchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
+      if (batchNumber) batchNumber.value = "1";
+      updateBroadcastAudience();
+    });
+    var broadcastFilters = document.getElementById("playerCrmBroadcastFilters");
+    if (broadcastFilters) broadcastFilters.addEventListener("change", function () {
       var batchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
       if (batchNumber) batchNumber.value = "1";
       updateBroadcastAudience();

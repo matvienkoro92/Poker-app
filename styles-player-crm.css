@@ -1237,6 +1237,30 @@ button.player-crm__stat:focus-visible,
 .player-crm__message-label {
   margin-bottom: 10px;
 }
+.player-crm__broadcast-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.player-crm__broadcast-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(199, 163, 106, 0.34);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.34);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+.player-crm__broadcast-filters input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
 .player-crm__broadcast-batch-grid {
   margin-bottom: 6px;
 }
@@ -1661,7 +1685,7 @@ button.player-crm__stat:focus-visible,
   min-width: 920px;
 }
 .player-crm__campaigns-table {
-  min-width: 920px;
+  min-width: 1320px;
 }
 .player-crm__visit-sections-table {
   width: max-content;

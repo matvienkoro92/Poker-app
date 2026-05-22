@@ -98,7 +98,8 @@ function pokerApplyTrackingLinkLanding(ctx) {
   var params = ctx.params || {};
   var targetStartApp = params.target_startapp ? String(params.target_startapp).trim() : "";
   var targetView = params.target_view ? String(params.target_view).trim() : "";
-  if (!targetStartApp && !targetView) return;
+  var targetUrl = params.target_url ? String(params.target_url).trim() : "";
+  if (!targetStartApp && !targetView && !targetUrl) return;
   var onceKey = "poker_session_tracking_landing_applied_" + String(ctx.ref).replace(/^ref_/, "");
   try {
     if (sessionStorage.getItem(onceKey)) return;
@@ -112,8 +113,12 @@ function pokerApplyTrackingLinkLanding(ctx) {
         setView(targetView);
       } else if (targetStartApp === "home" && typeof setView === "function") {
         setView("home");
+      } else if (/^https?:\/\//i.test(targetUrl)) {
+        if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:external", params.target_label || "");
+        if (!window.location || String(window.location.href || "") !== targetUrl) window.location.href = targetUrl;
+        return;
       }
-      if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:" + (targetView || targetStartApp), params.target_label || "");
+      if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:" + (targetView || targetStartApp || "url"), params.target_label || "");
     } catch (eApply) {}
   }, 80);
 }
