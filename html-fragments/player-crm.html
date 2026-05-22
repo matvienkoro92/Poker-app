@@ -13,6 +13,7 @@
       <button type="button" class="player-crm__tab" data-crm-tab="overview">График</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players">Игроки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="links">Ссылки</button>
     </nav>
 
     <div class="player-crm__workbench">
@@ -237,6 +238,38 @@
             <div class="player-crm__send-result" id="playerCrmBroadcastResult" aria-live="polite"></div>
           </div>
         </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="links">
+          <div class="player-crm__section-head">
+            <div>
+              <h3>Ссылки</h3>
+              <span id="playerCrmLinksSummary">Создание и эффективность лидов</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-links-refresh>Обновить</button>
+          </div>
+          <div class="player-crm__links">
+            <div class="player-crm__links-builder">
+              <div class="player-crm__form-grid player-crm__links-form-grid">
+                <label><span>Название</span><input id="playerCrmLinkLabel" maxlength="200" placeholder="Stories Instagram / Май" /></label>
+                <label><span>Раздел</span><select id="playerCrmLinkTarget"></select></label>
+                <label><span>Источник</span><input id="playerCrmLinkSource" maxlength="80" placeholder="instagram, telegram, vk" /></label>
+                <label><span>Канал</span><input id="playerCrmLinkMedium" maxlength="80" placeholder="story, post, ads, dm" /></label>
+                <label><span>Кампания</span><input id="playerCrmLinkCampaign" maxlength="120" placeholder="mtt_may_leads" /></label>
+                <label><span>Креатив</span><input id="playerCrmLinkContent" maxlength="120" placeholder="video_01 / banner_a" /></label>
+                <label><span>Аудитория</span><input id="playerCrmLinkTerm" maxlength="120" placeholder="новички / MTT / кеш" /></label>
+                <label><span>Оффер</span><input id="playerCrmLinkOffer" maxlength="160" placeholder="Бесплатный урок / клуб / бонус" /></label>
+                <label><span>Ответственный</span><input id="playerCrmLinkOwner" maxlength="80" placeholder="Аня / Вика / Роман" /></label>
+                <label><span>Комментарий</span><input id="playerCrmLinkNote" maxlength="240" placeholder="где размещали и что тестируем" /></label>
+              </div>
+              <div class="player-crm__broadcast-actions">
+                <button type="button" class="player-crm__primary-btn" id="playerCrmCreateLinkBtn">Создать ссылку</button>
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmClearLinkFormBtn">Очистить</button>
+              </div>
+              <div class="player-crm__send-result player-crm__links-result" id="playerCrmLinksResult" aria-live="polite"></div>
+            </div>
+            <div class="player-crm__links-list" id="playerCrmLinksList"></div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -321,6 +354,20 @@
           <button type="button" class="player-crm__dialog-modal-close" data-crm-close-bot-modal aria-label="Закрыть">×</button>
         </div>
         <div class="player-crm__dialog-modal-body" id="playerCrmBotModalBody"></div>
+      </section>
+    </div>
+
+    <div class="player-crm__dialog-modal" id="playerCrmLinkDetailsModal" hidden>
+      <div class="player-crm__dialog-modal-backdrop" data-crm-close-link-details-modal></div>
+      <section class="player-crm__dialog-modal-panel" aria-modal="true" role="dialog" aria-labelledby="playerCrmLinkDetailsTitle">
+        <div class="player-crm__dialog-modal-head">
+          <div>
+            <h3 id="playerCrmLinkDetailsTitle">Параметры ссылки</h3>
+            <span id="playerCrmLinkDetailsSubtitle">—</span>
+          </div>
+          <button type="button" class="player-crm__dialog-modal-close" data-crm-close-link-details-modal aria-label="Закрыть">×</button>
+        </div>
+        <div class="player-crm__dialog-modal-body" id="playerCrmLinkDetailsBody"></div>
       </section>
     </div>
 

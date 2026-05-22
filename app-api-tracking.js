@@ -44,11 +44,87 @@ function getPokerTrackingRefFromEnv() {
   return "";
 }
 
+function pokerNormalizeTrackingLinkParams(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  var out = {};
+  Object.keys(raw).forEach(function (key) {
+    if (!key) return;
+    var safeKey = String(key).slice(0, 80);
+    var value = raw[key];
+    if (value == null) return;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      out[safeKey] = typeof value === "string" ? value.slice(0, 500) : value;
+    }
+  });
+  return out;
+}
+
+function pokerSaveTrackingLinkContext(ref, link) {
+  var params = pokerNormalizeTrackingLinkParams(link && link.params);
+  var slug = String(ref || "").replace(/^ref_/, "");
+  var ctx = {
+    ref: ref,
+    id: slug,
+    label: link && link.label ? String(link.label).slice(0, 200) : "",
+    params: params,
+    clickedAt: new Date().toISOString(),
+  };
+  try {
+    window.__pokerTrackingLinkContext = ctx;
+  } catch (eWin) {}
+  try {
+    sessionStorage.setItem("poker_session_tracking_ref", ref);
+    sessionStorage.setItem("poker_session_tracking_context", JSON.stringify(ctx));
+    sessionStorage.setItem("poker_session_tracking_params", JSON.stringify(params));
+    if (ctx.label) sessionStorage.setItem("poker_session_tracking_label", ctx.label);
+  } catch (eStore) {}
+  return ctx;
+}
+
+function pokerGetTrackingLinkContext() {
+  try {
+    if (window.__pokerTrackingLinkContext) return window.__pokerTrackingLinkContext;
+  } catch (eWin) {}
+  try {
+    var raw = sessionStorage.getItem("poker_session_tracking_context");
+    if (raw) return JSON.parse(raw);
+  } catch (eStore) {}
+  return null;
+}
+
+function pokerApplyTrackingLinkLanding(ctx) {
+  ctx = ctx || pokerGetTrackingLinkContext();
+  if (!ctx || !ctx.ref || !ctx.params) return;
+  var params = ctx.params || {};
+  var targetStartApp = params.target_startapp ? String(params.target_startapp).trim() : "";
+  var targetView = params.target_view ? String(params.target_view).trim() : "";
+  if (!targetStartApp && !targetView) return;
+  var onceKey = "poker_session_tracking_landing_applied_" + String(ctx.ref).replace(/^ref_/, "");
+  try {
+    if (sessionStorage.getItem(onceKey)) return;
+    sessionStorage.setItem(onceKey, "1");
+  } catch (eOnce) {}
+  setTimeout(function () {
+    try {
+      if (targetStartApp && targetStartApp !== "home" && typeof window.__pokerApplyStartAppDeepLink === "function") {
+        window.__pokerApplyStartAppDeepLink(targetStartApp, {});
+      } else if (targetView && typeof setView === "function") {
+        setView(targetView);
+      } else if (targetStartApp === "home" && typeof setView === "function") {
+        setView("home");
+      }
+      if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:" + (targetView || targetStartApp), params.target_label || "");
+    } catch (eApply) {}
+  }, 80);
+}
 function recordTrackingLinkHit(ref) {
   if (!ref) return;
   var slug = ref.replace(/^ref_/, "");
   try {
-    if (sessionStorage.getItem("poker_track_ref_" + slug)) return;
+    if (sessionStorage.getItem("poker_track_ref_" + slug)) {
+      pokerApplyTrackingLinkLanding();
+      return;
+    }
   } catch (e) {}
   var base = getApiBase();
   if (!base) return;
@@ -67,6 +143,10 @@ function recordTrackingLinkHit(ref) {
         });
       })
       .then(function (data) {
+        if (data && data.link) {
+          var ctx = pokerSaveTrackingLinkContext(ref, data.link);
+          pokerApplyTrackingLinkLanding(ctx);
+        }
         if (data && data.recorded) {
           try {
             sessionStorage.setItem("poker_track_ref_" + slug, "1");

@@ -20,7 +20,7 @@ function pokerInitHomeDeepLinks(opts) {
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
    */
-  function pokerApplyStartAppDeepLink(startParamRaw, opts) {
+	  function pokerApplyStartAppDeepLink(startParamRaw, opts) {
     opts = opts || {};
     var withPeerOpt = opts.withPeer != null ? String(opts.withPeer).trim() : "";
     var startParam = startParamRaw != null ? String(startParamRaw).trim() : "";

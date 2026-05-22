@@ -67,6 +67,14 @@
     crmError: "",
     showAllPlayers: false,
     loadStartedAt: 0,
+    trackingLinks: [],
+    trackingLinksLoaded: false,
+    trackingLinksLoading: false,
+    trackingLinksError: "",
+    linkDetailsId: "",
+    linkDetailsVisitors: [],
+    linkDetailsVisitorsLoading: false,
+    linkDetailsVisitorsError: "",
   };
 
   var esc = pokerPlayerCrmEsc;
@@ -120,7 +128,7 @@
     : {};
   var hasRegistrationMethod = playerCrmRegistrationsRuntime.hasRegistrationMethod || function () { return false; }, registrationRowsByMethod = playerCrmRegistrationsRuntime.registrationRowsByMethod || function () { return []; };
   var renderRegistrationModal = playerCrmRegistrationsRuntime.renderRegistrationModal || function () {}, closeRegistrationModal = playerCrmRegistrationsRuntime.closeRegistrationModal || function () {}, exportRegistrationModalRows = playerCrmRegistrationsRuntime.exportRegistrationModalRows || function () {};
-  function noOpenDialogModals() { return !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.visitsModalOpen && !state.botModalOpen && !state.pushModalOpen && !state.playerModalOpen; }
+  function noOpenDialogModals() { return !state.chatDialogManager && !state.registrationModalMethod && !state.pokerPlusModalOpen && !state.generalMessagesModalOpen && !state.visitsModalOpen && !state.botModalOpen && !state.pushModalOpen && !state.playerModalOpen && !state.linkDetailsId; }
   var playerCrmVisitsRuntime = typeof initPlayerCrmVisitsRuntime === "function"
     ? initPlayerCrmVisitsRuntime({ state: state, esc: esc, intFmt: intFmt, dateTime: dateTime, dateInSelectedPeriod: dateInSelectedPeriod, periodLabel: periodLabel, noOpenDialogModals: noOpenDialogModals, renderStats: function () { return renderStats(); } })
     : {};
@@ -673,6 +681,376 @@
     if (el) el.textContent = players.length + " получателей";
     return players;
   }
+
+  var CRM_LINK_TARGETS = [
+    { key: "home", label: "Главная", view: "home", startapp: "home" },
+    { key: "chat", label: "Чат", view: "chat", startapp: "club_chat" },
+    { key: "video-lessons", label: "Видеоуроки", view: "video-lessons", startapp: "video_lessons" },
+    { key: "learn-play-hub", label: "Научиться играть", view: "learn-play-hub", startapp: "learn_play_hub" },
+    { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
+    { key: "spring-rating", label: "Рейтинг", view: "spring-rating", startapp: "spring_rating" },
+    { key: "hall-of-fame", label: "Зал славы", view: "hall-of-fame", startapp: "hall_fame_top2026" },
+    { key: "streams", label: "Стримы", view: "streams", startapp: "streams" },
+    { key: "download", label: "Скачать PWA", view: "download", startapp: "download" },
+    { key: "cashout", label: "Касса", view: "cashout", startapp: "cashout" },
+    { key: "profile", label: "Профиль", view: "profile", startapp: "profile" },
+    { key: "schedule", label: "Расписание", view: "schedule", startapp: "schedule" }
+  ];
+
+  function crmLinkTargetByKey(key) {
+    key = String(key || "").trim();
+    for (var i = 0; i < CRM_LINK_TARGETS.length; i++) {
+      if (CRM_LINK_TARGETS[i].key === key || CRM_LINK_TARGETS[i].startapp === key || CRM_LINK_TARGETS[i].view === key) return CRM_LINK_TARGETS[i];
+    }
+    return CRM_LINK_TARGETS[0];
+  }
+
+  function renderCrmLinkTargetOptions() {
+    var sel = document.getElementById("playerCrmLinkTarget");
+    if (!sel || sel.dataset.crmLinkTargetsReady === "1") return;
+    sel.innerHTML = CRM_LINK_TARGETS.map(function (target) {
+      return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
+    }).join("");
+    sel.dataset.crmLinkTargetsReady = "1";
+  }
+
+  function crmLinkFieldValue(id) {
+    var el = document.getElementById(id);
+    return el && el.value != null ? String(el.value).trim() : "";
+  }
+
+  function compactCrmLinkParams(params) {
+    var out = {};
+    Object.keys(params || {}).forEach(function (key) {
+      var value = params[key];
+      if (value == null) return;
+      if (typeof value === "string" && value.trim() === "") return;
+      out[key] = value;
+    });
+    return out;
+  }
+
+  function buildCrmLinkUrl(startParam) {
+    var base = "";
+    try {
+      base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+    } catch (e) {}
+    base = String(base || "").replace(/\/$/, "");
+    if (!base) return startParam || "";
+    return base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(startParam || "");
+  }
+
+  function copyCrmLinkText(text) {
+    if (!text) return;
+    function done(ok) {
+      var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgLocal && tgLocal.showAlert) tgLocal.showAlert(ok ? "Ссылка скопирована" : "Не удалось скопировать");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () { done(false); });
+      return;
+    }
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      done(true);
+    } catch (e) {
+      done(false);
+    }
+  }
+
+  function setCrmLinksResult(text, isError) {
+    var el = document.getElementById("playerCrmLinksResult");
+    if (!el) return;
+    el.classList.toggle("player-crm__notice--error", !!isError);
+    el.innerHTML = text || "";
+  }
+
+  function buildCrmTrackingParams() {
+    var target = crmLinkTargetByKey(crmLinkFieldValue("playerCrmLinkTarget") || "home");
+    return compactCrmLinkParams({
+      target_section: target.key,
+      target_view: target.view,
+      target_startapp: target.startapp,
+      target_label: target.label,
+      utm_source: crmLinkFieldValue("playerCrmLinkSource"),
+      utm_medium: crmLinkFieldValue("playerCrmLinkMedium"),
+      utm_campaign: crmLinkFieldValue("playerCrmLinkCampaign"),
+      utm_content: crmLinkFieldValue("playerCrmLinkContent"),
+      utm_term: crmLinkFieldValue("playerCrmLinkTerm"),
+      lead_offer: crmLinkFieldValue("playerCrmLinkOffer"),
+      lead_owner: crmLinkFieldValue("playerCrmLinkOwner"),
+      lead_note: crmLinkFieldValue("playerCrmLinkNote"),
+      created_from: "dashboard_links",
+      created_at_client: new Date().toISOString()
+    });
+  }
+
+  function clearCrmLinkForm() {
+    ["playerCrmLinkLabel", "playerCrmLinkSource", "playerCrmLinkMedium", "playerCrmLinkCampaign", "playerCrmLinkContent", "playerCrmLinkTerm", "playerCrmLinkOffer", "playerCrmLinkOwner", "playerCrmLinkNote"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    setCrmLinksResult("", false);
+  }
+
+  function crmLinkMetric(link, key) {
+    var n = Number(link && link[key]);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function crmLinkParams(link) {
+    return link && link.params && typeof link.params === "object" ? link.params : {};
+  }
+
+  function crmLinkTitle(link) {
+    return (link && link.label && String(link.label).trim()) || ("ref_" + (link && link.id ? link.id : ""));
+  }
+
+  function crmLinkTargetLabel(link) {
+    var params = crmLinkParams(link);
+    return params.target_label || crmLinkTargetByKey(params.target_section || params.target_startapp || params.target_view).label;
+  }
+
+  function crmLinkUrl(link) {
+    var id = link && link.id ? String(link.id) : "";
+    return id ? buildCrmLinkUrl("ref_" + id) : "";
+  }
+
+  function renderCrmTrackingLinks() {
+    renderCrmLinkTargetOptions();
+    var el = document.getElementById("playerCrmLinksList");
+    var summary = document.getElementById("playerCrmLinksSummary");
+    if (!el) return;
+    var links = Array.isArray(state.trackingLinks) ? state.trackingLinks : [];
+    if (summary) summary.textContent = links.length ? intFmt(links.length) + " ссылок" : "Создание и эффективность лидов";
+    if (state.trackingLinksLoading) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем ссылки…</div>";
+      return;
+    }
+    if (state.trackingLinksError) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.trackingLinksError) + "</div>";
+      return;
+    }
+    if (!links.length) {
+      el.innerHTML = "<div class=\"player-crm__notice\">Пока нет ссылок. Создай первую и выбери раздел, куда должен приходить лид.</div>";
+      return;
+    }
+    el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__links-table\"><thead><tr>" +
+      "<th>Название</th><th>Раздел</th><th>Ссылка</th><th>Клики</th><th>Уник.</th><th>Активн.</th><th>Событий</th><th>Действия</th>" +
+      "</tr></thead><tbody>" + links.map(function (link) {
+        var url = crmLinkUrl(link);
+        return "<tr>" +
+          "<td><button type=\"button\" class=\"player-crm__table-link\" data-crm-link-details=\"" + esc(link.id || "") + "\">" + esc(crmLinkTitle(link)) + "</button><br><span class=\"player-crm__detail-muted\">ref_" + esc(link.id || "") + "</span></td>" +
+          "<td>" + esc(crmLinkTargetLabel(link)) + "</td>" +
+          "<td><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\" title=\"Скопировать ссылку\">" + esc(url || "—") + "</button></td>" +
+          "<td>" + esc(intFmt(crmLinkMetric(link, "totalClicks"))) + "</td>" +
+          "<td>" + esc(intFmt(crmLinkMetric(link, "uniqueClicks"))) + "</td>" +
+          "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
+          "<td>" + esc(intFmt(crmLinkMetric(link, "actionEvents"))) + "</td>" +
+          "<td><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button></span></td>" +
+        "</tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
+  function loadCrmTrackingLinks() {
+    var base = getApiBaseSafe();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      state.trackingLinksError = "Нет сессии. Войди по email владельца дашборда.";
+      state.trackingLinksLoading = false;
+      renderCrmTrackingLinks();
+      return;
+    }
+    state.trackingLinksLoading = true;
+    state.trackingLinksError = "";
+    renderCrmTrackingLinks();
+    fetch(base + "/api/tracking-links" + authQuerySafe())
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state.trackingLinksLoading = false;
+        if (!data || !data.ok || !Array.isArray(data.links)) {
+          state.trackingLinks = [];
+          state.trackingLinksError = (data && data.error) || "Ссылки не загрузились.";
+        } else {
+          state.trackingLinks = data.links;
+          state.trackingLinksLoaded = true;
+          state.trackingLinksError = "";
+        }
+        renderCrmTrackingLinks();
+      })
+      .catch(function () {
+        state.trackingLinksLoading = false;
+        state.trackingLinksError = "Ошибка сети при загрузке ссылок.";
+        renderCrmTrackingLinks();
+      });
+  }
+
+  function createCrmTrackingLink() {
+    var btn = document.getElementById("playerCrmCreateLinkBtn");
+    var base = getApiBaseSafe();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      setCrmLinksResult("Нет сессии. Войди по email владельца дашборда.", true);
+      return;
+    }
+    var params = buildCrmTrackingParams();
+    var label = crmLinkFieldValue("playerCrmLinkLabel");
+    if (!label) label = (params.target_label || "Раздел") + (params.utm_source ? " · " + params.utm_source : "");
+    var body = postBodySafe({ label: label, params: params });
+    if (btn) btn.disabled = true;
+    setCrmLinksResult("Создаём ссылку…", false);
+    fetch(base + "/api/tracking-links", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (btn) btn.disabled = false;
+        if (!data || !data.ok || !data.startParam) {
+          setCrmLinksResult((data && data.error) || "Не удалось создать ссылку.", true);
+          return;
+        }
+        var url = buildCrmLinkUrl(data.startParam);
+        setCrmLinksResult("<div>Ссылка создана.</div><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\">" + esc(url || data.startParam) + "</button>", false);
+        loadCrmTrackingLinks();
+      })
+      .catch(function () {
+        if (btn) btn.disabled = false;
+        setCrmLinksResult("Ошибка сети при создании ссылки.", true);
+      });
+  }
+
+  function trackingActionLabel(action) {
+    action = String(action || "");
+    if (action.indexOf("view:") === 0) return "Экран: " + action.slice(5);
+    if (action.indexOf("open:") === 0) return "Клик: " + action.slice(5);
+    if (action.indexOf("landing:") === 0) return "Лендинг: " + action.slice(8);
+    return action || "—";
+  }
+
+  function renderCrmLinkActivity(activity) {
+    if (!activity || !activity.counts) return "нет действий";
+    var keys = Object.keys(activity.counts).sort(function (a, b) { return (activity.counts[b] || 0) - (activity.counts[a] || 0); }).slice(0, 5);
+    if (!keys.length) return "нет действий";
+    return keys.map(function (key) { return esc(trackingActionLabel(key)) + " ×" + esc(intFmt(activity.counts[key] || 0)); }).join("<br>");
+  }
+
+  function findCrmTrackingLink(id) {
+    id = String(id || "");
+    var links = Array.isArray(state.trackingLinks) ? state.trackingLinks : [];
+    for (var i = 0; i < links.length; i++) if (String(links[i].id || "") === id) return links[i];
+    return null;
+  }
+
+  function renderCrmLinkDetailsModal() {
+    var modal = document.getElementById("playerCrmLinkDetailsModal");
+    var subtitleEl = document.getElementById("playerCrmLinkDetailsSubtitle");
+    var bodyEl = document.getElementById("playerCrmLinkDetailsBody");
+    if (!modal || !bodyEl) return;
+    if (!state.linkDetailsId) {
+      modal.hidden = true;
+      if (document.body && noOpenDialogModals()) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    var link = findCrmTrackingLink(state.linkDetailsId) || { id: state.linkDetailsId, params: {} };
+    var params = crmLinkParams(link);
+    var url = crmLinkUrl(link);
+    if (subtitleEl) subtitleEl.textContent = "ref_" + state.linkDetailsId + " · " + crmLinkTargetLabel(link);
+    var detailItems = [
+      ["Название", crmLinkTitle(link)],
+      ["Ref", "ref_" + state.linkDetailsId],
+      ["Раздел", crmLinkTargetLabel(link)],
+      ["Ссылка", url],
+      ["Создана", link.createdAt || "—"],
+      ["Источник", params.utm_source || "—"],
+      ["Канал", params.utm_medium || "—"],
+      ["Кампания", params.utm_campaign || "—"],
+      ["Креатив", params.utm_content || "—"],
+      ["Аудитория", params.utm_term || "—"],
+      ["Оффер", params.lead_offer || "—"],
+      ["Ответственный", params.lead_owner || "—"],
+      ["Клики", intFmt(crmLinkMetric(link, "totalClicks"))],
+      ["Уникальные", intFmt(crmLinkMetric(link, "uniqueClicks"))],
+      ["Активные", intFmt(crmLinkMetric(link, "activeVisitors"))],
+      ["События", intFmt(crmLinkMetric(link, "actionEvents"))]
+    ];
+    var visitorsHtml = state.linkDetailsVisitorsLoading
+      ? "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем переходы…</div>"
+      : state.linkDetailsVisitorsError
+      ? "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.linkDetailsVisitorsError) + "</div>"
+      : state.linkDetailsVisitors && state.linkDetailsVisitors.length
+      ? "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visits-table\"><thead><tr><th>Время</th><th>Visitor</th><th>Telegram</th><th>Действия</th></tr></thead><tbody>" +
+        state.linkDetailsVisitors.map(function (v) {
+          var parts = [];
+          if (v.firstName) parts.push(v.firstName);
+          if (v.username) parts.push("@" + v.username);
+          return "<tr><td>" + esc(v.t || "") + "</td><td>" + esc(v.visitorId || "") + "</td><td>" + esc(parts.join(" · ") || "—") + "</td><td>" + renderCrmLinkActivity(v.activity) + "</td></tr>";
+        }).join("") + "</tbody></table></div>"
+      : "<div class=\"player-crm__notice\">Переходов пока нет.</div>";
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" +
+      "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать ссылку</button><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-links-refresh>Обновить список</button></div>" +
+      "<div class=\"player-crm__link-detail-grid\">" + detailItems.map(function (item) {
+        return "<div class=\"player-crm__link-detail-item\"><small>" + esc(item[0]) + "</small><strong>" + esc(item[1]) + "</strong></div>";
+      }).join("") + "</div>" +
+      "<h4 class=\"player-crm__edit-title\">Параметры для отслеживания лида</h4>" +
+      "<pre class=\"player-crm__link-detail-json\">" + esc(JSON.stringify(params, null, 2)) + "</pre>" +
+      "<h4 class=\"player-crm__edit-title\">Переходы и действия</h4>" + visitorsHtml +
+      "</div>";
+    modal.hidden = false;
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function openCrmLinkDetails(id) {
+    id = String(id || "").trim();
+    if (!id) return;
+    state.linkDetailsId = id;
+    state.linkDetailsVisitors = [];
+    state.linkDetailsVisitorsError = "";
+    state.linkDetailsVisitorsLoading = true;
+    renderCrmLinkDetailsModal();
+    var base = getApiBaseSafe();
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      state.linkDetailsVisitorsLoading = false;
+      state.linkDetailsVisitorsError = "Нет сессии.";
+      renderCrmLinkDetailsModal();
+      return;
+    }
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    fetch(base + "/api/tracking-links" + q + sep + "id=" + encodeURIComponent(id) + "&visitors=1")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state.linkDetailsVisitorsLoading = false;
+        if (!data || !data.ok || !Array.isArray(data.visitors)) {
+          state.linkDetailsVisitors = [];
+          state.linkDetailsVisitorsError = (data && data.error) || "Переходы не загрузились.";
+        } else {
+          state.linkDetailsVisitors = data.visitors;
+          state.linkDetailsVisitorsError = "";
+        }
+        renderCrmLinkDetailsModal();
+      })
+      .catch(function () {
+        state.linkDetailsVisitorsLoading = false;
+        state.linkDetailsVisitorsError = "Ошибка сети при загрузке переходов.";
+        renderCrmLinkDetailsModal();
+      });
+  }
+
+  function closeCrmLinkDetailsModal() {
+    state.linkDetailsId = "";
+    state.linkDetailsVisitors = [];
+    state.linkDetailsVisitorsLoading = false;
+    state.linkDetailsVisitorsError = "";
+    renderCrmLinkDetailsModal();
+  }
   var renderCampaigns = function () {};
 
   var playerCrmChartsRuntime = typeof initPlayerCrmChartsRuntime === "function"
@@ -720,6 +1098,8 @@
     renderSegments();
     renderBroadcastOptions();
     renderCampaigns();
+    renderCrmLinkTargetOptions();
+    renderCrmTrackingLinks();
     renderAnalytics();
     syncPeriodInputs();
     syncTabs();
@@ -730,6 +1110,7 @@
     renderGeneralMessagesModal();
     renderBotModal();
     renderPushModal();
+    renderCrmLinkDetailsModal();
   }
 
   function syncTabCounts() {
@@ -1294,11 +1675,43 @@
       if (tab) {
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
         syncTabs();
+        if (state.tab === "links") {
+          renderCrmLinkTargetOptions();
+          if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
+          else renderCrmTrackingLinks();
+        }
         return;
       }
       var sendSection = e.target.closest("[data-crm-send-section]");
       if (sendSection) {
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
+        return;
+      }
+      var linksRefresh = e.target.closest("[data-crm-links-refresh]");
+      if (linksRefresh) {
+        loadCrmTrackingLinks();
+        return;
+      }
+      if (e.target && e.target.id === "playerCrmCreateLinkBtn") {
+        createCrmTrackingLink();
+        return;
+      }
+      if (e.target && e.target.id === "playerCrmClearLinkFormBtn") {
+        clearCrmLinkForm();
+        return;
+      }
+      var linkCopy = e.target.closest("[data-crm-link-copy]");
+      if (linkCopy) {
+        copyCrmLinkText(linkCopy.getAttribute("data-crm-link-copy") || "");
+        return;
+      }
+      var linkDetails = e.target.closest("[data-crm-link-details]");
+      if (linkDetails) {
+        openCrmLinkDetails(linkDetails.getAttribute("data-crm-link-details") || "");
+        return;
+      }
+      if (e.target.closest("[data-crm-close-link-details-modal]")) {
+        closeCrmLinkDetailsModal();
         return;
       }
       var sortButton = e.target.closest("[data-crm-sort-field]");

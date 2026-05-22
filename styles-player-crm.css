@@ -1236,6 +1236,93 @@ button.player-crm__stat:focus-visible,
 .player-crm__campaigns {
   margin-top: 12px;
 }
+.player-crm__links {
+  display: grid;
+  gap: 12px;
+}
+.player-crm__links-builder {
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.35);
+}
+.player-crm__links-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.player-crm__links-result:empty {
+  display: none;
+}
+.player-crm__links-table {
+  min-width: 1040px;
+}
+.player-crm__links-url-btn {
+  display: block;
+  max-width: 360px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  text-overflow: ellipsis;
+  text-decoration: underline;
+  text-decoration-color: rgba(199, 163, 106, 0.55);
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.player-crm__links-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.player-crm__links-action-row .player-crm__ghost-btn,
+.player-crm__links-action-row .player-crm__primary-btn {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.player-crm__link-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.player-crm__link-detail-item {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.42);
+}
+.player-crm__link-detail-item small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.player-crm__link-detail-item strong {
+  display: block;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+}
+.player-crm__link-detail-json {
+  max-height: 220px;
+  overflow: auto;
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
 .player-crm__bar {
   display: grid;
   gap: 5px;
@@ -1391,7 +1478,9 @@ button.player-crm__stat:focus-visible,
   .player-crm__workbench,
   .player-crm__players-grid,
   .player-crm__list,
-  .player-crm__form-grid {
+  .player-crm__form-grid,
+  .player-crm__links-form-grid,
+  .player-crm__link-detail-grid {
     grid-template-columns: 1fr;
   }
   .player-crm__queue-item {
