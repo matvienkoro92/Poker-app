@@ -76,6 +76,8 @@
     linkDetailsVisitorsLoading: false,
     linkDetailsVisitorsError: "",
     broadcastImage: null,
+    broadcastProgressTimer: null,
+    broadcastProgressId: "",
   };
 
   var esc = pokerPlayerCrmEsc;
@@ -1379,6 +1381,64 @@
     return { buttonText: buttonText, buttonUrl: buttonUrl };
   }
 
+  function makeBroadcastProgressId() {
+    return "crm_send_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
+  }
+
+  function campaignProgressQuery(progressId) {
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    return q + sep + "campaignProgressId=" + encodeURIComponent(progressId || "");
+  }
+
+  function stopBroadcastProgressPolling() {
+    if (state.broadcastProgressTimer) {
+      clearInterval(state.broadcastProgressTimer);
+      state.broadcastProgressTimer = null;
+    }
+    state.broadcastProgressId = "";
+  }
+
+  function formatBroadcastProgress(progress, fallbackTotal) {
+    progress = progress && typeof progress === "object" ? progress : {};
+    var total = Math.max(0, Number(progress.total) || Number(fallbackTotal) || 0);
+    var processed = Math.max(0, Number(progress.processed) || 0);
+    var sentBot = Math.max(0, Number(progress.sentBot) || 0);
+    var sentPush = Math.max(0, Number(progress.sentPush) || 0);
+    var failed = Math.max(0, Number(progress.failed) || 0);
+    var status = String(progress.status || "").trim();
+    if (status === "building") return "Собираем аудиторию рассылки...";
+    if (status === "failed") return "Рассылка остановилась: " + (progress.error || "ошибка отправки") + (progress.details ? " Детали: " + progress.details : "");
+    var pctText = total > 0 ? " (" + Math.min(100, Math.round(processed / total * 100)) + "%)" : "";
+    var prefix = status === "done" ? "Рассылка завершена" : "Отправляем";
+    return prefix + ": " + intFmt(processed) + " / " + intFmt(total) + pctText + ". Бот " + intFmt(sentBot) + ", push " + intFmt(sentPush) + ", ошибок " + intFmt(failed) + ".";
+  }
+
+  function startBroadcastProgressPolling(base, progressId, totalFallback, out) {
+    stopBroadcastProgressPolling();
+    if (!base || !progressId) return function () {};
+    state.broadcastProgressId = progressId;
+    var stopped = false;
+    function poll() {
+      if (stopped || state.broadcastProgressId !== progressId) return;
+      fetch(base + "/api/player-crm" + campaignProgressQuery(progressId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (stopped || state.broadcastProgressId !== progressId) return;
+          if (data && data.ok && data.progress && out) {
+            out.textContent = formatBroadcastProgress(data.progress, totalFallback);
+          }
+        })
+        .catch(function () {});
+    }
+    state.broadcastProgressTimer = setInterval(poll, 1000);
+    setTimeout(poll, 350);
+    return function () {
+      stopped = true;
+      stopBroadcastProgressPolling();
+    };
+  }
+
   function renderBroadcastImageAttachment() {
     var nameEl = document.getElementById("playerCrmBroadcastImageName");
     var preview = document.getElementById("playerCrmBroadcastImagePreview");
@@ -1629,6 +1689,11 @@
     Object.keys(buttonPayload).forEach(function (key) {
       payload[key] = buttonPayload[key];
     });
+    var stopProgress = function () {};
+    if (action === "send_campaign") {
+      payload.progressId = makeBroadcastProgressId();
+      stopProgress = startBroadcastProgressPolling(base, payload.progressId, players.length, out);
+    }
     fetch(base + "/api/player-crm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1636,6 +1701,7 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        stopProgress();
         if (data && data.ok) {
           if (out) {
             var recipient = data.testRecipient || "тестовый получатель";
@@ -1651,6 +1717,7 @@
         }
       })
       .catch(function () {
+        stopProgress();
         if (out) out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
       });
   }
