@@ -1420,12 +1420,26 @@
     var sentBot = Math.max(0, Number(progress.sentBot) || 0);
     var sentPush = Math.max(0, Number(progress.sentPush) || 0);
     var failed = Math.max(0, Number(progress.failed) || 0);
+    var perSecond = Math.max(0, Number(progress.perSecond) || 0);
+    var etaSeconds = Number(progress.etaSeconds);
+    var etaText = Number.isFinite(etaSeconds) && etaSeconds > 0 ? ", осталось примерно " + formatBroadcastDuration(etaSeconds) : "";
+    var speedText = perSecond > 0 ? ", скорость " + perSecond.toLocaleString("ru-RU") + "/с" : "";
     var status = String(progress.status || "").trim();
     if (status === "building") return "Собираем аудиторию рассылки...";
     if (status === "failed") return "Рассылка остановилась: " + (progress.error || "ошибка отправки") + (progress.details ? " Детали: " + progress.details : "");
     var pctText = total > 0 ? " (" + Math.min(100, Math.round(processed / total * 100)) + "%)" : "";
     var prefix = status === "done" ? "Рассылка завершена" : "Отправляем";
-    return prefix + ": обработано " + intFmt(processed) + " / " + intFmt(total) + pctText + ". Доставлено " + intFmt(delivered) + ", осталось " + intFmt(notSent) + ". Бот " + intFmt(sentBot) + ", push " + intFmt(sentPush) + ", ошибок " + intFmt(failed) + ".";
+    return prefix + ": обработано " + intFmt(processed) + " / " + intFmt(total) + pctText + speedText + etaText + ". Доставлено " + intFmt(delivered) + ", осталось " + intFmt(notSent) + ". Бот " + intFmt(sentBot) + ", push " + intFmt(sentPush) + ", ошибок " + intFmt(failed) + ".";
+  }
+
+  function formatBroadcastDuration(seconds) {
+    var s = Math.max(0, Math.round(Number(seconds) || 0));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    if (m <= 0) return r + " сек";
+    if (m < 60) return m + " мин " + r + " сек";
+    var h = Math.floor(m / 60);
+    return h + " ч " + (m % 60) + " мин";
   }
 
   function fetchBroadcastProgress(base, progressId) {
