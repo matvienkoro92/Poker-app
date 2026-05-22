@@ -12,6 +12,7 @@ const {
   rewardForHandRank,
 } = require("../lib/daily-poker");
 const { buildBonusLedgerEntry } = require("../lib/bonus-ledger");
+const promoInternals = require("../lib/api-handlers/promo")._internals;
 
 function c(rank, suit) {
   return { rank, suit };
@@ -157,9 +158,44 @@ function testRewardsAndLedger() {
   }), /amount_must_be_positive/, "zero bonus operation is rejected");
 }
 
+function testRomanDailyPokerLimit() {
+  assert.strictEqual(promoInternals.isRomanDailyPokerIdentity({
+    memberId: "tg_388008256",
+    identity: { id: 388008256, telegramUsername: "roman1787443" },
+  }), true, "roman1787443 has the daily poker admin limit");
+  assert.strictEqual(promoInternals.isRomanDailyPokerIdentity({
+    memberId: "mail_ID000001",
+    identity: { id: 0, pwaUsername: "roman1_matvienko" },
+  }), true, "roman1_matvienko has the daily poker admin limit");
+  assert.strictEqual(promoInternals.isRomanDailyPokerIdentity({
+    memberId: "tg_2144406710",
+    identity: { id: 2144406710, telegramUsername: "another_admin" },
+  }), false, "other admins do not get Roman's daily poker limit");
+
+  const meta = {
+    serverTime: "2026-05-23T06:00:00.000Z",
+    nextFreeAttemptAt: "2026-05-23T17:00:00.000Z",
+  };
+  const almostDone = promoInternals.romanDailyPokerStatePayload(99, meta, 75);
+  assert.strictEqual(almostDone.specialDailyLimit, true, "payload marks the special daily limit");
+  assert.strictEqual(almostDone.dailyPlayLimit, 100, "Roman daily limit is 100 hands");
+  assert.strictEqual(almostDone.attemptsLeft, 1, "one hand remains after 99 plays");
+  assert.strictEqual(almostDone.canPlay, true, "Roman can play before the 100th hand");
+  assert.strictEqual(almostDone.bonusBalance, 75, "payload keeps the current bonus balance");
+
+  const done = promoInternals.romanDailyPokerStatePayload(100, meta, 75);
+  assert.strictEqual(done.attemptsLeft, 0, "no hands remain after 100 plays");
+  assert.strictEqual(done.canPlay, false, "Roman is blocked after 100 plays");
+  assert.ok(done.secondsUntilNextAttempt > 0, "blocked payload includes countdown to the next daily reset");
+
+  const over = promoInternals.romanDailyPokerStatePayload(101, meta, 75);
+  assert.strictEqual(over.attemptsLeft, 0, "attempts never go below zero");
+}
+
 testDeck();
 testHandRanks();
 testAttemptEconomy();
 testRewardsAndLedger();
+testRomanDailyPokerLimit();
 
 console.log("Daily poker tests passed.");

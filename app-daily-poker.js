@@ -82,7 +82,7 @@
       return;
     }
     if (status.canPlay) {
-      timerEl.textContent = status.attemptsLeft > 1 ? "Доступна раздача и дополнительная попытка." : "Раздача доступна.";
+      timerEl.textContent = status.specialDailyLimit ? "Раздача доступна." : (status.attemptsLeft > 1 ? "Доступна раздача и дополнительная попытка." : "Раздача доступна.");
       return;
     }
     if (!status.nextFreeAttemptAt) {
