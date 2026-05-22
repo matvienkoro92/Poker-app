@@ -8,6 +8,7 @@ const {
   evaluateSevenCardHand,
   getAttemptsLeft,
   getNextAttemptType,
+  nextFreeAttemptAt,
   rewardForHandRank,
 } = require("../lib/daily-poker");
 const { buildBonusLedgerEntry } = require("../lib/bonus-ledger");
@@ -62,39 +63,44 @@ function testHandRanks() {
   ]), "high_card", "high card");
 }
 
-function playPure(state, handRank) {
-  const attemptType = getNextAttemptType(state);
+function playPure(state, handRank, nowIso) {
+  const now = nowIso || "2026-05-22T12:00:00.000Z";
+  const attemptType = getNextAttemptType(state, now);
   assert.ok(attemptType, "attempt is available");
-  const reward = rewardForHandRank(handRank, state);
-  const next = applyAttemptToState(state, attemptType, reward, "2026-05-22T12:00:00.000Z");
+  const reward = rewardForHandRank(handRank, attemptType === "base" ? {} : state);
+  const next = applyAttemptToState(state, attemptType, reward, now);
   return { attemptType, reward, state: next };
 }
 
 function testAttemptEconomy() {
+  const now = "2026-05-22T12:00:00.000Z";
   let state = {};
-  assert.strictEqual(getAttemptsLeft(state), 1, "user can play once per day");
-  let first = playPure(state, "high_card");
+  assert.strictEqual(getAttemptsLeft(state, now), 1, "user can play a free hand");
+  let first = playPure(state, "high_card", now);
   state = first.state;
-  assert.strictEqual(getAttemptsLeft(state), 0, "second play without extra is blocked");
+  assert.strictEqual(getAttemptsLeft(state, "2026-05-23T11:59:59.000Z"), 0, "second free play before 24h is blocked");
+  assert.strictEqual(nextFreeAttemptAt(state), "2026-05-23T12:00:00.000Z", "next free play is 24h after the base hand");
+  assert.strictEqual(getAttemptsLeft(state, "2026-05-23T12:00:00.000Z"), 1, "free play unlocks exactly 24h after the base hand");
 
   state = {};
-  first = playPure(state, "three_of_a_kind");
+  first = playPure(state, "three_of_a_kind", now);
   assert.strictEqual(first.reward.grantsExtraAttempt, true, "set grants extra attempt");
-  assert.strictEqual(getAttemptsLeft(first.state), 1, "extra attempt is available");
-  const extra = playPure(first.state, "straight");
+  assert.strictEqual(getAttemptsLeft(first.state, "2026-05-22T12:05:00.000Z"), 1, "extra attempt is available");
+  const extra = playPure(first.state, "straight", "2026-05-22T12:05:00.000Z");
   assert.strictEqual(extra.attemptType, "extra", "extra attempt is used after base");
   assert.strictEqual(extra.reward.grantsExtraAttempt, false, "extra attempt cannot create an infinite chain");
-  assert.strictEqual(getAttemptsLeft(extra.state), 0, "extra attempt cannot be issued twice");
+  assert.strictEqual(getAttemptsLeft(extra.state, "2026-05-22T12:06:00.000Z"), 0, "extra attempt cannot be issued twice");
+  assert.strictEqual(getNextAttemptType(extra.state, "2026-05-23T12:05:00.000Z"), "base", "next base attempt is available 24h after the original base hand");
 
   state = {};
-  first = playPure(state, "straight");
+  first = playPure(state, "straight", now);
   assert.strictEqual(first.reward.grantsExtraAttempt, true, "straight grants extra attempt");
 
   state = {};
-  first = playPure(state, "flush");
+  first = playPure(state, "flush", now);
   assert.strictEqual(first.reward.grantsExtraAttempt, true, "flush grants extra attempt");
   assert.strictEqual(first.reward.bonusAmount, 50, "flush gives 50 bonuses");
-  const flushExtra = playPure(first.state, "flush");
+  const flushExtra = playPure(first.state, "flush", "2026-05-22T12:05:00.000Z");
   assert.strictEqual(flushExtra.reward.grantsExtraAttempt, false, "second flush does not grant another extra attempt");
   assert.strictEqual(flushExtra.reward.bonusAmount, 50, "second flush still credits bonus reward through ledger");
 }
