@@ -236,7 +236,7 @@
       return;
     }
     setBusy(true);
-    showMessage("Готовим честную раздачу…", false);
+    showMessage("Начинаем раздачу", false);
     fetch(authUrl("play"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
