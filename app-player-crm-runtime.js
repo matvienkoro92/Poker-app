@@ -1368,6 +1368,17 @@
     };
   }
 
+  function broadcastButtonPayload() {
+    var textEl = document.getElementById("playerCrmBroadcastButtonText");
+    var urlEl = document.getElementById("playerCrmBroadcastButtonUrl");
+    var buttonText = textEl ? String(textEl.value || "").trim().slice(0, 64) : "";
+    var buttonUrl = urlEl ? String(urlEl.value || "").trim().slice(0, 512) : "";
+    if (!buttonText && !buttonUrl) return {};
+    if (!buttonText || !buttonUrl) return { error: "Заполни название и ссылку кнопки или оставь оба поля пустыми." };
+    if (!/^https?:\/\//i.test(buttonUrl)) return { error: "Ссылка кнопки должна начинаться с http:// или https://." };
+    return { buttonText: buttonText, buttonUrl: buttonUrl };
+  }
+
   function renderBroadcastImageAttachment() {
     var nameEl = document.getElementById("playerCrmBroadcastImageName");
     var preview = document.getElementById("playerCrmBroadcastImagePreview");
@@ -1519,6 +1530,7 @@
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var image = state.broadcastImage || null;
+    var button = broadcastButtonPayload();
     var hasBot = channel === "bot" || channel === "bot_push";
     var hasPush = channel === "push" || channel === "bot_push";
     var pushText = text ? text.slice(0, 180) : (image ? "Фото от Два туза" : "Новое сообщение");
@@ -1530,7 +1542,7 @@
           "<div class=\"player-crm__recipient-bubble\">" +
             (image && image.dataUrl ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />" : "") +
             (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
-            "<span class=\"player-crm__recipient-open-btn\">Открыть приложение</span>" +
+            (button && !button.error && button.buttonText ? "<span class=\"player-crm__recipient-open-btn\">" + esc(button.buttonText) + "</span>" : "") +
           "</div>" +
         "</div>" +
       "</div>"
@@ -1608,6 +1620,14 @@
     var imagePayload = broadcastImagePayload();
     Object.keys(imagePayload).forEach(function (key) {
       payload[key] = imagePayload[key];
+    });
+    var buttonPayload = broadcastButtonPayload();
+    if (buttonPayload.error) {
+      if (out) out.textContent = buttonPayload.error;
+      return;
+    }
+    Object.keys(buttonPayload).forEach(function (key) {
+      payload[key] = buttonPayload[key];
     });
     fetch(base + "/api/player-crm", {
       method: "POST",

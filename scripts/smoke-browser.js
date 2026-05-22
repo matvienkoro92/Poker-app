@@ -296,6 +296,9 @@ async function installPlayerCrmMocks(page) {
           skippedAntispam: 0,
           failed: 0,
           hasImage: !!payload.imageDataUrl,
+          hasButton: !!(payload.buttonText && payload.buttonUrl),
+          buttonText: payload.buttonText || "",
+          buttonUrl: payload.buttonUrl || "",
         }),
       });
       return;
@@ -511,6 +514,8 @@ async function checkCrmBroadcastPreview(browser) {
   fs.writeFileSync(imagePath, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=", "base64"));
   await page.setInputFiles("#playerCrmBroadcastImageInput", imagePath);
   await page.waitForSelector("#playerCrmBroadcastImagePreview img", { timeout: 7000 });
+  await page.locator("#playerCrmBroadcastButtonText").fill("Открыть акцию");
+  await page.locator("#playerCrmBroadcastButtonUrl").fill("https://t.me/Roman1787443");
   await page.locator("#playerCrmBroadcastPreviewBtn").click();
   await page.waitForFunction(() => {
     const modal = document.getElementById("playerCrmBroadcastPreviewModal");
@@ -548,7 +553,7 @@ async function checkCrmBroadcastPreview(browser) {
   }));
   await page.close();
   const state = { ...previewState, ...testState };
-  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || state.audienceText !== "1 получателей" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да")) {
+  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || state.audienceText !== "1 получателей" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть акцию") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));
