@@ -27,6 +27,16 @@
     return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
   }
 
+  function appendQuery(q, name, value) {
+    q = String(q || "?");
+    var sep = q.indexOf("?") === -1 ? "?" : (q === "?" || /[?&]$/.test(q) ? "" : "&");
+    return q + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
+  }
+
+  function authPathQuery(path) {
+    return appendQuery(authQuery(), "path", path);
+  }
+
   function authBody(extra) {
     return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra || {}) : extra || {};
   }
@@ -54,11 +64,11 @@
   }
 
   function buildQuery() {
-    var q = authQuery();
+    var q = authPathQuery("bonus-balances");
     function add(name, value) {
       value = String(value == null ? "" : value).trim();
       if (!value) return;
-      q += (q.indexOf("?") === -1 ? "?" : "&") + encodeURIComponent(name) + "=" + encodeURIComponent(value);
+      q = appendQuery(q, name, value);
     }
     add("search", $("adminBonusesSearch") && $("adminBonusesSearch").value);
     add("minBalance", $("adminBonusesMinBalance") && $("adminBonusesMinBalance").value);
@@ -67,6 +77,20 @@
     add("page", adminBonusesState.page);
     add("limit", 50);
     return q;
+  }
+
+  function readJson(r) {
+    return r.text().then(function (text) {
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        var err = new Error("Сервер вернул неожиданный ответ. Обновите приложение и попробуйте ещё раз.");
+        err.status = r && r.status;
+        err.raw = String(text || "").slice(0, 120);
+        throw err;
+      }
+    });
   }
 
   function renderTable(users) {
@@ -104,8 +128,8 @@
     }
     adminBonusesState.loading = true;
     setStatus("Загрузка…", false);
-    fetch(base + "/api/admin/bonus-balances" + buildQuery(), { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    fetch(base + "/api/admin" + buildQuery(), { cache: "no-store" })
+      .then(readJson)
       .then(function (data) {
         adminBonusesState.loading = false;
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Ошибка загрузки");
@@ -125,8 +149,8 @@
     if (!base || !body) return;
     adminBonusesState.selectedUserId = userId;
     body.innerHTML = "Загрузка истории…";
-    fetch(base + "/api/admin/users/" + encodeURIComponent(userId) + "/bonus-ledger" + authQuery(), { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    fetch(base + "/api/admin" + authPathQuery("users/" + encodeURIComponent(userId) + "/bonus-ledger"), { cache: "no-store" })
+      .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "История не загрузилась");
         var ops = data.operations || [];
@@ -194,12 +218,12 @@
     var base = apiBase();
     var endpoint = operation === "debit" ? "bonus-debit" : "bonus-credit";
     if (message) message.textContent = "Сохраняем…";
-    fetch(base + "/api/admin/users/" + encodeURIComponent(userId) + "/" + endpoint, {
+    fetch(base + "/api/admin" + authPathQuery("users/" + encodeURIComponent(userId) + "/" + endpoint), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authBody({ amount: amount, comment: commentEl && commentEl.value })),
     })
-      .then(function (r) { return r.json(); })
+      .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Операция не выполнена");
         if (message) message.textContent = "Готово. Новый баланс: " + data.bonusBalance;

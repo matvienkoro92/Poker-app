@@ -33,6 +33,16 @@
     return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
   }
 
+  function appendQuery(q, name, value) {
+    q = String(q || "?");
+    var sep = q.indexOf("?") === -1 ? "?" : (q === "?" || /[?&]$/.test(q) ? "" : "&");
+    return q + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
+  }
+
+  function authPathQuery(path) {
+    return appendQuery(authQuery(), "path", path);
+  }
+
   function authBody(extra) {
     return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra || {}) : extra || {};
   }
@@ -172,6 +182,20 @@
     resultEl.classList.toggle("daily-poker__result--error", !!isError);
   }
 
+  function readJson(r) {
+    return r.text().then(function (text) {
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        var err = new Error("Сервер вернул неожиданный ответ. Обновите приложение и попробуйте ещё раз.");
+        err.status = r && r.status;
+        err.raw = String(text || "").slice(0, 120);
+        throw err;
+      }
+    });
+  }
+
   function loadStatus() {
     var base = apiBase();
     if (!base || !hasCredential()) {
@@ -179,8 +203,8 @@
       syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
       return Promise.resolve(false);
     }
-    return fetch(base + "/api/promo/daily-poker/status" + authQuery(), { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    return fetch(base + "/api/promo" + authPathQuery("daily-poker/status"), { cache: "no-store" })
+      .then(readJson)
       .then(function (data) {
         if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "status failed");
         syncStatus(data);
@@ -200,13 +224,13 @@
     }
     setBusy(true);
     showMessage("Готовим честную раздачу…", false);
-    fetch(base + "/api/promo/daily-poker/play", {
+    fetch(base + "/api/promo" + authPathQuery("daily-poker/play"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authBody({ idempotencyKey: idempotencyKey() })),
     })
       .then(function (r) {
-        return r.json().then(function (data) {
+        return readJson(r).then(function (data) {
           if (!r.ok || !data || data.success !== true) {
             var err = new Error(data && data.error ? data.error : "Раздача не сыграна");
             err.data = data;
