@@ -1328,6 +1328,38 @@ button.player-crm__stat:focus-visible,
   gap: 8px;
   margin-top: 10px;
 }
+.player-crm__delivery-log {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.player-crm__delivery-log summary {
+  cursor: pointer;
+  color: var(--text);
+}
+.player-crm__delivery-log div {
+  max-height: 260px;
+  margin-top: 8px;
+  overflow: auto;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+}
+.player-crm__delivery-log table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+.player-crm__delivery-log th,
+.player-crm__delivery-log td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  text-align: left;
+  white-space: nowrap;
+}
+.player-crm__delivery-log th {
+  color: var(--text);
+}
 .player-crm__campaigns {
   margin-top: 12px;
 }

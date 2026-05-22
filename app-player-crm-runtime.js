@@ -1422,6 +1422,32 @@
     if (out) out.textContent = text || "";
   }
 
+  function formatBroadcastLogTime(value) {
+    var ms = Date.parse(value || "");
+    if (!Number.isFinite(ms)) return "—";
+    return new Date(ms).toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function renderBroadcastDeliveryLog(progress) {
+    var log = progress && Array.isArray(progress.deliveryLog) ? progress.deliveryLog : [];
+    if (!log.length) return "";
+    var rows = log.slice(-300).reverse().map(function (entry) {
+      var status = entry.status === "delivered" ? "доставлено" : "ошибка";
+      var channels = [
+        Number(entry.sentBot) > 0 ? "bot" : "",
+        Number(entry.sentPush) > 0 ? "push" : "",
+      ].filter(Boolean).join(" + ") || "—";
+      var time = formatBroadcastLogTime(entry.createdAt);
+      return "<tr><td>" + esc(entry.userId || "—") + "</td><td>" + esc(status) + "</td><td>" + esc(channels) + "</td><td>" + esc(entry.reason || "—") + "</td><td>" + esc(time) + "</td></tr>";
+    }).join("");
+    return "<details class=\"player-crm__delivery-log\"><summary>История получателей: " + esc(intFmt(log.length)) + "</summary><div><table><thead><tr><th>user_id</th><th>статус</th><th>канал</th><th>причина</th><th>время</th></tr></thead><tbody>" + rows + "</tbody></table></div></details>";
+  }
+
   function renderBroadcastProgressResult(text, progress, allowResume) {
     var out = document.getElementById("playerCrmBroadcastResult");
     if (!out) return;
@@ -1441,6 +1467,7 @@
     if (allowResume && pendingIds.length) {
       html += "<div class=\"player-crm__send-result-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-resume-broadcast>Дослать оставшимся: " + esc(intFmt(pendingIds.length)) + "</button></div>";
     }
+    html += renderBroadcastDeliveryLog(progress);
     out.innerHTML = html;
   }
 
