@@ -668,7 +668,8 @@
     if (!sel) return;
     var prev = sel.value || state.filter || "has_bot";
     sel.innerHTML = segments.map(function (seg) {
-      return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + "</option>";
+      var count = segmentPlayers(seg.key).length;
+      return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + esc(intFmt(count)) + "</option>";
     }).join("");
     sel.value = segmentByKey(prev).key;
     updateBroadcastAudience();
@@ -679,7 +680,7 @@
     var el = document.getElementById("playerCrmBroadcastAudience");
     var key = sel ? sel.value : state.filter;
     var players = segmentPlayers(key);
-    if (el) el.textContent = players.length + " получателей";
+    if (el) el.textContent = intFmt(players.length) + " получателей";
     return players;
   }
 

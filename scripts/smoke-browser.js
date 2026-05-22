@@ -503,6 +503,10 @@ async function checkCrmBroadcastPreview(browser) {
     return select && select.options && select.options.length > 0;
   }, null, { timeout: 7000 });
   await page.locator("[data-crm-tab='broadcast']").click();
+  await page.waitForFunction(() => {
+    const option = document.querySelector("#playerCrmBroadcastSegment option[value='has_bot']");
+    return option && option.textContent.includes("· 1");
+  }, null, { timeout: 7000 });
   const imagePath = path.join(os.tmpdir(), "crm-broadcast-smoke.png");
   fs.writeFileSync(imagePath, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=", "base64"));
   await page.setInputFiles("#playerCrmBroadcastImageInput", imagePath);
@@ -519,6 +523,8 @@ async function checkCrmBroadcastPreview(browser) {
       previewButton: document.getElementById("playerCrmBroadcastPreviewBtn")?.textContent.trim() || "",
       testButton: document.getElementById("playerCrmBroadcastTestBtn")?.textContent.trim() || "",
       tabRows: new Set(Array.from(document.querySelectorAll(".player-crm__tab")).map((tab) => Math.round(tab.getBoundingClientRect().top))).size,
+      segmentOption: document.querySelector("#playerCrmBroadcastSegment option[value='has_bot']")?.textContent.trim() || "",
+      audienceText: document.getElementById("playerCrmBroadcastAudience")?.textContent.trim() || "",
       imageName: document.getElementById("playerCrmBroadcastImageName")?.textContent.trim() || "",
       modalOpen: !!(modal && !modal.hidden),
       modalImages: modal ? modal.querySelectorAll("img").length : 0,
@@ -540,7 +546,7 @@ async function checkCrmBroadcastPreview(browser) {
   }));
   await page.close();
   const state = { ...previewState, ...testState };
-  if (state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен Роману @Roman1787443") || !state.testResult.includes("фото да")) {
+  if (state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || !state.segmentOption.includes("Подписан на бот · 1") || state.audienceText !== "1 получателей" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен Роману @Roman1787443") || !state.testResult.includes("фото да")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));
