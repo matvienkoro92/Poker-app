@@ -238,6 +238,21 @@
                 <input id="playerCrmBroadcastButtonUrl" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
             </div>
+            <div class="player-crm__form-grid player-crm__broadcast-batch-grid">
+              <label>
+                <span>Размер пачки</span>
+                <input id="playerCrmBroadcastBatchSize" type="number" min="1" max="500" step="1" value="50" inputmode="numeric" />
+              </label>
+              <label>
+                <span>Номер пачки</span>
+                <input id="playerCrmBroadcastBatchNumber" type="number" min="1" step="1" value="1" inputmode="numeric" />
+              </label>
+            </div>
+            <div class="player-crm__broadcast-batch-row">
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastBatchPrevBtn" aria-label="Предыдущая пачка">←</button>
+              <span id="playerCrmBroadcastBatchSummary">Пачка 1/1 · получателей 0</span>
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastBatchNextBtn" aria-label="Следующая пачка">→</button>
+            </div>
             <div class="player-crm__broadcast-attachment">
               <input type="file" id="playerCrmBroadcastImageInput" class="player-crm__file-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Прикрепить картинку" />
               <div class="player-crm__broadcast-attachment-row">

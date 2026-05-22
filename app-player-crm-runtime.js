@@ -683,8 +683,69 @@
     var el = document.getElementById("playerCrmBroadcastAudience");
     var key = sel ? sel.value : state.filter;
     var players = segmentPlayers(key);
-    if (el) el.textContent = intFmt(players.length) + " получателей";
+    var batch = readBroadcastBatch(players);
+    if (el) el.textContent = intFmt(players.length) + " получателей · " + batch.label;
+    renderBroadcastBatchSummary(batch);
     return players;
+  }
+
+  function playerBroadcastId(player) {
+    if (!player) return "";
+    return String(player.accountId || player.id || "").trim();
+  }
+
+  function readPositiveIntegerInput(id, fallback, min, max) {
+    var el = document.getElementById(id);
+    var raw = el ? Number(el.value) : NaN;
+    var value = Number.isFinite(raw) ? Math.floor(raw) : fallback;
+    value = Math.max(min, value);
+    if (Number.isFinite(max)) value = Math.min(max, value);
+    if (el && String(el.value) !== String(value)) el.value = String(value);
+    return value;
+  }
+
+  function readBroadcastBatch(players) {
+    players = Array.isArray(players) ? players : [];
+    var size = readPositiveIntegerInput("playerCrmBroadcastBatchSize", 50, 1, 500);
+    var total = players.length;
+    var totalBatches = Math.max(1, Math.ceil(total / size));
+    var number = readPositiveIntegerInput("playerCrmBroadcastBatchNumber", 1, 1, totalBatches);
+    var numberEl = document.getElementById("playerCrmBroadcastBatchNumber");
+    if (numberEl && String(numberEl.value) !== String(number)) numberEl.value = String(number);
+    var fromIndex = total ? (number - 1) * size : 0;
+    var toIndex = Math.min(total, fromIndex + size);
+    var ids = players.slice(fromIndex, toIndex).map(playerBroadcastId).filter(Boolean);
+    var rangeLabel = total ? intFmt(fromIndex + 1) + "-" + intFmt(toIndex) : "0";
+    return {
+      size: size,
+      number: number,
+      totalBatches: totalBatches,
+      fromIndex: fromIndex,
+      toIndex: toIndex,
+      total: total,
+      count: ids.length,
+      ids: ids,
+      label: "пачка " + intFmt(number) + "/" + intFmt(totalBatches) + ": " + intFmt(ids.length),
+      summary: "Пачка " + intFmt(number) + "/" + intFmt(totalBatches) + " · получателей " + rangeLabel + " из " + intFmt(total),
+    };
+  }
+
+  function renderBroadcastBatchSummary(batch) {
+    var summary = document.getElementById("playerCrmBroadcastBatchSummary");
+    var prev = document.getElementById("playerCrmBroadcastBatchPrevBtn");
+    var next = document.getElementById("playerCrmBroadcastBatchNextBtn");
+    if (summary) summary.textContent = batch ? batch.summary : "Пачка 1/1 · получателей 0";
+    if (prev) prev.disabled = !batch || batch.number <= 1;
+    if (next) next.disabled = !batch || batch.number >= batch.totalBatches;
+  }
+
+  function stepBroadcastBatch(delta) {
+    var players = updateBroadcastAudience();
+    var batch = readBroadcastBatch(players);
+    var numberEl = document.getElementById("playerCrmBroadcastBatchNumber");
+    var nextNumber = Math.max(1, Math.min(batch.totalBatches, batch.number + delta));
+    if (numberEl) numberEl.value = String(nextNumber);
+    updateBroadcastAudience();
   }
 
   var CRM_LINK_TARGETS = [
@@ -1619,6 +1680,7 @@
 
   function showBroadcastPreview() {
     var players = updateBroadcastAudience();
+    var batch = readBroadcastBatch(players);
     var segEl = document.getElementById("playerCrmBroadcastSegment");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var textEl = document.getElementById("playerCrmBroadcastText");
@@ -1656,7 +1718,7 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Получателей<strong>" + esc(intFmt(players.length)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span></div>" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span></div>" +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
         "</div>" +
@@ -1676,9 +1738,15 @@
     var text = textEl ? String(textEl.value || "").trim() : "";
     var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
     var players = segmentPlayers(segment);
-    var targetCount = resumeIds.length || players.length;
+    var batch = readBroadcastBatch(players);
+    var audienceIds = resumeIds.length ? resumeIds : batch.ids;
+    var targetCount = audienceIds.length;
     if (!text && !state.broadcastImage) {
       if (out) out.textContent = "Нужно написать текст или прикрепить картинку.";
+      return;
+    }
+    if (action !== "test_campaign" && !targetCount) {
+      if (out) out.textContent = "В выбранной пачке нет получателей.";
       return;
     }
     if (action === "send_campaign") {
@@ -1688,15 +1756,15 @@
       }
       var ok = options.skipConfirm === true
         ? true
-        : window.confirm ? window.confirm((resumeIds.length ? "Дослать рассылку оставшимся: " : "Отправить рассылку сейчас: ") + targetCount + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
+        : window.confirm ? window.confirm((resumeIds.length ? "Дослать рассылку оставшимся: " : "Отправить пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
       if (!ok) return;
     }
     if (out) {
       out.textContent = action === "test_campaign"
         ? "Отправляем тест: 1 получатель, массовая аудитория не затрагивается..."
         : action === "send_campaign"
-          ? (resumeIds.length ? "Досылаем оставшимся: " : "Отправляем: ") + targetCount + " игроков..."
-          : "Готовим аудиторию: " + targetCount + " игроков...";
+          ? (resumeIds.length ? "Досылаем оставшимся: " : "Отправляем пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков..."
+          : "Готовим пачку " + batch.number + "/" + batch.totalBatches + ": " + targetCount + " игроков...";
     }
     var base = getApiBaseSafe();
     var hasCred = false;
@@ -1716,7 +1784,17 @@
       range: requestRange(),
     };
     if (action !== "test_campaign") {
-      payload.audienceIds = resumeIds.length ? resumeIds : players.map(function (p) { return p.accountId || p.id; });
+      payload.audienceIds = audienceIds;
+      if (!resumeIds.length) {
+        payload.batch = {
+          number: batch.number,
+          totalBatches: batch.totalBatches,
+          size: batch.size,
+          from: batch.fromIndex + 1,
+          to: batch.toIndex,
+          total: batch.total,
+        };
+      }
     }
     if (options.resumeProgressId) {
       payload.resumeProgressId = options.resumeProgressId;
@@ -2280,6 +2358,8 @@
         var seg = broadSeg.getAttribute("data-crm-broadcast-segment") || "has_bot";
         var sel = document.getElementById("playerCrmBroadcastSegment");
         if (sel) sel.value = seg;
+        var batchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
+        if (batchNumber) batchNumber.value = "1";
         state.tab = "broadcast";
         syncTabs();
         updateBroadcastAudience();
@@ -2409,7 +2489,19 @@
       }
     });
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
-    if (broadcastSegment) broadcastSegment.addEventListener("change", updateBroadcastAudience);
+    if (broadcastSegment) broadcastSegment.addEventListener("change", function () {
+      var batchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
+      if (batchNumber) batchNumber.value = "1";
+      updateBroadcastAudience();
+    });
+    var broadcastBatchSize = document.getElementById("playerCrmBroadcastBatchSize");
+    if (broadcastBatchSize) broadcastBatchSize.addEventListener("input", updateBroadcastAudience);
+    var broadcastBatchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
+    if (broadcastBatchNumber) broadcastBatchNumber.addEventListener("input", updateBroadcastAudience);
+    var broadcastBatchPrev = document.getElementById("playerCrmBroadcastBatchPrevBtn");
+    if (broadcastBatchPrev) broadcastBatchPrev.addEventListener("click", function () { stepBroadcastBatch(-1); });
+    var broadcastBatchNext = document.getElementById("playerCrmBroadcastBatchNextBtn");
+    if (broadcastBatchNext) broadcastBatchNext.addEventListener("click", function () { stepBroadcastBatch(1); });
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
     var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");

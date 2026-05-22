@@ -1237,6 +1237,30 @@ button.player-crm__stat:focus-visible,
 .player-crm__message-label {
   margin-bottom: 10px;
 }
+.player-crm__broadcast-batch-grid {
+  margin-bottom: 6px;
+}
+.player-crm__broadcast-batch-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.player-crm__broadcast-batch-row span {
+  min-width: 180px;
+}
+.player-crm__broadcast-batch-row button {
+  min-width: 42px;
+  padding-inline: 12px;
+}
+.player-crm__broadcast-batch-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .player-crm__file-input {
   position: absolute;
   width: 1px;
@@ -1324,7 +1348,7 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__broadcast-preview-meta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 .player-crm__broadcast-preview-meta span {
