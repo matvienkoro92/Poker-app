@@ -4,6 +4,7 @@
     serverDeltaMs: 0,
     timer: null,
     revealing: false,
+    optimisticStatusBeforePlay: null,
   };
 
   var suitSymbols = {
@@ -115,6 +116,39 @@
       extraBtn.disabled = !data.canPlay || dailyPokerState.revealing;
     }
     updateTimer();
+  }
+
+  function cloneStatus(status) {
+    var out = {};
+    Object.keys(status || {}).forEach(function (key) {
+      out[key] = status[key];
+    });
+    return out;
+  }
+
+  function spendAttemptImmediately() {
+    var status = dailyPokerState.status;
+    if (!status) return;
+    dailyPokerState.optimisticStatusBeforePlay = cloneStatus(status);
+    var attemptsLeft = Math.max(0, parseInt(status.attemptsLeft || "0", 10) || 0);
+    var next = cloneStatus(status);
+    next.attemptsLeft = Math.max(0, attemptsLeft - 1);
+    next.canPlay = next.attemptsLeft > 0 && status.canPlay !== false;
+    dailyPokerState.status = next;
+    var attemptsEl = $("dailyPokerAttempts");
+    var timerEl = $("dailyPokerTimer");
+    if (attemptsEl) attemptsEl.textContent = "Попытки: " + next.attemptsLeft;
+    if (timerEl) timerEl.textContent = "Раздача выполняется…";
+  }
+
+  function clearOptimisticSpend() {
+    dailyPokerState.optimisticStatusBeforePlay = null;
+  }
+
+  function restoreOptimisticSpend() {
+    var previous = dailyPokerState.optimisticStatusBeforePlay;
+    dailyPokerState.optimisticStatusBeforePlay = null;
+    if (previous) syncStatus(previous);
   }
 
   function hasStatusPayload(data) {
@@ -238,10 +272,13 @@
 
   function play() {
     var base = apiBase();
+    if (dailyPokerState.revealing) return;
     if (!base || !hasCredential()) {
       showMessage("Войдите в аккаунт, чтобы сыграть.", true);
       return;
     }
+    dailyPokerState.revealing = true;
+    spendAttemptImmediately();
     setBusy(true);
     showMessage("Начинаем раздачу", false);
     fetch(authUrl("play"), {
@@ -260,12 +297,19 @@
         });
       })
       .then(function (data) {
-        setBusy(false);
+        clearOptimisticSpend();
+        syncStatus(data);
         revealCards(data);
       })
       .catch(function (err) {
+        dailyPokerState.revealing = false;
         setBusy(false);
-        if (err && hasStatusPayload(err.data)) syncStatus(err.data);
+        if (err && hasStatusPayload(err.data)) {
+          clearOptimisticSpend();
+          syncStatus(err.data);
+        } else {
+          restoreOptimisticSpend();
+        }
         showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
       });
   }
