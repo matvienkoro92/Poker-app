@@ -47,6 +47,13 @@
     return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
   }
 
+  function setLiveText(el, text) {
+    if (!el) return;
+    text = String(text || "");
+    el.textContent = text;
+    el.hidden = !text.trim();
+  }
+
   function formatBonus(value) {
     var n = Math.max(0, parseInt(value || "0", 10) || 0);
     return "Бонусный баланс: " + n + " бонусов";
@@ -144,8 +151,8 @@
     var rewardEl = $("dailyPokerReward");
     var claimBtn = $("dailyPokerClaimBtn");
     dailyPokerState.revealing = true;
-    if (resultEl) resultEl.textContent = "Открываем карты…";
-    if (rewardEl) rewardEl.textContent = "";
+    setLiveText(resultEl, "Открываем карты…");
+    setLiveText(rewardEl, "");
     if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
 
@@ -169,8 +176,8 @@
     setTimeout(function () {
       if (board) board.innerHTML = (result.boardCards || []).map(function (card) { return cardHtml(card, false); }).join("");
       dailyPokerState.revealing = false;
-      if (resultEl) resultEl.textContent = result.handName || "Комбинация определена";
-      if (rewardEl) rewardEl.textContent = result.reward && result.reward.message ? result.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.";
+      setLiveText(resultEl, result.handName || "Комбинация определена");
+      setLiveText(rewardEl, result.reward && result.reward.message ? result.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.");
       if (claimBtn) claimBtn.hidden = true;
       syncStatus(result);
     }, 1840);
@@ -191,7 +198,7 @@
   function showMessage(text, isError) {
     var resultEl = $("dailyPokerResult");
     if (!resultEl) return;
-    resultEl.textContent = text || "";
+    setLiveText(resultEl, text || "");
     resultEl.classList.toggle("daily-poker__result--error", !!isError);
   }
 
