@@ -104,6 +104,7 @@
     ],
     "learning": [
       "styles-learning-games.css",
+      "styles-daily-poker.css",
       "styles-rating-learning-games.css",
       "styles-rating-learning.css",
       "styles-rating-games.css",
@@ -144,7 +145,8 @@
       "styles-profile-modals-tail.css"
     ],
     "admin": [
-      "styles-admin.css"
+      "styles-admin.css",
+      "styles-daily-poker.css"
     ],
     "playerCrm": [
       "styles-player-crm.css"
@@ -203,6 +205,11 @@
       "learning",
       "layout"
     ],
+    "daily-poker": [
+      "base",
+      "learning",
+      "layout"
+    ],
     "cooler-game": [
       "base",
       "learning",
@@ -240,6 +247,11 @@
       "layout"
     ],
     "admin": [
+      "base",
+      "admin",
+      "layout"
+    ],
+    "admin-bonuses": [
       "base",
       "admin",
       "layout"

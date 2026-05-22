@@ -135,6 +135,7 @@
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
+    var bonusAdminBtn = document.getElementById("adminBonusBalancesHomeBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !homeAdminVersion) return;
@@ -181,6 +182,7 @@
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
+      if (bonusAdminBtn) bonusAdminBtn.hidden = false;
       showReportUi();
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();

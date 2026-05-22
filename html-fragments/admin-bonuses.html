@@ -1,0 +1,69 @@
+<div class="view" data-view="admin-bonuses">
+  <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+  <section class="admin-bonuses" aria-labelledby="adminBonusesTitle">
+    <header class="admin-bonuses__header">
+      <div>
+        <p class="admin-bonuses__eyebrow">Админка</p>
+        <h2 class="admin-bonuses__title" id="adminBonusesTitle">Бонусные балансы</h2>
+      </div>
+      <button type="button" class="admin-bonuses__refresh" id="adminBonusesRefreshBtn">Обновить</button>
+    </header>
+
+    <div class="admin-bonuses__filters">
+      <input type="search" id="adminBonusesSearch" class="admin-bonuses__input" placeholder="id / nickname / email / phone" autocomplete="off" />
+      <input type="number" id="adminBonusesMinBalance" class="admin-bonuses__input" placeholder="Баланс от" inputmode="numeric" min="0" />
+      <input type="number" id="adminBonusesMaxBalance" class="admin-bonuses__input" placeholder="Баланс до" inputmode="numeric" min="0" />
+      <select id="adminBonusesSort" class="admin-bonuses__input">
+        <option value="bonus_balance_desc">Баланс ↓</option>
+        <option value="bonus_balance_asc">Баланс ↑</option>
+        <option value="last_game_desc">Последняя игра</option>
+        <option value="games_desc">Раздачи</option>
+        <option value="tickets_desc">Билеты</option>
+        <option value="user_id">User ID</option>
+      </select>
+    </div>
+
+    <div class="admin-bonuses__notice" id="adminBonusesStatus">Загрузка…</div>
+
+    <div class="admin-bonuses__table-wrap">
+      <table class="admin-bonuses__table">
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Контакты</th>
+            <th>Баланс</th>
+            <th>Раздачи</th>
+            <th>Билеты</th>
+            <th>Последняя игра</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="adminBonusesTableBody"></tbody>
+      </table>
+    </div>
+
+    <section class="admin-bonuses__history" id="adminBonusesHistory" aria-live="polite">
+      <h3>История операций</h3>
+      <div class="admin-bonuses__history-body" id="adminBonusesHistoryBody">Выберите пользователя в таблице.</div>
+    </section>
+  </section>
+
+  <div class="admin-bonuses-modal" id="adminBonusesOperationModal" role="dialog" aria-modal="true" aria-labelledby="adminBonusesOperationTitle" aria-hidden="true" hidden>
+    <div class="admin-bonuses-modal__backdrop" id="adminBonusesOperationBackdrop"></div>
+    <section class="admin-bonuses-modal__panel">
+      <button type="button" class="admin-bonuses-modal__close" id="adminBonusesOperationClose" aria-label="Закрыть">×</button>
+      <h3 id="adminBonusesOperationTitle">Операция</h3>
+      <p class="admin-bonuses-modal__user" id="adminBonusesOperationUser">—</p>
+      <label class="admin-bonuses-modal__label">
+        <span>Сумма</span>
+        <input type="number" id="adminBonusesOperationAmount" min="1" inputmode="numeric" />
+      </label>
+      <label class="admin-bonuses-modal__label">
+        <span>Комментарий</span>
+        <textarea id="adminBonusesOperationComment" rows="3" maxlength="500"></textarea>
+      </label>
+      <button type="button" class="admin-bonuses-modal__confirm" id="adminBonusesOperationConfirm">Подтвердить</button>
+      <p class="admin-bonuses-modal__message" id="adminBonusesOperationMessage" aria-live="polite"></p>
+    </section>
+  </div>
+</div>

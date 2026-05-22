@@ -1,0 +1,449 @@
+.daily-poker,
+.admin-bonuses {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: max(72px, calc(env(safe-area-inset-top, 0px) + 56px)) 14px max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+  color: #f7ead2;
+  box-sizing: border-box;
+}
+
+.daily-poker__header,
+.admin-bonuses__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.daily-poker__eyebrow,
+.admin-bonuses__eyebrow {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #7dd3fc;
+}
+
+.daily-poker__title,
+.admin-bonuses__title {
+  margin: 0;
+  font-size: clamp(28px, 7vw, 46px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.daily-poker__balance {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(8, 47, 73, 0.72);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  font-size: 14px;
+  font-weight: 800;
+  color: #e0f2fe;
+}
+
+.daily-poker__intro {
+  max-width: 720px;
+  margin: 0 0 16px;
+  color: rgba(247, 234, 210, 0.78);
+  line-height: 1.45;
+  font-size: 15px;
+}
+
+.daily-poker__status-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.daily-poker__timer,
+.daily-poker__attempts,
+.admin-bonuses__notice {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(199, 163, 106, 0.32);
+  box-sizing: border-box;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.daily-poker__table {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 22% 18%, rgba(16, 185, 129, 0.28), transparent 36%),
+    linear-gradient(140deg, #064e3b 0%, #052e2b 52%, #101827 100%);
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 34px rgba(0, 0, 0, 0.25);
+}
+
+.daily-poker__zone-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(236, 253, 245, 0.72);
+  text-transform: uppercase;
+}
+
+.daily-poker__cards {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+}
+
+.daily-poker__cards--hole {
+  grid-template-columns: repeat(2, minmax(54px, 76px));
+}
+
+.daily-poker__cards--board {
+  grid-template-columns: repeat(5, minmax(46px, 76px));
+}
+
+.daily-poker-card {
+  aspect-ratio: 5 / 7;
+  min-width: 0;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #121826;
+  border: 1px solid rgba(15, 23, 42, 0.22);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.24);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 7px;
+  box-sizing: border-box;
+  animation: dailyPokerFlip 0.34s ease both;
+}
+
+.daily-poker-card--red {
+  color: #b91c1c;
+}
+
+.daily-poker-card--back {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 28%),
+    repeating-linear-gradient(45deg, #7f1d1d 0 7px, #991b1b 7px 14px);
+  border-color: rgba(252, 211, 77, 0.38);
+}
+
+.daily-poker-card__rank {
+  font-size: clamp(15px, 4vw, 20px);
+  line-height: 1;
+  font-weight: 900;
+}
+
+.daily-poker-card__suit {
+  align-self: center;
+  justify-self: center;
+  font-size: clamp(24px, 8vw, 38px);
+  line-height: 1;
+}
+
+@keyframes dailyPokerFlip {
+  from {
+    opacity: 0;
+    transform: translateY(8px) rotateY(70deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateY(0);
+  }
+}
+
+.daily-poker__result,
+.daily-poker__reward {
+  margin-top: 12px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  font-weight: 800;
+}
+
+.daily-poker__reward {
+  color: #fde68a;
+}
+
+.daily-poker__result--error,
+.admin-bonuses__notice--error {
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.daily-poker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.daily-poker__play-btn,
+.daily-poker__claim-btn,
+.admin-bonuses__refresh,
+.admin-bonuses__actions-cell button,
+.admin-bonuses-modal__confirm {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 900;
+  color: #111827;
+  background: linear-gradient(180deg, #fbbf24, #f59e0b);
+  cursor: pointer;
+}
+
+.daily-poker__play-btn--extra,
+.daily-poker__claim-btn {
+  color: #ecfeff;
+  background: linear-gradient(180deg, #0e7490, #155e75);
+}
+
+.daily-poker__play-btn:disabled,
+.daily-poker__claim-btn:disabled,
+.admin-bonuses__refresh:disabled,
+.admin-bonuses__actions-cell button:disabled,
+.admin-bonuses-modal__confirm:disabled {
+  opacity: 0.58;
+  cursor: default;
+}
+
+.admin-bonuses__filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(100px, 140px) minmax(100px, 140px) minmax(140px, 180px);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-bonuses__input,
+.admin-bonuses-modal__label input,
+.admin-bonuses-modal__label textarea {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(15, 23, 42, 0.78);
+  color: #f8fafc;
+  padding: 9px 10px;
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.admin-bonuses__table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.34);
+}
+
+.admin-bonuses__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.admin-bonuses__table th,
+.admin-bonuses__table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.admin-bonuses__table th {
+  color: #bfdbfe;
+  font-size: 12px;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.admin-bonuses__table td span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(226, 232, 240, 0.62);
+}
+
+.admin-bonuses__empty {
+  text-align: center;
+  color: rgba(226, 232, 240, 0.64);
+}
+
+.admin-bonuses__actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-bonuses__actions-cell button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #f8fafc;
+  background: #155e75;
+}
+
+.admin-bonuses__history {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(199, 163, 106, 0.28);
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.admin-bonuses__history h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.admin-bonuses__history-item {
+  padding: 10px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  color: rgba(248, 250, 252, 0.82);
+}
+
+.admin-bonuses__history-item:first-child {
+  border-top: 0;
+}
+
+.admin-bonuses__history-item div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-bonuses__history-item p {
+  margin: 6px 0 0;
+  color: rgba(226, 232, 240, 0.76);
+}
+
+.admin-bonuses-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.admin-bonuses-modal[hidden] {
+  display: none;
+}
+
+.admin-bonuses-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+}
+
+.admin-bonuses-modal__panel {
+  position: relative;
+  width: min(460px, 100%);
+  border-radius: 10px;
+  padding: 18px;
+  background: #0f172a;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+  color: #f8fafc;
+  box-sizing: border-box;
+}
+
+.admin-bonuses-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.14);
+  color: #f8fafc;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.admin-bonuses-modal__panel h3 {
+  margin: 0 42px 6px 0;
+}
+
+.admin-bonuses-modal__user {
+  margin: 0 0 12px;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.admin-bonuses-modal__label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-bonuses-modal__label textarea {
+  resize: vertical;
+}
+
+.admin-bonuses-modal__confirm {
+  width: 100%;
+}
+
+.admin-bonuses-modal__message {
+  min-height: 20px;
+  margin: 10px 0 0;
+  color: #fde68a;
+}
+
+@media (max-width: 720px) {
+  .daily-poker__header,
+  .admin-bonuses__header,
+  .daily-poker__status-row {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .daily-poker__balance {
+    width: 100%;
+  }
+
+  .daily-poker__table {
+    padding: 12px;
+  }
+
+  .daily-poker__cards {
+    gap: 6px;
+  }
+
+  .daily-poker__cards--hole {
+    grid-template-columns: repeat(2, minmax(56px, 1fr));
+    max-width: 180px;
+  }
+
+  .daily-poker__cards--board {
+    grid-template-columns: repeat(5, minmax(40px, 1fr));
+  }
+
+  .daily-poker-card {
+    padding: 5px;
+  }
+
+  .admin-bonuses__filters {
+    grid-template-columns: 1fr;
+  }
+}

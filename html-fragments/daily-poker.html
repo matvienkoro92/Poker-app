@@ -1,0 +1,39 @@
+<div class="view" data-view="daily-poker">
+  <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+  <section class="daily-poker" aria-labelledby="dailyPokerTitle">
+    <header class="daily-poker__header">
+      <div>
+        <p class="daily-poker__eyebrow">Daily Poker Deal</p>
+        <h2 class="daily-poker__title" id="dailyPokerTitle">Раздача дня</h2>
+      </div>
+      <div class="daily-poker__balance" id="dailyPokerBalance">Бонусный баланс: —</div>
+    </header>
+
+    <p class="daily-poker__intro">Раз в сутки ты можешь получить бесплатную покерную раздачу. Собери сильную комбинацию и выиграй билет на турнир.</p>
+
+    <div class="daily-poker__status-row">
+      <div class="daily-poker__timer" id="dailyPokerTimer">Проверяем доступность раздачи…</div>
+      <div class="daily-poker__attempts" id="dailyPokerAttempts">Попытки: —</div>
+    </div>
+
+    <div class="daily-poker__table" aria-live="polite">
+      <div class="daily-poker__zone daily-poker__zone--hole">
+        <div class="daily-poker__zone-label">Твои карты</div>
+        <div class="daily-poker__cards daily-poker__cards--hole" id="dailyPokerHoleCards"></div>
+      </div>
+      <div class="daily-poker__zone daily-poker__zone--board">
+        <div class="daily-poker__zone-label">Борд</div>
+        <div class="daily-poker__cards daily-poker__cards--board" id="dailyPokerBoardCards"></div>
+      </div>
+    </div>
+
+    <div class="daily-poker__result" id="dailyPokerResult" aria-live="polite">Готово к раздаче.</div>
+    <div class="daily-poker__reward" id="dailyPokerReward" aria-live="polite"></div>
+
+    <div class="daily-poker__actions">
+      <button type="button" class="daily-poker__play-btn" id="dailyPokerPlayBtn">Играть</button>
+      <button type="button" class="daily-poker__play-btn daily-poker__play-btn--extra" id="dailyPokerExtraBtn" hidden>Сыграть дополнительную попытку</button>
+      <button type="button" class="daily-poker__claim-btn" id="dailyPokerClaimBtn" hidden>Забрать приз</button>
+    </div>
+  </section>
+</div>

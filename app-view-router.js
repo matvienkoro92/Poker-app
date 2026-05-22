@@ -973,6 +973,8 @@ function setView(viewName, navOpts) {
     clearInterval(bonusPikhaninaInterval);
     bonusPikhaninaInterval = null;
   }
+  if (viewName === "daily-poker" && typeof initDailyPoker === "function") initDailyPoker();
+  if (viewName === "admin-bonuses" && typeof initAdminBonuses === "function") initAdminBonuses();
   if (viewName === "cooler-game") initCoolerGame();
   if (viewName === "plasterer-game") initPlastererGame();
   if (viewName === "raffles") {

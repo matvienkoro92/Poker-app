@@ -186,6 +186,8 @@
       "app-video-lessons.js",
       "app-video-lessons-modals.js",
       "app-games.js",
+      "app-daily-poker.js",
+      "app-admin-bonuses.js",
       "app-equilator.js",
       "peerjs.min.js"
     ],
