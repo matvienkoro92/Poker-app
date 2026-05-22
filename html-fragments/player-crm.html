@@ -229,10 +229,19 @@
               <span>Сообщение</span>
               <textarea id="playerCrmBroadcastText" rows="6" maxlength="900">Сегодня есть хорошие столы и турнирный движ. Если хочешь зайти, напиши менеджеру — подберём игру по лимиту.</textarea>
             </label>
+            <div class="player-crm__broadcast-attachment">
+              <input type="file" id="playerCrmBroadcastImageInput" class="player-crm__file-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Прикрепить картинку" />
+              <div class="player-crm__broadcast-attachment-row">
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageBtn">Прикрепить картинку</button>
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageRemoveBtn" hidden>Убрать</button>
+                <span id="playerCrmBroadcastImageName">Картинка не выбрана</span>
+              </div>
+              <div class="player-crm__broadcast-image-preview" id="playerCrmBroadcastImagePreview" hidden></div>
+            </div>
             <div class="player-crm__broadcast-actions">
               <button type="button" class="player-crm__primary-btn" id="playerCrmBroadcastPrepareBtn">Подготовить рассылку</button>
               <button type="button" class="player-crm__danger-btn" id="playerCrmBroadcastSendBtn">Отправить сейчас</button>
-              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastPreviewBtn">Пересчитать</button>
+              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastPreviewBtn">Посмотреть</button>
             </div>
             <div class="player-crm__send-result" id="playerCrmBroadcastResult" aria-live="polite"></div>
           </div>

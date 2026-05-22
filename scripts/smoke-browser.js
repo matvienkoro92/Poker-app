@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const http = require("http");
+const os = require("os");
 const path = require("path");
 
 const root = path.join(__dirname, "..");
@@ -265,6 +266,89 @@ async function enableVerifiedProfile(page) {
   });
 }
 
+async function installPlayerCrmMocks(page) {
+  await page.route(/\/api\/player-crm(?:\?|$)/, async (route) => {
+    const req = route.request();
+    const headers = {
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-headers": "content-type",
+    };
+    if (req.method() === "OPTIONS") {
+      await route.fulfill({ status: 204, headers, body: "" });
+      return;
+    }
+    if (req.method() === "POST") {
+      const payload = JSON.parse(req.postData() || "{}");
+      await route.fulfill({
+        status: 200,
+        headers,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({
+          ok: true,
+          id: "crm_smoke",
+          status: payload.action === "send_campaign" ? "sent" : "draft",
+          audience: Array.isArray(payload.audienceIds) ? payload.audienceIds.length : 0,
+          sentBot: 0,
+          sentPush: 0,
+          skippedAntispam: 0,
+          failed: 0,
+          hasImage: !!payload.imageDataUrl,
+        }),
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      headers,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({
+        ok: true,
+        periods: [7, 30, 90],
+        updatedAt: new Date().toISOString(),
+        permissions: { canSendCampaign: true },
+        source: "smoke",
+        players: [
+          {
+            id: "tg_1001",
+            accountId: "ID1001",
+            name: "Smoke Player",
+            channels: { bot: true, push: true },
+            deposits: { "7": 0, "30": 0, "90": 0, custom: 0 },
+            messages: { "7": 0, "30": 1, "90": 1, custom: 0 },
+            crm: {},
+            touches: [],
+          },
+        ],
+        registeredAccounts: [],
+        pokerPlusAccounts: [],
+        campaigns: [],
+        sourceAnalytics: [],
+        statsSummary: null,
+        chartAnalytics: null,
+        pushConfigured: true,
+      }),
+    });
+  });
+}
+
+async function enableCrmAdmin(page) {
+  await page.evaluate(() => {
+    window.__pokerTelegramAuth = {
+      status: "verified",
+      user: { id: 1897001087, first_name: "Smoke" },
+    };
+    window.pokerApiHasCredential = function () { return true; };
+    window.getApiBase = function () { return window.location.origin; };
+    window.pokerRafflesApiQueryLeading = function () { return "?initData=smoke"; };
+    window.pokerGuestOrAuthedPostBody = function (extra) {
+      return Object.assign({ initData: "smoke" }, extra || {});
+    };
+    document.getElementById("app")?.setAttribute("data-api-base", window.location.origin);
+    window.dispatchEvent(new CustomEvent("poker-telegram-auth"));
+  });
+}
+
 async function openRakebackTab(page) {
   await page.locator("#adminReportBtn").click();
   await page.waitForFunction(() => document.getElementById("adminReportModal")?.getAttribute("aria-hidden") === "false", null, { timeout: 5000 });
@@ -396,15 +480,65 @@ async function checkProfilePokerPlus(browser) {
   return state;
 }
 
+async function checkCrmBroadcastPreview(browser) {
+  const { page, pageErrors } = await newPage(browser);
+  await installPlayerCrmMocks(page);
+  await openIndex(page);
+  await enableCrmAdmin(page);
+  await page.waitForFunction(() => typeof window.pokerInitPlayerCrm === "function", null, { timeout: 7000 });
+  await page.evaluate(() => {
+    const root = document.getElementById("playerCrmView");
+    if (!root) throw new Error("CRM root missing");
+    document.body.setAttribute("data-view", "player-crm");
+    window.__pokerPlayerCrmStandaloneOpen = true;
+    root.classList.add("view--active", "player-crm-standalone");
+    root.removeAttribute("inert");
+    root.removeAttribute("aria-hidden");
+    window.pokerInitPlayerCrm();
+  });
+  await page.waitForFunction(() => {
+    const select = document.getElementById("playerCrmBroadcastSegment");
+    return select && select.options && select.options.length > 0;
+  }, null, { timeout: 7000 });
+  await page.locator("[data-crm-tab='broadcast']").click();
+  const imagePath = path.join(os.tmpdir(), "crm-broadcast-smoke.png");
+  fs.writeFileSync(imagePath, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=", "base64"));
+  await page.setInputFiles("#playerCrmBroadcastImageInput", imagePath);
+  await page.waitForSelector("#playerCrmBroadcastImagePreview img", { timeout: 7000 });
+  await page.locator("#playerCrmBroadcastPreviewBtn").click();
+  await page.waitForFunction(() => {
+    const modal = document.getElementById("playerCrmBroadcastPreviewModal");
+    return modal && !modal.hidden && modal.querySelectorAll("img").length === 1;
+  }, null, { timeout: 7000 });
+  const state = await page.evaluate(() => {
+    const modal = document.getElementById("playerCrmBroadcastPreviewModal");
+    return {
+      version: document.documentElement.getAttribute("data-app-version"),
+      previewButton: document.getElementById("playerCrmBroadcastPreviewBtn")?.textContent.trim() || "",
+      imageName: document.getElementById("playerCrmBroadcastImageName")?.textContent.trim() || "",
+      modalOpen: !!(modal && !modal.hidden),
+      modalImages: modal ? modal.querySelectorAll("img").length : 0,
+      modalText: modal ? modal.textContent.replace(/\s+/g, " ").trim() : "",
+    };
+  });
+  await page.close();
+  if (state.previewButton !== "Посмотреть" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа")) {
+    throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
+  }
+  if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));
+  return state;
+}
+
 const checks = {
   load: checkLoad,
   "admin-rakeback": checkAdminRakeback,
   "profile-pokerplus": checkProfilePokerPlus,
+  "crm-broadcast-preview": checkCrmBroadcastPreview,
 };
 
 async function main() {
   const requested = process.argv.slice(2);
-  const names = requested.length ? requested : ["load", "admin-rakeback", "profile-pokerplus"];
+  const names = requested.length ? requested : ["load", "admin-rakeback", "profile-pokerplus", "crm-broadcast-preview"];
   const unknown = names.filter((name) => !checks[name]);
   if (unknown.length) throw new Error("Unknown browser smoke check(s): " + unknown.join(", "));
 

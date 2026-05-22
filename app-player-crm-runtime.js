@@ -75,6 +75,7 @@
     linkDetailsVisitors: [],
     linkDetailsVisitorsLoading: false,
     linkDetailsVisitorsError: "",
+    broadcastImage: null,
   };
 
   var esc = pokerPlayerCrmEsc;
@@ -1349,6 +1350,212 @@
     return (data.error || "Дашборд не загрузился: API не вернул живые данные.") + code + detail;
   }
 
+  var BROADCAST_IMAGE_MAX_DATA_URL = 950000;
+
+  function setBroadcastResult(text) {
+    var out = document.getElementById("playerCrmBroadcastResult");
+    if (out) out.textContent = text || "";
+  }
+
+  function broadcastImagePayload() {
+    if (!state.broadcastImage || !state.broadcastImage.dataUrl) return {};
+    return {
+      imageDataUrl: state.broadcastImage.dataUrl,
+      imageMimeType: state.broadcastImage.mimeType || "image/jpeg",
+      imageName: state.broadcastImage.name || "image.jpg",
+      imageSize: state.broadcastImage.size || 0,
+    };
+  }
+
+  function renderBroadcastImageAttachment() {
+    var nameEl = document.getElementById("playerCrmBroadcastImageName");
+    var preview = document.getElementById("playerCrmBroadcastImagePreview");
+    var removeBtn = document.getElementById("playerCrmBroadcastImageRemoveBtn");
+    var img = state.broadcastImage || null;
+    if (nameEl) {
+      nameEl.textContent = img
+        ? (img.name || "Картинка") + (img.size ? " · " + Math.max(1, Math.round(img.size / 1024)) + " КБ" : "")
+        : "Картинка не выбрана";
+    }
+    if (removeBtn) removeBtn.hidden = !img;
+    if (preview) {
+      if (img && img.dataUrl) {
+        preview.hidden = false;
+        preview.innerHTML = "<img src=\"" + esc(img.dataUrl) + "\" alt=\"Прикрепленная картинка\" />";
+      } else {
+        preview.hidden = true;
+        preview.innerHTML = "";
+      }
+    }
+  }
+
+  function clearBroadcastImage() {
+    state.broadcastImage = null;
+    var input = document.getElementById("playerCrmBroadcastImageInput");
+    if (input) input.value = "";
+    renderBroadcastImageAttachment();
+  }
+
+  function readFileDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result || "")); };
+      reader.onerror = function () { reject(new Error("Картинка не прочиталась.")); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function compressBroadcastImage(file, dataUrl) {
+    var type = String(file && file.type || "").toLowerCase();
+    if (!/^image\/(jpeg|jpg|png|webp|gif)$/.test(type)) {
+      return Promise.reject(new Error("Можно прикрепить JPG, PNG, WEBP или GIF."));
+    }
+    if (type === "image/gif") {
+      if (dataUrl.length <= BROADCAST_IMAGE_MAX_DATA_URL) return Promise.resolve({ dataUrl: dataUrl, mimeType: type, size: file.size || 0 });
+      return Promise.reject(new Error("GIF слишком большой. Прикрепи картинку до 700 КБ."));
+    }
+    if (dataUrl.length <= BROADCAST_IMAGE_MAX_DATA_URL && (file.size || 0) <= 700000) {
+      return Promise.resolve({ dataUrl: dataUrl, mimeType: type, size: file.size || 0 });
+    }
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var sourceW = img.naturalWidth || img.width || 0;
+        var sourceH = img.naturalHeight || img.height || 0;
+        if (!sourceW || !sourceH) {
+          reject(new Error("Не удалось обработать картинку."));
+          return;
+        }
+        var sides = [1280, 1024, 800, 640];
+        var qualities = [0.84, 0.74, 0.64];
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext && canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Браузер не смог сжать картинку."));
+          return;
+        }
+        var best = "";
+        var bestBytes = 0;
+        for (var s = 0; s < sides.length; s++) {
+          var maxSide = sides[s];
+          var scale = Math.min(1, maxSide / Math.max(sourceW, sourceH));
+          var targetW = Math.max(1, Math.round(sourceW * scale));
+          var targetH = Math.max(1, Math.round(sourceH * scale));
+          canvas.width = targetW;
+          canvas.height = targetH;
+          ctx.clearRect(0, 0, targetW, targetH);
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+          for (var q = 0; q < qualities.length; q++) {
+            var out = canvas.toDataURL("image/jpeg", qualities[q]);
+            best = out;
+            bestBytes = Math.round((out.length * 3) / 4);
+            if (out.length <= BROADCAST_IMAGE_MAX_DATA_URL) {
+              resolve({ dataUrl: out, mimeType: "image/jpeg", size: bestBytes });
+              return;
+            }
+          }
+        }
+        if (best && best.length <= BROADCAST_IMAGE_MAX_DATA_URL * 1.08) {
+          resolve({ dataUrl: best, mimeType: "image/jpeg", size: bestBytes });
+          return;
+        }
+        reject(new Error("Картинка слишком большая. Попробуй файл поменьше."));
+      };
+      img.onerror = function () { reject(new Error("Картинка не открылась.")); };
+      img.src = dataUrl;
+    });
+  }
+
+  function handleBroadcastImageFile(file) {
+    if (!file) return;
+    setBroadcastResult("Готовим картинку...");
+    readFileDataUrl(file)
+      .then(function (dataUrl) { return compressBroadcastImage(file, dataUrl); })
+      .then(function (image) {
+        state.broadcastImage = {
+          dataUrl: image.dataUrl,
+          mimeType: image.mimeType || "image/jpeg",
+          name: file.name || "image.jpg",
+          size: image.size || file.size || 0,
+        };
+        renderBroadcastImageAttachment();
+        setBroadcastResult("Картинка прикреплена.");
+      })
+      .catch(function (err) {
+        clearBroadcastImage();
+        setBroadcastResult(err && err.message ? err.message : "Не удалось прикрепить картинку.");
+      });
+  }
+
+  function closeBroadcastPreview() {
+    var modal = document.getElementById("playerCrmBroadcastPreviewModal");
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove("player-crm-dialog-modal-open");
+  }
+
+  function ensureBroadcastPreviewModal() {
+    var modal = document.getElementById("playerCrmBroadcastPreviewModal");
+    if (modal) return modal;
+    var root = document.getElementById("playerCrmView") || document.body;
+    modal = document.createElement("div");
+    modal.id = "playerCrmBroadcastPreviewModal";
+    modal.className = "player-crm__dialog-modal player-crm__broadcast-preview-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Предпросмотр рассылки");
+    modal.hidden = true;
+    root.appendChild(modal);
+    return modal;
+  }
+
+  function showBroadcastPreview() {
+    var players = updateBroadcastAudience();
+    var segEl = document.getElementById("playerCrmBroadcastSegment");
+    var channelEl = document.getElementById("playerCrmBroadcastChannel");
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    var segmentTitle = segEl && segEl.options && segEl.selectedIndex >= 0 ? segEl.options[segEl.selectedIndex].text : "—";
+    var channel = channelEl ? channelEl.value : "bot";
+    var text = textEl ? String(textEl.value || "").trim() : "";
+    var image = state.broadcastImage || null;
+    var hasBot = channel === "bot" || channel === "bot_push";
+    var hasPush = channel === "push" || channel === "bot_push";
+    var pushText = text ? text.slice(0, 180) : (image ? "Фото от Два туза" : "Новое сообщение");
+    var gridClass = !hasBot ? " player-crm__recipient-preview-grid--push-only" : !hasPush ? " player-crm__recipient-preview-grid--bot-only" : "";
+    var botHtml = hasBot ? (
+      "<div class=\"player-crm__recipient-phone\">" +
+        "<div class=\"player-crm__recipient-phone-head\"><strong>Два туза</strong><span>бот</span></div>" +
+        "<div class=\"player-crm__recipient-chat\">" +
+          "<div class=\"player-crm__recipient-bubble\">" +
+            (image && image.dataUrl ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />" : "") +
+            (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
+            "<span class=\"player-crm__recipient-open-btn\">Открыть приложение</span>" +
+          "</div>" +
+        "</div>" +
+      "</div>"
+    ) : "";
+    var pushHtml = hasPush ? (
+      "<div class=\"player-crm__push-card\">" +
+        "<span class=\"player-crm__push-icon\">2</span>" +
+        "<span><strong>Два туза</strong><p>" + esc(pushText) + "</p></span>" +
+      "</div>"
+    ) : "";
+    var modal = ensureBroadcastPreviewModal();
+    modal.innerHTML =
+      "<button type=\"button\" class=\"player-crm__dialog-modal-backdrop\" data-crm-broadcast-preview-close aria-label=\"Закрыть\"></button>" +
+      "<div class=\"player-crm__dialog-modal-panel\">" +
+        "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
+        "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
+          "<div class=\"player-crm__broadcast-preview-scroll\">" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Получателей<strong>" + esc(intFmt(players.length)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span></div>" +
+            "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
+          "</div>" +
+        "</div>" +
+      "</div>";
+    modal.hidden = false;
+    document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
   function runBroadcast(action) {
     var segEl = document.getElementById("playerCrmBroadcastSegment");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
@@ -1358,8 +1565,8 @@
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var players = segmentPlayers(segment);
-    if (!text) {
-      if (out) out.textContent = "Нужно написать текст сообщения.";
+    if (!text && !state.broadcastImage) {
+      if (out) out.textContent = "Нужно написать текст или прикрепить картинку.";
       return;
     }
     if (action === "send_campaign") {
@@ -1367,7 +1574,7 @@
         if (out) out.textContent = "У твоей роли нет права отправлять массовые рассылки.";
         return;
       }
-      var ok = window.confirm ? window.confirm("Отправить рассылку сейчас: " + players.length + " игроков, канал " + channelLabel(channel) + "?") : false;
+      var ok = window.confirm ? window.confirm("Отправить рассылку сейчас: " + players.length + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
       if (!ok) return;
     }
     if (out) out.textContent = action === "send_campaign" ? "Отправляем: " + players.length + " игроков..." : "Готовим аудиторию: " + players.length + " игроков...";
@@ -1380,23 +1587,28 @@
       if (out) out.textContent = "Нет авторизации/API: живая аудитория недоступна.";
       return;
     }
+    var payload = {
+      action: action,
+      segment: segment,
+      channel: channel,
+      text: text,
+      audienceIds: players.map(function (p) { return p.accountId || p.id; }),
+      period: state.period === "custom" ? "30" : state.period,
+      range: requestRange(),
+    };
+    var imagePayload = broadcastImagePayload();
+    Object.keys(imagePayload).forEach(function (key) {
+      payload[key] = imagePayload[key];
+    });
     fetch(base + "/api/player-crm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(postBodySafe({
-        action: action,
-        segment: segment,
-        channel: channel,
-        text: text,
-        audienceIds: players.map(function (p) { return p.accountId || p.id; }),
-        period: state.period === "custom" ? "30" : state.period,
-        range: requestRange(),
-      })),
+      body: JSON.stringify(postBodySafe(payload)),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok) {
-          if (out) out.textContent = (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+          if (out) out.textContent = (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
           loadCrmData();
         } else if (out) {
           out.textContent = data && data.error ? data.error : "Не удалось подготовить рассылку.";
@@ -2005,16 +2217,31 @@
     var broadcastSegment = document.getElementById("playerCrmBroadcastSegment");
     if (broadcastSegment) broadcastSegment.addEventListener("change", updateBroadcastAudience);
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
-    if (broadcastPreview) broadcastPreview.addEventListener("click", function () {
-      var players = updateBroadcastAudience();
-      var out = document.getElementById("playerCrmBroadcastResult");
-      if (out) out.textContent = "В выбранной группе " + players.length + " игроков. Бот/push-метрики видны в карточках.";
+    if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
+    var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");
+    var broadcastImageInput = document.getElementById("playerCrmBroadcastImageInput");
+    var broadcastImageRemove = document.getElementById("playerCrmBroadcastImageRemoveBtn");
+    if (broadcastImageBtn && broadcastImageInput) broadcastImageBtn.addEventListener("click", function () { broadcastImageInput.click(); });
+    if (broadcastImageInput) broadcastImageInput.addEventListener("change", function () {
+      var file = broadcastImageInput.files && broadcastImageInput.files[0] ? broadcastImageInput.files[0] : null;
+      handleBroadcastImageFile(file);
+    });
+    if (broadcastImageRemove) broadcastImageRemove.addEventListener("click", function () {
+      clearBroadcastImage();
+      setBroadcastResult("Картинка убрана.");
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeBroadcastPreview();
     });
     var broadcastPrepare = document.getElementById("playerCrmBroadcastPrepareBtn");
     if (broadcastPrepare) broadcastPrepare.addEventListener("click", prepareBroadcast);
     var broadcastSend = document.getElementById("playerCrmBroadcastSendBtn");
     if (broadcastSend) broadcastSend.addEventListener("click", sendBroadcastNow);
     root.addEventListener("click", function (e) {
+      if (e.target.closest("[data-crm-broadcast-preview-close]")) {
+        closeBroadcastPreview();
+        return;
+      }
       if (e.target && e.target.id === "playerCrmSavePlayerBtn") saveSelectedPlayer();
       if (e.target && e.target.id === "playerCrmAddEventBtn") addSelectedEvent();
       if (e.target && e.target.id === "playerCrmLinkIdentityBtn") linkSelectedIdentity();
