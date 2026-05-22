@@ -1298,6 +1298,12 @@ button.player-crm__stat:focus-visible,
   font-size: 13px;
   line-height: 1.4;
 }
+.player-crm__send-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
 .player-crm__campaigns {
   margin-top: 12px;
 }

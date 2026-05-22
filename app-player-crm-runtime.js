@@ -78,6 +78,7 @@
     broadcastImage: null,
     broadcastProgressTimer: null,
     broadcastProgressId: "",
+    lastBroadcastProgress: null,
   };
 
   var esc = pokerPlayerCrmEsc;
@@ -1360,6 +1361,17 @@
     if (out) out.textContent = text || "";
   }
 
+  function renderBroadcastProgressResult(text, progress, allowResume) {
+    var out = document.getElementById("playerCrmBroadcastResult");
+    if (!out) return;
+    var pendingIds = progress && Array.isArray(progress.pendingIds) ? progress.pendingIds : [];
+    var html = "<div>" + esc(text || "") + "</div>";
+    if (allowResume && pendingIds.length) {
+      html += "<div class=\"player-crm__send-result-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-resume-broadcast>Дослать оставшимся: " + esc(intFmt(pendingIds.length)) + "</button></div>";
+    }
+    out.innerHTML = html;
+  }
+
   function broadcastImagePayload() {
     if (!state.broadcastImage || !state.broadcastImage.dataUrl) return {};
     return {
@@ -1403,6 +1415,8 @@
     progress = progress && typeof progress === "object" ? progress : {};
     var total = Math.max(0, Number(progress.total) || Number(fallbackTotal) || 0);
     var processed = Math.max(0, Number(progress.processed) || 0);
+    var delivered = Math.max(0, Number(progress.delivered) || (Array.isArray(progress.sentIds) ? progress.sentIds.length : 0));
+    var notSent = Math.max(0, Number(progress.notSent) || (Array.isArray(progress.pendingIds) ? progress.pendingIds.length : Math.max(0, total - delivered)));
     var sentBot = Math.max(0, Number(progress.sentBot) || 0);
     var sentPush = Math.max(0, Number(progress.sentPush) || 0);
     var failed = Math.max(0, Number(progress.failed) || 0);
@@ -1411,7 +1425,15 @@
     if (status === "failed") return "Рассылка остановилась: " + (progress.error || "ошибка отправки") + (progress.details ? " Детали: " + progress.details : "");
     var pctText = total > 0 ? " (" + Math.min(100, Math.round(processed / total * 100)) + "%)" : "";
     var prefix = status === "done" ? "Рассылка завершена" : "Отправляем";
-    return prefix + ": " + intFmt(processed) + " / " + intFmt(total) + pctText + ". Бот " + intFmt(sentBot) + ", push " + intFmt(sentPush) + ", ошибок " + intFmt(failed) + ".";
+    return prefix + ": обработано " + intFmt(processed) + " / " + intFmt(total) + pctText + ". Доставлено " + intFmt(delivered) + ", осталось " + intFmt(notSent) + ". Бот " + intFmt(sentBot) + ", push " + intFmt(sentPush) + ", ошибок " + intFmt(failed) + ".";
+  }
+
+  function fetchBroadcastProgress(base, progressId) {
+    if (!base || !progressId) return Promise.resolve(null);
+    return fetch(base + "/api/player-crm" + campaignProgressQuery(progressId))
+      .then(function (r) { return r.json(); })
+      .then(function (data) { return data && data.ok && data.progress ? data.progress : null; })
+      .catch(function () { return null; });
   }
 
   function startBroadcastProgressPolling(base, progressId, totalFallback, out) {
@@ -1421,12 +1443,12 @@
     var stopped = false;
     function poll() {
       if (stopped || state.broadcastProgressId !== progressId) return;
-      fetch(base + "/api/player-crm" + campaignProgressQuery(progressId))
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
+      fetchBroadcastProgress(base, progressId)
+        .then(function (progress) {
           if (stopped || state.broadcastProgressId !== progressId) return;
-          if (data && data.ok && data.progress && out) {
-            out.textContent = formatBroadcastProgress(data.progress, totalFallback);
+          if (progress && out) {
+            state.lastBroadcastProgress = progress;
+            renderBroadcastProgressResult(formatBroadcastProgress(progress, totalFallback), progress, progress.status === "failed");
           }
         })
         .catch(function () {});
@@ -1629,7 +1651,8 @@
     document.body.classList.add("player-crm-dialog-modal-open");
   }
 
-  function runBroadcast(action) {
+  function runBroadcast(action, options) {
+    options = options && typeof options === "object" ? options : {};
     var segEl = document.getElementById("playerCrmBroadcastSegment");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var textEl = document.getElementById("playerCrmBroadcastText");
@@ -1637,7 +1660,9 @@
     var segment = segEl ? segEl.value : "has_bot";
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
+    var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
     var players = segmentPlayers(segment);
+    var targetCount = resumeIds.length || players.length;
     if (!text && !state.broadcastImage) {
       if (out) out.textContent = "Нужно написать текст или прикрепить картинку.";
       return;
@@ -1647,15 +1672,17 @@
         if (out) out.textContent = "У твоей роли нет права отправлять массовые рассылки.";
         return;
       }
-      var ok = window.confirm ? window.confirm("Отправить рассылку сейчас: " + players.length + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
+      var ok = options.skipConfirm === true
+        ? true
+        : window.confirm ? window.confirm((resumeIds.length ? "Дослать рассылку оставшимся: " : "Отправить рассылку сейчас: ") + targetCount + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
       if (!ok) return;
     }
     if (out) {
       out.textContent = action === "test_campaign"
         ? "Отправляем тест: 1 получатель, массовая аудитория не затрагивается..."
         : action === "send_campaign"
-          ? "Отправляем: " + players.length + " игроков..."
-          : "Готовим аудиторию: " + players.length + " игроков...";
+          ? (resumeIds.length ? "Досылаем оставшимся: " : "Отправляем: ") + targetCount + " игроков..."
+          : "Готовим аудиторию: " + targetCount + " игроков...";
     }
     var base = getApiBaseSafe();
     var hasCred = false;
@@ -1675,7 +1702,11 @@
       range: requestRange(),
     };
     if (action !== "test_campaign") {
-      payload.audienceIds = players.map(function (p) { return p.accountId || p.id; });
+      payload.audienceIds = resumeIds.length ? resumeIds : players.map(function (p) { return p.accountId || p.id; });
+    }
+    if (options.resumeProgressId) {
+      payload.resumeProgressId = options.resumeProgressId;
+      payload.force = true;
     }
     var imagePayload = broadcastImagePayload();
     Object.keys(imagePayload).forEach(function (key) {
@@ -1692,7 +1723,7 @@
     var stopProgress = function () {};
     if (action === "send_campaign") {
       payload.progressId = makeBroadcastProgressId();
-      stopProgress = startBroadcastProgressPolling(base, payload.progressId, players.length, out);
+      stopProgress = startBroadcastProgressPolling(base, payload.progressId, targetCount, out);
     }
     fetch(base + "/api/player-crm", {
       method: "POST",
@@ -1707,18 +1738,42 @@
             var recipient = data.testRecipient || "тестовый получатель";
             out.textContent = action === "test_campaign"
               ? "Тест отправлен: " + recipient + ", получатель 1, бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + ". Массовая аудитория не затронута."
-              : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+              : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, доставлено " + (data.delivered != null ? data.delivered : (data.sentBot || data.sentPush || 0)) + ", осталось " + (data.notSent != null ? data.notSent : 0) + ", бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
             if (data.warning) out.textContent += " Предупреждение: " + data.warning;
           }
           loadCrmData();
         } else if (out) {
-          out.textContent = data && data.error ? data.error : "Не удалось подготовить рассылку.";
-          if (data && data.details) out.textContent += " Детали: " + data.details;
+          var errorText = data && data.error ? data.error : "Не удалось подготовить рассылку.";
+          if (data && data.details) errorText += " Детали: " + data.details;
+          if (payload.progressId) {
+            fetchBroadcastProgress(base, payload.progressId).then(function (progress) {
+              if (progress) {
+                state.lastBroadcastProgress = progress;
+                renderBroadcastProgressResult(errorText + " " + formatBroadcastProgress(progress, targetCount), progress, true);
+              } else {
+                out.textContent = errorText;
+              }
+            });
+          } else {
+            out.textContent = errorText;
+          }
         }
       })
       .catch(function () {
         stopProgress();
-        if (out) out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
+        if (!out) return;
+        if (payload.progressId) {
+          fetchBroadcastProgress(base, payload.progressId).then(function (progress) {
+            if (progress) {
+              state.lastBroadcastProgress = progress;
+              renderBroadcastProgressResult((typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.") + " " + formatBroadcastProgress(progress, targetCount), progress, true);
+            } else {
+              out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
+            }
+          });
+        } else {
+          out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
+        }
       });
   }
 
@@ -1732,6 +1787,19 @@
 
   function sendBroadcastTest() {
     runBroadcast("test_campaign");
+  }
+
+  function resumeBroadcastRemaining() {
+    var progress = state.lastBroadcastProgress || null;
+    var pendingIds = progress && Array.isArray(progress.pendingIds) ? progress.pendingIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
+    if (!pendingIds.length) {
+      setBroadcastResult("Оставшихся получателей нет.");
+      return;
+    }
+    runBroadcast("send_campaign", {
+      audienceIds: pendingIds,
+      resumeProgressId: progress.progressId || state.broadcastProgressId || "",
+    });
   }
 
   function saveSelectedPlayer() {
@@ -2201,6 +2269,11 @@
         state.tab = "broadcast";
         syncTabs();
         updateBroadcastAudience();
+        return;
+      }
+      if (e.target.closest("[data-crm-resume-broadcast]")) {
+        resumeBroadcastRemaining();
+        return;
       }
     });
 
