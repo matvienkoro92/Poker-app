@@ -99,12 +99,14 @@ function testAttemptEconomy() {
   const extra = playPure(first.state, "straight", "2026-05-22T12:05:00.000Z");
   assert.strictEqual(extra.attemptType, "extra", "extra attempt is used after base");
   assert.strictEqual(extra.reward.grantsExtraAttempt, false, "extra attempt cannot create an infinite chain");
+  assert.strictEqual(extra.reward.bonusAmount, 50, "straight on an extra attempt still credits 50 bonuses");
   assert.strictEqual(getAttemptsLeft(extra.state, "2026-05-22T12:06:00.000Z"), 0, "extra attempt cannot be issued twice");
   assert.strictEqual(getNextAttemptType(extra.state, "2026-05-23T12:05:00.000Z"), "base", "next base attempt is available 24h after the original base hand");
 
   state = {};
   first = playPure(state, "straight", now);
   assert.strictEqual(first.reward.grantsExtraAttempt, true, "straight grants extra attempt");
+  assert.strictEqual(first.reward.bonusAmount, 50, "straight gives 50 bonuses");
 
   state = {};
   first = playPure(state, "flush", now);
@@ -162,6 +164,7 @@ function testRewardsAndLedger() {
   assert.strictEqual(rewardForHandRank("royal_flush", {}).ticketAmount, 10000, "royal flush ticket 10000");
   assert.strictEqual(rewardForHandRank("four_of_a_kind", {}).title, "Билет на Нокаут Мистери 1 200 ₽", "four of a kind ticket title matches Thursday Mystery");
   assert.strictEqual(rewardForHandRank("straight_flush", {}).bonusAmount, 0, "straight flush is not paid as a flush");
+  assert.strictEqual(rewardForHandRank("straight", {}).bonusAmount, 50, "straight is paid like a flush");
   const promo = buildBonusLedgerEntry({
     userId: "ID100001",
     amount: 50,
