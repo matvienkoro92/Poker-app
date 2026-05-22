@@ -100,20 +100,22 @@
     var body = $("adminBonusesTableBody");
     if (!body) return;
     if (!users || !users.length) {
-      body.innerHTML = '<tr><td colspan="7" class="admin-bonuses__empty">Пользователей не найдено.</td></tr>';
+      body.innerHTML = '<tr><td colspan="9" class="admin-bonuses__empty">Пользователей не найдено.</td></tr>';
       return;
     }
     body.innerHTML = users.map(function (user) {
       var name = rowTitle(user);
-      var sub = user.username ? "@" + user.username + " · " + user.userId : user.userId;
-      var contact = [user.email || "", user.phone || ""].filter(Boolean).map(esc).join("<br>") || "—";
+      var userId = user.userId || "—";
+      var nick = user.username ? "@" + user.username : (user.nickname || "—");
       return '<tr data-user-id="' + esc(user.userId) + '">' +
-        '<td><strong>' + esc(name) + '</strong><span>' + esc(sub) + '</span></td>' +
-        '<td>' + contact + '</td>' +
+        '<td><strong>' + esc(name) + '</strong><span>' + esc(user.email || user.phone || "") + '</span></td>' +
+        '<td><span class="admin-bonuses__mono">' + esc(userId) + '</span></td>' +
+        '<td>' + esc(nick) + '</td>' +
         '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
-        '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
-        '<td>' + esc(user.ticketsWon || 0) + '</td>' +
         '<td>' + esc(fmtDate(user.lastGameAt)) + '</td>' +
+        '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
+        '<td><strong class="admin-bonuses__amount-plus">+' + esc(user.totalCredited || 0) + '</strong></td>' +
+        '<td><strong class="admin-bonuses__amount-minus">-' + esc(user.totalDebited || 0) + '</strong></td>' +
         '<td class="admin-bonuses__actions-cell">' +
           '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
           '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
@@ -182,13 +184,19 @@
     var modal = $("adminBonusesOperationModal");
     var title = $("adminBonusesOperationTitle");
     var userEl = $("adminBonusesOperationUser");
+    var balanceEl = $("adminBonusesOperationBalance");
     var amount = $("adminBonusesOperationAmount");
     var comment = $("adminBonusesOperationComment");
     var message = $("adminBonusesOperationMessage");
     var found = adminBonusesState.users.find(function (u) { return u.userId === userId; });
     if (title) title.textContent = operation === "debit" ? "Списать бонусы" : "Начислить бонусы";
     if (userEl) userEl.textContent = (found ? rowTitle(found) + " · " : "") + userId;
-    if (amount) amount.value = "";
+    if (balanceEl) balanceEl.textContent = "Текущий баланс: " + (found ? found.bonusBalance || 0 : 0);
+    if (amount) {
+      amount.value = "";
+      if (operation === "debit" && found) amount.max = String(Math.max(0, parseInt(found.bonusBalance || "0", 10) || 0));
+      else amount.removeAttribute("max");
+    }
     if (comment) comment.value = "";
     if (message) message.textContent = "";
     if (modal) {
@@ -212,13 +220,16 @@
     var commentEl = $("adminBonusesOperationComment");
     var message = $("adminBonusesOperationMessage");
     var amount = Math.floor(Number(amountEl && amountEl.value));
+    var found = adminBonusesState.users.find(function (u) { return u.userId === userId; });
     if (!userId || (operation !== "credit" && operation !== "debit")) return;
     if (!Number.isFinite(amount) || amount <= 0) {
       if (message) message.textContent = "Сумма должна быть больше 0.";
       return;
     }
-    if (!confirm((operation === "debit" ? "Списать " : "Начислить ") + amount + " бонусов?")) return;
-    var base = apiBase();
+    if (operation === "debit" && found && amount > (parseInt(found.bonusBalance || "0", 10) || 0)) {
+      if (message) message.textContent = "Нельзя списать больше текущего баланса.";
+      return;
+    }
     var endpoint = operation === "debit" ? "bonus-debit" : "bonus-credit";
     if (message) message.textContent = "Сохраняем…";
     fetch(authUrl("users/" + userId + "/" + endpoint), {
