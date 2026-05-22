@@ -191,6 +191,14 @@
   font-weight: 700;
 }
 
+.daily-poker__timer {
+  min-width: 0;
+}
+
+.daily-poker__attempts {
+  white-space: nowrap;
+}
+
 .daily-poker__table {
   position: relative;
   display: grid;
@@ -525,8 +533,7 @@
 }
 
 @media (max-width: 720px) {
-  .admin-bonuses__header,
-  .daily-poker__status-row {
+  .admin-bonuses__header {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
