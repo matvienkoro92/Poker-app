@@ -115,6 +115,17 @@ function testRewardsAndLedger() {
     sourceId: "game1",
   });
   assert.strictEqual(promo.balance_after, 150, "bonuses are credited through ledger entry");
+  const ticket = buildBonusLedgerEntry({
+    userId: "ID100001",
+    amount: 500,
+    direction: "credit",
+    operationType: "promo_ticket",
+    balanceBefore: 150,
+    source: "daily_poker_ticket",
+    sourceId: "ticket1",
+  });
+  assert.strictEqual(ticket.balance_after, 650, "ticket rewards are credited through ledger entry");
+  assert.strictEqual(ticket.operation_type, "promo_ticket", "ticket reward uses ticket operation type");
   assert.throws(() => buildBonusLedgerEntry({
     userId: "ID100001",
     amount: 101,

@@ -171,7 +171,7 @@
       dailyPokerState.revealing = false;
       if (resultEl) resultEl.textContent = result.handName || "Комбинация определена";
       if (rewardEl) rewardEl.textContent = result.reward && result.reward.message ? result.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.";
-      if (claimBtn) claimBtn.hidden = !(result.reward && result.reward.type === "ticket");
+      if (claimBtn) claimBtn.hidden = true;
       syncStatus(result);
     }, 1840);
   }
@@ -278,7 +278,7 @@
     if (claimBtn && claimBtn.dataset.dailyPokerBound !== "1") {
       claimBtn.dataset.dailyPokerBound = "1";
       claimBtn.addEventListener("click", function () {
-        showMessage("Приз зафиксирован. Менеджер увидит билет в истории промо.", false);
+        showMessage("Билет уже зачислен на баланс.", false);
         claimBtn.hidden = true;
       });
     }
