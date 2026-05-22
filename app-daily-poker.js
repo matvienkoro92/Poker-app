@@ -70,8 +70,16 @@
     var timerEl = $("dailyPokerTimer");
     if (!timerEl) return;
     var status = dailyPokerState.status || {};
+    if (!dailyPokerState.status) {
+      timerEl.textContent = "Проверяем доступность раздачи…";
+      return;
+    }
     if (status.canPlay) {
       timerEl.textContent = status.attemptsLeft > 1 ? "Доступна раздача и дополнительная попытка." : "Раздача доступна.";
+      return;
+    }
+    if (!status.nextFreeAttemptAt) {
+      timerEl.textContent = "Не удалось проверить доступность раздачи.";
       return;
     }
     var nextMs = Date.parse(status.nextFreeAttemptAt || "");
