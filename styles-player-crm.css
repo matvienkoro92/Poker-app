@@ -185,14 +185,6 @@
   resize: vertical;
   line-height: 1.45;
 }
-.player-crm__tabs-title {
-  margin: 5px 0 7px;
-  color: #c7a36a;
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.01em;
-}
 .player-crm__tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -246,11 +238,27 @@
   color: #fff7df;
   box-shadow: inset 0 1px 0 rgba(255, 240, 214, 0.08);
 }
+.player-crm__tab.player-crm__tab--active {
+  border-color: rgba(251, 191, 36, 0.82);
+  background:
+    linear-gradient(180deg, rgba(255, 231, 160, 0.98), rgba(217, 158, 58, 0.94)),
+    #d99e3a;
+  color: #0b1220;
+  box-shadow:
+    0 0 0 1px rgba(255, 240, 214, 0.18),
+    0 10px 24px rgba(251, 191, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
 .player-crm__tab:hover,
 .player-crm__tab:focus-visible {
   border-color: rgba(199, 163, 106, 0.42);
   color: #fff7df;
   outline: none;
+}
+.player-crm__tab.player-crm__tab--active:hover,
+.player-crm__tab.player-crm__tab--active:focus-visible {
+  border-color: rgba(255, 231, 160, 0.95);
+  color: #0b1220;
 }
 [data-theme="light"] .player-crm__tab--active,
 [data-theme="light"] .player-crm__chip--active {
