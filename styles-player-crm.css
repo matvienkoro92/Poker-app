@@ -118,6 +118,7 @@
 .player-crm input,
 .player-crm textarea {
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   border: 1px solid rgba(148, 163, 184, 0.32);
   border-radius: 8px;
@@ -1218,7 +1219,11 @@ button.player-crm__stat:focus-visible,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  min-width: 0;
   margin-bottom: 10px;
+}
+.player-crm__form-grid label {
+  min-width: 0;
 }
 .player-crm__message-label {
   margin-bottom: 10px;
@@ -1239,8 +1244,12 @@ button.player-crm__stat:focus-visible,
 .player-crm__links {
   display: grid;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 .player-crm__links-builder {
+  min-width: 0;
+  max-width: 100%;
   padding: 12px;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
@@ -1251,6 +1260,10 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__links-result:empty {
   display: none;
+}
+.player-crm__links-list {
+  min-width: 0;
+  max-width: 100%;
 }
 .player-crm__links-table {
   min-width: 1040px;
@@ -1346,6 +1359,9 @@ button.player-crm__stat:focus-visible,
   background: linear-gradient(90deg, #38bdf8, #34d399);
 }
 .player-crm__source-table-wrap {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
