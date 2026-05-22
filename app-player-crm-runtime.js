@@ -1452,6 +1452,7 @@
     var out = document.getElementById("playerCrmBroadcastResult");
     if (!out) return;
     var pendingIds = progress && Array.isArray(progress.pendingIds) ? progress.pendingIds : [];
+    var failedIds = progress && Array.isArray(progress.failedIds) ? progress.failedIds : [];
     var status = String(progress && progress.status || "").trim();
     var progressId = String((progress && (progress.progressId || progress.jobId)) || state.broadcastProgressId || "").trim();
     var html = "<div>" + esc(text || "") + "</div>";
@@ -1466,6 +1467,9 @@
     }
     if (allowResume && pendingIds.length) {
       html += "<div class=\"player-crm__send-result-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-resume-broadcast>Дослать оставшимся: " + esc(intFmt(pendingIds.length)) + "</button></div>";
+    }
+    if (failedIds.length) {
+      html += "<div class=\"player-crm__send-result-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-retry-failed-broadcast>Дослать ошибочные: " + esc(intFmt(failedIds.length)) + "</button></div>";
     }
     html += renderBroadcastDeliveryLog(progress);
     out.innerHTML = html;
@@ -1913,7 +1917,7 @@
         return;
       }
       var sendLabel = resumeIds.length
-        ? "Дослать рассылку оставшимся: "
+        ? (options.failedOnly === true ? "Дослать только ошибочные: " : "Дослать рассылку оставшимся: ")
         : sendAllBatches
           ? "Отправить все пачки выбранной группы: "
           : "Отправить пачку " + batch.number + "/" + batch.totalBatches + ": ";
@@ -1926,7 +1930,7 @@
       out.textContent = action === "test_campaign"
         ? "Отправляем тест: 1 получатель, массовая аудитория не затрагивается..."
         : action === "send_campaign"
-          ? (resumeIds.length ? "Досылаем оставшимся: " : sendAllBatches ? "Отправляем все пачки: " : "Отправляем пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков..."
+          ? (resumeIds.length ? (options.failedOnly === true ? "Досылаем ошибочные: " : "Досылаем оставшимся: ") : sendAllBatches ? "Отправляем все пачки: " : "Отправляем пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков..."
           : "Готовим пачку " + batch.number + "/" + batch.totalBatches + ": " + targetCount + " игроков...";
     }
     var base = getApiBaseSafe();
@@ -1964,6 +1968,7 @@
       payload.resumeProgressId = options.resumeProgressId;
       payload.force = true;
     }
+    if (options.force === true) payload.force = true;
     var imagePayload = broadcastImagePayload();
     Object.keys(imagePayload).forEach(function (key) {
       payload[key] = imagePayload[key];
@@ -2068,6 +2073,20 @@
     runBroadcast("send_campaign", {
       audienceIds: pendingIds,
       resumeProgressId: progress.progressId || state.broadcastProgressId || "",
+    });
+  }
+
+  function retryBroadcastFailed() {
+    var progress = state.lastBroadcastProgress || null;
+    var failedIds = progress && Array.isArray(progress.failedIds) ? progress.failedIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
+    if (!failedIds.length) {
+      setBroadcastResult("Ошибочных получателей нет.");
+      return;
+    }
+    runBroadcast("send_campaign", {
+      audienceIds: failedIds,
+      force: true,
+      failedOnly: true,
     });
   }
 
@@ -2544,6 +2563,10 @@
       }
       if (e.target.closest("[data-crm-resume-broadcast]")) {
         resumeBroadcastRemaining();
+        return;
+      }
+      if (e.target.closest("[data-crm-retry-failed-broadcast]")) {
+        retryBroadcastFailed();
         return;
       }
       if (e.target.closest("[data-crm-pause-job]")) {
