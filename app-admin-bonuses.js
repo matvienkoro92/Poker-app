@@ -33,8 +33,16 @@
     return q + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
   }
 
-  function authPathQuery(path) {
-    return appendQuery(authQuery(), "path", path);
+  function authUrl(path, query) {
+    var q = authQuery();
+    if (q && q.charAt(0) !== "?") q = "?" + q.replace(/^&+/, "");
+    var url = apiBase() + "/api/admin/" + String(path || "").split("/").map(encodeURIComponent).join("/") + (q || "");
+    Object.keys(query || {}).forEach(function (name) {
+      var value = String(query[name] == null ? "" : query[name]).trim();
+      if (!value) return;
+      url = appendQuery(url, name, value);
+    });
+    return url;
   }
 
   function authBody(extra) {
@@ -63,20 +71,15 @@
     return user.displayName || user.nickname || (user.username ? "@" + user.username : user.userId);
   }
 
-  function buildQuery() {
-    var q = authPathQuery("bonus-balances");
-    function add(name, value) {
-      value = String(value == null ? "" : value).trim();
-      if (!value) return;
-      q = appendQuery(q, name, value);
-    }
-    add("search", $("adminBonusesSearch") && $("adminBonusesSearch").value);
-    add("minBalance", $("adminBonusesMinBalance") && $("adminBonusesMinBalance").value);
-    add("maxBalance", $("adminBonusesMaxBalance") && $("adminBonusesMaxBalance").value);
-    add("sortBy", $("adminBonusesSort") && $("adminBonusesSort").value);
-    add("page", adminBonusesState.page);
-    add("limit", 50);
-    return q;
+  function listUrl() {
+    return authUrl("bonus-balances", {
+      search: $("adminBonusesSearch") && $("adminBonusesSearch").value,
+      minBalance: $("adminBonusesMinBalance") && $("adminBonusesMinBalance").value,
+      maxBalance: $("adminBonusesMaxBalance") && $("adminBonusesMaxBalance").value,
+      sortBy: $("adminBonusesSort") && $("adminBonusesSort").value,
+      page: adminBonusesState.page,
+      limit: 50,
+    });
   }
 
   function readJson(r) {
@@ -128,7 +131,7 @@
     }
     adminBonusesState.loading = true;
     setStatus("Загрузка…", false);
-    fetch(base + "/api/admin" + buildQuery(), { cache: "no-store" })
+    fetch(listUrl(), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         adminBonusesState.loading = false;
@@ -149,7 +152,7 @@
     if (!base || !body) return;
     adminBonusesState.selectedUserId = userId;
     body.innerHTML = "Загрузка истории…";
-    fetch(base + "/api/admin" + authPathQuery("users/" + encodeURIComponent(userId) + "/bonus-ledger"), { cache: "no-store" })
+    fetch(authUrl("users/" + userId + "/bonus-ledger"), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "История не загрузилась");
@@ -218,7 +221,7 @@
     var base = apiBase();
     var endpoint = operation === "debit" ? "bonus-debit" : "bonus-credit";
     if (message) message.textContent = "Сохраняем…";
-    fetch(base + "/api/admin" + authPathQuery("users/" + encodeURIComponent(userId) + "/" + endpoint), {
+    fetch(authUrl("users/" + userId + "/" + endpoint), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authBody({ amount: amount, comment: commentEl && commentEl.value })),
