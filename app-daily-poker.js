@@ -60,6 +60,17 @@
     return "Бонусный баланс: " + n + " бонусов";
   }
 
+  function formatTicketlessStreak(data) {
+    var payload = data || {};
+    var target = Math.max(1, parseInt(payload.ticketlessStreakTarget || "7", 10) || 7);
+    var amount = Math.max(0, parseInt(payload.ticketlessStreakTicketAmount || "300", 10) || 300);
+    if (payload.ticketlessStreakAward && payload.ticketlessStreakAward.amount) {
+      return "Серия без билета: " + target + "/" + target + " — билет " + amount + " ₽ зачислен";
+    }
+    var streak = Math.max(0, parseInt(payload.ticketlessStreak || "0", 10) || 0);
+    return "Серия без билета: " + Math.min(streak, target) + "/" + target;
+  }
+
   function formatDuration(seconds) {
     var s = Math.max(0, Math.floor(Number(seconds) || 0));
     var h = Math.floor(s / 3600);
@@ -102,10 +113,15 @@
     if (Number.isFinite(serverMs)) dailyPokerState.serverDeltaMs = serverMs - Date.now();
     var balanceEl = $("dailyPokerBalance");
     var attemptsEl = $("dailyPokerAttempts");
+    var streakEl = $("dailyPokerTicketlessStreak");
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) balanceEl.textContent = formatBonus(data.bonusBalance);
     if (attemptsEl) attemptsEl.textContent = "Попытки: " + (data.attemptsLeft || 0);
+    if (streakEl) {
+      streakEl.textContent = formatTicketlessStreak(data);
+      streakEl.classList.toggle("daily-poker__ticketless-streak--award", !!data.ticketlessStreakAward);
+    }
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
@@ -156,6 +172,7 @@
       Object.prototype.hasOwnProperty.call(data, "canPlay") ||
       Object.prototype.hasOwnProperty.call(data, "attemptsLeft") ||
       Object.prototype.hasOwnProperty.call(data, "bonusBalance") ||
+      Object.prototype.hasOwnProperty.call(data, "ticketlessStreak") ||
       Object.prototype.hasOwnProperty.call(data, "nextFreeAttemptAt")
     ));
   }
@@ -254,7 +271,7 @@
     var base = apiBase();
     if (!base || !hasCredential()) {
       showMessage("Войдите в аккаунт, чтобы сыграть в Раздачу дня.", true);
-      syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
+      syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, ticketlessStreak: 0, ticketlessStreakTarget: 7, ticketlessStreakTicketAmount: 300, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
       return Promise.resolve(false);
     }
     return fetch(authUrl("status"), { cache: "no-store" })

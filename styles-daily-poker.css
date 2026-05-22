@@ -304,6 +304,30 @@
   white-space: nowrap;
 }
 
+.daily-poker__ticketless-streak {
+  margin-top: 12px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(8, 47, 73, 0.62);
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  box-sizing: border-box;
+  color: #dbeafe;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.daily-poker__ticketless-streak--award {
+  color: #fde68a;
+  background: rgba(67, 56, 202, 0.24);
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
 .daily-poker__result--error,
 .admin-bonuses__notice--error {
   color: #fecaca;

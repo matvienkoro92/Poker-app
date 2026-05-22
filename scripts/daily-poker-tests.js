@@ -4,6 +4,7 @@
 const assert = require("assert");
 const {
   applyAttemptToState,
+  applyTicketlessStreakToState,
   createDeck,
   evaluateSevenCardHand,
   getAttemptsLeft,
@@ -74,6 +75,10 @@ function playPure(state, handRank, nowIso) {
   return { attemptType, reward, state: next };
 }
 
+function gameDateFromIso(iso) {
+  return String(iso || "").slice(0, 10);
+}
+
 function testAttemptEconomy() {
   const now = "2026-05-22T12:00:00.000Z";
   let state = {};
@@ -108,6 +113,46 @@ function testAttemptEconomy() {
   const flushExtra = playPure(first.state, "flush", "2026-05-22T12:05:00.000Z");
   assert.strictEqual(flushExtra.reward.grantsExtraAttempt, false, "second flush does not grant another extra attempt");
   assert.strictEqual(flushExtra.reward.bonusAmount, 50, "second flush still credits bonus reward through ledger");
+}
+
+function testTicketlessStreak() {
+  let state = {};
+  let streakReward = null;
+  for (let day = 0; day < 6; day += 1) {
+    const iso = new Date(Date.UTC(2026, 4, 1 + day, 12, 0, 0)).toISOString();
+    const reward = rewardForHandRank("high_card", {});
+    const afterAttempt = applyAttemptToState(state, "base", reward, iso);
+    const streak = applyTicketlessStreakToState(afterAttempt, "base", reward, iso, gameDateFromIso(iso));
+    state = streak.state;
+    streakReward = streak.streakReward;
+    assert.strictEqual(state.ticketlessStreak, day + 1, "ticketless streak grows for base hands without tickets");
+    assert.strictEqual(streakReward, null, "ticketless streak is not paid before day 7");
+  }
+  const seventhIso = "2026-05-07T12:00:00.000Z";
+  const noPrize = rewardForHandRank("pair", {});
+  const seventhAttempt = applyAttemptToState(state, "base", noPrize, seventhIso);
+  const seventh = applyTicketlessStreakToState(seventhAttempt, "base", noPrize, seventhIso, gameDateFromIso(seventhIso));
+  assert.strictEqual(seventh.awarded, true, "seventh ticketless base hand pays the consolation ticket");
+  assert.strictEqual(seventh.streakReward.ticketAmount, 300, "ticketless streak reward is a 300 ticket");
+  assert.strictEqual(seventh.state.ticketlessStreak, 0, "ticketless streak resets after the 300 ticket");
+
+  const repeatSameDate = applyTicketlessStreakToState(seventh.state, "base", noPrize, seventhIso, gameDateFromIso(seventhIso));
+  assert.strictEqual(repeatSameDate.state.ticketlessStreak, 0, "same date cannot increment the streak twice");
+
+  const extraNoTicket = applyTicketlessStreakToState(seventh.state, "extra", noPrize, "2026-05-08T12:00:00.000Z", "2026-05-08");
+  assert.strictEqual(extraNoTicket.state.ticketlessStreak, 0, "extra attempts without tickets do not increment the daily streak");
+
+  state = { ticketlessStreak: 4, ticketlessStreakAt: "2026-05-10T12:00:00.000Z", ticketlessStreakGameDate: "2026-05-10" };
+  const ticketReward = rewardForHandRank("full_house", {});
+  const ticketAttempt = applyAttemptToState(state, "base", ticketReward, "2026-05-11T12:00:00.000Z");
+  const reset = applyTicketlessStreakToState(ticketAttempt, "base", ticketReward, "2026-05-11T12:00:00.000Z", "2026-05-11");
+  assert.strictEqual(reset.state.ticketlessStreak, 0, "any ticket reward resets the ticketless streak");
+
+  state = { ticketlessStreak: 3, ticketlessStreakAt: "2026-05-01T12:00:00.000Z", ticketlessStreakGameDate: "2026-05-01" };
+  const lateIso = "2026-05-05T12:00:00.000Z";
+  const lateAttempt = applyAttemptToState(state, "base", noPrize, lateIso);
+  const late = applyTicketlessStreakToState(lateAttempt, "base", noPrize, lateIso, "2026-05-05");
+  assert.strictEqual(late.state.ticketlessStreak, 1, "missed days restart the ticketless streak");
 }
 
 function testRewardsAndLedger() {
@@ -207,6 +252,7 @@ function testRomanDailyPokerLimit() {
 testDeck();
 testHandRanks();
 testAttemptEconomy();
+testTicketlessStreak();
 testRewardsAndLedger();
 testRomanDailyPokerLimit();
 
