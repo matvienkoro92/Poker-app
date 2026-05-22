@@ -706,7 +706,7 @@
 
   function readBroadcastBatch(players) {
     players = Array.isArray(players) ? players : [];
-    var size = readPositiveIntegerInput("playerCrmBroadcastBatchSize", 50, 1, 500);
+    var size = readPositiveIntegerInput("playerCrmBroadcastBatchSize", 100, 1, 500);
     var total = players.length;
     var totalBatches = Math.max(1, Math.ceil(total / size));
     var number = readPositiveIntegerInput("playerCrmBroadcastBatchNumber", 1, 1, totalBatches);
