@@ -1800,7 +1800,9 @@
     var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
     var players = segmentPlayers(segment);
     var batch = readBroadcastBatch(players);
-    var audienceIds = resumeIds.length ? resumeIds : batch.ids;
+    var allAudienceIds = players.map(playerBroadcastId).filter(Boolean);
+    var sendAllBatches = options.allBatches === true && !resumeIds.length;
+    var audienceIds = resumeIds.length ? resumeIds : (sendAllBatches ? allAudienceIds : batch.ids);
     var targetCount = audienceIds.length;
     if (!text && !state.broadcastImage) {
       if (out) out.textContent = "Нужно написать текст или прикрепить картинку.";
@@ -1815,16 +1817,21 @@
         if (out) out.textContent = "У твоей роли нет права отправлять массовые рассылки.";
         return;
       }
+      var sendLabel = resumeIds.length
+        ? "Дослать рассылку оставшимся: "
+        : sendAllBatches
+          ? "Отправить все пачки выбранной группы: "
+          : "Отправить пачку " + batch.number + "/" + batch.totalBatches + ": ";
       var ok = options.skipConfirm === true
         ? true
-        : window.confirm ? window.confirm((resumeIds.length ? "Дослать рассылку оставшимся: " : "Отправить пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
+        : window.confirm ? window.confirm(sendLabel + targetCount + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
       if (!ok) return;
     }
     if (out) {
       out.textContent = action === "test_campaign"
         ? "Отправляем тест: 1 получатель, массовая аудитория не затрагивается..."
         : action === "send_campaign"
-          ? (resumeIds.length ? "Досылаем оставшимся: " : "Отправляем пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков..."
+          ? (resumeIds.length ? "Досылаем оставшимся: " : sendAllBatches ? "Отправляем все пачки: " : "Отправляем пачку " + batch.number + "/" + batch.totalBatches + ": ") + targetCount + " игроков..."
           : "Готовим пачку " + batch.number + "/" + batch.totalBatches + ": " + targetCount + " игроков...";
     }
     var base = getApiBaseSafe();
@@ -1851,9 +1858,10 @@
           number: batch.number,
           totalBatches: batch.totalBatches,
           size: batch.size,
-          from: batch.fromIndex + 1,
-          to: batch.toIndex,
+          from: sendAllBatches ? 1 : batch.fromIndex + 1,
+          to: sendAllBatches ? allAudienceIds.length : batch.toIndex,
           total: batch.total,
+          allBatches: sendAllBatches,
         };
       }
     }
@@ -1945,6 +1953,10 @@
 
   function sendBroadcastNow() {
     runBroadcast("send_campaign");
+  }
+
+  function sendBroadcastAllBatches() {
+    runBroadcast("send_campaign", { allBatches: true });
   }
 
   function sendBroadcastTest() {
@@ -2593,6 +2605,8 @@
     if (broadcastPrepare) broadcastPrepare.addEventListener("click", prepareBroadcast);
     var broadcastSend = document.getElementById("playerCrmBroadcastSendBtn");
     if (broadcastSend) broadcastSend.addEventListener("click", sendBroadcastNow);
+    var broadcastSendAll = document.getElementById("playerCrmBroadcastSendAllBtn");
+    if (broadcastSendAll) broadcastSendAll.addEventListener("click", sendBroadcastAllBatches);
     var broadcastTest = document.getElementById("playerCrmBroadcastTestBtn");
     if (broadcastTest) broadcastTest.addEventListener("click", sendBroadcastTest);
     root.addEventListener("click", function (e) {

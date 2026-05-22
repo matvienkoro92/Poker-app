@@ -598,6 +598,7 @@ async function checkCrmBroadcastPreview(browser) {
       currentStatsHeading: document.querySelector("#playerCrmCurrentStats .player-crm__stats-section-head h3")?.textContent.trim() || "",
       previewButton: document.getElementById("playerCrmBroadcastPreviewBtn")?.textContent.trim() || "",
       testButton: document.getElementById("playerCrmBroadcastTestBtn")?.textContent.trim() || "",
+      sendAllButton: document.getElementById("playerCrmBroadcastSendAllBtn")?.textContent.trim() || "",
       tabRows: new Set(Array.from(document.querySelectorAll(".player-crm__tab")).map((tab) => Math.round(tab.getBoundingClientRect().top))).size,
       segmentOption: document.querySelector("#playerCrmBroadcastSegment option[value='has_bot']")?.textContent.trim() || "",
       audienceText: document.getElementById("playerCrmBroadcastAudience")?.textContent.trim() || "",
@@ -633,7 +634,7 @@ async function checkCrmBroadcastPreview(browser) {
   }));
   await page.close();
   const state = { ...previewState, ...testState, ...sendState };
-  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || !state.audienceText.includes("1 получателей") || !state.audienceText.includes("пачка 1/1") || !state.batchSummary.includes("Пачка 1/1") || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть акцию") || !state.modalText.includes("Пачка1/1") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да") || !state.sendResult.includes("Рассылка завершена") || !state.sendResult.includes("Доставлено 1")) {
+  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.sendAllButton !== "Отправить все пачки" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || !state.audienceText.includes("1 получателей") || !state.audienceText.includes("пачка 1/1") || !state.batchSummary.includes("Пачка 1/1") || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть акцию") || !state.modalText.includes("Пачка1/1") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да") || !state.sendResult.includes("Рассылка завершена") || !state.sendResult.includes("Доставлено 1")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));
