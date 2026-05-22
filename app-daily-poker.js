@@ -33,14 +33,10 @@
     return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
   }
 
-  function appendQuery(q, name, value) {
-    q = String(q || "?");
-    var sep = q.indexOf("?") === -1 ? "?" : (q === "?" || /[?&]$/.test(q) ? "" : "&");
-    return q + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
-  }
-
-  function authPathQuery(path) {
-    return appendQuery(authQuery(), "path", path);
+  function authUrl(path) {
+    var q = authQuery();
+    if (q && q.charAt(0) !== "?") q = "?" + q.replace(/^&+/, "");
+    return apiBase() + "/api/promo/daily-poker/" + encodeURIComponent(path) + (q || "");
   }
 
   function authBody(extra) {
@@ -104,6 +100,15 @@
       extraBtn.disabled = !data.canPlay || dailyPokerState.revealing;
     }
     updateTimer();
+  }
+
+  function hasStatusPayload(data) {
+    return !!(data && (
+      Object.prototype.hasOwnProperty.call(data, "canPlay") ||
+      Object.prototype.hasOwnProperty.call(data, "attemptsLeft") ||
+      Object.prototype.hasOwnProperty.call(data, "bonusBalance") ||
+      Object.prototype.hasOwnProperty.call(data, "nextFreeAttemptAt")
+    ));
   }
 
   function cardHtml(card, hidden) {
@@ -203,7 +208,7 @@
       syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
       return Promise.resolve(false);
     }
-    return fetch(base + "/api/promo" + authPathQuery("daily-poker/status"), { cache: "no-store" })
+    return fetch(authUrl("status"), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "status failed");
@@ -224,7 +229,7 @@
     }
     setBusy(true);
     showMessage("Готовим честную раздачу…", false);
-    fetch(base + "/api/promo" + authPathQuery("daily-poker/play"), {
+    fetch(authUrl("play"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authBody({ idempotencyKey: idempotencyKey() })),
@@ -245,7 +250,7 @@
       })
       .catch(function (err) {
         setBusy(false);
-        if (err && err.data) syncStatus(err.data);
+        if (err && hasStatusPayload(err.data)) syncStatus(err.data);
         showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
       });
   }
