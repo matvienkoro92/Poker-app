@@ -9,6 +9,7 @@ const {
   getAttemptsLeft,
   getNextAttemptType,
   nextFreeAttemptAt,
+  publicStatePayload,
   rewardForHandRank,
 } = require("../lib/daily-poker");
 const { buildBonusLedgerEntry } = require("../lib/bonus-ledger");
@@ -87,6 +88,9 @@ function testAttemptEconomy() {
   first = playPure(state, "three_of_a_kind", now);
   assert.strictEqual(first.reward.grantsExtraAttempt, true, "set grants extra attempt");
   assert.strictEqual(getAttemptsLeft(first.state, "2026-05-22T12:05:00.000Z"), 1, "extra attempt is available");
+  const setPayload = publicStatePayload(first.state, { serverTime: "2026-05-22T12:05:00.000Z" }, 0);
+  assert.strictEqual(setPayload.attemptsLeft, 1, "set keeps one playable attempt in the public counter");
+  assert.strictEqual(setPayload.extraAttemptGrantedToday, true, "set marks the extra attempt in public state");
   const extra = playPure(first.state, "straight", "2026-05-22T12:05:00.000Z");
   assert.strictEqual(extra.attemptType, "extra", "extra attempt is used after base");
   assert.strictEqual(extra.reward.grantsExtraAttempt, false, "extra attempt cannot create an infinite chain");
@@ -188,6 +192,13 @@ function testRomanDailyPokerLimit() {
   assert.strictEqual(done.attemptsLeft, 0, "no hands remain after 100 plays");
   assert.strictEqual(done.canPlay, false, "Roman is blocked after 100 plays");
   assert.ok(done.secondsUntilNextAttempt > 0, "blocked payload includes countdown to the next daily reset");
+
+  const withExtra = promoInternals.romanDailyPokerStatePayload(1, meta, 75, 1);
+  assert.strictEqual(withExtra.dailyExtraAttemptsGranted, 1, "Roman payload counts earned extra attempts");
+  assert.strictEqual(withExtra.attemptsLeft, 100, "earned extra attempt is added back to Roman's counter");
+  const limitWithExtra = promoInternals.romanDailyPokerStatePayload(100, meta, 75, 1);
+  assert.strictEqual(limitWithExtra.canPlay, true, "Roman can use earned extra attempt after 100 regular hands");
+  assert.strictEqual(limitWithExtra.attemptsLeft, 1, "one earned extra attempt remains at the regular limit");
 
   const over = promoInternals.romanDailyPokerStatePayload(101, meta, 75);
   assert.strictEqual(over.attemptsLeft, 0, "attempts never go below zero");
