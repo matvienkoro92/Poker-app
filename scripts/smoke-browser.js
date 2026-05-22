@@ -280,6 +280,7 @@ async function installPlayerCrmMocks(page) {
     }
     if (req.method() === "POST") {
       const payload = JSON.parse(req.postData() || "{}");
+      const isTest = payload.action === "test_campaign";
       await route.fulfill({
         status: 200,
         headers,
@@ -287,9 +288,10 @@ async function installPlayerCrmMocks(page) {
         body: JSON.stringify({
           ok: true,
           id: "crm_smoke",
-          status: payload.action === "send_campaign" ? "sent" : "draft",
-          audience: Array.isArray(payload.audienceIds) ? payload.audienceIds.length : 0,
-          sentBot: 0,
+          status: isTest ? "test" : payload.action === "send_campaign" ? "sent" : "draft",
+          audience: isTest ? 1 : Array.isArray(payload.audienceIds) ? payload.audienceIds.length : 0,
+          testRecipient: isTest ? "@Roman1787443" : undefined,
+          sentBot: isTest ? 1 : 0,
           sentPush: 0,
           skippedAntispam: 0,
           failed: 0,
@@ -510,19 +512,34 @@ async function checkCrmBroadcastPreview(browser) {
     const modal = document.getElementById("playerCrmBroadcastPreviewModal");
     return modal && !modal.hidden && modal.querySelectorAll("img").length === 1;
   }, null, { timeout: 7000 });
-  const state = await page.evaluate(() => {
+  const previewState = await page.evaluate(() => {
     const modal = document.getElementById("playerCrmBroadcastPreviewModal");
     return {
       version: document.documentElement.getAttribute("data-app-version"),
       previewButton: document.getElementById("playerCrmBroadcastPreviewBtn")?.textContent.trim() || "",
+      testButton: document.getElementById("playerCrmBroadcastTestBtn")?.textContent.trim() || "",
       imageName: document.getElementById("playerCrmBroadcastImageName")?.textContent.trim() || "",
       modalOpen: !!(modal && !modal.hidden),
       modalImages: modal ? modal.querySelectorAll("img").length : 0,
       modalText: modal ? modal.textContent.replace(/\s+/g, " ").trim() : "",
     };
   });
+  await page.locator(".player-crm__dialog-modal-close[data-crm-broadcast-preview-close]").click();
+  await page.waitForFunction(() => {
+    const modal = document.getElementById("playerCrmBroadcastPreviewModal");
+    return !modal || modal.hidden;
+  }, null, { timeout: 7000 });
+  await page.locator("#playerCrmBroadcastTestBtn").click();
+  await page.waitForFunction(() => {
+    const result = document.getElementById("playerCrmBroadcastResult");
+    return result && result.textContent.includes("Тест отправлен Роману @Roman1787443");
+  }, null, { timeout: 7000 });
+  const testState = await page.evaluate(() => ({
+    testResult: document.getElementById("playerCrmBroadcastResult")?.textContent.replace(/\s+/g, " ").trim() || "",
+  }));
   await page.close();
-  if (state.previewButton !== "Посмотреть" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа")) {
+  const state = { ...previewState, ...testState };
+  if (state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен Роману @Roman1787443") || !state.testResult.includes("фото да")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));

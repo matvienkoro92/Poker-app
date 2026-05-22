@@ -1577,7 +1577,13 @@
       var ok = window.confirm ? window.confirm("Отправить рассылку сейчас: " + players.length + " игроков, канал " + channelLabel(channel) + (state.broadcastImage ? ", с картинкой" : "") + "?") : false;
       if (!ok) return;
     }
-    if (out) out.textContent = action === "send_campaign" ? "Отправляем: " + players.length + " игроков..." : "Готовим аудиторию: " + players.length + " игроков...";
+    if (out) {
+      out.textContent = action === "test_campaign"
+        ? "Отправляем тест Роману @Roman1787443..."
+        : action === "send_campaign"
+          ? "Отправляем: " + players.length + " игроков..."
+          : "Готовим аудиторию: " + players.length + " игроков...";
+    }
     var base = getApiBaseSafe();
     var hasCred = false;
     try {
@@ -1608,7 +1614,11 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok) {
-          if (out) out.textContent = (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+          if (out) {
+            out.textContent = action === "test_campaign"
+              ? "Тест отправлен Роману @Roman1787443: бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + "."
+              : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+          }
           loadCrmData();
         } else if (out) {
           out.textContent = data && data.error ? data.error : "Не удалось подготовить рассылку.";
@@ -1625,6 +1635,10 @@
 
   function sendBroadcastNow() {
     runBroadcast("send_campaign");
+  }
+
+  function sendBroadcastTest() {
+    runBroadcast("test_campaign");
   }
 
   function saveSelectedPlayer() {
@@ -2237,6 +2251,8 @@
     if (broadcastPrepare) broadcastPrepare.addEventListener("click", prepareBroadcast);
     var broadcastSend = document.getElementById("playerCrmBroadcastSendBtn");
     if (broadcastSend) broadcastSend.addEventListener("click", sendBroadcastNow);
+    var broadcastTest = document.getElementById("playerCrmBroadcastTestBtn");
+    if (broadcastTest) broadcastTest.addEventListener("click", sendBroadcastTest);
     root.addEventListener("click", function (e) {
       if (e.target.closest("[data-crm-broadcast-preview-close]")) {
         closeBroadcastPreview();
