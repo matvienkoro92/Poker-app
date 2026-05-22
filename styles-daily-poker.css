@@ -2,12 +2,54 @@
 .admin-bonuses {
   width: min(1080px, 100%);
   margin: 0 auto;
-  padding: max(72px, calc(env(safe-area-inset-top, 0px) + 56px)) 14px max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px));
   color: #f7ead2;
   box-sizing: border-box;
 }
 
-.daily-poker__header,
+.daily-poker {
+  padding: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) 14px max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+}
+
+.admin-bonuses {
+  padding: max(72px, calc(env(safe-area-inset-top, 0px) + 56px)) 14px max(28px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+}
+
+.daily-poker__header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.daily-poker__header::after {
+  content: "";
+  grid-column: 3;
+  grid-row: 1;
+  width: 44px;
+  height: 44px;
+}
+
+.daily-poker__back {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin: 0;
+  padding: 0;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 16px;
+}
+
+.daily-poker__heading {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  text-align: center;
+}
+
 .admin-bonuses__header {
   display: flex;
   align-items: center;
@@ -36,7 +78,9 @@
 }
 
 .daily-poker__balance {
-  flex: 0 0 auto;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
   background: rgba(8, 47, 73, 0.72);
@@ -477,7 +521,6 @@
 }
 
 @media (max-width: 720px) {
-  .daily-poker__header,
   .admin-bonuses__header,
   .daily-poker__status-row {
     grid-template-columns: 1fr;
