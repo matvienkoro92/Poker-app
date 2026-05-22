@@ -1580,7 +1580,7 @@
     }
     if (out) {
       out.textContent = action === "test_campaign"
-        ? "Отправляем тест Роману @Roman1787443..."
+        ? "Отправляем тест: 1 получатель, массовая аудитория не затрагивается..."
         : action === "send_campaign"
           ? "Отправляем: " + players.length + " игроков..."
           : "Готовим аудиторию: " + players.length + " игроков...";
@@ -1599,10 +1599,12 @@
       segment: segment,
       channel: channel,
       text: text,
-      audienceIds: players.map(function (p) { return p.accountId || p.id; }),
       period: state.period === "custom" ? "30" : state.period,
       range: requestRange(),
     };
+    if (action !== "test_campaign") {
+      payload.audienceIds = players.map(function (p) { return p.accountId || p.id; });
+    }
     var imagePayload = broadcastImagePayload();
     Object.keys(imagePayload).forEach(function (key) {
       payload[key] = imagePayload[key];
@@ -1616,14 +1618,16 @@
       .then(function (data) {
         if (data && data.ok) {
           if (out) {
+            var recipient = data.testRecipient || "тестовый получатель";
             out.textContent = action === "test_campaign"
-              ? "Тест отправлен Роману @Roman1787443: бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + "."
+              ? "Тест отправлен: " + recipient + ", получатель 1, бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + ". Массовая аудитория не затронута."
               : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
             if (data.warning) out.textContent += " Предупреждение: " + data.warning;
           }
           loadCrmData();
         } else if (out) {
           out.textContent = data && data.error ? data.error : "Не удалось подготовить рассылку.";
+          if (data && data.details) out.textContent += " Детали: " + data.details;
         }
       })
       .catch(function () {

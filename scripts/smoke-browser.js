@@ -541,14 +541,14 @@ async function checkCrmBroadcastPreview(browser) {
   await page.locator("#playerCrmBroadcastTestBtn").click();
   await page.waitForFunction(() => {
     const result = document.getElementById("playerCrmBroadcastResult");
-    return result && result.textContent.includes("Тест отправлен Роману @Roman1787443");
+    return result && result.textContent.includes("Тест отправлен: @Roman1787443");
   }, null, { timeout: 7000 });
   const testState = await page.evaluate(() => ({
     testResult: document.getElementById("playerCrmBroadcastResult")?.textContent.replace(/\s+/g, " ").trim() || "",
   }));
   await page.close();
   const state = { ...previewState, ...testState };
-  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || state.audienceText !== "1 получателей" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен Роману @Roman1787443") || !state.testResult.includes("фото да")) {
+  if (state.currentStatsHeading !== "За все время" || state.previewButton !== "Посмотреть" || state.testButton !== "Тест" || state.tabRows !== 1 || state.broadcastHeaderSendButton || !state.segmentOption.includes("Подписан на бот · 1") || state.audienceText !== "1 получателей" || !state.imageName.includes("crm-broadcast-smoke.png") || !state.modalOpen || state.modalImages !== 1 || !state.modalText.includes("Открыть приложение") || !state.modalText.includes("КартинкаДа") || !state.testResult.includes("Тест отправлен: @Roman1787443") || !state.testResult.includes("получатель 1") || !state.testResult.includes("фото да")) {
     throw new Error("CRM broadcast preview smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during crm-broadcast-preview check:\n" + pageErrors.join("\n"));

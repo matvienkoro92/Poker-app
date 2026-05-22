@@ -197,6 +197,15 @@ function initPlayerCrmReportsRuntime(deps) {
     }
   }
 
+  function campaignStatusLabel(value) {
+    var s = String(value || "").trim();
+    if (s === "sent") return "Отправлена";
+    if (s === "draft") return "Черновик";
+    if (s === "test") return "Тест";
+    if (s === "test_failed") return "Тест не ушёл";
+    return s || "—";
+  }
+
   function renderCampaigns() {
     var el = document.getElementById("playerCrmCampaigns");
     if (!el) return;
@@ -206,12 +215,14 @@ function initPlayerCrmReportsRuntime(deps) {
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__campaigns-table\"><thead><tr>" +
-      "<th>Дата</th><th>Канал</th><th>Аудитория</th><th>Бот отправлено</th><th>Push доставлено</th><th>Открыто</th><th>Клики</th><th>Уник.</th><th>Ошибки</th><th>ID</th>" +
+      "<th>Дата</th><th>Статус</th><th>Канал</th><th>Аудитория</th><th>Получатель</th><th>Бот отправлено</th><th>Push доставлено</th><th>Открыто</th><th>Клики</th><th>Уник.</th><th>Ошибки</th><th>ID</th>" +
       "</tr></thead><tbody>" + rows.map(function (campaign) {
         return "<tr>" +
           "<td>" + esc(campaignDateLabel(campaign && campaign.createdAt)) + "</td>" +
+          "<td>" + esc(campaignStatusLabel(campaign && campaign.status)) + "</td>" +
           "<td>" + esc(channelLabel(campaign && campaign.channel)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.audience)) + "</td>" +
+          "<td>" + esc(campaign && campaign.testRecipient ? campaign.testRecipient : "—") + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.sentBot)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.sentPush)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.pushOpens)) + "</td>" +
