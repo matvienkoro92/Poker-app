@@ -299,6 +299,9 @@
 
 .daily-poker__reward {
   color: #fde68a;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .daily-poker__result--error,
@@ -578,6 +581,10 @@
 
   .daily-poker__cards--board {
     grid-template-columns: repeat(5, minmax(40px, 1fr));
+  }
+
+  .daily-poker__reward {
+    font-size: 13px;
   }
 
   .daily-poker-card {
