@@ -42,7 +42,7 @@
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
   height: 226px;
   min-height: 0;
-  margin: calc(-2mm + 1px) calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
+  margin: calc(-2mm + 25px) calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
   padding: 12px 14px;
   box-sizing: border-box;
   overflow: visible;
@@ -182,11 +182,11 @@
   position: absolute;
   z-index: 2;
   right: 8px;
-  top: 4px;
+  top: -22px;
   bottom: auto;
   width: auto;
   max-width: none;
-  height: 133%;
+  height: 144%;
   object-fit: contain;
   filter: drop-shadow(0 0 24px rgba(255, 122, 0, 0.42));
   pointer-events: none;
@@ -381,10 +381,10 @@
 
   .home-daily-deal-hero__image {
     right: 8px;
-    top: 4px;
+    top: -22px;
     bottom: auto;
     width: auto;
-    height: 133%;
+    height: 144%;
     opacity: 1;
   }
 
@@ -445,10 +445,10 @@
 
   .home-daily-deal-hero__image {
     right: -2px;
-    top: 4px;
+    top: -18px;
     bottom: auto;
     width: auto;
-    height: 130%;
+    height: 140%;
     opacity: 1;
   }
 
@@ -508,9 +508,9 @@
 
   .home-daily-deal-hero__image {
     right: -18px;
-    top: 6px;
+    top: -10px;
     bottom: auto;
-    height: 128%;
+    height: 134%;
   }
 
   .home-daily-shortcuts.home-mini-icons {
