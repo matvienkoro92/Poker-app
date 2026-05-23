@@ -219,7 +219,7 @@ var POKER_PWA_AUTH_I18N = {
         homeSubtitle: "Закрытый покерный онлайн-клуб для своих.",
         tgChat: "Чат в ТГ",
         channel: "Канал",
-        prediction: "Предсказание",
+        prediction: "Предсказания",
         raffles: "Розыгрыши",
         rating: "Рейтинг турнирщиков",
         nextFreeroll: "Следующий фриролл",

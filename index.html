@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.199">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.200">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -288,7 +288,7 @@
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/fish-king-home.png" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.199" />
+    <link rel="stylesheet" href="./styles.css?v=3.200" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home {
@@ -598,7 +598,7 @@
               </span>
               <img
                 class="home-daily-deal-hero__image"
-                src="./assets/daily-poker-home-hero.png?v=3.199"
+                src="./assets/daily-poker-home-hero.png?v=3.200"
                 alt=""
                 width="784"
                 height="980"
@@ -608,6 +608,45 @@
                 aria-hidden="true"
               />
             </a>
+            <div class="home-mini-icons home-daily-shortcuts" aria-label="Быстрые разделы клуба">
+              <a
+                class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
+                href="https://t.me/+snBngKmXYa1mYjky"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Чат в ТГ"
+                aria-label="Чат в ТГ"
+              >
+                <span class="home-mini-icon home-mini-icon--telegram" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" focusable="false" aria-hidden="true">
+                    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.43l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
+                  </svg>
+                </span>
+                <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
+              </a>
+              <a
+                class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
+                href="https://t.me/+UjuRSQoCpBk4YzVi"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Канал"
+                aria-label="Канал"
+              >
+                <span class="home-mini-icon" aria-hidden="true">📡</span>
+                <span class="home-mini-icon__label" id="homeMiniChannelLabel">Канал</span>
+              </a>
+              <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
+                <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
+                <span class="home-mini-icon" aria-hidden="true">🔮</span>
+                <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
+              </a>
+              <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" id="dailyPredictionBtn" title="Предсказания" aria-label="Предсказания">
+                <span class="feature__badge feature__badge--hidden feature__badge--bottom-right" id="dailyPredictionBadge" aria-hidden="true">1</span>
+                <span class="home-mini-icon" aria-hidden="true">📝</span>
+                <span class="home-mini-icon__label" id="homeMiniPredictionLabel">Предсказания</span>
+                <span id="dailyPredictionPreview" aria-hidden="true" style="display:none">Нажми, чтобы узнать совет дня</span>
+              </a>
+            </div>
             <div class="home-welcome-outline">
             <div class="welcome-title-row">
               <div class="welcome-title-wrap">
@@ -673,45 +712,6 @@
                     decoding="sync"
                     fetchpriority="high"
                   />
-                </a>
-              </div>
-              <div class="home-mini-icons">
-                <a
-                  class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
-                  href="https://t.me/+snBngKmXYa1mYjky"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Чат в ТГ"
-                  aria-label="Чат в ТГ"
-                >
-                  <span class="home-mini-icon home-mini-icon--telegram" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" focusable="false" aria-hidden="true">
-                      <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.43l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" />
-                    </svg>
-                  </span>
-                  <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
-                </a>
-                <a
-                  class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
-                  href="https://t.me/+UjuRSQoCpBk4YzVi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Канал"
-                  aria-label="Канал"
-                >
-                  <span class="home-mini-icon" aria-hidden="true">📡</span>
-                  <span class="home-mini-icon__label" id="homeMiniChannelLabel">Канал</span>
-                </a>
-                <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" id="dailyPredictionBtn" title="Предсказание на день" aria-label="Предсказание на день">
-                  <span class="feature__badge feature__badge--hidden feature__badge--bottom-right" id="dailyPredictionBadge" aria-hidden="true">1</span>
-                  <span class="home-mini-icon" aria-hidden="true">🔮</span>
-                  <span class="home-mini-icon__label" id="homeMiniPredictionLabel">Предсказание</span>
-                  <span id="dailyPredictionPreview" aria-hidden="true" style="display:none">Нажми, чтобы узнать совет дня</span>
-                </a>
-                <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
-                  <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
-                  <span class="home-mini-icon" aria-hidden="true">🎲</span>
-                  <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
                 </a>
               </div>
               <script>
@@ -1670,7 +1670,7 @@
     <script defer src="./app-profile.js?v=3.176"></script>
     <script defer src="./app-profile-shows.js?v=3.176"></script>
     <script defer src="./app-pwa-auth-session.js?v=3.176"></script>
-    <script defer src="./app-pwa-auth-i18n.js?v=3.176"></script>
+    <script defer src="./app-pwa-auth-i18n.js?v=3.200"></script>
     <script defer src="./app-pwa-auth-language-ui.js?v=3.176"></script>
     <script defer src="./app-pwa-auth-telegram-code.js?v=3.176"></script>
     <script defer src="./app-pwa-auth-email-login.js?v=3.176"></script>
