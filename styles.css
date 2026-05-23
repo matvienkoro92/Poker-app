@@ -182,7 +182,7 @@
   position: absolute;
   z-index: 2;
   right: 8px;
-  top: -34px;
+  top: -50px;
   bottom: auto;
   width: auto;
   max-width: none;
@@ -291,17 +291,18 @@
   align-items: center;
   justify-content: center;
   color: #ff950f;
+  opacity: 0.78;
   font-size: 31px;
   line-height: 1;
   text-shadow:
-    0 0 7px rgba(255, 232, 173, 0.9),
-    0 0 16px rgba(255, 116, 0, 0.98),
-    0 0 30px rgba(255, 76, 0, 0.74);
+    0 0 5px rgba(255, 226, 166, 0.54),
+    0 0 10px rgba(255, 116, 0, 0.62),
+    0 0 20px rgba(255, 76, 0, 0.38);
   filter:
-    saturate(1.22)
-    contrast(1.22)
-    brightness(1.08)
-    drop-shadow(0 0 8px rgba(255, 104, 0, 0.86));
+    saturate(0.9)
+    contrast(1.06)
+    brightness(0.82)
+    drop-shadow(0 0 6px rgba(255, 104, 0, 0.54));
 }
 
 .home-daily-shortcuts .home-mini-icon svg {
@@ -309,11 +310,11 @@
   height: 34px;
   fill: currentColor;
   filter:
-    saturate(1.25)
-    contrast(1.2)
-    brightness(1.1)
-    drop-shadow(0 0 5px rgba(255, 232, 173, 0.7))
-    drop-shadow(0 0 16px rgba(255, 96, 0, 0.8));
+    saturate(0.92)
+    contrast(1.08)
+    brightness(0.84)
+    drop-shadow(0 0 4px rgba(255, 232, 173, 0.48))
+    drop-shadow(0 0 10px rgba(255, 96, 0, 0.48));
 }
 
 .home-daily-shortcuts .home-mini-icon__label {
@@ -386,7 +387,7 @@
 
   .home-daily-deal-hero__image {
     right: 8px;
-    top: -34px;
+    top: -50px;
     bottom: auto;
     width: auto;
     height: 150%;
@@ -450,7 +451,7 @@
 
   .home-daily-deal-hero__image {
     right: -2px;
-    top: -30px;
+    top: -45px;
     bottom: auto;
     width: auto;
     height: 147%;
@@ -513,7 +514,7 @@
 
   .home-daily-deal-hero__image {
     right: -18px;
-    top: -18px;
+    top: -31px;
     bottom: auto;
     height: 140%;
   }
