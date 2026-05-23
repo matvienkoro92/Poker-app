@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.209">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.210">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -288,7 +288,7 @@
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/fish-king-home.png" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.209" />
+    <link rel="stylesheet" href="./styles.css?v=3.210" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home {
@@ -650,6 +650,73 @@
                 <span id="dailyPredictionPreview" aria-hidden="true" style="display:none">Нажми, чтобы узнать совет дня</span>
               </a>
             </div>
+            <div class="tournament-day-home-dual">
+              <div class="tournament-day-home-wrap tournament-day-home-wrap--freeroll">
+                <div class="tournament-day-block tournament-day-block--home feature feature--app" aria-label="Следующий фриролл">
+                  <div class="feature__body tournament-day-block__body">
+                    <div class="tournament-day-block__home-head">
+                      <h2 class="tournament-day-block__home-heading" id="homeFreerollTitle">Следующий фриролл</h2>
+                      <div class="tournament-day-block__countdown">
+                        <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
+                      </div>
+                    </div>
+                    <div class="feature__desc tournament-day-block__meta">
+                      <div class="home-freeroll-schedule" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tournament-day-actions-row">
+                  <a
+                    href="#"
+                    class="tournament-day-share-btn tournament-day-freeroll-play-cta"
+                    id="freerollHomePlayBtn"
+                    data-view-target="download"
+                    aria-label="Сыграть во фриролл — скачать клиент"
+                  ><span id="freerollHomePlayBtnText">Сыграть во фриролл</span></a>
+                </div>
+              </div>
+              <div class="tournament-day-home-wrap tournament-day-home-wrap--tournament-day">
+                <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="schedule" aria-label="Турнир дня — перейти к расписанию">
+                  <div class="feature__body tournament-day-block__body">
+                    <div class="tournament-day-block__home-head">
+                      <h2 class="tournament-day-block__home-heading" id="homeTournamentDayTitle">Турнир дня</h2>
+                      <div class="tournament-day-block__countdown">
+                        <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
+                      </div>
+                    </div>
+                    <div class="feature__desc tournament-day-block__meta">
+                      <div class="tournament-day-block__stats">
+                        <div class="tournament-day-block__stat">
+                    <span class="tournament-day-block__stat-label" id="homeTournamentPrizeLabel">Приз</span>
+                          <span class="tournament-day-block__stat-value" id="tournamentDayGuarantee">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                    <span class="tournament-day-block__stat-label" id="homeTournamentBuyinLabel">Вход</span>
+                          <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                    <span class="tournament-day-block__stat-label" id="homeTournamentTimeLabel">Время</span>
+                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="tournamentDayHomeWeekTime">—, 18:00 МСК</span>
+                        </div>
+                        <div class="tournament-day-block__stat">
+                    <span class="tournament-day-block__stat-label" id="homeTournamentRoomLabel">Площадка</span>
+                          <span class="tournament-day-block__stat-value">Poker21</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+                <div class="tournament-day-actions-row">
+                  <a
+                    href="#"
+                    class="tournament-day-share-btn tournament-day-schedule-cta"
+                    id="tournamentDayScheduleBtn"
+                    data-view-target="schedule"
+                    aria-label="Расписание турниров на неделю"
+                  ><span id="tournamentDayScheduleBtnText">Расписание на неделю</span></a>
+                </div>
+              </div>
+            </div>
             <div class="home-welcome-outline">
             <div class="welcome-title-row">
               <div class="welcome-title-wrap">
@@ -820,74 +887,6 @@
                 </div>
               </div>
             </div>
-            </div>
-
-            <div class="tournament-day-home-dual">
-              <div class="tournament-day-home-wrap tournament-day-home-wrap--freeroll">
-                <div class="tournament-day-block tournament-day-block--home feature feature--app" aria-label="Следующий фриролл">
-                  <div class="feature__body tournament-day-block__body">
-                    <div class="tournament-day-block__home-head">
-                      <h2 class="tournament-day-block__home-heading" id="homeFreerollTitle">Следующий фриролл</h2>
-                      <div class="tournament-day-block__countdown">
-                        <span class="tournament-day-block__timer-label" id="freerollHomeTimerLabel"></span><span class="tournament-day-block__timer" id="freerollHomeTimer">—</span>
-                      </div>
-                    </div>
-                    <div class="feature__desc tournament-day-block__meta">
-                      <div class="home-freeroll-schedule" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="tournament-day-actions-row">
-                  <a
-                    href="#"
-                    class="tournament-day-share-btn tournament-day-freeroll-play-cta"
-                    id="freerollHomePlayBtn"
-                    data-view-target="download"
-                    aria-label="Сыграть во фриролл — скачать клиент"
-                  ><span id="freerollHomePlayBtnText">Сыграть во фриролл</span></a>
-                </div>
-              </div>
-              <div class="tournament-day-home-wrap tournament-day-home-wrap--tournament-day">
-                <a href="#" class="tournament-day-block tournament-day-block--home feature feature--link feature--app" data-view-target="schedule" aria-label="Турнир дня — перейти к расписанию">
-                  <div class="feature__body tournament-day-block__body">
-                    <div class="tournament-day-block__home-head">
-                      <h2 class="tournament-day-block__home-heading" id="homeTournamentDayTitle">Турнир дня</h2>
-                      <div class="tournament-day-block__countdown">
-                        <span class="tournament-day-block__timer-label" id="tournamentDayTimerLabel"></span><span class="tournament-day-block__timer" id="tournamentDayTimer">—</span>
-                      </div>
-                    </div>
-                    <div class="feature__desc tournament-day-block__meta">
-                      <div class="tournament-day-block__stats">
-                        <div class="tournament-day-block__stat">
-                    <span class="tournament-day-block__stat-label" id="homeTournamentPrizeLabel">Приз</span>
-                          <span class="tournament-day-block__stat-value" id="tournamentDayGuarantee">—</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
-                    <span class="tournament-day-block__stat-label" id="homeTournamentBuyinLabel">Вход</span>
-                          <span class="tournament-day-block__stat-value" id="tournamentDayBuyin">—</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
-                    <span class="tournament-day-block__stat-label" id="homeTournamentTimeLabel">Время</span>
-                          <span class="tournament-day-block__stat-value tournament-day-block__stat-value--time" id="tournamentDayHomeWeekTime">—, 18:00 МСК</span>
-                        </div>
-                        <div class="tournament-day-block__stat">
-                    <span class="tournament-day-block__stat-label" id="homeTournamentRoomLabel">Площадка</span>
-                          <span class="tournament-day-block__stat-value">Poker21</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-                <div class="tournament-day-actions-row">
-                  <a
-                    href="#"
-                    class="tournament-day-share-btn tournament-day-schedule-cta"
-                    id="tournamentDayScheduleBtn"
-                    data-view-target="schedule"
-                    aria-label="Расписание турниров на неделю"
-                  ><span id="tournamentDayScheduleBtnText">Расписание на неделю</span></a>
-                </div>
-              </div>
             </div>
 
             <h2 class="features-section-title features-section-title--games" id="homeGamesTitle">Игры и приложения</h2>

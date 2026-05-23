@@ -335,6 +335,14 @@
     0 0 12px rgba(255, 104, 0, 0.72);
 }
 
+.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual {
+  margin-top: 14px;
+}
+
+.app.app--view-home .tournament-day-home-dual + .home-welcome-outline {
+  margin-top: 14px;
+}
+
 .home-daily-shortcuts .feature__badge {
   top: 5px;
   right: 14px;
