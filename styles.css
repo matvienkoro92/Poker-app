@@ -181,11 +181,11 @@
 .home-daily-deal-hero__image {
   position: absolute;
   z-index: 2;
-  right: -70px;
-  bottom: -42px;
+  right: 8px;
+  bottom: -46px;
   width: auto;
   max-width: none;
-  height: 138%;
+  height: 145%;
   object-fit: contain;
   filter: drop-shadow(0 0 24px rgba(255, 122, 0, 0.42));
   pointer-events: none;
@@ -379,10 +379,10 @@
   }
 
   .home-daily-deal-hero__image {
-    right: -70px;
-    bottom: -42px;
+    right: 8px;
+    bottom: -46px;
     width: auto;
-    height: 138%;
+    height: 145%;
     opacity: 1;
   }
 
@@ -442,10 +442,10 @@
   }
 
   .home-daily-deal-hero__image {
-    right: -70px;
+    right: -2px;
     bottom: -42px;
     width: auto;
-    height: 138%;
+    height: 142%;
     opacity: 1;
   }
 
@@ -500,9 +500,9 @@
   }
 
   .home-daily-deal-hero__image {
-    right: -78px;
+    right: -18px;
     bottom: -39px;
-    height: 135%;
+    height: 136%;
   }
 
   .home-daily-shortcuts.home-mini-icons {
