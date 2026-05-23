@@ -221,7 +221,7 @@
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
   height: 76px;
   margin: -7px calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
-  padding: 8px 0;
+  padding: 0;
   box-sizing: border-box;
   overflow: hidden;
   border: 1px solid rgba(255, 138, 18, 0.68);
@@ -250,7 +250,7 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 2px 4px;
+  padding: 8px 4px;
   box-sizing: border-box;
   overflow: visible;
   color: #ffe2a3;
@@ -455,8 +455,12 @@
   .home-daily-shortcuts.home-mini-icons {
     height: 72px;
     margin-bottom: 12px;
-    padding: 7px 0;
+    padding: 0;
     border-radius: 20px;
+  }
+
+  .home-daily-shortcuts .home-mini-icon-item {
+    padding: 7px 4px;
   }
 
   .home-daily-shortcuts .home-mini-icon {
