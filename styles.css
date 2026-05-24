@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.217");
-@import url("./styles-home-rating-promo.css?v=3.217");
-@import url("./styles-auth.css?v=3.217");
-@import url("./styles-home.css?v=3.217");
-@import url("./styles-chat.css?v=3.217");
-@import url("./styles-learning-games.css?v=3.217");
-@import url("./styles-raffles.css?v=3.217");
-@import url("./styles-daily-poker.css?v=3.217");
-@import url("./styles-home-legacy-prelude.css?v=3.217");
-@import url("./styles-download.css?v=3.217");
-@import url("./styles-home-legacy-tail.css?v=3.217");
-@import url("./styles-home-rating-promo-legacy.css?v=3.217");
-@import url("./styles-rating.css?v=3.217");
-@import url("./styles-hall.css?v=3.217");
-@import url("./styles-admin.css?v=3.217");
-@import url("./styles-player-crm.css?v=3.217");
-@import url("./styles-profile.css?v=3.217");
-@import url("./styles-layout.css?v=3.217");
-@import url("./styles-chat-overlays.css?v=3.217");
-@import url("./styles-home-overrides.css?v=3.217");
-@import url("./styles-layout-touch-targets.css?v=3.217");
-@import url("./styles-home-rating-promo-late.css?v=3.217");
+@import url("./styles-base.css?v=3.218");
+@import url("./styles-home-rating-promo.css?v=3.218");
+@import url("./styles-auth.css?v=3.218");
+@import url("./styles-home.css?v=3.218");
+@import url("./styles-chat.css?v=3.218");
+@import url("./styles-learning-games.css?v=3.218");
+@import url("./styles-raffles.css?v=3.218");
+@import url("./styles-daily-poker.css?v=3.218");
+@import url("./styles-home-legacy-prelude.css?v=3.218");
+@import url("./styles-download.css?v=3.218");
+@import url("./styles-home-legacy-tail.css?v=3.218");
+@import url("./styles-home-rating-promo-legacy.css?v=3.218");
+@import url("./styles-rating.css?v=3.218");
+@import url("./styles-hall.css?v=3.218");
+@import url("./styles-admin.css?v=3.218");
+@import url("./styles-player-crm.css?v=3.218");
+@import url("./styles-profile.css?v=3.218");
+@import url("./styles-layout.css?v=3.218");
+@import url("./styles-chat-overlays.css?v=3.218");
+@import url("./styles-home-overrides.css?v=3.218");
+@import url("./styles-layout-touch-targets.css?v=3.218");
+@import url("./styles-home-rating-promo-late.css?v=3.218");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -71,7 +71,7 @@
   overflow: hidden;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(2, 4, 8, 0.98) 0%, rgba(2, 4, 8, 0.84) 38%, rgba(2, 4, 8, 0.34) 65%, rgba(2, 4, 8, 0.06) 100%),
+    linear-gradient(90deg, rgba(2, 4, 8, 0.82) 0%, rgba(2, 4, 8, 0.62) 38%, rgba(2, 4, 8, 0.24) 65%, rgba(2, 4, 8, 0.04) 100%),
     repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.18) 19px, rgba(255, 118, 0, 0) 22px),
     linear-gradient(180deg, rgba(255, 128, 0, 0.18), rgba(255, 118, 0, 0.03) 44%, rgba(0, 0, 0, 0.06));
   pointer-events: none;
@@ -86,6 +86,7 @@
   z-index: 4;
   display: flex;
   width: 51%;
+  height: 100%;
   min-width: 0;
   max-width: 210px;
   flex-direction: column;
@@ -103,15 +104,16 @@
 }
 
 .home-daily-deal-hero__title {
-  color: #d97912;
+  color: #ff9f1a;
   font-size: 24px;
   font-weight: 1000;
   line-height: 0.96;
   text-transform: uppercase;
   text-shadow:
-    0 0 5px rgba(255, 226, 148, 0.52),
-    0 0 15px rgba(255, 118, 0, 0.7),
-    0 0 28px rgba(255, 78, 0, 0.5);
+    0 1px 0 rgba(78, 26, 0, 0.7),
+    0 0 7px rgba(255, 226, 148, 0.86),
+    0 0 18px rgba(255, 118, 0, 0.96),
+    0 0 34px rgba(255, 78, 0, 0.72);
 }
 
 .home-daily-deal-hero__title-line {
@@ -127,15 +129,21 @@
   line-height: 1.16;
 }
 
+.home-daily-deal-hero__copy span {
+  display: block;
+}
+
 .home-daily-deal-hero__prize {
   margin-top: 4px;
-  color: #ff7a00;
+  color: #ffa31f;
   font-size: 25px;
   font-weight: 1000;
   line-height: 1;
   text-shadow:
-    0 0 12px rgba(255, 208, 84, 0.7),
-    0 0 26px rgba(255, 92, 0, 0.95);
+    0 1px 0 rgba(78, 26, 0, 0.7),
+    0 0 10px rgba(255, 226, 148, 0.86),
+    0 0 24px rgba(255, 118, 0, 1),
+    0 0 40px rgba(255, 74, 0, 0.76);
 }
 
 .home-daily-deal-hero__cta {
@@ -143,9 +151,10 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  width: 108px;
   min-width: 108px;
   min-height: 30px;
-  margin-top: 6px;
+  margin-top: auto;
   padding: 0 11px;
   box-sizing: border-box;
   border: 1px solid rgba(255, 234, 184, 0.72);
@@ -170,8 +179,10 @@
 .home-daily-deal-hero__timer {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 108px;
   min-height: 19px;
-  margin-top: 5px;
+  margin-top: 6px;
   padding: 0 9px;
   border: 1px solid rgba(255, 138, 18, 0.35);
   border-radius: 8px;
@@ -335,10 +346,169 @@
     0 0 12px rgba(255, 104, 0, 0.72);
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual {
+.app.app--view-home .home-freerolls-strip {
+  width: 100%;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.app.app--view-home .home-freerolls-strip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 2px 7px;
+}
+
+.app.app--view-home .home-freerolls-strip__title {
+  margin: 0;
+  color: #ffdf9e;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(255, 118, 0, 0.38);
+}
+
+.app.app--view-home .home-freerolls-strip__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 234, 190, 0.72);
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.app.app--view-home .home-freerolls-strip__all span {
+  color: #ffb531;
+  font-size: 16px;
+  line-height: 0.8;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(134px, 1fr);
+  gap: 6px;
+  width: 100%;
+  padding: 0 1px 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards::-webkit-scrollbar {
+  display: none;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row {
+  position: relative;
+  appearance: none;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 7px;
+  min-height: 84px;
+  padding: 9px 8px 8px;
+  overflow: hidden;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 118, 0, 0.38);
+  border-radius: 11px;
+  background:
+    radial-gradient(circle at 82% 12%, rgba(255, 181, 49, 0.12), transparent 35%),
+    linear-gradient(145deg, rgba(5, 8, 12, 0.98), rgba(2, 5, 10, 0.96));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 166, 0.06),
+    0 0 12px rgba(255, 118, 0, 0.16);
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row::after {
+  content: "🏆";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: #ffb531;
+  font-size: 12px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 118, 0, 0.62));
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--next {
+  border-color: rgba(255, 181, 49, 0.95);
+  background:
+    radial-gradient(circle at 76% 18%, rgba(255, 181, 49, 0.3), transparent 36%),
+    linear-gradient(145deg, rgba(30, 18, 8, 0.98), rgba(3, 6, 11, 0.96));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 246, 220, 0.12),
+    0 0 16px rgba(255, 118, 0, 0.36);
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  color: #ffc247;
+  border: 1px solid rgba(255, 181, 49, 0.36);
+  border-radius: 8px;
+  background: rgba(255, 181, 49, 0.08);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__title,
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__meta,
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__entry {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__title {
+  margin-top: 20px;
+  color: #f8fafc;
+  font-size: 11.5px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__meta {
+  margin-top: 3px;
+  color: rgba(255, 234, 190, 0.76);
+  font-size: 8.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__entry {
+  margin-top: 7px;
+  padding-top: 6px;
+  color: rgba(255, 234, 190, 0.78);
+  border-top: 1px solid rgba(255, 118, 0, 0.2);
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus {
   --home-promo-gold: #ffb531;
   --home-promo-orange: #ff7600;
   --home-promo-line: rgba(255, 118, 0, 0.42);
+  position: relative;
   margin-top: 14px;
   padding: 0;
   border: 0;
@@ -347,11 +517,12 @@
   box-shadow: none;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual::before {
+.app.app--view-home .tournament-day-home-dual--tournament-focus::before {
   content: none;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-home-wrap {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
+  position: relative;
   gap: 10px;
   padding: 12px;
   border: 1px solid rgba(255, 118, 0, 0.9);
@@ -368,11 +539,28 @@
     0 12px 26px rgba(0, 0, 0, 0.32);
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-home-wrap:first-child {
-  border-right: 1px solid rgba(255, 118, 0, 0.9) !important;
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap:first-child {
+  border-right-color: transparent !important;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block--home {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--tournament-day {
+  border-left-color: transparent;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--tournament-day::before {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  width: 26px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 181, 49, 0), rgba(255, 181, 49, 0.8), rgba(255, 118, 0, 0));
+  box-shadow: 0 0 12px rgba(255, 118, 0, 0.48);
+  pointer-events: none;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block--home {
   flex: 0 0 auto;
   padding: 0;
   border: 0 !important;
@@ -382,26 +570,26 @@
   box-shadow: none !important;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__body {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__body {
   padding: 0;
   justify-content: flex-start;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__home-head {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
   padding: 2px 4px 8px;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__countdown {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__countdown {
   font-size: clamp(12px, 1.4vw, 16px);
   line-height: 1.05;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__timer-label {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__timer-label {
   display: block;
   font-size: 0.86em;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__timer {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__timer {
   display: block;
   font-size: clamp(16px, 1.25vw, 20px);
   font-weight: 800;
@@ -409,8 +597,8 @@
   white-space: nowrap;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .home-freeroll-schedule,
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__stats {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-freeroll-schedule,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__stats {
   border-color: rgba(255, 118, 0, 0.34);
   background:
     linear-gradient(180deg, rgba(255, 118, 0, 0.05), transparent 44%),
@@ -420,12 +608,12 @@
     inset 0 0 20px rgba(255, 118, 0, 0.035);
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .home-freeroll-schedule__row + .home-freeroll-schedule__row,
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__stat + .tournament-day-block__stat {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-freeroll-schedule__row + .home-freeroll-schedule__row,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__stat + .tournament-day-block__stat {
   border-color: rgba(255, 118, 0, 0.18);
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .home-freeroll-schedule__row--next {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-freeroll-schedule__row--next {
   border-color: rgba(255, 181, 49, 0.9);
   background:
     radial-gradient(circle at 0% 50%, rgba(255, 181, 49, 0.26), transparent 42%),
@@ -435,12 +623,12 @@
     inset 0 1px 0 rgba(255, 250, 232, 0.12);
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-actions-row {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {
   min-height: 44px;
   margin-top: 0;
 }
 
-.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-share-btn {
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-share-btn {
   width: 100%;
   min-height: 48px;
   border-color: rgba(255, 231, 180, 0.84);
@@ -464,16 +652,27 @@
   flex: 1 1 auto;
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
+  padding-top: 8px;
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
   grid-template-columns: 42px minmax(0, 1fr);
   column-gap: 8px;
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-head {
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 7px;
+  padding: 0 2px 6px;
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-head::before {
   content: "◷";
-  width: 40px;
-  height: 40px;
-  font-size: 23px;
+  width: 34px;
+  height: 34px;
+  font-size: 20px;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-heading {
@@ -481,8 +680,45 @@
   line-height: 1.05;
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-heading {
+  overflow: hidden;
+  font-size: clamp(13px, 1.08vw, 15px);
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__countdown {
   font-size: clamp(10px, 1.1vw, 13px);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__countdown {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__timer-label,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__timer {
+  display: inline;
+  min-width: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__timer-label {
+  flex: 0 0 auto;
+  font-size: 8.5px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__timer {
+  flex: 0 0 auto;
+  font-size: 12px;
 }
 
 .app.app--view-home .home-tournament-week-list {
@@ -503,6 +739,7 @@
 
 .app.app--view-home .home-tournament-week-row {
   appearance: none;
+  position: relative;
   display: grid;
   grid-template-columns: 25px minmax(0, 1fr);
   align-items: center;
@@ -533,6 +770,19 @@
     inset 0 1px 0 rgba(255, 250, 232, 0.1);
 }
 
+.app.app--view-home .home-tournament-week-row--active::after {
+  content: "›";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  color: #ffcf67;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(255, 118, 0, 0.72);
+  transform: translateY(-50%);
+}
+
 .app.app--view-home .home-tournament-week-row__day {
   color: #ffb531;
   font-size: 13px;
@@ -545,6 +795,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  padding-right: 12px;
   gap: 2px;
 }
 
@@ -714,12 +965,12 @@
 
 .app.app--view-home .home-live-tournament {
   display: grid;
-  grid-template-columns: 48px 42px minmax(0, 1fr) 74px 84px;
+  grid-template-columns: 46px 36px minmax(0, 1fr) 70px 76px;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   margin: 10px 0 0;
-  padding: 9px 10px;
+  padding: 8px 7px;
   overflow: hidden;
   color: #f8fafc;
   border: 1px solid rgba(255, 118, 0, 0.58);
@@ -747,7 +998,7 @@
 
 .app.app--view-home .home-live-tournament__status-title {
   color: rgba(226, 232, 240, 0.64);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
   line-height: 1.05;
   text-transform: uppercase;
@@ -758,9 +1009,9 @@
   align-items: center;
   gap: 4px;
   min-height: 20px;
-  padding: 0 6px;
+  padding: 0 5px;
   color: #fff7ed;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 900;
   line-height: 1;
   border: 1px solid rgba(255, 196, 164, 0.35);
@@ -792,10 +1043,10 @@
 .app.app--view-home .home-live-tournament__thumb {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border: 1px solid rgba(255, 181, 49, 0.42);
-  border-radius: 14px;
+  border-radius: 12px;
   background:
     linear-gradient(145deg, rgba(255, 181, 49, 0.16), rgba(255, 118, 0, 0.04)),
     rgba(3, 6, 11, 0.78);
@@ -807,13 +1058,14 @@
 .app.app--view-home .home-live-tournament__thumb::before {
   content: "♠";
   color: #ffbd45;
-  font-size: 23px;
+  font-size: 20px;
   line-height: 1;
   text-shadow: 0 0 14px rgba(255, 118, 0, 0.58);
 }
 
 .app.app--view-home .home-live-tournament__main {
   min-width: 0;
+  overflow: hidden;
 }
 
 .app.app--view-home .home-live-tournament__name,
@@ -842,10 +1094,12 @@
 
 .app.app--view-home .home-live-tournament__prize {
   margin-top: 3px;
+  overflow: hidden;
   color: #ffb531;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 900;
   line-height: 1;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -877,7 +1131,8 @@
 
 .app.app--view-home .home-live-tournament__timer {
   min-width: 0;
-  padding-left: 6px;
+  overflow: hidden;
+  padding-left: 5px;
   border-left: 1px solid rgba(255, 118, 0, 0.28);
 }
 
@@ -896,11 +1151,13 @@
 
 .app.app--view-home .home-live-tournament__timer-value {
   display: block;
+  overflow: hidden;
   margin: 3px 0;
   color: #ff9f1a;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 900;
   line-height: 1;
+  text-overflow: ellipsis;
   white-space: nowrap;
   text-shadow: 0 0 13px rgba(255, 118, 0, 0.32);
 }
@@ -911,10 +1168,10 @@
   justify-content: center;
   gap: 5px;
   min-width: 0;
-  min-height: 44px;
-  padding: 0 8px;
+  min-height: 40px;
+  padding: 0 7px;
   color: #fff8df;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 900;
   line-height: 1;
   text-decoration: none;
@@ -937,7 +1194,7 @@
 }
 
 .app.app--view-home .home-live-tournament__cta span[aria-hidden="true"] {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 0.7;
 }
 
@@ -1057,7 +1314,7 @@
 
   .home-daily-deal-hero::before {
     background:
-      linear-gradient(90deg, rgba(2, 4, 8, 0.98) 0%, rgba(2, 4, 8, 0.9) 42%, rgba(2, 4, 8, 0.42) 69%, rgba(2, 4, 8, 0.1) 100%),
+      linear-gradient(90deg, rgba(2, 4, 8, 0.82) 0%, rgba(2, 4, 8, 0.64) 42%, rgba(2, 4, 8, 0.28) 69%, rgba(2, 4, 8, 0.06) 100%),
       repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.18) 19px, rgba(255, 118, 0, 0) 22px),
       linear-gradient(180deg, rgba(255, 128, 0, 0.18), rgba(255, 118, 0, 0.03) 44%, rgba(0, 0, 0, 0.06));
   }
@@ -1085,17 +1342,19 @@
   }
 
   .home-daily-deal-hero__cta {
+    width: 108px;
     min-width: 108px;
     min-height: 30px;
     gap: 10px;
-    margin-top: 6px;
+    margin-top: auto;
     padding: 0 11px;
     font-size: 14px;
   }
 
   .home-daily-deal-hero__timer {
+    width: 108px;
     min-height: 19px;
-    margin-top: 5px;
+    margin-top: 6px;
     font-size: 9px;
   }
 
