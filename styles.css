@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.232");
-@import url("./styles-home-rating-promo.css?v=3.232");
-@import url("./styles-auth.css?v=3.232");
-@import url("./styles-home.css?v=3.232");
-@import url("./styles-chat.css?v=3.232");
-@import url("./styles-learning-games.css?v=3.232");
-@import url("./styles-raffles.css?v=3.232");
-@import url("./styles-daily-poker.css?v=3.232");
-@import url("./styles-home-legacy-prelude.css?v=3.232");
-@import url("./styles-download.css?v=3.232");
-@import url("./styles-home-legacy-tail.css?v=3.232");
-@import url("./styles-home-rating-promo-legacy.css?v=3.232");
-@import url("./styles-rating.css?v=3.232");
-@import url("./styles-hall.css?v=3.232");
-@import url("./styles-admin.css?v=3.232");
-@import url("./styles-player-crm.css?v=3.232");
-@import url("./styles-profile.css?v=3.232");
-@import url("./styles-layout.css?v=3.232");
-@import url("./styles-chat-overlays.css?v=3.232");
-@import url("./styles-home-overrides.css?v=3.232");
-@import url("./styles-layout-touch-targets.css?v=3.232");
-@import url("./styles-home-rating-promo-late.css?v=3.232");
+@import url("./styles-base.css?v=3.233");
+@import url("./styles-home-rating-promo.css?v=3.233");
+@import url("./styles-auth.css?v=3.233");
+@import url("./styles-home.css?v=3.233");
+@import url("./styles-chat.css?v=3.233");
+@import url("./styles-learning-games.css?v=3.233");
+@import url("./styles-raffles.css?v=3.233");
+@import url("./styles-daily-poker.css?v=3.233");
+@import url("./styles-home-legacy-prelude.css?v=3.233");
+@import url("./styles-download.css?v=3.233");
+@import url("./styles-home-legacy-tail.css?v=3.233");
+@import url("./styles-home-rating-promo-legacy.css?v=3.233");
+@import url("./styles-rating.css?v=3.233");
+@import url("./styles-hall.css?v=3.233");
+@import url("./styles-admin.css?v=3.233");
+@import url("./styles-player-crm.css?v=3.233");
+@import url("./styles-profile.css?v=3.233");
+@import url("./styles-layout.css?v=3.233");
+@import url("./styles-chat-overlays.css?v=3.233");
+@import url("./styles-home-overrides.css?v=3.233");
+@import url("./styles-layout-touch-targets.css?v=3.233");
+@import url("./styles-home-rating-promo-late.css?v=3.233");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -44,6 +44,167 @@
 
 html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"] {
   display: grid !important;
+}
+
+.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+  width: 100% !important;
+  min-height: 62px;
+  margin: 0 0 4px !important;
+  padding: 4px 0 8px !important;
+  gap: 10px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="gold"].app-view-home #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .logo.logo--welcome {
+  flex: 1 1 auto;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+.app.app--view-home .logo__image {
+  width: 40px;
+  height: 40px;
+}
+
+.app.app--view-home .logo__text {
+  gap: 2px;
+  min-width: 0;
+}
+
+.app.app--view-home .logo__title {
+  flex-direction: row;
+  gap: 0.2em;
+  max-width: 100%;
+  font-size: clamp(10px, 2.95vw, 13px);
+  line-height: 1.04;
+  white-space: nowrap;
+}
+
+.app.app--view-home .logo__title-line {
+  min-width: 0;
+}
+
+.app.app--view-home .logo__title-line--name {
+  flex: 1 1 auto;
+}
+
+.app.app--view-home .logo__subtitle {
+  font-size: clamp(7px, 1.95vw, 9px);
+  line-height: 1.1;
+  letter-spacing: 0.2em;
+}
+
+.app.app--view-home .header-actions {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.app.app--view-home .header-profile-summary {
+  width: min(96px, 24vw);
+  min-width: 62px;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.app.app--view-home .header-greeting-wrap {
+  max-width: 100%;
+}
+
+.app.app--view-home .header-greeting {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(255, 247, 237, 0.96);
+  font-size: clamp(11px, 3.05vw, 13px);
+  line-height: 1.12;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app.app--view-home .header-status {
+  max-width: 100%;
+  gap: 4px;
+  font-size: clamp(8px, 2.35vw, 10px);
+}
+
+.app.app--view-home .header-status__fish {
+  width: 22px;
+  height: 22px;
+}
+
+.app.app--view-home .header-actions__row {
+  gap: 7px;
+}
+
+.app.app--view-home .header-actions__row .header-icon-btn {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+}
+
+html.site-home-header-mode .app.app--view-home .header-profile-summary {
+  display: none;
+}
+
+.app.app--view-home .header-more-menu .welcome-admin-report-btn__icon {
+  display: inline-flex;
+}
+
+@media (max-width: 380px) {
+  .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+    min-height: 56px;
+    gap: 7px;
+  }
+
+  .app.app--view-home .logo.logo--welcome {
+    gap: 5px;
+  }
+
+  .app.app--view-home .logo__image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app.app--view-home .header-actions {
+    gap: 7px;
+  }
+
+  .app.app--view-home .header-profile-summary {
+    width: 78px;
+    min-width: 58px;
+  }
+
+  .app.app--view-home .header-actions__row {
+    gap: 6px;
+  }
+
+  .app.app--view-home .header-actions__row .header-icon-btn {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 14px;
+  }
 }
 
 .home-daily-deal-hero {
