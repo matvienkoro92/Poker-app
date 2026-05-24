@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.251");
-@import url("./styles-home-rating-promo.css?v=3.251");
-@import url("./styles-auth.css?v=3.251");
-@import url("./styles-home.css?v=3.251");
-@import url("./styles-chat.css?v=3.251");
-@import url("./styles-learning-games.css?v=3.251");
-@import url("./styles-raffles.css?v=3.251");
-@import url("./styles-daily-poker.css?v=3.251");
-@import url("./styles-home-legacy-prelude.css?v=3.251");
-@import url("./styles-download.css?v=3.251");
-@import url("./styles-home-legacy-tail.css?v=3.251");
-@import url("./styles-home-rating-promo-legacy.css?v=3.251");
-@import url("./styles-rating.css?v=3.251");
-@import url("./styles-hall.css?v=3.251");
-@import url("./styles-admin.css?v=3.251");
-@import url("./styles-player-crm.css?v=3.251");
-@import url("./styles-profile.css?v=3.251");
-@import url("./styles-layout.css?v=3.251");
-@import url("./styles-chat-overlays.css?v=3.251");
-@import url("./styles-home-overrides.css?v=3.251");
-@import url("./styles-layout-touch-targets.css?v=3.251");
-@import url("./styles-home-rating-promo-late.css?v=3.251");
+@import url("./styles-base.css?v=3.252");
+@import url("./styles-home-rating-promo.css?v=3.252");
+@import url("./styles-auth.css?v=3.252");
+@import url("./styles-home.css?v=3.252");
+@import url("./styles-chat.css?v=3.252");
+@import url("./styles-learning-games.css?v=3.252");
+@import url("./styles-raffles.css?v=3.252");
+@import url("./styles-daily-poker.css?v=3.252");
+@import url("./styles-home-legacy-prelude.css?v=3.252");
+@import url("./styles-download.css?v=3.252");
+@import url("./styles-home-legacy-tail.css?v=3.252");
+@import url("./styles-home-rating-promo-legacy.css?v=3.252");
+@import url("./styles-rating.css?v=3.252");
+@import url("./styles-hall.css?v=3.252");
+@import url("./styles-admin.css?v=3.252");
+@import url("./styles-player-crm.css?v=3.252");
+@import url("./styles-profile.css?v=3.252");
+@import url("./styles-layout.css?v=3.252");
+@import url("./styles-chat-overlays.css?v=3.252");
+@import url("./styles-home-overrides.css?v=3.252");
+@import url("./styles-layout-touch-targets.css?v=3.252");
+@import url("./styles-home-rating-promo-late.css?v=3.252");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -231,21 +231,29 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .home-daily-deal-hero::before {
-  content: none;
+  content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
   overflow: hidden;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(27, 12, 6, 0.56) 0%, rgba(25, 12, 7, 0.36) 38%, rgba(10, 6, 5, 0.12) 66%, rgba(2, 4, 8, 0.02) 100%),
-    repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.2) 19px, rgba(255, 118, 0, 0) 22px),
-    linear-gradient(180deg, rgba(255, 147, 28, 0.24), rgba(255, 118, 0, 0.07) 46%, rgba(0, 0, 0, 0.02));
+    linear-gradient(90deg, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.32) 36%, rgba(0, 0, 0, 0.12) 54%, rgba(0, 0, 0, 0) 68%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.14) 73%, rgba(0, 0, 0, 0.2) 100%);
   pointer-events: none;
 }
 
 .home-daily-deal-hero::after {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 101% 15%, rgba(4, 5, 8, 0.46) 0%, rgba(4, 5, 8, 0.22) 13%, rgba(4, 5, 8, 0) 27%),
+    radial-gradient(circle at 100% 43%, rgba(4, 5, 8, 0.34) 0%, rgba(4, 5, 8, 0.16) 12%, rgba(4, 5, 8, 0) 26%),
+    linear-gradient(90deg, rgba(4, 5, 8, 0) 78%, rgba(4, 5, 8, 0.06) 88%, rgba(4, 5, 8, 0.18) 100%);
+  pointer-events: none;
 }
 
 .home-daily-deal-hero__content {
@@ -408,11 +416,11 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   height: 124%;
   object-fit: contain;
   filter:
-    saturate(1.32)
-    contrast(1.16)
-    brightness(1.14)
-    drop-shadow(0 0 18px rgba(255, 126, 0, 0.72))
-    drop-shadow(0 0 34px rgba(255, 76, 0, 0.42));
+    saturate(1.24)
+    contrast(1.12)
+    brightness(1.08)
+    drop-shadow(0 0 13px rgba(255, 126, 0, 0.5))
+    drop-shadow(0 0 24px rgba(255, 76, 0, 0.28));
   pointer-events: none;
   user-select: none;
 }
