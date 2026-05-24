@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.252");
-@import url("./styles-home-rating-promo.css?v=3.252");
-@import url("./styles-auth.css?v=3.252");
-@import url("./styles-home.css?v=3.252");
-@import url("./styles-chat.css?v=3.252");
-@import url("./styles-learning-games.css?v=3.252");
-@import url("./styles-raffles.css?v=3.252");
-@import url("./styles-daily-poker.css?v=3.252");
-@import url("./styles-home-legacy-prelude.css?v=3.252");
-@import url("./styles-download.css?v=3.252");
-@import url("./styles-home-legacy-tail.css?v=3.252");
-@import url("./styles-home-rating-promo-legacy.css?v=3.252");
-@import url("./styles-rating.css?v=3.252");
-@import url("./styles-hall.css?v=3.252");
-@import url("./styles-admin.css?v=3.252");
-@import url("./styles-player-crm.css?v=3.252");
-@import url("./styles-profile.css?v=3.252");
-@import url("./styles-layout.css?v=3.252");
-@import url("./styles-chat-overlays.css?v=3.252");
-@import url("./styles-home-overrides.css?v=3.252");
-@import url("./styles-layout-touch-targets.css?v=3.252");
-@import url("./styles-home-rating-promo-late.css?v=3.252");
+@import url("./styles-base.css?v=3.253");
+@import url("./styles-home-rating-promo.css?v=3.253");
+@import url("./styles-auth.css?v=3.253");
+@import url("./styles-home.css?v=3.253");
+@import url("./styles-chat.css?v=3.253");
+@import url("./styles-learning-games.css?v=3.253");
+@import url("./styles-raffles.css?v=3.253");
+@import url("./styles-daily-poker.css?v=3.253");
+@import url("./styles-home-legacy-prelude.css?v=3.253");
+@import url("./styles-download.css?v=3.253");
+@import url("./styles-home-legacy-tail.css?v=3.253");
+@import url("./styles-home-rating-promo-legacy.css?v=3.253");
+@import url("./styles-rating.css?v=3.253");
+@import url("./styles-hall.css?v=3.253");
+@import url("./styles-admin.css?v=3.253");
+@import url("./styles-player-crm.css?v=3.253");
+@import url("./styles-profile.css?v=3.253");
+@import url("./styles-layout.css?v=3.253");
+@import url("./styles-chat-overlays.css?v=3.253");
+@import url("./styles-home-overrides.css?v=3.253");
+@import url("./styles-layout-touch-targets.css?v=3.253");
+@import url("./styles-home-rating-promo-late.css?v=3.253");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -442,6 +442,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .home-daily-shortcuts.home-mini-icons {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
@@ -464,6 +465,16 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
     inset 0 0 24px rgba(255, 118, 0, 0.14),
     0 0 24px rgba(255, 102, 0, 0.34),
     0 10px 24px rgba(0, 0, 0, 0.34);
+}
+
+.home-daily-shortcuts.home-mini-icons::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
 }
 
 .home-daily-shortcuts .home-mini-icon-item {
