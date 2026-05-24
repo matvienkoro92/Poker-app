@@ -153,11 +153,59 @@
   });
 })();
 
+(function initHeaderMoreMenu() {
+  var toggle = document.getElementById("headerMoreMenuBtn");
+  var menu = document.getElementById("headerMoreMenu");
+  if (!toggle || !menu) return;
+  function setOpen(open) {
+    menu.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
+  }
+  toggle.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (menu.hidden && typeof window.__pokerSyncRomanTaskPlanner === "function") {
+      try {
+        window.__pokerSyncRomanTaskPlanner();
+      } catch (syncErr) {}
+    }
+    setOpen(menu.hidden);
+  });
+  menu.addEventListener("click", function (e) {
+    if (e.target && e.target.closest && e.target.closest("[data-header-menu-close]")) {
+      setOpen(false);
+    }
+  });
+  document.addEventListener("click", function (e) {
+    if (menu.hidden) return;
+    var target = e.target;
+    if (target && (target === toggle || menu.contains(target))) return;
+    setOpen(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !menu.hidden) {
+      setOpen(false);
+      try {
+        toggle.focus();
+      } catch (focusErr) {}
+    }
+  });
+})();
+
 (function initHomeFishPoker21Status() {
   var btn = document.getElementById("hallFishRatingBtn");
   var statusEl = document.getElementById("homeFishPoker21Status");
-  if (!btn || !statusEl) return;
+  var headerStatus = document.getElementById("headerPokerStatus");
+  var headerStatusLevel = document.getElementById("headerPokerStatusLevel");
+  var headerStatusFish = document.getElementById("headerPokerStatusFish");
+  if (!btn && !statusEl && !headerStatus) return;
   var loadedLinked = false;
+  function fishSrcForLevel(level) {
+    if (typeof pokerProfileStatusFishSrc === "function") return pokerProfileStatusFishSrc(level);
+    var n = Math.max(1, Math.min(55, parseInt(level, 10) || 1));
+    return "./assets/profile-status-fish-level-" + (n < 10 ? "0" : "") + n + ".png";
+  }
   function applyStatus(data) {
     var hasAuthoritativeStatus = !!(data && data.ok);
     var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
@@ -165,8 +213,14 @@
     var level = data && data.level != null ? parseInt(data.level, 10) : NaN;
     var safeLevel = isFinite(level) && level > 0 ? level : 1;
     loadedLinked = linked;
-    btn.classList.toggle("home-fish-rating-btn--linked", !!linked);
-    statusEl.textContent = linked ? "Уровень " + safeLevel : "Привяжите Poker21";
+    if (btn) btn.classList.toggle("home-fish-rating-btn--linked", !!linked);
+    if (statusEl) statusEl.textContent = linked ? "Уровень " + safeLevel : "Привяжите Poker21";
+    if (headerStatus) {
+      headerStatus.classList.toggle("header-status--hidden", !linked);
+      headerStatus.setAttribute("aria-hidden", linked ? "false" : "true");
+    }
+    if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ " + safeLevel;
+    if (headerStatusFish) headerStatusFish.src = fishSrcForLevel(safeLevel);
   }
   function authQuery() {
     if (typeof pokerApiAuthQuery === "function") return pokerApiAuthQuery("?");

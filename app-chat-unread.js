@@ -30,9 +30,10 @@ function updateChatNavDot() {
   // В бейдже хотим реальное количество непрочитанных (общий чат + личные), без деления пополам.
   var count = raw > 0 ? raw : 0;
   var badge = document.getElementById("chatNavBadge");
+  var headerBadge = document.getElementById("headerNotificationsBadge");
+  var display = count > 99 ? "99+" : (count > 0 ? String(count) : "0");
+  var on = count > 0;
   if (badge) {
-    var display = count > 99 ? "99+" : (count > 0 ? String(count) : "0");
-    var on = count > 0;
     /* Частые перерисовки одним и тем же числом (опрос loadGeneral/loadContacts) дёргали DOM и aria-live */
     if (badge.getAttribute("data-poker-unread-display") !== display) {
       badge.setAttribute("data-poker-unread-display", display);
@@ -43,6 +44,11 @@ function updateChatNavDot() {
     }
     badge.setAttribute("aria-label", on ? "Непрочитанных: " + count : "Нет непрочитанных");
   }
+  if (headerBadge) {
+    headerBadge.hidden = !on;
+    headerBadge.textContent = display;
+    headerBadge.setAttribute("aria-hidden", on ? "false" : "true");
+    headerBadge.setAttribute("aria-label", on ? "Непрочитанных: " + count : "Нет непрочитанных");
+  }
   pokerSyncPwaAppIconUnreadBadge(count);
 }
-

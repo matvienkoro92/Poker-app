@@ -11,7 +11,51 @@ function pokerInitHomePlanner() {
     var form = document.getElementById("romanTaskAddForm");
     var input = document.getElementById("romanTaskInput");
     var importantCheckbox = document.getElementById("romanTaskImportantCheckbox");
-    if (!plannerModal || !boardEl || !listAll || !form || !input || !openBtn) return;
+    if (!openBtn) return;
+    /** Общий планер двух Романов. */
+    var PLANNER_ROMAN_SHARED_USERNAMES = { roman1787443: true, roman1_matvienko: true };
+    /** Отдельный список задач (не общий с Романами). */
+    var PLANNER_SOLO_USERNAMES = { polyapineapple: true };
+    /**
+     * Доступ по числовому Telegram id, если username в WebApp пустой (скрыт в настройках).
+     * Штатные админы тоже видят общий планер: это важно для контроля задач без отдельной выдачи роли.
+     * Для @polyapineapple при скрытом username задайте тот же id, что в env GAZETTE_EDITOR_PLANNER_POLY_TELEGRAM_ID на сервере.
+     */
+    var PLANNER_ALLOWED_TELEGRAM_IDS = { 388008256: true, 2144406710: true, 1897001087: true };
+    /** Числовой id Telegram для @polyapineapple, если username скрыт (должен совпадать с серверным env). */
+    var PLANNER_POLY_TELEGRAM_ID = null;
+    var LEGACY_PLANNER_STORAGE_KEY = "poker_roman1787443_planner_v1";
+    var PLANNER_SHARED_STORAGE_KEY = "poker_gazette_editor_planner_shared_v1";
+    var PLANNER_OLD_KEYS_TO_MIGRATE = [
+      LEGACY_PLANNER_STORAGE_KEY,
+      "poker_gazette_editor_planner_v1_roman1787443",
+      "poker_gazette_editor_planner_v1_roman1_matvienko",
+    ];
+    var plannerAccessRuntime = typeof initHomePlannerAccessRuntime === "function"
+      ? initHomePlannerAccessRuntime({
+        allowedTelegramIds: PLANNER_ALLOWED_TELEGRAM_IDS,
+        polyTelegramId: PLANNER_POLY_TELEGRAM_ID,
+        sharedStorageKey: PLANNER_SHARED_STORAGE_KEY,
+        sharedUsernames: PLANNER_ROMAN_SHARED_USERNAMES,
+        soloUsernames: PLANNER_SOLO_USERNAMES,
+      })
+      : {};
+    var isPlannerAllowedUser = plannerAccessRuntime.isPlannerAllowedUser || function () { return false; };
+    var plannerStorageKey = plannerAccessRuntime.plannerStorageKey || function () { return null; };
+    function syncPlannerOpenButtonAccessOnly() {
+      var visible = isPlannerAllowedUser();
+      openBtn.classList.toggle("welcome-planner-icon--hidden", !visible);
+      openBtn.toggleAttribute("disabled", !visible);
+      openBtn.setAttribute("aria-hidden", visible ? "false" : "true");
+      if (visible) openBtn.setAttribute("data-planner-access", "allowed");
+      else openBtn.removeAttribute("data-planner-access");
+      document.documentElement.classList.toggle("home-planner-access-granted", !!visible);
+      if (!visible && plannerModal) plannerModal.setAttribute("aria-hidden", "true");
+      return visible;
+    }
+    window.__pokerSyncRomanTaskPlanner = syncPlannerOpenButtonAccessOnly;
+    syncPlannerOpenButtonAccessOnly();
+    if (!plannerModal || !boardEl || !listAll || !form || !input) return;
     if (plannerModal.dataset.romanTaskPlannerBound === "1") return;
     plannerModal.dataset.romanTaskPlannerBound = "1";
     var PLANNER_TAB_STORAGE_KEY = "poker_gazette_planner_tab_v1";
@@ -1253,6 +1297,15 @@ function pokerInitHomePlanner() {
       } catch (eRz) {}
     }
     window.pokerOpenRomanTaskPlanner = openPlannerModal;
+    function closeHeaderMoreMenu() {
+      var menu = document.getElementById("headerMoreMenu");
+      var toggle = document.getElementById("headerMoreMenuBtn");
+      if (menu) menu.hidden = true;
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Открыть меню");
+      }
+    }
     function closePlannerModal() {
       romanPlannerStopLiveSync();
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
@@ -1270,13 +1323,21 @@ function pokerInitHomePlanner() {
         }
       } catch (eKb) {}
     }
+    function setPlannerOpenButtonVisible(visible) {
+      openBtn.classList.toggle("welcome-planner-icon--hidden", !visible);
+      openBtn.toggleAttribute("disabled", !visible);
+      openBtn.setAttribute("aria-hidden", visible ? "false" : "true");
+      if (visible) openBtn.setAttribute("data-planner-access", "allowed");
+      else openBtn.removeAttribute("data-planner-access");
+      document.documentElement.classList.toggle("home-planner-access-granted", !!visible);
+    }
     function syncVisibility() {
       if (!isPlannerAllowedUser()) {
-        openBtn.classList.remove("welcome-planner-icon--hidden");
+        setPlannerOpenButtonVisible(false);
         closePlannerModal();
         return;
       }
-      openBtn.classList.remove("welcome-planner-icon--hidden");
+      setPlannerOpenButtonVisible(true);
       if (plannerModal.getAttribute("aria-hidden") === "false") {
         renderTasks();
         romanPlannerPullFromServer();
@@ -1670,6 +1731,7 @@ function pokerInitHomePlanner() {
         if (!btn) return;
         ev.preventDefault();
         ev.stopPropagation();
+        closeHeaderMoreMenu();
         var ensure =
           typeof window.pokerEnsureGlobalModalsHtml === "function"
             ? window.pokerEnsureGlobalModalsHtml()
