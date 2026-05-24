@@ -475,6 +475,8 @@
 
   function hasRakebackDomValue(row) {
     if (!row) return false;
+    var rakeInput = row.querySelector("[data-rakeback-rake]");
+    if (rakeInput && String(rakeInput.value || "").trim() && parseNumber(rakeInput.value) === 0) return true;
     var amountEl = row.querySelector("[data-rakeback-amount]");
     if (amountEl && String(amountEl.textContent || "").trim()) return true;
     return parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
