@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.183");
-@import url("./styles-home-rating-promo.css?v=3.176");
-@import url("./styles-auth.css?v=3.176");
-@import url("./styles-home.css?v=3.176");
-@import url("./styles-chat.css?v=3.176");
-@import url("./styles-learning-games.css?v=3.176");
-@import url("./styles-raffles.css?v=3.176");
-@import url("./styles-daily-poker.css?v=3.197");
-@import url("./styles-home-legacy-prelude.css?v=3.176");
-@import url("./styles-download.css?v=3.176");
-@import url("./styles-home-legacy-tail.css?v=3.176");
-@import url("./styles-home-rating-promo-legacy.css?v=3.176");
-@import url("./styles-rating.css?v=3.176");
-@import url("./styles-hall.css?v=3.176");
-@import url("./styles-admin.css?v=3.176");
-@import url("./styles-player-crm.css?v=3.176");
-@import url("./styles-profile.css?v=3.176");
-@import url("./styles-layout.css?v=3.176");
-@import url("./styles-chat-overlays.css?v=3.176");
-@import url("./styles-home-overrides.css?v=3.176");
-@import url("./styles-layout-touch-targets.css?v=3.176");
-@import url("./styles-home-rating-promo-late.css?v=3.176");
+@import url("./styles-base.css?v=3.217");
+@import url("./styles-home-rating-promo.css?v=3.217");
+@import url("./styles-auth.css?v=3.217");
+@import url("./styles-home.css?v=3.217");
+@import url("./styles-chat.css?v=3.217");
+@import url("./styles-learning-games.css?v=3.217");
+@import url("./styles-raffles.css?v=3.217");
+@import url("./styles-daily-poker.css?v=3.217");
+@import url("./styles-home-legacy-prelude.css?v=3.217");
+@import url("./styles-download.css?v=3.217");
+@import url("./styles-home-legacy-tail.css?v=3.217");
+@import url("./styles-home-rating-promo-legacy.css?v=3.217");
+@import url("./styles-rating.css?v=3.217");
+@import url("./styles-hall.css?v=3.217");
+@import url("./styles-admin.css?v=3.217");
+@import url("./styles-player-crm.css?v=3.217");
+@import url("./styles-profile.css?v=3.217");
+@import url("./styles-layout.css?v=3.217");
+@import url("./styles-chat-overlays.css?v=3.217");
+@import url("./styles-home-overrides.css?v=3.217");
+@import url("./styles-layout-touch-targets.css?v=3.217");
+@import url("./styles-home-rating-promo-late.css?v=3.217");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -352,8 +352,8 @@
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-home-wrap {
-  gap: 12px;
-  padding: 14px;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid rgba(255, 118, 0, 0.9);
   border-radius: 22px;
   overflow: hidden;
@@ -373,6 +373,7 @@
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block--home {
+  flex: 0 0 auto;
   padding: 0;
   border: 0 !important;
   border-radius: 0 !important;
@@ -383,10 +384,29 @@
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__body {
   padding: 0;
+  justify-content: flex-start;
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__home-head {
-  padding: 4px 4px 12px;
+  padding: 2px 4px 8px;
+}
+
+.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__countdown {
+  font-size: clamp(12px, 1.4vw, 16px);
+  line-height: 1.05;
+}
+
+.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__timer-label {
+  display: block;
+  font-size: 0.86em;
+}
+
+.app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-block__timer {
+  display: block;
+  font-size: clamp(16px, 1.25vw, 20px);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .home-freeroll-schedule,
@@ -416,13 +436,13 @@
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-actions-row {
-  min-height: 48px;
+  min-height: 44px;
   margin-top: 0;
 }
 
 .app.app--view-home .home-daily-shortcuts + .tournament-day-home-dual .tournament-day-share-btn {
   width: 100%;
-  min-height: 52px;
+  min-height: 48px;
   border-color: rgba(255, 231, 180, 0.84);
   border-radius: 15px;
   background:
@@ -440,8 +460,525 @@
     inset 0 -12px 20px rgba(129, 43, 0, 0.26);
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap .tournament-day-block--home {
+  flex: 1 1 auto;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
+  grid-template-columns: 42px minmax(0, 1fr);
+  column-gap: 8px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-head::before {
+  content: "◷";
+  width: 40px;
+  height: 40px;
+  font-size: 23px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-heading {
+  font-size: clamp(16px, 1.35vw, 20px);
+  line-height: 1.05;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__countdown {
+  font-size: clamp(10px, 1.1vw, 13px);
+}
+
+.app.app--view-home .home-tournament-week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  padding: 4px;
+  border: 1px solid rgba(255, 118, 0, 0.34);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 118, 0, 0.05), transparent 44%),
+    rgba(0, 2, 7, 0.64);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 166, 0.04),
+    inset 0 0 20px rgba(255, 118, 0, 0.035);
+}
+
+.app.app--view-home .home-tournament-week-row {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 5px;
+  color: #f8fafc;
+  text-align: left;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.app.app--view-home .home-tournament-week-row + .home-tournament-week-row {
+  border-top: 1px solid rgba(255, 118, 0, 0.18);
+}
+
+.app.app--view-home .home-tournament-week-row--active {
+  border: 1px solid rgba(255, 181, 49, 0.82);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(255, 181, 49, 0.22), transparent 42%),
+    linear-gradient(90deg, rgba(255, 118, 0, 0.2), rgba(255, 181, 49, 0.07));
+  box-shadow:
+    0 0 16px rgba(255, 118, 0, 0.2),
+    inset 0 1px 0 rgba(255, 250, 232, 0.1);
+}
+
+.app.app--view-home .home-tournament-week-row__day {
+  color: #ffb531;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.app.app--view-home .home-tournament-week-row__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.app.app--view-home .home-tournament-week-row__name {
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-tournament-week-row__meta {
+  overflow: hidden;
+  color: rgba(255, 234, 190, 0.74);
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-tournament-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  height: 100%;
+  min-height: 100%;
+}
+
+.app.app--view-home .home-tournament-detail__media {
+  position: relative;
+  flex: 1 1 112px;
+  min-height: 88px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 118, 0, 0.3);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 68% 42%, rgba(255, 118, 0, 0.22), transparent 38%),
+    radial-gradient(circle at 34% 18%, rgba(255, 181, 49, 0.1), transparent 34%),
+    linear-gradient(145deg, rgba(8, 10, 13, 0.96), rgba(2, 5, 10, 0.96));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 166, 0.04),
+    inset 0 -24px 34px rgba(0, 0, 0, 0.24);
+}
+
+.app.app--view-home .home-tournament-detail__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app.app--view-home .home-tournament-detail__eyebrow {
+  color: rgba(255, 224, 166, 0.82);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.app.app--view-home .home-tournament-detail__name {
+  margin: 0;
+  overflow: hidden;
+  color: #ff9f1a;
+  font-size: clamp(14px, 1.25vw, 18px);
+  font-weight: 900;
+  line-height: 1.04;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: normal;
+  text-shadow: 0 0 14px rgba(255, 118, 0, 0.24);
+}
+
+.app.app--view-home .home-tournament-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin: 0;
+  color: rgba(255, 234, 190, 0.84);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.app.app--view-home .home-tournament-detail__dot {
+  color: rgba(255, 181, 49, 0.62);
+}
+
+.app.app--view-home .home-tournament-detail__prize {
+  color: #ffad28;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 0 16px rgba(255, 118, 0, 0.24);
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-tournament-detail__countdown {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: rgba(255, 234, 190, 0.78);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app.app--view-home .home-tournament-detail__countdown .tournament-day-block__timer-label,
+.app.app--view-home .home-tournament-detail__countdown .tournament-day-block__timer {
+  display: inline;
+  font-size: 1em;
+  line-height: 1;
+}
+
+.app.app--view-home .home-tournament-detail__countdown .tournament-day-block__timer {
+  color: #ffc64a;
+  font-size: 1.15em;
+}
+
+.app.app--view-home .home-tournament-detail__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.app.app--view-home .home-tournament-detail__fact {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr);
+  gap: 1px 3px;
+  min-width: 0;
+  padding: 5px 4px;
+  border: 1px solid rgba(255, 118, 0, 0.22);
+  border-radius: 8px;
+  background: rgba(2, 5, 10, 0.52);
+}
+
+.app.app--view-home .home-tournament-detail__fact-icon {
+  grid-row: 1 / span 2;
+  color: #ffb531;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.app.app--view-home .home-tournament-detail__fact-label {
+  overflow: hidden;
+  color: rgba(226, 232, 240, 0.64);
+  font-size: 7.5px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-tournament-detail__fact-value {
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-live-tournament {
+  display: grid;
+  grid-template-columns: 48px 42px minmax(0, 1fr) 74px 84px;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 9px 10px;
+  overflow: hidden;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 118, 0, 0.58);
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(255, 118, 0, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(5, 8, 12, 0.98), rgba(2, 5, 10, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 166, 0.06),
+    0 0 18px rgba(255, 118, 0, 0.24),
+    0 10px 20px rgba(0, 0, 0, 0.24);
+}
+
+.app.app--view-home .home-live-tournament[hidden] {
+  display: none;
+}
+
+.app.app--view-home .home-live-tournament__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.app.app--view-home .home-live-tournament__status-title {
+  color: rgba(226, 232, 240, 0.64);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.app.app--view-home .home-live-tournament__live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 20px;
+  padding: 0 6px;
+  color: #fff7ed;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  border: 1px solid rgba(255, 196, 164, 0.35);
+  border-radius: 7px;
+  background: linear-gradient(180deg, #ff3f25, #8e0f0a);
+  box-shadow: 0 0 12px rgba(255, 55, 28, 0.34);
+}
+
+.app.app--view-home .home-live-tournament__live-badge span {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #fff7ed;
+  box-shadow: 0 0 8px rgba(255, 247, 237, 0.72);
+}
+
+.app.app--view-home .home-live-tournament--upcoming .home-live-tournament__live-badge {
+  color: #271707;
+  border-color: rgba(255, 218, 145, 0.6);
+  background: linear-gradient(180deg, #ffd36b, #ff8a18);
+  box-shadow: 0 0 12px rgba(255, 138, 24, 0.24);
+}
+
+.app.app--view-home .home-live-tournament--upcoming .home-live-tournament__live-badge span {
+  background: #271707;
+  box-shadow: none;
+}
+
+.app.app--view-home .home-live-tournament__thumb {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 181, 49, 0.42);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255, 181, 49, 0.16), rgba(255, 118, 0, 0.04)),
+    rgba(3, 6, 11, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 247, 237, 0.06),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.2);
+}
+
+.app.app--view-home .home-live-tournament__thumb::before {
+  content: "♠";
+  color: #ffbd45;
+  font-size: 23px;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(255, 118, 0, 0.58);
+}
+
+.app.app--view-home .home-live-tournament__main {
+  min-width: 0;
+}
+
+.app.app--view-home .home-live-tournament__name,
+.app.app--view-home .home-live-tournament__room,
+.app.app--view-home .home-live-tournament__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-live-tournament__name {
+  color: #ffe3a8;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.app.app--view-home .home-live-tournament__room {
+  margin-top: 2px;
+  color: rgba(226, 232, 240, 0.66);
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app.app--view-home .home-live-tournament__prize {
+  margin-top: 3px;
+  color: #ffb531;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-live-tournament__progress {
+  width: 100%;
+  height: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app.app--view-home .home-live-tournament__progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff4d22, #ffd05f);
+  box-shadow: 0 0 10px rgba(255, 118, 0, 0.48);
+}
+
+.app.app--view-home .home-live-tournament__meta {
+  margin-top: 4px;
+  color: rgba(255, 234, 190, 0.74);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app.app--view-home .home-live-tournament__timer {
+  min-width: 0;
+  padding-left: 6px;
+  border-left: 1px solid rgba(255, 118, 0, 0.28);
+}
+
+.app.app--view-home .home-live-tournament__timer-label,
+.app.app--view-home .home-live-tournament__buyin {
+  display: block;
+  overflow: hidden;
+  color: rgba(255, 234, 190, 0.72);
+  font-size: 7.5px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-live-tournament__timer-value {
+  display: block;
+  margin: 3px 0;
+  color: #ff9f1a;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0 13px rgba(255, 118, 0, 0.32);
+}
+
+.app.app--view-home .home-live-tournament__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 8px;
+  color: #fff8df;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 231, 180, 0.8);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.08) 30%, transparent 31%),
+    linear-gradient(180deg, #ff9f1a, #f56b00 58%, #c94a00);
+  box-shadow:
+    0 0 16px rgba(255, 118, 0, 0.42),
+    inset 0 1px 0 rgba(255, 250, 232, 0.46);
+  text-shadow: 0 1px 0 rgba(92, 31, 0, 0.68);
+}
+
+.app.app--view-home .home-live-tournament__cta span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-live-tournament__cta span[aria-hidden="true"] {
+  font-size: 24px;
+  line-height: 0.7;
+}
+
 .app.app--view-home .tournament-day-home-dual + .home-welcome-outline {
   margin-top: 14px;
+}
+
+.app.app--view-home .home-live-tournament + .home-welcome-outline,
+.app.app--view-home .tournament-day-home-dual + .home-live-tournament[hidden] + .home-welcome-outline {
+  margin-top: 14px;
+}
+
+[data-theme="light"] .app.app--view-home .home-live-tournament {
+  color: #1f2937;
+  border-color: rgba(217, 119, 6, 0.34);
+  background:
+    linear-gradient(90deg, rgba(251, 146, 60, 0.16), transparent 38%),
+    linear-gradient(145deg, rgba(255, 250, 244, 0.98), rgba(255, 236, 207, 0.96));
+  box-shadow: 0 8px 18px rgba(217, 119, 6, 0.12);
+}
+
+[data-theme="light"] .app.app--view-home .home-live-tournament__status-title,
+[data-theme="light"] .app.app--view-home .home-live-tournament__room,
+[data-theme="light"] .app.app--view-home .home-live-tournament__meta,
+[data-theme="light"] .app.app--view-home .home-live-tournament__timer-label,
+[data-theme="light"] .app.app--view-home .home-live-tournament__buyin {
+  color: rgba(92, 47, 10, 0.68);
+}
+
+[data-theme="light"] .app.app--view-home .home-live-tournament__name {
+  color: #7c2d12;
+}
+
+[data-theme="light"] .app.app--view-home .home-live-tournament__prize,
+[data-theme="light"] .app.app--view-home .home-live-tournament__timer-value {
+  color: #c2410c;
+  text-shadow: none;
+}
+
+[data-theme="light"] .app.app--view-home .home-live-tournament__thumb {
+  background: linear-gradient(145deg, rgba(255, 247, 237, 0.92), rgba(254, 215, 170, 0.72));
 }
 
 .home-daily-shortcuts .feature__badge {

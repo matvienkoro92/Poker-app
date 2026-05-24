@@ -145,6 +145,12 @@
     setText("homeSpringRatingTitle", t.rating);
     setText("homeFreerollTitle", t.nextFreeroll);
     setText("freerollHomePlayBtnText", t.playFreeroll);
+    setText("homeTournamentWeekTitle", t.tournamentWeek);
+    setText("tournamentDayWeekScheduleBtnText", t.fullCalendar);
+    setText("homeTournamentFocusLabel", t.focusDay);
+    setText("tournamentDayDetailsBtnText", t.details);
+    setText("homeLiveTournamentTitle", t.nowRunning);
+    setText("homeLiveTournamentCtaText", t.playNow);
     setText("homeTournamentDayTitle", t.tournamentDay);
     setText("homeTournamentPrizeLabel", t.prize);
     setText("homeTournamentBuyinLabel", t.buyin);
