@@ -483,6 +483,45 @@
       parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
   }
 
+  function getRakebackScrollContainer(source) {
+    var el = source && source.nodeType === 1 ? source : null;
+    if (el && typeof el.closest === "function") {
+      var wrap = el.closest(".admin-report-rakeback-wrap");
+      if (wrap) return wrap;
+      var panel = el.closest(".admin-report-panel--active");
+      if (panel && panel.scrollHeight > panel.clientHeight) return panel;
+    }
+    var fallbackBody = document.getElementById("adminReportRakebackTableBody");
+    if (fallbackBody && typeof fallbackBody.closest === "function") {
+      var bodyWrap = fallbackBody.closest(".admin-report-rakeback-wrap");
+      if (bodyWrap) return bodyWrap;
+    }
+    return null;
+  }
+
+  function captureRakebackScroll(source) {
+    var scroller = getRakebackScrollContainer(source);
+    if (!scroller) return null;
+    return {
+      scroller: scroller,
+      top: scroller.scrollTop || 0,
+      left: scroller.scrollLeft || 0,
+    };
+  }
+
+  function restoreRakebackScroll(snapshot) {
+    if (!snapshot || !snapshot.scroller || snapshot.scroller.isConnected === false) return;
+    function apply() {
+      if (!snapshot.scroller || snapshot.scroller.isConnected === false) return;
+      snapshot.scroller.scrollTop = snapshot.top || 0;
+      snapshot.scroller.scrollLeft = snapshot.left || 0;
+    }
+    apply();
+    if (window && typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(apply);
+    }
+  }
+
   function updateSharedRowActions(row, busy) {
     if (!row) return;
     var saved = row.getAttribute("data-rakeback-saved") === "1";
@@ -1514,6 +1553,7 @@
         (patch.deleteRowKeys && patch.deleteRowKeys.length)
       ));
       var skipRender = !!(patch && patch.skipRender);
+      var preserveScroll = !!(patch && patch.preserveScroll);
       var payload = {
         action: "rakeback_draft_save",
         date: "shared",
@@ -1534,7 +1574,11 @@
         if (data && data.ok && data.rakebackDraft) {
           sharedRows = mergeRowsWithLocalUnsaved(filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows)), localRows);
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
-          if (!skipRender) render();
+          if (!skipRender) {
+            var scrollSnapshot = preserveScroll ? captureRakebackScroll(body) : null;
+            render();
+            restoreRakebackScroll(scrollSnapshot);
+          }
           else syncControls();
           if (showStatus) setStatus("Сохранено");
           return true;
@@ -2065,14 +2109,18 @@
         sharedRows = [row].concat(mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
           return getSharedRowLocalKey(item) !== rowKey;
         }));
+        var scrollSnapshot = captureRakebackScroll(templateRow);
         render();
+        restoreRakebackScroll(scrollSnapshot);
         setStatus("Шаблон сохранен в записи", true);
-        saveSharedDraftNow(true, { upsertGroupIds: [row.groupId] }).then(function (ok) {
+        saveSharedDraftNow(true, { upsertGroupIds: [row.groupId], preserveScroll: true }).then(function (ok) {
           if (ok) return;
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
             return getSharedRowLocalKey(item) !== rowKey;
           });
+          var fallbackScrollSnapshot = captureRakebackScroll(body);
           render();
+          restoreRakebackScroll(fallbackScrollSnapshot);
         });
       }
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
