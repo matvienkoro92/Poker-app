@@ -111,6 +111,13 @@ function pokerFindNextFreerollItem(items, now) {
 
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
+var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+
+function pokerGetFreerollDayLabel(item) {
+  if (!item) return "—";
+  if (item.daily) return "Ежедневный";
+  return HOME_FREEROLL_DAY_LABELS[Number(item.dow)] || item.day || "—";
+}
 
 function pokerFormatRubSpacing(value) {
   return String(value || "—").replace(/₽/g, " ₽");
@@ -393,7 +400,7 @@ function renderHomeFreerollSchedule() {
     }
     var day = document.createElement("span");
     day.className = "home-freeroll-schedule__day";
-    day.textContent = item.day;
+    day.textContent = pokerGetFreerollDayLabel(item);
     var main = document.createElement("span");
     main.className = "home-freeroll-schedule__main";
     var title = document.createElement("span");
