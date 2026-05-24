@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.254");
-@import url("./styles-home-rating-promo.css?v=3.254");
-@import url("./styles-auth.css?v=3.254");
-@import url("./styles-home.css?v=3.254");
-@import url("./styles-chat.css?v=3.254");
-@import url("./styles-learning-games.css?v=3.254");
-@import url("./styles-raffles.css?v=3.254");
-@import url("./styles-daily-poker.css?v=3.254");
-@import url("./styles-home-legacy-prelude.css?v=3.254");
-@import url("./styles-download.css?v=3.254");
-@import url("./styles-home-legacy-tail.css?v=3.254");
-@import url("./styles-home-rating-promo-legacy.css?v=3.254");
-@import url("./styles-rating.css?v=3.254");
-@import url("./styles-hall.css?v=3.254");
-@import url("./styles-admin.css?v=3.254");
-@import url("./styles-player-crm.css?v=3.254");
-@import url("./styles-profile.css?v=3.254");
-@import url("./styles-layout.css?v=3.254");
-@import url("./styles-chat-overlays.css?v=3.254");
-@import url("./styles-home-overrides.css?v=3.254");
-@import url("./styles-layout-touch-targets.css?v=3.254");
-@import url("./styles-home-rating-promo-late.css?v=3.254");
+@import url("./styles-base.css?v=3.255");
+@import url("./styles-home-rating-promo.css?v=3.255");
+@import url("./styles-auth.css?v=3.255");
+@import url("./styles-home.css?v=3.255");
+@import url("./styles-chat.css?v=3.255");
+@import url("./styles-learning-games.css?v=3.255");
+@import url("./styles-raffles.css?v=3.255");
+@import url("./styles-daily-poker.css?v=3.255");
+@import url("./styles-home-legacy-prelude.css?v=3.255");
+@import url("./styles-download.css?v=3.255");
+@import url("./styles-home-legacy-tail.css?v=3.255");
+@import url("./styles-home-rating-promo-legacy.css?v=3.255");
+@import url("./styles-rating.css?v=3.255");
+@import url("./styles-hall.css?v=3.255");
+@import url("./styles-admin.css?v=3.255");
+@import url("./styles-player-crm.css?v=3.255");
+@import url("./styles-profile.css?v=3.255");
+@import url("./styles-layout.css?v=3.255");
+@import url("./styles-chat-overlays.css?v=3.255");
+@import url("./styles-home-overrides.css?v=3.255");
+@import url("./styles-layout-touch-targets.css?v=3.255");
+@import url("./styles-home-rating-promo-late.css?v=3.255");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -47,22 +47,36 @@ html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTas
 }
 
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
-  width: 100% !important;
-  min-height: 62px;
-  margin: 0 0 4px !important;
-  padding: 4px 0 8px !important;
-  gap: 10px;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  position: relative;
+  z-index: 60;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px) !important;
+  min-height: 66px;
+  margin: 0 calc(-1 * var(--card-padding-x, 16px) + 3px) 8px !important;
+  padding: 7px 12px !important;
+  gap: 8px;
+  border: 1px solid rgba(214, 163, 84, 0.3) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.06), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.035), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.94), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.1),
+    inset 0 -18px 34px rgba(0, 0, 0, 0.16),
+    0 18px 46px rgba(0, 0, 0, 0.28) !important;
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.065), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.95), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.12),
+    inset 0 -18px 34px rgba(0, 0, 0, 0.16),
+    0 18px 46px rgba(0, 0, 0, 0.28) !important;
 }
 
 .app.app--view-home .logo.logo--welcome {
@@ -106,16 +120,19 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
 }
 
 .app.app--view-home .header-actions {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   flex-direction: row;
   align-items: center;
+  justify-content: flex-end;
   gap: 9px;
   min-width: 0;
 }
 
 .app.app--view-home .header-profile-summary {
-  width: min(96px, 24vw);
-  min-width: 62px;
+  flex: 1 1 128px;
+  width: auto;
+  min-width: 0;
+  max-width: 152px;
   gap: 3px;
   align-items: flex-end;
 }
@@ -157,10 +174,15 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   gap: 7px;
 }
 
+.app.app--view-home .header-notification-btn {
+  display: none !important;
+}
+
 .app.app--view-home .header-actions__row .header-icon-btn {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 999px;
 }
 
 html.site-home-header-mode .app.app--view-home .header-profile-summary {
@@ -173,8 +195,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 @media (max-width: 380px) {
   .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
-    min-height: 56px;
+    min-height: 60px;
     gap: 7px;
+    padding: 7px 10px !important;
   }
 
   .app.app--view-home .logo.logo--welcome {
@@ -191,8 +214,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   }
 
   .app.app--view-home .header-profile-summary {
-    width: 78px;
-    min-width: 58px;
+    flex-basis: 118px;
+    width: auto;
+    min-width: 0;
   }
 
   .app.app--view-home .header-actions__row {
@@ -200,10 +224,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   }
 
   .app.app--view-home .header-actions__row .header-icon-btn {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
-    border-radius: 14px;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 999px;
   }
 }
 
