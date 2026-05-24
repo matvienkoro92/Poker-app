@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.221");
-@import url("./styles-home-rating-promo.css?v=3.221");
-@import url("./styles-auth.css?v=3.221");
-@import url("./styles-home.css?v=3.221");
-@import url("./styles-chat.css?v=3.221");
-@import url("./styles-learning-games.css?v=3.221");
-@import url("./styles-raffles.css?v=3.221");
-@import url("./styles-daily-poker.css?v=3.221");
-@import url("./styles-home-legacy-prelude.css?v=3.221");
-@import url("./styles-download.css?v=3.221");
-@import url("./styles-home-legacy-tail.css?v=3.221");
-@import url("./styles-home-rating-promo-legacy.css?v=3.221");
-@import url("./styles-rating.css?v=3.221");
-@import url("./styles-hall.css?v=3.221");
-@import url("./styles-admin.css?v=3.221");
-@import url("./styles-player-crm.css?v=3.221");
-@import url("./styles-profile.css?v=3.221");
-@import url("./styles-layout.css?v=3.221");
-@import url("./styles-chat-overlays.css?v=3.221");
-@import url("./styles-home-overrides.css?v=3.221");
-@import url("./styles-layout-touch-targets.css?v=3.221");
-@import url("./styles-home-rating-promo-late.css?v=3.221");
+@import url("./styles-base.css?v=3.223");
+@import url("./styles-home-rating-promo.css?v=3.223");
+@import url("./styles-auth.css?v=3.223");
+@import url("./styles-home.css?v=3.223");
+@import url("./styles-chat.css?v=3.223");
+@import url("./styles-learning-games.css?v=3.223");
+@import url("./styles-raffles.css?v=3.223");
+@import url("./styles-daily-poker.css?v=3.223");
+@import url("./styles-home-legacy-prelude.css?v=3.223");
+@import url("./styles-download.css?v=3.223");
+@import url("./styles-home-legacy-tail.css?v=3.223");
+@import url("./styles-home-rating-promo-legacy.css?v=3.223");
+@import url("./styles-rating.css?v=3.223");
+@import url("./styles-hall.css?v=3.223");
+@import url("./styles-admin.css?v=3.223");
+@import url("./styles-player-crm.css?v=3.223");
+@import url("./styles-profile.css?v=3.223");
+@import url("./styles-layout.css?v=3.223");
+@import url("./styles-chat-overlays.css?v=3.223");
+@import url("./styles-home-overrides.css?v=3.223");
+@import url("./styles-layout-touch-targets.css?v=3.223");
+@import url("./styles-home-rating-promo-late.css?v=3.223");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -52,9 +52,10 @@
   border: 1px solid rgba(255, 118, 0, 0.95);
   border-radius: 22px;
   background:
-    radial-gradient(ellipse at 70% 24%, rgba(255, 118, 0, 0.24), transparent 36%),
-    radial-gradient(ellipse at 62% 108%, rgba(255, 138, 0, 0.22), transparent 42%),
-    linear-gradient(145deg, rgba(8, 10, 12, 0.99), rgba(2, 4, 8, 0.99) 50%, rgba(4, 5, 8, 0.99));
+    radial-gradient(ellipse at 42% 12%, rgba(255, 157, 29, 0.36), transparent 42%),
+    radial-gradient(ellipse at 72% 24%, rgba(255, 118, 0, 0.34), transparent 38%),
+    radial-gradient(ellipse at 58% 108%, rgba(255, 138, 0, 0.3), transparent 44%),
+    linear-gradient(145deg, rgba(46, 20, 9, 0.99), rgba(24, 12, 8, 0.98) 50%, rgba(9, 7, 8, 0.98));
   box-shadow:
     inset 0 0 0 1px rgba(255, 222, 148, 0.22),
     inset 0 0 28px rgba(255, 112, 0, 0.16),
@@ -71,9 +72,9 @@
   overflow: hidden;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(2, 4, 8, 0.82) 0%, rgba(2, 4, 8, 0.62) 38%, rgba(2, 4, 8, 0.24) 65%, rgba(2, 4, 8, 0.04) 100%),
-    repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.18) 19px, rgba(255, 118, 0, 0) 22px),
-    linear-gradient(180deg, rgba(255, 128, 0, 0.18), rgba(255, 118, 0, 0.03) 44%, rgba(0, 0, 0, 0.06));
+    linear-gradient(90deg, rgba(27, 12, 6, 0.56) 0%, rgba(25, 12, 7, 0.36) 38%, rgba(10, 6, 5, 0.12) 66%, rgba(2, 4, 8, 0.02) 100%),
+    repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.2) 19px, rgba(255, 118, 0, 0) 22px),
+    linear-gradient(180deg, rgba(255, 147, 28, 0.24), rgba(255, 118, 0, 0.07) 46%, rgba(0, 0, 0, 0.02));
   pointer-events: none;
 }
 
@@ -104,16 +105,16 @@
 }
 
 .home-daily-deal-hero__title {
-  color: #ff9f1a;
+  color: #ffbd35;
   font-size: 24px;
   font-weight: 1000;
   line-height: 0.96;
   text-transform: uppercase;
   text-shadow:
     0 1px 0 rgba(78, 26, 0, 0.7),
-    0 0 7px rgba(255, 226, 148, 0.86),
-    0 0 18px rgba(255, 118, 0, 0.96),
-    0 0 34px rgba(255, 78, 0, 0.72);
+    0 0 9px rgba(255, 242, 188, 0.98),
+    0 0 22px rgba(255, 133, 0, 1),
+    0 0 42px rgba(255, 74, 0, 0.84);
 }
 
 .home-daily-deal-hero__title-line {
@@ -135,15 +136,15 @@
 
 .home-daily-deal-hero__prize {
   margin-top: 4px;
-  color: #ffa31f;
+  color: #ffc244;
   font-size: 25px;
   font-weight: 1000;
   line-height: 1;
   text-shadow:
     0 1px 0 rgba(78, 26, 0, 0.7),
-    0 0 10px rgba(255, 226, 148, 0.86),
-    0 0 24px rgba(255, 118, 0, 1),
-    0 0 40px rgba(255, 74, 0, 0.76);
+    0 0 12px rgba(255, 246, 202, 1),
+    0 0 28px rgba(255, 133, 0, 1),
+    0 0 48px rgba(255, 74, 0, 0.86);
 }
 
 .home-daily-deal-hero__cta {
@@ -304,6 +305,18 @@
     saturate(1.08)
     contrast(1.06)
     brightness(1.03);
+}
+
+.home-daily-shortcuts .home-mini-icon-item--raffles .home-mini-icon__image--raffles,
+.home-daily-shortcuts .home-mini-icon-item--gazette .home-mini-icon__image--gazette {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  filter:
+    saturate(1.1)
+    contrast(1.07)
+    brightness(1.04);
 }
 
 .home-daily-shortcuts .home-mini-icon {
@@ -608,25 +621,142 @@
 }
 
 .app.app--view-home .home-compact-link--rating {
+  display: block;
+  isolation: isolate;
+  overflow: visible;
   padding: 0;
-  border-color: rgba(255, 192, 56, 0.74);
-  background: #030508;
+  border-color: rgba(255, 193, 80, 0.68);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 88% 10%, rgba(255, 118, 0, 0.32), transparent 46%),
+    radial-gradient(ellipse at 8% 92%, rgba(255, 193, 80, 0.18), transparent 40%),
+    linear-gradient(145deg, #080b0d 0%, #101205 52%, #05070a 100%);
   box-shadow:
-    0 0 0 1px rgba(255, 214, 128, 0.18),
-    0 0 16px rgba(255, 118, 0, 0.18);
+    inset 0 0 0 1px rgba(255, 232, 176, 0.1),
+    inset 0 -16px 28px rgba(255, 118, 0, 0.1),
+    0 0 0 1px rgba(255, 118, 0, 0.16),
+    0 0 18px rgba(255, 118, 0, 0.22);
 }
 
-.app.app--view-home .home-compact-link--rating .home-compact-link__icon,
-.app.app--view-home .home-compact-link--rating .home-compact-link__body,
-.app.app--view-home .home-compact-link--rating .home-compact-link__cta {
-  display: none;
+.app.app--view-home .home-compact-link--rating::before,
+.app.app--view-home .home-compact-link--rating::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.app.app--view-home .home-compact-link--rating::before {
+  background:
+    linear-gradient(105deg, rgba(255, 118, 0, 0.14), transparent 34%),
+    repeating-linear-gradient(138deg, rgba(255, 193, 80, 0) 0 17px, rgba(255, 193, 80, 0.16) 18px, rgba(255, 193, 80, 0) 22px);
+}
+
+.app.app--view-home .home-compact-link--rating::after {
+  inset: 1px;
+  border: 1px solid rgba(255, 232, 176, 0.13);
+  box-shadow: inset 0 0 24px rgba(255, 118, 0, 0.14);
 }
 
 .app.app--view-home .home-compact-link--rating:focus-visible,
 .app.app--view-home .home-compact-link--rating:hover {
   box-shadow:
+    inset 0 0 0 1px rgba(255, 246, 220, 0.18),
+    inset 0 -16px 28px rgba(255, 118, 0, 0.14),
     0 0 0 1px rgba(255, 226, 166, 0.42),
-    0 0 20px rgba(255, 118, 0, 0.34);
+    0 0 22px rgba(255, 118, 0, 0.36);
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__icon {
+  position: absolute;
+  z-index: 3;
+  top: 9px;
+  left: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid rgba(255, 214, 128, 0.46);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 181, 49, 0.18), rgba(255, 118, 0, 0.08)),
+    rgba(1, 5, 9, 0.72);
+  font-size: 13px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 11px rgba(255, 118, 0, 0.3);
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__body {
+  position: absolute;
+  z-index: 3;
+  top: 30px;
+  left: 10px;
+  width: 92px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__eyebrow {
+  color: rgba(255, 236, 198, 0.82);
+  font-size: 7px;
+  text-shadow: 0 0 9px rgba(255, 118, 0, 0.34);
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__title {
+  color: #ffd36f;
+  margin-top: 4px;
+  font-size: 12px;
+  text-shadow:
+    0 1px 0 rgba(74, 35, 0, 0.66),
+    0 0 13px rgba(255, 118, 0, 0.46);
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__sub {
+  color: rgba(255, 236, 198, 0.82);
+  margin-top: 3px;
+  font-size: 7.5px;
+}
+
+.app.app--view-home .home-compact-link--rating .home-compact-link__cta {
+  position: absolute;
+  z-index: 4;
+  bottom: 8px;
+  left: 10px;
+  width: 94px;
+  min-height: 21px;
+  padding: 0 7px;
+  color: rgba(255, 244, 217, 0.94);
+  border-color: rgba(255, 118, 0, 0.44);
+  background:
+    linear-gradient(180deg, rgba(10, 12, 11, 0.94), rgba(1, 5, 9, 0.96));
+  font-size: 7.3px;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 176, 0.08),
+    0 0 9px rgba(255, 118, 0, 0.18);
+}
+
+.app.app--view-home .home-compact-link__rocket {
+  position: absolute;
+  z-index: 2;
+  right: -4px;
+  top: -17px;
+  width: auto;
+  height: 153px;
+  max-width: none;
+  object-fit: contain;
+  filter:
+    saturate(1.08)
+    contrast(1.08)
+    drop-shadow(0 0 12px rgba(255, 118, 0, 0.52))
+    drop-shadow(0 10px 16px rgba(0, 0, 0, 0.48));
+  pointer-events: none;
+  user-select: none;
 }
 
 .app.app--view-home .home-compact-link__icon {
@@ -713,30 +843,38 @@
 
 .app.app--view-home .home-compact-link--hall {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 52px minmax(0, 1fr) 24px;
+  grid-template-rows: 57px minmax(0, 1fr) 26px;
   grid-template-areas:
     "icon"
     "body"
     "cta";
   justify-items: center;
   align-items: center;
-  gap: 2px;
-  padding-top: 5px;
+  gap: 1px;
+  padding: 6px 10px 7px;
+  border-color: rgba(255, 193, 80, 0.56);
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 12%, rgba(255, 181, 49, 0.22), transparent 38%),
-    linear-gradient(90deg, rgba(4, 7, 12, 0.2), rgba(4, 7, 12, 0.82)),
-    linear-gradient(145deg, rgba(10, 7, 4, 0.96), rgba(2, 5, 10, 0.98));
+    radial-gradient(ellipse at 50% 18%, rgba(255, 181, 49, 0.28), transparent 42%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 118, 0, 0.2), transparent 52%),
+    linear-gradient(180deg, rgba(9, 9, 7, 0.98), rgba(1, 5, 9, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 231, 171, 0.11),
+    0 0 0 1px rgba(255, 118, 0, 0.1),
+    0 0 16px rgba(255, 118, 0, 0.18);
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__media {
-  width: 72px;
-  height: 52px;
+  width: 106px;
+  height: 56px;
   align-self: end;
+  object-position: center 45%;
   border-radius: 999px;
-  filter: saturate(1.08) contrast(1.05) brightness(1.02);
+  filter: saturate(1.12) contrast(1.08) brightness(1.03);
   box-shadow:
-    0 0 14px rgba(255, 118, 0, 0.36),
-    0 0 0 1px rgba(255, 213, 128, 0.18);
+    0 7px 18px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(255, 118, 0, 0.46),
+    0 0 0 1px rgba(255, 213, 128, 0.24);
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__body {
@@ -750,12 +888,25 @@
   color: #ffd47e;
   max-width: 100%;
   margin-top: 0;
-  font-size: 11.5px;
+  font-size: 13px;
   text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(74, 35, 0, 0.65),
+    0 0 12px rgba(255, 118, 0, 0.38);
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__cta {
   width: 100%;
+  min-height: 26px;
+  color: rgba(255, 238, 203, 0.92);
+  border-color: rgba(255, 118, 0, 0.42);
+  background:
+    linear-gradient(180deg, rgba(9, 10, 10, 0.96), rgba(1, 5, 9, 0.96));
+  font-size: 9.5px;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 176, 0.08),
+    0 0 9px rgba(255, 118, 0, 0.13);
 }
 
 .app.app--view-home .hero-row--home-hidden,
@@ -1583,9 +1734,9 @@
 
   .home-daily-deal-hero::before {
     background:
-      linear-gradient(90deg, rgba(2, 4, 8, 0.82) 0%, rgba(2, 4, 8, 0.64) 42%, rgba(2, 4, 8, 0.28) 69%, rgba(2, 4, 8, 0.06) 100%),
-      repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.18) 19px, rgba(255, 118, 0, 0) 22px),
-      linear-gradient(180deg, rgba(255, 128, 0, 0.18), rgba(255, 118, 0, 0.03) 44%, rgba(0, 0, 0, 0.06));
+      linear-gradient(90deg, rgba(27, 12, 6, 0.56) 0%, rgba(25, 12, 7, 0.38) 42%, rgba(10, 6, 5, 0.15) 69%, rgba(2, 4, 8, 0.03) 100%),
+      repeating-linear-gradient(155deg, rgba(255, 118, 0, 0) 0 18px, rgba(255, 118, 0, 0.2) 19px, rgba(255, 118, 0, 0) 22px),
+      linear-gradient(180deg, rgba(255, 147, 28, 0.24), rgba(255, 118, 0, 0.07) 46%, rgba(0, 0, 0, 0.02));
   }
 
   .home-daily-deal-hero__content {

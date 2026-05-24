@@ -31,6 +31,24 @@
         if (typeof fn === "function") fn();
       } catch (eHook) {}
     }
+    function runHomeGlobalModalInit() {
+      if (window.__pokerHomeGlobalModalsReinitDone || typeof window.runGazetteAndTasksInit !== "function") return;
+      var attempts = Number(window.__pokerHomeGlobalModalsReinitAttempts || 0);
+      try {
+        window.runGazetteAndTasksInit();
+        if ((document.getElementById("gazetteOpenBtn") || document.querySelector("[data-gazette-open]")) && typeof window.openGazette !== "function") {
+          throw new Error("gazette init pending");
+        }
+        window.__pokerHomeGlobalModalsReinitDone = true;
+      } catch (eGazetteInit) {
+        window.__pokerHomeGlobalModalsReinitAttempts = attempts + 1;
+        if (attempts < 5) {
+          setTimeout(function () {
+            runHomeGlobalModalInit();
+          }, 120);
+        }
+      }
+    }
     if (viewName === "video-lessons") safeCall(window.pokerInitVideoLessonsModals);
     if (viewName === "download") safeCall(window.pokerUpdateDownloadInfoSubsections);
     if (viewName === "schedule") safeCall(window.updateTournamentDayBlock);
@@ -42,10 +60,7 @@
     }
     if (viewName === "player-crm") safeCall(window.pokerInitPlayerCrm);
     if (viewName === "global-modals") {
-      if (!window.__pokerHomeGlobalModalsReinitDone && typeof window.runGazetteAndTasksInit === "function") {
-        window.__pokerHomeGlobalModalsReinitDone = true;
-        safeCall(window.runGazetteAndTasksInit);
-      }
+      runHomeGlobalModalInit();
       safeCall(window.pokerInitAdminReportModal);
       safeCall(window.pokerInitBroadcastReportsModal);
       safeCall(window.pokerInitVisitorsAdminUi);
@@ -282,7 +297,7 @@
 
   function findGlobalModalClickTarget(from) {
     return from && from.closest
-      ? from.closest("#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
+      ? from.closest("[data-gazette-open],#gazetteOpenBtn,#clubCharterOpenBtn,#headerClubWelcomeBtn,#homeWelcomeTitleBtn,#dailyPredictionBtn,#siteHomeInstructionBtn,#vpnProxyOpenBtn,#adminVisitorsBtn,#visitorsAdminBroadcastBtn,#adminPushToAdminsBtn,#adminPushToAllChatSubsBtn,#adminAuthDebugBtn,#adminShareStatsBtn,#adminTrackingLinksBtn,#adminReportBtn,#adminBroadcastReportsBtn,#romanTaskPlannerOpenBtn,#partnershipOpenBtn,.hall-photo-album__btn,.hall-shame-board__thumb-btn,.video-lessons__mtt-grid,.video-lessons__coach-student-gallery,.video-lessons__coach-reviews-grid,a.chat-msg__document-link--view,button[data-chat-pdf-download],button[data-chat-pdf-share],[data-open-image-lightbox],[data-open-pdf-viewer]")
       : null;
   }
 

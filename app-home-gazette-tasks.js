@@ -213,7 +213,19 @@ function runGazetteAndTasksInit() {
       showGazetteView("pick");
     }
   });
-  if (openBtn) openBtn.addEventListener("click", openGazette);
+  function bindGazetteOpenTrigger(trigger) {
+    if (!trigger || trigger.dataset.gazetteOpenBound === "1") return;
+    trigger.dataset.gazetteOpenBound = "1";
+    trigger.addEventListener("click", function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      openGazette();
+    });
+  }
+  bindGazetteOpenTrigger(openBtn);
+  var gazetteOpenTriggers = document.querySelectorAll("[data-gazette-open]");
+  for (var gOpenIdx = 0; gOpenIdx < gazetteOpenTriggers.length; gOpenIdx++) {
+    bindGazetteOpenTrigger(gazetteOpenTriggers[gOpenIdx]);
+  }
   if (closeBtn) closeBtn.addEventListener("click", closeGazette);
   if (backdrop) backdrop.addEventListener("click", closeGazette);
 
