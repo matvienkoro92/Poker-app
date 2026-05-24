@@ -626,5 +626,33 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-13-05-2026-league1-freeroll-1mln-18h.jpg",
     "rating-compressed-preview/rating-13-05-2026-league1-mini-shr-18h.jpg",
     "rating-compressed-preview/rating-13-05-2026-league1-hok-19h.jpg"
+  ],
+  "14.05.2026": [
+    "rating-compressed-preview/rating-14-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-14-05-2026-league1-tournir-chetverga-18h.jpg"
+  ],
+  "15.05.2026": [
+    "rating-compressed-preview/rating-15-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-15-05-2026-league1-friday-progressive-18h.jpg"
+  ],
+  "16.05.2026": [
+    "rating-compressed-preview/rating-16-05-2026-league1-dv-rebuy-12h.jpg"
+  ],
+  "17.05.2026": [
+    "rating-compressed-preview/rating-17-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-17-05-2026-league1-sunday-tournament-18h.jpg"
+  ],
+  "18.05.2026": [
+    "rating-compressed-preview/rating-18-05-2026-league1-monday-tournament-18h.jpg"
+  ],
+  "19.05.2026": [
+    "rating-compressed-preview/rating-19-05-2026-league1-dv-rebuy-12h.jpg"
+  ],
+  "20.05.2026": [
+    "rating-compressed-preview/rating-20-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-20-05-2026-league1-hok-19h.jpg"
+  ],
+  "21.05.2026": [
+    "rating-compressed-preview/rating-21-05-2026-league1-tournir-chetverga-18h.jpg"
   ]
 };

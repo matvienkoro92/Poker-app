@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
+const { spawnSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILES = [
@@ -18,11 +19,17 @@ const DATA_FILES = [
 ].map((file) => path.join(ROOT, file));
 const ASSETS_DIR = path.join(ROOT, "assets");
 const XPOKER_POINTS = { 1: 135, 2: 110, 3: 90, 4: 70, 5: 60, 6: 50, 7: 40, 8: 30 };
+const MONTH_FILES = {
+  "03": { file: "spring-rating-data-march.js", varName: "SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE" },
+  "04": { file: "spring-rating-data-april.js", varName: "SPRING_RATING_TOURNAMENTS_APRIL_BY_DATE" },
+  "05": { file: "spring-rating-data-may.js", varName: "SPRING_RATING_TOURNAMENTS_MAY_BY_DATE" }
+};
 
 function usage(exitCode) {
   const out = exitCode ? console.error : console.log;
   out(`Usage:
   node scripts/rating-entry-helper.js snippet < input.txt
+  node scripts/rating-entry-helper.js import < input.txt
   node scripts/rating-entry-helper.js validate [--strict]
 
 Input format for snippet:
@@ -33,12 +40,22 @@ Input format for snippet:
   buyin: 5000
   multiplier: 100
   screens: rating-15-04-2026-league1-monday-250k-18h.png
+  source: /Users/me/Downloads/IMG_0001.PNG
+  slug: rating-15-04-2026-league1-monday-250k-18h
   players:
   1 | Nick One | 12000
   2 | Nick Two | 7000
   9 | Nick Without Prize | 0
 
-You may repeat time/name/buyin/screens/players blocks for several tournaments.`);
+You may repeat time/name/buyin/screens/source/players blocks for several tournaments.
+
+Import command options:
+  --dry-run          Print planned changes without writing files
+  --no-build         Do not run npm run build after import
+  --no-check         Do not run validation and syntax checks after import
+  --force           Recompress and overwrite existing generated screenshots
+  --append          Append duplicate date/time/name/league entries instead of replacing
+  --target-kb=50    Target compressed screenshot size`);
   process.exit(exitCode);
 }
 
@@ -99,6 +116,8 @@ function newTournament(date, defaults) {
     league: defaults.league || 1,
     multiplier: defaults.multiplier || 1,
     screens: [],
+    sources: [],
+    slug: "",
     players: []
   };
 }
@@ -119,7 +138,7 @@ function parseSnippetInput(text) {
 
   function flush() {
     if (!current) return;
-    if (current.time || current.name || current.players.length || current.screens.length) {
+    if (current.time || current.name || current.players.length || current.screens.length || current.sources.length) {
       tournaments.push(current);
     }
     current = null;
@@ -165,7 +184,7 @@ function parseSnippetInput(text) {
       }
       if (key === "time" || key === "время") {
         if (current && (current.time || current.name || current.players.length || current.screens.length)) flush();
-        current = newTournament(date, defaults);
+        if (!current) current = newTournament(date, defaults);
         current.time = value;
         if (!/^\d{1,2}:\d{2}$/.test(value)) warnings.push(`line ${lineNo}: suspicious time "${value}"`);
         return;
@@ -173,6 +192,10 @@ function parseSnippetInput(text) {
       const t = ensureTournament(lineNo);
       if (key === "name" || key === "турнир") t.name = value;
       else if (key === "buyin" || key === "байин") t.buyin = parseNumber(value, "buyin", warnings, lineNo);
+      else if (key === "slug" || key === "alias") t.slug = value;
+      else if (key === "source" || key === "sources" || key === "file" || key === "files" || key === "image" || key === "images" || key === "исходник" || key === "файл" || key === "файлы") {
+        t.sources = value.split(",").map((s) => s.trim()).filter(Boolean);
+      }
       else if (key === "screens" || key === "screen" || key === "скрины" || key === "скрин") {
         t.screens = value.split(",").map((s) => s.trim()).filter(Boolean);
       } else if (key === "players" || key === "игроки") {
@@ -201,7 +224,12 @@ function parseSnippetInput(text) {
     if (!Number.isFinite(t.multiplier) || t.multiplier <= 0) warnings.push(`tournament ${i + 1}: bad multiplier`);
     if (!t.players.length) warnings.push(`tournament ${i + 1}: no players`);
     t.screens.forEach((file) => {
-      if (!fs.existsSync(path.join(ASSETS_DIR, file))) warnings.push(`missing asset: assets/${file}`);
+      if (looksLikeLocalSource(file)) {
+        if (!fs.existsSync(expandHome(file))) warnings.push(`missing source: ${file}`);
+      } else if (!fs.existsSync(path.join(ASSETS_DIR, file))) warnings.push(`missing asset: assets/${file}`);
+    });
+    t.sources.forEach((file) => {
+      if (!fs.existsSync(expandHome(file))) warnings.push(`missing source: ${file}`);
     });
   });
 
@@ -210,6 +238,18 @@ function parseSnippetInput(text) {
 
 function q(s) {
   return JSON.stringify(String(s == null ? "" : s));
+}
+
+function expandHome(filePath) {
+  if (!filePath) return filePath;
+  if (filePath === "~") return process.env.HOME || filePath;
+  if (filePath.startsWith("~/")) return path.join(process.env.HOME || "", filePath.slice(2));
+  return filePath;
+}
+
+function looksLikeLocalSource(file) {
+  const s = String(file || "");
+  return path.isAbsolute(s) || s.startsWith("~/") || s.startsWith("../") || s.startsWith("./");
 }
 
 function tournamentToJs(t) {
@@ -262,6 +302,442 @@ function printSnippet() {
     console.error("\nWarnings:");
     warnings.forEach((w) => console.error(`- ${w}`));
     process.exitCode = 2;
+  }
+}
+
+function parseArgs(argv) {
+  const opts = {
+    dryRun: false,
+    force: false,
+    append: false,
+    build: true,
+    check: true,
+    targetKb: 50,
+    width: 680
+  };
+  argv.forEach((arg) => {
+    if (arg === "--dry-run") opts.dryRun = true;
+    else if (arg === "--force") opts.force = true;
+    else if (arg === "--append") opts.append = true;
+    else if (arg === "--no-build") opts.build = false;
+    else if (arg === "--no-check") opts.check = false;
+    else if (arg.startsWith("--target-kb=")) {
+      const n = Number(arg.slice("--target-kb=".length));
+      if (Number.isFinite(n) && n > 0) opts.targetKb = n;
+    } else if (arg.startsWith("--width=")) {
+      const n = Number(arg.slice("--width=".length));
+      if (Number.isFinite(n) && n > 0) opts.width = Math.round(n);
+    }
+  });
+  return opts;
+}
+
+function dateToStamp(dateStr) {
+  const parts = String(dateStr || "").split(".").map(Number);
+  if (parts.length !== 3) return 0;
+  return parts[2] * 10000 + parts[1] * 100 + parts[0];
+}
+
+function dateParts(dateStr) {
+  const parts = String(dateStr || "").split(".");
+  return {
+    day: parts[0] || "",
+    month: parts[1] || "",
+    year: parts[2] || ""
+  };
+}
+
+function monthNameRu(month) {
+  return {
+    "03": "марта",
+    "04": "апреля",
+    "05": "мая"
+  }[String(month).padStart(2, "0")] || "";
+}
+
+function slugify(input) {
+  const map = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z", и: "i", й: "j",
+    к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f",
+    х: "h", ц: "c", ч: "ch", ш: "sh", щ: "shch", ы: "y", э: "e", ю: "yu", я: "ya", ъ: "", ь: ""
+  };
+  return String(input || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[а-яё]/g, (ch) => map[ch] || "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+function defaultScreenBasename(t, index) {
+  const p = dateParts(t.date);
+  const name = slugify(t.slug || t.name) || "tournament";
+  const timeMatch = String(t.time || "00:00").match(/^(\d{1,2}):(\d{2})$/);
+  const time = timeMatch
+    ? `${timeMatch[1].padStart(2, "0")}${timeMatch[2] === "00" ? "" : timeMatch[2]}h`
+    : String(t.time || "00:00").replace(/[^0-9]+/g, "") + "h";
+  const suffix = index > 0 ? `-${index + 1}` : "";
+  return `rating-${p.day}-${p.month}-${p.year}-league${t.league}-${name}-${time}${suffix}`;
+}
+
+function normalizeScreenRelPath(raw) {
+  let s = String(raw || "").trim();
+  if (!s) return "";
+  s = s.replace(/^assets\//, "");
+  if (s.startsWith("rating-compressed-preview/")) return s;
+  if (s.startsWith("rating-")) return s;
+  return s;
+}
+
+function formatNumber(n) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return "0";
+  return Number.isInteger(num) ? String(num) : String(num);
+}
+
+function formatPlayerObject(p, indent) {
+  const spaces = " ".repeat(indent);
+  const inner = " ".repeat(indent + 2);
+  return [
+    `${spaces}{`,
+    `${inner}"nick": ${q(p.nick)},`,
+    `${inner}"place": ${formatNumber(p.place)},`,
+    `${inner}"reward": ${formatNumber(p.reward)},`,
+    `${inner}"points": ${formatNumber(p.points)}`,
+    `${spaces}}`
+  ].join("\n");
+}
+
+function toStoredTournament(t) {
+  return {
+    time: String(t.time || ""),
+    name: String(t.name || ""),
+    buyin: Number(t.buyin) || 0,
+    league: Number(t.league) || 1,
+    players: (t.players || []).map((p) => {
+      const reward = Number(p.reward) * (Number(t.multiplier) || 1);
+      return {
+        nick: String(p.nick || ""),
+        place: Number(p.place) || 0,
+        reward,
+        points: pointsForPlayer({ place: Number(p.place) || 0, reward })
+      };
+    })
+  };
+}
+
+function formatTournamentObject(t, indent) {
+  const spaces = " ".repeat(indent);
+  const inner = " ".repeat(indent + 2);
+  const players = (t.players || []).map((p) => formatPlayerObject(p, indent + 4)).join(",\n");
+  return [
+    `${spaces}{`,
+    `${inner}"time": ${q(t.time)},`,
+    `${inner}"name": ${q(t.name)},`,
+    `${inner}"buyin": ${formatNumber(t.buyin)},`,
+    `${inner}"league": ${formatNumber(t.league)},`,
+    `${inner}"players": [`,
+    players,
+    `${inner}]`,
+    `${spaces}}`
+  ].join("\n");
+}
+
+function formatDateBlock(dateStr, tournaments) {
+  const list = tournaments.map((t) => formatTournamentObject(t, 4)).join(",\n");
+  return `  ${q(dateStr)}: [\n${list}\n  ]`;
+}
+
+function formatImageDateBlock(dateStr, files) {
+  const body = files.map((file) => `    ${q(file)}`).join(",\n");
+  return `  ${q(dateStr)}: [\n${body}\n  ]`;
+}
+
+function findMatchingBracket(text, openIndex) {
+  const open = text[openIndex];
+  const close = open === "[" ? "]" : "}";
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = openIndex; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escape) escape = false;
+      else if (ch === "\\") escape = true;
+      else if (ch === "\"") inString = false;
+      continue;
+    }
+    if (ch === "\"") {
+      inString = true;
+      continue;
+    }
+    if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function findDatePropertyRange(text, dateStr) {
+  const propRe = new RegExp(`${q(dateStr).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*\\[`);
+  const match = propRe.exec(text);
+  if (!match) return null;
+  const propStart = match.index;
+  const lineStart = text.lastIndexOf("\n", propStart) + 1;
+  const openIndex = text.indexOf("[", propStart);
+  const closeIndex = findMatchingBracket(text, openIndex);
+  if (closeIndex < 0) throw new Error(`Cannot find closing array bracket for ${dateStr}`);
+  let end = closeIndex + 1;
+  let cursor = end;
+  while (cursor < text.length && /\s/.test(text[cursor])) cursor++;
+  const hasComma = text[cursor] === ",";
+  if (hasComma) end = cursor + 1;
+  while (end < text.length && text[end] === "\n") end++;
+  return { start: lineStart, end, hasComma };
+}
+
+function upsertDateBlock(text, dateStr, block, existingDates) {
+  const existing = findDatePropertyRange(text, dateStr);
+  if (existing) {
+    return text.slice(0, existing.start) + block + (existing.hasComma ? "," : "") + "\n" + text.slice(existing.end);
+  }
+  const sorted = existingDates.slice().sort((a, b) => dateToStamp(a) - dateToStamp(b));
+  const nextDate = sorted.find((d) => dateToStamp(d) > dateToStamp(dateStr));
+  if (nextDate) {
+    const next = findDatePropertyRange(text, nextDate);
+    if (!next) throw new Error(`Cannot locate insertion point before ${nextDate}`);
+    return text.slice(0, next.start) + block + ",\n" + text.slice(next.start);
+  }
+  const objectEnd = text.lastIndexOf("\n};");
+  if (objectEnd < 0) throw new Error("Cannot locate object end");
+  const prefix = sorted.length ? ",\n" : "\n";
+  return text.slice(0, objectEnd) + prefix + block + text.slice(objectEnd);
+}
+
+function sameTournament(a, b) {
+  return String(a.time || "") === String(b.time || "") &&
+    String(a.name || "") === String(b.name || "") &&
+    Number(a.league) === Number(b.league);
+}
+
+function mergeTournamentLists(oldList, newList, append) {
+  const result = Array.isArray(oldList) ? oldList.slice() : [];
+  newList.forEach((next) => {
+    const idx = result.findIndex((old) => sameTournament(old, next));
+    if (!append && idx >= 0) result[idx] = next;
+    else result.push(next);
+  });
+  return result;
+}
+
+function loadObjectVar(filePath, varName) {
+  const sandbox = {};
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync(filePath, "utf8"), sandbox, { filename: filePath });
+  return sandbox[varName] || {};
+}
+
+function writeMonthData(dateStr, tournaments, opts) {
+  const p = dateParts(dateStr);
+  const cfg = MONTH_FILES[p.month];
+  if (!cfg) throw new Error(`Unsupported spring rating month for ${dateStr}`);
+  const filePath = path.join(ROOT, cfg.file);
+  const current = loadObjectVar(filePath, cfg.varName);
+  const merged = mergeTournamentLists(current[dateStr], tournaments, opts.append);
+  const text = fs.readFileSync(filePath, "utf8");
+  const next = upsertDateBlock(text, dateStr, formatDateBlock(dateStr, merged), Object.keys(current));
+  if (!opts.dryRun) fs.writeFileSync(filePath, next);
+  return { file: cfg.file, count: tournaments.length, total: merged.length };
+}
+
+function writeImageMap(league, dateStr, files, opts) {
+  if (!files.length) return null;
+  const fileName = `spring-rating-images-league${league}.js`;
+  const varName = `SPRING_RATING_IMAGES_LEAGUE${league}`;
+  const filePath = path.join(ROOT, fileName);
+  const current = loadObjectVar(filePath, varName);
+  const existing = Array.isArray(current[dateStr]) ? current[dateStr].slice() : [];
+  const merged = existing.slice();
+  files.forEach((file) => {
+    if (!merged.includes(file)) merged.push(file);
+  });
+  const text = fs.readFileSync(filePath, "utf8");
+  const next = upsertDateBlock(text, dateStr, formatImageDateBlock(dateStr, merged), Object.keys(current));
+  if (!opts.dryRun) fs.writeFileSync(filePath, next);
+  return { file: fileName, count: files.length, total: merged.length };
+}
+
+function updateSpringMeta(latestDate, opts) {
+  const p = dateParts(latestDate);
+  const month = monthNameRu(p.month);
+  if (!month) return null;
+  const filePath = path.join(ROOT, "spring-rating-meta.js");
+  const text = fs.readFileSync(filePath, "utf8");
+  const value = `${Number(p.day)} ${month}`;
+  const next = text.replace(/var SPRING_RATING_UPDATED = "[^"]*";/, `var SPRING_RATING_UPDATED = ${q(value)};`);
+  if (!opts.dryRun) fs.writeFileSync(filePath, next);
+  return value;
+}
+
+function updateMaySeasonDates(mayDates, opts) {
+  const tailDates = mayDates
+    .filter((date) => Number(dateParts(date).day) >= 10)
+    .sort((a, b) => dateToStamp(a) - dateToStamp(b));
+  if (!tailDates.length) return null;
+  const lastDay = Number(dateParts(tailDates[tailDates.length - 1]).day);
+  const varName = `SPRING_HOME_MAY_DAYS_10_${lastDay}`;
+  const filePath = path.join(ROOT, "app-rating-spring-season.js");
+  let text = fs.readFileSync(filePath, "utf8");
+  const old = text.match(/var (SPRING_HOME_MAY_DAYS_10_\d+) = \[[^\]]*\];/);
+  if (!old) return null;
+  const oldName = old[1];
+  text = text.replace(new RegExp(oldName, "g"), varName);
+  text = text.replace(/var SPRING_HOME_MAY_DAYS_10_\d+ = \[[^\]]*\];/, `var ${varName} = ${JSON.stringify(tailDates)};`);
+  text = text.replace(/\{ label: "10—\d+ мая", dates: SPRING_HOME_MAY_DAYS_10_\d+ \}/, `{ label: "10—${lastDay} мая", dates: ${varName} }`);
+  if (!opts.dryRun) fs.writeFileSync(filePath, text);
+  return { varName, label: `10—${lastDay} мая`, count: tailDates.length };
+}
+
+async function compressOneSource(srcRaw, relTarget, opts) {
+  const src = expandHome(srcRaw);
+  const dst = path.join(ASSETS_DIR, relTarget);
+  if (!opts.force && fs.existsSync(dst)) {
+    return { file: relTarget, skipped: true, size: fs.statSync(dst).size };
+  }
+  if (opts.dryRun) return { file: relTarget, skipped: false, size: 0 };
+  fs.mkdirSync(path.dirname(dst), { recursive: true });
+  let sharp;
+  try {
+    sharp = require("sharp");
+  } catch (err) {
+    throw new Error("sharp is required for screenshot compression. Run npm install first.");
+  }
+  const targetBytes = Math.max(1, opts.targetKb) * 1024;
+  let best = null;
+  const widths = [opts.width, opts.width - 40, opts.width - 80, opts.width - 120, opts.width - 160].filter((w) => w >= 360);
+  for (const width of widths) {
+    for (let quality = 58; quality >= 28; quality -= 4) {
+      const buffer = await sharp(src)
+        .resize({ width, withoutEnlargement: true })
+        .jpeg({ quality, progressive: true, mozjpeg: true })
+        .toBuffer();
+      if (!best || buffer.length < best.buffer.length) best = { buffer, width, quality };
+      if (buffer.length <= targetBytes) {
+        fs.writeFileSync(dst, buffer);
+        return { file: relTarget, skipped: false, size: buffer.length, width, quality };
+      }
+    }
+  }
+  fs.writeFileSync(dst, best.buffer);
+  return { file: relTarget, skipped: false, size: best.buffer.length, width: best.width, quality: best.quality };
+}
+
+async function prepareScreens(tournaments, opts) {
+  const usedTargets = new Set();
+  const byLeagueDate = {};
+  const compressed = [];
+  for (const t of tournaments) {
+    const relScreens = [];
+    const sourceScreens = [];
+    (t.screens || []).forEach((screen) => {
+      if (looksLikeLocalSource(screen)) sourceScreens.push(screen);
+      else relScreens.push(normalizeScreenRelPath(screen));
+    });
+    (t.sources || []).forEach((source) => sourceScreens.push(source));
+    for (let i = 0; i < sourceScreens.length; i++) {
+      let base = t.slug ? slugify(t.slug.replace(/\.[a-z0-9]+$/i, "")) : defaultScreenBasename(t, i);
+      if (!base.startsWith("rating-")) base = defaultScreenBasename({ ...t, slug: base }, i);
+      let rel = `rating-compressed-preview/${base}.jpg`;
+      let suffix = 2;
+      while (usedTargets.has(rel)) {
+        rel = `rating-compressed-preview/${base}-${suffix}.jpg`;
+        suffix++;
+      }
+      usedTargets.add(rel);
+      const out = await compressOneSource(sourceScreens[i], rel, opts);
+      compressed.push({ source: sourceScreens[i], ...out });
+      relScreens.push(rel);
+    }
+    t.finalScreens = relScreens.filter(Boolean);
+    if (t.finalScreens.length) {
+      const key = `${t.league}|${t.date}`;
+      if (!byLeagueDate[key]) byLeagueDate[key] = [];
+      t.finalScreens.forEach((file) => {
+        if (!byLeagueDate[key].includes(file)) byLeagueDate[key].push(file);
+      });
+    }
+  }
+  return { byLeagueDate, compressed };
+}
+
+function runChecked(command, args) {
+  const result = spawnSync(command, args, { cwd: ROOT, stdio: "inherit", shell: false });
+  if (result.status !== 0) {
+    throw new Error(`${command} ${args.join(" ")} failed with exit code ${result.status}`);
+  }
+}
+
+async function importRatingInput() {
+  const opts = parseArgs(process.argv.slice(3));
+  const { tournaments, warnings } = parseSnippetInput(readStdin());
+  if (!tournaments.length) {
+    console.error("No tournaments parsed.\n");
+    usage(1);
+  }
+  if (warnings.length) {
+    console.error("Warnings:");
+    warnings.forEach((w) => console.error(`- ${w}`));
+    if (!opts.dryRun) process.exitCode = 2;
+  }
+
+  const prepared = await prepareScreens(tournaments, opts);
+  const byDate = {};
+  tournaments.forEach((t) => {
+    if (!byDate[t.date]) byDate[t.date] = [];
+    byDate[t.date].push(toStoredTournament(t));
+  });
+
+  const dataResults = [];
+  Object.keys(byDate).sort((a, b) => dateToStamp(a) - dateToStamp(b)).forEach((dateStr) => {
+    dataResults.push(writeMonthData(dateStr, byDate[dateStr], opts));
+  });
+
+  const imageResults = [];
+  Object.keys(prepared.byLeagueDate).sort().forEach((key) => {
+    const [league, dateStr] = key.split("|");
+    imageResults.push(writeImageMap(Number(league), dateStr, prepared.byLeagueDate[key], opts));
+  });
+
+  const allSpringDates = new Set(Object.keys(loadData().SPRING_RATING_TOURNAMENTS_BY_DATE || {}));
+  Object.keys(byDate).forEach((dateStr) => allSpringDates.add(dateStr));
+  const latestDate = Array.from(allSpringDates).sort((a, b) => dateToStamp(a) - dateToStamp(b)).pop();
+  const meta = updateSpringMeta(latestDate, opts);
+  let season = null;
+  const mayDataPath = path.join(ROOT, MONTH_FILES["05"].file);
+  const mayData = loadObjectVar(mayDataPath, MONTH_FILES["05"].varName);
+  const mayDates = Object.keys(mayData).concat(Object.keys(byDate).filter((d) => dateParts(d).month === "05"));
+  season = updateMaySeasonDates(Array.from(new Set(mayDates)), opts);
+
+  console.log(opts.dryRun ? "Dry run summary:" : "Import summary:");
+  prepared.compressed.forEach((item) => {
+    const kb = item.size ? `${Math.round(item.size / 1024)} KB` : "planned";
+    console.log(`- screenshot ${item.skipped ? "reused" : "compressed"}: ${item.file} (${kb})`);
+  });
+  dataResults.forEach((r) => console.log(`- data: ${r.file}, ${r.count} imported, ${r.total} total on date`));
+  imageResults.filter(Boolean).forEach((r) => console.log(`- images: ${r.file}, ${r.count} added/reused, ${r.total} total on date`));
+  if (season) console.log(`- May calendar: ${season.label} (${season.count} dates)`);
+  if (meta) console.log(`- updated label: ${meta}`);
+
+  if (!opts.dryRun && opts.check) {
+    runChecked("npm", ["run", "rating:validate"]);
+    runChecked("npm", ["run", "check:syntax"]);
+  }
+  if (!opts.dryRun && opts.build) {
+    runChecked("npm", ["run", "build"]);
   }
 }
 
@@ -339,5 +815,9 @@ function validateData() {
 
 const cmd = process.argv[2];
 if (cmd === "snippet") printSnippet();
+else if (cmd === "import") importRatingInput().catch((err) => {
+  console.error(err && err.stack ? err.stack : err);
+  process.exit(1);
+});
 else if (cmd === "validate") validateData();
 else usage(cmd ? 1 : 0);

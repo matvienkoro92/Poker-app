@@ -2439,5 +2439,795 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         }
       ]
     }
+  ],
+  "14.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 15000,
+          "points": 135
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 2,
+          "reward": 9000,
+          "points": 110
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 9,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "VOSOvec",
+          "place": 10,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "isildur",
+          "place": 13,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "OK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "PlayerF64117",
+          "place": 3,
+          "reward": 3850,
+          "points": 90
+        },
+        {
+          "nick": "мистерFox",
+          "place": 5,
+          "reward": 2225,
+          "points": 60
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 9,
+          "reward": 286.87,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 10,
+          "reward": 168.75,
+          "points": 0
+        },
+        {
+          "nick": "BabyShark",
+          "place": 11,
+          "reward": 371.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Четверга",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 14800,
+          "points": 90
+        },
+        {
+          "nick": "🔥INFERNO🔥",
+          "place": 5,
+          "reward": 5400,
+          "points": 60
+        },
+        {
+          "nick": "COBRA",
+          "place": 6,
+          "reward": 17000,
+          "points": 50
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 7,
+          "reward": 3700,
+          "points": 40
+        },
+        {
+          "nick": "Baldendi",
+          "place": 8,
+          "reward": 2750,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "COBRA",
+          "place": 1,
+          "reward": 7750,
+          "points": 135
+        },
+        {
+          "nick": "doss93",
+          "place": 2,
+          "reward": 4880,
+          "points": 110
+        },
+        {
+          "nick": "PlayerF64117",
+          "place": 3,
+          "reward": 3320,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 5,
+          "reward": 1990,
+          "points": 60
+        },
+        {
+          "nick": "🔥INFERNO🔥",
+          "place": 9,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "15.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PlayerF64117",
+          "place": 1,
+          "reward": 18400,
+          "points": 135
+        },
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 12500,
+          "points": 110
+        },
+        {
+          "nick": "Mr.V",
+          "place": 3,
+          "reward": 7480,
+          "points": 90
+        },
+        {
+          "nick": "FrankL",
+          "place": 13,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 16,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "OK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 6296.87,
+          "points": 110
+        },
+        {
+          "nick": "kriak",
+          "place": 12,
+          "reward": 270,
+          "points": 0
+        },
+        {
+          "nick": "БОГДАН",
+          "place": 13,
+          "reward": 270,
+          "points": 0
+        },
+        {
+          "nick": "мистерFox",
+          "place": 14,
+          "reward": 67.5,
+          "points": 0
+        },
+        {
+          "nick": "Yanson47",
+          "place": 16,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 27089.88,
+          "points": 135
+        },
+        {
+          "nick": "Mr.V",
+          "place": 2,
+          "reward": 14053.91,
+          "points": 110
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 7695.31,
+          "points": 90
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 5725,
+          "points": 70
+        },
+        {
+          "nick": "Рамиль01fan",
+          "place": 8,
+          "reward": 3613.12,
+          "points": 30
+        }
+      ]
+    }
+  ],
+  "16.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PlayerF64117",
+          "place": 1,
+          "reward": 16300,
+          "points": 135
+        },
+        {
+          "nick": "Просто",
+          "place": 2,
+          "reward": 11000,
+          "points": 110
+        },
+        {
+          "nick": "king00001",
+          "place": 3,
+          "reward": 6600,
+          "points": 90
+        },
+        {
+          "nick": "Рамиль01",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "FrankL",
+          "place": 7,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "17.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 7900,
+          "points": 90
+        },
+        {
+          "nick": "Просто",
+          "place": 14,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "RUS22RUS",
+          "place": 15,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Evgen.",
+          "place": 18,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "MOK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Gleb",
+          "place": 1,
+          "reward": 14070,
+          "points": 135
+        },
+        {
+          "nick": "Prushnik",
+          "place": 2,
+          "reward": 7500,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 3430,
+          "points": 90
+        },
+        {
+          "nick": "RUS22RUS",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "\"Зараза\"",
+          "place": 7,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 2,
+          "reward": 64843.75,
+          "points": 110
+        },
+        {
+          "nick": "Виктор",
+          "place": 3,
+          "reward": 26600,
+          "points": 90
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 6,
+          "reward": 15300,
+          "points": 50
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 7,
+          "reward": 9250,
+          "points": 40
+        },
+        {
+          "nick": "Waaar",
+          "place": 8,
+          "reward": 8825,
+          "points": 30
+        }
+      ]
+    }
+  ],
+  "18.05.2026": [
+    {
+      "time": "17:00",
+      "name": "OK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 1,
+          "reward": 11544.55,
+          "points": 135
+        },
+        {
+          "nick": "MilkyWay77",
+          "place": 2,
+          "reward": 6301.4,
+          "points": 110
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 3469.06,
+          "points": 90
+        },
+        {
+          "nick": "PROFESSOR",
+          "place": 4,
+          "reward": 2413.75,
+          "points": 70
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 1930,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "COBRA",
+          "place": 5,
+          "reward": 6845,
+          "points": 60
+        },
+        {
+          "nick": "Виктор",
+          "place": 8,
+          "reward": 3240,
+          "points": 30
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 9,
+          "reward": 1860,
+          "points": 0
+        },
+        {
+          "nick": "БОГДАН",
+          "place": 10,
+          "reward": 1290,
+          "points": 0
+        },
+        {
+          "nick": "ухо174",
+          "place": 12,
+          "reward": 1170,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "19.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RUS22RUS",
+          "place": 5,
+          "reward": 5400,
+          "points": 60
+        },
+        {
+          "nick": "Danger",
+          "place": 19,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 22,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AliySvin",
+          "place": 3,
+          "reward": 9900,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 7,
+          "reward": 4900,
+          "points": 40
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 9,
+          "reward": 2900,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 10,
+          "reward": 2000,
+          "points": 0
+        },
+        {
+          "nick": "Stepchik",
+          "place": 11,
+          "reward": 1700,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "20.05.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RUS22RUS",
+          "place": 1,
+          "reward": 15000,
+          "points": 135
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Феникс",
+          "place": 14,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "denchik333",
+          "place": 15,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "MOK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 3350,
+          "points": 110
+        },
+        {
+          "nick": "COBRA",
+          "place": 3,
+          "reward": 2010,
+          "points": 90
+        },
+        {
+          "nick": "Prushnik",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "ухо174",
+          "place": 8,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "RUS22RUS",
+          "place": 14,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Среды",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "mamalena",
+          "place": 1,
+          "reward": 19260,
+          "points": 135
+        },
+        {
+          "nick": "AliySvin",
+          "place": 6,
+          "reward": 3580,
+          "points": 50
+        },
+        {
+          "nick": "AliPetuhov",
+          "place": 7,
+          "reward": 2740,
+          "points": 40
+        },
+        {
+          "nick": "tatarin_1",
+          "place": 15,
+          "reward": 940,
+          "points": 0
+        },
+        {
+          "nick": "Пряник",
+          "place": 17,
+          "reward": 890,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "HOK🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 3,
+          "reward": 10225,
+          "points": 90
+        },
+        {
+          "nick": "Пряник",
+          "place": 4,
+          "reward": 6800,
+          "points": 70
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 5025,
+          "points": 60
+        },
+        {
+          "nick": "Рамиль01",
+          "place": 6,
+          "reward": 6887.5,
+          "points": 50
+        },
+        {
+          "nick": "Waaar",
+          "place": 7,
+          "reward": 900,
+          "points": 40
+        }
+      ]
+    }
+  ],
+  "21.05.2026": [
+    {
+      "time": "17:00",
+      "name": "OK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ПСИХ",
+          "place": 1,
+          "reward": 11294.07,
+          "points": 135
+        },
+        {
+          "nick": "БОГДАН",
+          "place": 3,
+          "reward": 2763.44,
+          "points": 90
+        },
+        {
+          "nick": "ПашаАСК",
+          "place": 4,
+          "reward": 2142.5,
+          "points": 70
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 6,
+          "reward": 303.75,
+          "points": 50
+        },
+        {
+          "nick": "king00001",
+          "place": 10,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Четверга 🏆",
+      "buyin": 1200,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 9000,
+          "points": 70
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 16400,
+          "points": 60
+        },
+        {
+          "nick": "Виталька",
+          "place": 7,
+          "reward": 5400,
+          "points": 40
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 10,
+          "reward": 2620,
+          "points": 0
+        },
+        {
+          "nick": "Kotik",
+          "place": 13,
+          "reward": 2300,
+          "points": 0
+        }
+      ]
+    }
   ]
 };

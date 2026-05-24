@@ -1,1 +1,1 @@
-var SPRING_RATING_UPDATED = "13 мая";
+var SPRING_RATING_UPDATED = "21 мая";
