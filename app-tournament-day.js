@@ -375,6 +375,8 @@ function renderHomeFreerollSchedule() {
   el.innerHTML = "";
   var nextIndex = -1;
   var displayItems = HOME_FREEROLL_SCHEDULE.slice();
+  var nearestItem = null;
+  var followingItem = null;
   try {
     var now = new Date();
     var msk = pokerGetMskDowAndMinutes(now);
@@ -386,6 +388,8 @@ function renderHomeFreerollSchedule() {
       if (deltaA !== deltaB) return deltaA - deltaB;
       return HOME_FREEROLL_SCHEDULE.indexOf(a) - HOME_FREEROLL_SCHEDULE.indexOf(b);
     });
+    nearestItem = displayItems[0] || null;
+    followingItem = displayItems[1] || null;
   } catch (eNextFreeroll) {}
   displayItems.forEach(function (item) {
     var row = document.createElement("div");
@@ -397,6 +401,14 @@ function renderHomeFreerollSchedule() {
     }
     if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
       row.classList.add("home-freeroll-schedule__row--next");
+    }
+    var stampText = "";
+    if (nearestItem === item) {
+      row.classList.add("home-freeroll-schedule__row--nearest");
+      stampText = "Ближайший";
+    } else if (followingItem === item) {
+      row.classList.add("home-freeroll-schedule__row--following");
+      stampText = "Следующий";
     }
     var day = document.createElement("span");
     day.className = "home-freeroll-schedule__day";
@@ -417,6 +429,12 @@ function renderHomeFreerollSchedule() {
     main.appendChild(entry);
     row.appendChild(day);
     row.appendChild(main);
+    if (stampText) {
+      var stamp = document.createElement("span");
+      stamp.className = "home-freeroll-schedule__stamp";
+      stamp.textContent = stampText;
+      row.appendChild(stamp);
+    }
     row.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();

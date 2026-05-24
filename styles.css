@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.219");
-@import url("./styles-home-rating-promo.css?v=3.219");
-@import url("./styles-auth.css?v=3.219");
-@import url("./styles-home.css?v=3.219");
-@import url("./styles-chat.css?v=3.219");
-@import url("./styles-learning-games.css?v=3.219");
-@import url("./styles-raffles.css?v=3.219");
-@import url("./styles-daily-poker.css?v=3.219");
-@import url("./styles-home-legacy-prelude.css?v=3.219");
-@import url("./styles-download.css?v=3.219");
-@import url("./styles-home-legacy-tail.css?v=3.219");
-@import url("./styles-home-rating-promo-legacy.css?v=3.219");
-@import url("./styles-rating.css?v=3.219");
-@import url("./styles-hall.css?v=3.219");
-@import url("./styles-admin.css?v=3.219");
-@import url("./styles-player-crm.css?v=3.219");
-@import url("./styles-profile.css?v=3.219");
-@import url("./styles-layout.css?v=3.219");
-@import url("./styles-chat-overlays.css?v=3.219");
-@import url("./styles-home-overrides.css?v=3.219");
-@import url("./styles-layout-touch-targets.css?v=3.219");
-@import url("./styles-home-rating-promo-late.css?v=3.219");
+@import url("./styles-base.css?v=3.220");
+@import url("./styles-home-rating-promo.css?v=3.220");
+@import url("./styles-auth.css?v=3.220");
+@import url("./styles-home.css?v=3.220");
+@import url("./styles-chat.css?v=3.220");
+@import url("./styles-learning-games.css?v=3.220");
+@import url("./styles-raffles.css?v=3.220");
+@import url("./styles-daily-poker.css?v=3.220");
+@import url("./styles-home-legacy-prelude.css?v=3.220");
+@import url("./styles-download.css?v=3.220");
+@import url("./styles-home-legacy-tail.css?v=3.220");
+@import url("./styles-home-rating-promo-legacy.css?v=3.220");
+@import url("./styles-rating.css?v=3.220");
+@import url("./styles-hall.css?v=3.220");
+@import url("./styles-admin.css?v=3.220");
+@import url("./styles-player-crm.css?v=3.220");
+@import url("./styles-profile.css?v=3.220");
+@import url("./styles-layout.css?v=3.220");
+@import url("./styles-chat-overlays.css?v=3.220");
+@import url("./styles-home-overrides.css?v=3.220");
+@import url("./styles-layout-touch-targets.css?v=3.220");
+@import url("./styles-home-rating-promo-late.css?v=3.220");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -465,7 +465,6 @@
   font-size: 9.5px;
   font-weight: 900;
   line-height: 1;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -506,6 +505,7 @@
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__entry {
   margin-top: auto;
   padding-top: 8px;
+  padding-right: 62px;
   color: rgba(255, 234, 190, 0.78);
   border-top: 1px solid rgba(255, 118, 0, 0.2);
   font-size: 8px;
@@ -514,12 +514,49 @@
   white-space: nowrap;
 }
 
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__stamp {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 62px;
+  min-height: 18px;
+  padding: 0 6px;
+  color: #2b1602;
+  border: 1px solid rgba(255, 226, 166, 0.72);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #ffe4a5, #ffb531 58%, #d97706);
+  box-shadow:
+    0 0 12px rgba(255, 118, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.56);
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--following .home-freeroll-schedule__stamp {
+  color: rgba(255, 234, 190, 0.9);
+  border-color: rgba(255, 181, 49, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 181, 49, 0.18), rgba(255, 118, 0, 0.08));
+  box-shadow:
+    0 0 10px rgba(255, 118, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: rotate(-2deg);
+}
+
 .app.app--view-home .home-compact-links {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   width: 100%;
-  margin: 7px 0 14px;
+  margin: 7px 0 6px;
 }
 
 .app.app--view-home .home-compact-link {
@@ -640,17 +677,50 @@
 }
 
 .app.app--view-home .home-compact-link--hall {
-  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 52px minmax(0, 1fr) 24px;
+  grid-template-areas:
+    "icon"
+    "body"
+    "cta";
+  justify-items: center;
+  align-items: center;
+  gap: 2px;
+  padding-top: 5px;
   background:
-    linear-gradient(90deg, rgba(4, 7, 12, 0.24), rgba(4, 7, 12, 0.8)),
-    radial-gradient(circle at 38% 20%, rgba(255, 181, 49, 0.2), transparent 36%),
+    radial-gradient(circle at 50% 12%, rgba(255, 181, 49, 0.22), transparent 38%),
+    linear-gradient(90deg, rgba(4, 7, 12, 0.2), rgba(4, 7, 12, 0.82)),
     linear-gradient(145deg, rgba(10, 7, 4, 0.96), rgba(2, 5, 10, 0.98));
+}
+
+.app.app--view-home .home-compact-link--hall .home-compact-link__media {
+  width: 72px;
+  height: 52px;
+  align-self: end;
+  border-radius: 999px;
+  filter: saturate(1.08) contrast(1.05) brightness(1.02);
+  box-shadow:
+    0 0 14px rgba(255, 118, 0, 0.36),
+    0 0 0 1px rgba(255, 213, 128, 0.18);
+}
+
+.app.app--view-home .home-compact-link--hall .home-compact-link__body {
+  align-items: center;
+  justify-content: start;
+  width: 100%;
+  text-align: center;
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__title {
   color: #ffd47e;
-  font-size: 11px;
+  max-width: 100%;
+  margin-top: 0;
+  font-size: 11.5px;
   text-transform: uppercase;
+}
+
+.app.app--view-home .home-compact-link--hall .home-compact-link__cta {
+  width: 100%;
 }
 
 .app.app--view-home .hero-row--home-hidden,
@@ -658,12 +728,22 @@
   display: none !important;
 }
 
+.app.app--view-home .home-tournament-section-title {
+  margin: 0 0 6px;
+  color: #ffdf9e;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(255, 118, 0, 0.38);
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus {
   --home-promo-gold: #ffb531;
   --home-promo-orange: #ff7600;
   --home-promo-line: rgba(255, 118, 0, 0.42);
   position: relative;
-  margin-top: 14px;
+  margin-top: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -807,7 +887,7 @@
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
-  padding-top: 8px;
+  padding-top: 12px;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
@@ -816,17 +896,11 @@
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-head {
-  grid-template-columns: 34px minmax(0, 1fr);
-  align-items: center;
-  column-gap: 7px;
-  padding: 0 2px 6px;
+  display: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week .tournament-day-block__home-head::before {
-  content: "◷";
-  width: 34px;
-  height: 34px;
-  font-size: 20px;
+  content: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-heading {
