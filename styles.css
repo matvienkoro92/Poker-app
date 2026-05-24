@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.235");
-@import url("./styles-home-rating-promo.css?v=3.235");
-@import url("./styles-auth.css?v=3.235");
-@import url("./styles-home.css?v=3.235");
-@import url("./styles-chat.css?v=3.235");
-@import url("./styles-learning-games.css?v=3.235");
-@import url("./styles-raffles.css?v=3.235");
-@import url("./styles-daily-poker.css?v=3.235");
-@import url("./styles-home-legacy-prelude.css?v=3.235");
-@import url("./styles-download.css?v=3.235");
-@import url("./styles-home-legacy-tail.css?v=3.235");
-@import url("./styles-home-rating-promo-legacy.css?v=3.235");
-@import url("./styles-rating.css?v=3.235");
-@import url("./styles-hall.css?v=3.235");
-@import url("./styles-admin.css?v=3.235");
-@import url("./styles-player-crm.css?v=3.235");
-@import url("./styles-profile.css?v=3.235");
-@import url("./styles-layout.css?v=3.235");
-@import url("./styles-chat-overlays.css?v=3.235");
-@import url("./styles-home-overrides.css?v=3.235");
-@import url("./styles-layout-touch-targets.css?v=3.235");
-@import url("./styles-home-rating-promo-late.css?v=3.235");
+@import url("./styles-base.css?v=3.236");
+@import url("./styles-home-rating-promo.css?v=3.236");
+@import url("./styles-auth.css?v=3.236");
+@import url("./styles-home.css?v=3.236");
+@import url("./styles-chat.css?v=3.236");
+@import url("./styles-learning-games.css?v=3.236");
+@import url("./styles-raffles.css?v=3.236");
+@import url("./styles-daily-poker.css?v=3.236");
+@import url("./styles-home-legacy-prelude.css?v=3.236");
+@import url("./styles-download.css?v=3.236");
+@import url("./styles-home-legacy-tail.css?v=3.236");
+@import url("./styles-home-rating-promo-legacy.css?v=3.236");
+@import url("./styles-rating.css?v=3.236");
+@import url("./styles-hall.css?v=3.236");
+@import url("./styles-admin.css?v=3.236");
+@import url("./styles-player-crm.css?v=3.236");
+@import url("./styles-profile.css?v=3.236");
+@import url("./styles-layout.css?v=3.236");
+@import url("./styles-chat-overlays.css?v=3.236");
+@import url("./styles-home-overrides.css?v=3.236");
+@import url("./styles-layout-touch-targets.css?v=3.236");
+@import url("./styles-home-rating-promo-late.css?v=3.236");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -1016,14 +1016,15 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .app.app--view-home .home-compact-link--hall {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 57px minmax(0, 1fr) 26px;
+  grid-template-rows: minmax(0, 1fr) 26px;
   grid-template-areas:
-    "icon"
     "body"
     "cta";
   justify-items: center;
   align-items: center;
   gap: 1px;
+  isolation: isolate;
+  overflow: visible;
   padding: 6px 10px 7px;
   border-color: rgba(255, 193, 80, 0.56);
   border-radius: 14px;
@@ -1038,22 +1039,31 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__media {
-  width: 106px;
-  height: 56px;
-  align-self: end;
-  object-position: center 45%;
-  border-radius: 999px;
-  filter: saturate(1.12) contrast(1.08) brightness(1.03);
+  position: absolute;
+  z-index: 1;
+  top: -8px;
+  left: 50%;
+  width: 132px;
+  height: auto;
+  max-width: none;
+  object-fit: contain;
+  border-radius: 0;
+  transform: translateX(-50%);
+  filter: saturate(1.14) contrast(1.08) brightness(1.04);
   box-shadow:
-    0 7px 18px rgba(0, 0, 0, 0.42),
-    0 0 18px rgba(255, 118, 0, 0.46),
-    0 0 0 1px rgba(255, 213, 128, 0.24);
+    0 10px 20px rgba(0, 0, 0, 0.34),
+    0 0 18px rgba(255, 118, 0, 0.5);
+  pointer-events: none;
+  user-select: none;
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__body {
+  position: relative;
+  z-index: 3;
   align-items: center;
-  justify-content: start;
+  justify-content: end;
   width: 100%;
+  padding-top: 55px;
   text-align: center;
 }
 
@@ -1069,8 +1079,11 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__cta {
+  position: relative;
+  z-index: 2;
   width: 100%;
   min-height: 26px;
+  overflow: visible;
   color: rgba(255, 238, 203, 0.92);
   border-color: rgba(255, 118, 0, 0.42);
   background:
