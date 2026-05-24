@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.241");
-@import url("./styles-home-rating-promo.css?v=3.241");
-@import url("./styles-auth.css?v=3.241");
-@import url("./styles-home.css?v=3.241");
-@import url("./styles-chat.css?v=3.241");
-@import url("./styles-learning-games.css?v=3.241");
-@import url("./styles-raffles.css?v=3.241");
-@import url("./styles-daily-poker.css?v=3.241");
-@import url("./styles-home-legacy-prelude.css?v=3.241");
-@import url("./styles-download.css?v=3.241");
-@import url("./styles-home-legacy-tail.css?v=3.241");
-@import url("./styles-home-rating-promo-legacy.css?v=3.241");
-@import url("./styles-rating.css?v=3.241");
-@import url("./styles-hall.css?v=3.241");
-@import url("./styles-admin.css?v=3.241");
-@import url("./styles-player-crm.css?v=3.241");
-@import url("./styles-profile.css?v=3.241");
-@import url("./styles-layout.css?v=3.241");
-@import url("./styles-chat-overlays.css?v=3.241");
-@import url("./styles-home-overrides.css?v=3.241");
-@import url("./styles-layout-touch-targets.css?v=3.241");
-@import url("./styles-home-rating-promo-late.css?v=3.241");
+@import url("./styles-base.css?v=3.243");
+@import url("./styles-home-rating-promo.css?v=3.243");
+@import url("./styles-auth.css?v=3.243");
+@import url("./styles-home.css?v=3.243");
+@import url("./styles-chat.css?v=3.243");
+@import url("./styles-learning-games.css?v=3.243");
+@import url("./styles-raffles.css?v=3.243");
+@import url("./styles-daily-poker.css?v=3.243");
+@import url("./styles-home-legacy-prelude.css?v=3.243");
+@import url("./styles-download.css?v=3.243");
+@import url("./styles-home-legacy-tail.css?v=3.243");
+@import url("./styles-home-rating-promo-legacy.css?v=3.243");
+@import url("./styles-rating.css?v=3.243");
+@import url("./styles-hall.css?v=3.243");
+@import url("./styles-admin.css?v=3.243");
+@import url("./styles-player-crm.css?v=3.243");
+@import url("./styles-profile.css?v=3.243");
+@import url("./styles-layout.css?v=3.243");
+@import url("./styles-chat-overlays.css?v=3.243");
+@import url("./styles-home-overrides.css?v=3.243");
+@import url("./styles-layout-touch-targets.css?v=3.243");
+@import url("./styles-home-rating-promo-late.css?v=3.243");
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -213,10 +213,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   position: relative;
   display: block;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
-  height: 226px;
+  height: 258px;
   min-height: 0;
   margin: calc(-2mm + 33px) calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
-  padding: 12px 14px;
+  padding: 14px 15px 12px;
   box-sizing: border-box;
   overflow: visible;
   isolation: isolate;
@@ -259,48 +259,78 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   position: relative;
   z-index: 5;
   display: flex;
-  width: 51%;
+  width: 52%;
   height: 100%;
   min-width: 0;
-  max-width: 210px;
+  max-width: 214px;
   flex-direction: column;
   align-items: flex-start;
 }
 
 .home-daily-deal-hero__eyebrow {
-  margin-bottom: 3px;
+  margin-bottom: 5px;
   color: #ff9d1d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 900;
   line-height: 1.1;
   text-transform: uppercase;
-  text-shadow: 0 0 14px rgba(255, 104, 0, 0.82);
+  text-shadow:
+    0 1px 0 rgba(63, 24, 0, 0.72),
+    0 0 10px rgba(255, 104, 0, 0.62);
 }
 
 .home-daily-deal-hero__title {
-  color: #ffbd35;
-  font-size: 24px;
+  color: #ffc13a;
+  font-size: 31px;
   font-weight: 1000;
-  line-height: 0.96;
+  line-height: 0.92;
   text-transform: uppercase;
   text-shadow:
-    0 1px 0 rgba(78, 26, 0, 0.7),
-    0 0 9px rgba(255, 242, 188, 0.98),
-    0 0 22px rgba(255, 133, 0, 1),
-    0 0 42px rgba(255, 74, 0, 0.84);
+    0 1px 0 rgba(78, 26, 0, 0.82),
+    0 0 8px rgba(255, 218, 121, 0.46),
+    0 0 18px rgba(255, 133, 0, 0.64);
 }
 
 .home-daily-deal-hero__title-line {
   display: block;
 }
 
+.home-daily-deal-hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  color: #47e679;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow:
+    0 1px 0 rgba(0, 24, 7, 0.76),
+    0 0 10px rgba(38, 221, 99, 0.34);
+  white-space: nowrap;
+}
+
+.home-daily-deal-hero__status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #37dd67;
+  box-shadow:
+    0 0 0 1px rgba(120, 255, 162, 0.16),
+    0 0 10px rgba(55, 221, 103, 0.58);
+}
+
 .home-daily-deal-hero__copy {
   max-width: 165px;
-  margin-top: 5px;
-  color: rgba(255, 247, 225, 0.88);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.16;
+  margin-top: 14px;
+  color: rgba(255, 246, 225, 0.94);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.24;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.76),
+    0 0 9px rgba(255, 220, 166, 0.16);
 }
 
 .home-daily-deal-hero__copy span {
@@ -308,35 +338,34 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .home-daily-deal-hero__prize {
-  margin-top: 4px;
-  color: #ffc244;
-  font-size: 25px;
+  margin-top: 5px;
+  color: #ffd269;
+  font-size: 31px;
   font-weight: 1000;
   line-height: 1;
   text-shadow:
-    0 1px 0 rgba(78, 26, 0, 0.7),
-    0 0 12px rgba(255, 246, 202, 1),
-    0 0 28px rgba(255, 133, 0, 1),
-    0 0 48px rgba(255, 74, 0, 0.86);
+    0 1px 0 rgba(78, 26, 0, 0.78),
+    0 0 9px rgba(255, 237, 181, 0.72),
+    0 0 21px rgba(255, 133, 0, 0.82);
 }
 
 .home-daily-deal-hero__cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  width: 108px;
-  min-width: 108px;
-  min-height: 30px;
+  gap: 11px;
+  width: 122px;
+  min-width: 122px;
+  min-height: 36px;
   margin-top: auto;
-  padding: 0 11px;
+  padding: 0 13px;
   box-sizing: border-box;
   border: 1px solid rgba(255, 234, 184, 0.72);
-  border-radius: 12px;
+  border-radius: 16px;
   background:
     linear-gradient(180deg, #ffc02c 0%, #ff7a00 48%, #f05a00 100%);
   color: #fff8df;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 1000;
   line-height: 1;
   box-shadow:
@@ -354,28 +383,36 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 108px;
-  min-height: 19px;
+  gap: 5px;
+  width: 122px;
+  min-height: 21px;
   margin-top: 6px;
   padding: 0 9px;
   border: 1px solid rgba(255, 138, 18, 0.35);
   border-radius: 8px;
   background: rgba(3, 4, 7, 0.62);
   color: rgba(255, 231, 184, 0.86);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
+  line-height: 1;
+}
+
+.home-daily-deal-hero__timer::before {
+  content: "◷";
+  color: rgba(255, 232, 190, 0.74);
+  font-size: 11px;
   line-height: 1;
 }
 
 .home-daily-deal-hero__image {
   position: absolute;
   z-index: 4;
-  right: 8px;
-  top: -50px;
+  right: -62px;
+  top: -42px;
   bottom: auto;
   width: auto;
   max-width: none;
-  height: 150%;
+  height: 133%;
   object-fit: contain;
   filter:
     saturate(1.32)
@@ -1971,35 +2008,35 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 @media (max-width: 620px) {
   .home-daily-deal-hero {
-    height: 226px;
-    padding: 12px 14px;
+    height: 258px;
+    padding: 14px 15px 12px;
     border-radius: 22px;
   }
 
   .home-daily-deal-hero__content {
-    width: 51%;
-    max-width: 210px;
+    width: 52%;
+    max-width: 214px;
   }
 
   .home-daily-deal-hero__title {
-    font-size: 24px;
+    font-size: 31px;
   }
 
   .home-daily-deal-hero__copy {
     max-width: 165px;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .home-daily-deal-hero__prize {
-    font-size: 25px;
+    font-size: 31px;
   }
 
   .home-daily-deal-hero__image {
-    right: 8px;
-    top: -50px;
+    right: -62px;
+    top: -42px;
     bottom: auto;
     width: auto;
-    height: 150%;
+    height: 133%;
     opacity: 1;
   }
 
@@ -2010,8 +2047,8 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 @media (max-width: 430px) {
   .home-daily-deal-hero {
-    height: 226px;
-    padding: 12px 14px;
+    height: 258px;
+    padding: 14px 15px 12px;
   }
 
   .home-daily-deal-hero::before {
@@ -2022,50 +2059,54 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   }
 
   .home-daily-deal-hero__content {
-    width: 51%;
+    width: 52%;
   }
 
   .home-daily-deal-hero__eyebrow {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .home-daily-deal-hero__title {
-    font-size: 24px;
+    font-size: 31px;
+  }
+
+  .home-daily-deal-hero__status {
+    font-size: 12px;
   }
 
   .home-daily-deal-hero__copy {
     max-width: 165px;
-    margin-top: 5px;
-    font-size: 11px;
+    margin-top: 14px;
+    font-size: 13px;
   }
 
   .home-daily-deal-hero__prize {
-    font-size: 25px;
+    font-size: 31px;
   }
 
   .home-daily-deal-hero__cta {
-    width: 108px;
-    min-width: 108px;
-    min-height: 30px;
-    gap: 10px;
+    width: 122px;
+    min-width: 122px;
+    min-height: 36px;
+    gap: 11px;
     margin-top: auto;
-    padding: 0 11px;
-    font-size: 14px;
+    padding: 0 13px;
+    font-size: 16px;
   }
 
   .home-daily-deal-hero__timer {
-    width: 108px;
-    min-height: 19px;
+    width: 122px;
+    min-height: 21px;
     margin-top: 6px;
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .home-daily-deal-hero__image {
-    right: -2px;
-    top: -45px;
+    right: -62px;
+    top: -40px;
     bottom: auto;
     width: auto;
-    height: 147%;
+    height: 132%;
     opacity: 1;
   }
 
@@ -2105,7 +2146,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 @media (max-width: 360px) {
   .home-daily-deal-hero {
-    height: 214px;
+    height: 240px;
     padding: 11px 12px;
   }
 
@@ -2113,24 +2154,49 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
     width: 52%;
   }
 
+  .home-daily-deal-hero__eyebrow {
+    margin-bottom: 4px;
+    font-size: 10px;
+  }
+
   .home-daily-deal-hero__title {
-    font-size: 22px;
+    font-size: 28px;
+  }
+
+  .home-daily-deal-hero__status {
+    gap: 5px;
+    margin-top: 6px;
+    font-size: 11px;
   }
 
   .home-daily-deal-hero__copy {
     max-width: 150px;
-    font-size: 10px;
+    margin-top: 11px;
+    font-size: 12px;
   }
 
   .home-daily-deal-hero__prize {
-    font-size: 23px;
+    font-size: 28px;
+  }
+
+  .home-daily-deal-hero__cta {
+    width: 112px;
+    min-width: 112px;
+    min-height: 33px;
+    font-size: 15px;
+  }
+
+  .home-daily-deal-hero__timer {
+    width: 112px;
+    min-height: 20px;
+    font-size: 9.5px;
   }
 
   .home-daily-deal-hero__image {
-    right: -18px;
-    top: -31px;
+    right: -76px;
+    top: -34px;
     bottom: auto;
-    height: 140%;
+    height: 130%;
   }
 
   .home-daily-shortcuts.home-mini-icons {
