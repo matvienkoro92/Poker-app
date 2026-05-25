@@ -1641,7 +1641,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-table th,
 .admin-report-rakeback-table td {
-  padding: 2px 6px;
+  padding: 0 6px;
   text-align: left;
   color: var(--text);
   vertical-align: middle;
@@ -2290,8 +2290,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-select,
 .admin-report-rakeback-input {
   width: 100%;
-  min-height: 30px;
-  padding: 4px 7px;
+  min-height: 28px;
+  padding: 2px 7px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--input-bg, var(--card-bg));
@@ -2383,7 +2383,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-amount {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  min-height: 28px;
   font-size: 13px;
   font-weight: 700;
   color: #ffe7b0;
@@ -2397,13 +2397,13 @@ button.admin-report-rakeback-summary__row:focus-visible {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   overflow: visible;
 }
 .admin-report-rakeback-icon-btn {
-  width: 42px;
-  min-width: 42px;
-  height: 42px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
   padding: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
@@ -2636,7 +2636,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-table th,
   .admin-report-rakeback-table td {
-    padding: 1px 2px;
+    padding: 0 2px;
   }
   .admin-report-rakeback-table th {
     font-size: 10px;
@@ -2763,7 +2763,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     height: 16px;
   }
   .admin-report-rakeback-amount {
-    min-height: 32px;
+    min-height: 28px;
     font-size: 12px;
   }
   .admin-report-rakeback-rake-with-rest {
