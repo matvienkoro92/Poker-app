@@ -1795,7 +1795,7 @@
     }
 
     function getUnsentReportRakebackRows() {
-      var rows = collectRows({ savedOnly: true }).filter(function (row) {
+      var rows = mergeSharedRowsFromDom({ savedOnly: true }).filter(function (row) {
         return row &&
           String(row.playerId || "").trim() &&
           isCurrentRakebackRow(row) &&
