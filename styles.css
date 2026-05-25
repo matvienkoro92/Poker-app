@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.297");
-@import url("./styles-home-rating-promo.css?v=3.297");
-@import url("./styles-auth.css?v=3.297");
-@import url("./styles-home.css?v=3.297");
-@import url("./styles-chat.css?v=3.297");
-@import url("./styles-learning-games.css?v=3.297");
-@import url("./styles-raffles.css?v=3.297");
-@import url("./styles-daily-poker.css?v=3.297");
-@import url("./styles-home-legacy-prelude.css?v=3.297");
-@import url("./styles-download.css?v=3.297");
-@import url("./styles-home-legacy-tail.css?v=3.297");
-@import url("./styles-home-rating-promo-legacy.css?v=3.297");
-@import url("./styles-rating.css?v=3.297");
-@import url("./styles-hall.css?v=3.297");
-@import url("./styles-admin.css?v=3.297");
-@import url("./styles-player-crm.css?v=3.297");
-@import url("./styles-profile.css?v=3.297");
-@import url("./styles-layout.css?v=3.297");
-@import url("./styles-chat-overlays.css?v=3.297");
-@import url("./styles-home-overrides.css?v=3.297");
-@import url("./styles-layout-touch-targets.css?v=3.297");
-@import url("./styles-home-rating-promo-late.css?v=3.297");
+@import url("./styles-base.css?v=3.298");
+@import url("./styles-home-rating-promo.css?v=3.298");
+@import url("./styles-auth.css?v=3.298");
+@import url("./styles-home.css?v=3.298");
+@import url("./styles-chat.css?v=3.298");
+@import url("./styles-learning-games.css?v=3.298");
+@import url("./styles-raffles.css?v=3.298");
+@import url("./styles-daily-poker.css?v=3.298");
+@import url("./styles-home-legacy-prelude.css?v=3.298");
+@import url("./styles-download.css?v=3.298");
+@import url("./styles-home-legacy-tail.css?v=3.298");
+@import url("./styles-home-rating-promo-legacy.css?v=3.298");
+@import url("./styles-rating.css?v=3.298");
+@import url("./styles-hall.css?v=3.298");
+@import url("./styles-admin.css?v=3.298");
+@import url("./styles-player-crm.css?v=3.298");
+@import url("./styles-profile.css?v=3.298");
+@import url("./styles-layout.css?v=3.298");
+@import url("./styles-chat-overlays.css?v=3.298");
+@import url("./styles-home-overrides.css?v=3.298");
+@import url("./styles-layout-touch-targets.css?v=3.298");
+@import url("./styles-home-rating-promo-late.css?v=3.298");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -1592,7 +1592,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
-  padding-top: 4px;
+  width: calc(100% + 10px);
+  margin-left: -10px;
+  padding: 4px 0 0;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
@@ -1659,9 +1661,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   flex-direction: column;
   gap: 0;
   width: 100%;
-  padding: 4px;
+  padding: 3px 3px 0;
   border: 1px solid rgba(255, 118, 0, 0.34);
   border-radius: 14px;
+  overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255, 118, 0, 0.05), transparent 44%),
     rgba(0, 2, 7, 0.64);
