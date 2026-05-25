@@ -548,6 +548,11 @@
     }
   }
 
+  function formatHeaderGreeting(name) {
+    var displayName = name != null ? String(name).trim() : "";
+    return displayName ? "Привет,\n" + displayName + "!" : "Привет!";
+  }
+
   function updateHeaderGreeting() {
     var el = document.getElementById("headerGreeting");
     syncSiteHomeInstructionMode();
@@ -563,7 +568,7 @@
     setHeaderGreetingLoginActive(false);
     var profileName = pokerPreferredProfileDisplayName();
     if (profileName) {
-      el.textContent = "Привет, " + profileName + "!";
+      el.textContent = formatHeaderGreeting(profileName);
       return;
     }
     var u = null;
@@ -579,7 +584,7 @@
       }
     }
     var dn = telegramUserDisplayName(u);
-    el.textContent = dn ? "Привет, " + dn + "!" : "Привет!";
+    el.textContent = formatHeaderGreeting(dn);
   }
 
   function hasResolvedHomeAuthUser() {

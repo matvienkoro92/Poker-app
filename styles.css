@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.275");
-@import url("./styles-home-rating-promo.css?v=3.275");
-@import url("./styles-auth.css?v=3.275");
-@import url("./styles-home.css?v=3.275");
-@import url("./styles-chat.css?v=3.275");
-@import url("./styles-learning-games.css?v=3.275");
-@import url("./styles-raffles.css?v=3.275");
-@import url("./styles-daily-poker.css?v=3.275");
-@import url("./styles-home-legacy-prelude.css?v=3.275");
-@import url("./styles-download.css?v=3.275");
-@import url("./styles-home-legacy-tail.css?v=3.275");
-@import url("./styles-home-rating-promo-legacy.css?v=3.275");
-@import url("./styles-rating.css?v=3.275");
-@import url("./styles-hall.css?v=3.275");
-@import url("./styles-admin.css?v=3.275");
-@import url("./styles-player-crm.css?v=3.275");
-@import url("./styles-profile.css?v=3.275");
-@import url("./styles-layout.css?v=3.275");
-@import url("./styles-chat-overlays.css?v=3.275");
-@import url("./styles-home-overrides.css?v=3.275");
-@import url("./styles-layout-touch-targets.css?v=3.275");
-@import url("./styles-home-rating-promo-late.css?v=3.275");
+@import url("./styles-base.css?v=3.276");
+@import url("./styles-home-rating-promo.css?v=3.276");
+@import url("./styles-auth.css?v=3.276");
+@import url("./styles-home.css?v=3.276");
+@import url("./styles-chat.css?v=3.276");
+@import url("./styles-learning-games.css?v=3.276");
+@import url("./styles-raffles.css?v=3.276");
+@import url("./styles-daily-poker.css?v=3.276");
+@import url("./styles-home-legacy-prelude.css?v=3.276");
+@import url("./styles-download.css?v=3.276");
+@import url("./styles-home-legacy-tail.css?v=3.276");
+@import url("./styles-home-rating-promo-legacy.css?v=3.276");
+@import url("./styles-rating.css?v=3.276");
+@import url("./styles-hall.css?v=3.276");
+@import url("./styles-admin.css?v=3.276");
+@import url("./styles-player-crm.css?v=3.276");
+@import url("./styles-profile.css?v=3.276");
+@import url("./styles-layout.css?v=3.276");
+@import url("./styles-chat-overlays.css?v=3.276");
+@import url("./styles-home-overrides.css?v=3.276");
+@import url("./styles-layout-touch-targets.css?v=3.276");
+@import url("./styles-home-rating-promo-late.css?v=3.276");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -173,8 +173,9 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   color: rgba(255, 247, 237, 0.96);
   font-size: clamp(11px, 3.05vw, 13px);
   line-height: 1.12;
-  white-space: nowrap;
+  white-space: pre-line;
   overflow: hidden;
+  overflow-wrap: anywhere;
   text-overflow: ellipsis;
 }
 
@@ -450,14 +451,14 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   position: absolute;
   z-index: 4;
   right: -20px;
-  top: -23px;
+  top: -72px;
   bottom: auto;
   width: auto;
   max-width: none;
-  height: 121%;
+  height: 162%;
   object-fit: contain;
-  -webkit-clip-path: inset(-48px 24px -48px 0);
-  clip-path: inset(-48px 24px -48px 0);
+  -webkit-clip-path: inset(-96px 24px -110px 0);
+  clip-path: inset(-96px 24px -110px 0);
   filter: none;
   pointer-events: none;
   user-select: none;
@@ -2083,10 +2084,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
   .home-daily-deal-hero__image {
     right: -20px;
-    top: -23px;
+    top: -64px;
     bottom: auto;
     width: auto;
-    height: 121%;
+    height: 154%;
     opacity: 1;
   }
 
@@ -2146,10 +2147,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
   .home-daily-deal-hero__image {
     right: -20px;
-    top: -23px;
+    top: -62px;
     bottom: auto;
     width: auto;
-    height: 121%;
+    height: 156%;
     opacity: 1;
   }
 
@@ -2237,9 +2238,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
   .home-daily-deal-hero__image {
     right: -2px;
-    top: -12px;
+    top: -54px;
     bottom: auto;
-    height: 116%;
+    height: 149%;
   }
 
   .home-daily-shortcuts.home-mini-icons {
