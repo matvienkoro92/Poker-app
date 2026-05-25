@@ -2791,6 +2791,71 @@ button.admin-report-rakeback-summary__row:focus-visible {
   color: var(--text-muted);
   font-size: 13px;
 }
+.admin-report-sent-view {
+  display: grid;
+  gap: 12px;
+}
+.admin-report-sent-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid rgba(246, 211, 145, 0.28);
+  border-radius: 10px;
+  background: rgba(3, 6, 12, 0.62);
+}
+.admin-report-sent-tab {
+  min-height: 38px;
+  padding: 8px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-report-sent-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+.admin-report-sent-tab--active,
+.admin-report-sent-tab[aria-selected="true"] {
+  border-color: rgba(45, 212, 191, 0.62);
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.34), rgba(8, 47, 73, 0.42));
+  color: #e6fffb;
+  box-shadow:
+    inset 0 0 0 1px rgba(45, 212, 191, 0.16),
+    0 0 18px rgba(20, 184, 166, 0.18);
+}
+.admin-report-sent-tab-panels {
+  min-width: 0;
+}
+.admin-report-sent-tab-panel {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(3, 6, 12, 0.42);
+}
+.admin-report-sent-tab-panel[hidden] {
+  display: none !important;
+}
+.admin-report-sent-tab-panel--months {
+  border-color: rgba(45, 212, 191, 0.42);
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.12), rgba(14, 165, 233, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.08);
+}
+.admin-report-sent-tab-panel .admin-report-sent-current {
+  margin-bottom: 0;
+}
+.admin-report-sent-tab-panel .admin-report-sent-archive__inner,
+.admin-report-sent-tab-panel .admin-report-sent-months__inner {
+  border-top: 0;
+}
 .admin-report-week-copy-btn {
   width: 28px;
   height: 28px;

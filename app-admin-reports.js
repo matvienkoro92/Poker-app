@@ -188,6 +188,10 @@ function initAdminReportModal() {
       totalEl: rakebackTotalEl,
       roomTotalLabelEl: rakebackRoomTotalLabelEl,
       roomTotalEl: rakebackRoomTotalEl,
+      rakebackTotalInput: rakebackTotalInput,
+      getManualRakebackInputTouched: function () {
+        return manualRakebackInputTouched;
+      },
       statusEl: rakebackStatusEl,
       summaryEl: rakebackSummaryEl,
       rakebackGrandTotalBtn: rakebackGrandTotalBtn,
@@ -2826,31 +2830,46 @@ function initAdminReportModal() {
 
   function buildSentReportsLoadingShellHtml() {
     return (
-      '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
-        '<details class="admin-report-sent-week" open>' +
-          '<summary class="admin-report-sent-archive__summary">Текущая неделя</summary>' +
-          '<div class="admin-report-sent-week__inner">' +
-            '<details class="admin-report-sent-week-subspoiler" open>' +
-              '<summary class="admin-report-sent-day-title">Итого по неделе</summary>' +
-              '<div class="admin-report-sent-week-subspoiler__inner">' +
-                '<p class="admin-report-sent-period-hint">Обновляю текущую неделю…</p>' +
-              "</div>" +
-            "</details>" +
-            '<details class="admin-report-sent-week-subspoiler">' +
-              '<summary class="admin-report-sent-day-title">По дням</summary>' +
-              '<div class="admin-report-sent-week-subspoiler__inner">' +
-                '<p class="admin-report-sent-period-hint">Дни появятся сразу после ответа сервера.</p>' +
-              "</div>" +
-            "</details>" +
-          "</div>" +
-        "</details>" +
-      "</div>" +
-      '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
-        '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
-        '<div class="admin-report-sent-archive__inner">' +
-          '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
+      '<div class="admin-report-sent-view" data-admin-report-sent-view>' +
+        '<div class="admin-report-sent-tabs" role="tablist" aria-label="Отправленные отчёты">' +
+          '<button type="button" class="admin-report-sent-tab admin-report-sent-tab--active" data-admin-report-sent-tab="current" role="tab" aria-selected="true">Текущая неделя</button>' +
+          '<button type="button" class="admin-report-sent-tab" data-admin-report-sent-tab="archive" role="tab" aria-selected="false">Прошлые недели</button>' +
+          '<button type="button" class="admin-report-sent-tab" data-admin-report-sent-tab="months" role="tab" aria-selected="false">По месяцам</button>' +
         "</div>" +
-      "</details>"
+        '<div class="admin-report-sent-tab-panels">' +
+          '<section class="admin-report-sent-tab-panel admin-report-sent-tab-panel--current" data-admin-report-sent-panel="current" role="tabpanel">' +
+            '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
+              '<details class="admin-report-sent-week" open>' +
+                '<summary class="admin-report-sent-archive__summary">Текущая неделя</summary>' +
+                '<div class="admin-report-sent-week__inner">' +
+                  '<details class="admin-report-sent-week-subspoiler" open>' +
+                    '<summary class="admin-report-sent-day-title">Итого по неделе</summary>' +
+                    '<div class="admin-report-sent-week-subspoiler__inner">' +
+                      '<p class="admin-report-sent-period-hint">Обновляю текущую неделю…</p>' +
+                    "</div>" +
+                  "</details>" +
+                  '<details class="admin-report-sent-week-subspoiler">' +
+                    '<summary class="admin-report-sent-day-title">По дням</summary>' +
+                    '<div class="admin-report-sent-week-subspoiler__inner">' +
+                      '<p class="admin-report-sent-period-hint">Дни появятся сразу после ответа сервера.</p>' +
+                    "</div>" +
+                  "</details>" +
+                "</div>" +
+              "</details>" +
+            "</div>" +
+          "</section>" +
+          '<section class="admin-report-sent-tab-panel admin-report-sent-tab-panel--archive" data-admin-report-sent-panel="archive" data-admin-report-sent-archive role="tabpanel" hidden>' +
+            '<div class="admin-report-sent-archive__inner">' +
+              '<p class="admin-report-sent-period-hint">Откройте вкладку, чтобы загрузить прошлые недели.</p>' +
+            "</div>" +
+          "</section>" +
+          '<section class="admin-report-sent-tab-panel admin-report-sent-tab-panel--months" data-admin-report-sent-panel="months" data-admin-report-sent-months role="tabpanel" hidden>' +
+            '<div class="admin-report-sent-months__inner">' +
+              '<p class="admin-report-sent-period-hint">Откройте вкладку, чтобы загрузить месяцы.</p>' +
+              "</div>" +
+          "</section>" +
+        "</div>" +
+      "</div>"
     );
   }
 

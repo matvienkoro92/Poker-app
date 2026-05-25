@@ -10,6 +10,7 @@
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 12 * 60 * 60 * 1000;
+  var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
 
   function readRakebackTemplateSpoilerOpen() {
     return false;
@@ -207,6 +208,30 @@
     return Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0) - MOSCOW_UTC_OFFSET_MS;
   }
 
+  function getCurrentReportDateKey() {
+    var shifted = new Date(normalizeTimeValue(Date.now()) - REPORT_DAY_CUTOFF_MS + MOSCOW_UTC_OFFSET_MS);
+    return [
+      shifted.getUTCFullYear(),
+      padDatePart(shifted.getUTCMonth() + 1),
+      padDatePart(shifted.getUTCDate()),
+    ].join("-");
+  }
+
+  function normalizeReportDateKey(value) {
+    var raw = String(value == null ? "" : value).trim();
+    var isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) return isoMatch[1] + "-" + isoMatch[2] + "-" + isoMatch[3];
+    var ruMatch = raw.match(/^(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?$/);
+    if (ruMatch) {
+      var year = ruMatch[3] ? Number(ruMatch[3]) : new Date().getFullYear();
+      if (year < 100) year += 2000;
+      return [year, padDatePart(ruMatch[2]), padDatePart(ruMatch[1])].join("-");
+    }
+    var parsed = Date.parse(raw);
+    if (isFinite(parsed)) return getDateInputValue(parsed);
+    return "";
+  }
+
   function isSameEntryDate(a, b) {
     var left = getRakebackEntryDateParts(a);
     var right = getRakebackEntryDateParts(b);
@@ -228,6 +253,71 @@
 
   function getReportAmount(room, roomAmount) {
     return Math.round(parseNumber(roomAmount)) * getRakebackRoomMultiplier(room);
+  }
+
+  function getCurrentRakebackOwnerId() {
+    var users = [];
+    try {
+      var resolved = typeof window !== "undefined" && typeof window.getPokerResolvedTelegramUser === "function"
+        ? window.getPokerResolvedTelegramUser()
+        : null;
+      if (resolved) users.push(resolved);
+    } catch (eResolved) {}
+    try {
+      var tgUser = typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe
+        ? window.Telegram.WebApp.initDataUnsafe.user
+        : null;
+      if (tgUser) users.push(tgUser);
+    } catch (eTg) {}
+    try {
+      var auth = typeof window !== "undefined" ? (window.__pokerTelegramAuth || null) : null;
+      if (auth) users.push(auth);
+      if (auth && auth.user) users.push(auth.user);
+    } catch (eAuth) {}
+    try {
+      var rec = typeof window !== "undefined" && typeof window.pokerReadPwaTgSessionRecord === "function"
+        ? window.pokerReadPwaTgSessionRecord()
+        : null;
+      if (rec) users.push(rec);
+      if (rec && rec.user) users.push(rec.user);
+    } catch (eRec) {}
+    for (var i = 0; i < users.length; i += 1) {
+      var user = users[i] || {};
+      var memberId = user.memberId != null ? String(user.memberId).trim() : "";
+      if (memberId) return memberId;
+      var rawId = user.id != null ? String(user.id).trim() : "";
+      if (!rawId) continue;
+      if (rawId.indexOf("tg_") === 0 || rawId.indexOf("vk_") === 0) return rawId;
+      if (user.is_vk || user.vk || user.vkId != null) return "vk_" + rawId.replace(/^vk_/, "");
+      return "tg_" + rawId.replace(/^tg_/, "");
+    }
+    return "";
+  }
+
+  function rakebackOwnerMatches(left, right) {
+    left = String(left || "").trim();
+    right = String(right || "").trim();
+    if (!left || !right) return true;
+    if (left === right) return true;
+    return left.replace(/^(tg_|vk_)/, "") === right.replace(/^(tg_|vk_)/, "");
+  }
+
+  function isCurrentRakebackReportOwner(ownerId) {
+    var currentOwnerId = getCurrentRakebackOwnerId();
+    return rakebackOwnerMatches(ownerId, currentOwnerId);
+  }
+
+  function isRakebackRowReported(row) {
+    return !!(row && (row.accounted === true || row.reportedAt || row.reportId));
+  }
+
+  function hasRakebackReportValue(row) {
+    if (!row) return false;
+    return parseNumber(row.rake) !== 0 ||
+      parseNumber(row.roomAmount) !== 0 ||
+      parseNumber(row.amount) !== 0 ||
+      row.rakeZero === true ||
+      isRakebackRowReported(row);
   }
 
   function hasSharedDraftRowData(row) {
@@ -668,6 +758,7 @@
     tr.setAttribute("data-rakeback-owner", data.ownerId || data.authorId || "");
     tr.setAttribute("data-rakeback-report-id", data.reportId || "");
     tr.setAttribute("data-rakeback-reported-at", data.reportedAt || "");
+    tr.setAttribute("data-rakeback-accounted", data.accounted === true || data.reportedAt || data.reportId ? "1" : "0");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
       '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span><input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
@@ -746,6 +837,7 @@
     var totalEl = config.totalEl || document.getElementById("adminReportRakebackTotal");
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
+    var reportTotalInput = config.rakebackTotalInput || config.reportTotalInput || document.getElementById("adminReportRakeback");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var rakeHeaderEl = config.rakeHeaderEl || document.getElementById("adminReportRakebackRakeHeader");
@@ -1237,6 +1329,66 @@
       };
     }
 
+    function isManualRakebackReportInputTouched() {
+      if (typeof config.getManualRakebackInputTouched === "function") {
+        return !!config.getManualRakebackInputTouched();
+      }
+      return !!config.manualRakebackInputTouched;
+    }
+
+    function getConfiguredReportDateKey() {
+      var value = "";
+      if (typeof config.getRakebackReportDateKey === "function") value = config.getRakebackReportDateKey();
+      else if (typeof config.getCurrentReportDateKey === "function") value = config.getCurrentReportDateKey();
+      return normalizeReportDateKey(value) || getCurrentReportDateKey();
+    }
+
+    function getRowReportDateKey(row) {
+      if (!row) return "";
+      return getDateInputValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
+    }
+
+    function getLatestReportDateKey(rows) {
+      var latestStamp = 0;
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        var stamp = normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt), 0);
+        if (stamp > latestStamp) latestStamp = stamp;
+      });
+      return latestStamp ? getDateInputValue(latestStamp) : "";
+    }
+
+    function getUnsentReportRakebackRows() {
+      var rows = collectRows({ savedOnly: true }).filter(function (row) {
+        return row &&
+          String(row.playerId || "").trim() &&
+          isCurrentRakebackReportOwner(row.ownerId) &&
+          !isRakebackRowReported(row) &&
+          hasRakebackReportValue(row);
+      });
+      if (!rows.length) return rows;
+      var reportDateKey = getConfiguredReportDateKey();
+      var datedRows = reportDateKey ? rows.filter(function (row) {
+        return getRowReportDateKey(row) === reportDateKey;
+      }) : [];
+      if (datedRows.length) return datedRows;
+      var latestDateKey = getLatestReportDateKey(rows);
+      return latestDateKey ? rows.filter(function (row) {
+        return getRowReportDateKey(row) === latestDateKey;
+      }) : rows;
+    }
+
+    function sumReportRakebackRows(rows) {
+      return (Array.isArray(rows) ? rows : []).reduce(function (sum, row) {
+        return sum + parseNumber(row && row.amount);
+      }, 0);
+    }
+
+    function syncReportRakebackTotalInput() {
+      if (!reportTotalInput || isManualRakebackReportInputTouched()) return;
+      var total = sumReportRakebackRows(getUnsentReportRakebackRows());
+      reportTotalInput.value = String(Math.round(total * 100) / 100 || "");
+    }
+
     function getPulledTemplateIdSet(room) {
       var set = {};
       room = normalizeRoom(room);
@@ -1314,6 +1466,9 @@
         roomAmount = Math.round(roomAmount * 100) / 100;
         var amount = getReportAmount(room, roomAmount);
         if (kind !== "addon" || hasRakeInputValue) previousRakeByGroup[groupId] = rake;
+        var reportedAt = row.getAttribute("data-rakeback-reported-at") || "";
+        var reportId = row.getAttribute("data-rakeback-report-id") || "";
+        var accounted = row.getAttribute("data-rakeback-accounted") === "1" || !!reportedAt || !!reportId;
         return {
           groupId: groupId,
           kind: kind,
@@ -1329,8 +1484,9 @@
           createdAt: row.getAttribute("data-rakeback-created-at") || Date.now(),
           standardAt: row.getAttribute("data-rakeback-standard-at") || Date.now(),
           entryAddedAt: row.getAttribute("data-rakeback-entry-added-at") || Date.now(),
-          reportId: row.getAttribute("data-rakeback-report-id") || "",
-          reportedAt: row.getAttribute("data-rakeback-reported-at") || "",
+          reportId: reportId,
+          reportedAt: reportedAt,
+          accounted: accounted,
           color: row.getAttribute("data-rakeback-row-color") || "",
           amount: amount,
           roomAmount: roomAmount,
@@ -1371,6 +1527,8 @@
           ? row.roomAmount
           : Math.round(parseNumber(rake) * parseNumber(percent) / 100 * (row.discount15 || row.subtract15 ? 0.85 : 1) * 100) / 100;
         var carryForward = row.carryForward === true || row.templateCarryForward === true;
+        var reportedAt = row.reportedAt || "";
+        var reportId = row.reportId || "";
         return {
           groupId: String(row.groupId || "").trim() || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2)),
           kind: row.kind === "addon" ? "addon" : "base",
@@ -1388,8 +1546,9 @@
           createdAt: row.createdAt || row.addedAt || row.created || Date.now(),
           standardAt: row.standardAt || row.orderAt || row.sortAt || row.createdAt || Date.now(),
           entryAddedAt: row.entryAddedAt || row.firstAddedAt || row.createdAt || Date.now(),
-          reportId: row.reportId || "",
-          reportedAt: row.reportedAt || "",
+          reportId: reportId,
+          reportedAt: reportedAt,
+          accounted: row.accounted === true || !!reportedAt || !!reportId,
           color: normalizeRakebackRowColor(row.color || row.rowColor || row.highlightColor),
           amount: row.amount != null ? row.amount : getReportAmount(room, roomAmount),
           roomAmount: roomAmount,
@@ -1758,6 +1917,7 @@
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
       if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
+      syncReportRakebackTotalInput();
       if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
     }
 
@@ -2381,9 +2541,8 @@
       fillTable: render,
       getActiveRoom: function () { return activeRoom; },
       getUnaccountedRows: function () {
-        return collectRows({ savedOnly: true }).filter(function (row) {
-          if (!row || !String(row.playerId || "").trim()) return false;
-          return parseNumber(row.rake) !== 0 || parseNumber(row.amount) !== 0 || row.rakeZero === true;
+        return getUnsentReportRakebackRows().filter(function (row) {
+          return row && String(row.playerId || "").trim();
         });
       },
       isArchiveMode: function () { return archiveMode; },

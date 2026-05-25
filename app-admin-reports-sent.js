@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v5";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v6";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -293,6 +293,7 @@
     function bindCachedSentReportToggles(scope) {
       scope = scope || sentList;
       if (!scope) return;
+      bindSentReportsTabShell(scope);
       scope.querySelectorAll(".admin-report-sent-item__head").forEach(function (head) {
         if (head.getAttribute("data-admin-report-cache-bound") === "1") return;
         head.setAttribute("data-admin-report-cache-bound", "1");
@@ -327,8 +328,72 @@
       return !/Обновляю текущую неделю|Дни появятся сразу после ответа сервера|Ошибка загрузки|Не удалось загрузить/i.test(text);
     }
 
-    function buildSentReportsLoadingShellHtml() {
+    function buildSentReportsTabButton(name, label, active) {
+      return '<button type="button" class="admin-report-sent-tab' + (active ? " admin-report-sent-tab--active" : "") + '" data-admin-report-sent-tab="' + name + '" role="tab" aria-selected="' + (active ? "true" : "false") + '">' + label + "</button>";
+    }
+
+    function buildSentReportsTabsHtml(activeName) {
+      var active = activeName || "current";
       return (
+        '<div class="admin-report-sent-tabs" role="tablist" aria-label="Отправленные отчёты">' +
+          buildSentReportsTabButton("current", "Текущая неделя", active === "current") +
+          buildSentReportsTabButton("archive", "Прошлые недели", active === "archive") +
+          buildSentReportsTabButton("months", "По месяцам", active === "months") +
+        "</div>"
+      );
+    }
+
+    function buildSentReportsPanelHtml(name, className, html, active) {
+      return '<section class="admin-report-sent-tab-panel ' + className + '" data-admin-report-sent-panel="' + name + '"' + (name === "archive" ? " data-admin-report-sent-archive" : "") + (name === "months" ? " data-admin-report-sent-months" : "") + ' role="tabpanel"' + (active ? "" : " hidden") + ">" + html + "</section>";
+    }
+
+    function buildSentReportsTabbedShellHtml(currentHtml, options) {
+      options = options || {};
+      var active = options.active || "current";
+      var archiveHtml = options.archiveHtml || '<div class="admin-report-sent-archive__inner"><p class="admin-report-sent-period-hint">Откройте вкладку, чтобы загрузить прошлые недели.</p></div>';
+      var monthsHtml = options.monthsHtml || '<div class="admin-report-sent-months__inner"><p class="admin-report-sent-period-hint">Откройте вкладку, чтобы загрузить месяцы.</p></div>';
+      return (
+        '<div class="admin-report-sent-view" data-admin-report-sent-view>' +
+          buildSentReportsTabsHtml(active) +
+          '<div class="admin-report-sent-tab-panels">' +
+            buildSentReportsPanelHtml("current", "admin-report-sent-tab-panel--current", currentHtml || "", active === "current") +
+            buildSentReportsPanelHtml("archive", "admin-report-sent-tab-panel--archive", archiveHtml, active === "archive") +
+            buildSentReportsPanelHtml("months", "admin-report-sent-tab-panel--months", monthsHtml, active === "months") +
+          "</div>" +
+        "</div>"
+      );
+    }
+
+    function setSentReportsActivePanel(root, name) {
+      root = root || sentList;
+      var active = name || "current";
+      if (!root) return;
+      root.querySelectorAll("[data-admin-report-sent-tab]").forEach(function (tab) {
+        var selected = tab.getAttribute("data-admin-report-sent-tab") === active;
+        tab.classList.toggle("admin-report-sent-tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+      root.querySelectorAll("[data-admin-report-sent-panel]").forEach(function (panel) {
+        panel.hidden = panel.getAttribute("data-admin-report-sent-panel") !== active;
+      });
+    }
+
+    function bindSentReportsTabShell(root, onActivate) {
+      root = root || sentList;
+      if (!root) return;
+      root.querySelectorAll("[data-admin-report-sent-tab]").forEach(function (tab) {
+        if (tab.getAttribute("data-admin-report-tab-bound") === "1") return;
+        tab.setAttribute("data-admin-report-tab-bound", "1");
+        tab.addEventListener("click", function () {
+          var name = tab.getAttribute("data-admin-report-sent-tab") || "current";
+          setSentReportsActivePanel(root, name);
+          if (typeof onActivate === "function") onActivate(name);
+        });
+      });
+    }
+
+    function buildSentReportsLoadingShellHtml() {
+      var currentHtml =
         '<div class="admin-report-sent-current admin-report-sent-current--loading">' +
           '<details class="admin-report-sent-week" open>' +
             '<summary class="admin-report-sent-archive__summary">Текущая неделя</summary>' +
@@ -347,19 +412,9 @@
               "</details>" +
             "</div>" +
           "</details>" +
-        "</div>" +
-        '<details class="admin-report-sent-months" data-admin-report-sent-months>' +
-          '<summary class="admin-report-sent-archive__summary admin-report-sent-months__summary">Итого по месяцам</summary>' +
-          '<div class="admin-report-sent-months__inner">' +
-            '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить месяцы.</p>' +
-          "</div>" +
-        "</details>" +
-        '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
-          '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
-          '<div class="admin-report-sent-archive__inner">' +
-            '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
-          "</div>" +
-        "</details>"
+        "</div>";
+      return (
+        buildSentReportsTabbedShellHtml(currentHtml)
       );
     }
 
@@ -789,29 +844,11 @@
         }
 
         var currentBlock = buildWeekBlock(currentWeek.start, currentItems, "ar-cur-", true);
-        var html = [];
-        html.push('<div class="admin-report-sent-current">');
-        html.push(currentBlock.html);
-        html.push("</div>");
-        html.push(
-          '<details class="admin-report-sent-months" data-admin-report-sent-months>' +
-            '<summary class="admin-report-sent-archive__summary admin-report-sent-months__summary">Итого по месяцам</summary>' +
-            '<div class="admin-report-sent-months__inner">' +
-              '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить месяцы.</p>' +
-            "</div></details>"
-        );
-
-        if (hasArchive) {
-          html.push(
-            '<details class="admin-report-sent-archive" data-admin-report-sent-archive>' +
-              '<summary class="admin-report-sent-archive__summary">Прошлые недели</summary>' +
-              '<div class="admin-report-sent-archive__inner">' +
-              '<p class="admin-report-sent-period-hint">Откройте, чтобы загрузить прошлые недели.</p>' +
-              "</div></details>"
-          );
-        }
-
-        sentList.innerHTML = html.join("");
+        var currentHtml = '<div class="admin-report-sent-current">' + currentBlock.html + "</div>";
+        sentList.innerHTML = buildSentReportsTabbedShellHtml(currentHtml, {
+          archiveHtml: '<div class="admin-report-sent-archive__inner"><p class="admin-report-sent-period-hint">' + (hasArchive ? "Откройте вкладку, чтобы загрузить прошлые недели." : "Прошлых недель пока нет.") + "</p></div>",
+          monthsHtml: '<div class="admin-report-sent-months__inner"><p class="admin-report-sent-period-hint">Откройте вкладку, чтобы загрузить месяцы.</p></div>',
+        });
         writeSentReportsHtmlCache(sentList.innerHTML);
         sentReportsLoadedAt = Date.now();
 
@@ -969,9 +1006,8 @@
 
         bindSentReportControls(sentList);
         var monthsEl = sentList.querySelector("[data-admin-report-sent-months]");
-        if (monthsEl) {
-          monthsEl.addEventListener("toggle", function () {
-            if (!monthsEl.open || monthsEl.getAttribute("data-admin-report-months-built") === "1") return;
+        function loadSentMonthsIfNeeded() {
+          if (!monthsEl || monthsEl.getAttribute("data-admin-report-months-built") === "1") return;
             monthsEl.setAttribute("data-admin-report-months-built", "1");
             var inner = monthsEl.querySelector(".admin-report-sent-months__inner");
             if (!inner) return;
@@ -991,12 +1027,10 @@
               monthsEl.removeAttribute("data-admin-report-months-built");
               if (inner) inner.innerHTML = '<p class="admin-report-sent-period-hint">Не удалось загрузить месячные итоги.</p>';
             });
-          });
         }
         var archiveEl = sentList.querySelector("[data-admin-report-sent-archive]");
-        if (archiveEl) {
-          archiveEl.addEventListener("toggle", function () {
-            if (!archiveEl.open || archiveEl.getAttribute("data-admin-report-archive-built") === "1") return;
+        function loadSentArchiveIfNeeded() {
+          if (!archiveEl || archiveEl.getAttribute("data-admin-report-archive-built") === "1") return;
             archiveEl.setAttribute("data-admin-report-archive-built", "1");
             var inner = archiveEl.querySelector(".admin-report-sent-archive__inner");
             if (!inner) return;
@@ -1024,8 +1058,11 @@
               archiveEl.removeAttribute("data-admin-report-archive-built");
               if (inner) inner.innerHTML = '<p class="admin-report-sent-period-hint">Не удалось загрузить прошлые недели.</p>';
             });
-          });
         }
+        bindSentReportsTabShell(sentList, function (name) {
+          if (name === "months") loadSentMonthsIfNeeded();
+          if (name === "archive" && hasArchive) loadSentArchiveIfNeeded();
+        });
       })
       .catch(function () {
         sentReportsLoading = false;

@@ -838,7 +838,7 @@ function initWinterRating() {
   var titleTextEl = document.querySelector("#winterRatingSection .winter-rating__title-text");
   if (titleTextEl) {
     titleTextEl.innerHTML = isSpringRatingMode()
-      ? "Рейтинг Турнирщиков весны<br /><span class=\"winter-rating__title-accent\">На 250 000р</span>"
+      ? "Рейтинг Турнирщиков<br /><span class=\"winter-rating__title-accent\">На 250 000р</span>"
       : "Архив рейтинга зимы<br /><span class=\"winter-rating__title-accent\">на 250 000₽</span>";
   }
   window.openWinterRatingDatePanel = function (dateStr) {

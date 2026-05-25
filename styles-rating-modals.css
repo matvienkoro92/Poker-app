@@ -99,16 +99,16 @@
   box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
 }
 .winter-rating-player-modal__header-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
+  column-gap: 16px;
+  row-gap: 10px;
   margin-bottom: 14px;
   padding-right: 42px;
-  flex-wrap: wrap;
 }
 .winter-rating-player-modal__title {
-  flex: 1 1 128px;
+  justify-self: start;
   margin: 0;
   font-size: 18px;
   font-weight: 700;
@@ -313,8 +313,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-self: end;
   gap: 8px;
   flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .winter-rating-player-modal__header-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .winter-rating-player-modal__share-wrap {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }
 .winter-rating-player-modal__share-btn.winter-rating__share-btn--copy-icon {
   width: 44px;
