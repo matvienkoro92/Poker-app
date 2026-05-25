@@ -982,6 +982,7 @@
     var locallyDeletedRowKeys = {};
     var locallyDeletedGroupIds = {};
     var templateDefaultSaveTimers = {};
+    var archiveWeekRoomOpen = {};
 
     function getTemplateIds(room) {
       room = normalizeRoom(room);
@@ -1448,6 +1449,175 @@
       room = normalizeRoom(room);
       return (Array.isArray(rows) ? rows : []).filter(function (row) {
         return normalizeRoom(row && row.room) === room;
+      });
+    }
+
+    function getArchiveRoomOrder() {
+      return Object.keys(ROOM_LABELS);
+    }
+
+    function formatArchiveMetric(value) {
+      return String(Math.round(parseNumber(value)));
+    }
+
+    function formatArchiveWeekRange(weekStart) {
+      return formatArchiveWeekDate(weekStart, 0) + " - " + formatArchiveWeekDate(weekStart, 6);
+    }
+
+    function getArchiveDateTotalsMap(rows) {
+      var map = {};
+      getRakebackDateTotals(rows).forEach(function (day) {
+        if (day && day.key) map[day.key] = day;
+      });
+      return map;
+    }
+
+    function getArchiveWeekRoomTotals(rows) {
+      var totals = {};
+      getArchiveRoomOrder().forEach(function (room) {
+        var roomRows = getArchiveRowsForRoom(rows, room);
+        var roomTotals = getRakebackTotals(roomRows);
+        totals[room] = {
+          rake: roomTotals.rake,
+          amount: roomTotals.amount,
+          count: roomRows.length,
+        };
+      });
+      return totals;
+    }
+
+    function createArchiveTableWeekSeparator(week) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      var button = document.createElement("button");
+      var label = document.createElement("span");
+      var meta = document.createElement("small");
+      var weekKey = getArchiveWeekKey(week && week.weekStart);
+      var totals = getRakebackTotals(week && week.rows);
+      var open = archiveWeekOpen[weekKey] === true;
+      tr.className = "admin-report-rakeback-week-separator";
+      tr.setAttribute("data-rakeback-generated", "1");
+      td.colSpan = 7;
+      button.type = "button";
+      button.className = "admin-report-rakeback-week-separator__button";
+      button.setAttribute("data-rakeback-week-toggle", weekKey);
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+      label.textContent = formatArchiveWeekRange(week && week.weekStart);
+      meta.textContent = "Рейк " + formatArchiveMetric(totals.rake) + " · РБ " + formatArchiveMetric(totals.amount);
+      button.appendChild(label);
+      button.appendChild(meta);
+      td.appendChild(button);
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function createArchiveTableRoomTabs(week) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      var wrap = document.createElement("div");
+      var weekKey = getArchiveWeekKey(week && week.weekStart);
+      var roomTotals = getArchiveWeekRoomTotals(week && week.rows);
+      tr.className = "admin-report-rakeback-week-room-tabs";
+      tr.setAttribute("data-rakeback-generated", "1");
+      td.colSpan = 7;
+      wrap.className = "admin-report-rakeback-week-room-tabs__grid";
+      getArchiveRoomOrder().forEach(function (room) {
+        var key = weekKey + "|" + room;
+        var open = archiveWeekRoomOpen[key] !== false;
+        var totals = roomTotals[room] || { rake: 0, amount: 0, count: 0 };
+        var button = document.createElement("button");
+        var label = document.createElement("span");
+        var meta = document.createElement("small");
+        button.type = "button";
+        button.className = "admin-report-rakeback-week-room-tabs__button";
+        button.setAttribute("data-rakeback-week-room-toggle", key);
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+        button.classList.toggle("admin-report-rakeback-week-room-tabs__button--empty", !totals.count);
+        label.textContent = ROOM_LABELS[room] || room;
+        meta.textContent = "Рейк " + formatArchiveMetric(totals.rake) + " · РБ " + formatArchiveMetric(totals.amount);
+        button.appendChild(label);
+        button.appendChild(meta);
+        wrap.appendChild(button);
+      });
+      td.appendChild(wrap);
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function createArchiveTableWeekTotalRow(totals) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      var row = document.createElement("div");
+      var label = document.createElement("span");
+      var value = document.createElement("span");
+      tr.className = "admin-report-rakeback-week-total";
+      tr.setAttribute("data-rakeback-generated", "1");
+      td.colSpan = 7;
+      row.className = "admin-report-rakeback-week-total__row";
+      label.className = "admin-report-rakeback-week-total__label";
+      value.className = "admin-report-rakeback-week-total__value";
+      label.textContent = "Итого по всем румам";
+      value.textContent = formatArchiveMetric(totals && totals.amount);
+      row.appendChild(label);
+      row.appendChild(value);
+      td.appendChild(row);
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function createArchiveTableDateSeparator(entryAt, totals) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      var label = document.createElement("span");
+      var meta = document.createElement("small");
+      totals = totals || { rake: 0, amount: 0 };
+      tr.className = "admin-report-rakeback-date-separator";
+      tr.setAttribute("data-rakeback-generated", "1");
+      td.colSpan = 7;
+      label.textContent = formatEntryDateLabel(entryAt);
+      meta.textContent = "Рейк " + formatArchiveMetric(totals.rake) + " · РБ " + formatArchiveMetric(totals.amount);
+      td.appendChild(label);
+      td.appendChild(meta);
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function appendArchiveTableWeek(fragment, week) {
+      var weekKey = getArchiveWeekKey(week && week.weekStart);
+      var open = archiveWeekOpen[weekKey] === true;
+      fragment.appendChild(createArchiveTableWeekSeparator(week));
+      if (!open) return;
+      fragment.appendChild(createArchiveTableRoomTabs(week));
+      fragment.appendChild(createArchiveTableWeekTotalRow(getRakebackTotals(week && week.rows)));
+      getArchiveRoomOrder().forEach(function (room) {
+        var roomOpen = archiveWeekRoomOpen[weekKey + "|" + room] !== false;
+        var rows = getArchiveRowsForRoom(week && week.rows, room);
+        var dateTotals = getArchiveDateTotalsMap(rows);
+        var lastDateKey = "";
+        var baseIndex = 0;
+        var baseEntryByGroup = {};
+        if (!roomOpen) return;
+        rows.forEach(function (row) {
+          var groupId = String(row && row.groupId || "").trim();
+          var entryAt = normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt || Date.now()));
+          var dateKey = getDateInputValue(entryAt);
+          var renderRow = row;
+          if (dateKey && dateKey !== lastDateKey) {
+            fragment.appendChild(createArchiveTableDateSeparator(entryAt, dateTotals[dateKey]));
+            lastDateKey = dateKey;
+          }
+          if (getSharedRowKind(row) !== "addon") {
+            baseIndex += 1;
+            baseEntryByGroup[groupId] = entryAt;
+          } else {
+            renderRow = {};
+            Object.keys(row || {}).forEach(function (key) { renderRow[key] = row[key]; });
+            renderRow.baseEntryAt = baseEntryByGroup[groupId] || entryAt;
+          }
+          var domRow = createSharedRow(renderRow, Math.max(0, baseIndex - 1));
+          domRow.setAttribute("data-rakeback-archive-row", "1");
+          fragment.appendChild(domRow);
+        });
       });
     }
 
@@ -2204,7 +2374,7 @@
         var archiveWeeks = getArchiveWeeks(archiveRows);
         if (archiveWeeks.length) {
           archiveWeeks.forEach(function (week) {
-            archiveFragment.appendChild(createArchiveWeekRow(week));
+            appendArchiveTableWeek(archiveFragment, week);
           });
         } else {
           archiveFragment.appendChild(createArchiveEmptyRow());
@@ -2697,6 +2867,22 @@
               return;
             }
             render({ showTemplateStatus: templateRowsOpen });
+            return;
+          }
+          var weekToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-week-toggle]") : null;
+          if (weekToggle) {
+            event.preventDefault();
+            var weekKey = weekToggle.getAttribute("data-rakeback-week-toggle") || "";
+            if (weekKey) archiveWeekOpen[weekKey] = archiveWeekOpen[weekKey] !== true;
+            render();
+            return;
+          }
+          var weekRoomToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-week-room-toggle]") : null;
+          if (weekRoomToggle) {
+            event.preventDefault();
+            var weekRoomKey = weekRoomToggle.getAttribute("data-rakeback-week-room-toggle") || "";
+            if (weekRoomKey) archiveWeekRoomOpen[weekRoomKey] = archiveWeekRoomOpen[weekRoomKey] === false;
+            render();
             return;
           }
           var archiveRoomTab = event.target && event.target.closest ? event.target.closest("[data-rakeback-archive-room-tab]") : null;

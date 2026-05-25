@@ -1666,11 +1666,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-  width: 18%;
+  width: 23%;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-  width: 15%;
+  width: 10%;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -2688,11 +2688,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 22%;
+    width: 28%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 24%;
+    width: 18%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -2847,11 +2847,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 22%;
+    width: 30%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 24%;
+    width: 16%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
