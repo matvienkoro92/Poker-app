@@ -160,6 +160,7 @@ function renderSpringRatingViewTotalsWeeks() {
     var openAttr = openWeeks ? " open" : "";
     var sumTitle = monthTotals ? "Итого суммарный выигрыш за месяц" : "Топ суммарный выигрыш за неделю";
     var winTitle = monthTotals ? "Итого топ за 1 турнир за месяц" : "Топ занос за 1 турнир";
+    var totalLabel = monthTotals ? "Всего выиграно игроками: " : "Всего выиграно игроками за неделю: ";
     var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month spring-rating-view-week--month-total" : "");
     return (
       "<details class=\"" + detailClass + "\"" + openAttr + ">" +
@@ -180,7 +181,7 @@ function renderSpringRatingViewTotalsWeeks() {
       moreButtonHtml(winRows) +
       "</div>" +
       "</div>" +
-      "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">Всего выиграно игроками: " + totalText + "</p>" +
+      "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">" + totalLabel + totalText + "</p>" +
       "</div>" +
       "</details>"
     );

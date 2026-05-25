@@ -701,6 +701,39 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+.winter-rating__calendar-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 12px 10px;
+  color: rgba(255, 238, 206, 0.76);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.winter-rating__calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.winter-rating__calendar-legend-swatch {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border-radius: 5px;
+}
+.winter-rating__calendar-legend-swatch--green {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.48), rgba(21, 128, 61, 0.26));
+  box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.52), 0 6px 16px rgba(34, 197, 94, 0.12);
+}
+.winter-rating__calendar-legend-swatch--brown {
+  background: linear-gradient(180deg, rgba(180, 83, 9, 0.5), rgba(120, 53, 15, 0.26));
+  box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.52), 0 6px 16px rgba(180, 83, 9, 0.12);
+}
+[data-theme="light"] .winter-rating__calendar-legend {
+  color: #6f6556;
+}
 .winter-rating__dates {
   display: flex;
   flex-direction: column;
@@ -801,12 +834,30 @@
   opacity: 0.5;
 }
 .winter-rating__calendar-cell--day {
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 2px;
   border: none;
   background: rgba(148, 163, 184, 0.15);
   color: var(--text);
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   font-family: inherit;
+}
+.winter-rating__calendar-cell-daynum {
+  display: block;
+  line-height: 1;
+}
+.winter-rating__calendar-cell-reward {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(255, 238, 206, 0.78);
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .winter-rating__calendar-cell--day.winter-rating__calendar-cell--green {
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.34), rgba(21, 128, 61, 0.2));
@@ -851,6 +902,9 @@
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(22, 163, 74, 0.16));
   color: #14532d;
   box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.34), 0 8px 20px rgba(22, 163, 74, 0.1);
+}
+[data-theme="light"] .winter-rating__calendar-cell-reward {
+  color: rgba(67, 20, 7, 0.72);
 }
 [data-theme="light"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--brown {
   background: linear-gradient(180deg, rgba(180, 83, 9, 0.28), rgba(146, 64, 14, 0.15));

@@ -1391,7 +1391,7 @@ function initWinterRating() {
       var tableEl = block.querySelector(".winter-rating__date-table-wrap[data-league=\"" + leagueNum + "\"]");
       if (screensEl) fillScreensForDate(screensEl, dateStr, leagueNum);
       if (tournamentsEl) {
-        var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100₽ до 500₽";
+        var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига2. Турниры от 100р до 499р";
         tournamentsEl.innerHTML = "<p class=\"winter-rating__date-tournaments-caption\">" + label + "</p>";
       }
       if (tableEl) {
@@ -1419,7 +1419,7 @@ function initWinterRating() {
           if (!block) return;
           var tournamentsEl = block.querySelector(".winter-rating__date-tournaments-list[data-league=\"" + leagueNum + "\"]");
           if (tournamentsEl) {
-            var capLabel = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100₽ до 500₽";
+            var capLabel = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига2. Турниры от 100р до 499р";
             tournamentsEl.innerHTML = "<p class=\"winter-rating__date-tournaments-caption\">" + capLabel + "</p>";
           }
         });
@@ -1536,6 +1536,41 @@ function initWinterRating() {
       }
       return hasMidReward ? "brown" : "";
     }
+    function getCalendarCellTopReward(dateStr) {
+      var maxReward = 0;
+      try {
+        if (isSpringRatingMode()) {
+          var springByDate = getSpringRatingTournamentsByDate();
+          var tournaments = springByDate && springByDate[dateStr] ? springByDate[dateStr] : [];
+          for (var st = 0; st < tournaments.length; st++) {
+            var players = tournaments[st] && tournaments[st].players ? tournaments[st].players : [];
+            for (var sp = 0; sp < players.length; sp++) {
+              var springReward = players[sp] && players[sp].reward != null ? Number(players[sp].reward) : 0;
+              if (springReward === springReward && springReward > maxReward) maxReward = springReward;
+            }
+          }
+        } else {
+          var byDate = getRatingByDate();
+          var rows = byDate && byDate[dateStr] ? byDate[dateStr] : [];
+          for (var wr = 0; wr < rows.length; wr++) {
+            var reward = rows[wr] && rows[wr].reward != null ? Number(rows[wr].reward) : 0;
+            if (reward === reward && reward > maxReward) maxReward = reward;
+          }
+        }
+      } catch (eTopReward) {
+        return 0;
+      }
+      return maxReward;
+    }
+    function formatCalendarCellRewardShort(reward) {
+      var val = Number(reward) || 0;
+      if (val >= 1000000) {
+        return (Math.round(val / 100000) / 10).toString().replace(".", ",") + "М₽";
+      }
+      if (val >= 10000) return Math.round(val / 1000) + "К₽";
+      if (val >= 1000) return (Math.round(val / 100) / 10).toString().replace(".", ",") + "К₽";
+      return formatRewardRound(val) + "₽";
+    }
     function openDateModal(dateStr, panel) {
       if (!dateModal || !dateModalBody || !panel) return;
       var lwModal = panel.querySelector(".spring-rating-date-leagues");
@@ -1605,7 +1640,7 @@ function initWinterRating() {
         var m = monthNum < 10 ? "0" + monthNum : "" + monthNum;
         var dateStr = d + "." + m + "." + yearNum;
         var hasData = avail.indexOf(dateStr) !== -1;
-        cells.push({ empty: false, day: i, dateStr: dateStr, hasData: hasData, tone: hasData ? getCalendarCellTone(dateStr) : "" });
+        cells.push({ empty: false, day: i, dateStr: dateStr, hasData: hasData, tone: hasData ? getCalendarCellTone(dateStr) : "", topReward: hasData ? getCalendarCellTopReward(dateStr) : 0 });
       }
       var weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
       var headerRow = "<div class=\"winter-rating__calendar-weekdays\">" + weekdays.map(function (w) { return "<span class=\"winter-rating__calendar-wday\">" + w + "</span>"; }).join("") + "</div>";
@@ -1621,7 +1656,12 @@ function initWinterRating() {
           rowHtml += "<span class=\"winter-rating__calendar-cell winter-rating__calendar-cell--empty\"></span>";
         } else if (cell.hasData) {
           var toneClass = cell.tone === "green" ? " winter-rating__calendar-cell--green" : (cell.tone === "brown" ? " winter-rating__calendar-cell--brown" : "");
-          rowHtml += "<button type=\"button\" class=\"winter-rating__calendar-cell winter-rating__calendar-cell--day" + toneClass + "\" data-rating-date=\"" + cell.dateStr.replace(/"/g, "&quot;") + "\" aria-label=\"Рейтинг на " + cell.dateStr + "\">" + cell.day + "</button>";
+          var rewardText = cell.topReward > 0 ? formatRewardRound(cell.topReward) + " ₽" : "";
+          var rewardShortText = cell.topReward > 0 ? formatCalendarCellRewardShort(cell.topReward) : "";
+          var rewardAttr = rewardText ? rewardText.replace(/"/g, "&quot;") : "";
+          var rewardHtml = rewardText ? "<span class=\"winter-rating__calendar-cell-reward\" title=\"Максимальный выигрыш: " + rewardAttr + "\">" + rewardShortText + "</span>" : "";
+          var ariaReward = rewardText ? ", максимальный выигрыш " + rewardText : "";
+          rowHtml += "<button type=\"button\" class=\"winter-rating__calendar-cell winter-rating__calendar-cell--day" + toneClass + "\" data-rating-date=\"" + cell.dateStr.replace(/"/g, "&quot;") + "\" aria-label=\"Рейтинг на " + cell.dateStr + ariaReward + "\"><span class=\"winter-rating__calendar-cell-daynum\">" + cell.day + "</span>" + rewardHtml + "</button>";
         } else {
           rowHtml += "<span class=\"winter-rating__calendar-cell winter-rating__calendar-cell--no-data\" aria-hidden=\"true\">" + cell.day + "</span>";
         }

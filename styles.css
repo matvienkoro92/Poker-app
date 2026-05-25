@@ -1,26 +1,45 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.260");
-@import url("./styles-home-rating-promo.css?v=3.260");
-@import url("./styles-auth.css?v=3.260");
-@import url("./styles-home.css?v=3.260");
-@import url("./styles-chat.css?v=3.260");
-@import url("./styles-learning-games.css?v=3.260");
-@import url("./styles-raffles.css?v=3.260");
-@import url("./styles-daily-poker.css?v=3.260");
-@import url("./styles-home-legacy-prelude.css?v=3.260");
-@import url("./styles-download.css?v=3.260");
-@import url("./styles-home-legacy-tail.css?v=3.260");
-@import url("./styles-home-rating-promo-legacy.css?v=3.260");
-@import url("./styles-rating.css?v=3.260");
-@import url("./styles-hall.css?v=3.260");
-@import url("./styles-admin.css?v=3.260");
-@import url("./styles-player-crm.css?v=3.260");
-@import url("./styles-profile.css?v=3.260");
-@import url("./styles-layout.css?v=3.260");
-@import url("./styles-chat-overlays.css?v=3.260");
-@import url("./styles-home-overrides.css?v=3.260");
-@import url("./styles-layout-touch-targets.css?v=3.260");
-@import url("./styles-home-rating-promo-late.css?v=3.260");
+@import url("./styles-base.css?v=3.267");
+@import url("./styles-home-rating-promo.css?v=3.267");
+@import url("./styles-auth.css?v=3.267");
+@import url("./styles-home.css?v=3.267");
+@import url("./styles-chat.css?v=3.267");
+@import url("./styles-learning-games.css?v=3.267");
+@import url("./styles-raffles.css?v=3.267");
+@import url("./styles-daily-poker.css?v=3.267");
+@import url("./styles-home-legacy-prelude.css?v=3.267");
+@import url("./styles-download.css?v=3.267");
+@import url("./styles-home-legacy-tail.css?v=3.267");
+@import url("./styles-home-rating-promo-legacy.css?v=3.267");
+@import url("./styles-rating.css?v=3.267");
+@import url("./styles-hall.css?v=3.267");
+@import url("./styles-admin.css?v=3.267");
+@import url("./styles-player-crm.css?v=3.267");
+@import url("./styles-profile.css?v=3.267");
+@import url("./styles-layout.css?v=3.267");
+@import url("./styles-chat-overlays.css?v=3.267");
+@import url("./styles-home-overrides.css?v=3.267");
+@import url("./styles-layout-touch-targets.css?v=3.267");
+@import url("./styles-home-rating-promo-late.css?v=3.267");
+
+.view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
+html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
+body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active {
+  background: linear-gradient(180deg, #f8d98d 0%, #d89b2d 100%) !important;
+  border-color: rgba(255, 221, 143, 0.88) !important;
+  color: #11151c !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 219, 0.62),
+    inset 0 -4px 0 rgba(103, 58, 10, 0.26),
+    0 0 20px rgba(216, 155, 45, 0.3) !important;
+  text-shadow: none !important;
+}
+
+.view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
+html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
+body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover {
+  background: linear-gradient(180deg, #ffe7a9 0%, #e2aa42 100%) !important;
+}
 
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab.admin-report-rakeback-room-tab--active,
 .admin-report-rakeback-room-tabs > .admin-report-rakeback-room-tab[aria-selected="true"] {
@@ -248,7 +267,10 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   text-decoration: none;
   border: 1px solid rgba(255, 118, 0, 0.72);
   border-radius: 22px;
-  background: #07090c;
+  background:
+    radial-gradient(ellipse 112% 132% at 62% 52%, rgba(255, 112, 0, 0.26) 0%, rgba(117, 45, 7, 0.28) 35%, rgba(34, 14, 7, 0.52) 62%, rgba(7, 9, 12, 0) 82%),
+    radial-gradient(ellipse 78% 92% at 31% 82%, rgba(255, 118, 0, 0.13) 0%, rgba(89, 34, 7, 0.12) 36%, rgba(7, 9, 12, 0) 68%),
+    linear-gradient(90deg, #0d0a08 0%, #120b08 34%, #190d08 58%, #261107 82%, #150806 100%);
   box-shadow:
     inset 0 0 0 1px rgba(255, 222, 148, 0.08);
   -webkit-tap-highlight-color: transparent;
@@ -262,8 +284,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   overflow: hidden;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.32) 36%, rgba(0, 0, 0, 0.12) 54%, rgba(0, 0, 0, 0) 68%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.14) 73%, rgba(0, 0, 0, 0.2) 100%);
+    radial-gradient(ellipse 106% 126% at 67% 50%, rgba(255, 133, 0, 0.26) 0%, rgba(255, 87, 0, 0.18) 33%, rgba(88, 30, 5, 0.13) 57%, rgba(7, 9, 12, 0) 78%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.22) 29%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0) 68%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.08) 76%, rgba(0, 0, 0, 0.18) 100%);
   pointer-events: none;
 }
 
