@@ -9,6 +9,7 @@
   };
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
+  var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
   var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 12 * 60 * 60 * 1000;
   var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
 
@@ -191,6 +192,38 @@
     var weekdays = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
     var weekdayIndex = new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
     return weekdays[weekdayIndex] || "";
+  }
+
+  function getWeekStartFromDateParts(date) {
+    date = date || {};
+    var day = Number(date.day) || 1;
+    var month = Math.max(1, Number(date.month) || 1);
+    var year = Number(date.year) || new Date().getFullYear();
+    var weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+    var daysFromMonday = (weekdayIndex + 6) % 7;
+    return Date.UTC(year, month - 1, day, 0, 0, 0, 0) - daysFromMonday * RAKEBACK_DAY_MS - MOSCOW_UTC_OFFSET_MS;
+  }
+
+  function getRakebackEntryWeekStart(raw) {
+    return getWeekStartFromDateParts(getRakebackEntryDateParts(raw));
+  }
+
+  function getCurrentRakebackWeekStart() {
+    var shifted = new Date(normalizeTimeValue(Date.now()) - REPORT_DAY_CUTOFF_MS + MOSCOW_UTC_OFFSET_MS);
+    return getWeekStartFromDateParts({
+      year: shifted.getUTCFullYear(),
+      month: shifted.getUTCMonth() + 1,
+      day: shifted.getUTCDate(),
+    });
+  }
+
+  function formatArchiveWeekDate(weekStart, offsetDays) {
+    var d = new Date(Number(weekStart) + (Number(offsetDays) || 0) * RAKEBACK_DAY_MS + MOSCOW_UTC_OFFSET_MS);
+    return padDatePart(d.getUTCDate()) + "." + padDatePart(d.getUTCMonth() + 1);
+  }
+
+  function formatArchiveWeekLabel(weekStart) {
+    return formatArchiveWeekDate(weekStart, 0) + "–" + formatArchiveWeekDate(weekStart, 6);
   }
 
   function getDateInputValue(raw) {
@@ -948,7 +981,13 @@
     var templateDefaultSaveTimers = {};
 
     function getTemplateIds(room) {
-      var ids = templates[normalizeRoom(room)] || [];
+      room = normalizeRoom(room);
+      var ids = (templates[room] || []).slice();
+      sharedRows.forEach(function (row) {
+        if (!isCarryForwardTemplateRow(row) || normalizeRoom(row.room) !== room) return;
+        var playerId = String(row.playerId || row.id || "").trim();
+        if (playerId) ids.push(playerId);
+      });
       var seen = {};
       return (Array.isArray(ids) ? ids : []).map(function (id) {
         return String(id || "").trim();
@@ -1218,6 +1257,23 @@
       return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
     }
 
+    function rowWeekStart(row) {
+      var time = rowEntryTime(row);
+      return time ? getRakebackEntryWeekStart(time) : 0;
+    }
+
+    function isArchivedRakebackRow(row) {
+      if (!row || isCarryForwardTemplateRow(row)) return false;
+      var weekStart = rowWeekStart(row);
+      return !!(weekStart && weekStart < getCurrentRakebackWeekStart());
+    }
+
+    function isCurrentRakebackRow(row) {
+      if (!row || isCarryForwardTemplateRow(row)) return false;
+      var weekStart = rowWeekStart(row);
+      return !weekStart || weekStart >= getCurrentRakebackWeekStart();
+    }
+
     function compareRowsByEntryDateDesc(a, b) {
       return rowEntryDay(b) - rowEntryDay(a) || rowTime(b) - rowTime(a) || rowEntryTime(b) - rowEntryTime(a);
     }
@@ -1289,6 +1345,7 @@
       var query = getSearchQuery();
       return orderSharedRowsForDisplay(sharedRows.filter(function (row) {
         if (isCarryForwardTemplateRow(row)) return false;
+        if (!isCurrentRakebackRow(row)) return false;
         if (room && normalizeRoom(row.room) !== normalizeRoom(room)) return false;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         return !query || playerId.indexOf(query) !== -1;
@@ -1329,6 +1386,68 @@
       };
     }
 
+    function getArchiveRows(room) {
+      var query = getSearchQuery();
+      return orderSharedRowsForDisplay(sharedRows.filter(function (row) {
+        if (!row || row.saved !== true || !isArchivedRakebackRow(row) || !hasRakebackReportValue(row)) return false;
+        if (room && normalizeRoom(row.room) !== normalizeRoom(room)) return false;
+        var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
+        return !query || playerId.indexOf(query) !== -1;
+      }));
+    }
+
+    function getArchiveWeeks(rows) {
+      var byWeek = {};
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        var weekStart = rowWeekStart(row);
+        if (!weekStart) return;
+        if (!byWeek[weekStart]) byWeek[weekStart] = [];
+        byWeek[weekStart].push(row);
+      });
+      return Object.keys(byWeek).map(function (key) {
+        return { weekStart: Number(key), rows: orderSharedRowsForDisplay(byWeek[key]) };
+      }).sort(function (a, b) {
+        return b.weekStart - a.weekStart;
+      });
+    }
+
+    function createArchiveWeekRow(week) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      var details = document.createElement("details");
+      var summary = document.createElement("summary");
+      var list = document.createElement("div");
+      var totals = getRakebackTotals(week.rows);
+      tr.className = "admin-report-rakeback-archive-week-row";
+      tr.setAttribute("data-rakeback-generated", "1");
+      td.colSpan = 7;
+      details.className = "admin-report-rakeback-archive-week";
+      summary.className = "admin-report-rakeback-archive-week__summary";
+      summary.innerHTML =
+        '<span class="admin-report-rakeback-archive-week__title">Неделя ' + escapeHtml(formatArchiveWeekLabel(week.weekStart)) + "</span>" +
+        '<span class="admin-report-rakeback-archive-week__total">' + escapeHtml(formatRakebackSummaryPair(totals.rake, totals.amount)) + "</span>";
+      list.className = "admin-report-rakeback-archive-week__list";
+      week.rows.forEach(function (row, index) {
+        var item = document.createElement("div");
+        var room = ROOM_LABELS[normalizeRoom(row.room)] || row.room || "";
+        item.className = "admin-report-rakeback-archive-week__item";
+        item.innerHTML =
+          '<span class="admin-report-rakeback-archive-week__num">' + escapeHtml(String(index + 1)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__room">' + escapeHtml(room) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__id">' + escapeHtml(row.playerId || row.id || "") + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__rake">' + escapeHtml(formatInputNumber(row.rake) || "0") + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__percent">' + escapeHtml(formatInputNumber(row.percent) || "0") + "%</span>" +
+          '<span class="admin-report-rakeback-archive-week__amount">' + escapeHtml(formatInputNumber(row.amount) || "0") + "</span>";
+        list.appendChild(item);
+      });
+      details.appendChild(summary);
+      details.appendChild(list);
+      td.appendChild(details);
+      tr.appendChild(td);
+      return tr;
+    }
+
     function isManualRakebackReportInputTouched() {
       if (typeof config.getManualRakebackInputTouched === "function") {
         return !!config.getManualRakebackInputTouched();
@@ -1361,6 +1480,7 @@
       var rows = collectRows({ savedOnly: true }).filter(function (row) {
         return row &&
           String(row.playerId || "").trim() &&
+          isCurrentRakebackRow(row) &&
           isCurrentRakebackReportOwner(row.ownerId) &&
           !isRakebackRowReported(row) &&
           hasRakebackReportValue(row);
@@ -1395,6 +1515,7 @@
       sharedRows.forEach(function (row) {
         if (!row || (row.saved !== true && row.persisted !== true) || getSharedRowKind(row) === "addon") return;
         if (isCarryForwardTemplateRow(row)) return;
+        if (!isCurrentRakebackRow(row)) return;
         if (normalizeRoom(row.room) !== room) return;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         if (playerId) set[playerId] = true;
@@ -1895,8 +2016,9 @@
       if (summaryEl) summaryEl.hidden = false;
       if (statusEl) {
         if (archiveMode) {
-          statusEl.hidden = false;
-          statusEl.textContent = "Архив пока пуст";
+          var archiveRows = getArchiveRows();
+          statusEl.hidden = archiveRows.length > 0;
+          statusEl.textContent = archiveRows.length ? "" : "Архив пока пуст";
         } else if (!statusEl.textContent) {
           statusEl.hidden = true;
         }
@@ -1911,8 +2033,8 @@
       }
       if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       syncRakebackHeaderLabels();
-      var visibleShared = archiveMode ? [] : getVisibleSharedRows();
-      var allShared = archiveMode ? [] : getSharedRowsForTotal();
+      var visibleShared = archiveMode ? getArchiveRows() : getVisibleSharedRows();
+      var allShared = archiveMode ? visibleShared : getSharedRowsForTotal();
       var roomTotals = getRakebackTotals(visibleShared);
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
@@ -1930,7 +2052,15 @@
       activeRoom = normalizeRoom(activeRoom);
       if (archiveMode) {
         var archiveFragment = document.createDocumentFragment();
-        archiveFragment.appendChild(createArchiveEmptyRow());
+        var archiveRows = getArchiveRows();
+        var archiveWeeks = getArchiveWeeks(archiveRows);
+        if (archiveWeeks.length) {
+          archiveWeeks.forEach(function (week) {
+            archiveFragment.appendChild(createArchiveWeekRow(week));
+          });
+        } else {
+          archiveFragment.appendChild(createArchiveEmptyRow());
+        }
         body.replaceChildren(archiveFragment);
         syncRoomTabs();
         syncControls();
@@ -1939,7 +2069,8 @@
       var query = getSearchQuery();
       var pulledTemplateIds = getPulledTemplateIdSet(activeRoom);
       var showTemplateRows = templateRowsOpen || !!query;
-      var ids = templatesLoaded && showTemplateRows ? getTemplateIds(activeRoom).filter(function (id) {
+      var hasTemplateRowsForRoom = templatesMayExist || templatesLoading || getTemplateIds(activeRoom).length > 0;
+      var ids = showTemplateRows ? getTemplateIds(activeRoom).filter(function (id) {
         id = String(id || "").trim();
         if (!id || pulledTemplateIds[id.toLowerCase()]) return false;
         return !query || id.toLowerCase().indexOf(query) !== -1;
@@ -1975,18 +2106,18 @@
         fragment.appendChild(createSharedRow(renderRow, Math.max(0, baseIndex - 1)));
       });
       if (!templateRowsOpen && !query) clearTemplateStatus();
-      if (templatesMayExist || templatesLoading || ids.length) fragment.appendChild(createTemplateSeparator(showTemplateRows));
-      if (showTemplateRows && !templatesLoaded) {
+      if (hasTemplateRowsForRoom || ids.length) fragment.appendChild(createTemplateSeparator(showTemplateRows));
+      if (showTemplateRows && !templatesLoaded && templatesMayExist) {
         loadTemplatesIfNeeded({ showStatus: showTemplateStatus }).then(function () {
           render({ showTemplateStatus: showTemplateStatus });
         });
       }
-      if (showTemplateRows && templatesLoaded && showTemplateStatus) {
+      if (showTemplateRows && ids.length && showTemplateStatus) {
         setStatus("Загружаю шаблоны… 0 / " + ids.length, true);
       }
       body.replaceChildren(fragment);
       syncSharedGroupRows();
-      if (showTemplateRows && templatesLoaded) {
+      if (showTemplateRows && ids.length) {
         streamTemplateRows(ids, visibleShared.length, streamSeq, showTemplateStatus, showTemplateRows);
       }
       syncRoomTabs();

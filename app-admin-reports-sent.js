@@ -781,7 +781,7 @@
           var monthsByKey = groupReportsByMonth(list);
           var monthStarts = sortedMonthStarts(monthsByKey);
           if (!monthStarts.length) return '<p class="admin-report-sent-period-hint">Месячных итогов пока нет.</p>';
-          return monthStarts.map(function (monthStart, idx) {
+          return monthStarts.map(function (monthStart) {
             var monthList = monthsByKey[String(monthStart)] || [];
             var monthEnd = nextMonthStartMs(monthStart) - 1;
             var label = monthLabelFromStartMs(monthStart);
@@ -789,7 +789,7 @@
             var totalDetailHtml = buildReportDetailHtml(totals);
             var prefix = idPrefixBase + "month-" + String(monthStart) + "-";
             return (
-              '<details class="admin-report-sent-month"' + (idx === 0 ? " open" : "") + ">" +
+              '<details class="admin-report-sent-month">' +
                 '<summary class="admin-report-sent-month__summary">' + escapeReportHtml(label) + "</summary>" +
                 '<div class="admin-report-sent-month__inner">' +
                   '<details class="admin-report-sent-month-total" open>' +

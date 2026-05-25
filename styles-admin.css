@@ -1918,6 +1918,79 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 700;
   line-height: 1.25;
 }
+.admin-report-rakeback-archive-week-row td {
+  display: table-cell !important;
+  padding: 8px 6px 10px;
+  background: rgba(4, 6, 12, 0.96) !important;
+}
+.admin-report-rakeback-archive-week {
+  border: 1px solid rgba(246, 211, 145, 0.38);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(8, 11, 18, 0.82);
+}
+.admin-report-rakeback-archive-week__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 12px;
+  color: #ffe7b0;
+  cursor: pointer;
+  list-style: none;
+}
+.admin-report-rakeback-archive-week__summary::-webkit-details-marker {
+  display: none;
+}
+.admin-report-rakeback-archive-week__title {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 900;
+}
+.admin-report-rakeback-archive-week__title::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 7px;
+}
+.admin-report-rakeback-archive-week[open] .admin-report-rakeback-archive-week__title::before {
+  content: "▾";
+}
+.admin-report-rakeback-archive-week__total {
+  font-size: 16px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-archive-week__list {
+  display: grid;
+  gap: 6px;
+  padding: 0 8px 10px;
+}
+.admin-report-rakeback-archive-week__item {
+  display: grid;
+  grid-template-columns: 28px 52px minmax(68px, 0.8fr) minmax(78px, 1fr) minmax(58px, 0.8fr) 52px minmax(72px, 0.8fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 1px solid rgba(246, 211, 145, 0.2);
+  border-radius: 7px;
+  background: rgba(16, 16, 22, 0.82);
+  color: #d8d1c1;
+  font-size: 12px;
+  font-weight: 800;
+}
+.admin-report-rakeback-archive-week__num,
+.admin-report-rakeback-archive-week__date {
+  color: #ffe7b0;
+}
+.admin-report-rakeback-archive-week__rake,
+.admin-report-rakeback-archive-week__percent,
+.admin-report-rakeback-archive-week__amount {
+  color: #ffe7b0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 .admin-report-rakeback-week-separator td {
   display: table-cell !important;
   padding: 10px 6px 6px;
