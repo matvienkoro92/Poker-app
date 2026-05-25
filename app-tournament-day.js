@@ -1,7 +1,4 @@
-/** Кастомный кубок «Турнир дня» на дату по МСК (ключ YYYY-MM-DD) — файл в assets/ */
-var TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE = {
-  "2026-03-20": "tournament-day-championship-500.png"
-};
+var HOME_TOURNAMENT_DAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.png";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Турнир Недели Нокаут Меджик", buyin: "2 000₽", guarantee: "300 000₽" },
@@ -830,81 +827,16 @@ function updateTournamentDayBlock() {
           pokerMskWeekdayShortAt(frState.target.getTime()) + ", " + formatMskHmForDate(frState.target) + " МСК";
       }
     }
-    var scheduleTrophyImg = document.getElementById("scheduleTournamentDayTrophyImg");
-    var weekday = detailState.weekday != null ? detailState.weekday : selectedWeekday;
-    var pToday = getDisplayedTournamentMskParts(n);
-    var moNum = pToday.m + 1;
-    var daNum = pToday.d;
-    var mskDateKey =
-      pToday.y +
-      "-" +
-      (moNum < 10 ? "0" : "") +
-      moNum +
-      "-" +
-      (daNum < 10 ? "0" : "") +
-      daNum;
-    var dayImageOverride =
-      typeof TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE !== "undefined"
-        ? TOURNAMENT_DAY_IMAGE_OVERRIDE_BY_MSK_DATE[mskDateKey]
-        : null;
-    var trophyFile;
-    if (dayImageOverride) {
-      trophyFile = dayImageOverride;
-    } else if (detailNameStr === "Фриролл") {
-      trophyFile = "tournament-day-trophy.png";
-    } else if (weekday === 0) {
-      // Воскресный турнир недели — промо с перчаткой / 300k
-      trophyFile = "tournament-day-glove-champion-300k.png";
-    } else if (weekday === 1) {
-      // Понедельник — Magic MKO 500₽ (кастом: кубок с шаром и «500»)
-      trophyFile = "tournament-day-monday-magic-500.png";
-    } else if (weekday === 2) {
-      // Вторник — Poker21 Rebuy 300₽
-      trophyFile = "tournament-day-tuesday-poker21-rebuy-300.jpg";
-    } else if (weekday === 3) {
-      // Среда — Moscow Poker Open 100₽
-      trophyFile = "tournament-day-moscow-open-100.png";
-    } else if (weekday === 5) {
-      // Пятница — Нокаут Прогрессив 500₽
-      trophyFile = "tournament-day-championship-500.png";
-    } else {
-      // Чт, сб (не фриролл) — классический кубок клуба
-      trophyFile = "tournament-day-two-aces.png";
-    }
-    var trophySrc = typeof getAssetUrl === "function" ? getAssetUrl(trophyFile) : "";
-    if (scheduleTrophyImg && trophySrc) scheduleTrophyImg.src = trophySrc;
     var homeTrophyImg = document.getElementById("tournamentDayHomeTrophyImg");
-    var homeTrophyFile = dayImageOverride || trophyFile;
-    var homeTrophySrc = typeof getAssetUrl === "function" ? getAssetUrl(homeTrophyFile) : "";
+    var homeTrophySrc =
+      typeof getAssetUrl === "function"
+        ? getAssetUrl(HOME_TOURNAMENT_DAY_BANNER_FILE)
+        : "./assets/" + HOME_TOURNAMENT_DAY_BANNER_FILE;
     if (homeTrophyImg && homeTrophySrc) {
       homeTrophyImg.src = homeTrophySrc;
-      homeTrophyImg.alt = detailNameStr ? "Турнир дня: " + detailNameStr : "";
+      homeTrophyImg.alt = "Poker21 Мистери Баунти 130 000 ₽";
     }
     updateHomeTournamentFocusFlow();
-    var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
-    if (schedTbody) {
-      var schedRows = schedTbody.querySelectorAll("tr");
-      var trophyRowIdx = (state.weekday + 6) % 7;
-      for (var ri = 0; ri < schedRows.length; ri++) {
-        var tr = schedRows[ri];
-        var nameCell = tr.querySelector("td:nth-child(2)");
-        if (!nameCell) continue;
-        var inlineTrophy = nameCell.querySelector(".schedule-tournament-day-trophy-inline");
-        if (ri === trophyRowIdx && dayImageOverride && trophySrc) {
-          if (!inlineTrophy) {
-            inlineTrophy = document.createElement("img");
-            inlineTrophy.className = "schedule-tournament-day-trophy-inline";
-            inlineTrophy.alt = "";
-            inlineTrophy.width = 56;
-            inlineTrophy.height = 56;
-            nameCell.insertBefore(inlineTrophy, nameCell.firstChild);
-          }
-          inlineTrophy.src = trophySrc;
-        } else if (inlineTrophy) {
-          inlineTrophy.remove();
-        }
-      }
-    }
   }
   formatTimer();
   if (window._tournamentDayTimer) clearInterval(window._tournamentDayTimer);
