@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.288");
-@import url("./styles-home-rating-promo.css?v=3.288");
-@import url("./styles-auth.css?v=3.288");
-@import url("./styles-home.css?v=3.288");
-@import url("./styles-chat.css?v=3.288");
-@import url("./styles-learning-games.css?v=3.288");
-@import url("./styles-raffles.css?v=3.288");
-@import url("./styles-daily-poker.css?v=3.288");
-@import url("./styles-home-legacy-prelude.css?v=3.288");
-@import url("./styles-download.css?v=3.288");
-@import url("./styles-home-legacy-tail.css?v=3.288");
-@import url("./styles-home-rating-promo-legacy.css?v=3.288");
-@import url("./styles-rating.css?v=3.288");
-@import url("./styles-hall.css?v=3.288");
-@import url("./styles-admin.css?v=3.288");
-@import url("./styles-player-crm.css?v=3.288");
-@import url("./styles-profile.css?v=3.288");
-@import url("./styles-layout.css?v=3.288");
-@import url("./styles-chat-overlays.css?v=3.288");
-@import url("./styles-home-overrides.css?v=3.288");
-@import url("./styles-layout-touch-targets.css?v=3.288");
-@import url("./styles-home-rating-promo-late.css?v=3.288");
+@import url("./styles-base.css?v=3.289");
+@import url("./styles-home-rating-promo.css?v=3.289");
+@import url("./styles-auth.css?v=3.289");
+@import url("./styles-home.css?v=3.289");
+@import url("./styles-chat.css?v=3.289");
+@import url("./styles-learning-games.css?v=3.289");
+@import url("./styles-raffles.css?v=3.289");
+@import url("./styles-daily-poker.css?v=3.289");
+@import url("./styles-home-legacy-prelude.css?v=3.289");
+@import url("./styles-download.css?v=3.289");
+@import url("./styles-home-legacy-tail.css?v=3.289");
+@import url("./styles-home-rating-promo-legacy.css?v=3.289");
+@import url("./styles-rating.css?v=3.289");
+@import url("./styles-hall.css?v=3.289");
+@import url("./styles-admin.css?v=3.289");
+@import url("./styles-player-crm.css?v=3.289");
+@import url("./styles-profile.css?v=3.289");
+@import url("./styles-layout.css?v=3.289");
+@import url("./styles-chat-overlays.css?v=3.289");
+@import url("./styles-home-overrides.css?v=3.289");
+@import url("./styles-layout-touch-targets.css?v=3.289");
+@import url("./styles-home-rating-promo-late.css?v=3.289");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -312,28 +312,28 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .home-daily-deal-hero__admin-version {
   position: absolute;
-  z-index: 8;
-  top: -40px;
-  right: 182px;
+  z-index: 9;
+  top: -35px;
+  right: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 5px 8px;
-  border: 1px solid rgba(255, 181, 49, 0.7);
-  border-radius: 999px;
-  background: rgba(2, 4, 8, 0.9);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #ffdf9e;
-  box-shadow:
-    0 0 16px rgba(255, 118, 0, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  font-size: 10px;
+  box-shadow: none;
+  font-size: 11px;
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(255, 118, 0, 0.44);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 9px rgba(255, 118, 0, 0.52);
   white-space: nowrap;
   pointer-events: none;
 }
