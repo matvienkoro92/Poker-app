@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.295");
-@import url("./styles-home-rating-promo.css?v=3.295");
-@import url("./styles-auth.css?v=3.295");
-@import url("./styles-home.css?v=3.295");
-@import url("./styles-chat.css?v=3.295");
-@import url("./styles-learning-games.css?v=3.295");
-@import url("./styles-raffles.css?v=3.295");
-@import url("./styles-daily-poker.css?v=3.295");
-@import url("./styles-home-legacy-prelude.css?v=3.295");
-@import url("./styles-download.css?v=3.295");
-@import url("./styles-home-legacy-tail.css?v=3.295");
-@import url("./styles-home-rating-promo-legacy.css?v=3.295");
-@import url("./styles-rating.css?v=3.295");
-@import url("./styles-hall.css?v=3.295");
-@import url("./styles-admin.css?v=3.295");
-@import url("./styles-player-crm.css?v=3.295");
-@import url("./styles-profile.css?v=3.295");
-@import url("./styles-layout.css?v=3.295");
-@import url("./styles-chat-overlays.css?v=3.295");
-@import url("./styles-home-overrides.css?v=3.295");
-@import url("./styles-layout-touch-targets.css?v=3.295");
-@import url("./styles-home-rating-promo-late.css?v=3.295");
+@import url("./styles-base.css?v=3.296");
+@import url("./styles-home-rating-promo.css?v=3.296");
+@import url("./styles-auth.css?v=3.296");
+@import url("./styles-home.css?v=3.296");
+@import url("./styles-chat.css?v=3.296");
+@import url("./styles-learning-games.css?v=3.296");
+@import url("./styles-raffles.css?v=3.296");
+@import url("./styles-daily-poker.css?v=3.296");
+@import url("./styles-home-legacy-prelude.css?v=3.296");
+@import url("./styles-download.css?v=3.296");
+@import url("./styles-home-legacy-tail.css?v=3.296");
+@import url("./styles-home-rating-promo-legacy.css?v=3.296");
+@import url("./styles-rating.css?v=3.296");
+@import url("./styles-hall.css?v=3.296");
+@import url("./styles-admin.css?v=3.296");
+@import url("./styles-player-crm.css?v=3.296");
+@import url("./styles-profile.css?v=3.296");
+@import url("./styles-layout.css?v=3.296");
+@import url("./styles-chat-overlays.css?v=3.296");
+@import url("./styles-home-overrides.css?v=3.296");
+@import url("./styles-layout-touch-targets.css?v=3.296");
+@import url("./styles-home-rating-promo-late.css?v=3.296");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -1384,8 +1384,91 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   content: none;
 }
 
+.app.app--view-home .home-tournament-flow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.app.app--view-home .home-tournament-flow--ready {
+  opacity: 1;
+}
+
+.app.app--view-home .home-tournament-flow__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.app.app--view-home .home-tournament-flow__trail {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.app.app--view-home .home-tournament-flow__trail--halo {
+  stroke: rgba(255, 181, 49, 0.3);
+  stroke-width: 18px;
+  filter: url("#homeTournamentFlowGlow");
+}
+
+.app.app--view-home .home-tournament-flow__trail--strand {
+  stroke: rgba(255, 232, 166, 0.82);
+  stroke-width: 2.6px;
+  stroke-dasharray: 18 14;
+  filter: url("#homeTournamentFlowGlow");
+  animation: homeTournamentFlowPulse 1.8s linear infinite;
+}
+
+.app.app--view-home .home-tournament-flow__trail--strand-b {
+  stroke: rgba(255, 154, 28, 0.68);
+  stroke-dasharray: 10 18;
+  animation-duration: 2.35s;
+  animation-direction: reverse;
+}
+
+.app.app--view-home .home-tournament-flow__trail--core {
+  stroke: url("#homeTournamentFlowGold");
+  stroke-width: 4.8px;
+  filter: url("#homeTournamentFlowGlow");
+}
+
+.app.app--view-home .home-tournament-flow__spark {
+  fill: #ffe9a8;
+  filter: url("#homeTournamentFlowGlow");
+}
+
+.app.app--view-home .home-tournament-flow__spark--start {
+  fill: #fff4c8;
+}
+
+.app.app--view-home .home-tournament-flow__spark--mid {
+  fill: #ffb531;
+  opacity: 0.78;
+}
+
+.app.app--view-home .home-tournament-flow__spark--end {
+  fill: #ffe2a0;
+  opacity: 0.86;
+}
+
+@keyframes homeTournamentFlowPulse {
+  to {
+    stroke-dashoffset: -56;
+  }
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
   position: relative;
+  z-index: 3;
   gap: 10px;
   padding: 4px 12px 12px;
   border: 0;

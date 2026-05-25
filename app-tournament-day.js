@@ -338,6 +338,98 @@ function renderHomeTournamentWeekList(activeWeekday) {
   });
 }
 
+function updateHomeTournamentFocusFlow() {
+  var section = document.querySelector(".tournament-day-home-dual--tournament-focus");
+  if (!section) return;
+  var flow = section.querySelector(".home-tournament-flow");
+  var svg = flow ? flow.querySelector(".home-tournament-flow__svg") : null;
+  var activeRow = section.querySelector(".home-tournament-week-row--active");
+  var target = section.querySelector(".home-tournament-detail__media");
+  if (!flow || !svg || !activeRow || !target) return;
+  window.requestAnimationFrame(function () {
+    var sectionRect = section.getBoundingClientRect();
+    var rowRect = activeRow.getBoundingClientRect();
+    var targetRect = target.getBoundingClientRect();
+    var gap = targetRect.left - rowRect.right;
+    if (sectionRect.width < 360 || gap < 24 || rowRect.height <= 0 || targetRect.height <= 0) {
+      flow.classList.remove("home-tournament-flow--ready");
+      return;
+    }
+    var startX = rowRect.right - sectionRect.left - 3;
+    var startY = rowRect.top + rowRect.height * 0.5 - sectionRect.top;
+    var endX = targetRect.left - sectionRect.left + Math.min(20, targetRect.width * 0.09);
+    var endY = targetRect.top + targetRect.height * 0.55 - sectionRect.top;
+    var dx = endX - startX;
+    var dy = endY - startY;
+    var c1x = startX + dx * 0.22;
+    var c2x = startX + dx * 0.54;
+    var c1y = startY - Math.max(12, Math.abs(dy) * 0.22);
+    var c2y = endY + Math.max(8, Math.abs(dy) * 0.18);
+    var path = "M " + startX + " " + startY + " C " + c1x + " " + c1y + " " + c2x + " " + c2y + " " + endX + " " + endY;
+    var upperPath =
+      "M " +
+      startX +
+      " " +
+      (startY - 8) +
+      " C " +
+      c1x +
+      " " +
+      (c1y - 10) +
+      " " +
+      c2x +
+      " " +
+      (c2y - 8) +
+      " " +
+      endX +
+      " " +
+      (endY - 7);
+    var lowerPath =
+      "M " +
+      startX +
+      " " +
+      (startY + 8) +
+      " C " +
+      c1x +
+      " " +
+      (c1y + 8) +
+      " " +
+      c2x +
+      " " +
+      (c2y + 10) +
+      " " +
+      endX +
+      " " +
+      (endY + 7);
+    svg.setAttribute("viewBox", "0 0 " + Math.max(1, Math.round(sectionRect.width)) + " " + Math.max(1, Math.round(sectionRect.height)));
+    var halo = svg.querySelector(".home-tournament-flow__trail--halo");
+    var core = svg.querySelector(".home-tournament-flow__trail--core");
+    var strandA = svg.querySelector(".home-tournament-flow__trail--strand-a");
+    var strandB = svg.querySelector(".home-tournament-flow__trail--strand-b");
+    if (halo) halo.setAttribute("d", path);
+    if (core) core.setAttribute("d", path);
+    if (strandA) strandA.setAttribute("d", upperPath);
+    if (strandB) strandB.setAttribute("d", lowerPath);
+    var midX = startX + dx * 0.48;
+    var midY = startY + dy * 0.44 - 10;
+    [
+      [".home-tournament-flow__spark--start", startX, startY],
+      [".home-tournament-flow__spark--mid", midX, midY],
+      [".home-tournament-flow__spark--end", endX, endY]
+    ].forEach(function (spark) {
+      var el = svg.querySelector(spark[0]);
+      if (!el) return;
+      el.setAttribute("cx", spark[1]);
+      el.setAttribute("cy", spark[2]);
+    });
+    flow.classList.add("home-tournament-flow--ready");
+  });
+}
+
+if (!window._homeTournamentFocusFlowResizeBound) {
+  window._homeTournamentFocusFlowResizeBound = true;
+  window.addEventListener("resize", updateHomeTournamentFocusFlow);
+}
+
 function pokerGetDownloadTournamentDayInfo(now) {
   now = now || new Date();
   var msk = pokerGetMskDowAndMinutes(now);
@@ -788,6 +880,7 @@ function updateTournamentDayBlock() {
       homeTrophyImg.src = homeTrophySrc;
       homeTrophyImg.alt = detailNameStr ? "Турнир дня: " + detailNameStr : "";
     }
+    updateHomeTournamentFocusFlow();
     var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
     if (schedTbody) {
       var schedRows = schedTbody.querySelectorAll("tr");
