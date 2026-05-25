@@ -148,7 +148,7 @@
       if (!shown && candidates[i]) shown = candidates[i];
       if (isKnownAdminUser(candidates[i])) knownAdmin = true;
     }
-    el.textContent = version ? "Version " + version : "";
+    el.textContent = version ? "v" + version : "";
     if (forceVisible || knownAdmin) el.classList.remove("home-admin-version--hidden");
   }
 
