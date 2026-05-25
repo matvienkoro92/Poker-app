@@ -3998,6 +3998,64 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 60
         }
       ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Proxor",
+          "place": 1,
+          "reward": 32650.8,
+          "points": 135
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 3,
+          "reward": 8188.75,
+          "points": 90
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 6090.62,
+          "points": 60
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 6,
+          "reward": 4548.75,
+          "points": 50
+        },
+        {
+          "nick": "Waaar",
+          "place": 10,
+          "reward": 1980,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Igorjn84",
+          "place": 1,
+          "reward": 16000,
+          "points": 135
+        },
+        {
+          "nick": "king000001",
+          "place": 4,
+          "reward": 5100,
+          "points": 70
+        }
+      ]
     }
   ],
   "23.05.2026": [
@@ -4072,6 +4130,64 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 1,
           "reward": 463840,
           "points": 135
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "HOK🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 10993.75,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 7700,
+          "points": 70
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 7,
+          "reward": 956.25,
+          "points": 40
+        },
+        {
+          "nick": "kriak",
+          "place": 8,
+          "reward": 1237.5,
+          "points": 30
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 9,
+          "reward": 2643.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "MOK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 1,
+          "reward": 14375,
+          "points": 135
+        },
+        {
+          "nick": "RUS22RUS",
+          "place": 5,
+          "reward": 1570,
+          "points": 60
         }
       ]
     }
@@ -4172,6 +4288,84 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 28,
           "reward": 420,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "XORTYRETSKOGO",
+          "place": 1,
+          "reward": 6750,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресний турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Y-gin",
+          "place": 3,
+          "reward": 21231.25,
+          "points": 90
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 6,
+          "reward": 13150,
+          "points": 50
+        },
+        {
+          "nick": "kriak",
+          "place": 9,
+          "reward": 6600,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 10,
+          "reward": 5600,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 11,
+          "reward": 6650,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "MOK🏦",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Tanechka",
+          "place": 3,
+          "reward": 2210,
+          "points": 90
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 1760,
+          "points": 70
+        },
+        {
+          "nick": "Prushnik",
+          "place": 5,
+          "reward": 1620,
+          "points": 60
         }
       ]
     }

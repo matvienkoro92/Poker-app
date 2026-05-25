@@ -683,16 +683,20 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-22-05-2026-league1-new-hot-pko-15h.jpg",
     "rating-compressed-preview/rating-22-05-2026-league1-shr-1mln-18h.jpg",
     "rating-compressed-preview/rating-22-05-2026-league1-magic-500-22h.jpg",
-    "rating-compressed-preview/rating-22-05-2026-league1-night-magic-23h.jpg"
+    "rating-compressed-preview/rating-22-05-2026-league1-night-magic-23h.jpg",
+    "rating-compressed-preview/rating-22-05-2026-league1-friday-progressive-18h.jpg",
+    "rating-compressed-preview/rating-22-05-2026-league1-dv-rebuy-12h.jpg"
   ],
   "23.05.2026": [
     "rating-compressed-preview/rating-23-05-2026-league1-sbounty-00h.jpg",
     "rating-compressed-preview/rating-23-05-2026-league1-dv-turbo-500-10h.jpg",
-    "rating-compressed-preview/rating-23-05-2026-league1-shr-magic-19h.jpg"
+    "rating-compressed-preview/rating-23-05-2026-league1-shr-magic-19h.jpg",
+    "rating-compressed-preview/rating-23-05-2026-league1-hok-19h.jpg"
   ],
   "24.05.2026": [
     "rating-compressed-preview/rating-24-05-2026-league1-magic-bounty-11h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-main-2mln-18h.jpg",
-    "rating-compressed-preview/rating-24-05-2026-league1-nlh-knockout-21h.jpg"
+    "rating-compressed-preview/rating-24-05-2026-league1-nlh-knockout-21h.jpg",
+    "rating-compressed-preview/rating-24-05-2026-league1-sunday-tournament-18h.jpg"
   ]
 };

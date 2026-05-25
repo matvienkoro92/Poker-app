@@ -435,9 +435,12 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-22-05-2026-league2-dv-plo5-12h.jpg"
   ],
   "23.05.2026": [
-    "rating-compressed-preview/rating-23-05-2026-league2-deep-night-02h.jpg"
+    "rating-compressed-preview/rating-23-05-2026-league2-deep-night-02h.jpg",
+    "rating-compressed-preview/rating-23-05-2026-league2-mok-17h.jpg"
   ],
   "24.05.2026": [
-    "rating-compressed-preview/rating-24-05-2026-league2-kg-plo6-09h.jpg"
+    "rating-compressed-preview/rating-24-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-24-05-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-24-05-2026-league2-mok-17h.jpg"
   ]
 };
