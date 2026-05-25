@@ -125,7 +125,7 @@
     }
     function getReportExtraEntries(report) {
       var entries = [];
-      if (Array.isArray(report && report.extraFields)) {
+      if (Array.isArray(report && report.extraFields) && report.extraFields.length > 0) {
         report.extraFields.forEach(function (field) {
           if (!field || !(field.name || field.amount != null && field.amount !== "")) return;
           entries.push({ name: field.name || "Доп", value: field.amount != null ? field.amount : "" });
@@ -241,13 +241,40 @@
       parts.push(buildDetailBlock("admin-report-sent-detail__field-block--other", otherEntries));
       return parts.join("");
     };
+    function isReportUsdtRateFieldName(name) {
+      if (typeof helpers.isReportUsdtRateFieldName === "function") return !!helpers.isReportUsdtRateFieldName(name);
+      var normalized = normalizeReportDetailName(name);
+      return normalized.indexOf("курс") !== -1 && (normalized.indexOf("usdt") !== -1 || normalized.indexOf("юсдт") !== -1);
+    }
     var mergeReportExtrasIntoMap = helpers.mergeReportExtrasIntoMap || function (map, report) {
-      if (!map || !report || !Array.isArray(report.extraFields)) return map;
-      report.extraFields.forEach(function (field) {
-        if (!field || !field.name) return;
-        var n = typeof field.amount === "number" ? field.amount : parseFloat(String(field.amount || "").replace(",", "."));
-        if (Number.isFinite(n)) map[field.name] = (map[field.name] || 0) + n;
-      });
+      if (!map || !report) return map;
+      function addExtra(name, raw) {
+        name = name != null ? String(name).trim() : "";
+        if (!name) name = "Доп.";
+        if (isReportManualRakebackFieldName(name)) return;
+        var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
+        if (isNaN(n)) n = 0;
+        if (isReportUsdtRateFieldName(name)) {
+          var prev = map[name] && map[name].__avg ? map[name] : { __avg: true, sum: 0, count: 0 };
+          if (n !== 0) {
+            prev.sum += n;
+            prev.count += 1;
+          }
+          map[name] = prev;
+          return;
+        }
+        map[name] = (map[name] || 0) + n;
+      }
+      if (Array.isArray(report.extraFields) && report.extraFields.length > 0) {
+        report.extraFields.forEach(function (field) {
+          if (!field) return;
+          addExtra(field.name != null ? field.name : field.extraName, field.amount != null ? field.amount : field.extraAmount);
+        });
+        return map;
+      }
+      if (report.extraName || report.extraAmount != null) {
+        addExtra(report.extraName, report.extraAmount);
+      }
       return map;
     };
 

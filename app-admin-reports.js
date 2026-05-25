@@ -817,6 +817,7 @@ function initAdminReportModal() {
         formatReportRubleNumber: formatReportRubleNumber,
         formatRuWeekdayDateFromTs: formatRuWeekdayDateFromTs,
         getReportStoredRakebackTotal: getReportStoredRakebackTotal,
+        isReportUsdtRateFieldName: isReportUsdtRateFieldName,
         mergeReportExtrasIntoMap: mergeReportExtrasIntoMap,
         reportBusinessTimestampMs: reportBusinessTimestampMs,
         reportEffectiveTimestampMs: reportEffectiveTimestampMs,
@@ -2168,7 +2169,37 @@ function initAdminReportModal() {
   }
 
   function mergeReportExtrasIntoMap() {
-    return callLegacyModule("mergeReportExtrasIntoMap", arguments);
+    var map = arguments[0];
+    var r = arguments[1];
+    if (!r || !map) return map;
+    function addExtra(name, raw) {
+      name = name != null ? String(name).trim() : "";
+      if (!name) name = "Доп.";
+      if (isReportManualRakebackFieldName(name)) return;
+      var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
+      if (isNaN(n)) n = 0;
+      if (isReportUsdtRateFieldName(name)) {
+        var prev = map[name] && map[name].__avg ? map[name] : { __avg: true, sum: 0, count: 0 };
+        if (n !== 0) {
+          prev.sum += n;
+          prev.count += 1;
+        }
+        map[name] = prev;
+        return;
+      }
+      map[name] = (map[name] || 0) + n;
+    }
+    if (Array.isArray(r.extraFields) && r.extraFields.length > 0) {
+      r.extraFields.forEach(function (f) {
+        if (!f) return;
+        addExtra(f.name != null ? f.name : f.extraName, f.amount != null ? f.amount : f.extraAmount);
+      });
+      return map;
+    }
+    if (r.extraName || r.extraAmount != null) {
+      addExtra(r.extraName, r.extraAmount);
+    }
+    return map;
   }
 
   function mergeRakebackRowsIntoMap() {
