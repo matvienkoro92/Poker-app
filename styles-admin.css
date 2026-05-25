@@ -1641,7 +1641,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-table th,
 .admin-report-rakeback-table td {
-  padding: 4px 6px;
+  padding: 2px 6px;
   text-align: left;
   color: var(--text);
   vertical-align: middle;
@@ -2048,6 +2048,26 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-size: 12px;
   font-weight: 800;
 }
+.admin-report-rakeback-archive-week__item--head {
+  min-height: 24px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  border-color: rgba(246, 211, 145, 0.12);
+  background: rgba(246, 211, 145, 0.06);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.admin-report-rakeback-archive-week__item--addon {
+  border-color: rgba(255, 181, 49, 0.28);
+  background:
+    linear-gradient(90deg, rgba(255, 181, 49, 0.1), rgba(16, 16, 22, 0.82) 42%);
+}
+.admin-report-rakeback-archive-week__item--addon .admin-report-rakeback-archive-week__num {
+  color: #ffb531;
+  font-size: 15px;
+}
 .admin-report-rakeback-archive-week__num,
 .admin-report-rakeback-archive-week__date {
   color: #ffe7b0;
@@ -2058,6 +2078,17 @@ button.admin-report-rakeback-summary__row:focus-visible {
   color: #ffe7b0;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.admin-report-rakeback-archive-week__rake-main,
+.admin-report-rakeback-archive-week__rake-sub {
+  display: block;
+}
+.admin-report-rakeback-archive-week__rake-sub {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
 }
 .admin-report-rakeback-week-separator td {
   display: table-cell !important;
@@ -2259,8 +2290,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-select,
 .admin-report-rakeback-input {
   width: 100%;
-  min-height: 34px;
-  padding: 5px 7px;
+  min-height: 30px;
+  padding: 4px 7px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--input-bg, var(--card-bg));
@@ -2605,7 +2636,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-table th,
   .admin-report-rakeback-table td {
-    padding: 4px 2px;
+    padding: 1px 2px;
   }
   .admin-report-rakeback-table th {
     font-size: 10px;
@@ -2681,8 +2712,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
-    min-height: 32px;
-    padding: 4px 4px;
+    min-height: 28px;
+    padding: 2px 4px;
     border-radius: 7px;
     font-size: 12px;
   }
@@ -2840,7 +2871,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
-    min-height: 30px;
+    min-height: 28px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     padding-left: 3px;
     padding-right: 3px;
     font-size: 11px;

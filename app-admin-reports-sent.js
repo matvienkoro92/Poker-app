@@ -159,6 +159,7 @@
       }
       var childParts = [];
       var childTotal = 0;
+      var extraEntries = getReportExtraEntries(report);
       depositChildren.forEach(function (key) {
         if (!hasReportValue(report[key])) return;
         childTotal += parseReportNumber(report[key]);
@@ -166,6 +167,16 @@
           '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--' + escapeReportHtml(key) + '">' +
             '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(labels[key]) + "</span>" +
             '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(report[key]) + "</span>" +
+          "</div>"
+        );
+      });
+      extraEntries.forEach(function (extra) {
+        if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name)) return;
+        childTotal += parseReportNumber(extra.value);
+        childParts.push(
+          '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--extra">' +
+            '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(extra.name) + "</span>" +
+            '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(String(extra.value)) + "</span>" +
           "</div>"
         );
       });
@@ -230,11 +241,10 @@
       pushEntry(otherEntries, labels.botExchipCashout, report.botExchipCashout, false);
       pushEntry(otherEntries, labels.transfers, report.transfers, false);
       pushEntry(otherEntries, labels.ret, report.ret, false);
-      getReportExtraEntries(report).forEach(function (extra) {
+      extraEntries.forEach(function (extra) {
         if (isReportManualRakebackFieldName(extra.name)) return;
         var entry = { label: extra.name, value: String(extra.value) };
         if (isReportAnyaSalaryFieldName(extra.name)) anyaEntries.push(entry);
-        else otherEntries.push(entry);
       });
       parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
       parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(anyaEntries)));

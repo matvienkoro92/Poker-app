@@ -1292,10 +1292,24 @@
       return parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
     }
 
-    function sortRows(rows) {
+    function getRakeSortValue(row, addonsByGroup) {
+      if (!row) return 0;
+      var groupId = String(row.groupId || "").trim();
+      var values = [parseNumber(row.rake)];
+      if (getSharedRowKind(row) !== "addon" && groupId && addonsByGroup && addonsByGroup[groupId]) {
+        addonsByGroup[groupId].forEach(function (addon) {
+          values.push(parseNumber(addon && addon.rake));
+        });
+      }
+      return values.reduce(function (max, value) {
+        return value > max ? value : max;
+      }, 0);
+    }
+
+    function sortRows(rows, addonsByGroup) {
       var mode = getSortMode();
       return rows.slice().sort(function (a, b) {
-        if (mode === "rake") return parseNumber(b.rake) - parseNumber(a.rake) || compareRowsByEntryDateDesc(a, b);
+        if (mode === "rake") return getRakeSortValue(b, addonsByGroup) - getRakeSortValue(a, addonsByGroup) || compareRowsByEntryDateDesc(a, b);
         if (mode === "percent") return parseNumber(b.percent) - parseNumber(a.percent) || compareRowsByEntryDateDesc(a, b);
         if (mode === "created_percent") {
           return compareRowsByEntryDateDesc(a, b) || parseNumber(b.percent) - parseNumber(a.percent) || parseNumber(b.rake) - parseNumber(a.rake);
@@ -1328,7 +1342,7 @@
         addonsByGroup[groupId].sort(compareRowsByEntryDateAsc);
       });
       var ordered = [];
-      sortRows(baseRows).forEach(function (row) {
+      sortRows(baseRows, addonsByGroup).forEach(function (row) {
         var groupId = String(row.groupId || "").trim();
         ordered.push(row);
         (addonsByGroup[groupId] || []).forEach(function (addon) {
@@ -1504,20 +1518,44 @@
       }
       var list = document.createElement("div");
       list.className = "admin-report-rakeback-archive-week__list";
-      rows.forEach(function (row, index) {
+      var header = document.createElement("div");
+      header.className = "admin-report-rakeback-archive-week__item admin-report-rakeback-archive-week__item--head";
+      header.innerHTML =
+        '<span class="admin-report-rakeback-archive-week__num">№</span>' +
+        '<span class="admin-report-rakeback-archive-week__date">Дата</span>' +
+        '<span class="admin-report-rakeback-archive-week__room">Рум</span>' +
+        '<span class="admin-report-rakeback-archive-week__id">ID</span>' +
+        '<span class="admin-report-rakeback-archive-week__rake">Рейк</span>' +
+        '<span class="admin-report-rakeback-archive-week__percent">%</span>' +
+        '<span class="admin-report-rakeback-archive-week__amount">РБ</span>';
+      list.appendChild(header);
+      var baseIndex = 0;
+      var previousRakeByGroup = {};
+      rows.forEach(function (row) {
         var item = document.createElement("div");
         var rowRoom = ROOM_LABELS[normalizeRoom(row.room)] || row.room || "";
         var amount = row.amount != null && row.amount !== "" ? row.amount : getReportAmount(row.room, rowAmount(row));
-        item.className = "admin-report-rakeback-archive-week__item";
+        var kind = getSharedRowKind(row);
+        var isAddon = kind === "addon";
+        var groupId = String(row.groupId || "").trim();
+        var currentRake = parseNumber(row.rake);
+        var previousRake = groupId && previousRakeByGroup[groupId] != null ? previousRakeByGroup[groupId] : 0;
+        var addonDelta = currentRake - previousRake;
+        var rakeHtml = isAddon
+          ? '<span class="admin-report-rakeback-archive-week__rake-main">' + escapeHtml((addonDelta >= 0 ? "+" : "") + (formatInputNumber(addonDelta) || "0")) + '</span><small class="admin-report-rakeback-archive-week__rake-sub">итого ' + escapeHtml(formatInputNumber(currentRake) || "0") + "</small>"
+          : '<span class="admin-report-rakeback-archive-week__rake-main">' + escapeHtml(formatInputNumber(row.rake) || "0") + "</span>";
+        if (!isAddon) baseIndex += 1;
+        item.className = "admin-report-rakeback-archive-week__item" + (isAddon ? " admin-report-rakeback-archive-week__item--addon" : "");
         item.innerHTML =
-          '<span class="admin-report-rakeback-archive-week__num">' + escapeHtml(String(index + 1)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__num">' + (isAddon ? '<span title="Подзапись" aria-label="Подзапись">↳</span>' : escapeHtml(String(baseIndex))) + "</span>" +
           '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
           '<span class="admin-report-rakeback-archive-week__room">' + escapeHtml(rowRoom) + "</span>" +
           '<span class="admin-report-rakeback-archive-week__id">' + escapeHtml(row.playerId || row.id || "") + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__rake">' + escapeHtml(formatInputNumber(row.rake) || "0") + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__rake">' + rakeHtml + "</span>" +
           '<span class="admin-report-rakeback-archive-week__percent">' + escapeHtml(formatInputNumber(row.percent) || "0") + "%</span>" +
           '<span class="admin-report-rakeback-archive-week__amount">' + escapeHtml(formatInputNumber(amount) || "0") + "</span>";
         list.appendChild(item);
+        if (!isAddon || row.rake != null && row.rake !== "") previousRakeByGroup[groupId] = currentRake;
       });
       panel.appendChild(list);
       return panel;

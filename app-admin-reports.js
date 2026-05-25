@@ -2773,6 +2773,7 @@ function initAdminReportModal() {
     }
     var childParts = [];
     var childTotal = 0;
+    var extraEntries = getReportExtraEntries(it);
     depositChildren.forEach(function (k) {
       if (!hasReportValue(it[k])) return;
       childTotal += parseReportNumber(it[k]);
@@ -2780,6 +2781,16 @@ function initAdminReportModal() {
         '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--' + escapeReportHtml(k) + '">' +
           '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(labels[k]) + "</span>" +
           '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(it[k]) + "</span>" +
+        "</div>"
+      );
+    });
+    extraEntries.forEach(function (extra) {
+      if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name)) return;
+      childTotal += parseReportNumber(extra.value);
+      childParts.push(
+        '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--extra">' +
+          '<span class="admin-report-sent-detail__deposit-child-label">' + escapeReportHtml(extra.name) + "</span>" +
+          '<span class="admin-report-sent-detail__deposit-child-value">' + escapeReportHtml(String(extra.value)) + "</span>" +
         "</div>"
       );
     });
@@ -2844,12 +2855,11 @@ function initAdminReportModal() {
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
     pushEntry(otherEntries, labels.transfers, it.transfers, false);
     pushEntry(otherEntries, labels.ret, it.ret, false);
-    getReportExtraEntries(it).forEach(function (extra) {
+    extraEntries.forEach(function (extra) {
       var normalizedName = normalizeReportDetailName(extra.name);
       if (isReportManualRakebackFieldName(extra.name)) return;
       var entry = { label: extra.name, value: String(extra.value) };
       if (isReportAnyaSalaryFieldName(normalizedName)) anyaEntries.push(entry);
-      else otherEntries.push(entry);
     });
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--calc", calcEntries));
     parts.push(buildDetailBlock("admin-report-sent-detail__field-block--danger", expenseEntries.concat(anyaEntries)));
