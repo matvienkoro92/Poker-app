@@ -53,8 +53,7 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-05-03-2026-10.png",
     "rating-05-03-2026-11.png",
     "rating-05-03-2026-12.png",
-    "rating-05-03-2026-14.png",
-    "rating-05-03-2026-hyper-turbo-300.png"
+    "rating-05-03-2026-14.png"
   ],
   "06.03.2026": [
     "rating-06-03-2026-1.png",
@@ -665,10 +664,12 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-19-05-2026-league1-night-magic-23h.jpg"
   ],
   "20.05.2026": [
+    "rating-compressed-preview/rating-20-05-2026-league1-dva-tuza-dollars-deep-freeze-dendi-01.jpg",
     "rating-compressed-preview/rating-20-05-2026-league1-tai-7-ko-06h.jpg",
     "rating-compressed-preview/rating-20-05-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-20-05-2026-league1-dv-bounty-13h.jpg",
-    "rating-compressed-preview/rating-20-05-2026-league1-hok-19h.jpg"
+    "rating-compressed-preview/rating-20-05-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-20-05-2026-league1-dva-tuza-dollars-big-pko-dendi-01.jpg"
   ],
   "21.05.2026": [
     "rating-compressed-preview/rating-21-05-2026-league1-tai-7-ko-06h.jpg",
@@ -694,7 +695,6 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-23-05-2026-league1-hok-19h.jpg"
   ],
   "24.05.2026": [
-    "rating-compressed-preview/rating-24-05-2026-league1-magic-bounty-11h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-main-2mln-18h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-nlh-knockout-21h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-sunday-tournament-18h.jpg"

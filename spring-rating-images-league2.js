@@ -29,7 +29,8 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "05.03.2026": [
     "rating-05-03-2026-13.png",
-    "rating-05-03-2026-league2-2.png"
+    "rating-05-03-2026-league2-2.png",
+    "rating-05-03-2026-hyper-turbo-300.png"
   ],
   "06.03.2026": [
     "rating-06-03-2026-league2-1.png",
@@ -440,6 +441,7 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
   ],
   "24.05.2026": [
     "rating-compressed-preview/rating-24-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-24-05-2026-league2-magic-bounty-11h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league2-tournament-plo6-20h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league2-mok-17h.jpg"
   ]

@@ -1815,7 +1815,7 @@ var SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE = {
       "time": "20:00",
       "name": "Hyper Turbo 300",
       "buyin": 300,
-      "league": 1,
+      "league": 2,
       "players": [
         {
           "nick": "AlenaSt",

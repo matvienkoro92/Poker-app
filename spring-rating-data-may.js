@@ -3502,6 +3502,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
   ],
   "20.05.2026": [
     {
+      "time": "04:00",
+      "name": "Два туза. Доллары (DEEP FREEZE)",
+      "buyin": 0,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Dendi-01",
+          "place": 2,
+          "reward": 41400,
+          "points": 110
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -3644,6 +3658,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 7,
           "reward": 900,
           "points": 40
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "Два туза. Доллары (BIG PKO)",
+      "buyin": 0,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Dendi-01",
+          "place": 1,
+          "reward": 153755,
+          "points": 135
         }
       ]
     },
@@ -4211,7 +4239,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
       "time": "11:00",
       "name": "Magic Bounty 50k",
       "buyin": 10000,
-      "league": 1,
+      "league": 2,
       "players": [
         {
           "nick": "AlenaSt",
