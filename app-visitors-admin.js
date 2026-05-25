@@ -49,10 +49,23 @@
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
     if (id === "5053253480") return true;
-    var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
-    if (username === "roman1787443") return true;
+    var names = [user.username, user.telegramUsername, user.pwaUsername];
+    for (var i = 0; i < names.length; i++) {
+      var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1787443" || username === "roman1_matvienko") return true;
+    }
     var email = user.email != null ? String(user.email).replace(/^@+/, "").trim().toLowerCase() : "";
     return email === "matvienkoro92@gmail.com" || email === "matvienko.r2@yandex.ru";
+  }
+
+  function isCrmMenuUser(user) {
+    if (!user) return false;
+    var names = [user.username, user.telegramUsername, user.pwaUsername];
+    for (var i = 0; i < names.length; i++) {
+      var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1787443" || username === "roman1_matvienko") return true;
+    }
+    return false;
   }
 
   function buildCrmAccessProbeUrl() {
@@ -78,9 +91,19 @@
     return false;
   }
 
+  function userCanSeeCrmMenuButton() {
+    var users = collectAdminIdentityCandidates();
+    for (var i = 0; i < users.length; i++) {
+      if (isCrmMenuUser(users[i])) return true;
+    }
+    return false;
+  }
+
   function syncCrmButtonAccess() {
     var btn = document.getElementById("adminCrmBtn");
-    if (!btn) return;
+    var menuBtn = document.getElementById("headerCrmBtn");
+    if (!btn && !menuBtn) return;
+    setCrmButtonAllowed(menuBtn, userCanSeeCrmMenuButton());
     var allowed = userCanOpenCrm();
     if (allowed || crmAccessProbeState === "allowed") {
       crmAccessProbeState = "allowed";
@@ -1046,17 +1069,17 @@
       adminPushAllBodyInp.addEventListener("input", refreshAdminPushAllRemainInputs);
       adminPushAllBodyInp.addEventListener("keyup", refreshAdminPushAllRemainInputs);
     }
-    var adminCrmBtn = document.getElementById("adminCrmBtn");
-    if (adminCrmBtn && adminCrmBtn.dataset.crmAccessBound !== "1") {
-      adminCrmBtn.dataset.crmAccessBound = "1";
-      adminCrmBtn.addEventListener("click", function (e) {
+    Array.prototype.slice.call(document.querySelectorAll('[data-crm-open="player-crm"]')).forEach(function (crmBtn) {
+      if (!crmBtn || crmBtn.dataset.crmAccessBound === "1") return;
+      crmBtn.dataset.crmAccessBound = "1";
+      crmBtn.addEventListener("click", function (e) {
         if (userCanOpenCrm() || crmAccessProbeState === "allowed") return;
         e.preventDefault();
         e.stopPropagation();
         syncCrmButtonAccess();
       });
-      syncCrmButtonAccess();
-    }
+    });
+    syncCrmButtonAccess();
     try {
       window.pokerRecheckAdminFooter = checkAdminAndShowVisitorsButton;
     } catch (eExp) {}

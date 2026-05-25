@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.267");
-@import url("./styles-home-rating-promo.css?v=3.267");
-@import url("./styles-auth.css?v=3.267");
-@import url("./styles-home.css?v=3.267");
-@import url("./styles-chat.css?v=3.267");
-@import url("./styles-learning-games.css?v=3.267");
-@import url("./styles-raffles.css?v=3.267");
-@import url("./styles-daily-poker.css?v=3.267");
-@import url("./styles-home-legacy-prelude.css?v=3.267");
-@import url("./styles-download.css?v=3.267");
-@import url("./styles-home-legacy-tail.css?v=3.267");
-@import url("./styles-home-rating-promo-legacy.css?v=3.267");
-@import url("./styles-rating.css?v=3.267");
-@import url("./styles-hall.css?v=3.267");
-@import url("./styles-admin.css?v=3.267");
-@import url("./styles-player-crm.css?v=3.267");
-@import url("./styles-profile.css?v=3.267");
-@import url("./styles-layout.css?v=3.267");
-@import url("./styles-chat-overlays.css?v=3.267");
-@import url("./styles-home-overrides.css?v=3.267");
-@import url("./styles-layout-touch-targets.css?v=3.267");
-@import url("./styles-home-rating-promo-late.css?v=3.267");
+@import url("./styles-base.css?v=3.274");
+@import url("./styles-home-rating-promo.css?v=3.274");
+@import url("./styles-auth.css?v=3.274");
+@import url("./styles-home.css?v=3.274");
+@import url("./styles-chat.css?v=3.274");
+@import url("./styles-learning-games.css?v=3.274");
+@import url("./styles-raffles.css?v=3.274");
+@import url("./styles-daily-poker.css?v=3.274");
+@import url("./styles-home-legacy-prelude.css?v=3.274");
+@import url("./styles-download.css?v=3.274");
+@import url("./styles-home-legacy-tail.css?v=3.274");
+@import url("./styles-home-rating-promo-legacy.css?v=3.274");
+@import url("./styles-rating.css?v=3.274");
+@import url("./styles-hall.css?v=3.274");
+@import url("./styles-admin.css?v=3.274");
+@import url("./styles-player-crm.css?v=3.274");
+@import url("./styles-profile.css?v=3.274");
+@import url("./styles-layout.css?v=3.274");
+@import url("./styles-chat-overlays.css?v=3.274");
+@import url("./styles-home-overrides.css?v=3.274");
+@import url("./styles-layout-touch-targets.css?v=3.274");
+@import url("./styles-home-rating-promo-late.css?v=3.274");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -267,10 +267,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   text-decoration: none;
   border: 1px solid rgba(255, 118, 0, 0.72);
   border-radius: 22px;
-  background:
-    radial-gradient(ellipse 112% 132% at 62% 52%, rgba(255, 112, 0, 0.26) 0%, rgba(117, 45, 7, 0.28) 35%, rgba(34, 14, 7, 0.52) 62%, rgba(7, 9, 12, 0) 82%),
-    radial-gradient(ellipse 78% 92% at 31% 82%, rgba(255, 118, 0, 0.13) 0%, rgba(89, 34, 7, 0.12) 36%, rgba(7, 9, 12, 0) 68%),
-    linear-gradient(90deg, #0d0a08 0%, #120b08 34%, #190d08 58%, #261107 82%, #150806 100%);
+  background: linear-gradient(180deg, #64250a 0%, #4f1b07 48%, #2e0d05 100%);
   box-shadow:
     inset 0 0 0 1px rgba(255, 222, 148, 0.08);
   -webkit-tap-highlight-color: transparent;
@@ -283,10 +280,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   z-index: 1;
   overflow: hidden;
   border-radius: inherit;
-  background:
-    radial-gradient(ellipse 106% 126% at 67% 50%, rgba(255, 133, 0, 0.26) 0%, rgba(255, 87, 0, 0.18) 33%, rgba(88, 30, 5, 0.13) 57%, rgba(7, 9, 12, 0) 78%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.22) 29%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0) 68%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.08) 76%, rgba(0, 0, 0, 0.18) 100%);
+  background: linear-gradient(180deg, rgba(255, 169, 51, 0.08) 0%, rgba(38, 8, 3, 0.12) 100%);
   pointer-events: none;
 }
 
@@ -464,12 +458,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   object-fit: contain;
   -webkit-clip-path: inset(-48px 24px -48px 0);
   clip-path: inset(-48px 24px -48px 0);
-  filter:
-    saturate(1.24)
-    contrast(1.12)
-    brightness(1.08)
-    drop-shadow(0 0 13px rgba(255, 126, 0, 0.5))
-    drop-shadow(0 0 24px rgba(255, 76, 0, 0.28));
+  filter: none;
   pointer-events: none;
   user-select: none;
 }

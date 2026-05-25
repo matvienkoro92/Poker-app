@@ -1529,23 +1529,39 @@ function pokerOpenPlayerCrmFromHome() {
 }
 
 (function bindPlayerCrmFastOpen() {
-  var btn = document.querySelector('[data-crm-open="player-crm"]') || document.getElementById("adminCrmBtn");
-  if (!btn || btn.__pokerPlayerCrmFastOpenBound) return;
-  btn.__pokerPlayerCrmFastOpenBound = true;
-  btn.addEventListener("touchend", function (e) {
-    if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
-    if (window.__touchWasScroll && window.__touchWasScroll()) return;
-    e.preventDefault();
-    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-    else e.stopPropagation();
-    pokerOpenPlayerCrmFromHome();
-  }, { passive: false });
-  btn.addEventListener("click", function (e) {
-    if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
-    e.preventDefault();
-    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-    else e.stopPropagation();
-    pokerOpenPlayerCrmFromHome();
+  function closeHeaderMenuForCrmButton(btn) {
+    var menu = btn && btn.closest ? btn.closest(".header-more-menu") : null;
+    if (!menu) return;
+    menu.hidden = true;
+    var toggle = document.getElementById("headerMoreMenuBtn");
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Открыть меню");
+    }
+  }
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-crm-open="player-crm"]'));
+  var legacyBtn = document.getElementById("adminCrmBtn");
+  if (legacyBtn && buttons.indexOf(legacyBtn) < 0) buttons.push(legacyBtn);
+  buttons.forEach(function (btn) {
+    if (!btn || btn.__pokerPlayerCrmFastOpenBound) return;
+    btn.__pokerPlayerCrmFastOpenBound = true;
+    btn.addEventListener("touchend", function (e) {
+      if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
+      if (window.__touchWasScroll && window.__touchWasScroll()) return;
+      e.preventDefault();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      else e.stopPropagation();
+      closeHeaderMenuForCrmButton(btn);
+      pokerOpenPlayerCrmFromHome();
+    }, { passive: false });
+    btn.addEventListener("click", function (e) {
+      if (btn.disabled || btn.hidden || btn.getAttribute("aria-hidden") === "true") return;
+      e.preventDefault();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      else e.stopPropagation();
+      closeHeaderMenuForCrmButton(btn);
+      pokerOpenPlayerCrmFromHome();
+    });
   });
 })();
 
