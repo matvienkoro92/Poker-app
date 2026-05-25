@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.291");
-@import url("./styles-home-rating-promo.css?v=3.291");
-@import url("./styles-auth.css?v=3.291");
-@import url("./styles-home.css?v=3.291");
-@import url("./styles-chat.css?v=3.291");
-@import url("./styles-learning-games.css?v=3.291");
-@import url("./styles-raffles.css?v=3.291");
-@import url("./styles-daily-poker.css?v=3.291");
-@import url("./styles-home-legacy-prelude.css?v=3.291");
-@import url("./styles-download.css?v=3.291");
-@import url("./styles-home-legacy-tail.css?v=3.291");
-@import url("./styles-home-rating-promo-legacy.css?v=3.291");
-@import url("./styles-rating.css?v=3.291");
-@import url("./styles-hall.css?v=3.291");
-@import url("./styles-admin.css?v=3.291");
-@import url("./styles-player-crm.css?v=3.291");
-@import url("./styles-profile.css?v=3.291");
-@import url("./styles-layout.css?v=3.291");
-@import url("./styles-chat-overlays.css?v=3.291");
-@import url("./styles-home-overrides.css?v=3.291");
-@import url("./styles-layout-touch-targets.css?v=3.291");
-@import url("./styles-home-rating-promo-late.css?v=3.291");
+@import url("./styles-base.css?v=3.292");
+@import url("./styles-home-rating-promo.css?v=3.292");
+@import url("./styles-auth.css?v=3.292");
+@import url("./styles-home.css?v=3.292");
+@import url("./styles-chat.css?v=3.292");
+@import url("./styles-learning-games.css?v=3.292");
+@import url("./styles-raffles.css?v=3.292");
+@import url("./styles-daily-poker.css?v=3.292");
+@import url("./styles-home-legacy-prelude.css?v=3.292");
+@import url("./styles-download.css?v=3.292");
+@import url("./styles-home-legacy-tail.css?v=3.292");
+@import url("./styles-home-rating-promo-legacy.css?v=3.292");
+@import url("./styles-rating.css?v=3.292");
+@import url("./styles-hall.css?v=3.292");
+@import url("./styles-admin.css?v=3.292");
+@import url("./styles-player-crm.css?v=3.292");
+@import url("./styles-profile.css?v=3.292");
+@import url("./styles-layout.css?v=3.292");
+@import url("./styles-chat-overlays.css?v=3.292");
+@import url("./styles-home-overrides.css?v=3.292");
+@import url("./styles-layout-touch-targets.css?v=3.292");
+@import url("./styles-home-rating-promo-late.css?v=3.292");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -1044,19 +1044,19 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .home-compact-link--rating .home-compact-link__icon {
   position: absolute;
   z-index: 3;
-  top: 9px;
-  left: 9px;
+  top: 17px;
+  left: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 19px;
-  height: 19px;
+  width: 29px;
+  height: 29px;
   border: 1px solid rgba(255, 214, 128, 0.46);
-  border-radius: 7px;
+  border-radius: 9px;
   background:
     linear-gradient(180deg, rgba(255, 181, 49, 0.18), rgba(255, 118, 0, 0.08)),
     rgba(1, 5, 9, 0.72);
-  font-size: 13px;
+  font-size: 20px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 0 11px rgba(255, 118, 0, 0.3);
@@ -1065,26 +1065,29 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .home-compact-link--rating .home-compact-link__body {
   position: absolute;
   z-index: 3;
-  top: 28px;
-  left: 10px;
-  width: 98px;
+  top: 15px;
+  left: 45px;
+  width: 108px;
   align-items: flex-start;
   justify-content: flex-start;
 }
 
 .app.app--view-home .home-compact-link--rating .home-compact-link__eyebrow {
+  display: flex;
+  flex-direction: column;
   color: rgba(255, 236, 198, 0.82);
-  max-width: 92px;
-  font-size: 10px;
-  line-height: 1.02;
+  max-width: 108px;
+  font-size: 15px;
+  line-height: 0.92;
   white-space: normal;
   text-shadow: 0 0 9px rgba(255, 118, 0, 0.34);
 }
 
 .app.app--view-home .home-compact-link--rating .home-compact-link__title {
   color: #ffd36f;
-  margin-top: 5px;
-  font-size: 12px;
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 1;
   text-shadow:
     0 1px 0 rgba(74, 35, 0, 0.66),
     0 0 13px rgba(255, 118, 0, 0.46);
@@ -1092,8 +1095,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .app.app--view-home .home-compact-link--rating .home-compact-link__sub {
   color: rgba(255, 236, 198, 0.82);
-  margin-top: 3px;
-  font-size: 7.5px;
+  margin-top: 4px;
+  font-size: 11.25px;
+  line-height: 1;
 }
 
 .app.app--view-home .home-compact-link--rating .home-compact-link__cta {
@@ -1101,14 +1105,14 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   z-index: 4;
   bottom: 8px;
   left: 10px;
-  width: 94px;
-  min-height: 21px;
+  width: 124px;
+  min-height: 24px;
   padding: 0 7px;
   color: rgba(255, 244, 217, 0.94);
   border-color: rgba(255, 118, 0, 0.44);
   background:
     linear-gradient(180deg, rgba(10, 12, 11, 0.94), rgba(1, 5, 9, 0.96));
-  font-size: 7.3px;
+  font-size: 10.95px;
   font-weight: 900;
   box-shadow:
     inset 0 1px 0 rgba(255, 232, 176, 0.08),
