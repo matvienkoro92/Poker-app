@@ -1283,6 +1283,16 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
     line-height: 1.1;
   }
 
+  .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab--conditions,
+  html.app-view-spring-rating .winter-rating__spring-main-tab--conditions {
+    flex-basis: 96px;
+    min-height: 48px;
+    padding: 7px 6px;
+    border-radius: 0 12px 12px 0;
+    font-size: 11px;
+    line-height: 1.05;
+  }
+
   .view--active[data-view="spring-rating"] .winter-rating__spring-league-caption,
   html.app-view-spring-rating .winter-rating__spring-league-caption {
     margin: 0 8px 10px;

@@ -550,7 +550,7 @@
 
   function formatHeaderGreeting(name) {
     var displayName = name != null ? String(name).trim() : "";
-    return displayName ? "Привет,\n" + displayName + "!" : "Привет!";
+    return displayName ? "Привет, " + displayName + "!" : "Привет!";
   }
 
   function updateHeaderGreeting() {

@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.279");
-@import url("./styles-home-rating-promo.css?v=3.279");
-@import url("./styles-auth.css?v=3.279");
-@import url("./styles-home.css?v=3.279");
-@import url("./styles-chat.css?v=3.279");
-@import url("./styles-learning-games.css?v=3.279");
-@import url("./styles-raffles.css?v=3.279");
-@import url("./styles-daily-poker.css?v=3.279");
-@import url("./styles-home-legacy-prelude.css?v=3.279");
-@import url("./styles-download.css?v=3.279");
-@import url("./styles-home-legacy-tail.css?v=3.279");
-@import url("./styles-home-rating-promo-legacy.css?v=3.279");
-@import url("./styles-rating.css?v=3.279");
-@import url("./styles-hall.css?v=3.279");
-@import url("./styles-admin.css?v=3.279");
-@import url("./styles-player-crm.css?v=3.279");
-@import url("./styles-profile.css?v=3.279");
-@import url("./styles-layout.css?v=3.279");
-@import url("./styles-chat-overlays.css?v=3.279");
-@import url("./styles-home-overrides.css?v=3.279");
-@import url("./styles-layout-touch-targets.css?v=3.279");
-@import url("./styles-home-rating-promo-late.css?v=3.279");
+@import url("./styles-base.css?v=3.280");
+@import url("./styles-home-rating-promo.css?v=3.280");
+@import url("./styles-auth.css?v=3.280");
+@import url("./styles-home.css?v=3.280");
+@import url("./styles-chat.css?v=3.280");
+@import url("./styles-learning-games.css?v=3.280");
+@import url("./styles-raffles.css?v=3.280");
+@import url("./styles-daily-poker.css?v=3.280");
+@import url("./styles-home-legacy-prelude.css?v=3.280");
+@import url("./styles-download.css?v=3.280");
+@import url("./styles-home-legacy-tail.css?v=3.280");
+@import url("./styles-home-rating-promo-legacy.css?v=3.280");
+@import url("./styles-rating.css?v=3.280");
+@import url("./styles-hall.css?v=3.280");
+@import url("./styles-admin.css?v=3.280");
+@import url("./styles-player-crm.css?v=3.280");
+@import url("./styles-profile.css?v=3.280");
+@import url("./styles-layout.css?v=3.280");
+@import url("./styles-chat-overlays.css?v=3.280");
+@import url("./styles-home-overrides.css?v=3.280");
+@import url("./styles-layout-touch-targets.css?v=3.280");
+@import url("./styles-home-rating-promo-late.css?v=3.280");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -173,9 +173,9 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   color: rgba(255, 247, 237, 0.96);
   font-size: clamp(11px, 3.05vw, 13px);
   line-height: 1.12;
-  white-space: pre-line;
+  white-space: nowrap;
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   text-overflow: ellipsis;
 }
 
@@ -660,14 +660,6 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   line-height: 1;
   text-transform: uppercase;
   text-shadow: 0 0 12px rgba(255, 118, 0, 0.38);
-}
-
-.app.app--view-home .home-freerolls-strip__title-arrow {
-  color: #ffb531;
-  font-size: 13px;
-  line-height: 0.85;
-  text-shadow: 0 0 9px rgba(255, 177, 49, 0.58);
-  transform: translateY(-1px);
 }
 
 .app.app--view-home .home-freerolls-strip__all {
@@ -1280,12 +1272,14 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .app.app--view-home .home-tournament-section-title {
   grid-column: 1 / -1;
+  justify-self: stretch;
   margin: 0;
   padding: 0;
   color: #ffdf9e;
   font-size: clamp(17px, 4.9vw, 25px);
   font-weight: 900;
   line-height: 1;
+  text-align: center;
   text-transform: uppercase;
   text-shadow:
     0 1px 0 rgba(0, 0, 0, 0.45),
@@ -1297,7 +1291,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   --home-promo-orange: #ff7600;
   --home-promo-line: rgba(255, 118, 0, 0.42);
   position: relative;
-  margin-top: 8px;
+  margin-top: 23px;
   row-gap: 0;
   column-gap: 10px;
   padding: 10px 10px 12px;
@@ -1319,7 +1313,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
   position: relative;
   gap: 10px;
-  padding: 7px 12px 12px;
+  padding: 4px 12px 12px;
   border: 0;
   border-radius: 0;
   overflow: hidden;
@@ -1441,7 +1435,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
-  padding-top: 7px;
+  padding-top: 4px;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-block__home-head {
