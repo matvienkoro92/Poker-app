@@ -2592,6 +2592,218 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 3001,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 2,
+          "reward": 16237,
+          "points": 110
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 7,
+          "reward": 3385,
+          "points": 40
+        },
+        {
+          "nick": "Simba33",
+          "place": 6,
+          "reward": 1374,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 5,
+          "reward": 11367,
+          "points": 60
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 12,
+          "reward": 1148,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Micro 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Simba33",
+          "place": 6,
+          "reward": 3029,
+          "points": 50
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 18,
+          "reward": 385,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 1,
+          "reward": 23416,
+          "points": 135
+        },
+        {
+          "nick": "Coonie Lee",
+          "place": 13,
+          "reward": 720,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 7,
+          "reward": 828,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "XXL Freeroll 100K",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Mr.Ebun",
+          "place": 2,
+          "reward": 13500,
+          "points": 110
+        },
+        {
+          "nick": "AVOCADO 😈",
+          "place": 20,
+          "reward": 1500,
+          "points": 0
+        },
+        {
+          "nick": "Dvoryanin",
+          "place": 53,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "TexasRangerX",
+          "place": 56,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Julia Shish",
+          "place": 74,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 4,
+          "reward": 5411,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WhiskeyClub",
+          "place": 2,
+          "reward": 27594,
+          "points": 110
+        },
+        {
+          "nick": "Бэха",
+          "place": 12,
+          "reward": 2738,
+          "points": 0
+        },
+        {
+          "nick": "Coonie Lee",
+          "place": 20,
+          "reward": 1496,
+          "points": 0
+        },
+        {
+          "nick": "nikola233",
+          "place": 29,
+          "reward": 900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 18321,
+          "points": 110
+        }
+      ]
     }
   ],
   "15.05.2026": [
@@ -2708,6 +2920,134 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 30
         }
       ]
+    },
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 6273,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Fokys7",
+          "place": 2,
+          "reward": 1982,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Суворовка",
+          "place": 5,
+          "reward": 1215,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "SHR 1 MLN GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CCCP",
+          "place": 7,
+          "reward": 50207,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бэха",
+          "place": 3,
+          "reward": 6984,
+          "points": 90
+        },
+        {
+          "nick": "Антон Ойнус",
+          "place": 4,
+          "reward": 4988,
+          "points": 70
+        },
+        {
+          "nick": "Annie1609",
+          "place": 11,
+          "reward": 841,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WhiskeyClub",
+          "place": 8,
+          "reward": 326,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 3,
+          "reward": 6615,
+          "points": 90
+        },
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 3863,
+          "points": 50
+        },
+        {
+          "nick": "Serebrennaya",
+          "place": 0,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "CCCP",
+          "place": 0,
+          "reward": 0,
+          "points": 0
+        }
+      ]
     }
   ],
   "16.05.2026": [
@@ -2746,6 +3086,68 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 7,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 4,
+          "reward": 1597,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana 20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 3,
+          "reward": 5143,
+          "points": 90
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 8,
+          "reward": 1005,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 24553,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "SHR MAGIC 800K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 251180,
+          "points": 110
         }
       ]
     }
@@ -2856,6 +3258,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 8,
           "reward": 8825,
           "points": 30
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "пупсик",
+          "place": 4,
+          "reward": 8232,
+          "points": 70
         }
       ]
     }
@@ -3000,6 +3416,86 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "place": 11,
           "reward": 1700,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 4,
+          "reward": 9784,
+          "points": 70
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 7,
+          "reward": 4803,
+          "points": 40
+        },
+        {
+          "nick": "shockin",
+          "place": 6,
+          "reward": 3265,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "PLO4 PKO 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Simple",
+          "place": 3,
+          "reward": 3180,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 3,
+          "reward": 7902,
+          "points": 90
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 2443,
+          "points": 40
+        },
+        {
+          "nick": "Бэха",
+          "place": 13,
+          "reward": 661,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coonie Lee",
+          "place": 8,
+          "reward": 2477,
+          "points": 30
         }
       ]
     }
@@ -3150,6 +3646,74 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 40
         }
       ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 10098,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MEVRIK",
+          "place": 3,
+          "reward": 12606,
+          "points": 90
+        },
+        {
+          "nick": "adiga666",
+          "place": 7,
+          "reward": 6675,
+          "points": 40
+        },
+        {
+          "nick": "Бардюр",
+          "place": 12,
+          "reward": 2145,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "PLO5 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 2,
+          "reward": 5716,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 5577,
+          "points": 90
+        }
+      ]
     }
   ],
   "21.05.2026": [
@@ -3225,6 +3789,388 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "nick": "Kotik",
           "place": 13,
           "reward": 2300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 2,
+          "reward": 5092,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Micro 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 4985,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 2865,
+          "points": 40
+        },
+        {
+          "nick": "CCCP",
+          "place": 11,
+          "reward": 230,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 19861,
+          "points": 135
+        },
+        {
+          "nick": "MEVRIK",
+          "place": 8,
+          "reward": 1074,
+          "points": 30
+        }
+      ]
+    }
+  ],
+  "22.05.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WhiskeyClub",
+          "place": 2,
+          "reward": 19332,
+          "points": 110
+        },
+        {
+          "nick": "Em13!!",
+          "place": 7,
+          "reward": 3407,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FizzBuzz",
+          "place": 2,
+          "reward": 17649,
+          "points": 110
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 10184,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "allex 1983",
+          "place": 3,
+          "reward": 2345,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 6,
+          "reward": 4231,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 2,
+          "reward": 3008,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "SHR 1 MLN GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "qoqoEpta",
+          "place": 9,
+          "reward": 34292,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 13,
+          "reward": 14072,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Неизвестны",
+          "place": 2,
+          "reward": 23187,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 1,
+          "reward": 17521,
+          "points": 135
+        },
+        {
+          "nick": "cap888881",
+          "place": 5,
+          "reward": 3917,
+          "points": 60
+        }
+      ]
+    }
+  ],
+  "23.05.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 65703,
+          "points": 135
+        },
+        {
+          "nick": "nikola233",
+          "place": 7,
+          "reward": 8771,
+          "points": 40
+        },
+        {
+          "nick": "WhiskeyClub",
+          "place": 19,
+          "reward": 2044,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 1962,
+          "points": 90
+        },
+        {
+          "nick": "AndrushaMorf",
+          "place": 5,
+          "reward": 1168,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 1,
+          "reward": 16131,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "SHR MAGIC 800K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WhiskeyClub",
+          "place": 1,
+          "reward": 463840,
+          "points": 135
+        }
+      ]
+    }
+  ],
+  "24.05.2026": [
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 2,
+          "reward": 4371,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 2052,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "MAIN 2 MLN GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 3,
+          "reward": 186800,
+          "points": 90
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 9,
+          "reward": 26107,
+          "points": 0
+        },
+        {
+          "nick": "Бардюр",
+          "place": 33,
+          "reward": 4133,
+          "points": 0
+        },
+        {
+          "nick": "outsider",
+          "place": 63,
+          "reward": 2306,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ManTiQ",
+          "place": 5,
+          "reward": 11654,
+          "points": 60
+        },
+        {
+          "nick": "Бабник",
+          "place": 17,
+          "reward": 3713,
+          "points": 0
+        },
+        {
+          "nick": "nagibator",
+          "place": 19,
+          "reward": 3138,
+          "points": 0
+        },
+        {
+          "nick": "Неизвестны",
+          "place": 29,
+          "reward": 970,
+          "points": 0
+        },
+        {
+          "nick": "cap888881",
+          "place": 28,
+          "reward": 420,
           "points": 0
         }
       ]

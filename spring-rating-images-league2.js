@@ -394,11 +394,21 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-13-05-2026-league2-tournir-sredy-18h.jpg"
   ],
   "14.05.2026": [
+    "rating-compressed-preview/rating-14-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-14-05-2026-league2-micro-200-14h.jpg",
+    "rating-compressed-preview/rating-14-05-2026-league2-plo4-20k-16h.jpg",
     "rating-compressed-preview/rating-14-05-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-14-05-2026-league2-hyper-turbo-300-20h.jpg",
     "rating-compressed-preview/rating-14-05-2026-league2-energetik-22h.jpg"
   ],
   "15.05.2026": [
-    "rating-compressed-preview/rating-15-05-2026-league2-ok-17h.jpg"
+    "rating-compressed-preview/rating-15-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-15-05-2026-league2-plo4-20k-16h.jpg",
+    "rating-compressed-preview/rating-15-05-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-15-05-2026-league2-hyper-turbo-300-20h.jpg"
+  ],
+  "16.05.2026": [
+    "rating-compressed-preview/rating-16-05-2026-league2-deep-night-02h.jpg"
   ],
   "17.05.2026": [
     "rating-compressed-preview/rating-17-05-2026-league2-mok-17h.jpg"
@@ -407,13 +417,27 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-18-05-2026-league2-ok-17h.jpg"
   ],
   "19.05.2026": [
-    "rating-compressed-preview/rating-19-05-2026-league2-tuesday-tournament-18h.jpg"
+    "rating-compressed-preview/rating-19-05-2026-league2-tuesday-tournament-18h.jpg",
+    "rating-compressed-preview/rating-19-05-2026-league2-plo4-pko-19h.jpg",
+    "rating-compressed-preview/rating-19-05-2026-league2-hyper-turbo-300-20h.jpg"
   ],
   "20.05.2026": [
     "rating-compressed-preview/rating-20-05-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-20-05-2026-league2-wednesday-tournament-18h.jpg"
+    "rating-compressed-preview/rating-20-05-2026-league2-wednesday-tournament-18h.jpg",
+    "rating-compressed-preview/rating-20-05-2026-league2-plo5-300-19h.jpg",
+    "rating-compressed-preview/rating-20-05-2026-league2-hyper-turbo-300-20h.jpg"
   ],
   "21.05.2026": [
+    "rating-compressed-preview/rating-21-05-2026-league2-micro-200-14h.jpg",
     "rating-compressed-preview/rating-21-05-2026-league2-ok-17h.jpg"
+  ],
+  "22.05.2026": [
+    "rating-compressed-preview/rating-22-05-2026-league2-dv-plo5-12h.jpg"
+  ],
+  "23.05.2026": [
+    "rating-compressed-preview/rating-23-05-2026-league2-deep-night-02h.jpg"
+  ],
+  "24.05.2026": [
+    "rating-compressed-preview/rating-24-05-2026-league2-kg-plo6-09h.jpg"
   ]
 };
