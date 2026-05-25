@@ -1961,10 +1961,78 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 900;
   font-variant-numeric: tabular-nums;
 }
+.admin-report-rakeback-archive-week__room-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+.admin-report-rakeback-archive-week__room-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 42px;
+  padding: 5px 6px;
+  border: 1px solid rgba(246, 211, 145, 0.34);
+  border-radius: 7px;
+  background: rgba(8, 11, 18, 0.74);
+  color: #ffe7b0;
+  font: inherit;
+  cursor: pointer;
+}
+.admin-report-rakeback-archive-week__room-tab--active,
+.admin-report-rakeback-archive-week__room-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, rgba(255, 231, 176, 0.24), rgba(216, 169, 79, 0.18));
+  border-color: rgba(246, 211, 145, 0.74);
+  box-shadow: inset 0 0 0 1px rgba(255, 245, 214, 0.14);
+}
+.admin-report-rakeback-archive-week__room-tab--empty {
+  opacity: 0.58;
+}
+.admin-report-rakeback-archive-week__room-tab-label,
+.admin-report-rakeback-archive-week__room-tab-total {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-report-rakeback-archive-week__room-tab-label {
+  color: #ffe7b0;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.admin-report-rakeback-archive-week__room-tab-total {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.admin-report-rakeback-archive-week__panels {
+  min-width: 0;
+}
+.admin-report-rakeback-archive-week__room-panel[hidden] {
+  display: none !important;
+}
 .admin-report-rakeback-archive-week__list {
   display: grid;
   gap: 6px;
   padding: 0 8px 10px;
+}
+.admin-report-rakeback-archive-week__empty {
+  margin: 0 8px 10px;
+  padding: 10px;
+  border: 1px solid rgba(246, 211, 145, 0.16);
+  border-radius: 7px;
+  background: rgba(16, 16, 22, 0.64);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
 .admin-report-rakeback-archive-week__item {
   display: grid;
@@ -2709,6 +2777,35 @@ button.admin-report-rakeback-summary__row:focus-visible {
     width: 24px;
     height: 24px;
     border-radius: 7px;
+  }
+  .admin-report-rakeback-archive-week-row td {
+    padding: 6px 2px 8px;
+  }
+  .admin-report-rakeback-archive-week__summary {
+    min-height: 44px;
+    gap: 6px;
+    padding: 8px 8px;
+  }
+  .admin-report-rakeback-archive-week__title {
+    font-size: 13px;
+  }
+  .admin-report-rakeback-archive-week__total {
+    font-size: 14px;
+  }
+  .admin-report-rakeback-archive-week__room-tabs {
+    gap: 5px;
+    padding: 0 6px 7px;
+  }
+  .admin-report-rakeback-archive-week__room-tab {
+    min-height: 38px;
+    padding: 4px 5px;
+  }
+  .admin-report-rakeback-archive-week__item {
+    grid-template-columns: 20px 38px minmax(48px, 0.75fr) minmax(54px, 0.95fr) minmax(45px, 0.8fr) 34px minmax(50px, 0.85fr);
+    gap: 4px;
+    min-height: 34px;
+    padding: 6px 5px;
+    font-size: 10px;
   }
 }
 @media (max-width: 430px) {

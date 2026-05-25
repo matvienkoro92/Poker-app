@@ -158,10 +158,10 @@
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
-    var bonusAdminBtn = document.getElementById("adminBonusBalancesHomeBtn");
+    var bonusAdminBtn = document.getElementById("adminBonusBalancesHeaderBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
-    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !homeAdminVersion) return;
+    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !homeAdminVersion) return;
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
@@ -205,7 +205,10 @@
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");
-      if (bonusAdminBtn) bonusAdminBtn.hidden = false;
+      if (bonusAdminBtn) {
+        bonusAdminBtn.hidden = false;
+        bonusAdminBtn.removeAttribute("aria-hidden");
+      }
       showReportUi();
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();

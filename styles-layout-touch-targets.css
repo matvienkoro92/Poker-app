@@ -134,6 +134,13 @@
   z-index: 30;
 }
 
+.winter-rating-player-modal__header-row > .winter-rating-player-modal__back {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 5;
+}
+
 /* Personal chat back: keep the expanded hit target above the header glass. */
 body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-conv-top {
   pointer-events: auto !important;

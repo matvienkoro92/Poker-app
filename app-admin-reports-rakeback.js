@@ -7,6 +7,7 @@
     Supr: "Супрема",
     PP: "PPpoker",
   };
+  var ARCHIVE_ROOM_TABS = ["P21", "X"];
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
@@ -971,6 +972,8 @@
       if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "false");
     }
     var sharedRows = [];
+    var archiveWeekOpen = {};
+    var archiveWeekRoomActive = {};
     var sharedUpdatedAt = "";
     var sharedAutoLoadStarted = false;
     var sharedAutoLoadRetryCount = 0;
@@ -1411,38 +1414,145 @@
       });
     }
 
+    function getArchiveWeekKey(weekStart) {
+      return String(Number(weekStart) || 0);
+    }
+
+    function getArchiveWeekRooms(rows) {
+      var seen = {};
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        seen[normalizeRoom(row && row.room)] = true;
+      });
+      var rooms = ARCHIVE_ROOM_TABS.slice();
+      Object.keys(ROOM_LABELS).forEach(function (room) {
+        if (rooms.indexOf(room) === -1 && seen[room]) rooms.push(room);
+      });
+      return rooms;
+    }
+
+    function getArchiveRowsForRoom(rows, room) {
+      room = normalizeRoom(room);
+      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return normalizeRoom(row && row.room) === room;
+      });
+    }
+
+    function getArchiveWeekActiveRoom(week) {
+      var weekKey = getArchiveWeekKey(week && week.weekStart);
+      var rooms = getArchiveWeekRooms(week && week.rows);
+      var savedRoom = archiveWeekRoomActive[weekKey] ? normalizeRoom(archiveWeekRoomActive[weekKey]) : "";
+      if (savedRoom && rooms.indexOf(savedRoom) !== -1) return savedRoom;
+      for (var i = 0; i < rooms.length; i += 1) {
+        if (getArchiveRowsForRoom(week && week.rows, rooms[i]).length) return rooms[i];
+      }
+      return rooms[0] || "P21";
+    }
+
+    function activateArchiveWeekRoom(details, room) {
+      if (!details) return;
+      room = normalizeRoom(room);
+      var weekKey = details.getAttribute("data-rakeback-archive-week") || "";
+      if (weekKey) archiveWeekRoomActive[weekKey] = room;
+      Array.prototype.slice.call(details.querySelectorAll("[data-rakeback-archive-room-tab]")).forEach(function (tab) {
+        var selected = normalizeRoom(tab.getAttribute("data-rakeback-archive-room-tab")) === room;
+        tab.classList.toggle("admin-report-rakeback-archive-week__room-tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+      Array.prototype.slice.call(details.querySelectorAll("[data-rakeback-archive-room-panel]")).forEach(function (panel) {
+        panel.hidden = normalizeRoom(panel.getAttribute("data-rakeback-archive-room-panel")) !== room;
+      });
+    }
+
+    function createArchiveWeekRoomTabs(week, activeRoom) {
+      var tabs = document.createElement("div");
+      tabs.className = "admin-report-rakeback-archive-week__room-tabs";
+      tabs.setAttribute("role", "tablist");
+      tabs.setAttribute("aria-label", "Румы недели");
+      getArchiveWeekRooms(week.rows).forEach(function (room) {
+        var rows = getArchiveRowsForRoom(week.rows, room);
+        var totals = getRakebackTotals(rows);
+        var selected = room === activeRoom;
+        var tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "admin-report-rakeback-archive-week__room-tab";
+        tab.setAttribute("data-rakeback-archive-room-tab", room);
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+        tab.classList.toggle("admin-report-rakeback-archive-week__room-tab--active", selected);
+        tab.classList.toggle("admin-report-rakeback-archive-week__room-tab--empty", rows.length === 0);
+        tab.innerHTML =
+          '<span class="admin-report-rakeback-archive-week__room-tab-label">' + escapeHtml(ROOM_LABELS[room] || room) + "</span>" +
+          '<small class="admin-report-rakeback-archive-week__room-tab-total">' + escapeHtml(formatRakebackSummaryPair(totals.rake, totals.amount)) + "</small>";
+        tabs.appendChild(tab);
+      });
+      return tabs;
+    }
+
+    function createArchiveWeekRoomPanel(week, room, activeRoom) {
+      var panel = document.createElement("div");
+      var rows = getArchiveRowsForRoom(week.rows, room);
+      panel.className = "admin-report-rakeback-archive-week__room-panel";
+      panel.setAttribute("data-rakeback-archive-room-panel", room);
+      panel.setAttribute("role", "tabpanel");
+      panel.hidden = room !== activeRoom;
+      if (!rows.length) {
+        var empty = document.createElement("div");
+        empty.className = "admin-report-rakeback-archive-week__empty";
+        empty.textContent = "Записей нет";
+        panel.appendChild(empty);
+        return panel;
+      }
+      var list = document.createElement("div");
+      list.className = "admin-report-rakeback-archive-week__list";
+      rows.forEach(function (row, index) {
+        var item = document.createElement("div");
+        var rowRoom = ROOM_LABELS[normalizeRoom(row.room)] || row.room || "";
+        var amount = row.amount != null && row.amount !== "" ? row.amount : getReportAmount(row.room, rowAmount(row));
+        item.className = "admin-report-rakeback-archive-week__item";
+        item.innerHTML =
+          '<span class="admin-report-rakeback-archive-week__num">' + escapeHtml(String(index + 1)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__room">' + escapeHtml(rowRoom) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__id">' + escapeHtml(row.playerId || row.id || "") + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__rake">' + escapeHtml(formatInputNumber(row.rake) || "0") + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__percent">' + escapeHtml(formatInputNumber(row.percent) || "0") + "%</span>" +
+          '<span class="admin-report-rakeback-archive-week__amount">' + escapeHtml(formatInputNumber(amount) || "0") + "</span>";
+        list.appendChild(item);
+      });
+      panel.appendChild(list);
+      return panel;
+    }
+
     function createArchiveWeekRow(week) {
       var tr = document.createElement("tr");
       var td = document.createElement("td");
       var details = document.createElement("details");
       var summary = document.createElement("summary");
-      var list = document.createElement("div");
       var totals = getRakebackTotals(week.rows);
+      var weekKey = getArchiveWeekKey(week.weekStart);
+      var activeRoom = getArchiveWeekActiveRoom(week);
+      var panels = document.createElement("div");
       tr.className = "admin-report-rakeback-archive-week-row";
       tr.setAttribute("data-rakeback-generated", "1");
       td.colSpan = 7;
       details.className = "admin-report-rakeback-archive-week";
+      details.setAttribute("data-rakeback-archive-week", weekKey);
+      if (archiveWeekOpen[weekKey] === true) details.open = true;
+      details.addEventListener("toggle", function () {
+        archiveWeekOpen[weekKey] = details.open;
+      });
       summary.className = "admin-report-rakeback-archive-week__summary";
+      summary.setAttribute("data-rakeback-archive-week-summary", "");
       summary.innerHTML =
         '<span class="admin-report-rakeback-archive-week__title">Неделя ' + escapeHtml(formatArchiveWeekLabel(week.weekStart)) + "</span>" +
         '<span class="admin-report-rakeback-archive-week__total">' + escapeHtml(formatRakebackSummaryPair(totals.rake, totals.amount)) + "</span>";
-      list.className = "admin-report-rakeback-archive-week__list";
-      week.rows.forEach(function (row, index) {
-        var item = document.createElement("div");
-        var room = ROOM_LABELS[normalizeRoom(row.room)] || row.room || "";
-        item.className = "admin-report-rakeback-archive-week__item";
-        item.innerHTML =
-          '<span class="admin-report-rakeback-archive-week__num">' + escapeHtml(String(index + 1)) + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__room">' + escapeHtml(room) + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__id">' + escapeHtml(row.playerId || row.id || "") + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__rake">' + escapeHtml(formatInputNumber(row.rake) || "0") + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__percent">' + escapeHtml(formatInputNumber(row.percent) || "0") + "%</span>" +
-          '<span class="admin-report-rakeback-archive-week__amount">' + escapeHtml(formatInputNumber(row.amount) || "0") + "</span>";
-        list.appendChild(item);
+      panels.className = "admin-report-rakeback-archive-week__panels";
+      getArchiveWeekRooms(week.rows).forEach(function (room) {
+        panels.appendChild(createArchiveWeekRoomPanel(week, room, activeRoom));
       });
       details.appendChild(summary);
-      details.appendChild(list);
+      details.appendChild(createArchiveWeekRoomTabs(week, activeRoom));
+      details.appendChild(panels);
       td.appendChild(details);
       tr.appendChild(td);
       return tr;
@@ -2549,6 +2659,16 @@
               return;
             }
             render({ showTemplateStatus: templateRowsOpen });
+            return;
+          }
+          var archiveRoomTab = event.target && event.target.closest ? event.target.closest("[data-rakeback-archive-room-tab]") : null;
+          if (archiveRoomTab) {
+            event.preventDefault();
+            event.stopPropagation();
+            activateArchiveWeekRoom(
+              archiveRoomTab.closest("[data-rakeback-archive-week]"),
+              archiveRoomTab.getAttribute("data-rakeback-archive-room-tab")
+            );
             return;
           }
           var saveBtn = event.target && event.target.closest ? event.target.closest("[data-rakeback-save]") : null;

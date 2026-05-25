@@ -397,6 +397,11 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   display: none !important;
 }
 
+.app.app--view-home .header-more-menu .header-menu-action[hidden],
+.app.app--view-home .games-apps-grid .feature[hidden] {
+  display: none !important;
+}
+
 .app.app--view-home .header-more-menu__head {
   padding: 2px 4px 4px;
 }
@@ -438,6 +443,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   color: rgba(255, 247, 237, 0.92);
   font: inherit;
   text-align: left;
+  text-decoration: none;
 }
 
 .app.app--view-home .header-more-menu .radio-toggle {
