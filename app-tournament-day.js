@@ -767,8 +767,8 @@ function updateTournamentDayBlock() {
       // Понедельник — Magic MKO 500₽ (кастом: кубок с шаром и «500»)
       trophyFile = "tournament-day-monday-magic-500.png";
     } else if (weekday === 2) {
-      // Вторник — трактор
-      trophyFile = "tournament-day-tuesday.png";
+      // Вторник — Poker21 Rebuy 300₽
+      trophyFile = "tournament-day-tuesday-poker21-rebuy-300.jpg";
     } else if (weekday === 3) {
       // Среда — Moscow Poker Open 100₽
       trophyFile = "tournament-day-moscow-open-100.png";
@@ -786,7 +786,7 @@ function updateTournamentDayBlock() {
     var homeTrophySrc = typeof getAssetUrl === "function" ? getAssetUrl(homeTrophyFile) : "";
     if (homeTrophyImg && homeTrophySrc) {
       homeTrophyImg.src = homeTrophySrc;
-      homeTrophyImg.alt = nameStr ? "Турнир дня: " + nameStr : "";
+      homeTrophyImg.alt = detailNameStr ? "Турнир дня: " + detailNameStr : "";
     }
     var schedTbody = document.querySelector(".schedule-table-wrap--tournament-day tbody");
     if (schedTbody) {
