@@ -1,4 +1,4 @@
-var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.png";
+var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.webp";
 var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.webp";
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-stolnik-70k.webp";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
@@ -22,8 +22,8 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     guarantee: "130 000₽",
     banner: HOME_TOURNAMENT_MONDAY_BANNER_FILE,
     bannerAlt: "Poker21 Magic MKO понедельника — Мистери Баунти 130 000 ₽",
-    bannerWidth: 1049,
-    bannerHeight: 1499
+    bannerWidth: 640,
+    bannerHeight: 915
   },
   {
     name: "Турнир Тракториста",
@@ -171,6 +171,50 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+var HOME_TOURNAMENT_BANNER_PRELOADS = {};
+var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
+
+function getHomeTournamentBannerUrl(file) {
+  if (!file) return "";
+  return typeof getAssetUrl === "function" ? getAssetUrl(file) : "./assets/" + file;
+}
+
+function preloadHomeTournamentBanner(file) {
+  if (!file || typeof Image === "undefined") return null;
+  var url = getHomeTournamentBannerUrl(file);
+  if (!url) return null;
+  if (HOME_TOURNAMENT_BANNER_PRELOADS[url]) return HOME_TOURNAMENT_BANNER_PRELOADS[url];
+  var img = new Image();
+  var state = { img: img, loaded: false, failed: false, url: url };
+  HOME_TOURNAMENT_BANNER_PRELOADS[url] = state;
+  img.decoding = "async";
+  img.onload = function () {
+    state.loaded = true;
+  };
+  img.onerror = function () {
+    state.failed = true;
+  };
+  img.src = url;
+  return state;
+}
+
+function preloadHomeTournamentBanners(preferredWeekday) {
+  if (HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED) {
+    var preferred = TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday];
+    if (preferred && preferred.banner) preloadHomeTournamentBanner(preferred.banner);
+    return;
+  }
+  HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = true;
+  var order = [];
+  if (TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday]) order.push(preferredWeekday);
+  HOME_TOURNAMENT_WEEK_ORDER.forEach(function (dow) {
+    if (order.indexOf(dow) === -1) order.push(dow);
+  });
+  order.forEach(function (dow) {
+    var item = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow];
+    if (item && item.banner) preloadHomeTournamentBanner(item.banner);
+  });
+}
 
 function pokerGetFreerollDayLabel(item) {
   if (!item) return "—";
@@ -389,7 +433,14 @@ function renderHomeTournamentWeekList(activeWeekday) {
 
     row.appendChild(day);
     row.appendChild(main);
+    row.addEventListener("pointerenter", function () {
+      if (item.banner) preloadHomeTournamentBanner(item.banner);
+    });
+    row.addEventListener("pointerdown", function () {
+      if (item.banner) preloadHomeTournamentBanner(item.banner);
+    });
     row.addEventListener("click", function () {
+      if (item.banner) preloadHomeTournamentBanner(item.banner);
       window._homeTournamentSelectedWeekday = dow;
       updateTournamentDayBlock();
     });
@@ -806,6 +857,7 @@ function updateTournamentDayBlock() {
     if (!Number.isFinite(selectedWeekday) || !TOURNAMENT_OF_DAY_BY_WEEKDAY[selectedWeekday]) {
       selectedWeekday = state.weekday;
     }
+    preloadHomeTournamentBanners(selectedWeekday);
     var detailState =
       selectedWeekday === state.weekday
         ? state
@@ -911,13 +963,16 @@ function updateTournamentDayBlock() {
     }
     if (homeTrophyImg) {
       if (hasDetailBanner) {
-        var homeTrophySrc =
-          typeof getAssetUrl === "function" ? getAssetUrl(detailBannerFile) : "./assets/" + detailBannerFile;
-        homeTrophyImg.src = homeTrophySrc;
+        var homeTrophySrc = getHomeTournamentBannerUrl(detailBannerFile);
+        if (homeTrophyImg.getAttribute("data-home-tournament-banner-src") !== homeTrophySrc) {
+          homeTrophyImg.setAttribute("data-home-tournament-banner-src", homeTrophySrc);
+          homeTrophyImg.src = homeTrophySrc;
+        }
         homeTrophyImg.alt = detailState.t.bannerAlt || detailNameStr || "Турнир дня";
         if (detailState.t.bannerWidth) homeTrophyImg.width = detailState.t.bannerWidth;
         if (detailState.t.bannerHeight) homeTrophyImg.height = detailState.t.bannerHeight;
       } else {
+        homeTrophyImg.removeAttribute("data-home-tournament-banner-src");
         homeTrophyImg.removeAttribute("src");
         homeTrophyImg.alt = "";
       }

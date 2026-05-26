@@ -1121,14 +1121,13 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .app.app--view-home .home-compact-link__rocket {
   position: absolute;
-  z-index: 2;
-  right: -14px;
-  top: -29px;
+  z-index: 8;
+  right: -4px;
+  top: -17px;
   width: auto;
-  height: 143px;
+  height: 153px;
   max-width: none;
   object-fit: contain;
-  clip-path: inset(0 0 28px 0);
   filter:
     saturate(1.08)
     contrast(1.08)
