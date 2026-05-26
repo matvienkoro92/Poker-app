@@ -227,7 +227,7 @@ var POKER_PWA_AUTH_I18N = {
         tournamentWeek: "Турниры дня",
         fullCalendar: "Расписание",
         focusDay: "Фокус дня",
-        details: "Играть",
+        details: "Сыграть",
         nowRunning: "Сейчас идет",
         playNow: "Играть",
         tournamentDay: "Турнир дня",

@@ -116,8 +116,11 @@
     var streakEl = $("dailyPokerTicketlessStreak");
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
-    if (balanceEl) balanceEl.textContent = formatBonus(data.bonusBalance);
-    if (attemptsEl) attemptsEl.textContent = "Попытки: " + (data.attemptsLeft || 0);
+    if (balanceEl) {
+      var bonusValue = Math.max(0, parseInt(data.bonusBalance || "0", 10) || 0);
+      balanceEl.innerHTML = '<span class="daily-poker__balance-label">Бонусный баланс:</span> <strong>' + bonusValue + '</strong> <span>бонусов</span>';
+    }
+    if (attemptsEl) attemptsEl.innerHTML = '<span>Попытки:</span> <strong>' + (data.attemptsLeft || 0) + '</strong>';
     if (streakEl) {
       streakEl.textContent = formatTicketlessStreak(data);
       streakEl.classList.toggle("daily-poker__ticketless-streak--award", !!data.ticketlessStreakAward);
@@ -153,7 +156,7 @@
     dailyPokerState.status = next;
     var attemptsEl = $("dailyPokerAttempts");
     var timerEl = $("dailyPokerTimer");
-    if (attemptsEl) attemptsEl.textContent = "Попытки: " + next.attemptsLeft;
+    if (attemptsEl) attemptsEl.innerHTML = '<span>Попытки:</span> <strong>' + next.attemptsLeft + '</strong>';
     if (timerEl) timerEl.textContent = "Раздача выполняется…";
   }
 
@@ -181,18 +184,25 @@
     var suit = card && card.suit ? String(card.suit) : "";
     var rank = card && card.rank ? String(card.rank) : "";
     var red = suit === "hearts" || suit === "diamonds";
-    if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"></div>';
+    if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"><span class="daily-poker-card__back-logo">Poker<br>21</span></div>';
     return '<div class="daily-poker-card' + (red ? " daily-poker-card--red" : "") + '">' +
       '<span class="daily-poker-card__rank">' + esc(rank) + '</span>' +
       '<span class="daily-poker-card__suit">' + esc(suitSymbols[suit] || "?") + '</span>' +
       '</div>';
   }
 
+  function setBoardActive(active) {
+    var board = $("dailyPokerBoardCards");
+    var zone = board && board.closest ? board.closest(".daily-poker__zone--board") : null;
+    if (zone) zone.hidden = !active;
+  }
+
   function renderEmptyCards() {
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
     if (hole) hole.innerHTML = cardHtml(null, true) + cardHtml(null, true);
-    if (board) board.innerHTML = [0, 1, 2, 3, 4].map(function () { return cardHtml(null, true); }).join("");
+    if (board) board.innerHTML = "";
+    setBoardActive(false);
   }
 
   function revealCards(result) {
@@ -206,6 +216,8 @@
     setLiveText(rewardEl, "");
     if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
+    setBoardActive(true);
+    if (board) board.innerHTML = [0, 1, 2, 3, 4].map(function () { return cardHtml(null, true); }).join("");
 
     setTimeout(function () {
       if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");

@@ -344,7 +344,7 @@ function initAdminReportModal() {
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
     if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
     var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
-    if (username === "roman1_matvienko") return true;
+    if (username === "roman1787443" || username === "roman1_matvienko") return true;
     var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
     return email === "matvienkoro92@gmail.com";
   }
@@ -360,9 +360,9 @@ function initAdminReportModal() {
     if (isLocalAdminReportDevHost()) return true;
     try {
       var auth = window.__pokerTelegramAuth;
-      if (auth && auth.adminAccess === true) return true;
+      if (auth && (auth.adminAccess === true || auth.adminReportAccess === true)) return true;
       var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-      if (rec && rec.adminAccess === true) return true;
+      if (rec && (rec.adminAccess === true || rec.adminReportAccess === true)) return true;
     } catch (eAuth) {}
     var users = collectAdminReportIdentityCandidates();
     for (var i = 0; i < users.length; i++) {

@@ -45,10 +45,23 @@
     return email === "matvienkoro92@gmail.com";
   }
 
+  function isKnownReportUser(user) {
+    if (!user) return false;
+    var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+    if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+    var names = [user.username, user.telegramUsername, user.pwaUsername];
+    for (var i = 0; i < names.length; i++) {
+      var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1787443" || username === "roman1_matvienko") return true;
+    }
+    var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
+    return email === "matvienkoro92@gmail.com";
+  }
+
   function isCrmOwnerUser(user) {
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
-    if (id === "5053253480") return true;
+    if (id === "388008256" || id === "5053253480") return true;
     var names = [user.username, user.telegramUsername, user.pwaUsername];
     for (var i = 0; i < names.length; i++) {
       var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
@@ -60,6 +73,8 @@
 
   function isCrmMenuUser(user) {
     if (!user) return false;
+    var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
+    if (id === "388008256") return true;
     var names = [user.username, user.telegramUsername, user.pwaUsername];
     for (var i = 0; i < names.length; i++) {
       var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
@@ -228,6 +243,19 @@
       }
       return false;
     }
+    function pokerIsKnownClientReportUser() {
+      try {
+        var authReportFlag = window.__pokerTelegramAuth;
+        if (authReportFlag && (authReportFlag.adminAccess === true || authReportFlag.adminReportAccess === true)) return true;
+        var recReportFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (recReportFlag && (recReportFlag.adminAccess === true || recReportFlag.adminReportAccess === true)) return true;
+      } catch (eReportFlag) {}
+      var users = collectAdminIdentityCandidates();
+      for (var i = 0; i < users.length; i++) {
+        if (isKnownReportUser(users[i])) return true;
+      }
+      return false;
+    }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
     try {
@@ -241,6 +269,8 @@
     }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
+    } else if (pokerIsKnownClientReportUser()) {
+      showReportUi();
     } else if (reportBtn) {
       reportBtn.classList.add("header-admin-report--hidden");
       reportBtn.setAttribute("aria-hidden", "true");
