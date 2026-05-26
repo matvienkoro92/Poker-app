@@ -165,7 +165,6 @@
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
-      if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
     }
     function showReportUi() {
       try {
@@ -201,7 +200,6 @@
       renderHomeAdminIdentityStatus(true);
       if (wrap) wrap.classList.remove("footer-admin-visitors--hidden");
       syncCrmButtonAccess();
-      if (keyboardLabWrap) keyboardLabWrap.classList.remove("footer-admin-visitors--hidden");
       if (ratingAdminRow) ratingAdminRow.classList.remove("winter-rating__admin-row--hidden");
       if (window.updateRatingSubsCount) window.updateRatingSubsCount();
       if (gazetteAdminRow) gazetteAdminRow.classList.remove("gazette-admin-row--hidden");

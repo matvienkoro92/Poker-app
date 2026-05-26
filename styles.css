@@ -1067,7 +1067,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   z-index: 3;
   top: 15px;
   left: 10px;
-  width: 108px;
+  width: 132px;
   align-items: flex-start;
   justify-content: flex-start;
 }
@@ -1076,7 +1076,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   display: flex;
   flex-direction: column;
   color: rgba(255, 236, 198, 0.82);
-  max-width: 108px;
+  max-width: 132px;
   font-size: 15px;
   line-height: 0.92;
   white-space: normal;
@@ -1122,12 +1122,13 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .home-compact-link__rocket {
   position: absolute;
   z-index: 2;
-  right: -4px;
-  top: -17px;
+  right: -14px;
+  top: -29px;
   width: auto;
-  height: 153px;
+  height: 143px;
   max-width: none;
   object-fit: contain;
+  clip-path: inset(0 0 28px 0);
   filter:
     saturate(1.08)
     contrast(1.08)
@@ -1272,7 +1273,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .home-compact-link--hall .home-compact-link__media {
   position: absolute;
   z-index: 1;
-  top: -19px;
+  top: -13px;
   left: 50%;
   width: 126px;
   height: 126px;
@@ -1323,7 +1324,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   position: absolute;
   z-index: 3;
   right: 10px;
-  bottom: 0;
+  bottom: 3px;
   left: 10px;
   width: auto;
   min-height: 26px;
@@ -1365,7 +1366,8 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   --home-promo-orange: #ff7600;
   --home-promo-line: rgba(255, 118, 0, 0.42);
   position: relative;
-  margin-top: 33px;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
+  margin: 33px calc(-1 * var(--card-padding-x, 16px) + 3px) 0;
   row-gap: 0;
   column-gap: 10px;
   padding: 10px 10px 12px;
@@ -1385,6 +1387,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .home-tournament-flow {
+  display: none;
   position: absolute;
   inset: 0;
   z-index: 4;
@@ -1469,7 +1472,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
   position: relative;
   z-index: 3;
-  gap: 10px;
+  gap: 0;
   padding: 4px 12px 12px;
   border: 0;
   border-radius: 0;
@@ -1554,21 +1557,24 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {
-  min-height: 42px;
-  margin-top: 0;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  margin-top: -1px;
+  align-items: stretch;
+  justify-content: stretch;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-share-btn {
-  flex: 0 1 150px;
-  width: min(100%, 150px);
-  min-height: 42px;
-  padding: 6px 12px;
+  flex: 1 1 100%;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 12px;
   border-color: rgba(255, 231, 180, 0.84);
-  border-radius: 14px;
+  border-radius: 0 0 14px 14px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.08) 28%, transparent 29%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 28%, transparent 29%),
     radial-gradient(circle at 18% 8%, rgba(255, 242, 199, 0.42), transparent 30%),
     linear-gradient(180deg, #ffb22a 0%, #ff8200 48%, #d75b00 100%);
   color: #fff;
@@ -1580,9 +1586,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
     0 2px 2px rgba(76, 29, 0, 0.72),
     0 0 10px rgba(255, 255, 255, 0.18);
   box-shadow:
-    0 0 18px rgba(255, 118, 0, 0.45),
+    0 0 14px rgba(255, 118, 0, 0.28),
     inset 0 1px 0 rgba(255, 250, 232, 0.55),
-    inset 0 -12px 20px rgba(129, 43, 0, 0.26);
+    inset 0 -9px 16px rgba(129, 43, 0, 0.22);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayWeekScheduleBtn {
@@ -1592,9 +1598,9 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
     linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 30%, transparent 31%),
     linear-gradient(180deg, #171717 0%, #050505 100%);
   box-shadow:
-    0 0 14px rgba(255, 118, 0, 0.24),
+    0 0 12px rgba(255, 118, 0, 0.18),
     inset 0 1px 0 rgba(255, 250, 232, 0.18),
-    inset 0 -10px 16px rgba(0, 0, 0, 0.42);
+    inset 0 -8px 14px rgba(0, 0, 0, 0.38);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayScheduleBtn {
@@ -1621,11 +1627,12 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
   width: calc(100% + 10px);
   margin-left: -10px;
-  gap: 4px;
+  gap: 0;
   padding: 4px 0 0;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--tournament-day {
+  padding-right: 0;
   padding-bottom: 0;
 }
 

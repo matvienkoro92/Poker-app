@@ -32,11 +32,16 @@
   }
   function applyCounts(counts) {
     counts = counts || {};
+    var allTimeTotal = 0;
+    Object.keys(counts).forEach(function (key) {
+      var value = Number(counts[key]);
+      if (value === value && value > 0) allTimeTotal += value;
+    });
     document.querySelectorAll(".admin-section-views[data-admin-section]").forEach(function (bar) {
       var name = bar.getAttribute("data-admin-section");
       var strong = bar.querySelector(".admin-section-views__count");
       if (!strong || !name) return;
-      var n = counts[name] != null ? Number(counts[name]) : 0;
+      var n = allTimeTotal || (counts[name] != null ? Number(counts[name]) : 0);
       strong.textContent = String(n === n ? n : 0);
     });
   }

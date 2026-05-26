@@ -1,7 +1,21 @@
 var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.png";
+var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.webp";
+var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-stolnik-70k.webp";
+var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
+var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.webp";
+var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.webp";
+var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-week-300k.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
-  { name: "Турнир Недели Нокаут Меджик", buyin: "2 000₽", guarantee: "300 000₽" },
+  {
+    name: "Нокаут недели",
+    buyin: "2 000₽",
+    guarantee: "300 000₽",
+    banner: HOME_TOURNAMENT_SUNDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Нокаут недели воскресенья — вход 2 000 ₽, призовые 300 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
   {
     name: "Magic MKO",
     buyin: "500₽",
@@ -11,11 +25,51 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerWidth: 1049,
     bannerHeight: 1499
   },
-  { name: "Rebuy", buyin: "300₽", guarantee: "100 000₽" },
-  { name: "Rebuy", buyin: "100₽", guarantee: "70 000₽" },
-  { name: "Нокаут Мистери", buyin: "1 200₽", guarantee: "220 000₽" },
-  { name: "Нокаут Прогрессив", buyin: "500₽", guarantee: "130 000₽" },
-  { name: "Фриролл", buyin: "0₽ · R:500₽ / A:1 000₽", guarantee: "200 000₽" }
+  {
+    name: "Турнир Тракториста",
+    buyin: "300₽",
+    guarantee: "120 000₽",
+    banner: HOME_TOURNAMENT_TUESDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Турнир Тракториста вторника — призовые 120 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Турнир Стольник",
+    buyin: "100₽",
+    guarantee: "70 000₽",
+    banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Турнир Стольник среды — призовые 70 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Мистери+",
+    buyin: "1 200₽",
+    guarantee: "220 000₽",
+    banner: HOME_TOURNAMENT_THURSDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Мистери+ четверга — призовые 220 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Нокаут Прогрессив",
+    buyin: "500₽",
+    guarantee: "130 000₽",
+    banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Нокаут Прогрессив пятницы — вход 500 ₽, призовые 130 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Фриролл",
+    buyin: "0₽ · R:400₽ / A:800₽",
+    guarantee: "200 000₽",
+    banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Фриролл субботы — ребай 400 ₽, аддон 800 ₽, призовые 200 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  }
 ];
 
 var HOME_FREEROLL_SCHEDULE = [
@@ -36,7 +90,7 @@ var HOME_FREEROLL_SCHEDULE = [
   { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
   { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "X-poker · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Главный недельный фриролл в X-poker. Старт в 18:00 МСК, вход 0₽, гарантия 1 000 000₽." },
   { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
-  { day: "Сб", dow: 6, title: "Приз 200 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:500₽ / A:1 000₽, гарантия 200 000₽." }
+  { day: "Сб", dow: 6, title: "Приз 200 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:400₽ / A:800₽, гарантия 200 000₽." }
 ];
 
 var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [
@@ -54,12 +108,12 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "daily", category: "Ежедневный", name: "Magic Chest", buyin: "50₽", rebuy: "R:50₽", guarantee: "3 000₽", hour: 16, minute: 0, durationMinutes: 180, priority: 50 },
   { repeat: "daily", category: "Ежедневный", name: "PKO/MKO", buyin: "300₽", rebuy: "R:300₽", guarantee: "25 000₽", hour: 17, minute: 0, durationMinutes: 180, priority: 55 },
   { repeat: "weekly", dow: 1, category: "Турнир дня", name: "Magic MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Rebuy", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "100 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Rebuy", buyin: "100₽", rebuy: "R:100₽ / A:100₽", guarantee: "70 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Нокаут Мистери", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "120 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Турнир Стольник", buyin: "100₽", rebuy: "R:100₽ / A:100₽", guarantee: "70 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери+", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:500₽ / A:1 000₽", guarantee: "200 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Турнир Недели Нокаут Меджик", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
+  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "200 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Нокаут недели", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
   { repeat: "daily", category: "Сателлит", name: "К турниру месяца Нокаут", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Ежедневный", name: "PLO4", buyin: "300₽", rebuy: "—", guarantee: "10 000₽", hour: 20, minute: 0, durationMinutes: 180, priority: 50 },
   { repeat: "daily", category: "Ежедневный", name: "Energetic Tournament", buyin: "200₽", rebuy: "R:200₽ / A:200₽", guarantee: "10 000₽", hour: 22, minute: 0, durationMinutes: 180, priority: 50 },
@@ -686,7 +740,7 @@ function updateTournamentDayBlock() {
   }
   function getFreerollTournamentInfo(item) {
     if (!item) return TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
-    var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "0₽ · R:500₽ / A:1 000₽" : "0₽";
+    var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "0₽ · R:400₽ / A:800₽" : "0₽";
     var fallbackGuarantee = item.dow === 3 ? "1 000 000₽" : item.room === "Poker21" && item.dow === 6 ? "200 000₽" : "100 000₽";
     return {
       name: item.room === "X-poker" ? "Фриролл X-poker" : "Фриролл",
