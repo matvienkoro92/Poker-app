@@ -49,6 +49,7 @@
           roomWinLossTotal +
           parseReportNumber(totals.deposit) +
           parseReportNumber(totals.bonuses) +
+          parseReportNumber(totals.previousRakeback) +
           parseReportNumber(totals.rakeback) -
           parseReportNumber(figuresRakeTotal) -
           parseReportNumber(totals.cashout) -
@@ -162,6 +163,7 @@
         if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportNegativeDisplay(figuresPercentTotal);
         if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
         if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
+        if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var approxAgentsRake = getFiguresExtraRakeTotal();
         var approxIssuedRake = getIssuedRakebackReportRakeTotal();
@@ -180,6 +182,7 @@
             figuresPercentTotal -
             parseReportNumber(totals.rakeback) -
             parseReportNumber(totals.bonuses) -
+            parseReportNumber(totals.previousRakeback) -
             parseReportNumber(totals.anyaSalary) -
             parseReportNumber(figuresRomanPaidInput ? figuresRomanPaidInput.value : "") +
             parseReportNumber(figuresWinLossInput ? figuresWinLossInput.value : "") -
@@ -204,6 +207,7 @@
         calculationWeekTotals = totals;
         if (calculationsDepositEl) calculationsDepositEl.textContent = formatReportRubleNumber(totals.deposit);
         if (calculationsBonusesEl) calculationsBonusesEl.textContent = formatReportRubleNumber(totals.bonuses);
+        if (calculationsPreviousRakebackEl) calculationsPreviousRakebackEl.textContent = formatReportRubleNumber(totals.previousRakeback);
         if (calculationsRakebackEl) calculationsRakebackEl.textContent = formatReportRubleNumber(totals.rakeback);
         if (calculationsCashoutEl) calculationsCashoutEl.textContent = formatReportNegativeDisplay(totals.cashout);
         if (calculationsBotExchipCashoutEl) calculationsBotExchipCashoutEl.textContent = formatReportNegativeDisplay(totals.botExchipCashout);
@@ -215,6 +219,7 @@
         var totals = {
           deposit: 0,
           bonuses: 0,
+          previousRakeback: 0,
           rakeback: 0,
           cashout: 0,
           botExchipCashout: 0,
@@ -226,6 +231,7 @@
           if (!t || t < week.start || t > week.end) return;
           totals.deposit += parseReportNumber(report && report.deposit);
           totals.bonuses += parseReportNumber(report && report.bonuses);
+          totals.previousRakeback += getReportPreviousRakebackTotal(report);
           totals.rakeback += getReportStoredRakebackTotal(report);
           totals.cashout += parseReportNumber(report && report.cashout);
           totals.botExchipCashout += parseReportNumber(report && report.botExchipCashout);
@@ -251,6 +257,8 @@
         add("Бот крипта деп", report && report.botCryptoDep, false);
         add("Бот Эксчип деп", report && report.botExchipDep, false);
         add("Бонусы", report && report.bonuses, false);
+        var previousRakebackTotal = getReportPreviousRakebackTotal(report);
+        if (previousRakebackTotal !== 0) add("РБ прошлая", previousRakebackTotal, true);
         add("Переводы", report && report.transfers, false);
         add("Возврат", report && report.ret, false);
         add("Сергей/Марина", report && report.sergeyMarina, false);
@@ -263,6 +271,7 @@
           if (isReportManualRakebackFieldName(extra.name)) return;
           var normalizedName = normalizeReportDetailName(extra.name);
           if (isReportAnyaSalaryFieldName(normalizedName)) return;
+          if (isReportPreviousRakebackFieldName(normalizedName)) return;
           rows.push({
             label: extra.name || "Доп",
             value: formatReportRubleNumber(extra.value),
@@ -307,6 +316,7 @@
           '<div class="admin-report-calculations__archive-totals">' +
             '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Депозиты за неделю</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.deposit)) + "</output></div>" +
             '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Бонусы</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.bonuses)) + "</output></div>" +
+            '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>РБ прошлая</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.previousRakeback)) + "</output></div>" +
             '<div class="admin-report-calculations__field admin-report-calculations__field--positive"><span>Рейкбек</span><output>' + escapeReportHtml(formatReportRubleNumber(totals.rakeback)) + "</output></div>" +
             '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов игроками</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.cashout)) + "</output></div>" +
             '<div class="admin-report-calculations__field admin-report-calculations__field--negative"><span>Выводов Эксчип бот</span><output>' + escapeReportHtml(formatReportNegativeDisplay(totals.botExchipCashout)) + "</output></div>" +

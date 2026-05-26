@@ -1,8 +1,16 @@
-var HOME_TOURNAMENT_DAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.png";
+var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.png";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   { name: "Турнир Недели Нокаут Меджик", buyin: "2 000₽", guarantee: "300 000₽" },
-  { name: "Magic MKO", buyin: "500₽", guarantee: "130 000₽" },
+  {
+    name: "Magic MKO",
+    buyin: "500₽",
+    guarantee: "130 000₽",
+    banner: HOME_TOURNAMENT_MONDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Magic MKO понедельника — Мистери Баунти 130 000 ₽",
+    bannerWidth: 1049,
+    bannerHeight: 1499
+  },
   { name: "Rebuy", buyin: "300₽", guarantee: "100 000₽" },
   { name: "Rebuy", buyin: "100₽", guarantee: "70 000₽" },
   { name: "Нокаут Мистери", buyin: "1 200₽", guarantee: "220 000₽" },
@@ -341,7 +349,10 @@ function updateHomeTournamentFocusFlow() {
   var flow = section.querySelector(".home-tournament-flow");
   var svg = flow ? flow.querySelector(".home-tournament-flow__svg") : null;
   var activeRow = section.querySelector(".home-tournament-week-row--active");
-  var target = section.querySelector(".home-tournament-detail__media");
+  var target =
+    section.querySelector(".home-tournament-detail--has-banner .home-tournament-detail__media") ||
+    section.querySelector(".home-tournament-detail--no-banner .home-tournament-detail__content") ||
+    section.querySelector(".home-tournament-detail__media");
   if (!flow || !svg || !activeRow || !target) return;
   window.requestAnimationFrame(function () {
     var sectionRect = section.getBoundingClientRect();
@@ -827,14 +838,35 @@ function updateTournamentDayBlock() {
           pokerMskWeekdayShortAt(frState.target.getTime()) + ", " + formatMskHmForDate(frState.target) + " МСК";
       }
     }
+    var homeTournamentDetail = document.querySelector(".home-tournament-detail");
+    var homeTrophyMedia = document.querySelector(".home-tournament-detail__media");
     var homeTrophyImg = document.getElementById("tournamentDayHomeTrophyImg");
-    var homeTrophySrc =
-      typeof getAssetUrl === "function"
-        ? getAssetUrl(HOME_TOURNAMENT_DAY_BANNER_FILE)
-        : "./assets/" + HOME_TOURNAMENT_DAY_BANNER_FILE;
-    if (homeTrophyImg && homeTrophySrc) {
-      homeTrophyImg.src = homeTrophySrc;
-      homeTrophyImg.alt = "Poker21 Мистери Баунти 130 000 ₽";
+    var detailBannerFile = detailState.t && detailState.t.banner ? detailState.t.banner : "";
+    var hasDetailBanner = !!detailBannerFile;
+    if (homeTournamentDetail) {
+      homeTournamentDetail.classList.toggle("home-tournament-detail--has-banner", hasDetailBanner);
+      homeTournamentDetail.classList.toggle("home-tournament-detail--no-banner", !hasDetailBanner);
+    }
+    if (homeTrophyMedia) {
+      homeTrophyMedia.hidden = !hasDetailBanner;
+      if (hasDetailBanner && detailState.t.bannerWidth && detailState.t.bannerHeight) {
+        homeTrophyMedia.style.setProperty("--home-tournament-banner-aspect", detailState.t.bannerWidth + " / " + detailState.t.bannerHeight);
+      } else {
+        homeTrophyMedia.style.removeProperty("--home-tournament-banner-aspect");
+      }
+    }
+    if (homeTrophyImg) {
+      if (hasDetailBanner) {
+        var homeTrophySrc =
+          typeof getAssetUrl === "function" ? getAssetUrl(detailBannerFile) : "./assets/" + detailBannerFile;
+        homeTrophyImg.src = homeTrophySrc;
+        homeTrophyImg.alt = detailState.t.bannerAlt || detailNameStr || "Турнир дня";
+        if (detailState.t.bannerWidth) homeTrophyImg.width = detailState.t.bannerWidth;
+        if (detailState.t.bannerHeight) homeTrophyImg.height = detailState.t.bannerHeight;
+      } else {
+        homeTrophyImg.removeAttribute("src");
+        homeTrophyImg.alt = "";
+      }
     }
     updateHomeTournamentFocusFlow();
   }

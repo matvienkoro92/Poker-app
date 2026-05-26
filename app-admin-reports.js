@@ -40,6 +40,7 @@ function initAdminReportModal() {
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
   var calculationsBonusesEl = document.getElementById("adminReportCalcBonuses");
+  var calculationsPreviousRakebackEl = document.getElementById("adminReportCalcPreviousRakeback");
   var calculationsRakebackEl = document.getElementById("adminReportCalcRakeback");
   var calculationsRakeTotalEl = document.getElementById("adminReportCalcRakeTotal");
   var calculationsCashoutEl = document.getElementById("adminReportCalcCashout");
@@ -54,6 +55,7 @@ function initAdminReportModal() {
   var figuresPercentTotalMirrorEl = document.getElementById("adminReportFiguresPercentTotalMirror");
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
+  var figuresPreviousRakebackEl = document.getElementById("adminReportFiguresPreviousRakeback");
   var figuresSalaryEl = document.getElementById("adminReportFiguresSalary");
   var figuresSaveBtn = document.getElementById("adminReportFiguresSaveBtn");
   var figuresEditBtn = document.getElementById("adminReportFiguresEditBtn");
@@ -817,7 +819,9 @@ function initAdminReportModal() {
         formatReportRubleNumber: formatReportRubleNumber,
         formatRuWeekdayDateFromTs: formatRuWeekdayDateFromTs,
         getReportStoredRakebackTotal: getReportStoredRakebackTotal,
+        getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
         isReportUsdtRateFieldName: isReportUsdtRateFieldName,
+        isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,
         mergeReportExtrasIntoMap: mergeReportExtrasIntoMap,
         reportBusinessTimestampMs: reportBusinessTimestampMs,
         reportEffectiveTimestampMs: reportEffectiveTimestampMs,
@@ -931,6 +935,7 @@ function initAdminReportModal() {
       calculationsWeekLabelEl: calculationsWeekLabelEl,
       calculationsDepositEl: calculationsDepositEl,
       calculationsBonusesEl: calculationsBonusesEl,
+      calculationsPreviousRakebackEl: calculationsPreviousRakebackEl,
       calculationsRakebackEl: calculationsRakebackEl,
       calculationsRakeTotalEl: calculationsRakeTotalEl,
       calculationsCashoutEl: calculationsCashoutEl,
@@ -945,6 +950,7 @@ function initAdminReportModal() {
       figuresPercentTotalMirrorEl: figuresPercentTotalMirrorEl,
       figuresRakebackEl: figuresRakebackEl,
       figuresBonusesEl: figuresBonusesEl,
+      figuresPreviousRakebackEl: figuresPreviousRakebackEl,
       figuresSalaryEl: figuresSalaryEl,
       figuresSaveBtn: figuresSaveBtn,
       figuresEditBtn: figuresEditBtn,
@@ -1041,7 +1047,9 @@ function initAdminReportModal() {
       isReportUsdtRateFieldName: isReportUsdtRateFieldName,
       isReportManualRakebackFieldName: isReportManualRakebackFieldName,
       isReportAnyaSalaryFieldName: isReportAnyaSalaryFieldName,
+      isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,
       getReportAnyaSalaryTotal: getReportAnyaSalaryTotal,
+      getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
       createCalculationsLogicScope: createCalculationsLogicScope,
       getCalculationsLogic: getCalculationsLogic,
       callCalculationsLogic: callCalculationsLogic,
@@ -2176,6 +2184,7 @@ function initAdminReportModal() {
       name = name != null ? String(name).trim() : "";
       if (!name) name = "Доп.";
       if (isReportManualRakebackFieldName(name)) return;
+      if (isReportPreviousRakebackFieldName(name)) return;
       var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
       if (isNaN(n)) n = 0;
       if (isReportUsdtRateFieldName(name)) {
@@ -2450,9 +2459,26 @@ function initAdminReportModal() {
     return normalized === "аня зп" || normalized === "аня зарплата";
   }
 
+  function isReportPreviousRakebackFieldName(name) {
+    var normalized = normalizeReportDetailName(name)
+      .replace(/[._:;,\-–—]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    var hasRakeback = normalized.indexOf("рб") !== -1 || normalized.indexOf("рейкбек") !== -1 || normalized.indexOf("rb") !== -1;
+    var hasPrevious = normalized.indexOf("прошл") !== -1 || normalized.indexOf("пред") !== -1;
+    return hasRakeback && hasPrevious;
+  }
+
   function getReportAnyaSalaryTotal(it) {
     return getReportExtraEntries(it).reduce(function (sum, extra) {
       if (!extra || !isReportAnyaSalaryFieldName(extra.name)) return sum;
+      return sum + parseReportNumber(extra.value);
+    }, 0);
+  }
+
+  function getReportPreviousRakebackTotal(it) {
+    return getReportExtraEntries(it).reduce(function (sum, extra) {
+      if (!extra || !isReportPreviousRakebackFieldName(extra.name)) return sum;
       return sum + parseReportNumber(extra.value);
     }, 0);
   }
@@ -2486,6 +2512,7 @@ function initAdminReportModal() {
       calculationsWeekLabelEl: calculationsWeekLabelEl,
       calculationsDepositEl: calculationsDepositEl,
       calculationsBonusesEl: calculationsBonusesEl,
+      calculationsPreviousRakebackEl: calculationsPreviousRakebackEl,
       calculationsRakebackEl: calculationsRakebackEl,
       calculationsRakeTotalEl: calculationsRakeTotalEl,
       calculationsCashoutEl: calculationsCashoutEl,
@@ -2501,6 +2528,7 @@ function initAdminReportModal() {
       figuresPercentTotalMirrorEl: figuresPercentTotalMirrorEl,
       figuresRakebackEl: figuresRakebackEl,
       figuresBonusesEl: figuresBonusesEl,
+      figuresPreviousRakebackEl: figuresPreviousRakebackEl,
       figuresSalaryEl: figuresSalaryEl,
       figuresSaveBtn: figuresSaveBtn,
       figuresEditBtn: figuresEditBtn,
@@ -2532,9 +2560,11 @@ function initAdminReportModal() {
       getCalculationWeekMetaFromStart: getCalculationWeekMetaFromStart,
       getReportAnyaSalaryTotal: getReportAnyaSalaryTotal,
       getReportExtraEntries: getReportExtraEntries,
+      getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
       getReportStoredRakebackTotal: getReportStoredRakebackTotal,
       isReportAnyaSalaryFieldName: isReportAnyaSalaryFieldName,
       isReportManualRakebackFieldName: isReportManualRakebackFieldName,
+      isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,
       normalizeReportDetailName: normalizeReportDetailName,
       parseReportNumber: parseReportNumber,
       reportEffectiveTimestampMs: reportEffectiveTimestampMs,
@@ -2785,7 +2815,7 @@ function initAdminReportModal() {
       );
     });
     extraEntries.forEach(function (extra) {
-      if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name)) return;
+      if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name) || isReportPreviousRakebackFieldName(extra.name)) return;
       childTotal += parseReportNumber(extra.value);
       childParts.push(
         '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--extra">' +
@@ -2851,6 +2881,7 @@ function initAdminReportModal() {
       });
     }
     pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
+    pushEntry(expenseEntries, "РБ прошлая", getReportPreviousRakebackTotal(it), false);
     pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(it), true);
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
     pushEntry(otherEntries, labels.transfers, it.transfers, false);
@@ -2858,6 +2889,7 @@ function initAdminReportModal() {
     extraEntries.forEach(function (extra) {
       var normalizedName = normalizeReportDetailName(extra.name);
       if (isReportManualRakebackFieldName(extra.name)) return;
+      if (isReportPreviousRakebackFieldName(normalizedName)) return;
       var entry = { label: extra.name, value: String(extra.value) };
       if (isReportAnyaSalaryFieldName(normalizedName)) anyaEntries.push(entry);
     });
@@ -3602,6 +3634,7 @@ function initAdminReportModal() {
       calculationsWeekLabelEl: calculationsWeekLabelEl,
       calculationsDepositEl: calculationsDepositEl,
       calculationsBonusesEl: calculationsBonusesEl,
+      calculationsPreviousRakebackEl: calculationsPreviousRakebackEl,
       calculationsRakebackEl: calculationsRakebackEl,
       calculationsRakeTotalEl: calculationsRakeTotalEl,
       calculationsCashoutEl: calculationsCashoutEl,
@@ -3616,6 +3649,7 @@ function initAdminReportModal() {
       figuresPercentTotalMirrorEl: figuresPercentTotalMirrorEl,
       figuresRakebackEl: figuresRakebackEl,
       figuresBonusesEl: figuresBonusesEl,
+      figuresPreviousRakebackEl: figuresPreviousRakebackEl,
       figuresSalaryEl: figuresSalaryEl,
       figuresSaveBtn: figuresSaveBtn,
       figuresEditBtn: figuresEditBtn,
@@ -3954,7 +3988,9 @@ function initAdminReportModal() {
       isReportUsdtRateFieldName: isReportUsdtRateFieldName,
       isReportManualRakebackFieldName: isReportManualRakebackFieldName,
       isReportAnyaSalaryFieldName: isReportAnyaSalaryFieldName,
+      isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,
       getReportAnyaSalaryTotal: getReportAnyaSalaryTotal,
+      getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
       createCalculationsLogicScope: createCalculationsLogicScope,
       getCalculationsLogic: getCalculationsLogic,
       callCalculationsLogic: callCalculationsLogic,

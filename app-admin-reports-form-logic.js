@@ -19,6 +19,8 @@
         var extraRows = modal.querySelectorAll(".admin-report-extra-row");
         var extraFields = [];
         var extraTotal = 0;
+        var extraExpenseTotal = 0;
+        var extraRawTotal = 0;
         extraRows.forEach(function (row) {
           var nameInput = row.querySelector(".admin-report-extra-name");
           var amountInput = row.querySelector(".admin-report-extra-amount");
@@ -30,7 +32,12 @@
           }
           if (name || amount) {
             extraFields.push({ name: name, amount: amount });
-            extraTotal += amount;
+            extraRawTotal += amount;
+            if (typeof isReportPreviousRakebackFieldName === "function" && isReportPreviousRakebackFieldName(name)) {
+              extraExpenseTotal += amount;
+            } else {
+              extraTotal += amount;
+            }
           }
         });
         var corePayload = {
@@ -57,10 +64,10 @@
           typeof pokerGuestOrAuthedPostBody === "function"
             ? pokerGuestOrAuthedPostBody(corePayload)
             : corePayload;
-        var total = payload.deposit - payload.cashout + payload.prodamus + payload.robokassa + payload.romaCrypto + payload.botCryptoDep + payload.botExchipDep - payload.botExchipCashout - payload.bonuses + payload.transfers + payload.ret + payload.sergeyMarina + payload.rakeback + extraTotal;
+        var total = payload.deposit - payload.cashout + payload.prodamus + payload.robokassa + payload.romaCrypto + payload.botCryptoDep + payload.botExchipDep - payload.botExchipCashout - payload.bonuses + payload.transfers + payload.ret + payload.sergeyMarina + payload.rakeback + extraTotal - extraExpenseTotal;
         payload.total = total;
         payload.extraName = extraFields[0] ? extraFields[0].name : "";
-        payload.extraAmount = extraTotal;
+        payload.extraAmount = extraRawTotal;
         payload.comment = extraFields.map(function (f) { return f.name; }).filter(Boolean).join(", ");
         return payload;
       }

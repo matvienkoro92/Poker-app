@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v6";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v7";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -123,6 +123,15 @@
       var normalized = normalizeReportDetailName(name);
       return normalized === "аня зп" || normalized === "аня зарплата";
     }
+    var isReportPreviousRakebackFieldName = helpers.isReportPreviousRakebackFieldName || function (name) {
+      var normalized = normalizeReportDetailName(name)
+        .replace(/[._:;,\-–—]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      var hasRakeback = normalized.indexOf("рб") !== -1 || normalized.indexOf("рейкбек") !== -1 || normalized.indexOf("rb") !== -1;
+      var hasPrevious = normalized.indexOf("прошл") !== -1 || normalized.indexOf("пред") !== -1;
+      return hasRakeback && hasPrevious;
+    };
     function getReportExtraEntries(report) {
       var entries = [];
       if (Array.isArray(report && report.extraFields) && report.extraFields.length > 0) {
@@ -140,6 +149,11 @@
         return isReportAnyaSalaryFieldName(extra.name) ? sum + parseReportNumber(extra.value) : sum;
       }, 0);
     }
+    var getReportPreviousRakebackTotal = helpers.getReportPreviousRakebackTotal || function (report) {
+      return getReportExtraEntries(report).reduce(function (sum, extra) {
+        return isReportPreviousRakebackFieldName(extra.name) ? sum + parseReportNumber(extra.value) : sum;
+      }, 0);
+    };
     var buildReportDetailHtml = helpers.buildReportDetailHtml || function (report) {
       report = report || {};
       var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
@@ -171,7 +185,7 @@
         );
       });
       extraEntries.forEach(function (extra) {
-        if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name)) return;
+        if (!extra || isReportManualRakebackFieldName(extra.name) || isReportAnyaSalaryFieldName(extra.name) || isReportPreviousRakebackFieldName(extra.name)) return;
         childTotal += parseReportNumber(extra.value);
         childParts.push(
           '<div class="admin-report-sent-detail__deposit-child admin-report-sent-detail__deposit-child--extra">' +
@@ -237,12 +251,14 @@
         });
       }
       pushEntry(expenseEntries, labels.bonuses, report.bonuses, false);
+      pushEntry(expenseEntries, "РБ прошлая", getReportPreviousRakebackTotal(report), false);
       pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(report), true);
       pushEntry(otherEntries, labels.botExchipCashout, report.botExchipCashout, false);
       pushEntry(otherEntries, labels.transfers, report.transfers, false);
       pushEntry(otherEntries, labels.ret, report.ret, false);
       extraEntries.forEach(function (extra) {
         if (isReportManualRakebackFieldName(extra.name)) return;
+        if (isReportPreviousRakebackFieldName(extra.name)) return;
         var entry = { label: extra.name, value: String(extra.value) };
         if (isReportAnyaSalaryFieldName(extra.name)) anyaEntries.push(entry);
       });
@@ -262,6 +278,7 @@
         name = name != null ? String(name).trim() : "";
         if (!name) name = "Доп.";
         if (isReportManualRakebackFieldName(name)) return;
+        if (isReportPreviousRakebackFieldName(name)) return;
         var n = typeof raw === "number" ? raw : parseFloat(String(raw != null ? raw : "").replace(",", "."));
         if (isNaN(n)) n = 0;
         if (isReportUsdtRateFieldName(name)) {
@@ -553,14 +570,16 @@
           return {
             deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
             botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
-            bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0
+            bonuses: 0, previousRakeback: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0
           };
         }
 
         function addNumericToTotals(totals, r) {
           Object.keys(totals).forEach(function (k) {
             if (k === "extraFields") return;
-            var v = k === "rakeback" ? getReportStoredRakebackTotal(r) : r[k];
+            var v = k === "rakeback"
+              ? getReportStoredRakebackTotal(r)
+              : (k === "previousRakeback" ? getReportPreviousRakebackTotal(r) : r[k]);
             if (v == null || v === "") return;
             var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
             if (!isNaN(n)) totals[k] += n;
@@ -903,12 +922,13 @@
           botExchipDep: "Бот эксчип деп",
           botExchipCashout: "Бот эксчип вывод",
           bonuses: "Бонусы",
+          previousRakeback: "РБ прошлая",
           transfers: "Переводы",
           ret: "Возврат",
           sergeyMarina: "Сергей/Марина",
           rakeback: "Рейкбек",
         };
-        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "transfers", "ret", "sergeyMarina", "rakeback"];
+        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "previousRakeback", "transfers", "ret", "sergeyMarina", "rakeback"];
 
         function copyTextToClipboard(text) {
           if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
@@ -934,7 +954,7 @@
           lines.push("Итого за неделю " + label);
           weekKeys.forEach(function (k) {
             var v = totals[k];
-            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + (k === "rakeback" ? formatReportRubleNumber(v) : String(v)));
+            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + ((k === "rakeback" || k === "previousRakeback") ? formatReportRubleNumber(v) : String(v)));
           });
           if (totals.extraFields && totals.extraFields.length) {
             totals.extraFields.forEach(function (f) {
