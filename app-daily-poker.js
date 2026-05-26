@@ -184,7 +184,7 @@
     var suit = card && card.suit ? String(card.suit) : "";
     var rank = card && card.rank ? String(card.rank) : "";
     var red = suit === "hearts" || suit === "diamonds";
-    if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"><span class="daily-poker-card__back-logo">Poker<br>21</span></div>';
+    if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"></div>';
     return '<div class="daily-poker-card' + (red ? " daily-poker-card--red" : "") + '">' +
       '<span class="daily-poker-card__rank">' + esc(rank) + '</span>' +
       '<span class="daily-poker-card__suit">' + esc(suitSymbols[suit] || "?") + '</span>' +
@@ -201,8 +201,8 @@
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
     if (hole) hole.innerHTML = cardHtml(null, true) + cardHtml(null, true);
-    if (board) board.innerHTML = "";
-    setBoardActive(false);
+    if (board) board.innerHTML = [0, 1, 2, 3, 4].map(function () { return cardHtml(null, true); }).join("");
+    setBoardActive(true);
   }
 
   function revealCards(result) {
