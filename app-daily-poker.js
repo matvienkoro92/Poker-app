@@ -10,6 +10,8 @@
     activeDealButtonId: "",
   };
 
+  var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
+
   var suitSymbols = {
     spades: "♠",
     hearts: "♥",
@@ -77,20 +79,20 @@
     setLiveText($("dailyPokerReward"), "");
   }
 
+  function syncStartPrompt(data) {
+    var resultEl = $("dailyPokerResult");
+    if (!resultEl || dailyPokerState.revealing || dailyPokerState.stagedDealResult) return;
+    var current = String(resultEl.textContent || "").trim();
+    if (data && data.canPlay && (!current || current === DAILY_POKER_START_PROMPT)) {
+      setResultText(DAILY_POKER_START_PROMPT, false);
+    } else if (current === DAILY_POKER_START_PROMPT) {
+      setResultText("", false);
+    }
+  }
+
   function formatBonus(value) {
     var n = Math.max(0, parseInt(value || "0", 10) || 0);
     return "Бонусный баланс: " + n + " бонусов";
-  }
-
-  function formatTicketlessStreak(data) {
-    var payload = data || {};
-    var target = Math.max(1, parseInt(payload.ticketlessStreakTarget || "7", 10) || 7);
-    var amount = Math.max(0, parseInt(payload.ticketlessStreakTicketAmount || "300", 10) || 300);
-    if (payload.ticketlessStreakAward && payload.ticketlessStreakAward.amount) {
-      return "Серия без билета: " + target + "/" + target + " — билет " + amount + " ₽ зачислен";
-    }
-    var streak = Math.max(0, parseInt(payload.ticketlessStreak || "0", 10) || 0);
-    return "Серия без билета: " + Math.min(streak, target) + "/" + target;
   }
 
   function formatDuration(seconds) {
@@ -135,7 +137,6 @@
     if (Number.isFinite(serverMs)) dailyPokerState.serverDeltaMs = serverMs - Date.now();
     var balanceEl = $("dailyPokerBalance");
     var attemptsEl = $("dailyPokerAttempts");
-    var streakEl = $("dailyPokerTicketlessStreak");
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) {
@@ -143,10 +144,6 @@
       balanceEl.innerHTML = '<span class="daily-poker__balance-label">Бонусный баланс:</span> <strong>' + bonusValue + '</strong> <span>бонусов</span>';
     }
     if (attemptsEl) attemptsEl.innerHTML = '<span>Попытки:</span> <strong>' + (data.attemptsLeft || 0) + '</strong>';
-    if (streakEl) {
-      streakEl.textContent = formatTicketlessStreak(data);
-      streakEl.classList.toggle("daily-poker__ticketless-streak--award", !!data.ticketlessStreakAward);
-    }
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
@@ -158,6 +155,7 @@
       extraBtn.textContent = "Раздать карты";
     }
     updateTimer();
+    syncStartPrompt(data);
   }
 
   function cloneStatus(status) {
@@ -198,7 +196,6 @@
       Object.prototype.hasOwnProperty.call(data, "canPlay") ||
       Object.prototype.hasOwnProperty.call(data, "attemptsLeft") ||
       Object.prototype.hasOwnProperty.call(data, "bonusBalance") ||
-      Object.prototype.hasOwnProperty.call(data, "ticketlessStreak") ||
       Object.prototype.hasOwnProperty.call(data, "nextFreeAttemptAt")
     ));
   }
@@ -357,7 +354,7 @@
     var base = apiBase();
     if (!base || !hasCredential()) {
       showMessage("Войдите в аккаунт, чтобы сыграть в Раздачу дня.", true);
-      syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, ticketlessStreak: 0, ticketlessStreakTarget: 7, ticketlessStreakTicketAmount: 300, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
+      syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
       return Promise.resolve(false);
     }
     return fetch(authUrl("status"), { cache: "no-store" })
@@ -446,6 +443,7 @@
     resetManualDeal();
     bind();
     renderEmptyCards();
+    setResultText(DAILY_POKER_START_PROMPT, false);
     loadStatus();
     if (dailyPokerState.timer) clearInterval(dailyPokerState.timer);
     dailyPokerState.timer = setInterval(updateTimer, 1000);

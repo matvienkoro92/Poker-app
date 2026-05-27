@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.332");
-@import url("./styles-home-rating-promo.css?v=3.332");
-@import url("./styles-auth.css?v=3.332");
-@import url("./styles-home.css?v=3.332");
-@import url("./styles-chat.css?v=3.332");
-@import url("./styles-learning-games.css?v=3.332");
-@import url("./styles-raffles.css?v=3.332");
-@import url("./styles-daily-poker.css?v=3.332");
-@import url("./styles-home-legacy-prelude.css?v=3.332");
-@import url("./styles-download.css?v=3.332");
-@import url("./styles-home-legacy-tail.css?v=3.332");
-@import url("./styles-home-rating-promo-legacy.css?v=3.332");
-@import url("./styles-rating.css?v=3.332");
-@import url("./styles-hall.css?v=3.332");
-@import url("./styles-admin.css?v=3.332");
-@import url("./styles-player-crm.css?v=3.332");
-@import url("./styles-profile.css?v=3.332");
-@import url("./styles-layout.css?v=3.332");
-@import url("./styles-chat-overlays.css?v=3.332");
-@import url("./styles-home-overrides.css?v=3.332");
-@import url("./styles-layout-touch-targets.css?v=3.332");
-@import url("./styles-home-rating-promo-late.css?v=3.332");
+@import url("./styles-base.css?v=3.333");
+@import url("./styles-home-rating-promo.css?v=3.333");
+@import url("./styles-auth.css?v=3.333");
+@import url("./styles-home.css?v=3.333");
+@import url("./styles-chat.css?v=3.333");
+@import url("./styles-learning-games.css?v=3.333");
+@import url("./styles-raffles.css?v=3.333");
+@import url("./styles-daily-poker.css?v=3.333");
+@import url("./styles-home-legacy-prelude.css?v=3.333");
+@import url("./styles-download.css?v=3.333");
+@import url("./styles-home-legacy-tail.css?v=3.333");
+@import url("./styles-home-rating-promo-legacy.css?v=3.333");
+@import url("./styles-rating.css?v=3.333");
+@import url("./styles-hall.css?v=3.333");
+@import url("./styles-admin.css?v=3.333");
+@import url("./styles-player-crm.css?v=3.333");
+@import url("./styles-profile.css?v=3.333");
+@import url("./styles-layout.css?v=3.333");
+@import url("./styles-chat-overlays.css?v=3.333");
+@import url("./styles-home-overrides.css?v=3.333");
+@import url("./styles-layout-touch-targets.css?v=3.333");
+@import url("./styles-home-rating-promo-late.css?v=3.333");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -57,15 +57,18 @@ body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__s
   display: none !important;
 }
 
-.app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn {
+.app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu #romanTaskPlannerOpenBtn {
   display: none !important;
 }
 
-html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"] {
+html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"],
+html.home-planner-access-granted #app:has(.view--active[data-view="daily-poker"]) .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"] {
   display: grid !important;
 }
 
-.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
+#app:has(.view--active[data-view="daily-poker"]) > .card > .card__header {
   position: relative;
   z-index: 60;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px) !important;
@@ -86,7 +89,9 @@ html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTas
 }
 
 html[data-theme="gold"].app-view-home #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
-html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
+html[data-theme="gold"].app-view-daily-poker-html-scroll #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header,
+html[data-theme="gold"] body[data-view="daily-poker"] #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header {
   border-color: rgba(214, 163, 84, 0.34) !important;
   background:
     radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.065), transparent 36%),
@@ -98,24 +103,28 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
     0 18px 46px rgba(0, 0, 0, 0.28) !important;
 }
 
-.app.app--view-home .logo.logo--welcome {
+.app.app--view-home .logo.logo--welcome,
+#app:has(.view--active[data-view="daily-poker"]) .logo.logo--welcome {
   flex: 1 1 auto;
   gap: 6px;
   min-width: 0;
   padding: 0 !important;
 }
 
-.app.app--view-home .logo__image {
+.app.app--view-home .logo__image,
+#app:has(.view--active[data-view="daily-poker"]) .logo__image {
   width: 40px;
   height: 40px;
 }
 
-.app.app--view-home .logo__text {
+.app.app--view-home .logo__text,
+#app:has(.view--active[data-view="daily-poker"]) .logo__text {
   gap: 2px;
   min-width: 0;
 }
 
-.app.app--view-home .logo__title {
+.app.app--view-home .logo__title,
+#app:has(.view--active[data-view="daily-poker"]) .logo__title {
   flex-direction: row;
   gap: 0.2em;
   max-width: 100%;
@@ -124,21 +133,25 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   white-space: nowrap;
 }
 
-.app.app--view-home .logo__title-line {
+.app.app--view-home .logo__title-line,
+#app:has(.view--active[data-view="daily-poker"]) .logo__title-line {
   min-width: 0;
 }
 
-.app.app--view-home .logo__title-line--name {
+.app.app--view-home .logo__title-line--name,
+#app:has(.view--active[data-view="daily-poker"]) .logo__title-line--name {
   flex: 1 1 auto;
 }
 
-.app.app--view-home .logo__subtitle {
+.app.app--view-home .logo__subtitle,
+#app:has(.view--active[data-view="daily-poker"]) .logo__subtitle {
   font-size: clamp(7px, 1.95vw, 9px);
   line-height: 1.1;
   letter-spacing: 0.2em;
 }
 
-.app.app--view-home .header-actions {
+.app.app--view-home .header-actions,
+#app:has(.view--active[data-view="daily-poker"]) .header-actions {
   flex: 1 1 auto;
   flex-direction: row;
   align-items: center;
@@ -147,7 +160,8 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   min-width: 0;
 }
 
-.app.app--view-home .header-profile-summary {
+.app.app--view-home .header-profile-summary,
+#app:has(.view--active[data-view="daily-poker"]) .header-profile-summary {
   flex: 1 1 128px;
   width: auto;
   min-width: 0;
@@ -156,11 +170,13 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   align-items: flex-end;
 }
 
-.app.app--view-home .header-greeting-wrap {
+.app.app--view-home .header-greeting-wrap,
+#app:has(.view--active[data-view="daily-poker"]) .header-greeting-wrap {
   max-width: 100%;
 }
 
-.app.app--view-home .header-greeting {
+.app.app--view-home .header-greeting,
+#app:has(.view--active[data-view="daily-poker"]) .header-greeting {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -179,71 +195,86 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   text-overflow: ellipsis;
 }
 
-.app.app--view-home .header-status {
+.app.app--view-home .header-status,
+#app:has(.view--active[data-view="daily-poker"]) .header-status {
   max-width: 100%;
   gap: 4px;
   font-size: clamp(8px, 2.35vw, 10px);
 }
 
-.app.app--view-home .header-status__fish {
+.app.app--view-home .header-status__fish,
+#app:has(.view--active[data-view="daily-poker"]) .header-status__fish {
   width: 22px;
   height: 22px;
 }
 
-.app.app--view-home .header-actions__row {
+.app.app--view-home .header-actions__row,
+#app:has(.view--active[data-view="daily-poker"]) .header-actions__row {
   gap: 7px;
 }
 
-.app.app--view-home .header-notification-btn {
+.app.app--view-home .header-notification-btn,
+#app:has(.view--active[data-view="daily-poker"]) .header-notification-btn {
   display: none !important;
 }
 
-.app.app--view-home .header-actions__row .header-icon-btn {
+.app.app--view-home .header-actions__row .header-icon-btn,
+#app:has(.view--active[data-view="daily-poker"]) .header-actions__row .header-icon-btn {
   width: 44px;
   min-width: 44px;
   height: 44px;
   border-radius: 999px;
 }
 
-html.site-home-header-mode .app.app--view-home .header-profile-summary {
+html.site-home-header-mode .app.app--view-home .header-profile-summary,
+html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .header-profile-summary,
+#app:has(.view--active[data-view="daily-poker"]) .header-profile-summary {
   display: none;
 }
 
-.app.app--view-home .header-more-menu .welcome-admin-report-btn__icon {
+.app.app--view-home .header-more-menu .welcome-admin-report-btn__icon,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .welcome-admin-report-btn__icon {
   display: inline-flex;
 }
 
 @media (max-width: 380px) {
-  .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
+  .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
+  #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header {
     min-height: 60px;
     gap: 7px;
     padding: 7px 10px !important;
   }
 
-  .app.app--view-home .logo.logo--welcome {
+  .app.app--view-home .logo.logo--welcome,
+  #app:has(.view--active[data-view="daily-poker"]) .logo.logo--welcome {
     gap: 5px;
   }
 
-  .app.app--view-home .logo__image {
+  .app.app--view-home .logo__image,
+  #app:has(.view--active[data-view="daily-poker"]) .logo__image {
     width: 36px;
     height: 36px;
   }
 
-  .app.app--view-home .header-actions {
+  .app.app--view-home .header-actions,
+  #app:has(.view--active[data-view="daily-poker"]) .header-actions {
     gap: 7px;
   }
 
-  .app.app--view-home .header-profile-summary {
+  .app.app--view-home .header-profile-summary,
+  #app:has(.view--active[data-view="daily-poker"]) .header-profile-summary {
     flex-basis: 118px;
     width: auto;
     min-width: 0;
   }
 
-  .app.app--view-home .header-actions__row {
+  .app.app--view-home .header-actions__row,
+  #app:has(.view--active[data-view="daily-poker"]) .header-actions__row {
     gap: 6px;
   }
 
-  .app.app--view-home .header-actions__row .header-icon-btn {
+  .app.app--view-home .header-actions__row .header-icon-btn,
+  #app:has(.view--active[data-view="daily-poker"]) .header-actions__row .header-icon-btn {
     width: 40px;
     min-width: 40px;
     height: 40px;
@@ -1565,39 +1596,72 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   z-index: 3;
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
-  align-items: stretch;
-  gap: 5px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   width: 100%;
+  padding: 2px 8px 0;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses::before {
+  content: "♠";
+  position: absolute;
+  left: 50%;
+  top: -11px;
+  z-index: 1;
+  color: #ffd874;
+  font-size: clamp(12px, 2.4vw, 16px);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow:
+    0 0 6px rgba(255, 216, 116, 0.88),
+    0 1px 2px rgba(40, 14, 0, 0.88);
+  transform: translateX(-50%);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 4px 5px;
-  border: 1px solid rgba(255, 181, 49, 0.34);
-  border-radius: 10px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255, 219, 128, 0.18), transparent 58%),
-    linear-gradient(180deg, rgba(30, 16, 5, 0.92), rgba(8, 8, 8, 0.92));
-  color: #ffcf54;
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 1;
+  gap: 18px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: #ffe5a2;
+  font-size: clamp(27px, 5.8vw, 38px);
+  font-weight: 1000;
+  line-height: 0.92;
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 0 9px rgba(255, 177, 38, 0.34);
+  text-shadow:
+    0 2px 0 rgba(69, 25, 0, 0.92),
+    0 0 8px rgba(255, 237, 178, 0.5),
+    0 0 18px rgba(255, 137, 0, 0.36);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title::after {
+  content: "";
+  flex: 1 1 0;
+  min-width: 26px;
+  height: 1px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 196, 72, 0.88) 35%, rgba(255, 235, 160, 0.9) 50%, rgba(255, 196, 72, 0.48) 70%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 232, 0.12),
-    0 0 10px rgba(255, 118, 0, 0.12);
+    0 0 7px rgba(255, 166, 0, 0.65),
+    0 0 16px rgba(255, 166, 0, 0.24);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title::before {
+  transform: scaleX(-1);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 5px;
+  gap: 8px 10px;
   min-width: 0;
 }
 
@@ -1608,87 +1672,96 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: 32px;
-  padding: 4px 5px;
-  border: 1px solid rgba(255, 181, 49, 0.36);
-  border-radius: 10px;
+  min-height: clamp(56px, 8vw, 74px);
+  padding: 8px 8px 9px;
+  border: 1px solid rgba(255, 184, 36, 0.82);
+  border-radius: 8px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 38%),
-    radial-gradient(circle at 0% 50%, rgba(255, 181, 49, 0.14), transparent 52%),
-    rgba(7, 8, 10, 0.78);
+    linear-gradient(180deg, rgba(255, 227, 154, 0.13), rgba(255, 227, 154, 0.02) 42%, transparent 43%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 199, 81, 0.16), transparent 62%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 118, 0, 0.16), transparent 64%),
+    linear-gradient(180deg, rgba(36, 24, 11, 0.88), rgba(11, 11, 10, 0.9));
   text-align: center;
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 232, 0.09),
-    0 0 10px rgba(255, 118, 0, 0.1);
+    0 0 0 1px rgba(88, 37, 0, 0.72),
+    0 0 14px rgba(255, 145, 0, 0.28),
+    inset 0 1px 0 rgba(255, 242, 196, 0.18),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.22);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
   grid-column: span 3;
+  min-height: clamp(58px, 8.4vw, 76px);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount {
   min-width: 0;
-  color: #ffcf54;
-  font-size: clamp(12px, 2.8vw, 15px);
-  font-weight: 900;
-  line-height: 1;
+  color: #ffc33a;
+  font-size: clamp(25px, 5.4vw, 31px);
+  font-weight: 1000;
+  line-height: 0.92;
   white-space: nowrap;
   text-shadow:
-    0 1px 1px rgba(71, 27, 0, 0.72),
-    0 0 8px rgba(255, 177, 38, 0.32);
+    0 2px 0 rgba(91, 33, 0, 0.92),
+    0 0 7px rgba(255, 221, 116, 0.48),
+    0 0 15px rgba(255, 125, 0, 0.42);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
   min-width: 0;
   max-width: 100%;
-  margin-top: 2px;
+  margin-top: 5px;
   overflow-wrap: anywhere;
-  color: rgba(255, 239, 207, 0.88);
-  font-size: clamp(7.5px, 2.15vw, 10.5px);
-  font-weight: 800;
-  line-height: 1.05;
+  color: #fff0d0;
+  font-size: clamp(14px, 3.1vw, 18px);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow:
+    0 2px 0 rgba(29, 16, 8, 0.88),
+    0 0 7px rgba(255, 228, 174, 0.16);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {
   grid-column: 1 / -1;
   width: 100%;
-  min-height: 22px;
-  margin-top: 0;
+  min-height: clamp(44px, 6.6vw, 58px);
+  margin-top: 6px;
   align-items: stretch;
   justify-content: stretch;
-  border-radius: 12px;
+  padding: 0 8px;
+  border-radius: 999px;
   overflow: visible;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-share-btn {
   flex: 1 1 100%;
   width: 100%;
-  height: 22px;
-  min-height: 22px;
-  gap: 6px;
-  padding: 1px 14px 2px;
-  border: 1px solid rgba(255, 246, 202, 0.96);
-  border-radius: 12px;
+  height: auto;
+  min-height: clamp(44px, 6.6vw, 58px);
+  gap: 12px;
+  padding: 6px 18px 8px;
+  border: 1px solid rgba(255, 248, 208, 0.98);
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.18) 35%, transparent 36%),
-    radial-gradient(ellipse at 50% -18%, rgba(255, 255, 255, 0.42), rgba(255, 224, 114, 0.12) 44%, transparent 70%),
-    linear-gradient(180deg, #ffe36d 0%, #ffb329 39%, #c96b08 72%, #713002 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74) 0%, rgba(255, 255, 255, 0.24) 31%, rgba(255, 255, 255, 0) 32%),
+    radial-gradient(ellipse at 50% -18%, rgba(255, 255, 255, 0.54), rgba(255, 221, 108, 0.18) 43%, transparent 72%),
+    linear-gradient(180deg, #ffbf43 0%, #ff8f0c 45%, #bd4e04 76%, #6c2500 100%);
   color: #fff8dc;
-  font-size: clamp(14px, 3.4vw, 18px);
-  font-weight: 900;
+  font-size: clamp(32px, 6vw, 40px);
+  font-weight: 1000;
   line-height: 1;
   white-space: nowrap;
   text-shadow:
-    0 1px 1px rgba(86, 33, 0, 0.82),
-    0 0 6px rgba(255, 255, 255, 0.32),
-    0 0 10px rgba(255, 177, 38, 0.34);
+    0 2px 0 rgba(86, 33, 0, 0.88),
+    0 0 6px rgba(255, 255, 255, 0.48),
+    0 0 13px rgba(255, 177, 38, 0.46);
   box-shadow:
-    0 0 0 2px rgba(255, 177, 38, 0.36),
-    0 0 12px rgba(255, 151, 16, 0.42),
-    0 5px 12px rgba(72, 30, 0, 0.34),
-    inset 0 1px 0 rgba(255, 253, 226, 0.72),
-    inset 0 -5px 10px rgba(80, 29, 0, 0.34),
-    inset 0 0 0 2px rgba(255, 204, 78, 0.2);
+    0 0 0 2px rgba(255, 121, 0, 0.78),
+    0 0 21px rgba(255, 151, 16, 0.55),
+    0 8px 18px rgba(72, 30, 0, 0.42),
+    inset 0 1px 0 rgba(255, 253, 226, 0.86),
+    inset 0 -12px 18px rgba(80, 29, 0, 0.34),
+    inset 0 0 0 2px rgba(255, 204, 78, 0.24);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayWeekScheduleBtn {
@@ -1710,7 +1783,7 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayScheduleBtn::before {
   content: "▶";
   color: #fff8dc;
-  font-size: 0.66em;
+  font-size: 0.72em;
   line-height: 1;
   margin-top: 0.04em;
   text-shadow:
@@ -1720,13 +1793,13 @@ html.site-home-header-mode .app.app--view-home .header-profile-summary {
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-share-btn span {
   color: #fff8dc !important;
-  font-weight: 900;
+  font-weight: 1000;
   max-width: none;
   white-space: nowrap;
   text-shadow:
-    0 1px 1px rgba(86, 33, 0, 0.82),
-    0 0 6px rgba(255, 255, 255, 0.32),
-    0 0 10px rgba(255, 177, 38, 0.34);
+    0 2px 0 rgba(86, 33, 0, 0.88),
+    0 0 6px rgba(255, 255, 255, 0.5),
+    0 0 14px rgba(255, 177, 38, 0.46);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap .tournament-day-block--home {
