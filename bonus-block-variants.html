@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Варианты блока бонусов</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page-bg: #07080b;
+      --ink: #fff6df;
+      --muted: rgba(255, 246, 223, 0.68);
+      --line: rgba(255, 213, 130, 0.2);
+      --gold: #ffd36a;
+      --orange: #ff971c;
+      --green: #2ed388;
+      --red: #ff5e4f;
+      --teal: #31d4c4;
+      --blue: #64b5ff;
+      --pink: #ff6aa2;
+      --violet: #a78bfa;
+      --panel: rgba(13, 14, 18, 0.94);
+      --radius: 8px;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(13, 14, 18, 0.98), rgba(5, 6, 9, 0.98) 54%, rgba(15, 9, 6, 0.98)),
+        var(--page-bg);
+      color: var(--ink);
+    }
+
+    .lab {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .lab__head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 18px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .lab__kicker {
+      margin: 0 0 6px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .lab__title {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.04;
+    }
+
+    .lab__note {
+      max-width: 520px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .lab__screen-size {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 213, 130, 0.28);
+      border-radius: 999px;
+      color: #ffe6a9;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .variants {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      padding-top: 24px;
+    }
+
+    .variant {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.014)),
+        rgba(255, 255, 255, 0.025);
+    }
+
+    .variant__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .variant__title {
+      margin: 0;
+      color: #fff9ea;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .variant__tag {
+      flex: 0 0 auto;
+      padding: 4px 7px;
+      border: 1px solid rgba(255, 211, 106, 0.28);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .phone {
+      width: min(100%, 390px);
+      margin: 0 auto;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      background: #050506;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
+    }
+
+    .bonus {
+      overflow: hidden;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--panel);
+    }
+
+    .bonus__amount,
+    .bonus__label,
+    .bonus__eyebrow,
+    .bonus__cta,
+    .bonus__side,
+    .bonus__title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .bonus__amount {
+      font-weight: 1000;
+      line-height: 0.95;
+      white-space: nowrap;
+    }
+
+    .bonus__label {
+      font-weight: 850;
+      line-height: 1.05;
+    }
+
+    .bonus__cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 36px;
+      text-decoration: none;
+      font-weight: 1000;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .bonus__cta::before {
+      content: "▶";
+      font-size: 0.7em;
+    }
+
+    .bonus--podium {
+      padding: 10px;
+      border: 1px solid rgba(255, 190, 68, 0.32);
+      background:
+        linear-gradient(180deg, rgba(255, 189, 67, 0.12), transparent 34%),
+        #080707;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+    }
+
+    .bonus--podium .bonus__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .bonus--podium .bonus__title {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .bonus--podium .bonus__eyebrow {
+      color: rgba(255, 246, 223, 0.62);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .podium-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .podium-tile {
+      display: grid;
+      align-content: center;
+      min-height: 60px;
+      padding: 8px 6px;
+      border: 1px solid rgba(255, 211, 106, 0.28);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 42%),
+        rgba(255, 255, 255, 0.045);
+      text-align: center;
+    }
+
+    .podium-tile:nth-child(2) {
+      min-height: 70px;
+      margin-top: -5px;
+      border-color: rgba(255, 211, 106, 0.56);
+      background:
+        linear-gradient(180deg, rgba(255, 211, 106, 0.28), rgba(255, 255, 255, 0.04)),
+        rgba(255, 151, 28, 0.1);
+    }
+
+    .podium-tile .bonus__amount {
+      color: var(--gold);
+      font-size: 22px;
+    }
+
+    .podium-tile .bonus__label {
+      margin-top: 4px;
+      color: rgba(255, 247, 227, 0.82);
+      font-size: 11px;
+    }
+
+    .podium-ko {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .podium-ko .podium-tile {
+      min-height: 46px;
+      margin: 0;
+      border-color: rgba(46, 211, 136, 0.28);
+      background: rgba(46, 211, 136, 0.075);
+    }
+
+    .podium-ko .bonus__amount {
+      color: #91f0bd;
+      font-size: 18px;
+    }
+
+    .bonus--podium .bonus__cta {
+      margin-top: 10px;
+      border-radius: var(--radius);
+      color: #321600;
+      background: linear-gradient(180deg, #ffe48c, #ff9a20 58%, #d96d0b);
+      box-shadow: 0 0 18px rgba(255, 151, 28, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .bonus--chips {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background:
+        linear-gradient(180deg, #111214, #070707);
+    }
+
+    .bonus--chips .bonus__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #fff3d3;
+      font-size: 13px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .chip-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 5px;
+      padding: 2px 0 8px;
+    }
+
+    .chip {
+      position: relative;
+      display: grid;
+      align-content: center;
+      aspect-ratio: 1;
+      min-height: 0;
+      padding: 12px 7px;
+      border: 2px dashed rgba(255, 255, 255, 0.42);
+      border-radius: 50%;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 38%),
+        var(--chip-color, #b7791f);
+      text-align: center;
+      box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.24);
+    }
+
+    .chip::after {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .chip .bonus__amount {
+      font-size: 13px;
+      color: #fff9ed;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
+    }
+
+    .chip .bonus__label {
+      margin-top: 3px;
+      font-size: 8px;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .bonus--chips .bonus__cta {
+      border-radius: 999px;
+      color: #fff;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 34%),
+        linear-gradient(90deg, #ff7a1a, #ffbd3d);
+      box-shadow: 0 8px 20px rgba(255, 122, 26, 0.22);
+    }
+
+    .bonus--felt {
+      padding: 10px;
+      border: 1px solid rgba(96, 255, 178, 0.28);
+      background:
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 8px),
+        linear-gradient(135deg, #063d2a, #071814 62%, #090909);
+    }
+
+    .bonus--felt .bonus__head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .felt-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 211, 106, 0.42);
+      border-radius: 50%;
+      color: var(--gold);
+      font-size: 18px;
+      font-weight: 1000;
+      background: rgba(0, 0, 0, 0.24);
+    }
+
+    .bonus--felt .bonus__title {
+      color: #fafff6;
+      font-size: 15px;
+      font-weight: 1000;
+      line-height: 1.05;
+    }
+
+    .felt-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .felt-card {
+      display: grid;
+      align-content: space-between;
+      min-height: 84px;
+      padding: 7px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      color: #19120b;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .felt-card:nth-child(even) {
+      color: #a1121b;
+    }
+
+    .felt-card .bonus__amount {
+      font-size: 15px;
+    }
+
+    .felt-card .bonus__label {
+      font-size: 9px;
+    }
+
+    .felt-card__suit {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .bonus--felt .bonus__cta {
+      margin-top: 9px;
+      border: 1px solid rgba(255, 211, 106, 0.58);
+      border-radius: var(--radius);
+      color: #082216;
+      background: linear-gradient(180deg, #ffe38a, #71e89d 55%, #25b86e);
+    }
+
+    .bonus--tickets {
+      padding: 10px;
+      border: 1px solid rgba(255, 211, 106, 0.32);
+      background:
+        linear-gradient(180deg, rgba(255, 211, 106, 0.08), transparent 42%),
+        #090908;
+    }
+
+    .ticket-stack {
+      display: grid;
+      gap: 6px;
+    }
+
+    .ticket {
+      position: relative;
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      align-items: center;
+      min-height: 42px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 211, 106, 0.26);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(255, 211, 106, 0.2), transparent 42%),
+        rgba(255, 255, 255, 0.045);
+    }
+
+    .ticket::before,
+    .ticket::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #090908;
+      transform: translateY(-50%);
+    }
+
+    .ticket::before {
+      left: -8px;
+    }
+
+    .ticket::after {
+      right: -8px;
+    }
+
+    .ticket .bonus__amount {
+      padding-left: 12px;
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .ticket .bonus__label {
+      padding: 0 12px;
+      color: rgba(255, 246, 223, 0.84);
+      font-size: 12px;
+    }
+
+    .bonus--tickets .bonus__cta {
+      margin-top: 9px;
+      border-radius: var(--radius);
+      color: #fff7e4;
+      background: linear-gradient(180deg, #f13c2d, #a71516);
+      box-shadow: 0 8px 18px rgba(241, 60, 45, 0.22);
+    }
+
+    .bonus--scoreboard {
+      padding: 10px;
+      border: 1px solid rgba(49, 212, 196, 0.28);
+      background:
+        linear-gradient(180deg, rgba(49, 212, 196, 0.08), transparent 46%),
+        #05090a;
+    }
+
+    .score-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #b6fff5;
+      font-size: 12px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .score-tile {
+      display: grid;
+      grid-column: span 2;
+      align-content: center;
+      min-height: 54px;
+      padding: 7px 5px;
+      border: 1px solid rgba(49, 212, 196, 0.22);
+      border-radius: var(--radius);
+      background: rgba(0, 255, 223, 0.045);
+      text-align: center;
+    }
+
+    .score-tile:nth-child(n + 4) {
+      grid-column: span 3;
+    }
+
+    .score-tile .bonus__amount {
+      color: #7ffbed;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 20px;
+      text-shadow: 0 0 12px rgba(49, 212, 196, 0.42);
+    }
+
+    .score-tile .bonus__label {
+      margin-top: 4px;
+      color: rgba(232, 255, 251, 0.72);
+      font-size: 10px;
+    }
+
+    .bonus--scoreboard .bonus__cta {
+      margin-top: 9px;
+      border: 1px solid rgba(127, 251, 237, 0.36);
+      border-radius: var(--radius);
+      color: #021312;
+      background: linear-gradient(180deg, #bafff6, #31d4c4);
+    }
+
+    .bonus--medals {
+      padding: 10px;
+      border: 1px solid rgba(255, 211, 106, 0.25);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 38%),
+        #101010;
+    }
+
+    .medal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .medal {
+      display: grid;
+      justify-items: center;
+      align-content: start;
+      min-height: 104px;
+      padding: 8px 5px 7px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+      text-align: center;
+    }
+
+    .medal__icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 6px;
+      border-radius: 50%;
+      color: #3a2100;
+      font-size: 13px;
+      font-weight: 1000;
+      background: linear-gradient(180deg, #fff0a8, #d89416);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+    }
+
+    .medal:nth-child(2) .medal__icon {
+      background: linear-gradient(180deg, #e8f4ff, #8bb5d4);
+    }
+
+    .medal:nth-child(3) .medal__icon {
+      background: linear-gradient(180deg, #ffd3bd, #cc7045);
+    }
+
+    .medal .bonus__amount {
+      color: #ffdc79;
+      font-size: 17px;
+    }
+
+    .medal .bonus__label {
+      margin-top: 4px;
+      color: rgba(255, 246, 223, 0.78);
+      font-size: 10px;
+    }
+
+    .medal-ko {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .medal-ko__item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 42px;
+      padding: 6px;
+      border: 1px solid rgba(100, 181, 255, 0.24);
+      border-radius: var(--radius);
+      background: rgba(100, 181, 255, 0.07);
+      text-align: center;
+    }
+
+    .medal-ko__item .bonus__amount {
+      color: #b6dcff;
+      font-size: 16px;
+    }
+
+    .medal-ko__item .bonus__label {
+      color: rgba(240, 248, 255, 0.75);
+      font-size: 9px;
+    }
+
+    .bonus--medals .bonus__cta {
+      margin-top: 9px;
+      border-radius: var(--radius);
+      color: #130d04;
+      background: linear-gradient(180deg, #fff0a8, #ffbe42 55%, #df7c19);
+    }
+
+    .bonus--minimal {
+      padding: 10px;
+      border: 1px solid rgba(255, 246, 223, 0.13);
+      background: #0d0d0e;
+    }
+
+    .minimal-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(255, 246, 223, 0.1);
+    }
+
+    .minimal-head .bonus__title {
+      color: #fff6df;
+      font-size: 15px;
+      font-weight: 1000;
+    }
+
+    .minimal-head .bonus__eyebrow {
+      color: rgba(255, 246, 223, 0.5);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .minimal-list {
+      display: grid;
+      gap: 1px;
+      background: rgba(255, 246, 223, 0.08);
+    }
+
+    .minimal-line {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 37px;
+      padding: 7px 0;
+      background: #0d0d0e;
+    }
+
+    .minimal-line .bonus__amount {
+      color: #ffe1a2;
+      font-size: 17px;
+    }
+
+    .minimal-line .bonus__label {
+      color: rgba(255, 246, 223, 0.76);
+      font-size: 12px;
+    }
+
+    .bonus--minimal .bonus__cta {
+      margin-top: 9px;
+      border: 1px solid rgba(255, 211, 106, 0.44);
+      border-radius: var(--radius);
+      color: #080808;
+      background: #ffd36a;
+    }
+
+    .bonus--bounty {
+      padding: 10px;
+      border: 1px solid rgba(255, 94, 79, 0.25);
+      background:
+        linear-gradient(135deg, rgba(255, 94, 79, 0.1), transparent 48%),
+        #0c0b0d;
+    }
+
+    .bounty-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.92fr);
+      gap: 8px;
+    }
+
+    .bounty-panel {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .bounty-title {
+      color: rgba(255, 246, 223, 0.64);
+      font-size: 11px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .bounty-item {
+      display: grid;
+      align-content: center;
+      min-height: 48px;
+      padding: 7px 8px;
+      border: 1px solid rgba(255, 211, 106, 0.22);
+      border-radius: var(--radius);
+      background: rgba(255, 211, 106, 0.055);
+    }
+
+    .bounty-panel--ko .bounty-item {
+      min-height: 76px;
+      border-color: rgba(255, 94, 79, 0.34);
+      background:
+        linear-gradient(180deg, rgba(255, 94, 79, 0.18), rgba(255, 94, 79, 0.055));
+    }
+
+    .bounty-item .bonus__amount {
+      color: #ffd36a;
+      font-size: 18px;
+    }
+
+    .bounty-panel--ko .bonus__amount {
+      color: #ff9c92;
+    }
+
+    .bounty-item .bonus__label {
+      margin-top: 4px;
+      color: rgba(255, 246, 223, 0.76);
+      font-size: 10px;
+    }
+
+    .bonus--bounty .bonus__cta {
+      margin-top: 9px;
+      border-radius: var(--radius);
+      color: #fffaf0;
+      background: linear-gradient(90deg, #ff5e4f, #ff9f1a);
+    }
+
+    .bonus--ribbons {
+      padding: 10px;
+      border: 1px solid rgba(255, 106, 162, 0.24);
+      background:
+        linear-gradient(180deg, rgba(255, 106, 162, 0.08), transparent 42%),
+        #0c0a0d;
+    }
+
+    .ribbon-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .ribbon {
+      display: grid;
+      grid-template-columns: minmax(0, var(--bar, 1fr)) minmax(96px, 0.7fr);
+      align-items: center;
+      min-height: 37px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .ribbon__bar {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 10px;
+      background:
+        linear-gradient(90deg, rgba(255, 106, 162, 0.34), rgba(255, 211, 106, 0.3)),
+        rgba(255, 106, 162, 0.12);
+    }
+
+    .ribbon .bonus__amount {
+      color: #fff1c7;
+      font-size: 17px;
+    }
+
+    .ribbon .bonus__label {
+      padding: 0 10px;
+      color: rgba(255, 246, 223, 0.78);
+      font-size: 11px;
+    }
+
+    .bonus--ribbons .bonus__cta {
+      margin-top: 9px;
+      border-radius: var(--radius);
+      color: #17070f;
+      background: linear-gradient(180deg, #ffd36a, #ff6aa2);
+    }
+
+    .bonus--cards {
+      padding: 10px;
+      border: 1px solid rgba(167, 139, 250, 0.24);
+      background:
+        linear-gradient(135deg, rgba(167, 139, 250, 0.09), transparent 44%),
+        #0a0a10;
+    }
+
+    .cards-fan {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      align-items: end;
+      min-height: 106px;
+    }
+
+    .cards-fan .card-tile {
+      display: grid;
+      align-content: space-between;
+      min-height: 92px;
+      padding: 7px 5px;
+      border-radius: var(--radius);
+      background: #fbf3e6;
+      color: #19110b;
+      box-shadow: 0 9px 20px rgba(0, 0, 0, 0.26);
+      transform: translateY(var(--lift, 0));
+    }
+
+    .cards-fan .card-tile:nth-child(2),
+    .cards-fan .card-tile:nth-child(4) {
+      color: #b31322;
+    }
+
+    .card-tile__rank {
+      font-size: 13px;
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    .cards-fan .bonus__amount {
+      font-size: 14px;
+    }
+
+    .cards-fan .bonus__label {
+      font-size: 9px;
+    }
+
+    .bonus--cards .bonus__cta {
+      margin-top: 9px;
+      border: 1px solid rgba(167, 139, 250, 0.34);
+      border-radius: var(--radius);
+      color: #f8f4ff;
+      background: linear-gradient(90deg, #6d5dfc, #ff8a3d);
+    }
+
+    .bonus--strip {
+      padding: 10px;
+      border: 1px solid rgba(100, 181, 255, 0.24);
+      background:
+        linear-gradient(180deg, rgba(100, 181, 255, 0.08), transparent 42%),
+        #080a0d;
+    }
+
+    .strip-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 30px;
+      margin-bottom: 7px;
+      color: #d8ecff;
+      font-size: 12px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .strip-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1.4fr;
+      gap: 6px;
+    }
+
+    .strip-main,
+    .strip-ko {
+      display: grid;
+      align-content: center;
+      min-height: 62px;
+      padding: 7px 6px;
+      border: 1px solid rgba(100, 181, 255, 0.2);
+      border-radius: var(--radius);
+      background: rgba(100, 181, 255, 0.06);
+      text-align: center;
+    }
+
+    .strip-ko-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .strip-main .bonus__amount,
+    .strip-ko .bonus__amount {
+      color: #cce8ff;
+      font-size: 17px;
+    }
+
+    .strip-main:nth-child(3) .bonus__amount {
+      color: #ffd36a;
+      font-size: 20px;
+    }
+
+    .strip-main .bonus__label,
+    .strip-ko .bonus__label {
+      margin-top: 4px;
+      color: rgba(239, 249, 255, 0.74);
+      font-size: 10px;
+    }
+
+    .bonus--strip .bonus__cta {
+      margin-top: 9px;
+      border-radius: var(--radius);
+      color: #071017;
+      background: linear-gradient(180deg, #d8ecff, #64b5ff);
+    }
+
+    @media (max-width: 900px) {
+      .variants {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .lab {
+        width: min(100% - 18px, 420px);
+        padding-top: 18px;
+      }
+
+      .lab__head {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .lab__title {
+        font-size: 26px;
+      }
+
+      .variant {
+        padding: 9px;
+      }
+
+      .phone {
+        padding: 8px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .chip-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="lab">
+    <header class="lab__head">
+      <div>
+        <p class="lab__kicker">Poker21 UI</p>
+        <h1 class="lab__title">10 вариантов блока бонусов</h1>
+        <p class="lab__note">Мокапы сделаны в узкой ширине домашнего экрана, чтобы сразу было видно, где текст начинает спорить с формой.</p>
+      </div>
+      <div class="lab__screen-size">390 px preview</div>
+    </header>
+
+    <section class="variants" aria-label="Варианты оформления блока бонусов">
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">01. Подиум призов</h2>
+          <span class="variant__tag">мой выбор</span>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--podium" aria-label="Бонусы турнира, вариант подиум">
+            <div class="bonus__head">
+              <div class="bonus__title">Бонусы</div>
+              <div class="bonus__eyebrow">комбинации и нокауты</div>
+            </div>
+            <div class="podium-grid">
+              <div class="podium-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+              <div class="podium-tile"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="podium-tile"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял</span></div>
+            </div>
+            <div class="podium-ko">
+              <div class="podium-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги1</span></div>
+              <div class="podium-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">02. Фишки в рейле</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--chips" aria-label="Бонусы турнира, вариант фишки">
+            <div class="bonus__title"><span>Бонусы за редкие раздачи</span><span>+ KO</span></div>
+            <div class="chip-row">
+              <div class="chip" style="--chip-color: #b7791f;"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+              <div class="chip" style="--chip-color: #a71516;"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="chip" style="--chip-color: #063d2a;"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял</span></div>
+              <div class="chip" style="--chip-color: #1c5d83;"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">нокаут топ10 Лиги1</span></div>
+              <div class="chip" style="--chip-color: #5f3f97;"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">03. Зелёное сукно</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--felt" aria-label="Бонусы турнира, вариант сукно">
+            <div class="bonus__head">
+              <div class="felt-mark">♣</div>
+              <div class="bonus__title">Бонусные выплаты сегодня</div>
+            </div>
+            <div class="felt-grid">
+              <div class="felt-card"><span class="felt-card__suit">♣</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">каре</span></div>
+              <div class="felt-card"><span class="felt-card__suit">♦</span><span class="bonus__amount">2500 ₽</span><span class="bonus__label">стрит-флеш</span></div>
+              <div class="felt-card"><span class="felt-card__suit">♠</span><span class="bonus__amount">5000 ₽</span><span class="bonus__label">роял</span></div>
+              <div class="felt-card"><span class="felt-card__suit">♥</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">KO топ10 Лиги1</span></div>
+              <div class="felt-card"><span class="felt-card__suit">♦</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">KO топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">04. Билетная лента</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--tickets" aria-label="Бонусы турнира, вариант билеты">
+            <div class="ticket-stack">
+              <div class="ticket"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+              <div class="ticket"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="ticket"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял-флеш</span></div>
+              <div class="ticket"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги1</span></div>
+              <div class="ticket"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">05. Турнирное табло</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--scoreboard" aria-label="Бонусы турнира, вариант табло">
+            <div class="score-head"><span>Bonus board</span><span>5 целей</span></div>
+            <div class="score-grid">
+              <div class="score-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">каре</span></div>
+              <div class="score-tile"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">стрит-флеш</span></div>
+              <div class="score-tile"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">роял</span></div>
+              <div class="score-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">нокаут топ10 Лиги1</span></div>
+              <div class="score-tile"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">06. Медали и KO</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--medals" aria-label="Бонусы турнира, вариант медали">
+            <div class="medal-grid">
+              <div class="medal"><span class="medal__icon">4K</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+              <div class="medal"><span class="medal__icon">SF</span><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="medal"><span class="medal__icon">RF</span><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял</span></div>
+            </div>
+            <div class="medal-ko">
+              <div class="medal-ko__item"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">KO топ10 Лиги1</span></div>
+              <div class="medal-ko__item"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">KO топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">07. Премиум-минимал</h2>
+          <span class="variant__tag">тише</span>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--minimal" aria-label="Бонусы турнира, минимальный вариант">
+            <div class="minimal-head">
+              <div class="bonus__title">Бонусы</div>
+              <div class="bonus__eyebrow">для турнира дня</div>
+            </div>
+            <div class="minimal-list">
+              <div class="minimal-line"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+              <div class="minimal-line"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="minimal-line"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял</span></div>
+              <div class="minimal-line"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги1</span></div>
+              <div class="minimal-line"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">08. Bounty board</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--bounty" aria-label="Бонусы турнира, вариант bounty board">
+            <div class="bounty-layout">
+              <div class="bounty-panel">
+                <div class="bounty-title">Комбинации</div>
+                <div class="bounty-item"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">за каре</span></div>
+                <div class="bounty-item"><span class="bonus__amount">2500 ₽</span><span class="bonus__label">за стрит-флеш</span></div>
+                <div class="bounty-item"><span class="bonus__amount">5000 ₽</span><span class="bonus__label">за роял</span></div>
+              </div>
+              <div class="bounty-panel bounty-panel--ko">
+                <div class="bounty-title">Нокауты</div>
+                <div class="bounty-item"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">топ10 Лиги1</span></div>
+                <div class="bounty-item"><span class="bonus__amount">1000 ₽</span><span class="bonus__label">топ10 Лиги2</span></div>
+              </div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">09. Лестница выплат</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--ribbons" aria-label="Бонусы турнира, вариант лестница">
+            <div class="ribbon-list">
+              <div class="ribbon" style="--bar: 0.72fr;"><span class="ribbon__bar"><span class="bonus__amount">1000 ₽</span></span><span class="bonus__label">за каре</span></div>
+              <div class="ribbon" style="--bar: 1fr;"><span class="ribbon__bar"><span class="bonus__amount">2500 ₽</span></span><span class="bonus__label">за стрит-флеш</span></div>
+              <div class="ribbon" style="--bar: 1.28fr;"><span class="ribbon__bar"><span class="bonus__amount">5000 ₽</span></span><span class="bonus__label">за роял</span></div>
+              <div class="ribbon" style="--bar: 0.72fr;"><span class="ribbon__bar"><span class="bonus__amount">1000 ₽</span></span><span class="bonus__label">нокаут топ10 Лиги1</span></div>
+              <div class="ribbon" style="--bar: 0.72fr;"><span class="ribbon__bar"><span class="bonus__amount">1000 ₽</span></span><span class="bonus__label">нокаут топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+
+      <article class="variant">
+        <div class="variant__top">
+          <h2 class="variant__title">10. Карточный веер</h2>
+        </div>
+        <div class="phone">
+          <section class="bonus bonus--cards" aria-label="Бонусы турнира, вариант карточный веер">
+            <div class="cards-fan">
+              <div class="card-tile" style="--lift: 8px;"><span class="card-tile__rank">4K</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">каре</span></div>
+              <div class="card-tile" style="--lift: -2px;"><span class="card-tile__rank">SF</span><span class="bonus__amount">2500 ₽</span><span class="bonus__label">стрит-флеш</span></div>
+              <div class="card-tile" style="--lift: -8px;"><span class="card-tile__rank">RF</span><span class="bonus__amount">5000 ₽</span><span class="bonus__label">роял</span></div>
+              <div class="card-tile" style="--lift: -2px;"><span class="card-tile__rank">KO</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">топ10 Лиги1</span></div>
+              <div class="card-tile" style="--lift: 8px;"><span class="card-tile__rank">KO</span><span class="bonus__amount">1000 ₽</span><span class="bonus__label">топ10 Лиги2</span></div>
+            </div>
+            <a class="bonus__cta" href="#">Сыграть</a>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
