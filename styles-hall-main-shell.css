@@ -308,9 +308,9 @@
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
 }
 .hall-of-fame__top2026-trophy {
-  top: clamp(535px, 138vw, 610px);
-  right: clamp(-64px, -15vw, -38px);
-  width: clamp(120px, 35vw, 152px);
+  top: clamp(350px, 88vw, 420px);
+  right: clamp(-30px, -7vw, -16px);
+  width: clamp(118px, 34vw, 146px);
   filter: drop-shadow(0 14px 20px rgba(105, 67, 28, 0.2));
 }
 .hall-of-fame__top2026-inscriptions {
@@ -390,9 +390,9 @@
 .hall-of-fame__top2026-list-card {
   position: relative;
   z-index: 4;
-  width: min(100%, 342px) !important;
-  max-width: 342px !important;
-  margin: 0 auto !important;
+  width: min(82%, 316px) !important;
+  max-width: 316px !important;
+  margin: 0 auto 0 max(10px, calc(50% - 178px)) !important;
   padding: 12px 9px 10px;
   color: #664a2d;
   background: linear-gradient(180deg, rgba(255, 250, 241, 0.84) 0%, rgba(246, 226, 195, 0.8) 100%);
@@ -655,6 +655,9 @@
     padding-top: 314px;
   }
   .hall-of-fame__top2026-list-card {
+    width: min(80%, 304px) !important;
+    max-width: 304px !important;
+    margin-left: max(8px, calc(50% - 172px)) !important;
     padding: 10px 8px 8px;
     border-radius: 17px;
   }
