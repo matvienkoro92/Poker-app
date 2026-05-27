@@ -12,7 +12,7 @@
 @import url("./styles-home-legacy-tail.css?v=3.336");
 @import url("./styles-home-rating-promo-legacy.css?v=3.336");
 @import url("./styles-rating.css?v=3.336");
-@import url("./styles-hall.css?v=3.349");
+@import url("./styles-hall.css?v=3.350");
 @import url("./styles-admin.css?v=3.336");
 @import url("./styles-player-crm.css?v=3.336");
 @import url("./styles-profile.css?v=3.336");
@@ -1797,6 +1797,7 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus {
+  position: relative;
   display: flex;
   grid-column: span 2;
   flex-direction: column;
@@ -1818,6 +1819,7 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
     0 0 14px rgba(255, 145, 0, 0.28),
     inset 0 1px 0 rgba(255, 242, 196, 0.18),
     inset 0 -10px 16px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
@@ -1850,6 +1852,34 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   text-shadow:
     0 2px 0 rgba(29, 16, 8, 0.88),
     0 0 7px rgba(255, 228, 174, 0.16);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive {
+  border-color: rgba(62, 44, 26, 0.9);
+  background:
+    linear-gradient(180deg, rgba(28, 23, 19, 0.94), rgba(4, 4, 4, 0.96));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.72);
+  filter: grayscale(1) brightness(0.48) saturate(0.45);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(145deg, transparent 45%, rgba(0, 0, 0, 0.92) 46.5%, rgba(255, 224, 151, 0.24) 49%, rgba(0, 0, 0, 0.92) 51.5%, transparent 53%),
+    rgba(0, 0, 0, 0.42);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive .home-tournament-bonus__amount,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive .home-tournament-bonus__label {
+  color: rgba(255, 232, 184, 0.42);
+  text-shadow: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {

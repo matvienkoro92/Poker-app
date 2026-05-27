@@ -448,6 +448,17 @@ function renderHomeTournamentWeekList(activeWeekday) {
   });
 }
 
+function syncHomeTournamentBonusAvailability(activeWeekday) {
+  var league2Active = activeWeekday === 2 || activeWeekday === 3;
+  var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
+  bonuses.forEach(function (bonus) {
+    var kind = bonus.getAttribute("data-home-tournament-bonus");
+    var active = kind === "league2" ? league2Active : !league2Active;
+    bonus.classList.toggle("home-tournament-bonus--inactive", !active);
+    bonus.setAttribute("aria-disabled", active ? "false" : "true");
+  });
+}
+
 function updateHomeTournamentFocusFlow() {
   var section = document.querySelector(".tournament-day-home-dual--tournament-focus");
   if (!section) return;
@@ -911,6 +922,7 @@ function updateTournamentDayBlock() {
     if (tdWeekTime && detailState.target) {
       tdWeekTime.textContent = pokerMskWeekdayShortAt(detailState.target.getTime()) + ", 18:00 МСК";
     }
+    syncHomeTournamentBonusAvailability(selectedWeekday);
     var frBuy = document.getElementById("freerollHomeBuyin");
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");

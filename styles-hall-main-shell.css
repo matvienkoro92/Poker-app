@@ -194,6 +194,8 @@
 
 #hallOfFameView.hall-of-fame--top2026 {
   --hall-top2026-header-overlap: 142px;
+  --hall-top2026-bg-width: clamp(430px, 114%, 500px);
+  --hall-top2026-bg-y: -8px;
   margin: 0 -2px;
   padding: 4px 0 0;
   border-radius: 18px;
@@ -267,9 +269,9 @@
   background-color: #f4ddbd;
   background-image: linear-gradient(180deg, rgba(255, 248, 235, 0.08) 0%, rgba(255, 248, 235, 0) 36%, rgba(111, 71, 26, 0.13) 100%),
     url("./assets/hall-top2026-bg.jpg");
-  background-position: center top, center top;
+  background-position: center top, center var(--hall-top2026-bg-y);
   background-repeat: no-repeat, no-repeat;
-  background-size: 100% 100%, cover;
+  background-size: 100% 100%, var(--hall-top2026-bg-width) auto;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -28px 40px rgba(128, 83, 30, 0.1);
 }
 .hall-of-fame__top2026-stage::before {
@@ -302,15 +304,15 @@
   user-select: none;
 }
 .hall-of-fame__top2026-monkey {
-  top: clamp(138px, 36vw, 158px);
+  top: clamp(172px, 44vw, 190px);
   left: clamp(-102px, -24vw, -74px);
   width: clamp(212px, 57vw, 238px);
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
 }
 .hall-of-fame__top2026-trophy {
-  top: clamp(350px, 88vw, 420px);
-  right: clamp(-30px, -7vw, -16px);
-  width: clamp(118px, 34vw, 146px);
+  top: clamp(338px, 90vw, 394px);
+  right: clamp(-24px, -6vw, -10px);
+  width: clamp(108px, 30vw, 130px);
   filter: drop-shadow(0 14px 20px rgba(105, 67, 28, 0.2));
 }
 .hall-of-fame__top2026-inscriptions {
@@ -591,6 +593,8 @@
 @media (max-width: 380px) {
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-header-overlap: 140px;
+    --hall-top2026-bg-width: clamp(410px, 112%, 470px);
+    --hall-top2026-bg-y: -6px;
   }
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
     font-size: 30px;
