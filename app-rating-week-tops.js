@@ -242,7 +242,17 @@ function pokerInitWinterRatingWeekTops() {
         if (rewN !== rewN) rewN = 0;
         var nickEscaped = escapePreview(r.nick);
         var tags = singleTopResolveLightboxControlTags(escapePreview, r, nickN, rewN, nickEscaped);
-        var line = place + ". " + nickEscaped + " — " + sum + " ₽";
+        var line =
+          '<span class="winter-rating__single-top-rank">' +
+          place +
+          ".</span>" +
+          '<span class="winter-rating__single-top-nick">' +
+          nickEscaped +
+          "</span>" +
+          '<span class="winter-rating__single-top-separator">—</span>' +
+          '<span class="winter-rating__single-top-amount">' +
+          sum +
+          " ₽</span>";
         return '<li class="winter-rating__single-top-item">' + tags.open + line + tags.close + "</li>";
       })
       .join("");

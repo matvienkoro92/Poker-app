@@ -34,6 +34,7 @@ function showHallOfFamePanel(section, opts) {
     if (on) panel.removeAttribute("hidden");
     else panel.setAttribute("hidden", "");
   });
+  view.classList.toggle("hall-of-fame--top2026", section === "top2026");
   setHallOfFameSubtabActive(section);
   if (section === "top2026") {
     try {
@@ -453,6 +454,28 @@ function initHallFishRatingModal() {
 
 window.pokerInitHallFishRatingModal = initHallFishRatingModal;
 initHallFishRatingModal();
+
+function syncInitialHallFameSectionFromStartParam() {
+  var startParam = "";
+  try {
+    var qs = new URLSearchParams(typeof location !== "undefined" && location.search ? location.search : "");
+    startParam =
+      typeof pokerStartAppQueryFromUrlSearchParams === "function"
+        ? pokerStartAppQueryFromUrlSearchParams(qs)
+        : qs.get("startapp") || "";
+    if (typeof pokerNormalizeWebAppStartParam === "function") startParam = pokerNormalizeWebAppStartParam(startParam);
+  } catch (eHallStartParam) {}
+  var section = resolveHallFameSectionFromStartParam(startParam) || window.__pendingHallFameSection || "";
+  if (!section) return;
+  var view = document.getElementById("hallOfFameView");
+  if (!view || !view.classList.contains("view--active")) return;
+  var activePanel = view.querySelector(".hall-of-fame__panel--active[data-hall-panel]");
+  if (activePanel && activePanel.getAttribute("data-hall-panel") === section) return;
+  showHallOfFamePanel(section);
+}
+
+setTimeout(syncInitialHallFameSectionFromStartParam, 0);
+setTimeout(syncInitialHallFameSectionFromStartParam, 640);
 
 window.navigateToHallFameSection = navigateToHallFameSection;
 window.getHallFameSectionShareUrl = getHallFameSectionShareUrl;

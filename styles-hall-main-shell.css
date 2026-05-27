@@ -192,6 +192,305 @@
   max-width: 100%;
 }
 
+#hallOfFameView.hall-of-fame--top2026 {
+  margin: 0 -2px;
+  padding: 4px 0 0;
+  border-radius: 18px;
+  overflow: hidden;
+  color: #5f4933;
+  background: linear-gradient(180deg, #fbf0dd 0%, #f4ddbd 58%, #eed0a4 100%);
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
+  margin: 2px 8px 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9b6b2f !important;
+  text-shadow: 0 1px 0 #fff8ea, 0 3px 10px rgba(116, 73, 20, 0.24) !important;
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__toolbar {
+  gap: 8px;
+  margin: 0 8px 8px;
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__toolbar-back {
+  min-width: 54px;
+  color: #9b6b2f;
+  background: linear-gradient(180deg, rgba(255, 251, 242, 0.95) 0%, rgba(246, 228, 198, 0.96) 100%) !important;
+  border-color: rgba(173, 119, 45, 0.68) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(116, 73, 20, 0.18) !important;
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtabs {
+  min-height: 54px;
+  background: linear-gradient(180deg, rgba(255, 251, 242, 0.94) 0%, rgba(246, 228, 198, 0.9) 100%);
+  border-color: rgba(173, 119, 45, 0.72);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 4px 12px rgba(116, 73, 20, 0.16);
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtab {
+  color: rgba(90, 64, 39, 0.78);
+  background: transparent !important;
+  border-right-color: rgba(173, 119, 45, 0.28);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtab:hover,
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtab--active {
+  color: #5f3f1d;
+  background: rgba(184, 127, 52, 0.16) !important;
+}
+#hallOfFameView.hall-of-fame--top2026 .hall-of-fame__panels {
+  margin-top: 0;
+}
+.hall-of-fame__top2026-stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 1020px;
+  margin: 0;
+  padding: clamp(320px, 84vw, 365px) 10px 18px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 0 0 18px 18px;
+  background-color: #f4ddbd;
+  background-image: linear-gradient(180deg, rgba(255, 248, 235, 0.08) 0%, rgba(255, 248, 235, 0) 36%, rgba(111, 71, 26, 0.13) 100%),
+    url("./assets/hall-top2026-bg.jpg");
+  background-position: center top;
+  background-size: cover;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -28px 40px rgba(128, 83, 30, 0.1);
+}
+.hall-of-fame__top2026-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 249, 238, 0.16) 0%, rgba(255, 249, 238, 0) 24%, rgba(84, 51, 18, 0.1) 100%);
+}
+.hall-of-fame__top2026-stage::after {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 18px;
+  z-index: 0;
+  height: 210px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(124, 78, 27, 0.12) 100%);
+}
+.hall-of-fame__top2026-monkey,
+.hall-of-fame__top2026-trophy {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+.hall-of-fame__top2026-monkey {
+  top: clamp(92px, 25vw, 124px);
+  left: clamp(-110px, -25vw, -76px);
+  width: clamp(238px, 68vw, 292px);
+  filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
+}
+.hall-of-fame__top2026-trophy {
+  top: clamp(420px, 108vw, 500px);
+  right: clamp(-66px, -15vw, -42px);
+  width: clamp(126px, 37vw, 160px);
+  filter: drop-shadow(0 14px 20px rgba(105, 67, 28, 0.2));
+}
+.hall-of-fame__top2026-list-card {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 352px) !important;
+  max-width: 352px !important;
+  margin: 0 auto !important;
+  padding: 13px 10px 12px;
+  color: #664a2d;
+  background: linear-gradient(180deg, rgba(255, 250, 241, 0.84) 0%, rgba(246, 226, 195, 0.8) 100%);
+  border: 1px solid rgba(163, 104, 34, 0.74);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 12px 28px rgba(102, 66, 27, 0.2);
+  backdrop-filter: blur(2px);
+}
+.hall-of-fame__top2026-list-card .winter-rating__single-top--title {
+  margin: 0 0 9px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #9b6b2f !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-list {
+  overflow: hidden;
+  border: 1px solid rgba(173, 119, 45, 0.32);
+  border-radius: 12px;
+  background: rgba(255, 252, 246, 0.36);
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item {
+  margin: 0;
+  white-space: normal;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-link,
+.hall-of-fame__top2026-stage .winter-rating__single-top-static {
+  display: grid;
+  grid-template-columns: 24px 33px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+  color: #6d5539;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(173, 119, 45, 0.24);
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  box-shadow: none;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:last-child .winter-rating__single-top-link,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:last-child .winter-rating__single-top-static {
+  border-bottom: 0;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-static::before {
+  content: "♠";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #9b6b2f;
+  font-size: 13px;
+  line-height: 1;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(1) .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(1) .winter-rating__single-top-static::before {
+  content: "♛";
+  color: #b67b22;
+  font-size: 16px;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(2) .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(2) .winter-rating__single-top-static::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(3) .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(3) .winter-rating__single-top-static::before {
+  border: 1px solid rgba(173, 119, 45, 0.48);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff5da 0%, #e3af56 100%);
+  color: #7c4e1d;
+  font-size: 11px;
+  font-weight: 800;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(2) .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(2) .winter-rating__single-top-static::before {
+  content: "2";
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(3) .winter-rating__single-top-link::before,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(3) .winter-rating__single-top-static::before {
+  content: "3";
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-link:hover,
+.hall-of-fame__top2026-stage .winter-rating__single-top-link:focus-visible {
+  color: #5f3f1d;
+  background: rgba(255, 244, 222, 0.72);
+  outline: none;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-link:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(241, 139, 23, 0.45);
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(5) .winter-rating__single-top-link,
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(5) .winter-rating__single-top-static {
+  margin: 2px 0;
+  min-height: 32px;
+  color: #f06b12;
+  background: linear-gradient(90deg, rgba(255, 244, 222, 0.8) 0%, rgba(255, 236, 202, 0.56) 100%);
+  border: 1px solid rgba(240, 107, 18, 0.56);
+  border-radius: 10px;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-rank {
+  color: rgba(93, 68, 43, 0.86);
+  text-align: right;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-nick {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-separator {
+  display: none;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-amount {
+  color: #6a4e2f;
+  white-space: nowrap;
+  font-weight: 800;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-item:nth-child(5) .winter-rating__single-top-amount {
+  color: #f06b12;
+}
+.hall-of-fame__top2026-share {
+  position: relative;
+  z-index: 4;
+  width: min(100%, 300px);
+  margin: 14px auto 0;
+  padding: 0;
+  border-top: 0;
+  align-items: stretch !important;
+}
+.hall-of-fame__top2026-share .hall-of-fame__panel-share-row {
+  width: 100%;
+  margin: 0;
+}
+.hall-of-fame__top2026-share .raffles-hero__share-btn {
+  color: #9b6b2f !important;
+  background: linear-gradient(180deg, rgba(255, 251, 242, 0.92) 0%, rgba(246, 228, 198, 0.88) 100%) !important;
+  border-color: rgba(173, 119, 45, 0.7) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 5px 14px rgba(116, 73, 20, 0.16) !important;
+}
+.hall-of-fame__top2026-share .hall-of-fame__blog-top15-copy-hint {
+  display: none;
+}
+@media (max-width: 380px) {
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
+    font-size: 30px;
+  }
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtab {
+    font-size: 9px;
+    padding-inline: 2px;
+  }
+  .hall-of-fame__top2026-stage {
+    min-height: 1000px;
+    padding-top: 306px;
+  }
+  .hall-of-fame__top2026-list-card {
+    padding-inline: 8px;
+  }
+  .hall-of-fame__top2026-stage .winter-rating__single-top-link,
+  .hall-of-fame__top2026-stage .winter-rating__single-top-static {
+    grid-template-columns: 22px 30px minmax(0, 1fr) auto;
+    gap: 4px;
+    min-height: 29px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .hall-of-fame__top2026-stage .winter-rating__single-top-amount {
+    font-size: 12px;
+  }
+}
+
 /* Фотоальбом — сетка превью 5×N, плотные зазоры */
 .hall-photo-album--feed {
   position: relative;

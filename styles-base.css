@@ -1826,6 +1826,8 @@ html.app-view-daily-poker-html-scroll .card {
   min-height: 0 !important;
   height: auto !important;
   max-height: 100% !important;
+  border: 0 !important;
+  box-shadow: none !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column;

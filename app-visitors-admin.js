@@ -173,10 +173,21 @@
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
+    var crmMenuBtn = document.getElementById("headerCrmBtn");
     var bonusAdminBtn = document.getElementById("adminBonusBalancesHeaderBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !homeAdminVersion) return;
+    if (reportBtn) {
+      reportBtn.classList.add("header-admin-report--hidden");
+      reportBtn.setAttribute("aria-hidden", "true");
+      reportBtn.disabled = true;
+    }
+    if (bonusAdminBtn) {
+      bonusAdminBtn.hidden = true;
+      bonusAdminBtn.setAttribute("aria-hidden", "true");
+    }
+    setCrmButtonAllowed(crmMenuBtn, false);
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
@@ -271,10 +282,6 @@
       showAdminUi();
     } else if (pokerIsKnownClientReportUser()) {
       showReportUi();
-    } else if (reportBtn) {
-      reportBtn.classList.add("header-admin-report--hidden");
-      reportBtn.setAttribute("aria-hidden", "true");
-      reportBtn.disabled = true;
     }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;

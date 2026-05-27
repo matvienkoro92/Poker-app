@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.334");
-@import url("./styles-home-rating-promo.css?v=3.334");
-@import url("./styles-auth.css?v=3.334");
-@import url("./styles-home.css?v=3.334");
-@import url("./styles-chat.css?v=3.334");
-@import url("./styles-learning-games.css?v=3.334");
-@import url("./styles-raffles.css?v=3.334");
-@import url("./styles-daily-poker.css?v=3.334");
-@import url("./styles-home-legacy-prelude.css?v=3.334");
-@import url("./styles-download.css?v=3.334");
-@import url("./styles-home-legacy-tail.css?v=3.334");
-@import url("./styles-home-rating-promo-legacy.css?v=3.334");
-@import url("./styles-rating.css?v=3.334");
-@import url("./styles-hall.css?v=3.334");
-@import url("./styles-admin.css?v=3.334");
-@import url("./styles-player-crm.css?v=3.334");
-@import url("./styles-profile.css?v=3.334");
-@import url("./styles-layout.css?v=3.334");
-@import url("./styles-chat-overlays.css?v=3.334");
-@import url("./styles-home-overrides.css?v=3.334");
-@import url("./styles-layout-touch-targets.css?v=3.334");
-@import url("./styles-home-rating-promo-late.css?v=3.334");
+@import url("./styles-base.css?v=3.335");
+@import url("./styles-home-rating-promo.css?v=3.335");
+@import url("./styles-auth.css?v=3.335");
+@import url("./styles-home.css?v=3.335");
+@import url("./styles-chat.css?v=3.335");
+@import url("./styles-learning-games.css?v=3.335");
+@import url("./styles-raffles.css?v=3.335");
+@import url("./styles-daily-poker.css?v=3.335");
+@import url("./styles-home-legacy-prelude.css?v=3.335");
+@import url("./styles-download.css?v=3.335");
+@import url("./styles-home-legacy-tail.css?v=3.335");
+@import url("./styles-home-rating-promo-legacy.css?v=3.335");
+@import url("./styles-rating.css?v=3.335");
+@import url("./styles-hall.css?v=3.335");
+@import url("./styles-admin.css?v=3.335");
+@import url("./styles-player-crm.css?v=3.335");
+@import url("./styles-profile.css?v=3.335");
+@import url("./styles-layout.css?v=3.335");
+@import url("./styles-chat-overlays.css?v=3.335");
+@import url("./styles-home-overrides.css?v=3.335");
+@import url("./styles-layout-touch-targets.css?v=3.335");
+@import url("./styles-home-rating-promo-late.css?v=3.335");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -65,6 +65,136 @@ body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__s
 html.home-planner-access-granted .app.app--view-home .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"],
 html.home-planner-access-granted #app:has(.view--active[data-view="daily-poker"]) .header-more-menu #romanTaskPlannerOpenBtn[data-planner-access="allowed"] {
   display: grid !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu {
+  position: fixed;
+  z-index: 1500;
+  top: calc(env(safe-area-inset-top, 0px) + 86px);
+  right: 14px;
+  width: min(300px, calc(100vw - 28px));
+  max-height: calc(100vh - 112px);
+  box-sizing: border-box;
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  overflow: auto;
+  border-radius: 16px;
+  border-color: rgba(251, 191, 36, 0.28);
+  background:
+    radial-gradient(ellipse at 86% -10%, rgba(255, 184, 77, 0.2), transparent 48%),
+    linear-gradient(180deg, rgba(11, 14, 21, 0.98), rgba(5, 8, 14, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 18px 38px rgba(0, 0, 0, 0.52),
+    0 0 22px rgba(251, 146, 60, 0.14);
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu[hidden],
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action[hidden],
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-admin-report--hidden,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .welcome-planner-icon--hidden {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .site-home-instruction-btn,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .site-home-auth-btn,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  justify-content: initial;
+  gap: 10px;
+  padding: 8px 10px !important;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border-color: rgba(251, 191, 36, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)),
+    rgba(14, 19, 32, 0.76);
+  box-shadow: none !important;
+  color: rgba(255, 247, 237, 0.92);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle .radio-toggle__icon,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle .theme-toggle__icon {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle .radio-toggle__icon--off,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--chill .radio-toggle__icon--chill,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--lounge .radio-toggle__icon--lounge,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--90s .radio-toggle__icon--90s,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--radio7 .radio-toggle__icon--radio7,
+html[data-theme="dark"] #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle .theme-toggle__icon--dark,
+html[data-theme="light"] #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle .theme-toggle__icon--light,
+html[data-theme="gold"] #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle .theme-toggle__icon--gold,
+html[data-theme="neon"] #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle .theme-toggle__icon--neon {
+  display: inline-flex !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--chill .radio-toggle__icon--off,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--lounge .radio-toggle__icon--off,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--90s .radio-toggle__icon--off,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle.radio-toggle--radio7 .radio-toggle__icon--off {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-menu-action__icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(251, 191, 36, 0.1);
+  font-size: 18px;
+  line-height: 1;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-menu-action__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-menu-action__title {
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(255, 247, 237, 0.94);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-menu-action__hint,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle__listen {
+  display: none;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle__text {
+  align-items: flex-start;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .radio-toggle .radio-toggle__label {
+  color: rgba(255, 226, 154, 0.78);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
@@ -1403,15 +1533,13 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   row-gap: 8px;
   column-gap: 10px;
   padding: 10px 10px 12px;
-  border: 2px solid rgba(255, 181, 49, 0.82);
+  border: 0;
   border-radius: 22px;
   background:
     radial-gradient(ellipse at 18% 0%, rgba(255, 181, 49, 0.13), transparent 36%),
     radial-gradient(ellipse at 84% 18%, rgba(255, 118, 0, 0.12), transparent 42%),
     linear-gradient(148deg, rgba(35, 16, 7, 0.78), rgba(13, 8, 8, 0.78) 45%, rgba(4, 5, 8, 0.74));
   box-shadow:
-    0 0 0 1px rgba(93, 38, 0, 0.72),
-    0 0 24px rgba(255, 118, 0, 0.2),
     inset 0 1px 0 rgba(255, 232, 176, 0.08),
     inset 0 -18px 28px rgba(0, 0, 0, 0.16);
 }
