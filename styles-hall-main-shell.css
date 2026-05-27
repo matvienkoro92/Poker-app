@@ -267,9 +267,9 @@
   background-color: #f4ddbd;
   background-image: linear-gradient(180deg, rgba(255, 248, 235, 0.08) 0%, rgba(255, 248, 235, 0) 36%, rgba(111, 71, 26, 0.13) 100%),
     url("./assets/hall-top2026-bg.jpg");
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-position: center top, center top;
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 100%, cover;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -28px 40px rgba(128, 83, 30, 0.1);
 }
 .hall-of-fame__top2026-stage::before {
