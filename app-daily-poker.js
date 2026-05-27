@@ -5,6 +5,9 @@
     timer: null,
     revealing: false,
     optimisticStatusBeforePlay: null,
+    stagedDealResult: null,
+    dealStage: "idle",
+    activeDealButtonId: "",
   };
 
   var suitSymbols = {
@@ -53,6 +56,25 @@
     text = String(text || "");
     el.textContent = text;
     el.hidden = !text.trim();
+  }
+
+  function cleanSentencePart(value) {
+    return String(value == null ? "" : value).trim().replace(/[.!?]+$/g, "");
+  }
+
+  function formatResultLine(result) {
+    var payload = result || {};
+    var hand = cleanSentencePart(payload.handName || "Комбинация определена");
+    var reward = String(payload.reward && payload.reward.message ? payload.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.").trim();
+    if (hand && reward) return hand + ". " + reward;
+    return hand || reward;
+  }
+
+  function setResultText(text, isError) {
+    var resultEl = $("dailyPokerResult");
+    setLiveText(resultEl, text || "");
+    if (resultEl) resultEl.classList.toggle("daily-poker__result--error", !!isError);
+    setLiveText($("dailyPokerReward"), "");
   }
 
   function formatBonus(value) {
@@ -128,11 +150,12 @@
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
-      playBtn.textContent = data.baseAttemptUsedToday ? "Играть" : "Играть";
+      playBtn.textContent = "Раздать карты";
     }
     if (extraBtn) {
       extraBtn.hidden = !(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       extraBtn.disabled = !data.canPlay || dailyPokerState.revealing;
+      extraBtn.textContent = "Раздать карты";
     }
     updateTimer();
   }
@@ -183,9 +206,9 @@
   function cardHtml(card, hidden) {
     var suit = card && card.suit ? String(card.suit) : "";
     var rank = card && card.rank ? String(card.rank) : "";
-    var red = suit === "hearts" || suit === "diamonds";
+    var suitClass = Object.prototype.hasOwnProperty.call(suitSymbols, suit) ? " daily-poker-card--suit-" + suit : "";
     if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"></div>';
-    return '<div class="daily-poker-card' + (red ? " daily-poker-card--red" : "") + '">' +
+    return '<div class="daily-poker-card' + suitClass + '">' +
       '<span class="daily-poker-card__rank">' + esc(rank) + '</span>' +
       '<span class="daily-poker-card__suit">' + esc(suitSymbols[suit] || "?") + '</span>' +
       '</div>';
@@ -205,45 +228,99 @@
     setBoardActive(true);
   }
 
-  function revealCards(result) {
+  function resetManualDeal() {
+    dailyPokerState.stagedDealResult = null;
+    dailyPokerState.dealStage = "idle";
+    dailyPokerState.activeDealButtonId = "";
+  }
+
+  function boardHtml(cards, openCount) {
+    var source = Array.isArray(cards) ? cards : [];
+    var out = [];
+    for (var i = 0; i < 5; i += 1) {
+      out.push(i < openCount && source[i] ? cardHtml(source[i], false) : cardHtml(null, true));
+    }
+    return out.join("");
+  }
+
+  function getDealButton() {
+    if (dailyPokerState.activeDealButtonId) return $(dailyPokerState.activeDealButtonId);
+    var extraBtn = $("dailyPokerExtraBtn");
+    if (extraBtn && !extraBtn.hidden) return extraBtn;
+    return $("dailyPokerPlayBtn");
+  }
+
+  function setDealButtonLabel(label) {
+    var btn = getDealButton();
+    if (btn) {
+      btn.textContent = label;
+      btn.disabled = false;
+      btn.hidden = false;
+    }
+  }
+
+  function setActiveDealButton(btn) {
+    var playBtn = $("dailyPokerPlayBtn");
+    var extraBtn = $("dailyPokerExtraBtn");
+    dailyPokerState.activeDealButtonId = btn && btn.id ? btn.id : "";
+    if (playBtn && extraBtn && dailyPokerState.activeDealButtonId) {
+      playBtn.hidden = dailyPokerState.activeDealButtonId !== playBtn.id;
+      extraBtn.hidden = dailyPokerState.activeDealButtonId !== extraBtn.id;
+    }
+  }
+
+  function finishManualDeal() {
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
-    var resultEl = $("dailyPokerResult");
-    var rewardEl = $("dailyPokerReward");
     var claimBtn = $("dailyPokerClaimBtn");
-    dailyPokerState.revealing = true;
-    setLiveText(resultEl, "Открываем карты…");
-    setLiveText(rewardEl, "");
+    var result = dailyPokerState.stagedDealResult || {};
+    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");
+    if (board) board.innerHTML = boardHtml(result.boardCards || [], 5);
+    dailyPokerState.revealing = false;
+    setResultText(formatResultLine(result), false);
+    if (claimBtn) claimBtn.hidden = true;
+    resetManualDeal();
+    syncStatus(result);
+  }
+
+  function advanceManualDeal() {
+    var board = $("dailyPokerBoardCards");
+    var result = dailyPokerState.stagedDealResult;
+    if (!result || dailyPokerState.revealing) return;
+    if (dailyPokerState.dealStage === "hole") {
+      if (board) board.innerHTML = boardHtml(result.boardCards || [], 3);
+      dailyPokerState.dealStage = "flop";
+      setResultText("Флоп на борде. Теперь раздай терн.", false);
+      setDealButtonLabel("Раздать терн");
+      return;
+    }
+    if (dailyPokerState.dealStage === "flop") {
+      if (board) board.innerHTML = boardHtml(result.boardCards || [], 4);
+      dailyPokerState.dealStage = "turn";
+      setResultText("Терн открыт. Остался ривер.", false);
+      setDealButtonLabel("Раздать ривер");
+      return;
+    }
+    if (dailyPokerState.dealStage === "turn") {
+      finishManualDeal();
+    }
+  }
+
+  function revealCards(result, triggerBtn) {
+    var hole = $("dailyPokerHoleCards");
+    var board = $("dailyPokerBoardCards");
+    var claimBtn = $("dailyPokerClaimBtn");
+    dailyPokerState.stagedDealResult = result || {};
+    dailyPokerState.dealStage = "hole";
+    setActiveDealButton(triggerBtn || getDealButton());
+    dailyPokerState.revealing = false;
+    setResultText("Карты на руках. Теперь раздай флоп.", false);
     if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
     setBoardActive(true);
-    if (board) board.innerHTML = [0, 1, 2, 3, 4].map(function () { return cardHtml(null, true); }).join("");
-
-    setTimeout(function () {
-      if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");
-    }, 160);
-    setTimeout(function () {
-      if (board) {
-        var cards = result.boardCards || [];
-        board.innerHTML = cards.slice(0, 3).map(function (card) { return cardHtml(card, false); }).join("") +
-          cardHtml(null, true) + cardHtml(null, true);
-      }
-    }, 720);
-    setTimeout(function () {
-      if (board) {
-        var cards = result.boardCards || [];
-        board.innerHTML = cards.slice(0, 4).map(function (card) { return cardHtml(card, false); }).join("") +
-          cardHtml(null, true);
-      }
-    }, 1280);
-    setTimeout(function () {
-      if (board) board.innerHTML = (result.boardCards || []).map(function (card) { return cardHtml(card, false); }).join("");
-      dailyPokerState.revealing = false;
-      setLiveText(resultEl, result.handName || "Комбинация определена");
-      setLiveText(rewardEl, result.reward && result.reward.message ? result.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.");
-      if (claimBtn) claimBtn.hidden = true;
-      syncStatus(result);
-    }, 1840);
+    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");
+    if (board) board.innerHTML = boardHtml(result.boardCards || [], 0);
+    setDealButtonLabel("Раздать флоп");
   }
 
   function idempotencyKey() {
@@ -259,10 +336,7 @@
   }
 
   function showMessage(text, isError) {
-    var resultEl = $("dailyPokerResult");
-    if (!resultEl) return;
-    setLiveText(resultEl, text || "");
-    resultEl.classList.toggle("daily-poker__result--error", !!isError);
+    setResultText(text || "", !!isError);
   }
 
   function readJson(r) {
@@ -299,9 +373,13 @@
       });
   }
 
-  function play() {
+  function play(evt) {
     var base = apiBase();
     if (dailyPokerState.revealing) return;
+    if (dailyPokerState.stagedDealResult) {
+      advanceManualDeal();
+      return;
+    }
     if (!base || !hasCredential()) {
       showMessage("Войдите в аккаунт, чтобы сыграть.", true);
       return;
@@ -327,10 +405,10 @@
       })
       .then(function (data) {
         clearOptimisticSpend();
-        syncStatus(data);
-        revealCards(data);
+        revealCards(data, evt && evt.currentTarget);
       })
       .catch(function (err) {
+        resetManualDeal();
         dailyPokerState.revealing = false;
         setBusy(false);
         if (err && hasStatusPayload(err.data)) {
@@ -365,6 +443,7 @@
   }
 
   window.initDailyPoker = function () {
+    resetManualDeal();
     bind();
     renderEmptyCards();
     loadStatus();
