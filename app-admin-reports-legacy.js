@@ -3160,7 +3160,7 @@
       var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
       var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
       var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
-      var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
+      var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
 
       function reportBusinessTimestampMs(ts) {
         var raw = Number(ts);
@@ -3188,7 +3188,7 @@
         return new Date(year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0") + "T12:00:00+03:00").getTime();
       }
 
-      /** Отчётный день переключается в 16:00 МСК: до 16:00 идёт предыдущая дата. */
+      /** Отчётный день переключается в 18:00 МСК: до 18:00 идёт предыдущая дата. */
       function reportEffectiveTimestampMs(r) {
         var stored = reportStoredDateTimestampMs(r);
         if (Number.isFinite(stored)) return stored;
@@ -3208,7 +3208,7 @@
         return { weekday: cap(wd), date: dd };
       }
 
-      /** Дата/день недели для новой формы: отчётный день начинается в 16:00 МСК. */
+      /** Дата/день недели для новой формы: отчётный день начинается в 18:00 МСК. */
       function getShiftReportDateInfo() {
         var effTs = reportBusinessTimestampMs(Date.now());
         var meta = formatRuWeekdayDateFromTs(effTs);
@@ -3230,7 +3230,7 @@
         return new Date(ts + REPORT_MSK_SHIFT_MS);
       }
 
-      /** Неделя отчётных дат: Пн -> Вс; реальный переход недели происходит в Пн 16:00 МСК. */
+      /** Неделя отчётных дат: Пн -> Вс; реальный переход недели происходит в Пн 18:00 МСК. */
       function weekStartMsForReport(ts) {
         var msk = mskDateFromReportTs(ts);
         var y = msk.getUTCFullYear();

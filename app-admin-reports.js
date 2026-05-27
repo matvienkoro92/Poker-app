@@ -121,7 +121,7 @@ function initAdminReportModal() {
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
   var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
-  var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
+  var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];

@@ -11,8 +11,8 @@
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
-  var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 12 * 60 * 60 * 1000;
-  var REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
+  var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 18 * 60 * 60 * 1000;
+  var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
 
   function readRakebackTemplateSpoilerOpen() {
     return false;
@@ -239,7 +239,7 @@
   function getTimeFromDateInput(value, fallback) {
     var parts = String(value || "").split("-").map(function (part) { return Number(part); });
     if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return normalizeTimeValue(fallback);
-    return Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0) - MOSCOW_UTC_OFFSET_MS;
+    return Date.UTC(parts[0], parts[1] - 1, parts[2], REPORT_DAY_CUTOFF_MS / (60 * 60 * 1000), 0, 0, 0) - MOSCOW_UTC_OFFSET_MS;
   }
 
   function getCurrentReportDateKey() {
