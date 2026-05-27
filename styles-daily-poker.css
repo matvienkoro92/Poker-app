@@ -1049,7 +1049,7 @@
 }
 
 .daily-poker__zone--hole {
-  margin-top: 18.5%;
+  margin-top: 10.5%;
 }
 
 .daily-poker__zone--hole .daily-poker__zone-label {
@@ -1086,12 +1086,12 @@
 }
 
 .daily-poker__zone--board {
-  margin-top: 5.2%;
+  margin-top: 2.1%;
 }
 
 .daily-poker__zone--board .daily-poker__zone-label {
   width: min(930px, 84%);
-  margin: 0 auto 3.8%;
+  margin: 0 auto 1.8%;
   font-size: clamp(24px, 5.2vw, 56px);
   color: var(--daily-poker-gold);
 }
@@ -1524,14 +1524,14 @@
 
 @container (max-width: 720px) {
   .daily-poker__table {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1.08;
     min-height: 0;
     padding: 0;
     border-radius: 20px;
   }
 
   .daily-poker__zone--hole {
-    margin-top: 18.5%;
+    margin-top: 10.5%;
   }
 
   .daily-poker__cards--hole {
@@ -1542,12 +1542,12 @@
   }
 
   .daily-poker__zone--board {
-    margin-top: 5.2%;
+    margin-top: 2.1%;
   }
 
   .daily-poker__zone--board .daily-poker__zone-label {
     width: 84%;
-    margin: 0 auto 3.8%;
+    margin: 0 auto 1.8%;
     font-size: clamp(23px, 8vw, 34px);
   }
 
@@ -1570,14 +1570,14 @@
 
 @media (max-width: 720px) {
   .daily-poker__table {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1.08;
     min-height: 0;
     padding: 0;
     border-radius: 20px;
   }
 
   .daily-poker__zone--hole {
-    margin-top: 18.5%;
+    margin-top: 10.5%;
   }
 
   .daily-poker__cards--hole {
@@ -1588,12 +1588,12 @@
   }
 
   .daily-poker__zone--board {
-    margin-top: 5.2%;
+    margin-top: 2.1%;
   }
 
   .daily-poker__zone--board .daily-poker__zone-label {
     width: 84%;
-    margin: 0 auto 3.8%;
+    margin: 0 auto 1.8%;
     font-size: clamp(23px, 8vw, 34px);
   }
 
