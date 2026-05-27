@@ -1,4 +1,4 @@
 /* styles-hall-main.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-hall-main-shell.css");
+@import url("./styles-hall-main-shell.css?v=3.342");
 @import url("./styles-hall-main-players.css");
 @import url("./styles-hall-main-responsive.css");
