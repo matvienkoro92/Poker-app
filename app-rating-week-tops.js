@@ -257,6 +257,23 @@ function pokerInitWinterRatingWeekTops() {
       })
       .join("");
   }
+  function buildSingleTopLoadingHtml(count) {
+    var rows = [];
+    var total = count || 15;
+    for (var i = 0; i < total; i++) {
+      rows.push(
+        '<li class="winter-rating__single-top-item winter-rating__single-top-item--loading">' +
+          '<span class="winter-rating__single-top-static" aria-hidden="true">' +
+            '<span class="winter-rating__single-top-rank">' + (i + 1) + ".</span>" +
+            '<span class="winter-rating__single-top-nick"></span>' +
+            '<span class="winter-rating__single-top-separator">—</span>' +
+            '<span class="winter-rating__single-top-amount"></span>' +
+          "</span>" +
+        "</li>"
+      );
+    }
+    return rows.join("");
+  }
   function updateButtonPreviews() {
     var pastTop = getTopByDates(GAZETTE_DATES);
     var currentTop = getTopByDates(CURRENT_WEEK_DATES);
@@ -273,14 +290,16 @@ function pokerInitWinterRatingWeekTops() {
       var singleTopTitleText = "Топ выигрышей за один турнир (2026)";
       var isLoadingWinterSingleTop = ensureSingleTopWinterTournamentData();
       var listHtml = isLoadingWinterSingleTop
-        ? '<li class="winter-rating__single-top-item">Загружаю январь и февраль…</li>'
+        ? buildSingleTopLoadingHtml(15)
         : buildSimpleSingleTopListHtml(getSingleTopWins(null, 15));
       if (hasMainSingleTop) {
         singleTopSummary.textContent = singleTopTitleText;
+        singleTopList.setAttribute("aria-busy", isLoadingWinterSingleTop ? "true" : "false");
         singleTopList.innerHTML = listHtml;
       }
       if (hasHallSingleTop) {
         hallFameSingleTopSummary.textContent = singleTopTitleText;
+        hallFameSingleTopList.setAttribute("aria-busy", isLoadingWinterSingleTop ? "true" : "false");
         hallFameSingleTopList.innerHTML = listHtml;
       }
     }
