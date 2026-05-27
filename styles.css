@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.333");
-@import url("./styles-home-rating-promo.css?v=3.333");
-@import url("./styles-auth.css?v=3.333");
-@import url("./styles-home.css?v=3.333");
-@import url("./styles-chat.css?v=3.333");
-@import url("./styles-learning-games.css?v=3.333");
-@import url("./styles-raffles.css?v=3.333");
-@import url("./styles-daily-poker.css?v=3.333");
-@import url("./styles-home-legacy-prelude.css?v=3.333");
-@import url("./styles-download.css?v=3.333");
-@import url("./styles-home-legacy-tail.css?v=3.333");
-@import url("./styles-home-rating-promo-legacy.css?v=3.333");
-@import url("./styles-rating.css?v=3.333");
-@import url("./styles-hall.css?v=3.333");
-@import url("./styles-admin.css?v=3.333");
-@import url("./styles-player-crm.css?v=3.333");
-@import url("./styles-profile.css?v=3.333");
-@import url("./styles-layout.css?v=3.333");
-@import url("./styles-chat-overlays.css?v=3.333");
-@import url("./styles-home-overrides.css?v=3.333");
-@import url("./styles-layout-touch-targets.css?v=3.333");
-@import url("./styles-home-rating-promo-late.css?v=3.333");
+@import url("./styles-base.css?v=3.334");
+@import url("./styles-home-rating-promo.css?v=3.334");
+@import url("./styles-auth.css?v=3.334");
+@import url("./styles-home.css?v=3.334");
+@import url("./styles-chat.css?v=3.334");
+@import url("./styles-learning-games.css?v=3.334");
+@import url("./styles-raffles.css?v=3.334");
+@import url("./styles-daily-poker.css?v=3.334");
+@import url("./styles-home-legacy-prelude.css?v=3.334");
+@import url("./styles-download.css?v=3.334");
+@import url("./styles-home-legacy-tail.css?v=3.334");
+@import url("./styles-home-rating-promo-legacy.css?v=3.334");
+@import url("./styles-rating.css?v=3.334");
+@import url("./styles-hall.css?v=3.334");
+@import url("./styles-admin.css?v=3.334");
+@import url("./styles-player-crm.css?v=3.334");
+@import url("./styles-profile.css?v=3.334");
+@import url("./styles-layout.css?v=3.334");
+@import url("./styles-chat-overlays.css?v=3.334");
+@import url("./styles-home-overrides.css?v=3.334");
+@import url("./styles-layout-touch-targets.css?v=3.334");
+@import url("./styles-home-rating-promo-late.css?v=3.334");
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
@@ -1396,19 +1396,22 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   --home-promo-orange: #ff7600;
   --home-promo-line: rgba(255, 118, 0, 0.42);
   position: relative;
+  box-sizing: border-box;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
   margin: 33px calc(-1 * var(--card-padding-x, 16px) + 3px) 0;
   align-items: stretch;
   row-gap: 8px;
   column-gap: 10px;
   padding: 10px 10px 12px;
-  border: 0;
+  border: 2px solid rgba(255, 181, 49, 0.82);
   border-radius: 22px;
   background:
     radial-gradient(ellipse at 18% 0%, rgba(255, 181, 49, 0.13), transparent 36%),
     radial-gradient(ellipse at 84% 18%, rgba(255, 118, 0, 0.12), transparent 42%),
     linear-gradient(148deg, rgba(35, 16, 7, 0.78), rgba(13, 8, 8, 0.78) 45%, rgba(4, 5, 8, 0.74));
   box-shadow:
+    0 0 0 1px rgba(93, 38, 0, 0.72),
+    0 0 24px rgba(255, 118, 0, 0.2),
     inset 0 1px 0 rgba(255, 232, 176, 0.08),
     inset 0 -18px 28px rgba(0, 0, 0, 0.16);
 }
@@ -1598,19 +1601,19 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   width: 100%;
-  padding: 2px 8px 0;
+  padding: 1px 8px 0;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses::before {
   content: "♠";
   position: absolute;
   left: 50%;
-  top: -11px;
+  top: -7px;
   z-index: 1;
   color: #ffd874;
-  font-size: clamp(12px, 2.4vw, 16px);
+  font-size: clamp(8px, 1.6vw, 11px);
   font-weight: 900;
   line-height: 1;
   text-shadow:
@@ -1623,14 +1626,14 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
-  min-height: 34px;
-  padding: 0 6px;
+  min-height: 30px;
+  padding: 0 4px;
   border: 0;
   background: transparent;
   color: #ffe5a2;
-  font-size: clamp(27px, 5.8vw, 38px);
+  font-size: clamp(18px, 3.9vw, 25px);
   font-weight: 1000;
   line-height: 0.92;
   text-align: center;
@@ -1645,7 +1648,7 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title::after {
   content: "";
   flex: 1 1 0;
-  min-width: 26px;
+  min-width: 18px;
   height: 1px;
   background:
     linear-gradient(90deg, transparent, rgba(255, 196, 72, 0.88) 35%, rgba(255, 235, 160, 0.9) 50%, rgba(255, 196, 72, 0.48) 70%, transparent);
@@ -1661,7 +1664,7 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px 10px;
+  gap: 5px 7px;
   min-width: 0;
 }
 
@@ -1672,10 +1675,10 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: clamp(56px, 8vw, 74px);
-  padding: 8px 8px 9px;
+  min-height: clamp(37px, 5.3vw, 49px);
+  padding: 5px 6px 6px;
   border: 1px solid rgba(255, 184, 36, 0.82);
-  border-radius: 8px;
+  border-radius: 7px;
   background:
     linear-gradient(180deg, rgba(255, 227, 154, 0.13), rgba(255, 227, 154, 0.02) 42%, transparent 43%),
     radial-gradient(ellipse at 50% 0%, rgba(255, 199, 81, 0.16), transparent 62%),
@@ -1691,13 +1694,13 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
   grid-column: span 3;
-  min-height: clamp(58px, 8.4vw, 76px);
+  min-height: clamp(39px, 5.6vw, 51px);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount {
   min-width: 0;
   color: #ffc33a;
-  font-size: clamp(25px, 5.4vw, 31px);
+  font-size: clamp(17px, 3.6vw, 21px);
   font-weight: 1000;
   line-height: 0.92;
   white-space: nowrap;
@@ -1710,10 +1713,10 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
   min-width: 0;
   max-width: 100%;
-  margin-top: 5px;
+  margin-top: 3px;
   overflow-wrap: anywhere;
   color: #fff0d0;
-  font-size: clamp(14px, 3.1vw, 18px);
+  font-size: clamp(9px, 2.1vw, 12px);
   font-weight: 900;
   line-height: 1;
   text-shadow:
@@ -1724,8 +1727,8 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {
   grid-column: 1 / -1;
   width: 100%;
-  min-height: clamp(44px, 6.6vw, 58px);
-  margin-top: 6px;
+  min-height: clamp(29px, 4.4vw, 39px);
+  margin-top: 4px;
   align-items: stretch;
   justify-content: stretch;
   padding: 0 8px;
@@ -1737,9 +1740,9 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   flex: 1 1 100%;
   width: 100%;
   height: auto;
-  min-height: clamp(44px, 6.6vw, 58px);
-  gap: 12px;
-  padding: 6px 18px 8px;
+  min-height: clamp(29px, 4.4vw, 39px);
+  gap: 8px;
+  padding: 4px 12px 5px;
   border: 1px solid rgba(255, 248, 208, 0.98);
   border-radius: 999px;
   background:
@@ -1747,7 +1750,7 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
     radial-gradient(ellipse at 50% -18%, rgba(255, 255, 255, 0.54), rgba(255, 221, 108, 0.18) 43%, transparent 72%),
     linear-gradient(180deg, #ffbf43 0%, #ff8f0c 45%, #bd4e04 76%, #6c2500 100%);
   color: #fff8dc;
-  font-size: clamp(32px, 6vw, 40px);
+  font-size: clamp(21px, 4vw, 27px);
   font-weight: 1000;
   line-height: 1;
   white-space: nowrap;
