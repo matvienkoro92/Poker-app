@@ -914,7 +914,7 @@
       var dateMap = {};
       (Array.isArray(rows) ? rows : []).forEach(function (row, index) {
         if (!row || row.saved !== true) return;
-        var stamp = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
+        var stamp = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
         if (!stamp) return;
         var key = getDateInputValue(stamp);
         if (!dateMap[key]) dateMap[key] = { key: key, stamp: stamp, amount: 0, finalRakeByGroup: {}, groupOrder: [] };
@@ -1251,6 +1251,15 @@
     }
 
     function rowEntryTime(row) {
+      if (getSharedRowKind(row) === "addon") {
+        var groupId = String(row && row.groupId || "").trim();
+        for (var i = 0; groupId && i < sharedRows.length; i += 1) {
+          var base = sharedRows[i];
+          if (!base || getSharedRowKind(base) === "addon") continue;
+          if (String(base.groupId || "").trim() !== groupId) continue;
+          return parseRowTime(base, ["entryAddedAt", "createdAt", "standardAt", "addedAt", "created"]);
+        }
+      }
       return parseRowTime(row, ["entryAddedAt", "createdAt", "standardAt", "addedAt", "created"]);
     }
 
@@ -1599,7 +1608,7 @@
         if (!roomOpen) return;
         rows.forEach(function (row) {
           var groupId = String(row && row.groupId || "").trim();
-          var entryAt = normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt || Date.now()));
+          var entryAt = rowEntryTime(row) || normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt || Date.now()));
           var dateKey = getDateInputValue(entryAt);
           var renderRow = row;
           if (dateKey && dateKey !== lastDateKey) {
@@ -1718,7 +1727,7 @@
         item.className = "admin-report-rakeback-archive-week__item" + (isAddon ? " admin-report-rakeback-archive-week__item--addon" : "");
         item.innerHTML =
           '<span class="admin-report-rakeback-archive-week__num">' + (isAddon ? '<span title="Подзапись" aria-label="Подзапись">↳</span>' : escapeHtml(String(baseIndex))) + "</span>" +
-          '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
+          '<span class="admin-report-rakeback-archive-week__date">' + escapeHtml(formatEntryDateLabel(rowEntryTime(row) || row.entryAddedAt || row.createdAt || row.standardAt)) + "</span>" +
           '<span class="admin-report-rakeback-archive-week__room">' + escapeHtml(rowRoom) + "</span>" +
           '<span class="admin-report-rakeback-archive-week__id">' + escapeHtml(row.playerId || row.id || "") + "</span>" +
           '<span class="admin-report-rakeback-archive-week__rake">' + rakeHtml + "</span>" +
@@ -1782,13 +1791,13 @@
 
     function getRowReportDateKey(row) {
       if (!row) return "";
-      return getDateInputValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
+      return getDateInputValue(rowEntryTime(row) || row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
     }
 
     function getLatestReportDateKey(rows) {
       var latestStamp = 0;
       (Array.isArray(rows) ? rows : []).forEach(function (row) {
-        var stamp = normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt), 0);
+        var stamp = rowEntryTime(row) || normalizeTimeValue(row && (row.entryAddedAt || row.createdAt || row.standardAt), 0);
         if (stamp > latestStamp) latestStamp = stamp;
       });
       return latestStamp ? getDateInputValue(latestStamp) : "";
@@ -2404,7 +2413,7 @@
       });
       visibleShared.forEach(function (row, index) {
         var groupId = String(row.groupId || "").trim();
-        var entryAt = normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
+        var entryAt = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
         var entryDateKey = getDateInputValue(entryAt);
         if (entryDateKey && entryDateKey !== lastEntryDateKey) {
           var dayTotal = dateTotalsByKey[entryDateKey];
