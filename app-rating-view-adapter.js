@@ -10,7 +10,20 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
   opts = opts || {};
   var box = document.getElementById("winterRatingLightbox");
   var img = box && box.querySelector(".winter-rating-lightbox__img");
-  if (!box || !img) return;
+  if (!box || !img) {
+    if (!opts.__globalModalsEnsured && typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      var retryOpts = {};
+      Object.keys(opts).forEach(function (key) {
+        retryOpts[key] = opts[key];
+      });
+      retryOpts.__globalModalsEnsured = true;
+      Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
+        openWinterRatingLightbox(dateStr, index, leagueNum, retryOpts);
+      }).catch(function () {});
+    }
+    return;
+  }
+  initWinterRatingLightbox();
   if (opts.overrideFile) {
     delete box.dataset.lightboxSingleOnly;
     box.dataset.lightboxOverrideFile = opts.overrideFile;

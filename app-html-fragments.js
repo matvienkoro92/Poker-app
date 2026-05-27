@@ -70,6 +70,9 @@
       safeCall(window.pokerInitRomanGazetteTaskPlanner);
       safeCall(window.pokerInitDailyPredictionModal);
       safeCall(window.pokerInitImageLightbox);
+      safeCall(window.initWinterRatingLightbox);
+      safeCall(window.initWinterRatingPlayerModal);
+      safeCall(window.pokerInitWinterRatingWeekTops);
       safeCall(window.pokerInitPartnershipModal);
       safeCall(window.initHomeFreerollModal);
       safeCall(window.__pokerInitSiteHomeInstructionModal);
@@ -256,6 +259,7 @@
   (function pokerEagerHydratePrimaryViews() {
     var queue = [
       "chat",
+      "hall-of-fame",
       "download",
       "profile",
       "raffles"

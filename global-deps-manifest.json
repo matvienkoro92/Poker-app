@@ -460,7 +460,18 @@
         "app-rating-view-adapter.js"
       ],
       "consumedBy": [
+        "app-html-fragments.js",
         "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "initWinterRatingPlayerModal",
+      "domain": "rating",
+      "exportedBy": [
+        "app-rating-view-adapter.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
       ]
     },
     {
