@@ -264,7 +264,7 @@
 
 .daily-poker-card--back {
   background:
-    #050303 url("./assets/daily-poker-card-back.webp?v=3.323") center / cover no-repeat;
+    #050303 url("./assets/daily-poker-card-back.webp?v=3.328") center / cover no-repeat;
   border-color: rgba(255, 133, 0, 0.56);
 }
 
@@ -673,7 +673,7 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(56px, 1fr));
-    max-width: 180px;
+    max-width: 270px;
   }
 
   .daily-poker__cards--board {
@@ -1073,7 +1073,7 @@
 
 .daily-poker__cards--hole {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: min(420px, 46%);
+  width: min(630px, 69%);
   gap: clamp(14px, 3.2vw, 34px);
   margin: 0 auto;
 }
@@ -1118,7 +1118,7 @@
   display: block;
   padding: 0;
   background:
-    #050303 url("./assets/daily-poker-card-back.webp?v=3.323") center / cover no-repeat;
+    #050303 url("./assets/daily-poker-card-back.webp?v=3.328") center / cover no-repeat;
   border: 1px solid rgba(255, 133, 0, 0.58);
   box-shadow:
     0 0 18px rgba(255, 177, 39, 0.78),
@@ -1330,7 +1330,7 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(86px, 1fr));
-    width: min(250px, 74%);
+    width: min(375px, 100%);
     margin-left: 20px;
   }
 
@@ -1474,7 +1474,7 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(86px, 1fr));
-    width: min(250px, 74%);
+    width: min(375px, 100%);
     margin-left: 20px;
   }
 
@@ -1536,7 +1536,7 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 46%;
+    width: 69%;
     gap: clamp(10px, 3vw, 16px);
     margin: 0 auto;
   }
@@ -1582,7 +1582,7 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 46%;
+    width: 69%;
     gap: clamp(10px, 3vw, 16px);
     margin: 0 auto;
   }
