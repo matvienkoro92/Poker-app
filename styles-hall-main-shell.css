@@ -260,7 +260,7 @@
   width: 100%;
   min-height: 1180px;
   margin: calc(-1 * var(--hall-top2026-header-overlap, 142px)) 0 0;
-  padding: clamp(370px, 98vw, 392px) 10px 18px;
+  padding: clamp(342px, 90vw, 368px) 10px 18px;
   box-sizing: border-box;
   overflow: hidden;
   border-radius: 0 0 18px 18px;
@@ -601,7 +601,7 @@
   }
   .hall-of-fame__top2026-stage {
     min-height: 1120px;
-    padding-top: 352px;
+    padding-top: 326px;
   }
   .hall-of-fame__top2026-list-card {
     padding-inline: 8px;
@@ -652,7 +652,7 @@
 @media (max-width: 900px) and (max-height: 760px) {
   .hall-of-fame__top2026-stage {
     min-height: 1060px;
-    padding-top: 342px;
+    padding-top: 314px;
   }
   .hall-of-fame__top2026-list-card {
     padding: 10px 8px 8px;
