@@ -2332,6 +2332,214 @@
     return q;
   }
 
+  var crmDateRangePicker = null;
+  var crmRangeWeekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  var crmRangeMonthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+  function crmPad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function crmDateKeyFromParts(year, monthIndex, day) {
+    return year + "-" + crmPad2(monthIndex + 1) + "-" + crmPad2(day);
+  }
+
+  function crmDateKeyIsValid(key) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(key || ""));
+  }
+
+  function crmDisplayDate(key) {
+    var parts = String(key || "").split("-");
+    if (parts.length !== 3) return "";
+    return parts[2] + "." + parts[1] + "." + parts[0];
+  }
+
+  function crmMonthKeyFromDateKey(key) {
+    if (crmDateKeyIsValid(key)) return String(key).slice(0, 7);
+    var now = new Date();
+    return crmDateKeyFromParts(now.getFullYear(), now.getMonth(), 1).slice(0, 7);
+  }
+
+  function crmAddMonths(monthKey, delta) {
+    var parts = String(monthKey || "").split("-");
+    var year = Number(parts[0]) || new Date().getFullYear();
+    var month = Number(parts[1]) || (new Date().getMonth() + 1);
+    var d = new Date(year, month - 1 + (Number(delta) || 0), 1);
+    return crmDateKeyFromParts(d.getFullYear(), d.getMonth(), 1).slice(0, 7);
+  }
+
+  function crmRangeElements(scope) {
+    var isChart = scope === "chart";
+    return {
+      button: document.getElementById(isChart ? "playerCrmChartDateRangeBtn" : "playerCrmDateRangeBtn"),
+      text: document.getElementById(isChart ? "playerCrmChartDateRangeText" : "playerCrmDateRangeText"),
+      popover: document.getElementById(isChart ? "playerCrmChartDateRangeCalendar" : "playerCrmDateRangeCalendar"),
+    };
+  }
+
+  function crmRangeValues(scope) {
+    if (scope === "chart") return { from: state.chartDateFrom || "", to: state.chartDateTo || "" };
+    return { from: state.dateFrom || "", to: state.dateTo || "" };
+  }
+
+  function crmRangeLabel(scope) {
+    var range = crmRangeValues(scope);
+    if (range.from && range.to) return crmDisplayDate(range.from) + " — " + crmDisplayDate(range.to);
+    if (range.from) return "Начало: " + crmDisplayDate(range.from);
+    return "Выбрать диапазон";
+  }
+
+  function syncCrmDateRangeControl(scope) {
+    var els = crmRangeElements(scope);
+    var label = crmRangeLabel(scope);
+    if (els.text) els.text.textContent = label;
+    if (els.button) els.button.setAttribute("aria-label", label === "Выбрать диапазон" ? "Выбрать диапазон дат" : "Изменить диапазон дат: " + label);
+  }
+
+  function setCrmDateRangeExpanded(scope, expanded) {
+    var els = crmRangeElements(scope);
+    if (els.button) els.button.setAttribute("aria-expanded", expanded ? "true" : "false");
+    if (els.popover) els.popover.hidden = !expanded;
+  }
+
+  function closeCrmDateRangePicker(scope) {
+    if (!crmDateRangePicker) return;
+    if (scope && crmDateRangePicker.scope !== scope) return;
+    var activeScope = crmDateRangePicker.scope;
+    crmDateRangePicker = null;
+    setCrmDateRangeExpanded(activeScope, false);
+  }
+
+  function renderCrmDateRangePicker() {
+    if (!crmDateRangePicker) return;
+    var scope = crmDateRangePicker.scope;
+    var els = crmRangeElements(scope);
+    var popover = els.popover;
+    if (!popover) return;
+    var monthParts = String(crmDateRangePicker.month || "").split("-");
+    var year = Number(monthParts[0]) || new Date().getFullYear();
+    var monthIndex = (Number(monthParts[1]) || (new Date().getMonth() + 1)) - 1;
+    var first = new Date(year, monthIndex, 1);
+    var offset = (first.getDay() + 6) % 7;
+    var todayKey = localDateKey(new Date());
+    var from = crmDateRangePicker.draftFrom || "";
+    var to = crmDateRangePicker.draftTo || "";
+    var status = "";
+    if (from && to) status = crmDisplayDate(from) + " — " + crmDisplayDate(to);
+    else if (from) status = "Теперь выберите окончание";
+    else status = "Выберите начало периода";
+    var html = "<div class=\"player-crm__range-calendar-head\">" +
+      "<button type=\"button\" class=\"player-crm__range-calendar-nav\" data-crm-range-nav=\"-1\" aria-label=\"Предыдущий месяц\">‹</button>" +
+      "<strong>" + esc((crmRangeMonthNames[monthIndex] || "") + " " + year) + "</strong>" +
+      "<button type=\"button\" class=\"player-crm__range-calendar-nav\" data-crm-range-nav=\"1\" aria-label=\"Следующий месяц\">›</button>" +
+      "<button type=\"button\" class=\"player-crm__range-calendar-close\" data-crm-range-close aria-label=\"Закрыть календарь\">×</button>" +
+      "</div>" +
+      "<div class=\"player-crm__range-calendar-state\">" + esc(status) + "</div>" +
+      "<div class=\"player-crm__range-calendar-weekdays\">" + crmRangeWeekdays.map(function (day) { return "<span>" + esc(day) + "</span>"; }).join("") + "</div>" +
+      "<div class=\"player-crm__range-calendar-days\">";
+    for (var i = 0; i < 42; i += 1) {
+      var date = new Date(year, monthIndex, i - offset + 1);
+      var key = crmDateKeyFromParts(date.getFullYear(), date.getMonth(), date.getDate());
+      var classes = ["player-crm__range-calendar-day"];
+      if (date.getMonth() !== monthIndex) classes.push("player-crm__range-calendar-day--outside");
+      if (key === todayKey) classes.push("player-crm__range-calendar-day--today");
+      if (from && to && key > from && key < to) classes.push("player-crm__range-calendar-day--inside");
+      if (from && key === from) classes.push("player-crm__range-calendar-day--start");
+      if (to && key === to) classes.push("player-crm__range-calendar-day--end");
+      if (from && to && from === to && key === from) classes.push("player-crm__range-calendar-day--single");
+      html += "<button type=\"button\" class=\"" + classes.join(" ") + "\" data-crm-range-day=\"" + esc(key) + "\" aria-label=\"" + esc(crmDisplayDate(key)) + "\">" + date.getDate() + "</button>";
+    }
+    html += "</div>";
+    popover.innerHTML = html;
+  }
+
+  function openCrmDateRangePicker(scope) {
+    scope = scope === "chart" ? "chart" : "stats";
+    if (scope === "chart") {
+      if (!state.chartDateFrom || !state.chartDateTo) setDefaultChartDates();
+    } else if (!state.dateFrom || !state.dateTo) {
+      setDefaultDates();
+    }
+    var range = crmRangeValues(scope);
+    crmDateRangePicker = {
+      scope: scope,
+      month: crmMonthKeyFromDateKey(range.from || range.to || localDateKey(new Date())),
+      draftFrom: range.from || "",
+      draftTo: range.to || "",
+      pending: false,
+    };
+    setCrmDateRangeExpanded(scope, true);
+    renderCrmDateRangePicker();
+    syncCrmDateRangeControl(scope);
+  }
+
+  function toggleCrmDateRangePicker(scope) {
+    scope = scope === "chart" ? "chart" : "stats";
+    if (crmDateRangePicker && crmDateRangePicker.scope === scope) {
+      closeCrmDateRangePicker(scope);
+      return;
+    }
+    closeCrmDateRangePicker();
+    openCrmDateRangePicker(scope);
+  }
+
+  function applyCrmDateRange(scope, from, to) {
+    if (!crmDateKeyIsValid(from) || !crmDateKeyIsValid(to)) return;
+    if (to < from) {
+      var tmp = from;
+      from = to;
+      to = tmp;
+    }
+    if (scope === "chart") {
+      state.chartPeriod = "custom";
+      state.chartDateFrom = from;
+      state.chartDateTo = to;
+      normalizeChartDateRange("to");
+      syncPeriodInputs();
+      closeCrmDateRangePicker("chart");
+      loadCrmData("chart");
+      return;
+    }
+    state.period = "custom";
+    state.dateFrom = from;
+    state.dateTo = to;
+    normalizeDateRange("to");
+    state.showAllPlayers = false;
+    syncPeriodInputs();
+    closeCrmDateRangePicker("stats");
+    loadCrmData("data");
+  }
+
+  function pickCrmDateRangeDay(scope, key) {
+    if (!crmDateKeyIsValid(key)) return;
+    if (!crmDateRangePicker || crmDateRangePicker.scope !== scope) openCrmDateRangePicker(scope);
+    if (!crmDateRangePicker.draftFrom || !crmDateRangePicker.pending) {
+      crmDateRangePicker.draftFrom = key;
+      crmDateRangePicker.draftTo = "";
+      crmDateRangePicker.pending = true;
+      crmDateRangePicker.month = crmMonthKeyFromDateKey(key);
+      renderCrmDateRangePicker();
+      return;
+    }
+    var from = crmDateRangePicker.draftFrom;
+    var to = key;
+    if (to < from) {
+      var tmp = from;
+      from = to;
+      to = tmp;
+    }
+    crmDateRangePicker.draftFrom = from;
+    crmDateRangePicker.draftTo = to;
+    crmDateRangePicker.pending = false;
+    applyCrmDateRange(scope, from, to);
+  }
+
+  function moveCrmDateRangeMonth(delta) {
+    if (!crmDateRangePicker) return;
+    crmDateRangePicker.month = crmAddMonths(crmDateRangePicker.month, delta);
+    renderCrmDateRangePicker();
+  }
+
   function syncPeriodInputs() {
     var period = document.getElementById("playerCrmPeriodSelect");
     var from = document.getElementById("playerCrmDateFrom");
@@ -2353,6 +2561,8 @@
     document.querySelectorAll(".player-crm__date-field").forEach(function (el) {
       el.classList.toggle("player-crm__date-field--visible", showDates);
     });
+    syncCrmDateRangeControl("stats");
+    if (!showDates) closeCrmDateRangePicker("stats");
     if (periodRange) {
       var rangeLabel = periodRangeLabel();
       periodRange.textContent = rangeLabel;
@@ -2371,6 +2581,8 @@
     document.querySelectorAll(".player-crm__chart-date-field").forEach(function (el) {
       el.classList.toggle("player-crm__chart-date-field--visible", showChartDates);
     });
+    syncCrmDateRangeControl("chart");
+    if (!showChartDates) closeCrmDateRangePicker("chart");
   }
 
   function openDatePicker(input) {
@@ -2604,6 +2816,33 @@
         renderManagerDialogModal();
         return;
       }
+      var rangeButton = e.target.closest("[data-crm-date-range]");
+      if (rangeButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleCrmDateRangePicker(rangeButton.getAttribute("data-crm-date-range") || "stats");
+        return;
+      }
+      var rangeNav = e.target.closest("[data-crm-range-nav]");
+      if (rangeNav) {
+        e.preventDefault();
+        e.stopPropagation();
+        moveCrmDateRangeMonth(Number(rangeNav.getAttribute("data-crm-range-nav")) || 0);
+        return;
+      }
+      var rangeDay = e.target.closest("[data-crm-range-day]");
+      if (rangeDay) {
+        e.preventDefault();
+        e.stopPropagation();
+        pickCrmDateRangeDay(crmDateRangePicker && crmDateRangePicker.scope || "stats", rangeDay.getAttribute("data-crm-range-day") || "");
+        return;
+      }
+      if (e.target.closest("[data-crm-range-close]")) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeCrmDateRangePicker();
+        return;
+      }
       var datePicker = e.target.closest("[data-crm-date-picker]");
       if (datePicker) {
         e.preventDefault();
@@ -2653,6 +2892,15 @@
         }
         return;
       }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!crmDateRangePicker || !e.target || !e.target.closest) return;
+      if (e.target.closest("[data-crm-date-range]") || e.target.closest("[data-crm-date-range-popover]")) return;
+      closeCrmDateRangePicker();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeCrmDateRangePicker();
     });
 
     var search = document.getElementById("playerCrmSearch");

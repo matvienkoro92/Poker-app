@@ -568,7 +568,7 @@ Request body:
 }
 ```
 
-For the admin shift-report cash-history tab the frontend sends `"all": true` with `pageSize: 200`; the backend then requests all available pages and returns one combined `chipLogs.list`. The route also supports an admin-only cashier source through `POKERPLUS_CASH_HISTORY_USER_APP_ID` and `POKERPLUS_CASH_HISTORY_MAIL` (or the `POKERPLUS_CHIP_LOG_*` aliases), so production can show cashier history without relying on the current admin user's personal Poker21 bind.
+For the admin shift-report cash-history tab the frontend sends `"all": true` with `pageSize: 200`; the backend then requests all available pages and returns one combined `chipLogs.list`. The route also supports admin-only cashier sources through `POKERPLUS_CASH_HISTORY_USER_APP_IDS` + `POKERPLUS_CASH_HISTORY_MAILS` (or singular `POKERPLUS_CASH_HISTORY_USER_APP_ID` + `POKERPLUS_CASH_HISTORY_MAIL`, with the `POKERPLUS_CHIP_LOG_*` aliases), so production can show cashier history without relying on the current admin user's personal Poker21 bind. When only one cashier source is configured, the route also tries the known operator IDs `369073`, `467511`, and `208238` with the configured cashier mail and merges successful responses without duplicate rows.
 
 Normalized chip log item:
 

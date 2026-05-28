@@ -137,6 +137,7 @@ function initAdminReportModal() {
   var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var CASH_HISTORY_CACHE_TTL_MS = 2 * 60 * 1000;
+  var CASH_HISTORY_OPERATOR_IDS = ["369073", "467511", "208238"];
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
   var RAKEBACK_EDITOR_USERNAMES = [];
@@ -929,6 +930,30 @@ function initAdminReportModal() {
     return n > 0 ? "admin-report-cash-history-table__amount--positive" : "admin-report-cash-history-table__amount--negative";
   }
 
+  function getCashHistoryOperatorId(row) {
+    var keys = ["operUserId", "oper_user_id", "operUserid", "operUserID", "operatorUserId", "operator_user_id", "operatorId", "operator_id"];
+    for (var i = 0; i < keys.length; i += 1) {
+      var value = row && row[keys[i]];
+      var id = value != null ? String(value).trim() : "";
+      if (id) return id;
+    }
+    return "";
+  }
+
+  function sortCashHistoryOperatorIds(a, b) {
+    var ai = CASH_HISTORY_OPERATOR_IDS.indexOf(a);
+    var bi = CASH_HISTORY_OPERATOR_IDS.indexOf(b);
+    if (ai !== -1 || bi !== -1) {
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    }
+    var na = Number(a);
+    var nb = Number(b);
+    if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+    return a.localeCompare(b);
+  }
+
   function syncCashHistoryDateInputsDisabled() {
     var custom = !cashHistoryPeriodFilter || cashHistoryPeriodFilter.value === "custom";
     if (cashHistoryDateFromFilter) cashHistoryDateFromFilter.disabled = !custom && !!cashHistoryPeriodFilter && !!cashHistoryPeriodFilter.value;
@@ -973,23 +998,21 @@ function initAdminReportModal() {
     if (!cashHistoryOperatorFilter) return;
     var selected = cashHistoryOperatorFilter.value;
     var counts = {};
+    CASH_HISTORY_OPERATOR_IDS.forEach(function (id) {
+      counts[id] = 0;
+    });
     (Array.isArray(rows) ? rows : []).forEach(function (row) {
-      var id = row && row.operUserId ? String(row.operUserId).trim() : "";
+      var id = getCashHistoryOperatorId(row);
       if (!id) return;
       counts[id] = (counts[id] || 0) + 1;
     });
-    var ids = Object.keys(counts).sort(function (a, b) {
-      var na = Number(a);
-      var nb = Number(b);
-      if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
-      return a.localeCompare(b);
-    });
+    var ids = Object.keys(counts).sort(sortCashHistoryOperatorIds);
     cashHistoryOperatorFilter.innerHTML =
       '<option value="">Все</option>' +
       ids.map(function (id) {
         return '<option value="' + escapeReportHtml(id) + '">' + escapeReportHtml(id + " (" + counts[id] + ")") + "</option>";
       }).join("");
-    if (selected && counts[selected]) cashHistoryOperatorFilter.value = selected;
+    if (selected && Object.prototype.hasOwnProperty.call(counts, selected)) cashHistoryOperatorFilter.value = selected;
   }
 
   function cashHistoryFiltersActive() {
@@ -1008,7 +1031,7 @@ function initAdminReportModal() {
     var from = cashHistoryDateFromFilter ? String(cashHistoryDateFromFilter.value || "") : "";
     var to = cashHistoryDateToFilter ? String(cashHistoryDateToFilter.value || "") : "";
     return cashHistoryRows.filter(function (row) {
-      if (operator && String((row && row.operUserId) || "").trim() !== operator) return false;
+      if (operator && getCashHistoryOperatorId(row) !== operator) return false;
       var info = getCashHistoryMskDateInfo(row && row.operTime);
       if (!info) return false;
       if (weekday != null && info.weekday !== weekday) return false;
@@ -1029,11 +1052,12 @@ function initAdminReportModal() {
     }
     var bodyHtml = rows.map(function (row) {
       var amountClass = getCashHistoryAmountClass(row && row.operGold);
+      var operatorId = getCashHistoryOperatorId(row);
       return (
         "<tr>" +
           "<td>" + escapeReportHtml(formatCashHistoryTime(row && row.operTime)) + "</td>" +
           "<td>" + escapeReportHtml(row && row.userId ? row.userId : "-") + "</td>" +
-          "<td>" + escapeReportHtml(row && row.operUserId ? row.operUserId : "-") + "</td>" +
+          "<td>" + escapeReportHtml(operatorId || "-") + "</td>" +
           "<td>" + escapeReportHtml(row && row.operType ? row.operType : "-") + "</td>" +
           '<td class="admin-report-cash-history-table__amount ' + amountClass + '">' + escapeReportHtml(formatCashHistoryAmount(row && row.operGold)) + "</td>" +
           "<td>" + escapeReportHtml(row && row.groupId ? row.groupId : "-") + "</td>" +

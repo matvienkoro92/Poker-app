@@ -36,28 +36,18 @@
                 <option value="7">7 дней</option>
               </select>
             </label>
-            <label class="player-crm__period player-crm__date-field">
-              <span>С</span>
-              <span class="player-crm__date-control">
-                <input id="playerCrmDateFrom" type="date" inputmode="none" />
-                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateFrom" aria-label="Выбрать дату начала">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-                  </svg>
-                </button>
-              </span>
-            </label>
-            <label class="player-crm__period player-crm__date-field">
-              <span>По</span>
-              <span class="player-crm__date-control">
-                <input id="playerCrmDateTo" type="date" inputmode="none" />
-                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmDateTo" aria-label="Выбрать дату окончания">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-                  </svg>
-                </button>
-              </span>
-            </label>
+            <div class="player-crm__period player-crm__date-field player-crm__date-range-field">
+              <span>Даты</span>
+              <input id="playerCrmDateFrom" type="hidden" />
+              <input id="playerCrmDateTo" type="hidden" />
+              <button type="button" class="player-crm__date-range-btn" id="playerCrmDateRangeBtn" data-crm-date-range="stats" aria-expanded="false" aria-controls="playerCrmDateRangeCalendar">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                </svg>
+                <span id="playerCrmDateRangeText">Выбрать диапазон</span>
+              </button>
+              <div class="player-crm__range-calendar" id="playerCrmDateRangeCalendar" data-crm-date-range-popover="stats" hidden></div>
+            </div>
           </div>
 
           <div class="player-crm__stats" id="playerCrmStats"></div>
@@ -87,28 +77,18 @@
                 <option value="7">7 дней</option>
               </select>
             </label>
-            <label class="player-crm__period player-crm__chart-date-field">
-              <span>С</span>
-              <span class="player-crm__date-control">
-                <input id="playerCrmChartDateFrom" type="date" inputmode="none" />
-                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmChartDateFrom" aria-label="Выбрать дату начала графика">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-                  </svg>
-                </button>
-              </span>
-            </label>
-            <label class="player-crm__period player-crm__chart-date-field">
-              <span>По</span>
-              <span class="player-crm__date-control">
-                <input id="playerCrmChartDateTo" type="date" inputmode="none" />
-                <button type="button" class="player-crm__date-picker-btn" data-crm-date-picker="playerCrmChartDateTo" aria-label="Выбрать дату окончания графика">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-                  </svg>
-                </button>
-              </span>
-            </label>
+            <div class="player-crm__period player-crm__chart-date-field player-crm__date-range-field">
+              <span>Диапазон</span>
+              <input id="playerCrmChartDateFrom" type="hidden" />
+              <input id="playerCrmChartDateTo" type="hidden" />
+              <button type="button" class="player-crm__date-range-btn" id="playerCrmChartDateRangeBtn" data-crm-date-range="chart" aria-expanded="false" aria-controls="playerCrmChartDateRangeCalendar">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                </svg>
+                <span id="playerCrmChartDateRangeText">Выбрать диапазон</span>
+              </button>
+              <div class="player-crm__range-calendar" id="playerCrmChartDateRangeCalendar" data-crm-date-range-popover="chart" hidden></div>
+            </div>
           </div>
           <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
         </section>

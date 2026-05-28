@@ -1009,6 +1009,7 @@ async function testPokerPlusClubLeagueDataAndChipLogs(redis) {
             data: {
               list: [
                 { userId: "990907", operUserId: "990911", operType: "0", operGold: "-40", groupId: "7526", leagueId: "8944", operTime: "1774315929" },
+                { user_id: "990908", oper_user_id: "990912", oper_type: "1", oper_gold: "12.5", group_id: "7527", league_id: "8945", oper_time: "1774315930" },
               ],
               page: "2",
               pageSize: "50",
@@ -1043,6 +1044,110 @@ async function testPokerPlusClubLeagueDataAndChipLogs(redis) {
   assert.strictEqual(chipLogs.totalCount, 254, "chip log total count is normalized");
   assert.strictEqual(chipLogs.list[0].operGold, -40, "chip log operGold is numeric");
   assert.strictEqual(chipLogs.list[0].operTime, 1774315929, "chip log operTime is numeric");
+  assert.strictEqual(chipLogs.list[1].operUserId, "990912", "chip log accepts snake_case operator id");
+  assert.strictEqual(chipLogs.list[1].operGold, 12.5, "chip log accepts snake_case amount");
+}
+
+async function testPokerPlusChipLogsMultiCashierSources(redis) {
+  const previousEnv = {
+    POKERPLUS_BASE_URL: process.env.POKERPLUS_BASE_URL,
+    POKERPLUS_MERCHANT_ID: process.env.POKERPLUS_MERCHANT_ID,
+    POKERPLUS_SECRET_KEY: process.env.POKERPLUS_SECRET_KEY,
+    POKERPLUS_STORAGE_SECRET: process.env.POKERPLUS_STORAGE_SECRET,
+    POKERPLUS_CASH_HISTORY_USER_APP_IDS: process.env.POKERPLUS_CASH_HISTORY_USER_APP_IDS,
+    POKERPLUS_CASH_HISTORY_MAILS: process.env.POKERPLUS_CASH_HISTORY_MAILS,
+    POKERPLUS_CASH_HISTORY_USER_APP_ID: process.env.POKERPLUS_CASH_HISTORY_USER_APP_ID,
+    POKERPLUS_CASH_HISTORY_MAIL: process.env.POKERPLUS_CASH_HISTORY_MAIL,
+  };
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  process.env.POKERPLUS_CASH_HISTORY_USER_APP_IDS = "369073,467511,208238";
+  process.env.POKERPLUS_CASH_HISTORY_MAILS = "one@example.test,two@example.test,three@example.test";
+  delete process.env.POKERPLUS_CASH_HISTORY_USER_APP_ID;
+  delete process.env.POKERPLUS_CASH_HISTORY_MAIL;
+  clearProjectRequireCache();
+
+  const chipLogForms = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getPlayerChipsChangeLog")) {
+      chipLogForms.push(form);
+      const rowsBySource = {
+        "369073": [
+          { userId: "player-a", operUserId: "369073", operType: "0", operGold: "10", groupId: "g", leagueId: "l", operTime: "1774315931" },
+        ],
+        "467511": [
+          { userId: "player-b", operUserId: "467511", operType: "0", operGold: "20", groupId: "g", leagueId: "l", operTime: "1774315932" },
+        ],
+        "208238": [
+          { userId: "player-c", operUserId: "208238", operType: "0", operGold: "30", groupId: "g", leagueId: "l", operTime: "1774315933" },
+        ],
+      };
+      return {
+        ok: true,
+        async json() {
+          return {
+            status: 1,
+            message: "success",
+            data: {
+              list: rowsBySource[form.user_app_id] || [],
+              page: "1",
+              pageSize: "200",
+              totalPage: "1",
+              totalCount: "1",
+            },
+            code: 0,
+          };
+        },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  try {
+    const handler = loadHandler("pokerplus-chip-logs");
+    const r = await call(handler, req("POST", {}, { pwaSession: sessions().admin, all: true, pageSize: 200 }));
+    assert.strictEqual(r.statusCode, 200, "admin chip logs can merge multiple cashier sources");
+    assert.deepStrictEqual(
+      chipLogForms.map((form) => form.user_app_id).sort(),
+      ["208238", "369073", "467511"],
+      "multi-source chip log requests all cashier operator ids",
+    );
+    assert.strictEqual(r.body.chipLogs.sourceCount, 3, "multi-source chip logs report source count");
+    assert.deepStrictEqual(
+      r.body.chipLogs.list.map((row) => row.operUserId).sort(),
+      ["208238", "369073", "467511"],
+      "multi-source chip logs include all operators",
+    );
+  } finally {
+    Object.keys(previousEnv).forEach((key) => {
+      if (previousEnv[key] == null) delete process.env[key];
+      else process.env[key] = previousEnv[key];
+    });
+    clearProjectRequireCache();
+  }
 }
 
 async function testAuthEmailAndPwaCode(redis) {
@@ -1483,6 +1588,7 @@ async function main() {
     ["pokerplus counter hands aliases", testPokerPlusCounterHandsAliases],
     ["pokerplus key persists without storage secret", testPokerPlusKeyPersistsWithoutStorageSecret],
     ["pokerplus club league data and chip logs", testPokerPlusClubLeagueDataAndChipLogs],
+    ["pokerplus multi cashier chip logs", testPokerPlusChipLogsMultiCashierSources],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

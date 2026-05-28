@@ -200,12 +200,12 @@
     ));
   }
 
-  function cardHtml(card, hidden) {
+  function cardHtml(card, hidden, animate) {
     var suit = card && card.suit ? String(card.suit) : "";
     var rank = card && card.rank ? String(card.rank) : "";
     var suitClass = Object.prototype.hasOwnProperty.call(suitSymbols, suit) ? " daily-poker-card--suit-" + suit : "";
     if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"></div>';
-    return '<div class="daily-poker-card' + suitClass + '">' +
+    return '<div class="daily-poker-card' + suitClass + (animate ? " daily-poker-card--dealt" : "") + '">' +
       '<span class="daily-poker-card__rank">' + esc(rank) + '</span>' +
       '<span class="daily-poker-card__suit">' + esc(suitSymbols[suit] || "?") + '</span>' +
       '</div>';
@@ -231,11 +231,15 @@
     dailyPokerState.activeDealButtonId = "";
   }
 
-  function boardHtml(cards, openCount) {
+  function boardHtml(cards, openCount, animatedIndexes) {
     var source = Array.isArray(cards) ? cards : [];
+    var animated = {};
+    (Array.isArray(animatedIndexes) ? animatedIndexes : []).forEach(function (idx) {
+      animated[Number(idx)] = true;
+    });
     var out = [];
     for (var i = 0; i < 5; i += 1) {
-      out.push(i < openCount && source[i] ? cardHtml(source[i], false) : cardHtml(null, true));
+      out.push(i < openCount && source[i] ? cardHtml(source[i], false, !!animated[i]) : cardHtml(null, true));
     }
     return out.join("");
   }
@@ -271,8 +275,8 @@
     var board = $("dailyPokerBoardCards");
     var claimBtn = $("dailyPokerClaimBtn");
     var result = dailyPokerState.stagedDealResult || {};
-    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");
-    if (board) board.innerHTML = boardHtml(result.boardCards || [], 5);
+    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false, false); }).join("");
+    if (board) board.innerHTML = boardHtml(result.boardCards || [], 5, [4]);
     dailyPokerState.revealing = false;
     setResultText(formatResultLine(result), false);
     if (claimBtn) claimBtn.hidden = true;
@@ -285,14 +289,14 @@
     var result = dailyPokerState.stagedDealResult;
     if (!result || dailyPokerState.revealing) return;
     if (dailyPokerState.dealStage === "hole") {
-      if (board) board.innerHTML = boardHtml(result.boardCards || [], 3);
+      if (board) board.innerHTML = boardHtml(result.boardCards || [], 3, [0, 1, 2]);
       dailyPokerState.dealStage = "flop";
       setResultText("Флоп на борде. Теперь раздай терн.", false);
       setDealButtonLabel("Раздать терн");
       return;
     }
     if (dailyPokerState.dealStage === "flop") {
-      if (board) board.innerHTML = boardHtml(result.boardCards || [], 4);
+      if (board) board.innerHTML = boardHtml(result.boardCards || [], 4, [3]);
       dailyPokerState.dealStage = "turn";
       setResultText("Терн открыт. Остался ривер.", false);
       setDealButtonLabel("Раздать ривер");
@@ -315,7 +319,7 @@
     if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
     setBoardActive(true);
-    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false); }).join("");
+    if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false, true); }).join("");
     if (board) board.innerHTML = boardHtml(result.boardCards || [], 0);
     setDealButtonLabel("Раздать флоп");
   }
