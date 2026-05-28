@@ -835,7 +835,13 @@ function initEquilator() {
   if (!calcBtn) return;
   calcBtn.addEventListener("click", function () {
     try {
+      var calcScrollEl = document.scrollingElement || document.documentElement;
+      var calcScrollTop = calcScrollEl ? calcScrollEl.scrollTop : null;
+      var restoreCalcScroll = function () {
+        if (calcScrollEl && calcScrollTop != null) calcScrollEl.scrollTop = calcScrollTop;
+      };
       if (resultBlock) resultBlock.classList.remove("equilator-result--hidden");
+      restoreCalcScroll();
       if (resultMeta) resultMeta.textContent = "Проверка…";
       var board = getBoard();
       var specs = getPlayerSpecs();
@@ -883,8 +889,7 @@ function initEquilator() {
         }
         if (resultMeta) resultMeta.textContent = trials === 1 ? "Точный расчёт (все карты известны)." : "По " + trials.toLocaleString("ru-RU") + " симуляциям.";
         calcBtn.disabled = false;
-        var scrollEl = document.scrollingElement || document.documentElement;
-        if (scrollEl) scrollEl.scrollBy({ top: 100, behavior: "smooth" });
+        restoreCalcScroll();
       };
       var allFixed = board.length === 5 && specs.every(function (spec) { return spec.kind === "fixed"; });
       if (allFixed) {
