@@ -407,17 +407,28 @@
   box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12), 0 0 28px rgba(255, 106, 0, 0.36), inset 0 0 18px rgba(245, 158, 11, 0.1);
 }
 .equilator-hero-art {
-  min-height: 210px;
+  position: relative;
+  height: clamp(188px, 54vw, 260px);
   margin: -4px -8px -24px;
   border-radius: 24px 24px 10px 10px;
   border: 1px solid rgba(245, 158, 11, 0.28);
-  background:
-    radial-gradient(circle at 50% 78%, rgba(255, 106, 0, 0.32), transparent 30%),
-    radial-gradient(circle at 50% 24%, rgba(245, 158, 11, 0.22), transparent 34%),
-    linear-gradient(135deg, rgba(255, 106, 0, 0.18), transparent 26%),
-    linear-gradient(225deg, rgba(245, 158, 11, 0.16), transparent 25%),
-    #010303;
-  box-shadow: inset 0 -52px 52px rgba(0, 0, 0, 0.72), inset 0 0 72px rgba(245, 158, 11, 0.12);
+  overflow: hidden;
+  background: #010303;
+  box-shadow: inset 0 -52px 52px rgba(0, 0, 0, 0.72), inset 0 0 72px rgba(245, 158, 11, 0.12), 0 12px 30px rgba(0, 0, 0, 0.36);
+}
+.equilator-hero-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.72) 100%);
+}
+.equilator-hero-art__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 .view[data-view="equilator"] > .title {
   position: relative;
