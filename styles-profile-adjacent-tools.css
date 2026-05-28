@@ -385,30 +385,92 @@
 }
 
 /* Эквилятор */
+.view[data-view="equilator"] {
+  --equilator-gold: #f59e0b;
+  --equilator-gold-bright: #ffd166;
+  --equilator-orange: #ff6a00;
+  --equilator-red: #7f1d0d;
+  --equilator-panel: #030706;
+  position: relative;
+}
+.view[data-view="equilator"] .bonus-game-back {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 4;
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(245, 158, 11, 0.82);
+  border-radius: 50%;
+  color: #ffe8a3;
+  background: rgba(0, 0, 0, 0.62);
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12), 0 0 28px rgba(255, 106, 0, 0.36), inset 0 0 18px rgba(245, 158, 11, 0.1);
+}
+.equilator-hero-art {
+  min-height: 210px;
+  margin: -4px -8px -24px;
+  border-radius: 24px 24px 10px 10px;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  background:
+    radial-gradient(circle at 50% 78%, rgba(255, 106, 0, 0.32), transparent 30%),
+    radial-gradient(circle at 50% 24%, rgba(245, 158, 11, 0.22), transparent 34%),
+    linear-gradient(135deg, rgba(255, 106, 0, 0.18), transparent 26%),
+    linear-gradient(225deg, rgba(245, 158, 11, 0.16), transparent 25%),
+    #010303;
+  box-shadow: inset 0 -52px 52px rgba(0, 0, 0, 0.72), inset 0 0 72px rgba(245, 158, 11, 0.12);
+}
+.view[data-view="equilator"] > .title {
+  position: relative;
+  z-index: 2;
+  margin: 0 12px 8px;
+  color: #ffc44d;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 #5f2306, 0 0 18px rgba(245, 158, 11, 0.76), 0 0 34px rgba(255, 106, 0, 0.44);
+}
 .equilator-intro {
-  margin: 0 0 16px;
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.45;
+  position: relative;
+  z-index: 2;
+  max-width: 360px;
+  margin: 0 auto 14px;
+  font-size: 17px;
+  font-weight: 700;
+  color: rgba(255, 239, 204, 0.78);
+  line-height: 1.38;
+  text-align: center;
 }
 .equilator-form {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  position: relative;
+  margin: 0 2px 24px;
+  padding: 18px 14px 20px;
+  background:
+    radial-gradient(circle at 50% 5%, rgba(255, 106, 0, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(13, 18, 18, 0.98), rgba(0, 5, 7, 0.98));
+  border: 1px solid rgba(245, 158, 11, 0.68);
+  border-radius: 24px;
+  box-shadow: 0 0 0 2px rgba(91, 48, 8, 0.48), inset 0 0 0 1px rgba(255, 209, 102, 0.12), 0 0 28px rgba(255, 106, 0, 0.16);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  overflow: hidden;
 }
 .equilator-section__title {
-  margin: 0 0 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
+  margin: 0 0 12px;
+  color: #ffb22e;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 #5c2104, 0 0 14px rgba(245, 158, 11, 0.62);
 }
 .equilator-hand-label {
-  font-size: 16px;
+  font-size: 26px;
 }
 .equilator-hint {
   margin: 0 0 8px;
@@ -420,41 +482,58 @@
 .equilator-board {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
+  justify-content: center;
+}
+.equilator-hands-section {
+  padding: 6px 0 2px;
 }
 .equilator-hands-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  justify-content: stretch;
   align-items: flex-start;
   width: 100%;
-  gap: 16px;
+  gap: 18px;
+}
+.equilator-hands-row::before {
+  content: "";
+  position: absolute;
+  top: 42px;
+  bottom: 10px;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(245, 158, 11, 0.72), transparent);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.42);
 }
 .equilator-hero-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 .equilator-opp-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 12px;
-  flex: 1 1 0;
   min-width: 0;
 }
 .equilator-opp-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: stretch;
+  gap: 14px;
   width: 100%;
 }
 .equilator-hands-section--range-open .equilator-hands-row {
+  display: flex;
   flex-wrap: wrap;
 }
+.equilator-hands-section--range-open .equilator-hero-block,
 .equilator-hands-section--range-open .equilator-opp-block {
   flex: 1 1 100%;
   width: 100%;
@@ -463,34 +542,46 @@
   align-items: stretch;
 }
 .equilator-add-player-section {
-  margin-top: -4px;
+  display: flex;
+  justify-content: center;
+  margin: -2px 0 -4px;
 }
 .equilator-add-player-btn {
-  padding: 6px 12px;
-  font-size: 13px;
-  color: var(--text-muted);
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px dashed var(--border-subtle);
-  border-radius: 8px;
+  width: min(100%, 300px);
+  min-height: 48px;
+  padding: 10px 18px;
+  color: #ffb22e;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px dashed rgba(245, 158, 11, 0.82);
+  border-radius: 14px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  box-shadow: 0 0 18px rgba(255, 106, 0, 0.12), inset 0 0 18px rgba(245, 158, 11, 0.06);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
 }
 .equilator-add-player-btn:hover {
-  background: rgba(51, 65, 85, 0.8);
-  color: var(--text);
+  color: #ffe8a3;
+  background: rgba(105, 44, 4, 0.36);
+  border-color: rgba(255, 196, 77, 0.92);
+  transform: translateY(-1px);
 }
 .equilator-opp-row {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 0;
   width: 100%;
 }
 .equilator-opp-row-head {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
 }
 .equilator-opp-remove-btn {
   width: 24px;
@@ -498,9 +589,9 @@
   padding: 0;
   font-size: 18px;
   line-height: 1;
-  color: var(--text-muted);
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ffb22e;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.42);
   border-radius: 6px;
   cursor: pointer;
   display: flex;
@@ -509,14 +600,20 @@
   transition: background 0.15s, color 0.15s;
 }
 .equilator-opp-remove-btn:hover {
-  background: rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  background: rgba(127, 29, 13, 0.62);
+  color: #ffe8a3;
 }
 .equilator-opp-label {
-  min-width: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-muted);
+  min-width: 0;
+  color: #ffb22e;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #5c2104, 0 0 14px rgba(245, 158, 11, 0.62);
 }
 .equilator-opp-range-toggle {
   display: flex;
@@ -524,13 +621,13 @@
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  max-width: 270px;
-  min-height: 34px;
-  padding: 7px 10px;
-  color: var(--text-muted);
-  background: rgba(30, 41, 59, 0.68);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  max-width: 230px;
+  min-height: 36px;
+  padding: 8px 10px;
+  color: #f8d98d;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(245, 158, 11, 0.44);
+  border-radius: 10px;
   cursor: pointer;
   text-align: left;
   touch-action: manipulation;
@@ -538,19 +635,19 @@
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 .equilator-opp-range-toggle:hover {
-  color: var(--text);
-  border-color: rgba(248, 217, 141, 0.5);
-  background: rgba(51, 65, 85, 0.86);
+  color: #ffe8a3;
+  border-color: rgba(255, 196, 77, 0.78);
+  background: rgba(105, 44, 4, 0.4);
 }
 .equilator-opp-range-toggle--filled {
-  color: #fde68a;
-  border-color: rgba(251, 191, 36, 0.42);
+  color: #ffe8a3;
+  border-color: rgba(245, 158, 11, 0.78);
 }
 .equilator-opp-range-toggle[aria-expanded="true"] {
   color: #11151c;
-  border-color: rgba(248, 217, 141, 0.86);
-  background: linear-gradient(180deg, #f8d98d 0%, #d89b2d 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 250, 219, 0.65), 0 0 14px rgba(216, 155, 45, 0.22);
+  border-color: rgba(255, 196, 77, 0.92);
+  background: linear-gradient(180deg, #ffd166 0%, #f59e0b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 219, 0.65), 0 0 16px rgba(245, 158, 11, 0.34);
 }
 .equilator-opp-range-toggle__title {
   flex: 0 0 auto;
@@ -577,10 +674,10 @@
   max-width: 360px;
   padding: 10px;
   box-sizing: border-box;
-  background: rgba(15, 23, 42, 0.76);
-  border: 1px solid rgba(248, 217, 141, 0.24);
-  border-radius: 8px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.66);
+  border: 1px solid rgba(245, 158, 11, 0.36);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 22px rgba(255, 106, 0, 0.14);
 }
 .equilator-hands-section--range-open .equilator-opp-range-panel {
   max-width: 100%;
@@ -589,7 +686,7 @@
   display: none;
 }
 .equilator-opp-range-summary {
-  color: var(--text-muted);
+  color: rgba(255, 239, 204, 0.76);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
@@ -634,16 +731,18 @@
 }
 .equilator-result {
   padding: 16px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  margin-top: 8px;
+  background: linear-gradient(180deg, rgba(9, 14, 14, 0.96), rgba(2, 4, 4, 0.96));
+  border: 1px solid rgba(245, 158, 11, 0.48);
+  border-radius: 18px;
+  margin-top: 10px;
+  box-shadow: 0 0 22px rgba(255, 106, 0, 0.12), inset 0 0 0 1px rgba(255, 209, 102, 0.08);
 }
 .equilator-result__title {
   margin: 0 0 12px;
   font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 900;
+  color: #ffb22e;
+  text-transform: uppercase;
 }
 .equilator-result__line {
   margin: 0 0 6px;
@@ -678,40 +777,40 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 68px;
+  width: 62px;
+  height: 88px;
   padding: 0;
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
   background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.58);
+  border-radius: 12px;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.18), 0 0 18px rgba(255, 106, 0, 0.34), 0 8px 16px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 .equilator-card-slot:not([data-rank]) {
   background-image: url("./assets/equilator-card-back.webp");
   background-size: cover;
   background-position: center;
   background-color: #04120d;
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 177, 46, 0.82);
   color: transparent;
 }
 .equilator-card-slot:not([data-rank]) .equilator-card-slot__text { visibility: hidden; }
 .equilator-card-slot:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  box-shadow: 0 0 0 2px rgba(255, 196, 77, 0.34), 0 0 24px rgba(255, 106, 0, 0.52), 0 10px 18px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 .equilator-card-slot[data-rank]:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2), 0 2px 6px rgba(0, 0, 0, 0.25);
+  border-color: #ffb22e;
+  box-shadow: 0 0 0 2px rgba(255, 196, 77, 0.34), 0 0 24px rgba(255, 106, 0, 0.38), 0 10px 18px rgba(0, 0, 0, 0.38);
 }
 .equilator-card-slot[data-rank] {
   background: linear-gradient(145deg, #fffaf0, #f1e5cf);
-  border-color: rgba(214, 163, 84, 0.48);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.58);
+  border-color: rgba(255, 177, 46, 0.84);
+  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.18), 0 6px 14px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.58);
   text-shadow: none;
 }
 .equilator-card-slot.equilator-card-slot--spade,
@@ -770,23 +869,39 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 .equilator-board-row:last-of-type { margin-bottom: 0; }
 .equilator-board-label {
-  min-width: 52px;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 500;
+  display: none;
+}
+.equilator-board-section .equilator-section__title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.equilator-board-section .equilator-section__title::before,
+.equilator-board-section .equilator-section__title::after {
+  content: "";
+  flex: 1 1 0;
+  height: 1px;
+  max-width: 120px;
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.72), transparent);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.32);
 }
 .equilator-picker-wrap {
   margin: 12px 0;
   padding: 14px;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  background: rgba(2, 5, 5, 0.98);
+  border: 1px solid rgba(245, 158, 11, 0.44);
+  border-radius: 14px;
   z-index: 100;
+  box-shadow: 0 0 24px rgba(255, 106, 0, 0.18);
 }
 .equilator-picker-wrap--hidden { display: none; }
 .equilator-picker-title {
@@ -834,13 +949,41 @@
 .equilator-picker-close {
   padding: 8px 14px;
   font-size: 13px;
-  color: var(--text-muted);
+  color: #f8d98d;
   background: transparent;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.44);
   border-radius: 8px;
   cursor: pointer;
 }
-.equilator-picker-close:hover { color: var(--text); border-color: var(--text-muted); }
+.equilator-picker-close:hover { color: #ffe8a3; border-color: rgba(255, 196, 77, 0.72); }
+
+#equilatorCalcBtn.primary-button {
+  width: min(100%, 360px);
+  min-height: 68px;
+  align-self: center;
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 196, 77, 0.86);
+  border-radius: 18px;
+  color: #fff8e7;
+  background:
+    linear-gradient(180deg, rgba(255, 122, 24, 0.96), rgba(127, 29, 13, 0.98) 54%, rgba(75, 12, 4, 0.98)),
+    #7f1d0d;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.26), 0 0 30px rgba(255, 106, 0, 0.54), inset 0 2px 0 rgba(255, 239, 204, 0.42), inset 0 -10px 20px rgba(46, 5, 3, 0.58);
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(45, 5, 3, 0.72), 0 0 14px rgba(255, 255, 255, 0.26);
+}
+#equilatorCalcBtn.primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(255, 196, 77, 0.28), 0 0 36px rgba(255, 106, 0, 0.66), inset 0 2px 0 rgba(255, 239, 204, 0.5), inset 0 -10px 20px rgba(46, 5, 3, 0.58);
+}
+#equilatorCalcBtn.primary-button:disabled {
+  opacity: 0.7;
+  transform: none;
+}
 
 .equilator-range-section {
   display: flex;
@@ -883,10 +1026,10 @@
   flex: 0 0 auto;
   min-height: 34px;
   padding: 7px 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.44);
   border-radius: 8px;
-  background: rgba(30, 41, 59, 0.68);
-  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.44);
+  color: #f8d98d;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -899,22 +1042,22 @@
 }
 .equilator-range-tab:hover,
 .equilator-range-preset:hover {
-  color: var(--text);
-  border-color: rgba(248, 217, 141, 0.5);
-  background: rgba(51, 65, 85, 0.86);
+  color: #ffe8a3;
+  border-color: rgba(255, 196, 77, 0.78);
+  background: rgba(105, 44, 4, 0.4);
 }
 .equilator-range-tab--active {
   color: #11151c;
-  border-color: rgba(248, 217, 141, 0.86);
-  background: linear-gradient(180deg, #f8d98d 0%, #d89b2d 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 250, 219, 0.65), 0 0 14px rgba(216, 155, 45, 0.22);
+  border-color: rgba(255, 196, 77, 0.92);
+  background: linear-gradient(180deg, #ffd166 0%, #f59e0b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 219, 0.65), 0 0 14px rgba(216, 155, 45, 0.3);
 }
 .equilator-range-tab--filled:not(.equilator-range-tab--active) {
-  color: #fde68a;
-  border-color: rgba(251, 191, 36, 0.42);
+  color: #ffe8a3;
+  border-color: rgba(245, 158, 11, 0.78);
 }
 .equilator-range-preset--muted {
-  color: rgba(226, 232, 240, 0.72);
+  color: rgba(255, 239, 204, 0.64);
 }
 .equilator-range-grid {
   display: grid;
@@ -988,21 +1131,23 @@
 }
 
 [data-theme="light"] .equilator-form {
-  background: rgba(255, 251, 247, 0.74);
-  border-color: rgba(249, 115, 22, 0.25);
+  background:
+    radial-gradient(circle at 50% 5%, rgba(255, 106, 0, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(13, 18, 18, 0.98), rgba(0, 5, 7, 0.98));
+  border-color: rgba(245, 158, 11, 0.68);
 }
 [data-theme="light"] .equilator-range-tab,
 [data-theme="light"] .equilator-range-preset,
 [data-theme="light"] .equilator-opp-range-toggle {
-  background: rgba(255, 247, 237, 0.92);
-  color: #7c2d12;
-  border-color: rgba(249, 115, 22, 0.28);
+  background: rgba(0, 0, 0, 0.44);
+  color: #f8d98d;
+  border-color: rgba(245, 158, 11, 0.44);
 }
 [data-theme="light"] .equilator-range-tab:hover,
 [data-theme="light"] .equilator-range-preset:hover,
 [data-theme="light"] .equilator-opp-range-toggle:hover {
-  background: #ffedd5;
-  color: #431407;
+  background: rgba(105, 44, 4, 0.4);
+  color: #ffe8a3;
 }
 [data-theme="light"] .equilator-range-tab--active,
 [data-theme="light"] .equilator-opp-range-toggle[aria-expanded="true"] {
@@ -1012,15 +1157,65 @@
 }
 [data-theme="light"] .equilator-range-tab--filled:not(.equilator-range-tab--active),
 [data-theme="light"] .equilator-opp-range-toggle--filled:not([aria-expanded="true"]) {
-  color: #92400e;
-  border-color: rgba(245, 158, 11, 0.5);
+  color: #ffe8a3;
+  border-color: rgba(245, 158, 11, 0.78);
 }
 [data-theme="light"] .equilator-opp-range-panel {
-  background: rgba(255, 251, 247, 0.9);
-  border-color: rgba(249, 115, 22, 0.25);
+  background: rgba(0, 0, 0, 0.66);
+  border-color: rgba(245, 158, 11, 0.36);
 }
 
 @media (max-width: 420px) {
+  .view[data-view="equilator"] .bonus-game-back {
+    top: 12px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+  }
+  .equilator-hero-art {
+    min-height: 184px;
+    margin-inline: -10px;
+    margin-bottom: -20px;
+  }
+  .view[data-view="equilator"] > .title {
+    margin-inline: 6px;
+    font-size: 37px;
+  }
+  .equilator-intro {
+    max-width: 320px;
+    font-size: 15px;
+  }
+  .equilator-form {
+    padding: 16px 10px 18px;
+    border-radius: 20px;
+    gap: 16px;
+  }
+  .equilator-section__title,
+  .equilator-hand-label,
+  .equilator-opp-label {
+    font-size: 22px;
+  }
+  .equilator-hands-row {
+    gap: 12px;
+  }
+  .equilator-cards,
+  .equilator-board {
+    gap: 8px;
+  }
+  .equilator-card-slot {
+    width: 56px;
+    height: 80px;
+    border-radius: 10px;
+  }
+  .equilator-add-player-btn {
+    width: min(100%, 280px);
+    min-height: 44px;
+    font-size: 14px;
+  }
+  #equilatorCalcBtn.primary-button {
+    min-height: 62px;
+    font-size: 22px;
+  }
   .equilator-range-head {
     flex-direction: column;
     gap: 4px;
