@@ -498,6 +498,7 @@ body.admin-report-modal-open .bottom-nav {
   min-height: 44px;
   padding: 0 10px;
   font-size: 15px;
+  line-height: 1.08;
   font-weight: 700;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -505,6 +506,9 @@ body.admin-report-modal-open .bottom-nav {
   color: var(--text);
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.admin-report-tab[data-admin-report-tab="cash-history"] {
+  flex-grow: 1.35;
 }
 .admin-report-tab--active,
 .admin-report-tab[aria-selected="true"] {
@@ -520,11 +524,21 @@ body.admin-report-modal-open .bottom-nav {
 @media (max-width: 420px) {
   .admin-report-tabs {
     gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .admin-report-tabs::-webkit-scrollbar {
+    display: none;
   }
   .admin-report-tab {
+    flex: 0 0 auto;
+    min-width: 82px;
     min-height: 42px;
     padding: 0 6px;
     font-size: 13px;
+  }
+  .admin-report-tab[data-admin-report-tab="cash-history"] {
+    min-width: 116px;
   }
 }
 .admin-report-panel {
@@ -549,6 +563,14 @@ body.admin-report-modal-open .bottom-nav {
   overflow: hidden;
   padding-bottom: 0;
   background: #05070d;
+}
+#adminReportModal .admin-report-panel[data-admin-report-panel="cash-history"].admin-report-panel--active {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 0;
 }
 .admin-report-calculations {
   display: grid;
@@ -2966,6 +2988,83 @@ button.admin-report-rakeback-summary__row:focus-visible {
 #adminReportModal .admin-report-sent-wrap {
   max-height: none;
   overflow: visible;
+}
+.admin-report-cash-history {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+.admin-report-cash-history__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+}
+.admin-report-cash-history__refresh {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(246, 211, 145, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-report-cash-history__refresh:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+.admin-report-cash-history__refresh:disabled {
+  opacity: 0.58;
+  cursor: default;
+}
+.admin-report-cash-history__status {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+.admin-report-cash-history__status[data-tone="error"] {
+  color: #ff9a82;
+}
+.admin-report-cash-history__status[data-tone="loading"] {
+  color: #f6d391;
+}
+.admin-report-cash-history__wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+#adminReportModal .admin-report-cash-history__wrap {
+  max-height: none;
+  overflow: auto;
+}
+.admin-report-cash-history__empty {
+  margin: 0;
+  padding: 10px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.admin-report-cash-history-table {
+  min-width: 760px;
+}
+.admin-report-cash-history-table th,
+.admin-report-cash-history-table td {
+  white-space: nowrap;
+}
+.admin-report-cash-history-table__amount {
+  text-align: right;
+  font-weight: 800;
+}
+.admin-report-cash-history-table__amount--positive {
+  color: #7ddc93;
+}
+.admin-report-cash-history-table__amount--negative {
+  color: #ff907a;
 }
 .admin-report-sent-current {
   margin-bottom: 4px;

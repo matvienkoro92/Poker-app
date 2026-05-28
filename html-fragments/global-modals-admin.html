@@ -228,6 +228,7 @@
           <div class="admin-report-tabs" role="tablist">
             <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form" role="tab" aria-selected="true">Отчет</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback" role="tab" aria-selected="false">Рейкбек</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="cash-history" role="tab" aria-selected="false">История кассы</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent" role="tab" aria-selected="false">Отправленные</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="calculations" role="tab" aria-selected="false" hidden>Расчеты</button>
           </div>
@@ -327,6 +328,19 @@
                 <button type="button" class="admin-report-rakeback-totals-modal__close" id="adminReportRakebackTotalsClose" aria-label="Закрыть">×</button>
                 <h3 class="admin-report-rakeback-totals-modal__title">Итого по вкладкам</h3>
                 <div class="admin-report-rakeback-totals-modal__list" id="adminReportRakebackTotalsList"></div>
+              </div>
+            </div>
+          </div>
+          <div class="admin-report-panel" data-admin-report-panel="cash-history">
+            <div class="admin-report-cash-history">
+              <div class="admin-report-cash-history__toolbar">
+                <button type="button" class="admin-report-cash-history__refresh" id="adminReportCashHistoryRefreshBtn">Обновить</button>
+                <span class="admin-report-cash-history__status" id="adminReportCashHistoryStatus"></span>
+              </div>
+              <div class="share-stats-admin-modal__table-wrap admin-report-cash-history__wrap">
+                <div class="admin-report-cash-history__list" id="adminReportCashHistoryList">
+                  <p class="admin-report-cash-history__empty">Откройте вкладку, чтобы загрузить историю кассы.</p>
+                </div>
               </div>
             </div>
           </div>

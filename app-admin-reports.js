@@ -9,6 +9,9 @@ function initAdminReportModal() {
   var submitBtn = document.getElementById("adminReportSubmitBtn");
   var addExtraBtn = document.getElementById("adminReportAddExtraBtn");
   var sentList = document.getElementById("adminReportSentList");
+  var cashHistoryList = document.getElementById("adminReportCashHistoryList");
+  var cashHistoryRefreshBtn = document.getElementById("adminReportCashHistoryRefreshBtn");
+  var cashHistoryStatusEl = document.getElementById("adminReportCashHistoryStatus");
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
@@ -117,12 +120,15 @@ function initAdminReportModal() {
   var sentReportsModule = null;
   var sentReportsModuleLoadPromise = null;
   var sentReportsPrefetchStarted = false;
+  var cashHistoryLoading = false;
+  var cashHistoryLoadedAt = 0;
   var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
   var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
   var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
+  var CASH_HISTORY_CACHE_TTL_MS = 2 * 60 * 1000;
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
   var RAKEBACK_EDITOR_USERNAMES = [];
@@ -793,17 +799,190 @@ function initAdminReportModal() {
     if (tabs && tabs.length) {
       tabs.forEach(function (tab) {
         if (tab.getAttribute("data-admin-report-tab") === "sent") tab.hidden = !allowed;
+        if (tab.getAttribute("data-admin-report-tab") === "cash-history") tab.hidden = !allowed;
         if (tab.getAttribute("data-admin-report-tab") === "calculations") tab.hidden = !calculationsAllowed;
       });
     }
     if (panels && panels.length) {
       panels.forEach(function (panel) {
         if (panel.getAttribute("data-admin-report-panel") === "sent") panel.hidden = !allowed;
+        if (panel.getAttribute("data-admin-report-panel") === "cash-history") panel.hidden = !allowed;
         if (panel.getAttribute("data-admin-report-panel") === "calculations") panel.hidden = !calculationsAllowed;
       });
     }
     if (!allowed && sentList) sentList.innerHTML = "";
+    if (!allowed && cashHistoryList) cashHistoryList.innerHTML = "";
     return allowed || calculationsAllowed;
+  }
+
+  function setCashHistoryStatus(text, tone) {
+    if (!cashHistoryStatusEl) return;
+    cashHistoryStatusEl.textContent = text || "";
+    cashHistoryStatusEl.hidden = !text;
+    if (tone) cashHistoryStatusEl.setAttribute("data-tone", tone);
+    else cashHistoryStatusEl.removeAttribute("data-tone");
+  }
+
+  function cashHistoryMessageHtml(text) {
+    return '<p class="admin-report-cash-history__empty">' + escapeReportHtml(text) + "</p>";
+  }
+
+  function formatCashHistoryTime(value) {
+    var raw = value == null ? "" : String(value).trim();
+    if (!raw) return "-";
+    var n = Number(raw);
+    var ms = null;
+    if (Number.isFinite(n)) {
+      ms = n < 100000000000 ? n * 1000 : n;
+    } else {
+      var parsed = Date.parse(raw);
+      if (Number.isFinite(parsed)) ms = parsed;
+    }
+    if (!Number.isFinite(ms)) return raw;
+    try {
+      return new Intl.DateTimeFormat("ru-RU", {
+        timeZone: "Europe/Moscow",
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(ms));
+    } catch (e) {
+      return new Date(ms).toLocaleString("ru-RU");
+    }
+  }
+
+  function formatCashHistoryAmount(value) {
+    if (value == null || value === "") return "-";
+    var n = typeof value === "number" ? value : Number(String(value).replace(/\s+/g, "").replace(",", "."));
+    if (!Number.isFinite(n)) return String(value);
+    try {
+      return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(n);
+    } catch (e) {
+      return String(Math.round(n * 100) / 100).replace(".", ",");
+    }
+  }
+
+  function getCashHistoryAmountClass(value) {
+    var n = typeof value === "number" ? value : Number(String(value || "").replace(/\s+/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n === 0) return "";
+    return n > 0 ? "admin-report-cash-history-table__amount--positive" : "admin-report-cash-history-table__amount--negative";
+  }
+
+  function renderCashHistoryRecords(data) {
+    if (!cashHistoryList) return;
+    var chipLogs = data && data.chipLogs ? data.chipLogs : null;
+    var rows = chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : [];
+    if (!rows.length) {
+      cashHistoryList.innerHTML = cashHistoryMessageHtml("История кассы пока пустая.");
+      setCashHistoryStatus("0 записей", "");
+      return;
+    }
+    var bodyHtml = rows.map(function (row) {
+      var amountClass = getCashHistoryAmountClass(row && row.operGold);
+      return (
+        "<tr>" +
+          "<td>" + escapeReportHtml(formatCashHistoryTime(row && row.operTime)) + "</td>" +
+          "<td>" + escapeReportHtml(row && row.userId ? row.userId : "-") + "</td>" +
+          "<td>" + escapeReportHtml(row && row.operUserId ? row.operUserId : "-") + "</td>" +
+          "<td>" + escapeReportHtml(row && row.operType ? row.operType : "-") + "</td>" +
+          '<td class="admin-report-cash-history-table__amount ' + amountClass + '">' + escapeReportHtml(formatCashHistoryAmount(row && row.operGold)) + "</td>" +
+          "<td>" + escapeReportHtml(row && row.groupId ? row.groupId : "-") + "</td>" +
+          "<td>" + escapeReportHtml(row && row.leagueId ? row.leagueId : "-") + "</td>" +
+        "</tr>"
+      );
+    }).join("");
+    cashHistoryList.innerHTML =
+      '<table class="share-stats-admin-modal__table admin-report-cash-history-table">' +
+        "<thead>" +
+          "<tr>" +
+            "<th>Время</th>" +
+            "<th>Игрок</th>" +
+            "<th>Оператор</th>" +
+            "<th>Тип</th>" +
+            "<th>Сумма</th>" +
+            "<th>Клуб</th>" +
+            "<th>Лига</th>" +
+          "</tr>" +
+        "</thead>" +
+        "<tbody>" + bodyHtml + "</tbody>" +
+      "</table>";
+    var status = String(rows.length) + " записей";
+    if (chipLogs && chipLogs.totalCount && Number(chipLogs.totalCount) !== rows.length) {
+      status += " из " + chipLogs.totalCount;
+    }
+    if (chipLogs && chipLogs.truncated) {
+      status += ", показан лимит страниц";
+    }
+    setCashHistoryStatus(status, "");
+  }
+
+  function loadCashHistoryRecords(forceRefresh) {
+    if (!cashHistoryList) return undefined;
+    if (!canViewSentReports()) {
+      cashHistoryList.innerHTML = cashHistoryMessageHtml("Нет доступа к истории кассы.");
+      setCashHistoryStatus("", "");
+      return undefined;
+    }
+    var now = Date.now();
+    if (!forceRefresh && cashHistoryLoadedAt && now - cashHistoryLoadedAt < CASH_HISTORY_CACHE_TTL_MS) return undefined;
+    if (cashHistoryLoading) return undefined;
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base) {
+      cashHistoryList.innerHTML = cashHistoryMessageHtml("API недоступен для загрузки истории кассы.");
+      setCashHistoryStatus("", "error");
+      return undefined;
+    }
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      cashHistoryList.innerHTML = cashHistoryMessageHtml("Войдите в аккаунт, чтобы загрузить историю кассы.");
+      setCashHistoryStatus("", "error");
+      return undefined;
+    }
+    var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ all: true, pageSize: 200 }) : { all: true, pageSize: 200 };
+    var fetchFn = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : (typeof fetch === "function" ? fetch : null);
+    if (!fetchFn) {
+      cashHistoryList.innerHTML = cashHistoryMessageHtml("Браузер не может выполнить запрос истории кассы.");
+      setCashHistoryStatus("", "error");
+      return undefined;
+    }
+    cashHistoryLoading = true;
+    if (cashHistoryRefreshBtn) cashHistoryRefreshBtn.disabled = true;
+    cashHistoryList.innerHTML = cashHistoryMessageHtml("Загружаю историю кассы...");
+    setCashHistoryStatus("Загрузка...", "loading");
+    return fetchFn(base.replace(/\/$/, "") + "/api/pokerplus-chip-logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }, 45000)
+      .then(function (resp) {
+        return resp.json().catch(function () { return null; }).then(function (payload) {
+          return { resp: resp, payload: payload };
+        });
+      })
+      .then(function (result) {
+        var resp = result.resp;
+        var payload = result.payload || {};
+        if (!resp.ok || payload.ok === false) {
+          throw new Error(payload.error || "Не удалось загрузить историю кассы.");
+        }
+        if (payload.linked === false && !payload.chipLogs) {
+          cashHistoryList.innerHTML = cashHistoryMessageHtml("Кассовая привязка Poker21 не найдена.");
+          setCashHistoryStatus("", "error");
+          return;
+        }
+        renderCashHistoryRecords(payload);
+        cashHistoryLoadedAt = Date.now();
+      })
+      .catch(function (err) {
+        var fallbackMessage = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети";
+        cashHistoryList.innerHTML = cashHistoryMessageHtml((err && err.message) || fallbackMessage);
+        setCashHistoryStatus("Ошибка", "error");
+      })
+      .then(function () {
+        cashHistoryLoading = false;
+        if (cashHistoryRefreshBtn) cashHistoryRefreshBtn.disabled = false;
+      });
   }
 
   function ensureSentReportsModule() {
@@ -856,6 +1035,7 @@ function initAdminReportModal() {
       callbacks: {
         canOpen: function (name) {
           if (name === "sent") return canViewSentReports();
+          if (name === "cash-history") return canViewSentReports();
           if (name === "calculations") return canViewCalculationsReports();
           return true;
         },
@@ -874,6 +1054,11 @@ function initAdminReportModal() {
             runAdminReportAfterPaint(function () {
               if (sentReportsModule) sentReportsModule.open();
               else loadSentReports();
+            });
+          }
+          if (name === "cash-history") {
+            runAdminReportAfterPaint(function () {
+              loadCashHistoryRecords(false);
             });
           }
           if (name === "calculations") {
@@ -2414,6 +2599,7 @@ function initAdminReportModal() {
   function fallbackSetActiveTab(name) {
     var activeName = String(name || "form");
     if (activeName === "sent" && !canViewSentReports()) activeName = "form";
+    if (activeName === "cash-history" && !canViewSentReports()) activeName = "form";
     if (activeName === "calculations" && !canViewCalculationsReports()) activeName = "form";
     if (tabs && tabs.length) {
       tabs.forEach(function (tab) {
@@ -3066,6 +3252,11 @@ function initAdminReportModal() {
       loadSharedRakebackDraftRows({ force: true, showStatus: true });
     });
   }
+  if (cashHistoryRefreshBtn) {
+    cashHistoryRefreshBtn.addEventListener("click", function () {
+      loadCashHistoryRecords(true);
+    });
+  }
   if (!rakebackModule && rakebackGrandTotalBtn) rakebackGrandTotalBtn.addEventListener("click", openRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsClose) rakebackTotalsClose.addEventListener("click", closeRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsBackdrop) rakebackTotalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
@@ -3075,6 +3266,7 @@ function initAdminReportModal() {
       tab.addEventListener("click", function () {
         var name = tab.getAttribute("data-admin-report-tab") || "form";
         if (name === "sent" && !canViewSentReports()) return;
+        if (name === "cash-history" && !canViewSentReports()) return;
         if (name === "calculations" && !canViewCalculationsReports()) return;
         if (name === "sent") {
           if (sentReportsModule) sentReportsModule.open();
@@ -3088,6 +3280,9 @@ function initAdminReportModal() {
           if (sentReportsModule) sentReportsModule.open();
           else loadSentReports();
         });
+        if (name === "cash-history") runAdminReportAfterPaint(function () {
+          loadCashHistoryRecords(false);
+        });
         if (name === "calculations") runAdminReportAfterPaint(function () {
           openCalculationsReports();
         });
@@ -3098,10 +3293,17 @@ function initAdminReportModal() {
     modal.dataset.adminReportSentLoadGuardBound = "1";
     modal.addEventListener("click", function (e) {
       var target = e.target && e.target.closest ? e.target.closest("[data-admin-report-tab]") : null;
-      if (!target || target.getAttribute("data-admin-report-tab") !== "sent") return;
+      if (!target) return;
+      var targetTab = target.getAttribute("data-admin-report-tab");
+      if (targetTab !== "sent" && targetTab !== "cash-history") return;
       var run = function () {
-        if (!sentList || String(sentList.innerHTML || "").trim()) return;
-        loadSentReports();
+        if (targetTab === "sent") {
+          if (!sentList || String(sentList.innerHTML || "").trim()) return;
+          loadSentReports();
+        } else {
+          if (!cashHistoryList || cashHistoryLoadedAt || cashHistoryLoading) return;
+          loadCashHistoryRecords(false);
+        }
       };
       if (typeof requestAnimationFrame === "function") {
         requestAnimationFrame(function () { setTimeout(run, 0); });

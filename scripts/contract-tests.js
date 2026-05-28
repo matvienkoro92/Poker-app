@@ -931,6 +931,100 @@ async function testPokerPlusKeyPersistsWithoutStorageSecret(redis) {
   );
 }
 
+async function testPokerPlusClubLeagueDataAndChipLogs(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  let chipLogPayload = null;
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getGroupOrLeagueData")) {
+      assert.strictEqual(form.token, "token-contract", "club/league data sends token");
+      return {
+        ok: true,
+        async json() {
+          return {
+            status: 1,
+            message: "success",
+            data: {
+              today: { service_charge: "12.5", round: 3, score: "40", mtt_fee: 4, sng_fee: 5, mtt_score: 6, sng_score: 7 },
+              week: { service_charge: 82, round: "9", score: 100, mtt_fee: "10", sng_fee: "11", mtt_score: "12", sng_score: "13" },
+            },
+            code: 0,
+          };
+        },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getPlayerChipsChangeLog")) {
+      chipLogPayload = form;
+      return {
+        ok: true,
+        async json() {
+          return {
+            status: 1,
+            message: "success",
+            data: {
+              list: [
+                { userId: "990907", operUserId: "990911", operType: "0", operGold: "-40", groupId: "7526", leagueId: "8944", operTime: "1774315929" },
+              ],
+              page: "2",
+              pageSize: "50",
+              totalPage: "13",
+              totalCount: "254",
+            },
+            code: 0,
+          };
+        },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { getGroupOrLeagueData, getPlayerChipsChangeLog } = require(path.join(root, "lib", "pokerplus"));
+  const clubLeagueData = await getGroupOrLeagueData();
+  assert.strictEqual(clubLeagueData.today.serviceCharge, 12.5, "club/league today service_charge is normalized");
+  assert.strictEqual(clubLeagueData.week.sngScore, 13, "club/league week sng_score is normalized");
+
+  const chipLogs = await getPlayerChipsChangeLog({
+    userAppId: "tg_1001",
+    mail: "Player@Test.com",
+    page: 2,
+    pageSize: 50,
+  });
+  assert.strictEqual(chipLogPayload.user_app_id, "1001", "chip log strips tg_ prefix from user_app_id");
+  assert.strictEqual(chipLogPayload.mail, "Player@Test.com", "chip log sends mail");
+  assert.strictEqual(chipLogPayload.page, "2", "chip log sends page");
+  assert.strictEqual(chipLogPayload.pageSize, "50", "chip log sends pageSize");
+  assert.strictEqual(chipLogPayload.token, "token-contract", "chip log sends token");
+  assert.strictEqual(chipLogs.totalCount, 254, "chip log total count is normalized");
+  assert.strictEqual(chipLogs.list[0].operGold, -40, "chip log operGold is numeric");
+  assert.strictEqual(chipLogs.list[0].operTime, 1774315929, "chip log operTime is numeric");
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1368,6 +1462,7 @@ async function main() {
     ["pokerplus refresh saved key", testPokerPlusRefreshUsesSavedKey],
     ["pokerplus counter hands aliases", testPokerPlusCounterHandsAliases],
     ["pokerplus key persists without storage secret", testPokerPlusKeyPersistsWithoutStorageSecret],
+    ["pokerplus club league data and chip logs", testPokerPlusClubLeagueDataAndChipLogs],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

@@ -3821,6 +3821,7 @@
         }
         if (!tabs || !panels) return;
         if (name === "sent" && !canViewSentReports()) name = "form";
+        if (name === "cash-history" && !canViewSentReports()) name = "form";
         if (name === "calculations" && !canViewCalculationsReports()) name = "form";
         if (name !== "rakeback" && !rakebackModule) suspendRakebackDomRows();
         tabs.forEach(function (tab) {

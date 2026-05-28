@@ -480,6 +480,112 @@ Normalized maintenance fields:
 
 The frontend does not currently display this status in the profile UI.
 
+## Club / League Data Flow
+
+Our backend can request aggregated club or league counters from PokerPlus.
+
+PokerPlus endpoint:
+
+```text
+POST https://sp.poker21pro.com/service_v1/getGroupOrLeagueData
+Content-Type: form-data
+```
+
+Form-data fields:
+
+```text
+token = <token returned by getToken>
+```
+
+Our public backend endpoint:
+
+```text
+GET https://poker-app-ebon.vercel.app/api/pokerplus-club-league-data
+```
+
+Normalized response:
+
+```json
+{
+  "today": {
+    "serviceCharge": 0,
+    "round": 0,
+    "score": 0,
+    "mttFee": 0,
+    "sngFee": 0,
+    "mttScore": 0,
+    "sngScore": 0
+  },
+  "week": {
+    "serviceCharge": 0,
+    "round": 0,
+    "score": 0,
+    "mttFee": 0,
+    "sngFee": 0,
+    "mttScore": 0,
+    "sngScore": 0
+  }
+}
+```
+
+The frontend does not currently display this block in the profile UI.
+
+## Player Chip Operation Records Flow
+
+Our backend can request chip operation records for the currently linked Poker21 user.
+
+PokerPlus endpoint:
+
+```text
+POST https://sp.poker21pro.com/service_v1/getPlayerChipsChangeLog
+Content-Type: form-data
+```
+
+Form-data fields:
+
+```text
+user_app_id = <saved third-party app player ID from bind>
+mail        = <saved Poker21 mail/email from bind>
+token       = <token returned by getToken>
+page        = <page number, default 1>
+pageSize    = <rows per page, default 20>
+```
+
+Our authenticated backend endpoint:
+
+```text
+POST https://poker-app-ebon.vercel.app/api/pokerplus-chip-logs
+```
+
+Request body:
+
+```json
+{
+  "pwaSession": "<signed PWA session>",
+  "page": 1,
+  "pageSize": 20,
+  "all": false
+}
+```
+
+For the admin shift-report cash-history tab the frontend sends `"all": true` with `pageSize: 200`; the backend then requests all available pages and returns one combined `chipLogs.list`. The route also supports an admin-only cashier source through `POKERPLUS_CASH_HISTORY_USER_APP_ID` and `POKERPLUS_CASH_HISTORY_MAIL` (or the `POKERPLUS_CHIP_LOG_*` aliases), so production can show cashier history without relying on the current admin user's personal Poker21 bind.
+
+Normalized chip log item:
+
+```json
+{
+  "userId": "",
+  "operUserId": "",
+  "operType": "",
+  "operGold": 0,
+  "groupId": "",
+  "leagueId": "",
+  "operTime": 0
+}
+```
+
+The route does not accept arbitrary `user_app_id` from the client. It uses the stored value from the user's Poker21 bind so one user cannot request another user's chip records.
+
 ## PWA Profile Loading Notes
 
 The normal PWA profile screen also shows non-PokerPlus data such as email, Telegram username, respect score, display name, internal account ID, and manually entered Poker21 ID.
