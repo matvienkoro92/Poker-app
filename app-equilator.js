@@ -116,6 +116,24 @@ function initEquilator() {
   var pickerClose = document.getElementById("equilatorPickerClose");
   var oppCardsContainer = document.getElementById("equilatorOppCards");
   var addPlayerBtn = document.getElementById("equilatorAddPlayerBtn");
+  var rangeTabs = document.getElementById("equilatorRangeTabs");
+  var rangeGrid = document.getElementById("equilatorRangeGrid");
+  var rangeSummary = document.getElementById("equilatorRangeSummary");
+  var rangePresetBtns = document.querySelectorAll("[data-equilator-range-preset]");
+  var MATRIX_RANKS = "AKQJT98765432";
+  var RANGE_TOP_ORDER = [
+    "AA", "KK", "QQ", "JJ", "AKs", "TT", "AQs", "AJs", "KQs", "AKo",
+    "99", "ATs", "KJs", "QJs", "KTs", "AQo", "AJo", "88", "QTs", "JTs",
+    "A9s", "KQo", "77", "A8s", "K9s", "T9s", "A7s", "KJo", "66", "Q9s",
+    "98s", "A5s", "A6s", "K8s", "QJo", "J9s", "87s", "A4s", "ATo", "55",
+    "A3s", "K7s", "Q8s", "T8s", "97s", "A2s", "K6s", "44", "J8s", "86s",
+    "K5s", "QTo", "T9o", "76s", "33", "K4s", "Q7s", "65s", "JTo", "K3s",
+    "Q6s", "22", "K2s", "Q5s", "54s", "J7s", "T7s", "98o", "Q4s", "87o",
+    "J9o", "Q3s", "T8o", "97o", "Q2s", "J6s", "76o", "75s", "64s", "J8o",
+    "86o", "T6s", "96s", "65o", "54o", "T7o", "85s", "53s", "43s"
+  ];
+  var rangeState = { hero: {}, opps: [{}] };
+  var activeRangeTarget = "hero";
   var activeSlotId = null;
   var numOpponents = 1;
   function getNumOpp() { return numOpponents; }
@@ -135,15 +153,241 @@ function initEquilator() {
     }
     return out;
   }
+  function rangeLabelAt(row, col) {
+    var r1 = MATRIX_RANKS.charAt(row);
+    var r2 = MATRIX_RANKS.charAt(col);
+    if (row === col) return r1 + r2;
+    return row < col ? r1 + r2 + "s" : r2 + r1 + "o";
+  }
+  function rangeLabelKind(label) {
+    if (!label || label.length < 2) return "offsuit";
+    if (label.charAt(0) === label.charAt(1)) return "pair";
+    return label.charAt(2) === "s" ? "suited" : "offsuit";
+  }
+  function rangeLabelBaseCombos(label) {
+    var kind = rangeLabelKind(label);
+    if (kind === "pair") return 6;
+    return kind === "suited" ? 4 : 12;
+  }
+  function rangeTargetIndex(key) {
+    if (key === "hero") return -1;
+    if (String(key || "").indexOf("opp") !== 0) return -1;
+    var idx = parseInt(String(key).slice(3), 10);
+    return isFinite(idx) ? idx : -1;
+  }
+  function normalizeActiveRangeTarget() {
+    var idx = rangeTargetIndex(activeRangeTarget);
+    if (activeRangeTarget !== "hero" && (idx < 0 || idx >= numOpponents)) activeRangeTarget = "hero";
+  }
+  function ensureOppRangeState() {
+    while (rangeState.opps.length < numOpponents) rangeState.opps.push({});
+    if (rangeState.opps.length > numOpponents) rangeState.opps.length = numOpponents;
+  }
+  function getRangeMap(key) {
+    ensureOppRangeState();
+    if (key === "hero") return rangeState.hero;
+    var idx = rangeTargetIndex(key);
+    if (idx >= 0 && idx < rangeState.opps.length) return rangeState.opps[idx];
+    return rangeState.hero;
+  }
+  function getActiveRangeMap() {
+    normalizeActiveRangeTarget();
+    return getRangeMap(activeRangeTarget);
+  }
+  function rangeTargetForSlot(slotId) {
+    var id = String(slotId || "");
+    if (id === "hero1" || id === "hero2") return "hero";
+    if (id.indexOf("opp") === 0) {
+      var cardNum = parseInt(id.slice(3), 10);
+      if (isFinite(cardNum) && cardNum > 0) return "opp" + Math.floor((cardNum - 1) / 2);
+    }
+    return null;
+  }
+  function clearExactCardsForRangeTarget(key) {
+    if (key === "hero") {
+      clearSlot("hero1");
+      clearSlot("hero2");
+      return;
+    }
+    var idx = rangeTargetIndex(key);
+    if (idx < 0) return;
+    clearSlot("opp" + (idx * 2 + 1));
+    clearSlot("opp" + (idx * 2 + 2));
+  }
+  function clearRangeForSlot(slotId) {
+    var key = rangeTargetForSlot(slotId);
+    if (!key) return;
+    if (!rangeHasSelected(getRangeMap(key))) return;
+    setRangeMap(key, []);
+    renderRangeGrid();
+    renderRangeTabs();
+    updateRangeSummary();
+  }
+  function rangeTargetName(key) {
+    if (key === "hero") return "Вы";
+    var idx = rangeTargetIndex(key);
+    return "Оппонент " + (idx + 1);
+  }
+  function rangeSelectedLabels(map) {
+    var selected = map || {};
+    var labels = [];
+    for (var row = 0; row < MATRIX_RANKS.length; row++) {
+      for (var col = 0; col < MATRIX_RANKS.length; col++) {
+        var label = rangeLabelAt(row, col);
+        if (selected[label]) labels.push(label);
+      }
+    }
+    return labels;
+  }
+  function rangeHasSelected(map) {
+    return rangeSelectedLabels(map).length > 0;
+  }
+  function rangeBaseComboCount(map) {
+    var labels = rangeSelectedLabels(map);
+    var count = 0;
+    for (var i = 0; i < labels.length; i++) count += rangeLabelBaseCombos(labels[i]);
+    return count;
+  }
+  function allRangeLabels() {
+    var labels = [];
+    for (var row = 0; row < MATRIX_RANKS.length; row++) {
+      for (var col = 0; col < MATRIX_RANKS.length; col++) labels.push(rangeLabelAt(row, col));
+    }
+    return labels;
+  }
+  function setRangeMap(key, labels) {
+    var map = getRangeMap(key);
+    Object.keys(map).forEach(function (label) { delete map[label]; });
+    (labels || []).forEach(function (label) { map[label] = true; });
+  }
+  function rangePresetLabels(preset) {
+    if (preset === "clear") return [];
+    var labels = [];
+    if (preset === "all") return allRangeLabels();
+    if (preset === "pairs") {
+      for (var i = 0; i < MATRIX_RANKS.length; i++) labels.push(MATRIX_RANKS.charAt(i) + MATRIX_RANKS.charAt(i));
+      return labels;
+    }
+    var targetPct = preset === "top10" ? 10 : preset === "top20" ? 20 : preset === "top50" ? 50 : 0;
+    if (!targetPct) return labels;
+    var ordered = RANGE_TOP_ORDER.slice();
+    var seen = {};
+    ordered.forEach(function (label) { seen[label] = true; });
+    allRangeLabels().forEach(function (label) {
+      if (!seen[label]) ordered.push(label);
+    });
+    var targetCombos = Math.round(1326 * targetPct / 100);
+    var combos = 0;
+    for (var j = 0; j < ordered.length && combos < targetCombos; j++) {
+      if (labels.indexOf(ordered[j]) >= 0) continue;
+      labels.push(ordered[j]);
+      combos += rangeLabelBaseCombos(ordered[j]);
+    }
+    return labels;
+  }
+  function updateRangeSummary() {
+    if (!rangeSummary) return;
+    var map = getActiveRangeMap();
+    var labels = rangeSelectedLabels(map);
+    if (!labels.length) {
+      rangeSummary.textContent = rangeTargetName(activeRangeTarget) + ": диапазон не выбран";
+      return;
+    }
+    var combos = rangeBaseComboCount(map);
+    var preview = labels.slice(0, 7).join(", ");
+    if (labels.length > 7) preview += " +" + (labels.length - 7);
+    rangeSummary.textContent = rangeTargetName(activeRangeTarget) + ": " + combos + " комб. · " + preview;
+  }
+  function renderRangeTabs() {
+    if (!rangeTabs) return;
+    ensureOppRangeState();
+    normalizeActiveRangeTarget();
+    rangeTabs.innerHTML = "";
+    var keys = ["hero"];
+    for (var o = 0; o < numOpponents; o++) keys.push("opp" + o);
+    keys.forEach(function (key) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "equilator-range-tab" + (key === activeRangeTarget ? " equilator-range-tab--active" : "");
+      btn.setAttribute("aria-pressed", key === activeRangeTarget ? "true" : "false");
+      btn.setAttribute("data-equilator-range-target", key);
+      btn.textContent = rangeTargetName(key);
+      if (rangeHasSelected(getRangeMap(key))) btn.classList.add("equilator-range-tab--filled");
+      btn.addEventListener("click", function () {
+        activeRangeTarget = this.getAttribute("data-equilator-range-target") || "hero";
+        renderRangeTabs();
+        renderRangeGrid();
+        updateRangeSummary();
+      });
+      rangeTabs.appendChild(btn);
+    });
+  }
+  function renderRangeGrid() {
+    if (!rangeGrid) {
+      updateRangeSummary();
+      return;
+    }
+    normalizeActiveRangeTarget();
+    var gridTarget = activeRangeTarget;
+    var map = getRangeMap(gridTarget);
+    rangeGrid.innerHTML = "";
+    for (var row = 0; row < MATRIX_RANKS.length; row++) {
+      for (var col = 0; col < MATRIX_RANKS.length; col++) {
+        var label = rangeLabelAt(row, col);
+        var kind = rangeLabelKind(label);
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "equilator-range-cell equilator-range-cell--" + kind + (map[label] ? " equilator-range-cell--selected" : "");
+        btn.setAttribute("data-equilator-range-label", label);
+        btn.setAttribute("data-equilator-range-target", gridTarget);
+        btn.setAttribute("aria-pressed", map[label] ? "true" : "false");
+        btn.setAttribute("role", "gridcell");
+        btn.textContent = label;
+        btn.addEventListener("click", function () {
+          var target = this.getAttribute("data-equilator-range-target") || activeRangeTarget;
+          activeRangeTarget = target;
+          var current = getRangeMap(target);
+          var hand = this.getAttribute("data-equilator-range-label");
+          if (current[hand]) delete current[hand];
+          else {
+            clearExactCardsForRangeTarget(target);
+            current[hand] = true;
+          }
+          renderRangeGrid();
+          renderRangeTabs();
+          updateRangeSummary();
+        });
+        rangeGrid.appendChild(btn);
+      }
+    }
+    updateRangeSummary();
+  }
+  function applyRangePreset(preset, targetKey) {
+    var target = targetKey || activeRangeTarget;
+    activeRangeTarget = target;
+    var labels = rangePresetLabels(preset);
+    if (labels.length) clearExactCardsForRangeTarget(target);
+    setRangeMap(target, labels);
+    renderRangeGrid();
+    renderRangeTabs();
+    updateRangeSummary();
+  }
   function removeOpponent(idx) {
     if (numOpponents <= 1) return;
     var preserved = collectOppCards();
     preserved.splice(idx, 1);
+    if (rangeState.opps[idx]) rangeState.opps.splice(idx, 1);
+    if (activeRangeTarget === "opp" + idx) activeRangeTarget = "hero";
+    else {
+      var activeIdx = rangeTargetIndex(activeRangeTarget);
+      if (activeIdx > idx) activeRangeTarget = "opp" + (activeIdx - 1);
+    }
     numOpponents--;
     buildOppSlots(preserved);
   }
   function buildOppSlots(preservedCards) {
     if (!oppCardsContainer) return;
+    ensureOppRangeState();
     oppCardsContainer.innerHTML = "";
     for (var o = 0; o < numOpponents; o++) {
       var row = document.createElement("div");
@@ -205,11 +449,23 @@ function initEquilator() {
       row.appendChild(cardsWrap);
       oppCardsContainer.appendChild(row);
     }
+    renderRangeTabs();
+    renderRangeGrid();
   }
   if (addPlayerBtn) addPlayerBtn.addEventListener("click", function (e) {
     e.preventDefault();
+    var preserved = collectOppCards();
     numOpponents++;
-    buildOppSlots();
+    rangeState.opps.push({});
+    buildOppSlots(preserved);
+  });
+  Array.prototype.forEach.call(rangePresetBtns || [], function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var activeTab = rangeTabs ? rangeTabs.querySelector(".equilator-range-tab--active") : null;
+      var target = activeTab ? activeTab.getAttribute("data-equilator-range-target") : activeRangeTarget;
+      applyRangePreset(this.getAttribute("data-equilator-range-preset") || "clear", target);
+    });
   });
   buildOppSlots();
   function slotEl(slotId) { return document.querySelector(".equilator-card-slot[data-equilator-slot=\"" + slotId + "\"]"); }
@@ -259,6 +515,7 @@ function initEquilator() {
       var resetBtn = wrap.querySelector(".equilator-card-slot__reset");
       if (resetBtn) resetBtn.classList.remove("equilator-card-slot__reset--hidden");
     }
+    clearRangeForSlot(slotId);
   }
   function openPicker(forSlotId) {
     activeSlotId = forSlotId;
@@ -387,36 +644,215 @@ function initEquilator() {
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   };
+  function cardKey(c) {
+    return c.r + "_" + c.s;
+  }
+  function copyUsed(used) {
+    var out = {};
+    Object.keys(used || {}).forEach(function (key) { out[key] = true; });
+    return out;
+  }
+  function addCardToUsed(used, card) {
+    var key = cardKey(card);
+    if (used[key]) return false;
+    used[key] = true;
+    return true;
+  }
+  function addCardsToUsed(used, cards) {
+    for (var i = 0; i < cards.length; i++) {
+      if (!addCardToUsed(used, cards[i])) return false;
+    }
+    return true;
+  }
+  function cardsConflict(used, cards) {
+    for (var i = 0; i < cards.length; i++) if (used[cardKey(cards[i])]) return true;
+    return false;
+  }
+  function clonePair(pair) {
+    return [pair[0], pair[1]];
+  }
+  function cardFromRankSuit(rank, suit) {
+    return window.equilatorParseCard(rank + suit);
+  }
+  function concreteCombosForLabel(label, used) {
+    var out = [];
+    var r1 = label.charAt(0);
+    var r2 = label.charAt(1);
+    var kind = rangeLabelKind(label);
+    function push(c1, c2) {
+      if (!c1 || !c2) return;
+      if (cardKey(c1) === cardKey(c2)) return;
+      if (used && (used[cardKey(c1)] || used[cardKey(c2)])) return;
+      out.push([c1, c2]);
+    }
+    if (kind === "pair") {
+      for (var s1 = 0; s1 < SUITS.length; s1++) {
+        for (var s2 = s1 + 1; s2 < SUITS.length; s2++) {
+          push(cardFromRankSuit(r1, SUITS.charAt(s1)), cardFromRankSuit(r1, SUITS.charAt(s2)));
+        }
+      }
+      return out;
+    }
+    if (kind === "suited") {
+      for (var ss = 0; ss < SUITS.length; ss++) push(cardFromRankSuit(r1, SUITS.charAt(ss)), cardFromRankSuit(r2, SUITS.charAt(ss)));
+      return out;
+    }
+    for (var a = 0; a < SUITS.length; a++) {
+      for (var b = 0; b < SUITS.length; b++) {
+        if (a !== b) push(cardFromRankSuit(r1, SUITS.charAt(a)), cardFromRankSuit(r2, SUITS.charAt(b)));
+      }
+    }
+    return out;
+  }
+  function concreteCombosForRange(map, used) {
+    var labels = rangeSelectedLabels(map);
+    var out = [];
+    labels.forEach(function (label) {
+      var combos = concreteCombosForLabel(label, used);
+      combos.forEach(function (combo) { out.push(combo); });
+    });
+    return out;
+  }
+  function concreteCombosForRandom(used) {
+    var deck = deckWithout(used || {});
+    var out = [];
+    for (var i = 0; i < deck.length; i++) {
+      for (var j = i + 1; j < deck.length; j++) out.push([deck[i], deck[j]]);
+    }
+    return out;
+  }
+  function getHeroSpec() {
+    var heroRange = getRangeMap("hero");
+    if (rangeHasSelected(heroRange)) return { kind: "range", range: heroRange, label: "Вы" };
+    var hero = getHero();
+    if (!hero) return null;
+    return { kind: "fixed", cards: hero, label: "Вы" };
+  }
+  function getPlayerSpecs() {
+    var specs = [];
+    var heroSpec = getHeroSpec();
+    if (!heroSpec) return null;
+    specs.push(heroSpec);
+    var fixedOpps = getFixedOpps();
+    for (var o = 0; o < getNumOpp(); o++) {
+      var key = "opp" + o;
+      var oppRange = getRangeMap(key);
+      if (rangeHasSelected(oppRange)) specs.push({ kind: "range", range: oppRange, label: "Оппонент " + (o + 1) });
+      else if (fixedOpps[o]) specs.push({ kind: "fixed", cards: fixedOpps[o], label: "Оппонент " + (o + 1) });
+      else specs.push({ kind: "random", label: "Оппонент " + (o + 1) });
+    }
+    return specs;
+  }
+  function collectKnownUsed(board, specs) {
+    var used = {};
+    var duplicate = false;
+    (board || []).forEach(function (card) {
+      if (!addCardToUsed(used, card)) duplicate = true;
+    });
+    (specs || []).forEach(function (spec) {
+      if (spec && spec.kind === "fixed" && !addCardsToUsed(used, spec.cards)) duplicate = true;
+    });
+    return { used: used, duplicate: duplicate };
+  }
+  function compareHandValues(a, b) {
+    for (var i = 0; i < 6; i++) {
+      if (a[i] > b[i]) return 1;
+      if (a[i] < b[i]) return -1;
+    }
+    return 0;
+  }
+  function scoreShowdown(playerHoleCards, boardCards) {
+    var values = [];
+    for (var i = 0; i < playerHoleCards.length; i++) {
+      values.push(window.equilatorEvalHand(playerHoleCards[i].concat(boardCards)));
+    }
+    var best = values[0];
+    var winners = [0];
+    for (var p = 1; p < values.length; p++) {
+      var cmp = compareHandValues(values[p], best);
+      if (cmp > 0) {
+        best = values[p];
+        winners = [p];
+      } else if (cmp === 0) {
+        winners.push(p);
+      }
+    }
+    var oppSoleWins = [];
+    for (var o = 1; o < playerHoleCards.length; o++) oppSoleWins.push(winners.length === 1 && winners[0] === o ? 1 : 0);
+    return {
+      heroWin: winners.length === 1 && winners[0] === 0 ? 1 : 0,
+      tie: winners.length > 1 ? 1 : 0,
+      oppWins: oppSoleWins
+    };
+  }
+  function buildComboPools(specs, knownUsed) {
+    var pools = [];
+    for (var i = 0; i < specs.length; i++) {
+      if (specs[i].kind === "fixed") {
+        pools.push(null);
+      } else if (specs[i].kind === "range") {
+        pools.push(concreteCombosForRange(specs[i].range, knownUsed));
+      } else {
+        pools.push(concreteCombosForRandom(knownUsed));
+      }
+    }
+    return pools;
+  }
+  function sampleHoleCards(specs, comboPools, knownUsed) {
+    for (var attempt = 0; attempt < 120; attempt++) {
+      var used = copyUsed(knownUsed);
+      var hands = [];
+      var ok = true;
+      for (var i = 0; i < specs.length; i++) {
+        if (specs[i].kind === "fixed") {
+          hands[i] = clonePair(specs[i].cards);
+          continue;
+        }
+        var pool = comboPools[i] || [];
+        if (!pool.length) {
+          ok = false;
+          break;
+        }
+        var combo = pool[Math.floor(Math.random() * pool.length)];
+        if (cardsConflict(used, combo)) {
+          ok = false;
+          break;
+        }
+        hands[i] = clonePair(combo);
+        addCardsToUsed(used, combo);
+      }
+      if (ok) return { hands: hands, used: used };
+    }
+    return null;
+  }
+  function renderCalcError(message) {
+    if (winPct) winPct.textContent = "—";
+    if (tiePct) tiePct.textContent = "—";
+    if (oppEquityLines) oppEquityLines.innerHTML = "";
+    if (resultMeta) resultMeta.textContent = message;
+    if (calcBtn) calcBtn.disabled = false;
+  }
   if (!calcBtn) return;
   calcBtn.addEventListener("click", function () {
-    var errMsg = null;
     try {
       if (resultBlock) resultBlock.classList.remove("equilator-result--hidden");
       if (resultMeta) resultMeta.textContent = "Проверка…";
-      var hero = getHero();
-      if (!hero) {
-        errMsg = "Выберите две разные карты в руку.";
-        if (winPct) winPct.textContent = "—";
-        if (tiePct) tiePct.textContent = "—";
-        if (oppEquityLines) oppEquityLines.innerHTML = "";
-        if (resultMeta) resultMeta.textContent = errMsg;
+      var board = getBoard();
+      var specs = getPlayerSpecs();
+      if (!specs) {
+        renderCalcError("Выберите две карты или диапазон для себя.");
         return;
       }
-      var board = getBoard();
-      var fixedOpps = getFixedOpps();
       var numOpp = getNumOpp();
-      var used = getUsed(hero, board, fixedOpps);
-      var deck = deckWithout(used);
+      var known = collectKnownUsed(board, specs);
+      if (known.duplicate) {
+        renderCalcError("Одна карта выбрана дважды.");
+        return;
+      }
       var needBoard = Math.max(0, 5 - board.length);
-      var randomOppCount = 0;
-      for (var ro = 0; ro < numOpp; ro++) { if (!fixedOpps[ro]) randomOppCount++; }
-      var needRandomCards = needBoard + randomOppCount * 2;
-      if (needRandomCards > 0 && deck.length < needRandomCards) {
-        errMsg = "Недостаточно карт в колоде.";
-        if (winPct) winPct.textContent = "—";
-        if (tiePct) tiePct.textContent = "—";
-        if (oppEquityLines) oppEquityLines.innerHTML = "";
-        if (resultMeta) resultMeta.textContent = errMsg;
+      var unresolvedPlayers = specs.filter(function (spec) { return spec.kind !== "fixed"; }).length;
+      if (deckWithout(known.used).length < needBoard + unresolvedPlayers * 2) {
+        renderCalcError("Недостаточно карт в колоде.");
         return;
       }
       calcBtn.disabled = true;
@@ -445,45 +881,25 @@ function initEquilator() {
           }
           oppEquityLines.innerHTML = html;
         }
-        if (resultMeta) resultMeta.textContent = trials === 1 ? "Точный расчёт (известна рука оппонента)." : "По " + trials + " симуляциям.";
+        if (resultMeta) resultMeta.textContent = trials === 1 ? "Точный расчёт (все карты известны)." : "По " + trials.toLocaleString("ru-RU") + " симуляциям.";
         calcBtn.disabled = false;
         var scrollEl = document.scrollingElement || document.documentElement;
         if (scrollEl) scrollEl.scrollBy({ top: 100, behavior: "smooth" });
       };
-      var allFixed = board.length === 5 && fixedOpps.every(function (p) { return p !== null; });
+      var allFixed = board.length === 5 && specs.every(function (spec) { return spec.kind === "fixed"; });
       if (allFixed) {
         var boardCardsExact = window.equilatorCloneCards(board);
-        var heroHandExact = hero.concat(boardCardsExact);
-        var oppHandsExact = fixedOpps.map(function (p) { return p.concat(boardCardsExact); });
-        var winsExact = 0, tiesExact = 0;
-        var oppWinsExact = [];
-        for (var eo = 0; eo < numOpp; eo++) oppWinsExact.push(0);
-        if (numOpp === 1) {
-          var cmp01 = window.equilatorCompareHands(heroHandExact, oppHandsExact[0]);
-          if (cmp01 > 0) winsExact = 1;
-          else if (cmp01 < 0) oppWinsExact[0] = 1;
-          else tiesExact = 1;
-        } else if (numOpp === 2) {
-          var cmpHero1 = window.equilatorCompareHands(heroHandExact, oppHandsExact[0]);
-          var cmpHero2 = window.equilatorCompareHands(heroHandExact, oppHandsExact[1]);
-          var cmp12 = window.equilatorCompareHands(oppHandsExact[0], oppHandsExact[1]);
-          if (cmpHero1 > 0 && cmpHero2 > 0) winsExact = 1;
-          else if (cmpHero1 < 0 && cmp12 > 0) oppWinsExact[0] = 1;
-          else if (cmpHero2 < 0 && cmp12 < 0) oppWinsExact[1] = 1;
-          else tiesExact = 1;
-        } else {
-          var anyLossExact = false;
-          var anyTieExact = false;
-          for (var eo = 0; eo < numOpp; eo++) {
-            var c = window.equilatorCompareHands(heroHandExact, oppHandsExact[eo]);
-            if (c < 0) anyLossExact = true;
-            if (c === 0) anyTieExact = true;
-          }
-          winsExact = anyLossExact ? 0 : (anyTieExact ? 0 : 1);
-          tiesExact = anyLossExact ? 0 : (anyTieExact ? 1 : 0);
-        }
-        showResult(winsExact, tiesExact, 1, numOpp <= 2 ? oppWinsExact : null);
+        var fixedHandsExact = specs.map(function (spec) { return spec.cards; });
+        var exactScore = scoreShowdown(fixedHandsExact, boardCardsExact);
+        showResult(exactScore.heroWin, exactScore.tie, 1, exactScore.oppWins);
         return;
+      }
+      var comboPools = buildComboPools(specs, known.used);
+      for (var pi = 0; pi < specs.length; pi++) {
+        if (specs[pi].kind !== "fixed" && (!comboPools[pi] || !comboPools[pi].length)) {
+          renderCalcError(specs[pi].label + ": нет доступных комбинаций с учетом выбранных карт.");
+          return;
+        }
       }
       var wins = 0;
       var ties = 0;
@@ -491,62 +907,44 @@ function initEquilator() {
       for (var ow = 0; ow < numOpp; ow++) oppWins.push(0);
       var run = function (done) {
         var next = 0;
+        var failedSamples = 0;
         function step() {
           var batch = 1000;
-          for (var b = 0; b < batch && next < trials; b++, next++) {
-            var sh = shuffle(deck);
+          for (var b = 0; b < batch && next < trials; b++) {
+            var sampled = sampleHoleCards(specs, comboPools, known.used);
+            if (!sampled) {
+              failedSamples++;
+              if (failedSamples > 1200) {
+                done(new Error("Не удалось собрать совместимые руки из выбранных диапазонов."));
+                return;
+              }
+              continue;
+            }
             var boardCards = window.equilatorCloneCards(board);
-            for (var bi = 0; bi < needBoard; bi++) {
-              boardCards.push(sh[bi]);
+            var deckForBoard = deckWithout(sampled.used);
+            if (deckForBoard.length < needBoard) {
+              failedSamples++;
+              continue;
             }
-            var heroHand = hero.concat(boardCards);
-            var heroVal = window.equilatorEvalHand(heroHand);
-            var oppHands = [];
-            var shOffset = needBoard;
-            for (var o = 0; o < numOpp; o++) {
-              var o1, o2;
-              if (fixedOpps[o]) {
-                o1 = fixedOpps[o][0];
-                o2 = fixedOpps[o][1];
-              } else {
-                o1 = sh[shOffset];
-                o2 = sh[shOffset + 1];
-                shOffset += 2;
-              }
-              oppHands.push([o1, o2].concat(boardCards));
-            }
-            if (numOpp === 1) {
-              var cmp = window.equilatorCompareHands(heroHand, oppHands[0]);
-              if (cmp > 0) wins++;
-              else if (cmp < 0) oppWins[0]++;
-              else ties++;
-            } else if (numOpp === 2) {
-              var cmpHero1 = window.equilatorCompareHands(heroHand, oppHands[0]);
-              var cmpHero2 = window.equilatorCompareHands(heroHand, oppHands[1]);
-              var cmp12 = window.equilatorCompareHands(oppHands[0], oppHands[1]);
-              if (cmpHero1 > 0 && cmpHero2 > 0) wins++;
-              else if (cmpHero1 < 0 && cmp12 > 0) oppWins[0]++;
-              else if (cmpHero2 < 0 && cmp12 < 0) oppWins[1]++;
-              else ties++;
-            } else {
-              var anyLoss = false;
-              var anyTie = false;
-              for (var o = 0; o < numOpp; o++) {
-                var c = window.equilatorCompareHands(heroHand, oppHands[o]);
-                if (c < 0) anyLoss = true;
-                if (c === 0) anyTie = true;
-              }
-              if (!anyLoss && anyTie) ties++;
-              else if (!anyLoss) wins++;
-            }
+            var sh = shuffle(deckForBoard);
+            for (var bi = 0; bi < needBoard; bi++) boardCards.push(sh[bi]);
+            var score = scoreShowdown(sampled.hands, boardCards);
+            wins += score.heroWin;
+            ties += score.tie;
+            for (var oi = 0; oi < oppWins.length; oi++) oppWins[oi] += score.oppWins[oi] || 0;
+            next++;
           }
           if (next < trials) setTimeout(step, 0);
           else done();
         }
         step();
       };
-      run(function () {
-        showResult(wins, ties, trials, numOpp <= 2 ? oppWins : null);
+      run(function (error) {
+        if (error) {
+          renderCalcError(error.message || String(error));
+          return;
+        }
+        showResult(wins, ties, trials, oppWins);
       });
     } catch (e) {
       calcBtn.disabled = false;
@@ -557,4 +955,3 @@ function initEquilator() {
     }
   });
 }
-
