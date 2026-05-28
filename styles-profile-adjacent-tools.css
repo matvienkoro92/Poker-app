@@ -784,24 +784,45 @@
   font-weight: 700;
   color: var(--text);
   background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
-  border: 1px solid rgba(245, 158, 11, 0.58);
+  border: 1px solid rgba(255, 194, 74, 0.82);
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.18), 0 0 18px rgba(255, 106, 0, 0.34), 0 8px 16px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  box-shadow:
+    0 0 0 1px rgba(255, 223, 142, 0.38),
+    0 0 8px rgba(255, 194, 74, 0.62),
+    0 0 18px rgba(255, 106, 0, 0.42),
+    0 8px 16px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 .equilator-card-slot:not([data-rank]) {
-  background-image: url("./assets/equilator-card-back.webp");
-  background-size: cover;
+  background-image: url("./assets/equilator-card-back.webp?v=3.372");
+  background-size: 104% 104%;
   background-position: center;
-  background-color: #04120d;
-  border-color: rgba(255, 177, 46, 0.82);
+  background-color: #2c0602;
+  border-color: rgba(255, 211, 99, 0.96);
   color: transparent;
+  box-shadow:
+    0 0 0 1px rgba(255, 238, 174, 0.82),
+    0 0 7px rgba(255, 211, 99, 0.92),
+    0 0 16px rgba(255, 136, 0, 0.82),
+    0 0 28px rgba(255, 78, 0, 0.52),
+    0 12px 22px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 238, 174, 0.3),
+    inset 0 0 12px rgba(255, 96, 0, 0.22);
 }
 .equilator-card-slot:not([data-rank]) .equilator-card-slot__text { visibility: hidden; }
 .equilator-card-slot:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 0 2px rgba(255, 196, 77, 0.34), 0 0 24px rgba(255, 106, 0, 0.52), 0 10px 18px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 232, 163, 0.98);
+  filter: saturate(1.08) brightness(1.05);
+  box-shadow:
+    0 0 0 1px rgba(255, 239, 204, 0.86),
+    0 0 9px rgba(255, 211, 99, 1),
+    0 0 22px rgba(255, 136, 0, 0.88),
+    0 0 34px rgba(255, 78, 0, 0.58),
+    0 10px 18px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 238, 174, 0.24);
 }
 .equilator-card-slot[data-rank]:hover {
   border-color: #ffb22e;
@@ -810,7 +831,12 @@
 .equilator-card-slot[data-rank] {
   background: linear-gradient(145deg, #fffaf0, #f1e5cf);
   border-color: rgba(255, 177, 46, 0.84);
-  box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.18), 0 6px 14px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.58);
+  box-shadow:
+    0 0 0 1px rgba(255, 223, 142, 0.42),
+    0 0 8px rgba(255, 194, 74, 0.46),
+    0 0 16px rgba(255, 106, 0, 0.24),
+    0 6px 14px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.58);
   text-shadow: none;
 }
 .equilator-card-slot.equilator-card-slot--spade,
