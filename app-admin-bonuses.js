@@ -138,11 +138,11 @@
       var contact = renderContact(user);
       return '<tr data-user-id="' + esc(user.userId) + '">' +
         '<td class="admin-bonuses__user-cell"><strong>' + esc(name) + '</strong>' + (sub ? '<span>' + esc(sub) + '</span>' : "") + '</td>' +
-        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
         '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
         '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
         '<td>' + esc(user.ticketsWon || 0) + '</td>' +
         '<td>' + esc(fmtDate(user.lastGameAt)) + '</td>' +
+        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
         '<td class="admin-bonuses__actions-cell">' +
           '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
           '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
