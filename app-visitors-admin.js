@@ -58,6 +58,17 @@
     return email === "matvienkoro92@gmail.com";
   }
 
+  function isKnownBonusAdminUser(user) {
+    if (isKnownAdminUser(user)) return true;
+    if (!user) return false;
+    var names = [user.username, user.telegramUsername, user.pwaUsername];
+    for (var i = 0; i < names.length; i++) {
+      var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (username === "roman1787443") return true;
+    }
+    return false;
+  }
+
   function isCrmOwnerUser(user) {
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
@@ -213,6 +224,19 @@
         }, 0);
       }
     }
+    function showBonusAdminUi() {
+      try {
+        var auth = window.__pokerTelegramAuth || {};
+        auth.adminBonusAccess = true;
+        if (!auth.status) auth.status = "verified";
+        window.__pokerTelegramAuth = auth;
+      } catch (eBonusAuth) {}
+      renderHomeAdminIdentityStatus(true);
+      if (bonusAdminBtn) {
+        bonusAdminBtn.hidden = false;
+        bonusAdminBtn.removeAttribute("aria-hidden");
+      }
+    }
     function showAdminUi() {
       try {
         var auth = window.__pokerTelegramAuth || {};
@@ -267,6 +291,19 @@
       }
       return false;
     }
+    function pokerIsKnownClientBonusAdmin() {
+      try {
+        var authBonusFlag = window.__pokerTelegramAuth;
+        if (authBonusFlag && (authBonusFlag.adminAccess === true || authBonusFlag.adminBonusAccess === true)) return true;
+        var recBonusFlag = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (recBonusFlag && recBonusFlag.adminAccess === true) return true;
+      } catch (eBonusFlag) {}
+      var users = collectAdminIdentityCandidates();
+      for (var i = 0; i < users.length; i++) {
+        if (isKnownBonusAdminUser(users[i])) return true;
+      }
+      return false;
+    }
     // В локальной разработке всегда показываем кнопку админа,
     // чтобы можно было тестировать без Telegram initData.
     try {
@@ -280,8 +317,9 @@
     }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
-    } else if (pokerIsKnownClientReportUser()) {
-      showReportUi();
+    } else {
+      if (pokerIsKnownClientReportUser()) showReportUi();
+      if (pokerIsKnownClientBonusAdmin()) showBonusAdminUi();
     }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;

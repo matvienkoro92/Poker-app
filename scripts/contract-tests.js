@@ -369,9 +369,29 @@ async function testAuthAndAdmin(redis) {
     false,
     "unknown identity is not admin",
   );
+  const bonusAccess = require(path.join(root, "lib", "bonus-admin-access"));
+  assert.strictEqual(bonusAccess.isBonusAdminUsername("roman1787443"), true, "roman1787443 can access bonus admin");
+  assert.strictEqual(bonusAccess.isBonusAdminUsername("unknown_player"), false, "unknown username cannot access bonus admin");
+  assert.strictEqual(
+    bonusAccess.isBonusAdminIdentity({ id: 0, pwaUsername: "roman1787443", adminAccess: false }, "mail_ID000003"),
+    true,
+    "roman1787443 pwa session grants bonus admin identity",
+  );
+  assert.strictEqual(
+    bonusAccess.isBonusAdminIdentity({ id: 0, pwaUsername: "player", adminAccess: false }, "mail_ID000004"),
+    false,
+    "unknown pwa session does not grant bonus admin identity",
+  );
   const pwa = require(path.join(root, "lib", "poker-pwa-session"));
   const adminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "", adminAccess: true }, BOT_TOKEN);
   assert.strictEqual(pwa.verifyPwaSessionToken(adminToken, BOT_TOKEN).adminAccess, true, "pwa session carries admin access");
+  const bonusAdminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000003", username: "roman1787443" }, BOT_TOKEN);
+  const nonBonusAdminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000004", username: "player" }, BOT_TOKEN);
+  const adminHandler = loadHandler("admin");
+  let bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken }));
+  assert.strictEqual(bonusRes.statusCode, 200, "roman1787443 can open bonus admin API");
+  bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: nonBonusAdminToken }));
+  assert.strictEqual(bonusRes.statusCode, 403, "ordinary user cannot open bonus admin API");
   const reportAccess = require(path.join(root, "lib", "admin-report-access"));
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 388008256, telegramUsername: "roman1787443" }, "tg_388008256"), true, "roman1787443 can access admin reports");
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 2144406710, telegramUsername: "" }, "tg_2144406710"), true, "anna can access admin reports");
