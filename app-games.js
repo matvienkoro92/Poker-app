@@ -323,7 +323,7 @@ window.pokerInitDailyPredictionModal = function () {
 })();
 
 // Подстраницы раздела «Скачать»
-const downloadPages = document.querySelectorAll("[data-download-page]");
+const downloadPages = document.querySelectorAll(".download-page[data-download-page]");
 const downloadAppButtons = document.querySelectorAll("[data-download-app]");
 const downloadBackButtons = document.querySelectorAll("[data-download-back]");
 

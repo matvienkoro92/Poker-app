@@ -11,7 +11,7 @@
 }
 
 .admin-bonuses {
-  padding: max(42px, calc(env(safe-area-inset-top, 0px) + 30px)) 10px max(22px, calc(env(safe-area-inset-bottom, 0px) + 14px));
+  padding: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)) 10px max(22px, calc(env(safe-area-inset-bottom, 0px) + 14px));
 }
 
 .daily-poker__header {
@@ -51,11 +51,25 @@
 }
 
 .admin-bonuses__header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.admin-bonuses__back {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin: 0;
+}
+
+.admin-bonuses__heading {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  align-self: center;
 }
 
 .daily-poker__eyebrow,
@@ -358,6 +372,7 @@
 .daily-poker__play-btn,
 .daily-poker__claim-btn,
 .admin-bonuses__refresh,
+.admin-bonuses__show-all,
 .admin-bonuses__actions-cell button,
 .admin-bonuses-modal__confirm {
   min-height: 44px;
@@ -380,6 +395,7 @@
 .daily-poker__play-btn:disabled,
 .daily-poker__claim-btn:disabled,
 .admin-bonuses__refresh:disabled,
+.admin-bonuses__show-all:disabled,
 .admin-bonuses__actions-cell button:disabled,
 .admin-bonuses-modal__confirm:disabled {
   opacity: 0.58;
@@ -387,9 +403,18 @@
 }
 
 .admin-bonuses__refresh {
+  grid-column: 1 / -1;
+  grid-row: 2;
   min-height: 34px;
   padding: 0 12px;
   border-radius: 7px;
+  font-size: 12px;
+}
+
+.admin-bonuses__notice {
+  min-height: 34px;
+  margin-bottom: 8px;
+  padding: 7px 10px;
   font-size: 12px;
 }
 
@@ -425,7 +450,7 @@
 .admin-bonuses__table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 612px;
+  min-width: 700px;
   table-layout: fixed;
 }
 
@@ -437,6 +462,7 @@
   vertical-align: middle;
   font-size: 11px;
   line-height: 1.18;
+  overflow: hidden;
 }
 
 .admin-bonuses__table th {
@@ -449,35 +475,36 @@
 
 .admin-bonuses__table th:nth-child(1),
 .admin-bonuses__table td:nth-child(1) {
-  width: 136px;
+  width: 23%;
 }
 
 .admin-bonuses__table th:nth-child(2),
 .admin-bonuses__table td:nth-child(2) {
-  width: 74px;
+  width: 25%;
 }
 
 .admin-bonuses__table th:nth-child(3),
 .admin-bonuses__table td:nth-child(3) {
-  width: 58px;
+  width: 11%;
+  text-align: right;
 }
 
 .admin-bonuses__table th:nth-child(4),
 .admin-bonuses__table td:nth-child(4),
 .admin-bonuses__table th:nth-child(5),
 .admin-bonuses__table td:nth-child(5) {
-  width: 48px;
+  width: 7%;
   text-align: center;
 }
 
 .admin-bonuses__table th:nth-child(6),
 .admin-bonuses__table td:nth-child(6) {
-  width: 74px;
+  width: 10%;
 }
 
 .admin-bonuses__table th:nth-child(7),
 .admin-bonuses__table td:nth-child(7) {
-  width: 148px;
+  width: 17%;
 }
 
 .admin-bonuses__table td strong {
@@ -499,6 +526,33 @@
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.admin-bonuses__user-cell,
+.admin-bonuses__contact-cell {
+  min-width: 0;
+}
+
+.admin-bonuses__contact-cell {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-bonuses__table td .admin-bonuses__contact-line {
+  margin-top: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-bonuses__table td .admin-bonuses__contact-line + .admin-bonuses__contact-line {
+  margin-top: 2px;
+}
+
+.admin-bonuses__table td .admin-bonuses__contact-email {
+  font-size: 10px;
 }
 
 .admin-bonuses__empty {
@@ -523,6 +577,27 @@
   white-space: nowrap;
   color: #f8fafc;
   background: #155e75;
+}
+
+.admin-bonuses__show-all-row {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 0;
+}
+
+.admin-bonuses__show-all-row[hidden] {
+  display: none;
+}
+
+.admin-bonuses__show-all {
+  width: min(260px, 100%);
+  min-height: 34px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.admin-bonuses__show-all[hidden] {
+  display: none;
 }
 
 .admin-bonuses__history {
@@ -640,9 +715,7 @@
 
 @media (max-width: 720px) {
   .admin-bonuses__header {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 84px minmax(0, 1fr);
   }
 
   .daily-poker__balance {
@@ -1042,7 +1115,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.52);
   pointer-events: none;
 }
 
@@ -1088,15 +1161,26 @@
 
 .daily-poker__zone--hole .daily-poker__zone-label {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
+  top: -20%;
+  left: 50%;
+  width: auto;
+  height: auto;
+  margin: 0;
   padding: 0;
   border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
   white-space: nowrap;
+  transform: translateX(-50%);
+  justify-content: center;
+  color: #ffc857;
+  font-size: clamp(20px, 3.8vw, 34px);
+  letter-spacing: 0.05em;
+  text-shadow:
+    0 0 8px rgba(255, 209, 91, 0.95),
+    0 0 20px rgba(255, 148, 25, 0.86),
+    0 4px 8px rgba(0, 0, 0, 0.88);
 }
 
 .daily-poker__cards {
@@ -1174,11 +1258,12 @@
   display: block;
   padding: 0;
   background:
-    #050303 url("./assets/daily-poker-card-back-red.jpg?v=3.334") center / cover no-repeat;
-  border: 1px solid rgba(255, 133, 0, 0.58);
+    #050303 url("./assets/daily-poker-card-back-red.jpg?v=3.334") center / 104% 104% no-repeat;
+  border: 1px solid rgba(255, 116, 0, 0.7);
   box-shadow:
     0 0 18px rgba(255, 177, 39, 0.78),
     0 16px 26px rgba(0, 0, 0, 0.48);
+  overflow: hidden;
 }
 
 .daily-poker-card__back-logo {

@@ -194,8 +194,8 @@
 
 #hallOfFameView.hall-of-fame--top2026 {
   --hall-top2026-header-overlap: 142px;
-  --hall-top2026-bg-width: clamp(430px, 114%, 500px);
-  --hall-top2026-bg-y: -8px;
+  --hall-top2026-bg-width: clamp(0px, 100%, 452px);
+  --hall-top2026-bg-y: 48px;
   margin: 0 -2px;
   padding: 4px 0 0;
   border-radius: 18px;
@@ -593,8 +593,8 @@
 @media (max-width: 380px) {
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-header-overlap: 140px;
-    --hall-top2026-bg-width: clamp(410px, 112%, 470px);
-    --hall-top2026-bg-y: -6px;
+    --hall-top2026-bg-width: clamp(0px, 100%, 430px);
+    --hall-top2026-bg-y: 42px;
   }
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
     font-size: 30px;

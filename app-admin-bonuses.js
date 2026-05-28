@@ -1,7 +1,11 @@
 (function () {
+  var ADMIN_BONUSES_INITIAL_LIMIT = 15;
+  var ADMIN_BONUSES_ALL_LIMIT = 500;
   var adminBonusesState = {
     page: 1,
     users: [],
+    total: 0,
+    showingAll: false,
     selectedUserId: "",
     operation: "",
     loading: false,
@@ -71,6 +75,10 @@
     return user.displayName || user.nickname || (user.username ? "@" + user.username : user.userId);
   }
 
+  function currentLimit() {
+    return adminBonusesState.showingAll ? ADMIN_BONUSES_ALL_LIMIT : ADMIN_BONUSES_INITIAL_LIMIT;
+  }
+
   function listUrl() {
     return authUrl("bonus-balances", {
       search: $("adminBonusesSearch") && $("adminBonusesSearch").value,
@@ -78,7 +86,7 @@
       maxBalance: $("adminBonusesMaxBalance") && $("adminBonusesMaxBalance").value,
       sortBy: $("adminBonusesSort") && $("adminBonusesSort").value,
       page: adminBonusesState.page,
-      limit: 50,
+      limit: currentLimit(),
     });
   }
 
@@ -96,6 +104,27 @@
     });
   }
 
+  function renderContact(user) {
+    var lines = [];
+    if (user.email) {
+      lines.push('<span class="admin-bonuses__contact-line admin-bonuses__contact-email">' + esc(user.email) + '</span>');
+    }
+    if (user.phone) {
+      lines.push('<span class="admin-bonuses__contact-line">' + esc(user.phone) + '</span>');
+    }
+    return lines.length ? lines.join("") : "—";
+  }
+
+  function syncShowAllButton(shown, total) {
+    var btn = $("adminBonusesShowAllBtn");
+    if (!btn) return;
+    var canShowAll = !adminBonusesState.showingAll && total > shown;
+    if (btn.parentElement) btn.parentElement.hidden = !canShowAll;
+    btn.hidden = !canShowAll;
+    btn.disabled = adminBonusesState.loading;
+    btn.textContent = total > 0 ? "Показать всех (" + total + ")" : "Показать всех";
+  }
+
   function renderTable(users) {
     var body = $("adminBonusesTableBody");
     if (!body) return;
@@ -105,11 +134,11 @@
     }
     body.innerHTML = users.map(function (user) {
       var name = rowTitle(user);
-      var sub = user.username ? "@" + user.username + " · " + user.userId : user.userId;
-      var contact = [user.email || "", user.phone || ""].filter(Boolean).map(esc).join("<br>") || "—";
+      var sub = user.username ? "@" + user.username : "";
+      var contact = renderContact(user);
       return '<tr data-user-id="' + esc(user.userId) + '">' +
-        '<td><strong>' + esc(name) + '</strong><span>' + esc(sub) + '</span></td>' +
-        '<td>' + contact + '</td>' +
+        '<td class="admin-bonuses__user-cell"><strong>' + esc(name) + '</strong>' + (sub ? '<span>' + esc(sub) + '</span>' : "") + '</td>' +
+        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
         '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
         '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
         '<td>' + esc(user.ticketsWon || 0) + '</td>' +
@@ -127,9 +156,11 @@
     var base = apiBase();
     if (!base || !hasCredential()) {
       setStatus("Нет админской сессии.", true);
+      syncShowAllButton(0, 0);
       return;
     }
     adminBonusesState.loading = true;
+    syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
     setStatus("Загрузка…", false);
     fetch(listUrl(), { cache: "no-store" })
       .then(readJson)
@@ -137,11 +168,14 @@
         adminBonusesState.loading = false;
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Ошибка загрузки");
         adminBonusesState.users = data.users || [];
+        adminBonusesState.total = Number(data.total || adminBonusesState.users.length || 0);
         renderTable(adminBonusesState.users);
-        setStatus("Показано: " + (data.users || []).length + " из " + (data.total || 0), false);
+        syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
+        setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
       .catch(function (err) {
         adminBonusesState.loading = false;
+        syncShowAllButton(0, 0);
         setStatus(err && err.message ? err.message : POKER_NET_ERR, true);
       });
   }
@@ -243,13 +277,25 @@
     var refresh = $("adminBonusesRefreshBtn");
     if (refresh && refresh.dataset.bound !== "1") {
       refresh.dataset.bound = "1";
-      refresh.addEventListener("click", loadList);
+      refresh.addEventListener("click", function () {
+        adminBonusesState.showingAll = false;
+        loadList();
+      });
+    }
+    var showAll = $("adminBonusesShowAllBtn");
+    if (showAll && showAll.dataset.bound !== "1") {
+      showAll.dataset.bound = "1";
+      showAll.addEventListener("click", function () {
+        adminBonusesState.showingAll = true;
+        loadList();
+      });
     }
     ["adminBonusesSearch", "adminBonusesMinBalance", "adminBonusesMaxBalance", "adminBonusesSort"].forEach(function (id) {
       var el = $(id);
       if (!el || el.dataset.bound === "1") return;
       el.dataset.bound = "1";
       el.addEventListener(id === "adminBonusesSort" ? "change" : "input", function () {
+        adminBonusesState.showingAll = false;
         clearTimeout(el.__adminBonusesTimer);
         el.__adminBonusesTimer = setTimeout(loadList, 350);
       });

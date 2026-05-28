@@ -5,7 +5,7 @@ const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-b
 const footer = document.querySelector(".card__footer");
 
 function setDownloadPage(pageName) {
-  var downloadPages = document.querySelectorAll("[data-download-page]");
+  var downloadPages = document.querySelectorAll(".download-page[data-download-page]");
   downloadPages.forEach(function (page) {
     if (page.dataset.downloadPage === pageName) {
       page.classList.add("download-page--active");
@@ -1238,6 +1238,9 @@ function setView(viewName, navOpts) {
       setTimeout(pokerForcePlayerCrmVisible, 1400);
     } catch (eCrmViewInit) {}
   }
+  if (viewName === "download" && navOpts.downloadPage && typeof setDownloadPage === "function") {
+    setDownloadPage(navOpts.downloadPage);
+  }
   try {
     if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("view:" + (viewName || "unknown"), "");
   } catch (eTrackView) {}
@@ -1331,8 +1334,9 @@ navItems.forEach(function (item) {
         pokerOpenPlayerCrmFromHome();
         return;
       }
-      setView(target);
-      if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main");
+      var downloadPage = target === "download" ? item.getAttribute("data-download-page") || "main" : "";
+      setView(target, downloadPage ? { downloadPage: downloadPage } : undefined);
+      if (downloadPage && typeof setDownloadPage === "function") setDownloadPage(downloadPage);
     }
   });
 });
@@ -1779,7 +1783,7 @@ document.addEventListener("click", function (e) {
   e.preventDefault();
   var view = link.getAttribute("data-view-target");
   var page = link.getAttribute("data-download-page");
-  if (view) setView(view);
+  if (view) setView(view, page ? { downloadPage: page } : undefined);
   if (page && typeof setDownloadPage === "function") setDownloadPage(page);
 });
 

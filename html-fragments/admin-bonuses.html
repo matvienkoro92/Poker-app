@@ -1,8 +1,8 @@
 <div class="view" data-view="admin-bonuses">
-  <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
   <section class="admin-bonuses" aria-labelledby="adminBonusesTitle">
     <header class="admin-bonuses__header">
-      <div>
+      <button type="button" class="bonus-game-back admin-bonuses__back" data-view-target="home" aria-label="На главную">←</button>
+      <div class="admin-bonuses__heading">
         <p class="admin-bonuses__eyebrow">Админка</p>
         <h2 class="admin-bonuses__title" id="adminBonusesTitle">Бонусные балансы</h2>
       </div>
@@ -40,6 +40,9 @@
         </thead>
         <tbody id="adminBonusesTableBody"></tbody>
       </table>
+    </div>
+    <div class="admin-bonuses__show-all-row" hidden>
+      <button type="button" class="admin-bonuses__show-all" id="adminBonusesShowAllBtn" hidden>Показать всех</button>
     </div>
 
     <section class="admin-bonuses__history" id="adminBonusesHistory" aria-live="polite">
