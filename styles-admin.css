@@ -3035,6 +3035,56 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-cash-history__status[data-tone="loading"] {
   color: #f6d391;
 }
+.admin-report-cash-history__filters {
+  display: grid;
+  grid-template-columns: minmax(132px, 1.1fr) minmax(92px, 0.75fr) minmax(112px, 0.9fr) minmax(118px, 0.85fr) minmax(118px, 0.85fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+.admin-report-cash-history__filter {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.admin-report-cash-history__filter span {
+  color: rgba(246, 232, 197, 0.68);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+.admin-report-cash-history__filter select,
+.admin-report-cash-history__filter input {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  box-sizing: border-box;
+  padding: 0 9px;
+  border: 1px solid rgba(246, 211, 145, 0.28);
+  border-radius: 8px;
+  background: #070b13;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+.admin-report-cash-history__filter input:disabled {
+  opacity: 0.56;
+}
+.admin-report-cash-history__reset {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(246, 211, 145, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-report-cash-history__reset:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
 .admin-report-cash-history__wrap {
   flex: 1 1 auto;
   min-height: 0;
@@ -3065,6 +3115,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-cash-history-table__amount--negative {
   color: #ff907a;
+}
+@media (max-width: 760px) {
+  .admin-report-cash-history__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-report-cash-history__reset {
+    grid-column: 1 / -1;
+  }
 }
 .admin-report-sent-current {
   margin-bottom: 4px;

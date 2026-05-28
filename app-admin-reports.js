@@ -12,6 +12,12 @@ function initAdminReportModal() {
   var cashHistoryList = document.getElementById("adminReportCashHistoryList");
   var cashHistoryRefreshBtn = document.getElementById("adminReportCashHistoryRefreshBtn");
   var cashHistoryStatusEl = document.getElementById("adminReportCashHistoryStatus");
+  var cashHistoryOperatorFilter = document.getElementById("adminReportCashHistoryOperator");
+  var cashHistoryWeekdayFilter = document.getElementById("adminReportCashHistoryWeekday");
+  var cashHistoryPeriodFilter = document.getElementById("adminReportCashHistoryPeriod");
+  var cashHistoryDateFromFilter = document.getElementById("adminReportCashHistoryDateFrom");
+  var cashHistoryDateToFilter = document.getElementById("adminReportCashHistoryDateTo");
+  var cashHistoryResetFiltersBtn = document.getElementById("adminReportCashHistoryResetFiltersBtn");
   var formBody = document.getElementById("adminReportFormBody");
   var rakebackBody = document.getElementById("adminReportRakebackTableBody");
   var rakebackAddBtn = document.getElementById("adminReportRakebackAddBtn");
@@ -122,6 +128,8 @@ function initAdminReportModal() {
   var sentReportsPrefetchStarted = false;
   var cashHistoryLoading = false;
   var cashHistoryLoadedAt = 0;
+  var cashHistoryRows = [];
+  var cashHistoryMeta = null;
   var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
@@ -853,6 +861,57 @@ function initAdminReportModal() {
     }
   }
 
+  function getCashHistoryTimestampMs(value) {
+    var raw = value == null ? "" : String(value).trim();
+    if (!raw) return NaN;
+    var n = Number(raw);
+    if (Number.isFinite(n)) return n < 100000000000 ? n * 1000 : n;
+    var parsed = Date.parse(raw);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
+  function cashHistoryPad2(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function cashHistoryDateStringFromUtcMs(ms) {
+    var d = new Date(ms);
+    return d.getUTCFullYear() + "-" + cashHistoryPad2(d.getUTCMonth() + 1) + "-" + cashHistoryPad2(d.getUTCDate());
+  }
+
+  function addDaysToCashHistoryDateString(value, days) {
+    var parts = String(value || "").split("-");
+    if (parts.length !== 3) return "";
+    var y = Number(parts[0]);
+    var m = Number(parts[1]);
+    var d = Number(parts[2]);
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return "";
+    return cashHistoryDateStringFromUtcMs(Date.UTC(y, m - 1, d) + days * REPORT_DAY_MS);
+  }
+
+  function getCashHistoryMskDateInfo(value) {
+    var ms = getCashHistoryTimestampMs(value);
+    if (!Number.isFinite(ms)) return null;
+    var shiftedMs = ms + REPORT_MSK_SHIFT_MS;
+    var shifted = new Date(shiftedMs);
+    return {
+      date: cashHistoryDateStringFromUtcMs(shiftedMs),
+      weekday: shifted.getUTCDay(),
+    };
+  }
+
+  function getCashHistoryMskTodayString() {
+    return cashHistoryDateStringFromUtcMs(Date.now() + REPORT_MSK_SHIFT_MS);
+  }
+
+  function getCashHistoryWeekStartString(dateString) {
+    var parts = String(dateString || "").split("-");
+    if (parts.length !== 3) return "";
+    var day = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))).getUTCDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    return addDaysToCashHistoryDateString(dateString, diff);
+  }
+
   function formatCashHistoryAmount(value) {
     if (value == null || value === "") return "-";
     var n = typeof value === "number" ? value : Number(String(value).replace(/\s+/g, "").replace(",", "."));
@@ -870,13 +929,102 @@ function initAdminReportModal() {
     return n > 0 ? "admin-report-cash-history-table__amount--positive" : "admin-report-cash-history-table__amount--negative";
   }
 
-  function renderCashHistoryRecords(data) {
+  function syncCashHistoryDateInputsDisabled() {
+    var custom = !cashHistoryPeriodFilter || cashHistoryPeriodFilter.value === "custom";
+    if (cashHistoryDateFromFilter) cashHistoryDateFromFilter.disabled = !custom && !!cashHistoryPeriodFilter && !!cashHistoryPeriodFilter.value;
+    if (cashHistoryDateToFilter) cashHistoryDateToFilter.disabled = !custom && !!cashHistoryPeriodFilter && !!cashHistoryPeriodFilter.value;
+  }
+
+  function applyCashHistoryPeriodPreset() {
+    if (!cashHistoryPeriodFilter) return;
+    var period = cashHistoryPeriodFilter.value;
+    if (!period) {
+      if (cashHistoryDateFromFilter) cashHistoryDateFromFilter.value = "";
+      if (cashHistoryDateToFilter) cashHistoryDateToFilter.value = "";
+      syncCashHistoryDateInputsDisabled();
+      return;
+    }
+    if (period === "custom") {
+      syncCashHistoryDateInputsDisabled();
+      return;
+    }
+    var today = getCashHistoryMskTodayString();
+    var from = "";
+    var to = "";
+    if (period === "today") {
+      from = today;
+      to = today;
+    } else if (period === "yesterday") {
+      from = addDaysToCashHistoryDateString(today, -1);
+      to = from;
+    } else if (period === "week") {
+      from = getCashHistoryWeekStartString(today);
+      to = today;
+    } else if (period === "last7") {
+      from = addDaysToCashHistoryDateString(today, -6);
+      to = today;
+    }
+    if (cashHistoryDateFromFilter) cashHistoryDateFromFilter.value = from;
+    if (cashHistoryDateToFilter) cashHistoryDateToFilter.value = to;
+    syncCashHistoryDateInputsDisabled();
+  }
+
+  function updateCashHistoryOperatorOptions(rows) {
+    if (!cashHistoryOperatorFilter) return;
+    var selected = cashHistoryOperatorFilter.value;
+    var counts = {};
+    (Array.isArray(rows) ? rows : []).forEach(function (row) {
+      var id = row && row.operUserId ? String(row.operUserId).trim() : "";
+      if (!id) return;
+      counts[id] = (counts[id] || 0) + 1;
+    });
+    var ids = Object.keys(counts).sort(function (a, b) {
+      var na = Number(a);
+      var nb = Number(b);
+      if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+    cashHistoryOperatorFilter.innerHTML =
+      '<option value="">Все</option>' +
+      ids.map(function (id) {
+        return '<option value="' + escapeReportHtml(id) + '">' + escapeReportHtml(id + " (" + counts[id] + ")") + "</option>";
+      }).join("");
+    if (selected && counts[selected]) cashHistoryOperatorFilter.value = selected;
+  }
+
+  function cashHistoryFiltersActive() {
+    return !!(
+      (cashHistoryOperatorFilter && cashHistoryOperatorFilter.value) ||
+      (cashHistoryWeekdayFilter && cashHistoryWeekdayFilter.value !== "") ||
+      (cashHistoryDateFromFilter && cashHistoryDateFromFilter.value) ||
+      (cashHistoryDateToFilter && cashHistoryDateToFilter.value)
+    );
+  }
+
+  function getFilteredCashHistoryRows() {
+    var operator = cashHistoryOperatorFilter ? String(cashHistoryOperatorFilter.value || "").trim() : "";
+    var weekdayRaw = cashHistoryWeekdayFilter ? String(cashHistoryWeekdayFilter.value || "") : "";
+    var weekday = weekdayRaw === "" ? null : Number(weekdayRaw);
+    var from = cashHistoryDateFromFilter ? String(cashHistoryDateFromFilter.value || "") : "";
+    var to = cashHistoryDateToFilter ? String(cashHistoryDateToFilter.value || "") : "";
+    return cashHistoryRows.filter(function (row) {
+      if (operator && String((row && row.operUserId) || "").trim() !== operator) return false;
+      var info = getCashHistoryMskDateInfo(row && row.operTime);
+      if (!info) return false;
+      if (weekday != null && info.weekday !== weekday) return false;
+      if (from && info.date < from) return false;
+      if (to && info.date > to) return false;
+      return true;
+    });
+  }
+
+  function renderCashHistoryTable(rows, totalRows) {
     if (!cashHistoryList) return;
-    var chipLogs = data && data.chipLogs ? data.chipLogs : null;
-    var rows = chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : [];
+    rows = Array.isArray(rows) ? rows : [];
+    totalRows = Number.isFinite(Number(totalRows)) ? Number(totalRows) : rows.length;
     if (!rows.length) {
-      cashHistoryList.innerHTML = cashHistoryMessageHtml("История кассы пока пустая.");
-      setCashHistoryStatus("0 записей", "");
+      cashHistoryList.innerHTML = cashHistoryMessageHtml(totalRows ? "По фильтрам записей нет." : "История кассы пока пустая.");
+      setCashHistoryStatus(totalRows ? "0 из " + totalRows + " записей" : "0 записей", "");
       return;
     }
     var bodyHtml = rows.map(function (row) {
@@ -908,14 +1056,44 @@ function initAdminReportModal() {
         "</thead>" +
         "<tbody>" + bodyHtml + "</tbody>" +
       "</table>";
-    var status = String(rows.length) + " записей";
-    if (chipLogs && chipLogs.totalCount && Number(chipLogs.totalCount) !== rows.length) {
-      status += " из " + chipLogs.totalCount;
+    var status = cashHistoryFiltersActive() ? String(rows.length) + " из " + totalRows + " записей" : String(rows.length) + " записей";
+    if (!cashHistoryFiltersActive() && cashHistoryMeta && cashHistoryMeta.totalCount && Number(cashHistoryMeta.totalCount) !== rows.length) {
+      status += " из " + cashHistoryMeta.totalCount;
     }
-    if (chipLogs && chipLogs.truncated) {
+    if (cashHistoryMeta && cashHistoryMeta.truncated) {
       status += ", показан лимит страниц";
     }
     setCashHistoryStatus(status, "");
+  }
+
+  function applyCashHistoryFilters() {
+    renderCashHistoryTable(getFilteredCashHistoryRows(), cashHistoryRows.length);
+  }
+
+  function renderCashHistoryRecords(data) {
+    var chipLogs = data && data.chipLogs ? data.chipLogs : null;
+    cashHistoryMeta = chipLogs || null;
+    cashHistoryRows = chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : [];
+    updateCashHistoryOperatorOptions(cashHistoryRows);
+    applyCashHistoryPeriodPreset();
+    applyCashHistoryFilters();
+  }
+
+  function resetCashHistoryFilters() {
+    if (cashHistoryOperatorFilter) cashHistoryOperatorFilter.value = "";
+    if (cashHistoryWeekdayFilter) cashHistoryWeekdayFilter.value = "";
+    if (cashHistoryPeriodFilter) cashHistoryPeriodFilter.value = "";
+    if (cashHistoryDateFromFilter) cashHistoryDateFromFilter.value = "";
+    if (cashHistoryDateToFilter) cashHistoryDateToFilter.value = "";
+    syncCashHistoryDateInputsDisabled();
+    applyCashHistoryFilters();
+  }
+
+  function ensureCashHistoryLoadedSoon(forceRefresh) {
+    if (!cashHistoryList) return;
+    runAdminReportAfterPaint(function () {
+      if (forceRefresh || (!cashHistoryLoadedAt && !cashHistoryLoading)) loadCashHistoryRecords(!!forceRefresh);
+    });
   }
 
   function loadCashHistoryRecords(forceRefresh) {
@@ -969,6 +1147,8 @@ function initAdminReportModal() {
         if (payload.linked === false && !payload.chipLogs) {
           cashHistoryList.innerHTML = cashHistoryMessageHtml("Кассовая привязка Poker21 не найдена.");
           setCashHistoryStatus("", "error");
+          cashHistoryRows = [];
+          cashHistoryMeta = null;
           return;
         }
         renderCashHistoryRecords(payload);
@@ -1057,9 +1237,7 @@ function initAdminReportModal() {
             });
           }
           if (name === "cash-history") {
-            runAdminReportAfterPaint(function () {
-              loadCashHistoryRecords(false);
-            });
+            ensureCashHistoryLoadedSoon(false);
           }
           if (name === "calculations") {
             runAdminReportAfterPaint(function () {
@@ -3257,6 +3435,48 @@ function initAdminReportModal() {
       loadCashHistoryRecords(true);
     });
   }
+  if (cashHistoryOperatorFilter) {
+    cashHistoryOperatorFilter.addEventListener("change", function () {
+      ensureCashHistoryLoadedSoon(false);
+      applyCashHistoryFilters();
+    });
+  }
+  if (cashHistoryWeekdayFilter) {
+    cashHistoryWeekdayFilter.addEventListener("change", function () {
+      ensureCashHistoryLoadedSoon(false);
+      applyCashHistoryFilters();
+    });
+  }
+  if (cashHistoryPeriodFilter) {
+    cashHistoryPeriodFilter.addEventListener("change", function () {
+      applyCashHistoryPeriodPreset();
+      ensureCashHistoryLoadedSoon(false);
+      applyCashHistoryFilters();
+    });
+  }
+  if (cashHistoryDateFromFilter) {
+    cashHistoryDateFromFilter.addEventListener("change", function () {
+      if (cashHistoryPeriodFilter) cashHistoryPeriodFilter.value = "custom";
+      syncCashHistoryDateInputsDisabled();
+      ensureCashHistoryLoadedSoon(false);
+      applyCashHistoryFilters();
+    });
+  }
+  if (cashHistoryDateToFilter) {
+    cashHistoryDateToFilter.addEventListener("change", function () {
+      if (cashHistoryPeriodFilter) cashHistoryPeriodFilter.value = "custom";
+      syncCashHistoryDateInputsDisabled();
+      ensureCashHistoryLoadedSoon(false);
+      applyCashHistoryFilters();
+    });
+  }
+  if (cashHistoryResetFiltersBtn) {
+    cashHistoryResetFiltersBtn.addEventListener("click", function () {
+      resetCashHistoryFilters();
+      ensureCashHistoryLoadedSoon(false);
+    });
+  }
+  syncCashHistoryDateInputsDisabled();
   if (!rakebackModule && rakebackGrandTotalBtn) rakebackGrandTotalBtn.addEventListener("click", openRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsClose) rakebackTotalsClose.addEventListener("click", closeRakebackTotalsModal);
   if (!rakebackModule && rakebackTotalsBackdrop) rakebackTotalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
@@ -3280,9 +3500,7 @@ function initAdminReportModal() {
           if (sentReportsModule) sentReportsModule.open();
           else loadSentReports();
         });
-        if (name === "cash-history") runAdminReportAfterPaint(function () {
-          loadCashHistoryRecords(false);
-        });
+        if (name === "cash-history") ensureCashHistoryLoadedSoon(false);
         if (name === "calculations") runAdminReportAfterPaint(function () {
           openCalculationsReports();
         });
@@ -3302,7 +3520,7 @@ function initAdminReportModal() {
           loadSentReports();
         } else {
           if (!cashHistoryList || cashHistoryLoadedAt || cashHistoryLoading) return;
-          loadCashHistoryRecords(false);
+          ensureCashHistoryLoadedSoon(false);
         }
       };
       if (typeof requestAnimationFrame === "function") {
