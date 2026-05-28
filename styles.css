@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.360");
-@import url("./styles-home-rating-promo.css?v=3.360");
-@import url("./styles-auth.css?v=3.360");
-@import url("./styles-home.css?v=3.360");
-@import url("./styles-chat.css?v=3.360");
-@import url("./styles-learning-games.css?v=3.360");
-@import url("./styles-raffles.css?v=3.360");
-@import url("./styles-daily-poker.css?v=3.360");
-@import url("./styles-home-legacy-prelude.css?v=3.360");
-@import url("./styles-download.css?v=3.360");
-@import url("./styles-home-legacy-tail.css?v=3.360");
-@import url("./styles-home-rating-promo-legacy.css?v=3.360");
-@import url("./styles-rating.css?v=3.360");
-@import url("./styles-hall.css?v=3.360");
-@import url("./styles-admin.css?v=3.360");
-@import url("./styles-player-crm.css?v=3.360");
-@import url("./styles-profile.css?v=3.360");
-@import url("./styles-layout.css?v=3.360");
-@import url("./styles-chat-overlays.css?v=3.360");
-@import url("./styles-home-overrides.css?v=3.360");
-@import url("./styles-layout-touch-targets.css?v=3.360");
-@import url("./styles-home-rating-promo-late.css?v=3.360");
+@import url("./styles-base.css?v=3.361");
+@import url("./styles-home-rating-promo.css?v=3.361");
+@import url("./styles-auth.css?v=3.361");
+@import url("./styles-home.css?v=3.361");
+@import url("./styles-chat.css?v=3.361");
+@import url("./styles-learning-games.css?v=3.361");
+@import url("./styles-raffles.css?v=3.361");
+@import url("./styles-daily-poker.css?v=3.361");
+@import url("./styles-home-legacy-prelude.css?v=3.361");
+@import url("./styles-download.css?v=3.361");
+@import url("./styles-home-legacy-tail.css?v=3.361");
+@import url("./styles-home-rating-promo-legacy.css?v=3.361");
+@import url("./styles-rating.css?v=3.361");
+@import url("./styles-hall.css?v=3.361");
+@import url("./styles-admin.css?v=3.361");
+@import url("./styles-player-crm.css?v=3.361");
+@import url("./styles-profile.css?v=3.361");
+@import url("./styles-layout.css?v=3.361");
+@import url("./styles-chat-overlays.css?v=3.361");
+@import url("./styles-home-overrides.css?v=3.361");
+@import url("./styles-layout-touch-targets.css?v=3.361");
+@import url("./styles-home-rating-promo-late.css?v=3.361");
 
 :root {
   --daily-poker-page-bg:
@@ -555,7 +555,7 @@ body[data-view="daily-poker"] #app.app,
 #app:has(.view--active[data-view="daily-poker"]) > .card,
 body[data-view="daily-poker"] #app.app > .card {
   background: transparent !important;
-  gap: 2px;
+  gap: 0;
 }
 
 #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header,
@@ -574,6 +574,7 @@ body[data-view="daily-poker"] #app.app .daily-poker {
 
 #app:has(.view--active[data-view="daily-poker"]) .daily-poker,
 body[data-view="daily-poker"] #app.app .daily-poker {
+  padding-top: 10px;
   overflow: visible;
 }
 
@@ -588,7 +589,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 @media (max-width: 720px) {
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker,
   body[data-view="daily-poker"] #app.app .daily-poker {
-    padding-top: 0;
+    padding-top: 10px;
   }
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__header,

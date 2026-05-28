@@ -1278,6 +1278,127 @@ async function testPokerPlusChipLogsAdminLinkedMailFallback(redis) {
   }
 }
 
+async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
+  const previousEnv = {
+    POKERPLUS_BASE_URL: process.env.POKERPLUS_BASE_URL,
+    POKERPLUS_MERCHANT_ID: process.env.POKERPLUS_MERCHANT_ID,
+    POKERPLUS_SECRET_KEY: process.env.POKERPLUS_SECRET_KEY,
+    POKERPLUS_STORAGE_SECRET: process.env.POKERPLUS_STORAGE_SECRET,
+    POKERPLUS_CASH_HISTORY_USER_APP_IDS: process.env.POKERPLUS_CASH_HISTORY_USER_APP_IDS,
+    POKERPLUS_CASH_HISTORY_MAILS: process.env.POKERPLUS_CASH_HISTORY_MAILS,
+    POKERPLUS_CASH_HISTORY_USER_APP_ID: process.env.POKERPLUS_CASH_HISTORY_USER_APP_ID,
+    POKERPLUS_CASH_HISTORY_MAIL: process.env.POKERPLUS_CASH_HISTORY_MAIL,
+    POKERPLUS_CHIP_LOG_USER_APP_IDS: process.env.POKERPLUS_CHIP_LOG_USER_APP_IDS,
+    POKERPLUS_CHIP_LOG_MAILS: process.env.POKERPLUS_CHIP_LOG_MAILS,
+    POKERPLUS_CHIP_LOG_USER_APP_ID: process.env.POKERPLUS_CHIP_LOG_USER_APP_ID,
+    POKERPLUS_CHIP_LOG_MAIL: process.env.POKERPLUS_CHIP_LOG_MAIL,
+    POKERPLUS_CASH_HISTORY_OPERATOR_IDS: process.env.POKERPLUS_CASH_HISTORY_OPERATOR_IDS,
+    POKERPLUS_CHIP_LOG_OPERATOR_IDS: process.env.POKERPLUS_CHIP_LOG_OPERATOR_IDS,
+  };
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  process.env.POKERPLUS_CASH_HISTORY_OPERATOR_IDS = "369073,467511,208238";
+  delete process.env.POKERPLUS_CASH_HISTORY_USER_APP_IDS;
+  delete process.env.POKERPLUS_CASH_HISTORY_MAILS;
+  delete process.env.POKERPLUS_CASH_HISTORY_USER_APP_ID;
+  delete process.env.POKERPLUS_CASH_HISTORY_MAIL;
+  delete process.env.POKERPLUS_CHIP_LOG_USER_APP_IDS;
+  delete process.env.POKERPLUS_CHIP_LOG_MAILS;
+  delete process.env.POKERPLUS_CHIP_LOG_USER_APP_ID;
+  delete process.env.POKERPLUS_CHIP_LOG_MAIL;
+  delete process.env.POKERPLUS_CHIP_LOG_OPERATOR_IDS;
+  clearProjectRequireCache();
+
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP001", "p21-one");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP002", "p21-two");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP003", "p21-three");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP001", "369073");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP002", "467511");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP003", "208238");
+  redis.h("poker_app:pokerplus_emails").set("IDOP001", "one@example.test");
+  redis.h("poker_app:pokerplus_emails").set("IDOP002", "two@example.test");
+  redis.h("poker_app:pokerplus_emails").set("IDOP003", "three@example.test");
+
+  const chipLogForms = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getPlayerChipsChangeLog")) {
+      chipLogForms.push(form);
+      const expectedMailByOperator = {
+        "369073": "one@example.test",
+        "467511": "two@example.test",
+        "208238": "three@example.test",
+      };
+      const okPair = expectedMailByOperator[form.user_app_id] === form.mail;
+      return {
+        ok: true,
+        async json() {
+          return {
+            status: 1,
+            message: "success",
+            data: {
+              list: okPair
+                ? [{ userId: "player-without-208238-" + form.user_app_id, operUserId: form.user_app_id, operType: "0", operGold: "10", groupId: "g", leagueId: "l", operTime: "1774315931" }]
+                : [],
+              page: "1",
+              pageSize: "200",
+              totalPage: "1",
+              totalCount: okPair ? "1" : "0",
+            },
+            code: 0,
+          };
+        },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  try {
+    const handler = loadHandler("pokerplus-chip-logs");
+    const r = await call(handler, req("POST", {}, { pwaSession: sessions().admin, all: true, pageSize: 200 }));
+    assert.strictEqual(r.statusCode, 200, "admin chip logs can use saved operator mails");
+    assert.strictEqual(r.body.source, "cash-history-linked-bindings", "cash history reports linked operator bindings source");
+    assert.deepStrictEqual(
+      chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
+      [["208238", "three@example.test"], ["369073", "one@example.test"], ["467511", "two@example.test"]],
+      "linked operator sources request each operator with its own mail",
+    );
+    assert.deepStrictEqual(
+      r.body.chipLogs.list.map((row) => row.operUserId).sort(),
+      ["208238", "369073", "467511"],
+      "linked operator sources include rows that do not involve the current admin id",
+    );
+  } finally {
+    Object.keys(previousEnv).forEach((key) => {
+      if (previousEnv[key] == null) delete process.env[key];
+      else process.env[key] = previousEnv[key];
+    });
+    clearProjectRequireCache();
+  }
+}
+
 async function testAuthEmailAndPwaCode(redis) {
   process.env.RESEND_API_KEY = "contract-resend-key";
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
@@ -1718,6 +1839,7 @@ async function main() {
     ["pokerplus club league data and chip logs", testPokerPlusClubLeagueDataAndChipLogs],
     ["pokerplus multi cashier chip logs", testPokerPlusChipLogsMultiCashierSources],
     ["pokerplus admin linked-mail cashier chip logs", testPokerPlusChipLogsAdminLinkedMailFallback],
+    ["pokerplus admin linked operator mails chip logs", testPokerPlusChipLogsAdminLinkedOperatorMails],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],

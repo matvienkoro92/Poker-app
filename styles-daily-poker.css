@@ -1199,7 +1199,8 @@
 
 .daily-poker__zone--hole .daily-poker__zone-label {
   position: absolute;
-  top: -14%;
+  top: auto;
+  bottom: calc(100% + 3px);
   left: 50%;
   width: auto;
   height: auto;
