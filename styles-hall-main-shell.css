@@ -193,7 +193,7 @@
 }
 
 #hallOfFameView.hall-of-fame--top2026 {
-  --hall-top2026-header-overlap: 142px;
+  --hall-top2026-header-overlap: 104px;
   --hall-top2026-bg-width: 452px;
   --hall-top2026-bg-y: 0px;
   --hall-top2026-stage-min-height: 852px;
@@ -205,24 +205,14 @@
   background: transparent;
 }
 #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
-  position: relative;
-  z-index: 6;
-  margin: 2px 8px 4px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #9b6b2f !important;
-  text-shadow: 0 1px 0 #fff8ea, 0 3px 10px rgba(116, 73, 20, 0.24) !important;
+  display: none;
 }
 #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__toolbar {
   position: relative;
   z-index: 6;
   align-items: center;
   gap: 6px;
-  margin: 0 8px 4px;
+  margin: 4px 8px 4px;
 }
 #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__toolbar-back {
   width: 34px;
@@ -314,7 +304,7 @@
   user-select: none;
 }
 .hall-of-fame__top2026-monkey {
-  top: clamp(122px, 32vw, 142px);
+  top: clamp(184px, 49vw, 208px);
   left: clamp(-102px, -24vw, -74px);
   width: clamp(212px, 57vw, 238px);
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
@@ -603,13 +593,10 @@
 }
 @media (max-width: 380px) {
   #hallOfFameView.hall-of-fame--top2026 {
-    --hall-top2026-header-overlap: 140px;
+    --hall-top2026-header-overlap: 102px;
     --hall-top2026-bg-width: 430px;
     --hall-top2026-bg-y: 0px;
     --hall-top2026-stage-min-height: 806px;
-  }
-  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
-    font-size: 30px;
   }
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__subtab {
     font-size: 9px;
