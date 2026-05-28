@@ -114,6 +114,7 @@ function initEquilator() {
   var pickerGrid = document.getElementById("equilatorPickerGrid");
   var pickerTitle = document.getElementById("equilatorPickerTitle");
   var pickerClose = document.getElementById("equilatorPickerClose");
+  var heroRangeContainer = document.getElementById("equilatorHeroRange");
   var oppCardsContainer = document.getElementById("equilatorOppCards");
   var addPlayerBtn = document.getElementById("equilatorAddPlayerBtn");
   var rangeTabs = document.getElementById("equilatorRangeTabs");
@@ -220,12 +221,10 @@ function initEquilator() {
     if (!key) return;
     if (!rangeHasSelected(getRangeMap(key))) return;
     setRangeMap(key, []);
-    if (key !== "hero") refreshOpponentRangeUi();
-    else {
-      renderRangeGrid();
-      renderRangeTabs();
-      updateRangeSummary();
-    }
+    refreshRangeUi();
+    renderRangeGrid();
+    renderRangeTabs();
+    updateRangeSummary();
   }
   function rangeTargetName(key) {
     if (key === "hero") return "Вы";
@@ -373,12 +372,10 @@ function initEquilator() {
     var labels = rangePresetLabels(preset);
     if (labels.length) clearExactCardsForRangeTarget(target);
     setRangeMap(target, labels);
-    if (target !== "hero") refreshOpponentRangeUi();
-    else {
-      renderRangeGrid();
-      renderRangeTabs();
-      updateRangeSummary();
-    }
+    refreshRangeUi();
+    renderRangeGrid();
+    renderRangeTabs();
+    updateRangeSummary();
   }
   function rangeSummaryText(map, maxPreview) {
     var labels = rangeSelectedLabels(map);
@@ -391,6 +388,10 @@ function initEquilator() {
   function refreshOpponentRangeUi() {
     if (!oppCardsContainer) return;
     buildOppSlots(collectOppCards());
+  }
+  function refreshRangeUi() {
+    renderHeroRangeControls();
+    refreshOpponentRangeUi();
   }
   function renderOpponentRangeGrid(grid, target) {
     if (!grid) return;
@@ -419,26 +420,27 @@ function initEquilator() {
             clearExactCardsForRangeTarget(currentTarget);
             current[hand] = true;
           }
-          refreshOpponentRangeUi();
+          refreshRangeUi();
         });
         grid.appendChild(btn);
       }
     }
   }
-  function appendOpponentRangeControls(row, oppIdx) {
-    var target = "opp" + oppIdx;
+  function appendRangeControls(container, target, options) {
+    var opts = options || {};
     var map = getRangeMap(target);
     var isOpen = openRangeTarget === target;
     var hasRange = rangeHasSelected(map);
-    if (isOpen) row.classList.add("equilator-opp-row--range-open");
+    if (isOpen && opts.openClass && container.classList) container.classList.add(opts.openClass);
     var toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "equilator-opp-range-toggle" + (hasRange ? " equilator-opp-range-toggle--filled" : "");
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
     toggle.setAttribute("data-equilator-range-toggle", target);
+    if (opts.toggleLabel) toggle.setAttribute("aria-label", opts.toggleLabel);
     var title = document.createElement("span");
     title.className = "equilator-opp-range-toggle__title";
-    title.textContent = "Диапазон";
+    title.textContent = "Задать диапозон";
     var meta = document.createElement("span");
     meta.className = "equilator-opp-range-toggle__meta";
     meta.textContent = hasRange ? rangeSummaryText(map, 3) : "не выбран";
@@ -448,9 +450,9 @@ function initEquilator() {
       e.preventDefault();
       openRangeTarget = isOpen ? null : target;
       activeRangeTarget = target;
-      refreshOpponentRangeUi();
+      refreshRangeUi();
     });
-    row.appendChild(toggle);
+    container.appendChild(toggle);
     var panel = document.createElement("div");
     panel.className = "equilator-opp-range-panel" + (isOpen ? "" : " equilator-opp-range-panel--hidden");
     panel.setAttribute("data-equilator-range-panel", target);
@@ -462,7 +464,7 @@ function initEquilator() {
       panel.appendChild(summary);
       var presets = document.createElement("div");
       presets.className = "equilator-range-presets";
-      presets.setAttribute("aria-label", "Быстрый выбор диапазона оппонента " + (oppIdx + 1));
+      presets.setAttribute("aria-label", opts.presetsLabel || "Быстрый выбор диапазона");
       [
         ["top10", "10%", ""],
         ["top20", "20%", ""],
@@ -488,11 +490,28 @@ function initEquilator() {
       var grid = document.createElement("div");
       grid.className = "equilator-range-grid";
       grid.setAttribute("role", "grid");
-      grid.setAttribute("aria-label", "Матрица стартовых рук оппонента " + (oppIdx + 1));
+      grid.setAttribute("aria-label", opts.gridLabel || "Матрица стартовых рук");
       panel.appendChild(grid);
       renderOpponentRangeGrid(grid, target);
     }
-    row.appendChild(panel);
+    container.appendChild(panel);
+  }
+  function renderHeroRangeControls() {
+    if (!heroRangeContainer) return;
+    heroRangeContainer.innerHTML = "";
+    appendRangeControls(heroRangeContainer, "hero", {
+      toggleLabel: "Задать ваш диапазон рук",
+      presetsLabel: "Быстрый выбор вашего диапазона",
+      gridLabel: "Матрица ваших стартовых рук"
+    });
+  }
+  function appendOpponentRangeControls(row, oppIdx) {
+    appendRangeControls(row, "opp" + oppIdx, {
+      openClass: "equilator-opp-row--range-open",
+      toggleLabel: "Задать диапазон рук оппонента " + (oppIdx + 1),
+      presetsLabel: "Быстрый выбор диапазона оппонента " + (oppIdx + 1),
+      gridLabel: "Матрица стартовых рук оппонента " + (oppIdx + 1)
+    });
   }
   function removeOpponent(idx) {
     if (numOpponents <= 1) return;
@@ -505,7 +524,7 @@ function initEquilator() {
       if (activeIdx > idx) activeRangeTarget = "opp" + (activeIdx - 1);
     }
     if (openRangeTarget === "opp" + idx) openRangeTarget = null;
-    else {
+    else if (openRangeTarget !== "hero") {
       var openIdx = rangeTargetIndex(openRangeTarget);
       if (openIdx > idx) openRangeTarget = "opp" + (openIdx - 1);
     }
@@ -516,7 +535,7 @@ function initEquilator() {
     if (!oppCardsContainer) return;
     ensureOppRangeState();
     var openIdx = rangeTargetIndex(openRangeTarget);
-    if (openRangeTarget && (openIdx < 0 || openIdx >= numOpponents)) openRangeTarget = null;
+    if (openRangeTarget && openRangeTarget !== "hero" && (openIdx < 0 || openIdx >= numOpponents)) openRangeTarget = null;
     var handsSection = oppCardsContainer.closest ? oppCardsContainer.closest(".equilator-hands-section") : null;
     if (handsSection) handsSection.classList.toggle("equilator-hands-section--range-open", !!openRangeTarget);
     oppCardsContainer.innerHTML = "";
@@ -597,6 +616,7 @@ function initEquilator() {
       applyRangePreset(this.getAttribute("data-equilator-range-preset") || "clear", target);
     });
   });
+  renderHeroRangeControls();
   buildOppSlots();
   function slotEl(slotId) { return document.querySelector(".equilator-card-slot[data-equilator-slot=\"" + slotId + "\"]"); }
   function getSlotCard(slotId) {
