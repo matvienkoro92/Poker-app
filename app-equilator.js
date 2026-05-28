@@ -134,6 +134,7 @@ function initEquilator() {
   ];
   var rangeState = { hero: {}, opps: [{}] };
   var activeRangeTarget = "hero";
+  var openRangeTarget = null;
   var activeSlotId = null;
   var numOpponents = 1;
   function getNumOpp() { return numOpponents; }
@@ -219,9 +220,12 @@ function initEquilator() {
     if (!key) return;
     if (!rangeHasSelected(getRangeMap(key))) return;
     setRangeMap(key, []);
-    renderRangeGrid();
-    renderRangeTabs();
-    updateRangeSummary();
+    if (key !== "hero") refreshOpponentRangeUi();
+    else {
+      renderRangeGrid();
+      renderRangeTabs();
+      updateRangeSummary();
+    }
   }
   function rangeTargetName(key) {
     if (key === "hero") return "Вы";
@@ -268,7 +272,7 @@ function initEquilator() {
       for (var i = 0; i < MATRIX_RANKS.length; i++) labels.push(MATRIX_RANKS.charAt(i) + MATRIX_RANKS.charAt(i));
       return labels;
     }
-    var targetPct = preset === "top10" ? 10 : preset === "top20" ? 20 : preset === "top50" ? 50 : 0;
+    var targetPct = preset === "top10" ? 10 : preset === "top20" ? 20 : preset === "top30" ? 30 : preset === "top40" ? 40 : preset === "top50" ? 50 : 0;
     if (!targetPct) return labels;
     var ordered = RANGE_TOP_ORDER.slice();
     var seen = {};
@@ -365,12 +369,130 @@ function initEquilator() {
   function applyRangePreset(preset, targetKey) {
     var target = targetKey || activeRangeTarget;
     activeRangeTarget = target;
+    openRangeTarget = target;
     var labels = rangePresetLabels(preset);
     if (labels.length) clearExactCardsForRangeTarget(target);
     setRangeMap(target, labels);
-    renderRangeGrid();
-    renderRangeTabs();
-    updateRangeSummary();
+    if (target !== "hero") refreshOpponentRangeUi();
+    else {
+      renderRangeGrid();
+      renderRangeTabs();
+      updateRangeSummary();
+    }
+  }
+  function rangeSummaryText(map, maxPreview) {
+    var labels = rangeSelectedLabels(map);
+    if (!labels.length) return "Диапазон не выбран";
+    var previewCount = maxPreview || 4;
+    var preview = labels.slice(0, previewCount).join(", ");
+    if (labels.length > previewCount) preview += " +" + (labels.length - previewCount);
+    return rangeBaseComboCount(map) + " комб. · " + preview;
+  }
+  function refreshOpponentRangeUi() {
+    if (!oppCardsContainer) return;
+    buildOppSlots(collectOppCards());
+  }
+  function renderOpponentRangeGrid(grid, target) {
+    if (!grid) return;
+    var map = getRangeMap(target);
+    grid.innerHTML = "";
+    for (var row = 0; row < MATRIX_RANKS.length; row++) {
+      for (var col = 0; col < MATRIX_RANKS.length; col++) {
+        var label = rangeLabelAt(row, col);
+        var kind = rangeLabelKind(label);
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "equilator-range-cell equilator-range-cell--" + kind + (map[label] ? " equilator-range-cell--selected" : "");
+        btn.setAttribute("data-equilator-range-label", label);
+        btn.setAttribute("data-equilator-range-target", target);
+        btn.setAttribute("aria-pressed", map[label] ? "true" : "false");
+        btn.setAttribute("role", "gridcell");
+        btn.textContent = label;
+        btn.addEventListener("click", function () {
+          var currentTarget = this.getAttribute("data-equilator-range-target") || target;
+          activeRangeTarget = currentTarget;
+          openRangeTarget = currentTarget;
+          var current = getRangeMap(currentTarget);
+          var hand = this.getAttribute("data-equilator-range-label");
+          if (current[hand]) delete current[hand];
+          else {
+            clearExactCardsForRangeTarget(currentTarget);
+            current[hand] = true;
+          }
+          refreshOpponentRangeUi();
+        });
+        grid.appendChild(btn);
+      }
+    }
+  }
+  function appendOpponentRangeControls(row, oppIdx) {
+    var target = "opp" + oppIdx;
+    var map = getRangeMap(target);
+    var isOpen = openRangeTarget === target;
+    var hasRange = rangeHasSelected(map);
+    if (isOpen) row.classList.add("equilator-opp-row--range-open");
+    var toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "equilator-opp-range-toggle" + (hasRange ? " equilator-opp-range-toggle--filled" : "");
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    toggle.setAttribute("data-equilator-range-toggle", target);
+    var title = document.createElement("span");
+    title.className = "equilator-opp-range-toggle__title";
+    title.textContent = "Диапазон";
+    var meta = document.createElement("span");
+    meta.className = "equilator-opp-range-toggle__meta";
+    meta.textContent = hasRange ? rangeSummaryText(map, 3) : "не выбран";
+    toggle.appendChild(title);
+    toggle.appendChild(meta);
+    toggle.addEventListener("click", function (e) {
+      e.preventDefault();
+      openRangeTarget = isOpen ? null : target;
+      activeRangeTarget = target;
+      refreshOpponentRangeUi();
+    });
+    row.appendChild(toggle);
+    var panel = document.createElement("div");
+    panel.className = "equilator-opp-range-panel" + (isOpen ? "" : " equilator-opp-range-panel--hidden");
+    panel.setAttribute("data-equilator-range-panel", target);
+    panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+    if (isOpen) {
+      var summary = document.createElement("div");
+      summary.className = "equilator-opp-range-summary";
+      summary.textContent = rangeSummaryText(map, 7);
+      panel.appendChild(summary);
+      var presets = document.createElement("div");
+      presets.className = "equilator-range-presets";
+      presets.setAttribute("aria-label", "Быстрый выбор диапазона оппонента " + (oppIdx + 1));
+      [
+        ["top10", "10%", ""],
+        ["top20", "20%", ""],
+        ["top30", "30%", ""],
+        ["top40", "40%", ""],
+        ["top50", "50%", ""],
+        ["all", "100%", ""],
+        ["pairs", "Пары", ""],
+        ["clear", "Сброс", " equilator-range-preset--muted"]
+      ].forEach(function (presetDef) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "equilator-range-preset" + presetDef[2];
+        btn.setAttribute("data-equilator-range-preset", presetDef[0]);
+        btn.textContent = presetDef[1];
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          applyRangePreset(this.getAttribute("data-equilator-range-preset") || "clear", target);
+        });
+        presets.appendChild(btn);
+      });
+      panel.appendChild(presets);
+      var grid = document.createElement("div");
+      grid.className = "equilator-range-grid";
+      grid.setAttribute("role", "grid");
+      grid.setAttribute("aria-label", "Матрица стартовых рук оппонента " + (oppIdx + 1));
+      panel.appendChild(grid);
+      renderOpponentRangeGrid(grid, target);
+    }
+    row.appendChild(panel);
   }
   function removeOpponent(idx) {
     if (numOpponents <= 1) return;
@@ -382,12 +504,21 @@ function initEquilator() {
       var activeIdx = rangeTargetIndex(activeRangeTarget);
       if (activeIdx > idx) activeRangeTarget = "opp" + (activeIdx - 1);
     }
+    if (openRangeTarget === "opp" + idx) openRangeTarget = null;
+    else {
+      var openIdx = rangeTargetIndex(openRangeTarget);
+      if (openIdx > idx) openRangeTarget = "opp" + (openIdx - 1);
+    }
     numOpponents--;
     buildOppSlots(preserved);
   }
   function buildOppSlots(preservedCards) {
     if (!oppCardsContainer) return;
     ensureOppRangeState();
+    var openIdx = rangeTargetIndex(openRangeTarget);
+    if (openRangeTarget && (openIdx < 0 || openIdx >= numOpponents)) openRangeTarget = null;
+    var handsSection = oppCardsContainer.closest ? oppCardsContainer.closest(".equilator-hands-section") : null;
+    if (handsSection) handsSection.classList.toggle("equilator-hands-section--range-open", !!openRangeTarget);
     oppCardsContainer.innerHTML = "";
     for (var o = 0; o < numOpponents; o++) {
       var row = document.createElement("div");
@@ -447,10 +578,9 @@ function initEquilator() {
         cardsWrap.appendChild(wrap);
       }
       row.appendChild(cardsWrap);
+      appendOpponentRangeControls(row, o);
       oppCardsContainer.appendChild(row);
     }
-    renderRangeTabs();
-    renderRangeGrid();
   }
   if (addPlayerBtn) addPlayerBtn.addEventListener("click", function (e) {
     e.preventDefault();
@@ -837,8 +967,17 @@ function initEquilator() {
     try {
       var calcScrollEl = document.scrollingElement || document.documentElement;
       var calcScrollTop = calcScrollEl ? calcScrollEl.scrollTop : null;
+      var calcBodyScrollTop = document.body ? document.body.scrollTop : null;
+      var calcDocScrollTop = document.documentElement ? document.documentElement.scrollTop : null;
+      var calcWindowScrollY = typeof window.scrollY === "number" ? window.scrollY : (typeof window.pageYOffset === "number" ? window.pageYOffset : null);
       var restoreCalcScroll = function () {
+        if (typeof window.scrollTo === "function") {
+          var targetY = calcBodyScrollTop != null && calcBodyScrollTop ? calcBodyScrollTop : (calcDocScrollTop != null && calcDocScrollTop ? calcDocScrollTop : calcWindowScrollY);
+          if (targetY != null) window.scrollTo(0, targetY);
+        }
         if (calcScrollEl && calcScrollTop != null) calcScrollEl.scrollTop = calcScrollTop;
+        if (document.documentElement && calcDocScrollTop != null) document.documentElement.scrollTop = calcDocScrollTop;
+        if (document.body && calcBodyScrollTop != null) document.body.scrollTop = calcBodyScrollTop;
       };
       if (resultBlock) resultBlock.classList.remove("equilator-result--hidden");
       restoreCalcScroll();
