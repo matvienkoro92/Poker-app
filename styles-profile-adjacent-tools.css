@@ -409,7 +409,7 @@
 .equilator-hero-art {
   position: relative;
   height: clamp(188px, 54vw, 260px);
-  margin: -4px -8px 10px;
+  margin: -4px -8px clamp(-86px, -19vw, -70px);
   border-radius: 24px 24px 10px 10px;
   border: 1px solid rgba(245, 158, 11, 0.28);
   overflow: hidden;
@@ -1175,7 +1175,7 @@
   .equilator-hero-art {
     min-height: 184px;
     margin-inline: -10px;
-    margin-bottom: 8px;
+    margin-bottom: -74px;
   }
   .view[data-view="equilator"] > .title {
     margin-inline: 6px;
