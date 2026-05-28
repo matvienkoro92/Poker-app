@@ -41,6 +41,7 @@ function showHallOfFamePanel(section, opts) {
       if (typeof window.pokerInitWinterRatingWeekTops === "function") window.pokerInitWinterRatingWeekTops();
       if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
     } catch (eTop2026Init) {}
+    scheduleHallTop2026ViewerLoginUpdate();
   }
 
   function applyHallFameScroll() {
@@ -79,6 +80,71 @@ function showHallOfFamePanel(section, opts) {
 
 window.showHallOfFamePanel = showHallOfFamePanel;
 window.openHallOfFameSectionModal = showHallOfFamePanel;
+
+function getHallTop2026ViewerLoginText() {
+  var user = null;
+  try {
+    user = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
+  } catch (eResolvedViewer) {}
+  try {
+    if (!user && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+      user = window.Telegram.WebApp.initDataUnsafe.user || null;
+    }
+  } catch (eUnsafeViewer) {}
+  try {
+    if (!user && window.__pokerTelegramAuth && window.__pokerTelegramAuth.user) {
+      user = window.__pokerTelegramAuth.user;
+    }
+  } catch (eAuthViewer) {}
+  var username = user && user.username != null ? String(user.username).replace(/^@+/, "").trim() : "";
+  return username ? "@" + username : "";
+}
+
+function fitHallTop2026ViewerLogin(el) {
+  if (!el || !el.textContent) return;
+  el.style.fontSize = "";
+  var size = parseFloat(window.getComputedStyle ? window.getComputedStyle(el).fontSize : "") || 6;
+  var minSize = 3.2;
+  while (el.scrollWidth > el.clientWidth && size > minSize) {
+    size -= 0.25;
+    el.style.fontSize = size.toFixed(2) + "px";
+  }
+}
+
+function updateHallTop2026ViewerLogin() {
+  var text = getHallTop2026ViewerLoginText();
+  var els = document.querySelectorAll(".hall-of-fame__top2026-trophy-login");
+  if (!els.length) return;
+  els.forEach(function (el) {
+    if (!text) {
+      el.textContent = "";
+      el.setAttribute("hidden", "");
+      return;
+    }
+    el.textContent = text;
+    el.removeAttribute("hidden");
+    el.setAttribute("title", text);
+    var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+    raf(function () { fitHallTop2026ViewerLogin(el); });
+  });
+}
+
+function scheduleHallTop2026ViewerLoginUpdate() {
+  [0, 180, 700].forEach(function (delay) {
+    setTimeout(updateHallTop2026ViewerLogin, delay);
+  });
+}
+
+window.pokerUpdateHallTop2026ViewerLogin = updateHallTop2026ViewerLogin;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", scheduleHallTop2026ViewerLoginUpdate);
+} else {
+  scheduleHallTop2026ViewerLoginUpdate();
+}
+window.addEventListener("poker-telegram-auth", scheduleHallTop2026ViewerLoginUpdate);
+window.addEventListener("resize", function () {
+  setTimeout(updateHallTop2026ViewerLogin, 80);
+});
 
 /** Уникальный startapp для каждой вкладки зала славы (плюс legacy для топ‑15). */
 var HALL_FAME_SECTION_STARTAPP = {

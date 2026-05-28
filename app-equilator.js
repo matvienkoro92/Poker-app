@@ -138,6 +138,26 @@ function initEquilator() {
   var openRangeTarget = null;
   var activeSlotId = null;
   var numOpponents = 1;
+  function scheduleEquilatorRangeScrollRefresh() {
+    function refresh() {
+      try {
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      } catch (eExpandBurst) {}
+      try {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && typeof tg.expand === "function") tg.expand();
+      } catch (eExpand) {}
+      try {
+        window.dispatchEvent(new Event("resize"));
+      } catch (eResize) {}
+    }
+    var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+    raf(refresh);
+    setTimeout(refresh, 32);
+    [80, 220, 520].forEach(function (delay) {
+      setTimeout(refresh, delay);
+    });
+  }
   function getNumOpp() { return numOpponents; }
   function getOppSlotIds() {
     var n = numOpponents;
@@ -225,6 +245,7 @@ function initEquilator() {
     renderRangeGrid();
     renderRangeTabs();
     updateRangeSummary();
+    scheduleEquilatorRangeScrollRefresh();
   }
   function rangeTargetName(key) {
     if (key === "hero") return "Вы";
@@ -385,6 +406,68 @@ function initEquilator() {
     if (labels.length > previewCount) preview += " +" + (labels.length - previewCount);
     return rangeBaseComboCount(map) + " комб. · " + preview;
   }
+  function collectScrollState() {
+    var states = [];
+    function add(el) {
+      if (!el) return;
+      for (var i = 0; i < states.length; i++) {
+        if (states[i].el === el) return;
+      }
+      states.push({ el: el, top: el.scrollTop || 0, left: el.scrollLeft || 0 });
+    }
+    add(document.scrollingElement || document.documentElement);
+    add(document.documentElement);
+    add(document.body);
+    add(document.getElementById("app"));
+    add(document.querySelector(".card__content"));
+    return states;
+  }
+  function restoreScrollState(states) {
+    (states || []).forEach(function (state) {
+      if (!state || !state.el) return;
+      state.el.scrollTop = state.top;
+      state.el.scrollLeft = state.left;
+    });
+  }
+  function scrollParentFor(el) {
+    var node = el ? el.parentElement : null;
+    while (node && node !== document.body && node !== document.documentElement) {
+      var style = window.getComputedStyle ? window.getComputedStyle(node) : null;
+      var overflowY = style ? style.overflowY : "";
+      if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) return node;
+      node = node.parentElement;
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+  function restoreAnchorPosition(selector, top) {
+    if (!selector || top == null) return;
+    var anchor = document.querySelector(selector);
+    if (!anchor || !anchor.getBoundingClientRect) return;
+    var delta = anchor.getBoundingClientRect().top - top;
+    if (Math.abs(delta) < 1) return;
+    var scroller = scrollParentFor(anchor);
+    if (scroller && scroller !== document.body && scroller !== document.documentElement) {
+      scroller.scrollTop += delta;
+      return;
+    }
+    var currentY = typeof window.scrollY === "number" ? window.scrollY : (document.documentElement.scrollTop || document.body.scrollTop || 0);
+    if (typeof window.scrollTo === "function") window.scrollTo(0, currentY + delta);
+    else if (document.documentElement) document.documentElement.scrollTop = currentY + delta;
+  }
+  function preserveScrollDuring(fn, anchorSelector, anchorTop) {
+    var states = collectScrollState();
+    var result = fn();
+    function restore() {
+      restoreScrollState(states);
+      restoreAnchorPosition(anchorSelector, anchorTop);
+    }
+    restore();
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(restore);
+    }
+    setTimeout(restore, 0);
+    return result;
+  }
   function refreshOpponentRangeUi() {
     if (!oppCardsContainer) return;
     buildOppSlots(collectOppCards());
@@ -448,9 +531,16 @@ function initEquilator() {
     toggle.appendChild(meta);
     toggle.addEventListener("click", function (e) {
       e.preventDefault();
-      openRangeTarget = isOpen ? null : target;
-      activeRangeTarget = target;
-      refreshRangeUi();
+      if (this.blur) this.blur();
+      var anchorTop = this.getBoundingClientRect ? this.getBoundingClientRect().top : null;
+      var anchorSelector = ".equilator-opp-range-toggle[data-equilator-range-toggle=\"" + target + "\"]";
+      var nextOpenTarget = isOpen ? null : target;
+      preserveScrollDuring(function () {
+        openRangeTarget = nextOpenTarget;
+        activeRangeTarget = target;
+        refreshRangeUi();
+      }, anchorSelector, anchorTop);
+      scheduleEquilatorRangeScrollRefresh();
     });
     container.appendChild(toggle);
     var panel = document.createElement("div");

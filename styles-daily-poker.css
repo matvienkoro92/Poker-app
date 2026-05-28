@@ -307,7 +307,15 @@
 .daily-poker-card--back {
   background:
     #050303 url("./assets/daily-poker-card-back-red.jpg?v=3.334") center / cover no-repeat;
-  border-color: rgba(255, 133, 0, 0.56);
+  border-color: rgba(255, 211, 99, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(255, 238, 174, 0.82),
+    0 0 7px rgba(255, 211, 99, 0.92),
+    0 0 16px rgba(255, 136, 0, 0.82),
+    0 0 28px rgba(255, 78, 0, 0.52),
+    0 12px 22px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 238, 174, 0.3),
+    inset 0 0 12px rgba(255, 96, 0, 0.22);
 }
 
 .daily-poker-card__rank {
@@ -1297,10 +1305,15 @@
   padding: 0;
   background:
     #050303 url("./assets/daily-poker-card-back-red.jpg?v=3.334") center / 104% 104% no-repeat;
-  border: 1px solid rgba(255, 116, 0, 0.7);
+  border: 1px solid rgba(255, 211, 99, 0.96);
   box-shadow:
-    0 0 18px rgba(255, 177, 39, 0.78),
-    0 16px 26px rgba(0, 0, 0, 0.48);
+    0 0 0 1px rgba(255, 238, 174, 0.82),
+    0 0 7px rgba(255, 211, 99, 0.92),
+    0 0 16px rgba(255, 136, 0, 0.82),
+    0 0 28px rgba(255, 78, 0, 0.52),
+    0 12px 22px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 238, 174, 0.3),
+    inset 0 0 12px rgba(255, 96, 0, 0.22);
   overflow: hidden;
 }
 
