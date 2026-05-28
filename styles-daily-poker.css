@@ -11,7 +11,10 @@
 }
 
 .admin-bonuses {
-  padding: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)) 10px max(22px, calc(env(safe-area-inset-bottom, 0px) + 14px));
+  padding:
+    max(16px, calc(env(safe-area-inset-top, 0px) + 10px))
+    10px
+    max(112px, calc(var(--app-bottom-tabbar-pad, 104px) + 18px));
 }
 
 .daily-poker__header {
@@ -128,7 +131,7 @@
 .daily-poker__prizes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -610,6 +613,32 @@
   display: none;
 }
 
+.admin-bonuses__total-debited {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(199, 163, 106, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-bonuses__total-debited[hidden] {
+  display: none;
+}
+
+.admin-bonuses__total-debited strong {
+  color: #fde68a;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .admin-bonuses__history {
   margin-top: 10px;
   padding: 9px;
@@ -733,7 +762,7 @@
   }
 
   .daily-poker__prizes {
-    gap: 5px;
+    gap: 3px;
   }
 
   .daily-poker__prize {
@@ -1004,7 +1033,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-rows: 1fr;
   align-items: stretch;
-  gap: 14px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1170,7 +1199,7 @@
 
 .daily-poker__zone--hole .daily-poker__zone-label {
   position: absolute;
-  top: -20%;
+  top: -14%;
   left: 50%;
   width: auto;
   height: auto;
@@ -1200,8 +1229,8 @@
 
 .daily-poker__cards--hole {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: min(630px, 69%);
-  gap: clamp(14px, 3.2vw, 34px);
+  width: min(590px, 64%);
+  gap: clamp(12px, 2.8vw, 28px);
   margin: 0 auto;
 }
 
@@ -1439,7 +1468,7 @@
 
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 3px;
   }
 
   .daily-poker__prize {
@@ -1490,8 +1519,8 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(86px, 1fr));
-    width: min(375px, 100%);
-    margin-left: 20px;
+    width: min(340px, 92%);
+    margin: 0 auto;
   }
 
   .daily-poker__cards--board {
@@ -1583,7 +1612,7 @@
 
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 3px;
   }
 
   .daily-poker__prize {
@@ -1634,8 +1663,8 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(86px, 1fr));
-    width: min(375px, 100%);
-    margin-left: 20px;
+    width: min(340px, 92%);
+    margin: 0 auto;
   }
 
   .daily-poker__cards--board {
@@ -1657,7 +1686,7 @@
 @container (max-width: 520px) {
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 3px;
   }
 
   .daily-poker__prize {
@@ -1671,7 +1700,7 @@
 @media (max-width: 520px) {
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 3px;
   }
 
   .daily-poker__prize {
@@ -1696,8 +1725,8 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 69%;
-    gap: clamp(10px, 3vw, 16px);
+    width: 64%;
+    gap: clamp(8px, 2.6vw, 14px);
     margin: 0 auto;
   }
 
@@ -1742,8 +1771,8 @@
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 69%;
-    gap: clamp(10px, 3vw, 16px);
+    width: 64%;
+    gap: clamp(8px, 2.6vw, 14px);
     margin: 0 auto;
   }
 

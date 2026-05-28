@@ -47,6 +47,8 @@ function initAdminReportModal() {
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWinLossTotalEl = document.getElementById("adminReportCalcWinLossTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
+  var calculationsClubDataBodyEl = document.getElementById("adminReportClubDataBody");
+  var calculationsClubDataStatusEl = document.getElementById("adminReportClubDataStatus");
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
   var calculationsBonusesEl = document.getElementById("adminReportCalcBonuses");
   var calculationsPreviousRakebackEl = document.getElementById("adminReportCalcPreviousRakeback");
@@ -130,6 +132,8 @@ function initAdminReportModal() {
   var cashHistoryLoadedAt = 0;
   var cashHistoryRows = [];
   var cashHistoryMeta = null;
+  var calculationClubDataLoading = false;
+  var calculationClubDataLoadedAt = 0;
   var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
@@ -137,6 +141,7 @@ function initAdminReportModal() {
   var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
   var DEFAULT_RAKEBACK_SORT_MODE = "created";
   var CASH_HISTORY_CACHE_TTL_MS = 2 * 60 * 1000;
+  var CALCULATION_CLUB_DATA_CACHE_TTL_MS = 2 * 60 * 1000;
   var CASH_HISTORY_OPERATOR_IDS = ["369073", "467511", "208238"];
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
@@ -577,6 +582,7 @@ function initAdminReportModal() {
   }
 
   function openCalculationsReports() {
+    loadCalculationClubData(false);
     if (calculationsModule && window.AdminReportCalculationsLogic) {
       calculationsModule.open();
       return;
@@ -592,6 +598,97 @@ function initAdminReportModal() {
       .catch(function () {
         hydrateCalculationsDraftOnce();
         loadCalculationsReports();
+      });
+  }
+
+  function setCalculationClubDataStatus(text, tone) {
+    if (!calculationsClubDataStatusEl) return;
+    calculationsClubDataStatusEl.textContent = text || "";
+    if (tone) calculationsClubDataStatusEl.setAttribute("data-tone", tone);
+    else calculationsClubDataStatusEl.removeAttribute("data-tone");
+  }
+
+  function formatCalculationClubDataValue(value) {
+    if (value == null || value === "") return "—";
+    var n = Number(value);
+    if (!Number.isFinite(n)) return String(value);
+    return formatReportNumber(n);
+  }
+
+  function renderCalculationClubDataColumn(title, data) {
+    var row = data || {};
+    var metrics = [
+      ["Рейк", row.serviceCharge],
+      ["Раздачи", row.round],
+      ["Очки", row.score],
+      ["MTT fee", row.mttFee],
+      ["SNG fee", row.sngFee],
+      ["MTT score", row.mttScore],
+      ["SNG score", row.sngScore],
+    ];
+    return '<article class="admin-report-calculations__club-card">' +
+      "<h4>" + escapeReportHtml(title) + "</h4>" +
+      metrics.map(function (item) {
+        return '<div class="admin-report-calculations__club-row">' +
+          "<span>" + escapeReportHtml(item[0]) + "</span>" +
+          "<output>" + escapeReportHtml(formatCalculationClubDataValue(item[1])) + "</output>" +
+        "</div>";
+      }).join("") +
+    "</article>";
+  }
+
+  function renderCalculationClubData(data) {
+    if (!calculationsClubDataBodyEl) return;
+    var clubLeagueData = data && data.clubLeagueData ? data.clubLeagueData : data || {};
+    calculationsClubDataBodyEl.innerHTML =
+      renderCalculationClubDataColumn("Сегодня", clubLeagueData.today) +
+      renderCalculationClubDataColumn("Неделя", clubLeagueData.week);
+  }
+
+  function loadCalculationClubData(forceRefresh) {
+    if (!calculationsClubDataBodyEl) return undefined;
+    var now = Date.now();
+    if (!forceRefresh && calculationClubDataLoadedAt && now - calculationClubDataLoadedAt < CALCULATION_CLUB_DATA_CACHE_TTL_MS) return undefined;
+    if (calculationClubDataLoading) return undefined;
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var fetchFn = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : (typeof fetch === "function" ? fetch : null);
+    if (!fetchFn) {
+      calculationsClubDataBodyEl.innerHTML = '<p class="admin-report-calculations__club-empty">Браузер не может загрузить клубные данные.</p>';
+      setCalculationClubDataStatus("Ошибка", "error");
+      return undefined;
+    }
+    calculationClubDataLoading = true;
+    setCalculationClubDataStatus("Загрузка...", "loading");
+    if (!calculationClubDataLoadedAt) {
+      calculationsClubDataBodyEl.innerHTML = '<p class="admin-report-calculations__club-empty">Загружаю клубные данные...</p>';
+    }
+    return fetchFn(base.replace(/\/$/, "") + "/api/pokerplus-club-league-data", {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+    }, 30000)
+      .then(function (resp) {
+        return resp.json().catch(function () { return null; }).then(function (payload) {
+          return { resp: resp, payload: payload };
+        });
+      })
+      .then(function (result) {
+        var resp = result.resp;
+        var payload = result.payload || {};
+        if (!resp.ok || payload.ok === false) {
+          throw new Error(payload.error || "Не удалось загрузить клубные данные.");
+        }
+        renderCalculationClubData(payload);
+        calculationClubDataLoadedAt = Date.now();
+        setCalculationClubDataStatus("Обновлено", "");
+      })
+      .catch(function (err) {
+        if (!calculationClubDataLoadedAt) {
+          calculationsClubDataBodyEl.innerHTML = '<p class="admin-report-calculations__club-empty">' + escapeReportHtml((err && err.message) || "Не удалось загрузить клубные данные.") + "</p>";
+        }
+        setCalculationClubDataStatus("Ошибка", "error");
+      })
+      .then(function () {
+        calculationClubDataLoading = false;
       });
   }
 

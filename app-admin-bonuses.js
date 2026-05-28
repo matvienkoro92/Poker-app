@@ -9,6 +9,7 @@
     selectedUserId: "",
     operation: "",
     loading: false,
+    totalDebited: null,
   };
 
   function $(id) {
@@ -71,6 +72,11 @@
     return d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
 
+  function fmtPoints(value) {
+    var amount = Math.max(0, Math.floor(Number(value) || 0));
+    return amount.toLocaleString("ru-RU");
+  }
+
   function rowTitle(user) {
     return user.displayName || user.nickname || (user.username ? "@" + user.username : user.userId);
   }
@@ -125,6 +131,18 @@
     btn.textContent = total > 0 ? "Показать всех (" + total + ")" : "Показать всех";
   }
 
+  function syncTotalDebited(total) {
+    var wrap = $("adminBonusesTotalDebited");
+    var value = $("adminBonusesTotalDebitedValue");
+    if (!wrap || !value) return;
+    if (total == null || !Number.isFinite(Number(total))) {
+      wrap.hidden = true;
+      return;
+    }
+    wrap.hidden = false;
+    value.textContent = fmtPoints(total);
+  }
+
   function renderTable(users) {
     var body = $("adminBonusesTableBody");
     if (!body) return;
@@ -169,13 +187,16 @@
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Ошибка загрузки");
         adminBonusesState.users = data.users || [];
         adminBonusesState.total = Number(data.total || adminBonusesState.users.length || 0);
+        adminBonusesState.totalDebited = data.bonusTotals ? data.bonusTotals.totalDebited : 0;
         renderTable(adminBonusesState.users);
         syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
+        syncTotalDebited(adminBonusesState.totalDebited);
         setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
       .catch(function (err) {
         adminBonusesState.loading = false;
         syncShowAllButton(0, 0);
+        syncTotalDebited(adminBonusesState.totalDebited);
         setStatus(err && err.message ? err.message : POKER_NET_ERR, true);
       });
   }
@@ -331,6 +352,7 @@
 
   window.initAdminBonuses = function () {
     bind();
+    syncTotalDebited(adminBonusesState.totalDebited);
     loadList();
   };
 })();

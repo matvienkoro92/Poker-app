@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.359");
-@import url("./styles-home-rating-promo.css?v=3.359");
-@import url("./styles-auth.css?v=3.359");
-@import url("./styles-home.css?v=3.359");
-@import url("./styles-chat.css?v=3.359");
-@import url("./styles-learning-games.css?v=3.359");
-@import url("./styles-raffles.css?v=3.359");
-@import url("./styles-daily-poker.css?v=3.359");
-@import url("./styles-home-legacy-prelude.css?v=3.359");
-@import url("./styles-download.css?v=3.359");
-@import url("./styles-home-legacy-tail.css?v=3.359");
-@import url("./styles-home-rating-promo-legacy.css?v=3.359");
-@import url("./styles-rating.css?v=3.359");
-@import url("./styles-hall.css?v=3.359");
-@import url("./styles-admin.css?v=3.359");
-@import url("./styles-player-crm.css?v=3.359");
-@import url("./styles-profile.css?v=3.359");
-@import url("./styles-layout.css?v=3.359");
-@import url("./styles-chat-overlays.css?v=3.359");
-@import url("./styles-home-overrides.css?v=3.359");
-@import url("./styles-layout-touch-targets.css?v=3.359");
-@import url("./styles-home-rating-promo-late.css?v=3.359");
+@import url("./styles-base.css?v=3.360");
+@import url("./styles-home-rating-promo.css?v=3.360");
+@import url("./styles-auth.css?v=3.360");
+@import url("./styles-home.css?v=3.360");
+@import url("./styles-chat.css?v=3.360");
+@import url("./styles-learning-games.css?v=3.360");
+@import url("./styles-raffles.css?v=3.360");
+@import url("./styles-daily-poker.css?v=3.360");
+@import url("./styles-home-legacy-prelude.css?v=3.360");
+@import url("./styles-download.css?v=3.360");
+@import url("./styles-home-legacy-tail.css?v=3.360");
+@import url("./styles-home-rating-promo-legacy.css?v=3.360");
+@import url("./styles-rating.css?v=3.360");
+@import url("./styles-hall.css?v=3.360");
+@import url("./styles-admin.css?v=3.360");
+@import url("./styles-player-crm.css?v=3.360");
+@import url("./styles-profile.css?v=3.360");
+@import url("./styles-layout.css?v=3.360");
+@import url("./styles-chat-overlays.css?v=3.360");
+@import url("./styles-home-overrides.css?v=3.360");
+@import url("./styles-layout-touch-targets.css?v=3.360");
+@import url("./styles-home-rating-promo-late.css?v=3.360");
 
 :root {
   --daily-poker-page-bg:
@@ -374,6 +374,100 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
   display: inline-flex;
 }
 
+#app.app > .card > .card__header {
+  position: relative;
+  z-index: 60;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px) !important;
+  min-height: 66px;
+  margin: 0 calc(-1 * var(--card-padding-x, 16px) + 3px) 8px !important;
+  padding: 7px 12px !important;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(214, 163, 84, 0.3) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.06), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.035), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.94), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.1),
+    inset 0 -18px 34px rgba(0, 0, 0, 0.16),
+    0 18px 46px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="gold"] #app.app > .card > .card__header {
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.065), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.95), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+}
+
+#app.app > .card > .card__header .logo.logo--welcome {
+  flex: 1 1 auto;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+#app.app > .card > .card__header .logo__image {
+  width: 40px;
+  height: 40px;
+}
+
+#app.app > .card > .card__header .logo__text {
+  gap: 2px;
+  min-width: 0;
+}
+
+#app.app > .card > .card__header .logo__title {
+  flex-direction: row;
+  gap: 0.2em;
+  max-width: 100%;
+  font-size: clamp(10px, 2.95vw, 13px);
+  line-height: 1.04;
+  white-space: nowrap;
+}
+
+#app.app > .card > .card__header .logo__title-line {
+  min-width: 0;
+}
+
+#app.app > .card > .card__header .logo__title-line--name {
+  flex: 1 1 auto;
+}
+
+#app.app > .card > .card__header .logo__subtitle {
+  font-size: clamp(7px, 1.95vw, 9px);
+  line-height: 1.1;
+  letter-spacing: 0.2em;
+}
+
+#app.app > .card > .card__header .header-actions {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-width: 0;
+}
+
+#app.app > .card > .card__header .header-profile-summary,
+#app.app > .card > .card__header .header-notification-btn {
+  display: none !important;
+}
+
+#app.app > .card > .card__header .header-actions__row {
+  gap: 6px;
+}
+
+#app.app > .card > .card__header .header-actions__row .header-icon-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+
 @media (max-width: 380px) {
   .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,
   #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header {
@@ -412,6 +506,36 @@ html.site-home-header-mode #app:has(.view--active[data-view="daily-poker"]) .hea
 
   .app.app--view-home .header-actions__row .header-icon-btn,
   #app:has(.view--active[data-view="daily-poker"]) .header-actions__row .header-icon-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 999px;
+  }
+
+  #app.app > .card > .card__header {
+    min-height: 60px;
+    gap: 7px;
+    padding: 7px 10px !important;
+  }
+
+  #app.app > .card > .card__header .logo.logo--welcome {
+    gap: 5px;
+  }
+
+  #app.app > .card > .card__header .logo__image {
+    width: 36px;
+    height: 36px;
+  }
+
+  #app.app > .card > .card__header .header-actions {
+    gap: 7px;
+  }
+
+  #app.app > .card > .card__header .header-actions__row {
+    gap: 6px;
+  }
+
+  #app.app > .card > .card__header .header-actions__row .header-icon-btn {
     width: 40px;
     min-width: 40px;
     height: 40px;

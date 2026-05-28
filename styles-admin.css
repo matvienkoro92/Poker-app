@@ -638,6 +638,67 @@ body.admin-report-modal-open .bottom-nav {
   font-size: 11px;
   font-weight: 800;
 }
+.admin-report-calculations__status[data-tone="error"] {
+  color: #ffb3b3;
+}
+.admin-report-calculations__status[data-tone="loading"] {
+  color: #ffe7b0;
+}
+.admin-report-calculations__club-data {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(125, 211, 252, 0.26);
+  border-radius: 8px;
+  background: rgba(14, 116, 144, 0.1);
+}
+.admin-report-calculations__club-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-report-calculations__club-card {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 8px;
+  background: rgba(5, 7, 13, 0.5);
+}
+.admin-report-calculations__club-card h4 {
+  margin: 0 0 6px;
+  color: #bfdbfe;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.admin-report-calculations__club-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(70px, auto);
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  padding: 3px 0;
+  border-top: 1px solid rgba(125, 211, 252, 0.12);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+.admin-report-calculations__club-row:first-of-type {
+  border-top: 0;
+}
+.admin-report-calculations__club-row output {
+  color: #ffe7b0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.admin-report-calculations__club-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
 .admin-report-calculations__side {
   min-width: 0;
 }
@@ -649,23 +710,23 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__side--left > .admin-report-calculations__column:nth-of-type(1) {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
 }
 .admin-report-calculations__side--right > .admin-report-calculations__column:nth-of-type(1) {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 2;
 }
 .admin-report-calculations__side--right > .admin-report-calculations__column:nth-of-type(2) {
   grid-column: 3;
-  grid-row: 1;
+  grid-row: 2;
 }
 .admin-report-calculations__side--left > .admin-report-calculations__column:nth-of-type(2) {
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 3;
 }
 .admin-report-calculations__side--left > .admin-report-calculations__field--grand {
   grid-column: 1 / -1;
-  grid-row: 3;
+  grid-row: 4;
   align-self: start;
 }
 .admin-report-calculations__figures {
@@ -1148,7 +1209,7 @@ body.admin-report-modal-open .bottom-nav {
   .admin-report-calculations__side--left > .admin-report-calculations__column:nth-of-type(1),
   .admin-report-calculations__side--right > .admin-report-calculations__column:nth-of-type(1),
   .admin-report-calculations__side--right > .admin-report-calculations__column:nth-of-type(2) {
-    grid-row: 1;
+    grid-row: 2;
     padding: 5px;
   }
   .admin-report-calculations__side--left > .admin-report-calculations__column:nth-of-type(1) {
@@ -1162,11 +1223,11 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-calculations__side--left > .admin-report-calculations__column:nth-of-type(2) {
     grid-column: 1 / -1;
-    grid-row: 2;
+    grid-row: 3;
   }
   .admin-report-calculations__side--left > .admin-report-calculations__field--grand {
     grid-column: 1 / -1;
-    grid-row: 3;
+    grid-row: 4;
   }
   .admin-report-calculations__figures {
     grid-column: 1 / -1;
@@ -1208,6 +1269,9 @@ body.admin-report-modal-open .bottom-nav {
   }
 }
 @media (max-width: 560px) {
+  .admin-report-calculations__club-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .admin-report-calculations__week-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 5px;
