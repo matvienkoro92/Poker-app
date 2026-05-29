@@ -1255,8 +1255,8 @@ async function testPokerPlusChipLogsAdminLinkedMailFallback(redis) {
     assert.strictEqual(r.body.source, "cash-history-admin-linked-mail", "cash history uses admin linked mail fallback");
     assert.deepStrictEqual(
       chipLogForms.map((form) => form.user_app_id).sort(),
-      ["208238", "369073", "467511"],
-      "linked-mail fallback requests all configured cashier ids",
+      ["ID000003"],
+      "linked-mail fallback requests only the linked admin source",
     );
     assert.deepStrictEqual(
       [...new Set(chipLogForms.map((form) => form.mail))],
@@ -1265,8 +1265,8 @@ async function testPokerPlusChipLogsAdminLinkedMailFallback(redis) {
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId).sort(),
-      ["208238", "369073", "467511"],
-      "linked-mail fallback returns all cashier operator rows",
+      ["ID000003"],
+      "linked-mail fallback does not present cross-operator partial rows as full cashier history",
     );
   } finally {
     Object.keys(previousEnv).forEach((key) => {
@@ -1381,19 +1381,8 @@ async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
     assert.strictEqual(r.body.source, "cash-history-linked-bindings", "cash history reports linked operator bindings source");
     assert.deepStrictEqual(
       chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
-      [
-        ["208238", "one@example.test"],
-        ["208238", "three@example.test"],
-        ["208238", "two@example.test"],
-        ["369073", "one@example.test"],
-        ["369073", "three@example.test"],
-        ["369073", "two@example.test"],
-        ["467511", "one@example.test"],
-        ["467511", "three@example.test"],
-        ["467511", "two@example.test"],
-        ["ID400800", "three@example.test"],
-      ].sort(),
-      "linked operator sources request exact pairs and cross-check known mails for every cashier id",
+      [["208238", "three@example.test"], ["369073", "one@example.test"], ["467511", "two@example.test"], ["ID400800", "three@example.test"]],
+      "linked operator sources request exact pairs and saved dt source variants only",
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId).sort(),
@@ -1499,13 +1488,13 @@ async function testPokerPlusChipLogsBoundPokerPlusIds(redis) {
     assert.strictEqual(r.body.source, "cash-history-linked-bindings", "cash history still reports linked bindings source");
     assert.deepStrictEqual(
       chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
-      [["208238", "one@example.test"], ["369073", "one@example.test"], ["467511", "one@example.test"]],
-      "linked cashier source uses Poker21 user id and rechecks the known mail against configured cashier ids",
+      [["369073", "one@example.test"]],
+      "linked cashier source uses Poker21 user id without borrowing its mail for other operators",
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId).sort(),
-      ["208238", "369073", "467511"],
-      "single linked cashier source can recover other configured operator rows with the known mail",
+      ["369073"],
+      "single linked cashier source does not present cross-operator partial rows as full cashier history",
     );
   } finally {
     Object.keys(previousEnv).forEach((key) => {
@@ -1610,14 +1599,8 @@ async function testPokerPlusChipLogsSharedBoundMailAndDtSource(redis) {
     assert.strictEqual(r.body.source, "cash-history-linked-bindings", "cash history reports linked bindings source");
     assert.deepStrictEqual(
       chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
-      [
-        ["208238", "roman@example.test"],
-        ["369073", "roman@example.test"],
-        ["467511", "roman@example.test"],
-        ["ID400800", "roman@example.test"],
-        ["ID494359", "roman@example.test"],
-      ],
-      "linked cashier sources try canonical ids plus saved dt/account id variants with the grouped mail",
+      [["208238", "roman@example.test"], ["ID400800", "roman@example.test"], ["ID494359", "roman@example.test"]],
+      "linked cashier sources try canonical id plus saved dt/account id variants with the grouped mail",
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId),
