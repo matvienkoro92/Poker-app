@@ -85,19 +85,12 @@ var HOME_FREEROLL_SCHEDULE = [
     roomPage: "poker21",
     buyin: "0₽",
     guarantee: "9 000₽",
-    desc: "Ежедневный фриролл-сателлит в Poker21. Старт в 16:00 МСК, вход 0₽, гарантия 9 000₽: 3 билета по 3 000₽ на турнир месяца с гарантией 1 000 000₽."
+    desc: "Ежедневный фриролл-сателлит в Poker21. Старт в 16:00 МСК, вход 0₽, гарантия 9 000₽: 3 билета по 3 000₽."
   },
-  { day: "Пн", dow: 1, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
-  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", meta: "X-poker · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Главный недельный фриролл в X-poker. Старт в 18:00 МСК, вход 0₽, гарантия 1 000 000₽." },
-  { day: "Чт", dow: 4, title: "Приз 100 000₽", meta: "X-poker · 17:00 МСК", time: "17:00 МСК", hour: 17, minute: 0, room: "X-poker", roomPage: "xpoker", desc: "Фриролл в X-poker. Старт в 17:00 МСК, вход бесплатный, призовой фонд 100 000₽." },
   { day: "Сб", dow: 6, title: "Приз 200 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:400₽ / A:800₽, гарантия 200 000₽." }
 ];
 
-var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [
-  { day: "Пн", dow: 1, title: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 },
-  { day: "Ср", dow: 3, title: "Приз 1 000 000₽", time: "18:00 МСК", hour: 18, minute: 0 },
-  { day: "Чт", dow: 4, title: "Приз 100 000₽", time: "17:00 МСК", hour: 17, minute: 0 }
-];
+var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [];
 
 var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "daily", category: "Сателлит", name: "К турниру недели", buyin: "0₽", rebuy: "R:100₽ / A:150₽", guarantee: "1 билет за 2 000₽", hour: 10, minute: 0, durationMinutes: 180, priority: 30 },
@@ -565,7 +558,7 @@ function pokerGetDownloadTournamentDayInfo(now) {
 
 function pokerGetDownloadXpokerFreerollInfo(now) {
   var item = pokerFindNextFreerollItem(DOWNLOAD_XPOKER_FREEROLL_SCHEDULE, now || new Date());
-  if (!item) return "X-poker · 17:00 МСК";
+  if (!item) return "Фрироллов нет в расписании";
   return item.day + ", " + item.time + " · " + item.title;
 }
 
@@ -608,21 +601,27 @@ function renderHomeFreerollSchedule() {
     followingItem = displayItems[1] || null;
   } catch (eNextFreeroll) {}
   displayItems.forEach(function (item) {
+    var card = document.createElement("div");
+    card.className = "home-freeroll-schedule__item";
     var row = document.createElement("div");
     row.className = "home-freeroll-schedule__row";
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
     if (item.room === "Poker21") {
+      card.classList.add("home-freeroll-schedule__item--poker21");
       row.classList.add("home-freeroll-schedule__row--poker21");
     }
     if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
+      card.classList.add("home-freeroll-schedule__item--next");
       row.classList.add("home-freeroll-schedule__row--next");
     }
     var stampText = "";
     if (nearestItem === item) {
+      card.classList.add("home-freeroll-schedule__item--nearest");
       row.classList.add("home-freeroll-schedule__row--nearest");
       stampText = "Ближайший";
     } else if (followingItem === item) {
+      card.classList.add("home-freeroll-schedule__item--following");
       row.classList.add("home-freeroll-schedule__row--following");
       stampText = "Следующий";
     }
@@ -649,7 +648,7 @@ function renderHomeFreerollSchedule() {
       var stamp = document.createElement("span");
       stamp.className = "home-freeroll-schedule__stamp";
       stamp.textContent = stampText;
-      row.appendChild(stamp);
+      card.appendChild(stamp);
     }
     row.addEventListener("click", function (e) {
       e.preventDefault();
@@ -662,7 +661,8 @@ function renderHomeFreerollSchedule() {
         openHomeFreerollModal(item);
       }
     });
-    el.appendChild(row);
+    card.appendChild(row);
+    el.appendChild(card);
   });
 }
 
@@ -803,7 +803,7 @@ function updateTournamentDayBlock() {
   function getFreerollTournamentInfo(item) {
     if (!item) return TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
     var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "0₽ · R:400₽ / A:800₽" : "0₽";
-    var fallbackGuarantee = item.dow === 3 ? "1 000 000₽" : item.room === "Poker21" && item.dow === 6 ? "200 000₽" : "100 000₽";
+    var fallbackGuarantee = item.daily ? "9 000₽" : "200 000₽";
     return {
       name: item.room === "X-poker" ? "Фриролл X-poker" : "Фриролл",
       buyin: item.buyin || fallbackBuyin,

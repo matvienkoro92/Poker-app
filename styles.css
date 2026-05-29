@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.379");
-@import url("./styles-home-rating-promo.css?v=3.379");
-@import url("./styles-auth.css?v=3.379");
-@import url("./styles-home.css?v=3.379");
-@import url("./styles-chat.css?v=3.379");
-@import url("./styles-learning-games.css?v=3.379");
-@import url("./styles-raffles.css?v=3.379");
-@import url("./styles-daily-poker.css?v=3.379");
-@import url("./styles-home-legacy-prelude.css?v=3.379");
-@import url("./styles-download.css?v=3.379");
-@import url("./styles-home-legacy-tail.css?v=3.379");
-@import url("./styles-home-rating-promo-legacy.css?v=3.379");
-@import url("./styles-rating.css?v=3.379");
-@import url("./styles-hall.css?v=3.379");
-@import url("./styles-admin.css?v=3.379");
-@import url("./styles-player-crm.css?v=3.379");
-@import url("./styles-profile.css?v=3.379");
-@import url("./styles-layout.css?v=3.379");
-@import url("./styles-chat-overlays.css?v=3.379");
-@import url("./styles-home-overrides.css?v=3.379");
-@import url("./styles-layout-touch-targets.css?v=3.379");
-@import url("./styles-home-rating-promo-late.css?v=3.379");
+@import url("./styles-base.css?v=3.380");
+@import url("./styles-home-rating-promo.css?v=3.380");
+@import url("./styles-auth.css?v=3.380");
+@import url("./styles-home.css?v=3.380");
+@import url("./styles-chat.css?v=3.380");
+@import url("./styles-learning-games.css?v=3.380");
+@import url("./styles-raffles.css?v=3.380");
+@import url("./styles-daily-poker.css?v=3.380");
+@import url("./styles-home-legacy-prelude.css?v=3.380");
+@import url("./styles-download.css?v=3.380");
+@import url("./styles-home-legacy-tail.css?v=3.380");
+@import url("./styles-home-rating-promo-legacy.css?v=3.380");
+@import url("./styles-rating.css?v=3.380");
+@import url("./styles-hall.css?v=3.380");
+@import url("./styles-admin.css?v=3.380");
+@import url("./styles-player-crm.css?v=3.380");
+@import url("./styles-profile.css?v=3.380");
+@import url("./styles-layout.css?v=3.380");
+@import url("./styles-chat-overlays.css?v=3.380");
+@import url("./styles-home-overrides.css?v=3.380");
+@import url("./styles-layout-touch-targets.css?v=3.380");
+@import url("./styles-home-rating-promo-late.css?v=3.380");
 
 :root {
   --daily-poker-page-bg:
@@ -560,7 +560,7 @@ body[data-view="daily-poker"] #app.app > .card {
 
 #app:has(.view--active[data-view="daily-poker"]) > .card > .card__header,
 body[data-view="daily-poker"] #app.app > .card > .card__header {
-  margin-bottom: 0 !important;
+  margin-bottom: 4px !important;
 }
 
 #app:has(.view--active[data-view="daily-poker"]) > .card > .card__content,
@@ -1112,13 +1112,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   z-index: 1;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: clamp(158px, 43.5%, 172px);
-  gap: 6px;
+  grid-auto-columns: minmax(168px, 1fr);
+  gap: 8px;
   width: 100%;
-  padding: 0 36px 4px 1px;
+  padding: 0 8px 4px 1px;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-padding-inline: 1px 36px;
+  scroll-padding-inline: 1px 8px;
   scroll-snap-type: x proximity;
   scrollbar-width: none;
 }
@@ -1153,6 +1153,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: none;
 }
 
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  padding-top: 28px;
+  flex-direction: column;
+  align-items: stretch;
+  scroll-snap-align: start;
+}
+
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row {
   position: relative;
   appearance: none;
@@ -1172,7 +1182,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     inset 0 0 0 1px rgba(255, 226, 166, 0.06),
     0 0 12px rgba(255, 118, 0, 0.16);
   cursor: pointer;
-  scroll-snap-align: start;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row::after {
@@ -1251,7 +1260,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__entry {
   margin-top: auto;
   padding-top: 8px;
-  padding-right: 62px;
+  padding-right: 0;
   color: rgba(255, 234, 190, 0.78);
   border-top: 1px solid rgba(255, 118, 0, 0.2);
   font-size: 8px;
@@ -1262,31 +1271,45 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__stamp {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
+  z-index: 3;
+  top: 0;
+  left: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 62px;
-  min-height: 18px;
-  padding: 0 6px;
+  min-width: 96px;
+  min-height: 25px;
+  padding: 0 10px;
   color: #2b1602;
   border: 1px solid rgba(255, 226, 166, 0.72);
-  border-radius: 999px;
+  border-radius: 12px 12px 8px 8px;
   background:
     linear-gradient(180deg, #ffe4a5, #ffb531 58%, #d97706);
   box-shadow:
     0 0 12px rgba(255, 118, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.56);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 900;
   line-height: 1;
+  text-transform: uppercase;
   white-space: nowrap;
-  transform: rotate(-3deg);
+  transform: translateY(3px);
   pointer-events: none;
 }
 
-.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--following .home-freeroll-schedule__stamp {
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__stamp::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -7px;
+  width: 13px;
+  height: 7px;
+  background: linear-gradient(180deg, #d97706, rgba(217, 119, 6, 0));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 3px 4px rgba(255, 118, 0, 0.22));
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__item--following .home-freeroll-schedule__stamp {
   color: rgba(255, 234, 190, 0.9);
   border-color: rgba(255, 181, 49, 0.5);
   background:
@@ -1294,7 +1317,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   box-shadow:
     0 0 10px rgba(255, 118, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transform: rotate(-2deg);
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__item--following .home-freeroll-schedule__stamp::after {
+  background: linear-gradient(180deg, rgba(255, 118, 0, 0.3), rgba(255, 118, 0, 0));
 }
 
 .app.app--view-home .home-compact-links {
@@ -2545,8 +2571,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr) 112px;
   grid-template-areas:
-    "badge label timer"
-    "badge main cta";
+    "badge label side"
+    "badge main side";
   align-items: center;
   gap: 4px 9px;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
@@ -2588,6 +2614,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-shadow:
     0 0 12px rgba(255, 159, 26, 0.68),
     0 1px 0 rgba(0, 0, 0, 0.72);
+}
+
+.app.app--view-home .home-live-tournament:not(.home-live-tournament--upcoming) .home-live-tournament__status-title {
+  font-size: 21px;
 }
 
 .app.app--view-home .home-live-tournament__live-badge {
@@ -2757,13 +2787,22 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   line-height: 1;
 }
 
-.app.app--view-home .home-live-tournament__timer {
-  grid-area: timer;
+.app.app--view-home .home-live-tournament__side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: stretch;
+  gap: 8px;
   min-width: 0;
-  overflow: hidden;
-  align-self: end;
   padding-left: 7px;
   border-left: 1px solid rgba(255, 118, 0, 0.28);
+}
+
+.app.app--view-home .home-live-tournament__timer {
+  min-width: 0;
+  overflow: hidden;
+  align-self: stretch;
 }
 
 .app.app--view-home .home-live-tournament__timer-label {
@@ -2792,12 +2831,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .home-live-tournament__cta {
-  grid-area: cta;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  align-self: start;
+  align-self: stretch;
   width: 100%;
   min-width: 0;
   min-height: 34px;

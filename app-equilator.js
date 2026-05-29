@@ -668,7 +668,11 @@ function initEquilator() {
     var openIdx = rangeTargetIndex(openRangeTarget);
     if (openRangeTarget && openRangeTarget !== "hero" && (openIdx < 0 || openIdx >= numOpponents)) openRangeTarget = null;
     var handsSection = oppCardsContainer.closest ? oppCardsContainer.closest(".equilator-hands-section") : null;
-    if (handsSection) handsSection.classList.toggle("equilator-hands-section--range-open", !!openRangeTarget);
+    if (handsSection) {
+      handsSection.classList.toggle("equilator-hands-section--range-open", !!openRangeTarget);
+      var view = handsSection.closest ? handsSection.closest(".view[data-view=\"equilator\"]") : null;
+      if (view) view.classList.toggle("equilator-view--range-open", !!openRangeTarget);
+    }
     oppCardsContainer.innerHTML = "";
     for (var o = 0; o < numOpponents; o++) {
       var row = document.createElement("div");
