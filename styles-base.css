@@ -1196,7 +1196,7 @@ html.app-view-browser-local {
   overscroll-behavior-y: none;
 }
 /* Без скролла body на экранах с внутренним scrollport в .card__content — иначе тот же приоритет, что у главной/скачать/депозит, даёт двойной скролл или «липкий» document */
-html.app-view-browser-local:not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll):not(.app-view-equilator-html-scroll):not(.app-view-daily-poker-html-scroll) body {
+html.app-view-browser-local:not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll):not(.app-view-equilator-html-scroll):not(.app-view-daily-poker-html-scroll):not(.app-view-admin-bonuses-html-scroll) body {
   overflow-y: auto !important;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -1209,7 +1209,7 @@ html.app-view-browser-local:not(.app-view-winter-rating):not(.app-view-spring-ra
   overscroll-behavior-y: none;
   touch-action: pan-y pinch-zoom;
 }
-html.app-view-browser-local:not(.app-view-chat) #app.app {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-admin-bonuses-html-scroll) #app.app {
   overflow: visible !important;
   /* 0: flex-колонка не тянется на весь вьюпорт пустотой (min-content в части WK давал лишнюю высоту + «чёрная дыра» при скролле) */
   min-height: 0 !important;
@@ -1217,12 +1217,12 @@ html.app-view-browser-local:not(.app-view-chat) #app.app {
   max-height: none !important;
   flex-shrink: 0;
 }
-html.app-view-browser-local:not(.app-view-chat):not(.app-view-daily-poker-html-scroll) #app.app .card {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-daily-poker-html-scroll):not(.app-view-admin-bonuses-html-scroll) #app.app .card {
   min-height: min-content;
   flex-shrink: 0;
 }
 /* Не задавать visible на экранах с внутренним layout/скроллом — иначе перебивает overflow:hidden (рейтинги) и overflow-y:auto (скачать) */
-html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll):not(.app-view-equilator-html-scroll):not(.app-view-daily-poker-html-scroll) .card .card__content {
+html.app-view-browser-local:not(.app-view-chat):not(.app-view-winter-rating):not(.app-view-spring-rating):not(.app-view-spring-rating-html-scroll):not(.app-view-download-html-scroll):not(.app-view-hall-html-scroll):not(.app-view-home-html-scroll):not(.app-view-cashout-html-scroll):not(.app-view-raffles-html-scroll):not(.app-view-profile-html-scroll):not(.app-view-video-lessons-html-scroll):not(.app-view-equilator-html-scroll):not(.app-view-daily-poker-html-scroll):not(.app-view-admin-bonuses-html-scroll) .card .card__content {
   overflow: visible !important;
 }
 /* Длинные страницы (не главная): класс с setView / IIFE. Скролл на body — см. :has() выше. */

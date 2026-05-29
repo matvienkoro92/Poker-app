@@ -158,11 +158,16 @@
   border-color: rgba(251, 146, 60, 0.3);
   outline: none;
 }
-.profile-tabs__btn--active {
-  color: #fff7ed;
-  border-color: rgba(251, 146, 60, 0.42);
-  background: linear-gradient(to top, rgba(234, 88, 12, 0.92), rgba(251, 146, 60, 0.94));
-  box-shadow: 0 10px 22px rgba(251, 146, 60, 0.22);
+.profile-tabs__btn--active,
+.profile-tabs__btn[aria-selected="true"] {
+  color: #111827;
+  border-color: rgba(255, 224, 138, 0.9);
+  background:
+    linear-gradient(180deg, #ffe39c 0%, #f59e0b 48%, #ea580c 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 244, 214, 0.26),
+    0 10px 24px rgba(251, 146, 60, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 .view[data-view="profile"].profile-view--tab-club [data-profile-poker21-panel],
 .view[data-view="profile"].profile-view--tab-poker21 [data-profile-club-panel] {
@@ -175,8 +180,9 @@
 [data-theme="light"] .profile-tabs__btn {
   color: rgba(154, 52, 18, 0.82);
 }
-[data-theme="light"] .profile-tabs__btn--active {
-  color: #fff;
+[data-theme="light"] .profile-tabs__btn--active,
+[data-theme="light"] .profile-tabs__btn[aria-selected="true"] {
+  color: #111827;
 }
 @media (max-width: 360px) {
   .profile-tabs {
