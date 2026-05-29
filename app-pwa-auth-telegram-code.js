@@ -206,6 +206,73 @@
       setHint(pwaAuthT("telegramPasswordSetupHint"), true);
       if (sendBtn && sendBtn.focus) sendBtn.focus();
     }
+    function completeTelegramPasswordAuth(data, username) {
+      if (!(data && data.ok && data.user && data.pwaSession)) return false;
+      saveLastUsername(username);
+      persistPassword();
+      try {
+        if (data.dtId) {
+          sessionStorage.setItem("poker_dt_id", data.dtId);
+          if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
+        }
+      } catch (eDtSave) {}
+      var u = normalizeVerifiedUser(data.user, null);
+      if (
+        !pokerSavePwaTgSession(
+          data.pwaSession,
+          data.user,
+          {
+            gazettePlannerAccess: data.gazettePlannerAccess === true,
+            adminAccess: data.adminAccess === true,
+            adminReportAccess: data.adminReportAccess === true,
+            authMethod: "telegram",
+          }
+        )
+      )
+        pwaSessionPersistenceWarning();
+      pokerSavePwaGuestMode(false);
+      var nextAuth = { status: "verified", user: u, error: null };
+      if (data.gazettePlannerAccess === true) nextAuth.gazettePlannerAccess = true;
+      if (data.adminAccess === true) nextAuth.adminAccess = true;
+      if (data.adminReportAccess === true) nextAuth.adminReportAccess = true;
+      window.__pokerTelegramAuth = nextAuth;
+      try {
+        if (typeof pokerMaybeRememberMemberIdFromUser === "function") pokerMaybeRememberMemberIdFromUser(u);
+      } catch (eRememberMember) {}
+      pokerSetAuthMethod("telegram");
+      (deps.updateHeaderGreeting || function () {})();
+      (deps.showAuthorized || function () {})(u);
+      (deps.loadHeaderAvatar || function () {})();
+      try {
+        window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
+      } catch (eDispatch) {}
+      return true;
+    }
+    function telegramPasswordLogin(username, password, fallbackMessage, allowSetupSwitch) {
+      return pokerAuthFetch(base + "/api/auth-pwa-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          typeof pokerApiAuthJsonBody === "function"
+            ? pokerApiAuthJsonBody({ action: "login", username: username, password: password })
+            : { action: "login", username: username, password: password }
+        ),
+      })
+        .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
+        .then(function (data) {
+          if (completeTelegramPasswordAuth(data, username)) return true;
+          if (data && data.passwordSetupRequired && allowSetupSwitch) {
+            switchTelegramToPasswordSetup();
+            return true;
+          }
+          setHint(fallbackMessage || (data && data.error) || pwaAuthT("loginFailed"), true);
+          return false;
+        })
+        .catch(function () {
+          setHint(fallbackMessage || pwaAuthT("networkRetry"), true);
+          return false;
+        });
+    }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
         authMode = "login";
@@ -216,58 +283,7 @@
           return;
         }
         setHint(pwaAuthT("checkingPassword"), false);
-        pokerAuthFetch(base + "/api/auth-pwa-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            typeof pokerApiAuthJsonBody === "function"
-              ? pokerApiAuthJsonBody({ action: "login", username: username, password: passwordValue() })
-              : { action: "login", username: username, password: passwordValue() }
-          ),
-        })
-          .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
-          .then(function (data) {
-            if (data && data.ok && data.user && data.pwaSession) {
-              saveLastUsername(username);
-              persistPassword();
-              var u = normalizeVerifiedUser(data.user, null);
-              if (
-                !pokerSavePwaTgSession(
-                  data.pwaSession,
-                  data.user,
-                  {
-                    gazettePlannerAccess: data.gazettePlannerAccess === true,
-                    adminAccess: data.adminAccess === true,
-                    adminReportAccess: data.adminReportAccess === true,
-                    authMethod: "telegram",
-                  }
-                )
-              )
-                pwaSessionPersistenceWarning();
-              pokerSavePwaGuestMode(false);
-              var _authPwaPassword = { status: "verified", user: u, error: null };
-              if (data.gazettePlannerAccess === true) _authPwaPassword.gazettePlannerAccess = true;
-              if (data.adminAccess === true) _authPwaPassword.adminAccess = true;
-              if (data.adminReportAccess === true) _authPwaPassword.adminReportAccess = true;
-              window.__pokerTelegramAuth = _authPwaPassword;
-              pokerSetAuthMethod("telegram");
-              (deps.updateHeaderGreeting || function () {})();
-              (deps.showAuthorized || function () {})(u);
-              (deps.loadHeaderAvatar || function () {})();
-              try {
-                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
-              } catch (ePwDispatch) {}
-              return;
-            }
-            if (data && data.passwordSetupRequired) {
-              switchTelegramToPasswordSetup();
-              return;
-            }
-            setHint((data && data.error) || pwaAuthT("loginFailed"), true);
-          })
-          .catch(function () {
-            setHint(pwaAuthT("networkRetry"), true);
-          });
+        telegramPasswordLogin(username, passwordValue(), "", true);
       });
     }
     if (registerModeBtn) {
@@ -356,42 +372,20 @@
       })
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: pwaAuthT("invalidServerResponse") }; }); })
         .then(function (data) {
-          if (data && data.ok && data.user && data.pwaSession) {
-            saveLastUsername(username);
-            persistPassword();
-            var u = normalizeVerifiedUser(data.user, null);
-            if (
-              !pokerSavePwaTgSession(
-                data.pwaSession,
-                data.user,
-                {
-                  gazettePlannerAccess: data.gazettePlannerAccess === true,
-                  adminAccess: data.adminAccess === true,
-                  adminReportAccess: data.adminReportAccess === true,
-                  authMethod: "telegram",
-                }
-              )
-            )
-              pwaSessionPersistenceWarning();
-            pokerSavePwaGuestMode(false);
-            var _authPwaCode = { status: "verified", user: u, error: null };
-            if (data.gazettePlannerAccess === true) _authPwaCode.gazettePlannerAccess = true;
-            if (data.adminAccess === true) _authPwaCode.adminAccess = true;
-            if (data.adminReportAccess === true) _authPwaCode.adminReportAccess = true;
-            window.__pokerTelegramAuth = _authPwaCode;
-            pokerSetAuthMethod("telegram");
-            (deps.updateHeaderGreeting || function () {})();
-            (deps.showAuthorized || function () {})(u);
-            (deps.loadHeaderAvatar || function () {})();
-            try {
-              window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
-            } catch (e1) {}
-            return;
+          if (completeTelegramPasswordAuth(data, username)) return true;
+          var err = (data && data.error) || pwaAuthT("codeNotVerified");
+          if (passwordValue() && /ист[её]к|expired/i.test(err)) {
+            return telegramPasswordLogin(username, passwordValue(), err, false);
           }
-          setHint((data && data.error) || pwaAuthT("codeNotVerified"), true);
+          setHint(err, true);
+          return false;
         })
         .catch(function () {
+          if (passwordValue()) {
+            return telegramPasswordLogin(username, passwordValue(), pwaAuthT("networkRetry"), false);
+          }
           setHint(pwaAuthT("networkRetry"), true);
+          return false;
         })
         .finally(function () {
           verifyInflight = false;
