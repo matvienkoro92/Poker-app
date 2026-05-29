@@ -713,6 +713,13 @@ function pokerSavePwaGuestMode(v) {
     try {
       window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
     } catch (eGuestAuth) {}
+    try {
+      delete window.__pokerChatDisplayName;
+    } catch (eGuestName) {
+      try {
+        window.__pokerChatDisplayName = "";
+      } catch (eGuestNameSet) {}
+    }
   } else {
     try {
       sessionStorage.removeItem(POKER_PWA_GUEST_SESSION_KEY);

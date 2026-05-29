@@ -32,6 +32,11 @@ function pokerWriteStoredProfileDisplayName(name) {
 }
 
 function pokerPreferredProfileDisplayName() {
+  try {
+    var auth = window.__pokerTelegramAuth;
+    if (auth && auth.status === "guest") return "";
+    if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return "";
+  } catch (eGuestProfileName) {}
   var profileName = "";
   try {
     profileName = String(window.__pokerChatDisplayName || "").trim();
@@ -90,7 +95,7 @@ function pokerAuthFetch(url, init) {
   function runAuthFetch(targetUrl) {
     return Promise.resolve().then(function () {
       if (typeof pokerFetchRetry === "function") {
-        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 15000, maxAttempts: 3, retryDelayMs: 500 });
+        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 7000, maxAttempts: 2, retryDelayMs: 350 });
       }
       return fetch(targetUrl, opts);
     });
