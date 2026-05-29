@@ -186,6 +186,49 @@
       if (registerSubmitBtn) registerSubmitBtn.style.display = registerMode ? "" : "none";
       if (registerBottomRow) registerBottomRow.style.display = registerMode ? "flex" : "none";
     }
+    function completeEmailPasswordAuth(data, email) {
+      if (!(data && data.ok && data.user && data.pwaSession)) return false;
+      saveLastEmail(email);
+      persistPassword();
+      var u = normalizeVerifiedUser(data.user, null);
+      try {
+        if (data.dtId) {
+          sessionStorage.setItem("poker_dt_id", data.dtId);
+          if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
+        }
+      } catch (eDtSave) {}
+      if (
+        !pokerSavePwaTgSession(
+          data.pwaSession,
+          data.user,
+          {
+            gazettePlannerAccess: data.gazettePlannerAccess === true,
+            adminAccess: data.adminAccess === true,
+            adminReportAccess: data.adminReportAccess === true,
+            authMethod: "email",
+          }
+        )
+      ) {
+        pwaSessionPersistenceWarning();
+      }
+      pokerSavePwaGuestMode(false);
+      window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
+      if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
+      if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
+      if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
+      pokerMaybeRememberMemberIdFromUser(u);
+      pokerSetAuthMethod("email");
+      (deps.updateHeaderGreeting || function () {})();
+      (deps.showAuthorized || function () {})(u);
+      (deps.loadHeaderAvatar || function () {})();
+      try {
+        window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
+      } catch (eEmailDispatch) {}
+      try {
+        pokerClearUiCachesAfterAuthSwitch();
+      } catch (eClearUiCaches) {}
+      return true;
+    }
     if (loginModeBtn) {
       loginModeBtn.addEventListener("click", function () {
         authMode = "login";
@@ -208,46 +251,7 @@
           })
           .then(function (pack) {
             var data = pack.data || {};
-            if (pack.res.ok && data.ok && data.user && data.pwaSession) {
-              saveLastEmail(email);
-              persistPassword();
-              var u = normalizeVerifiedUser(data.user, null);
-              try {
-                if (data.dtId) {
-                  sessionStorage.setItem("poker_dt_id", data.dtId);
-                  if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
-                }
-              } catch (eDtSaveLogin) {}
-              if (
-                !pokerSavePwaTgSession(
-                  data.pwaSession,
-                  data.user,
-                  {
-                    gazettePlannerAccess: data.gazettePlannerAccess === true,
-                    adminAccess: data.adminAccess === true,
-                    adminReportAccess: data.adminReportAccess === true,
-                    authMethod: "email",
-                  }
-                )
-              ) {
-                pwaSessionPersistenceWarning();
-              }
-              pokerSavePwaGuestMode(false);
-              window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-              if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
-              if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
-              if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
-              pokerMaybeRememberMemberIdFromUser(u);
-              pokerSetAuthMethod("email");
-              (deps.updateHeaderGreeting || function () {})();
-              (deps.showAuthorized || function () {})(u);
-              (deps.loadHeaderAvatar || function () {})();
-              try {
-                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
-              } catch (eEmailLoginDispatch) {}
-              try {
-                pokerClearUiCachesAfterAuthSwitch();
-              } catch (eClearUiCachesLogin) {}
+            if (pack.res.ok && completeEmailPasswordAuth(data, email)) {
               return;
             }
             if (data && data.passwordSetupRequired) {
@@ -335,10 +339,6 @@
       registerSubmitBtn.addEventListener("click", function () {
         var email = normalizeEmailInput();
         var code = String(codeInput && codeInput.value ? codeInput.value : "").trim();
-        if (!emailCodeConfirmed) {
-          if (verifyBtn) verifyBtn.click();
-          return;
-        }
         if (!passwordValue()) {
           setEmailHint(pwaAuthT("passwordRequired"), true);
           return;
@@ -365,46 +365,13 @@
           })
           .then(function (pack) {
             var data = pack.data || {};
-            if (pack.res.ok && data.ok && data.user && data.pwaSession) {
-              saveLastEmail(email);
-              persistPassword();
-              var u = normalizeVerifiedUser(data.user, null);
-              try {
-                if (data.dtId) {
-                  sessionStorage.setItem("poker_dt_id", data.dtId);
-                  if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
-                }
-              } catch (eDtSave) {}
-              if (
-                !pokerSavePwaTgSession(
-                  data.pwaSession,
-                  data.user,
-                  {
-                    gazettePlannerAccess: data.gazettePlannerAccess === true,
-                    adminAccess: data.adminAccess === true,
-                    adminReportAccess: data.adminReportAccess === true,
-                    authMethod: "email",
-                  }
-                )
-              ) {
-                pwaSessionPersistenceWarning();
-              }
-              pokerSavePwaGuestMode(false);
-              window.__pokerTelegramAuth = { status: "verified", user: u, error: null };
-              if (data.gazettePlannerAccess === true) window.__pokerTelegramAuth.gazettePlannerAccess = true;
-              if (data.adminAccess === true) window.__pokerTelegramAuth.adminAccess = true;
-              if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
-              pokerMaybeRememberMemberIdFromUser(u);
-              pokerSetAuthMethod("email");
-              (deps.updateHeaderGreeting || function () {})();
-              (deps.showAuthorized || function () {})(u);
-              (deps.loadHeaderAvatar || function () {})();
-              try {
-                window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
-              } catch (eEv) {}
-              try {
-                pokerClearUiCachesAfterAuthSwitch();
-              } catch (eClearUiCaches) {}
+            if (pack.res.ok && completeEmailPasswordAuth(data, email)) {
+              return;
+            }
+            if (pack.res.ok && data.ok && data.passwordRequired) {
+              emailCodeConfirmed = true;
+              setEmailHint(pwaAuthT("passwordRequired"), true);
+              if (passwordInput && passwordInput.focus) passwordInput.focus();
               return;
             }
             setEmailHint((data && data.error) || pwaAuthT("emailLoginFailed"), true);
