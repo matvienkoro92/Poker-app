@@ -1199,7 +1199,6 @@ async function testPokerPlusChipLogsAdminLinkedMailFallback(redis) {
 
   redis.h("poker_app:pokerplus_user_ids").set("ID000003", "p21-current");
   redis.h("poker_app:pokerplus_emails").set("ID000003", "cashier@example.test");
-  redis.h("poker_app:pokerplus_telegram_values").set("ID000003", "467511");
 
   const chipLogForms = [];
   global.fetch = async function fetchMock(url, opts) {
@@ -1311,12 +1310,12 @@ async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
   delete process.env.POKERPLUS_CHIP_LOG_OPERATOR_IDS;
   clearProjectRequireCache();
 
-  redis.h("poker_app:pokerplus_user_ids").set("IDOP001", "p21-one");
-  redis.h("poker_app:pokerplus_user_ids").set("IDOP002", "p21-two");
-  redis.h("poker_app:pokerplus_user_ids").set("IDOP003", "p21-three");
-  redis.h("poker_app:pokerplus_telegram_values").set("IDOP001", "369073");
-  redis.h("poker_app:pokerplus_telegram_values").set("IDOP002", "467511");
-  redis.h("poker_app:pokerplus_telegram_values").set("IDOP003", "208238");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP001", "369073");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP002", "467511");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP003", "208238");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP001", "2144406710");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP002", "1897001087");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP003", "ID400800");
   redis.h("poker_app:pokerplus_emails").set("IDOP001", "one@example.test");
   redis.h("poker_app:pokerplus_emails").set("IDOP002", "two@example.test");
   redis.h("poker_app:pokerplus_emails").set("IDOP003", "three@example.test");
@@ -1399,7 +1398,7 @@ async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
   }
 }
 
-async function testPokerPlusChipLogsLinkedMailFansOutMissingOperators(redis) {
+async function testPokerPlusChipLogsBoundPokerPlusIds(redis) {
   const previousEnv = {
     POKERPLUS_BASE_URL: process.env.POKERPLUS_BASE_URL,
     POKERPLUS_MERCHANT_ID: process.env.POKERPLUS_MERCHANT_ID,
@@ -1432,8 +1431,8 @@ async function testPokerPlusChipLogsLinkedMailFansOutMissingOperators(redis) {
   delete process.env.POKERPLUS_CHIP_LOG_OPERATOR_IDS;
   clearProjectRequireCache();
 
-  redis.h("poker_app:pokerplus_user_ids").set("IDOP001", "p21-one");
-  redis.h("poker_app:pokerplus_telegram_values").set("IDOP001", "369073");
+  redis.h("poker_app:pokerplus_user_ids").set("IDOP001", "369073");
+  redis.h("poker_app:pokerplus_telegram_values").set("IDOP001", "2144406710");
   redis.h("poker_app:pokerplus_emails").set("IDOP001", "one@example.test");
 
   const chipLogForms = [];
@@ -1485,17 +1484,17 @@ async function testPokerPlusChipLogsLinkedMailFansOutMissingOperators(redis) {
   try {
     const handler = loadHandler("pokerplus-chip-logs");
     const r = await call(handler, req("POST", {}, { pwaSession: sessions().admin, all: true, pageSize: 200 }));
-    assert.strictEqual(r.statusCode, 200, "admin chip logs can fan out a saved cashier mail to missing operators");
+    assert.strictEqual(r.statusCode, 200, "admin chip logs can use saved Poker21 user ids as cashier sources");
     assert.strictEqual(r.body.source, "cash-history-linked-bindings", "cash history still reports linked bindings source");
     assert.deepStrictEqual(
       chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
-      [["208238", "one@example.test"], ["369073", "one@example.test"], ["467511", "one@example.test"]],
-      "linked cashier mail is retried for every configured operator id",
+      [["369073", "one@example.test"]],
+      "linked cashier source uses Poker21 user id, not the saved Telegram user_app_id",
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId).sort(),
-      ["208238", "369073", "467511"],
-      "fanout returns rows for operators not linked to the current admin",
+      ["369073"],
+      "single linked cashier source does not borrow its mail for other operator ids",
     );
   } finally {
     Object.keys(previousEnv).forEach((key) => {
@@ -1947,7 +1946,7 @@ async function main() {
     ["pokerplus multi cashier chip logs", testPokerPlusChipLogsMultiCashierSources],
     ["pokerplus admin linked-mail cashier chip logs", testPokerPlusChipLogsAdminLinkedMailFallback],
     ["pokerplus admin linked operator mails chip logs", testPokerPlusChipLogsAdminLinkedOperatorMails],
-    ["pokerplus admin cashier mail fanout chip logs", testPokerPlusChipLogsLinkedMailFansOutMissingOperators],
+    ["pokerplus admin bound cashier source chip logs", testPokerPlusChipLogsBoundPokerPlusIds],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],
