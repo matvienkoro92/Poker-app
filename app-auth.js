@@ -466,6 +466,9 @@ function pokerReadPwaSessionRecordAsync(key) {
 }
 
 function pokerReadPwaTgSessionToken() {
+  try {
+    if (pokerReadPwaGuestMode()) return "";
+  } catch (eGuestToken) {}
   var o = null;
   try {
     o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY), false);
@@ -480,6 +483,9 @@ function pokerReadPwaTgSessionToken() {
 }
 
 function pokerReadPwaVkSessionToken() {
+  try {
+    if (pokerReadPwaGuestMode()) return "";
+  } catch (eGuestToken) {}
   var o = null;
   try {
     o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY), false);
@@ -574,6 +580,28 @@ function pokerSavePwaVkSession(token, userObj) {
   return ok;
 }
 
+function pokerClearPwaAuthSessions() {
+  try {
+    localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
+    localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
+  } catch (eLocalClear) {}
+  try {
+    sessionStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
+    sessionStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
+  } catch (eSessionClear) {}
+  try {
+    pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
+    pokerClearAuthCookie(POKER_PWA_VK_SESSION_KEY);
+  } catch (eCookieClear) {}
+  try {
+    pokerClearPwaSessionFromIdb(POKER_PWA_TG_SESSION_KEY);
+    pokerClearPwaSessionFromIdb(POKER_PWA_VK_SESSION_KEY);
+  } catch (eIdbClear) {}
+  try {
+    pokerSetAuthMethod("");
+  } catch (eMethodClear) {}
+}
+
 /** Полная запись сессии TG для восстановления при старте (localStorage и, при откате save, sessionStorage). */
 function pokerReadPwaTgSessionRecord() {
   try {
@@ -637,6 +665,12 @@ function pwaSessionPersistenceWarning() {
 /** Режим гостя только на время сессии вкладки (без записи в localStorage). */
 function pokerReadPwaGuestMode() {
   try {
+    try {
+      if (sessionStorage.getItem(POKER_PWA_GUEST_SESSION_KEY) === "1") {
+        window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+        return true;
+      }
+    } catch (eSessionGuestReadEarly) {}
     var resolvedUser =
       typeof getPokerResolvedTelegramUser === "function"
         ? getPokerResolvedTelegramUser()
@@ -661,12 +695,6 @@ function pokerReadPwaGuestMode() {
     }
     var auth = window.__pokerTelegramAuth;
     if (auth && auth.status === "guest") return true;
-    try {
-      if (sessionStorage.getItem(POKER_PWA_GUEST_SESSION_KEY) === "1") {
-        window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
-        return true;
-      }
-    } catch (eSessionGuestRead) {}
     return false;
   } catch (e) {
     return false;
@@ -675,10 +703,21 @@ function pokerReadPwaGuestMode() {
 
 /** false — сбросить гостя; true — запомнить гостя до закрытия вкладки/PWA-сессии. */
 function pokerSavePwaGuestMode(v) {
-  try {
-    if (v) sessionStorage.setItem(POKER_PWA_GUEST_SESSION_KEY, "1");
-    else sessionStorage.removeItem(POKER_PWA_GUEST_SESSION_KEY);
-  } catch (e) {}
+  if (v) {
+    try {
+      pokerClearPwaAuthSessions();
+    } catch (eClearSessions) {}
+    try {
+      sessionStorage.setItem(POKER_PWA_GUEST_SESSION_KEY, "1");
+    } catch (eGuestSession) {}
+    try {
+      window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+    } catch (eGuestAuth) {}
+  } else {
+    try {
+      sessionStorage.removeItem(POKER_PWA_GUEST_SESSION_KEY);
+    } catch (eGuestSessionClear) {}
+  }
   try {
     if (!v) localStorage.removeItem(POKER_PWA_GUEST_KEY);
   } catch (e2) {}
@@ -713,6 +752,9 @@ function pokerShouldPreferSavedPwaAuth(tg0) {
 
 /** Для запросов к API: Mini App — initData; PWA — pwaSession (Telegram) или pwaVkSession (ВКонтакте) */
 function pokerApiAuthQuery(lead) {
+  try {
+    if (pokerReadPwaGuestMode()) return lead + "initData=";
+  } catch (eGuestQuery) {}
   var tok = pokerReadPwaTgSessionToken();
   var vkt = pokerReadPwaVkSessionToken();
   try {
@@ -770,6 +812,14 @@ function pokerChatDisplayImageSrc(raw) {
 
 function pokerApiAuthJsonBody(extra) {
   var o = Object.assign({}, extra || {});
+  try {
+    if (pokerReadPwaGuestMode()) {
+      delete o.initData;
+      delete o.pwaSession;
+      delete o.pwaVkSession;
+      return o;
+    }
+  } catch (eGuestBody) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   var tok = pokerReadPwaTgSessionToken();
   var vkt = pokerReadPwaVkSessionToken();
@@ -877,6 +927,9 @@ function pokerCanSyncGuestProfileToServer() {
 }
 
 function pokerApiHasCredential() {
+  try {
+    if (pokerReadPwaGuestMode()) return false;
+  } catch (eGuestCred) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
 }

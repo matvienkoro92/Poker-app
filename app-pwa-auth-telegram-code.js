@@ -208,17 +208,27 @@
     }
     function completeTelegramPasswordAuth(data, username) {
       if (!(data && data.ok && data.user && data.pwaSession)) return false;
-      saveLastUsername(username);
-      persistPassword();
+      try {
+        saveLastUsername(username);
+      } catch (eSaveLastUsername) {}
+      try {
+        persistPassword();
+      } catch (ePersistPassword) {}
       try {
         if (data.dtId) {
           sessionStorage.setItem("poker_dt_id", data.dtId);
           if (typeof localStorage !== "undefined") localStorage.setItem("poker_dt_id", data.dtId);
         }
       } catch (eDtSave) {}
-      var u = normalizeVerifiedUser(data.user, null);
-      if (
-        !pokerSavePwaTgSession(
+      var u = null;
+      try {
+        u = normalizeVerifiedUser(data.user, null);
+      } catch (eNormalizeUser) {
+        u = data.user || null;
+      }
+      var savedSession = false;
+      try {
+        savedSession = pokerSavePwaTgSession(
           data.pwaSession,
           data.user,
           {
@@ -227,22 +237,40 @@
             adminReportAccess: data.adminReportAccess === true,
             authMethod: "telegram",
           }
-        )
-      )
-        pwaSessionPersistenceWarning();
-      pokerSavePwaGuestMode(false);
+        );
+      } catch (eSaveSession) {
+        savedSession = false;
+      }
+      if (!savedSession) {
+        try {
+          pwaSessionPersistenceWarning();
+        } catch (ePersistWarning) {}
+      }
+      try {
+        pokerSavePwaGuestMode(false);
+      } catch (eClearGuest) {}
       var nextAuth = { status: "verified", user: u, error: null };
       if (data.gazettePlannerAccess === true) nextAuth.gazettePlannerAccess = true;
       if (data.adminAccess === true) nextAuth.adminAccess = true;
       if (data.adminReportAccess === true) nextAuth.adminReportAccess = true;
-      window.__pokerTelegramAuth = nextAuth;
+      try {
+        window.__pokerTelegramAuth = nextAuth;
+      } catch (eSetAuth) {}
       try {
         if (typeof pokerMaybeRememberMemberIdFromUser === "function") pokerMaybeRememberMemberIdFromUser(u);
       } catch (eRememberMember) {}
-      pokerSetAuthMethod("telegram");
-      (deps.updateHeaderGreeting || function () {})();
-      (deps.showAuthorized || function () {})(u);
-      (deps.loadHeaderAvatar || function () {})();
+      try {
+        pokerSetAuthMethod("telegram");
+      } catch (eSetMethod) {}
+      try {
+        (deps.updateHeaderGreeting || function () {})();
+      } catch (eUpdateGreeting) {}
+      try {
+        (deps.showAuthorized || function () {})(u);
+      } catch (eShowAuthorized) {}
+      try {
+        (deps.loadHeaderAvatar || function () {})();
+      } catch (eLoadAvatar) {}
       try {
         window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true } }));
       } catch (eDispatch) {}
@@ -328,9 +356,14 @@
           .catch(function () {
             setHint(pwaAuthT("networkRetry"), true);
           })
-          .finally(function () {
+          .then(function (result) {
             sendBtn.disabled = false;
             sendBtn.textContent = pwaAuthT("sendCode");
+            return result;
+          }, function (err) {
+            sendBtn.disabled = false;
+            sendBtn.textContent = pwaAuthT("sendCode");
+            return Promise.reject(err);
           });
       });
     }
@@ -387,7 +420,7 @@
           setHint(pwaAuthT("networkRetry"), true);
           return false;
         })
-        .finally(function () {
+        .then(function (result) {
           verifyInflight = false;
           if (codeInput) codeInput.disabled = false;
           if (verifyBtn) {
@@ -395,6 +428,16 @@
             verifyBtn.textContent = pwaAuthT("done");
           }
           if (registerSubmitBtn) registerSubmitBtn.disabled = false;
+          return result;
+        }, function (err) {
+          verifyInflight = false;
+          if (codeInput) codeInput.disabled = false;
+          if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = pwaAuthT("done");
+          }
+          if (registerSubmitBtn) registerSubmitBtn.disabled = false;
+          return Promise.reject(err);
         });
     }
     if (verifyBtn) {
