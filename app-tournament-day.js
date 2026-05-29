@@ -377,7 +377,7 @@ function renderHomeLiveTournament(now) {
   var timerEl = document.getElementById("homeLiveTournamentTimer");
   var buyinEl = document.getElementById("homeLiveTournamentBuyin");
   var progressEl = document.getElementById("homeLiveTournamentProgress");
-  if (titleEl) titleEl.textContent = isLive ? "Сейчас идет" : "Скоро стартует";
+  if (titleEl) titleEl.textContent = isLive ? "Идет сейчас" : "Скоро стартует";
   if (badgeEl) badgeEl.innerHTML = '<span aria-hidden="true"></span>' + (isLive ? "LIVE" : "СКОРО");
   if (nameEl) nameEl.textContent = item.name || "Турнир";
   if (roomEl) roomEl.textContent = item.category || "Poker21+";

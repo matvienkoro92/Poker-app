@@ -474,8 +474,32 @@ function initEquilator() {
     buildOppSlots(collectOppCards());
   }
   function refreshRangeUi() {
+    clearRangePanelDock();
     renderHeroRangeControls();
     refreshOpponentRangeUi();
+  }
+  function getRangeHandsSection(container) {
+    if (container && container.closest) return container.closest(".equilator-hands-section");
+    return (heroRangeContainer && heroRangeContainer.closest) ? heroRangeContainer.closest(".equilator-hands-section") : null;
+  }
+  function getRangePanelDock(container) {
+    var handsSection = getRangeHandsSection(container);
+    if (!handsSection) return null;
+    var dock = handsSection.querySelector(".equilator-range-panel-dock");
+    if (!dock) {
+      dock = document.createElement("div");
+      dock.className = "equilator-range-panel-dock";
+      dock.setAttribute("data-equilator-range-panel-dock", "");
+      var row = handsSection.querySelector(".equilator-hands-row");
+      if (row && row.parentNode === handsSection) handsSection.insertBefore(dock, row.nextSibling);
+      else handsSection.appendChild(dock);
+    }
+    return dock;
+  }
+  function clearRangePanelDock() {
+    var handsSection = getRangeHandsSection(heroRangeContainer || oppCardsContainer);
+    var dock = handsSection ? handsSection.querySelector(".equilator-range-panel-dock") : null;
+    if (dock) dock.innerHTML = "";
   }
   function renderOpponentRangeGrid(grid, target) {
     if (!grid) return;
@@ -549,6 +573,18 @@ function initEquilator() {
     panel.setAttribute("data-equilator-range-panel", target);
     panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
     if (isOpen) {
+      var closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "equilator-range-close-icon";
+      closeBtn.setAttribute("aria-label", opts.closeLabel || "Закрыть выбор диапазона");
+      closeBtn.textContent = "×";
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openRangeTarget = null;
+        refreshRangeUi();
+      });
+      panel.appendChild(closeBtn);
       var summary = document.createElement("div");
       summary.className = "equilator-opp-range-summary";
       summary.textContent = rangeSummaryText(map, 7);
@@ -585,13 +621,15 @@ function initEquilator() {
       panel.appendChild(grid);
       renderOpponentRangeGrid(grid, target);
     }
-    container.appendChild(panel);
+    var panelHost = isOpen ? getRangePanelDock(container) : null;
+    (panelHost || container).appendChild(panel);
   }
   function renderHeroRangeControls() {
     if (!heroRangeContainer) return;
     heroRangeContainer.innerHTML = "";
     appendRangeControls(heroRangeContainer, "hero", {
       toggleLabel: "Задать ваш диапазон рук",
+      closeLabel: "Закрыть выбор вашего диапазона",
       presetsLabel: "Быстрый выбор вашего диапазона",
       gridLabel: "Матрица ваших стартовых рук"
     });
@@ -600,6 +638,7 @@ function initEquilator() {
     appendRangeControls(row, "opp" + oppIdx, {
       openClass: "equilator-opp-row--range-open",
       toggleLabel: "Задать диапазон рук оппонента " + (oppIdx + 1),
+      closeLabel: "Закрыть выбор диапазона оппонента " + (oppIdx + 1),
       presetsLabel: "Быстрый выбор диапазона оппонента " + (oppIdx + 1),
       gridLabel: "Матрица стартовых рук оппонента " + (oppIdx + 1)
     });
@@ -624,6 +663,7 @@ function initEquilator() {
   }
   function buildOppSlots(preservedCards) {
     if (!oppCardsContainer) return;
+    if (openRangeTarget !== "hero") clearRangePanelDock();
     ensureOppRangeState();
     var openIdx = rangeTargetIndex(openRangeTarget);
     if (openRangeTarget && openRangeTarget !== "hero" && (openIdx < 0 || openIdx >= numOpponents)) openRangeTarget = null;
@@ -688,8 +728,8 @@ function initEquilator() {
         cardsWrap.appendChild(wrap);
       }
       row.appendChild(cardsWrap);
-      appendOpponentRangeControls(row, o);
       oppCardsContainer.appendChild(row);
+      appendOpponentRangeControls(row, o);
     }
   }
   if (addPlayerBtn) addPlayerBtn.addEventListener("click", function (e) {

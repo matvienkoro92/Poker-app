@@ -969,17 +969,14 @@
   gap: 9px;
   min-height: 104px;
   width: min(690px, 75%);
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   padding: 18px 28px 18px 128px;
   border-radius: 16px;
-  border: 2px solid rgba(255, 177, 42, 0.94);
+  border: 0;
   background:
     linear-gradient(180deg, rgba(255, 193, 77, 0.14), rgba(0, 0, 0, 0.08)),
     rgba(3, 5, 7, 0.78);
-  box-shadow:
-    inset 0 0 0 2px rgba(120, 54, 10, 0.68),
-    inset 0 0 34px rgba(255, 144, 32, 0.16),
-    0 0 19px rgba(255, 172, 44, 0.58);
+  box-shadow: none;
   color: #f4eee3;
   font-size: clamp(22px, 3.2vw, 33px);
   font-weight: 900;
@@ -1159,13 +1156,17 @@
   text-wrap: balance;
 }
 
+.daily-poker__prizes .daily-poker__prize .daily-poker__prize-title--two-line {
+  font-size: clamp(16px, 13cqi, 36px);
+}
+
 .daily-poker__prizes .daily-poker__prize .daily-poker__prize-line {
   display: block;
   min-width: 0;
   max-width: 100%;
   margin: clamp(2px, 2cqi, 6px) 0 0;
   color: #fff1c9;
-  font-size: clamp(11px, 8.5cqi, 24px);
+  font-size: clamp(10px, 7.6cqi, 22px);
   font-weight: 900;
   line-height: 1.05;
   text-align: center;
@@ -1175,7 +1176,7 @@
 
 .daily-poker__prizes .daily-poker__prize .daily-poker__prize-line b {
   color: var(--daily-poker-prize-accent);
-  font-size: 1.22em;
+  font-size: 1.16em;
   font-weight: 950;
   text-shadow:
     0 0 8px color-mix(in srgb, var(--daily-poker-prize-accent) 72%, transparent),
@@ -1196,6 +1197,10 @@
   line-height: 0.98;
   text-align: center;
   text-shadow: 0 0 7px color-mix(in srgb, var(--daily-poker-prize-accent) 62%, transparent);
+}
+
+.daily-poker__prizes .daily-poker__prize small:empty {
+  display: none;
 }
 
 .daily-poker__status-row {

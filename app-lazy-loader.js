@@ -10,9 +10,6 @@
   var VIEW_DOMAINS = {
     "hall-of-fame": ["hall"],
     "video-lessons": ["video"],
-    "learn-play-hub": ["video"],
-    streams: ["streams"],
-    equilator: ["tools"],
     "winter-rating": ["rating-winter"],
     "poker-tasks": ["club-tasks"],
     "player-crm": ["player-crm"]

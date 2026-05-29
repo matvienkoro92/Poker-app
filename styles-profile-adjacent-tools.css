@@ -391,7 +391,10 @@
   --equilator-orange: #ff6a00;
   --equilator-red: #7f1d0d;
   --equilator-panel: #030706;
+  box-sizing: border-box;
+  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px);
   position: relative;
+  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + 18px);
 }
 .view[data-view="equilator"] .bonus-game-back {
   position: absolute;
@@ -409,20 +412,21 @@
 .equilator-hero-art {
   position: relative;
   height: clamp(188px, 54vw, 260px);
-  margin: -4px -8px clamp(-86px, -19vw, -70px);
-  border-radius: 24px 24px 10px 10px;
+  margin: -4px -8px clamp(-102px, -23vw, -84px);
+  border-radius: 24px 24px 0 0;
   border: 1px solid rgba(245, 158, 11, 0.28);
+  border-bottom: 0;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 42%, rgba(3, 7, 6, 0.46) 76%, rgba(3, 7, 6, 0.98) 100%),
     url("./assets/equilator-hero-monkey.jpg") center top / cover no-repeat,
     #010303;
-  box-shadow: inset 0 -52px 52px rgba(0, 0, 0, 0.72), inset 0 0 72px rgba(245, 158, 11, 0.12), 0 12px 30px rgba(0, 0, 0, 0.36);
+  box-shadow: inset 0 -78px 72px rgba(0, 5, 7, 0.98), inset 0 0 72px rgba(245, 158, 11, 0.12), 0 12px 30px rgba(0, 0, 0, 0.36);
 }
 .view[data-view="equilator"] > .title {
   position: relative;
   z-index: 2;
-  margin: 0 12px 8px;
+  margin: 0 12px 0;
   color: #ffc44d;
   font-size: 44px;
   font-weight: 900;
@@ -432,27 +436,17 @@
   text-transform: uppercase;
   text-shadow: 0 2px 0 #5f2306, 0 0 18px rgba(245, 158, 11, 0.76), 0 0 34px rgba(255, 106, 0, 0.44);
 }
-.equilator-intro {
-  position: relative;
-  z-index: 2;
-  max-width: 360px;
-  margin: 0 auto 14px;
-  font-size: 17px;
-  font-weight: 700;
-  color: rgba(255, 239, 204, 0.78);
-  line-height: 1.38;
-  text-align: center;
-}
 .equilator-form {
   position: relative;
-  margin: 0 2px 24px;
-  padding: 18px 14px 20px;
+  margin: -1px -8px 24px;
+  padding: 22px 14px 20px;
   background:
-    radial-gradient(circle at 50% 5%, rgba(255, 106, 0, 0.14), transparent 28%),
-    linear-gradient(180deg, rgba(13, 18, 18, 0.98), rgba(0, 5, 7, 0.98));
-  border: 1px solid rgba(245, 158, 11, 0.68);
-  border-radius: 24px;
-  box-shadow: 0 0 0 2px rgba(91, 48, 8, 0.48), inset 0 0 0 1px rgba(255, 209, 102, 0.12), 0 0 28px rgba(255, 106, 0, 0.16);
+    radial-gradient(circle at 50% 0%, rgba(255, 106, 0, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(3, 7, 6, 0.98) 0%, rgba(13, 18, 18, 0.98) 16%, rgba(0, 5, 7, 0.98) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.52);
+  border-top: 0;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 0 0 2px rgba(91, 48, 8, 0.48), inset 0 16px 28px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 209, 102, 0.08), 0 0 28px rgba(255, 106, 0, 0.14);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -534,13 +528,10 @@
   width: 100%;
 }
 .equilator-hands-section--range-open .equilator-hands-row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.equilator-hands-section--range-open .equilator-hero-block,
-.equilator-hands-section--range-open .equilator-opp-block {
-  flex: 1 1 100%;
-  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 18px;
 }
 .equilator-hands-section--range-open .equilator-opp-list {
   align-items: stretch;
@@ -551,6 +542,15 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+}
+.equilator-range-panel-dock {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 18px;
+}
+.equilator-range-panel-dock:empty {
+  display: none;
 }
 .equilator-add-player-section {
   display: flex;
@@ -678,6 +678,7 @@
   opacity: 0.76;
 }
 .equilator-opp-range-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -698,11 +699,41 @@
   display: none;
 }
 .equilator-opp-range-summary {
+  box-sizing: border-box;
+  min-height: 32px;
+  padding-right: 42px;
   color: rgba(255, 239, 204, 0.76);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
   text-align: right;
+}
+.equilator-range-close-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #f8d98d;
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid rgba(245, 158, 11, 0.48);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 14px rgba(0, 0, 0, 0.28);
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+}
+.equilator-range-close-icon:hover {
+  color: #ffe8a3;
+  background: rgba(36, 22, 6, 0.78);
+  border-color: rgba(255, 196, 77, 0.76);
+  transform: translateY(-1px);
 }
 .equilator-opp-range-panel .equilator-range-presets {
   justify-content: flex-end;
@@ -904,14 +935,26 @@
   display: none !important;
 }
 .equilator-board-row {
+  --equilator-board-gap: clamp(4px, 1.8vw, 10px);
+  --equilator-board-card-width: min(62px, calc((100% - 4 * var(--equilator-board-gap)) / 5));
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--equilator-board-gap);
   margin-bottom: 8px;
 }
 .equilator-board-row:last-of-type { margin-bottom: 0; }
+.equilator-board-row .equilator-slot-wrap {
+  flex: 0 0 var(--equilator-board-card-width);
+  min-width: 0;
+}
+.equilator-board-row .equilator-card-slot {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 31 / 44;
+}
 .equilator-board-label {
   display: none;
 }
@@ -1246,19 +1289,16 @@
   .equilator-hero-art {
     min-height: 184px;
     margin-inline: -10px;
-    margin-bottom: -74px;
+    margin-bottom: -92px;
   }
   .view[data-view="equilator"] > .title {
     margin-inline: 6px;
     font-size: 37px;
   }
-  .equilator-intro {
-    max-width: 320px;
-    font-size: 15px;
-  }
   .equilator-form {
     padding: 16px 10px 18px;
-    border-radius: 20px;
+    margin-inline: -10px;
+    border-radius: 0 0 20px 20px;
     gap: 16px;
   }
   .equilator-section__title,
