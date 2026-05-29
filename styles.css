@@ -452,9 +452,43 @@ html[data-theme="gold"] #app.app > .card > .card__header {
   min-width: 0;
 }
 
-#app.app > .card > .card__header .header-profile-summary,
 #app.app > .card > .card__header .header-notification-btn {
   display: none !important;
+}
+
+#app.app > .card > .card__header .header-profile-summary {
+  display: none !important;
+}
+
+html.app-view-home #app.app > .card > .card__header .header-profile-summary,
+body[data-view="home"] #app.app > .card > .card__header .header-profile-summary,
+#app.app.app--view-home > .card > .card__header .header-profile-summary {
+  display: flex !important;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  max-width: clamp(104px, 36vw, 152px);
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+}
+
+html.app-view-home #app.app > .card > .card__header .logo.logo--welcome,
+body[data-view="home"] #app.app > .card > .card__header .logo.logo--welcome,
+#app.app.app--view-home > .card > .card__header .logo.logo--welcome {
+  flex: 1 1 0;
+}
+
+html.app-view-home #app.app > .card > .card__header .header-actions,
+body[data-view="home"] #app.app > .card > .card__header .header-actions,
+#app.app.app--view-home > .card > .card__header .header-actions {
+  flex: 0 1 clamp(156px, 43vw, 198px);
+}
+
+html.app-view-home #app.app > .card > .card__header .header-greeting,
+body[data-view="home"] #app.app > .card > .card__header .header-greeting,
+#app.app.app--view-home > .card > .card__header .header-greeting {
+  max-width: 100%;
 }
 
 #app.app > .card > .card__header .header-actions__row {
