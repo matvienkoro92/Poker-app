@@ -18,7 +18,20 @@ function initPwaAuthRestoreRuntime(deps) {
   var tgSessionKey = deps.tgSessionKey || (typeof POKER_PWA_TG_SESSION_KEY !== "undefined" ? POKER_PWA_TG_SESSION_KEY : "");
   var vkSessionKey = deps.vkSessionKey || (typeof POKER_PWA_VK_SESSION_KEY !== "undefined" ? POKER_PWA_VK_SESSION_KEY : "");
 
+  function shouldKeepGuestMode() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.status === "guest") return true;
+    } catch (eAuthGuest) {}
+    try {
+      return typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+    } catch (eGuestMode) {
+      return false;
+    }
+  }
+
   function restoreSavedPwaAuthBeforeGate() {
+    if (shouldKeepGuestMode()) return false;
     try {
       if (typeof pokerReadPwaTgSessionRecord === "function") {
         var tgRecord = pokerReadPwaTgSessionRecord();
@@ -52,6 +65,7 @@ function initPwaAuthRestoreRuntime(deps) {
 
 
   function attemptPwaSideAuthRestore(hideBootOverlay) {
+    if (shouldKeepGuestMode()) return false;
     if (tryFinishVkOAuth()) return true;
     if (tryFinishTelegramLoginRedirect()) return true;
     try {
@@ -96,6 +110,7 @@ function initPwaAuthRestoreRuntime(deps) {
 
   function restorePwaSideAuthRecord(record, opts) {
     var options = opts || {};
+    if (shouldKeepGuestMode()) return false;
     if (!record || !record.user || record.user.id == null || !record.token) return false;
     var u = normalizeVerifiedUser(record.user, null);
     var _authRestore = { status: "verified", user: u, error: null };
@@ -173,6 +188,12 @@ function initPwaAuthRestoreRuntime(deps) {
       updateHeaderGreeting();
     } catch (eHdr) {}
     function finishPwaStandaloneIdentifyUi() {
+      if (shouldKeepGuestMode()) {
+        try {
+          setPwaAuthIdentifyingPhase(false);
+        } catch (eGuestPhase) {}
+        return;
+      }
       try {
         showPwaStandaloneEntryScreen();
       } catch (ePwaFlow) {
@@ -193,6 +214,10 @@ function initPwaAuthRestoreRuntime(deps) {
       }
     }
     attemptPwaSideAuthRestoreAsync(hideBootOverlay).then(function (restored) {
+      if (shouldKeepGuestMode()) {
+        setPwaAuthIdentifyingPhase(false);
+        return;
+      }
       if (restored) {
         setPwaAuthIdentifyingPhase(false);
         return;

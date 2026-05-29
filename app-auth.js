@@ -272,6 +272,7 @@ var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 var POKER_PWA_VK_SESSION_KEY = "poker_pwa_vk_session";
 /** PWA: режим «гость» (без авторизации, но можно смотреть). */
 var POKER_PWA_GUEST_KEY = "poker_pwa_guest";
+var POKER_PWA_GUEST_SESSION_KEY = "poker_pwa_guest_session";
 var POKER_PWA_IDB_NAME = "poker_pwa_auth";
 var POKER_PWA_IDB_STORE = "sessions";
 var POKER_PWA_AUTH_COOKIE_MAX_AGE_SEC = 15552000;
@@ -633,7 +634,7 @@ function pwaSessionPersistenceWarning() {
   } catch (e2) {}
 }
 
-/** Режим гостя только на время сессии вкладки (без записи в storage). */
+/** Режим гостя только на время сессии вкладки (без записи в localStorage). */
 function pokerReadPwaGuestMode() {
   try {
     var resolvedUser =
@@ -659,17 +660,28 @@ function pokerReadPwaGuestMode() {
       return false;
     }
     var auth = window.__pokerTelegramAuth;
-    return !!(auth && auth.status === "guest");
+    if (auth && auth.status === "guest") return true;
+    try {
+      if (sessionStorage.getItem(POKER_PWA_GUEST_SESSION_KEY) === "1") {
+        window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
+        return true;
+      }
+    } catch (eSessionGuestRead) {}
+    return false;
   } catch (e) {
     return false;
   }
 }
 
-/** false — сбросить устаревший флаг в localStorage (раньше гость сохранялся там). */
+/** false — сбросить гостя; true — запомнить гостя до закрытия вкладки/PWA-сессии. */
 function pokerSavePwaGuestMode(v) {
   try {
-    if (!v) localStorage.removeItem(POKER_PWA_GUEST_KEY);
+    if (v) sessionStorage.setItem(POKER_PWA_GUEST_SESSION_KEY, "1");
+    else sessionStorage.removeItem(POKER_PWA_GUEST_SESSION_KEY);
   } catch (e) {}
+  try {
+    if (!v) localStorage.removeItem(POKER_PWA_GUEST_KEY);
+  } catch (e2) {}
 }
 
 function pokerHasLiveTelegramWebViewTransport() {

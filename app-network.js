@@ -10,23 +10,39 @@ var POKER_FETCH_TIMEOUT_MS = 20000;
  */
 function pokerFetchWithTimeout(url, init, timeoutMs) {
   var ms = timeoutMs != null && timeoutMs > 0 ? timeoutMs : POKER_FETCH_TIMEOUT_MS;
-  var ac = new AbortController();
-  var timer = setTimeout(function () {
-    try {
-      ac.abort();
-    } catch (eAb) {}
-  }, ms);
+  var ac = typeof AbortController !== "undefined" ? new AbortController() : null;
+  var timer = null;
   var baseInit = init || {};
   var merged = {};
   var k;
   for (k in baseInit) {
     if (Object.prototype.hasOwnProperty.call(baseInit, k)) merged[k] = baseInit[k];
   }
-  merged.signal = ac.signal;
-  return fetch(url, merged).finally(function () {
+  if (ac) merged.signal = ac.signal;
+  return new Promise(function (resolve, reject) {
+    timer = setTimeout(function () {
+      try {
+        if (ac) ac.abort();
+      } catch (eAb) {}
+      var err = new Error("fetch timeout");
+      err.name = "AbortError";
+      reject(err);
+    }, ms);
+    try {
+      fetch(url, merged).then(resolve, reject);
+    } catch (eFetch) {
+      reject(eFetch);
+    }
+  }).then(function (res) {
     try {
       clearTimeout(timer);
     } catch (eCl) {}
+    return res;
+  }, function (err) {
+    try {
+      clearTimeout(timer);
+    } catch (eCl2) {}
+    return Promise.reject(err);
   });
 }
 
@@ -45,7 +61,9 @@ function pokerFetchRetry(url, init, opts) {
     });
   }
   function run(attemptIndex) {
-    return pokerFetchWithTimeout(url, init, timeoutMs).catch(function (err) {
+    return Promise.resolve().then(function () {
+      return pokerFetchWithTimeout(url, init, timeoutMs);
+    }).catch(function (err) {
       if (attemptIndex + 1 < maxAttempts) {
         return sleep(retryDelayMs * (attemptIndex + 1)).then(function () {
           return run(attemptIndex + 1);

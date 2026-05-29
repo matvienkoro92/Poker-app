@@ -67,11 +67,38 @@ function getTelegramAuthApiBase() {
 }
 
 function pokerAuthFetch(url, init) {
-  var opts = Object.assign({ cache: "no-store" }, init || {});
-  if (typeof pokerFetchRetry === "function") {
-    return pokerFetchRetry(url, opts, { timeoutMs: 15000, maxAttempts: 3, retryDelayMs: 500 });
+  var opts = {};
+  var source = init || {};
+  var key;
+  opts.cache = "no-store";
+  for (key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) opts[key] = source[key];
   }
-  return fetch(url, opts);
+  function sameOriginFallbackUrl(rawUrl) {
+    try {
+      if (isPwaAuthLocalHost()) return "";
+      if (typeof window === "undefined" || !window.location || !window.location.origin) return "";
+      var parsed = new URL(rawUrl, window.location.href);
+      if (parsed.origin === window.location.origin) return "";
+      if (parsed.pathname.indexOf("/api/") !== 0) return "";
+      return window.location.origin.replace(/\/$/, "") + parsed.pathname + parsed.search;
+    } catch (eFallbackUrl) {
+      return "";
+    }
+  }
+  var fallbackUrl = sameOriginFallbackUrl(url);
+  function runAuthFetch(targetUrl) {
+    return Promise.resolve().then(function () {
+      if (typeof pokerFetchRetry === "function") {
+        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 15000, maxAttempts: 3, retryDelayMs: 500 });
+      }
+      return fetch(targetUrl, opts);
+    });
+  }
+  return runAuthFetch(url).catch(function (err) {
+    if (!fallbackUrl) return Promise.reject(err);
+    return runAuthFetch(fallbackUrl);
+  });
 }
 
 function isPwaAuthLocalHost() {

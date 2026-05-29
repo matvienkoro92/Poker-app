@@ -71,7 +71,7 @@ function initPwaAuthEntryScreenRuntime(deps) {
     });
     if (guestBtn) {
       guestBtn.addEventListener("click", function () {
-        if (typeof deps.pokerSavePwaGuestMode === "function") deps.pokerSavePwaGuestMode(false);
+        if (typeof deps.pokerSavePwaGuestMode === "function") deps.pokerSavePwaGuestMode(true);
         try {
           window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
         } catch (eAuth) {}
