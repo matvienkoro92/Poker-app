@@ -1317,8 +1317,8 @@ async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
   redis.h("poker_app:pokerplus_telegram_values").set("IDOP002", "1897001087");
   redis.h("poker_app:pokerplus_telegram_values").set("IDOP003", "ID400800");
   redis.h("poker_app:pokerplus_emails").set("IDOP001", "one@example.test");
-  redis.h("poker_app:pokerplus_emails").set("IDOP002", "two@example.test");
   redis.h("poker_app:pokerplus_emails").set("IDOP003", "three@example.test");
+  redis.h("poker_app:email_originals").set("IDOP002", "two@example.test");
 
   const chipLogForms = [];
   global.fetch = async function fetchMock(url, opts) {
@@ -1382,7 +1382,7 @@ async function testPokerPlusChipLogsAdminLinkedOperatorMails(redis) {
     assert.deepStrictEqual(
       chipLogForms.map((form) => [form.user_app_id, form.mail]).sort(),
       [["208238", "three@example.test"], ["369073", "one@example.test"], ["467511", "two@example.test"], ["ID400800", "three@example.test"]],
-      "linked operator sources request exact pairs and saved dt source variants only",
+      "linked operator sources request exact pairs, app-email fallbacks, and saved dt source variants only",
     );
     assert.deepStrictEqual(
       r.body.chipLogs.list.map((row) => row.operUserId).sort(),
