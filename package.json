@@ -23,6 +23,7 @@
     "redis:cleanup": "node scripts/redis-cleanup-backfill.js",
     "redis:cleanup:apply": "node scripts/redis-cleanup-backfill.js --apply",
     "assets:optimize": "node scripts/optimize-assets.js",
+    "assets:compress-heavy": "node scripts/compress-heavy-images.js",
     "start": "npx serve .",
     "backup": "./scripts/backup.sh",
     "rating:ocr": "node scripts/rating-ocr-prefill.js",
