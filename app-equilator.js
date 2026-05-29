@@ -534,6 +534,11 @@ function initEquilator() {
       }
     }
   }
+  function closeRangePanel() {
+    openRangeTarget = null;
+    refreshRangeUi();
+    scheduleEquilatorRangeScrollRefresh();
+  }
   function appendRangeControls(container, target, options) {
     var opts = options || {};
     var map = getRangeMap(target);
@@ -551,7 +556,7 @@ function initEquilator() {
     title.textContent = "Задать диапозон";
     var meta = document.createElement("span");
     meta.className = "equilator-opp-range-toggle__meta";
-    meta.textContent = hasRange ? rangeSummaryText(map, 3) : "не выбран";
+    meta.textContent = hasRange ? rangeSummaryText(map, 6) : "не выбран";
     toggle.appendChild(title);
     toggle.appendChild(meta);
     toggle.addEventListener("click", function (e) {
@@ -581,8 +586,7 @@ function initEquilator() {
       closeBtn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        openRangeTarget = null;
-        refreshRangeUi();
+        closeRangePanel();
       });
       panel.appendChild(closeBtn);
       var summary = document.createElement("div");
@@ -620,6 +624,15 @@ function initEquilator() {
       grid.setAttribute("aria-label", opts.gridLabel || "Матрица стартовых рук");
       panel.appendChild(grid);
       renderOpponentRangeGrid(grid, target);
+      var acceptBtn = document.createElement("button");
+      acceptBtn.type = "button";
+      acceptBtn.className = "equilator-range-accept";
+      acceptBtn.textContent = "Принять";
+      acceptBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        closeRangePanel();
+      });
+      panel.appendChild(acceptBtn);
     }
     var panelHost = isOpen ? getRangePanelDock(container) : null;
     (panelHost || container).appendChild(panel);

@@ -203,6 +203,12 @@
   display: none !important;
 }
 
+.header-more-menu .header-menu-action[hidden],
+.header-more-menu .header-admin-report--hidden,
+.header-more-menu .header-crm-btn--hidden {
+  display: none !important;
+}
+
 .header-more-menu__head {
   padding: 2px 4px 4px;
 }

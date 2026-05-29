@@ -1079,6 +1079,8 @@
   align-items: center;
   justify-content: center;
   align-self: stretch;
+  justify-self: stretch;
+  width: 100%;
   gap: clamp(4px, 2.8cqi, 9px);
   aspect-ratio: 1 / 1;
   min-width: 0;

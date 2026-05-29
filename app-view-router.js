@@ -432,6 +432,7 @@ window.pokerClosePlayerCrmStandalone = pokerClosePlayerCrmStandalone;
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
+  document.documentElement.classList.toggle("app-view-admin-bonuses-html-scroll", viewName === "admin-bonuses");
   document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   document.documentElement.classList.remove("app-view-vl-html-scroll");
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
@@ -1201,6 +1202,7 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
   document.documentElement.classList.toggle("app-view-daily-poker-html-scroll", viewName === "daily-poker");
+  document.documentElement.classList.toggle("app-view-admin-bonuses-html-scroll", viewName === "admin-bonuses");
   document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   var appEl = document.getElementById("app");
   if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");

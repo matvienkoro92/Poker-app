@@ -105,6 +105,7 @@
   function setCrmButtonAllowed(btn, allowed) {
     if (!btn) return;
     btn.hidden = !allowed;
+    btn.classList.toggle("header-crm-btn--hidden", !allowed);
     btn.toggleAttribute("aria-hidden", !allowed);
     btn.disabled = !allowed;
   }
@@ -304,14 +305,6 @@
       }
       return false;
     }
-    // В локальной разработке всегда показываем кнопку админа,
-    // чтобы можно было тестировать без Telegram initData.
-    try {
-      if (typeof window !== "undefined" && window.location && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-        showAdminUi();
-        return;
-      }
-    } catch (e) {}
     if (typeof pokerShouldShowHomeTopVersionForSpecialUser === "function" && pokerShouldShowHomeTopVersionForSpecialUser()) {
       showKeyboardLabOnly();
     }
