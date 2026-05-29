@@ -470,6 +470,7 @@
   text-shadow: 0 1px 0 #5c2104, 0 0 14px rgba(245, 158, 11, 0.62);
 }
 .equilator-hand-label {
+  margin-bottom: 0;
   font-size: 26px;
 }
 .equilator-hint {
@@ -515,7 +516,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   min-width: 0;
 }
 .equilator-opp-block {
@@ -943,9 +944,37 @@
 .equilator-picker-wrap--hidden { display: none; }
 .equilator-picker-title {
   margin: 0 0 10px;
+  padding-right: 38px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
+}
+.equilator-picker-close-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #f8d98d;
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid rgba(245, 158, 11, 0.48);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 14px rgba(0, 0, 0, 0.28);
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+}
+.equilator-picker-close-icon:hover {
+  color: #ffe8a3;
+  background: rgba(36, 22, 6, 0.78);
+  border-color: rgba(255, 196, 77, 0.76);
+  transform: translateY(-1px);
 }
 .equilator-picker-grid {
   display: grid;

@@ -114,6 +114,7 @@ function initEquilator() {
   var pickerGrid = document.getElementById("equilatorPickerGrid");
   var pickerTitle = document.getElementById("equilatorPickerTitle");
   var pickerClose = document.getElementById("equilatorPickerClose");
+  var pickerCloseIcon = document.getElementById("equilatorPickerCloseIcon");
   var heroRangeContainer = document.getElementById("equilatorHeroRange");
   var oppCardsContainer = document.getElementById("equilatorOppCards");
   var addPlayerBtn = document.getElementById("equilatorAddPlayerBtn");
@@ -843,6 +844,7 @@ function initEquilator() {
     }
   });
   if (pickerClose) pickerClose.addEventListener("click", closePicker);
+  if (pickerCloseIcon) pickerCloseIcon.addEventListener("click", closePicker);
   var getHero = function () {
     var c1 = getSlotCard("hero1");
     var c2 = getSlotCard("hero2");
