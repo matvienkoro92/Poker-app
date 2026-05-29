@@ -263,11 +263,17 @@
         pokerSetAuthMethod("telegram");
       } catch (eSetMethod) {}
       try {
+        setHint("", false);
+      } catch (eClearHint) {}
+      try {
         (deps.updateHeaderGreeting || function () {})();
       } catch (eUpdateGreeting) {}
       try {
         (deps.showAuthorized || function () {})(u);
       } catch (eShowAuthorized) {}
+      try {
+        if (typeof pokerForceClosePwaAuthScreenAfterSuccess === "function") pokerForceClosePwaAuthScreenAfterSuccess();
+      } catch (eForceCloseAuth) {}
       try {
         (deps.loadHeaderAvatar || function () {})();
       } catch (eLoadAvatar) {}

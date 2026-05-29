@@ -218,9 +218,21 @@
       if (data.adminReportAccess === true) window.__pokerTelegramAuth.adminReportAccess = true;
       pokerMaybeRememberMemberIdFromUser(u);
       pokerSetAuthMethod("email");
-      (deps.updateHeaderGreeting || function () {})();
-      (deps.showAuthorized || function () {})(u);
-      (deps.loadHeaderAvatar || function () {})();
+      try {
+        setHint("", false);
+      } catch (eClearHint) {}
+      try {
+        (deps.updateHeaderGreeting || function () {})();
+      } catch (eUpdateGreeting) {}
+      try {
+        (deps.showAuthorized || function () {})(u);
+      } catch (eShowAuthorized) {}
+      try {
+        if (typeof pokerForceClosePwaAuthScreenAfterSuccess === "function") pokerForceClosePwaAuthScreenAfterSuccess();
+      } catch (eForceCloseAuth) {}
+      try {
+        (deps.loadHeaderAvatar || function () {})();
+      } catch (eLoadAvatar) {}
       try {
         window.dispatchEvent(new CustomEvent("poker-telegram-auth", { detail: { verified: true, user: u, pwa: true, email: true } }));
       } catch (eEmailDispatch) {}

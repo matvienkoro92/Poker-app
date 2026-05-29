@@ -465,6 +465,9 @@
     hideIdentifyingMini();
     if (bannerRetry) bannerRetry.hidden = true;
     syncSiteHomeInstructionMode();
+    try {
+      if (typeof pokerForceClosePwaAuthScreenAfterSuccess === "function") pokerForceClosePwaAuthScreenAfterSuccess();
+    } catch (eForceCloseAuthUi) {}
   }
 
   function hasActiveVerifiedAuthState() {

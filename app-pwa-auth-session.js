@@ -71,6 +71,62 @@ function getTelegramAuthApiBase() {
   return "";
 }
 
+function pokerForceClosePwaAuthScreenAfterSuccess() {
+  function hasVerifiedAuth() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      return !!(auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip"));
+    } catch (eAuth) {
+      return false;
+    }
+  }
+  function closeOnce() {
+    if (!hasVerifiedAuth()) return;
+    try {
+      var screen = document.getElementById("pwaAuthScreen");
+      if (screen) {
+        screen.classList.remove("pwa-auth-screen--identifying");
+        screen.classList.add("pwa-auth-screen--hidden");
+        screen.setAttribute("aria-hidden", "true");
+        screen.setAttribute("aria-busy", "false");
+      }
+    } catch (eScreen) {}
+    try {
+      var panel = document.getElementById("pwaAuthIdentifyingPanel");
+      if (panel) {
+        panel.hidden = true;
+        panel.setAttribute("aria-busy", "false");
+      }
+    } catch (ePanel) {}
+    try {
+      var mini = document.getElementById("authIdentifyingMini");
+      if (mini) {
+        mini.classList.add("auth-identifying-mini--hidden");
+        mini.setAttribute("aria-busy", "false");
+      }
+    } catch (eMini) {}
+    try {
+      var banner = document.getElementById("authBanner");
+      if (banner) {
+        banner.classList.add("auth-banner--hidden");
+        banner.classList.remove("auth-banner--verifying");
+      }
+    } catch (eBanner) {}
+    try {
+      document.body.classList.remove("pwa-auth-gated");
+      document.body.classList.remove("pwa-auth-preinit");
+    } catch (eBody) {}
+    try {
+      var app = document.getElementById("app");
+      if (app) app.setAttribute("aria-busy", "false");
+    } catch (eApp) {}
+  }
+  closeOnce();
+  setTimeout(closeOnce, 0);
+  setTimeout(closeOnce, 250);
+  setTimeout(closeOnce, 1000);
+}
+
 function pokerAuthFetch(url, init) {
   var opts = {};
   var source = init || {};
