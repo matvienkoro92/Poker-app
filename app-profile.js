@@ -89,17 +89,22 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   var verifiedContent = document.getElementById("profileVerifiedContent");
   var avatarBlock = document.getElementById("profileAvatarBlock");
   var profileView = document.getElementById("profileView");
+  var profileTabs = document.getElementById("profileTabs");
+  var heroCard = document.querySelector("#profileView .profile-hero-card");
   var chatRow = document.getElementById("profileChatNameRow");
   var saveWrap = document.getElementById("profileChatNameSaveWrap");
   var chatNameWrap = document.querySelector("#profileView .profile-chat-name");
   var friendsWrap = document.querySelector("#profileView .profile-friends");
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
+  if (profileTabs) profileTabs.hidden = !isVerified;
+  if (heroCard) heroCard.hidden = !isVerified;
   if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
   if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (friendsWrap) friendsWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (profileView) profileView.classList.toggle("profile-view--guest", !isVerified);
+  if (!isVerified && typeof closeProfileNameEditor === "function") closeProfileNameEditor();
 }
 
 function syncProfileLoadingVisibility(isLoading) {
@@ -141,7 +146,13 @@ function initProfileExitBtn() {
   btn.dataset.bound = "1";
   btn.addEventListener("click", function () {
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-    if (hasSession) {
+    var isGuest = false;
+    try {
+      var auth = window.__pokerTelegramAuth;
+      isGuest = !!(auth && auth.status === "guest");
+      if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
+    } catch (eGuestClick) {}
+    if (hasSession && !isGuest) {
       if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
       return;
     }

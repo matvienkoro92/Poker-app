@@ -83,6 +83,12 @@
   width: 100%;
   text-align: center;
 }
+.view[data-view="profile"].profile-view--guest .profile-tabs,
+.view[data-view="profile"].profile-view--guest .profile-loading-note,
+.view[data-view="profile"].profile-view--guest .profile-hero-card,
+.view[data-view="profile"].profile-view--guest #profileVerifiedContent {
+  display: none !important;
+}
 .view[data-view="profile"].profile-view--guest .profile-chat-name {
   margin-top: 0;
 }

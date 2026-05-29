@@ -192,14 +192,16 @@ function updateProfileExitBtnVisibility() {
     isLoading = !a || a.status === "unknown" || a.status === "verifying";
   } catch (e) {}
   var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-  var show = !!(hasSession && isVerified) || !isVerified;
+  var showProfileShell = !isGuest && (hasSession || isVerified);
+  var hasAccountSession = hasSession && !isGuest;
+  var show = !!(hasAccountSession && isVerified) || !isVerified;
   btn.classList.toggle("profile-exit-btn--hidden", !show);
   btn.hidden = !show;
-  btn.classList.toggle("profile-exit-btn--auth-cta", !isVerified);
-  btn.textContent = hasSession ? "Выйти из аккаунта" : "Войти в аккаунт";
-  syncProfileStatusVisibility(hasSession || isVerified);
-  syncProfileVerifiedContentVisibility(hasSession || isVerified);
-  syncProfileLoadingVisibility(!!(hasSession && isLoading && !isVerified && !isGuest));
+  btn.classList.toggle("profile-exit-btn--auth-cta", !hasAccountSession || !isVerified);
+  btn.textContent = hasAccountSession ? "Выйти из аккаунта" : "Войти в аккаунт";
+  syncProfileStatusVisibility(showProfileShell);
+  syncProfileVerifiedContentVisibility(showProfileShell);
+  syncProfileLoadingVisibility(!!(hasAccountSession && isLoading && !isVerified));
 }
 
 function pokerClearSessionsAndReloadForLogin() {
