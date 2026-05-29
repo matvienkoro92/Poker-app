@@ -91,11 +91,71 @@ function pokerAuthFetch(url, init) {
       return "";
     }
   }
+  function responseFromXhr(xhr) {
+    var body = xhr && xhr.responseText != null ? String(xhr.responseText) : "";
+    var status = xhr && xhr.status != null ? Number(xhr.status) : 0;
+    return {
+      ok: status >= 200 && status < 300,
+      status: status,
+      statusText: xhr && xhr.statusText ? xhr.statusText : "",
+      text: function () { return Promise.resolve(body); },
+      json: function () {
+        return Promise.resolve().then(function () {
+          return body ? JSON.parse(body) : {};
+        });
+      },
+    };
+  }
+  function pokerAuthFetchXhr(targetUrl, xhrOpts, timeoutMs) {
+    return new Promise(function (resolve, reject) {
+      var xhr;
+      try {
+        xhr = new XMLHttpRequest();
+      } catch (eXhrNew) {
+        reject(eXhrNew);
+        return;
+      }
+      xhr.open(xhrOpts.method || "GET", targetUrl, true);
+      xhr.timeout = timeoutMs || 8000;
+      var headers = xhrOpts.headers || {};
+      try {
+        if (headers && typeof headers.forEach === "function") {
+          headers.forEach(function (value, name) {
+            xhr.setRequestHeader(name, value);
+          });
+        } else {
+          for (var h in headers) {
+            if (Object.prototype.hasOwnProperty.call(headers, h)) xhr.setRequestHeader(h, headers[h]);
+          }
+        }
+      } catch (eHeaders) {}
+      xhr.onload = function () {
+        resolve(responseFromXhr(xhr));
+      };
+      xhr.onerror = function () {
+        reject(new Error("auth xhr network error"));
+      };
+      xhr.ontimeout = function () {
+        reject(new Error("auth xhr timeout"));
+      };
+      xhr.onabort = function () {
+        reject(new Error("auth xhr aborted"));
+      };
+      try {
+        xhr.send(xhrOpts.body != null ? xhrOpts.body : null);
+      } catch (eSend) {
+        reject(eSend);
+      }
+    });
+  }
   var fallbackUrl = sameOriginFallbackUrl(url);
   function runAuthFetch(targetUrl) {
     return Promise.resolve().then(function () {
+      if (typeof XMLHttpRequest !== "undefined") {
+        return pokerAuthFetchXhr(targetUrl, opts, 8000);
+      }
       if (typeof pokerFetchRetry === "function") {
-        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 7000, maxAttempts: 2, retryDelayMs: 350 });
+        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 6000, maxAttempts: 1, retryDelayMs: 0 });
       }
       return fetch(targetUrl, opts);
     });

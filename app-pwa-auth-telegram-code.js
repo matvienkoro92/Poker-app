@@ -302,6 +302,12 @@
         });
     }
     if (loginModeBtn) {
+      var loginInflightId = 0;
+      function setLoginBusy(on) {
+        if (!loginModeBtn) return;
+        loginModeBtn.disabled = !!on;
+        loginModeBtn.textContent = on ? pwaAuthT("checkingPassword") : pwaAuthT("login");
+      }
       loginModeBtn.addEventListener("click", function () {
         authMode = "login";
         syncAuthModeUi();
@@ -311,7 +317,26 @@
           return;
         }
         setHint(pwaAuthT("checkingPassword"), false);
-        telegramPasswordLogin(username, passwordValue(), "", true);
+        var runId = ++loginInflightId;
+        var watchdog = setTimeout(function () {
+          if (loginInflightId !== runId) return;
+          loginInflightId++;
+          setLoginBusy(false);
+          setHint(pwaAuthT("networkRetry"), true);
+        }, 9000);
+        setLoginBusy(true);
+        telegramPasswordLogin(username, passwordValue(), "", true).then(function (result) {
+          if (loginInflightId !== runId) return result;
+          clearTimeout(watchdog);
+          setLoginBusy(false);
+          return result;
+        }, function (err) {
+          if (loginInflightId === runId) {
+            clearTimeout(watchdog);
+            setLoginBusy(false);
+          }
+          return Promise.reject(err);
+        });
       });
     }
     if (registerModeBtn) {
