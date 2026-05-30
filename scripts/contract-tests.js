@@ -545,6 +545,48 @@ async function testProfileUserLookup(redis) {
   );
 }
 
+async function testDailyPokerWinners(redis) {
+  const promo = loadHandler("promo");
+  const s = sessions();
+  const meta = promo._internals.dailyWindow(new Date(), promo._internals.configuredTimeZone());
+  redis.s("poker_app:daily_poker_users").add("ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
+  redis.l("poker_app:daily_poker_games_date:ID100002:" + meta.gameDate).push("daily_win_1", "daily_no_prize_1");
+  redis.kv.set("poker_app:daily_poker_game:daily_win_1", JSON.stringify({
+    id: "daily_win_1",
+    user_id: "ID100002",
+    game_date: meta.gameDate,
+    hand_rank: "full_house",
+    hand_name: "Фулл-хаус",
+    ticket_balance_credited: 500,
+    bonus_credited: 0,
+    extra_attempt_granted: false,
+    created_at: "2026-05-30T08:00:00.000Z",
+  }));
+  redis.kv.set("poker_app:daily_poker_game:daily_no_prize_1", JSON.stringify({
+    id: "daily_no_prize_1",
+    user_id: "ID100002",
+    game_date: meta.gameDate,
+    hand_rank: "pair",
+    hand_name: "Пара",
+    ticket_balance_credited: 0,
+    bonus_credited: 0,
+    extra_attempt_granted: false,
+    created_at: "2026-05-30T09:00:00.000Z",
+  }));
+
+  const r = await call(promo, req("GET", { path: "daily-poker/winners", pwaSession: s.user, limit: "5" }));
+  assert.strictEqual(r.statusCode, 200, "daily poker winners succeeds");
+  assert.strictEqual(r.body.ok, true, "daily poker winners returns ok");
+  assert.strictEqual(r.body.gameDate, meta.gameDate, "daily poker winners returns current game date");
+  assert.strictEqual(r.body.winners.length, 1, "daily poker winners excludes no-prize games");
+  assert.strictEqual(r.body.winners[0].displayName, "Peer Display", "daily poker winners resolves display names");
+  assert.strictEqual(r.body.winners[0].handName, "Фулл-хаус", "daily poker winners keeps hand name");
+  assert.strictEqual(r.body.winners[0].prize, "Билет на любой турнир за 500 ₽", "daily poker winners formats ticket prize");
+}
+
 async function testPokerPlusKeyBindFallbackMatrix(redis) {
   process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
   process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
@@ -2047,6 +2089,7 @@ async function main() {
     ["raffle join/leave", testRaffleJoinLeave],
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
+    ["daily poker winners", testDailyPokerWinners],
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
     ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],

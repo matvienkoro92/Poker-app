@@ -45,6 +45,10 @@
     return apiBase() + "/api/promo/daily-poker/" + encodeURIComponent(path) + (q || "");
   }
 
+  function withQuery(url, query) {
+    return String(url || "") + (String(url || "").indexOf("?") === -1 ? "?" : "&") + query;
+  }
+
   function authBody(extra) {
     return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra || {}) : extra || {};
   }
@@ -93,6 +97,70 @@
   function formatBonus(value) {
     var n = Math.max(0, parseInt(value || "0", 10) || 0);
     return "Бонусный баланс: " + n + " бонусов";
+  }
+
+  function formatWinnerTime(value) {
+    var date = new Date(value || "");
+    if (!Number.isFinite(date.getTime())) return "";
+    try {
+      return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setWinnersMessage(text, isError) {
+    var list = $("dailyPokerWinnersList");
+    if (!list) return;
+    list.innerHTML = '<div class="daily-poker__winners-empty' + (isError ? " daily-poker__winners-empty--error" : "") + '">' + esc(text || "") + '</div>';
+  }
+
+  function winnerHtml(winner) {
+    var row = winner || {};
+    var time = formatWinnerTime(row.createdAt);
+    return '<article class="daily-poker-winner">' +
+      '<div class="daily-poker-winner__avatar" aria-hidden="true">★</div>' +
+      '<div class="daily-poker-winner__body">' +
+        '<div class="daily-poker-winner__top">' +
+          '<strong>' + esc(row.displayName || "Игрок") + '</strong>' +
+          (time ? '<span>' + esc(time) + '</span>' : "") +
+        '</div>' +
+        '<p>' + esc(row.prize || "Приз") + '</p>' +
+        (row.handName ? '<small>' + esc(row.handName) + '</small>' : "") +
+      '</div>' +
+    '</article>';
+  }
+
+  function renderWinners(data) {
+    var list = $("dailyPokerWinnersList");
+    var meta = $("dailyPokerWinnersMeta");
+    if (!list) return;
+    var winners = data && Array.isArray(data.winners) ? data.winners : [];
+    if (meta) meta.textContent = winners.length ? "Сегодня: " + winners.length : "Сегодня";
+    if (!winners.length) {
+      setWinnersMessage("Сегодня победителей пока нет.");
+      return;
+    }
+    list.innerHTML = winners.map(winnerHtml).join("");
+  }
+
+  function loadWinners() {
+    var base = apiBase();
+    if (!base || !hasCredential()) {
+      setWinnersMessage("Войдите, чтобы увидеть победителей.");
+      return Promise.resolve(false);
+    }
+    return fetch(withQuery(authUrl("winners"), "limit=8"), { cache: "no-store" })
+      .then(readJson)
+      .then(function (data) {
+        if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "winners failed");
+        renderWinners(data);
+        return true;
+      })
+      .catch(function () {
+        setWinnersMessage("Не удалось загрузить победителей.", true);
+        return false;
+      });
   }
 
   function formatDuration(seconds) {
@@ -282,6 +350,7 @@
     if (claimBtn) claimBtn.hidden = true;
     resetManualDeal();
     syncStatus(result);
+    loadWinners();
   }
 
   function advanceManualDeal() {
@@ -448,6 +517,8 @@
     bind();
     renderEmptyCards();
     setResultText(DAILY_POKER_START_PROMPT, false);
+    setWinnersMessage("Загружаем победителей…");
+    loadWinners();
     loadStatus();
     if (dailyPokerState.timer) clearInterval(dailyPokerState.timer);
     dailyPokerState.timer = setInterval(updateTimer, 1000);
