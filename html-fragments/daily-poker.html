@@ -64,7 +64,17 @@
       <button type="button" class="daily-poker__play-btn" id="dailyPokerPlayBtn">Раздать карты</button>
       <button type="button" class="daily-poker__play-btn daily-poker__play-btn--extra" id="dailyPokerExtraBtn" hidden>Раздать карты</button>
       <button type="button" class="daily-poker__claim-btn" id="dailyPokerClaimBtn" hidden>Забрать приз</button>
-      <button type="button" class="daily-poker__invite-btn" id="dailyPokerInviteBtn">Позвать друга</button>
+      <div class="daily-poker__share-actions">
+        <button type="button" class="daily-poker__invite-btn" id="dailyPokerInviteBtn">Позвать друга</button>
+        <button type="button" class="daily-poker__copy-btn" id="dailyPokerCopyLinkBtn" aria-label="Скопировать ссылку на Раздачу дня" title="Скопировать ссылку">
+          <span class="daily-poker__copy-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
     </div>
 
     <section class="daily-poker__winners" aria-labelledby="dailyPokerWinnersTitle">

@@ -8,6 +8,7 @@
     stagedDealResult: null,
     dealStage: "idle",
     activeDealButtonId: "",
+    copyFeedbackTimer: null,
   };
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
@@ -203,9 +204,8 @@
     var meta = $("dailyPokerWinnersMeta");
     if (!list) return;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
-    var total = Math.max(0, parseInt(data && data.totalWinners || winners.length || "0", 10) || 0);
     var totalRubles = Math.max(0, parseInt(data && data.totalPrizeRubles || "0", 10) || 0);
-    if (meta) meta.textContent = total ? "За всё время: " + total + (totalRubles ? " · " + formatRubles(totalRubles) : "") : "За всё время";
+    if (meta) meta.textContent = totalRubles ? "За всё время: " + formatRubles(totalRubles) : "За всё время";
     if (!winners.length) {
       setWinnersMessage("Рублёвых выигрышей пока нет.");
       return;
@@ -527,6 +527,68 @@
     openTelegramShare();
   }
 
+  function copyTextToClipboard(text) {
+    text = String(text || "");
+    if (!text) return Promise.reject(new Error("empty"));
+    function copyWithTextarea(resolve, reject) {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "readonly");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        if (document.execCommand && document.execCommand("copy")) resolve();
+        else reject(new Error("copy failed"));
+      } catch (err) {
+        reject(err);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+    if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      return navigator.clipboard.writeText(text).catch(function () {
+        return new Promise(copyWithTextarea);
+      });
+    }
+    return new Promise(copyWithTextarea);
+  }
+
+  function setCopyButtonCopied(btn) {
+    if (!btn) return;
+    btn.classList.add("daily-poker__copy-btn--copied");
+    btn.setAttribute("aria-label", "Ссылка скопирована");
+    if (dailyPokerState.copyFeedbackTimer) clearTimeout(dailyPokerState.copyFeedbackTimer);
+    dailyPokerState.copyFeedbackTimer = setTimeout(function () {
+      btn.classList.remove("daily-poker__copy-btn--copied");
+      btn.setAttribute("aria-label", "Скопировать ссылку на Раздачу дня");
+      dailyPokerState.copyFeedbackTimer = null;
+    }, 1400);
+  }
+
+  function copyDailyPokerLink(evt) {
+    if (evt && typeof evt.preventDefault === "function") evt.preventDefault();
+    if (evt && typeof evt.stopPropagation === "function") evt.stopPropagation();
+    var btn = evt && evt.currentTarget ? evt.currentTarget : $("dailyPokerCopyLinkBtn");
+    var link = buildDailyPokerInviteLink();
+    if (!link) {
+      showMessage("Не удалось подготовить ссылку. Попробуйте обновить приложение.", true);
+      return;
+    }
+    copyTextToClipboard(link).then(function () {
+      var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgw && tgw.HapticFeedback && typeof tgw.HapticFeedback.notificationOccurred === "function") {
+        tgw.HapticFeedback.notificationOccurred("success");
+      }
+      setCopyButtonCopied(btn);
+    }).catch(function () {
+      showMessage("Не удалось скопировать ссылку. Попробуйте кнопку «Позвать друга».", true);
+    });
+  }
+
   function loadStatus() {
     var base = apiBase();
     if (!base || !hasCredential()) {
@@ -600,6 +662,7 @@
     var extraBtn = $("dailyPokerExtraBtn");
     var claimBtn = $("dailyPokerClaimBtn");
     var inviteBtn = $("dailyPokerInviteBtn");
+    var copyBtn = $("dailyPokerCopyLinkBtn");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
       playBtn.addEventListener("click", play);
@@ -618,6 +681,10 @@
     if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {
       inviteBtn.dataset.dailyPokerBound = "1";
       inviteBtn.addEventListener("click", openDailyPokerInvite);
+    }
+    if (copyBtn && copyBtn.dataset.dailyPokerBound !== "1") {
+      copyBtn.dataset.dailyPokerBound = "1";
+      copyBtn.addEventListener("click", copyDailyPokerLink);
     }
   }
 

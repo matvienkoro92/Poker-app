@@ -338,7 +338,6 @@
   padding: 10px 12px;
   border-radius: 8px;
   background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.22);
   font-weight: 800;
   line-height: 1.18;
   text-align: center;
@@ -356,6 +355,9 @@
 .daily-poker__result--error,
 .admin-bonuses__notice--error {
   color: #fecaca;
+}
+
+.admin-bonuses__notice--error {
   border-color: rgba(248, 113, 113, 0.45);
 }
 
@@ -1143,21 +1145,23 @@
 .daily-poker__prizes .daily-poker__prize .daily-poker__prize-line {
   display: block;
   min-width: 0;
-  max-width: 100%;
+  max-width: 92%;
   margin: 0;
   color: #fff1c9;
-  font-size: clamp(10px, 7.6cqi, 22px);
+  font-size: clamp(9px, 7cqi, 20px);
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1.08;
   text-align: center;
-  white-space: nowrap;
+  text-wrap: balance;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.78);
 }
 
 .daily-poker__prizes .daily-poker__prize .daily-poker__prize-line b {
+  display: inline-block;
   color: var(--daily-poker-prize-accent);
   font-size: 1.16em;
   font-weight: 950;
+  white-space: nowrap;
   text-shadow:
     0 0 8px color-mix(in srgb, var(--daily-poker-prize-accent) 72%, transparent),
     0 1px 0 rgba(0, 0, 0, 0.8);
@@ -1432,6 +1436,7 @@
 
 .daily-poker__zone--hole {
   margin-top: 10.5%;
+  transform: translateY(6px);
 }
 
 .daily-poker__zone--hole .daily-poker__zone-label {
@@ -1467,7 +1472,7 @@
 
 .daily-poker__cards--hole {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: min(590px, 64%);
+  width: min(519px, 56.32%);
   gap: clamp(12px, 2.8vw, 28px);
   margin: 0 auto;
 }
@@ -1601,8 +1606,17 @@
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
 }
 
-.daily-poker__invite-btn {
+.daily-poker__share-actions {
   flex: 1 1 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+}
+
+.daily-poker__invite-btn {
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 48px;
   padding: 0 18px;
   border: 2px solid rgba(255, 177, 42, 0.74);
@@ -1633,12 +1647,55 @@
 }
 
 .daily-poker__invite-btn:hover,
-.daily-poker__invite-btn:focus-visible {
+.daily-poker__invite-btn:focus-visible,
+.daily-poker__copy-btn:hover,
+.daily-poker__copy-btn:focus-visible {
   border-color: rgba(255, 214, 128, 0.96);
   outline: none;
   box-shadow:
     inset 0 0 0 1px rgba(255, 238, 174, 0.18),
     0 0 22px rgba(255, 118, 0, 0.3);
+}
+
+.daily-poker__copy-btn {
+  flex: 0 0 48px;
+  width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid rgba(255, 177, 42, 0.74);
+  border-radius: 14px;
+  color: #f8e8c7;
+  background:
+    linear-gradient(180deg, rgba(255, 203, 107, 0.12), rgba(255, 118, 0, 0.06)),
+    rgba(4, 6, 7, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 238, 174, 0.1),
+    0 0 16px rgba(255, 118, 0, 0.18);
+  transition: transform 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.daily-poker__copy-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.daily-poker__copy-btn--copied {
+  color: #9bdcf6;
+  border-color: rgba(155, 220, 246, 0.95);
+}
+
+.daily-poker__copy-icon {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+.daily-poker__copy-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .daily-poker__play-btn--extra,
@@ -1651,10 +1708,8 @@
 .daily-poker__result,
 .daily-poker__reward {
   border-radius: 14px;
-  border: 2px solid rgba(255, 177, 42, 0.74);
   background: rgba(4, 6, 7, 0.78);
   color: #f1dfbe;
-  box-shadow: inset 0 0 0 2px rgba(76, 34, 8, 0.56);
 }
 
 .daily-poker__result {
@@ -2002,11 +2057,12 @@
 
   .daily-poker__zone--hole {
     margin-top: 10.5%;
+    transform: translateY(6px);
   }
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 64%;
+    width: 56.32%;
     gap: clamp(8px, 2.6vw, 14px);
     margin: 0 auto;
   }
@@ -2048,11 +2104,12 @@
 
   .daily-poker__zone--hole {
     margin-top: 10.5%;
+    transform: translateY(6px);
   }
 
   .daily-poker__cards--hole {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 64%;
+    width: 56.32%;
     gap: clamp(8px, 2.6vw, 14px);
     margin: 0 auto;
   }
