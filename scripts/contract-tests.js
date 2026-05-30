@@ -552,18 +552,28 @@ async function testDailyPokerWinners(redis) {
   redis.s("poker_app:daily_poker_users").add("ID100002");
   redis.s("poker_app:daily_poker_users").add("ID100003");
   redis.s("poker_app:daily_poker_users").add("ID100004");
+  redis.s("poker_app:daily_poker_users").add("ID100005");
+  redis.s("poker_app:daily_poker_users").add("ID100006");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");
   redis.h("poker_app:id_to_user").set("ID100004", "tg_388008256");
+  redis.h("poker_app:id_to_user").set("ID100005", "tg_1005");
+  redis.h("poker_app:id_to_user").set("ID100006", "tg_1006");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
   redis.h("poker_app:visitor_usernames").set("tg_1003", "leader");
   redis.h("poker_app:visitor_usernames").set("tg_388008256", "roman1_matvienko");
+  redis.h("poker_app:visitor_usernames").set("tg_1005", "attempt_only");
+  redis.h("poker_app:visitor_usernames").set("tg_1006", "bonus_only");
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100003", "Leader Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100004", "Admin Display");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100005", "Attempt Display");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100006", "Bonus Display");
   redis.l("poker_app:daily_poker_games_user:ID100002").push("daily_win_1", "daily_old_win_1", "daily_no_prize_1");
   redis.l("poker_app:daily_poker_games_user:ID100003").push("daily_leader_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100004").push("daily_admin_win_1");
+  redis.l("poker_app:daily_poker_games_user:ID100005").push("daily_attempt_win_1");
+  redis.l("poker_app:daily_poker_games_user:ID100006").push("daily_bonus_win_1");
   redis.kv.set("poker_app:daily_poker_game:daily_win_1", JSON.stringify({
     id: "daily_win_1",
     user_id: "ID100002",
@@ -619,20 +629,45 @@ async function testDailyPokerWinners(redis) {
     extra_attempt_granted: false,
     created_at: "2026-05-30T11:00:00.000Z",
   }));
+  redis.kv.set("poker_app:daily_poker_game:daily_attempt_win_1", JSON.stringify({
+    id: "daily_attempt_win_1",
+    user_id: "ID100005",
+    game_date: meta.gameDate,
+    hand_rank: "three_of_a_kind",
+    hand_name: "Сет",
+    ticket_balance_credited: 0,
+    bonus_credited: 0,
+    extra_attempt_granted: true,
+    created_at: "2026-05-30T12:00:00.000Z",
+  }));
+  redis.kv.set("poker_app:daily_poker_game:daily_bonus_win_1", JSON.stringify({
+    id: "daily_bonus_win_1",
+    user_id: "ID100006",
+    game_date: meta.gameDate,
+    hand_rank: "flush",
+    hand_name: "Флеш",
+    ticket_balance_credited: 0,
+    bonus_credited: 50,
+    extra_attempt_granted: true,
+    created_at: "2026-05-30T13:00:00.000Z",
+  }));
 
   const r = await call(promo, req("GET", { path: "daily-poker/winners", pwaSession: s.user, limit: "5" }));
   assert.strictEqual(r.statusCode, 200, "daily poker winners succeeds");
   assert.strictEqual(r.body.ok, true, "daily poker winners returns ok");
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
-  assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes no-prize games and admins");
+  assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
+  assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
   assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
-  assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by total amount desc");
+  assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by ruble total desc");
   assert.strictEqual(r.body.winners[0].totalPrizeAmount, 1200, "daily poker winners exposes leader total");
   assert.strictEqual(r.body.winners[0].prize, "Всего: 1 200 ₽", "daily poker winners formats total ticket prize");
   assert.strictEqual(r.body.winners[1].displayName, "Peer Display", "daily poker winners resolves display names");
   assert.strictEqual(r.body.winners[1].totalPrizeAmount, 550, "daily poker winners aggregates all-time prizes");
   assert.strictEqual(r.body.winners[1].prize, "Всего: 500 ₽ + 50 бонусов", "daily poker winners formats mixed total prize");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Admin Display"), false, "daily poker winners hides admins");
+  assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Attempt Display"), false, "daily poker winners hides attempt-only prizes");
+  assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), false, "daily poker winners hides bonus-only prizes");
 }
 
 async function testPokerPlusKeyBindFallbackMatrix(redis) {

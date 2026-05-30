@@ -221,6 +221,7 @@ function pokerInitHomeDeepLinks(opts) {
       cashout: "cashout",
       profile: "profile",
       streams: "streams",
+      daily_poker: "daily-poker",
       learn_play_hub: "learn-play-hub",
       bonus_game: "bonus-game",
       plasterer_game: "plasterer-game",

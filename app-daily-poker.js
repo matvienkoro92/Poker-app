@@ -11,6 +11,7 @@
   };
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
+  var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
 
   var suitSymbols = {
     spades: "♠",
@@ -148,6 +149,15 @@
     return "Бонусный баланс: " + n + " бонусов";
   }
 
+  function formatCompactAmount(value) {
+    var n = Math.max(0, parseInt(value || "0", 10) || 0);
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
+  function formatRubles(value) {
+    return formatCompactAmount(value) + " ₽";
+  }
+
   function pluralRu(count, one, few, many) {
     var n = Math.abs(parseInt(count || "0", 10) || 0);
     var mod10 = n % 10;
@@ -194,9 +204,10 @@
     if (!list) return;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
     var total = Math.max(0, parseInt(data && data.totalWinners || winners.length || "0", 10) || 0);
-    if (meta) meta.textContent = total ? "За всё время: " + total : "За всё время";
+    var totalRubles = Math.max(0, parseInt(data && data.totalPrizeRubles || "0", 10) || 0);
+    if (meta) meta.textContent = total ? "За всё время: " + total + (totalRubles ? " · " + formatRubles(totalRubles) : "") : "За всё время";
     if (!winners.length) {
-      setWinnersMessage("Победителей пока нет.");
+      setWinnersMessage("Рублёвых выигрышей пока нет.");
       return;
     }
     list.innerHTML = winners.map(winnerHtml).join("");
@@ -471,6 +482,51 @@
     });
   }
 
+  function buildDailyPokerInviteLink() {
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink("daily_poker");
+    var appUrl = "";
+    if (typeof getAppBaseUrlForLinks === "function") appUrl = getAppBaseUrlForLinks();
+    if (!appUrl && typeof location !== "undefined") appUrl = String(location.origin || "") + "/";
+    appUrl = String(appUrl || "").trim().replace(/\/+$/, "");
+    if (!appUrl) return "";
+    return appUrl + (appUrl.indexOf("?") >= 0 ? "&" : "?") + "startapp=daily_poker";
+  }
+
+  function openDailyPokerInvite(evt) {
+    if (evt && typeof evt.preventDefault === "function") evt.preventDefault();
+    if (evt && typeof evt.stopPropagation === "function") evt.stopPropagation();
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    var link = buildDailyPokerInviteLink();
+    if (!link) {
+      showMessage("Не удалось подготовить ссылку. Попробуйте обновить приложение.", true);
+      return;
+    }
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+      ? pokerBuildTelegramShareUrlDialog(link, DAILY_POKER_INVITE_TEXT)
+      : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(DAILY_POKER_INVITE_TEXT);
+    var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    function recordInviteShare() {
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("daily_poker_invite");
+    }
+    function openTelegramShare() {
+      if (tgw && typeof tgw.openTelegramLink === "function") tgw.openTelegramLink(shareUrl);
+      else if (tgw && typeof tgw.openLink === "function") tgw.openLink(shareUrl);
+      else window.open(shareUrl, "_blank");
+      recordInviteShare();
+    }
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: "Раздача дня", text: DAILY_POKER_INVITE_TEXT, url: link }).then(function (pwaOk) {
+        if (pwaOk) {
+          recordInviteShare();
+          return;
+        }
+        openTelegramShare();
+      });
+      return;
+    }
+    openTelegramShare();
+  }
+
   function loadStatus() {
     var base = apiBase();
     if (!base || !hasCredential()) {
@@ -543,6 +599,7 @@
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     var claimBtn = $("dailyPokerClaimBtn");
+    var inviteBtn = $("dailyPokerInviteBtn");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
       playBtn.addEventListener("click", play);
@@ -557,6 +614,10 @@
         showMessage("Билет уже зачислен на баланс.", false);
         claimBtn.hidden = true;
       });
+    }
+    if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {
+      inviteBtn.dataset.dailyPokerBound = "1";
+      inviteBtn.addEventListener("click", openDailyPokerInvite);
     }
   }
 
