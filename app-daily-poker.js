@@ -79,17 +79,66 @@
   function setResultText(text, isError) {
     var resultEl = $("dailyPokerResult");
     setLiveText(resultEl, text || "");
-    if (resultEl) resultEl.classList.toggle("daily-poker__result--error", !!isError);
+    if (resultEl) {
+      resultEl.classList.toggle("daily-poker__result--error", !!isError);
+      resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer");
+      resultEl.dataset.dailyPokerPrompt = "";
+    }
     setLiveText($("dailyPokerReward"), "");
+  }
+
+  function setResultPrompt(primary, detail, isTimer) {
+    var resultEl = $("dailyPokerResult");
+    if (!resultEl) return;
+    var details = Array.isArray(detail) ? detail.map(function (part) {
+      return String(part || "").trim();
+    }).filter(Boolean) : [];
+    var html = '<span class="daily-poker__result-primary">' + esc(primary || "") + '</span>';
+    if (details.length) {
+      html += '<span class="daily-poker__result-meta">' + details.map(function (part) {
+        return '<span>' + esc(part) + '</span>';
+      }).join("") + '</span>';
+    }
+    resultEl.innerHTML = html;
+    resultEl.hidden = !String(primary || "").trim();
+    resultEl.classList.remove("daily-poker__result--error");
+    resultEl.classList.add("daily-poker__result--prompt");
+    resultEl.classList.toggle("daily-poker__result--timer", !!isTimer);
+    resultEl.dataset.dailyPokerPrompt = "1";
+    setLiveText($("dailyPokerReward"), "");
+  }
+
+  function attemptStatusText(data) {
+    var attempts = Math.max(0, parseInt(data && data.attemptsLeft || "0", 10) || 0);
+    return "Попытки: " + attempts;
+  }
+
+  function availableStatusText(data) {
+    if (!data) return "Проверяем доступность раздачи…";
+    if (!data.canPlay) return "";
+    if (data.specialDailyLimit) return "Раздача доступна.";
+    var attempts = Math.max(0, parseInt(data.attemptsLeft || "0", 10) || 0);
+    return attempts > 1 ? "Доступна раздача и дополнительная попытка." : "Раздача доступна.";
+  }
+
+  function countdownStatusText(data) {
+    if (!data) return "Проверяем доступность раздачи…";
+    if (!data.nextFreeAttemptAt) return "Не удалось проверить доступность раздачи.";
+    var nextMs = Date.parse(data.nextFreeAttemptAt || "");
+    var left = Math.max(0, Math.ceil((nextMs - currentServerMs()) / 1000) || 0);
+    return "Следующая бесплатная раздача через: " + formatDuration(left);
   }
 
   function syncStartPrompt(data) {
     var resultEl = $("dailyPokerResult");
     if (!resultEl || dailyPokerState.revealing || dailyPokerState.stagedDealResult) return;
     var current = String(resultEl.textContent || "").trim();
-    if (data && data.canPlay && (!current || current === DAILY_POKER_START_PROMPT)) {
-      setResultText(DAILY_POKER_START_PROMPT, false);
-    } else if (current === DAILY_POKER_START_PROMPT) {
+    var isPrompt = resultEl.dataset.dailyPokerPrompt === "1" || current === DAILY_POKER_START_PROMPT;
+    if (data && data.canPlay) {
+      if (!current || isPrompt) setResultPrompt(DAILY_POKER_START_PROMPT, [availableStatusText(data), attemptStatusText(data)], false);
+    } else if (data && !data.canPlay && data.nextFreeAttemptAt) {
+      if (!current || isPrompt) setResultPrompt(countdownStatusText(data), [], true);
+    } else if (isPrompt) {
       setResultText("", false);
     }
   }
@@ -99,14 +148,21 @@
     return "Бонусный баланс: " + n + " бонусов";
   }
 
-  function formatWinnerTime(value) {
-    var date = new Date(value || "");
-    if (!Number.isFinite(date.getTime())) return "";
-    try {
-      return date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-    } catch (e) {
-      return "";
-    }
+  function pluralRu(count, one, few, many) {
+    var n = Math.abs(parseInt(count || "0", 10) || 0);
+    var mod10 = n % 10;
+    var mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+    return many;
+  }
+
+  function winnerSubline(row) {
+    var wins = Math.max(0, parseInt(row && row.winsCount || "0", 10) || 0);
+    var parts = [];
+    if (wins > 0) parts.push(wins + " " + pluralRu(wins, "выигрыш", "выигрыша", "выигрышей"));
+    if (row && row.bestPrize) parts.push("лучший: " + row.bestPrize);
+    return parts.join(" · ");
   }
 
   function setWinnersMessage(text, isError) {
@@ -115,18 +171,19 @@
     list.innerHTML = '<div class="daily-poker__winners-empty' + (isError ? " daily-poker__winners-empty--error" : "") + '">' + esc(text || "") + '</div>';
   }
 
-  function winnerHtml(winner) {
+  function winnerHtml(winner, index) {
     var row = winner || {};
-    var time = formatWinnerTime(row.createdAt);
+    var rank = Math.max(1, index + 1);
+    var subline = winnerSubline(row);
     return '<article class="daily-poker-winner">' +
-      '<div class="daily-poker-winner__avatar" aria-hidden="true">★</div>' +
+      '<div class="daily-poker-winner__avatar" aria-hidden="true">' + rank + '</div>' +
       '<div class="daily-poker-winner__body">' +
         '<div class="daily-poker-winner__top">' +
           '<strong>' + esc(row.displayName || "Игрок") + '</strong>' +
-          (time ? '<span>' + esc(time) + '</span>' : "") +
+          '<span>#' + rank + '</span>' +
         '</div>' +
-        '<p>' + esc(row.prize || "Приз") + '</p>' +
-        (row.handName ? '<small>' + esc(row.handName) + '</small>' : "") +
+        '<p>' + esc(row.prize || "Суммарный приз") + '</p>' +
+        (subline ? '<small>' + esc(subline) + '</small>' : "") +
       '</div>' +
     '</article>';
   }
@@ -136,9 +193,10 @@
     var meta = $("dailyPokerWinnersMeta");
     if (!list) return;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
-    if (meta) meta.textContent = winners.length ? "Сегодня: " + winners.length : "Сегодня";
+    var total = Math.max(0, parseInt(data && data.totalWinners || winners.length || "0", 10) || 0);
+    if (meta) meta.textContent = total ? "За всё время: " + total : "За всё время";
     if (!winners.length) {
-      setWinnersMessage("Сегодня победителей пока нет.");
+      setWinnersMessage("Победителей пока нет.");
       return;
     }
     list.innerHTML = winners.map(winnerHtml).join("");
@@ -150,7 +208,7 @@
       setWinnersMessage("Войдите, чтобы увидеть победителей.");
       return Promise.resolve(false);
     }
-    return fetch(withQuery(authUrl("winners"), "limit=8"), { cache: "no-store" })
+    return fetch(withQuery(authUrl("winners"), "limit=50"), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "winners failed");
@@ -178,24 +236,19 @@
   }
 
   function updateTimer() {
-    var timerEl = $("dailyPokerTimer");
-    if (!timerEl) return;
     var status = dailyPokerState.status || {};
     if (!dailyPokerState.status) {
-      timerEl.textContent = "Проверяем доступность раздачи…";
+      var resultEl = $("dailyPokerResult");
+      var current = resultEl ? String(resultEl.textContent || "").trim() : "";
+      var isPrompt = resultEl && (resultEl.dataset.dailyPokerPrompt === "1" || current === DAILY_POKER_START_PROMPT);
+      if (!current || isPrompt) setResultPrompt("Проверяем доступность раздачи…", [], false);
       return;
     }
     if (status.canPlay) {
-      timerEl.textContent = status.specialDailyLimit ? "Раздача доступна." : (status.attemptsLeft > 1 ? "Доступна раздача и дополнительная попытка." : "Раздача доступна.");
+      syncStartPrompt(status);
       return;
     }
-    if (!status.nextFreeAttemptAt) {
-      timerEl.textContent = "Не удалось проверить доступность раздачи.";
-      return;
-    }
-    var nextMs = Date.parse(status.nextFreeAttemptAt || "");
-    var left = Math.max(0, Math.ceil((nextMs - currentServerMs()) / 1000) || 0);
-    timerEl.textContent = "Следующая бесплатная раздача через: " + formatDuration(left);
+    syncStartPrompt(status);
   }
 
   function syncStatus(data) {
@@ -204,14 +257,12 @@
     var serverMs = Date.parse(data.serverTime || "");
     if (Number.isFinite(serverMs)) dailyPokerState.serverDeltaMs = serverMs - Date.now();
     var balanceEl = $("dailyPokerBalance");
-    var attemptsEl = $("dailyPokerAttempts");
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) {
       var bonusValue = Math.max(0, parseInt(data.bonusBalance || "0", 10) || 0);
       balanceEl.innerHTML = '<span class="daily-poker__balance-label">Бонусный баланс:</span> <strong>' + bonusValue + '</strong> <span>бонусов</span>';
     }
-    if (attemptsEl) attemptsEl.innerHTML = '<span>Попытки:</span> <strong>' + (data.attemptsLeft || 0) + '</strong>';
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
@@ -243,10 +294,7 @@
     next.attemptsLeft = Math.max(0, attemptsLeft - 1);
     next.canPlay = next.attemptsLeft > 0 && status.canPlay !== false;
     dailyPokerState.status = next;
-    var attemptsEl = $("dailyPokerAttempts");
-    var timerEl = $("dailyPokerTimer");
-    if (attemptsEl) attemptsEl.innerHTML = '<span>Попытки:</span> <strong>' + next.attemptsLeft + '</strong>';
-    if (timerEl) timerEl.textContent = "Раздача выполняется…";
+    syncStartPrompt(next);
   }
 
   function clearOptimisticSpend() {
@@ -516,7 +564,7 @@
     resetManualDeal();
     bind();
     renderEmptyCards();
-    setResultText(DAILY_POKER_START_PROMPT, false);
+    setResultPrompt(DAILY_POKER_START_PROMPT, [], false);
     setWinnersMessage("Загружаем победителей…");
     loadWinners();
     loadStatus();
