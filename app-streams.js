@@ -5,6 +5,45 @@ var streamsWatchPeer = null;
 var streamsWatchCall = null;
 var streamsBroadcastStartedAt = null;
 var streamsBroadcastTimerInterval = null;
+var streamsWatchRoomId = "";
+var streamsWatchIntentActive = false;
+var streamsWatchResetting = false;
+var streamsWatchReconnectTimer = null;
+var streamsWatchReconnectAttempt = 0;
+var streamsWatchWatchdogTimer = null;
+var streamsWatchGeneration = 0;
+var streamsBroadcastRoomId = "";
+var streamsBroadcastIntentActive = false;
+var streamsBroadcastResetting = false;
+var streamsBroadcastReconnectTimer = null;
+var streamsBroadcastReconnectAttempt = 0;
+var streamsBroadcastGeneration = 0;
+
+var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
+
+function streamsReconnectDelayMs(attempt) {
+  var index = Math.max(0, Math.min(STREAMS_RECONNECT_DELAYS_MS.length - 1, attempt || 0));
+  return STREAMS_RECONNECT_DELAYS_MS[index];
+}
+
+function streamsClearWatchReconnect() {
+  if (streamsWatchReconnectTimer) clearTimeout(streamsWatchReconnectTimer);
+  streamsWatchReconnectTimer = null;
+}
+
+function streamsClearWatchWatchdog() {
+  if (streamsWatchWatchdogTimer) clearTimeout(streamsWatchWatchdogTimer);
+  streamsWatchWatchdogTimer = null;
+  if (window.__streamsWatchWatchdogTimer) {
+    clearTimeout(window.__streamsWatchWatchdogTimer);
+    window.__streamsWatchWatchdogTimer = null;
+  }
+}
+
+function streamsClearBroadcastReconnect() {
+  if (streamsBroadcastReconnectTimer) clearTimeout(streamsBroadcastReconnectTimer);
+  streamsBroadcastReconnectTimer = null;
+}
 
 function randomStreamRoomId() {
   // Ровно 6 цифр (100000–999999), PeerJS id только из цифр.
@@ -40,6 +79,17 @@ function streamsCleanup() {
   if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
   streamsBroadcastTimerInterval = null;
   streamsBroadcastStartedAt = null;
+  streamsBroadcastIntentActive = false;
+  streamsBroadcastRoomId = "";
+  streamsBroadcastReconnectAttempt = 0;
+  streamsBroadcastGeneration += 1;
+  streamsClearBroadcastReconnect();
+  streamsWatchIntentActive = false;
+  streamsWatchRoomId = "";
+  streamsWatchReconnectAttempt = 0;
+  streamsWatchGeneration += 1;
+  streamsClearWatchReconnect();
+  streamsClearWatchWatchdog();
   var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
   if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "";
 
@@ -63,10 +113,20 @@ function streamsCleanup() {
   var previewVideo = document.getElementById("streamsPreviewVideo");
   var remoteWrap = document.getElementById("streamsRemoteWrap");
   var remoteVideo = document.getElementById("streamsRemoteVideo");
+  var watchStatusEl = document.getElementById("streamsWatchStatus");
+  var broadcastStatusEl = document.getElementById("streamsBroadcastStatus");
   if (previewWrap) previewWrap.classList.add("streams-preview-wrap--hidden");
   if (previewVideo) previewVideo.srcObject = null;
   if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
   if (remoteVideo) remoteVideo.srcObject = null;
+  if (watchStatusEl) {
+    watchStatusEl.textContent = "";
+    watchStatusEl.hidden = true;
+  }
+  if (broadcastStatusEl) {
+    broadcastStatusEl.textContent = "";
+    broadcastStatusEl.hidden = true;
+  }
 }
 
 /** Старт просмотра по deep link: вызывать после initStreams (в т.ч. когда initStreams вышел раньше из‑за __streamsInitAttached). */
@@ -96,6 +156,7 @@ function initStreams() {
   var stopBtn = document.getElementById("streamsStopBtn");
   var previewWrap = document.getElementById("streamsPreviewWrap");
   var previewVideo = document.getElementById("streamsPreviewVideo");
+  var broadcastStatusEl = document.getElementById("streamsBroadcastStatus");
   var shareLinkInput = document.getElementById("streamsShareLink");
   var copyLinkBtn = document.getElementById("streamsCopyLinkBtn");
   var browserLinkInput = document.getElementById("streamsBrowserLinkInput");
@@ -107,6 +168,7 @@ function initStreams() {
   var stopWatchBtn = document.getElementById("streamsStopWatchBtn");
   var remoteWrap = document.getElementById("streamsRemoteWrap");
   var remoteVideo = document.getElementById("streamsRemoteVideo");
+  var watchStatusEl = document.getElementById("streamsWatchStatus");
   var streamsBroadcastTimerEl = document.getElementById("streamsBroadcastTimer");
   var previewFullscreenBtn = document.getElementById("streamsPreviewFullscreenBtn");
   var remoteFullscreenBtn = document.getElementById("streamsRemoteFullscreenBtn");
@@ -150,6 +212,124 @@ function initStreams() {
   function streamsShowAlert(msg) {
     if (tg && tg.showAlert) tg.showAlert(msg);
     else if (typeof alert === "function") alert(msg);
+  }
+
+  function setStreamsStatus(el, text, tone) {
+    if (!el) return;
+    text = String(text || "").trim();
+    el.textContent = text;
+    el.hidden = !text;
+    el.classList.toggle("streams-status--ok", tone === "ok");
+    el.classList.toggle("streams-status--warn", tone === "warn");
+    el.classList.toggle("streams-status--error", tone === "error");
+  }
+
+  function setWatchStatus(text, tone) {
+    setStreamsStatus(watchStatusEl, text, tone);
+  }
+
+  function setBroadcastStatus(text, tone) {
+    setStreamsStatus(broadcastStatusEl, text, tone);
+  }
+
+  function isRecoverableStreamsError(err) {
+    var type = String(err && err.type || "").toLowerCase();
+    var message = String(err && err.message || "").toLowerCase();
+    if (/invalid|browser-incompatible|ssl-unavailable/.test(type)) return false;
+    if (/permission|notallowed|not found|access/i.test(message)) return false;
+    return !type || /network|socket|server|webrtc|disconnected|peer-unavailable|unavailable-id|connection/.test(type + " " + message);
+  }
+
+  function resetWatchConnection(keepIntent, keepVideo) {
+    streamsClearWatchWatchdog();
+    streamsClearWatchReconnect();
+    streamsWatchGeneration += 1;
+    streamsWatchResetting = true;
+    if (streamsWatchCall) {
+      try { streamsWatchCall.close(); } catch (eCall) {}
+      streamsWatchCall = null;
+    }
+    if (streamsWatchPeer) {
+      try { streamsWatchPeer.destroy(); } catch (ePeer) {}
+      streamsWatchPeer = null;
+    }
+    streamsWatchResetting = false;
+    if (!keepVideo && remoteVideo) remoteVideo.srcObject = null;
+    if (!keepVideo && remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
+    if (!keepIntent) {
+      streamsWatchIntentActive = false;
+      streamsWatchRoomId = "";
+      streamsWatchReconnectAttempt = 0;
+      setWatchStatus("", "");
+    }
+    if (watchBtn) watchBtn.disabled = false;
+  }
+
+  function scheduleWatchReconnect(reason, keepVideo) {
+    if (!streamsWatchIntentActive || !streamsWatchRoomId) return;
+    streamsClearWatchWatchdog();
+    streamsClearWatchReconnect();
+    var delay = streamsReconnectDelayMs(streamsWatchReconnectAttempt);
+    var seconds = Math.max(1, Math.ceil(delay / 1000));
+    var scheduledGeneration = streamsWatchGeneration;
+    setWatchStatus((reason || "Связь просела.") + " Переподключаюсь через " + seconds + " сек.", "warn");
+    if (watchBtn) watchBtn.disabled = true;
+    if (!keepVideo && remoteVideo) remoteVideo.srcObject = null;
+    if (!keepVideo && remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
+    streamsWatchReconnectTimer = setTimeout(function () {
+      streamsWatchReconnectTimer = null;
+      if (!streamsWatchIntentActive || !streamsWatchRoomId) return;
+      if (scheduledGeneration !== streamsWatchGeneration) return;
+      streamsWatchReconnectAttempt += 1;
+      startStreamsWatchByRoomId(streamsWatchRoomId, 0, true);
+    }, delay);
+  }
+
+  function attachRemoteStreamGuards(stream, watchGeneration) {
+    try {
+      stream.getTracks().forEach(function (track) {
+        track.addEventListener("ended", function () {
+          if (watchGeneration !== streamsWatchGeneration) return;
+          scheduleWatchReconnect("Поток оборвался.", false);
+        });
+        track.addEventListener("mute", function () {
+          if (watchGeneration !== streamsWatchGeneration) return;
+          setWatchStatus("Поток временно не отдаёт данные. Жду восстановления…", "warn");
+        });
+        track.addEventListener("unmute", function () {
+          if (watchGeneration !== streamsWatchGeneration) return;
+          if (streamsWatchIntentActive) setWatchStatus("Связь восстановлена. Автозащита активна.", "ok");
+        });
+      });
+    } catch (eTracks) {}
+  }
+
+  function attachWatchCallGuards(call, watchGeneration) {
+    var pc = call && call.peerConnection;
+    if (!pc || pc.__streamsGuardAttached) return;
+    pc.__streamsGuardAttached = true;
+    function inspectState() {
+      if (watchGeneration !== streamsWatchGeneration) return;
+      var iceState = String(pc.iceConnectionState || "");
+      var connectionState = String(pc.connectionState || "");
+      if (/failed|closed/.test(iceState) || /failed|closed/.test(connectionState)) {
+        scheduleWatchReconnect("Соединение стрима оборвалось.", false);
+      } else if (/disconnected/.test(iceState) || /disconnected/.test(connectionState)) {
+        scheduleWatchReconnect("Короткий обрыв связи.", true);
+      } else if (/connected|completed/.test(iceState) || /connected/.test(connectionState)) {
+        streamsClearWatchReconnect();
+        if (streamsWatchIntentActive) setWatchStatus("Связь восстановлена. Автозащита активна.", "ok");
+        if (watchBtn) watchBtn.disabled = false;
+      }
+    }
+    try { pc.addEventListener("iceconnectionstatechange", inspectState); } catch (eIce) {}
+    try { pc.addEventListener("connectionstatechange", inspectState); } catch (eState) {}
+  }
+
+  function showWatchFatalError(msg) {
+    resetWatchConnection(false, false);
+    setWatchStatus(msg || "Не удалось подключиться к стриму.", "error");
+    streamsShowAlert(msg || "Не удалось подключиться к стриму.");
   }
 
   function requestFullscreen(el) {
@@ -199,6 +379,11 @@ function initStreams() {
   }
 
   function resetBroadcastRuntime(btnText, destroyPeer) {
+    streamsBroadcastIntentActive = false;
+    streamsBroadcastRoomId = "";
+    streamsBroadcastReconnectAttempt = 0;
+    streamsBroadcastGeneration += 1;
+    streamsClearBroadcastReconnect();
     if (streamsBroadcastStream) {
       try {
         streamsBroadcastStream.getTracks().forEach(function (t) { t.stop(); });
@@ -208,7 +393,9 @@ function initStreams() {
     if (destroyPeer && streamsBroadcastPeer) {
       var peerToDestroy = streamsBroadcastPeer;
       streamsBroadcastPeer = null;
+      streamsBroadcastResetting = true;
       try { peerToDestroy.destroy(); } catch (eDestroy) {}
+      streamsBroadcastResetting = false;
     } else {
       streamsBroadcastPeer = null;
     }
@@ -222,6 +409,118 @@ function initStreams() {
       startBtn.disabled = false;
       if (btnText) startBtn.textContent = btnText;
     }
+  }
+
+  function attachBroadcastTrackGuards(stream, btnText) {
+    try {
+      stream.getTracks().forEach(function (track) {
+        track.addEventListener("ended", function () {
+          if (stream !== streamsBroadcastStream) return;
+          resetBroadcastRuntime(btnText, true);
+          setBroadcastStatus("Источник трансляции остановлен.", "warn");
+        });
+      });
+    } catch (eTrackGuard) {}
+  }
+
+  function scheduleBroadcastReconnect(reason, btnText) {
+    if (!streamsBroadcastIntentActive || !streamsBroadcastRoomId || !streamsBroadcastStream) return;
+    streamsClearBroadcastReconnect();
+    var delay = streamsReconnectDelayMs(streamsBroadcastReconnectAttempt);
+    var seconds = Math.max(1, Math.ceil(delay / 1000));
+    var scheduledGeneration = streamsBroadcastGeneration;
+    setBroadcastStatus((reason || "Связь просела.") + " Восстанавливаю трансляцию через " + seconds + " сек.", "warn");
+    streamsBroadcastReconnectTimer = setTimeout(function () {
+      streamsBroadcastReconnectTimer = null;
+      if (!streamsBroadcastIntentActive || !streamsBroadcastRoomId || !streamsBroadcastStream) return;
+      if (scheduledGeneration !== streamsBroadcastGeneration) return;
+      streamsBroadcastReconnectAttempt += 1;
+      reconnectBroadcastPeer(btnText);
+    }, delay);
+  }
+
+  function createBroadcastPeer(roomId, btnText) {
+    var PeerJs = typeof Peer !== "undefined" ? Peer : null;
+    if (!PeerJs) {
+      resetBroadcastRuntime(btnText, true);
+      showAlert("Библиотека PeerJS не загружена. Проверьте интернет и обновите страницу.");
+      return;
+    }
+    streamsBroadcastRoomId = roomId;
+    streamsBroadcastIntentActive = true;
+    streamsBroadcastGeneration += 1;
+    var broadcastGeneration = streamsBroadcastGeneration;
+    setBroadcastStatus("Поднимаю трансляцию…", "warn");
+    var peer = new PeerJs(roomId, { debug: 0 });
+    streamsBroadcastPeer = peer;
+    peer.on("open", function () {
+      if (broadcastGeneration !== streamsBroadcastGeneration) return;
+      var link = buildMiniAppStartLink("streams_" + roomId);
+      if (shareLinkInput) shareLinkInput.value = link;
+      if (browserLinkInput && isTelegramWebApp()) browserLinkInput.value = link;
+      if (roomInput) roomInput.placeholder = roomId;
+      previewVideo.srcObject = streamsBroadcastStream;
+      previewWrap.classList.remove("streams-preview-wrap--hidden");
+      streamsBroadcastStartedAt = streamsBroadcastStartedAt || Date.now();
+      if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
+      updateBroadcastTimerText();
+      streamsBroadcastTimerInterval = setInterval(updateBroadcastTimerText, 1000);
+      streamsBroadcastReconnectAttempt = 0;
+      if (startBtn) {
+        startBtn.disabled = false;
+        startBtn.textContent = btnText;
+      }
+      setBroadcastStatus("Трансляция активна. Автовосстановление от обрывов включено.", "ok");
+    });
+    peer.on("call", function (call) {
+      if (broadcastGeneration !== streamsBroadcastGeneration) return;
+      if (streamsBroadcastStream) call.answer(streamsBroadcastStream);
+    });
+    peer.on("disconnected", function () {
+      if (broadcastGeneration !== streamsBroadcastGeneration) return;
+      if (streamsBroadcastResetting) return;
+      scheduleBroadcastReconnect("Сигнальный сервер временно недоступен.", btnText);
+    });
+    peer.on("close", function () {
+      if (broadcastGeneration !== streamsBroadcastGeneration) return;
+      if (streamsBroadcastResetting) return;
+      if (streamsBroadcastIntentActive) scheduleBroadcastReconnect("Соединение трансляции закрыто.", btnText);
+    });
+    peer.on("error", function (err) {
+      if (broadcastGeneration !== streamsBroadcastGeneration) return;
+      if (streamsBroadcastResetting) return;
+      if (err && err.type === "unavailable-id" && streamsBroadcastReconnectAttempt <= 0) {
+        resetBroadcastRuntime(btnText, true);
+        setBroadcastStatus("Этот код комнаты уже занят. Введите другой код.", "error");
+        showAlert("Этот код комнаты уже занят. Введите другой код.");
+        return;
+      }
+      if (isRecoverableStreamsError(err)) {
+        scheduleBroadcastReconnect("Ошибка сети у трансляции.", btnText);
+        return;
+      }
+      resetBroadcastRuntime(btnText, true);
+      setBroadcastStatus("Ошибка трансляции: " + (err && (err.message || err.type) || "сеть"), "error");
+      showAlert("Ошибка трансляции: " + (err && (err.message || err.type) || "сеть"));
+    });
+  }
+
+  function reconnectBroadcastPeer(btnText) {
+    if (!streamsBroadcastIntentActive || !streamsBroadcastRoomId || !streamsBroadcastStream) return;
+    var peer = streamsBroadcastPeer;
+    if (peer && peer.disconnected && !peer.destroyed && typeof peer.reconnect === "function") {
+      try {
+        peer.reconnect();
+        return;
+      } catch (eReconnect) {}
+    }
+    if (peer) {
+      streamsBroadcastResetting = true;
+      try { peer.destroy(); } catch (eDestroy) {}
+      streamsBroadcastResetting = false;
+      streamsBroadcastPeer = null;
+    }
+    createBroadcastPeer(streamsBroadcastRoomId, btnText);
   }
 
   function copyTextToClipboard(input, successMessage, failMessage) {
@@ -256,41 +555,36 @@ function initStreams() {
 
   // Делаем стартер “смотреть” по комнате без зависимости от click-обработчика,
   // чтобы deep-link работал стабильно.
-  function startStreamsWatchByRoomId(roomId, attempt) {
+  function startStreamsWatchByRoomId(roomId, attempt, autoReconnect) {
     if (!roomId) return;
     attempt = attempt || 0;
     if (!watchBtn || !roomInput || !remoteWrap || !remoteVideo) return;
     setStreamsRoleTab("watch");
+    streamsWatchIntentActive = true;
+    streamsWatchRoomId = roomId;
+    if (!autoReconnect) streamsWatchReconnectAttempt = 0;
     // Если пользователь/глубокая ссылка уже пытались смотреть и peer/call "завис",
     // старый объект может помешать повторному старту. Сбрасываем перед новой попыткой.
-    if (streamsWatchCall) {
-      try { streamsWatchCall.close(); } catch (e) {}
-      streamsWatchCall = null;
-    }
-    if (streamsWatchPeer) {
-      try { streamsWatchPeer.destroy(); } catch (e) {}
-      streamsWatchPeer = null;
-    }
-    if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
-    if (remoteVideo) remoteVideo.srcObject = null;
-    if (window.__streamsWatchWatchdogTimer) {
-      clearTimeout(window.__streamsWatchWatchdogTimer);
-      window.__streamsWatchWatchdogTimer = null;
-    }
+    resetWatchConnection(true, !!autoReconnect && !!remoteVideo.srcObject);
+    var watchGeneration = streamsWatchGeneration;
 
     roomInput.value = roomId;
     watchBtn.disabled = true;
+    setWatchStatus(autoReconnect ? "Восстанавливаю стрим после обрыва…" : "Подключаюсь к стриму…", "warn");
 
     var PeerJs = typeof Peer !== "undefined" ? Peer : null;
     if (!PeerJs) {
       if (attempt < 12) {
         // PeerJS может подгружаться после инициализации экрана.
         // Ждем пару сотен мс и пробуем снова.
-        setTimeout(function () { startStreamsWatchByRoomId(roomId, attempt + 1); }, 300);
+        setTimeout(function () {
+          if (!streamsWatchIntentActive || streamsWatchRoomId !== roomId) return;
+          if (watchGeneration !== streamsWatchGeneration) return;
+          startStreamsWatchByRoomId(roomId, attempt + 1, autoReconnect);
+        }, 300);
         return;
       }
-      streamsShowAlert("Библиотека PeerJS не загружена.");
-      watchBtn.disabled = false;
+      showWatchFatalError("Библиотека PeerJS не загружена.");
       return;
     }
 
@@ -308,45 +602,54 @@ function initStreams() {
       } catch (e) {}
       return new MediaStream();
     }
+    peer.on("disconnected", function () {
+      if (watchGeneration !== streamsWatchGeneration) return;
+      if (streamsWatchResetting) return;
+      scheduleWatchReconnect("Сигнальный сервер временно недоступен.", true);
+    });
+    peer.on("close", function () {
+      if (watchGeneration !== streamsWatchGeneration) return;
+      if (streamsWatchResetting) return;
+      if (streamsWatchIntentActive) scheduleWatchReconnect("Соединение закрыто.", false);
+    });
     peer.on("error", function (err) {
-      if (window.__streamsWatchWatchdogTimer) {
-        clearTimeout(window.__streamsWatchWatchdogTimer);
-        window.__streamsWatchWatchdogTimer = null;
+      if (watchGeneration !== streamsWatchGeneration) return;
+      streamsClearWatchWatchdog();
+      if (isRecoverableStreamsError(err)) {
+        scheduleWatchReconnect("Связь со стримом временно потеряна.", !!remoteVideo.srcObject);
+        return;
       }
-      // Ошибки на уровне PeerJS (сигналинг/сервер) раньше не обрабатывались,
-      // из-за чего кнопка могла оставаться выключенной.
-      try { streamsWatchCall && streamsWatchCall.close && streamsWatchCall.close(); } catch (e) {}
-      streamsWatchCall = null;
-      streamsWatchPeer = null;
-      if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
-      if (remoteVideo) remoteVideo.srcObject = null;
-      watchBtn.disabled = false;
-      if (err && (err.type === "peer-unavailable" || err.type === "network")) streamsShowAlert("Трансляция недоступна. Проверьте код комнаты.");
-      else streamsShowAlert("PeerJS ошибка: " + (err && (err.message || err.type) || "сеть"));
+      showWatchFatalError("PeerJS ошибка: " + (err && (err.message || err.type) || "сеть"));
     });
     peer.on("open", function () {
+      if (watchGeneration !== streamsWatchGeneration) return;
       var call = peer.call(roomId, createDummyMediaStream());
+      if (!call) {
+        scheduleWatchReconnect("Не удалось создать соединение.", false);
+        return;
+      }
       streamsWatchCall = call;
+      attachWatchCallGuards(call, watchGeneration);
       call.on("error", function (err) {
+        if (watchGeneration !== streamsWatchGeneration) return;
         // Если call не смог поднять поток, нужно вернуть управление пользователю.
-        if (window.__streamsWatchWatchdogTimer) {
-          clearTimeout(window.__streamsWatchWatchdogTimer);
-          window.__streamsWatchWatchdogTimer = null;
-        }
-        remoteWrap.classList.add("streams-remote-wrap--hidden");
-        if (remoteVideo) remoteVideo.srcObject = null;
+        streamsClearWatchWatchdog();
         streamsWatchCall = null;
-        watchBtn.disabled = false;
-        streamsShowAlert("Не удалось подключиться к комнате. " + (err && (err.message || err.type)) || "");
+        if (isRecoverableStreamsError(err)) {
+          scheduleWatchReconnect("Не удалось удержать соединение.", !!remoteVideo.srcObject);
+          return;
+        }
+        showWatchFatalError("Не удалось подключиться к комнате. " + ((err && (err.message || err.type)) || ""));
       });
       call.on("stream", function (stream) {
-        if (window.__streamsWatchWatchdogTimer) {
-          clearTimeout(window.__streamsWatchWatchdogTimer);
-          window.__streamsWatchWatchdogTimer = null;
-        }
+        if (watchGeneration !== streamsWatchGeneration) return;
+        streamsClearWatchWatchdog();
+        streamsClearWatchReconnect();
+        streamsWatchReconnectAttempt = 0;
         remoteVideo.srcObject = stream;
         remoteVideo.muted = false;
         remoteVideo.volume = 1;
+        attachRemoteStreamGuards(stream, watchGeneration);
         try {
           var playPromise = remoteVideo.play();
           if (playPromise && typeof playPromise.catch === "function") {
@@ -357,28 +660,32 @@ function initStreams() {
         } catch (e) {}
         remoteWrap.classList.remove("streams-remote-wrap--hidden");
         watchBtn.disabled = false;
+        setWatchStatus("Стрим подключён. Автовосстановление от обрывов активно.", "ok");
       });
       call.on("close", function () {
-        if (window.__streamsWatchWatchdogTimer) {
-          clearTimeout(window.__streamsWatchWatchdogTimer);
-          window.__streamsWatchWatchdogTimer = null;
-        }
-        remoteWrap.classList.add("streams-remote-wrap--hidden");
-        remoteVideo.srcObject = null;
+        if (watchGeneration !== streamsWatchGeneration) return;
+        if (streamsWatchResetting) return;
         streamsWatchCall = null;
-        watchBtn.disabled = false;
+        streamsClearWatchWatchdog();
+        if (streamsWatchIntentActive) scheduleWatchReconnect("Стрим прервался.", !!remoteVideo.srcObject);
+        else {
+          remoteWrap.classList.add("streams-remote-wrap--hidden");
+          remoteVideo.srcObject = null;
+          watchBtn.disabled = false;
+        }
       });
 
       // Watchdog: если соединение зависнет (без stream/error/close),
       // вернем пользователю управление.
-      window.__streamsWatchWatchdogTimer = setTimeout(function () {
+      streamsWatchWatchdogTimer = setTimeout(function () {
+        streamsWatchWatchdogTimer = null;
+        window.__streamsWatchWatchdogTimer = null;
+        if (watchGeneration !== streamsWatchGeneration) return;
         if (!watchBtn) return;
         if (!watchBtn.disabled) return;
-        watchBtn.disabled = false;
-        if (remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
-        if (remoteVideo) remoteVideo.srcObject = null;
-        streamsShowAlert("Трансляция не отвечает. Попробуйте ещё раз через 5–10 секунд.");
+        scheduleWatchReconnect("Трансляция не отвечает.", false);
       }, 14000);
+      window.__streamsWatchWatchdogTimer = streamsWatchWatchdogTimer;
     });
   }
 
@@ -449,38 +756,10 @@ function initStreams() {
       })
       .then(function (stream) {
         streamsBroadcastStream = stream;
-        var PeerJs = typeof Peer !== "undefined" ? Peer : null;
-        if (!PeerJs) {
-          resetBroadcastRuntime(btnText, true);
-          showAlert("Библиотека PeerJS не загружена. Проверьте интернет и обновите страницу.");
-          return;
-        }
-        var peer = new PeerJs(roomId, { debug: 0 });
-        streamsBroadcastPeer = peer;
-        peer.on("open", function () {
-          var link = buildMiniAppStartLink("streams_" + roomId);
-          if (shareLinkInput) shareLinkInput.value = link;
-          if (browserLinkInput && isTelegramWebApp()) browserLinkInput.value = link;
-          if (roomInput) roomInput.placeholder = roomId;
-          previewVideo.srcObject = streamsBroadcastStream;
-          previewWrap.classList.remove("streams-preview-wrap--hidden");
-          streamsBroadcastStartedAt = Date.now();
-          if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
-          updateBroadcastTimerText();
-          streamsBroadcastTimerInterval = setInterval(updateBroadcastTimerText, 1000);
-          startBtn.disabled = false;
-          startBtn.textContent = btnText;
-        });
-        peer.on("call", function (call) {
-          if (streamsBroadcastStream) call.answer(streamsBroadcastStream);
-        });
-        peer.on("error", function (err) {
-          resetBroadcastRuntime(btnText, false);
-          showAlert("Ошибка трансляции: " + (err && (err.message || err.type) || "сеть"));
-        });
-        peer.on("close", function () {
-          resetBroadcastRuntime(btnText, false);
-        });
+        streamsBroadcastStartedAt = Date.now();
+        streamsBroadcastReconnectAttempt = 0;
+        attachBroadcastTrackGuards(stream, btnText);
+        createBroadcastPeer(roomId, btnText);
       })
       .catch(function (err) {
         startBtn.disabled = false;
@@ -502,6 +781,7 @@ function initStreams() {
     stopBtn.addEventListener("click", function () {
       resetBroadcastRuntime(null, true);
       if (streamsBroadcastTimerEl) streamsBroadcastTimerEl.textContent = "Трансляция остановлена";
+      setBroadcastStatus("Трансляция остановлена.", "warn");
     });
   }
 
@@ -540,18 +820,33 @@ function initStreams() {
     if (stopWatchBtn && !stopWatchBtn.__streamsStopWatchHandlerAttached) {
       stopWatchBtn.__streamsStopWatchHandlerAttached = true;
       stopWatchBtn.addEventListener("click", function () {
-        if (streamsWatchCall) {
-          try { streamsWatchCall.close(); } catch (e) {}
-          streamsWatchCall = null;
-        }
-        if (streamsWatchPeer) {
-          try { streamsWatchPeer.destroy(); } catch (e) {}
-          streamsWatchPeer = null;
-        }
-        remoteVideo.srcObject = null;
-        remoteWrap.classList.add("streams-remote-wrap--hidden");
+        resetWatchConnection(false, false);
+        setWatchStatus("Просмотр остановлен.", "warn");
       });
     }
+  }
+
+  if (!window.__streamsNetworkGuardAttached) {
+    window.__streamsNetworkGuardAttached = true;
+    window.addEventListener("offline", function () {
+      if (streamsWatchIntentActive) setWatchStatus("Интернет пропал. Жду сеть и верну стрим автоматически…", "warn");
+      if (streamsBroadcastIntentActive) setBroadcastStatus("Интернет пропал. Трансляция останется активной и переподключится после сети…", "warn");
+    });
+    window.addEventListener("online", function () {
+      if (streamsWatchIntentActive && streamsWatchRoomId) scheduleWatchReconnect("Интернет вернулся.", !!(remoteVideo && remoteVideo.srcObject));
+      if (streamsBroadcastIntentActive && streamsBroadcastRoomId) scheduleBroadcastReconnect("Интернет вернулся.", startBtn ? startBtn.textContent : "Запустить трансляцию");
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) return;
+      if (streamsWatchIntentActive && remoteVideo && remoteVideo.srcObject) {
+        try {
+          var playPromise = remoteVideo.play();
+          if (playPromise && typeof playPromise.catch === "function") playPromise.catch(function () {});
+        } catch (ePlay) {}
+      } else if (streamsWatchIntentActive && streamsWatchRoomId) {
+        scheduleWatchReconnect("Экран снова активен.", false);
+      }
+    });
   }
 
   // Fullscreen для превью и remote-видео

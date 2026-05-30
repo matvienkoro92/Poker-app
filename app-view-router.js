@@ -1338,9 +1338,10 @@ navItems.forEach(function (item) {
         pokerOpenPlayerCrmFromHome();
         return;
       }
-      var downloadPage = target === "download" ? item.getAttribute("data-download-page") || "main" : "";
+      var downloadPage = target === "download" ? item.getAttribute("data-download-page") || item.getAttribute("data-download-page-target") || "main" : "";
       setView(target, downloadPage ? { downloadPage: downloadPage } : undefined);
-      if (downloadPage && typeof setDownloadPage === "function") setDownloadPage(downloadPage);
+      if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main");
+      if (downloadPage && downloadPage !== "main" && typeof setDownloadPage === "function") setDownloadPage(downloadPage);
     }
   });
 });
@@ -1782,11 +1783,11 @@ document.addEventListener("touchend", function (e) {
 }, { passive: false });
 
 document.addEventListener("click", function (e) {
-  var link = e.target.closest("[data-view-target][data-download-page]");
+  var link = e.target.closest("[data-view-target][data-download-page], [data-view-target][data-download-page-target]");
   if (!link) return;
   e.preventDefault();
   var view = link.getAttribute("data-view-target");
-  var page = link.getAttribute("data-download-page");
+  var page = link.getAttribute("data-download-page") || link.getAttribute("data-download-page-target");
   if (view) setView(view, page ? { downloadPage: page } : undefined);
   if (page && typeof setDownloadPage === "function") setDownloadPage(page);
 });

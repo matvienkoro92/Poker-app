@@ -128,13 +128,7 @@ function pokerForceClosePwaAuthScreenAfterSuccess() {
 }
 
 function pokerAuthFetch(url, init) {
-  var opts = {};
-  var source = init || {};
-  var key;
-  opts.cache = "no-store";
-  for (key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) opts[key] = source[key];
-  }
+  var opts = Object.assign({ cache: "no-store" }, init || {});
   function sameOriginFallbackUrl(rawUrl) {
     try {
       if (isPwaAuthLocalHost()) return "";

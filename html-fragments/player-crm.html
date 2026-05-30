@@ -1,5 +1,5 @@
 <div class="view" data-view="player-crm" id="playerCrmView">
-  <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+  <button type="button" class="bonus-game-back" data-crm-close="player-crm" aria-label="На главную">←</button>
   <section class="player-crm" aria-labelledby="playerCrmTitle">
     <header class="player-crm__hero">
       <div class="player-crm__hero-copy">
@@ -21,12 +21,17 @@
           <div class="player-crm__current-stats" id="playerCrmCurrentStats"></div>
 
           <div class="player-crm__hero-tools player-crm__period-toolbar">
-            <label class="player-crm__period">
+            <label class="player-crm__period player-crm__period--main">
               <span>Период</span>
               <select id="playerCrmPeriodSelect">
                 <option value="all">За все время</option>
                 <option value="custom">Даты</option>
                 <option value="yesterday">Вчера</option>
+                <option value="month_2026_02">Февраль</option>
+                <option value="month_2026_03">Март</option>
+                <option value="month_2026_04">Апрель</option>
+                <option value="month_2026_05">Май</option>
+                <option value="period_2026_02_04">Февраль — апрель</option>
                 <option value="last_month">Прошлый месяц</option>
                 <option value="current_month">Текущий месяц</option>
                 <option value="last_week">Прошлая неделя</option>
@@ -35,6 +40,7 @@
                 <option value="30" selected>30 дней</option>
                 <option value="7">7 дней</option>
               </select>
+              <span class="player-crm__period-range" id="playerCrmPeriodRange" aria-live="polite"></span>
             </label>
             <div class="player-crm__period player-crm__date-field player-crm__date-range-field">
               <span>Даты</span>
@@ -50,7 +56,9 @@
             </div>
           </div>
 
-          <div class="player-crm__stats" id="playerCrmStats"></div>
+          <div class="player-crm__stats" id="playerCrmStats">
+            <div style="display:block;color:#f4ead6;background:rgba(15,23,42,0.78);border:1px solid rgba(199,163,106,0.35);border-radius:8px;padding:12px;font-weight:800;">Загрузка дашборда…</div>
+          </div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="overview">
@@ -68,6 +76,11 @@
                 <option value="all">За все время</option>
                 <option value="custom">Даты</option>
                 <option value="yesterday">Вчера</option>
+                <option value="month_2026_02">Февраль</option>
+                <option value="month_2026_03">Март</option>
+                <option value="month_2026_04">Апрель</option>
+                <option value="month_2026_05">Май</option>
+                <option value="period_2026_02_04">Февраль — апрель</option>
                 <option value="last_month">Прошлый месяц</option>
                 <option value="current_month">Текущий месяц</option>
                 <option value="last_week">Прошлая неделя</option>
@@ -90,7 +103,9 @@
               <div class="player-crm__range-calendar" id="playerCrmChartDateRangeCalendar" data-crm-date-range-popover="chart" hidden></div>
             </div>
           </div>
-          <div class="player-crm__analytics" id="playerCrmAnalytics"></div>
+          <div class="player-crm__analytics" id="playerCrmAnalytics">
+            <div style="display:block;color:#f4ead6;background:rgba(15,23,42,0.78);border:1px solid rgba(148,163,184,0.24);border-radius:8px;padding:12px;font-weight:700;">График загрузится после открытия дашборда.</div>
+          </div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="players">
@@ -257,6 +272,7 @@
               <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastPreviewBtn">Посмотреть</button>
             </div>
             <div class="player-crm__send-result" id="playerCrmBroadcastResult" aria-live="polite"></div>
+            <div class="player-crm__campaigns" id="playerCrmCampaigns"></div>
           </div>
         </section>
 
@@ -271,16 +287,46 @@
           <div class="player-crm__links">
             <div class="player-crm__links-builder">
               <div class="player-crm__form-grid player-crm__links-form-grid">
-                <label><span>Название</span><input id="playerCrmLinkLabel" maxlength="200" placeholder="Stories Instagram / Май" /></label>
-                <label><span>Раздел</span><select id="playerCrmLinkTarget"></select></label>
-                <label><span>Источник</span><input id="playerCrmLinkSource" maxlength="80" placeholder="instagram, telegram, vk" /></label>
-                <label><span>Канал</span><input id="playerCrmLinkMedium" maxlength="80" placeholder="story, post, ads, dm" /></label>
-                <label><span>Кампания</span><input id="playerCrmLinkCampaign" maxlength="120" placeholder="mtt_may_leads" /></label>
-                <label><span>Креатив</span><input id="playerCrmLinkContent" maxlength="120" placeholder="video_01 / banner_a" /></label>
-                <label><span>Аудитория</span><input id="playerCrmLinkTerm" maxlength="120" placeholder="новички / MTT / кеш" /></label>
-                <label><span>Оффер</span><input id="playerCrmLinkOffer" maxlength="160" placeholder="Бесплатный урок / клуб / бонус" /></label>
-                <label><span>Ответственный</span><input id="playerCrmLinkOwner" maxlength="80" placeholder="Аня / Вика / Роман" /></label>
-                <label><span>Комментарий</span><input id="playerCrmLinkNote" maxlength="240" placeholder="где размещали и что тестируем" /></label>
+                <label>
+                  <span>Название</span>
+                  <input id="playerCrmLinkLabel" maxlength="200" placeholder="Stories Instagram / Май" />
+                </label>
+                <label>
+                  <span>Раздел</span>
+                  <select id="playerCrmLinkTarget"></select>
+                </label>
+                <label>
+                  <span>Источник</span>
+                  <input id="playerCrmLinkSource" maxlength="80" placeholder="instagram, telegram, vk" />
+                </label>
+                <label>
+                  <span>Канал</span>
+                  <input id="playerCrmLinkMedium" maxlength="80" placeholder="story, post, ads, dm" />
+                </label>
+                <label>
+                  <span>Кампания</span>
+                  <input id="playerCrmLinkCampaign" maxlength="120" placeholder="mtt_may_leads" />
+                </label>
+                <label>
+                  <span>Креатив</span>
+                  <input id="playerCrmLinkContent" maxlength="120" placeholder="video_01 / banner_a" />
+                </label>
+                <label>
+                  <span>Аудитория</span>
+                  <input id="playerCrmLinkTerm" maxlength="120" placeholder="новички / MTT / кеш" />
+                </label>
+                <label>
+                  <span>Оффер</span>
+                  <input id="playerCrmLinkOffer" maxlength="160" placeholder="Бесплатный урок / клуб / бонус" />
+                </label>
+                <label>
+                  <span>Ответственный</span>
+                  <input id="playerCrmLinkOwner" maxlength="80" placeholder="Аня / Вика / Роман" />
+                </label>
+                <label>
+                  <span>Комментарий</span>
+                  <input id="playerCrmLinkNote" maxlength="240" placeholder="где размещали и что тестируем" />
+                </label>
               </div>
               <div class="player-crm__broadcast-actions">
                 <button type="button" class="player-crm__primary-btn" id="playerCrmCreateLinkBtn">Создать ссылку</button>
@@ -347,6 +393,20 @@
           <button type="button" class="player-crm__dialog-modal-close" data-crm-close-general-messages-modal aria-label="Закрыть">×</button>
         </div>
         <div class="player-crm__dialog-modal-body" id="playerCrmGeneralMessagesModalBody"></div>
+      </section>
+    </div>
+
+    <div class="player-crm__dialog-modal" id="playerCrmVisitsModal" hidden>
+      <div class="player-crm__dialog-modal-backdrop" data-crm-close-visits-modal></div>
+      <section class="player-crm__dialog-modal-panel" aria-modal="true" role="dialog" aria-labelledby="playerCrmVisitsModalTitle">
+        <div class="player-crm__dialog-modal-head">
+          <div>
+            <h3 id="playerCrmVisitsModalTitle">Уникальные пользователи</h3>
+            <span id="playerCrmVisitsModalSubtitle">—</span>
+          </div>
+          <button type="button" class="player-crm__dialog-modal-close" data-crm-close-visits-modal aria-label="Закрыть">×</button>
+        </div>
+        <div class="player-crm__dialog-modal-body" id="playerCrmVisitsModalBody"></div>
       </section>
     </div>
 

@@ -211,6 +211,7 @@
       "app-player-crm-registrations.js",
       "app-player-crm-viewport-shell.js",
       "app-player-crm-runtime.js",
+      "app-player-crm-runtime-core.js",
       "app-player-crm.js"
     ],
     "shell": [

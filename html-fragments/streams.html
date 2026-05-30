@@ -14,6 +14,7 @@
                   <input type="text" id="streamsRoomInput" class="streams-room-input" inputmode="numeric" placeholder="6 цифр или ссылка с streams_" aria-label="Код комнаты" maxlength="256" />
                   <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Смотреть</button>
                 </div>
+                <p id="streamsWatchStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-remote-wrap streams-remote-wrap--hidden" id="streamsRemoteWrap">
                   <video id="streamsRemoteVideo" class="streams-remote-video" autoplay playsinline controls aria-label="Трансляция"></video>
                   <button type="button" class="streams-btn streams-btn--stop" id="streamsStopWatchBtn">Отключиться</button>
@@ -28,6 +29,7 @@
                   <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
                 </div>
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
+                <p id="streamsBroadcastStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
                   <p class="streams-open-in-browser__text"><strong>Стрим будет работать только в Chrome или браузере на компьютере.</strong> В браузере Telegram не будет работать. Можете воспользоваться ссылкой ниже, если нужно сменить браузер.</p>
                   <div class="streams-link-row streams-open-in-browser__row">

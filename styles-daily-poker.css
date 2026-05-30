@@ -827,6 +827,34 @@
   overflow: hidden;
 }
 
+.daily-poker__feature {
+  position: relative;
+  isolation: isolate;
+  margin: 0 0 6px;
+  padding: clamp(14px, 2.8vw, 28px);
+  border-radius: clamp(22px, 4vw, 34px);
+  border: 1px solid rgba(255, 180, 53, 0.58);
+  background:
+    radial-gradient(ellipse at 82% 9%, rgba(255, 182, 70, 0.16), transparent 30%),
+    radial-gradient(ellipse at 16% 60%, rgba(255, 182, 70, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(8, 9, 8, 0.96), rgba(4, 6, 7, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 158, 0.13),
+    0 0 24px rgba(255, 165, 38, 0.2),
+    0 20px 38px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+}
+
+.daily-poker__feature::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  z-index: 3;
+  border: 1px solid rgba(255, 169, 40, 0.34);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
 .daily-poker__header {
   position: relative;
   display: grid;
@@ -1044,152 +1072,41 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-rows: 1fr;
   align-items: stretch;
-  gap: 0;
+  gap: clamp(7px, 1.5vw, 14px);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .daily-poker__prize {
-  --daily-poker-prize-accent: var(--daily-poker-blue);
-  --daily-poker-prize-soft: #7dd3fc;
-  --daily-poker-prize-deep: #021322;
   position: relative;
-  isolation: isolate;
-  container-type: inline-size;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  align-self: stretch;
-  justify-self: stretch;
+  display: block;
   width: 100%;
-  gap: clamp(4px, 2.8cqi, 9px);
   aspect-ratio: 1 / 1;
   min-width: 0;
   min-height: 0;
-  padding: clamp(10px, 8cqi, 18px) clamp(7px, 7cqi, 16px);
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: #fff4dc;
-  background:
-    radial-gradient(circle at 50% 16%, color-mix(in srgb, var(--daily-poker-prize-accent) 26%, transparent) 0, transparent 34%),
-    linear-gradient(145deg, rgba(2, 4, 5, 0.98), var(--daily-poker-prize-deep) 56%, rgba(1, 2, 3, 0.98));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 244, 199, 0.12),
-    inset 0 0 24px color-mix(in srgb, var(--daily-poker-prize-accent) 15%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--daily-poker-prize-accent) 44%, transparent),
-    0 0 11px color-mix(in srgb, var(--daily-poker-prize-accent) 72%, transparent),
-    0 8px 18px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  border: 0;
+  border-radius: clamp(10px, 2.2vw, 16px);
+  background: #000;
+  box-shadow: none;
   overflow: hidden;
-}
-
-.daily-poker__prize:nth-child(-n + 3),
-.daily-poker__prize--royal {
-  --daily-poker-prize-accent: var(--daily-poker-gold);
-  --daily-poker-prize-soft: var(--daily-poker-gold-soft);
-  --daily-poker-prize-deep: #190d03;
 }
 
 .daily-poker__prize::before,
 .daily-poker__prize::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
+  content: none;
 }
 
-.daily-poker__prize::before {
-  inset: clamp(7px, 5cqi, 13px);
-  z-index: -1;
-  border: 1px solid color-mix(in srgb, var(--daily-poker-prize-accent) 62%, transparent);
-  border-radius: 7px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 242, 194, 0.08),
-    0 0 12px color-mix(in srgb, var(--daily-poker-prize-accent) 34%, transparent);
-}
-
-.daily-poker__prize::after {
-  inset: 0;
-  z-index: -2;
-  opacity: 0.5;
-  background:
-    linear-gradient(135deg, transparent 0 47%, color-mix(in srgb, var(--daily-poker-prize-accent) 18%, transparent) 48% 52%, transparent 53%),
-    radial-gradient(circle at 8% 92%, color-mix(in srgb, var(--daily-poker-prize-accent) 28%, transparent), transparent 20%),
-    radial-gradient(circle at 94% 9%, color-mix(in srgb, var(--daily-poker-prize-accent) 18%, transparent), transparent 19%);
-}
-
-.daily-poker__prizes .daily-poker__prize .daily-poker__prize-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: 2em;
-  max-width: 100%;
-  margin: 0;
-  color: #fff4dc;
-  font-size: clamp(18px, 15cqi, 40px);
-  font-weight: 950;
-  letter-spacing: 0;
-  line-height: 0.94;
-  text-align: center;
-  text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.82),
-    0 0 10px color-mix(in srgb, var(--daily-poker-prize-accent) 48%, transparent);
-  text-wrap: balance;
-}
-
-.daily-poker__prizes .daily-poker__prize .daily-poker__prize-title--two-line {
-  font-size: clamp(16px, 13cqi, 36px);
-}
-
-.daily-poker__prizes .daily-poker__prize .daily-poker__prize-line {
+.daily-poker__prize-art {
   display: block;
-  min-width: 0;
-  max-width: 92%;
-  margin: 0;
-  color: #fff1c9;
-  font-size: clamp(9px, 7cqi, 20px);
-  font-weight: 900;
-  line-height: 1.08;
-  text-align: center;
-  text-wrap: balance;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.78);
-}
-
-.daily-poker__prizes .daily-poker__prize .daily-poker__prize-line b {
-  display: inline-block;
-  color: var(--daily-poker-prize-accent);
-  font-size: 1.16em;
-  font-weight: 950;
-  white-space: nowrap;
-  text-shadow:
-    0 0 8px color-mix(in srgb, var(--daily-poker-prize-accent) 72%, transparent),
-    0 1px 0 rgba(0, 0, 0, 0.8);
-}
-
-.daily-poker__prizes .daily-poker__prize.daily-poker__prize--bonus-extra .daily-poker__prize-line,
-.daily-poker__prizes .daily-poker__prize.daily-poker__prize--bonus-extra small {
-  color: #fff4dc;
-}
-
-.daily-poker__prizes .daily-poker__prize small {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: 2.05em;
-  max-width: 96%;
-  margin: 0;
-  color: var(--daily-poker-prize-accent);
-  font-size: clamp(8px, 6.2cqi, 15px);
-  font-weight: 900;
-  line-height: 0.98;
-  text-align: center;
-  text-shadow: 0 0 7px color-mix(in srgb, var(--daily-poker-prize-accent) 62%, transparent);
-}
-
-.daily-poker__prizes .daily-poker__prize small:empty {
-  display: none;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
 }
 
 .daily-poker__winners {
@@ -1571,79 +1488,73 @@
 .daily-poker__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .daily-poker__play-btn,
 .daily-poker__claim-btn {
   flex: 1 1 230px;
-  min-height: 64px;
-  border: 2px solid rgba(255, 236, 182, 0.78);
-  border-radius: 16px;
-  padding: 0 20px;
-  color: #fff4d8;
+  min-height: 72px;
+  border: 1px solid rgba(255, 227, 148, 0.96);
+  border-radius: 14px;
+  padding: 0 18px;
+  color: #ffe0a1;
   background:
-    linear-gradient(180deg, rgba(255, 237, 190, 0.8), rgba(255, 237, 190, 0) 34%),
-    linear-gradient(180deg, #e79b33, #c2640a);
+    radial-gradient(ellipse at 50% 0%, rgba(255, 240, 177, 0.55), transparent 40%),
+    linear-gradient(180deg, #b96f10 0%, #8a4a05 54%, #5b2c00 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(132, 59, 7, 0.8),
-    0 11px 22px rgba(0, 0, 0, 0.45);
-  font-size: clamp(22px, 3.3vw, 31px);
-  font-weight: 900;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    inset 0 0 0 1px rgba(255, 151, 28, 0.58),
+    inset 0 -20px 34px rgba(54, 22, 0, 0.4),
+    0 0 0 1px rgba(255, 136, 12, 0.38),
+    0 0 18px rgba(255, 161, 33, 0.45),
+    0 14px 28px rgba(0, 0, 0, 0.52);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(25px, 5.8vw, 42px);
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow:
+    0 2px 0 rgba(66, 31, 0, 0.9),
+    0 0 12px rgba(255, 201, 87, 0.82);
 }
 
 .daily-poker__play-btn::before {
-  content: "";
-  display: inline-block;
-  width: 0;
-  height: 0;
-  margin-right: 10px;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 16px solid currentColor;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+  content: none;
 }
 
 .daily-poker__share-actions {
   flex: 1 1 100%;
   display: flex;
   align-items: stretch;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
 
 .daily-poker__invite-btn {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 48px;
+  min-height: 56px;
   padding: 0 18px;
-  border: 2px solid rgba(255, 177, 42, 0.74);
-  border-radius: 14px;
-  color: #f8e8c7;
+  border: 1px solid rgba(255, 177, 42, 0.72);
+  border-radius: 12px;
+  color: #dac8aa;
   background:
-    linear-gradient(180deg, rgba(255, 203, 107, 0.12), rgba(255, 118, 0, 0.06)),
-    rgba(4, 6, 7, 0.78);
+    linear-gradient(180deg, rgba(255, 184, 68, 0.06), rgba(255, 184, 68, 0.015)),
+    rgba(1, 6, 9, 0.88);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 238, 174, 0.1),
-    0 0 16px rgba(255, 118, 0, 0.18);
-  font-size: clamp(17px, 2.8vw, 22px);
+    inset 0 0 0 1px rgba(255, 238, 174, 0.08),
+    0 0 14px rgba(255, 132, 0, 0.16);
+  font-size: clamp(18px, 4.2vw, 28px);
   font-weight: 900;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.52);
 }
 
 .daily-poker__invite-btn::before {
-  content: "";
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  margin-right: 9px;
-  vertical-align: -2px;
-  background: currentColor;
-  clip-path: polygon(8% 44%, 92% 6%, 65% 94%, 47% 58%);
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+  content: none;
 }
 
 .daily-poker__invite-btn:hover,
@@ -1658,22 +1569,22 @@
 }
 
 .daily-poker__copy-btn {
-  flex: 0 0 48px;
-  width: 48px;
-  min-height: 48px;
+  flex: 0 0 56px;
+  width: 56px;
+  min-height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 2px solid rgba(255, 177, 42, 0.74);
-  border-radius: 14px;
-  color: #f8e8c7;
+  border: 1px solid rgba(255, 177, 42, 0.72);
+  border-radius: 12px;
+  color: #dac8aa;
   background:
-    linear-gradient(180deg, rgba(255, 203, 107, 0.12), rgba(255, 118, 0, 0.06)),
-    rgba(4, 6, 7, 0.78);
+    linear-gradient(180deg, rgba(255, 184, 68, 0.06), rgba(255, 184, 68, 0.015)),
+    rgba(1, 6, 9, 0.88);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 238, 174, 0.1),
-    0 0 16px rgba(255, 118, 0, 0.18);
+    inset 0 0 0 1px rgba(255, 238, 174, 0.08),
+    0 0 14px rgba(255, 132, 0, 0.16);
   transition: transform 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -1701,44 +1612,72 @@
 .daily-poker__play-btn--extra,
 .daily-poker__claim-btn {
   background:
-    linear-gradient(180deg, rgba(255, 237, 190, 0.48), rgba(255, 237, 190, 0) 35%),
-    linear-gradient(180deg, #0f9bd0, #075276);
+    radial-gradient(ellipse at 50% 0%, rgba(255, 240, 177, 0.55), transparent 40%),
+    linear-gradient(180deg, #b96f10 0%, #8a4a05 54%, #5b2c00 100%);
 }
 
 .daily-poker__result,
 .daily-poker__reward {
+  min-height: 64px;
+  margin-top: 12px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 205, 116, 0.28);
   border-radius: 14px;
-  background: rgba(4, 6, 7, 0.78);
-  color: #f1dfbe;
+  background:
+    linear-gradient(180deg, rgba(255, 210, 118, 0.045), transparent 48%),
+    rgba(1, 5, 6, 0.9);
+  color: #ecd5a5;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 242, 194, 0.05),
+    0 0 16px rgba(255, 166, 38, 0.1),
+    0 12px 22px rgba(0, 0, 0, 0.44);
 }
 
 .daily-poker__result {
-  font-size: clamp(15px, 3.6vw, 22px);
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: clamp(16px, 4vw, 25px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-shadow: 0 0 8px rgba(255, 203, 100, 0.3);
+}
+
+.daily-poker__result:not([hidden]):not(.daily-poker__result--error)::before {
+  content: "♠";
+  flex: 0 0 auto;
+  color: var(--daily-poker-gold);
+  font-size: 1.34em;
+  line-height: 0.8;
+  text-shadow:
+    0 0 8px rgba(255, 194, 82, 0.75),
+    0 2px 6px rgba(0, 0, 0, 0.65);
 }
 
 .daily-poker__result--prompt {
-  min-height: 92px;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-color: transparent;
-  box-shadow: none;
+  min-height: 64px;
+  flex-direction: row;
+  gap: 12px;
+  padding: 12px 18px;
 }
 
 .daily-poker__result-primary {
   display: block;
   max-width: 100%;
+  min-width: 0;
 }
 
 .daily-poker__result-meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 14px;
-  color: #9bdcf6;
-  font-size: clamp(12px, 2.2vw, 16px);
-  line-height: 1.15;
+  gap: 5px 12px;
+  color: #ecd5a5;
+  font-size: clamp(10px, 2.8vw, 14px);
+  line-height: 1.1;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  opacity: 0.84;
 }
 
 .daily-poker__result-meta span {
@@ -1746,8 +1685,8 @@
 }
 
 .daily-poker__result--timer .daily-poker__result-primary {
-  color: #f8e8c7;
-  font-size: clamp(16px, 3.8vw, 24px);
+  color: #ecd5a5;
+  font-size: clamp(16px, 4vw, 25px);
 }
 
 .daily-poker__reward {
@@ -1772,6 +1711,15 @@
     padding: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) 12px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
   }
 
+  .daily-poker__feature {
+    padding: 10px;
+    border-radius: 24px;
+  }
+
+  .daily-poker__feature::before {
+    inset: 8px;
+  }
+
   .daily-poker__header {
     grid-template-columns: 60px minmax(0, 1fr);
     min-height: 148px;
@@ -1852,11 +1800,11 @@
 
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
+    gap: 6px;
   }
 
   .daily-poker__prize {
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .daily-poker__table {
@@ -1891,8 +1839,8 @@
 
   .daily-poker__play-btn,
   .daily-poker__claim-btn {
-    min-height: 56px;
-    font-size: 22px;
+    min-height: 66px;
+    font-size: clamp(24px, 7.2vw, 32px);
   }
 }
 
@@ -1901,6 +1849,15 @@
     padding: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) 12px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
   }
 
+  .daily-poker__feature {
+    padding: 10px;
+    border-radius: 24px;
+  }
+
+  .daily-poker__feature::before {
+    inset: 8px;
+  }
+
   .daily-poker__header {
     grid-template-columns: 60px minmax(0, 1fr);
     min-height: 148px;
@@ -1981,11 +1938,11 @@
 
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
+    gap: 6px;
   }
 
   .daily-poker__prize {
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .daily-poker__table {
@@ -2020,30 +1977,30 @@
 
   .daily-poker__play-btn,
   .daily-poker__claim-btn {
-    min-height: 56px;
-    font-size: 22px;
+    min-height: 66px;
+    font-size: clamp(24px, 7.2vw, 32px);
   }
 }
 
 @container (max-width: 520px) {
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
+    gap: 5px;
   }
 
   .daily-poker__prize {
-    border-radius: 8px;
+    border-radius: 9px;
   }
 }
 
 @media (max-width: 520px) {
   .daily-poker__prizes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
+    gap: 5px;
   }
 
   .daily-poker__prize {
-    border-radius: 8px;
+    border-radius: 9px;
   }
 }
 
