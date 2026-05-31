@@ -197,6 +197,13 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    if (startParam === "streams_delayed" || startParam === "stream_delayed") {
+      window.__pendingStreamsDelayed = true;
+      setTimeout(function () {
+        if (typeof setView === "function") setView("streams");
+      }, 0);
+      return;
+    }
     var streamsRoomId = parseStreamsRoomIdFromStartParam(startParam);
     if (streamsRoomId) {
       window.__pendingStreamsRoomId = streamsRoomId;

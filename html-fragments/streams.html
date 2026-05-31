@@ -24,7 +24,17 @@
               </div>
               <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
                 <h2 class="streams-block__title">Запустить трансляцию</h2>
-                <p class="streams-block__hint">Ваш экран идёт в LiveKit без задержки и, если настроен ключ, параллельно в Cloudflare с задержкой.</p>
+                <p class="streams-block__hint">Выберите, как зрители будут смотреть этот запуск.</p>
+                <div class="streams-broadcast-mode" role="group" aria-label="Режим запуска стрима">
+                  <button type="button" class="streams-broadcast-mode-btn" data-streams-broadcast-mode="instant" aria-pressed="false">
+                    <span>Без задержки</span>
+                    <small>LiveKit, почти realtime</small>
+                  </button>
+                  <button type="button" class="streams-broadcast-mode-btn streams-broadcast-mode-btn--active" data-streams-broadcast-mode="delayed" aria-pressed="true">
+                    <span>С задержкой</span>
+                    <small>2 минуты, против подсматривания</small>
+                  </button>
+                </div>
                 <p class="streams-room-guide">Введите ваш код комнаты и нажмите запустить трансляцию</p>
                 <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
                   <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />

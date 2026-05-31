@@ -1598,6 +1598,48 @@ body[data-view="equilator"] #app.app .card .card__content > .view--active[data-v
   color: var(--text-muted);
   line-height: 1.4;
 }
+.streams-broadcast-mode {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+.streams-broadcast-mode-btn {
+  min-height: 66px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.42);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+.streams-broadcast-mode-btn span,
+.streams-broadcast-mode-btn small {
+  display: block;
+  line-height: 1.2;
+}
+.streams-broadcast-mode-btn span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+.streams-broadcast-mode-btn small {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.streams-broadcast-mode-btn--active,
+.streams-broadcast-mode-btn[aria-pressed="true"] {
+  border-color: rgba(249, 115, 22, 0.52);
+  background: rgba(249, 115, 22, 0.2);
+  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.12);
+}
+.streams-broadcast-mode-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
 .streams-room-guide {
   margin: 0 0 4px;
   color: var(--text);

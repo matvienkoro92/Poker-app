@@ -24,6 +24,8 @@ var streamsCloudflareEgressRoomId = "";
 var streamsCloudflareEgressStopping = false;
 var streamsCloudflareHls = null;
 var streamsCloudflareDelayInterval = null;
+var streamsBroadcastLaunchMode = "delayed";
+var streamsBroadcastActiveMode = "";
 
 var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
 var STREAMS_LIVEKIT_CDN_URLS = [
@@ -406,6 +408,8 @@ function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
   streamsBroadcastRoomId = "";
   streamsBroadcastReconnectAttempt = 0;
   streamsBroadcastGeneration += 1;
+  streamsBroadcastActiveMode = "";
+  streamsSetBroadcastModeDisabled(false);
   if (disconnectRoom) streamsStopCloudflareEgress(false);
   if (disconnectRoom) {
     var room = streamsLiveKitBroadcastRoom;
@@ -475,6 +479,27 @@ function streamsSetRoleTab(name) {
   });
   Array.prototype.slice.call(document.querySelectorAll("[data-streams-tab-panel]")).forEach(function (panel) {
     panel.hidden = panel.getAttribute("data-streams-tab-panel") !== name;
+  });
+}
+
+function streamsNormalizeBroadcastMode(mode) {
+  mode = String(mode || "").trim();
+  return mode === "instant" ? "instant" : "delayed";
+}
+
+function streamsSetBroadcastMode(mode) {
+  mode = streamsNormalizeBroadcastMode(mode);
+  streamsBroadcastLaunchMode = mode;
+  Array.prototype.slice.call(document.querySelectorAll("[data-streams-broadcast-mode]")).forEach(function (btn) {
+    var isActive = btn.getAttribute("data-streams-broadcast-mode") === mode;
+    btn.classList.toggle("streams-broadcast-mode-btn--active", isActive);
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+function streamsSetBroadcastModeDisabled(disabled) {
+  Array.prototype.slice.call(document.querySelectorAll("[data-streams-broadcast-mode]")).forEach(function (btn) {
+    btn.disabled = !!disabled;
   });
 }
 
@@ -788,8 +813,9 @@ function streamsScheduleWatchReconnect(reason, keepVideo) {
   }, delay);
 }
 
-function streamsScheduleBroadcastReconnect(reason, btnText) {
+function streamsScheduleBroadcastReconnect(reason, btnText, mode) {
   if (!streamsBroadcastIntentActive || !streamsBroadcastRoomId || !streamsBroadcastStream) return;
+  mode = streamsNormalizeBroadcastMode(mode || streamsBroadcastActiveMode || streamsBroadcastLaunchMode);
   streamsClearBroadcastReconnect();
   var delay = streamsReconnectDelayMs(streamsBroadcastReconnectAttempt);
   var seconds = Math.max(1, Math.ceil(delay / 1000));
@@ -802,11 +828,11 @@ function streamsScheduleBroadcastReconnect(reason, btnText) {
     if (!streamsBroadcastIntentActive || streamsBroadcastRoomId !== roomId || streamsBroadcastStream !== stream) return;
     if (generation !== streamsBroadcastGeneration) return;
     streamsBroadcastReconnectAttempt += 1;
-    streamsConnectLiveKitBroadcast(roomId, stream, btnText, true);
+    streamsConnectLiveKitBroadcast(roomId, stream, btnText, true, mode);
   }, delay);
 }
 
-function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
+function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting, mode) {
   var startBtn = document.getElementById("streamsStartBtn");
   var previewWrap = document.getElementById("streamsPreviewWrap");
   var previewVideo = document.getElementById("streamsPreviewVideo");
@@ -814,6 +840,10 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
   var browserLinkInput = document.getElementById("streamsBrowserLinkInput");
   var roomInput = document.getElementById("streamsRoomInput");
 
+  mode = streamsNormalizeBroadcastMode(mode || streamsBroadcastActiveMode || streamsBroadcastLaunchMode);
+  streamsBroadcastActiveMode = mode;
+  streamsSetBroadcastMode(mode);
+  streamsSetBroadcastModeDisabled(true);
   streamsClearBroadcastReconnect();
   streamsBroadcastRoomId = roomId;
   streamsBroadcastIntentActive = true;
@@ -823,6 +853,7 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
   if (previewVideo) previewVideo.srcObject = stream;
   if (previewWrap) previewWrap.classList.remove("streams-preview-wrap--hidden");
   streamsSetBroadcastStatus(reconnecting ? "Восстанавливаю LiveKit-комнату…" : "Подключаю LiveKit…", "warn");
+  if (mode === "instant") streamsSetEgressStatus("", "");
   if (streamsLiveKitBroadcastRoom) {
     var oldRoom = streamsLiveKitBroadcastRoom;
     streamsLiveKitBroadcastRoom = null;
@@ -855,13 +886,16 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
         if (generation !== streamsBroadcastGeneration) return;
         streamsLiveKitBroadcastRoom = null;
         if (streamsBroadcastIntentActive && streamsBroadcastStream) {
-          streamsScheduleBroadcastReconnect("LiveKit закрыл соединение.", btnText);
+          streamsScheduleBroadcastReconnect("LiveKit закрыл соединение.", btnText, mode);
         }
       });
       return room.connect(ctx.tokenData.url, ctx.tokenData.token, { autoSubscribe: false }).then(function () {
         if (generation !== streamsBroadcastGeneration) throw new Error("stale");
         return streamsPublishMediaStream(room, stream).then(function () {
-          return streamsStartCloudflareEgress(roomId, generation).then(function () {
+          var egressPromise = mode === "delayed"
+            ? streamsStartCloudflareEgress(roomId, generation)
+            : Promise.resolve(false);
+          return egressPromise.then(function () {
             return ctx.tokenData;
           });
         });
@@ -869,7 +903,9 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
     })
     .then(function () {
       if (generation !== streamsBroadcastGeneration) return;
-      var link = buildMiniAppStartLink("streams_" + roomId);
+      var link = mode === "delayed"
+        ? buildMiniAppStartLink("streams_delayed")
+        : buildMiniAppStartLink("streams_" + roomId);
       if (shareLinkInput) shareLinkInput.value = link;
       if (browserLinkInput && typeof isTelegramWebApp === "function" && isTelegramWebApp()) browserLinkInput.value = link;
       if (roomInput) roomInput.placeholder = roomId;
@@ -882,7 +918,12 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
         startBtn.disabled = false;
         startBtn.textContent = btnText;
       }
-      streamsSetBroadcastStatus("Трансляция активна через LiveKit.", "ok");
+      streamsSetBroadcastStatus(
+        mode === "delayed"
+          ? "Трансляция активна. Для зрителей включён режим против подсматривания."
+          : "Трансляция активна без задержки через LiveKit.",
+        "ok"
+      );
     })
     .catch(function (err) {
       if (String(err && err.message || "") === "stale") return;
@@ -898,6 +939,14 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
 
 function consumePendingStreamsWatchRoom() {
   try {
+    if (window.__pendingStreamsDelayed) {
+      window.__pendingStreamsDelayed = false;
+      setTimeout(function () {
+        streamsSetRoleTab("delayed");
+        streamsInitCloudflarePlayer(false);
+      }, 0);
+      return;
+    }
     if (!window.__pendingStreamsRoomId) return;
     if (typeof window.startStreamsWatchByRoomId !== "function") return;
     var pendingRoomId = window.__pendingStreamsRoomId;
@@ -926,6 +975,7 @@ function initStreams() {
   var previewFullscreenBtn = document.getElementById("streamsPreviewFullscreenBtn");
   var remoteFullscreenBtn = document.getElementById("streamsRemoteFullscreenBtn");
   var cloudflareRefreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+  var broadcastModeButtons = document.querySelectorAll("[data-streams-broadcast-mode]");
   var roleTabs = document.querySelectorAll("[data-streams-tab-target]");
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -1008,6 +1058,16 @@ function initStreams() {
       streamsInitCloudflarePlayer(true);
     });
   }
+
+  Array.prototype.slice.call(broadcastModeButtons || []).forEach(function (btn) {
+    if (btn.__streamsBroadcastModeHandlerAttached) return;
+    btn.__streamsBroadcastModeHandlerAttached = true;
+    btn.addEventListener("click", function () {
+      if (streamsBroadcastStream || streamsLiveKitBroadcastRoom) return;
+      streamsSetBroadcastMode(btn.getAttribute("data-streams-broadcast-mode"));
+    });
+  });
+  streamsSetBroadcastMode(streamsBroadcastLaunchMode);
 
   var directAppUrl =
     typeof buildMiniAppStartLink === "function"
@@ -1148,6 +1208,7 @@ function initStreams() {
       if (broadcastRoomInput) broadcastRoomInput.value = roomId;
       startBtn.disabled = true;
       var btnText = startBtn.textContent;
+      var selectedMode = streamsNormalizeBroadcastMode(streamsBroadcastLaunchMode);
       startBtn.textContent = "Запрос доступа к экрану…";
       getDisplayMedia.call(mediaDevices, { video: true, audio: false })
         .then(function (screenStream) {
@@ -1164,7 +1225,7 @@ function initStreams() {
           streamsBroadcastStartedAt = Date.now();
           streamsBroadcastReconnectAttempt = 0;
           streamsAttachBroadcastTrackGuards(stream, btnText);
-          streamsConnectLiveKitBroadcast(roomId, stream, btnText, false);
+          streamsConnectLiveKitBroadcast(roomId, stream, btnText, false, selectedMode);
         })
         .catch(function (err) {
           startBtn.disabled = false;
@@ -1228,7 +1289,7 @@ function initStreams() {
     });
     window.addEventListener("online", function () {
       if (streamsWatchIntentActive && streamsWatchRoomId) streamsScheduleWatchReconnect("Интернет вернулся.", true);
-      if (streamsBroadcastIntentActive && streamsBroadcastRoomId) streamsScheduleBroadcastReconnect("Интернет вернулся.", startBtn ? startBtn.textContent : "Запустить трансляцию");
+      if (streamsBroadcastIntentActive && streamsBroadcastRoomId) streamsScheduleBroadcastReconnect("Интернет вернулся.", startBtn ? startBtn.textContent : "Запустить трансляцию", streamsBroadcastActiveMode || streamsBroadcastLaunchMode);
     });
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) return;
