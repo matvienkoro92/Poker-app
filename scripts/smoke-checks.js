@@ -24,6 +24,7 @@ const files = {
   plastererGameFragment: read("html-fragments/plasterer-game.html"),
   learnPlayHubFragment: read("html-fragments/learn-play-hub.html"),
   pokerTasksFragment: read("html-fragments/poker-tasks.html"),
+  playerCrmFragment: read("html-fragments/player-crm.html"),
   cashoutFragment: read("html-fragments/cashout.html"),
   streamsFragment: read("html-fragments/streams.html"),
   scheduleFragment: read("html-fragments/schedule.html"),
@@ -342,8 +343,8 @@ function fileContainsGlobalExport(rel, name) {
   const patterns = [
     new RegExp("\\bfunction\\s+" + n + "\\s*\\("),
     new RegExp("\\b(?:var|let|const)\\s+" + n + "\\b"),
-    new RegExp("\\bwindow\\s*\\.\\s*" + n + "\\s*="),
-    new RegExp("\\bwindow\\s*\\[\\s*[\"']" + n + "[\"']\\s*\\]\\s*="),
+    new RegExp("\\bwindow\\s*\\.\\s*" + n + "\\s*=(?!=)"),
+    new RegExp("\\bwindow\\s*\\[\\s*[\"']" + n + "[\"']\\s*\\]\\s*=(?!=)"),
   ];
   return patterns.some((pattern) => pattern.test(text));
 }
@@ -387,7 +388,7 @@ function windowGlobalAssignments() {
     } catch (err) {
       return;
     }
-    const re = /\bwindow\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*["']([^"']+)["']\s*\])\s*=/g;
+    const re = /\bwindow\s*(?:\.\s*([A-Za-z_$][\w$]*)|\[\s*["']([^"']+)["']\s*\])\s*=(?!=)/g;
     let match;
     while ((match = re.exec(text))) {
       const name = String(match[1] || match[2] || "").trim();
@@ -1115,7 +1116,7 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
   ]) &&
   has("appTournamentDay", 'guarantee: "300 000₽"') &&
-  has("appTournamentDay", 'buyin: "1 200₽", guarantee: "220 000₽"') &&
+  has("appTournamentDay", /buyin:\s*"1 200₽",\s*guarantee:\s*"220 000₽"/) &&
   !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
   !has("scheduleFragment", "Rebuy (19:00)")
 );
@@ -1141,8 +1142,11 @@ add("Poker21 profile privacy/status controls are wired", () =>
   hasAll("profileFragment", [
     'id="profilePoker21TabBtn"',
     'id="profilePokerPlusSection"',
-    'id="profilePokerPlusStatsVisibleYes"',
-    'id="profilePokerPlusStatsVisibleNo"',
+    'data-profile-pokerplus-stats-kind="cash"',
+    'data-profile-pokerplus-stats-kind="mtt"',
+    'data-profile-pokerplus-stats-kind="sng"',
+    'data-profile-pokerplus-stats-visible="1"',
+    'data-profile-pokerplus-stats-visible="0"',
     'id="profileStatusSection"',
     'id="profileStatusVisual"',
   ]) &&
@@ -1572,6 +1576,8 @@ add("Large domain entrypoints stay thin after runtime split", () =>
   !has("appViewRouter", "scriptsReady.then(activateCrmNow)") &&
   hasAll("html", [
     'data-crm-open="player-crm"',
+  ]) &&
+  hasAll("playerCrmFragment", [
     'data-crm-close="player-crm"',
     "Загрузка дашборда…",
     "График загрузится после открытия дашборда.",

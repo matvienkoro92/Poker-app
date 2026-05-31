@@ -27,7 +27,7 @@
   }
 
   function loadCore() {
-    if (typeof window.pokerInitPlayerCrm === "function" && window.pokerInitPlayerCrm !== placeholderInit) {
+    if (typeof window.pokerInitPlayerCrm === "function" && window.pokerInitPlayerCrm !== pokerInitPlayerCrm) {
       return Promise.resolve(true);
     }
     if (corePromise) return corePromise;
@@ -51,14 +51,14 @@
 
   function runCoreInit() {
     var fn = window.pokerInitPlayerCrm;
-    if (typeof fn === "function" && fn !== placeholderInit) return fn();
+    if (typeof fn === "function" && fn !== pokerInitPlayerCrm) return fn();
     return true;
   }
 
-  function placeholderInit() {
+  function pokerInitPlayerCrm() {
     return loadCore().then(runCoreInit);
   }
 
   window.pokerEnsurePlayerCrmRuntime = loadCore;
-  window.pokerInitPlayerCrm = placeholderInit;
+  window.pokerInitPlayerCrm = pokerInitPlayerCrm;
 })();

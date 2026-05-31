@@ -1339,7 +1339,8 @@ navItems.forEach(function (item) {
         return;
       }
       var downloadPage = target === "download" ? item.getAttribute("data-download-page") || item.getAttribute("data-download-page-target") || "main" : "";
-      setView(target, downloadPage ? { downloadPage: downloadPage } : undefined);
+      if (downloadPage) setView(target, { downloadPage: downloadPage });
+      else setView(target);
       if (target === "download" && typeof setDownloadPage === "function") setDownloadPage("main");
       if (downloadPage && downloadPage !== "main" && typeof setDownloadPage === "function") setDownloadPage(downloadPage);
     }

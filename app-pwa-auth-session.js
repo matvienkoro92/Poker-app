@@ -199,15 +199,15 @@ function pokerAuthFetch(url, init) {
     });
   }
   var fallbackUrl = sameOriginFallbackUrl(url);
-  function runAuthFetch(targetUrl) {
+  function runAuthFetch(url) {
     return Promise.resolve().then(function () {
       if (typeof XMLHttpRequest !== "undefined") {
-        return pokerAuthFetchXhr(targetUrl, opts, 8000);
+        return pokerAuthFetchXhr(url, opts, 8000);
       }
       if (typeof pokerFetchRetry === "function") {
-        return pokerFetchRetry(targetUrl, opts, { timeoutMs: 6000, maxAttempts: 1, retryDelayMs: 0 });
+        return pokerFetchRetry(url, opts, { timeoutMs: 6000, maxAttempts: 1, retryDelayMs: 0 });
       }
-      return fetch(targetUrl, opts);
+      return fetch(url, opts);
     });
   }
   return runAuthFetch(url).catch(function (err) {
