@@ -95,10 +95,15 @@
     var details = Array.isArray(detail) ? detail.map(function (part) {
       return String(part || "").trim();
     }).filter(Boolean) : [];
-    var html = '<span class="daily-poker__result-primary">' + esc(primary || "") + '</span>';
+    var primaryHtml = esc(primary || "");
+    if (primary === DAILY_POKER_START_PROMPT) {
+      primaryHtml = '<span class="daily-poker__result-nowrap">Нажмите на кнопку «Раздать карты»</span><span>, чтобы начать</span>';
+    }
+    var html = '<span class="daily-poker__result-primary">' + primaryHtml + '</span>';
     if (details.length) {
       html += '<span class="daily-poker__result-meta">' + details.map(function (part) {
-        return '<span>' + esc(part) + '</span>';
+        var className = part === "Раздача доступна." ? ' class="daily-poker__result-meta-available"' : "";
+        return '<span' + className + '>' + esc(part) + '</span>';
       }).join("") + '</span>';
     }
     resultEl.innerHTML = html;

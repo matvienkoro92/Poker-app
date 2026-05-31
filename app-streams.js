@@ -16,6 +16,8 @@ var streamsWatchReconnectTimer = null;
 var streamsWatchReconnectAttempt = 0;
 var streamsWatchGeneration = 0;
 var streamsWatchRemoteStream = null;
+var streamsCloudflareConfigPromise = null;
+var streamsCloudflareConfig = null;
 
 var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
 var STREAMS_LIVEKIT_CDN_URLS = [
@@ -137,6 +139,33 @@ function streamsFetchLiveKitToken(role, roomId) {
   });
 }
 
+function streamsFetchCloudflareConfig(forceRefresh) {
+  if (!forceRefresh && streamsCloudflareConfigPromise) return streamsCloudflareConfigPromise;
+  var base = streamsApiBase();
+  if (!base) return Promise.reject(new Error("api_base_missing"));
+  var request = typeof pokerAuthFetch === "function" ? pokerAuthFetch : fetch;
+  streamsCloudflareConfigPromise = request(base.replace(/\/$/, "") + "/api/cloudflare-stream", {
+    method: "GET",
+    cache: "no-store"
+  }).then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      if (!res.ok || !data || data.ok !== true) {
+        var code = data && data.error ? String(data.error) : "cloudflare_stream_config_error";
+        var err = new Error(code);
+        err.status = res.status;
+        err.data = data || {};
+        throw err;
+      }
+      streamsCloudflareConfig = data;
+      return data;
+    });
+  }).catch(function (err) {
+    streamsCloudflareConfigPromise = null;
+    throw err;
+  });
+  return streamsCloudflareConfigPromise;
+}
+
 function streamsTokenErrorText(err, role) {
   var code = String(err && err.message || "");
   if (code === "livekit_not_configured") return "LiveKit ещё не настроен на сервере. Проверьте LIVEKIT_URL/API_KEY/API_SECRET и redeploy.";
@@ -146,6 +175,13 @@ function streamsTokenErrorText(err, role) {
   return role === "broadcast"
     ? "Не удалось получить токен для трансляции."
     : "Не удалось получить доступ к комнате.";
+}
+
+function streamsCloudflareErrorText(err) {
+  var code = String(err && err.message || "");
+  if (code === "api_base_missing") return "Не удалось определить адрес API для Cloudflare Stream.";
+  if (code === "Method not allowed") return "Cloudflare Stream endpoint отвечает некорректно.";
+  return "Не удалось загрузить Cloudflare-плеер.";
 }
 
 function streamsSetStatus(el, text, tone) {
@@ -164,6 +200,10 @@ function streamsSetWatchStatus(text, tone) {
 
 function streamsSetBroadcastStatus(text, tone) {
   streamsSetStatus(document.getElementById("streamsBroadcastStatus"), text, tone);
+}
+
+function streamsSetCloudflareStatus(text, tone) {
+  streamsSetStatus(document.getElementById("streamsCloudflareStatus"), text, tone);
 }
 
 function streamsStopMediaStream(stream) {
@@ -197,6 +237,23 @@ function streamsResetWatchConnection(keepIntent, keepVideo) {
   if (!keepVideo && remoteVideo) remoteVideo.srcObject = null;
   if (!keepVideo && remoteWrap) remoteWrap.classList.add("streams-remote-wrap--hidden");
   if (!keepIntent) streamsSetWatchStatus("", "");
+}
+
+function streamsResetCloudflarePlayer(clearStatus) {
+  var frame = document.getElementById("streamsCloudflareFrame");
+  var video = document.getElementById("streamsCloudflareVideo");
+  var wrap = document.getElementById("streamsCloudflareWrap");
+  var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+  if (frame) frame.src = "about:blank";
+  if (video) {
+    try { video.pause(); } catch (ePause) {}
+    video.removeAttribute("src");
+    video.hidden = true;
+    try { video.load(); } catch (eLoad) {}
+  }
+  if (wrap) wrap.classList.add("streams-cloudflare-wrap--hidden");
+  if (refreshBtn) refreshBtn.disabled = false;
+  if (clearStatus) streamsSetCloudflareStatus("", "");
 }
 
 function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
@@ -233,8 +290,10 @@ function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
 function streamsCleanup() {
   streamsResetBroadcastRuntime(null, true);
   streamsResetWatchConnection(false, false);
+  streamsResetCloudflarePlayer(true);
   streamsSetBroadcastStatus("", "");
   streamsSetWatchStatus("", "");
+  streamsSetCloudflareStatus("", "");
 }
 
 function streamsPad2(n) {
@@ -256,8 +315,13 @@ function streamsUpdateBroadcastTimerText() {
   timerEl.textContent = "Трансляция запущена: " + t;
 }
 
+function streamsNormalizeRoleTabName(name) {
+  name = String(name || "").trim();
+  return name === "broadcast" || name === "delayed" ? name : "watch";
+}
+
 function streamsSetRoleTab(name) {
-  name = name === "broadcast" ? "broadcast" : "watch";
+  name = streamsNormalizeRoleTabName(name);
   Array.prototype.slice.call(document.querySelectorAll("[data-streams-tab-target]")).forEach(function (tab) {
     var isActive = tab.getAttribute("data-streams-tab-target") === name;
     tab.classList.toggle("streams-role-tab--active", isActive);
@@ -266,6 +330,61 @@ function streamsSetRoleTab(name) {
   Array.prototype.slice.call(document.querySelectorAll("[data-streams-tab-panel]")).forEach(function (panel) {
     panel.hidden = panel.getAttribute("data-streams-tab-panel") !== name;
   });
+}
+
+function streamsInitCloudflarePlayer(forceRefresh) {
+  var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+  var wrap = document.getElementById("streamsCloudflareWrap");
+  var frame = document.getElementById("streamsCloudflareFrame");
+  var video = document.getElementById("streamsCloudflareVideo");
+  if (!frame && !video) return Promise.resolve(false);
+  if (refreshBtn) refreshBtn.disabled = true;
+  streamsSetCloudflareStatus(forceRefresh ? "Обновляю Cloudflare-плеер…" : "Загружаю Cloudflare-плеер…", "warn");
+  return streamsFetchCloudflareConfig(!!forceRefresh)
+    .then(function (data) {
+      if (!data || data.configured !== true) {
+        streamsResetCloudflarePlayer(false);
+        streamsSetCloudflareStatus(
+          "Cloudflare Stream ещё не настроен на сервере. Проверьте CLOUDFLARE_STREAM_CUSTOMER_CODE, CLOUDFLARE_STREAM_LIVE_INPUT_ID, CLOUDFLARE_STREAM_HLS_URL и redeploy.",
+          "error"
+        );
+        return false;
+      }
+      var iframeUrl = String(data.iframeUrl || "").trim();
+      var hlsUrl = String(data.hlsUrl || "").trim();
+      if (wrap) wrap.classList.remove("streams-cloudflare-wrap--hidden");
+      if (iframeUrl && frame) {
+        if (forceRefresh || frame.src !== iframeUrl) frame.src = iframeUrl;
+        frame.hidden = false;
+        if (video) {
+          try { video.pause(); } catch (ePause) {}
+          video.hidden = true;
+          video.removeAttribute("src");
+          try { video.load(); } catch (eLoad) {}
+        }
+        streamsSetCloudflareStatus("Плеер Cloudflare готов. Если поток уже идёт в OBS, эфир появится здесь с задержкой.", "ok");
+        return true;
+      }
+      if (hlsUrl && video && typeof video.canPlayType === "function" && video.canPlayType("application/vnd.apple.mpegurl")) {
+        if (frame) frame.hidden = true;
+        video.hidden = false;
+        if (forceRefresh || video.src !== hlsUrl) video.src = hlsUrl;
+        streamsSetCloudflareStatus("HLS-плеер Cloudflare готов.", "ok");
+        return true;
+      }
+      streamsResetCloudflarePlayer(false);
+      streamsSetCloudflareStatus("Cloudflare прислал HLS, но этот браузер не умеет открыть его без встроенного Stream Player.", "error");
+      return false;
+    })
+    .catch(function (err) {
+      streamsResetCloudflarePlayer(false);
+      streamsSetCloudflareStatus(streamsCloudflareErrorText(err), "error");
+      return false;
+    })
+    .then(function (result) {
+      if (refreshBtn) refreshBtn.disabled = false;
+      return result;
+    });
 }
 
 function streamsNormalizeRoomId(val) {
@@ -523,6 +642,7 @@ function initStreams() {
   var remoteVideo = document.getElementById("streamsRemoteVideo");
   var previewFullscreenBtn = document.getElementById("streamsPreviewFullscreenBtn");
   var remoteFullscreenBtn = document.getElementById("streamsRemoteFullscreenBtn");
+  var cloudflareRefreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
   var roleTabs = document.querySelectorAll("[data-streams-tab-target]");
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -593,9 +713,18 @@ function initStreams() {
     if (tab.__streamsRoleTabHandlerAttached) return;
     tab.__streamsRoleTabHandlerAttached = true;
     tab.addEventListener("click", function () {
-      streamsSetRoleTab(tab.getAttribute("data-streams-tab-target"));
+      var target = streamsNormalizeRoleTabName(tab.getAttribute("data-streams-tab-target"));
+      streamsSetRoleTab(target);
+      if (target === "delayed") streamsInitCloudflarePlayer(false);
     });
   });
+
+  if (cloudflareRefreshBtn && !cloudflareRefreshBtn.__streamsCloudflareHandlerAttached) {
+    cloudflareRefreshBtn.__streamsCloudflareHandlerAttached = true;
+    cloudflareRefreshBtn.addEventListener("click", function () {
+      streamsInitCloudflarePlayer(true);
+    });
+  }
 
   var directAppUrl =
     typeof buildMiniAppStartLink === "function"

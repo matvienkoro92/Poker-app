@@ -1542,7 +1542,7 @@ body[data-view="equilator"] #app.app .card .card__content > .view--active[data-v
 }
 .streams-role-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 16px 0 18px;
   padding: 4px;
@@ -1660,21 +1660,38 @@ body[data-view="equilator"] #app.app .card .card__content > .view--active[data-v
   background: rgba(239, 68, 68, 0.35);
 }
 .streams-preview-wrap,
-.streams-remote-wrap {
+.streams-remote-wrap,
+.streams-cloudflare-wrap {
   margin-top: 12px;
 }
 .streams-preview-wrap--hidden,
-.streams-remote-wrap--hidden {
+.streams-remote-wrap--hidden,
+.streams-cloudflare-wrap--hidden {
   display: none !important;
 }
 .streams-preview-video,
-.streams-remote-video {
+.streams-remote-video,
+.streams-cloudflare-frame,
+.streams-cloudflare-video {
   display: block;
   width: 100%;
-  max-height: 240px;
   border-radius: 8px;
   background: #000;
   object-fit: contain;
+}
+.streams-preview-video,
+.streams-remote-video {
+  max-height: 240px;
+}
+.streams-cloudflare-frame,
+.streams-cloudflare-video {
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+  border: 0;
+}
+.streams-cloudflare-frame[hidden],
+.streams-cloudflare-video[hidden] {
+  display: none !important;
 }
 .streams-link-label {
   margin: 10px 0 4px;

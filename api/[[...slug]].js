@@ -29,6 +29,7 @@ const handlers = {
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
   "telegram-bot-webhook": () => require(path.join(handlersDir, "telegram-bot-webhook.js")),
   "livekit-token": () => require(path.join(handlersDir, "livekit-token.js")),
+  "cloudflare-stream": () => require(path.join(handlersDir, "cloudflare-stream.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),

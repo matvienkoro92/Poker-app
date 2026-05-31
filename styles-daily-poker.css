@@ -818,7 +818,7 @@
   --daily-poker-black: #030405;
   width: min(960px, 100%);
   min-height: 100dvh;
-  padding: max(22px, calc(env(safe-area-inset-top, 0px) + 18px)) 8px max(30px, calc(env(safe-area-inset-bottom, 0px) + 20px));
+  padding: max(18px, calc(env(safe-area-inset-top, 0px) + 14px)) 2px max(30px, calc(env(safe-area-inset-bottom, 0px) + 20px));
   color: #f7ead2;
   background:
     radial-gradient(ellipse at 78% 6%, rgba(255, 165, 42, 0.18), transparent 32%),
@@ -831,38 +831,30 @@
   position: relative;
   isolation: isolate;
   margin: 0 0 6px;
-  padding: clamp(18px, 2.8vw, 34px) clamp(26px, 4.6vw, 58px) clamp(22px, 3.2vw, 38px);
+  padding: clamp(14px, 2.4vw, 28px) clamp(6px, 1.6vw, 18px) clamp(18px, 3vw, 34px);
   border-radius: clamp(22px, 4vw, 34px);
-  border: 1px solid rgba(255, 156, 35, 0.52);
+  border: 0;
   background:
     radial-gradient(ellipse at 82% 9%, rgba(255, 182, 70, 0.16), transparent 30%),
     radial-gradient(ellipse at 16% 60%, rgba(255, 182, 70, 0.1), transparent 34%),
     linear-gradient(180deg, rgba(8, 9, 8, 0.96), rgba(4, 6, 7, 0.98));
   box-shadow:
-    inset 0 0 0 1px rgba(255, 220, 145, 0.16),
-    0 0 18px rgba(255, 165, 38, 0.12),
     0 20px 38px rgba(0, 0, 0, 0.42);
   overflow: hidden;
 }
 
 .daily-poker__feature::before {
-  content: "";
-  position: absolute;
-  inset: clamp(10px, 1.4vw, 18px);
-  z-index: 3;
-  border: 1px solid rgba(255, 142, 26, 0.28);
-  border-radius: inherit;
-  pointer-events: none;
+  content: none;
 }
 
 .daily-poker__header {
   position: relative;
   display: grid;
   grid-template-columns: clamp(72px, 8vw, 96px) minmax(0, min(50%, 600px)) minmax(0, 1fr);
-  min-height: clamp(220px, 29vw, 306px);
+  min-height: 0;
   align-items: start;
   gap: clamp(12px, 2vw, 20px);
-  margin: 0 0 2px;
+  margin: 0 0 6px;
   isolation: isolate;
 }
 
@@ -952,7 +944,7 @@
   margin: 0;
   color: #ffc24f;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(46px, 6.4vw, 82px);
+  font-size: clamp(37px, 5.1vw, 66px);
   line-height: 0.98;
   font-weight: 900;
   letter-spacing: 0;
@@ -966,7 +958,7 @@
   position: relative;
   z-index: 2;
   max-width: none;
-  margin: clamp(-24px, -2vw, -10px) 0 0;
+  margin: 0;
   color: #eadcc8;
   font-size: clamp(16px, 2.1vw, 25px);
   line-height: 1.35;
@@ -1124,6 +1116,10 @@
   transform: scale(1.24);
   user-select: none;
   pointer-events: none;
+}
+
+.daily-poker__prize--royal .daily-poker__prize-art {
+  transform: scale(1.3);
 }
 
 .daily-poker__winners {
@@ -1544,7 +1540,55 @@
   margin-top: 10px;
 }
 
-.daily-poker__play-btn,
+.daily-poker .daily-poker__play-btn {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 92px;
+  border: 2px solid rgba(255, 204, 91, 0.94);
+  border-radius: 24px;
+  padding: 0 clamp(22px, 5vw, 54px);
+  color: #ffd066;
+  background:
+    linear-gradient(180deg, rgba(255, 239, 162, 0.3) 0%, rgba(255, 184, 55, 0.12) 26%, rgba(84, 37, 3, 0) 27%),
+    radial-gradient(ellipse at 50% -28%, rgba(255, 229, 128, 0.44), rgba(196, 111, 14, 0.18) 44%, transparent 70%),
+    linear-gradient(180deg, #9a5b02 0%, #7b3f00 42%, #4a2100 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 244, 194, 0.52),
+    0 0 16px rgba(255, 190, 72, 0.92),
+    0 0 34px rgba(220, 120, 15, 0.56),
+    0 12px 18px rgba(0, 0, 0, 0.54),
+    inset 0 1px 0 rgba(255, 239, 164, 0.72),
+    inset 0 -13px 18px rgba(30, 11, 0, 0.44),
+    inset 0 0 0 1px rgba(255, 226, 128, 0.3);
+  font-family: inherit;
+  font-size: 44px;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow:
+    0 2px 0 rgba(78, 31, 0, 0.62),
+    0 0 8px rgba(255, 225, 122, 0.82),
+    0 0 18px rgba(255, 174, 39, 0.54);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.daily-poker .daily-poker__play-btn::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border-radius: 19px;
+  border: 1px solid rgba(255, 224, 139, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 179, 0.38),
+    inset 0 0 20px rgba(255, 160, 30, 0.2);
+  pointer-events: none;
+}
+
 .daily-poker__claim-btn {
   width: 100%;
   min-height: 78px;
@@ -1564,7 +1608,7 @@
     inset 0 -12px 18px rgba(80, 29, 0, 0.34),
     inset 0 0 0 2px rgba(255, 204, 78, 0.24);
   font-family: inherit;
-  font-size: clamp(28px, 6.6vw, 44px);
+  font-size: 44px;
   font-weight: 1000;
   letter-spacing: 0;
   line-height: 1;
@@ -1573,7 +1617,7 @@
     0 1px 0 rgba(255, 232, 149, 0.42);
 }
 
-.daily-poker__play-btn::before {
+.daily-poker .daily-poker__play-btn::before {
   content: none;
 }
 
@@ -1664,14 +1708,6 @@
   height: 100%;
 }
 
-.daily-poker__play-btn--extra,
-.daily-poker__claim-btn {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.74) 0%, rgba(255, 255, 255, 0.24) 31%, rgba(255, 255, 255, 0) 32%),
-    radial-gradient(ellipse at 50% -18%, rgba(255, 255, 255, 0.54), rgba(255, 221, 108, 0.18) 43%, transparent 72%),
-    linear-gradient(180deg, #ffbf43 0%, #ff8f0c 45%, #bd4e04 76%, #6c2500 100%);
-}
-
 .daily-poker__result,
 .daily-poker__reward {
   min-height: 64px;
@@ -1735,6 +1771,16 @@
   word-break: normal;
 }
 
+.daily-poker__result--prompt .daily-poker__result-primary {
+  font-size: clamp(13px, 3.8vw, 22px);
+  letter-spacing: 0.015em;
+  line-height: 1.18;
+}
+
+.daily-poker__result-nowrap {
+  white-space: nowrap;
+}
+
 .daily-poker__result-meta {
   display: flex;
   flex: 1 1 100%;
@@ -1747,6 +1793,13 @@
   letter-spacing: 0.03em;
   text-transform: uppercase;
   opacity: 0.84;
+}
+
+.daily-poker__result-meta-available {
+  color: #ffb52e;
+  text-shadow:
+    0 0 8px rgba(255, 181, 46, 0.45),
+    0 1px 0 rgba(0, 0, 0, 0.6);
 }
 
 .daily-poker__result-meta span {
@@ -1779,18 +1832,19 @@
 
 @container (max-width: 720px) {
   .daily-poker {
-    padding: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) 4px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+    padding: max(14px, calc(env(safe-area-inset-top, 0px) + 10px)) 2px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
   }
 
   .daily-poker__feature {
-    padding: 14px 12px 16px;
+    padding: 12px 4px 16px;
     border-radius: 24px;
   }
 
   .daily-poker__header {
     grid-template-columns: 50px minmax(0, 58%) minmax(0, 1fr);
-    min-height: 164px;
+    min-height: 0;
     gap: 10px;
+    margin-bottom: 6px;
   }
 
   .daily-poker__hero-monkey {
@@ -1824,12 +1878,12 @@
   }
 
   .daily-poker__title {
-    font-size: clamp(31px, 8.2vw, 38px);
+    font-size: clamp(25px, 6.6vw, 30px);
     line-height: 0.98;
   }
 
   .daily-poker__intro {
-    margin-top: -12px;
+    margin-top: 0;
     font-size: clamp(13px, 3.5vw, 16px);
     line-height: 1.32;
   }
@@ -1918,27 +1972,39 @@
     padding: 7px;
   }
 
-  .daily-poker__play-btn,
+  .daily-poker .daily-poker__play-btn {
+    min-height: 78px;
+    border-radius: 20px;
+    padding-inline: 18px;
+    font-size: 36px;
+  }
+
+  .daily-poker .daily-poker__play-btn::after {
+    inset: 4px;
+    border-radius: 16px;
+  }
+
   .daily-poker__claim-btn {
     min-height: 78px;
-    font-size: clamp(28px, 7.6vw, 38px);
+    font-size: 38px;
   }
 }
 
 @media (max-width: 720px) {
   .daily-poker {
-    padding: max(16px, calc(env(safe-area-inset-top, 0px) + 12px)) 4px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+    padding: max(14px, calc(env(safe-area-inset-top, 0px) + 10px)) 2px max(22px, calc(env(safe-area-inset-bottom, 0px) + 16px));
   }
 
   .daily-poker__feature {
-    padding: 14px 12px 16px;
+    padding: 12px 4px 16px;
     border-radius: 24px;
   }
 
   .daily-poker__header {
     grid-template-columns: 50px minmax(0, 58%) minmax(0, 1fr);
-    min-height: 164px;
+    min-height: 0;
     gap: 10px;
+    margin-bottom: 6px;
   }
 
   .daily-poker__hero-monkey {
@@ -1972,12 +2038,12 @@
   }
 
   .daily-poker__title {
-    font-size: clamp(31px, 8.2vw, 38px);
+    font-size: clamp(25px, 6.6vw, 30px);
     line-height: 0.98;
   }
 
   .daily-poker__intro {
-    margin-top: -12px;
+    margin-top: 0;
     font-size: clamp(13px, 3.5vw, 16px);
     line-height: 1.32;
   }
@@ -2066,10 +2132,21 @@
     padding: 7px;
   }
 
-  .daily-poker__play-btn,
+  .daily-poker .daily-poker__play-btn {
+    min-height: 78px;
+    border-radius: 20px;
+    padding-inline: 18px;
+    font-size: 36px;
+  }
+
+  .daily-poker .daily-poker__play-btn::after {
+    inset: 4px;
+    border-radius: 16px;
+  }
+
   .daily-poker__claim-btn {
     min-height: 78px;
-    font-size: clamp(28px, 7.6vw, 38px);
+    font-size: 38px;
   }
 }
 
