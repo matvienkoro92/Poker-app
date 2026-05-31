@@ -395,6 +395,7 @@ async function main() {
         btn.disabled = false;
         btn.removeAttribute("aria-hidden");
       });
+      await page.locator("#headerMoreMenuBtn").click();
       const earlyReportClickStartedAt = Date.now();
       await page.locator("#adminReportBtn").click();
       await page.waitForFunction(() => {
@@ -469,14 +470,14 @@ async function main() {
       if (!/Откройте/.test(earlySentState.monthHint)) throw new Error("admin report month totals did not stay as a lazy hint before click");
       if (adminReportRequestScopes.includes("archive")) throw new Error("admin report archive loaded before the archive block was opened");
       if (adminReportRequestScopes.includes("all")) throw new Error("admin report month totals loaded before the month block was opened");
-      await page.locator("[data-admin-report-sent-months] > summary").click();
+      await page.locator("[data-admin-report-sent-tab='months']").click();
       await page.waitForFunction(() => {
         const inner = document.querySelector("[data-admin-report-sent-months] .admin-report-sent-months__inner");
         const text = inner ? String(inner.textContent || "").trim() : "";
         return !!(text && !/Загрузка/.test(text) && /Итого за месяц|Общий отч.т по дням/.test(text));
       }, null, { timeout: 1800 });
       if (!adminReportRequestScopes.includes("all")) throw new Error("admin report month totals were not loaded after opening the month block");
-      await page.locator("[data-admin-report-sent-archive] > summary").click();
+      await page.locator("[data-admin-report-sent-tab='archive']").click();
       await page.waitForFunction(() => {
         const inner = document.querySelector("[data-admin-report-sent-archive] .admin-report-sent-archive__inner");
         const text = inner ? String(inner.textContent || "").trim() : "";
@@ -711,6 +712,7 @@ async function main() {
       btn.disabled = false;
       btn.removeAttribute("aria-hidden");
     });
+    await page.locator("#headerMoreMenuBtn").click();
     const reportClickStartedAt = Date.now();
     await page.locator("#adminReportBtn").click();
     await page.waitForFunction(() => {
