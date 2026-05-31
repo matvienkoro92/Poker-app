@@ -1,5 +1,6 @@
 // Стримы: LiveKit Cloud для трансляции экрана и микрофона в реальном времени.
 var streamsLiveKitScriptPromise = null;
+var streamsHlsScriptPromise = null;
 var streamsLiveKitBroadcastRoom = null;
 var streamsLiveKitWatchRoom = null;
 var streamsBroadcastStream = null;
@@ -21,11 +22,17 @@ var streamsCloudflareConfig = null;
 var streamsCloudflareEgressId = "";
 var streamsCloudflareEgressRoomId = "";
 var streamsCloudflareEgressStopping = false;
+var streamsCloudflareHls = null;
+var streamsCloudflareDelayInterval = null;
 
 var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
 var STREAMS_LIVEKIT_CDN_URLS = [
   "https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js",
   "https://unpkg.com/livekit-client@2/dist/livekit-client.umd.min.js"
+];
+var STREAMS_HLS_CDN_URLS = [
+  "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js",
+  "https://unpkg.com/hls.js@1/dist/hls.min.js"
 ];
 
 function streamsReconnectDelayMs(attempt) {
@@ -71,6 +78,10 @@ function streamsGetLiveKitClient() {
   return window.LivekitClient || window.LiveKitClient || null;
 }
 
+function streamsGetHlsClient() {
+  return window.Hls || null;
+}
+
 function streamsLoadScript(src) {
   return new Promise(function (resolve, reject) {
     var script = document.createElement("script");
@@ -101,6 +112,25 @@ function streamsEnsureLiveKitClient() {
     throw err;
   });
   return streamsLiveKitScriptPromise;
+}
+
+function streamsEnsureHlsClient() {
+  var existing = streamsGetHlsClient();
+  if (existing && existing.isSupported && existing.isSupported()) return Promise.resolve(existing);
+  if (streamsHlsScriptPromise) return streamsHlsScriptPromise;
+  streamsHlsScriptPromise = STREAMS_HLS_CDN_URLS.reduce(function (chain, url) {
+    return chain.catch(function () {
+      return streamsLoadScript(url).then(function () {
+        var loaded = streamsGetHlsClient();
+        if (!loaded || !loaded.isSupported || !loaded.isSupported()) throw new Error("HLS client is not available");
+        return loaded;
+      });
+    });
+  }, Promise.reject(new Error("start"))).catch(function (err) {
+    streamsHlsScriptPromise = null;
+    throw err;
+  });
+  return streamsHlsScriptPromise;
 }
 
 function streamsApiBase() {
@@ -252,6 +282,17 @@ function streamsSetEgressStatus(text, tone) {
   streamsSetStatus(document.getElementById("streamsEgressStatus"), text, tone);
 }
 
+function streamsClearCloudflareDelayTimer() {
+  if (streamsCloudflareDelayInterval) clearInterval(streamsCloudflareDelayInterval);
+  streamsCloudflareDelayInterval = null;
+}
+
+function streamsDestroyCloudflareHls() {
+  if (!streamsCloudflareHls) return;
+  try { streamsCloudflareHls.destroy(); } catch (eDestroy) {}
+  streamsCloudflareHls = null;
+}
+
 function streamsStopMediaStream(stream) {
   if (!stream || !stream.getTracks) return;
   try {
@@ -290,11 +331,17 @@ function streamsResetCloudflarePlayer(clearStatus) {
   var video = document.getElementById("streamsCloudflareVideo");
   var wrap = document.getElementById("streamsCloudflareWrap");
   var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+  streamsClearCloudflareDelayTimer();
+  streamsDestroyCloudflareHls();
   if (frame) frame.src = "about:blank";
   if (video) {
     try { video.pause(); } catch (ePause) {}
+    video.onloadedmetadata = null;
+    video.oncanplay = null;
+    video.onerror = null;
     video.removeAttribute("src");
     video.hidden = true;
+    video.controls = false;
     try { video.load(); } catch (eLoad) {}
   }
   if (wrap) wrap.classList.add("streams-cloudflare-wrap--hidden");
@@ -431,12 +478,171 @@ function streamsSetRoleTab(name) {
   });
 }
 
-function streamsInitCloudflarePlayer(forceRefresh) {
-  var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+function streamsAppendQueryParam(url, key, value) {
+  url = String(url || "").trim();
+  if (!url) return "";
+  try {
+    var parsed = new URL(url, window.location.href);
+    parsed.searchParams.set(key, value);
+    return parsed.toString();
+  } catch (e) {
+    return url + (url.indexOf("?") >= 0 ? "&" : "?") + encodeURIComponent(key) + "=" + encodeURIComponent(value);
+  }
+}
+
+function streamsCloudflareDelaySeconds(data) {
+  var n = Math.round(Number(data && data.delaySeconds));
+  if (!isFinite(n) || n <= 0) n = 120;
+  return Math.max(30, Math.min(1800, n));
+}
+
+function streamsCloudflareDelayLabel(seconds) {
+  seconds = Math.max(1, Math.round(Number(seconds) || 120));
+  if (seconds % 60 === 0) return String(seconds / 60) + " мин";
+  return String(seconds) + " сек";
+}
+
+function streamsCloudflareDvrHlsUrl(data) {
+  var url = String(data && (data.hlsDvrUrl || data.hlsUrl) || "").trim();
+  return url ? streamsAppendQueryParam(url, "dvrEnabled", "true") : "";
+}
+
+function streamsCloudflareSeekableInfo(video) {
+  if (!video || !video.seekable || video.seekable.length < 1) return null;
+  try {
+    var last = video.seekable.length - 1;
+    return {
+      start: video.seekable.start(0),
+      edge: video.seekable.end(last),
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function streamsApplyCloudflareDelay(video, delaySeconds, forceSeek) {
+  var info = streamsCloudflareSeekableInfo(video);
+  if (!info || !isFinite(info.edge) || !isFinite(info.start) || info.edge <= info.start) return null;
+  var target = Math.max(info.start, info.edge - delaySeconds);
+  var currentDelay = info.edge - (video.currentTime || info.start);
+  var shouldSeek =
+    forceSeek ||
+    !isFinite(currentDelay) ||
+    currentDelay < delaySeconds - 8 ||
+    currentDelay > delaySeconds + 45;
+  if (shouldSeek && isFinite(target)) {
+    try { video.currentTime = target; } catch (eSeek) {}
+    currentDelay = info.edge - target;
+  }
+  return {
+    availableDelay: Math.max(0, info.edge - info.start),
+    currentDelay: Math.max(0, currentDelay),
+    target: target,
+  };
+}
+
+function streamsStartCloudflareDelayLoop(video, delaySeconds) {
+  streamsClearCloudflareDelayTimer();
+  var label = streamsCloudflareDelayLabel(delaySeconds);
+  function tick(forceSeek) {
+    var state = streamsApplyCloudflareDelay(video, delaySeconds, !!forceSeek);
+    if (!state) return;
+    if (state.availableDelay < delaySeconds - 5) {
+      streamsSetCloudflareStatus("Плеер работает, буфер " + label + " ещё набирается.", "warn");
+      return;
+    }
+    streamsSetCloudflareStatus("Плеер держит задержку " + label + ".", "ok");
+  }
+  tick(true);
+  streamsCloudflareDelayInterval = setInterval(function () { tick(false); }, 5000);
+}
+
+function streamsPlayCloudflareVideo(video, delaySeconds) {
+  if (!video) return;
+  streamsApplyCloudflareDelay(video, delaySeconds, true);
+  try {
+    var playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(function () {
+        streamsSetCloudflareStatus("Плеер готов с задержкой " + streamsCloudflareDelayLabel(delaySeconds) + ". Нажмите видео, чтобы запустить.", "warn");
+      });
+    }
+  } catch (e) {
+    streamsSetCloudflareStatus("Плеер готов с задержкой " + streamsCloudflareDelayLabel(delaySeconds) + ". Нажмите видео, чтобы запустить.", "warn");
+  }
+}
+
+function streamsLoadCloudflareDelayedVideo(data, forceRefresh) {
   var wrap = document.getElementById("streamsCloudflareWrap");
   var frame = document.getElementById("streamsCloudflareFrame");
   var video = document.getElementById("streamsCloudflareVideo");
-  if (!frame && !video) return Promise.resolve(false);
+  var hlsUrl = streamsCloudflareDvrHlsUrl(data);
+  var delaySeconds = streamsCloudflareDelaySeconds(data);
+  var label = streamsCloudflareDelayLabel(delaySeconds);
+  if (!video || !hlsUrl) return Promise.resolve(false);
+
+  streamsClearCloudflareDelayTimer();
+  streamsDestroyCloudflareHls();
+  if (frame) {
+    frame.hidden = true;
+    frame.src = "about:blank";
+  }
+  if (wrap) wrap.classList.remove("streams-cloudflare-wrap--hidden");
+  video.hidden = false;
+  video.controls = false;
+  video.playsInline = true;
+  video.muted = false;
+  video.onloadedmetadata = function () {
+    streamsApplyCloudflareDelay(video, delaySeconds, true);
+  };
+  video.oncanplay = function () {
+    streamsStartCloudflareDelayLoop(video, delaySeconds);
+    streamsPlayCloudflareVideo(video, delaySeconds);
+  };
+  video.onerror = function () {
+    streamsSetCloudflareStatus("Не удалось открыть DVR-HLS поток Cloudflare.", "error");
+  };
+  if (!video.__streamsCloudflareClickHandlerAttached) {
+    video.__streamsCloudflareClickHandlerAttached = true;
+    video.addEventListener("click", function () {
+      if (video.paused) streamsPlayCloudflareVideo(video, streamsCloudflareDelaySeconds(streamsCloudflareConfig));
+      else video.pause();
+    });
+  }
+
+  streamsSetCloudflareStatus((forceRefresh ? "Обновляю" : "Загружаю") + " плеер с задержкой " + label + "…", "warn");
+  if (video.canPlayType && video.canPlayType("application/vnd.apple.mpegurl")) {
+    if (forceRefresh || video.src !== hlsUrl) video.src = hlsUrl;
+    try { video.load(); } catch (eLoad) {}
+    return Promise.resolve(true);
+  }
+  return streamsEnsureHlsClient().then(function (Hls) {
+    var hls = new Hls({
+      liveSyncDuration: delaySeconds,
+      liveMaxLatencyDuration: delaySeconds + 45,
+      maxLiveSyncPlaybackRate: 1,
+      lowLatencyMode: false,
+    });
+    streamsCloudflareHls = hls;
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+      hls.loadSource(hlsUrl);
+    });
+    hls.on(Hls.Events.ERROR, function (event, dataErr) {
+      if (!dataErr || !dataErr.fatal) return;
+      streamsSetCloudflareStatus("HLS-плеер Cloudflare остановился. Нажмите «Обновить плеер».", "error");
+    });
+    return true;
+  }).catch(function () {
+    streamsSetCloudflareStatus("Этот браузер не смог загрузить HLS-плеер для задержки " + label + ".", "error");
+    return false;
+  });
+}
+
+function streamsInitCloudflarePlayer(forceRefresh) {
+  var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
+  var video = document.getElementById("streamsCloudflareVideo");
+  if (!video) return Promise.resolve(false);
   if (refreshBtn) refreshBtn.disabled = true;
   streamsSetCloudflareStatus(forceRefresh ? "Обновляю Cloudflare-плеер…" : "Загружаю Cloudflare-плеер…", "warn");
   return streamsFetchCloudflareConfig(!!forceRefresh)
@@ -449,31 +655,7 @@ function streamsInitCloudflarePlayer(forceRefresh) {
         );
         return false;
       }
-      var iframeUrl = String(data.iframeUrl || "").trim();
-      var hlsUrl = String(data.hlsUrl || "").trim();
-      if (wrap) wrap.classList.remove("streams-cloudflare-wrap--hidden");
-      if (iframeUrl && frame) {
-        if (forceRefresh || frame.src !== iframeUrl) frame.src = iframeUrl;
-        frame.hidden = false;
-        if (video) {
-          try { video.pause(); } catch (ePause) {}
-          video.hidden = true;
-          video.removeAttribute("src");
-          try { video.load(); } catch (eLoad) {}
-        }
-        streamsSetCloudflareStatus("Плеер Cloudflare готов. Если поток уже идёт в OBS, эфир появится здесь с задержкой.", "ok");
-        return true;
-      }
-      if (hlsUrl && video && typeof video.canPlayType === "function" && video.canPlayType("application/vnd.apple.mpegurl")) {
-        if (frame) frame.hidden = true;
-        video.hidden = false;
-        if (forceRefresh || video.src !== hlsUrl) video.src = hlsUrl;
-        streamsSetCloudflareStatus("HLS-плеер Cloudflare готов.", "ok");
-        return true;
-      }
-      streamsResetCloudflarePlayer(false);
-      streamsSetCloudflareStatus("Cloudflare прислал HLS, но этот браузер не умеет открыть его без встроенного Stream Player.", "error");
-      return false;
+      return streamsLoadCloudflareDelayedVideo(data, forceRefresh);
     })
     .catch(function (err) {
       streamsResetCloudflarePlayer(false);

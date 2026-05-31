@@ -53,13 +53,13 @@
                 </div>
               </div>
               <div class="streams-block streams-block--delayed" id="streamsDelayedPanel" data-streams-tab-panel="delayed" role="tabpanel" aria-labelledby="streamsDelayedTab" hidden>
-                <h2 class="streams-block__title">Смотреть с задержкой</h2>
-                <p class="streams-block__hint">Cloudflare Stream / HLS-плеер для массового просмотра.</p>
-                <button type="button" class="streams-btn streams-btn--watch" id="streamsCloudflareRefreshBtn">Обновить плеер</button>
+                <h2 class="streams-block__title">Смотреть с задержкой 2 минуты</h2>
+                <p class="streams-block__hint">Cloudflare DVR-HLS держит эфир примерно на две минуты позади live.</p>
+                <button type="button" class="streams-btn streams-btn--watch" id="streamsCloudflareRefreshBtn">Запустить плеер</button>
                 <p id="streamsCloudflareStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-cloudflare-wrap streams-cloudflare-wrap--hidden" id="streamsCloudflareWrap">
                   <iframe id="streamsCloudflareFrame" class="streams-cloudflare-frame" title="Cloudflare Stream" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
-                  <video id="streamsCloudflareVideo" class="streams-cloudflare-video" controls playsinline hidden aria-label="Cloudflare Stream HLS"></video>
+                  <video id="streamsCloudflareVideo" class="streams-cloudflare-video" playsinline hidden aria-label="Cloudflare Stream HLS"></video>
                 </div>
               </div>
             </div>
