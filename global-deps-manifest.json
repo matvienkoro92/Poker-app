@@ -137,11 +137,13 @@
       "name": "pokerInitPlayerCrm",
       "domain": "playerCrm",
       "exportedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime.js",
+        "app-player-crm-runtime-core.js"
       ],
       "consumedBy": [
         "app-html-fragments.js",
-        "app-view-router.js"
+        "app-view-router.js",
+        "app-player-crm-runtime.js"
       ]
     },
     {
@@ -192,7 +194,7 @@
         "app-player-crm-formatters.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -202,7 +204,7 @@
         "app-player-crm-formatters.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1104,7 +1106,7 @@
         "app-player-crm-periods.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1114,7 +1116,7 @@
         "app-player-crm-stats.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1124,7 +1126,7 @@
         "app-player-crm-charts.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1134,7 +1136,7 @@
         "app-player-crm-reports.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1297,7 +1299,7 @@
         "app-player-crm-registrations.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1307,7 +1309,7 @@
         "app-player-crm-viewport-shell.js"
       ],
       "consumedBy": [
-        "app-player-crm-runtime.js"
+        "app-player-crm-runtime-core.js"
       ]
     },
     {
@@ -1408,6 +1410,191 @@
       ],
       "consumedBy": [
         "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "initAdminBonuses",
+      "domain": "adminBonuses",
+      "exportedBy": [
+        "app-admin-bonuses.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "__adminReportRakebackShellModule",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports.js",
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js",
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerPreloadAdminSentReports",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "__pokerTrackingLinkContext",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-api-tracking.js"
+      ],
+      "consumedBy": [
+        "app-api-tracking.js"
+      ]
+    },
+    {
+      "name": "__pokerChatDisplayName",
+      "domain": "chatIdentity",
+      "exportedBy": [
+        "app-auth.js"
+      ],
+      "consumedBy": [
+        "app-chat-identity-formatters.js",
+        "app-profile-hero.js",
+        "app-pwa-auth-session.js"
+      ]
+    },
+    {
+      "name": "initDailyPoker",
+      "domain": "dailyPoker",
+      "exportedBy": [
+        "app-daily-poker.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerUpdateHallTop2026ViewerLogin",
+      "domain": "hall",
+      "exportedBy": [
+        "app-hall-fame.js"
+      ],
+      "consumedBy": [
+        "app-hall-fame.js"
+      ]
+    },
+    {
+      "name": "__pokerHomeGlobalModalsReinitAttempts",
+      "domain": "htmlFragments",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerEnsureAdminReportModalHtml",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "__adminReportRakebackTemplateOpenRequested",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerOpenAdminReportRakebackShell",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js",
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerSyncPlayerCrmViewportShell",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-runtime-core.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerEnsurePlayerCrmRuntime",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-player-crm-runtime.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-runtime.js"
+      ]
+    },
+    {
+      "name": "pokerApplyPokerPlusStatsVisibility",
+      "domain": "profile",
+      "exportedBy": [
+        "app-profile-pokerplus.js"
+      ],
+      "consumedBy": [
+        "app-profile-user-info.js"
+      ]
+    },
+    {
+      "name": "__streamsNetworkGuardAttached",
+      "domain": "streams",
+      "exportedBy": [
+        "app-streams.js"
+      ],
+      "consumedBy": [
+        "app-streams.js"
+      ]
+    },
+    {
+      "name": "pokerGetCurrentTournamentSlot",
+      "domain": "tournamentDay",
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js"
+      ]
+    },
+    {
+      "name": "_homeTournamentSelectedWeekday",
+      "domain": "tournamentDay",
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js"
+      ]
+    },
+    {
+      "name": "_homeTournamentFocusFlowResizeBound",
+      "domain": "tournamentDay",
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js"
       ]
     }
   ]
