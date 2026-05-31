@@ -489,12 +489,13 @@ function openHallFishRatingModal() {
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
     });
 }
+window.openHallFishRatingModal = openHallFishRatingModal;
 
 function initHallFishRatingModal() {
   if (window.__pokerHallFishRatingBound) return;
   window.__pokerHallFishRatingBound = true;
   document.addEventListener("click", function (e) {
-    var openBtn = e.target && e.target.closest ? e.target.closest("#hallFishRatingBtn") : null;
+    var openBtn = e.target && e.target.closest ? e.target.closest("#headerPokerStatus,.header-greeting--status") : null;
     if (openBtn) {
       e.preventDefault();
       openHallFishRatingModal();

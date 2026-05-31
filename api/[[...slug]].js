@@ -28,6 +28,7 @@ const handlers = {
   "player-crm-push-event": () => require(path.join(handlersDir, "player-crm-push-event.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
   "telegram-bot-webhook": () => require(path.join(handlersDir, "telegram-bot-webhook.js")),
+  "livekit-token": () => require(path.join(handlersDir, "livekit-token.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),

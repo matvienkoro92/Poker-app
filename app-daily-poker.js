@@ -193,10 +193,12 @@
     var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
     var today = Math.max(0, parseInt(stats.todayUniquePlayers || data.todayUniquePlayers || "0", 10) || 0);
     var week = Math.max(0, parseInt(stats.weekUniquePlayers || data.weekUniquePlayers || "0", 10) || 0);
+    var previousWeek = Math.max(0, parseInt(stats.previousWeekUniquePlayers || data.previousWeekUniquePlayers || "0", 10) || 0);
     el.hidden = false;
     el.innerHTML =
       '<span>Сегодня крутили: <strong>' + esc(formatCompactAmount(today)) + '</strong></span>' +
-      '<span>За неделю: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>';
+      '<span>На прошлой неделе: <strong>' + esc(formatCompactAmount(previousWeek)) + '</strong></span>' +
+      '<span>На этой неделе уже: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>';
   }
 
   function winnerHtml(winner, index) {

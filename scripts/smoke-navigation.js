@@ -441,7 +441,16 @@ async function main() {
       await page.waitForFunction(() => {
         return typeof window.AdminReportSentTab === "object" &&
           !!document.querySelector(".admin-report-sent-detail__deposit-group");
-      }, null, { timeout: 1800 });
+      }, null, { timeout: 3000 }).catch(async (err) => {
+        const state = await page.evaluate(() => ({
+          sentModule: typeof window.AdminReportSentTab,
+          sentScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-sent.js" && script.getAttribute("data-admin-report-loaded") === "1"),
+          sentText: document.getElementById("adminReportSentList")?.textContent || "",
+          activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
+          hasDepositGroup: !!document.querySelector(".admin-report-sent-detail__deposit-group"),
+        }));
+        throw new Error("admin report sent detail shell did not hydrate before core: " + (err && err.message ? err.message : String(err)) + ": " + JSON.stringify(state));
+      });
       const earlySentState = await page.evaluate(() => {
         const list = document.getElementById("adminReportSentList");
         const activePanel = document.querySelector(".admin-report-panel--active");
@@ -553,18 +562,33 @@ async function main() {
     await page.evaluate(() => {
       if (typeof setView !== "function") throw new Error("setView is not available before fish rating click");
       setView("home");
+      window.__pokerHomeAuthResolved = true;
+      window.dispatchEvent(new CustomEvent("poker-pokerplus-status-change", {
+        detail: {
+          linked: true,
+          p21Id: "smoke-p21",
+          level: 31,
+          pokerPlusNickname: "SmokeP21",
+        },
+      }));
     });
     await page.waitForFunction(() => {
-      const btn = document.getElementById("hallFishRatingBtn");
-      if (!btn || document.body.getAttribute("data-view") !== "home") return false;
-      const rect = btn.getBoundingClientRect();
-      const style = getComputedStyle(btn);
-      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+      const greeting = document.getElementById("headerGreeting");
+      const status = document.getElementById("headerPokerStatus");
+      if (!greeting || !status || document.body.getAttribute("data-view") !== "home") return false;
+      const rect = greeting.getBoundingClientRect();
+      const style = getComputedStyle(greeting);
+      return /SmokeP21/.test(greeting.textContent || "") &&
+        !status.classList.contains("header-status--hidden") &&
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden";
     }, null, { timeout: 1200 }).catch(async (err) => {
       const state = await page.evaluate(() => {
-        const btn = document.getElementById("hallFishRatingBtn");
-        const view = btn ? btn.closest(".view") : null;
-        const row = btn ? btn.closest(".spring-rating-home-promo-action-row") : null;
+        const greeting = document.getElementById("headerGreeting");
+        const status = document.getElementById("headerPokerStatus");
+        const view = greeting ? greeting.closest(".view") : null;
         function nodeState(node) {
           if (!node) return null;
           const rect = node.getBoundingClientRect();
@@ -585,15 +609,14 @@ async function main() {
           appClass: document.getElementById("app")?.className || "",
           htmlClass: document.documentElement.className || "",
           activeView: document.querySelector(".view.view--active[data-view]")?.getAttribute("data-view") || "",
-          button: nodeState(btn),
-          row: nodeState(row),
+          greeting: nodeState(greeting),
+          status: nodeState(status),
           view: nodeState(view),
         };
       });
-      throw new Error("home fish rating button is not visible after returning home (" + (err && err.message ? err.message : String(err)) + "): " + JSON.stringify(state));
+      throw new Error("header fish rating entry is not visible after returning home (" + (err && err.message ? err.message : String(err)) + "): " + JSON.stringify(state));
     });
-    await page.locator("#hallFishRatingBtn").scrollIntoViewIfNeeded();
-    await page.locator("#hallFishRatingBtn").click();
+    await page.locator("#headerGreeting").click();
     await page.waitForFunction(() => {
       const modal = document.getElementById("hallFishRatingModal");
       return !!(modal && modal.hidden === false);
@@ -604,9 +627,9 @@ async function main() {
       lazyScriptExecuted: Array.from(document.scripts || [])
         .some((script) => /app-hall-fame\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "hall"),
     }));
-    if (!fishModalState.modalOpen) throw new Error("home fish rating modal did not open on first click");
+    if (!fishModalState.modalOpen) throw new Error("header fish rating modal did not open on first click");
     if (fishModalState.initFunction !== "function") throw new Error("hall fish modal init function did not load");
-    if (!fishModalState.lazyScriptExecuted) throw new Error("hall script was not lazy-loaded by fish button");
+    if (!fishModalState.lazyScriptExecuted) throw new Error("hall script was not lazy-loaded by header fish entry");
     await page.evaluate(() => {
       const close = document.querySelector("#hallFishRatingModal [data-hall-fish-close]");
       if (close) close.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));

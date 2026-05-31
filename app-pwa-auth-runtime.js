@@ -540,14 +540,53 @@
     var el = document.getElementById("headerGreeting");
     if (!el) return;
     var on = !!active;
+    var statusActive = !on && pokerHeaderPoker21Linked();
     el.classList.toggle("header-greeting--auth", on);
-    if ("disabled" in el) el.disabled = !on;
+    el.classList.toggle("header-greeting--status", statusActive);
+    if ("disabled" in el) el.disabled = !(on || statusActive);
     if (on) {
       el.setAttribute("title", "Войти в аккаунт");
       el.setAttribute("aria-label", "Войти в аккаунт");
+    } else if (statusActive) {
+      el.setAttribute("title", "Игроки по уровню");
+      el.setAttribute("aria-label", "Открыть игроков по уровню");
     } else {
       el.removeAttribute("title");
       el.removeAttribute("aria-label");
+    }
+  }
+
+  function pokerHeaderPoker21Linked() {
+    try {
+      return window.__pokerHeaderPoker21Linked === true;
+    } catch (eLinked) {
+      return false;
+    }
+  }
+
+  function pokerHeaderPoker21Nickname() {
+    try {
+      return String(window.__pokerHeaderPoker21Nickname || "").trim();
+    } catch (eName) {
+      return "";
+    }
+  }
+
+  function openHeaderPoker21Levels(e) {
+    if (typeof window.__pokerOpenHallFishRatingModal === "function") {
+      window.__pokerOpenHallFishRatingModal(e);
+      return;
+    }
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+    if (typeof window.openHallFishRatingModal === "function") {
+      window.openHallFishRatingModal();
+      return;
+    }
+    if (typeof window.pokerEnsureScriptDomains === "function") {
+      Promise.resolve(window.pokerEnsureScriptDomains(["hall"]))
+        .then(function () { if (typeof window.openHallFishRatingModal === "function") window.openHallFishRatingModal(); })
+        .catch(function () {});
     }
   }
 
@@ -569,6 +608,11 @@
       return;
     }
     setHeaderGreetingLoginActive(false);
+    var poker21Name = pokerHeaderPoker21Nickname();
+    if (poker21Name) {
+      el.textContent = formatHeaderGreeting(poker21Name);
+      return;
+    }
     var profileName = pokerPreferredProfileDisplayName();
     if (profileName) {
       el.textContent = formatHeaderGreeting(profileName);
@@ -589,6 +633,7 @@
     var dn = telegramUserDisplayName(u);
     el.textContent = formatHeaderGreeting(dn);
   }
+  window.__pokerUpdateHeaderGreeting = updateHeaderGreeting;
 
   function hasResolvedHomeAuthUser() {
     try {
@@ -688,6 +733,10 @@
     if (greetingBtn && greetingBtn.dataset.authEntryBound !== "1") {
       greetingBtn.dataset.authEntryBound = "1";
       greetingBtn.addEventListener("click", function (e) {
+        if (pokerHeaderPoker21Linked()) {
+          openHeaderPoker21Levels(e);
+          return;
+        }
         if (!isSiteHomeInstructionMode()) return;
         handleSharedAccountAuthClick(e);
       });

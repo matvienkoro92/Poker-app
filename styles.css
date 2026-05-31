@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.405");
-@import url("./styles-home-rating-promo.css?v=3.405");
-@import url("./styles-auth.css?v=3.405");
-@import url("./styles-home.css?v=3.405");
-@import url("./styles-chat.css?v=3.405");
-@import url("./styles-learning-games.css?v=3.405");
-@import url("./styles-raffles.css?v=3.405");
-@import url("./styles-daily-poker.css?v=3.405");
-@import url("./styles-home-legacy-prelude.css?v=3.405");
-@import url("./styles-download.css?v=3.405");
-@import url("./styles-home-legacy-tail.css?v=3.405");
-@import url("./styles-home-rating-promo-legacy.css?v=3.405");
-@import url("./styles-rating.css?v=3.405");
-@import url("./styles-hall.css?v=3.405");
-@import url("./styles-admin.css?v=3.405");
-@import url("./styles-player-crm.css?v=3.405");
-@import url("./styles-profile.css?v=3.405");
-@import url("./styles-layout.css?v=3.405");
-@import url("./styles-chat-overlays.css?v=3.405");
-@import url("./styles-home-overrides.css?v=3.405");
-@import url("./styles-layout-touch-targets.css?v=3.405");
-@import url("./styles-home-rating-promo-late.css?v=3.405");
+@import url("./styles-base.css?v=3.406");
+@import url("./styles-home-rating-promo.css?v=3.406");
+@import url("./styles-auth.css?v=3.406");
+@import url("./styles-home.css?v=3.406");
+@import url("./styles-chat.css?v=3.406");
+@import url("./styles-learning-games.css?v=3.406");
+@import url("./styles-raffles.css?v=3.406");
+@import url("./styles-daily-poker.css?v=3.406");
+@import url("./styles-home-legacy-prelude.css?v=3.406");
+@import url("./styles-download.css?v=3.406");
+@import url("./styles-home-legacy-tail.css?v=3.406");
+@import url("./styles-home-rating-promo-legacy.css?v=3.406");
+@import url("./styles-rating.css?v=3.406");
+@import url("./styles-hall.css?v=3.406");
+@import url("./styles-admin.css?v=3.406");
+@import url("./styles-player-crm.css?v=3.406");
+@import url("./styles-profile.css?v=3.406");
+@import url("./styles-layout.css?v=3.406");
+@import url("./styles-chat-overlays.css?v=3.406");
+@import url("./styles-home-overrides.css?v=3.406");
+@import url("./styles-layout-touch-targets.css?v=3.406");
+@import url("./styles-home-rating-promo-late.css?v=3.406");
 
 :root {
   --daily-poker-page-bg:
@@ -628,7 +628,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__header,
   body[data-view="daily-poker"] #app.app .daily-poker__header {
-    min-height: 136px;
+    min-height: 154px;
   }
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__heading,
@@ -638,12 +638,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__intro,
   body[data-view="daily-poker"] #app.app .daily-poker__intro {
-    margin-top: -14px;
+    margin-top: -10px;
   }
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__hero-monkey,
   body[data-view="daily-poker"] #app.app .daily-poker__hero-monkey {
-    top: -8px;
+    top: -4px;
   }
 }
 
@@ -2079,8 +2079,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: clamp(74px, 13.2vw, 112px);
-  padding: 6px 3px 7px;
+  min-height: clamp(58px, 10.8vw, 92px);
+  padding: 8px 4px;
   border: 1px solid rgba(255, 184, 36, 0.82);
   border-radius: 8px;
   background:
@@ -2098,51 +2098,28 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before {
-  content: "A A A A";
-  display: block;
-  margin: 0 0 4px;
-  color: #ffd87b;
-  font-size: clamp(10px, 2.2vw, 16px);
-  font-weight: 1000;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  text-shadow:
-    0 0 7px rgba(255, 184, 36, 0.58),
-    0 2px 4px rgba(0, 0, 0, 0.62);
+  content: none;
+  display: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(2)::before {
-  content: "10 J Q K A";
-  font-size: clamp(8px, 1.8vw, 13px);
+  content: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(3)::before {
-  content: "♛";
-  font-size: clamp(22px, 4.7vw, 34px);
-  line-height: 0.78;
+  content: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(4)::before {
-  content: "10";
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(24px, 5.2vw, 38px);
-  min-height: clamp(22px, 4.7vw, 34px);
-  border: 1px solid rgba(255, 205, 83, 0.54);
-  border-radius: 50%;
-  font-size: clamp(15px, 3.2vw, 24px);
+  content: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(5)::before {
-  content: "🔒";
-  color: rgba(255, 240, 206, 0.62);
-  font-size: clamp(21px, 4.8vw, 34px);
-  line-height: 0.82;
+  content: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
-  min-height: clamp(74px, 13.2vw, 112px);
+  min-height: clamp(58px, 10.8vw, 92px);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount {
@@ -2197,7 +2174,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   grid-column: 1 / -1;
   width: calc(100% + 14px);
   min-height: clamp(32px, 5.9vw, 55px);
-  margin: 8px -7px 0;
+  margin: 3px -7px 0;
   align-items: stretch;
   justify-content: center;
   padding: 0;

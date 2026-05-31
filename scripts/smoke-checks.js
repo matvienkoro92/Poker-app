@@ -1108,10 +1108,12 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
   !has("html", 'schedule-section--week-tournament') &&
   hasAll("scheduleFragment", [
     'schedule-section--week-tournament',
-    "Турнир Недели Нокаут Меджик</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00",
+    "Нокаут недели</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00",
     "Турниры дня в 18:00 МСК",
-    "<tr><td>Четверг</td><td>Нокаут Мистери</td><td>1 200₽</td><td>R:1 200₽</td><td>220 000₽</td><td>18:00</td></tr>",
-    '<tr class="schedule-row--freeroll"><td>Суббота</td><td><span class="schedule-freeroll-name">Фриролл</span></td><td>0₽</td><td>R:500₽ / A:1 000₽</td><td>200 000₽</td><td>18:00</td></tr>',
+    "<td>Турнир Тракториста</td>",
+    "<td>Турнир Стольник</td>",
+    "<tr><td>Четверг</td><td>Мистери+</td><td>1 200₽</td><td>R:1 200₽</td><td>220 000₽</td><td>18:00</td></tr>",
+    '<tr class="schedule-row--freeroll"><td>Суббота</td><td><span class="schedule-freeroll-name">Фриролл</span></td><td>0₽</td><td>R:400₽ / A:800₽</td><td>200 000₽</td><td>18:00</td></tr>',
     "<tr><td>PKO/MKO</td><td>300₽</td><td>R:300₽</td><td>25 000₽</td><td>17:00</td></tr>",
     "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
   ]) &&
@@ -2233,31 +2235,26 @@ add("Selected heavy views use JavaScript lazy gates", () =>
   ])
 );
 
-add("Home fish rating button uses a lightweight eager icon", () => {
-  const assetPath = path.join(root, "assets/fish-king-home.png");
-  return fs.existsSync(assetPath) &&
-    fs.statSync(assetPath).size < 128 * 1024 &&
-    hasAll("html", [
-      '<link rel="preload" as="image" href="./assets/fish-king-home.png"',
-      'id="hallFishRatingBtn"',
-      'src="./assets/fish-king-home.png"',
-      'loading="eager"',
-      'fetchpriority="high"',
-    ]);
-});
-
-add("Home fish rating button captures taps before deferred scripts finish", () =>
-  hasAll("html", [
-    "__pokerEarlyFishBound",
-    "waitForFishLazyLoader",
-    'window.pokerEnsureScriptDomains',
-    'ensureScripts(["hall"])',
-    "__pokerLazyRedispatched",
+add("Home fish rating moved to the header without duplicate content button", () =>
+  !has("html", 'id="hallFishRatingBtn"') &&
+  !has("html", 'id="hallFishRatingBtnLegacy"') &&
+  !has("html", "fish-king-home.png") &&
+  hasAll("appHomeInit", [
+    "function openHeaderFishRatingModal",
+    "waitForHallFishLazyLoader",
+    "window.pokerEnsureScriptDomains",
+    "__pokerOpenHallFishRatingModal",
+  ]) &&
+  hasAll("appPwaAuthRuntime", [
+    "header-greeting--status",
+    "openHeaderPoker21Levels",
+  ]) &&
+  hasAll("appHallFame", [
+    '"#headerPokerStatus,.header-greeting--status"',
+  ]) &&
+  hasAll("appLazyLoader", [
+    '"#headerPokerStatus,.header-greeting--status"',
   ])
-);
-
-add("Home fish rating button bypasses global modal fragment hydration", () =>
-  !has("appHtmlFragments", "#hallFishRatingBtn")
 );
 
 add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>

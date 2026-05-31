@@ -2079,9 +2079,10 @@
         if (data && data.ok) {
           if (out) {
             var recipient = data.testRecipient || "тестовый получатель";
+            var antispamText = data.skippedAntispam ? ", антиспам пропустил " + data.skippedAntispam : "";
             out.textContent = action === "test_campaign"
               ? "Тест отправлен: " + recipient + ", получатель 1, бот " + (data.sentBot || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", ошибок " + (data.failed || 0) + ". Массовая аудитория не затронута."
-              : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, доставлено " + (data.delivered != null ? data.delivered : (data.sentBot || data.sentPush || 0)) + ", осталось " + (data.notSent != null ? data.notSent : 0) + ", бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + ", антиспам пропустил " + (data.skippedAntispam || 0) + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
+              : (action === "send_campaign" ? "Рассылка отправлена" : "Черновик рассылки готов") + ": " + data.audience + " игроков, доставлено " + (data.delivered != null ? data.delivered : (data.sentBot || data.sentPush || 0)) + ", осталось " + (data.notSent != null ? data.notSent : 0) + ", бот " + (data.sentBot || 0) + ", push " + (data.sentPush || 0) + ", фото " + (data.hasImage ? "да" : "нет") + antispamText + ", ошибок " + (data.failed || 0) + ". ID: " + (data.id || data.campaignId || "—") + ".";
             if (data.warning) out.textContent += " Предупреждение: " + data.warning;
           }
           loadCrmData();

@@ -101,6 +101,10 @@ function initProfilePokerPlus() {
     var detail = { linked: !!linked };
     var p = profile && typeof profile === "object" ? profile : null;
     if (p && p.pokerPlusUserId) detail.p21Id = String(p.pokerPlusUserId);
+    if (linked && p) {
+      var nickname = p.nickname || p.Nike || p.nick || p.name || "";
+      if (nickname) detail.pokerPlusNickname = String(nickname).trim();
+    }
     if (linked && p && typeof pokerProfileStatusFromRake === "function") {
       var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : null);
       var fee = total && total.fee != null ? total.fee : null;

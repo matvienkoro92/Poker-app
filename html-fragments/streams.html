@@ -1,7 +1,7 @@
 <div class="view" data-view="streams">
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title streams-title">Стримы</h1>
-            <p class="streams-intro">Трансляция экрана и голоса в реальном времени. Задержка 2 минуты потребует отдельного стрим-сервера — пока доступна только прямая трансляция.</p>
+            <p class="streams-intro">Трансляция экрана и голоса в реальном времени через LiveKit Cloud.</p>
             <div class="streams-role-tabs" role="tablist" aria-label="Роль в стриме">
               <button type="button" class="streams-role-tab streams-role-tab--active" id="streamsWatchTab" data-streams-tab-target="watch" role="tab" aria-selected="true" aria-controls="streamsWatchPanel">Я смотрю стрим</button>
               <button type="button" class="streams-role-tab" id="streamsBroadcastTab" data-streams-tab-target="broadcast" role="tab" aria-selected="false" aria-controls="streamsBroadcastPanel">Я запускаю стрим</button>
@@ -31,7 +31,7 @@
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
                 <p id="streamsBroadcastStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
-                  <p class="streams-open-in-browser__text"><strong>Стрим будет работать только в Chrome или браузере на компьютере.</strong> В браузере Telegram не будет работать. Можете воспользоваться ссылкой ниже, если нужно сменить браузер.</p>
+                  <p class="streams-open-in-browser__text"><strong>Запуск экрана работает в Chrome или браузере на компьютере.</strong> В браузере Telegram доступ к экрану обычно недоступен.</p>
                   <div class="streams-link-row streams-open-in-browser__row">
                     <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для смены браузера" />
                     <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>

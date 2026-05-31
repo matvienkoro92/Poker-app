@@ -77,6 +77,25 @@ function initRafflesAdminCreateRuntime(opts) {
     var now = new Date();
     var moscowOffsetMs = 3 * 60 * 60 * 1000;
     var moscowNow = new Date(now.getTime() + moscowOffsetMs);
+    var day = moscowNow.getUTCDate();
+    var month = moscowNow.getUTCMonth() + 1;
+    var dateMarker = (day < 10 ? "0" : "") + day + "." + (month < 10 ? "0" : "") + month;
+    var allOptions = select.querySelectorAll("option");
+    var todayDateOpt = null;
+    for (var ai = 0; ai < allOptions.length; ai++) {
+      var dateTxt = allOptions[ai].textContent || "";
+      if (dateTxt.indexOf(dateMarker) !== -1) {
+        todayDateOpt = allOptions[ai];
+        break;
+      }
+    }
+    if (todayDateOpt) {
+      todayDateOpt.selected = true;
+      if (todayDateOpt.textContent.indexOf("сегодня") === -1) {
+        todayDateOpt.textContent = todayDateOpt.textContent + " — сегодня";
+      }
+      return;
+    }
     var weekday = moscowNow.getUTCDay(); // 0=Вс,1=Пн...
     var dayMap = { 1: "(Пн)", 2: "(Вт)", 3: "(Ср)", 4: "(Чт)", 5: "(Пт)", 6: "(Сб)", 0: "(Вс)" };
     var marker = dayMap[weekday];

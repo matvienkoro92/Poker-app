@@ -32,6 +32,17 @@
       ]
     },
     {
+      "name": "pokerEnsureScriptDomains",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-home-init.js",
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
       "name": "pokerPrewarmGlobalModalTarget",
       "domain": "htmlFragments",
       "exportedBy": [
@@ -1495,6 +1506,57 @@
       ],
       "consumedBy": [
         "app-hall-fame.js"
+      ]
+    },
+    {
+      "name": "openHallFishRatingModal",
+      "domain": "hall",
+      "exportedBy": [
+        "app-hall-fame.js"
+      ],
+      "consumedBy": [
+        "app-home-init.js",
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "__pokerHeaderPoker21Linked",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-init.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "__pokerHeaderPoker21Nickname",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-init.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "__pokerOpenHallFishRatingModal",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-init.js"
+      ],
+      "consumedBy": [
+        "app-pwa-auth-runtime.js"
+      ]
+    },
+    {
+      "name": "__pokerUpdateHeaderGreeting",
+      "domain": "auth",
+      "exportedBy": [
+        "app-pwa-auth-runtime.js"
+      ],
+      "consumedBy": [
+        "app-home-init.js"
       ]
     },
     {

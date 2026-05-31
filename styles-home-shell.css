@@ -36,10 +36,13 @@
 .header-greeting:disabled {
   opacity: 1;
 }
-.header-greeting--auth {
+.header-greeting--auth,
+.header-greeting--status {
   cursor: pointer;
 }
-.header-greeting--auth:focus-visible {
+.header-greeting--auth:focus-visible,
+.header-greeting--status:focus-visible,
+.header-status:focus-visible {
   outline: 2px solid rgba(253, 230, 138, 0.85);
   outline-offset: 3px;
   border-radius: 6px;
@@ -83,6 +86,10 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.header-status[role="button"] {
+  cursor: pointer;
 }
 
 .header-status--hidden {
