@@ -18,6 +18,9 @@ var streamsWatchGeneration = 0;
 var streamsWatchRemoteStream = null;
 var streamsCloudflareConfigPromise = null;
 var streamsCloudflareConfig = null;
+var streamsCloudflareEgressId = "";
+var streamsCloudflareEgressRoomId = "";
+var streamsCloudflareEgressStopping = false;
 
 var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
 var STREAMS_LIVEKIT_CDN_URLS = [
@@ -166,6 +169,33 @@ function streamsFetchCloudflareConfig(forceRefresh) {
   return streamsCloudflareConfigPromise;
 }
 
+function streamsFetchLiveKitEgress(action, roomId, egressId) {
+  var base = streamsApiBase();
+  if (!base) return Promise.reject(new Error("api_base_missing"));
+  var request = typeof pokerAuthFetch === "function" ? pokerAuthFetch : fetch;
+  return request(base.replace(/\/$/, "") + "/api/livekit-egress", {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(streamsAuthBody({
+      action: action,
+      room: roomId || streamsCloudflareEgressRoomId || streamsBroadcastRoomId,
+      egressId: egressId || streamsCloudflareEgressId,
+    }))
+  }).then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      if (!res.ok || !data || data.ok !== true) {
+        var code = data && data.error ? String(data.error) : "livekit_egress_error";
+        var err = new Error(code);
+        err.status = res.status;
+        err.data = data || {};
+        throw err;
+      }
+      return data;
+    });
+  });
+}
+
 function streamsTokenErrorText(err, role) {
   var code = String(err && err.message || "");
   if (code === "livekit_not_configured") return "LiveKit ещё не настроен на сервере. Проверьте LIVEKIT_URL/API_KEY/API_SECRET и redeploy.";
@@ -182,6 +212,18 @@ function streamsCloudflareErrorText(err) {
   if (code === "api_base_missing") return "Не удалось определить адрес API для Cloudflare Stream.";
   if (code === "Method not allowed") return "Cloudflare Stream endpoint отвечает некорректно.";
   return "Не удалось загрузить Cloudflare-плеер.";
+}
+
+function streamsEgressErrorText(err) {
+  var code = String(err && err.message || "");
+  if (code === "cloudflare_rtmps_not_configured") return "Cloudflare-мост не настроен: добавьте CLOUDFLARE_STREAM_RTMPS_KEY в Vercel и сделайте redeploy.";
+  if (code === "livekit_not_configured") return "LiveKit Egress не запущен: проверьте LIVEKIT_URL/API_KEY/API_SECRET.";
+  if (code === "auth_required_for_broadcast") return "Cloudflare-мост доступен только авторизованному ведущему.";
+  if (code === "admin_required_for_broadcast") return "Cloudflare-мост доступен только администратору.";
+  if (code === "bad_room") return "Cloudflare-мост не получил корректный код комнаты.";
+  if (code === "api_base_missing") return "Не удалось определить адрес API для LiveKit Egress.";
+  if (err && err.data && err.data.message) return "LiveKit Egress: " + String(err.data.message).slice(0, 160);
+  return "Не удалось включить режим с задержкой через Cloudflare.";
 }
 
 function streamsSetStatus(el, text, tone) {
@@ -204,6 +246,10 @@ function streamsSetBroadcastStatus(text, tone) {
 
 function streamsSetCloudflareStatus(text, tone) {
   streamsSetStatus(document.getElementById("streamsCloudflareStatus"), text, tone);
+}
+
+function streamsSetEgressStatus(text, tone) {
+  streamsSetStatus(document.getElementById("streamsEgressStatus"), text, tone);
 }
 
 function streamsStopMediaStream(stream) {
@@ -256,12 +302,64 @@ function streamsResetCloudflarePlayer(clearStatus) {
   if (clearStatus) streamsSetCloudflareStatus("", "");
 }
 
+function streamsStartCloudflareEgress(roomId, generation) {
+  if (!roomId) return Promise.resolve(false);
+  if (streamsCloudflareEgressId && streamsCloudflareEgressRoomId === roomId) {
+    streamsSetEgressStatus("Режим с задержкой уже отправляет поток в Cloudflare.", "ok");
+    return Promise.resolve(true);
+  }
+  streamsSetEgressStatus("Подключаю Cloudflare Stream без OBS…", "warn");
+  return streamsFetchLiveKitEgress("start", roomId, "")
+    .then(function (data) {
+      var egressId = String(data && data.egressId || "").trim();
+      if (generation !== streamsBroadcastGeneration) {
+        if (egressId) streamsFetchLiveKitEgress("stop", roomId, egressId).catch(function () {});
+        return false;
+      }
+      streamsCloudflareEgressId = egressId;
+      streamsCloudflareEgressRoomId = roomId;
+      streamsCloudflareEgressStopping = false;
+      streamsSetEgressStatus("Cloudflare-мост включён. Зрители могут открыть вкладку «С задержкой».", "ok");
+      return true;
+    })
+    .catch(function (err) {
+      if (generation !== streamsBroadcastGeneration) return false;
+      streamsSetEgressStatus(streamsEgressErrorText(err), "error");
+      return false;
+    });
+}
+
+function streamsStopCloudflareEgress(clearStatus) {
+  var egressId = streamsCloudflareEgressId;
+  var roomId = streamsCloudflareEgressRoomId || streamsBroadcastRoomId;
+  streamsCloudflareEgressId = "";
+  streamsCloudflareEgressRoomId = "";
+  if (!egressId || streamsCloudflareEgressStopping) {
+    if (clearStatus) streamsSetEgressStatus("", "");
+    return;
+  }
+  streamsCloudflareEgressStopping = true;
+  streamsSetEgressStatus("Останавливаю Cloudflare-мост…", "warn");
+  streamsFetchLiveKitEgress("stop", roomId, egressId)
+    .then(function () {
+      streamsCloudflareEgressStopping = false;
+      if (clearStatus) streamsSetEgressStatus("", "");
+      else streamsSetEgressStatus("Cloudflare-мост остановлен.", "warn");
+    })
+    .catch(function () {
+      streamsCloudflareEgressStopping = false;
+      if (clearStatus) streamsSetEgressStatus("", "");
+      else streamsSetEgressStatus("LiveKit сам остановит Cloudflare-мост после закрытия комнаты.", "warn");
+    });
+}
+
 function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
   streamsClearBroadcastReconnect();
   streamsBroadcastIntentActive = false;
   streamsBroadcastRoomId = "";
   streamsBroadcastReconnectAttempt = 0;
   streamsBroadcastGeneration += 1;
+  if (disconnectRoom) streamsStopCloudflareEgress(false);
   if (disconnectRoom) {
     var room = streamsLiveKitBroadcastRoom;
     streamsLiveKitBroadcastRoom = null;
@@ -294,6 +392,7 @@ function streamsCleanup() {
   streamsSetBroadcastStatus("", "");
   streamsSetWatchStatus("", "");
   streamsSetCloudflareStatus("", "");
+  streamsSetEgressStatus("", "");
 }
 
 function streamsPad2(n) {
@@ -580,7 +679,9 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting) {
       return room.connect(ctx.tokenData.url, ctx.tokenData.token, { autoSubscribe: false }).then(function () {
         if (generation !== streamsBroadcastGeneration) throw new Error("stale");
         return streamsPublishMediaStream(room, stream).then(function () {
-          return ctx.tokenData;
+          return streamsStartCloudflareEgress(roomId, generation).then(function () {
+            return ctx.tokenData;
+          });
         });
       });
     })

@@ -24,13 +24,14 @@
               </div>
               <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
                 <h2 class="streams-block__title">Запустить трансляцию</h2>
-                <p class="streams-block__hint">Ваш экран увидят зрители.</p>
+                <p class="streams-block__hint">Ваш экран идёт в LiveKit без задержки и, если настроен ключ, параллельно в Cloudflare с задержкой.</p>
                 <p class="streams-room-guide">Введите ваш код комнаты и нажмите запустить трансляцию</p>
                 <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
                   <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
                 </div>
                 <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
                 <p id="streamsBroadcastStatus" class="streams-status" aria-live="polite" hidden></p>
+                <p id="streamsEgressStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
                   <p class="streams-open-in-browser__text"><strong>Запуск экрана работает в Chrome или браузере на компьютере.</strong> В браузере Telegram доступ к экрану обычно недоступен.</p>
                   <div class="streams-link-row streams-open-in-browser__row">
