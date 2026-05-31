@@ -182,6 +182,23 @@
     list.innerHTML = '<div class="daily-poker__winners-empty' + (isError ? " daily-poker__winners-empty--error" : "") + '">' + esc(text || "") + '</div>';
   }
 
+  function renderSpinStats(data) {
+    var el = $("dailyPokerSpinStats");
+    if (!el) return;
+    if (!data) {
+      el.hidden = true;
+      el.innerHTML = "";
+      return;
+    }
+    var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
+    var today = Math.max(0, parseInt(stats.todayUniquePlayers || data.todayUniquePlayers || "0", 10) || 0);
+    var week = Math.max(0, parseInt(stats.weekUniquePlayers || data.weekUniquePlayers || "0", 10) || 0);
+    el.hidden = false;
+    el.innerHTML =
+      '<span>Сегодня крутили: <strong>' + esc(formatCompactAmount(today)) + '</strong></span>' +
+      '<span>За неделю: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>';
+  }
+
   function winnerHtml(winner, index) {
     var row = winner || {};
     var rank = Math.max(1, index + 1);
@@ -206,6 +223,7 @@
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
     var totalRubles = Math.max(0, parseInt(data && data.totalPrizeRubles || "0", 10) || 0);
     if (meta) meta.textContent = totalRubles ? "За всё время: " + formatRubles(totalRubles) : "За всё время";
+    renderSpinStats(data);
     if (!winners.length) {
       setWinnersMessage("Рублёвых выигрышей пока нет.");
       return;
@@ -217,6 +235,7 @@
     var base = apiBase();
     if (!base || !hasCredential()) {
       setWinnersMessage("Войдите, чтобы увидеть победителей.");
+      renderSpinStats(null);
       return Promise.resolve(false);
     }
     return fetch(withQuery(authUrl("winners"), "limit=50"), { cache: "no-store" })
@@ -228,6 +247,7 @@
       })
       .catch(function () {
         setWinnersMessage("Не удалось загрузить победителей.", true);
+        renderSpinStats(null);
         return false;
       });
   }
@@ -419,14 +439,14 @@
     if (dailyPokerState.dealStage === "hole") {
       if (board) board.innerHTML = boardHtml(result.boardCards || [], 3, [0, 1, 2]);
       dailyPokerState.dealStage = "flop";
-      setResultText("Флоп на борде. Теперь раздай терн.", false);
+      setResultText("Флоп открыт. Следующий ход — терн.", false);
       setDealButtonLabel("Раздать терн");
       return;
     }
     if (dailyPokerState.dealStage === "flop") {
       if (board) board.innerHTML = boardHtml(result.boardCards || [], 4, [3]);
       dailyPokerState.dealStage = "turn";
-      setResultText("Терн открыт. Остался ривер.", false);
+      setResultText("Терн открыт. Следующий ход — ривер.", false);
       setDealButtonLabel("Раздать ривер");
       return;
     }
@@ -443,7 +463,7 @@
     dailyPokerState.dealStage = "hole";
     setActiveDealButton(triggerBtn || getDealButton());
     dailyPokerState.revealing = false;
-    setResultText("Карты на руках. Теперь раздай флоп.", false);
+    setResultText("Карты на руках. Следующий ход — флоп.", false);
     if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
     setBoardActive(true);

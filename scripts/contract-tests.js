@@ -549,31 +549,52 @@ async function testDailyPokerWinners(redis) {
   const promo = loadHandler("promo");
   const s = sessions();
   const meta = promo._internals.dailyWindow(new Date(), promo._internals.configuredTimeZone());
+  const dateKey = (accountId, gameDate) => "poker_app:daily_poker_games_date:" + accountId + ":" + gameDate;
+  const previousDate = (gameDate) => {
+    const parts = String(gameDate || "").split("-").map((part) => parseInt(part, 10));
+    const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2] - 1));
+    return [
+      String(date.getUTCFullYear()).padStart(4, "0"),
+      String(date.getUTCMonth() + 1).padStart(2, "0"),
+      String(date.getUTCDate()).padStart(2, "0"),
+    ].join("-");
+  };
+  const weekDate = previousDate(meta.gameDate);
   redis.s("poker_app:daily_poker_users").add("ID100002");
   redis.s("poker_app:daily_poker_users").add("ID100003");
   redis.s("poker_app:daily_poker_users").add("ID100004");
   redis.s("poker_app:daily_poker_users").add("ID100005");
   redis.s("poker_app:daily_poker_users").add("ID100006");
+  redis.s("poker_app:daily_poker_users").add("ID100007");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");
   redis.h("poker_app:id_to_user").set("ID100004", "tg_388008256");
   redis.h("poker_app:id_to_user").set("ID100005", "tg_1005");
   redis.h("poker_app:id_to_user").set("ID100006", "tg_1006");
+  redis.h("poker_app:id_to_user").set("ID100007", "tg_1007");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
   redis.h("poker_app:visitor_usernames").set("tg_1003", "leader");
   redis.h("poker_app:visitor_usernames").set("tg_388008256", "roman1_matvienko");
   redis.h("poker_app:visitor_usernames").set("tg_1005", "attempt_only");
   redis.h("poker_app:visitor_usernames").set("tg_1006", "bonus_only");
+  redis.h("poker_app:visitor_usernames").set("tg_1007", "week_spin");
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100003", "Leader Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100004", "Admin Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100005", "Attempt Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100006", "Bonus Display");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100007", "Week Spin Display");
   redis.l("poker_app:daily_poker_games_user:ID100002").push("daily_win_1", "daily_old_win_1", "daily_no_prize_1");
   redis.l("poker_app:daily_poker_games_user:ID100003").push("daily_leader_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100004").push("daily_admin_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100005").push("daily_attempt_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100006").push("daily_bonus_win_1");
+  redis.l(dateKey("ID100002", meta.gameDate)).push("daily_win_1", "daily_no_prize_1");
+  redis.l(dateKey("ID100003", meta.gameDate)).push("daily_leader_win_1");
+  redis.l(dateKey("ID100004", meta.gameDate)).push("daily_admin_win_1");
+  redis.l(dateKey("ID100005", meta.gameDate)).push("daily_attempt_win_1");
+  redis.l(dateKey("ID100006", meta.gameDate)).push("daily_bonus_win_1");
+  redis.l(dateKey("ID100007", weekDate)).push("daily_week_spin_1");
   redis.kv.set("poker_app:daily_poker_game:daily_win_1", JSON.stringify({
     id: "daily_win_1",
     user_id: "ID100002",
@@ -658,6 +679,9 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
   assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
   assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
+  assert.strictEqual(r.body.todayUniquePlayers, 4, "daily poker winners exposes unique public spinners today");
+  assert.strictEqual(r.body.weekUniquePlayers, 5, "daily poker winners exposes unique public spinners this week");
+  assert.deepStrictEqual(r.body.spinStats, { todayUniquePlayers: 4, weekUniquePlayers: 5 }, "daily poker winners exposes grouped spin stats");
   assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
   assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by ruble total desc");
   assert.strictEqual(r.body.winners[0].totalPrizeAmount, 1200, "daily poker winners exposes leader total");
