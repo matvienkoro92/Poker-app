@@ -98,7 +98,7 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
   if (profileTabs) profileTabs.hidden = !isVerified;
-  if (heroCard) heroCard.hidden = !isVerified;
+  if (heroCard) heroCard.hidden = false;
   if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
   if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);

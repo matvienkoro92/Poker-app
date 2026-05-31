@@ -1449,6 +1449,16 @@ function pokerWarmPlayerCrmScripts() {
   }
 }
 
+function pokerWarmPlayerCrmHtml() {
+  try {
+    return typeof window.pokerEnsureViewHtml === "function"
+      ? window.pokerEnsureViewHtml("player-crm")
+      : false;
+  } catch (eCrmHtmlWarm) {
+    return false;
+  }
+}
+
 var playerCrmOpenInFlight = false;
 var playerCrmOpenToken = 0;
 
@@ -1465,7 +1475,7 @@ function pokerFinalizePlayerCrmDirectOpen() {
   } catch (eCrmFinalize) {}
 }
 
-function pokerContinuePlayerCrmWarmOpen(openToken) {
+function pokerContinuePlayerCrmScriptsOpen(openToken) {
   if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
   var scriptsReady = pokerWarmPlayerCrmScripts();
   if (typeof window.pokerInitPlayerCrm === "function") {
@@ -1510,6 +1520,26 @@ function pokerContinuePlayerCrmWarmOpen(openToken) {
       }
     }, delay);
   });
+}
+
+function pokerContinuePlayerCrmWarmOpen(openToken) {
+  if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
+  var htmlReady = pokerWarmPlayerCrmHtml();
+  if (htmlReady && typeof htmlReady.then === "function") {
+    htmlReady.then(function () {
+      if (openToken !== playerCrmOpenToken || !window.__pokerPlayerCrmStandaloneOpen) return;
+      pokerFinalizePlayerCrmDirectOpen();
+      pokerContinuePlayerCrmScriptsOpen(openToken);
+    }).catch(function (err) {
+      if (openToken !== playerCrmOpenToken) return;
+      playerCrmOpenInFlight = false;
+      pokerRenderPlayerCrmOpenError("Дашборд открыт, но разметка не загрузилась. Обнови раздел через несколько секунд.");
+      if (typeof console !== "undefined" && console.warn) console.warn("player CRM html warm open", err);
+    });
+    return;
+  }
+  pokerFinalizePlayerCrmDirectOpen();
+  pokerContinuePlayerCrmScriptsOpen(openToken);
 }
 
 function pokerOpenPlayerCrmFromHome() {

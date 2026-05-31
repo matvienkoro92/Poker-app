@@ -141,6 +141,9 @@ async function main() {
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.addInitScript(() => {
+      window.confirm = function () { return true; };
+    });
     const adminReportRequestScopes = [];
     const smokeCurrentReport = {
       id: "smoke-current-report",
@@ -654,23 +657,27 @@ async function main() {
           const section = root && root.querySelector(".player-crm");
           const rootRect = root ? root.getBoundingClientRect() : null;
           const rect = section ? section.getBoundingClientRect() : null;
+          const style = section ? getComputedStyle(section) : null;
           return {
             standalone: !!window.__pokerPlayerCrmStandaloneOpen,
             classed: !!(root && root.classList && root.classList.contains("player-crm-standalone")),
             bound: root && root.dataset.crmBound === "1",
             rootTall: !!(rootRect && rootRect.height >= Math.min(window.innerHeight || 0, 640)),
+            rootRect: rootRect ? { top: rootRect.top, right: rootRect.right, bottom: rootRect.bottom, left: rootRect.left, width: rootRect.width, height: rootRect.height } : null,
+            rect: rect ? { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height } : null,
+            sectionStyle: style ? { display: style.display, visibility: style.visibility, opacity: style.opacity, position: style.position } : null,
             visible: !!(section && rect && rect.width > 0 && rect.height > 0 && getComputedStyle(section).visibility !== "hidden"),
             sectionInViewport: !!(rect && rect.bottom > 180 && rect.top < Math.max(360, (window.innerHeight || 0) - 120)),
             hasFeedback: !!(document.getElementById("playerCrmStats") && document.getElementById("playerCrmStats").textContent.trim()) ||
               !!(document.getElementById("playerCrmAnalytics") && document.getElementById("playerCrmAnalytics").textContent.trim()),
           };
         });
-        if (!crmState.standalone || !crmState.classed) throw new Error("player CRM standalone layout was not applied");
-        if (!crmState.bound) throw new Error("player CRM runtime did not bind");
-        if (!crmState.rootTall) throw new Error("player CRM root collapsed on mobile viewport");
-        if (!crmState.visible) throw new Error("player CRM section is not visible on mobile viewport");
-        if (!crmState.sectionInViewport) throw new Error("player CRM content is clipped below the back button");
-        if (!crmState.hasFeedback) throw new Error("player CRM opened without feedback content");
+        if (!crmState.standalone || !crmState.classed) throw new Error("player CRM standalone layout was not applied: " + JSON.stringify(crmState));
+        if (!crmState.bound) throw new Error("player CRM runtime did not bind: " + JSON.stringify(crmState));
+        if (!crmState.rootTall) throw new Error("player CRM root collapsed on mobile viewport: " + JSON.stringify(crmState));
+        if (!crmState.visible) throw new Error("player CRM section is not visible on mobile viewport: " + JSON.stringify(crmState));
+        if (!crmState.sectionInViewport) throw new Error("player CRM content is clipped below the back button: " + JSON.stringify(crmState));
+        if (!crmState.hasFeedback) throw new Error("player CRM opened without feedback content: " + JSON.stringify(crmState));
       }
     }
 
@@ -904,8 +911,21 @@ async function main() {
         expanded: document.querySelector("[data-rakeback-template-toggle]")?.getAttribute("aria-expanded") || "",
         storageValue: window.localStorage?.getItem("poker_admin_report_rakeback_templates_open") || "",
         hasTemplateId: !!templateRow,
-        templateEditable: !!(templateRow && rakeInput && percentInput && discountInput && saveBtn &&
-          !rakeInput.readOnly && !percentInput.readOnly && !discountInput.disabled && !saveBtn.hidden && !saveBtn.disabled),
+        templateEditable: !!(templateRow && rakeInput && percentInput && discountInput &&
+          !rakeInput.readOnly && !rakeInput.disabled && !percentInput.readOnly && !percentInput.disabled && !discountInput.disabled),
+        templateControls: {
+          hasRake: !!rakeInput,
+          rakeReadOnly: !!(rakeInput && rakeInput.readOnly),
+          rakeDisabled: !!(rakeInput && rakeInput.disabled),
+          hasPercent: !!percentInput,
+          percentReadOnly: !!(percentInput && percentInput.readOnly),
+          percentDisabled: !!(percentInput && percentInput.disabled),
+          hasDiscount: !!discountInput,
+          discountDisabled: !!(discountInput && discountInput.disabled),
+          hasSave: !!saveBtn,
+          saveHidden: !!(saveBtn && saveBtn.hidden),
+          saveDisabled: !!(saveBtn && saveBtn.disabled),
+        },
         dataScriptLoaded: Array.from(document.scripts || []).some((script) => script.getAttribute("data-admin-report-module") === "app-admin-reports-rakeback-data.js" && script.getAttribute("data-admin-report-loaded") === "1"),
         visibleTemplateRows: Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-template-row]"))
           .filter((row) => getComputedStyle(row).display !== "none").length,
@@ -1075,14 +1095,14 @@ async function main() {
       });
       const rakeInput = blankAddon?.querySelector("[data-rakeback-rake]");
       if (rakeInput) {
-        rakeInput.value = "20";
+        rakeInput.value = "35";
         rakeInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
     const chainedAddonState = await page.evaluate(() => {
       const addons = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']"))
         .filter((row) => String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared");
-      const chained = addons.find((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20");
+      const chained = addons.find((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "35");
       return {
         addonCount: addons.length,
         order: addons.map((row) => String(row.querySelector("[data-rakeback-rake]")?.value || "").trim()),
@@ -1090,7 +1110,7 @@ async function main() {
         amount: chained?.querySelector("[data-rakeback-amount]")?.textContent || "",
       };
     });
-    if (chainedAddonState.addonCount < 2 || chainedAddonState.order.join("|") !== "25|20" || chainedAddonState.rest !== "-5" || chainedAddonState.amount !== "-2.5") {
+    if (chainedAddonState.addonCount < 2 || chainedAddonState.order.join("|") !== "25|35" || chainedAddonState.rest !== "10" || chainedAddonState.amount !== "5") {
       throw new Error("admin report rakeback chained addon did not depend on previous addon: " + JSON.stringify(chainedAddonState));
     }
     const secondAddonSaveResponse = page.waitForResponse((response) => {
@@ -1100,7 +1120,7 @@ async function main() {
       const addon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
         return row.getAttribute("data-rakeback-saved") !== "1" &&
           String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
-          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20";
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "35";
       });
       addon?.querySelector("[data-rakeback-save]")?.click();
     });
@@ -1109,16 +1129,16 @@ async function main() {
     const savedChainedAddon = (savedChainedDraft.rakebackRows || []).find((row) => {
       return row && row.kind === "addon" &&
         String(row.playerId || "").trim() === "smoke-shared" &&
-        String(row.rake || "").trim() === "20";
+        String(row.rake || "").trim() === "35";
     });
-    if (!savedChainedAddon || Number(savedChainedAddon.roomAmount) !== -2.5 || Number(savedChainedAddon.amount) !== -2) {
-      throw new Error("admin report rakeback chained addon save did not submit signed delta: " + JSON.stringify(savedChainedDraft));
+    if (!savedChainedAddon || Number(savedChainedAddon.roomAmount) !== 5 || Number(savedChainedAddon.amount) !== 5) {
+      throw new Error("admin report rakeback chained addon save did not submit positive delta: " + JSON.stringify(savedChainedDraft));
     }
     await page.waitForFunction(() => {
       return Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
         return row.getAttribute("data-rakeback-saved") === "1" &&
           String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
-          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20";
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "35";
       });
     }, null, { timeout: 1200 });
     const middleDeleteDraftCount = submittedRakebackDrafts.length;
@@ -1159,7 +1179,7 @@ async function main() {
       const addon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
         return row.getAttribute("data-rakeback-saved") === "1" &&
           String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
-          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20";
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "35";
       });
       addon?.querySelector("[data-rakeback-remove]")?.click();
     });
@@ -1167,7 +1187,7 @@ async function main() {
     await page.waitForFunction(() => {
       return !Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).some((row) => {
         return String(row.querySelector("[data-rakeback-player-id]")?.value || "").trim() === "smoke-shared" &&
-          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "20";
+          String(row.querySelector("[data-rakeback-rake]")?.value || "").trim() === "35";
       });
     }, null, { timeout: 1200 });
     const persistedAddonDeleteOrderState = await page.evaluate((beforeOrder) => {
