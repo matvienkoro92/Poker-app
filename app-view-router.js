@@ -156,6 +156,43 @@ function pokerRenderPlayerCrmOpenError(message) {
   stats.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + (message || "Дашборд не догрузился. Закрой и открой раздел ещё раз.") + "</div>";
 }
 
+function pokerSyncPlayerCrmShellTabs(tabName) {
+  var root = document.getElementById("playerCrmView");
+  if (!root) return;
+  var tabs = root.querySelectorAll(".player-crm__tab[data-crm-tab]");
+  var panels = root.querySelectorAll(".player-crm__tab-panel[data-crm-panel]");
+  if (!tabs.length || !panels.length) return;
+  var target = tabName || window.__pokerPlayerCrmPendingTab || "";
+  if (!target) {
+    var active = root.querySelector(".player-crm__tab--active[data-crm-tab]");
+    target = active ? active.getAttribute("data-crm-tab") : "stats";
+  }
+  var hasTarget = false;
+  tabs.forEach(function (tab) {
+    if (tab.getAttribute("data-crm-tab") === target) hasTarget = true;
+  });
+  if (!hasTarget) target = "stats";
+  window.__pokerPlayerCrmPendingTab = target;
+  tabs.forEach(function (tab) {
+    tab.classList.toggle("player-crm__tab--active", tab.getAttribute("data-crm-tab") === target);
+  });
+  panels.forEach(function (panel) {
+    panel.classList.toggle("player-crm__tab-panel--active", panel.getAttribute("data-crm-panel") === target);
+  });
+}
+
+function pokerBindPlayerCrmShellTabs() {
+  var root = document.getElementById("playerCrmView");
+  if (!root || root.dataset.crmShellTabsBound === "1") return;
+  root.dataset.crmShellTabsBound = "1";
+  root.addEventListener("click", function (e) {
+    var tab = e.target && e.target.closest ? e.target.closest(".player-crm__tab[data-crm-tab]") : null;
+    if (!tab || !root.contains(tab)) return;
+    pokerSyncPlayerCrmShellTabs(tab.getAttribute("data-crm-tab") || "stats");
+  });
+  pokerSyncPlayerCrmShellTabs();
+}
+
 function pokerForcePlayerCrmVisible() {
   var root = document.getElementById("playerCrmView");
   if (!root) return;
@@ -1465,10 +1502,17 @@ var playerCrmOpenToken = 0;
 function pokerFinalizePlayerCrmDirectOpen() {
   pokerApplyPlayerCrmStandaloneLayout();
   pokerRenderPlayerCrmOpeningFallback();
+  pokerBindPlayerCrmShellTabs();
   pokerSchedulePlayerCrmViewportSync();
   try {
     if (typeof window.pokerInitPlayerCrm === "function") {
-      window.pokerInitPlayerCrm();
+      var initResult = window.pokerInitPlayerCrm();
+      if (initResult && typeof initResult.catch === "function") {
+        initResult.catch(function (err) {
+          pokerRenderPlayerCrmOpenError("Дашборд открыт, но модуль данных не стартовал. Обнови приложение и открой дашборд ещё раз.");
+          if (typeof console !== "undefined" && console.warn) console.warn("player CRM init", err);
+        });
+      }
     } else if (typeof window.pokerSyncPlayerCrmViewportShell === "function") {
       window.pokerSyncPlayerCrmViewportShell();
     }

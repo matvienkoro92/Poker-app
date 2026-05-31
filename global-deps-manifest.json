@@ -188,6 +188,17 @@
       ]
     },
     {
+      "name": "__pokerPlayerCrmPendingTab",
+      "domain": "playerCrm",
+      "exportedBy": [
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-player-crm-runtime-core.js"
+      ]
+    },
+    {
       "name": "pokerPlayerCrmEsc",
       "domain": "playerCrm",
       "exportedBy": [

@@ -632,6 +632,39 @@ async function main() {
           const root = document.getElementById("playerCrmView");
           return !!(window.__pokerPlayerCrmStandaloneOpen && root && root.classList.contains("player-crm-standalone"));
         }, null, { timeout: 6000 });
+        await page.waitForFunction(() => {
+          const root = document.getElementById("playerCrmView");
+          return !!(root && root.querySelector('[data-crm-tab="players"]') && root.querySelector('[data-crm-panel="players"]'));
+        }, null, { timeout: 6000 });
+        const shellTabState = await page.evaluate(() => {
+          const root = document.getElementById("playerCrmView");
+          const statsTab = root && root.querySelector('[data-crm-tab="stats"]');
+          const playersTab = root && root.querySelector('[data-crm-tab="players"]');
+          const statsPanel = root && root.querySelector('[data-crm-panel="stats"]');
+          const playersPanel = root && root.querySelector('[data-crm-panel="players"]');
+          if (playersTab) playersTab.click();
+          const playersActive = !!(
+            playersTab &&
+            playersTab.classList.contains("player-crm__tab--active") &&
+            playersPanel &&
+            playersPanel.classList.contains("player-crm__tab-panel--active")
+          );
+          if (statsTab) statsTab.click();
+          const statsActive = !!(
+            statsTab &&
+            statsTab.classList.contains("player-crm__tab--active") &&
+            statsPanel &&
+            statsPanel.classList.contains("player-crm__tab-panel--active")
+          );
+          return {
+            shellBound: !!(root && root.dataset.crmShellTabsBound === "1"),
+            playersActive,
+            statsActive
+          };
+        });
+        if (!shellTabState.shellBound || !shellTabState.playersActive || !shellTabState.statsActive) {
+          throw new Error("player CRM shell tabs are not interactive while opening: " + JSON.stringify(shellTabState));
+        }
       } else {
         await page.waitForTimeout(target === "chat" ? 1200 : 350);
       }

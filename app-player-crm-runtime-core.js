@@ -1254,6 +1254,15 @@
     });
   }
 
+  function adoptPendingShellTab() {
+    var pending = String(window.__pokerPlayerCrmPendingTab || "").trim();
+    if (!pending) return;
+    var panels = document.querySelectorAll(".player-crm__tab-panel[data-crm-panel]");
+    panels.forEach(function (panel) {
+      if (panel.getAttribute("data-crm-panel") === pending) state.tab = pending;
+    });
+  }
+
   function getApiBaseSafe() {
     try {
       return typeof getApiBase === "function" ? getApiBase() : "";
@@ -3109,6 +3118,7 @@
     syncCrmViewportShell();
     setTimeout(syncCrmViewportShell, 80);
     setTimeout(syncCrmViewportShell, 320);
+    adoptPendingShellTab();
     bindOnce();
     syncPeriodInputs();
     if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
