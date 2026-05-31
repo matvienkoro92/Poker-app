@@ -541,8 +541,55 @@ async function main() {
         throw new Error("admin report rakeback add created duplicate template separators: " + JSON.stringify(earlyRakebackAddState));
       }
       await page.locator("#adminReportModalClose").click();
+      await page.waitForFunction(() => {
+        const modal = document.getElementById("adminReportModal");
+        return !modal || modal.getAttribute("aria-hidden") === "true";
+      }, null, { timeout: 1200 });
     }
 
+    await page.evaluate(() => {
+      if (typeof setView !== "function") throw new Error("setView is not available before fish rating click");
+      setView("home");
+    });
+    await page.waitForFunction(() => {
+      const btn = document.getElementById("hallFishRatingBtn");
+      if (!btn || document.body.getAttribute("data-view") !== "home") return false;
+      const rect = btn.getBoundingClientRect();
+      const style = getComputedStyle(btn);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    }, null, { timeout: 1200 }).catch(async (err) => {
+      const state = await page.evaluate(() => {
+        const btn = document.getElementById("hallFishRatingBtn");
+        const view = btn ? btn.closest(".view") : null;
+        const row = btn ? btn.closest(".spring-rating-home-promo-action-row") : null;
+        function nodeState(node) {
+          if (!node) return null;
+          const rect = node.getBoundingClientRect();
+          const style = getComputedStyle(node);
+          return {
+            tag: node.tagName,
+            id: node.id || "",
+            className: String(node.className || ""),
+            hidden: !!node.hidden,
+            display: style.display,
+            visibility: style.visibility,
+            width: rect.width,
+            height: rect.height,
+          };
+        }
+        return {
+          bodyView: document.body.getAttribute("data-view") || "",
+          appClass: document.getElementById("app")?.className || "",
+          htmlClass: document.documentElement.className || "",
+          activeView: document.querySelector(".view.view--active[data-view]")?.getAttribute("data-view") || "",
+          button: nodeState(btn),
+          row: nodeState(row),
+          view: nodeState(view),
+        };
+      });
+      throw new Error("home fish rating button is not visible after returning home (" + (err && err.message ? err.message : String(err)) + "): " + JSON.stringify(state));
+    });
+    await page.locator("#hallFishRatingBtn").scrollIntoViewIfNeeded();
     await page.locator("#hallFishRatingBtn").click();
     await page.waitForFunction(() => {
       const modal = document.getElementById("hallFishRatingModal");
