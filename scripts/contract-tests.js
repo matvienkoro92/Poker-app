@@ -521,6 +521,55 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleWinnerReady(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_raffle_ready",
+    title: "Ready raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      groupIndex: 0,
+      prize: "Ticket",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_ready", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_ready");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "setWinnerReady",
+    raffleId: "contract_raffle_ready",
+    winnerUserId: "tg_1001",
+  }));
+  assert.strictEqual(r.statusCode, 403, "non-winner cannot mark winner ready");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "setWinnerReady",
+    raffleId: "contract_raffle_ready",
+    winnerUserId: "tg_1001",
+  }));
+  assert.strictEqual(r.statusCode, 200, "winner can mark self ready");
+  assert.strictEqual(r.body.raffle.winners[0].winnerReady, true, "winner ready flag is stored");
+  assert.strictEqual(r.body.raffle.winners[0].winnerReadyBy, "tg_1001", "winner ready author is stored");
+  assert.ok(r.body.raffle.winners[0].winnerReadyAt, "winner ready timestamp is stored");
+}
+
 async function testRaffleDailyRecurring(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -2451,6 +2500,7 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle winner ready", testRaffleWinnerReady],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],

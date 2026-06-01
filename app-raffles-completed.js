@@ -18,6 +18,30 @@ function initRafflesCompletedRuntime(opts) {
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
+    var winnerReady = w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true";
+    var viewerIds = [];
+    try {
+      viewerIds = typeof collectRaffleIdentityIds === "function" ? collectRaffleIdentityIds() : [];
+    } catch (eViewerIds) {
+      viewerIds = [];
+    }
+    var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
+    var readyBadge = winnerReady
+      ? "<span class=\"raffle-winner-ready-badge\">Готов</span>"
+      : "";
+    var readyAction = isMyWin && status !== "ok"
+      ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
+        (winnerReady ? " raffle-winner-ready-btn--active" : "") +
+        "\" data-raffle-id=\"" +
+        escapeHtml(raffleId) +
+        "\" data-winner-user-id=\"" +
+        uidAttr +
+        "\"" +
+        (winnerReady ? " disabled aria-disabled=\"true\"" : "") +
+        ">" +
+        (winnerReady ? "Готов" : "Я готов") +
+        "</button>"
+      : "";
     var raffleIdText = w.p21Id != null && String(w.p21Id).trim()
       ? String(w.p21Id).trim()
       : (w.accountId != null && String(w.accountId).trim() ? String(w.accountId).trim() : uidRaw);
@@ -44,7 +68,7 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(tgLogin) +
         "</a>"
       : "";
-    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + "</span>";
+    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + readyBadge + "</span>";
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
@@ -56,6 +80,7 @@ function initRafflesCompletedRuntime(opts) {
         "\">" +
         statusIcon +
         "</span>" +
+        readyAction +
         "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" +
         okActive +
         "\" data-raffle-id=\"" +
@@ -79,7 +104,9 @@ function initRafflesCompletedRuntime(opts) {
       statusClass +
       "\">" +
       statusIcon +
-      "</span></li>"
+      "</span>" +
+      readyAction +
+      "</li>"
     );
   }
 
@@ -235,8 +262,52 @@ function initRafflesCompletedRuntime(opts) {
       });
   }
 
+  function setRaffleWinnerReady(rid, wid, btn, onDone) {
+    if (!rid || !wid || !base) {
+      if (onDone) onDone(false);
+      return;
+    }
+    fetch(base + "/api/raffles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerReady", raffleId: rid, winnerUserId: wid })),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          if (btn) {
+            btn.textContent = "Готов";
+            btn.disabled = true;
+            btn.setAttribute("aria-disabled", "true");
+            btn.classList.add("raffle-winner-ready-btn--active");
+          }
+          loadRaffles();
+        } else if (tg && tg.showAlert) {
+          tg.showAlert((data && data.error) || "Не удалось подтвердить готовность.");
+        }
+        if (onDone) onDone(!!(data && data.ok));
+      })
+      .catch(function () {
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        if (onDone) onDone(false);
+      });
+  }
+
   function bindRaffleWinnerStatusButtons(container, raffleId) {
-    if (!container || !rafflesIsAdmin || !base) return;
+    if (!container || !base) return;
+    container.querySelectorAll(".raffle-winner-ready-btn").forEach(function (btn) {
+      if (btn.dataset.readyBound === "1") return;
+      btn.dataset.readyBound = "1";
+      btn.addEventListener("click", function () {
+        if (btn.disabled) return;
+        var rid = this.getAttribute("data-raffle-id") || raffleId;
+        var wid = this.getAttribute("data-winner-user-id");
+        if (!rid || !wid) return;
+        btn.disabled = true;
+        setRaffleWinnerReady(rid, wid, btn, function (ok) { if (!ok) btn.disabled = false; });
+      });
+    });
+    if (!rafflesIsAdmin) return;
     container.querySelectorAll(".raffle-winner-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var rid = this.getAttribute("data-raffle-id");
@@ -298,6 +369,16 @@ function initRafflesCompletedRuntime(opts) {
 
   if (rafflesCompleted) {
     rafflesCompleted.addEventListener("click", function (e) {
+      var readyBtn = e.target.closest(".raffle-winner-ready-btn");
+      if (readyBtn) {
+        if (readyBtn.disabled) return;
+        var readyRid = readyBtn.getAttribute("data-raffle-id");
+        var readyWid = readyBtn.getAttribute("data-winner-user-id");
+        if (!readyRid || !readyWid) return;
+        readyBtn.disabled = true;
+        setRaffleWinnerReady(readyRid, readyWid, readyBtn, function (ok) { if (!ok) readyBtn.disabled = false; });
+        return;
+      }
       var winnerBtn = e.target.closest(".raffle-winner-btn");
       if (winnerBtn && rafflesIsAdmin) {
         if (!base || !pokerApiHasCredential()) {

@@ -82,6 +82,7 @@ function initRaffles() {
   var raffleFeedbackTimer = null;
   var rafflesFocusedActiveId = null;
   var rafflesCompletedRenderSeq = 0;
+  var rafflesCurrentTab = "active";
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -233,6 +234,104 @@ function initRaffles() {
   function focusRaffleAfterMutation(raffleId) {
     rafflesFocusedActiveId = raffleId ? String(raffleId) : null;
   }
+
+  function getRafflesScrollElement() {
+    try {
+      if (typeof pokerGetPanelScrollCardContentEl === "function") {
+        var sharedPanel = pokerGetPanelScrollCardContentEl();
+        if (sharedPanel) return sharedPanel;
+      }
+    } catch (eSharedPanel) {}
+    try {
+      var activeRafflesView = document.querySelector(".view--active[data-view=\"raffles\"]");
+      var viewPanel = activeRafflesView && activeRafflesView.closest ? activeRafflesView.closest(".card__content") : null;
+      if (viewPanel) return viewPanel;
+      var card = document.querySelector("main.card");
+      var cardPanel = card ? card.querySelector(".card__content") : null;
+      if (cardPanel) return cardPanel;
+    } catch (eRafflesScrollElement) {}
+    return null;
+  }
+
+  function getRafflesScrollY() {
+    try {
+      var panel = getRafflesScrollElement();
+      if (panel) return panel.scrollTop || 0;
+      if (typeof getMainDocumentScrollY === "function") return getMainDocumentScrollY();
+      var se = document.scrollingElement || document.documentElement;
+      return (se && se.scrollTop) || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    } catch (eRafflesScrollY) {
+      return 0;
+    }
+  }
+
+  function setRafflesScrollY(y) {
+    try {
+      y = Math.max(0, Number(y) || 0);
+      var panel = getRafflesScrollElement();
+      if (panel) {
+        var maxPanelY = Math.max(0, (panel.scrollHeight || 0) - (panel.clientHeight || 0));
+        panel.scrollTop = Math.min(y, maxPanelY);
+        return;
+      }
+      if (typeof setMainDocumentScrollY === "function") {
+        setMainDocumentScrollY(y);
+        return;
+      }
+      if (typeof window.scrollTo === "function") window.scrollTo(0, y);
+      var se = document.scrollingElement || document.documentElement;
+      if (se) se.scrollTop = y;
+      if (document.documentElement) document.documentElement.scrollTop = y;
+      if (document.body) document.body.scrollTop = y;
+    } catch (eSetRafflesScrollY) {}
+  }
+
+  function clampRafflesScrollY(y) {
+    try {
+      var panel = getRafflesScrollElement();
+      if (panel) {
+        var maxPanelY = Math.max(0, (panel.scrollHeight || 0) - (panel.clientHeight || 0));
+        return Math.min(Math.max(0, Number(y) || 0), maxPanelY);
+      }
+      if (typeof clampMainDocumentScrollY === "function") return clampMainDocumentScrollY(y);
+    } catch (eClampRafflesScrollY) {}
+    return Math.max(0, Number(y) || 0);
+  }
+
+  function getRafflesTabsViewportTop() {
+    try {
+      if (!rafflesTabs || typeof rafflesTabs.getBoundingClientRect !== "function") return null;
+      return rafflesTabs.getBoundingClientRect().top;
+    } catch (eRafflesTabsTop) {
+      return null;
+    }
+  }
+
+  function restoreRafflesTabScroll(targetY, tabsTopBefore) {
+    function apply() {
+      var y = Number(targetY) || 0;
+      if (tabsTopBefore != null && rafflesTabs && typeof rafflesTabs.getBoundingClientRect === "function") {
+        try {
+          y = getRafflesScrollY() + rafflesTabs.getBoundingClientRect().top - tabsTopBefore;
+        } catch (eTabsDelta) {}
+      }
+      setRafflesScrollY(clampRafflesScrollY(y));
+    }
+    apply();
+    var raf = window.requestAnimationFrame || function (fn) {
+      setTimeout(fn, 16);
+    };
+    raf(function () {
+      apply();
+      raf(function () {
+        apply();
+        raf(apply);
+      });
+    });
+    [0, 48, 120, 220].forEach(function (ms) {
+      setTimeout(apply, ms);
+    });
+  }
   function formatMoscowDateTimeLocalForInput(date) {
     if (!date) return "";
     try {
@@ -264,6 +363,7 @@ function initRaffles() {
       clearRafflesCache: clearRafflesCache,
       focusRaffleAfterMutation: focusRaffleAfterMutation,
       confirmRaffleAdminAction: confirmRaffleAdminAction,
+      collectRaffleIdentityIds: collectRaffleIdentityIds,
       escapeHtml: escapeHtml,
       raffleParticipantDisplayLine: raffleParticipantDisplayLine,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
@@ -574,7 +674,13 @@ function initRaffles() {
     var isCreate = tab === "create";
     var isActive = tab === "active";
     var isCompleted = tab === "completed";
-    if (!isCreate && !isActive && !isCompleted) isActive = true;
+    if (!isCreate && !isActive && !isCompleted) {
+      tab = "active";
+      isActive = true;
+    }
+    var tabChanged = rafflesCurrentTab !== tab;
+    var yBefore = getRafflesScrollY();
+    var tabsTopBefore = getRafflesTabsViewportTop();
     if (rafflesTabCreate) {
       rafflesTabCreate.classList.toggle("raffles-tab--active", isCreate);
       rafflesTabCreate.setAttribute("aria-selected", isCreate ? "true" : "false");
@@ -599,6 +705,8 @@ function initRaffles() {
       rafflesPanelCompleted.classList.toggle("raffles-panel--active", isCompleted);
       rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
     }
+    rafflesCurrentTab = tab;
+    if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
   }
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
