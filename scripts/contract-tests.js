@@ -559,9 +559,66 @@ async function testDailyPokerWinners(redis) {
       String(date.getUTCDate()).padStart(2, "0"),
     ].join("-");
   };
-  const weekDate = previousDate(meta.gameDate);
-  let previousWeekDate = meta.gameDate;
-  for (let i = 0; i < 7; i += 1) previousWeekDate = previousDate(previousWeekDate);
+  const shiftDate = (gameDate, days) => {
+    const parts = String(gameDate || "").split("-").map((part) => parseInt(part, 10));
+    const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2] + days));
+    return [
+      String(date.getUTCFullYear()).padStart(4, "0"),
+      String(date.getUTCMonth() + 1).padStart(2, "0"),
+      String(date.getUTCDate()).padStart(2, "0"),
+    ].join("-");
+  };
+  const datesBetween = (startDate, endDate) => {
+    const out = [];
+    let current = endDate;
+    while (current && current >= startDate) {
+      out.push(current);
+      if (current === startDate) break;
+      current = previousDate(current);
+    }
+    return out;
+  };
+  const weekStartDate = (gameDate) => {
+    const parts = String(gameDate || "").split("-").map((part) => parseInt(part, 10));
+    const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    return shiftDate(gameDate, -((date.getUTCDay() + 6) % 7));
+  };
+  const currentWeekStart = weekStartDate(meta.gameDate);
+  const weekDate = previousDate(meta.gameDate) >= currentWeekStart ? previousDate(meta.gameDate) : meta.gameDate;
+  const previousWeekStart = shiftDate(currentWeekStart, -7);
+  const previousWeekDate = shiftDate(currentWeekStart, -1);
+  const currentMonthStart = meta.gameDate.slice(0, 8) + "01";
+  const currentMonthDate = previousDate(meta.gameDate) >= currentMonthStart ? previousDate(meta.gameDate) : meta.gameDate;
+  const previousMonthDate = previousDate(currentMonthStart);
+  const previousMonthStart = previousMonthDate.slice(0, 8) + "01";
+  const weekDateSet = new Set(datesBetween(currentWeekStart, meta.gameDate));
+  const previousWeekDateSet = new Set(datesBetween(previousWeekStart, previousWeekDate));
+  const monthDateSet = new Set(datesBetween(currentMonthStart, meta.gameDate));
+  const previousMonthDateSet = new Set(datesBetween(previousMonthStart, previousMonthDate));
+  const publicSpinDates = [
+    ["ID100002", meta.gameDate],
+    ["ID100003", meta.gameDate],
+    ["ID100005", meta.gameDate],
+    ["ID100006", meta.gameDate],
+    ["ID100007", weekDate],
+    ["ID100008", previousWeekDate],
+    ["ID100009", previousMonthDate],
+    ["ID100010", currentMonthDate],
+  ];
+  const expectedUniqueForDates = (dateSet) => {
+    const ids = new Set();
+    publicSpinDates.forEach(([accountId, spinDate]) => {
+      if (dateSet.has(spinDate)) ids.add(accountId);
+    });
+    return ids.size;
+  };
+  const expectedSpinStats = {
+    todayUniquePlayers: expectedUniqueForDates(new Set([meta.gameDate])),
+    weekUniquePlayers: expectedUniqueForDates(weekDateSet),
+    previousWeekUniquePlayers: expectedUniqueForDates(previousWeekDateSet),
+    monthUniquePlayers: expectedUniqueForDates(monthDateSet),
+    previousMonthUniquePlayers: expectedUniqueForDates(previousMonthDateSet),
+  };
   redis.s("poker_app:daily_poker_users").add("ID100002");
   redis.s("poker_app:daily_poker_users").add("ID100003");
   redis.s("poker_app:daily_poker_users").add("ID100004");
@@ -569,6 +626,8 @@ async function testDailyPokerWinners(redis) {
   redis.s("poker_app:daily_poker_users").add("ID100006");
   redis.s("poker_app:daily_poker_users").add("ID100007");
   redis.s("poker_app:daily_poker_users").add("ID100008");
+  redis.s("poker_app:daily_poker_users").add("ID100009");
+  redis.s("poker_app:daily_poker_users").add("ID100010");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");
   redis.h("poker_app:id_to_user").set("ID100004", "tg_388008256");
@@ -576,6 +635,8 @@ async function testDailyPokerWinners(redis) {
   redis.h("poker_app:id_to_user").set("ID100006", "tg_1006");
   redis.h("poker_app:id_to_user").set("ID100007", "tg_1007");
   redis.h("poker_app:id_to_user").set("ID100008", "tg_1008");
+  redis.h("poker_app:id_to_user").set("ID100009", "tg_1009");
+  redis.h("poker_app:id_to_user").set("ID100010", "tg_1010");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
   redis.h("poker_app:visitor_usernames").set("tg_1003", "leader");
   redis.h("poker_app:visitor_usernames").set("tg_388008256", "roman1_matvienko");
@@ -583,6 +644,8 @@ async function testDailyPokerWinners(redis) {
   redis.h("poker_app:visitor_usernames").set("tg_1006", "bonus_only");
   redis.h("poker_app:visitor_usernames").set("tg_1007", "week_spin");
   redis.h("poker_app:visitor_usernames").set("tg_1008", "previous_week_spin");
+  redis.h("poker_app:visitor_usernames").set("tg_1009", "previous_month_spin");
+  redis.h("poker_app:visitor_usernames").set("tg_1010", "current_month_spin");
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100003", "Leader Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100004", "Admin Display");
@@ -590,6 +653,8 @@ async function testDailyPokerWinners(redis) {
   redis.h("poker_app:visitor_chat_display_names").set("ID100006", "Bonus Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100007", "Week Spin Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100008", "Previous Week Spin Display");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100009", "Previous Month Spin Display");
+  redis.h("poker_app:visitor_chat_display_names").set("ID100010", "Current Month Spin Display");
   redis.l("poker_app:daily_poker_games_user:ID100002").push("daily_win_1", "daily_old_win_1", "daily_no_prize_1");
   redis.l("poker_app:daily_poker_games_user:ID100003").push("daily_leader_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100004").push("daily_admin_win_1");
@@ -602,6 +667,8 @@ async function testDailyPokerWinners(redis) {
   redis.l(dateKey("ID100006", meta.gameDate)).push("daily_bonus_win_1");
   redis.l(dateKey("ID100007", weekDate)).push("daily_week_spin_1");
   redis.l(dateKey("ID100008", previousWeekDate)).push("daily_previous_week_spin_1");
+  redis.l(dateKey("ID100009", previousMonthDate)).push("daily_previous_month_spin_1");
+  redis.l(dateKey("ID100010", currentMonthDate)).push("daily_current_month_spin_1");
   redis.kv.set("poker_app:daily_poker_game:daily_win_1", JSON.stringify({
     id: "daily_win_1",
     user_id: "ID100002",
@@ -686,10 +753,12 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
   assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
   assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
-  assert.strictEqual(r.body.todayUniquePlayers, 4, "daily poker winners exposes unique public spinners today");
-  assert.strictEqual(r.body.weekUniquePlayers, 5, "daily poker winners exposes unique public spinners this week");
-  assert.strictEqual(r.body.previousWeekUniquePlayers, 1, "daily poker winners exposes unique public spinners previous week");
-  assert.deepStrictEqual(r.body.spinStats, { todayUniquePlayers: 4, weekUniquePlayers: 5, previousWeekUniquePlayers: 1 }, "daily poker winners exposes grouped spin stats");
+  assert.strictEqual(r.body.todayUniquePlayers, expectedSpinStats.todayUniquePlayers, "daily poker winners exposes unique public spinners today");
+  assert.strictEqual(r.body.weekUniquePlayers, expectedSpinStats.weekUniquePlayers, "daily poker winners exposes unique public spinners this week");
+  assert.strictEqual(r.body.previousWeekUniquePlayers, expectedSpinStats.previousWeekUniquePlayers, "daily poker winners exposes unique public spinners previous week");
+  assert.strictEqual(r.body.monthUniquePlayers, expectedSpinStats.monthUniquePlayers, "daily poker winners exposes unique public spinners this month");
+  assert.strictEqual(r.body.previousMonthUniquePlayers, expectedSpinStats.previousMonthUniquePlayers, "daily poker winners exposes unique public spinners previous month");
+  assert.deepStrictEqual(r.body.spinStats, expectedSpinStats, "daily poker winners exposes grouped spin stats");
   assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
   assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by ruble total desc");
   assert.strictEqual(r.body.winners[0].totalPrizeAmount, 1200, "daily poker winners exposes leader total");

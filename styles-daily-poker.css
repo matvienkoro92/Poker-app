@@ -1173,10 +1173,9 @@
 
 .daily-poker__spin-stats {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 16px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 193, 78, 0.2);

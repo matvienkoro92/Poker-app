@@ -198,12 +198,14 @@
     var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
     var today = Math.max(0, parseInt(stats.todayUniquePlayers || data.todayUniquePlayers || "0", 10) || 0);
     var week = Math.max(0, parseInt(stats.weekUniquePlayers || data.weekUniquePlayers || "0", 10) || 0);
-    var previousWeek = Math.max(0, parseInt(stats.previousWeekUniquePlayers || data.previousWeekUniquePlayers || "0", 10) || 0);
+    var month = Math.max(0, parseInt(stats.monthUniquePlayers || data.monthUniquePlayers || "0", 10) || 0);
+    var previousMonth = Math.max(0, parseInt(stats.previousMonthUniquePlayers || data.previousMonthUniquePlayers || "0", 10) || 0);
     el.hidden = false;
     el.innerHTML =
       '<span>Сегодня крутили: <strong>' + esc(formatCompactAmount(today)) + '</strong></span>' +
-      '<span>На прошлой неделе: <strong>' + esc(formatCompactAmount(previousWeek)) + '</strong></span>' +
-      '<span>На этой неделе уже: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>';
+      '<span>На этой неделе крутили: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>' +
+      '<span>В этом месяце крутили: <strong>' + esc(formatCompactAmount(month)) + '</strong></span>' +
+      '<span>В прошлом месяце крутили: <strong>' + esc(formatCompactAmount(previousMonth)) + '</strong></span>';
   }
 
   function winnerHtml(winner, index) {
