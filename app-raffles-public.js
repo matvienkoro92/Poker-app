@@ -184,6 +184,19 @@ function initRafflesPublicRuntime(opts) {
     initRaffles.__profileOpenDelegate = true;
     root.addEventListener("click", function (e) {
       if (e.target.closest(".raffle-winner-btn")) return;
+      var tgLink = e.target.closest(".raffle-winner-row__tg[href]");
+      if (tgLink && root.contains(tgLink)) {
+        var href = tgLink.getAttribute("href") || "";
+        if (href && tg && tg.openTelegramLink && typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          e.preventDefault();
+          try {
+            tg.openTelegramLink(href);
+          } catch (eTgOpen) {
+            if (typeof window.open === "function") window.open(href, "_blank");
+          }
+        }
+        return;
+      }
       var btn = e.target.closest(".raffle-participants__profile-btn");
       if (!btn || !root.contains(btn)) return;
       e.preventDefault();

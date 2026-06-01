@@ -300,11 +300,14 @@ function initImageLightbox() {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
         return;
       }
-      if (startApp === "club_chat_dm" && typeof setView === "function") {
+      var dmStart = typeof pokerParseClubChatDmStartParam === "function"
+        ? pokerParseClubChatDmStartParam(startApp, sp.get("with") || "")
+        : { match: startApp === "club_chat_dm", peer: (sp.get("with") || "").trim() };
+      if (dmStart && dmStart.match && typeof setView === "function") {
         var peerDm = (sp.get("with") || "").trim();
-        if (peerDm) {
+        if (dmStart.peer || peerDm) {
           window.__pendingOpenChatPersonalFromDeepLink = {
-            userId: peerDm,
+            userId: dmStart.peer || peerDm,
             userName: null,
             peerP21Id: null,
           };

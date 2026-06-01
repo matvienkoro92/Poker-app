@@ -18,7 +18,13 @@ function initRafflesCompletedRuntime(opts) {
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
-    var textInner = raffleParticipantDisplayLine(w);
+    var raffleIdText = w.p21Id != null && String(w.p21Id).trim()
+      ? String(w.p21Id).trim()
+      : (w.accountId != null && String(w.accountId).trim() ? String(w.accountId).trim() : uidRaw);
+    var primaryLabel = String(w.name || "").trim() || uidRaw || "Игрок";
+    var primaryText = raffleIdText ? primaryLabel + " — " + raffleIdText : primaryLabel;
+    var tgLogin = w.telegramUsername != null ? String(w.telegramUsername).trim().replace(/^@+/g, "") : "";
+    if (!/^[A-Za-z0-9_]{5,32}$/.test(tgLogin)) tgLogin = "";
     var profileOpen =
       uidRaw && (uidRaw.indexOf("tg_") === 0 || uidRaw.indexOf("vk_") === 0)
         ? "<button type=\"button\" class=\"raffle-participants__profile-btn raffle-winner-row__profile\" data-user-id=\"" +
@@ -26,15 +32,25 @@ function initRafflesCompletedRuntime(opts) {
           "\" data-user-name=\"" +
           escapeHtml(w.name || "") +
           "\">" +
-          textInner +
+          "<span class=\"raffle-winner-row__primary\">" +
+          escapeHtml(primaryText) +
+          "</span>" +
           "</button>"
-        : "<span class=\"raffle-winner-row__text\">" + textInner + "</span>";
+        : "<span class=\"raffle-winner-row__primary\">" + escapeHtml(primaryText) + "</span>";
+    var tgOpen = tgLogin
+      ? "<a class=\"raffle-winner-row__tg\" href=\"https://t.me/" +
+        escapeHtml(tgLogin) +
+        "\" target=\"_blank\" rel=\"noopener noreferrer\">@" +
+        escapeHtml(tgLogin) +
+        "</a>"
+      : "";
+    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + "</span>";
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
       return (
         "<li class=\"raffle-winner-row\">" +
-        profileOpen +
+        profileBlock +
         "<span class=\"raffle-winner-status " +
         statusClass +
         "\">" +
@@ -58,7 +74,7 @@ function initRafflesCompletedRuntime(opts) {
     }
     return (
       "<li class=\"raffle-winner-row\">" +
-      profileOpen +
+      profileBlock +
       "<span class=\"raffle-winner-status " +
       statusClass +
       "\">" +
@@ -74,6 +90,31 @@ function initRafflesCompletedRuntime(opts) {
     if (d === 1) return n + " раз";
     if (d >= 2 && d <= 4) return n + " раза";
     return n + " раз";
+  }
+
+  function raffleWinnerPrizeAmount(prize) {
+    var text = prize != null ? String(prize).replace(/\u00a0|\u202f/g, " ") : "";
+    if (!text) return 0;
+    var currencyMatch = text.match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(?:₽|р\.?|руб\.?)/i);
+    if (!currencyMatch) return 0;
+    var normalized = currencyMatch[1].replace(/\s+/g, "").replace(",", ".");
+    var value = parseFloat(normalized);
+    return isFinite(value) && value > 0 ? value : 0;
+  }
+
+  function raffleWinnerPrizeText(raffle, winner) {
+    if (winner && winner.prize) return winner.prize;
+    var groupIndex = winner && winner.groupIndex != null ? parseInt(winner.groupIndex, 10) : -1;
+    var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+    if (groupIndex >= 0 && groups[groupIndex] && groups[groupIndex].prize) return groups[groupIndex].prize;
+    return "";
+  }
+
+  function raffleWinnerLeaderTotalText(amount) {
+    var n = Math.round(parseFloat(amount) || 0);
+    if (n <= 0) return "";
+    if (typeof formatRaffleSum === "function") return formatRaffleSum(n);
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
   }
 
   function raffleWinnerLeaderId(w) {
@@ -107,7 +148,8 @@ function initRafflesCompletedRuntime(opts) {
             userId: w.userId != null ? String(w.userId).trim() : "",
             name: w.name != null ? String(w.name).trim() : "",
             telegramUsername: w.telegramUsername != null ? String(w.telegramUsername).trim() : "",
-            count: 0
+            count: 0,
+            totalPrize: 0
           };
         } else {
           if (!byId[id].name && w.name != null && String(w.name).trim()) byId[id].name = String(w.name).trim();
@@ -115,12 +157,14 @@ function initRafflesCompletedRuntime(opts) {
           if (!byId[id].userId && w.userId != null && String(w.userId).trim()) byId[id].userId = String(w.userId).trim();
         }
         byId[id].count += 1;
+        byId[id].totalPrize += raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, w));
       });
     });
     return Object.keys(byId)
       .map(function (id) { return byId[id]; })
       .sort(function (a, b) {
         if (b.count !== a.count) return b.count - a.count;
+        if ((b.totalPrize || 0) !== (a.totalPrize || 0)) return (b.totalPrize || 0) - (a.totalPrize || 0);
         return String(a.id).localeCompare(String(b.id), "ru");
       });
   }
@@ -128,12 +172,15 @@ function initRafflesCompletedRuntime(opts) {
   function raffleWinnerLeaderRowsHtml(rows) {
     return (rows || []).map(function (row) {
       var meta = raffleWinnerLeaderMetaText(row);
+      var totalText = raffleWinnerLeaderTotalText(row.totalPrize);
       return (
         '<li class="raffle-winner-leaders__item"><span class="raffle-winner-leaders__id">' +
         escapeHtml(row.id) +
         (meta ? '<span class="raffle-winner-leaders__meta">' + escapeHtml(meta) + "</span>" : "") +
-        '</span><span class="raffle-winner-leaders__count">— ' +
+        '</span><span class="raffle-winner-leaders__stats"><span class="raffle-winner-leaders__count">— ' +
         escapeHtml(raffleWinCountText(row.count)) +
+        "</span>" +
+        (totalText ? '<span class="raffle-winner-leaders__total">Итого: ' + escapeHtml(totalText) + "</span>" : "") +
         "</span></li>"
       );
     }).join("");

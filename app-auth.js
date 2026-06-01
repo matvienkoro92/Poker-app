@@ -113,6 +113,28 @@ function pokerNormalizeWebAppStartParam(raw) {
   return s;
 }
 
+function pokerNormalizeClubChatDmPeer(raw) {
+  if (raw == null) return "";
+  var s = String(raw).trim();
+  if (!s) return "";
+  try {
+    s = decodeURIComponent(s.replace(/\+/g, " "));
+  } catch (eDecPeer) {}
+  s = s.trim();
+  if (/^\d+$/.test(s)) s = "tg_" + s;
+  if (/^(tg_\d+|vk_[A-Za-z0-9_-]+|guest_[A-Za-z0-9_-]+|group_[A-Za-z0-9_-]+|ID\d{6})$/.test(s)) return s;
+  return "";
+}
+
+function pokerParseClubChatDmStartParam(rawStartParam, rawWithPeer) {
+  var start = pokerNormalizeWebAppStartParam(rawStartParam);
+  var peer = pokerNormalizeClubChatDmPeer(rawWithPeer);
+  if (start === "club_chat_dm") return { match: true, peer: peer };
+  var m = start.match(/^club_chat_dm[_-](.+)$/);
+  if (!m) return { match: false, peer: "" };
+  return { match: true, peer: peer || pokerNormalizeClubChatDmPeer(m[1]) };
+}
+
 /**
  * Параметр ссылки ?startapp= / startattach: в hash приходит как tgWebAppStartParam (см. launch parameters Mini App).
  * Раньше читали только initDataUnsafe.start_param — на части клиентов он пустой, открывалась главная.

@@ -2274,6 +2274,7 @@ async function testChatCoreInvariants() {
   const threadStore = require(path.join(root, "lib", "chat-thread-store.js"));
   const unread = require(path.join(root, "lib", "chat-unread.js"));
   const notifications = require(path.join(root, "lib", "chat-notifications.js"));
+  const raffleNotifications = require(path.join(root, "lib", "raffle-notifications.js"));
 
   assert.strictEqual(core.isGroupChatId("group_abcdefgh"), true, "valid group id is accepted");
   assert.strictEqual(core.isGroupChatId("group_short"), false, "short group id is rejected");
@@ -2331,6 +2332,28 @@ async function testChatCoreInvariants() {
     notifications.buildClubChatMiniAppLink("https://t.me/Poker_dvatuza_bot/DvaTuza)"),
     "https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=club_chat",
     "club chat mini app link trims legacy closing paren",
+  );
+  assert.strictEqual(raffleNotifications.isHourInShift(1, 18, 2), true, "overnight admin shift includes late hour");
+  assert.strictEqual(raffleNotifications.isHourInShift(2, 18, 2), false, "overnight admin shift ends on boundary");
+  assert.strictEqual(
+    raffleNotifications.resolveWorkingRaffleAdmin(new Date("2026-06-02T04:00:00.000Z")).userId,
+    "tg_2144406710",
+    "raffle winner admin resolves Anna during day shift",
+  );
+  assert.strictEqual(
+    raffleNotifications.resolveWorkingRaffleAdmin(new Date("2026-06-02T16:30:00.000Z")).userId,
+    "tg_1897001087",
+    "raffle winner admin resolves Vika during evening shift",
+  );
+  assert.strictEqual(
+    raffleNotifications.buildRaffleWinnerAdminChatLink("https://t.me/Poker_dvatuza_bot/DvaTuza)", "tg_1897001087"),
+    "https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=club_chat_dm_tg_1897001087",
+    "raffle winner admin link keeps peer id inside Telegram startapp",
+  );
+  assert.strictEqual(
+    raffleNotifications.buildRaffleWinnerAdminChatLink("https://poker-app-ebon.vercel.app/", "1897001087"),
+    "https://poker-app-ebon.vercel.app?startapp=club_chat_dm&with=tg_1897001087",
+    "raffle winner admin link keeps browser/PWA with param",
   );
   const unreadCommands = [];
   const redisPipeline = async (commands) => {

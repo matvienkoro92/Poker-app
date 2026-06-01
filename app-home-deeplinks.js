@@ -197,10 +197,13 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
-    if (startParam === "club_chat_dm") {
-      if (withPeerOpt) {
+    var dmDeepLink = typeof pokerParseClubChatDmStartParam === "function"
+      ? pokerParseClubChatDmStartParam(startParam, withPeerOpt)
+      : { match: startParam === "club_chat_dm", peer: withPeerOpt };
+    if (dmDeepLink && dmDeepLink.match) {
+      if (dmDeepLink.peer) {
         window.__pendingOpenChatPersonalFromDeepLink = {
-          userId: withPeerOpt,
+          userId: dmDeepLink.peer,
           userName: null,
           peerP21Id: null,
         };
@@ -676,13 +679,16 @@ function pokerInitHomeDeepLinks(opts) {
         window.openClubChat();
         return true;
       }
-      if (startApp === "club_chat_dm" && withPeer) {
-        if (pokerOpenResolvedChatPeer(withPeer, withPeer)) {
+      var dmUrl = typeof pokerParseClubChatDmStartParam === "function"
+        ? pokerParseClubChatDmStartParam(startApp, withPeer)
+        : { match: startApp === "club_chat_dm", peer: withPeer };
+      if (dmUrl && dmUrl.match && dmUrl.peer) {
+        if (pokerOpenResolvedChatPeer(dmUrl.peer, dmUrl.peer)) {
           return true;
         }
         window.__pendingOpenChatPersonalFromDeepLink = {
-          userId: withPeer,
-          userName: withPeer,
+          userId: dmUrl.peer,
+          userName: dmUrl.peer,
         };
         if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
           window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();
@@ -721,14 +727,17 @@ function pokerInitHomeDeepLinks(opts) {
       var sp = new URLSearchParams(urlObj.search || "");
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
       var withPeer = (sp.get("with") || "").trim();
+      var dmPushUrl = typeof pokerParseClubChatDmStartParam === "function"
+        ? pokerParseClubChatDmStartParam(startApp, withPeer)
+        : { match: startApp === "club_chat_dm", peer: withPeer };
       if (!startApp) return;
-      pokerPushOpenDebug("push-url", startApp + (withPeer ? " with=" + withPeer : ""));
+      pokerPushOpenDebug("push-url", startApp + (dmPushUrl && dmPushUrl.peer ? " with=" + dmPushUrl.peer : ""));
       try {
         window.__pokerLastPushOpenUrl = String(rawUrl || "");
         window.__pokerLastPushOpenAt = Date.now();
       } catch (ePushMark) {}
       try {
-        if (startApp === "club_chat" || startApp === "club_chat_dm") {
+        if (startApp === "club_chat" || (dmPushUrl && dmPushUrl.match)) {
           window.__pokerPushNeedsFullChatBootstrap = true;
         }
       } catch (ePushBootstrapMark) {}
@@ -737,9 +746,9 @@ function pokerInitHomeDeepLinks(opts) {
           history.replaceState(history.state, "", urlObj.href);
         }
       } catch (ePushHistory) {}
-      pokerApplyStartAppDeepLink(startApp, { withPeer: withPeer });
-      if (startApp !== "club_chat" && startApp !== "club_chat_dm") return;
-      if (startApp === "club_chat_dm" && withPeer) {
+      pokerApplyStartAppDeepLink(startApp, { withPeer: dmPushUrl && dmPushUrl.peer ? dmPushUrl.peer : withPeer });
+      if (startApp !== "club_chat" && !(dmPushUrl && dmPushUrl.match)) return;
+      if (dmPushUrl && dmPushUrl.match && dmPushUrl.peer) {
         try {
           if (typeof window.__pokerEnsureOpenPendingChatPersonalFromDeepLink === "function") {
             window.__pokerEnsureOpenPendingChatPersonalFromDeepLink();

@@ -413,6 +413,7 @@ function initRafflesAdminCreateRuntime(opts) {
           if (createForm) createForm.classList.add("raffle-create-form--hidden");
           focusRaffleAfterMutation(data.raffle.id);
           clearRafflesCache();
+          if (typeof setRafflesTab === "function") setRafflesTab("active");
           loadRaffles();
           if (!data.idempotentReplay) {
             if (tg && tg.showAlert) tg.showAlert("Розыгрыш повторён");
@@ -653,6 +654,7 @@ function initRafflesAdminCreateRuntime(opts) {
             createForm.classList.add("raffle-create-form--hidden");
             focusRaffleAfterMutation(data.raffle.id);
             clearRafflesCache();
+            if (typeof setRafflesTab === "function") setRafflesTab("active");
             loadRaffles();
             if (!data.idempotentReplay) {
               if (tg && tg.showAlert) tg.showAlert("Розыгрыш создан");

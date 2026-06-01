@@ -30,8 +30,11 @@ function initRaffles() {
   var raffleAdminActions = document.getElementById("raffleAdminActions");
   var raffleCurrent = document.getElementById("raffleCurrent");
   var raffleEmpty = document.getElementById("raffleEmpty");
+  var rafflesTabs = document.getElementById("rafflesTabs");
+  var rafflesTabCreate = document.getElementById("rafflesTabCreate");
   var rafflesTabActive = document.getElementById("rafflesTabActive");
   var rafflesTabCompleted = document.getElementById("rafflesTabCompleted");
+  var rafflesPanelCreate = document.getElementById("rafflesPanelCreate");
   var rafflesPanelActive = document.getElementById("rafflesPanelActive");
   var rafflesPanelCompleted = document.getElementById("rafflesPanelCompleted");
   var rafflesTabActiveCount = document.getElementById("rafflesTabActiveCount");
@@ -79,6 +82,10 @@ function initRaffles() {
   var raffleFeedbackTimer = null;
   var rafflesFocusedActiveId = null;
   var rafflesCompletedRenderSeq = 0;
+
+  if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
+    rafflesPanelCreate.appendChild(adminWrap);
+  }
 
   function showRaffleFeedback(message, kind) {
     if (!message) return;
@@ -259,7 +266,8 @@ function initRaffles() {
       confirmRaffleAdminAction: confirmRaffleAdminAction,
       escapeHtml: escapeHtml,
       raffleParticipantDisplayLine: raffleParticipantDisplayLine,
-      raffleDisplayPrizeText: raffleDisplayPrizeText
+      raffleDisplayPrizeText: raffleDisplayPrizeText,
+      formatRaffleSum: formatRaffleSum
     });
     rafflesCompletedRuntime = initRafflesCompletedRuntime(rafflesCompletedRuntimeDeps);
   }
@@ -382,6 +390,11 @@ function initRaffles() {
           window.pokerMarkAdminAccess("raffles");
         }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
+        if (rafflesTabs) rafflesTabs.classList.toggle("raffles-tabs--admin", rafflesIsAdmin);
+        if (rafflesTabCreate) rafflesTabCreate.classList.toggle("raffles-tab--hidden", !rafflesIsAdmin);
+        if (!rafflesIsAdmin && rafflesPanelCreate && !rafflesPanelCreate.classList.contains("raffles-panel--hidden")) {
+          setRafflesTab("active");
+        }
         var raw = data.raffles || [];
         var seen = {};
         var allRaffles = raw.filter(function (r) {
@@ -395,6 +408,8 @@ function initRaffles() {
           window.pokerMarkAdminAccess("raffles");
         }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
+        if (rafflesTabs) rafflesTabs.classList.toggle("raffles-tabs--admin", rafflesIsAdmin);
+        if (rafflesTabCreate) rafflesTabCreate.classList.toggle("raffles-tab--hidden", !rafflesIsAdmin);
         if (raffleAdminActions) {
           raffleAdminActions.classList.toggle("raffle-admin-actions--hidden", !rafflesIsAdmin);
           raffleAdminActions.setAttribute("aria-hidden", rafflesIsAdmin ? "false" : "true");
@@ -549,19 +564,43 @@ function initRaffles() {
       parseMoscowDateTimeLocal: parseMoscowDateTimeLocal,
       clearRafflesCache: clearRafflesCache,
       focusRaffleAfterMutation: focusRaffleAfterMutation,
-      loadRaffles: loadRaffles
+      loadRaffles: loadRaffles,
+      setRafflesTab: setRafflesTab
     });
   }
 
   function setRafflesTab(tab) {
+    if (tab === "create" && !rafflesIsAdmin) tab = "active";
+    var isCreate = tab === "create";
     var isActive = tab === "active";
-    if (rafflesTabActive) rafflesTabActive.classList.toggle("raffles-tab--active", isActive);
-    if (rafflesTabCompleted) rafflesTabCompleted.classList.toggle("raffles-tab--active", !isActive);
-    if (rafflesPanelActive) rafflesPanelActive.classList.toggle("raffles-panel--active", isActive);
-    if (rafflesPanelActive) rafflesPanelActive.classList.toggle("raffles-panel--hidden", !isActive);
-    if (rafflesPanelCompleted) rafflesPanelCompleted.classList.toggle("raffles-panel--active", !isActive);
-    if (rafflesPanelCompleted) rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", isActive);
+    var isCompleted = tab === "completed";
+    if (!isCreate && !isActive && !isCompleted) isActive = true;
+    if (rafflesTabCreate) {
+      rafflesTabCreate.classList.toggle("raffles-tab--active", isCreate);
+      rafflesTabCreate.setAttribute("aria-selected", isCreate ? "true" : "false");
+    }
+    if (rafflesTabActive) {
+      rafflesTabActive.classList.toggle("raffles-tab--active", isActive);
+      rafflesTabActive.setAttribute("aria-selected", isActive ? "true" : "false");
+    }
+    if (rafflesTabCompleted) {
+      rafflesTabCompleted.classList.toggle("raffles-tab--active", isCompleted);
+      rafflesTabCompleted.setAttribute("aria-selected", isCompleted ? "true" : "false");
+    }
+    if (rafflesPanelCreate) {
+      rafflesPanelCreate.classList.toggle("raffles-panel--active", isCreate);
+      rafflesPanelCreate.classList.toggle("raffles-panel--hidden", !isCreate);
+    }
+    if (rafflesPanelActive) {
+      rafflesPanelActive.classList.toggle("raffles-panel--active", isActive);
+      rafflesPanelActive.classList.toggle("raffles-panel--hidden", !isActive);
+    }
+    if (rafflesPanelCompleted) {
+      rafflesPanelCompleted.classList.toggle("raffles-panel--active", isCompleted);
+      rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
+    }
   }
+  if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
 
