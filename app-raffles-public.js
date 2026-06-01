@@ -79,6 +79,20 @@ function initRafflesPublicRuntime(opts) {
     });
   }
 
+  function openRaffleRequirementLink(data) {
+    var url = data && data.openUrl ? String(data.openUrl) : "";
+    if (!url && data && data.code === "CHANNEL_REQUIRED") url = "https://t.me/Dva_tuza_club";
+    if (!url && data && data.code === "BOT_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
+    if (!url && data && data.code === "SUBSCRIPTION_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
+    if (!url) return;
+    if (tg && tg.openTelegramLink) {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      tg.openTelegramLink(url);
+      return;
+    }
+    if (typeof window.open === "function") window.open(url, "_blank");
+  }
+
   if (raffleJoinToggleBtn) {
     raffleJoinToggleBtn.addEventListener("click", function () {
       if (!currentRaffleId) {
@@ -153,12 +167,9 @@ function initRafflesPublicRuntime(opts) {
             if (data && data.code === "P21_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш. После сохранения вернитесь в «Розыгрыши» и нажмите «Участвовать» снова.");
               if (typeof setView === "function") setView("profile");
-            } else if (data && data.code === "CHANNEL_REQUIRED") {
-              if (tg && tg.showAlert) tg.showAlert(err + " После подписки вернитесь в мини-приложение и нажмите «Участвовать» снова.");
-              if (tg && tg.openTelegramLink) {
-                if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-                tg.openTelegramLink("https://t.me/dva_tuza_club");
-              }
+            } else if (data && (data.code === "CHANNEL_REQUIRED" || data.code === "BOT_REQUIRED" || data.code === "SUBSCRIPTION_REQUIRED" || data.code === "TELEGRAM_REQUIRED")) {
+              if (tg && tg.showAlert) tg.showAlert(err);
+              openRaffleRequirementLink(data);
             } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
               else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");

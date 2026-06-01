@@ -230,6 +230,61 @@ function installFetch(redis) {
         async text() { return JSON.stringify(payload); },
       };
     }
+    if (u.includes("/getChat?")) {
+      return {
+        ok: true,
+        async json() { return { ok: true, result: { id: 1001, type: "private" } }; },
+        async text() { return JSON.stringify({ ok: true }); },
+      };
+    }
+    if (u.includes("/getChatMember?")) {
+      return {
+        ok: true,
+        async json() { return { ok: true, result: { status: "member" } }; },
+        async text() { return JSON.stringify({ ok: true }); },
+      };
+    }
+    return {
+      ok: true,
+      async json() { return { ok: true, result: true }; },
+      async text() { return JSON.stringify({ ok: true }); },
+    };
+  };
+}
+
+function installTelegramGateFetch(redis, options) {
+  const opts = Object.assign({ botOk: true, channelOk: true }, options || {});
+  global.fetch = async function fetchGateMock(url, requestOpts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = requestOpts && requestOpts.body ? JSON.parse(requestOpts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    if (u.includes("/getChat?")) {
+      const payload = opts.botOk
+        ? { ok: true, result: { id: 1001, type: "private" } }
+        : { ok: false, error_code: 400, description: "Bad Request: chat not found" };
+      return {
+        ok: !!opts.botOk,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    if (u.includes("/getChatMember?")) {
+      const payload = opts.channelOk
+        ? { ok: true, result: { status: "member" } }
+        : { ok: true, result: { status: "left" } };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
     return {
       ok: true,
       async json() { return { ok: true, result: true }; },
@@ -248,6 +303,20 @@ function installRecordingFetch(redis, sentMessages) {
         ok: true,
         async json() { return payload; },
         async text() { return JSON.stringify(payload); },
+      };
+    }
+    if (u.includes("/getChat?")) {
+      return {
+        ok: true,
+        async json() { return { ok: true, result: { id: 1001, type: "private" } }; },
+        async text() { return JSON.stringify({ ok: true }); },
+      };
+    }
+    if (u.includes("/getChatMember?")) {
+      return {
+        ok: true,
+        async json() { return { ok: true, result: { status: "member" } }; },
+        async text() { return JSON.stringify({ ok: true }); },
       };
     }
     if (u.includes("/sendMessage")) {
@@ -548,6 +617,68 @@ async function testRaffleJoinLeave(redis) {
   r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "leave", raffleId: "contract_raffle" }));
   assert.strictEqual(r.statusCode, 200, "raffle leave succeeds");
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
+}
+
+async function testParticipationRequiresBotAndChannel(redis) {
+  const raffles = loadHandler("raffles");
+  const promo = loadHandler("promo");
+  const s = sessions();
+  const raffle = {
+    id: "contract_raffle_gate",
+    title: "Contract gated raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_gate", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_gate");
+  redis.h("poker_app:visitor_p21_ids").set("ID100001", "P21-1001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+
+  installTelegramGateFetch(redis, { botOk: false, channelOk: true });
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "join",
+    raffleId: "contract_raffle_gate",
+    deviceId: "gate-dev-1",
+  }));
+  assert.strictEqual(r.statusCode, 403, "raffle join requires bot");
+  assert.strictEqual(r.body.code, "BOT_REQUIRED", "raffle join returns bot-required code");
+  assert.ok(String(r.body.error || "").includes("/start"), "raffle bot error explains start command");
+
+  installTelegramGateFetch(redis, { botOk: true, channelOk: false });
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "join",
+    raffleId: "contract_raffle_gate",
+    deviceId: "gate-dev-2",
+  }));
+  assert.strictEqual(r.statusCode, 403, "raffle join requires channel");
+  assert.strictEqual(r.body.code, "CHANNEL_REQUIRED", "raffle join returns channel-required code");
+  assert.ok(String(r.body.error || "").includes("@Dva_tuza_club"), "raffle channel error names club channel");
+
+  installTelegramGateFetch(redis, { botOk: true, channelOk: false });
+  r = await call(promo, req("POST", { path: "daily-poker/play" }, {
+    pwaSession: s.user,
+    idempotencyKey: "daily-gate-channel",
+  }));
+  assert.strictEqual(r.statusCode, 403, "daily poker play requires channel");
+  assert.strictEqual(r.body.code, "CHANNEL_REQUIRED", "daily poker returns channel-required code");
+  assert.ok(String(r.body.error || "").includes("Раздать карты"), "daily poker channel error explains retry action");
+
+  installTelegramGateFetch(redis, { botOk: false, channelOk: true });
+  r = await call(promo, req("POST", { path: "daily-poker/play" }, {
+    pwaSession: s.user,
+    idempotencyKey: "daily-gate-bot",
+  }));
+  assert.strictEqual(r.statusCode, 403, "daily poker play requires bot");
+  assert.strictEqual(r.body.code, "BOT_REQUIRED", "daily poker returns bot-required code");
+  assert.ok(String(r.body.error || "").includes("@Poker_dvatuza_bot"), "daily poker bot error names club bot");
 }
 
 async function testRaffleWinnerReady(redis) {
@@ -2680,6 +2811,7 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
     ["raffle winner ready", testRaffleWinnerReady],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],

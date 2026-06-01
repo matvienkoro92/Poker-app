@@ -128,6 +128,28 @@
   margin: 0 0 10px;
 }
 
+.daily-poker__eligibility {
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 8px;
+  background: rgba(8, 47, 73, 0.42);
+  color: rgba(224, 242, 254, 0.9);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.daily-poker__eligibility a {
+  color: #facc15;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.daily-poker__eligibility a:hover {
+  text-decoration: underline;
+}
+
 .daily-poker__prizes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

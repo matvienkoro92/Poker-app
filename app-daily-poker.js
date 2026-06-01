@@ -497,6 +497,31 @@
     setResultText(text || "", !!isError);
   }
 
+  function openDailyPokerRequirementLink(data) {
+    var url = data && data.openUrl ? String(data.openUrl) : "";
+    if (!url && data && data.code === "CHANNEL_REQUIRED") url = "https://t.me/Dva_tuza_club";
+    if (!url && data && data.code === "BOT_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
+    if (!url && data && data.code === "SUBSCRIPTION_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
+    if (!url) return false;
+    try {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(url);
+        return true;
+      }
+      if (typeof window.open === "function") {
+        window.open(url, "_blank");
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function isDailyPokerRequirementCode(code) {
+    return code === "CHANNEL_REQUIRED" || code === "BOT_REQUIRED" || code === "SUBSCRIPTION_REQUIRED" || code === "TELEGRAM_REQUIRED";
+  }
+
   function readJson(r) {
     return r.text().then(function (text) {
       if (!text) return {};
@@ -683,7 +708,12 @@
         } else {
           restoreOptimisticSpend();
         }
-        showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
+        if (err && err.data && isDailyPokerRequirementCode(err.data.code)) {
+          showMessage(err.message || "Для игры нужно открыть бота и подписаться на канал.", true);
+          openDailyPokerRequirementLink(err.data);
+        } else {
+          showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
+        }
       });
   }
 
