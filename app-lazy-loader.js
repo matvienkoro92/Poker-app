@@ -15,7 +15,6 @@
     "poker-tasks": ["club-tasks"],
     "player-crm": ["player-crm"],
     streams: ["streams"],
-    "daily-poker": ["daily-poker"],
     "admin-bonuses": ["admin-bonuses"],
     equilator: ["tools"]
   };
