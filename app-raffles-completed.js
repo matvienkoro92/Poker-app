@@ -61,7 +61,7 @@ function initRafflesCompletedRuntime(opts) {
           "</span>" +
           "</button>"
         : "<span class=\"raffle-winner-row__primary\">" + escapeHtml(primaryText) + "</span>";
-    var tgOpen = tgLogin
+    var tgOpen = isAdmin && tgLogin
       ? "<a class=\"raffle-winner-row__tg\" href=\"https://t.me/" +
         escapeHtml(tgLogin) +
         "\" target=\"_blank\" rel=\"noopener noreferrer\">@" +
@@ -156,7 +156,7 @@ function initRafflesCompletedRuntime(opts) {
     if (!row) return "";
     var parts = [];
     var login = row.telegramUsername != null ? String(row.telegramUsername).trim().replace(/^@+/g, "") : "";
-    if (login) parts.push("@" + login);
+    if (rafflesIsAdmin && login) parts.push("@" + login);
     var name = row.name != null ? String(row.name).trim() : "";
     if (name && name !== "Участник" && parts.indexOf(name) === -1) parts.push(name);
     return parts.join(" · ");

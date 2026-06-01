@@ -599,6 +599,57 @@ async function testRaffleWinnerReady(redis) {
   assert.ok(r.body.raffle.winners[0].winnerReadyAt, "winner ready timestamp is stored");
 }
 
+async function testRaffleTelegramUsernamesAdminOnly(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_raffle_tg_privacy",
+    title: "Telegram privacy raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      telegramUsername: "player_public",
+    }],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      groupIndex: 0,
+      prize: "Ticket",
+      telegramUsername: "player_public",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_tg_privacy", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_tg_privacy");
+  redis.h("poker_app:visitor_usernames").set("tg_1001", "player_public");
+
+  let r = await call(raffles, req("GET", { pwaSession: s.user, id: "contract_raffle_tg_privacy" }));
+  assert.strictEqual(r.statusCode, 200, "non-admin can load raffle");
+  assert.strictEqual(r.body.isAdmin, false, "non-admin response is not admin");
+  assert.strictEqual(r.body.raffle.participants[0].telegramUsername, undefined, "non-admin does not receive participant telegram username");
+  assert.strictEqual(r.body.raffle.winners[0].telegramUsername, undefined, "non-admin does not receive winner telegram username");
+
+  r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_tg_privacy" }));
+  assert.strictEqual(r.statusCode, 200, "admin can load raffle");
+  assert.strictEqual(r.body.isAdmin, true, "admin response is admin");
+  assert.strictEqual(r.body.raffle.participants[0].telegramUsername, "player_public", "admin receives participant telegram username");
+  assert.strictEqual(r.body.raffle.winners[0].telegramUsername, "player_public", "admin receives winner telegram username");
+
+  r = await call(raffles, req("GET", { pwaSession: s.user }));
+  const listed = (r.body.raffles || []).find((item) => item.id === "contract_raffle_tg_privacy");
+  assert.ok(listed, "non-admin list includes raffle");
+  assert.strictEqual(listed.winners[0].telegramUsername, undefined, "non-admin list hides winner telegram username");
+}
+
 async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -2592,6 +2643,7 @@ async function main() {
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle winner ready", testRaffleWinnerReady],
+    ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
