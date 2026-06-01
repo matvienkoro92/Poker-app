@@ -3150,6 +3150,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "points": 110
         }
       ]
+    },
+    {
+      "time": "20:00",
+      "name": "Battle HR",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WhiskeyClub",
+          "place": 4,
+          "reward": 69575,
+          "points": 70
+        }
+      ]
     }
   ],
   "17.05.2026": [

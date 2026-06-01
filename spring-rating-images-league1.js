@@ -648,7 +648,8 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-16-05-2026-league1-bali-yana-08h.jpg",
     "rating-compressed-preview/rating-16-05-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-16-05-2026-league1-new-hot-pko-15h.jpg",
-    "rating-compressed-preview/rating-16-05-2026-league1-shr-magic-19h.jpg"
+    "rating-compressed-preview/rating-16-05-2026-league1-shr-magic-19h.jpg",
+    "rating-compressed-preview/rating-16-05-2026-league1-battle-hr-whiskeyclub-rank4.jpg"
   ],
   "17.05.2026": [
     "rating-compressed-preview/rating-17-05-2026-league1-dv-turbo-500-10h.jpg",
