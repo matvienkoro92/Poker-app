@@ -3,29 +3,63 @@
   function rafflesDeepLink() {
     return buildMiniAppStartLink("raffles");
   }
+  function showRafflesCopyResult(link, copied) {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    var successMsg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
+    var fallbackMsg = "Ссылка: " + link;
+    if (tg && tg.showAlert) {
+      tg.showAlert(copied ? successMsg : fallbackMsg);
+      return;
+    }
+    alert(copied ? "Ссылка скопирована." : fallbackMsg);
+  }
+  function copyRafflesLinkText(text) {
+    return new Promise(function (resolve) {
+      var value = text != null ? String(text) : "";
+      if (!value) {
+        resolve(false);
+        return;
+      }
+      function copyWithFallback() {
+        var input = null;
+        try {
+          input = document.createElement("textarea");
+          input.value = value;
+          input.setAttribute("readonly", "readonly");
+          input.style.position = "fixed";
+          input.style.left = "-9999px";
+          input.style.top = "0";
+          document.body.appendChild(input);
+          input.focus();
+          input.select();
+          input.setSelectionRange(0, input.value.length);
+          var ok = typeof document.execCommand === "function" && document.execCommand("copy");
+          if (input.parentNode) input.parentNode.removeChild(input);
+          resolve(!!ok);
+        } catch (e) {
+          if (input && input.parentNode) input.parentNode.removeChild(input);
+          resolve(false);
+        }
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(value).then(function () {
+          resolve(true);
+        }).catch(copyWithFallback);
+        return;
+      }
+      copyWithFallback();
+    });
+  }
   var rafflesCopyLinkBtn = document.getElementById("rafflesCopyLinkBtn");
   if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
     rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
     rafflesCopyLinkBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
-      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
-        return;
-      }
-      var msg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
+      copyRafflesLinkText(link).then(function (copied) {
+        showRafflesCopyResult(link, copied);
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero_copy");
+      });
     });
   }
   var rafflesInviteFriendBtn = document.getElementById("rafflesInviteFriendBtn");
