@@ -136,21 +136,14 @@ function initHomeClubInfoModals() {
     }
     function runCharterCopy() {
       var link = getCharterShareLink();
-      var shareText = getCharterShareText();
       var textToCopy = link;
-      try {
-        if (typeof navigator !== "undefined" && navigator && typeof navigator.clipboard !== "undefined" && typeof navigator.clipboard.writeText === "function") {
-          navigator.clipboard.writeText(textToCopy).then(function () {
-            notifyUser("Ссылка скопирована.");
-          }).catch(function () {
-            notifyUser("Не удалось скопировать ссылку.");
-          });
-        } else {
-          notifyUser("Скопируйте ссылку вручную: " + shareText);
-        }
-      } catch (eCopy) {
-        notifyUser("Не удалось скопировать ссылку.");
+      if (!textToCopy) {
+        notifyUser("Не удалось сформировать ссылку.");
+        return;
       }
+      pokerCopyTextToClipboard(textToCopy).then(function (copied) {
+        notifyUser(copied ? "Ссылка скопирована." : "Скопируйте ссылку вручную: " + textToCopy);
+      });
     }
     window.openClubCharterModal = openCharter;
     window.closeClubCharterModal = closeCharter;

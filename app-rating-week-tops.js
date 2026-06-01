@@ -583,18 +583,16 @@ function pokerInitWinterRatingWeekTops() {
       var msg = type === "rating_top_current"
         ? "Ссылка скопирована. Отправьте другу — откроется блок «Топы текущей недели»."
         : "Ссылка скопирована. Отправьте другу — откроется этот топ.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
+      pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
+        if (copied) {
+          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
+        } else if (tg && tg.showAlert) {
+          tg.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+      });
     });
   }
   // Кнопки «Поделиться» для весенних лиг находятся внутри блоков лиг (winter-rating__spring-league-share),

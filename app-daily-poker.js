@@ -613,6 +613,7 @@
         tgw.HapticFeedback.notificationOccurred("success");
       }
       setCopyButtonCopied(btn);
+      showMessage("Ссылка скопирована.", false);
     }).catch(function () {
       showMessage("Не удалось скопировать ссылку. Попробуйте кнопку «Позвать друга».", true);
     });

@@ -298,16 +298,15 @@ function initChatGroupAddMembersModal(opts) {
           }
           doneGeneralInvite();
         }
-        if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-          navigator.clipboard
-            .writeText(linkGen)
-            .then(afterGeneralCopy)
-            .catch(function () {
-              afterGeneralCopy();
-            });
-        } else {
-          afterGeneralCopy();
-        }
+        pokerCopyTextToClipboard(linkGen).then(function (copied) {
+          if (copied) {
+            afterGeneralCopy();
+            return;
+          }
+          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + linkGen);
+          else if (typeof alert === "function") alert("Ссылка: " + linkGen);
+          doneGeneralInvite();
+        });
         return;
       }
       if (typeof pokerEnsureChatTelegramVerified === "function" && !pokerEnsureChatTelegramVerified()) return;

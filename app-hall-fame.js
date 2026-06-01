@@ -232,31 +232,9 @@ function hallFameCopyUrlToClipboard(url) {
     hallFameCopyDone(false);
     return;
   }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard
-      .writeText(url)
-      .then(function () {
-        hallFameCopyDone(true);
-      })
-      .catch(function () {
-        hallFameCopyDone(false);
-      });
-  } else {
-    try {
-      var ta = document.createElement("textarea");
-      ta.value = url;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      hallFameCopyDone(true);
-    } catch (e) {
-      hallFameCopyDone(false);
-    }
-  }
+  pokerCopyTextToClipboard(url).then(function (copied) {
+    hallFameCopyDone(copied);
+  });
 }
 
 function hallFameOpenTelegramShareForSection(section) {

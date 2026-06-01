@@ -18,10 +18,7 @@
   }
   function copyShareLink() {
     var link = getAppUrl();
-    if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(link).then(function () { return true; }).catch(function () { return false; });
-    }
-    return Promise.resolve(false);
+    return pokerCopyTextToClipboard(link);
   }
   function nativeShare() {
     if (typeof navigator.share !== "function") return Promise.resolve(false);

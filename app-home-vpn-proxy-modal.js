@@ -253,22 +253,18 @@ function initHomeVpnProxyModal(opts) {
         var linkCp = vpnProxyShareAbsoluteUrl();
         if (!linkCp) return;
         var msgCp = "Ссылка скопирована. Отправьте другу — откроется подборка ВПН и прокси.";
-        if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(linkCp).then(function () {
-            var tgCp = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        pokerCopyTextToClipboard(linkCp).then(function (copied) {
+          var tgCp = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (copied) {
             if (tgCp && tgCp.showAlert) tgCp.showAlert(msgCp);
             else alert("Ссылка скопирована.");
             if (typeof recordShareButtonClick === "function") recordShareButtonClick("vpn_proxy_modal_copy");
-          }).catch(function () {
-            var tgCp2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            if (tgCp2 && tgCp2.showAlert) tgCp2.showAlert("Ссылка: " + linkCp);
-            else alert("Ссылка: " + linkCp);
-          });
-        } else {
-          var tgCp3 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tgCp3 && tgCp3.showAlert) tgCp3.showAlert("Ссылка: " + linkCp);
-          else alert("Ссылка: " + linkCp);
-        }
+          } else if (tgCp && tgCp.showAlert) {
+            tgCp.showAlert("Ссылка: " + linkCp);
+          } else {
+            alert("Ссылка: " + linkCp);
+          }
+        });
       });
     }
     var vpnProxyShareBtn = document.getElementById("vpnProxyShareBtn");

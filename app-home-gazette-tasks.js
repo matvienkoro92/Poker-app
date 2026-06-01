@@ -300,18 +300,16 @@ function runGazetteAndTasksInit() {
           if (typeof recordShareButtonClick === "function") recordShareButtonClick("gazette_article");
         });
       } else {
-        if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(link).then(function () {
-            var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована. Отправьте её другу — по ней откроется эта новость."); else alert("Ссылка скопирована.");
-          }).catch(function () {
-            var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-            if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-          });
-        } else {
+        pokerCopyTextToClipboard(link).then(function (copied) {
           var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        }
+          if (copied) {
+            if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована. Отправьте её другу — по ней откроется эта новость."); else alert("Ссылка скопирована.");
+          } else if (tg && tg.showAlert) {
+            tg.showAlert("Ссылка: " + link);
+          } else {
+            alert("Ссылка: " + link);
+          }
+        });
       }
     }
   });

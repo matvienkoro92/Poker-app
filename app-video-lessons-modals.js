@@ -13,21 +13,17 @@ function initVideoLessonsHeroShare() {
       var link = videoLessonsSectionLink();
       if (!link) return;
       var msg = "Скопирована ссылка на раздел с видеоуроками. Отправьте её другу.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      pokerCopyTextToClipboard(link).then(function (copied) {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (copied) {
           if (tg && tg.showAlert) tg.showAlert(msg);
           else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
-          else alert("Ссылка: " + link);
-        });
-      } else {
-        var tg2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg2 && tg2.showAlert) tg2.showAlert("Ссылка: " + link);
-        else alert("Ссылка: " + link);
-      }
+        } else if (tg && tg.showAlert) {
+          tg.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+      });
     });
   }
   var inviteBtn = document.getElementById("videoLessonsInviteFriendBtn");
@@ -72,22 +68,18 @@ function initVideoLessonsHeroShare() {
       var link = learnPlayHubSectionLink();
       if (!link) return;
       var msg = "Скопирована ссылка на раздел «Научиться играть». Отправьте её другу.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      pokerCopyTextToClipboard(link).then(function (copied) {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (copied) {
           if (tg && tg.showAlert) tg.showAlert(msg);
           else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
-          else alert("Ссылка: " + link);
-        });
-      } else {
-        var tg2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg2 && tg2.showAlert) tg2.showAlert("Ссылка: " + link);
-        else alert("Ссылка: " + link);
-      }
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_copy");
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("learn_play_hub_copy");
+        } else if (tg && tg.showAlert) {
+          tg.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+      });
     });
   }
   var inviteBtn = document.getElementById("learnPlayHubInviteFriendBtn");
@@ -610,21 +602,16 @@ function initVideoLessonsReviewsModal() {
         showReviewsCopyHint("Скопировано. Вставьте ссылку в любой чат: " + linkCr);
         if (typeof recordShareButtonClick === "function") recordShareButtonClick("video_lessons_coach_reviews_copy");
       }
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(linkCr).then(function () {
+      pokerCopyTextToClipboard(linkCr).then(function (copied) {
+        if (copied) {
           afterCopyOk();
-        }).catch(function () {
+        } else {
           showReviewsCopyHint("Ссылка (скопируйте вручную): " + linkCr);
           var tgCr2 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
           if (tgCr2 && tgCr2.showAlert) tgCr2.showAlert("Ссылка: " + linkCr);
           else alert("Ссылка: " + linkCr);
-        });
-      } else {
-        showReviewsCopyHint("Ссылка (скопируйте вручную): " + linkCr);
-        var tgCr3 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tgCr3 && tgCr3.showAlert) tgCr3.showAlert("Ссылка: " + linkCr);
-        else alert("Ссылка: " + linkCr);
-      }
+        }
+      });
     });
   }
   if (reviewsInviteBtn && reviewsInviteBtn.getAttribute("data-share-bound") !== "1") {

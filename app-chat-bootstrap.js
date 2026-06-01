@@ -148,22 +148,18 @@ function initChatBootstrap(opts) {
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("club_chat") : "";
       if (!link) return;
       var msg = "Ссылка на общий чат скопирована. Отправь другу — откроется этот чат в приложении.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      pokerCopyTextToClipboard(link).then(function (copied) {
+        var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (copied) {
           if (tgLocal && tgLocal.showAlert) tgLocal.showAlert(msg);
           else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tgLocal && tgLocal.showAlert) tgLocal.showAlert("Ссылка: " + link);
-          else alert("Ссылка: " + link);
-        });
-      } else {
-        var tgFallback = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tgFallback && tgFallback.showAlert) tgFallback.showAlert("Ссылка: " + link);
-        else alert("Ссылка: " + link);
-      }
-      if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_copy_link");
+        } else if (tgLocal && tgLocal.showAlert) {
+          tgLocal.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("chat_general_copy_link");
+      });
     });
   })();
 

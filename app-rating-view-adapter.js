@@ -727,18 +727,16 @@ function initWinterRatingPlayerModal() {
       var startApp = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("player") : "winter_rating_player_";
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована. Отправьте другу — откроется сводка по игроку " + nick + "."); else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
+      pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
+        if (copied) {
+          if (tg && tg.showAlert) tg.showAlert("Ссылка скопирована. Отправьте другу — откроется сводка по игроку " + nick + "."); else alert("Ссылка скопирована.");
+        } else if (tg && tg.showAlert) {
+          tg.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+      });
     });
   }
   var shareTelegramBtn = document.getElementById("winterRatingPlayerModalShareTelegramBtn");
@@ -992,15 +990,13 @@ function initWinterRating() {
       var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp) : "";
       var msg = "Ссылка скопирована. Отправьте другу — откроется рейтинг за " + dateStr + ".";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
+      pokerCopyTextToClipboard(link).then(function (copied) {
+        if (copied) {
           if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
-        }).catch(function () {
+        } else {
           if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
+        }
+      });
     }, true);
   }
   if (document.body.getAttribute("data-spring-league-share-bound") !== "1") {
@@ -1015,18 +1011,16 @@ function initWinterRating() {
           ? buildMiniAppStartLink((typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + shareBtn.dataset.springLeague)
           : "";
       var msg = shareBtn.dataset.springLeague === "1" ? "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 1." : "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 2.";
-      if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
-        }).catch(function () {
-          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-          if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-        });
-      } else {
+      pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link); else alert("Ссылка: " + link);
-      }
+        if (copied) {
+          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
+        } else if (tg && tg.showAlert) {
+          tg.showAlert("Ссылка: " + link);
+        } else {
+          alert("Ссылка: " + link);
+        }
+      });
     });
   }
   var allRows = [];

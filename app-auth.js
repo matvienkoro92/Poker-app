@@ -266,6 +266,46 @@ function pokerBuildTelegramShareUrlDialog(link, textOpt) {
   return "https://t.me/share/url?url=" + encodeURIComponent(u) + "&text=" + encodeURIComponent(t);
 }
 
+/** Copy text with a textarea fallback for older Telegram/PWA webviews. */
+function pokerCopyTextToClipboard(text) {
+  var value = text != null ? String(text) : "";
+  if (!value) return Promise.resolve(false);
+  function fallbackCopy() {
+    return new Promise(function (resolve) {
+      var textarea = null;
+      try {
+        textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "readonly");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        var parent = document.body || document.documentElement;
+        if (!parent) {
+          resolve(false);
+          return;
+        }
+        parent.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        if (typeof textarea.setSelectionRange === "function") textarea.setSelectionRange(0, textarea.value.length);
+        var ok = typeof document.execCommand === "function" && document.execCommand("copy");
+        if (textarea.parentNode) textarea.parentNode.removeChild(textarea);
+        resolve(!!ok);
+      } catch (eCopyFallback) {
+        if (textarea && textarea.parentNode) textarea.parentNode.removeChild(textarea);
+        resolve(false);
+      }
+    });
+  }
+  if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+    return navigator.clipboard.writeText(value).then(function () {
+      return true;
+    }).catch(fallbackCopy);
+  }
+  return fallbackCopy();
+}
+
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
 /** PWA: сессия после OAuth ВКонтакте */
