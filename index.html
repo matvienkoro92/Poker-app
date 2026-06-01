@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.413">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.414">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -287,7 +287,14 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/gazette-katerina-venius-win-apr2026.png" />
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.413" />
+    <link rel="preload" as="image" href="./assets/home-tournament-mystery-bounty-130k.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/home-tournament-tuesday-tractor-120k.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-tournament-wednesday-stolnik-70k.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-tournament-thursday-mystery-plus-220k.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-tournament-friday-knockout-progressive-130k.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-tournament-saturday-freeroll-200k.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-tournament-sunday-knockout-week-300k.webp" fetchpriority="low" />
+    <link rel="stylesheet" href="./styles.css?v=3.414" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home {
@@ -848,8 +855,9 @@
                           alt="Poker21 Мистери Баунти 130 000 ₽"
                           width="640"
                           height="915"
-                          loading="lazy"
+                          loading="eager"
                           decoding="async"
+                          fetchpriority="high"
                         />
                       </div>
                       <div class="home-tournament-detail__content">
@@ -1239,7 +1247,24 @@
           <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html" data-html-fragment-view="raffles"></div>
 
           <!-- Научиться играть — хаб: видео-уроки -->
-          <div class="view" data-view="learn-play-hub" data-html-fragment="./html-fragments/learn-play-hub.html" data-html-fragment-view="learn-play-hub"></div>
+          <div class="view" data-view="learn-play-hub">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <h1 class="title">Научиться играть</h1>
+            <p class="learn-play-hub__desc">Бесплатные видео-уроки по темам от тренера клуба.</p>
+            <div class="raffles-hero__share-row video-lessons__share-row learn-play-hub__share-row">
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="learnPlayHubInviteFriendBtn" aria-label="Отправить другу ссылку на раздел «Научиться играть»">Поделиться</button>
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="learnPlayHubCopyLinkBtn" aria-label="Скопировать ссылку на раздел «Научиться играть»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+            </div>
+            <div class="learn-play-hub__buttons">
+              <a href="#" class="feature feature--link feature--app learn-play-hub__btn learn-play-hub__btn--video-lessons" data-view-target="video-lessons">
+                <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🎬</span></div>
+                <div class="feature__body">
+                  <div class="feature__title">Бесплатные Видео-уроки</div>
+                  <div class="feature__desc">15 уроков + бонусы, тренер Николай FishKopcheny</div>
+                </div>
+              </a>
+            </div>
+          </div>
 
           <!-- Научиться играть — Tournament Pro Challenge (Задачи) -->
           <div class="view" data-view="poker-tasks" data-html-fragment="./html-fragments/poker-tasks.html" data-html-fragment-view="poker-tasks"></div>
@@ -1262,17 +1287,218 @@
           <!-- Дашборд игроков -->
           <div class="view" data-view="player-crm" id="playerCrmView" data-html-fragment="./html-fragments/player-crm.html" data-html-fragment-view="player-crm"></div>
 
-          <div class="view" data-view="streams" data-html-fragment="./html-fragments/streams.html" data-html-fragment-view="streams"></div>
+          <div class="view" data-view="streams">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <h1 class="title streams-title">Стримы</h1>
+            <p class="streams-intro">Без задержки через LiveKit Cloud, с задержкой через Cloudflare Stream.</p>
+            <div class="streams-role-tabs" role="tablist" aria-label="Роль в стриме">
+              <button type="button" class="streams-role-tab streams-role-tab--active" id="streamsWatchTab" data-streams-tab-target="watch" role="tab" aria-selected="true" aria-controls="streamsWatchPanel">Без задержки</button>
+              <button type="button" class="streams-role-tab" id="streamsBroadcastTab" data-streams-tab-target="broadcast" role="tab" aria-selected="false" aria-controls="streamsBroadcastPanel">Запустить</button>
+              <button type="button" class="streams-role-tab" id="streamsDelayedTab" data-streams-tab-target="delayed" role="tab" aria-selected="false" aria-controls="streamsDelayedPanel">С задержкой</button>
+            </div>
+            <div class="streams-actions">
+              <div class="streams-block streams-block--watch" id="streamsWatchPanel" data-streams-tab-panel="watch" role="tabpanel" aria-labelledby="streamsWatchTab">
+                <h2 class="streams-block__title">Смотреть трансляцию</h2>
+                <p class="streams-block__hint">Вставьте ссылку или код комнаты от ведущего.</p>
+                <div class="streams-watch-row">
+                  <input type="text" id="streamsRoomInput" class="streams-room-input" inputmode="numeric" placeholder="6 цифр или ссылка с streams_" aria-label="Код комнаты" maxlength="256" />
+                  <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Смотреть</button>
+                </div>
+                <p id="streamsWatchStatus" class="streams-status" aria-live="polite" hidden></p>
+                <div class="streams-remote-wrap streams-remote-wrap--hidden" id="streamsRemoteWrap">
+                  <video id="streamsRemoteVideo" class="streams-remote-video" autoplay playsinline controls aria-label="Трансляция"></video>
+                  <button type="button" class="streams-btn streams-btn--stop" id="streamsStopWatchBtn">Отключиться</button>
+                  <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsRemoteFullscreenBtn">Во весь экран</button>
+                </div>
+              </div>
+              <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
+                <h2 class="streams-block__title">Запустить трансляцию</h2>
+                <p class="streams-block__hint">Выберите, как зрители будут смотреть этот запуск.</p>
+                <div class="streams-broadcast-mode" role="group" aria-label="Режим запуска стрима">
+                  <button type="button" class="streams-broadcast-mode-btn" data-streams-broadcast-mode="instant" aria-pressed="false">
+                    <span>Без задержки</span>
+                    <small>LiveKit, почти realtime</small>
+                  </button>
+                  <button type="button" class="streams-broadcast-mode-btn streams-broadcast-mode-btn--active" data-streams-broadcast-mode="delayed" aria-pressed="true">
+                    <span>С задержкой</span>
+                    <small>2 минуты, против подсматривания</small>
+                  </button>
+                </div>
+                <p class="streams-room-guide">Введите ваш код комнаты и нажмите запустить трансляцию</p>
+                <div class="streams-watch-row" style="margin-top: 8px; margin-bottom: 6px;">
+                  <input type="text" id="streamsBroadcastRoomInput" class="streams-room-input" inputmode="numeric" pattern="[0-9]{6}" placeholder="Код комнаты (6 цифр)" aria-label="Код комнаты для трансляции" maxlength="6" />
+                </div>
+                <button type="button" class="streams-btn streams-btn--start" id="streamsStartBtn">Запустить трансляцию</button>
+                <p id="streamsBroadcastStatus" class="streams-status" aria-live="polite" hidden></p>
+                <p id="streamsEgressStatus" class="streams-status" aria-live="polite" hidden></p>
+                <div class="streams-open-in-browser" id="streamsOpenInBrowserWrap">
+                  <p class="streams-open-in-browser__text"><strong>Запуск экрана работает в Chrome или браузере на компьютере.</strong> В браузере Telegram доступ к экрану обычно недоступен.</p>
+                  <div class="streams-link-row streams-open-in-browser__row">
+                    <input type="text" id="streamsBrowserLinkInput" class="streams-link-input" readonly aria-label="Ссылка для смены браузера" />
+                    <button type="button" class="streams-open-browser-btn" id="streamsOpenBrowserBtn">Открыть в браузере</button>
+                    <button type="button" class="streams-copy-btn" id="streamsCopyBrowserLinkBtn">Копировать</button>
+                  </div>
+                </div>
+                <div class="streams-preview-wrap streams-preview-wrap--hidden" id="streamsPreviewWrap">
+                  <video id="streamsPreviewVideo" class="streams-preview-video" autoplay muted playsinline aria-label="Превью трансляции"></video>
+                  <p class="streams-link-label">Ссылка для зрителей:</p>
+                  <div class="streams-link-row">
+                    <input type="text" id="streamsShareLink" class="streams-link-input" readonly aria-label="Ссылка на трансляцию" />
+                    <button type="button" class="streams-copy-btn" id="streamsCopyLinkBtn">Копировать</button>
+                  </div>
+                  <button type="button" class="streams-btn streams-btn--stop" id="streamsStopBtn">Остановить</button>
+                  <p id="streamsBroadcastTimer" class="streams-broadcast-timer" aria-live="polite"></p>
+                  <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsPreviewFullscreenBtn">Во весь экран</button>
+                </div>
+              </div>
+              <div class="streams-block streams-block--delayed" id="streamsDelayedPanel" data-streams-tab-panel="delayed" role="tabpanel" aria-labelledby="streamsDelayedTab" hidden>
+                <h2 class="streams-block__title">Смотреть с задержкой 2 минуты</h2>
+                <p class="streams-block__hint">Cloudflare DVR-HLS держит эфир примерно на две минуты позади live.</p>
+                <button type="button" class="streams-btn streams-btn--watch" id="streamsCloudflareRefreshBtn">Запустить плеер</button>
+                <p id="streamsCloudflareStatus" class="streams-status" aria-live="polite" hidden></p>
+                <div class="streams-cloudflare-wrap streams-cloudflare-wrap--hidden" id="streamsCloudflareWrap">
+                  <iframe id="streamsCloudflareFrame" class="streams-cloudflare-frame" title="Cloudflare Stream" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
+                  <video id="streamsCloudflareVideo" class="streams-cloudflare-video" playsinline hidden aria-label="Cloudflare Stream HLS"></video>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Расписание турниров -->
           <div class="view" data-view="schedule" data-html-fragment="./html-fragments/schedule.html" data-html-fragment-view="schedule"></div>
 
           <!-- Эквилятор: расчёт эквити -->
-          <div class="view" data-view="equilator" data-html-fragment="./html-fragments/equilator.html" data-html-fragment-view="equilator"></div>
+          <div class="view" data-view="equilator">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <div class="equilator-hero-art" aria-hidden="true"></div>
+            <h1 class="title">Эквилятор</h1>
+            <div class="equilator-form">
+              <div class="equilator-section equilator-hands-section">
+                <div class="equilator-hands-row">
+                  <div class="equilator-hero-block">
+                    <h2 class="equilator-section__title equilator-hand-label">Вы</h2>
+                    <div class="equilator-cards" id="equilatorHeroCards">
+                      <div class="equilator-slot-wrap">
+                        <button type="button" class="equilator-card-slot" id="equilatorSlotHero1" data-equilator-slot="hero1" aria-label="Карта 1 — нажмите для выбора"><span class="equilator-card-slot__text">—</span></button>
+                        <button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="hero1" aria-label="Сбросить карту">×</button>
+                      </div>
+                      <div class="equilator-slot-wrap">
+                        <button type="button" class="equilator-card-slot" id="equilatorSlotHero2" data-equilator-slot="hero2" aria-label="Карта 2 — нажмите для выбора"><span class="equilator-card-slot__text">—</span></button>
+                        <button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="hero2" aria-label="Сбросить карту">×</button>
+                      </div>
+                    </div>
+                    <div class="equilator-hero-range" id="equilatorHeroRange"></div>
+                  </div>
+                  <div class="equilator-opp-block">
+                    <div class="equilator-opp-list" id="equilatorOppCards"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="equilator-section equilator-add-player-section">
+                <button type="button" class="equilator-add-player-btn" id="equilatorAddPlayerBtn">+ Добавить игрока</button>
+              </div>
+              <div class="equilator-section equilator-board-section">
+                <h2 class="equilator-section__title">Борд</h2>
+                <div class="equilator-board-row">
+                  <span class="equilator-board-label">Борд</span>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard1" data-equilator-slot="board1" aria-label="Борд карта 1"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board1" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard2" data-equilator-slot="board2" aria-label="Борд карта 2"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board2" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard3" data-equilator-slot="board3" aria-label="Борд карта 3"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board3" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard4" data-equilator-slot="board4" aria-label="Борд карта 4"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board4" aria-label="Сбросить карту">×</button></div>
+                  <div class="equilator-slot-wrap"><button type="button" class="equilator-card-slot" id="equilatorSlotBoard5" data-equilator-slot="board5" aria-label="Борд карта 5"><span class="equilator-card-slot__text">—</span></button><button type="button" class="equilator-card-slot__reset equilator-card-slot__reset--hidden" data-equilator-slot="board5" aria-label="Сбросить карту">×</button></div>
+                </div>
+              </div>
+              <div class="equilator-picker-wrap equilator-picker-wrap--hidden" id="equilatorPickerWrap" aria-hidden="true">
+                <button type="button" class="equilator-picker-close-icon" id="equilatorPickerCloseIcon" aria-label="Закрыть выбор карты">×</button>
+                <p class="equilator-picker-title" id="equilatorPickerTitle">Выберите карту</p>
+                <div class="equilator-picker-grid" id="equilatorPickerGrid"></div>
+                <button type="button" class="equilator-picker-close" id="equilatorPickerClose">Закрыть</button>
+              </div>
+              <button type="button" class="primary-button" id="equilatorCalcBtn">Рассчитать эквити</button>
+            </div>
+            <div class="equilator-result equilator-result--hidden" id="equilatorResult">
+              <h2 class="equilator-result__title">Результат</h2>
+              <p class="equilator-result__line"><span class="equilator-result__label">Моё эквити на победу:</span> <strong id="equilatorWinPct">—</strong></p>
+              <div id="equilatorOppEquityLines"></div>
+              <p class="equilator-result__line"><span class="equilator-result__label">Ничья:</span> <strong id="equilatorTiePct">—</strong></p>
+              <p class="equilator-result__meta" id="equilatorResultMeta">—</p>
+            </div>
+          </div>
         </section>
 
       </main>
-      <!-- Глобальные модалки грузятся лениво: отчёты, посетители, tracking, lightbox, partnership -->
+      <!-- Модалка партнёрства открывается с главной, поэтому живёт в DOM сразу. -->
+      <div class="partnership-modal" id="partnershipModal" role="dialog" aria-modal="true" aria-label="Партнёрство: 3 шага для своего клуба" aria-hidden="true">
+        <div class="partnership-modal__backdrop" id="partnershipModalBackdrop"></div>
+        <div class="partnership-modal__box">
+          <button type="button" class="partnership-modal__close" id="partnershipModalClose" aria-label="Закрыть">×</button>
+          <div class="partnership-modal__track" id="partnershipModalTrack">
+            <div class="partnership-modal__sheet partnership-modal__sheet--active" data-partnership-sheet="0">
+              <div class="partnership-modal__sheet-inner">
+                <img src="./assets/partnership-2026-overview.jpg" alt="Poker21: 3 шага для создания покерного онлайн-клуба" class="partnership-modal__img" loading="lazy" />
+                <h2 class="partnership-modal__title">❗️ 3 шага для создания своего покерного онлайн-клуба</h2>
+                <p class="partnership-modal__text">Зарабатывай на привлечении игроков. Стань партнером с нашей поддержкой и входом во все союзы с максимальным рейкбеком.</p>
+                <p class="partnership-modal__text">✅ Если у вас уже есть клуб, но он еще не в Poker21 или Xpoker, напишите в тг ➡️ <a href="https://t.me/Roman1787443" target="_blank" rel="noopener noreferrer" class="partnership-modal__link">@Roman1787443</a> для получения особых условий.</p>
+                <div class="partnership-modal__nav-btns">
+                  <button type="button" class="partnership-modal__next" id="partnershipNextBtn" aria-label="Следующая страница">→</button>
+                </div>
+              </div>
+            </div>
+            <div class="partnership-modal__sheet" data-partnership-sheet="1">
+              <div class="partnership-modal__sheet-inner">
+                <img src="./assets/partnership-2026-step1.jpg" alt="Шаг 1: создаем вам онлайн-клуб Poker21" class="partnership-modal__img" loading="lazy" />
+                <h3 class="partnership-modal__heading">Если у вас еще нет клуба</h3>
+                <p class="partnership-modal__step">1️⃣ Создаем вам онлайн-клуб</p>
+                <p class="partnership-modal__text">в одном приложении на выбор или в нескольких.</p>
+                <div class="partnership-modal__nav-btns">
+                  <button type="button" class="partnership-modal__prev" aria-label="Предыдущая страница">←</button>
+                  <button type="button" class="partnership-modal__next" aria-label="Следующая страница">→</button>
+                </div>
+              </div>
+            </div>
+            <div class="partnership-modal__sheet" data-partnership-sheet="2">
+              <div class="partnership-modal__sheet-inner">
+                <img src="./assets/partnership-2026-step2.jpg" alt="Шаг 2: подключаем клуб к союзу клубов" class="partnership-modal__img" loading="lazy" />
+                <p class="partnership-modal__step">2️⃣ Подключаем ваш клуб к союзу клубов.</p>
+                <p class="partnership-modal__text">В вашем клубе появляются наши кеш-столы, турниры и фрироллы.</p>
+                <p class="partnership-modal__text">Все те же самые столы, что и в клубе Два Туза, где уже играют наши игроки. И игроки вашего клуба будут видеть эти столы и смогут играть вместе с нашими через ваш клуб.</p>
+                <div class="partnership-modal__nav-btns">
+                  <button type="button" class="partnership-modal__prev" aria-label="Предыдущая страница">←</button>
+                  <button type="button" class="partnership-modal__next" aria-label="Следующая страница">→</button>
+                </div>
+              </div>
+            </div>
+            <div class="partnership-modal__sheet" data-partnership-sheet="3">
+              <div class="partnership-modal__sheet-inner">
+                <img src="./assets/partnership-2026-step3.jpg" alt="Шаг 3: игроки играют через ваш клуб" class="partnership-modal__img" loading="lazy" />
+                <p class="partnership-modal__step">3️⃣ Игроки вступают и играют через ваш клуб.</p>
+                <p class="partnership-modal__text">Вы получаете клубный сверх-рейкбек (комиссию с ваших игроков, которые играют через ваш клуб) до 90%.</p>
+                <div class="partnership-modal__nav-btns">
+                  <button type="button" class="partnership-modal__prev" aria-label="Предыдущая страница">←</button>
+                  <button type="button" class="partnership-modal__next" aria-label="Следующая страница">→</button>
+                </div>
+              </div>
+            </div>
+            <div class="partnership-modal__sheet" data-partnership-sheet="4">
+              <div class="partnership-modal__sheet-inner">
+                <img src="./assets/partnership-2026-cost.jpg" alt="Стоимость партнерства Poker21" class="partnership-modal__img" loading="lazy" />
+                <h3 class="partnership-modal__heading">Стоимость партнерства</h3>
+                <p class="partnership-modal__text">✅ 65$ в неделю, оплата минимум за месяц</p>
+                <p class="partnership-modal__text">✅ Если у вас уже есть активный клуб (проверяется), то условия индивидуальные</p>
+                <p class="partnership-modal__text partnership-modal__text--contact">❓ По вопросам и подключению пишите в лс<br />➡️ <a href="https://t.me/Roman1787443" target="_blank" rel="noopener noreferrer" class="partnership-modal__link">@Roman1787443</a></p>
+                <div class="partnership-modal__nav-btns">
+                  <button type="button" class="partnership-modal__prev" aria-label="Предыдущая страница">←</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="partnership-modal__nav" aria-hidden="true">
+            <span class="partnership-modal__page-indicator" id="partnershipPageIndicator">1 / 5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Глобальные модалки грузятся лениво: отчёты, посетители, tracking, lightbox -->
       <div id="globalModalsFragmentHost" data-html-fragment="./html-fragments/global-modals.html"></div>
     <nav class="bottom-nav" role="navigation">
       <button type="button" class="bottom-nav__item bottom-nav__item--active" data-view-target="home">
@@ -1311,189 +1537,189 @@
         <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
       </button>
     </nav>
-    <script defer src="./telegram-web-app.js?v=3.413"></script>
-    <script defer src="./updates-data.js?v=3.413"></script>
-    <script defer src="./poker-tasks-data.js?v=3.413"></script>
-    <script defer src="./app-auth.js?v=3.413"></script>
-    <script defer src="./app-network.js?v=3.413"></script>
-    <script defer src="./app-shared-helpers.js?v=3.413"></script>
-    <script defer src="./app-home-init.js?v=3.413"></script>
-    <script defer src="./app-home-media.js?v=3.413"></script>
-    <script defer src="./app-lazy-loader.js?v=3.413"></script>
-    <script defer src="./app-home-planner-access.js?v=3.413"></script>
-    <script defer src="./app-home-planner-runtime.js?v=3.413"></script>
-    <script defer src="./app-home-planner.js?v=3.413"></script>
-    <script defer src="./app-home-tasks.js?v=3.413"></script>
-    <script defer src="./app-tournament-day.js?v=3.413"></script>
-    <script defer src="./app-home-deeplinks.js?v=3.413"></script>
-    <script defer src="./app-home-club-info-modals.js?v=3.413"></script>
-    <script defer src="./app-home-vpn-proxy-modal.js?v=3.413"></script>
-    <script defer src="./app-home-gazette-comments.js?v=3.413"></script>
-    <script defer src="./app-home-gazette-tasks.js?v=3.413"></script>
-    <script defer src="./app-rating-core.js?v=3.413"></script>
-    <script defer src="./app-rating-spring-season.js?v=3.413"></script>
-    <script defer src="./app-rating-summer-season.js?v=3.413"></script>
-    <script defer src="./app-rating-view.js?v=3.413"></script>
-    <script defer src="./app-rating-view-adapter.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-render-utils.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-identity-formatters.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-roster-ui.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-render.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-storage.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-prefetch.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-pickers.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-add-members.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-create.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-group-info.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-user-modal.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-club-access.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-templates.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-helpers.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-message-builders.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-runtime.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-media-layout.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-outgoing-helpers.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-general-loader.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-general-sender.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-loader.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-sender.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-reactions.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-edit-delete-ui.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-context-menu.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-polling.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-conversation-shell.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-tab-dialog-shell.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-open-shell.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-open-peer-hydrate.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-club-gate.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs-meta.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-loader.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-self-pins.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-friend-actions.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-contact-swipe-actions.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-unread.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-auth-guard.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-bootstrap.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialog-actions.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-dialog-preview.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-push-open.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-voice-media.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-voice-recording.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-overlay.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-scroll-bottom.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-composer-core.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-composer-send.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-presence-typing.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-bootstrap-prefetch.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-math.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-foundation.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-lifecycle.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-composer-layout.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-viewport-events.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-view-glue.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-header-avatar.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-attachments.js?v=3.413"></script>
-    <script defer src="./app-profile-hero.js?v=3.413"></script>
-    <script defer src="./app-profile-user-info.js?v=3.413"></script>
-    <script defer src="./app-profile-pokerplus.js?v=3.413"></script>
-    <script defer src="./app-profile-email-auth.js?v=3.413"></script>
-    <script defer src="./app-profile-friends.js?v=3.413"></script>
-    <script defer src="./app-profile-avatar-cache.js?v=3.413"></script>
-    <script defer src="./app-profile-avatar.js?v=3.413"></script>
-    <script defer src="./app-profile.js?v=3.413"></script>
-    <script defer src="./app-profile-shows.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-session.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-i18n.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-language-ui.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-telegram-code.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-email-login.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-restore.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-entry-screen.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-mode.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-overlay.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-runtime.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth.js?v=3.413"></script>
-    <script defer src="./app-pwa-auth-keyboard-lift.js?v=3.413"></script>
-    <script defer src="./app-push.js?v=3.413"></script>
-    <script defer src="./app-pwa-open-handlers.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="streams" src="./app-streams.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-games.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-daily-poker.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-subscribe.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-broadcast.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-admin-create.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-completed.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-public.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-active-view.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-formatters.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons-modals.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="tools" src="./app-equilator.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating-summer-runtime.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating-data-registry.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=3.413"></script>
-    <script defer src="./app-shell-layout.js?v=3.413"></script>
-    <script defer src="./app-navigation-scroll.js?v=3.413"></script>
-    <script defer src="./app-html-fragments.js?v=3.413"></script>
-    <script defer src="./app-webview-keyboard.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-emoji-picker.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-reply-retry-glue.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-guest-gate.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-debug.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-overscroll-debug.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js?v=3.413"></script>
-    <script defer src="./app-view-router.js?v=3.413"></script>
-    <script defer src="./app-popstate-recovery.js?v=3.413"></script>
-    <script defer src="./app-visitor-id.js?v=3.413"></script>
-    <script defer src="./app-api-tracking.js?v=3.413"></script>
-    <script defer src="./app-shell-bootstrap.js?v=3.413"></script>
-    <script defer src="./app.js?v=3.413"></script>
-    <script defer src="./app-section-views.js?v=3.413"></script>
-    <script defer src="./app-visitors-admin.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-charts.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-reports.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-registrations.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-viewport-shell.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-runtime.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-runtime-core.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="auth-debug" src="./app-auth-debug.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="share-stats" src="./app-share-stats.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="tracking" src="./app-tracking-links.js?v=3.413"></script>
-    <script defer src="./app-cashout.js?v=3.413"></script>
-    <script defer src="./app-updates.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league1.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league2.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-meta.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-data-march.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-data-april.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-data-may.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./spring-rating-data.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league1.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league2.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-meta.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-data-june.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-data-july.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-data-august.js?v=3.413"></script>
-    <script defer data-poker-eager-domain="app" src="./summer-rating-data.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js?v=3.413"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="streams" src="./peerjs.min.js?v=3.413"></script>
+    <script defer src="./telegram-web-app.js?v=3.414"></script>
+    <script defer src="./updates-data.js?v=3.414"></script>
+    <script defer src="./poker-tasks-data.js?v=3.414"></script>
+    <script defer src="./app-auth.js?v=3.414"></script>
+    <script defer src="./app-network.js?v=3.414"></script>
+    <script defer src="./app-shared-helpers.js?v=3.414"></script>
+    <script defer src="./app-home-init.js?v=3.414"></script>
+    <script defer src="./app-home-media.js?v=3.414"></script>
+    <script defer src="./app-lazy-loader.js?v=3.414"></script>
+    <script defer src="./app-home-planner-access.js?v=3.414"></script>
+    <script defer src="./app-home-planner-runtime.js?v=3.414"></script>
+    <script defer src="./app-home-planner.js?v=3.414"></script>
+    <script defer src="./app-home-tasks.js?v=3.414"></script>
+    <script defer src="./app-tournament-day.js?v=3.414"></script>
+    <script defer src="./app-home-deeplinks.js?v=3.414"></script>
+    <script defer src="./app-home-club-info-modals.js?v=3.414"></script>
+    <script defer src="./app-home-vpn-proxy-modal.js?v=3.414"></script>
+    <script defer src="./app-home-gazette-comments.js?v=3.414"></script>
+    <script defer src="./app-home-gazette-tasks.js?v=3.414"></script>
+    <script defer src="./app-rating-core.js?v=3.414"></script>
+    <script defer src="./app-rating-spring-season.js?v=3.414"></script>
+    <script defer src="./app-rating-summer-season.js?v=3.414"></script>
+    <script defer src="./app-rating-view.js?v=3.414"></script>
+    <script defer src="./app-rating-view-adapter.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-render-utils.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-identity-formatters.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-roster-ui.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-render.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-storage.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-prefetch.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-pickers.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-add-members.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-create.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-group-info.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-user-modal.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-club-access.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-templates.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-helpers.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-message-builders.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-message-render-runtime.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-media-layout.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-outgoing-helpers.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-general-loader.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-general-sender.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-loader.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-personal-sender.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-reactions.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-edit-delete-ui.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-context-menu.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-polling.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-conversation-shell.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-tab-dialog-shell.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-open-shell.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-open-peer-hydrate.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-club-gate.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialogs-meta.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-contacts-loader.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-self-pins.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-friend-actions.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-contact-swipe-actions.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-unread.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-auth-guard.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-bootstrap.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialog-actions.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-dialog-preview.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-push-open.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-voice-media.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-voice-recording.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-overlay.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-scroll-bottom.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-composer-core.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-composer-send.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-presence-typing.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-bootstrap-prefetch.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-math.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-foundation.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-lifecycle.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-composer-layout.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-viewport-events.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-view-glue.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-header-avatar.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-attachments.js?v=3.414"></script>
+    <script defer src="./app-profile-hero.js?v=3.414"></script>
+    <script defer src="./app-profile-user-info.js?v=3.414"></script>
+    <script defer src="./app-profile-pokerplus.js?v=3.414"></script>
+    <script defer src="./app-profile-email-auth.js?v=3.414"></script>
+    <script defer src="./app-profile-friends.js?v=3.414"></script>
+    <script defer src="./app-profile-avatar-cache.js?v=3.414"></script>
+    <script defer src="./app-profile-avatar.js?v=3.414"></script>
+    <script defer src="./app-profile.js?v=3.414"></script>
+    <script defer src="./app-profile-shows.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-session.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-i18n.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-language-ui.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-telegram-code.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-email-login.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-restore.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-entry-screen.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-mode.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-overlay.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-runtime.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth.js?v=3.414"></script>
+    <script defer src="./app-pwa-auth-keyboard-lift.js?v=3.414"></script>
+    <script defer src="./app-push.js?v=3.414"></script>
+    <script defer src="./app-pwa-open-handlers.js?v=3.414"></script>
+    <script defer src="./app-streams.js?v=3.414"></script>
+    <script defer src="./app-video-lessons.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-games.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-daily-poker.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-subscribe.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-broadcast.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-admin-create.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-completed.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-public.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-active-view.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-formatters.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=3.414"></script>
+    <script defer src="./app-video-lessons-modals.js?v=3.414"></script>
+    <script defer src="./app-equilator.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-summer-runtime.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-data-registry.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=3.414"></script>
+    <script defer src="./app-shell-layout.js?v=3.414"></script>
+    <script defer src="./app-navigation-scroll.js?v=3.414"></script>
+    <script defer src="./app-html-fragments.js?v=3.414"></script>
+    <script defer src="./app-webview-keyboard.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-emoji-picker.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-reply-retry-glue.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-guest-gate.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-keyboard-debug.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-overscroll-debug.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js?v=3.414"></script>
+    <script defer src="./app-view-router.js?v=3.414"></script>
+    <script defer src="./app-popstate-recovery.js?v=3.414"></script>
+    <script defer src="./app-visitor-id.js?v=3.414"></script>
+    <script defer src="./app-api-tracking.js?v=3.414"></script>
+    <script defer src="./app-shell-bootstrap.js?v=3.414"></script>
+    <script defer src="./app.js?v=3.414"></script>
+    <script defer src="./app-section-views.js?v=3.414"></script>
+    <script defer src="./app-visitors-admin.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-charts.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-reports.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-registrations.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-viewport-shell.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-runtime.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-runtime-core.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="auth-debug" src="./app-auth-debug.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="share-stats" src="./app-share-stats.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="tracking" src="./app-tracking-links.js?v=3.414"></script>
+    <script defer src="./app-cashout.js?v=3.414"></script>
+    <script defer src="./app-updates.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league1.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-images-league2.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-meta.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data-march.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data-april.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data-may.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./spring-rating-data.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league1.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league2.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-meta.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-june.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-july.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-august.js?v=3.414"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js?v=3.414"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js?v=3.414"></script>
+    <script defer src="./peerjs.min.js?v=3.414"></script>
     <script>
       (function () {
         var v = document.documentElement.getAttribute("data-app-version");

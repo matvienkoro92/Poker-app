@@ -15,7 +15,9 @@
           return String(el.value).trim();
         };
         syncRakebackTable();
-        var rakebackRows = getUnaccountedRakebackReportRows();
+        var rakebackRows = editingReportId && typeof collectRakebackRows === "function"
+          ? collectRakebackRows(false, false)
+          : getUnaccountedRakebackReportRows();
         var rakebackTotal = sumRakebackReportRows(rakebackRows);
         if (!isFinite(rakebackTotal)) rakebackTotal = 0;
         var manualRakebackRaw = getRawVal("adminReportRakeback");

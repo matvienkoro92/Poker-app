@@ -2452,6 +2452,22 @@
       return (showTemplateRows ? ids.length : 0) + visibleShared.length;
     }
 
+    function fillTable(rows, legacyRakeback) {
+      if (Array.isArray(rows)) {
+        sharedRows = normalizeDraftRows(rows);
+        if (!sharedRows.length && legacyRakeback != null && legacyRakeback !== "" && parseNumber(legacyRakeback) !== 0) {
+          sharedRows = normalizeDraftRows([{
+            kind: "base",
+            room: activeRoom || "P21",
+            playerId: "",
+            rake: legacyRakeback,
+            percent: 100,
+          }]);
+        }
+      }
+      return render();
+    }
+
     function open() {
       var count = render();
       scheduleSharedDraftAutoload();
@@ -3022,7 +3038,7 @@
       bind: bind,
       close: closeRakebackTotalsModal,
       collectRows: collectRows,
-      fillTable: render,
+      fillTable: fillTable,
       getActiveRoom: function () { return activeRoom; },
       getUnaccountedRows: function () {
         return getUnsentReportRakebackRows().filter(function (row) {

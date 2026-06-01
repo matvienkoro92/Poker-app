@@ -6,6 +6,9 @@
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
   var adminReportRakebackShellModule = null;
+  var INLINE_GLOBAL_MODAL_IDS = [
+    "partnershipModal"
+  ];
   var ADMIN_GLOBAL_MODAL_IDS = [
     "visitorsAdminModal",
     "visitorsBroadcastModal",
@@ -130,6 +133,15 @@
     });
   }
 
+  function removeExistingInlineGlobalModals(root) {
+    if (!root) return;
+    INLINE_GLOBAL_MODAL_IDS.forEach(function (id) {
+      if (!document.getElementById(id)) return;
+      var node = root.querySelector ? root.querySelector("#" + id) : null;
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+    });
+  }
+
   function hydrateGlobalModalSubfragments(root) {
     var hosts = Array.prototype.slice.call(root.querySelectorAll("[data-global-modal-fragment]"));
     if (!hosts.length) return Promise.resolve(root);
@@ -190,6 +202,7 @@
         wrap.innerHTML = html;
         return hydrateGlobalModalSubfragments(wrap).then(function () {
           removeExistingAdminGlobalModals(wrap);
+          removeExistingInlineGlobalModals(wrap);
           var nodes = [];
           while (wrap.firstChild) nodes.push(wrap.removeChild(wrap.firstChild));
           nodes.forEach(function (node) {

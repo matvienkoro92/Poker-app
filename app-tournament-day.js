@@ -172,15 +172,29 @@ function getHomeTournamentBannerUrl(file) {
   return typeof getAssetUrl === "function" ? getAssetUrl(file) : "./assets/" + file;
 }
 
-function preloadHomeTournamentBanner(file) {
+function setHomeTournamentImagePriority(img, priority) {
+  if (!img) return;
+  try {
+    img.loading = "eager";
+  } catch (e) {}
+  try {
+    img.fetchPriority = priority || "low";
+  } catch (e2) {}
+}
+
+function preloadHomeTournamentBanner(file, priority) {
   if (!file || typeof Image === "undefined") return null;
   var url = getHomeTournamentBannerUrl(file);
   if (!url) return null;
-  if (HOME_TOURNAMENT_BANNER_PRELOADS[url]) return HOME_TOURNAMENT_BANNER_PRELOADS[url];
+  if (HOME_TOURNAMENT_BANNER_PRELOADS[url]) {
+    if (priority === "high") setHomeTournamentImagePriority(HOME_TOURNAMENT_BANNER_PRELOADS[url].img, "high");
+    return HOME_TOURNAMENT_BANNER_PRELOADS[url];
+  }
   var img = new Image();
   var state = { img: img, loaded: false, failed: false, url: url };
   HOME_TOURNAMENT_BANNER_PRELOADS[url] = state;
   img.decoding = "async";
+  setHomeTournamentImagePriority(img, priority || "low");
   img.onload = function () {
     state.loaded = true;
   };
@@ -194,7 +208,7 @@ function preloadHomeTournamentBanner(file) {
 function preloadHomeTournamentBanners(preferredWeekday) {
   if (HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED) {
     var preferred = TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday];
-    if (preferred && preferred.banner) preloadHomeTournamentBanner(preferred.banner);
+    if (preferred && preferred.banner) preloadHomeTournamentBanner(preferred.banner, "high");
     return;
   }
   HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = true;
@@ -205,7 +219,7 @@ function preloadHomeTournamentBanners(preferredWeekday) {
   });
   order.forEach(function (dow) {
     var item = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow];
-    if (item && item.banner) preloadHomeTournamentBanner(item.banner);
+    if (item && item.banner) preloadHomeTournamentBanner(item.banner, dow === preferredWeekday ? "high" : "low");
   });
 }
 
@@ -427,13 +441,13 @@ function renderHomeTournamentWeekList(activeWeekday) {
     row.appendChild(day);
     row.appendChild(main);
     row.addEventListener("pointerenter", function () {
-      if (item.banner) preloadHomeTournamentBanner(item.banner);
+      if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
     });
     row.addEventListener("pointerdown", function () {
-      if (item.banner) preloadHomeTournamentBanner(item.banner);
+      if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
     });
     row.addEventListener("click", function () {
-      if (item.banner) preloadHomeTournamentBanner(item.banner);
+      if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
       window._homeTournamentSelectedWeekday = dow;
       updateTournamentDayBlock();
     });
@@ -976,6 +990,8 @@ function updateTournamentDayBlock() {
     if (homeTrophyImg) {
       if (hasDetailBanner) {
         var homeTrophySrc = getHomeTournamentBannerUrl(detailBannerFile);
+        setHomeTournamentImagePriority(homeTrophyImg, "high");
+        preloadHomeTournamentBanner(detailBannerFile, "high");
         if (homeTrophyImg.getAttribute("data-home-tournament-banner-src") !== homeTrophySrc) {
           homeTrophyImg.setAttribute("data-home-tournament-banner-src", homeTrophySrc);
           homeTrophyImg.src = homeTrophySrc;

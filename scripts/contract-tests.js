@@ -410,9 +410,67 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 388008256, telegramUsername: "roman1787443" }, "tg_388008256"), true, "roman1787443 can access admin reports");
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 2144406710, telegramUsername: "" }, "tg_2144406710"), true, "anna can access admin reports");
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, pwaUsername: "roman1_matvienko" }, "mail_ID000001"), true, "roman1 can access admin reports by username");
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, telegramUsername: "player", pwaUsername: "roman1_matvienko" }, "mail_ID000001"), true, "roman1 pwa username grants admin reports even with another telegram username field");
   assert.strictEqual(reportAccess.isAdminReportEmail("matvienkoro92@gmail.com"), true, "roman1 can access admin reports by email");
   const reportToken = pwa.signPwaSession({ id: 2144406710, username: "anna", adminReportAccess: true }, BOT_TOKEN);
   assert.strictEqual(pwa.verifyPwaSessionToken(reportToken, BOT_TOKEN).adminReportAccess, true, "pwa session carries admin report access");
+
+  const reportHandler = loadHandler("admin-report-shifts");
+  const roman1ReportToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "roman1_matvienko" }, BOT_TOKEN);
+  const roman178ReportToken = pwa.signPwaSession({ id: 388008256, memberId: "tg_388008256", username: "roman1787443" }, BOT_TOKEN);
+  let shiftReportRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman1ReportToken,
+    date: "01.06.2026",
+    weekday: "Понедельник",
+    deposit: 100,
+    cashout: 0,
+    prodamus: 0,
+    robokassa: 0,
+    romaCrypto: 0,
+    botCryptoDep: 0,
+    botExchipDep: 0,
+    botExchipCashout: 0,
+    bonuses: 0,
+    transfers: 0,
+    ret: 0,
+    sergeyMarina: 0,
+    rakeback: 0,
+    extraFields: [],
+  }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman1 can create an admin shift report");
+  const shiftReportId = shiftReportRes.body && shiftReportRes.body.report && shiftReportRes.body.report.id;
+  assert.ok(shiftReportId, "admin shift report returns id");
+  shiftReportRes = await call(reportHandler, req("PUT", {}, {
+    pwaSession: roman1ReportToken,
+    id: shiftReportId,
+    date: "01.06.2026",
+    weekday: "Понедельник",
+    deposit: 250,
+    cashout: 0,
+    prodamus: 0,
+    robokassa: 0,
+    romaCrypto: 0,
+    botCryptoDep: 0,
+    botExchipDep: 0,
+    botExchipCashout: 0,
+    bonuses: 0,
+    transfers: 0,
+    ret: 0,
+    sergeyMarina: 0,
+    rakeback: 0,
+    extraFields: [],
+  }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman1 can edit a sent admin shift report");
+  assert.strictEqual(shiftReportRes.body.report.deposit, 250, "sent report edit updates deposit");
+  shiftReportRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman178ReportToken,
+    action: "delete",
+    id: shiftReportId,
+  }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can delete a sent admin shift report");
+  shiftReportRes = await call(reportHandler, req("GET", { pwaSession: roman178ReportToken, scope: "all" }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can list sent reports after delete");
+  assert.strictEqual((shiftReportRes.body.reports || []).some((report) => report.id === shiftReportId), false, "deleted sent report is gone");
 }
 
 async function testChatSendEditDelete() {
