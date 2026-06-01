@@ -1139,6 +1139,8 @@ async function testDailyPokerWinners(redis) {
     previousWeekUniquePlayers: expectedUniqueForDates(previousWeekDateSet),
     monthUniquePlayers: expectedUniqueForDates(monthDateSet),
     previousMonthUniquePlayers: expectedUniqueForDates(previousMonthDateSet),
+    firstSpinAt: "2026-05-20T08:00:00.000Z",
+    firstSpinDate: "2026-05-20",
   };
   redis.s("poker_app:daily_poker_users").add("ID100002");
   redis.s("poker_app:daily_poker_users").add("ID100003");
@@ -1279,6 +1281,8 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.previousWeekUniquePlayers, expectedSpinStats.previousWeekUniquePlayers, "daily poker winners exposes unique public spinners previous week");
   assert.strictEqual(r.body.monthUniquePlayers, expectedSpinStats.monthUniquePlayers, "daily poker winners exposes unique public spinners this month");
   assert.strictEqual(r.body.previousMonthUniquePlayers, expectedSpinStats.previousMonthUniquePlayers, "daily poker winners exposes unique public spinners previous month");
+  assert.strictEqual(r.body.firstSpinAt, expectedSpinStats.firstSpinAt, "daily poker winners exposes first public spin timestamp");
+  assert.strictEqual(r.body.firstSpinDate, expectedSpinStats.firstSpinDate, "daily poker winners exposes first public spin date");
   assert.deepStrictEqual(r.body.spinStats, expectedSpinStats, "daily poker winners exposes grouped spin stats");
   assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
   assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by ruble total desc");

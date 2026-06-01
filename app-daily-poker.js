@@ -187,6 +187,22 @@
     list.innerHTML = '<div class="daily-poker__winners-empty' + (isError ? " daily-poker__winners-empty--error" : "") + '">' + esc(text || "") + '</div>';
   }
 
+  function formatDailyPokerStartDate(value) {
+    var raw = String(value || "").trim();
+    if (!raw) return "";
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[3] + "." + m[2] + "." + m[1];
+    var d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      try {
+        return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+      } catch (e) {
+        return d.toLocaleDateString("ru-RU");
+      }
+    }
+    return "";
+  }
+
   function renderSpinStats(data) {
     var el = $("dailyPokerSpinStats");
     if (!el) return;
@@ -200,8 +216,10 @@
     var week = Math.max(0, parseInt(stats.weekUniquePlayers || data.weekUniquePlayers || "0", 10) || 0);
     var month = Math.max(0, parseInt(stats.monthUniquePlayers || data.monthUniquePlayers || "0", 10) || 0);
     var previousMonth = Math.max(0, parseInt(stats.previousMonthUniquePlayers || data.previousMonthUniquePlayers || "0", 10) || 0);
+    var firstSpinDate = formatDailyPokerStartDate(stats.firstSpinDate || data.firstSpinDate || stats.firstSpinAt || data.firstSpinAt);
     el.hidden = false;
     el.innerHTML =
+      (firstSpinDate ? '<span>Игра запущена: <strong>' + esc(firstSpinDate) + '</strong></span>' : "") +
       '<span>Сегодня крутили: <strong>' + esc(formatCompactAmount(today)) + '</strong></span>' +
       '<span>На этой неделе крутили: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>' +
       '<span>В этом месяце крутили: <strong>' + esc(formatCompactAmount(month)) + '</strong></span>' +
