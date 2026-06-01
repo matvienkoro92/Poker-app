@@ -22,6 +22,7 @@ function initRaffles() {
     initRaffles.__profileOpenDelegate = false;
   }
   var rafflesRoot = document.querySelector('.view[data-view="raffles"]');
+  if (rafflesRoot && typeof window.pokerInitRafflesHeroShare === "function") window.pokerInitRafflesHeroShare();
   var base = getApiBase();
   var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;

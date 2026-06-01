@@ -1,5 +1,5 @@
-// Кнопки шаринга в шапке розыгрышей: один раз при загрузке (не внутри initRaffles — иначе при каждом заходе дублируются обработчики).
-(function initRafflesHeroShare() {
+// Кнопки шаринга в шапке розыгрышей. Разметка приходит lazy-фрагментом, поэтому init можно безопасно повторять.
+function pokerInitRafflesHeroShare() {
   function rafflesDeepLink() {
     return buildMiniAppStartLink("raffles");
   }
@@ -93,4 +93,11 @@
       });
     });
   }
-})();
+}
+
+window.pokerInitRafflesHeroShare = pokerInitRafflesHeroShare;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", pokerInitRafflesHeroShare, { once: true });
+} else {
+  pokerInitRafflesHeroShare();
+}

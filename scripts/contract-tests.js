@@ -54,6 +54,8 @@ class MemoryRedis {
     const key = command[1] != null ? String(command[1]) : "";
     if (cmd === "GET") return this.result(this.kv.has(key) ? this.kv.get(key) : null);
     if (cmd === "SET") {
+      const opts = command.slice(3).map((item) => String(item || "").toUpperCase());
+      if (opts.includes("NX") && this.kv.has(key)) return this.result(null);
       this.kv.set(key, String(command[2] == null ? "" : command[2]));
       return this.result("OK");
     }
@@ -883,6 +885,46 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
   } finally {
     webpush.sendNotification = originalSendNotification;
   }
+}
+
+async function testRaffleWinnerNotificationDedup(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const { createRaffleNotificationService } = require(path.join(root, "lib/raffle-notifications"));
+  const sentPushes = [];
+  const service = createRaffleNotificationService({
+    botToken: BOT_TOKEN,
+    adminIds: [],
+    miniAppUrl: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+    rafflePrefix: "poker_app:raffle:",
+    redisPipeline: async (commands) => redis.pipeline(commands),
+    sendWebPushToMember: async (memberId, payload) => {
+      sentPushes.push({ memberId, payload });
+      return 1;
+    },
+  });
+  const raffle = {
+    id: "contract_raffle_notify_dedup",
+    title: "Dedup raffle",
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      prize: "Ticket 500 ₽",
+    }],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  await Promise.all([
+    service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle))),
+    service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle))),
+  ]);
+  const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
+  const winnerPushes = sentPushes.filter((item) => item.payload && item.payload.kind === "raffle_winner");
+  assert.strictEqual(winnerMessages.length, 1, "winner Telegram notification is sent once under duplicate triggers");
+  assert.strictEqual(winnerPushes.length, 1, "winner web push is sent once under duplicate triggers");
 }
 
 async function testRaffleDailyRecurring(redis) {
@@ -2823,6 +2865,7 @@ async function main() {
     ["raffle winner ready", testRaffleWinnerReady],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
+    ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],
