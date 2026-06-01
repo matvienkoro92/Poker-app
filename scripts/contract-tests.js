@@ -762,23 +762,27 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   redis.kv.set("poker_app:raffle:contract_raffle_tg_privacy", JSON.stringify(raffle));
   redis.l("poker_app:raffle_ids").push("contract_raffle_tg_privacy");
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player_public");
+  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({ nickname: "Poker21Nick" }));
 
   let r = await call(raffles, req("GET", { pwaSession: s.user, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "non-admin can load raffle");
   assert.strictEqual(r.body.isAdmin, false, "non-admin response is not admin");
   assert.strictEqual(r.body.raffle.participants[0].telegramUsername, undefined, "non-admin does not receive participant telegram username");
   assert.strictEqual(r.body.raffle.winners[0].telegramUsername, undefined, "non-admin does not receive winner telegram username");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin receives winner Poker21 nickname");
 
   r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "admin can load raffle");
   assert.strictEqual(r.body.isAdmin, true, "admin response is admin");
   assert.strictEqual(r.body.raffle.participants[0].telegramUsername, "player_public", "admin receives participant telegram username");
   assert.strictEqual(r.body.raffle.winners[0].telegramUsername, "player_public", "admin receives winner telegram username");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "admin receives winner Poker21 nickname");
 
   r = await call(raffles, req("GET", { pwaSession: s.user }));
   const listed = (r.body.raffles || []).find((item) => item.id === "contract_raffle_tg_privacy");
   assert.ok(listed, "non-admin list includes raffle");
   assert.strictEqual(listed.winners[0].telegramUsername, undefined, "non-admin list hides winner telegram username");
+  assert.strictEqual(listed.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin list exposes winner Poker21 nickname");
 }
 
 async function testRaffleCashBroadcastAndWinnerInstruction(redis) {

@@ -821,6 +821,14 @@
   font-size: 12px;
   font-weight: 600;
 }
+.raffle-winner-leaders__poker-nick {
+  display: block;
+  margin-top: 2px;
+  color: #fed7aa;
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
 .raffle-winner-leaders__stats {
   flex: 0 0 auto;
   display: flex;

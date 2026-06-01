@@ -162,6 +162,14 @@ function initRafflesCompletedRuntime(opts) {
     return parts.join(" · ");
   }
 
+  function raffleWinnerLeaderPokerNick(row) {
+    if (!row) return "";
+    var nick = row.pokerPlusNickname != null ? String(row.pokerPlusNickname).trim() : "";
+    if (!nick) return "";
+    if (row.id != null && nick === String(row.id).trim()) return "";
+    return nick;
+  }
+
   function buildRaffleWinnerLeaderRows(completed) {
     var byId = {};
     (completed || []).forEach(function (raffle) {
@@ -175,12 +183,14 @@ function initRafflesCompletedRuntime(opts) {
             userId: w.userId != null ? String(w.userId).trim() : "",
             name: w.name != null ? String(w.name).trim() : "",
             telegramUsername: w.telegramUsername != null ? String(w.telegramUsername).trim() : "",
+            pokerPlusNickname: w.pokerPlusNickname != null ? String(w.pokerPlusNickname).trim() : "",
             count: 0,
             totalPrize: 0
           };
         } else {
           if (!byId[id].name && w.name != null && String(w.name).trim()) byId[id].name = String(w.name).trim();
           if (!byId[id].telegramUsername && w.telegramUsername != null && String(w.telegramUsername).trim()) byId[id].telegramUsername = String(w.telegramUsername).trim();
+          if (!byId[id].pokerPlusNickname && w.pokerPlusNickname != null && String(w.pokerPlusNickname).trim()) byId[id].pokerPlusNickname = String(w.pokerPlusNickname).trim();
           if (!byId[id].userId && w.userId != null && String(w.userId).trim()) byId[id].userId = String(w.userId).trim();
         }
         byId[id].count += 1;
@@ -198,11 +208,13 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleWinnerLeaderRowsHtml(rows) {
     return (rows || []).map(function (row) {
+      var pokerNick = raffleWinnerLeaderPokerNick(row);
       var meta = raffleWinnerLeaderMetaText(row);
       var totalText = raffleWinnerLeaderTotalText(row.totalPrize);
       return (
         '<li class="raffle-winner-leaders__item"><span class="raffle-winner-leaders__id">' +
         escapeHtml(row.id) +
+        (pokerNick ? '<span class="raffle-winner-leaders__poker-nick">Poker21: ' + escapeHtml(pokerNick) + "</span>" : "") +
         (meta ? '<span class="raffle-winner-leaders__meta">' + escapeHtml(meta) + "</span>" : "") +
         '</span><span class="raffle-winner-leaders__stats"><span class="raffle-winner-leaders__count">— ' +
         escapeHtml(raffleWinCountText(row.count)) +
