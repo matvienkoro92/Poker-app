@@ -5,12 +5,14 @@ function initRafflesCompletedRuntime(opts) {
     var rafflesCompletedEmpty = document.getElementById("rafflesCompletedEmpty");
     var raffleWinnerLeaders = document.getElementById("raffleWinnerLeaders");
     var raffleWinnerLeadersList = document.getElementById("raffleWinnerLeadersList");
+    var raffleWinnerLeadersSummary = document.getElementById("raffleWinnerLeadersSummary");
     var raffleWinnerLeadersExpandBtn = document.getElementById("raffleWinnerLeadersExpandBtn");
     var raffleWinnerLeadersModal = document.getElementById("raffleWinnerLeadersModal");
     var raffleWinnerLeadersModalBackdrop = document.getElementById("raffleWinnerLeadersModalBackdrop");
     var raffleWinnerLeadersModalClose = document.getElementById("raffleWinnerLeadersModalClose");
     var raffleWinnerLeadersModalList = document.getElementById("raffleWinnerLeadersModalList");
     var raffleWinnerLeaderRows = [];
+    var RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT = 5;
 
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin) {
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
@@ -148,8 +150,35 @@ function initRafflesCompletedRuntime(opts) {
     if (!w) return "";
     var p21 = w.p21Id != null ? String(w.p21Id).trim() : "";
     if (p21) return p21;
+    var accountId = w.accountId != null ? String(w.accountId).trim() : "";
+    if (accountId) return accountId;
     var uid = w.userId != null ? String(w.userId).trim() : "";
     return uid;
+  }
+
+  function buildRaffleWinnerLeaderSummary(completed) {
+    var participants = {};
+    var winners = {};
+    (completed || []).forEach(function (raffle) {
+      if (!raffle || raffle.status === "cancelled") return;
+      var participantRows = Array.isArray(raffle.participants) ? raffle.participants : [];
+      var winnerRows = Array.isArray(raffle.winners) ? raffle.winners : [];
+      if (!participantRows.length && !winnerRows.length) return;
+      participantRows.forEach(function (p) {
+        var id = raffleWinnerLeaderId(p);
+        if (id) participants[id] = true;
+      });
+      winnerRows.forEach(function (w) {
+        var id = raffleWinnerLeaderId(w);
+        if (!id) return;
+        winners[id] = true;
+        participants[id] = true;
+      });
+    });
+    return {
+      participants: Object.keys(participants).length,
+      winners: Object.keys(winners).length
+    };
   }
 
   function raffleWinnerLeaderMetaText(row) {
@@ -227,17 +256,23 @@ function initRafflesCompletedRuntime(opts) {
 
   function renderRaffleWinnerLeaders(completed) {
     raffleWinnerLeaderRows = buildRaffleWinnerLeaderRows(completed);
+    var summary = buildRaffleWinnerLeaderSummary(completed);
     var hasRows = raffleWinnerLeaderRows.length > 0;
     if (raffleWinnerLeaders) {
       raffleWinnerLeaders.hidden = !hasRows;
       raffleWinnerLeaders.classList.toggle("raffle-winner-leaders--hidden", !hasRows);
     }
+    if (raffleWinnerLeadersSummary) {
+      raffleWinnerLeadersSummary.textContent = hasRows
+        ? "Уникальных участников: " + summary.participants + " · победителей: " + summary.winners
+        : "";
+    }
     if (raffleWinnerLeadersList) {
-      raffleWinnerLeadersList.innerHTML = hasRows ? raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows.slice(0, 10)) : "";
+      raffleWinnerLeadersList.innerHTML = hasRows ? raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows.slice(0, RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT)) : "";
     }
     if (raffleWinnerLeadersExpandBtn) {
-      raffleWinnerLeadersExpandBtn.hidden = raffleWinnerLeaderRows.length <= 10;
-      raffleWinnerLeadersExpandBtn.textContent = raffleWinnerLeaderRows.length > 10 ? "Развернуть" : "Все показаны";
+      raffleWinnerLeadersExpandBtn.hidden = raffleWinnerLeaderRows.length <= RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT;
+      raffleWinnerLeadersExpandBtn.textContent = raffleWinnerLeaderRows.length > RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT ? "Развернуть" : "Все показаны";
     }
   }
 
