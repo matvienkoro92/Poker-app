@@ -13,19 +13,24 @@ function initRafflesPublicRuntime(opts) {
       var groups = raffle.groups || [];
       var total = raffle.totalWinners || 0;
       var totalPrize = getRaffleTotalPrize(raffle);
+      var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+      var cashPrizeWord = typeof pokerRafflesPluralizeCashBuyinsForHeading === "function"
+        ? pokerRafflesPluralizeCashBuyinsForHeading(total || 0)
+        : "беккинг-байинов";
       var tournamentName = raffleDisplayPrizeText((raffle.title || (groups[0] && groups[0].prize) || "").trim()) || "турнир клуба";
       var link = buildMiniAppStartLink("raffles");
       if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
         if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
         return;
       }
-      var text =
-        "Разыгрываем " +
-        (total || 0) +
-        " беккинг-билетов на сумму " +
-        (totalPrize || 0) +
-        "₽ на " +
-        tournamentName;
+      var text = isCashPrize
+        ? "Разыгрываем " + (total || 0) + " " + cashPrizeWord + " на кеш. Сумма " + (totalPrize || 0) + "₽. Столы Бонус гейм на Poker21"
+        : "Разыгрываем " +
+          (total || 0) +
+          " беккинг-билетов на сумму " +
+          (totalPrize || 0) +
+          "₽ на " +
+          tournamentName;
       var textWithLink = text + "\n" + link;
       var shareTitleRaw =
         (typeof buildActiveRaffleCardHeading === "function" ? buildActiveRaffleCardHeading(raffle) : "") ||

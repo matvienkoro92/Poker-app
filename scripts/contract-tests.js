@@ -238,6 +238,35 @@ function installFetch(redis) {
   };
 }
 
+function installRecordingFetch(redis, sentMessages) {
+  global.fetch = async function fetchRecordingMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    if (u.includes("/sendMessage")) {
+      const payload = opts && opts.body ? JSON.parse(opts.body) : {};
+      sentMessages.push({ url: u, body: payload });
+      return {
+        ok: true,
+        async json() { return { ok: true, result: true }; },
+        async text() { return JSON.stringify({ ok: true }); },
+      };
+    }
+    return {
+      ok: true,
+      async json() { return { ok: true, result: true }; },
+      async text() { return JSON.stringify({ ok: true }); },
+    };
+  };
+}
+
 function clearProjectRequireCache() {
   const prefix = root + path.sep;
   Object.keys(require.cache).forEach((file) => {
@@ -568,6 +597,68 @@ async function testRaffleWinnerReady(redis) {
   assert.strictEqual(r.body.raffle.winners[0].winnerReady, true, "winner ready flag is stored");
   assert.strictEqual(r.body.raffle.winners[0].winnerReadyBy, "tg_1001", "winner ready author is stored");
   assert.ok(r.body.raffle.winners[0].winnerReadyAt, "winner ready timestamp is stored");
+}
+
+async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const s = sessions();
+
+  redis.s("poker_app:raffle_subscribers").add("1001");
+  const manual = loadHandler("raffle-manual-subscribers");
+  let r = await call(manual, req("POST", {}, {
+    pwaSession: s.admin,
+    prizeKind: "cash",
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    broadcastIdempotencyKey: "contract-cash-broadcast",
+  }));
+  assert.strictEqual(r.statusCode, 200, "cash raffle subscriber broadcast succeeds");
+  const subscriberMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
+  assert.ok(subscriberMessage, "subscriber receives cash raffle message");
+  assert.ok(String(subscriberMessage.body.text).includes("беккинг-байинов на кеш"), "cash broadcast says backing buy-ins");
+  assert.ok(!String(subscriberMessage.body.text).includes("беккинг-билетов"), "cash broadcast does not say backing tickets");
+
+  sentMessages.length = 0;
+  const raffles = loadHandler("raffles");
+  const raffle = {
+    id: "contract_cash_raffle",
+    title: "Розыгрыш беккинг-байинов на кеш",
+    prizeKind: "cash",
+    totalWinners: 1,
+    groups: [{ prize: "Беккинг-байин 500 ₽ на кеш", count: 1 }],
+    endDate: new Date(Date.now() - 60_000).toISOString(),
+    participants: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+    }],
+    winners: [],
+    status: "active",
+    createdAt: new Date(Date.now() - 3600_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_cash_raffle", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_cash_raffle");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "complete",
+    raffleId: "contract_cash_raffle",
+  }));
+  assert.strictEqual(r.statusCode, 200, "cash raffle can be completed");
+  assert.strictEqual(r.body.raffle.prizeKind, "cash", "cash raffle keeps prize kind after draw");
+
+  let winnerMessage = null;
+  for (let i = 0; i < 8 && !winnerMessage; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    winnerMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
+  }
+  assert.ok(winnerMessage, "winner receives raffle ready instruction");
+  const winnerText = String(winnerMessage.body.text || "");
+  assert.ok(winnerText.includes("startapp=raffles"), "winner message includes raffles deeplink");
+  assert.ok(winnerText.includes("«Я готов»"), "winner message explains ready button");
+  assert.ok(winnerText.includes("«Завершённые»"), "winner message explains completed tab");
+  assert.ok(winnerText.includes("отметку «Готов»"), "winner message explains admin-ready badge");
 }
 
 async function testRaffleDailyRecurring(redis) {
@@ -2501,6 +2592,7 @@ async function main() {
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle winner ready", testRaffleWinnerReady],
+    ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],

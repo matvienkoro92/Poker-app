@@ -24,6 +24,10 @@ function initRafflesAdminCreateRuntime(opts) {
     var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
 
+  function getRafflePrizeKind() {
+    return getRaffleCreateType() === "tickets" ? "tournament_ticket" : "cash";
+  }
+
   function getRaffleCreateType() {
     return raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other";
   }
@@ -282,7 +286,7 @@ function initRafflesAdminCreateRuntime(opts) {
       var div = document.createElement("div");
       div.className = "raffle-group-row";
       div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " — мест:</span><input type=\"number\" class=\"raffle-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>" +
-        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Приз:</span><input type=\"text\" class=\"raffle-group-prize randomizer-input\" placeholder=\"Название приза\" data-group-index=\"" + i + "\" /></label>";
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Приз:</span><input type=\"text\" class=\"raffle-group-prize randomizer-input\" placeholder=\"Например: Беккинг-байин 500 ₽ на кеш\" data-group-index=\"" + i + "\" /></label>";
       raffleGroupsEl.appendChild(div);
     }
   }
@@ -532,6 +536,7 @@ function initRafflesAdminCreateRuntime(opts) {
       var totalWinners;
       var groups;
       var title = "";
+      var prizeKind = getRafflePrizeKind();
       if (isTickets) {
         totalWinners = 0;
         groups = [];
@@ -592,12 +597,14 @@ function initRafflesAdminCreateRuntime(opts) {
         for (var j = 0; j < groupInputs.length; j++) {
           var count = Math.max(0, parseInt(groupInputs[j].value, 10) || 0);
           var prize = prizeInputs[j] ? prizeInputs[j].value.trim().slice(0, 200) : "";
+          if (!prize) prize = "Беккинг-байин на кеш";
           totalWinners += count;
           groups.push({ count: count, prize: prize });
         }
-        if (groups.length === 0) groups = [{ count: 1, prize: "Приз" }];
+        if (groups.length === 0) groups = [{ count: 1, prize: "Беккинг-байин на кеш" }];
         totalWinners = Math.max(1, totalWinners);
         title = document.getElementById("raffleTitle") ? document.getElementById("raffleTitle").value.trim().slice(0, 200) : "";
+        if (!title) title = "Розыгрыш беккинг-байинов на кеш";
       }
       var dailyEnabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
       var dailyStartTime = dailyEnabled ? normalizeRaffleDailyStartTime(raffleDailyStartTime && raffleDailyStartTime.value) : "";
@@ -628,6 +635,7 @@ function initRafflesAdminCreateRuntime(opts) {
             groups: groups,
             endDate: endDate.toISOString(),
             title: title || undefined,
+            prizeKind: prizeKind,
             daily: dailyEnabled,
             dailyStartTime: dailyStartTime || undefined,
             createIdempotencyKey: idemKey,

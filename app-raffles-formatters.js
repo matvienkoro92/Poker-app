@@ -87,6 +87,26 @@ function pokerRafflesPluralizeBackingTicketsForHeading(n) {
   return "беккинг-билетов";
 }
 
+function pokerRafflesPluralizeCashBuyinsForHeading(n) {
+  var v = Math.abs(n) % 100;
+  var d = v % 10;
+  if (v >= 11 && v <= 19) return "беккинг-байинов";
+  if (d === 1) return "беккинг-байин";
+  if (d >= 2 && d <= 4) return "беккинг-байина";
+  return "беккинг-байинов";
+}
+
+function pokerRafflesIsCashPrize(raffle) {
+  if (!raffle) return false;
+  var explicit = String(raffle.prizeKind || raffle.prize_kind || "").trim().toLowerCase();
+  if (explicit === "cash" || explicit === "cash_buyin" || explicit === "cash_buyins" || explicit === "other") return true;
+  if (explicit === "tournament_ticket" || explicit === "ticket" || explicit === "tickets") return false;
+  var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
+  var text = String(raffle.title || "").toLowerCase();
+  for (var i = 0; i < groups.length; i++) text += " " + String(groups[i] && groups[i].prize || "").toLowerCase();
+  return text.indexOf("на кеш") !== -1 || text.indexOf("кеш") !== -1 || text.indexOf("cash") !== -1 || text.indexOf("бонус гейм") !== -1 || text.indexOf("bonus game") !== -1;
+}
+
 function pokerRafflesParsePrizeTournamentNameFromPrize(prizeStr) {
   var s = String(prizeStr || "").trim();
   var idx = s.indexOf(" — ");
@@ -113,6 +133,7 @@ function pokerRafflesBuildActiveCardHeading(raffle) {
   var sumText = totalPrize > 0 ? pokerRafflesFormatSum(totalPrize) : "—";
   var rawTitle = (raffle.title || "").trim();
   var ticketWord = pokerRafflesPluralizeBackingTicketsForHeading(totalTickets || 0);
+  var isCashPrize = pokerRafflesIsCashPrize(raffle);
 
   function tourPhraseFromNames(uniqueNames) {
     if (uniqueNames.length >= 2) return "на турниры «" + uniqueNames.join("», «") + "»";
@@ -145,6 +166,53 @@ function pokerRafflesBuildActiveCardHeading(raffle) {
   for (var nj = 0; nj < rows.length; nj++) {
     var tn = rows[nj].tournament;
     if (tn && uniqueNames.indexOf(tn) === -1) uniqueNames.push(tn);
+  }
+
+  if (isCashPrize) {
+    var cashWord = pokerRafflesPluralizeCashBuyinsForHeading(totalTickets || 0);
+    if (uniqueNom.length === 1) {
+      var cashPrice = uniqueNom[0];
+      return (
+        "Розыгрыш " +
+        totalTickets +
+        " " +
+        cashWord +
+        " на кеш за " +
+        pokerRafflesFormatSum(cashPrice) +
+        ". Столы Бонус гейм на Poker21. Итого сумма розыгрыша " +
+        sumText +
+        "."
+      );
+    }
+    if (uniqueNom.length > 1) {
+      var cashParts = [];
+      for (var ck = 0; ck < rows.length; ck++) {
+        var cr = rows[ck];
+        if (cr.count > 0 && cr.nominal > 0) cashParts.push(cr.count + "×" + pokerRafflesFormatSum(cr.nominal));
+      }
+      if (cashParts.length) {
+        return (
+          "Розыгрыш " +
+          totalTickets +
+          " " +
+          cashWord +
+          " на кеш: " +
+          cashParts.join(", ") +
+          ". Столы Бонус гейм на Poker21. Итого сумма розыгрыша " +
+          sumText +
+          "."
+        );
+      }
+    }
+    return (
+      "Розыгрыш " +
+      totalTickets +
+      " " +
+      cashWord +
+      " на кеш. Столы Бонус гейм на Poker21. Итого сумма розыгрыша " +
+      sumText +
+      "."
+    );
   }
 
   if (uniqueNom.length === 1) {

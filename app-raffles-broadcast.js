@@ -35,6 +35,18 @@ function initRafflesBroadcastRuntime(opts) {
       if (d >= 2 && d <= 4) return "билета";
       return "билетов";
     }
+    function pluralizeCashBuyins(n) {
+      var v = Math.abs(n) % 100;
+      var d = v % 10;
+      if (v >= 11 && v <= 19) return "беккинг-байинов";
+      if (d === 1) return "беккинг-байин";
+      if (d >= 2 && d <= 4) return "беккинг-байина";
+      return "беккинг-байинов";
+    }
+    var isCashPrize =
+      typeof pokerRafflesIsCashPrize === "function" &&
+      currentRaffleData &&
+      pokerRafflesIsCashPrize(currentRaffleData);
     var ticketCount = 0;
     // Разбивка по номиналам (например: 3 за 1000 и 12 за 300)
     var nominalToCount = {};
@@ -60,8 +72,9 @@ function initRafflesBroadcastRuntime(opts) {
         var nominalOnly = Number(nominalKeys[0]) || 0;
         var ticketNominalText = nominalOnly > 0 ? formatRaffleSum(nominalOnly) : "";
         if (ticketNominalText) {
-          broadcastText =
-            "Разыгрывается " + ticketCount + " " + pluralizeTickets(ticketCount) + " за " + ticketNominalText + ".";
+          broadcastText = isCashPrize
+            ? "Разыгрывается " + ticketCount + " " + pluralizeCashBuyins(ticketCount) + " на кеш за " + ticketNominalText + ". Столы Бонус гейм на Poker21."
+            : "Разыгрывается " + ticketCount + " " + pluralizeTickets(ticketCount) + " за " + ticketNominalText + ".";
         }
       } else {
         // Составляем breakdown в порядке убывания номинала (обычно 1000, потом 300)
@@ -83,20 +96,28 @@ function initRafflesBroadcastRuntime(opts) {
           });
         if (parts.length) {
           var breakdownText = parts.length === 2 ? parts[0] + " и " + parts[1] : parts.slice(0, -1).join(", ") + " и " + parts[parts.length - 1];
-          broadcastText =
-            "Разыгрывается " +
-            ticketCount +
-            " " +
-            pluralizeTickets(ticketCount) +
-            ": " +
-            breakdownText +
-            ".";
+          broadcastText = isCashPrize
+            ? "Разыгрывается " +
+              ticketCount +
+              " " +
+              pluralizeCashBuyins(ticketCount) +
+              " на кеш: " +
+              breakdownText +
+              ". Столы Бонус гейм на Poker21."
+            : "Разыгрывается " +
+              ticketCount +
+              " " +
+              pluralizeTickets(ticketCount) +
+              ": " +
+              breakdownText +
+              ".";
         }
       }
     }
     return {
       endDate: endDate,
       message: broadcastText || undefined,
+      prizeKind: isCashPrize ? "cash" : "tournament_ticket",
       ticketsCount: ticketCount || undefined,
       // ticketPrice может не использоваться на сервере, но оставляем для совместимости: первый номинал
       ticketPrice:
