@@ -144,9 +144,12 @@ function initAdminReportModal() {
   var CALCULATION_CLUB_DATA_CACHE_TTL_MS = 2 * 60 * 1000;
   var CASH_HISTORY_OPERATOR_IDS = ["369073", "467511", "208238"];
   var RAKEBACK_ROOMS = ["P21", "X", "Supr", "PP"];
+  var REPORT_EDITOR_IDS = ["388008256", "2144406710", "1897001087"];
+  var REPORT_EDITOR_USERNAMES = ["roman1787443", "roman1_matvienko"];
+  var REPORT_EDITOR_EMAILS = ["matvienkoro92@gmail.com"];
   var RAKEBACK_EDITOR_IDS = ["1897001087"];
   var RAKEBACK_EDITOR_USERNAMES = [];
-  var RAKEBACK_REFRESH_ACCESS_IDS = ["388008256", "2144406710"];
+  var RAKEBACK_REFRESH_ACCESS_IDS = ["388008256", "2144406710", "1897001087"];
   var RAKEBACK_REFRESH_ACCESS_USERNAMES = ["roman1787443", "roman1_matvienko"];
   var RAKEBACK_REFRESH_ACCESS_EMAILS = ["matvienkoro92@gmail.com"];
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
@@ -718,13 +721,7 @@ function initAdminReportModal() {
       if (recUser && recUser.user) users.push(recUser.user);
     } catch (eRecUser) {}
     for (var i = 0; i < users.length; i++) {
-      var u = users[i] || {};
-      var id = u.id != null ? String(u.id).replace(/^tg_/, "").trim() : "";
-      if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
-      var username = u.username != null ? String(u.username).replace(/^@+/, "").trim().toLowerCase() : "";
-      if (username === "roman1787443" || username === "roman1_matvienko") return true;
-      var email = u.email != null ? String(u.email).trim().toLowerCase() : "";
-      if (email === "matvienkoro92@gmail.com") return true;
+      if (reportIdentityMatches(users[i], REPORT_EDITOR_IDS, REPORT_EDITOR_USERNAMES, REPORT_EDITOR_EMAILS)) return true;
     }
     return false;
   }
@@ -793,27 +790,64 @@ function initAdminReportModal() {
     return users;
   }
 
-  function rakebackIdentityMatches(users, idsList, usernamesList, emailsList) {
+  function getReportIdentityIdCandidates(u) {
+    u = u || {};
+    var nested = u.user || {};
+    return [
+      u.id,
+      u.memberId,
+      u.emailMemberId,
+      u.telegramId,
+      u.telegram_id,
+      u.telegramUserId,
+      u.telegram_user_id,
+      u.pwaTelegramId,
+      u.pwa_telegram_id,
+      u.tgId,
+      u.tg_id,
+      u.uid,
+      u.userId,
+      u.user_id,
+      u.vkId,
+      u.vk_id,
+      nested.id,
+      nested.memberId,
+      nested.telegramId,
+      nested.telegram_id,
+      nested.telegramUserId,
+      nested.telegram_user_id,
+      nested.tgId,
+      nested.tg_id
+    ];
+  }
+
+  function reportIdentityMatches(u, idsList, usernamesList, emailsList) {
     var idsAllowed = Array.isArray(idsList) ? idsList : [];
     var usernamesAllowed = Array.isArray(usernamesList) ? usernamesList : [];
     var emailsAllowed = Array.isArray(emailsList) ? emailsList : [];
+    var ids = getReportIdentityIdCandidates(u);
+    for (var j = 0; j < ids.length; j++) {
+      var rawId = ids[j] != null ? String(ids[j]).replace(/^tg_/, "").trim() : "";
+      if (idsAllowed.indexOf(rawId) >= 0) return true;
+    }
+    u = u || {};
+    var nested = u.user || {};
+    var names = [u.username, u.telegramUsername, u.pwaUsername, u.userName, u.user_name, nested.username, nested.telegramUsername, nested.pwaUsername];
+    for (var k = 0; k < names.length; k++) {
+      var username = names[k] != null ? String(names[k]).replace(/^@+/, "").trim().toLowerCase() : "";
+      if (usernamesAllowed.indexOf(username) >= 0) return true;
+    }
+    var emails = [u.email, u.pwaEmail, u.mail, nested.email, nested.pwaEmail, nested.mail];
+    for (var m = 0; m < emails.length; m++) {
+      var email = emails[m] != null ? String(emails[m]).trim().toLowerCase() : "";
+      if (emailsAllowed.indexOf(email) >= 0) return true;
+    }
+    return false;
+  }
+
+  function rakebackIdentityMatches(users, idsList, usernamesList, emailsList) {
     for (var i = 0; i < users.length; i++) {
-      var u = users[i] || {};
-      var ids = [u.id, u.memberId, u.telegramId, u.telegram_id, u.uid, u.userId, u.user_id];
-      for (var j = 0; j < ids.length; j++) {
-        var rawId = ids[j] != null ? String(ids[j]).replace(/^tg_/, "").trim() : "";
-        if (idsAllowed.indexOf(rawId) >= 0) return true;
-      }
-      var names = [u.username, u.telegramUsername, u.pwaUsername];
-      for (var k = 0; k < names.length; k++) {
-        var username = names[k] != null ? String(names[k]).replace(/^@+/, "").trim().toLowerCase() : "";
-        if (usernamesAllowed.indexOf(username) >= 0) return true;
-      }
-      var emails = [u.email, u.pwaEmail, u.mail];
-      for (var m = 0; m < emails.length; m++) {
-        var email = emails[m] != null ? String(emails[m]).trim().toLowerCase() : "";
-        if (emailsAllowed.indexOf(email) >= 0) return true;
-      }
+      if (reportIdentityMatches(users[i], idsList, usernamesList, emailsList)) return true;
     }
     return false;
   }

@@ -9,12 +9,24 @@
           if (!el) return 0;
           return parseReportNumber(el.value);
         };
+        var getRawVal = function (id) {
+          var el = document.getElementById(id);
+          if (!el || el.value == null) return "";
+          return String(el.value).trim();
+        };
         syncRakebackTable();
         var rakebackRows = getUnaccountedRakebackReportRows();
         var rakebackTotal = sumRakebackReportRows(rakebackRows);
         if (!isFinite(rakebackTotal)) rakebackTotal = 0;
-        var manualRakebackTotal = getVal("adminReportRakeback");
-        var reportRakebackTotal = manualRakebackInputTouched ? manualRakebackTotal : rakebackTotal;
+        var manualRakebackRaw = getRawVal("adminReportRakeback");
+        var manualRakebackTotal = parseReportNumber(manualRakebackRaw);
+        var manualRakebackRounded = Math.round(manualRakebackTotal * 100) / 100;
+        var rakebackRounded = Math.round(rakebackTotal * 100) / 100;
+        var keepManualRakeback =
+          manualRakebackInputTouched ||
+          !!editingReportId ||
+          (manualRakebackRaw !== "" && manualRakebackRounded !== rakebackRounded);
+        var reportRakebackTotal = keepManualRakeback ? manualRakebackTotal : rakebackTotal;
         if (!isFinite(reportRakebackTotal)) reportRakebackTotal = 0;
         var extraRows = modal.querySelectorAll(".admin-report-extra-row");
         var extraFields = [];
