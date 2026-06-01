@@ -521,6 +521,105 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleDailyRecurring(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "create",
+    title: "Daily contract raffle",
+    totalWinners: 2,
+    groups: [{ prize: "Ticket", count: 2 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    daily: true,
+    dailyStartTime: "9:05",
+    idemKey: "contract-daily-create",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can create a daily raffle");
+  assert.strictEqual(r.body.raffle.daily, true, "daily raffle is marked daily");
+  assert.strictEqual(r.body.raffle.recurrence.startTime, "09:05", "daily start time is normalized");
+  assert.ok(new Date(r.body.raffle.recurrence.nextStartAt) > new Date(r.body.raffle.createdAt), "daily next start is after first launch");
+
+  const dueStart = new Date(Date.now() - 5 * 60_000);
+  const durationMs = 60 * 60_000;
+  const source = {
+    id: "daily_contract_source",
+    createdBy: "tg_388008256",
+    title: "Daily source",
+    totalWinners: 1,
+    groups: [{ prize: "Daily ticket", count: 1 }],
+    endDate: new Date(Date.now() - 30 * 60_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+    daily: true,
+    recurrence: {
+      type: "daily",
+      timeZone: "Europe/Moscow",
+      startTime: "11:30",
+      seriesId: "contract_daily_series",
+      scheduledStartAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      nextStartAt: dueStart.toISOString(),
+      durationMs,
+      template: {
+        title: "Daily source",
+        totalWinners: 1,
+        groups: [{ prize: "Daily ticket", count: 1 }],
+      },
+    },
+  };
+  redis.kv.set("poker_app:raffle:daily_contract_source", JSON.stringify(source));
+  redis.l("poker_app:raffle_ids").push("daily_contract_source");
+
+  r = await call(raffles, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "raffles list succeeds with daily series");
+  const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === "contract_daily_series" && raffle.id !== source.id);
+  assert.strictEqual(generated.length, 1, "due daily series creates one next raffle");
+  assert.strictEqual(generated[0].status, "active", "generated daily raffle is active");
+  assert.strictEqual(generated[0].createdAt, dueStart.toISOString(), "generated daily raffle starts at scheduled time");
+  assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
+}
+
+async function testRaffleDuplicateOptions(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  for (let i = 1; i <= 4; i += 1) {
+    const raffle = {
+      id: "duplicate_option_" + i,
+      title: "Duplicate source " + i,
+      totalWinners: i,
+      groups: [{ prize: "Prize " + i, count: i }],
+      endDate: new Date(Date.now() + (i + 1) * 3600_000).toISOString(),
+      participants: [],
+      winners: [],
+      status: i % 2 === 0 ? "drawn" : "active",
+      createdAt: new Date(Date.now() - (5 - i) * 3600_000).toISOString(),
+    };
+    redis.kv.set("poker_app:raffle:" + raffle.id, JSON.stringify(raffle));
+    redis.l("poker_app:raffle_ids").push(raffle.id);
+  }
+
+  let r = await call(raffles, req("POST", {}, { pwaSession: s.admin, action: "duplicateOptions" }));
+  assert.strictEqual(r.statusCode, 200, "admin can load raffle duplicate options");
+  assert.deepStrictEqual(
+    (r.body.raffles || []).map((raffle) => raffle.id),
+    ["duplicate_option_4", "duplicate_option_3", "duplicate_option_2"],
+    "duplicate options return three latest raffles",
+  );
+  assert.strictEqual(r.body.raffles[2].groups[0].prize, "Prize 2", "duplicate options include group params");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "duplicateLast",
+    sourceRaffleId: "duplicate_option_2",
+    createIdempotencyKey: "contract-duplicate-selected",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can duplicate selected raffle");
+  assert.strictEqual(r.body.raffle.title, "Duplicate source 2", "selected duplicate keeps source title");
+  assert.strictEqual(r.body.raffle.groups[0].prize, "Prize 2", "selected duplicate keeps source prize");
+}
+
 async function testRespectVoteWithdraw(redis) {
   const respect = loadHandler("respect");
   const s = sessions();
@@ -2329,6 +2428,8 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle daily recurring", testRaffleDailyRecurring],
+    ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
     ["daily poker winners", testDailyPokerWinners],

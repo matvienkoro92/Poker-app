@@ -20,6 +20,7 @@
                 <button type="button" class="raffles-create-toggle" id="rafflesCreateToggle">Создать розыгрыш</button>
                 <button type="button" class="raffles-create-toggle raffles-create-toggle--ghost" id="rafflesDuplicateLastBtn">Повторить розыгрыш</button>
               </div>
+              <div class="raffle-duplicate-options raffle-duplicate-options--hidden" id="raffleDuplicateOptions" aria-live="polite"></div>
               <div class="raffle-create-form raffle-create-form--hidden" id="raffleCreateForm">
                 <p class="raffle-create-form__type-label">Вид розыгрыша</p>
                 <div class="raffle-create-form__type-row" role="group" aria-label="Тип розыгрыша">
@@ -112,6 +113,17 @@
                   <label class="randomizer-label">
                     <span class="randomizer-label__text">Дата и время завершения (МСК):</span>
                     <input type="datetime-local" id="raffleEndDateOther" class="randomizer-input" />
+                  </label>
+                </div>
+
+                <div class="raffle-create-form__daily">
+                  <label class="raffle-create-form__daily-toggle">
+                    <input type="checkbox" id="raffleDailyEnabled" />
+                    <span>Ежедневный</span>
+                  </label>
+                  <label class="randomizer-label raffle-create-form__daily-time raffle-create-form__daily-time--hidden" id="raffleDailyStartWrap">
+                    <span class="randomizer-label__text">Время ежедневного старта (МСК):</span>
+                    <input type="time" id="raffleDailyStartTime" class="randomizer-input" value="12:00" />
                   </label>
                 </div>
 

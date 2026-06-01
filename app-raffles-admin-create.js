@@ -18,6 +18,10 @@ function initRafflesAdminCreateRuntime(opts) {
     var groupCountInput = document.getElementById("raffleGroupCount");
     var raffleGroupsEl = document.getElementById("raffleGroups");
     var raffleEndDateOther = document.getElementById("raffleEndDateOther");
+    var raffleDailyEnabled = document.getElementById("raffleDailyEnabled");
+    var raffleDailyStartWrap = document.getElementById("raffleDailyStartWrap");
+    var raffleDailyStartTime = document.getElementById("raffleDailyStartTime");
+    var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
 
   function getRaffleCreateType() {
@@ -129,6 +133,25 @@ function initRafflesAdminCreateRuntime(opts) {
     } else {
       buildGroupInputs();
     }
+  }
+
+  function syncRaffleDailyControls() {
+    var enabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
+    if (raffleDailyStartWrap) raffleDailyStartWrap.classList.toggle("raffle-create-form__daily-time--hidden", !enabled);
+    if (raffleDailyStartTime) {
+      raffleDailyStartTime.disabled = !enabled;
+      if (enabled && !raffleDailyStartTime.value) raffleDailyStartTime.value = "12:00";
+    }
+  }
+
+  function normalizeRaffleDailyStartTime(value) {
+    var raw = String(value || "").trim();
+    var m = raw.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return "";
+    var hh = parseInt(m[1], 10);
+    var mm = parseInt(m[2], 10);
+    if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return "";
+    return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
   }
 
   var raffleTicketTournamentWrap = document.getElementById("raffleTicketTournamentWrap");
@@ -264,6 +287,150 @@ function initRafflesAdminCreateRuntime(opts) {
     }
   }
 
+  function raffleCreateEscapeHtml(value) {
+    if (typeof pokerRafflesEscapeHtml === "function") return pokerRafflesEscapeHtml(value);
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function raffleDuplicateStatusText(status) {
+    if (status === "active") return "Активный";
+    if (status === "drawn") return "Завершён";
+    if (status === "cancelled") return "Отменён";
+    return status || "Розыгрыш";
+  }
+
+  function raffleDuplicateDateText(raw) {
+    if (!raw) return "—";
+    var d = new Date(raw);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleString("ru-RU", {
+      timeZone: "Europe/Moscow",
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function raffleDuplicateGroupsText(raffle) {
+    var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+    if (!groups.length) return "Группы: —";
+    return groups.map(function (g, i) {
+      return "Группа " + (i + 1) + ": " + (parseInt(g.count, 10) || 0) + " мест — " + (g.prize || "Приз");
+    }).join("\n");
+  }
+
+  function renderRaffleDuplicateOptions(raffles) {
+    if (!duplicateOptionsEl) return;
+    var list = Array.isArray(raffles) ? raffles : [];
+    if (!list.length) {
+      duplicateOptionsEl.innerHTML =
+        '<p class="raffle-duplicate-options__title">Выберите розыгрыш для повтора</p>' +
+        '<p class="raffle-duplicate-options__empty">Нет последних розыгрышей для повтора.</p>';
+      duplicateOptionsEl.classList.remove("raffle-duplicate-options--hidden");
+      return;
+    }
+    var html = '<p class="raffle-duplicate-options__title">Выберите один из трёх последних розыгрышей</p>';
+    html += list.map(function (raffle, i) {
+      var title = raffle.title || (raffle.groups && raffle.groups[0] && raffle.groups[0].prize) || "Розыгрыш";
+      var daily = raffle.daily && raffle.recurrence
+        ? "Ежедневный: старт " + (raffle.recurrence.startTime || "—") + " МСК"
+        : "Ежедневный: нет";
+      var meta =
+        "Создан: " + raffleDuplicateDateText(raffle.createdAt) +
+        " · Итоги: " + raffleDuplicateDateText(raffle.endDate) +
+        " · Победителей: " + (parseInt(raffle.totalWinners, 10) || 0) +
+        " · Участников: " + (parseInt(raffle.participantsCount, 10) || 0);
+      return (
+        '<article class="raffle-duplicate-card">' +
+          '<div class="raffle-duplicate-card__head">' +
+            '<span>' + (i + 1) + ". " + raffleCreateEscapeHtml(title) + '</span>' +
+            '<span class="raffle-duplicate-card__status">' + raffleCreateEscapeHtml(raffleDuplicateStatusText(raffle.status)) + '</span>' +
+          "</div>" +
+          '<p class="raffle-duplicate-card__meta">' + raffleCreateEscapeHtml(meta) + '</p>' +
+          '<p class="raffle-duplicate-card__daily">' + raffleCreateEscapeHtml(daily) + '</p>' +
+          '<p class="raffle-duplicate-card__groups">' + raffleCreateEscapeHtml(raffleDuplicateGroupsText(raffle)) + '</p>' +
+          '<button type="button" class="raffle-duplicate-card__btn" data-raffle-duplicate-source="' + raffleCreateEscapeHtml(raffle.id || "") + '">Повторить этот</button>' +
+        "</article>"
+      );
+    }).join("");
+    duplicateOptionsEl.innerHTML = html;
+    duplicateOptionsEl.classList.remove("raffle-duplicate-options--hidden");
+  }
+
+  function raffleDuplicateParseResponse(r) {
+    return r
+      .json()
+      .catch(function () {
+        return { ok: false, error: "Не удалось разобрать ответ сервера" };
+      })
+      .then(function (data) {
+        var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
+        if (!r.ok && !d.error) {
+          d = Object.assign({}, d, { ok: false, error: "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "") });
+        }
+        return d;
+      });
+  }
+
+  function duplicateRaffleById(sourceRaffleId, sourceBtn) {
+    if (!sourceRaffleId || window.__pokerRaffleCreateInFlight) return;
+    window.__pokerRaffleCreateInFlight = true;
+    var buttons = duplicateOptionsEl ? duplicateOptionsEl.querySelectorAll(".raffle-duplicate-card__btn") : [];
+    Array.prototype.forEach.call(buttons, function (btn) { btn.disabled = true; });
+    var prevText = sourceBtn ? sourceBtn.textContent : "";
+    if (sourceBtn) sourceBtn.textContent = "Повторяем…";
+    var idemKey =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
+    function resetDuplicateUi() {
+      window.__pokerRaffleCreateInFlight = false;
+      Array.prototype.forEach.call(buttons, function (btn) { btn.disabled = false; });
+      if (sourceBtn) sourceBtn.textContent = prevText || "Повторить этот";
+    }
+    fetch(base + "/api/raffles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+        pokerGuestOrAuthedPostBody({
+          action: "duplicateLast",
+          sourceRaffleId: sourceRaffleId,
+          createIdempotencyKey: idemKey,
+        })
+      ),
+    })
+      .then(raffleDuplicateParseResponse)
+      .then(function (data) {
+        resetDuplicateUi();
+        if (data && data.ok && data.raffle) {
+          if (duplicateOptionsEl) duplicateOptionsEl.classList.add("raffle-duplicate-options--hidden");
+          if (createForm) createForm.classList.add("raffle-create-form--hidden");
+          focusRaffleAfterMutation(data.raffle.id);
+          clearRafflesCache();
+          loadRaffles();
+          if (!data.idempotentReplay) {
+            if (tg && tg.showAlert) tg.showAlert("Розыгрыш повторён");
+            else if (typeof alert === "function") alert("Розыгрыш повторён");
+          }
+        } else {
+          var errMsg = (data && data.error) || "Ошибка";
+          if (tg && tg.showAlert) tg.showAlert(errMsg);
+          else if (typeof alert === "function") alert(errMsg);
+        }
+      })
+      .catch(function () {
+        resetDuplicateUi();
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        else if (typeof alert === "function") alert(POKER_NET_ERR);
+      });
+  }
+
   if (createToggle && createForm) {
     createToggle.addEventListener("click", function () {
       createForm.classList.toggle("raffle-create-form--hidden");
@@ -272,17 +439,13 @@ function initRafflesAdminCreateRuntime(opts) {
   }
   if (duplicateLastBtn) {
     duplicateLastBtn.addEventListener("click", function () {
-      if (window.__pokerRaffleCreateInFlight) return;
-      window.__pokerRaffleCreateInFlight = true;
+      if (window.__pokerRaffleCreateInFlight || window.__pokerRaffleDuplicateOptionsInFlight) return;
+      window.__pokerRaffleDuplicateOptionsInFlight = true;
       duplicateLastBtn.disabled = true;
       var prevDuplicateText = duplicateLastBtn.textContent;
-      duplicateLastBtn.textContent = "Повторяем…";
-      var idemKey =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
-      function raffleDuplicateResetUi() {
-        window.__pokerRaffleCreateInFlight = false;
+      duplicateLastBtn.textContent = "Загружаем…";
+      function raffleDuplicateOptionsResetUi() {
+        window.__pokerRaffleDuplicateOptionsInFlight = false;
         duplicateLastBtn.disabled = false;
         duplicateLastBtn.textContent = prevDuplicateText;
       }
@@ -291,36 +454,16 @@ function initRafflesAdminCreateRuntime(opts) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           pokerGuestOrAuthedPostBody({
-            action: "duplicateLast",
-            createIdempotencyKey: idemKey,
+            action: "duplicateOptions",
           })
         ),
       })
-        .then(function (r) {
-          return r
-            .json()
-            .catch(function () {
-              return { ok: false, error: "Не удалось разобрать ответ сервера" };
-            })
-            .then(function (data) {
-              var d = data && typeof data === "object" ? data : { ok: false, error: "Ошибка ответа" };
-              if (!r.ok && !d.error) {
-                d = Object.assign({}, d, { ok: false, error: "Ошибка " + (r.status || "") + (r.statusText ? " " + r.statusText : "") });
-              }
-              return d;
-            });
-        })
+        .then(raffleDuplicateParseResponse)
         .then(function (data) {
-          raffleDuplicateResetUi();
-          if (data && data.ok && data.raffle) {
+          raffleDuplicateOptionsResetUi();
+          if (data && data.ok) {
             if (createForm) createForm.classList.add("raffle-create-form--hidden");
-            focusRaffleAfterMutation(data.raffle.id);
-            clearRafflesCache();
-            loadRaffles();
-            if (!data.idempotentReplay) {
-              if (tg && tg.showAlert) tg.showAlert("Розыгрыш повторён");
-              else if (typeof alert === "function") alert("Розыгрыш повторён");
-            }
+            renderRaffleDuplicateOptions(data.raffles || []);
           } else {
             var errMsg = (data && data.error) || "Ошибка";
             if (tg && tg.showAlert) tg.showAlert(errMsg);
@@ -328,14 +471,22 @@ function initRafflesAdminCreateRuntime(opts) {
           }
         })
         .catch(function () {
-          raffleDuplicateResetUi();
+          raffleDuplicateOptionsResetUi();
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
           else if (typeof alert === "function") alert(POKER_NET_ERR);
         });
     });
   }
+  if (duplicateOptionsEl) {
+    duplicateOptionsEl.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-duplicate-source]") : null;
+      if (!btn) return;
+      duplicateRaffleById(btn.getAttribute("data-raffle-duplicate-source") || "", btn);
+    });
+  }
   if (raffleTypeTickets) raffleTypeTickets.addEventListener("change", switchRaffleCreatePanel);
   if (raffleTypeOther) raffleTypeOther.addEventListener("change", switchRaffleCreatePanel);
+  if (raffleDailyEnabled) raffleDailyEnabled.addEventListener("change", syncRaffleDailyControls);
   if (raffleTicketTournamentSelect) raffleTicketTournamentSelect.addEventListener("change", function () {
     syncSingleTicketCustomInputs();
     updateRaffleCreateTotal();
@@ -447,6 +598,12 @@ function initRafflesAdminCreateRuntime(opts) {
         totalWinners = Math.max(1, totalWinners);
         title = document.getElementById("raffleTitle") ? document.getElementById("raffleTitle").value.trim().slice(0, 200) : "";
       }
+      var dailyEnabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
+      var dailyStartTime = dailyEnabled ? normalizeRaffleDailyStartTime(raffleDailyStartTime && raffleDailyStartTime.value) : "";
+      if (dailyEnabled && !dailyStartTime) {
+        if (tg && tg.showAlert) tg.showAlert("Укажите время ежедневного старта");
+        return;
+      }
       window.__pokerRaffleCreateInFlight = true;
       createBtn.disabled = true;
       var prevCreateBtnText = createBtn.textContent;
@@ -470,6 +627,8 @@ function initRafflesAdminCreateRuntime(opts) {
             groups: groups,
             endDate: endDate.toISOString(),
             title: title || undefined,
+            daily: dailyEnabled,
+            dailyStartTime: dailyStartTime || undefined,
             createIdempotencyKey: idemKey,
           })
         ),
@@ -512,6 +671,7 @@ function initRafflesAdminCreateRuntime(opts) {
         });
     });
   }
+  syncRaffleDailyControls();
 
   }
 }
