@@ -504,7 +504,7 @@ function dirSizeBytes(dir) {
 
 const engineeringBudgets = {
   indexHtmlMaxBytes: 100 * 1024,
-  eagerScriptsMax: 157,
+  eagerScriptsMax: 158,
   lazyScriptsMax: 25,
   runtimeFiles: {
     "app-pwa-auth-runtime.js": { maxBytes: 76 * 1024, maxLines: 1700 },
@@ -2188,9 +2188,9 @@ add("Winter rating HTML is lazy-loaded from a fragment", () =>
   ]) &&
   !has("html", 'id="winterRatingSection"') &&
   hasAll("appViewRouter", [
-    'var htmlViewName = viewName === "spring-rating" ? "winter-rating" : viewName;',
+    'var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;',
     "pokerEnsureViewHtml(htmlViewName)",
-    'if (viewName === "spring-rating")',
+    'if (viewName === "spring-rating" || viewName === "summer-rating")',
   ]) &&
   fs.existsSync(path.join(root, "html-fragments", "winter-rating.html"))
 );

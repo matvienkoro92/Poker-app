@@ -309,6 +309,7 @@ function initPlayerCrmVisitsRuntime(ctx) {
     cashout: "Кэшаут",
     profile: "Профиль",
     "spring-rating": "Весенний рейтинг",
+    "summer-rating": "Летний рейтинг",
     "winter-rating": "Зимний рейтинг",
     raffles: "Розыгрыши",
     schedule: "Расписание",

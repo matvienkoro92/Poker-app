@@ -125,6 +125,18 @@
       ]
     },
     {
+      "name": "__pendingStreamsDelayed",
+      "domain": "streams",
+      "exportedBy": [
+        "app-home-deeplinks.js",
+        "app-streams.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js",
+        "app-streams.js"
+      ]
+    },
+    {
       "name": "pokerInitAdminReportModal",
       "domain": "adminReports",
       "exportedBy": [

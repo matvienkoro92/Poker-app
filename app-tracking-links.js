@@ -46,6 +46,7 @@ function initTrackingLinksAdminModal() {
     "view:cashout": "Экран: касса",
     "view:profile": "Экран: профиль",
     "view:spring-rating": "Экран: рейтинг весны",
+    "view:summer-rating": "Экран: рейтинг лета",
     "view:winter-rating": "Экран: рейтинг зимы",
     "view:schedule": "Экран: расписание",
     "view:raffles": "Экран: розыгрыши",

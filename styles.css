@@ -31,7 +31,10 @@
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
-body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active {
+body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
+.view--active[data-view="summer-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
+html.app-view-summer-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
+body[data-view="summer-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active {
   background: linear-gradient(180deg, #f8d98d 0%, #d89b2d 100%) !important;
   border-color: rgba(255, 221, 143, 0.88) !important;
   color: #11151c !important;
@@ -44,7 +47,10 @@ body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__s
 
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
-body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover {
+body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
+.view--active[data-view="summer-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
+html.app-view-summer-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover,
+body[data-view="summer-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active:hover {
   background: linear-gradient(180deg, #ffe7a9 0%, #e2aa42 100%) !important;
 }
 

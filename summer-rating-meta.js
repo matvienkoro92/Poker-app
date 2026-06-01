@@ -1,0 +1,1 @@
+var SUMMER_RATING_UPDATED = "1 июня";

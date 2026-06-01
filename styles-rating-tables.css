@@ -58,6 +58,14 @@
   opacity: 0.75;
   color: rgba(181, 196, 138, 0.72);
 }
+.winter-rating.spring-rating.summer-rating .winter-rating__winter-decor .winter-rating__snow::before,
+.winter-rating.spring-rating.summer-rating .winter-rating__title-snow::before {
+  content: "☀";
+}
+.winter-rating.spring-rating.summer-rating .winter-rating__caption-icon::before {
+  content: "☀";
+  color: rgba(255, 213, 135, 0.82);
+}
 .winter-rating.spring-rating .winter-rating__title-accent {
   color: rgba(181, 196, 138, 0.88);
   text-shadow: 0 0 20px rgba(181, 196, 138, 0.22), 0 0 40px rgba(107, 142, 35, 0.08);

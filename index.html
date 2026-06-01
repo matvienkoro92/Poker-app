@@ -771,6 +771,18 @@
                 <span class="home-compact-link__cta">Смотреть рейтинг</span>
                 <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey.png?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
               </a>
+              <a href="#" class="home-compact-link home-compact-link--rating" data-view-target="summer-rating" aria-label="Рейтинг турнирщиков лета на 250 000 рублей">
+                <span class="home-compact-link__body">
+                  <span class="home-compact-link__eyebrow">
+                    <span>Рейтинг</span>
+                    <span>турнирщиков</span>
+                  </span>
+                  <span class="home-compact-link__title">на 250 000 ₽</span>
+                  <span class="home-compact-link__sub">Лето 2026 <span aria-hidden="true">☀</span></span>
+                </span>
+                <span class="home-compact-link__cta">Смотреть рейтинг</span>
+                <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey.png?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
+              </a>
               <a href="#" class="home-compact-link home-compact-link--hall" data-view-target="hall-of-fame" aria-label="Зал славы клуба">
                 <img class="home-compact-link__banner" src="./assets/home-hall-of-fame-banner-gold.jpg" alt="" width="1672" height="941" loading="lazy" decoding="async" aria-hidden="true" />
               </a>
@@ -1093,6 +1105,13 @@
             <div id="springRatingSectionPlaceholder"></div>
           </div>
 
+          <!-- Рейтинг Лета: тот же section рейтинга переносится из winter-rating при открытии -->
+          <div class="view" data-view="summer-rating" id="summerRatingView">
+            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+            <button type="button" class="spring-rating-view-scroll-btn" id="summerRatingViewScrollBtn" aria-label="Прокрутить рейтинг" hidden></button>
+            <div id="summerRatingSectionPlaceholder"></div>
+          </div>
+
           <div class="view" data-view="keyboard-lab" id="keyboardLabView">
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <section class="keyboard-lab" aria-labelledby="keyboardLabTitle">
@@ -1229,6 +1248,7 @@
     <script defer src="./app-home-gazette-tasks.js?v=3.407"></script>
     <script defer src="./app-rating-core.js?v=3.407"></script>
     <script defer src="./app-rating-spring-season.js?v=3.407"></script>
+    <script defer src="./app-rating-summer-season.js?v=3.407"></script>
     <script defer src="./app-rating-view.js?v=3.407"></script>
     <script defer src="./app-rating-view-adapter.js?v=3.407"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=3.407"></script>
@@ -1334,6 +1354,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="tools" src="./app-equilator.js?v=3.407"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./app-rating-summer-runtime.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-data-registry.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=3.407"></script>
@@ -1379,6 +1400,13 @@
     <script defer data-poker-eager-domain="app" src="./spring-rating-data-april.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./spring-rating-data-may.js?v=3.407"></script>
     <script defer data-poker-eager-domain="app" src="./spring-rating-data.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league1.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-images-league2.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-meta.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-june.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-july.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data-august.js?v=3.407"></script>
+    <script defer data-poker-eager-domain="app" src="./summer-rating-data.js?v=3.407"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js?v=3.407"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js?v=3.407"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="streams" src="./peerjs.min.js?v=3.407"></script>

@@ -45,12 +45,28 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    if (startParam === "summer_rating") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("summer-rating");
+      }, 0);
+      return;
+    }
     if (startParam === "spring_rating_league_1" || startParam === "spring_rating_league_2") {
       var leagueNum = startParam === "spring_rating_league_1" ? "1" : "2";
       setTimeout(function () {
         if (typeof setView === "function") setView("spring-rating");
         setTimeout(function () {
           if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(leagueNum);
+        }, 400);
+      }, 0);
+      return;
+    }
+    if (startParam === "summer_rating_league_1" || startParam === "summer_rating_league_2") {
+      var summerLeagueNum = startParam === "summer_rating_league_1" ? "1" : "2";
+      setTimeout(function () {
+        if (typeof setView === "function") setView("summer-rating");
+        setTimeout(function () {
+          if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(summerLeagueNum);
         }, 400);
       }, 0);
       return;
@@ -79,12 +95,34 @@ function pokerInitHomeDeepLinks(opts) {
       }
       return;
     }
-    if (startParam.indexOf("rating_") === 0 && startParam.indexOf("spring_rating_date_") !== 0) {
+    if (startParam.indexOf("summer_rating_player_") === 0) {
+      var playerNickSummer = decodeURIComponent(startParam.replace("summer_rating_player_", "").replace(/\+/g, " "));
+      if (playerNickSummer) {
+        setTimeout(function () {
+          if (typeof setView === "function") setView("summer-rating");
+          setTimeout(function () {
+            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickSummer);
+          }, 400);
+        }, 0);
+      }
+      return;
+    }
+    if (startParam.indexOf("rating_") === 0 && startParam.indexOf("spring_rating_date_") !== 0 && startParam.indexOf("summer_rating_date_") !== 0) {
       var dateParamR = startParam.replace("rating_", "").replace(/_/g, ".");
       setTimeout(function () {
         if (typeof setView === "function") setView("winter-rating");
         setTimeout(function () {
           if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamR);
+        }, 400);
+      }, 0);
+      return;
+    }
+    if (startParam.indexOf("summer_rating_date_") === 0) {
+      var dateParamSummer = startParam.replace("summer_rating_date_", "").replace(/_/g, ".");
+      setTimeout(function () {
+        if (typeof setView === "function") setView("summer-rating");
+        setTimeout(function () {
+          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSummer);
         }, 400);
       }, 0);
       return;
@@ -229,6 +267,7 @@ function pokerInitHomeDeepLinks(opts) {
       profile: "profile",
       streams: "streams",
       daily_poker: "daily-poker",
+      summer_rating: "summer-rating",
       learn_play_hub: "learn-play-hub",
       bonus_game: "bonus-game",
       plasterer_game: "plasterer-game",

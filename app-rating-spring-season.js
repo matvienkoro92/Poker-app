@@ -1,5 +1,27 @@
 // Spring rating season constants and external top links.
 
+var SPRING_RATING_SEASON = {
+  key: "spring",
+  view: "spring-rating",
+  placeholderId: "springRatingSectionPlaceholder",
+  scrollBtnId: "springRatingViewScrollBtn",
+  sectionClass: "spring-rating",
+  icon: "🌿",
+  label: "Весна 2026",
+  topLabel: "Топы весны",
+  maxWinLabel: "за весну",
+  top3WinsLabel: "за весну",
+  finalAt: new Date(2026, 4, 31, 23, 59, 59, 999),
+  finalText: "Итоги 31-го мая",
+  emptyDataText: "Данные с 1 марта",
+  monthRegex: /\.(03|04|05)\.2026$/,
+  monthToneRegex: /\.(03|04|05)\./,
+  playerPrefix: "spring_rating_player_",
+  datePrefix: "spring_rating_date_",
+  leaguePrefix: "spring_rating_league_",
+  topLinkBase: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+};
+
 /** Рейтинг весны: даты прошлой недели по марту (9–15 марта) */
 var MARCH_PAST_WEEK_DATES = ["09.03.2026", "10.03.2026", "11.03.2026", "12.03.2026", "13.03.2026", "14.03.2026", "15.03.2026"];
 /** Рейтинг весны: даты текущей недели по марту (23–29 марта) */
@@ -50,6 +72,15 @@ var SPRING_VIEW_MARCH_WEEK_BLOCKS = [
   { label: "23—29 марта", dates: MARCH_CURRENT_WEEK_DATES },
   { label: "30—31 марта", dates: SPRING_HOME_MARCH_TAIL_DATES }
 ];
+
+SPRING_RATING_SEASON.viewMonths = [
+  { title: "Май", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: SPRING_VIEW_MAY_WEEK_BLOCKS },
+  { title: "Апрель", totalId: "springRatingViewAprilTotal", weeksHostId: "springRatingViewAprilWeeks", blocks: SPRING_VIEW_APRIL_WEEK_BLOCKS },
+  { title: "Март", totalId: "springRatingViewMarchTotal", weeksHostId: "springRatingViewMarchWeeks", blocks: SPRING_VIEW_MARCH_WEEK_BLOCKS },
+];
+SPRING_RATING_SEASON.pastWeekDates = MARCH_PAST_WEEK_DATES;
+SPRING_RATING_SEASON.currentWeekDates = MARCH_CURRENT_WEEK_DATES;
+SPRING_RATING_SEASON.nextWeekDates = MARCH_NEXT_WEEK_DATES;
 
 // Рейтинг весны: одна база для ссылок топов. Топы текущей недели = BASE?Mart_week_1=1, Топы Марта = BASE?mart=1
 // Укажите сюда полный URL (например https://t.me/... или ссылку на пост), параметры допишутся автоматически

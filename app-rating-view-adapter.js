@@ -385,7 +385,8 @@ function getWinterRatingPlayerSummary(nick) {
         if (p) {
           var reward = p.reward != null ? p.reward : 0;
           var league = t.league != null ? Number(t.league) : null;
-          if (league == null && isSpringRatingMode() && /\.(03|04|05)\./.test(String(dateStr)) && t.buyin != null) {
+          var seasonToneRegex = typeof getRatingSeasonMonthToneRegex === "function" ? getRatingSeasonMonthToneRegex() : /\.(03|04|05)\./;
+          if (league == null && isSpringRatingMode() && seasonToneRegex.test(String(dateStr)) && t.buyin != null) {
             var buyin = Number(t.buyin);
             if (buyin === buyin) {
               league = buyin >= 500 ? 1 : (buyin >= 100 ? 2 : 1);
@@ -723,7 +724,7 @@ function initWinterRatingPlayerModal() {
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
-      var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
+      var startApp = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("player") : "winter_rating_player_";
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
@@ -748,7 +749,7 @@ function initWinterRatingPlayerModal() {
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
-      var startApp = isSpring ? "spring_rating_player_" : "winter_rating_player_";
+      var startApp = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("player") : "winter_rating_player_";
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
       if (!link) return;
@@ -847,7 +848,8 @@ function initWinterRating() {
     conditionsBtn.addEventListener("click", function () { openSpringRatingInfoModal(); });
   }
   var febBtnLabel = document.querySelector("#winterRatingTopFebruaryBtn .winter-rating__week-top-btn-label");
-  if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? "Топы весны" : "Топы Февраля";
+  var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
+  if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? (seasonConfig.topLabel || "Топы весны") : "Топы Февраля";
   var titleTextEl = document.querySelector("#winterRatingSection .winter-rating__title-text");
   if (titleTextEl) {
     titleTextEl.innerHTML = isSpringRatingMode()
@@ -887,13 +889,15 @@ function initWinterRating() {
   }
   if (tableCaption) {
     tableCaption.innerHTML = isSpringRatingMode()
-      ? "<span class=\"winter-rating__caption-icon\" aria-hidden=\"true\">🌿</span> Весна 2026"
+      ? "<span class=\"winter-rating__caption-icon\" aria-hidden=\"true\">" + (seasonConfig.icon || "🌿") + "</span> " + (seasonConfig.label || "Весна 2026")
       : "<span class=\"winter-rating__caption-icon\" aria-hidden=\"true\">❄</span> Итоговая таблица";
   }
   var tableCaptionRow = document.querySelector("#winterRatingSection .winter-rating__table-caption-row");
   var springLeaguesEl = document.getElementById("winterRatingSpringLeagues");
   var springMainTabsEl = document.getElementById("winterRatingSpringMainTabs");
   var winterRatingShareBtn = document.getElementById("winterRatingShareBtn");
+  if (springMainTabsEl) springMainTabsEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Лиги рейтинга лета" : "Лиги рейтинга весны");
+  if (springLeaguesEl) springLeaguesEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Итоговые таблицы рейтинга лета по лигам" : "Итоговые таблицы рейтинга весны по лигам");
   function filterTableByNick(tbody, searchStr, tableWrap, showAllBtn) {
     if (!tbody) return;
     var q = (searchStr || "").trim().toLowerCase();
@@ -983,7 +987,8 @@ function initWinterRating() {
       e.stopPropagation();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
-      var startApp = isSpring ? "spring_rating_date_" + String(dateStr).replace(/\./g, "_") : "rating_" + String(dateStr).replace(/\./g, "_");
+      var datePrefix = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("date") : "rating_";
+      var startApp = datePrefix + String(dateStr).replace(/\./g, "_");
       var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp) : "";
       var msg = "Ссылка скопирована. Отправьте другу — откроется рейтинг за " + dateStr + ".";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -1007,7 +1012,7 @@ function initWinterRating() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link =
         typeof buildMiniAppStartLink === "function"
-          ? buildMiniAppStartLink("spring_rating_league_" + shareBtn.dataset.springLeague)
+          ? buildMiniAppStartLink((typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + shareBtn.dataset.springLeague)
           : "";
       var msg = shareBtn.dataset.springLeague === "1" ? "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 1." : "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 2.";
       if (typeof navigator.clipboard !== "undefined" && navigator.clipboard.writeText) {
@@ -1100,7 +1105,7 @@ function initWinterRating() {
         }
         parts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td>" + prizeCell + "</tr>");
       }
-      bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">Данные с 1 марта</td></tr>";
+      bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">" + (seasonConfig.emptyDataText || "Данные с 1 марта") + "</td></tr>";
       bodyEl.removeEventListener("click", bodyEl._leagueNickClick);
       bodyEl._leagueNickClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".winter-rating__nick-btn");
@@ -1318,7 +1323,7 @@ function initWinterRating() {
     });
   }
   var dateItems = datesContainer.querySelectorAll(".winter-rating__date-item");
-  var currentDateSeason = isSpringRatingMode() ? "spring" : "winter";
+  var currentDateSeason = isSpringRatingMode() ? (seasonConfig.key || "spring") : "winter";
   dateItems.forEach(function (item) {
     var itemSeason = item.getAttribute("data-rating-season") || "winter";
     if (itemSeason !== currentDateSeason && item.parentNode === datesContainer) datesContainer.removeChild(item);

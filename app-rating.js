@@ -1,7 +1,59 @@
 // Spring seasonal data is eager but physically chunked; winter runtime and tables stay in lazy domain rating-winter.
 
 function isSpringRatingMode() {
+  return isSeasonalRatingMode();
+}
+function isActualSpringRatingMode() {
   return document.body && document.body.getAttribute("data-view") === "spring-rating";
+}
+function isSummerRatingMode() {
+  return document.body && document.body.getAttribute("data-view") === "summer-rating";
+}
+function isSeasonalRatingMode() {
+  var viewName = document.body && document.body.getAttribute("data-view");
+  return viewName === "spring-rating" || viewName === "summer-rating";
+}
+function getRatingSeasonConfig() {
+  if (isSummerRatingMode() && typeof SUMMER_RATING_SEASON !== "undefined") return SUMMER_RATING_SEASON;
+  if (typeof SPRING_RATING_SEASON !== "undefined") return SPRING_RATING_SEASON;
+  return {
+    key: "spring",
+    view: "spring-rating",
+    placeholderId: "springRatingSectionPlaceholder",
+    scrollBtnId: "springRatingViewScrollBtn",
+    sectionClass: "spring-rating",
+    icon: "🌿",
+    label: "Весна 2026",
+    topLabel: "Топы весны",
+    maxWinLabel: "за весну",
+    top3WinsLabel: "за весну",
+    emptyDataText: "Данные с 1 марта",
+    monthRegex: /\.(03|04|05)\.2026$/,
+    monthToneRegex: /\.(03|04|05)\./,
+    playerPrefix: "spring_rating_player_",
+    datePrefix: "spring_rating_date_",
+    leaguePrefix: "spring_rating_league_",
+    topLinkBase: typeof SPRING_TOP_LINK_BASE !== "undefined" ? SPRING_TOP_LINK_BASE : "",
+  };
+}
+function getRatingSeasonMonthRegex() {
+  var config = getRatingSeasonConfig();
+  return config && config.monthRegex ? config.monthRegex : /\.(03|04|05)\.2026$/;
+}
+function getRatingSeasonMonthToneRegex() {
+  var config = getRatingSeasonConfig();
+  return config && config.monthToneRegex ? config.monthToneRegex : /\.(03|04|05)\./;
+}
+function getRatingSeasonStartAppPrefix(kind) {
+  var config = getRatingSeasonConfig();
+  if (kind === "date") return config.datePrefix || "spring_rating_date_";
+  if (kind === "league") return config.leaguePrefix || "spring_rating_league_";
+  if (kind === "player") return config.playerPrefix || "spring_rating_player_";
+  return "";
+}
+function getRatingSeasonTopLinkBase() {
+  var config = getRatingSeasonConfig();
+  return config && config.topLinkBase ? config.topLinkBase : "";
 }
 /** Счётчик дней до финала весеннего рейтинга (31 мая, конец дня по локальному времени). */
 function getRatingByDate() {

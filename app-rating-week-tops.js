@@ -135,7 +135,14 @@ function pokerInitWinterRatingWeekTops() {
   function getMarchDatesFromData() {
     var byDate = getRatingByDate();
     if (typeof byDate !== "object" || !Object.keys(byDate).length) return [];
-    return Object.keys(byDate).filter(function (d) { return /\.(03|04|05)\.2026$/.test(d); });
+    var seasonRegex = typeof getRatingSeasonMonthRegex === "function" ? getRatingSeasonMonthRegex() : /\.(03|04|05)\.2026$/;
+    return Object.keys(byDate).filter(function (d) { return seasonRegex.test(d); });
+  }
+  function getSeasonalWeekTopDates(kind, fallbackDates) {
+    if (typeof isSummerRatingMode === "function" && isSummerRatingMode() && typeof getActiveRatingSeasonDates === "function") {
+      return getActiveRatingSeasonDates(kind);
+    }
+    return fallbackDates;
   }
   /**
    * Топ заносов за один турнир: зима и весна отдельно. Индекс скрина = порядок турнира в массиве
@@ -275,8 +282,8 @@ function pokerInitWinterRatingWeekTops() {
     return rows.join("");
   }
   function updateButtonPreviews() {
-    var pastTop = getTopByDates(GAZETTE_DATES);
-    var currentTop = getTopByDates(CURRENT_WEEK_DATES);
+    var pastTop = getTopByDates(getSeasonalWeekTopDates("past", GAZETTE_DATES));
+    var currentTop = getTopByDates(getSeasonalWeekTopDates("current", CURRENT_WEEK_DATES));
     var febDates = isSpringRatingMode() ? getMarchDatesFromData() : getFebruaryDatesFromData();
     var febTop = febDates.length ? getTopByDates(febDates) : [];
     if (currentPreview) currentPreview.innerHTML = currentTop.length ? previewHtml(currentTop) : "";
@@ -310,14 +317,17 @@ function pokerInitWinterRatingWeekTops() {
     if (marchWrap && marchSummary && marchList) {
       if (isSpringRatingMode()) {
         var marchData = getSpringRatingMarchTopWins();
+        var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
+        var maxWinLabel = seasonConfig.maxWinLabel || "за весну";
+        var top3WinsLabel = seasonConfig.top3WinsLabel || "за весну";
         marchWrap.removeAttribute("hidden");
         marchWrap.style.display = "";
         if (marchData.max) {
-          marchSummary.textContent = "Самый большой выигрыш за весну: " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
+          marchSummary.textContent = "Самый большой выигрыш " + maxWinLabel + ": " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
         } else {
-          marchSummary.textContent = "Самый большой выигрыш за весну: —";
+          marchSummary.textContent = "Самый большой выигрыш " + maxWinLabel + ": —";
         }
-        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 выигрыша за весну:" : "";
+        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 выигрыша " + top3WinsLabel + ":" : "";
         if (marchData.top3 && marchData.top3.length) {
           marchList.innerHTML = marchData.top3.map(function (r, i) {
             var sum = formatRewardRound(r.reward);
@@ -553,7 +563,8 @@ function pokerInitWinterRatingWeekTops() {
     }
     var shareRow = shareBtn ? shareBtn.closest(".winter-rating-week-top-modal__share-row") : null;
     if (shareRow) {
-      shareRow.style.display = (typeof isSpringRatingMode === "function" && isSpringRatingMode() && linkType === "past") ? "none" : "";
+      var hideSeasonalShare = typeof isSummerRatingMode === "function" && isSummerRatingMode();
+      shareRow.style.display = (typeof isSpringRatingMode === "function" && isSpringRatingMode() && (linkType === "past" || hideSeasonalShare)) ? "none" : "";
     }
     modal.setAttribute("aria-hidden", "false");
     if (document.body) document.body.style.overflow = "hidden";
@@ -590,10 +601,13 @@ function pokerInitWinterRatingWeekTops() {
   // отдельная общая кнопка под итоговой таблицей отключена.
   if (hasWeekTopControls) {
     window.openWinterRatingWeekTopModal = function (kind) {
-      if (kind === "current") openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
-      else if (kind === "past") openModal("Топы прошлой недели", GAZETTE_DATES, "past");
+      if (kind === "current") openModal("Топы текущей недели", getSeasonalWeekTopDates("current", CURRENT_WEEK_DATES), "current");
+      else if (kind === "past") openModal("Топы прошлой недели", getSeasonalWeekTopDates("past", GAZETTE_DATES), "past");
       else if (kind === "feb") {
-        if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
+        if (isSpringRatingMode()) {
+          var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
+          openModal(seasonConfig.topLabel || "Топы весны", getMarchDatesFromData(), "mar");
+        }
         else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
       }
     };
@@ -605,37 +619,42 @@ function pokerInitWinterRatingWeekTops() {
   if (currentBtn && currentBtn.getAttribute("data-rating-week-top-bound") !== "1") {
     currentBtn.setAttribute("data-rating-week-top-bound", "1");
     currentBtn.addEventListener("click", function () {
-    if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
+    var topLinkBase = typeof getRatingSeasonTopLinkBase === "function" ? getRatingSeasonTopLinkBase() : (typeof SPRING_TOP_LINK_BASE !== "undefined" ? SPRING_TOP_LINK_BASE : "");
+    if (isSpringRatingMode() && topLinkBase) {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var sep = SPRING_TOP_LINK_BASE.indexOf("?") >= 0 ? "&" : "?";
-      var link = SPRING_TOP_LINK_BASE + sep + "Mart_week_1=1";
+      var sep = topLinkBase.indexOf("?") >= 0 ? "&" : "?";
+      var link = topLinkBase + sep + "Mart_week_1=1";
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
       else window.open(link, "_blank");
       return;
     }
-    openModal("Топы текущей недели", CURRENT_WEEK_DATES, "current");
+    openModal("Топы текущей недели", getSeasonalWeekTopDates("current", CURRENT_WEEK_DATES), "current");
     });
   }
   if (pastBtn && pastBtn.getAttribute("data-rating-week-top-bound") !== "1") {
     pastBtn.setAttribute("data-rating-week-top-bound", "1");
     pastBtn.addEventListener("click", function () {
-      openModal("Топы прошлой недели", GAZETTE_DATES, "past");
+      openModal("Топы прошлой недели", getSeasonalWeekTopDates("past", GAZETTE_DATES), "past");
     });
   }
   if (febBtn && febBtn.getAttribute("data-rating-week-top-bound") !== "1") {
     febBtn.setAttribute("data-rating-week-top-bound", "1");
     febBtn.addEventListener("click", function () {
-      if (isSpringRatingMode() && SPRING_TOP_LINK_BASE) {
+      var topLinkBase = typeof getRatingSeasonTopLinkBase === "function" ? getRatingSeasonTopLinkBase() : (typeof SPRING_TOP_LINK_BASE !== "undefined" ? SPRING_TOP_LINK_BASE : "");
+      if (isSpringRatingMode() && topLinkBase) {
         if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-        var sep = SPRING_TOP_LINK_BASE.indexOf("?") >= 0 ? "&" : "?";
-        var link = SPRING_TOP_LINK_BASE + sep + "mart=1";
+        var sep = topLinkBase.indexOf("?") >= 0 ? "&" : "?";
+        var link = topLinkBase + sep + "mart=1";
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
         else window.open(link, "_blank");
         return;
       }
-      if (isSpringRatingMode()) openModal("Топы весны", getMarchDatesFromData(), "mar");
+      if (isSpringRatingMode()) {
+        var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
+        openModal(seasonConfig.topLabel || "Топы весны", getMarchDatesFromData(), "mar");
+      }
       else openModal("Топы Февраля", getFebruaryDatesFromData(), "feb");
     });
   }

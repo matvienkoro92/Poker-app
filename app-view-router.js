@@ -465,6 +465,7 @@ window.pokerClosePlayerCrmStandalone = pokerClosePlayerCrmStandalone;
   document.documentElement.classList.toggle("app-view-download-html-scroll", viewName === "download");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
   document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
+  document.documentElement.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
@@ -517,7 +518,7 @@ function setView(viewName, navOpts) {
   navOpts = navOpts || {};
   try {
     if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
-      var htmlViewName = viewName === "spring-rating" ? "winter-rating" : viewName;
+      var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;
       var htmlReady = window.pokerEnsureViewHtml(htmlViewName);
       if (htmlReady && typeof htmlReady.then === "function") {
         htmlReady.then(function () {
@@ -921,32 +922,34 @@ function setView(viewName, navOpts) {
       }
     }
   }
-  if (viewName === "winter-rating") {
+  function restoreSeasonalRatingSectionToWinter() {
     var winterView = document.querySelector('[data-view="winter-rating"]');
-    var springView = document.querySelector('[data-view="spring-rating"]');
     var ratingSection = document.getElementById("winterRatingSection");
-    var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
-    if (ratingSection && springPlaceholder && ratingSection.classList.contains("spring-rating")) {
-      ratingSection.classList.remove("spring-rating");
-      if (winterView) winterView.appendChild(ratingSection);
-    }
+    if (!ratingSection || !winterView) return;
+    ratingSection.classList.remove("spring-rating", "summer-rating");
+    if (ratingSection.parentNode !== winterView) winterView.appendChild(ratingSection);
+  }
+  function moveRatingSectionToSeason(viewNameForSeason) {
+    var winterView = document.querySelector('[data-view="winter-rating"]');
+    var ratingSection = document.getElementById("winterRatingSection");
+    var placeholderId = viewNameForSeason === "summer-rating" ? "summerRatingSectionPlaceholder" : "springRatingSectionPlaceholder";
+    var placeholder = document.getElementById(placeholderId);
+    if (!ratingSection || !placeholder) return;
+    if (ratingSection.parentNode === winterView) winterView.removeChild(ratingSection);
+    ratingSection.classList.add("spring-rating");
+    ratingSection.classList.toggle("summer-rating", viewNameForSeason === "summer-rating");
+    if (ratingSection.parentNode !== placeholder) placeholder.appendChild(ratingSection);
+  }
+  if (viewName === "winter-rating") {
+    restoreSeasonalRatingSectionToWinter();
     try {
       initWinterRating();
     } catch (err) {
       if (typeof console !== "undefined" && console.error) console.error("initWinterRating", err);
     }
   }
-  if (viewName === "spring-rating") {
-    var winterView = document.querySelector('[data-view="winter-rating"]');
-    var ratingSection = document.getElementById("winterRatingSection");
-    var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
-    if (ratingSection && springPlaceholder && winterView && ratingSection.parentNode === winterView) {
-      winterView.removeChild(ratingSection);
-      ratingSection.classList.add("spring-rating");
-      springPlaceholder.appendChild(ratingSection);
-    } else if (ratingSection && !ratingSection.classList.contains("spring-rating")) {
-      ratingSection.classList.add("spring-rating");
-    }
+  if (viewName === "spring-rating" || viewName === "summer-rating") {
+    moveRatingSectionToSeason(viewName);
     try {
       initWinterRating();
     } catch (err) {
@@ -1189,32 +1192,18 @@ function setView(viewName, navOpts) {
       }
     } catch (eChatPostRefreshWrap) {}
   } else if (viewName === "winter-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-spring-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-spring-rating", "app-view-summer-rating");
     document.documentElement.classList.add("app-view-winter-rating");
-  } else if (viewName === "spring-rating") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-winter-rating");
-    document.documentElement.classList.add("app-view-spring-rating");
+  } else if (viewName === "spring-rating" || viewName === "summer-rating") {
+    document.documentElement.classList.remove("app-view-chat", "app-view-home", "app-view-winter-rating", "app-view-spring-rating", "app-view-summer-rating");
+    document.documentElement.classList.add(viewName === "summer-rating" ? "app-view-summer-rating" : "app-view-spring-rating");
   } else if (viewName === "home") {
-    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating");
+    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-summer-rating");
     document.documentElement.classList.add("app-view-home");
-    var ratingSection = document.getElementById("winterRatingSection");
-    var winterView = document.querySelector('[data-view="winter-rating"]');
-    var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
-    if (ratingSection && ratingSection.classList.contains("spring-rating") && winterView && springPlaceholder && ratingSection.parentNode === springPlaceholder) {
-      ratingSection.classList.remove("spring-rating");
-      springPlaceholder.removeChild(ratingSection);
-      winterView.appendChild(ratingSection);
-    }
+    restoreSeasonalRatingSectionToWinter();
   } else {
-    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-home");
-    var ratingSection = document.getElementById("winterRatingSection");
-    var winterView = document.querySelector('[data-view="winter-rating"]');
-    var springPlaceholder = document.getElementById("springRatingSectionPlaceholder");
-    if (ratingSection && ratingSection.classList.contains("spring-rating") && winterView && springPlaceholder && ratingSection.parentNode === springPlaceholder) {
-      ratingSection.classList.remove("spring-rating");
-      springPlaceholder.removeChild(ratingSection);
-      winterView.appendChild(ratingSection);
-    }
+    document.documentElement.classList.remove("app-view-chat", "app-view-winter-rating", "app-view-spring-rating", "app-view-summer-rating", "app-view-home");
+    restoreSeasonalRatingSectionToWinter();
   }
   document.documentElement.classList.toggle("app-view-browser-local", viewName !== "chat");
   /* Длинные экраны без :has() в CSS — часть WebView Telegram не крутит страницу; главную/дашборд сюда не включать. */
@@ -1234,6 +1223,7 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-home-html-scroll", viewName === "home");
   document.documentElement.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
   document.documentElement.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
+  document.documentElement.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");

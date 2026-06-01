@@ -94,9 +94,11 @@
     "rating": [
       "app-rating-core.js",
       "app-rating-spring-season.js",
+      "app-rating-summer-season.js",
       "app-rating-view.js",
       "app-rating-view-adapter.js",
       "app-rating-spring-runtime.js",
+      "app-rating-summer-runtime.js",
       "app-rating-data-registry.js",
       "app-rating.js",
       "app-rating-week-tops.js",
@@ -106,7 +108,14 @@
       "spring-rating-data-march.js",
       "spring-rating-data-april.js",
       "spring-rating-data-may.js",
-      "spring-rating-data.js"
+      "spring-rating-data.js",
+      "summer-rating-images-league1.js",
+      "summer-rating-images-league2.js",
+      "summer-rating-meta.js",
+      "summer-rating-data-june.js",
+      "summer-rating-data-july.js",
+      "summer-rating-data-august.js",
+      "summer-rating-data.js"
     ],
     "ratingWinter": [
       "app-rating-winter-runtime.js",

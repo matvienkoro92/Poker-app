@@ -472,6 +472,7 @@ button.logo.logo--welcome:focus-visible {
 .card:has(.view--active[data-view="download"]) .card__content,
 .card:has(.view--active[data-view="cashout"]) .card__content,
 .card:has(.view--active[data-view="spring-rating"]) .card__content,
+.card:has(.view--active[data-view="summer-rating"]) .card__content,
 .card:has(.view--active[data-view="raffles"]) .card__content {
   min-width: 0;
 }

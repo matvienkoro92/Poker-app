@@ -9,15 +9,75 @@ function pluralRuDays(n) {
   return "дней";
 }
 
+function getActiveRatingSeasonConfigSafe() {
+  if (typeof getRatingSeasonConfig === "function") return getRatingSeasonConfig();
+  return typeof SPRING_RATING_SEASON !== "undefined" ? SPRING_RATING_SEASON : {};
+}
+
+function getActiveRatingSeasonViewMonths() {
+  var config = getActiveRatingSeasonConfigSafe();
+  if (config && Array.isArray(config.viewMonths)) return config.viewMonths;
+  return [
+    {
+      title: "Май",
+      totalId: "springRatingViewMayTotal",
+      weeksHostId: "springRatingViewMayWeeks",
+      blocks: typeof SPRING_VIEW_MAY_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MAY_WEEK_BLOCKS : [],
+    },
+    {
+      title: "Апрель",
+      totalId: "springRatingViewAprilTotal",
+      weeksHostId: "springRatingViewAprilWeeks",
+      blocks: typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [],
+    },
+    {
+      title: "Март",
+      totalId: "springRatingViewMarchTotal",
+      weeksHostId: "springRatingViewMarchWeeks",
+      blocks: typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [],
+    },
+  ];
+}
+
+function getActiveRatingSeasonDates(kind) {
+  var config = getActiveRatingSeasonConfigSafe();
+  var field = kind === "past" ? "pastWeekDates" : kind === "current" ? "currentWeekDates" : "nextWeekDates";
+  if (config && Array.isArray(config[field])) return config[field];
+  if (kind === "past") return typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : [];
+  if (kind === "current") return typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : [];
+  return typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : [];
+}
+
+function getActiveRatingSeasonMonthRegex() {
+  if (typeof getRatingSeasonMonthRegex === "function") return getRatingSeasonMonthRegex();
+  var config = getActiveRatingSeasonConfigSafe();
+  return config && config.monthRegex ? config.monthRegex : /\.(03|04|05)\.2026$/;
+}
+
+function getActiveRatingSeasonScrollBtn() {
+  var config = getActiveRatingSeasonConfigSafe();
+  var id = config && config.scrollBtnId ? config.scrollBtnId : "springRatingViewScrollBtn";
+  return document.getElementById(id);
+}
+
+function getActiveRatingSeasonViewName() {
+  var config = getActiveRatingSeasonConfigSafe();
+  return config && config.view ? config.view : "spring-rating";
+}
+
 function updateSpringRatingFinalCountdown() {
   var els = document.querySelectorAll(".spring-rating-final-countdown__days");
   if (!els.length) return;
-  var end = new Date(2026, 4, 31, 23, 59, 59, 999);
+  var config = getActiveRatingSeasonConfigSafe();
+  var end = config && config.finalAt instanceof Date ? config.finalAt : new Date(2026, 4, 31, 23, 59, 59, 999);
   var now = new Date();
   var diffMs = end.getTime() - now.getTime();
   var days = diffMs <= 0 ? 0 : Math.ceil(diffMs / (24 * 60 * 60 * 1000));
   var text = days <= 0 ? "сезон завершён" : days + " " + pluralRuDays(days);
   for (var i = 0; i < els.length; i++) els[i].textContent = text;
+  var finalLines = document.querySelectorAll(".spring-rating-final-countdown__line:first-child");
+  var finalText = config && config.finalText ? config.finalText : "Итоги 31-го мая";
+  for (var j = 0; j < finalLines.length; j++) finalLines[j].textContent = finalText;
 }
 
 function getSpringRatingTournamentsByDate() {
@@ -48,29 +108,42 @@ function updateSpringRatingHomePromoStats() {
   var viewWrap = document.getElementById("springRatingViewTotals");
   if (!wrap && !viewWrap) return;
   try {
-    if (typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined") {
+    var tournamentsByDate = getSpringRatingTournamentsByDate();
+    if (!tournamentsByDate || typeof tournamentsByDate !== "object") {
       if (wrap) wrap.setAttribute("hidden", "");
       if (viewWrap) viewWrap.setAttribute("hidden", "");
       return;
     }
     var fmt = typeof formatRewardRound === "function" ? formatRewardRound : function (n) { return String(Math.round(Number(n) || 0)); };
-    var mayTot = document.getElementById("springRatingViewMayTotal");
+    var months = getActiveRatingSeasonViewMonths();
+    function collectDates(blocks) {
+      var seen = {};
+      var dates = [];
+      (blocks || []).forEach(function (block) {
+        (block && Array.isArray(block.dates) ? block.dates : []).forEach(function (dateStr) {
+          if (dateStr && !seen[dateStr]) {
+            seen[dateStr] = 1;
+            dates.push(dateStr);
+          }
+        });
+      });
+      return dates;
+    }
+    months.forEach(function (month) {
+      var totalEl = month && month.totalId ? document.getElementById(month.totalId) : null;
+      var sum = getSpringRatingTotalRewardSumForDates(collectDates(month && month.blocks));
+      if (totalEl) totalEl.textContent = sum > 0 ? fmt(sum) + " ₽" : "—";
+    });
     var aprTot = document.getElementById("springRatingHomePromoAprilTotal");
     var marTot = document.getElementById("springRatingHomePromoMarchTotal");
-    var aprView = document.getElementById("springRatingViewAprilTotal");
-    var marView = document.getElementById("springRatingViewMarchTotal");
     var w1 = document.getElementById("springRatingHomePromoMarchW1");
     var w2 = document.getElementById("springRatingHomePromoMarchW2");
     var w3 = document.getElementById("springRatingHomePromoMarchW3");
     var w4 = document.getElementById("springRatingHomePromoMarchW4");
     var w5 = document.getElementById("springRatingHomePromoMarchW5");
-    var maySum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MAY_PROMO_TOTAL_DATES !== "undefined" ? SPRING_HOME_MAY_PROMO_TOTAL_DATES : []);
-    var mayText = maySum > 0 ? fmt(maySum) + " ₽" : "—";
-    if (mayTot) mayTot.textContent = mayText;
     var aprSum = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_APRIL_PROMO_TOTAL_DATES !== "undefined" ? SPRING_HOME_APRIL_PROMO_TOTAL_DATES : []);
     var aprText = aprSum > 0 ? fmt(aprSum) + " ₽" : "—";
     if (aprTot) aprTot.textContent = aprText;
-    if (aprView) aprView.textContent = aprText;
     var s1 = getSpringRatingTotalRewardSumForDates(typeof SPRING_HOME_MARCH_WEEK1_DATES !== "undefined" ? SPRING_HOME_MARCH_WEEK1_DATES : []);
     var s2 = getSpringRatingTotalRewardSumForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
     var s3 = getSpringRatingTotalRewardSumForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
@@ -79,7 +152,6 @@ function updateSpringRatingHomePromoStats() {
     var marchAll = s1 + s2 + s3 + s4 + s5;
     var marText = marchAll > 0 ? fmt(marchAll) + " ₽" : "—";
     if (marTot) marTot.textContent = marText;
-    if (marView) marView.textContent = marText;
     function line(period, sum) {
       return period + " · общий выигрыш " + (sum > 0 ? fmt(sum) + " ₽" : "—");
     }
@@ -186,9 +258,28 @@ function renderSpringRatingViewTotalsWeeks() {
       "</details>"
     );
   }
-  var mayBlocks = typeof SPRING_VIEW_MAY_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MAY_WEEK_BLOCKS : [];
-  var aprBlocks = typeof SPRING_VIEW_APRIL_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_APRIL_WEEK_BLOCKS : [];
-  var marBlocks = typeof SPRING_VIEW_MARCH_WEEK_BLOCKS !== "undefined" ? SPRING_VIEW_MARCH_WEEK_BLOCKS : [];
+  var months = getActiveRatingSeasonViewMonths();
+  function monthAt(index, fallbackTitle) {
+    return months[index] || { title: fallbackTitle, blocks: [] };
+  }
+  var mayMonth = monthAt(0, "Май");
+  var aprMonth = monthAt(1, "Апрель");
+  var marMonth = monthAt(2, "Март");
+  var mayBlocks = Array.isArray(mayMonth.blocks) ? mayMonth.blocks : [];
+  var aprBlocks = Array.isArray(aprMonth.blocks) ? aprMonth.blocks : [];
+  var marBlocks = Array.isArray(marMonth.blocks) ? marMonth.blocks : [];
+  function setMonthPanelTitle(panelClass, title, suffix) {
+    var titleEl = document.querySelector(panelClass + " .spring-rating-view-totals__month-title");
+    if (!titleEl) return;
+    titleEl.innerHTML = "<strong>" + escNick(title) + "</strong>" + (suffix || "");
+  }
+  setMonthPanelTitle(".spring-rating-view-totals-panel--may", mayMonth.title || "Май", "");
+  setMonthPanelTitle(".spring-rating-view-totals-panel--april", aprMonth.title || "Апрель", "");
+  setMonthPanelTitle(
+    ".spring-rating-view-totals-panel--march",
+    marMonth.title || "Март",
+    typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "" : " · итоги"
+  );
   function collectMonthDates(blocks) {
     var seen = {};
     var dates = [];
@@ -237,8 +328,9 @@ function renderSpringRatingViewTotalsWeeks() {
 function getSpringRatingMarchTopWins() {
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
   var allWins = [];
+  var seasonRegex = getActiveRatingSeasonMonthRegex();
   Object.keys(tournamentsByDate).forEach(function (dateStr) {
-    if (!/\.(03|04|05)\.2026$/.test(dateStr)) return;
+    if (seasonRegex && !seasonRegex.test(dateStr)) return;
     var list = tournamentsByDate[dateStr];
     if (!Array.isArray(list)) return;
     list.forEach(function (t) {
@@ -308,27 +400,27 @@ function getSpringRatingWeekTopWinsForDates(allowedDates) {
 }
 
 function getSpringRatingPastWeekTopSum() {
-  return getSpringRatingWeekTopSumForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
+  return getSpringRatingWeekTopSumForDates(getActiveRatingSeasonDates("past"));
 }
 
 function getSpringRatingPastWeekTopWins() {
-  return getSpringRatingWeekTopWinsForDates(typeof MARCH_PAST_WEEK_DATES !== "undefined" ? MARCH_PAST_WEEK_DATES : []);
+  return getSpringRatingWeekTopWinsForDates(getActiveRatingSeasonDates("past"));
 }
 
 function getSpringRatingCurrentWeekTopSum() {
-  return getSpringRatingWeekTopSumForDates(typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : []);
+  return getSpringRatingWeekTopSumForDates(getActiveRatingSeasonDates("current"));
 }
 
 function getSpringRatingCurrentWeekTopWins() {
-  return getSpringRatingWeekTopWinsForDates(typeof MARCH_CURRENT_WEEK_DATES !== "undefined" ? MARCH_CURRENT_WEEK_DATES : []);
+  return getSpringRatingWeekTopWinsForDates(getActiveRatingSeasonDates("current"));
 }
 
 function getSpringRatingNextWeekTopSum() {
-  return getSpringRatingWeekTopSumForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
+  return getSpringRatingWeekTopSumForDates(getActiveRatingSeasonDates("next"));
 }
 
 function getSpringRatingNextWeekTopWins() {
-  return getSpringRatingWeekTopWinsForDates(typeof MARCH_NEXT_WEEK_DATES !== "undefined" ? MARCH_NEXT_WEEK_DATES : []);
+  return getSpringRatingWeekTopWinsForDates(getActiveRatingSeasonDates("next"));
 }
 
 function getSpringRatingImagesByLeague(leagueNum) {
@@ -371,6 +463,12 @@ function openSpringRatingInfoModal() {
   var modal = document.getElementById("springRatingInfoModal");
   if (!modal) return;
   initSpringRatingInfoModal();
+  var config = getActiveRatingSeasonConfigSafe();
+  var title = modal.querySelector(".spring-rating-info-modal__title");
+  var subtitle = modal.querySelector(".spring-rating-info-modal__subtitle");
+  if (title) title.textContent = config && config.key === "summer" ? "Рейтинг турнирщиков лета" : "Рейтинг турнирщиков весны";
+  if (subtitle) subtitle.textContent = config && config.key === "summer" ? "Стартуем 1го июня" : "Стартуем 1го марта";
+  modal.setAttribute("aria-label", config && config.key === "summer" ? "Рейтинг турнирщиков лета" : "Рейтинг турнирщиков весны");
   modal.setAttribute("aria-hidden", "false");
   modal.classList.add("spring-rating-info-modal--open");
   document.body.style.overflow = "hidden";
@@ -398,7 +496,7 @@ function initSpringRatingInfoModal() {
 }
 
 function getSpringRatingViewScrollTarget() {
-  if (document.body && document.body.getAttribute("data-view") === "spring-rating") {
+  if (typeof isSpringRatingMode === "function" && isSpringRatingMode()) {
     var panel = document.querySelector("main.card .card__content") || document.querySelector(".card__content");
     if (panel) return panel;
   }
@@ -407,14 +505,15 @@ function getSpringRatingViewScrollTarget() {
 }
 
 function getSpringRatingViewScrollTargets() {
-  var view = document.querySelector(".view--active[data-view=\"spring-rating\"]") || document.getElementById("springRatingView");
+  var viewName = getActiveRatingSeasonViewName();
+  var view = document.querySelector(".view--active[data-view=\"" + viewName + "\"]") || document.getElementById(viewName === "summer-rating" ? "summerRatingView" : "springRatingView");
   var cardContent = view && view.closest ? view.closest(".card__content") : null;
   var card = view && view.closest ? view.closest(".card") : null;
   var candidates = [
     cardContent,
     card,
     view,
-    document.getElementById("springRatingSectionPlaceholder"),
+    document.getElementById((getActiveRatingSeasonConfigSafe() && getActiveRatingSeasonConfigSafe().placeholderId) || "springRatingSectionPlaceholder"),
     document.getElementById("winterRatingSection"),
     document.getElementById("app"),
     document.querySelector(".app"),
@@ -586,7 +685,7 @@ function springRatingViewScrollOnePage(direction) {
 }
 
 function initSpringRatingViewScrollButton() {
-  var btn = document.getElementById("springRatingViewScrollBtn");
+  var btn = getActiveRatingSeasonScrollBtn();
   if (!btn || btn.getAttribute("data-inited") === "1") return;
   btn.setAttribute("data-inited", "1");
   if (btn.tagName === "INPUT") {
@@ -693,9 +792,9 @@ function initSpringRatingViewScrollButton() {
 }
 
 function updateSpringRatingViewScrollButton() {
-  var btn = document.getElementById("springRatingViewScrollBtn");
+  var btn = getActiveRatingSeasonScrollBtn();
   if (!btn) return;
-  var isSpringView = document.body && document.body.getAttribute("data-view") === "spring-rating";
+  var isSpringView = typeof isSpringRatingMode === "function" && isSpringRatingMode();
   var target = isSpringView ? getSpringRatingViewScrollTarget() : null;
   var maxScroll = target ? getSpringRatingViewMaxScroll(target) : 0;
   if (!isSpringView || !target) {
@@ -717,7 +816,7 @@ function getSpringRatingOverallByLeague(leagueNum) {
   if (!isSpringRatingMode()) return [];
   var tournamentsByDate = getSpringRatingTournamentsByDate() || {};
   var byNick = {};
-  var springOverallRegex = /\.(03|04|05)\.2026$/;
+  var springOverallRegex = getActiveRatingSeasonMonthRegex();
   var dateStrs = Object.keys(tournamentsByDate).filter(function (d) { return springOverallRegex.test(d); });
   for (var i = 0; i < dateStrs.length; i++) {
     var list = tournamentsByDate[dateStrs[i]];

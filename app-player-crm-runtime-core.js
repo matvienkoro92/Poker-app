@@ -816,6 +816,7 @@
     { key: "learn-play-hub", label: "Научиться играть", view: "learn-play-hub", startapp: "learn_play_hub" },
     { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
     { key: "spring-rating", label: "Рейтинг", view: "spring-rating", startapp: "spring_rating" },
+    { key: "summer-rating", label: "Летний рейтинг", view: "summer-rating", startapp: "summer_rating" },
     { key: "hall-of-fame", label: "Зал славы", view: "hall-of-fame", startapp: "hall_fame_top2026" },
     { key: "streams", label: "Стримы", view: "streams", startapp: "streams" },
     { key: "download", label: "Скачать PWA", view: "download", startapp: "download" },
