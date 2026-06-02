@@ -30,7 +30,7 @@ function initRafflesCompletedRuntime(opts) {
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
     var readyBadge = winnerReady
       ? "<span class=\"raffle-winner-ready-badge\">Готов</span>"
-      : "";
+      : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
     var readyAction = isMyWin && status !== "ok"
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
         (winnerReady ? " raffle-winner-ready-btn--active" : "") +
@@ -395,12 +395,14 @@ function initRafflesCompletedRuntime(opts) {
                 });
                 winHtml += "</ul></li>";
               });
-              var deleteHtml = rafflesIsAdmin
-                ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
+              var adminActionsHtml = rafflesIsAdmin
+                ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
+                  escapeHtml(raffle.id || "") +
+                  "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
                   escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
                 : "";
               return "<div class=\"raffle-completed-card\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
-                deleteHtml +
+                adminActionsHtml +
                 (winHtml ? "<p class=\"raffle-completed-card__winners-title\">Победители</p><ul class=\"raffle-completed-card__winners\">" + winHtml + "</ul>" : "") + "</div>";
               }).join("");
           } else {
@@ -444,6 +446,20 @@ function initRafflesCompletedRuntime(opts) {
         return;
       }
       if (!rafflesIsAdmin) return;
+      var refreshBtn = e.target.closest(".raffle-completed-card__refresh-btn");
+      if (refreshBtn) {
+        if (refreshBtn.disabled) return;
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = "Обновляю";
+        clearRafflesCache();
+        loadRaffles();
+        setTimeout(function () {
+          if (!refreshBtn || !refreshBtn.isConnected) return;
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = "Обновить";
+        }, 2500);
+        return;
+      }
       var btn = e.target.closest(".raffle-completed-card__delete-btn");
       if (!btn) return;
       if (!base || !pokerApiHasCredential()) {
