@@ -873,13 +873,13 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     }
     assert.ok(winnerMessage, "winner receives raffle ready instruction");
     const winnerText = String(winnerMessage.body.text || "");
-    assert.ok(winnerText.includes("startapp=raffles"), "winner message includes raffles deeplink");
+    assert.ok(winnerText.includes("startapp=raffle_contract_cash_raffle"), "winner message includes completed raffle deeplink");
     assert.ok(winnerText.includes("«Я готов»"), "winner message explains ready button");
     assert.ok(winnerText.includes("«Завершённые»"), "winner message explains completed tab");
     assert.ok(winnerText.includes("отметку «Готов»"), "winner message explains admin-ready badge");
     assert.ok(winnerPush, "winner receives personal raffle web push");
     assert.strictEqual(winnerPush.subscription.endpoint, "https://push.example.test/raffle-winner-1001", "winner push uses winner subscription");
-    assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffles", "winner push opens raffles");
+    assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffle_contract_cash_raffle", "winner push opens completed raffle");
     assert.strictEqual(winnerPush.payload.raffleId, "contract_cash_raffle", "winner push carries raffle id");
     assert.ok(String(winnerPush.payload.body || "").includes("Я готов"), "winner push asks to press ready");
   } finally {

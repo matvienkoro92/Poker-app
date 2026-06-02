@@ -1029,6 +1029,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
 }
+.raffle-completed-card--target {
+  border-color: rgba(251, 191, 36, 0.72);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.18), 0 0 22px rgba(251, 191, 36, 0.18);
+}
 .raffle-completed-card__meta { margin: 0 0 6px; font-size: 13px; color: var(--text-muted); }
 .raffle-completed-card__actions {
   margin: 6px 0;

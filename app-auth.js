@@ -135,6 +135,33 @@ function pokerParseClubChatDmStartParam(rawStartParam, rawWithPeer) {
   return { match: true, peer: peer || pokerNormalizeClubChatDmPeer(m[1]) };
 }
 
+function pokerNormalizeRaffleCompletedId(raw) {
+  var s = String(raw || "").trim();
+  if (!s) return "";
+  return s.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
+}
+
+function pokerBuildRaffleCompletedStartParam(raffleId) {
+  var id = pokerNormalizeRaffleCompletedId(raffleId);
+  return id ? "raffle_" + id : "raffles";
+}
+
+function pokerParseRaffleCompletedStartParam(rawStartParam) {
+  var start = pokerNormalizeWebAppStartParam(rawStartParam);
+  if (!start || start === "raffles") return "";
+  var m = start.match(/^raffle_(.+)$/) || start.match(/^raffles_(.+)$/);
+  if (!m || !m[1]) return "";
+  return pokerNormalizeRaffleCompletedId(m[1]);
+}
+
+try {
+  if (typeof window !== "undefined") {
+    window.pokerNormalizeRaffleCompletedId = pokerNormalizeRaffleCompletedId;
+    window.pokerBuildRaffleCompletedStartParam = pokerBuildRaffleCompletedStartParam;
+    window.pokerParseRaffleCompletedStartParam = pokerParseRaffleCompletedStartParam;
+  }
+} catch (eRaffleCompletedHelpers) {}
+
 /**
  * Параметр ссылки ?startapp= / startattach: в hash приходит как tgWebAppStartParam (см. launch parameters Mini App).
  * Раньше читали только initDataUnsafe.start_param — на части клиентов он пустой, открывалась главная.

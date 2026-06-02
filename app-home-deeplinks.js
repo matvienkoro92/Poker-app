@@ -170,7 +170,11 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
-    if (startParam === "raffles") {
+    var raffleCompletedTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleCompletedStartParam === "function"
+      ? window.pokerParseRaffleCompletedStartParam(startParam)
+      : "";
+    if (startParam === "raffles" || raffleCompletedTargetId) {
+      if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
       setTimeout(function () {
         if (typeof setView === "function") setView("raffles");
       }, 0);

@@ -278,7 +278,11 @@ function initImageLightbox() {
       var urlObj = new URL(link.href, window.location.href);
       var sp = new URLSearchParams(urlObj.search || "");
       var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(sp));
-      if (startApp === "raffles" && typeof setView === "function") {
+      var raffleCompletedTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleCompletedStartParam === "function"
+        ? window.pokerParseRaffleCompletedStartParam(startApp)
+        : "";
+      if ((startApp === "raffles" || raffleCompletedTargetId) && typeof setView === "function") {
+        if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
         setView("raffles");
         return;
       }

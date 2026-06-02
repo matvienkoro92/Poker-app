@@ -401,7 +401,7 @@ function initRafflesCompletedRuntime(opts) {
                   "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
                   escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
                 : "";
-              return "<div class=\"raffle-completed-card\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
+              return "<div class=\"raffle-completed-card\" data-raffle-id=\"" + escapeHtml(raffle.id || "") + "\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
                 adminActionsHtml +
                 (winHtml ? "<p class=\"raffle-completed-card__winners-title\">Победители</p><ul class=\"raffle-completed-card__winners\">" + winHtml + "</ul>" : "") + "</div>";
               }).join("");

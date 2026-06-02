@@ -88,6 +88,7 @@ function initRaffles() {
   var rafflesCompletedDirty = false;
   var rafflesLoadSeq = 0;
   var rafflesDeadlineRefreshInFlight = false;
+  var rafflesPendingCompletedId = "";
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -244,6 +245,92 @@ function initRaffles() {
     rafflesFocusedActiveId = raffleId ? String(raffleId) : null;
   }
 
+  function normalizePendingCompletedRaffleId(raw) {
+    var rawText = String(raw || "").trim();
+    if (!rawText || rawText === "raffles") return "";
+    if (typeof window !== "undefined" && typeof window.pokerParseRaffleCompletedStartParam === "function") {
+      var parsed = window.pokerParseRaffleCompletedStartParam(rawText);
+      if (parsed) return parsed;
+    }
+    if (typeof window !== "undefined" && typeof window.pokerNormalizeRaffleCompletedId === "function") {
+      return window.pokerNormalizeRaffleCompletedId(rawText);
+    }
+    return rawText.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
+  }
+
+  function readPendingCompletedRaffleId() {
+    var raw = "";
+    try {
+      raw = typeof window !== "undefined" ? window.__pendingRaffleCompletedId || "" : "";
+    } catch (ePendingRead) {}
+    return normalizePendingCompletedRaffleId(raw);
+  }
+
+  function completedRaffleCardSelector(raffleId) {
+    var id = normalizePendingCompletedRaffleId(raffleId);
+    if (!id) return "";
+    var escaped = id;
+    try {
+      if (typeof CSS !== "undefined" && CSS.escape) escaped = CSS.escape(id);
+      else escaped = id.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+    } catch (eEsc) {
+      escaped = id.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+    }
+    return ".raffle-completed-card[data-raffle-id=\"" + escaped + "\"]";
+  }
+
+  function scrollCompletedRaffleCardIntoView(card) {
+    if (!card) return;
+    try {
+      var panel = getRafflesScrollElement();
+      if (panel && panel.contains(card)) {
+        var panelRect = panel.getBoundingClientRect();
+        var cardRect = card.getBoundingClientRect();
+        var target = (panel.scrollTop || 0) + (cardRect.top - panelRect.top) - Math.max(12, ((panel.clientHeight || 0) - (cardRect.height || 0)) / 2);
+        panel.scrollTop = Math.max(0, target);
+        return;
+      }
+    } catch (ePanelScroll) {}
+    try {
+      if (typeof card.scrollIntoView === "function") card.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (eScrollView) {
+      try {
+        card.scrollIntoView();
+      } catch (eScrollFallback) {}
+    }
+  }
+
+  function focusPendingCompletedRaffle() {
+    var targetId = normalizePendingCompletedRaffleId(rafflesPendingCompletedId || readPendingCompletedRaffleId());
+    if (!targetId || !rafflesCompleted) return false;
+    var selector = completedRaffleCardSelector(targetId);
+    var card = selector ? rafflesCompleted.querySelector(selector) : null;
+    if (!card) return false;
+    try {
+      rafflesCompleted.querySelectorAll(".raffle-completed-card--target").forEach(function (node) {
+        if (node !== card) node.classList.remove("raffle-completed-card--target");
+      });
+    } catch (eCleanTarget) {}
+    card.classList.add("raffle-completed-card--target");
+    rafflesPendingCompletedId = "";
+    try {
+      if (typeof window !== "undefined") window.__pendingRaffleCompletedId = "";
+    } catch (eClearPending) {}
+    setTimeout(function () {
+      scrollCompletedRaffleCardIntoView(card);
+    }, 0);
+    return true;
+  }
+
+  function schedulePendingCompletedRaffleFocus() {
+    var targetId = normalizePendingCompletedRaffleId(rafflesPendingCompletedId || readPendingCompletedRaffleId());
+    if (!targetId) return;
+    rafflesPendingCompletedId = targetId;
+    setTimeout(focusPendingCompletedRaffle, 0);
+    setTimeout(focusPendingCompletedRaffle, 120);
+    setTimeout(focusPendingCompletedRaffle, 360);
+  }
+
   function getRafflesScrollElement() {
     try {
       if (typeof pokerGetPanelScrollCardContentEl === "function") {
@@ -362,6 +449,7 @@ function initRaffles() {
   function renderStoredCompletedRafflesPanel() {
     renderCompletedRafflesPanel(rafflesLastCompleted || []);
     rafflesCompletedDirty = false;
+    schedulePendingCompletedRaffleFocus();
   }
 
   if (typeof initRafflesCompletedRuntime === "function") {
@@ -522,6 +610,11 @@ function initRaffles() {
 
   function applyRafflesData(data, switchToCompleted) {
         if (!data || !data.ok) return;
+        var pendingCompletedId = readPendingCompletedRaffleId();
+        if (pendingCompletedId) {
+          rafflesPendingCompletedId = pendingCompletedId;
+          switchToCompleted = true;
+        }
         rafflesIsAdmin = !!data.isAdmin;
         if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
           window.pokerMarkAdminAccess("raffles");
@@ -668,6 +761,7 @@ function initRaffles() {
         } else {
           rafflesCompletedDirty = true;
         }
+        schedulePendingCompletedRaffleFocus();
   }
 
   if (typeof initRafflesBroadcastRuntime === "function") {
@@ -741,6 +835,7 @@ function initRaffles() {
     }
     rafflesCurrentTab = tab;
     if (isCompleted && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
+    if (isCompleted) schedulePendingCompletedRaffleFocus();
     if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
   }
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
