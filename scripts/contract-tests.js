@@ -897,6 +897,12 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     assert.ok(winnerText.includes("отметку «Готов»"), "winner message explains admin-ready badge");
     assert.ok(winnerPush, "winner receives personal raffle web push");
     assert.strictEqual(winnerPush.subscription.endpoint, "https://push.example.test/raffle-winner-1001", "winner push uses winner subscription");
+    assert.strictEqual(winnerPush.payload.title, "Вы выиграли розыгрыш", "winner push title omits club name");
+    assert.ok(!String(winnerPush.payload.title || "").includes("Два туза"), "winner push title does not duplicate source name");
+    assert.ok(
+      String(winnerPush.payload.body || "").includes("Розыгрыш беккинг-байинов на кеш · Приз: Беккинг-байин 500 ₽ на кеш\nОткройте"),
+      "winner push keeps title and prize on one line before instruction"
+    );
     assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffle_2", "winner push opens short completed raffle link");
     assert.strictEqual(winnerPush.payload.raffleId, "contract_cash_raffle", "winner push carries raffle id");
     assert.ok(String(winnerPush.payload.body || "").includes("Я готов"), "winner push asks to press ready");
