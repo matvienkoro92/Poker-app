@@ -1039,6 +1039,51 @@ async function testRaffleAutoCompleteNotificationDedup(redis) {
   assert.strictEqual((stored.winners || []).length, 1, "auto-complete stores one winner");
 }
 
+async function testRaffleDrawnGetDoesNotNotifyWinners(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  const raffle = {
+    id: "contract_raffle_drawn_get_no_notify",
+    title: "Drawn GET no notify",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    endDate: new Date(Date.now() - 60_000).toISOString(),
+    participants: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+    }],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      prize: "Ticket 500 ₽",
+    }],
+    status: "drawn",
+    drawnAt: new Date(Date.now() - 30_000).toISOString(),
+    createdAt: new Date(Date.now() - 3600_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_drawn_get_no_notify", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_drawn_get_no_notify");
+
+  let r = await call(raffles, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "drawn raffle list GET succeeds");
+  r = await call(raffles, req("GET", {
+    pwaSession: s.user,
+    id: "contract_raffle_drawn_get_no_notify",
+  }));
+  assert.strictEqual(r.statusCode, 200, "drawn raffle detail GET succeeds");
+  for (let i = 0; i < 8; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+  const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
+  assert.strictEqual(winnerMessages.length, 0, "GET of an already-drawn raffle does not send winner Telegram notifications");
+}
+
 async function testRaffleDailyRecurring(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -2983,6 +3028,7 @@ async function main() {
     ["raffle winner push retry after zero", testRaffleWinnerNotificationRetriesPushAfterZero],
     ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
+    ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],
