@@ -879,6 +879,14 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     assert.strictEqual(r.statusCode, 200, "cash raffle can be completed");
     assert.strictEqual(r.body.raffle.prizeKind, "cash", "cash raffle keeps prize kind after draw");
     assert.strictEqual(r.body.raffle.completedNumber, 2, "completed raffle receives short completed number after existing results");
+    assert.ok(
+      sentMessages.find((msg) => String(msg.body.chat_id) === "1001"),
+      "complete waits until winner Telegram notification is attempted"
+    );
+    assert.ok(
+      sentPushes.find((item) => item.payload && item.payload.kind === "raffle_winner"),
+      "complete waits until winner push is attempted"
+    );
 
     let winnerMessage = null;
     let winnerPush = null;
