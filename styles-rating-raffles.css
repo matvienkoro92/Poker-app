@@ -278,7 +278,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   cursor: default;
   opacity: 0.75;
 }
-.raffle-duplicate-options--hidden { display: none; }
+.raffle-duplicate-options.raffle-duplicate-options--hidden { display: none; }
 .raffle-duplicate-options {
   display: flex;
   flex-direction: column;
@@ -349,7 +349,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   opacity: 0.72;
   cursor: default;
 }
-.raffle-create-form--hidden { display: none; }
+.raffle-create-form.raffle-create-form--hidden { display: none; }
 .raffle-create-form {
   margin-bottom: 20px;
   padding: 14px;
