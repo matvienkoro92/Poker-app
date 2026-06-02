@@ -744,14 +744,14 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
     participants: [{
       userId: "tg_1001",
       accountId: "ID100001",
-      name: "Player",
+      name: "@player_public",
       p21Id: "P21-1001",
       telegramUsername: "player_public",
     }],
     winners: [{
       userId: "tg_1001",
       accountId: "ID100001",
-      name: "Player",
+      name: "@player_public",
       p21Id: "P21-1001",
       groupIndex: 0,
       prize: "Ticket",
@@ -771,6 +771,8 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.isAdmin, false, "non-admin response is not admin");
   assert.strictEqual(r.body.raffle.participants[0].telegramUsername, undefined, "non-admin does not receive participant telegram username");
   assert.strictEqual(r.body.raffle.winners[0].telegramUsername, undefined, "non-admin does not receive winner telegram username");
+  assert.strictEqual(r.body.raffle.participants[0].name, "Участник", "non-admin does not receive participant telegram login as name");
+  assert.strictEqual(r.body.raffle.winners[0].name, "Участник", "non-admin does not receive winner telegram login as name");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin receives winner Poker21 nickname");
 
   r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_tg_privacy" }));
@@ -778,12 +780,15 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.isAdmin, true, "admin response is admin");
   assert.strictEqual(r.body.raffle.participants[0].telegramUsername, "player_public", "admin receives participant telegram username");
   assert.strictEqual(r.body.raffle.winners[0].telegramUsername, "player_public", "admin receives winner telegram username");
+  assert.strictEqual(r.body.raffle.participants[0].name, "@player_public", "admin receives participant telegram login name");
+  assert.strictEqual(r.body.raffle.winners[0].name, "@player_public", "admin receives winner telegram login name");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "admin receives winner Poker21 nickname");
 
   r = await call(raffles, req("GET", { pwaSession: s.user }));
   const listed = (r.body.raffles || []).find((item) => item.id === "contract_raffle_tg_privacy");
   assert.ok(listed, "non-admin list includes raffle");
   assert.strictEqual(listed.winners[0].telegramUsername, undefined, "non-admin list hides winner telegram username");
+  assert.strictEqual(listed.winners[0].name, "Участник", "non-admin list hides winner telegram login name");
   assert.strictEqual(listed.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin list exposes winner Poker21 nickname");
 }
 

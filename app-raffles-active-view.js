@@ -125,7 +125,7 @@ function initRafflesActiveViewRuntime(opts) {
       parts.length === 0
         ? "<li class=\"raffle-participants-empty\">Пока никого</li>"
         : parts.map(function (p) {
-            return raffleParticipantLineHtml(p);
+            return raffleParticipantLineHtml(p, rafflesIsAdmin);
           }).join("");
     if (raffle.status === "drawn" && raffle.winners && raffle.winners.length > 0) {
       raffleWinnersWrap.classList.remove("raffle-winners-wrap--hidden");

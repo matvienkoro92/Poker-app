@@ -47,7 +47,9 @@ function initRafflesCompletedRuntime(opts) {
     var raffleIdText = w.p21Id != null && String(w.p21Id).trim()
       ? String(w.p21Id).trim()
       : (w.accountId != null && String(w.accountId).trim() ? String(w.accountId).trim() : uidRaw);
-    var primaryLabel = String(w.name || "").trim() || uidRaw || "Игрок";
+    var rawName = String(w.name || "").trim();
+    if (!isAdmin && typeof pokerRafflesLooksLikeTelegramLogin === "function" && pokerRafflesLooksLikeTelegramLogin(rawName, w.telegramUsername)) rawName = "";
+    var primaryLabel = rawName || uidRaw || "Игрок";
     var primaryText = raffleIdText ? primaryLabel + " — " + raffleIdText : primaryLabel;
     var tgLogin = w.telegramUsername != null ? String(w.telegramUsername).trim().replace(/^@+/g, "") : "";
     if (!/^[A-Za-z0-9_]{5,32}$/.test(tgLogin)) tgLogin = "";
@@ -56,7 +58,7 @@ function initRafflesCompletedRuntime(opts) {
         ? "<button type=\"button\" class=\"raffle-participants__profile-btn raffle-winner-row__profile\" data-user-id=\"" +
           uidAttr +
           "\" data-user-name=\"" +
-          escapeHtml(w.name || "") +
+          escapeHtml(rawName || "") +
           "\">" +
           "<span class=\"raffle-winner-row__primary\">" +
           escapeHtml(primaryText) +
@@ -187,6 +189,7 @@ function initRafflesCompletedRuntime(opts) {
     var login = row.telegramUsername != null ? String(row.telegramUsername).trim().replace(/^@+/g, "") : "";
     if (rafflesIsAdmin && login) parts.push("@" + login);
     var name = row.name != null ? String(row.name).trim() : "";
+    if (!rafflesIsAdmin && typeof pokerRafflesLooksLikeTelegramLogin === "function" && pokerRafflesLooksLikeTelegramLogin(name, row.telegramUsername)) name = "";
     if (name && name !== "Участник" && parts.indexOf(name) === -1) parts.push(name);
     return parts.join(" · ");
   }

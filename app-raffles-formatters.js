@@ -21,22 +21,45 @@ function pokerRafflesEscapeHtml(s) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function pokerRafflesParticipantDisplayLine(p) {
-  var namePart = pokerRafflesEscapeHtml(p.name);
+function pokerRafflesNormalizeTelegramLogin(raw) {
+  var login = raw != null ? String(raw).trim().replace(/^@+/g, "") : "";
+  return /^[A-Za-z0-9_]{5,32}$/.test(login) ? login : "";
+}
+
+function pokerRafflesLooksLikeTelegramLogin(raw, telegramUsername) {
+  var text = raw != null ? String(raw).trim() : "";
+  if (!text) return false;
+  var normalized = pokerRafflesNormalizeTelegramLogin(text);
+  if (!normalized) return false;
+  if (text.charAt(0) === "@") return true;
+  var tgLogin = pokerRafflesNormalizeTelegramLogin(telegramUsername);
+  return !!(tgLogin && normalized.toLowerCase() === tgLogin.toLowerCase());
+}
+
+function pokerRafflesParticipantPublicName(p, showTelegramLogins) {
+  var raw = p && p.name != null ? String(p.name).trim() : "";
+  if (!showTelegramLogins && pokerRafflesLooksLikeTelegramLogin(raw, p && p.telegramUsername)) return "";
+  return raw;
+}
+
+function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
+  var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins) || "Участник";
+  var namePart = pokerRafflesEscapeHtml(safeName);
   var uid0 = String(p.userId != null ? p.userId : "").trim();
   var raffleIdText = p.p21Id != null && String(p.p21Id).trim()
     ? String(p.p21Id).trim()
     : (p.accountId != null && String(p.accountId).trim() ? String(p.accountId).trim() : uid0);
-  var un = p.telegramUsername != null ? String(p.telegramUsername).trim().replace(/^@+/g, "") : "";
-  if (un && uid0.indexOf("tg_") === 0) {
+  var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
+  if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
   }
   return raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart;
 }
 
-function pokerRafflesParticipantLineHtml(p) {
+function pokerRafflesParticipantLineHtml(p, showTelegramLogins) {
   var uid = String(p.userId != null ? p.userId : "").trim();
-  var line = pokerRafflesParticipantDisplayLine(p);
+  var line = pokerRafflesParticipantDisplayLine(p, !!showTelegramLogins);
+  var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
   if (!uid || (uid.indexOf("tg_") !== 0 && uid.indexOf("vk_") !== 0)) {
     return "<li class=\"raffle-participants-item\">" + line + "</li>";
   }
@@ -44,7 +67,7 @@ function pokerRafflesParticipantLineHtml(p) {
     "<li class=\"raffle-participants-item\"><button type=\"button\" class=\"raffle-participants__profile-btn\" data-user-id=\"" +
     pokerRafflesEscapeHtml(uid) +
     "\" data-user-name=\"" +
-    pokerRafflesEscapeHtml(p.name || "") +
+    pokerRafflesEscapeHtml(safeName || "") +
     "\">" +
     line +
     "</button></li>"
