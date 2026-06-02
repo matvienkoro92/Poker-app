@@ -835,6 +835,9 @@ function initRaffles() {
       rafflesPanelCompleted.classList.toggle("raffles-panel--active", isCompleted);
       rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
     }
+    if (isCreate && typeof window !== "undefined" && typeof window.pokerRafflesOpenCreateActionTab === "function") {
+      window.pokerRafflesOpenCreateActionTab();
+    }
     rafflesCurrentTab = tab;
     if (isCompleted && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (isCompleted) schedulePendingCompletedRaffleFocus();

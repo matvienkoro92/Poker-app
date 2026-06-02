@@ -351,6 +351,12 @@ function initRafflesAdminCreateRuntime(opts) {
     if (isCreate) switchRaffleCreatePanel();
   }
 
+  if (typeof window !== "undefined") {
+    window.pokerRafflesOpenCreateActionTab = function () {
+      setRaffleAdminActionTab("create");
+    };
+  }
+
   function setRaffleDuplicateOptionsLoading() {
     if (!duplicateOptionsEl) return;
     duplicateOptionsEl.innerHTML =
