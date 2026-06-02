@@ -516,7 +516,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-end { margin: 0; font-size: inherit; color: inherit; }
 .raffle-channel-note {
   margin: 4px 0 10px;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.28;
   color: #fff;
 }
 .raffle-channel-note a {
