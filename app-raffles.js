@@ -28,6 +28,7 @@ function initRaffles() {
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   var rafflesSubscribeBtn = document.getElementById("rafflesSubscribeBtn");
   var adminWrap = document.getElementById("rafflesAdminWrap");
+  var rafflesSubscribersRow = document.getElementById("rafflesSubscribersRow");
   var raffleAdminActions = document.getElementById("raffleAdminActions");
   var raffleCurrent = document.getElementById("raffleCurrent");
   var raffleEmpty = document.getElementById("raffleEmpty");
@@ -94,8 +95,66 @@ function initRaffles() {
     rafflesPanelCreate.appendChild(adminWrap);
   }
 
-  function showRaffleFeedback(message, kind) {
+  function setRafflesSubscribersRowVisible(visible) {
+    if (!rafflesSubscribersRow) return;
+    rafflesSubscribersRow.classList.toggle("raffles-admin-row--hidden", !visible);
+    rafflesSubscribersRow.setAttribute("aria-hidden", visible ? "false" : "true");
+  }
+
+  function raffleFeedbackTelegramLink(url) {
+    var raw = String(url || "").trim();
+    var m = raw.match(/^https:\/\/t\.me\/([A-Za-z0-9_]{3,64})(?:[/?#].*)?$/i);
+    if (!m || !m[1]) return null;
+    return { text: "@" + m[1], url: "https://t.me/" + m[1] };
+  }
+
+  function raffleFeedbackLinks(options) {
+    var opts = options && typeof options === "object" ? options : {};
+    var links = [];
+    function add(link) {
+      if (!link || !link.text || !link.url) return;
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].text === link.text) return;
+      }
+      links.push(link);
+    }
+    add(raffleFeedbackTelegramLink(opts.botUrl));
+    add(raffleFeedbackTelegramLink(opts.channelUrl));
+    add({ text: "@Poker_dvatuza_bot", url: "https://t.me/Poker_dvatuza_bot" });
+    add({ text: "@Dva_tuza_club", url: "https://t.me/Dva_tuza_club" });
+    return links;
+  }
+
+  function appendRaffleFeedbackMessage(target, message, options) {
+    var text = String(message || "");
+    var links = raffleFeedbackLinks(options);
+    var pos = 0;
+    while (pos < text.length) {
+      var found = null;
+      for (var i = 0; i < links.length; i++) {
+        var idx = text.indexOf(links[i].text, pos);
+        if (idx === -1) continue;
+        if (!found || idx < found.idx) found = { idx: idx, link: links[i] };
+      }
+      if (!found) {
+        target.appendChild(document.createTextNode(text.slice(pos)));
+        break;
+      }
+      if (found.idx > pos) target.appendChild(document.createTextNode(text.slice(pos, found.idx)));
+      var a = document.createElement("a");
+      a.className = "raffle-feedback-link";
+      a.href = found.link.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = text.slice(found.idx, found.idx + found.link.text.length);
+      target.appendChild(a);
+      pos = found.idx + found.link.text.length;
+    }
+  }
+
+  function showRaffleFeedback(message, kind, options) {
     if (!message) return;
+    var opts = options && typeof options === "object" ? options : {};
     if (raffleFeedbackTimer) {
       clearTimeout(raffleFeedbackTimer);
       raffleFeedbackTimer = null;
@@ -106,14 +165,17 @@ function initRaffles() {
       } catch (eH) {}
     }
     if (raffleActionFeedback) {
-      raffleActionFeedback.textContent = message;
+      raffleActionFeedback.textContent = "";
+      appendRaffleFeedbackMessage(raffleActionFeedback, message, opts);
       raffleActionFeedback.classList.remove("raffle-action-feedback--hidden");
       raffleActionFeedback.classList.toggle("raffle-action-feedback--ok", kind !== "err");
       raffleActionFeedback.classList.toggle("raffle-action-feedback--err", kind === "err");
-      raffleFeedbackTimer = setTimeout(function () {
-        if (raffleActionFeedback) raffleActionFeedback.classList.add("raffle-action-feedback--hidden");
-        raffleFeedbackTimer = null;
-      }, 5000);
+      if (!opts.sticky) {
+        raffleFeedbackTimer = setTimeout(function () {
+          if (raffleActionFeedback) raffleActionFeedback.classList.add("raffle-action-feedback--hidden");
+          raffleFeedbackTimer = null;
+        }, 5000);
+      }
     } else if (typeof alert === "function") {
       alert(message);
     }
@@ -622,6 +684,7 @@ function initRaffles() {
           window.pokerMarkAdminAccess("raffles");
         }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
+        if (!rafflesIsAdmin) setRafflesSubscribersRowVisible(false);
         if (rafflesTabs) rafflesTabs.classList.toggle("raffles-tabs--admin", rafflesIsAdmin);
         if (rafflesTabCreate) rafflesTabCreate.classList.toggle("raffles-tab--hidden", !rafflesIsAdmin);
         if (!rafflesIsAdmin && rafflesPanelCreate && !rafflesPanelCreate.classList.contains("raffles-panel--hidden")) {
@@ -640,6 +703,7 @@ function initRaffles() {
           window.pokerMarkAdminAccess("raffles");
         }
         if (adminWrap) adminWrap.classList.toggle("raffles-admin-wrap--hidden", !rafflesIsAdmin);
+        if (!rafflesIsAdmin) setRafflesSubscribersRowVisible(false);
         if (rafflesTabs) rafflesTabs.classList.toggle("raffles-tabs--admin", rafflesIsAdmin);
         if (rafflesTabCreate) rafflesTabCreate.classList.toggle("raffles-tab--hidden", !rafflesIsAdmin);
         if (raffleAdminActions) {
@@ -720,10 +784,12 @@ function initRaffles() {
         if (rafflesTabActiveSum) rafflesTabActiveSum.textContent = formatRaffleSum(activeSumRub);
 
         if (active) {
+          setRafflesSubscribersRowVisible(rafflesIsAdmin);
           if (raffleCurrent) raffleCurrent.classList.remove("raffle-current--hidden");
           if (raffleEmpty) raffleEmpty.classList.add("raffle-empty--hidden");
           renderRaffle(active);
         } else {
+          setRafflesSubscribersRowVisible(false);
           if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
           if (raffleEmpty) {
             raffleEmpty.textContent = "Нет активных розыгрышей.";

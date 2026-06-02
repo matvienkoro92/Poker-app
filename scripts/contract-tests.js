@@ -594,6 +594,11 @@ async function testChatSendEditDelete() {
 async function testRaffleJoinLeave(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
+  const pwa = require(path.join(root, "lib", "poker-pwa-session"));
+  const linkedAccountToken = pwa.signPwaSession(
+    { id: 1001, memberId: "mail_ID100001", username: "player" },
+    BOT_TOKEN
+  );
   const raffle = {
     id: "contract_raffle",
     title: "Contract raffle",
@@ -610,11 +615,36 @@ async function testRaffleJoinLeave(redis) {
   redis.h("poker_app:visitor_p21_ids").set("ID100001", "P21-1001");
   redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_p21_ids").set("ID100002", "P21-1002");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
 
-  let r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "join", raffleId: "contract_raffle", deviceId: "dev-1" }));
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: "not-a-valid-session",
+    guestDeviceId: "dev-contract-auth-fallback",
+    action: "join",
+    raffleId: "contract_raffle",
+    deviceId: "dev-contract-auth-fallback",
+  }));
+  assert.strictEqual(r.statusCode, 401, "raffle invalid auth does not fall back to guest");
+  assert.strictEqual(r.body.code, "AUTH_INVALID", "raffle invalid auth returns auth-invalid code");
+
+  r = await call(raffles, req("POST", {}, { pwaSession: linkedAccountToken, action: "join", raffleId: "contract_raffle", deviceId: "dev-contract-device-1" }));
   assert.strictEqual(r.statusCode, 200, "raffle join succeeds");
   assert.strictEqual(r.body.raffle.participants.length, 1, "join adds participant");
   assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100001", "join stores account id");
+
+  redis.h("poker_app:raffle_devices:contract_raffle").delete("dev-contract-device-1");
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "join",
+    raffleId: "contract_raffle",
+    deviceId: "dev-contract-device-1",
+  }, { "x-forwarded-for": "10.0.0.2" }));
+  assert.strictEqual(r.statusCode, 400, "raffle blocks another account from the same device");
+  assert.strictEqual(r.body.code, "SAME_DEVICE", "raffle returns same-device code");
+  const storedAfterSameDevice = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle"));
+  assert.strictEqual(storedAfterSameDevice.participants.length, 1, "same-device account is not added");
 
   r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "leave", raffleId: "contract_raffle" }));
   assert.strictEqual(r.statusCode, 200, "raffle leave succeeds");

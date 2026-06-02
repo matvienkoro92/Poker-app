@@ -163,13 +163,32 @@ function initRafflesPublicRuntime(opts) {
           } else {
             if (currentRaffleData) renderRaffle(currentRaffleData);
             var err = (data && data.error) || "Ошибка";
-            showRaffleFeedback(err, "err");
+            var isRequirementError =
+              data &&
+              (data.code === "CHANNEL_REQUIRED" ||
+                data.code === "BOT_REQUIRED" ||
+                data.code === "SUBSCRIPTION_REQUIRED" ||
+                data.code === "TELEGRAM_REQUIRED");
+            if (isRequirementError) {
+              showRaffleFeedback(err, "err", {
+                botUrl: data.botUrl,
+                channelUrl: data.channelUrl,
+                openUrl: data.openUrl,
+                sticky: true,
+              });
+            } else {
+              showRaffleFeedback(err, "err");
+            }
             if (data && data.code === "P21_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш. После сохранения вернитесь в «Розыгрыши» и нажмите «Участвовать» снова.");
               if (typeof setView === "function") setView("profile");
-            } else if (data && (data.code === "CHANNEL_REQUIRED" || data.code === "BOT_REQUIRED" || data.code === "SUBSCRIPTION_REQUIRED" || data.code === "TELEGRAM_REQUIRED")) {
+            } else if (isRequirementError) {
               if (tg && tg.showAlert) tg.showAlert(err);
               openRaffleRequirementLink(data);
+            } else if (data && data.code === "AUTH_INVALID") {
+              showRaffleFeedback(err || "Сессия входа не подтвердилась. Войдите ещё раз.", "err", { sticky: true });
+              if (tg && tg.showAlert) tg.showAlert(err || "Сессия входа не подтвердилась. Войдите ещё раз.");
+              if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
             } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
               else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
@@ -200,6 +219,19 @@ function initRafflesPublicRuntime(opts) {
     initRaffles.__profileOpenDelegate = true;
     root.addEventListener("click", function (e) {
       if (e.target.closest(".raffle-winner-btn")) return;
+      var feedbackLink = e.target.closest(".raffle-feedback-link[href]");
+      if (feedbackLink && root.contains(feedbackLink)) {
+        var feedbackHref = feedbackLink.getAttribute("href") || "";
+        if (feedbackHref && tg && tg.openTelegramLink && typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
+          e.preventDefault();
+          try {
+            tg.openTelegramLink(feedbackHref);
+          } catch (eTgFeedbackOpen) {
+            if (typeof window.open === "function") window.open(feedbackHref, "_blank");
+          }
+        }
+        return;
+      }
       var tgLink = e.target.closest(".raffle-winner-row__tg[href]");
       if (tgLink && root.contains(tgLink)) {
         var href = tgLink.getAttribute("href") || "";

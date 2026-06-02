@@ -366,11 +366,20 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   flex-direction: column;
   gap: 4px;
 }
+.raffles-admin-row--hidden {
+  display: none !important;
+}
 .raffles-admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+.raffles-admin-actions--broadcast {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  width: 100%;
 }
 .raffles-admin-btn {
   padding: 10px 14px;
@@ -381,6 +390,16 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+}
+.raffles-admin-actions--broadcast .raffles-admin-btn {
+  min-width: 0;
+  min-height: 52px;
+  padding: 8px 6px;
+  font-size: 11px;
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 .raffles-admin-btn:disabled {
   opacity: 0.7;
@@ -613,6 +632,16 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-action-feedback--hidden { display: none !important; }
 .raffle-action-feedback--ok { color: var(--accent-2); font-weight: 500; }
 .raffle-action-feedback--err { color: #f87171; }
+.raffle-feedback-link {
+  color: #fda4af;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.raffle-feedback-link:active,
+.raffle-feedback-link:hover {
+  color: #fecdd3;
+}
 .raffle-guest-gate {
   display: flex;
   flex-direction: column;

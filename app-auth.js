@@ -559,6 +559,9 @@ function pokerReadPwaSessionRecordAsync(key) {
 }
 
 function pokerHasStoredPwaSessionTokenRaw() {
+  try {
+    if (window.__pokerPwaTgSessionToken || window.__pokerPwaVkSessionToken) return true;
+  } catch (eMemorySessionRaw) {}
   var keys = [POKER_PWA_TG_SESSION_KEY, POKER_PWA_VK_SESSION_KEY];
   for (var i = 0; i < keys.length; i += 1) {
     var key = keys[i];
@@ -583,6 +586,10 @@ function pokerReadPwaTgSessionToken() {
   try {
     if (pokerReadPwaGuestMode()) return "";
   } catch (eGuestToken) {}
+  try {
+    var memTok = String(window.__pokerPwaTgSessionToken || "").trim();
+    if (memTok) return memTok;
+  } catch (eMemoryTgToken) {}
   var o = null;
   try {
     o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_TG_SESSION_KEY), false);
@@ -600,6 +607,10 @@ function pokerReadPwaVkSessionToken() {
   try {
     if (pokerReadPwaGuestMode()) return "";
   } catch (eGuestToken) {}
+  try {
+    var memTok = String(window.__pokerPwaVkSessionToken || "").trim();
+    if (memTok) return memTok;
+  } catch (eMemoryVkToken) {}
   var o = null;
   try {
     o = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY), false);
@@ -637,6 +648,10 @@ try {
 
 function pokerSavePwaTgSession(token, userObj, sessionExtra) {
   var rec = { token: token, user: userObj };
+  try {
+    window.__pokerPwaTgSessionToken = String(token || "");
+    window.__pokerPwaVkSessionToken = "";
+  } catch (eMemorySaveTg) {}
   if (sessionExtra && sessionExtra.gazettePlannerAccess) rec.gazettePlannerAccess = true;
   if (sessionExtra && sessionExtra.adminAccess) rec.adminAccess = true;
   if (sessionExtra && sessionExtra.adminReportAccess) rec.adminReportAccess = true;
@@ -670,6 +685,10 @@ function pokerSavePwaTgSession(token, userObj, sessionExtra) {
 function pokerSavePwaVkSession(token, userObj) {
   var payload = JSON.stringify({ token: token, user: userObj, authMethod: "vk" });
   var ok = false;
+  try {
+    window.__pokerPwaVkSessionToken = String(token || "");
+    window.__pokerPwaTgSessionToken = "";
+  } catch (eMemorySaveVk) {}
   pokerWriteAuthCookie(POKER_PWA_VK_SESSION_KEY, pokerMinimalPwaSessionCookiePayload(token, "vk"));
   pokerClearAuthCookie(POKER_PWA_TG_SESSION_KEY);
   pokerWritePwaSessionToIdb(POKER_PWA_VK_SESSION_KEY, payload);
@@ -695,6 +714,10 @@ function pokerSavePwaVkSession(token, userObj) {
 }
 
 function pokerClearPwaAuthSessions() {
+  try {
+    window.__pokerPwaTgSessionToken = "";
+    window.__pokerPwaVkSessionToken = "";
+  } catch (eMemoryClear) {}
   try {
     localStorage.removeItem(POKER_PWA_TG_SESSION_KEY);
     localStorage.removeItem(POKER_PWA_VK_SESSION_KEY);
@@ -777,14 +800,37 @@ function pwaSessionPersistenceWarning() {
 }
 
 /** Режим гостя только на время сессии вкладки (без записи в localStorage). */
+function pokerHasVerifiedAuthContextForGuestMode() {
+  try {
+    if (pokerHasStoredPwaSessionTokenRaw()) return true;
+  } catch (eStoredAuthContext) {}
+  try {
+    var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg0 && tg0.initData && String(tg0.initData).trim()) return true;
+  } catch (eInitDataAuthContext) {}
+  try {
+    var auth = window.__pokerTelegramAuth;
+    if (
+      auth &&
+      auth.user &&
+      auth.status &&
+      auth.status !== "guest" &&
+      (auth.user.id != null || auth.user.memberId || auth.user.email)
+    ) {
+      return true;
+    }
+  } catch (eVerifiedAuthContext) {}
+  return false;
+}
+
 function pokerReadPwaGuestMode() {
   try {
+    if (pokerHasVerifiedAuthContextForGuestMode()) {
+      pokerSavePwaGuestMode(false);
+      return false;
+    }
     try {
       if (sessionStorage.getItem(POKER_PWA_GUEST_SESSION_KEY) === "1") {
-        if (pokerHasStoredPwaSessionTokenRaw()) {
-          pokerSavePwaGuestMode(false);
-          return false;
-        }
         window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
         return true;
       }
