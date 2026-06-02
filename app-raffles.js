@@ -82,8 +82,9 @@ function initRaffles() {
   var myRaffleUserId = null;
   var raffleFeedbackTimer = null;
   var rafflesFocusedActiveId = null;
-  var rafflesCompletedRenderSeq = 0;
   var rafflesCurrentTab = "active";
+  var rafflesLastCompleted = [];
+  var rafflesCompletedDirty = false;
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -349,6 +350,11 @@ function initRaffles() {
     if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.renderPanel === "function") {
       rafflesCompletedRuntime.renderPanel(completed || []);
     }
+  }
+
+  function renderStoredCompletedRafflesPanel() {
+    renderCompletedRafflesPanel(rafflesLastCompleted || []);
+    rafflesCompletedDirty = false;
   }
 
   if (typeof initRafflesCompletedRuntime === "function") {
@@ -626,14 +632,11 @@ function initRaffles() {
             switchToCompleted ||
             (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden"))
           );
+        rafflesLastCompleted = completed;
         if (completedPanelVisible) {
-          renderCompletedRafflesPanel(completed);
+          renderStoredCompletedRafflesPanel();
         } else {
-          var completedRenderSeq = ++rafflesCompletedRenderSeq;
-          setTimeout(function () {
-            if (completedRenderSeq !== rafflesCompletedRenderSeq) return;
-            renderCompletedRafflesPanel(completed);
-          }, 0);
+          rafflesCompletedDirty = true;
         }
   }
 
@@ -707,6 +710,7 @@ function initRaffles() {
       rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
     }
     rafflesCurrentTab = tab;
+    if (isCompleted && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
   }
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });

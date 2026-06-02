@@ -926,6 +926,48 @@ async function testRaffleWinnerNotificationDedup(redis) {
   assert.strictEqual(winnerPushes.length, 1, "winner web push is sent once under duplicate triggers");
 }
 
+async function testRaffleWinnerNotificationRetriesPushAfterZero(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const { createRaffleNotificationService } = require(path.join(root, "lib/raffle-notifications"));
+  const sentPushes = [];
+  let pushCalls = 0;
+  const service = createRaffleNotificationService({
+    botToken: BOT_TOKEN,
+    adminIds: [],
+    miniAppUrl: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+    rafflePrefix: "poker_app:raffle:",
+    redisPipeline: async (commands) => redis.pipeline(commands),
+    sendWebPushToMember: async (memberId, payload) => {
+      pushCalls += 1;
+      sentPushes.push({ memberId, payload, call: pushCalls });
+      return pushCalls <= 2 ? 0 : 1;
+    },
+  });
+  const raffle = {
+    id: "contract_raffle_notify_push_retry",
+    title: "Push retry raffle",
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      prize: "Ticket 500 ₽",
+    }],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_push_retry", JSON.parse(JSON.stringify(raffle)));
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_push_retry", JSON.parse(JSON.stringify(raffle)));
+  const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
+  const winnerPushes = sentPushes.filter((item) => item.payload && item.payload.kind === "raffle_winner");
+  assert.strictEqual(winnerMessages.length, 1, "winner Telegram notification stays deduped while retrying push");
+  assert.strictEqual(winnerPushes.length, 3, "winner push is retried after zero deliveries");
+  assert.strictEqual(winnerPushes[0].memberId, "ID100001", "first push tries account id");
+  assert.strictEqual(winnerPushes[1].memberId, "tg_1001", "first push falls back to telegram id");
+  assert.strictEqual(winnerPushes[2].memberId, "ID100001", "second notification run retries account id");
+}
+
 async function testRaffleWinnerNotificationResolvesAccountId(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -2938,6 +2980,7 @@ async function main() {
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],
+    ["raffle winner push retry after zero", testRaffleWinnerNotificationRetriesPushAfterZero],
     ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle daily recurring", testRaffleDailyRecurring],
