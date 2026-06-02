@@ -86,6 +86,8 @@ function initRaffles() {
   var rafflesCurrentTab = "active";
   var rafflesLastCompleted = [];
   var rafflesCompletedDirty = false;
+  var rafflesLoadSeq = 0;
+  var rafflesDeadlineRefreshInFlight = false;
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -162,12 +164,16 @@ function initRaffles() {
     if (!raffleEnd || !currentRaffleEndDate) return;
     var text = formatRaffleCountdown(currentRaffleEndDate);
     if (text === "Завершён") {
-      raffleEnd.textContent = "Завершён";
+      raffleEnd.textContent = rafflesDeadlineRefreshInFlight ? "Подводим итоги…" : "Завершён";
       if (raffleTimerInterval) {
         clearInterval(raffleTimerInterval);
         raffleTimerInterval = null;
       }
-      loadRaffles();
+      if (!rafflesDeadlineRefreshInFlight) {
+        rafflesDeadlineRefreshInFlight = true;
+        clearRafflesCache();
+        loadRaffles(true, { skipCache: true, keepCurrentOnLoading: true, deadlineRefresh: true });
+      }
       return;
     }
     raffleEnd.textContent = "Завершится через " + text;
@@ -433,15 +439,29 @@ function initRaffles() {
     return pokerGetRaffleStableDeviceId();
   }
 
-  function loadRaffles(switchToCompleted) {
+  function loadRaffles(switchToCompleted, options) {
     if (!base) return;
+    var loadOptions = options && typeof options === "object" ? options : {};
+    if (switchToCompleted && typeof switchToCompleted === "object") {
+      loadOptions = switchToCompleted;
+      switchToCompleted = !!loadOptions.switchToCompleted;
+    }
+    switchToCompleted = !!switchToCompleted;
+    var loadSeq = ++rafflesLoadSeq;
     var hostname = typeof window !== "undefined" && window.location && window.location.hostname ? window.location.hostname : "";
     var baseStr = (base || "").toString();
     var isLocal = /localhost|127\.0\.0\.1/i.test(hostname) || /localhost|127\.0\.0\.1/i.test(baseStr);
     var qLead = pokerRafflesApiQueryLeading();
-    if (!isLocal && qLead === "?initData=" && !pokerCanSyncGuestProfileToServer()) return;
+    if (!isLocal && qLead === "?initData=" && !pokerCanSyncGuestProfileToServer()) {
+      if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
+      return;
+    }
 
     function showRafflesLoading() {
+      if (loadOptions.keepCurrentOnLoading) {
+        if (raffleEnd) raffleEnd.textContent = "Подводим итоги…";
+        return;
+      }
       if (raffleEmpty) {
         raffleEmpty.innerHTML = "<span class=\"raffle-loading__spinner\" aria-hidden=\"true\"></span><span class=\"raffle-loading__text\">Подождите, Розыгрыш загружается</span>";
         raffleEmpty.classList.remove("raffle-empty--hidden");
@@ -449,6 +469,10 @@ function initRaffles() {
       if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
     }
     function showRafflesError() {
+      if (loadOptions.keepCurrentOnLoading) {
+        if (raffleEnd) raffleEnd.textContent = "Не удалось обновить итоги. Обновите раздел.";
+        return;
+      }
       if (raffleEmpty) {
         raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть или перезайдите.";
         raffleEmpty.classList.remove("raffle-empty--hidden");
@@ -457,7 +481,7 @@ function initRaffles() {
     }
 
     var cache = typeof window !== "undefined" ? window._rafflesCache : null;
-    var cacheUsable = !!(cache && cache.data && cache.data.ok);
+    var cacheUsable = !loadOptions.skipCache && !!(cache && cache.data && cache.data.ok);
     if (cacheUsable) {
       applyRafflesData(cache.data, switchToCompleted);
     } else {
@@ -469,6 +493,8 @@ function initRaffles() {
       fetch(url)
         .then(function (r) { return r.json(); })
         .then(function (data) {
+          if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
+          if (loadSeq !== rafflesLoadSeq) return;
           if (!data || !data.ok) {
             if (!cacheUsable) showRafflesError();
             return;
@@ -477,6 +503,8 @@ function initRaffles() {
           applyRafflesData(data, switchToCompleted);
         })
         .catch(function () {
+          if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
+          if (loadSeq !== rafflesLoadSeq) return;
           if (!cacheUsable) showRafflesError();
         });
     }
