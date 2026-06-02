@@ -276,7 +276,9 @@ function initRaffles() {
     } catch (eEsc) {
       escaped = id.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
     }
-    return ".raffle-completed-card[data-raffle-id=\"" + escaped + "\"]";
+    var byId = ".raffle-completed-card[data-raffle-id=\"" + escaped + "\"]";
+    if (/^\d+$/.test(id)) return ".raffle-completed-card[data-raffle-number=\"" + escaped + "\"], " + byId;
+    return byId;
   }
 
   function scrollCompletedRaffleCardIntoView(card) {

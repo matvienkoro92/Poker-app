@@ -836,6 +836,21 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
       },
     }));
 
+    const oldDrawnRaffle = {
+      id: "contract_old_drawn_raffle",
+      title: "Старый завершённый розыгрыш",
+      totalWinners: 1,
+      groups: [{ prize: "Ticket 100 ₽", count: 1 }],
+      endDate: new Date(Date.now() - 7200_000).toISOString(),
+      participants: [],
+      winners: [],
+      status: "drawn",
+      drawnAt: new Date(Date.now() - 7100_000).toISOString(),
+      createdAt: new Date(Date.now() - 8200_000).toISOString(),
+    };
+    redis.kv.set("poker_app:raffle:contract_old_drawn_raffle", JSON.stringify(oldDrawnRaffle));
+    redis.l("poker_app:raffle_ids").push("contract_old_drawn_raffle");
+
     const raffle = {
       id: "contract_cash_raffle",
       title: "Розыгрыш беккинг-байинов на кеш",
@@ -863,6 +878,7 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     }));
     assert.strictEqual(r.statusCode, 200, "cash raffle can be completed");
     assert.strictEqual(r.body.raffle.prizeKind, "cash", "cash raffle keeps prize kind after draw");
+    assert.strictEqual(r.body.raffle.completedNumber, 2, "completed raffle receives short completed number after existing results");
 
     let winnerMessage = null;
     let winnerPush = null;
@@ -873,14 +889,15 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     }
     assert.ok(winnerMessage, "winner receives raffle ready instruction");
     const winnerText = String(winnerMessage.body.text || "");
-    assert.ok(winnerText.includes("startapp=raffle_contract_cash_raffle"), "winner message includes completed raffle deeplink");
+    assert.ok(winnerText.includes("startapp=raffle_2"), "winner message includes short completed raffle deeplink");
+    assert.ok(!winnerText.includes("startapp=raffle_contract_cash_raffle"), "winner message does not expose long raffle id");
     assert.ok(winnerText.includes("«Я готов»"), "winner message explains ready button");
     assert.ok(winnerText.includes("2. Рядом со своим ником нажмите кнопку «Я готов»."), "winner message keeps ready button as step two");
     assert.ok(!winnerText.includes("Ссылка откроет вкладку"), "winner message omits completed-tab hint step");
     assert.ok(winnerText.includes("отметку «Готов»"), "winner message explains admin-ready badge");
     assert.ok(winnerPush, "winner receives personal raffle web push");
     assert.strictEqual(winnerPush.subscription.endpoint, "https://push.example.test/raffle-winner-1001", "winner push uses winner subscription");
-    assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffle_contract_cash_raffle", "winner push opens completed raffle");
+    assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffle_2", "winner push opens short completed raffle link");
     assert.strictEqual(winnerPush.payload.raffleId, "contract_cash_raffle", "winner push carries raffle id");
     assert.ok(String(winnerPush.payload.body || "").includes("Я готов"), "winner push asks to press ready");
   } finally {

@@ -142,7 +142,11 @@ function pokerNormalizeRaffleCompletedId(raw) {
 }
 
 function pokerBuildRaffleCompletedStartParam(raffleId) {
-  var id = pokerNormalizeRaffleCompletedId(raffleId);
+  var numberSource = raffleId && typeof raffleId === "object" ? raffleId.completedNumber || raffleId.completed_number : "";
+  var n = parseInt(String(numberSource || ""), 10);
+  if (Number.isFinite(n) && n > 0) return "raffle_" + n;
+  var rawId = raffleId && typeof raffleId === "object" ? raffleId.id || raffleId.raffleId || raffleId.raffle_id : raffleId;
+  var id = pokerNormalizeRaffleCompletedId(rawId);
   return id ? "raffle_" + id : "raffles";
 }
 
