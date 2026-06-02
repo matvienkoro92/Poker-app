@@ -917,14 +917,84 @@ async function testRaffleWinnerNotificationDedup(redis) {
     status: "drawn",
     drawnAt: new Date().toISOString(),
   };
-  await Promise.all([
-    service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle))),
-    service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle))),
-  ]);
+  await Promise.all(Array.from({ length: 60 }, () =>
+    service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle)))
+  ));
   const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
   const winnerPushes = sentPushes.filter((item) => item.payload && item.payload.kind === "raffle_winner");
   assert.strictEqual(winnerMessages.length, 1, "winner Telegram notification is sent once under duplicate triggers");
   assert.strictEqual(winnerPushes.length, 1, "winner web push is sent once under duplicate triggers");
+}
+
+async function testRaffleWinnerNotificationResolvesAccountId(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  const { createRaffleNotificationService } = require(path.join(root, "lib/raffle-notifications"));
+  const sentPushes = [];
+  const service = createRaffleNotificationService({
+    botToken: BOT_TOKEN,
+    adminIds: [],
+    miniAppUrl: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+    rafflePrefix: "poker_app:raffle:",
+    redisPipeline: async (commands) => redis.pipeline(commands),
+    sendWebPushToMember: async (memberId, payload) => {
+      sentPushes.push({ memberId, payload });
+      return 1;
+    },
+  });
+  const raffle = {
+    id: "contract_raffle_notify_account_id",
+    title: "Account ID raffle",
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    winners: [{
+      userId: "ID100002",
+      accountId: "ID100002",
+      name: "Account Player",
+      prize: "Ticket 500 ₽",
+    }],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_account_id", raffle);
+  const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1002");
+  assert.strictEqual(winnerMessages.length, 1, "account-id winner resolves Telegram recipient");
+  assert.strictEqual(sentPushes.length, 1, "account-id winner receives push attempt");
+  assert.strictEqual(sentPushes[0].memberId, "ID100002", "push is addressed to account id");
+}
+
+async function testRaffleAutoCompleteNotificationDedup(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  const raffle = {
+    id: "contract_raffle_auto_notify_dedup",
+    title: "Auto dedup raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    endDate: new Date(Date.now() - 60_000).toISOString(),
+    participants: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+    }],
+    winners: [],
+    status: "active",
+    createdAt: new Date(Date.now() - 3600_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_auto_notify_dedup", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_auto_notify_dedup");
+  await Promise.all(Array.from({ length: 50 }, () => call(raffles, req("GET", { pwaSession: s.user }))));
+  for (let i = 0; i < 8; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+  const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
+  assert.strictEqual(winnerMessages.length, 1, "auto-complete sends winner Telegram notification once under duplicate GETs");
+  const stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_auto_notify_dedup"));
+  assert.strictEqual(stored.status, "drawn", "auto-complete stores drawn raffle");
+  assert.strictEqual((stored.winners || []).length, 1, "auto-complete stores one winner");
 }
 
 async function testRaffleDailyRecurring(redis) {
@@ -2866,6 +2936,8 @@ async function main() {
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],
+    ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
+    ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],
