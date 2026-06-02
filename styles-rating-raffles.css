@@ -267,6 +267,17 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-color: var(--border-subtle);
   color: var(--text);
 }
+.raffles-create-toggle--active,
+.raffles-create-toggle[aria-selected="true"] {
+  border-color: var(--accent);
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.16) inset;
+}
+.raffles-create-toggle:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
 .raffle-duplicate-options--hidden { display: none; }
 .raffle-duplicate-options {
   display: flex;

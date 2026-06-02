@@ -23,6 +23,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleDailyStartTime = document.getElementById("raffleDailyStartTime");
     var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
+    var raffleAdminActionMode = "";
 
   function getRafflePrizeKind() {
     return getRaffleCreateType() === "tickets" ? "tournament_ticket" : "cash";
@@ -329,8 +330,38 @@ function initRafflesAdminCreateRuntime(opts) {
     }).join("\n");
   }
 
+  function setRaffleAdminActionTab(mode) {
+    raffleAdminActionMode = mode === "duplicate" || mode === "create" ? mode : "";
+    var isCreate = raffleAdminActionMode === "create";
+    var isDuplicate = raffleAdminActionMode === "duplicate";
+    if (createForm) createForm.classList.toggle("raffle-create-form--hidden", !isCreate);
+    if (duplicateOptionsEl) duplicateOptionsEl.classList.toggle("raffle-duplicate-options--hidden", !isDuplicate);
+    if (createToggle) {
+      createToggle.classList.toggle("raffles-create-toggle--active", isCreate);
+      createToggle.classList.toggle("raffles-create-toggle--ghost", isDuplicate);
+      createToggle.setAttribute("aria-selected", isCreate ? "true" : "false");
+      createToggle.setAttribute("tabindex", isCreate || !raffleAdminActionMode ? "0" : "-1");
+    }
+    if (duplicateLastBtn) {
+      duplicateLastBtn.classList.toggle("raffles-create-toggle--active", isDuplicate);
+      duplicateLastBtn.classList.toggle("raffles-create-toggle--ghost", !isDuplicate);
+      duplicateLastBtn.setAttribute("aria-selected", isDuplicate ? "true" : "false");
+      duplicateLastBtn.setAttribute("tabindex", isDuplicate ? "0" : "-1");
+    }
+    if (isCreate) switchRaffleCreatePanel();
+  }
+
+  function setRaffleDuplicateOptionsLoading() {
+    if (!duplicateOptionsEl) return;
+    duplicateOptionsEl.innerHTML =
+      '<p class="raffle-duplicate-options__title">Выберите розыгрыш для повтора</p>' +
+      '<p class="raffle-duplicate-options__empty">Загружаем последние розыгрыши…</p>';
+    duplicateOptionsEl.classList.remove("raffle-duplicate-options--hidden");
+  }
+
   function renderRaffleDuplicateOptions(raffles) {
     if (!duplicateOptionsEl) return;
+    duplicateOptionsEl.dataset.loaded = "1";
     var list = Array.isArray(raffles) ? raffles : [];
     if (!list.length) {
       duplicateOptionsEl.innerHTML =
@@ -413,8 +444,8 @@ function initRafflesAdminCreateRuntime(opts) {
       .then(function (data) {
         resetDuplicateUi();
         if (data && data.ok && data.raffle) {
-          if (duplicateOptionsEl) duplicateOptionsEl.classList.add("raffle-duplicate-options--hidden");
-          if (createForm) createForm.classList.add("raffle-create-form--hidden");
+          if (duplicateOptionsEl) duplicateOptionsEl.dataset.loaded = "";
+          setRaffleAdminActionTab("");
           focusRaffleAfterMutation(data.raffle.id);
           clearRafflesCache();
           if (typeof setRafflesTab === "function") setRafflesTab("active");
@@ -438,17 +469,19 @@ function initRafflesAdminCreateRuntime(opts) {
 
   if (createToggle && createForm) {
     createToggle.addEventListener("click", function () {
-      createForm.classList.toggle("raffle-create-form--hidden");
-      if (!createForm.classList.contains("raffle-create-form--hidden")) switchRaffleCreatePanel();
+      setRaffleAdminActionTab("create");
     });
   }
   if (duplicateLastBtn) {
     duplicateLastBtn.addEventListener("click", function () {
+      setRaffleAdminActionTab("duplicate");
+      if (duplicateOptionsEl && duplicateOptionsEl.dataset.loaded === "1") return;
       if (window.__pokerRaffleCreateInFlight || window.__pokerRaffleDuplicateOptionsInFlight) return;
       window.__pokerRaffleDuplicateOptionsInFlight = true;
       duplicateLastBtn.disabled = true;
       var prevDuplicateText = duplicateLastBtn.textContent;
       duplicateLastBtn.textContent = "Загружаем…";
+      setRaffleDuplicateOptionsLoading();
       function raffleDuplicateOptionsResetUi() {
         window.__pokerRaffleDuplicateOptionsInFlight = false;
         duplicateLastBtn.disabled = false;
@@ -467,8 +500,10 @@ function initRafflesAdminCreateRuntime(opts) {
         .then(function (data) {
           raffleDuplicateOptionsResetUi();
           if (data && data.ok) {
-            if (createForm) createForm.classList.add("raffle-create-form--hidden");
             renderRaffleDuplicateOptions(data.raffles || []);
+            if (raffleAdminActionMode !== "duplicate" && duplicateOptionsEl) {
+              duplicateOptionsEl.classList.add("raffle-duplicate-options--hidden");
+            }
           } else {
             var errMsg = (data && data.error) || "Ошибка";
             if (tg && tg.showAlert) tg.showAlert(errMsg);

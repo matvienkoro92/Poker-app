@@ -17,9 +17,9 @@
             </header>
 
             <div class="raffles-admin-wrap raffles-admin-wrap--hidden" id="rafflesAdminWrap">
-              <div class="raffles-admin-actions raffles-admin-actions--top">
-                <button type="button" class="raffles-create-toggle" id="rafflesCreateToggle">Создать розыгрыш</button>
-                <button type="button" class="raffles-create-toggle raffles-create-toggle--ghost" id="rafflesDuplicateLastBtn">Повторить розыгрыш</button>
+              <div class="raffles-admin-actions raffles-admin-actions--top" role="tablist" aria-label="Админские действия с розыгрышами">
+                <button type="button" class="raffles-create-toggle" id="rafflesCreateToggle" role="tab" aria-controls="raffleCreateForm" aria-selected="false">Создать розыгрыш</button>
+                <button type="button" class="raffles-create-toggle raffles-create-toggle--ghost" id="rafflesDuplicateLastBtn" role="tab" aria-controls="raffleDuplicateOptions" aria-selected="false">Повторить розыгрыш</button>
               </div>
               <div class="raffle-duplicate-options raffle-duplicate-options--hidden" id="raffleDuplicateOptions" aria-live="polite"></div>
               <div class="raffle-create-form raffle-create-form--hidden" id="raffleCreateForm">
