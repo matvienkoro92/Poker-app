@@ -1,12 +1,12 @@
 <div class="view" data-view="raffles" data-html-fragment-view="raffles">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
-            <p class="raffles-tagline">Розыгрыши беккинг-билетов и байинов клуба</p>
             <header class="raffles-hero">
               <picture>
                 <source srcset="./assets/raffles-hero.avif" type="image/avif" />
                 <source srcset="./assets/raffles-hero.webp" type="image/webp" />
                 <img src="./assets/raffles-hero.png" alt="" class="raffles-hero__img" width="720" height="288" loading="lazy" decoding="async" />
               </picture>
+              <button type="button" class="bonus-game-back raffles-hero__back" data-view-target="home" aria-label="На главную">←</button>
+              <p class="raffles-tagline">Розыгрыши беккинг-билетов и байинов клуба</p>
               <p class="raffles-subscribe-text">Получать уведомления о новых розыгрышах в Telegram</p>
               <div class="raffles-hero__share-row">
                 <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="rafflesInviteFriendBtn" aria-label="Позвать друга">Позвать друга</button>

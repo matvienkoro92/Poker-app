@@ -781,6 +781,11 @@ body[data-view="video-lessons"] #app.app .card {
   display: flex !important;
   flex-direction: column !important;
 }
+body[data-view="raffles"] #app.app .card {
+  padding-top: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
 body[data-view="video-lessons"] #app.app .card .card__content {
   flex: 1 1 0 !important;
   min-height: 0 !important;
