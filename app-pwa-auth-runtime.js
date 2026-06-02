@@ -807,10 +807,11 @@
 
   function openSharedAccountAuthFlow() {
     try {
-      if (typeof window.__pokerOpenPwaLoginScreen === "function") {
-        window.__pokerOpenPwaLoginScreen();
-        return;
-      }
+      var wtg = getTelegramWebAppNow();
+      if (wtg && wtg.initData) { runVerifyFlow(); return; }
+      if (shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();
+      else { resetBannerForPwaLogin(); mountTelegramLoginWidgetForPwa();
+        if (banner) { banner.classList.remove("auth-banner--hidden"); try { banner.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (eScroll) {} } }
     } catch (eOpenPwaLogin) {}
   }
   window.__pokerOpenSharedAccountAuthFlow = openSharedAccountAuthFlow;

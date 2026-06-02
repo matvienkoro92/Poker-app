@@ -16,30 +16,90 @@
     return "./" + coreFile + (version ? "?v=" + encodeURIComponent(version) : "");
   }
 
-  function hasCoreScript() {
+  function findCoreScript() {
     try {
-      return Array.prototype.some.call(document.scripts || [], function (script) {
-        return script.src && script.src.indexOf("/" + coreFile) !== -1 && script.type !== "application/poker-lazy";
-      });
-    } catch (eScripts) {
-      return false;
-    }
+      var scripts = Array.prototype.slice.call(document.scripts || []);
+      for (var i = scripts.length - 1; i >= 0; i -= 1) {
+        var script = scripts[i];
+        if (
+          script &&
+          script.src &&
+          script.src.indexOf("/" + coreFile) !== -1 &&
+          script.type !== "application/poker-lazy"
+        ) {
+          return script;
+        }
+      }
+    } catch (eScripts) {}
+    return null;
+  }
+
+  function isCoreReady() {
+    return typeof window.pokerInitPlayerCrm === "function" && window.pokerInitPlayerCrm !== pokerInitPlayerCrm;
+  }
+
+  function waitForCoreReady(script) {
+    if (isCoreReady()) return Promise.resolve(true);
+    return new Promise(function (resolve, reject) {
+      var done = false;
+      var startedAt = Date.now();
+      function cleanup() {
+        done = true;
+        if (script) {
+          script.removeEventListener("load", check);
+          script.removeEventListener("error", fail);
+        }
+      }
+      function check() {
+        if (done) return;
+        if (isCoreReady()) {
+          cleanup();
+          resolve(true);
+          return;
+        }
+        if (Date.now() - startedAt > 9000) {
+          cleanup();
+          reject(new Error(coreFile + " loaded but did not expose CRM init"));
+          return;
+        }
+        setTimeout(check, 40);
+      }
+      function fail() {
+        if (done) return;
+        cleanup();
+        reject(new Error("Failed to load " + coreFile));
+      }
+      if (script) {
+        script.addEventListener("load", check);
+        script.addEventListener("error", fail);
+      }
+      check();
+    });
   }
 
   function loadCore() {
-    if (typeof window.pokerInitPlayerCrm === "function" && window.pokerInitPlayerCrm !== pokerInitPlayerCrm) {
+    if (isCoreReady()) {
       return Promise.resolve(true);
     }
     if (corePromise) return corePromise;
     corePromise = new Promise(function (resolve, reject) {
-      if (hasCoreScript()) {
-        resolve(true);
+      var existing = findCoreScript();
+      if (existing) {
+        waitForCoreReady(existing).then(resolve).catch(function (err) {
+          corePromise = null;
+          reject(err);
+        });
         return;
       }
       var script = document.createElement("script");
       script.src = coreSrc();
       script.async = false;
-      script.onload = function () { resolve(true); };
+      script.onload = function () {
+        waitForCoreReady(script).then(resolve).catch(function (err) {
+          corePromise = null;
+          reject(err);
+        });
+      };
       script.onerror = function () {
         corePromise = null;
         reject(new Error("Failed to load " + coreFile));
@@ -58,6 +118,7 @@
   function pokerInitPlayerCrm() {
     return loadCore().then(runCoreInit);
   }
+  pokerInitPlayerCrm.__pokerPlayerCrmRuntimeGate = true;
 
   window.pokerEnsurePlayerCrmRuntime = loadCore;
   window.pokerInitPlayerCrm = pokerInitPlayerCrm;

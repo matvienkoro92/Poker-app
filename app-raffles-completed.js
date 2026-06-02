@@ -48,9 +48,16 @@ function initRafflesCompletedRuntime(opts) {
       ? String(w.p21Id).trim()
       : (w.accountId != null && String(w.accountId).trim() ? String(w.accountId).trim() : uidRaw);
     var rawName = String(w.name || "").trim();
+    if (rawName === "Участник") rawName = "";
     if (!isAdmin && typeof pokerRafflesLooksLikeTelegramLogin === "function" && pokerRafflesLooksLikeTelegramLogin(rawName, w.telegramUsername)) rawName = "";
-    var primaryLabel = rawName || uidRaw || "Игрок";
-    var primaryText = raffleIdText ? primaryLabel + " — " + raffleIdText : primaryLabel;
+    var primaryHtml = "";
+    if (typeof raffleParticipantDisplayLine === "function") {
+      primaryHtml = raffleParticipantDisplayLine(w, false);
+    }
+    if (!primaryHtml) {
+      var primaryLabel = rawName || raffleIdText || uidRaw || "Игрок";
+      primaryHtml = escapeHtml(raffleIdText && primaryLabel !== raffleIdText ? primaryLabel + " — " + raffleIdText : primaryLabel);
+    }
     var tgLogin = w.telegramUsername != null ? String(w.telegramUsername).trim().replace(/^@+/g, "") : "";
     if (!/^[A-Za-z0-9_]{5,32}$/.test(tgLogin)) tgLogin = "";
     var profileOpen =
@@ -61,10 +68,10 @@ function initRafflesCompletedRuntime(opts) {
           escapeHtml(rawName || "") +
           "\">" +
           "<span class=\"raffle-winner-row__primary\">" +
-          escapeHtml(primaryText) +
+          primaryHtml +
           "</span>" +
           "</button>"
-        : "<span class=\"raffle-winner-row__primary\">" + escapeHtml(primaryText) + "</span>";
+        : "<span class=\"raffle-winner-row__primary\">" + primaryHtml + "</span>";
     var tgOpen = isAdmin && tgLogin
       ? "<a class=\"raffle-winner-row__tg\" href=\"https://t.me/" +
         escapeHtml(tgLogin) +

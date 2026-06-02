@@ -262,8 +262,8 @@
 
   function loadWinners() {
     var base = apiBase();
-    if (!base || !hasCredential()) {
-      setWinnersMessage("Войдите, чтобы увидеть победителей.");
+    if (!base) {
+      setWinnersMessage("Не удалось загрузить победителей.");
       renderSpinStats(null);
       return Promise.resolve(false);
     }

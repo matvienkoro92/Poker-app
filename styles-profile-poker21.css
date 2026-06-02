@@ -441,6 +441,7 @@
 }
 #profilePokerPlusSection.profile-pokerplus-card--loading #profilePokerPlusText,
 #profilePokerPlusSection.profile-pokerplus-card--loading #profilePokerPlusForm,
+#profilePokerPlusSection.profile-pokerplus-card--loading .profile-pokerplus-key-guide,
 #profilePokerPlusSection.profile-pokerplus-card--loading .profile-email-auth__linked {
   display: none !important;
 }
@@ -535,6 +536,23 @@
   flex-direction: column;
   gap: 10px;
 }
+.profile-pokerplus-key-guide {
+  display: grid;
+  justify-items: center;
+  max-width: min(100%, 360px);
+  margin: 12px auto 0;
+}
+.profile-pokerplus-key-guide__img {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  object-fit: contain;
+  object-position: top center;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: #05070c;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+}
 .profile-email-auth--email-linked .profile-email-auth__form {
   display: none !important;
 }
@@ -621,6 +639,9 @@
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
   display: none !important;
 }
+#profilePokerPlusSection.profile-pokerplus-card--linked:not(.profile-pokerplus-card--needs-key) .profile-pokerplus-key-guide {
+  display: none !important;
+}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBindBtn {
   display: none !important;
 }
@@ -634,6 +655,13 @@
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key #profilePokerPlusBindBtn {
   display: inline-flex !important;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked.profile-pokerplus-card--needs-key .profile-pokerplus-key-guide {
+  grid-column: 1 / -1;
+  order: 2;
+  max-width: min(100%, 340px);
+  margin-top: 2px;
+  z-index: 1;
 }
 #profilePokerPlusSection #profilePokerPlusBindBtn,
 #profilePokerPlusSection .profile-pokerplus-refresh-key-inline .profile-visible-to-others__p21-save {

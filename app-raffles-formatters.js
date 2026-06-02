@@ -38,21 +38,29 @@ function pokerRafflesLooksLikeTelegramLogin(raw, telegramUsername) {
 
 function pokerRafflesParticipantPublicName(p, showTelegramLogins) {
   var raw = p && p.name != null ? String(p.name).trim() : "";
+  if (raw === "Участник") return "";
   if (!showTelegramLogins && pokerRafflesLooksLikeTelegramLogin(raw, p && p.telegramUsername)) return "";
   return raw;
 }
 
 function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
-  var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins) || "Участник";
-  var namePart = pokerRafflesEscapeHtml(safeName);
+  var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
   var uid0 = String(p.userId != null ? p.userId : "").trim();
   var raffleIdText = p.p21Id != null && String(p.p21Id).trim()
     ? String(p.p21Id).trim()
     : (p.accountId != null && String(p.accountId).trim() ? String(p.accountId).trim() : uid0);
+  var pokerNick = p && p.pokerPlusNickname != null ? String(p.pokerPlusNickname).trim() : "";
+  if (pokerNick === "Участник") pokerNick = "";
+  if (pokerNick && raffleIdText && pokerNick === raffleIdText) pokerNick = "";
+  if (pokerNick && safeName && pokerNick.toLowerCase() === safeName.toLowerCase()) pokerNick = "";
+  var namePart = safeName
+    ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
+    : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
   }
+  if (!namePart) return pokerRafflesEscapeHtml(raffleIdText);
   return raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart;
 }
 
@@ -63,11 +71,13 @@ function pokerRafflesParticipantLineHtml(p, showTelegramLogins) {
   if (!uid || (uid.indexOf("tg_") !== 0 && uid.indexOf("vk_") !== 0)) {
     return "<li class=\"raffle-participants-item\">" + line + "</li>";
   }
+  var dataName = safeName || (p && p.pokerPlusNickname != null ? String(p.pokerPlusNickname).trim() : "");
+  if (dataName === "Участник") dataName = "";
   return (
     "<li class=\"raffle-participants-item\"><button type=\"button\" class=\"raffle-participants__profile-btn\" data-user-id=\"" +
     pokerRafflesEscapeHtml(uid) +
     "\" data-user-name=\"" +
-    pokerRafflesEscapeHtml(safeName || "") +
+    pokerRafflesEscapeHtml(dataName || "") +
     "\">" +
     line +
     "</button></li>"
@@ -249,7 +259,7 @@ function pokerRafflesBuildActiveCardHeading(raffle) {
       ticketWord +
       " за " +
       nomText +
-      " (цена билета) " +
+      " " +
       tourPhrase +
       ". Итого сумма розыгрыша " +
       sumText +

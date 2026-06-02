@@ -2747,14 +2747,55 @@ async function testChatPushSubscribeAndBroadcast(redis) {
   assert.strictEqual(redis.s("poker_app:chat_push_registry").has(myAccountId), true, "chat push registry stores account id");
   assert.strictEqual(redis.h("poker_app:chat_push_sub:" + myAccountId).size, 1, "chat push stores subscription hash");
 
+  const webpushRuntime = require("web-push");
+  const sentPushes = [];
+  const originalSendNotification = webpushRuntime.sendNotification;
+  webpushRuntime.sendNotification = async function sendNotificationMock(subscription, payload, opts) {
+    sentPushes.push({ subscription, payload: JSON.parse(payload), opts });
+    return { statusCode: 201 };
+  };
+  try {
+    const { sendToMemberDevices } = require(path.join(root, "lib", "chat-webpush-notify"));
+    let delivered = await sendToMemberDevices(myAccountId, {
+      title: "Contract direct",
+      body: "Direct body",
+      openUrl: "./?startapp=club_chat",
+    });
+    assert.strictEqual(delivered, 1, "chat push sends to canonical account id subscription");
+
+    redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+    redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+    redis.s("poker_app:chat_push_registry").add("tg_1002");
+    redis.h("poker_app:chat_push_sub:tg_1002").set("legacy-endpoint", JSON.stringify({
+      endpoint: "https://push.example.test/legacy-user-1002",
+      expirationTime: null,
+      keys: {
+        p256dh: "BN-legacy-p256dh",
+        auth: "legacy-auth",
+      },
+    }));
+    delivered = await sendToMemberDevices("ID100002", {
+      title: "Contract legacy",
+      body: "Legacy body",
+      openUrl: "./?startapp=club_chat",
+    });
+    assert.strictEqual(delivered, 1, "chat push sends to legacy runtime-id subscription from account id");
+    assert.strictEqual(redis.s("poker_app:chat_push_registry").has("ID100002"), true, "legacy push send also marks canonical account id");
+  } finally {
+    webpushRuntime.sendNotification = originalSendNotification;
+  }
+
   r = await call(pushAdminBroadcast, req("GET", { pwaSession: s.admin }));
   assert.strictEqual(r.statusCode, 200, "admin chat push list succeeds");
-  assert.strictEqual(r.body.count, 1, "admin chat push list sees active subscriber");
+  assert.strictEqual(r.body.count, 2, "admin chat push list sees active canonical and legacy subscribers");
 
   r = await call(pushSubscribe, req("POST", {}, { pwaSession: s.user, action: "disable" }));
   assert.strictEqual(r.statusCode, 200, "chat push disable succeeds");
   assert.strictEqual(r.body.notificationsEnabled, false, "chat push disable returns disabled");
   assert.strictEqual(redis.s("poker_app:chat_push_registry").has(myAccountId), false, "chat push disable removes registry member");
+  redis.s("poker_app:chat_push_registry").delete("tg_1002");
+  redis.s("poker_app:chat_push_registry").delete("ID100002");
+  redis.hash.delete("poker_app:chat_push_sub:tg_1002");
 
   r = await call(pushAdminBroadcast, req("POST", {}, {
     pwaSession: s.admin,

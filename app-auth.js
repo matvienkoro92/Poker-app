@@ -558,6 +558,27 @@ function pokerReadPwaSessionRecordAsync(key) {
   });
 }
 
+function pokerHasStoredPwaSessionTokenRaw() {
+  var keys = [POKER_PWA_TG_SESSION_KEY, POKER_PWA_VK_SESSION_KEY];
+  for (var i = 0; i < keys.length; i += 1) {
+    var key = keys[i];
+    var o = null;
+    try {
+      o = pokerParsePwaSessionRaw(localStorage.getItem(key), false);
+      if (o && o.token) return true;
+    } catch (eLocalSessionRaw) {}
+    try {
+      o = pokerParsePwaSessionRaw(sessionStorage.getItem(key), false);
+      if (o && o.token) return true;
+    } catch (eSessionSessionRaw) {}
+    try {
+      o = pokerParsePwaSessionRaw(pokerReadAuthCookie(key), false);
+      if (o && o.token) return true;
+    } catch (eCookieSessionRaw) {}
+  }
+  return false;
+}
+
 function pokerReadPwaTgSessionToken() {
   try {
     if (pokerReadPwaGuestMode()) return "";
@@ -760,6 +781,10 @@ function pokerReadPwaGuestMode() {
   try {
     try {
       if (sessionStorage.getItem(POKER_PWA_GUEST_SESSION_KEY) === "1") {
+        if (pokerHasStoredPwaSessionTokenRaw()) {
+          pokerSavePwaGuestMode(false);
+          return false;
+        }
         window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
         return true;
       }

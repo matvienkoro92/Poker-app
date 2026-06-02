@@ -97,6 +97,20 @@ function initProfilePokerPlus() {
     feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
   }
 
+  function pokerPlusAuthBody(extra) {
+    if (typeof pokerGuestOrAuthedPostBody === "function") return pokerGuestOrAuthedPostBody(extra || {});
+    if (typeof pokerApiAuthJsonBody === "function") return pokerApiAuthJsonBody(extra || {});
+    return Object.assign({}, extra || {});
+  }
+
+  function pokerPlusAuthBodyHasCredential(body) {
+    return !!(body && (body.initData || body.pwaSession || body.pwaVkSession));
+  }
+
+  function pokerPlusMissingAuthMessage() {
+    return "Сессия входа не передалась. Нажмите «Выйти из аккаунта» и войдите снова.";
+  }
+
   function notifyPokerPlusStatusChange(linked, profile) {
     var detail = { linked: !!linked };
     var p = profile && typeof profile === "object" ? profile : null;
@@ -339,16 +353,17 @@ function initProfilePokerPlus() {
     if (pokerPlusStatsVisibilityEquals(nextMap, pokerPlusStatsVisibilityToOthers)) return;
     var prevMap = clonePokerPlusStatsVisibility(pokerPlusStatsVisibilityToOthers);
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var body = pokerPlusAuthBody({
+      pokerPlusStatsVisibility: nextMap,
+      pokerPlusStatsVisible: pokerPlusStatsVisibilityAny(nextMap),
+    });
+    if (!base || !pokerPlusAuthBodyHasCredential(body)) return;
     setPokerPlusStatsVisibilityMap(nextMap);
     renderPokerPlusStatsVisibilityToggle(savingKind);
     fetch(base + "/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({
-        pokerPlusStatsVisibility: nextMap,
-        pokerPlusStatsVisible: pokerPlusStatsVisibilityAny(nextMap),
-      })),
+      body: JSON.stringify(body),
     })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
@@ -1336,8 +1351,8 @@ function initProfilePokerPlus() {
   function readPokerPlusCachedProfile() {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    if (!state.isVerified || state.isGuest || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return Promise.resolve(null);
-    var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
+    var body = pokerPlusAuthBody({});
+    if (!state.isVerified || state.isGuest || !base || !pokerPlusAuthBodyHasCredential(body)) return Promise.resolve(null);
     return pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1405,12 +1420,12 @@ function initProfilePokerPlus() {
   function loadProfile(refresh) {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    if (!state.isVerified || state.isGuest || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+    var body = pokerPlusAuthBody({});
+    if (!state.isVerified || state.isGuest || !base || !pokerPlusAuthBodyHasCredential(body)) {
       setProfileStatusLoading(false);
       return Promise.resolve();
     }
     setProfileStatusLoading(true);
-    var body = typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody({}) : {};
     var refreshCiphertext = "";
     var refreshPreviousSyncedAt = refresh ? pokerPlusLastSyncedAt : 0;
     var refreshStartedAt = refresh ? Date.now() : 0;
@@ -1501,8 +1516,9 @@ function initProfilePokerPlus() {
       setFeedback("Сначала войдите в аккаунт.", true);
       return;
     }
-    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-      setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
+    var body = pokerPlusAuthBody({});
+    if (!base || !pokerPlusAuthBodyHasCredential(body)) {
+      setFeedback(pokerPlusMissingAuthMessage(), true);
       return;
     }
     var ciphertext = normalizePokerPlusKeyInput(input.value || "");
@@ -1519,7 +1535,7 @@ function initProfilePokerPlus() {
     pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-bind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({ ciphertext: ciphertext })),
+      body: JSON.stringify(Object.assign(body, { ciphertext: ciphertext })),
     }, 15000)
       .then(function (data) {
         if (!data || !data.ok) {
@@ -1582,8 +1598,9 @@ function initProfilePokerPlus() {
       setFeedback("Сначала войдите в аккаунт.", true);
       return;
     }
-    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
-      setFeedback("Откройте приложение в Telegram или войдите в PWA.", true);
+    var body = pokerPlusAuthBody({});
+    if (!base || !pokerPlusAuthBodyHasCredential(body)) {
+      setFeedback(pokerPlusMissingAuthMessage(), true);
       return;
     }
     bindBtn.disabled = true;
@@ -1593,7 +1610,7 @@ function initProfilePokerPlus() {
     pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-unbind", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerApiAuthJsonBody({})),
+      body: JSON.stringify(body),
     }, 10000)
       .then(function (data) {
         if (!data || !data.ok) {
