@@ -3,15 +3,42 @@ function pokerInitRafflesHeroShare() {
   function rafflesDeepLink() {
     return buildMiniAppStartLink("raffles");
   }
+  function showRafflesCopyFeedback(text) {
+    var feedback = document.getElementById("rafflesCopyFeedback");
+    var btn = document.getElementById("rafflesCopyLinkBtn");
+    if (!feedback) return false;
+    if (showRafflesCopyFeedback.timer) clearTimeout(showRafflesCopyFeedback.timer);
+    feedback.textContent = text || "";
+    feedback.hidden = !feedback.textContent;
+    if (btn) {
+      btn.classList.add("raffles-hero__share-btn--copied");
+      btn.setAttribute("aria-label", text || "Ссылка скопирована");
+    }
+    showRafflesCopyFeedback.timer = setTimeout(function () {
+      feedback.hidden = true;
+      feedback.textContent = "";
+      if (btn) {
+        btn.classList.remove("raffles-hero__share-btn--copied");
+        btn.setAttribute("aria-label", "Скопировать ссылку на розыгрыши");
+      }
+      showRafflesCopyFeedback.timer = null;
+    }, 2200);
+    return true;
+  }
   function showRafflesCopyResult(link, copied) {
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var successMsg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
     var fallbackMsg = "Ссылка: " + link;
-    if (tg && tg.showAlert) {
-      tg.showAlert(copied ? successMsg : fallbackMsg);
+    if (copied) {
+      var showedInline = showRafflesCopyFeedback("Скопировано");
+      if (!showedInline && tg && tg.showToast) tg.showToast("Скопировано");
+      else if (!showedInline && tg && tg.showAlert) tg.showAlert(successMsg);
+      else if (!showedInline) alert("Ссылка скопирована.");
       return;
     }
-    alert(copied ? "Ссылка скопирована." : fallbackMsg);
+    showRafflesCopyFeedback("Не скопировано");
+    if (tg && tg.showAlert) tg.showAlert(fallbackMsg);
+    else alert(fallbackMsg);
   }
   function copyRafflesLinkText(text) {
     return new Promise(function (resolve) {
