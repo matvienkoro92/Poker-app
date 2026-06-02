@@ -1246,6 +1246,7 @@ async function testDailyPokerWinners(redis) {
     return ids.size;
   };
   const expectedSpinStats = {
+    totalUniquePlayers: new Set(publicSpinDates.map(([accountId]) => accountId)).size,
     todayUniquePlayers: expectedUniqueForDates(new Set([meta.gameDate])),
     weekUniquePlayers: expectedUniqueForDates(weekDateSet),
     previousWeekUniquePlayers: expectedUniqueForDates(previousWeekDateSet),
@@ -1388,6 +1389,7 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
   assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
   assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
+  assert.strictEqual(r.body.totalUniquePlayers, expectedSpinStats.totalUniquePlayers, "daily poker winners exposes all-time unique public spinners");
   assert.strictEqual(r.body.todayUniquePlayers, expectedSpinStats.todayUniquePlayers, "daily poker winners exposes unique public spinners today");
   assert.strictEqual(r.body.weekUniquePlayers, expectedSpinStats.weekUniquePlayers, "daily poker winners exposes unique public spinners this week");
   assert.strictEqual(r.body.previousWeekUniquePlayers, expectedSpinStats.previousWeekUniquePlayers, "daily poker winners exposes unique public spinners previous week");

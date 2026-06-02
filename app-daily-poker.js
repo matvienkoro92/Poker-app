@@ -212,6 +212,7 @@
       return;
     }
     var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
+    var totalUnique = Math.max(0, parseInt(stats.totalUniquePlayers || data.totalUniquePlayers || "0", 10) || 0);
     var today = Math.max(0, parseInt(stats.todayUniquePlayers || data.todayUniquePlayers || "0", 10) || 0);
     var week = Math.max(0, parseInt(stats.weekUniquePlayers || data.weekUniquePlayers || "0", 10) || 0);
     var month = Math.max(0, parseInt(stats.monthUniquePlayers || data.monthUniquePlayers || "0", 10) || 0);
@@ -220,6 +221,7 @@
     el.hidden = false;
     el.innerHTML =
       (firstSpinDate ? '<span>Игра запущена: <strong>' + esc(firstSpinDate) + '</strong></span>' : "") +
+      '<span>Всего уникальных: <strong>' + esc(formatCompactAmount(totalUnique)) + '</strong></span>' +
       '<span>Сегодня крутили: <strong>' + esc(formatCompactAmount(today)) + '</strong></span>' +
       '<span>На этой неделе крутили: <strong>' + esc(formatCompactAmount(week)) + '</strong></span>' +
       '<span>В этом месяце крутили: <strong>' + esc(formatCompactAmount(month)) + '</strong></span>' +
