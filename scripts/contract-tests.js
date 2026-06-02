@@ -875,7 +875,8 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     const winnerText = String(winnerMessage.body.text || "");
     assert.ok(winnerText.includes("startapp=raffle_contract_cash_raffle"), "winner message includes completed raffle deeplink");
     assert.ok(winnerText.includes("«Я готов»"), "winner message explains ready button");
-    assert.ok(winnerText.includes("«Завершённые»"), "winner message explains completed tab");
+    assert.ok(winnerText.includes("2. Рядом со своим ником нажмите кнопку «Я готов»."), "winner message keeps ready button as step two");
+    assert.ok(!winnerText.includes("Ссылка откроет вкладку"), "winner message omits completed-tab hint step");
     assert.ok(winnerText.includes("отметку «Готов»"), "winner message explains admin-ready badge");
     assert.ok(winnerPush, "winner receives personal raffle web push");
     assert.strictEqual(winnerPush.subscription.endpoint, "https://push.example.test/raffle-winner-1001", "winner push uses winner subscription");
