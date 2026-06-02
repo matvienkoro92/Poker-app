@@ -634,7 +634,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__header,
   body[data-view="daily-poker"] #app.app .daily-poker__header {
-    min-height: 154px;
+    min-height: 134px;
   }
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__heading,
