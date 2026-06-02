@@ -3,6 +3,26 @@
 function initRafflesActiveViewRuntime(opts) {
   opts = opts || {};
   with (opts) {
+  function splitRaffleCardHeadingText(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return { title: "", subtitle: "" };
+    var m = raw.match(/^(.+?[.!?])\s+(.+)$/);
+    if (!m) return { title: raw, subtitle: "" };
+    return {
+      title: (m[1] || "").trim(),
+      subtitle: (m[2] || "").trim(),
+    };
+  }
+
+  function setRaffleCardHeadingText(text) {
+    var parts = splitRaffleCardHeadingText(text);
+    if (raffleCardHeading) raffleCardHeading.textContent = parts.title;
+    if (raffleCardSubheading) {
+      raffleCardSubheading.textContent = parts.subtitle;
+      raffleCardSubheading.hidden = !parts.subtitle;
+    }
+  }
+
   function renderRaffle(raffle) {
     if (!raffle || !raffleCard) return;
     if (raffleTimerInterval) {
@@ -11,7 +31,7 @@ function initRafflesActiveViewRuntime(opts) {
     }
     currentRaffleId = raffle.id;
     currentRaffleData = raffle;
-    if (raffleCardHeading) raffleCardHeading.textContent = buildActiveRaffleCardHeading(raffle);
+    setRaffleCardHeadingText(buildActiveRaffleCardHeading(raffle));
     var total = raffle.totalWinners || 0;
     var groups = raffle.groups || [];
     var totalPrize = getRaffleTotalPrize(raffle);

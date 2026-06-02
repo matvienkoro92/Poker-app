@@ -45,6 +45,7 @@ function initRaffles() {
   var rafflesCompleted = document.getElementById("rafflesCompleted");
   var raffleCard = document.getElementById("raffleCard");
   var raffleCardHeading = document.getElementById("raffleCardHeading");
+  var raffleCardSubheading = document.getElementById("raffleCardSubheading");
   var raffleCompleteBtn = document.getElementById("raffleCompleteBtn");
   var raffleCancelBtn = document.getElementById("raffleCancelBtn");
   var raffleUpdateEndBtn = document.getElementById("raffleUpdateEndBtn");
@@ -398,6 +399,7 @@ function initRaffles() {
     Object.assign(rafflesActiveViewDeps, {
       raffleCard: raffleCard,
       raffleCardHeading: raffleCardHeading,
+      raffleCardSubheading: raffleCardSubheading,
       raffleCompleteBtn: raffleCompleteBtn,
       raffleCancelBtn: raffleCancelBtn,
       raffleUpdateEndBtn: raffleUpdateEndBtn,

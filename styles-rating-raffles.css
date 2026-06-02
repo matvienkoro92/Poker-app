@@ -484,12 +484,19 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-radius: 12px;
 }
 .raffle-card__heading {
-  margin: 0 0 12px;
+  margin: 0 0 6px;
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.4;
   color: var(--text);
   font-style: normal;
+}
+.raffle-card__subheading {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.35;
 }
 .raffle-id-note {
   margin: 0 0 12px;
