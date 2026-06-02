@@ -514,20 +514,6 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-stat--timer { color: var(--accent-2); font-weight: 600; }
 .raffle-meta { margin: 0 0 4px; font-size: 14px; color: var(--text-muted); }
 .raffle-end { margin: 0; font-size: inherit; color: inherit; }
-.raffle-channel-note {
-  margin: 4px 0 10px;
-  font-size: 14px;
-  line-height: 1.28;
-  color: #fff;
-}
-.raffle-channel-note a {
-  color: #fff;
-  text-decoration: underline;
-}
-.raffle-channel-note a:hover {
-  color: #fff;
-  opacity: 0.9;
-}
 .raffle-prizes { margin-bottom: 14px; }
 .raffle-prize { font-size: 13px; color: var(--text); margin-bottom: 4px; }
 .raffle-join-invite-row {
@@ -1071,16 +1057,6 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 
 /* Светлая тема: заметный текст и кнопки админа (не «бледный на бледном»). */
-[data-theme="light"] .raffle-channel-note {
-  color: var(--text-muted);
-}
-[data-theme="light"] .raffle-channel-note a {
-  color: #c2410c;
-}
-[data-theme="light"] .raffle-channel-note a:hover {
-  color: #9a3412;
-  opacity: 1;
-}
 [data-theme="light"] .raffle-complete-btn {
   color: #166534;
   background: rgba(34, 197, 94, 0.22);
