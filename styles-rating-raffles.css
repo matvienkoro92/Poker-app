@@ -1220,6 +1220,47 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-completed-card__winners { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text); }
 .raffle-completed-card__winners-title { margin: 8px 0 4px; font-size: 13px; font-weight: 600; color: var(--accent-2); }
 
+/* Золотая тема держит розыгрыши на тёмной поверхности; не полагаемся на глобальные text-переменные. */
+[data-theme="gold"] body[data-view="raffles"] .raffles-tagline,
+[data-theme="gold"] body[data-view="raffles"] .raffle-card,
+[data-theme="gold"] body[data-view="raffles"] .raffle-card__heading,
+[data-theme="gold"] body[data-view="raffles"] .raffle-stat,
+[data-theme="gold"] body[data-view="raffles"] .raffle-prize,
+[data-theme="gold"] body[data-view="raffles"] .raffle-participants-title,
+[data-theme="gold"] body[data-view="raffles"] .raffle-participants,
+[data-theme="gold"] body[data-view="raffles"] .raffle-participants__profile-btn,
+[data-theme="dark"] body[data-view="raffles"] .raffles-tagline,
+[data-theme="dark"] body[data-view="raffles"] .raffle-card,
+[data-theme="dark"] body[data-view="raffles"] .raffle-card__heading,
+[data-theme="dark"] body[data-view="raffles"] .raffle-stat,
+[data-theme="dark"] body[data-view="raffles"] .raffle-prize,
+[data-theme="dark"] body[data-view="raffles"] .raffle-participants-title,
+[data-theme="dark"] body[data-view="raffles"] .raffle-participants,
+[data-theme="dark"] body[data-view="raffles"] .raffle-participants__profile-btn {
+  color: #f8ead0;
+}
+
+[data-theme="gold"] body[data-view="raffles"] .raffle-card__subheading,
+[data-theme="gold"] body[data-view="raffles"] .raffle-id-note__hint,
+[data-theme="gold"] body[data-view="raffles"] .raffle-meta,
+[data-theme="gold"] body[data-view="raffles"] .raffle-participants-chance,
+[data-theme="dark"] body[data-view="raffles"] .raffle-card__subheading,
+[data-theme="dark"] body[data-view="raffles"] .raffle-id-note__hint,
+[data-theme="dark"] body[data-view="raffles"] .raffle-meta,
+[data-theme="dark"] body[data-view="raffles"] .raffle-participants-chance {
+  color: rgba(248, 234, 208, 0.72);
+}
+
+[data-theme="gold"] body[data-view="raffles"] .raffles-tab:not(.raffles-tab--active):not([aria-selected="true"]),
+[data-theme="dark"] body[data-view="raffles"] .raffles-tab:not(.raffles-tab--active):not([aria-selected="true"]) {
+  color: rgba(248, 234, 208, 0.72);
+}
+
+[data-theme="gold"] body[data-view="raffles"] .raffles-tab:not(.raffles-tab--active):not([aria-selected="true"]):hover,
+[data-theme="dark"] body[data-view="raffles"] .raffles-tab:not(.raffles-tab--active):not([aria-selected="true"]):hover {
+  color: #fff3d2;
+}
+
 [data-theme="light"] .raffles-hero {
   background: linear-gradient(145deg, rgba(255, 251, 247, 0.95), rgba(255, 243, 230, 0.9));
   border-color: rgba(249, 115, 22, 0.35);

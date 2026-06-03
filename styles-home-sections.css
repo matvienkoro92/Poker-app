@@ -176,7 +176,6 @@ html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__cl
 }
 html.site-home-header-mode #vpnProxyOpenBtn,
 html.site-home-header-mode #radioToggle,
-html.site-home-header-mode #themeToggle,
 html.site-home-header-mode #pwaInstallBtn {
   display: none !important;
 }

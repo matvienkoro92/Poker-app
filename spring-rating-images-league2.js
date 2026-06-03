@@ -446,6 +446,7 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-24-05-2026-league2-mok-17h.jpg"
   ],
   "25.05.2026": [
+    "rating-compressed-preview/rating-25-05-2026-league2-hyper-turbo-300-20h.jpg",
     "rating-compressed-preview/rating-25-05-2026-league2-mok-21h.jpg"
   ],
   "26.05.2026": [
@@ -454,22 +455,30 @@ var SPRING_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-26-05-2026-league2-energetik-22h.jpg"
   ],
   "27.05.2026": [
-    "rating-compressed-preview/rating-27-05-2026-league2-tournir-sredy-18h.jpg"
+    "rating-compressed-preview/rating-27-05-2026-league2-kg-plo6-09h.jpg",
+    "rating-compressed-preview/rating-27-05-2026-league2-bounty-200-14h.jpg",
+    "rating-compressed-preview/rating-27-05-2026-league2-tournir-sredy-18h.jpg",
+    "rating-compressed-preview/rating-27-05-2026-league2-plo5-300-19h.jpg"
   ],
   "28.05.2026": [
+    "rating-compressed-preview/rating-28-05-2026-league2-micro-200-14h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-28-05-2026-league2-plo5-pko-18h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league2-energetik-22h.jpg"
   ],
   "29.05.2026": [
     "rating-compressed-preview/rating-29-05-2026-league2-mok-17h.jpg"
   ],
   "30.05.2026": [
+    "rating-compressed-preview/rating-30-05-2026-league2-kg-plo6-09h.jpg",
     "rating-compressed-preview/rating-30-05-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-30-05-2026-league2-ok-17h.jpg"
+    "rating-compressed-preview/rating-30-05-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-30-05-2026-league2-plo4-pko-19h.jpg"
   ],
   "31.05.2026": [
     "rating-compressed-preview/rating-31-05-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-31-05-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-31-05-2026-league2-plo5-300-20h.jpg",
     "rating-compressed-preview/rating-31-05-2026-league2-energetik-22h.jpg"
   ]
 };

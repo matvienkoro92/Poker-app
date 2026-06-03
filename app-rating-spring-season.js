@@ -47,12 +47,15 @@ var SPRING_HOME_MAY_DAYS_1_3 = ["01.05.2026", "02.05.2026", "03.05.2026"];
 var SPRING_HOME_MAY_DAYS_4_10 = ["04.05.2026", "05.05.2026", "06.05.2026", "07.05.2026", "08.05.2026", "09.05.2026", "10.05.2026"];
 var SPRING_HOME_MAY_DAYS_11_17 = ["11.05.2026", "12.05.2026", "13.05.2026", "14.05.2026", "15.05.2026", "16.05.2026", "17.05.2026"];
 var SPRING_HOME_MAY_DAYS_18_24 = ["18.05.2026", "19.05.2026", "20.05.2026", "21.05.2026", "22.05.2026", "23.05.2026", "24.05.2026"];
+var SPRING_HOME_MAY_DAYS_25_31 = ["25.05.2026", "26.05.2026", "27.05.2026", "28.05.2026", "29.05.2026", "30.05.2026", "31.05.2026"];
 var SPRING_HOME_MAY_PROMO_TOTAL_DATES = SPRING_HOME_MAY_DAYS_1_3
   .concat(SPRING_HOME_MAY_DAYS_4_10)
   .concat(SPRING_HOME_MAY_DAYS_11_17)
-  .concat(SPRING_HOME_MAY_DAYS_18_24);
+  .concat(SPRING_HOME_MAY_DAYS_18_24)
+  .concat(SPRING_HOME_MAY_DAYS_25_31);
 /** Экран рейтинга весны: недели внутри раскрывающихся «Апрель» / «Март · итоги» */
 var SPRING_VIEW_MAY_WEEK_BLOCKS = [
+  { label: "25—31 мая", dates: SPRING_HOME_MAY_DAYS_25_31 },
   { label: "18—24 мая", dates: SPRING_HOME_MAY_DAYS_18_24 },
   { label: "11—17 мая", dates: SPRING_HOME_MAY_DAYS_11_17 },
   { label: "4—10 мая", dates: SPRING_HOME_MAY_DAYS_4_10 },
