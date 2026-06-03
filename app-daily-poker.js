@@ -196,6 +196,48 @@
     return parts.join(" · ");
   }
 
+  function normalizeWinnerNamePart(value) {
+    return String(value == null ? "" : value).trim();
+  }
+
+  function sameWinnerNamePart(a, b) {
+    return normalizeWinnerNamePart(a).toLowerCase() === normalizeWinnerNamePart(b).toLowerCase();
+  }
+
+  function winnerFishLevelHtml(row) {
+    if (!row || row.pokerPlusStatusLevel == null || row.pokerPlusStatusLevel === "") return "";
+    var level = parseInt(row.pokerPlusStatusLevel, 10);
+    if (!isFinite(level)) return "";
+    level = Math.max(0, Math.min(55, level));
+    var fishHtml = "";
+    if (typeof pokerProfileStatusFishIconHtml === "function") {
+      fishHtml = pokerProfileStatusFishIconHtml(level, "daily-poker-winner__fish");
+    }
+    return '<span class="daily-poker-winner__fish-level">' +
+      fishHtml +
+      '<span>Уровень ' + esc(level) + '</span>' +
+    '</span>';
+  }
+
+  function winnerIdentityHtml(row) {
+    var name = normalizeWinnerNamePart(row && (row.pokerPlusName || row.displayName)) || "Игрок";
+    var nick = normalizeWinnerNamePart(row && row.pokerPlusNickname);
+    var nickHtml = nick && !sameWinnerNamePart(nick, name)
+      ? '<span class="daily-poker-winner__poker-nick">' + esc(nick) + '</span>'
+      : "";
+    return '<span class="daily-poker-winner__identity"><strong>' + esc(name) + '</strong>' + nickHtml + '</span>';
+  }
+
+  function winnerTelegramHtml(row) {
+    var login = normalizeWinnerNamePart(row && row.telegramUsername).replace(/^@+/g, "");
+    var name = normalizeWinnerNamePart(row && row.telegramDisplayName);
+    var parts = [];
+    if (login) parts.push("@" + login);
+    if (name && !sameWinnerNamePart(name, login) && !sameWinnerNamePart(name, "@" + login)) parts.push(name);
+    if (!parts.length) return "";
+    return '<small class="daily-poker-winner__telegram">Telegram: ' + esc(parts.join(" · ")) + '</small>';
+  }
+
   function setWinnersMessage(text, isError) {
     var list = $("dailyPokerWinnersList");
     if (!list) return;
@@ -255,15 +297,19 @@
     var row = winner || {};
     var rank = Math.max(1, index + 1);
     var subline = winnerSubline(row);
+    var fishLevel = winnerFishLevelHtml(row);
+    var telegram = winnerTelegramHtml(row);
     return '<article class="daily-poker-winner">' +
       '<div class="daily-poker-winner__avatar" aria-hidden="true">' + rank + '</div>' +
       '<div class="daily-poker-winner__body">' +
         '<div class="daily-poker-winner__top">' +
-          '<strong>' + esc(row.displayName || "Игрок") + '</strong>' +
-          '<span>#' + rank + '</span>' +
+          winnerIdentityHtml(row) +
+          '<span class="daily-poker-winner__rank">#' + rank + '</span>' +
         '</div>' +
+        fishLevel +
         '<p>' + esc(row.prize || "Суммарный приз") + '</p>' +
         (subline ? '<small>' + esc(subline) + '</small>' : "") +
+        telegram +
       '</div>' +
     '</article>';
   }

@@ -1235,6 +1235,15 @@
   min-width: 0;
 }
 
+.daily-poker-winner__identity {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .daily-poker-winner__top strong {
   min-width: 0;
   overflow: hidden;
@@ -1246,7 +1255,26 @@
   white-space: nowrap;
 }
 
-.daily-poker-winner__top span {
+.daily-poker-winner__poker-nick {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 230, 167, 0.78);
+  font-size: 11px;
+  line-height: 1.15;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-poker-winner__poker-nick::before {
+  content: "(";
+}
+
+.daily-poker-winner__poker-nick::after {
+  content: ")";
+}
+
+.daily-poker-winner__rank {
   flex: 0 0 auto;
   color: rgba(155, 220, 246, 0.86);
   font-size: 12px;
@@ -1267,6 +1295,27 @@
   font-weight: 900;
 }
 
+.daily-poker-winner__fish-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin-top: 4px;
+  color: #9bdcf6;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.daily-poker-winner__fish {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(155, 220, 246, 0.4));
+}
+
 .daily-poker-winner small {
   display: block;
   margin-top: 3px;
@@ -1274,6 +1323,10 @@
   font-size: 11px;
   line-height: 1.2;
   font-weight: 800;
+}
+
+.daily-poker-winner__telegram {
+  color: rgba(155, 220, 246, 0.72);
 }
 
 .daily-poker__winners-empty {

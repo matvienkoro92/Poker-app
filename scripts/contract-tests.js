@@ -1650,6 +1650,18 @@ async function testDailyPokerWinners(redis) {
   redis.h("poker_app:visitor_chat_display_names").set("ID100008", "Previous Week Spin Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100009", "Previous Month Spin Display");
   redis.h("poker_app:visitor_chat_display_names").set("ID100010", "Current Month Spin Display");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100002", "P21-PEER");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100003", "P21-LEADER");
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({
+    name: "Peer Poker21 Name",
+    nickname: "PeerPoker21Nick",
+    totalCounter: { fee: 12000 },
+  }));
+  redis.h("poker_app:pokerplus_profiles").set("ID100003", JSON.stringify({
+    name: "Leader Poker21 Name",
+    nickname: "LeaderPoker21Nick",
+    totalCounter: { fee: 32000 },
+  }));
   redis.l("poker_app:daily_poker_games_user:ID100002").push("daily_win_1", "daily_old_win_1", "daily_no_prize_1");
   redis.l("poker_app:daily_poker_games_user:ID100003").push("daily_leader_win_1");
   redis.l("poker_app:daily_poker_games_user:ID100004").push("daily_admin_win_1");
@@ -1763,15 +1775,29 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.firstSpinDate, expectedSpinStats.firstSpinDate, "daily poker winners exposes first public spin date");
   assert.deepStrictEqual(r.body.spinStats, expectedSpinStats, "daily poker winners exposes grouped spin stats");
   assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
-  assert.strictEqual(r.body.winners[0].displayName, "Leader Display", "daily poker winners sorts by ruble total desc");
+  assert.strictEqual(r.body.isAdmin, false, "daily poker winners marks regular viewer");
+  assert.strictEqual(r.body.winners[0].displayName, "Leader Poker21 Name", "daily poker winners prefers Poker21 name publicly");
+  assert.strictEqual(r.body.winners[0].pokerPlusNickname, "LeaderPoker21Nick", "daily poker winners exposes Poker21 nick publicly");
+  assert.strictEqual(r.body.winners[0].pokerPlusStatusLevel, 4, "daily poker winners exposes leader fish level");
+  assert.strictEqual(r.body.winners[0].telegramUsername, undefined, "daily poker winners hides Telegram username publicly");
+  assert.strictEqual(r.body.winners[0].telegramDisplayName, undefined, "daily poker winners hides Telegram display publicly");
   assert.strictEqual(r.body.winners[0].totalPrizeAmount, 1200, "daily poker winners exposes leader total");
   assert.strictEqual(r.body.winners[0].prize, "Всего: 1 200 ₽", "daily poker winners formats total ticket prize");
-  assert.strictEqual(r.body.winners[1].displayName, "Peer Display", "daily poker winners resolves display names");
+  assert.strictEqual(r.body.winners[1].displayName, "Peer Poker21 Name", "daily poker winners resolves Poker21 display names");
+  assert.strictEqual(r.body.winners[1].pokerPlusNickname, "PeerPoker21Nick", "daily poker winners exposes peer Poker21 nick");
+  assert.strictEqual(r.body.winners[1].pokerPlusStatusLevel, 2, "daily poker winners exposes peer fish level");
   assert.strictEqual(r.body.winners[1].totalPrizeAmount, 550, "daily poker winners aggregates all-time prizes");
   assert.strictEqual(r.body.winners[1].prize, "Всего: 500 ₽ + 50 бонусов", "daily poker winners formats mixed total prize");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Admin Display"), false, "daily poker winners hides admins");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Attempt Display"), false, "daily poker winners hides attempt-only prizes");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), false, "daily poker winners hides bonus-only prizes");
+
+  const adminWinners = await call(promo, req("GET", { path: "daily-poker/winners", pwaSession: s.admin, limit: "5" }));
+  assert.strictEqual(adminWinners.statusCode, 200, "daily poker admin winners succeeds");
+  assert.strictEqual(adminWinners.body.isAdmin, true, "daily poker winners marks admin viewer");
+  assert.strictEqual(adminWinners.body.winners[0].displayName, "Leader Poker21 Name", "daily poker admin winners keeps Poker21 public name");
+  assert.strictEqual(adminWinners.body.winners[0].telegramUsername, "leader", "daily poker admin winners exposes Telegram username");
+  assert.strictEqual(adminWinners.body.winners[0].telegramDisplayName, "Leader Display", "daily poker admin winners exposes Telegram display");
 }
 
 async function testPokerPlusKeyBindFallbackMatrix(redis) {
