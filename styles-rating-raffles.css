@@ -661,6 +661,96 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   flex: 1 1 auto;
   flex-shrink: 1;
 }
+.raffle-join-invite-row .primary-button.raffle-join-toggle-btn:not(.raffle-join-toggle-btn--leave) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 42px;
+  color: #1c1203;
+  background:
+    radial-gradient(circle at 50% -40%, rgba(255, 255, 255, 0.72), transparent 42%),
+    linear-gradient(180deg, #fff1b8 0%, #ffd36a 42%, #f59e0b 100%);
+  border: 1px solid rgba(255, 222, 137, 0.98);
+  box-shadow:
+    0 0 0 1px rgba(255, 244, 201, 0.28),
+    0 0 24px rgba(245, 158, 11, 0.72),
+    0 10px 26px rgba(245, 158, 11, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -3px 0 rgba(146, 64, 14, 0.28);
+  font-weight: 950;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, 0.42);
+  letter-spacing: 0.03em;
+  animation: raffle-join-gold-pulse 2.4s ease-in-out infinite;
+}
+.raffle-join-invite-row .primary-button.raffle-join-toggle-btn:not(.raffle-join-toggle-btn--leave)::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -42% auto -42% -62%;
+  width: 48%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+  animation: raffle-join-gold-sheen 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.raffle-join-invite-row .primary-button.raffle-join-toggle-btn:not(.raffle-join-toggle-btn--leave):hover:not(:disabled) {
+  filter: brightness(1.04);
+  border-color: rgba(255, 235, 168, 1);
+  box-shadow:
+    0 0 0 1px rgba(255, 244, 201, 0.34),
+    0 0 30px rgba(251, 191, 36, 0.82),
+    0 12px 28px rgba(245, 158, 11, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -3px 0 rgba(146, 64, 14, 0.24);
+}
+.raffle-join-invite-row .raffles-hero__share-btn--inline.raffles-hero__share-btn--primary {
+  min-height: 42px;
+  color: #fff1c2;
+  background:
+    linear-gradient(180deg, rgba(255, 214, 127, 0.12), rgba(214, 163, 84, 0.05)),
+    rgba(8, 12, 20, 0.92);
+  border-color: rgba(214, 163, 84, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(255, 214, 127, 0.08),
+    0 0 18px rgba(214, 163, 84, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+.raffle-join-invite-row .raffles-hero__share-btn--inline.raffles-hero__share-btn--primary:hover {
+  color: #fff7dc;
+  background:
+    linear-gradient(180deg, rgba(255, 226, 150, 0.18), rgba(214, 163, 84, 0.08)),
+    rgba(10, 15, 24, 0.96);
+  border-color: rgba(255, 218, 130, 0.94);
+  box-shadow:
+    0 0 0 1px rgba(255, 214, 127, 0.12),
+    0 0 24px rgba(214, 163, 84, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+@keyframes raffle-join-gold-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 244, 201, 0.28),
+      0 0 20px rgba(245, 158, 11, 0.62),
+      0 10px 26px rgba(245, 158, 11, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -3px 0 rgba(146, 64, 14, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 244, 201, 0.36),
+      0 0 30px rgba(251, 191, 36, 0.86),
+      0 12px 30px rgba(245, 158, 11, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.76),
+      inset 0 -3px 0 rgba(146, 64, 14, 0.24);
+  }
+}
+@keyframes raffle-join-gold-sheen {
+  0%, 42% { left: -62%; opacity: 0; }
+  55% { opacity: 0.8; }
+  76%, 100% { left: 118%; opacity: 0; }
+}
 .raffle-join-leave-cell {
   display: flex;
   min-width: 0;
@@ -674,29 +764,51 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-join-toggle-btn { margin-bottom: 12px; }
 .raffle-admin-actions--hidden { display: none !important; }
-.raffle-admin-actions { margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.raffle-admin-actions {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  align-items: stretch;
+}
 .raffle-cancel-btn--hidden { display: none; }
 .raffle-cancel-btn {
-  margin: 0 0 12px 10px;
-  padding: 8px 14px;
-  font-size: 14px;
+  margin: 0;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 4px;
+  font-size: 11px;
+  line-height: 1.08;
+  font-weight: 750;
   color: #fecaca;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
   border-radius: 10px;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 .raffle-complete-btn {
-  margin: 0 0 12px 10px;
-  padding: 8px 14px;
-  font-size: 14px;
+  margin: 0;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 4px;
+  font-size: 11px;
+  line-height: 1.08;
+  font-weight: 750;
   color: #bbf7d0;
   background: rgba(34, 197, 94, 0.15);
   border: 1px solid rgba(34, 197, 94, 0.4);
   border-radius: 10px;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 .raffle-complete-btn:hover { background: rgba(34, 197, 94, 0.25); color: #bbf7d0; border-color: rgba(34, 197, 94, 0.5); }
 .raffle-joined-msg--hidden { display: none; }
@@ -812,14 +924,41 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-winners-wrap--hidden { display: none; }
 .raffle-winners-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--accent-2); }
 .raffle-winners { margin: 0; padding-left: 20px; font-size: 13px; }
-.raffle-winner-group { margin-bottom: 8px; }
-.raffle-winner-group ul { margin: 4px 0 0; padding-left: 18px; list-style: none; }
+.raffle-winner-group { margin-bottom: 10px; }
+.raffle-winner-group ul {
+  display: grid;
+  gap: 7px;
+  margin: 7px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
 .raffle-winner-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  padding: 8px;
+  border: 1px solid rgba(214, 163, 84, 0.24);
+  border-radius: 8px;
+  background: rgba(8, 13, 24, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   flex-wrap: nowrap;
+}
+.raffle-winner-row__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.22), rgba(146, 64, 14, 0.18));
+  color: #fde68a;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
 }
 .raffle-winner-row__text { flex: 1; min-width: 0; }
 .raffle-winner-row__person {
@@ -878,6 +1017,18 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-color: rgba(148, 163, 184, 0.35);
   background: rgba(148, 163, 184, 0.1);
   color: #cbd5e1;
+}
+.raffle-winner-ready-badge--missed {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(127, 29, 29, 0.32);
+  color: #fecaca;
+}
+.raffle-winner-row--missed .raffle-winner-row__primary {
+  color: rgba(226, 232, 240, 0.72);
+}
+.raffle-winner-row--reroll {
+  border-left: 2px solid rgba(250, 204, 21, 0.48);
+  padding-left: 7px;
 }
 .raffle-winner-ready-btn {
   flex: 0 0 auto;
@@ -1219,6 +1370,43 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-completed-card__winners { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text); }
 .raffle-completed-card__winners-title { margin: 8px 0 4px; font-size: 13px; font-weight: 600; color: var(--accent-2); }
+.raffle-completed-card__reroll-title {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  margin: 12px 0 5px;
+  padding: 3px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.2), rgba(180, 83, 9, 0.18));
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.raffle-completed-card__winners--reroll {
+  padding-left: 16px;
+}
+.raffle-burned-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  gap: 7px 9px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(248, 113, 113, 0.42);
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.22);
+  color: #fecaca;
+  font-size: 12px;
+  font-weight: 700;
+}
+.raffle-burned-summary strong {
+  color: #fff1f2;
+  font-size: 13px;
+}
 
 /* Золотая тема держит розыгрыши на тёмной поверхности; не полагаемся на глобальные text-переменные. */
 [data-theme="gold"] body[data-view="raffles"] .raffles-tagline,

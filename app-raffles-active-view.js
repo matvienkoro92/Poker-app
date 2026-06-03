@@ -143,8 +143,8 @@ function initRafflesActiveViewRuntime(opts) {
       Object.keys(byGroup).forEach(function (g) {
         var prize = byGroup[g][0] && byGroup[g][0].prize ? byGroup[g][0].prize : "";
         winHtml += "<li class=\"raffle-winner-group\"><strong>" + escapeHtml(g) + (prize ? ": " + escapeHtml(raffleDisplayPrizeText(prize)) : "") + "</strong><ul>";
-        byGroup[g].forEach(function (w) {
-          if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.buildWinnerRowHtml === "function") winHtml += rafflesCompletedRuntime.buildWinnerRowHtml(w, raffle.id, rafflesIsAdmin);
+        byGroup[g].forEach(function (w, index) {
+          if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.buildWinnerRowHtml === "function") winHtml += rafflesCompletedRuntime.buildWinnerRowHtml(w, raffle.id, rafflesIsAdmin, index + 1);
         });
         winHtml += "</ul></li>";
       });

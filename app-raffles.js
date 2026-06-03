@@ -649,6 +649,30 @@ function initRaffles() {
     schedulePendingCompletedRaffleFocus();
   }
 
+  function updateCompletedRaffleCache(raffle) {
+    if (!raffle || !raffle.id) return;
+    var targetId = String(raffle.id);
+    function replaceInList(list) {
+      if (!Array.isArray(list)) return false;
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i] && String(list[i].id || "") === targetId) {
+          list[i] = raffle;
+          return true;
+        }
+      }
+      return false;
+    }
+    replaceInList(rafflesLastCompleted);
+    var cache = typeof window !== "undefined" ? window._rafflesCache : null;
+    if (cache && cache.data) {
+      replaceInList(cache.data.raffles);
+      replaceInList(cache.data.activeRaffles);
+      if (cache.data.activeRaffle && String(cache.data.activeRaffle.id || "") === targetId) {
+        cache.data.activeRaffle = raffle;
+      }
+    }
+  }
+
   if (typeof initRafflesCompletedRuntime === "function") {
     var rafflesCompletedRuntimeDeps = {};
     Object.defineProperties(rafflesCompletedRuntimeDeps, {
@@ -660,6 +684,8 @@ function initRaffles() {
       tg: tg,
       loadRaffles: loadRaffles,
       clearRafflesCache: clearRafflesCache,
+      pokerRafflesApiQueryLeading: pokerRafflesApiQueryLeading,
+      updateCompletedRaffleCache: updateCompletedRaffleCache,
       focusRaffleAfterMutation: focusRaffleAfterMutation,
       confirmRaffleAdminAction: confirmRaffleAdminAction,
       collectRaffleIdentityIds: collectRaffleIdentityIds,

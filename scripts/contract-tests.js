@@ -11,6 +11,7 @@ process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";
 process.env.UPSTASH_REDIS_REST_TOKEN = "mock-token";
 process.env.TELEGRAM_BOT_TOKEN = BOT_TOKEN;
 process.env.TELEGRAM_ADMIN_ID = "388008256";
+process.env.RAFFLE_READY_ROMAN_ADMIN_IDS = "388008256";
 process.env.CLUB_CHAT_REQUIRE_APPLICATION = "0";
 process.env.CRON_SECRET = "contract-cron-secret";
 process.env.MINI_APP_URL = "https://t.me/Poker_dvatuza_bot/DvaTuza";
@@ -860,6 +861,8 @@ async function testRaffleEmailAccountSubscriptionGate(redis) {
 }
 
 async function testRaffleWinnerReady(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
   const raffles = loadHandler("raffles");
   const s = sessions();
   const raffle = {
@@ -906,6 +909,365 @@ async function testRaffleWinnerReady(redis) {
   assert.strictEqual(r.body.raffle.winners[0].winnerReady, true, "winner ready flag is stored");
   assert.strictEqual(r.body.raffle.winners[0].winnerReadyBy, "tg_1001", "winner ready author is stored");
   assert.ok(r.body.raffle.winners[0].winnerReadyAt, "winner ready timestamp is stored");
+  for (let i = 0; i < 8 && sentMessages.length === 0; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+}
+
+async function testRaffleWinnerReadyCannotConfirmAnotherWinner(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_raffle_ready_own_only",
+    title: "Ready own only raffle",
+    totalWinners: 2,
+    groups: [{ prize: "Ticket", count: 2 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player One",
+      p21Id: "P21-1001",
+      groupIndex: 0,
+      prize: "Ticket",
+    }, {
+      userId: "tg_1002",
+      accountId: "ID100002",
+      name: "Player Two",
+      p21Id: "P21-1002",
+      groupIndex: 0,
+      prize: "Ticket",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_ready_own_only", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_ready_own_only");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "setWinnerReady",
+    raffleId: "contract_raffle_ready_own_only",
+    winnerUserId: "tg_1002",
+  }));
+  assert.strictEqual(r.statusCode, 403, "winner cannot mark another winner ready");
+  let stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_own_only"));
+  assert.strictEqual(stored.winners[0].winnerReady, undefined, "wrong-target ready does not mark requester ready");
+  assert.strictEqual(stored.winners[1].winnerReady, undefined, "wrong-target ready does not mark target ready");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "setWinnerReady",
+    raffleId: "contract_raffle_ready_own_only",
+    winnerUserId: "tg_1001",
+  }));
+  assert.strictEqual(r.statusCode, 200, "winner can still mark own row ready");
+  stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_own_only"));
+  assert.strictEqual(stored.winners[0].winnerReady, true, "own ready marks requester");
+  assert.strictEqual(stored.winners[1].winnerReady, undefined, "own ready does not mark another winner");
+  for (let i = 0; i < 8 && sentMessages.length === 0; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+}
+
+async function testRaffleWinnerReadyAdminNotifications(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const webpush = require("web-push");
+  const keys = webpush.generateVAPIDKeys();
+  process.env.WEBPUSH_VAPID_PUBLIC_KEY = keys.publicKey;
+  process.env.WEBPUSH_VAPID_PRIVATE_KEY = keys.privateKey;
+  process.env.WEBPUSH_CONTACT_EMAIL = "mailto:contract@example.test";
+  const raffleNotifications = require(path.join(root, "lib", "raffle-notifications"));
+  const workingAdmin = raffleNotifications.resolveWorkingRaffleAdmin(new Date());
+  const adminIds = [...new Set([workingAdmin && workingAdmin.userId, "tg_388008256"].filter(Boolean))];
+  const sentPushes = [];
+  let webpushRuntime = null;
+  let originalSendNotification = null;
+  try {
+    adminIds.forEach((adminId) => {
+      redis.s("poker_app:chat_push_registry").add(adminId);
+      redis.h("poker_app:chat_push_sub:" + adminId).set("ready-admin-endpoint", JSON.stringify({
+        endpoint: "https://push.example.test/ready-admin-" + adminId.replace(/^tg_/, ""),
+        expirationTime: null,
+        keys: {
+          p256dh: keys.publicKey,
+          auth: Buffer.alloc(16, 7).toString("base64url"),
+        },
+      }));
+    });
+
+    const raffles = loadHandler("raffles");
+    webpushRuntime = require("web-push");
+    originalSendNotification = webpushRuntime.sendNotification;
+    webpushRuntime.sendNotification = async function sendNotificationMock(subscription, payload, opts) {
+      sentPushes.push({
+        subscription,
+        payload: JSON.parse(payload),
+        opts,
+      });
+      return { statusCode: 201 };
+    };
+    const s = sessions();
+    const raffle = {
+      id: "contract_raffle_ready_admin_notify",
+      title: "Ready admin notification raffle",
+      completedNumber: 44,
+      totalWinners: 1,
+      groups: [{ prize: "Беккинг-билет 1 000 ₽", count: 1 }],
+      endDate: new Date(Date.now() - 3600_000).toISOString(),
+      participants: [],
+      winners: [{
+        userId: "tg_1001",
+        accountId: "ID100001",
+        name: "Ready Player",
+        telegramUsername: "ready_player",
+        p21Id: "799755",
+        groupIndex: 0,
+        prize: "Беккинг-билет 1 000 ₽",
+      }],
+      status: "drawn",
+      createdAt: new Date(Date.now() - 7200_000).toISOString(),
+      drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+    };
+    redis.kv.set("poker_app:raffle:contract_raffle_ready_admin_notify", JSON.stringify(raffle));
+    redis.l("poker_app:raffle_ids").push("contract_raffle_ready_admin_notify");
+    redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+    redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+
+    let r = await call(raffles, req("POST", {}, {
+      pwaSession: s.user,
+      action: "setWinnerReady",
+      raffleId: "contract_raffle_ready_admin_notify",
+      winnerUserId: "tg_1001",
+    }));
+    assert.strictEqual(r.statusCode, 200, "winner ready succeeds before admin notifications finish");
+
+    const expectedReadyHeadline = "ID799755 готов забрать 1000р беккинг-билет";
+    for (let i = 0; i < 16; i += 1) {
+      const allMessages = adminIds.every((adminId) =>
+        sentMessages.some((msg) => {
+          const text = String(msg.body.text || "");
+          return (
+            String(msg.body.chat_id) === adminId.replace(/^tg_/, "") &&
+            text.includes(expectedReadyHeadline) &&
+            text.includes("Ready admin notification raffle")
+          );
+        })
+      );
+      const allPushes = adminIds.every((adminId) =>
+        sentPushes.some((push) => String(push.subscription.endpoint || "").includes(adminId.replace(/^tg_/, "")))
+      );
+      if (allMessages && allPushes) break;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    adminIds.forEach((adminId) => {
+      const chatId = adminId.replace(/^tg_/, "");
+      const message = sentMessages.find((msg) => {
+        const text = String(msg.body.text || "");
+        return (
+          String(msg.body.chat_id) === chatId &&
+          text.includes(expectedReadyHeadline) &&
+          text.includes("Ready admin notification raffle")
+        );
+      });
+      assert.ok(message, "ready admin receives bot popup message " + adminId);
+      const text = String(message.body.text || "");
+      assert.ok(text.includes(expectedReadyHeadline), "admin message headline includes ready prize");
+      assert.ok(text.includes("799755"), "admin message includes Poker21 id");
+      assert.ok(text.includes("Ready Player"), "admin message includes winner name");
+      const push = sentPushes.find((item) => String(item.subscription.endpoint || "").includes(chatId));
+      assert.ok(push, "ready admin receives web push " + adminId);
+      assert.strictEqual(push.payload.kind, "raffle_winner_ready", "ready admin push kind is stable");
+      assert.strictEqual(push.payload.title, expectedReadyHeadline, "ready admin push title includes id and prize");
+      assert.ok(String(push.payload.body || "").includes("799755"), "ready admin push includes Poker21 id");
+    });
+
+    const messageCount = sentMessages.length;
+    const pushCount = sentPushes.length;
+    r = await call(raffles, req("POST", {}, {
+      pwaSession: s.user,
+      action: "setWinnerReady",
+      raffleId: "contract_raffle_ready_admin_notify",
+      winnerUserId: "tg_1001",
+    }));
+    assert.strictEqual(r.statusCode, 200, "repeated ready request still succeeds");
+    for (let i = 0; i < 6; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.strictEqual(sentMessages.length, messageCount, "repeated ready does not duplicate bot messages");
+    assert.strictEqual(sentPushes.length, pushCount, "repeated ready does not duplicate web pushes");
+  } finally {
+    if (webpushRuntime && originalSendNotification) webpushRuntime.sendNotification = originalSendNotification;
+  }
+}
+
+async function testRaffleWinnerStatusPrizeNotification(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_raffle_prize_notify",
+    title: "Prize notification raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Беккинг-билет 1 000 ₽", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "799755",
+      groupIndex: 0,
+      prize: "Беккинг-билет 1 000 ₽",
+      winnerReady: true,
+      winnerReadyState: "ready",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_prize_notify", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_prize_notify");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: "contract_raffle_prize_notify",
+    winnerUserId: "tg_1001",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can mark winner prize issued");
+  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1001"); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const winnerMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
+  assert.ok(winnerMessage, "winner receives prize issued bot message");
+  const text = String(winnerMessage.body.text || "");
+  assert.ok(text.includes("Приз начислен"), "message says prize is credited");
+  assert.ok(text.includes("799755"), "message includes Poker21 id");
+  assert.ok(text.includes("Вас ждут в игре"), "message invites winner to the game");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: "contract_raffle_prize_notify",
+    winnerUserId: "tg_1001",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "repeated ok status request succeeds");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.strictEqual(
+    sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length,
+    1,
+    "repeated ok status does not duplicate prize notification"
+  );
+}
+
+async function testRaffleWinnerReadyRerollAndBurn(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const now = Date.now();
+  const pastDeadline = new Date(now - 60_000).toISOString();
+  const startedAt = new Date(now - 11 * 60_000).toISOString();
+  const prize = "Беккинг-билет 500 ₽";
+  const participants = [
+    { userId: "tg_1001", accountId: "ID100001", name: "Ready Player", p21Id: "P21-1001" },
+    { userId: "tg_1002", accountId: "ID100002", name: "Late Player", p21Id: "P21-1002" },
+    { userId: "tg_1003", accountId: "ID100003", name: "Backup One", p21Id: "P21-1003" },
+    { userId: "tg_1004", accountId: "ID100004", name: "Backup Two", p21Id: "P21-1004" },
+  ];
+  const raffle = {
+    id: "contract_raffle_ready_reroll",
+    title: "Ready reroll raffle",
+    totalWinners: 2,
+    groups: [{ prize, count: 2 }],
+    endDate: new Date(now - 3600_000).toISOString(),
+    participants,
+    winners: [{
+      ...participants[0],
+      groupIndex: 0,
+      prize,
+      winnerReady: true,
+      winnerReadyAt: new Date(now - 5 * 60_000).toISOString(),
+      winnerReadyRound: 0,
+      winnerReadyWindowStartedAt: startedAt,
+      winnerReadyDeadlineAt: pastDeadline,
+      winnerReadyState: "ready",
+    }, {
+      ...participants[1],
+      groupIndex: 0,
+      prize,
+      winnerReadyRound: 0,
+      winnerReadyWindowStartedAt: startedAt,
+      winnerReadyDeadlineAt: pastDeadline,
+      winnerReadyState: "pending",
+    }],
+    status: "drawn",
+    createdAt: new Date(now - 7200_000).toISOString(),
+    drawnAt: new Date(now - 1800_000).toISOString(),
+    winnerReadyWindowMs: 10 * 60 * 1000,
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_ready_reroll");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+
+  let r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll" }));
+  assert.strictEqual(r.statusCode, 200, "admin can load and settle expired ready window");
+  const missed = r.body.raffle.winners.find((w) => w.userId === "tg_1002");
+  const replacement = r.body.raffle.winners.find((w) => w.winnerReroll === true);
+  assert.ok(missed, "late original winner is still shown");
+  assert.strictEqual(missed.winnerReadyState, "missed", "late original winner is marked missed");
+  assert.strictEqual(missed.winnerReadyExpired, true, "late original winner cannot confirm later");
+  assert.ok(replacement, "replacement winner is appended after reroll");
+  assert.strictEqual(replacement.winnerReadyRound, 1, "replacement receives reroll round");
+  assert.ok(["tg_1003", "tg_1004"].includes(replacement.userId), "replacement comes from non-winning participants");
+  assert.ok(new Date(replacement.winnerReadyDeadlineAt).getTime() > Date.now(), "replacement receives a fresh ready deadline");
+  assert.ok(!r.body.raffle.readyBurned || !r.body.raffle.readyBurned.count, "first missed original is rerolled, not burned");
+  assert.ok(
+    sentMessages.find((msg) => String(msg.body.chat_id) === String(replacement.userId).replace(/^tg_/, "")),
+    "replacement winner receives reroll notification"
+  );
+  assert.ok(
+    !sentMessages.find((msg) => String(msg.body.chat_id) === "1002"),
+    "missed original winner is not notified after reroll"
+  );
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "setWinnerReady",
+    raffleId: "contract_raffle_ready_reroll",
+    winnerUserId: "tg_1002",
+  }));
+  assert.strictEqual(r.statusCode, 400, "missed original winner cannot mark ready after reroll");
+
+  const stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_reroll"));
+  const storedReplacement = stored.winners.find((w) => w.winnerReroll === true);
+  assert.ok(storedReplacement, "stored raffle keeps replacement winner");
+  storedReplacement.winnerReadyWindowStartedAt = new Date(Date.now() - 11 * 60_000).toISOString();
+  storedReplacement.winnerReadyDeadlineAt = new Date(Date.now() - 60_000).toISOString();
+  redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll", JSON.stringify(stored));
+
+  r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll" }));
+  assert.strictEqual(r.statusCode, 200, "admin can load and settle expired reroll window");
+  const burnedReplacement = r.body.raffle.winners.find((w) => w.winnerReroll === true);
+  assert.strictEqual(burnedReplacement.winnerReadyState, "burned", "expired reroll winner is burned");
+  assert.strictEqual(burnedReplacement.winnerBurned, true, "burned reroll winner is locked");
+  assert.strictEqual(r.body.raffle.readyBurned.count, 1, "one prize is counted as burned");
+  assert.strictEqual(r.body.raffle.readyBurned.totalPrizeAmount, 500, "burned prize amount is summed");
 }
 
 async function testRaffleTelegramUsernamesAdminOnly(redis) {
@@ -3368,6 +3730,10 @@ async function main() {
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
     ["raffle email account subscription gate", testRaffleEmailAccountSubscriptionGate],
     ["raffle winner ready", testRaffleWinnerReady],
+    ["raffle winner ready own row only", testRaffleWinnerReadyCannotConfirmAnotherWinner],
+    ["raffle winner ready admin notifications", testRaffleWinnerReadyAdminNotifications],
+    ["raffle winner status prize notification", testRaffleWinnerStatusPrizeNotification],
+    ["raffle winner ready reroll and burn", testRaffleWinnerReadyRerollAndBurn],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],

@@ -14,13 +14,26 @@ function initRafflesCompletedRuntime(opts) {
     var raffleWinnerLeaderRows = [];
     var RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT = 5;
 
-  function buildRaffleWinnerRowHtml(w, raffleId, isAdmin) {
+  function raffleWinnerReadyExpired(w) {
+    if (!w) return false;
+    var state = String(w.winnerReadyState || "").toLowerCase();
+    return w.winnerReadyExpired === true || w.winnerBurned === true || state === "missed" || state === "burned";
+  }
+
+  function raffleWinnerIsReroll(w) {
+    if (!w) return false;
+    var round = parseInt(w.winnerReadyRound, 10);
+    return w.winnerReroll === true || (isFinite(round) && round > 0);
+  }
+
+  function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
     var uidAttr = escapeHtml(uidRaw);
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
     var winnerReady = w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true";
+    var readyExpired = !winnerReady && raffleWinnerReadyExpired(w);
     var viewerIds = [];
     try {
       viewerIds = typeof collectRaffleIdentityIds === "function" ? collectRaffleIdentityIds() : [];
@@ -30,8 +43,10 @@ function initRafflesCompletedRuntime(opts) {
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
     var readyBadge = winnerReady
       ? "<span class=\"raffle-winner-ready-badge\">Готов</span>"
-      : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
-    var readyAction = isMyWin && status !== "ok"
+      : readyExpired
+        ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
+        : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
+    var readyAction = isMyWin && status !== "ok" && !readyExpired
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
         (winnerReady ? " raffle-winner-ready-btn--active" : "") +
         "\" data-raffle-id=\"" +
@@ -80,11 +95,17 @@ function initRafflesCompletedRuntime(opts) {
         "</a>"
       : "";
     var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + readyBadge + "</span>";
+    var rowClass = "raffle-winner-row" + (readyExpired ? " raffle-winner-row--missed" : "") + (raffleWinnerIsReroll(w) ? " raffle-winner-row--reroll" : "");
+    var numberValue = parseInt(winnerNumber, 10);
+    var numberHtml = isFinite(numberValue) && numberValue > 0
+      ? "<span class=\"raffle-winner-row__number\" aria-hidden=\"true\">" + escapeHtml(numberValue) + "</span>"
+      : "";
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
       return (
-        "<li class=\"raffle-winner-row\">" +
+        "<li class=\"" + rowClass + "\">" +
+        numberHtml +
         profileBlock +
         "<span class=\"raffle-winner-status " +
         statusClass +
@@ -109,7 +130,8 @@ function initRafflesCompletedRuntime(opts) {
       );
     }
     return (
-      "<li class=\"raffle-winner-row\">" +
+      "<li class=\"" + rowClass + "\">" +
+      numberHtml +
       profileBlock +
       "<span class=\"raffle-winner-status " +
       statusClass +
@@ -178,6 +200,7 @@ function initRafflesCompletedRuntime(opts) {
         if (id) participants[id] = true;
       });
       winnerRows.forEach(function (w) {
+        if (raffleWinnerReadyExpired(w)) return;
         var id = raffleWinnerLeaderId(w);
         if (!id) return;
         winners[id] = true;
@@ -214,6 +237,7 @@ function initRafflesCompletedRuntime(opts) {
     (completed || []).forEach(function (raffle) {
       var winners = raffle && Array.isArray(raffle.winners) ? raffle.winners : [];
       winners.forEach(function (w) {
+        if (raffleWinnerReadyExpired(w)) return;
         var id = raffleWinnerLeaderId(w);
         if (!id) return;
         if (!byId[id]) {
@@ -380,41 +404,118 @@ function initRafflesCompletedRuntime(opts) {
   }
 
 
+  function raffleCompletedWinnerGroupsHtml(raffle, winners) {
+    var rows = Array.isArray(winners) ? winners : [];
+    var byGroup = {};
+    rows.forEach(function (w) {
+      var g = w.groupIndex >= 0 ? "Группа " + (w.groupIndex + 1) : "Без группы";
+      if (!byGroup[g]) byGroup[g] = [];
+      byGroup[g].push(w);
+    });
+    var html = "";
+    Object.keys(byGroup).forEach(function (g) {
+      var prize = byGroup[g][0] && byGroup[g][0].prize ? byGroup[g][0].prize : "";
+      html += "<li class=\"raffle-winner-group\"><strong>" + escapeHtml(g) + (prize ? ": " + escapeHtml(raffleDisplayPrizeText(prize)) : "") + "</strong><ul>";
+      byGroup[g].forEach(function (w, index) {
+        html += buildRaffleWinnerRowHtml(w, raffle.id, rafflesIsAdmin, index + 1);
+      });
+      html += "</ul></li>";
+    });
+    return html;
+  }
+
+  function raffleCompletedBurnedSummaryHtml(raffle) {
+    var summary = raffle && raffle.readyBurned && typeof raffle.readyBurned === "object" ? raffle.readyBurned : null;
+    if (!summary) return "";
+    var items = Array.isArray(summary.items) ? summary.items : [];
+    var count = parseInt(summary.count, 10) || items.length || 0;
+    if (count <= 0) return "";
+    var amount = parseFloat(summary.totalPrizeAmount);
+    if (!isFinite(amount) && items.length) {
+      amount = items.reduce(function (sum, item) { return sum + (parseFloat(item && item.prizeAmount) || 0); }, 0);
+    }
+    if (!isFinite(amount)) amount = 0;
+    var amountText = typeof formatRaffleSum === "function"
+      ? formatRaffleSum(amount)
+      : String(Math.round(amount)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
+    return "<div class=\"raffle-burned-summary\"><span>Выигрыши сгорели</span><strong>" +
+      escapeHtml(count) +
+      "</strong><span>Сумма</span><strong>" +
+      escapeHtml(amountText) +
+      "</strong></div>";
+  }
+
+  function buildCompletedRaffleCardHtml(raffle) {
+    var created = raffle.createdAt ? new Date(raffle.createdAt).toLocaleDateString("ru-RU") : "";
+    var end = raffle.endDate ? new Date(raffle.endDate).toLocaleString("ru-RU") : "";
+    var meta = "Розыгрыш" + (created ? " от " + created : "") + (end ? " · Завершён " + end : "");
+    var winners = raffle.winners || [];
+    var originalWinners = [];
+    var rerollWinners = [];
+    winners.forEach(function (w) {
+      if (raffleWinnerIsReroll(w)) rerollWinners.push(w);
+      else originalWinners.push(w);
+    });
+    var winHtml = raffleCompletedWinnerGroupsHtml(raffle, originalWinners);
+    var rerollHtml = raffleCompletedWinnerGroupsHtml(raffle, rerollWinners);
+    var burnedHtml = raffleCompletedBurnedSummaryHtml(raffle);
+    var adminActionsHtml = rafflesIsAdmin
+      ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
+        escapeHtml(raffle.id || "") +
+        "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
+        escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
+      : "";
+    return "<div class=\"raffle-completed-card\" data-raffle-id=\"" + escapeHtml(raffle.id || "") + "\" data-raffle-number=\"" + escapeHtml(raffle.completedNumber || "") + "\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
+      adminActionsHtml +
+      (winHtml ? "<p class=\"raffle-completed-card__winners-title\">Победители</p><ul class=\"raffle-completed-card__winners\">" + winHtml + "</ul>" : "") +
+      (rerollHtml ? "<p class=\"raffle-completed-card__reroll-title\">Реролл</p><ul class=\"raffle-completed-card__winners raffle-completed-card__winners--reroll\">" + rerollHtml + "</ul>" : "") +
+      burnedHtml + "</div>";
+  }
+
+  function refreshCompletedRaffleCard(refreshBtn) {
+    if (!refreshBtn || refreshBtn.disabled) return;
+    if (!base || !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      return;
+    }
+    var raffleId = refreshBtn.getAttribute("data-raffle-id") || "";
+    var card = refreshBtn.closest(".raffle-completed-card");
+    if (!raffleId || !card) return;
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "Обновляю";
+    var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    var url = base + "/api/raffles" + query + "&id=" + encodeURIComponent(raffleId) + "&_t=" + Date.now();
+    fetch(url)
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
+      })
+      .then(function (data) {
+        if (!data || !data.ok || !data.raffle) {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = "Обновить";
+          if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Не удалось обновить розыгрыш");
+          return;
+        }
+        if (typeof updateCompletedRaffleCache === "function") updateCompletedRaffleCache(data.raffle);
+        var nextHtml = buildCompletedRaffleCardHtml(data.raffle);
+        var wrap = document.createElement("div");
+        wrap.innerHTML = nextHtml;
+        var nextCard = wrap.firstElementChild;
+        if (nextCard) card.replaceWith(nextCard);
+      })
+      .catch(function () {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Обновить";
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+      });
+  }
+
         function renderCompletedRafflesPanel(completed) {
           renderRaffleWinnerLeaders(completed);
           if (!rafflesCompleted) return;
           if (completed.length > 0) {
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");
-            rafflesCompleted.innerHTML = completed.map(function (raffle) {
-              var created = raffle.createdAt ? new Date(raffle.createdAt).toLocaleDateString("ru-RU") : "";
-              var end = raffle.endDate ? new Date(raffle.endDate).toLocaleString("ru-RU") : "";
-              var meta = "Розыгрыш" + (created ? " от " + created : "") + (end ? " · Завершён " + end : "");
-              var winners = raffle.winners || [];
-              var byGroup = {};
-              winners.forEach(function (w) {
-                var g = w.groupIndex >= 0 ? "Группа " + (w.groupIndex + 1) : "Без группы";
-                if (!byGroup[g]) byGroup[g] = [];
-                byGroup[g].push(w);
-              });
-              var winHtml = "";
-              Object.keys(byGroup).forEach(function (g) {
-                var prize = byGroup[g][0] && byGroup[g][0].prize ? byGroup[g][0].prize : "";
-                winHtml += "<li class=\"raffle-winner-group\"><strong>" + escapeHtml(g) + (prize ? ": " + escapeHtml(raffleDisplayPrizeText(prize)) : "") + "</strong><ul>";
-                byGroup[g].forEach(function (w) {
-                  winHtml += buildRaffleWinnerRowHtml(w, raffle.id, rafflesIsAdmin);
-                });
-                winHtml += "</ul></li>";
-              });
-              var adminActionsHtml = rafflesIsAdmin
-                ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
-                  escapeHtml(raffle.id || "") +
-                  "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
-                  escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
-                : "";
-              return "<div class=\"raffle-completed-card\" data-raffle-id=\"" + escapeHtml(raffle.id || "") + "\" data-raffle-number=\"" + escapeHtml(raffle.completedNumber || "") + "\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
-                adminActionsHtml +
-                (winHtml ? "<p class=\"raffle-completed-card__winners-title\">Победители</p><ul class=\"raffle-completed-card__winners\">" + winHtml + "</ul>" : "") + "</div>";
-              }).join("");
+            rafflesCompleted.innerHTML = completed.map(buildCompletedRaffleCardHtml).join("");
           } else {
             rafflesCompleted.innerHTML = "";
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.remove("raffle-empty--hidden");
@@ -458,16 +559,7 @@ function initRafflesCompletedRuntime(opts) {
       if (!rafflesIsAdmin) return;
       var refreshBtn = e.target.closest(".raffle-completed-card__refresh-btn");
       if (refreshBtn) {
-        if (refreshBtn.disabled) return;
-        refreshBtn.disabled = true;
-        refreshBtn.textContent = "Обновляю";
-        clearRafflesCache();
-        loadRaffles();
-        setTimeout(function () {
-          if (!refreshBtn || !refreshBtn.isConnected) return;
-          refreshBtn.disabled = false;
-          refreshBtn.textContent = "Обновить";
-        }, 2500);
+        refreshCompletedRaffleCard(refreshBtn);
         return;
       }
       var btn = e.target.closest(".raffle-completed-card__delete-btn");
