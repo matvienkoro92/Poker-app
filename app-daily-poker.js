@@ -464,13 +464,11 @@
   function finishManualDeal() {
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
-    var claimBtn = $("dailyPokerClaimBtn");
     var result = dailyPokerState.stagedDealResult || {};
     if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false, false); }).join("");
     if (board) board.innerHTML = boardHtml(result.boardCards || [], 5, [4]);
     dailyPokerState.revealing = false;
     setResultText(formatResultLine(result), false);
-    if (claimBtn) claimBtn.hidden = true;
     resetManualDeal();
     syncStatus(result);
     loadWinners();
@@ -502,13 +500,11 @@
   function revealCards(result, triggerBtn) {
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
-    var claimBtn = $("dailyPokerClaimBtn");
     dailyPokerState.stagedDealResult = result || {};
     dailyPokerState.dealStage = "hole";
     setActiveDealButton(triggerBtn || getDealButton());
     dailyPokerState.revealing = false;
     setResultText("Карты на руках. Следующий ход — флоп.", false);
-    if (claimBtn) claimBtn.hidden = true;
     renderEmptyCards();
     setBoardActive(true);
     if (hole) hole.innerHTML = (result.holeCards || []).map(function (card) { return cardHtml(card, false, true); }).join("");
@@ -755,7 +751,6 @@
   function bind() {
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
-    var claimBtn = $("dailyPokerClaimBtn");
     var inviteBtn = $("dailyPokerInviteBtn");
     var copyBtn = $("dailyPokerCopyLinkBtn");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
@@ -765,13 +760,6 @@
     if (extraBtn && extraBtn.dataset.dailyPokerBound !== "1") {
       extraBtn.dataset.dailyPokerBound = "1";
       extraBtn.addEventListener("click", play);
-    }
-    if (claimBtn && claimBtn.dataset.dailyPokerBound !== "1") {
-      claimBtn.dataset.dailyPokerBound = "1";
-      claimBtn.addEventListener("click", function () {
-        showMessage("Билет уже зачислен на баланс.", false);
-        claimBtn.hidden = true;
-      });
     }
     if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {
       inviteBtn.dataset.dailyPokerBound = "1";
