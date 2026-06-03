@@ -925,7 +925,7 @@ function initRaffles() {
             raffleTimerInterval = null;
           }
         }
-        updateRaffleBadge(!!active);
+        updateRaffleBadge(activeList.length);
 
         if (switchToCompleted && typeof setRafflesTab === "function") setRafflesTab("completed");
 

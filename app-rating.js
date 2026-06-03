@@ -343,7 +343,10 @@ function fetchRaffleBadge() {
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok) {
-        updateRaffleBadge(!!(data.activeRaffle));
+        var activeCount = Array.isArray(data.activeRaffles)
+          ? data.activeRaffles.length
+          : (data.activeRaffle ? 1 : 0);
+        updateRaffleBadge(activeCount);
         if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
       }
     })

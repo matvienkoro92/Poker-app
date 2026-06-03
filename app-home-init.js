@@ -356,15 +356,27 @@ if (startButton) {
   });
 }
 
-function updateRaffleBadge(hasActive) {
+function updateRaffleBadge(activeCount) {
+  var count = 0;
+  if (Array.isArray(activeCount)) {
+    count = activeCount.length;
+  } else if (typeof activeCount === "number") {
+    count = Math.max(0, Math.floor(activeCount));
+  } else {
+    count = activeCount ? 1 : 0;
+  }
+  var hasActive = count > 0;
   var badge = document.getElementById("raffleActiveBadge");
   if (badge) {
+    badge.textContent = String(Math.min(count, 99));
     badge.classList.toggle("feature__badge--hidden", !hasActive);
     badge.setAttribute("aria-hidden", hasActive ? "false" : "true");
+    badge.setAttribute("aria-label", hasActive ? "Активных розыгрышей: " + count : "Нет активных розыгрышей");
   }
   try {
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("poker_raffle_active_badge", hasActive ? "1" : "0");
+      localStorage.setItem("poker_raffle_active_badge_count", String(count));
     }
   } catch (eRaffleHint) {}
   var cache = (typeof window !== "undefined" && window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.activeRaffle) ? window._rafflesCache.data.activeRaffle : null;
