@@ -651,6 +651,68 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleActiveListIncludesDailySibling(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const base = Date.now();
+  const first = {
+    id: "contract_active_regular",
+    title: "Contract active regular",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket regular", count: 1 }],
+    endDate: new Date(base + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date(base - 2000).toISOString(),
+  };
+  const second = {
+    id: "contract_active_daily",
+    title: "Contract active daily",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket daily", count: 1 }],
+    endDate: new Date(base + 7200_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date(base - 1000).toISOString(),
+    daily: true,
+    recurrence: {
+      type: "daily",
+      timeZone: "Europe/Moscow",
+      startTime: "12:00",
+      seriesId: "contract_daily_series",
+      scheduledStartAt: new Date(base - 1000).toISOString(),
+      nextStartAt: new Date(base + 24 * 3600_000).toISOString(),
+      durationMs: 7200_000,
+      template: {
+        title: "Contract active daily",
+        totalWinners: 1,
+        groups: [{ prize: "Ticket daily", count: 1 }],
+        prizeKind: "tournament_ticket",
+      },
+    },
+  };
+  redis.kv.set("poker_app:raffle:contract_active_regular", JSON.stringify(first));
+  redis.kv.set("poker_app:raffle:contract_active_daily", JSON.stringify(second));
+  redis.l("poker_app:raffle_ids").push("contract_active_regular");
+  redis.l("poker_app:raffle_ids").push("contract_active_daily");
+
+  const r = await call(raffles, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "raffle list succeeds with two active raffles");
+  const activeIds = (r.body.activeRaffles || []).map((raffle) => raffle.id);
+  assert.deepStrictEqual(
+    activeIds.sort(),
+    ["contract_active_daily", "contract_active_regular"].sort(),
+    "activeRaffles exposes every active raffle"
+  );
+  assert.strictEqual(
+    (r.body.raffles || []).filter((raffle) => raffle && raffle.status === "active").length,
+    2,
+    "raffles payload keeps both active raffle records"
+  );
+}
+
 async function testParticipationRequiresBotAndChannel(redis) {
   const raffles = loadHandler("raffles");
   const promo = loadHandler("promo");
@@ -711,6 +773,76 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "daily poker play requires bot");
   assert.strictEqual(r.body.code, "BOT_REQUIRED", "daily poker returns bot-required code");
   assert.ok(String(r.body.error || "").includes("@Poker_dvatuza_bot"), "daily poker bot error names club bot");
+}
+
+async function testRaffleEmailAccountSubscriptionGate(redis) {
+  const subscribe = loadHandler("raffle-subscribe");
+  const pwa = require(path.join(root, "lib", "poker-pwa-session"));
+  const emailOnlyToken = pwa.signPwaSession(
+    { id: 0, memberId: "mail_ID100004", username: "", email: "email-only@example.test" },
+    BOT_TOKEN
+  );
+  installTelegramGateFetch(redis, { botOk: true, channelOk: true });
+  let r = await call(subscribe, req("POST", {}, { pwaSession: emailOnlyToken }));
+  assert.strictEqual(r.statusCode, 400, "email-only raffle subscribe requires Telegram bot");
+  assert.strictEqual(r.body.code, "BOT_REQUIRED", "email-only subscribe returns bot-required code");
+  assert.strictEqual(redis.s("poker_app:raffle_account_subscribers").has("ID100004"), false, "email-only subscribe is not saved");
+
+  const emailToken = pwa.signPwaSession(
+    { id: 0, memberId: "mail_ID100003", username: "", email: "player@example.test" },
+    BOT_TOKEN
+  );
+  redis.h("poker_app:visitor_dt_ids").set("tg_1003", "ID100003");
+  redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");
+  redis.s("poker_app:raffle_subscribers").add("0");
+  redis.h("poker_app:bot_subscribed_at").set("0", "legacy");
+
+  installTelegramGateFetch(redis, { botOk: false, channelOk: true });
+  r = await call(subscribe, req("POST", {}, { pwaSession: emailToken }));
+  assert.strictEqual(r.statusCode, 403, "linked email raffle subscribe requires reachable bot");
+  assert.strictEqual(r.body.code, "BOT_REQUIRED", "linked email subscribe returns bot-required code");
+  assert.strictEqual(redis.s("poker_app:raffle_account_subscribers").has("ID100003"), false, "unreachable bot subscribe is not saved");
+
+  installTelegramGateFetch(redis, { botOk: true, channelOk: true });
+  r = await call(subscribe, req("POST", {}, { pwaSession: emailToken }));
+  assert.strictEqual(r.statusCode, 200, "linked email raffle subscribe succeeds after bot start");
+  assert.strictEqual(redis.s("poker_app:raffle_account_subscribers").has("ID100003"), true, "email subscribe stores account id");
+  assert.strictEqual(redis.s("poker_app:raffle_subscribers").has("1003"), true, "email subscribe stores linked Telegram chat id");
+  assert.strictEqual(redis.s("poker_app:raffle_subscribers").has("0"), false, "email subscribe cleans legacy chat id 0");
+  assert.strictEqual(redis.h("poker_app:bot_subscribed_at").has("0"), false, "email subscribe cleans legacy bot_subscribed_at 0");
+
+  const users = loadHandler("users");
+  r = await call(users, req("GET", { pwaSession: emailToken }));
+  assert.strictEqual(r.statusCode, 200, "email profile user info succeeds");
+  assert.strictEqual(r.body.telegramSubscriptions.accountSubscribed, true, "profile reports account subscription");
+  assert.strictEqual(r.body.telegramSubscriptions.botSubscribed, true, "profile marks bot checklist item from account subscription");
+  assert.strictEqual(r.body.telegramSubscriptions.channelSubscribed, true, "profile marks channel checklist item from account subscription");
+
+  const raffles = loadHandler("raffles");
+  const raffle = {
+    id: "contract_raffle_email_gate",
+    title: "Contract email gated raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_email_gate", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_email_gate");
+  redis.h("poker_app:visitor_p21_ids").set("ID100003", "P21-1003");
+
+  installTelegramGateFetch(redis, { botOk: true, channelOk: true });
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: emailToken,
+    action: "join",
+    raffleId: "contract_raffle_email_gate",
+    deviceId: "email-gate-dev-1",
+  }));
+  assert.strictEqual(r.statusCode, 200, "linked email account with bot access can join raffle");
+  assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100003", "email join stores dt account id");
 }
 
 async function testRaffleWinnerReady(redis) {
@@ -3128,7 +3260,9 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle active list includes daily sibling", testRaffleActiveListIncludesDailySibling],
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
+    ["raffle email account subscription gate", testRaffleEmailAccountSubscriptionGate],
     ["raffle winner ready", testRaffleWinnerReady],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],

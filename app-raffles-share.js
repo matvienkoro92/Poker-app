@@ -77,6 +77,30 @@ function pokerInitRafflesHeroShare() {
       copyWithFallback();
     });
   }
+  function currentRaffleHeadingLooksCash() {
+    var headingEl = document.getElementById("raffleCardHeading");
+    var subheadingEl = document.getElementById("raffleCardSubheading");
+    var prizesEl = document.getElementById("rafflePrizes");
+    var text = [
+      headingEl && headingEl.textContent,
+      subheadingEl && subheadingEl.textContent,
+      prizesEl && prizesEl.textContent,
+    ].join(" ").toLowerCase();
+    return text.indexOf("на кеш") !== -1 || text.indexOf("кеш") !== -1 || text.indexOf("cash") !== -1 || text.indexOf("бонус гейм") !== -1;
+  }
+  function currentRaffleLooksCashForShare() {
+    var card = document.getElementById("raffleCard");
+    var kind = card && card.dataset ? String(card.dataset.rafflePrizeKind || "").trim().toLowerCase() : "";
+    if (kind === "cash") return true;
+    if (kind === "tournament_ticket") return false;
+    return currentRaffleHeadingLooksCash();
+  }
+  function buildRafflesInviteBody() {
+    if (currentRaffleLooksCashForShare()) {
+      return "В клубе «Два туза» разыгрываются беккинг-байины на кеш бесплатно. Столы Бонус гейм на Poker21. Заходи и участвуй!";
+    }
+    return "Клуб «Два туза» снова разыгрывает беккинг-билеты на турниры бесплатно. Заходи и участвуй!";
+  }
   var rafflesCopyLinkBtn = document.getElementById("rafflesCopyLinkBtn");
   if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
     rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
@@ -95,12 +119,7 @@ function pokerInitRafflesHeroShare() {
     rafflesInviteFriendBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
-      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero");
-        return;
-      }
-      var inviteBody =
-        "Клуб «Два туза» снова разыгрывает беккинг-билеты на турниры бесплатно. Заходи и участвуй!";
+      var inviteBody = buildRafflesInviteBody();
       var inviteBodyWithLink = inviteBody + "\n" + link;
       var shareUrl =
         typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, inviteBody) : "";

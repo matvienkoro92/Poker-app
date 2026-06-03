@@ -161,22 +161,8 @@
     var el = document.getElementById("homeAdminVersionTop");
     if (!el) return;
     var version = document.documentElement.getAttribute("data-app-version") || "";
-    var authAdmin = false;
-    try {
-      var auth = window.__pokerTelegramAuth;
-      if (auth && auth.adminAccess === true) authAdmin = true;
-      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-      if (rec && rec.adminAccess === true) authAdmin = true;
-    } catch (eAuthFlag) {}
-    var candidates = collectAdminIdentityCandidates();
-    var shown = null;
-    var knownAdmin = authAdmin;
-    for (var i = 0; i < candidates.length; i++) {
-      if (!shown && candidates[i]) shown = candidates[i];
-      if (isKnownAdminUser(candidates[i])) knownAdmin = true;
-    }
     el.textContent = version ? "v" + version : "";
-    if (forceVisible || knownAdmin) el.classList.remove("home-admin-version--hidden");
+    if (version || forceVisible) el.classList.remove("home-admin-version--hidden");
   }
 
   function checkAdminAndShowVisitorsButton() {

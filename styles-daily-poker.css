@@ -1542,8 +1542,14 @@
 .daily-poker .daily-poker__play-btn {
   position: relative;
   isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 92px;
+  box-sizing: border-box;
   border: 2px solid rgba(255, 204, 91, 0.94);
   border-radius: 24px;
   padding: 0 clamp(22px, 5vw, 54px);
@@ -1563,6 +1569,7 @@
   font-weight: 1000;
   letter-spacing: 0;
   line-height: 1;
+  text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
   text-shadow: 0 2px 0 rgba(78, 31, 0, 0.62);
@@ -1582,8 +1589,14 @@
 }
 
 .daily-poker__claim-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 78px;
+  box-sizing: border-box;
   border: 1px solid rgba(255, 248, 208, 0.98);
   border-radius: 14px;
   padding: 0 18px;
@@ -1604,6 +1617,7 @@
   font-weight: 1000;
   letter-spacing: 0;
   line-height: 1;
+  text-align: center;
   text-transform: uppercase;
   text-shadow:
     0 1px 0 rgba(255, 232, 149, 0.42);
@@ -1960,8 +1974,8 @@
   .daily-poker .daily-poker__play-btn {
     min-height: 78px;
     border-radius: 20px;
-    padding-inline: 18px;
-    font-size: 36px;
+    padding-inline: 14px;
+    font-size: clamp(27px, 8.6vw, 36px);
   }
 
   .daily-poker .daily-poker__play-btn::after {
@@ -1971,7 +1985,8 @@
 
   .daily-poker__claim-btn {
     min-height: 78px;
-    font-size: 38px;
+    padding-inline: 14px;
+    font-size: clamp(27px, 8.6vw, 38px);
   }
 }
 
@@ -2120,8 +2135,8 @@
   .daily-poker .daily-poker__play-btn {
     min-height: 78px;
     border-radius: 20px;
-    padding-inline: 18px;
-    font-size: 36px;
+    padding-inline: 14px;
+    font-size: clamp(27px, 8.6vw, 36px);
   }
 
   .daily-poker .daily-poker__play-btn::after {
@@ -2131,7 +2146,47 @@
 
   .daily-poker__claim-btn {
     min-height: 78px;
-    font-size: 38px;
+    padding-inline: 14px;
+    font-size: clamp(27px, 8.6vw, 38px);
+  }
+}
+
+.daily-poker {
+  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 18px);
+  padding-bottom: max(30px, calc(var(--app-bottom-tabbar-pad, 104px) + 18px));
+}
+
+@container (max-width: 720px) {
+  .daily-poker {
+    scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 14px);
+    padding-bottom: max(24px, calc(var(--app-bottom-tabbar-pad, 104px) + 14px));
+  }
+}
+
+@media (max-width: 720px) {
+  .daily-poker {
+    scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 14px);
+    padding-bottom: max(24px, calc(var(--app-bottom-tabbar-pad, 104px) + 14px));
+  }
+}
+
+@container (max-width: 360px) {
+  .daily-poker .daily-poker__play-btn,
+  .daily-poker__claim-btn {
+    min-height: 70px;
+    border-radius: 18px;
+    padding-inline: 10px;
+    font-size: clamp(24px, 8.1vw, 30px);
+  }
+}
+
+@media (max-width: 360px) {
+  .daily-poker .daily-poker__play-btn,
+  .daily-poker__claim-btn {
+    min-height: 70px;
+    border-radius: 18px;
+    padding-inline: 10px;
+    font-size: clamp(24px, 8.1vw, 30px);
   }
 }
 

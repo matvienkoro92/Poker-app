@@ -13,6 +13,7 @@
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
+  var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
 
   var suitSymbols = {
     spades: "♠",
@@ -76,6 +77,20 @@
     var reward = String(payload.reward && payload.reward.message ? payload.reward.message : "Сегодня без приза. Возвращайся завтра за новой раздачей.").trim();
     if (hand && reward) return hand + ". " + reward;
     return hand || reward;
+  }
+
+  function normalizeErrorText(message, fallback) {
+    var text = String(message || "").trim();
+    var low = text.toLowerCase();
+    if (!text) return fallback || (typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети");
+    if (low === "auth required" || low === "member not resolved" || low === "unauthorized") {
+      return DAILY_POKER_AUTH_ERROR_TEXT;
+    }
+    return text;
+  }
+
+  function errorTextFrom(err, fallback) {
+    return normalizeErrorText(err && err.message, fallback);
   }
 
   function setResultText(text, isError) {
@@ -679,7 +694,7 @@
         return true;
       })
       .catch(function (err) {
-        showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
+        showMessage(errorTextFrom(err, POKER_NET_ERR), true);
         return false;
       });
   }
@@ -729,10 +744,10 @@
           restoreOptimisticSpend();
         }
         if (err && err.data && isDailyPokerRequirementCode(err.data.code)) {
-          showMessage(err.message || "Для игры нужно открыть бота и подписаться на канал.", true);
+          showMessage(errorTextFrom(err, "Для игры нужно открыть бота и подписаться на канал."), true);
           openDailyPokerRequirementLink(err.data);
         } else {
-          showMessage(err && err.message ? err.message : POKER_NET_ERR, true);
+          showMessage(errorTextFrom(err, POKER_NET_ERR), true);
         }
       });
   }

@@ -19,10 +19,6 @@ function initRafflesPublicRuntime(opts) {
         : "беккинг-байинов";
       var tournamentName = raffleDisplayPrizeText((raffle.title || (groups[0] && groups[0].prize) || "").trim()) || "турнир клуба";
       var link = buildMiniAppStartLink("raffles");
-      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_card");
-        return;
-      }
       var text = isCashPrize
         ? "Разыгрываем " + (total || 0) + " " + cashPrizeWord + " на кеш. Сумма " + (totalPrize || 0) + "₽. Столы Бонус гейм на Poker21"
         : "Разыгрываем " +

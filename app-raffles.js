@@ -68,6 +68,7 @@ function initRaffles() {
   var raffleActionFeedback = document.getElementById("raffleActionFeedback");
   var rafflesNotifySubsBtn = document.getElementById("rafflesNotifySubsBtn");
   var rafflesNotifySubsHint = document.getElementById("rafflesNotifySubsHint");
+  var rafflesActiveChooser = document.getElementById("rafflesActiveChooser");
   var rafflesLastBroadcastReportBtn = document.getElementById(
     "rafflesLastBroadcastReportBtn"
   );
@@ -305,6 +306,107 @@ function initRaffles() {
 
   function focusRaffleAfterMutation(raffleId) {
     rafflesFocusedActiveId = raffleId ? String(raffleId) : null;
+  }
+
+  function activeRaffleShortTitle(raffle) {
+    var title = "";
+    try {
+      title =
+        (typeof buildActiveRaffleCardHeading === "function" ? buildActiveRaffleCardHeading(raffle) : "") ||
+        (raffle && raffle.title) ||
+        (raffle && raffle.groups && raffle.groups[0] && raffle.groups[0].prize) ||
+        "Розыгрыш";
+    } catch (eTitle) {
+      title = (raffle && raffle.title) || "Розыгрыш";
+    }
+    title = String(title || "Розыгрыш").replace(/\s+/g, " ").trim();
+    var split = title.match(/^(.+?[.!?])\s+(.+)$/);
+    if (split && split[1]) title = split[1];
+    if (title.length > 78) title = title.slice(0, 77).trim() + "...";
+    return title;
+  }
+
+  function activeRaffleMetaText(raffle) {
+    var parts = [];
+    if (raffle && raffle.daily) parts.push("Ежедневный");
+    var winners = parseInt(raffle && raffle.totalWinners, 10) || 0;
+    if (winners > 0) parts.push("Победителей: " + winners);
+    var prize = raffle ? getRaffleTotalPrize(raffle) : 0;
+    if (prize > 0) parts.push(formatRaffleSum(prize));
+    if (raffle && raffle.endDate) {
+      var end = new Date(raffle.endDate);
+      if (!isNaN(end.getTime())) {
+        parts.push(
+          "до " +
+            end.toLocaleString("ru-RU", {
+              timeZone: "Europe/Moscow",
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+        );
+      }
+    }
+    return parts.join(" · ");
+  }
+
+  function renderRafflesActiveChooser(activeList, activeId) {
+    if (!rafflesActiveChooser) return;
+    var list = Array.isArray(activeList) ? activeList : [];
+    if (list.length <= 1) {
+      rafflesActiveChooser.innerHTML = "";
+      rafflesActiveChooser.classList.add("raffles-active-chooser--hidden");
+      rafflesActiveChooser.hidden = true;
+      return;
+    }
+    var selectedId = String(activeId || "");
+    rafflesActiveChooser.hidden = false;
+    rafflesActiveChooser.classList.remove("raffles-active-chooser--hidden");
+    rafflesActiveChooser.innerHTML = list
+      .map(function (raffle, index) {
+        var id = String((raffle && raffle.id) || "");
+        var selected = selectedId && id === selectedId;
+        return (
+          '<button type="button" class="raffles-active-chooser__item' +
+          (selected ? " raffles-active-chooser__item--active" : "") +
+          '" data-raffle-active-id="' +
+          escapeHtml(id) +
+          '" aria-selected="' +
+          (selected ? "true" : "false") +
+          '">' +
+          '<span class="raffles-active-chooser__index">' +
+          (index + 1) +
+          "</span>" +
+          '<span class="raffles-active-chooser__text">' +
+          '<span class="raffles-active-chooser__title">' +
+          escapeHtml(activeRaffleShortTitle(raffle)) +
+          "</span>" +
+          '<span class="raffles-active-chooser__meta">' +
+          escapeHtml(activeRaffleMetaText(raffle)) +
+          "</span>" +
+          "</span>" +
+          "</button>"
+        );
+      })
+      .join("");
+  }
+
+  if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
+    rafflesActiveChooser.dataset.bound = "1";
+    rafflesActiveChooser.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-id]") : null;
+      if (!btn || !rafflesActiveChooser.contains(btn)) return;
+      var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
+      if (!id) return;
+      focusRaffleAfterMutation(id);
+      var cache = typeof window !== "undefined" ? window._rafflesCache : null;
+      if (cache && cache.data && cache.data.ok) {
+        applyRafflesData(cache.data, false);
+      } else {
+        loadRaffles(false, { keepCurrentOnLoading: true });
+      }
+    });
   }
 
   function normalizePendingCompletedRaffleId(raw) {
@@ -740,8 +842,14 @@ function initRaffles() {
           return false;
         }
 
-        var activeList = allRaffles.filter(function (r) {
+        var activeSeen = {};
+        var activeSource = Array.isArray(data.activeRaffles) ? data.activeRaffles : allRaffles;
+        var activeList = activeSource.filter(function (r) {
+          var id = r && r.id;
+          if (!id || activeSeen[id]) return false;
+          activeSeen[id] = true;
           if (r.status !== "active") return false;
+          if (Array.isArray(data.activeRaffles)) return true;
           var end = r.endDate ? new Date(r.endDate) : null;
           return !end || end > now;
         });
@@ -765,8 +873,8 @@ function initRaffles() {
           return endB - endA;
         });
 
-        // Вкладка «Активные»: показываем один розыгрыш. После админского создания держим
-        // фокус на созданном id, иначе сортировка могла показать другой активный розыгрыш.
+        // Вкладка «Активные»: карточка показывает выбранный розыгрыш, а переключатель
+        // выше даёт доступ ко всем текущим активным.
         var active = null;
         if (rafflesFocusedActiveId) {
           for (var afi = 0; afi < activeList.length; afi++) {
@@ -777,18 +885,28 @@ function initRaffles() {
           }
           if (!active) rafflesFocusedActiveId = null;
         }
+        if (!active && currentRaffleId) {
+          for (var aci = 0; aci < activeList.length; aci++) {
+            if (String(activeList[aci].id || "") === String(currentRaffleId || "")) {
+              active = activeList[aci];
+              break;
+            }
+          }
+        }
         if (!active) active = activeList[0] || null;
-        var activeCount = active ? 1 : 0;
-        var activeSumRub = active ? getRaffleTotalPrize(active) : 0;
+        var activeCount = activeList.length;
+        var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0);
         if (rafflesTabActiveCount) rafflesTabActiveCount.textContent = String(activeCount);
         if (rafflesTabActiveSum) rafflesTabActiveSum.textContent = formatRaffleSum(activeSumRub);
 
         if (active) {
+          renderRafflesActiveChooser(activeList, active.id);
           setRafflesSubscribersRowVisible(rafflesIsAdmin);
           if (raffleCurrent) raffleCurrent.classList.remove("raffle-current--hidden");
           if (raffleEmpty) raffleEmpty.classList.add("raffle-empty--hidden");
           renderRaffle(active);
         } else {
+          renderRafflesActiveChooser([], "");
           setRafflesSubscribersRowVisible(false);
           if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
           if (raffleEmpty) {

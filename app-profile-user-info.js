@@ -42,6 +42,41 @@ var POKER_PROFILE_USER_INFO_CACHE_MS = 15000;
 var POKER_PROFILE_LINKED_EMAIL_CACHE_KEY = "poker_profile_linked_email";
 var POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY = "poker_profile_telegram_username";
 var POKER_PROFILE_RESPECT_CACHE_KEY = "poker_profile_respect_score";
+function pokerProfileSubscriptionHandle(raw, fallback) {
+  var text = String(raw || fallback || "").trim();
+  if (!text) return "";
+  return "@" + text.replace(/^@+/, "").toLowerCase();
+}
+function pokerSetProfileSubscriptionItem(kind, checked, handle, url) {
+  var item = document.getElementById(kind === "bot" ? "profileBotSubscriptionItem" : "profileChannelSubscriptionItem");
+  var handleEl = item ? item.querySelector(".profile-subscription-checklist__handle") : null;
+  if (!item) return;
+  var visibleHandle = pokerProfileSubscriptionHandle(handle, kind === "bot" ? "@poker_dvatuza_bot" : "@dva_tuza_club");
+  item.classList.toggle("profile-subscription-checklist__item--checked", !!checked);
+  item.setAttribute(
+    "aria-label",
+    (checked ? "Подписан" : "Не подтверждена подписка") +
+      (kind === "bot" ? " на бот " : " на канал клуба ") +
+      visibleHandle
+  );
+  if (url) item.href = String(url);
+  if (handleEl) handleEl.textContent = visibleHandle;
+}
+function pokerSetProfileSubscriptionStatus(status) {
+  var data = status && status.telegramSubscriptions ? status.telegramSubscriptions : status || {};
+  pokerSetProfileSubscriptionItem(
+    "bot",
+    data.botSubscribed === true,
+    data.botHandle || "@poker_dvatuza_bot",
+    data.botUrl || "https://t.me/Poker_dvatuza_bot"
+  );
+  pokerSetProfileSubscriptionItem(
+    "channel",
+    data.channelSubscribed === true,
+    data.channelHandle || "@dva_tuza_club",
+    data.channelUrl || "https://t.me/Dva_tuza_club"
+  );
+}
 function pokerReadProfileStorage(key) {
   try {
     return (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key)) ||
@@ -90,6 +125,9 @@ function pokerApplyProfileUserInfo(data) {
       window.pokerApplyPokerPlusStatsVisible(data.pokerPlusStatsVisible);
     }
   } catch (ePpStatsVisible) {}
+  try {
+    pokerSetProfileSubscriptionStatus(data);
+  } catch (eSubStatus) {}
 }
 function loadCurrentProfileUserInfo() {
   var now = Date.now();
@@ -250,3 +288,20 @@ function pokerClearSessionsAndReloadForLogin() {
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+window.addEventListener("poker-raffle-subscription-change", function (ev) {
+  var detail = ev && ev.detail ? ev.detail : {};
+  pokerProfileUserInfoCache = null;
+  pokerProfileUserInfoCacheAt = 0;
+  if (detail.subscribed === true) {
+    pokerSetProfileSubscriptionStatus({
+      botSubscribed: true,
+      channelSubscribed: true,
+      botUrl: detail.botUrl || "https://t.me/Poker_dvatuza_bot",
+      channelUrl: detail.channelUrl || "https://t.me/Dva_tuza_club",
+    });
+    return;
+  }
+  loadCurrentProfileUserInfo().then(function (data) {
+    if (data && data.ok) pokerSetProfileSubscriptionStatus(data);
+  });
+});
