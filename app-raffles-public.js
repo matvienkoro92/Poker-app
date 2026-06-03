@@ -2,7 +2,6 @@ function initRafflesPublicRuntime(opts) {
   opts = opts || {};
   with (opts) {
     var raffleInviteFriendInlineBtn = document.getElementById("raffleInviteFriendInlineBtn");
-    var raffleGuestLoginBtn = document.getElementById("raffleGuestLoginBtn");
     var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
 
   if (raffleInviteFriendInlineBtn) {
@@ -66,13 +65,6 @@ function initRafflesPublicRuntime(opts) {
           code: "INVALID_SERVER_RESPONSE",
         };
       });
-  }
-
-  if (raffleGuestLoginBtn && raffleGuestLoginBtn.dataset.bound !== "1") {
-    raffleGuestLoginBtn.dataset.bound = "1";
-    raffleGuestLoginBtn.addEventListener("click", function () {
-      if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
-    });
   }
 
   function openRaffleRequirementLink(data) {

@@ -733,6 +733,10 @@
   font-family: Georgia, "Times New Roman", serif;
 }
 .gazette-article-comments__hint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   margin: 0 0 10px;
   font-size: 12px;
   line-height: 1.45;
@@ -949,10 +953,37 @@
   cursor: default;
 }
 .gazette-article-comments__form-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 9px;
   margin: 8px 0 0;
   min-height: 1.2em;
   font-size: 12px;
   color: #78350f;
+}
+
+.gazette-article-comments__login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 6px 13px;
+  border: 1px solid rgba(120, 53, 15, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff7ed, #fed7aa);
+  color: #7c2d12;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gazette-article-comments__login-btn--inline {
+  min-height: 28px;
+  padding: 5px 12px;
 }
 
 .gazette-modal__intro {
@@ -1308,4 +1339,3 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
-

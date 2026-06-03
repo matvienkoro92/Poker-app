@@ -254,14 +254,8 @@ function loadContacts(opts) {
         '<div class="chat-contacts-list-block">' +
         '<div class="chat-guest-cta">' +
         '<p class="chat-empty chat-empty--guest-msg">Войдите, чтобы открыть диалоги и писать в главный чат.</p>' +
-        '<button type="button" class="profile-exit-btn" id="chatGuestLoginBtn">Войти в аккаунт</button>' +
+        '<button type="button" class="profile-exit-btn" id="chatGuestLoginBtn" data-poker-login-action="1">Войти в аккаунт</button>' +
         "</div></div>";
-      var gBtn = document.getElementById("chatGuestLoginBtn");
-      if (gBtn) {
-        gBtn.addEventListener("click", function () {
-          if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
-        });
-      }
     }
     return;
   }

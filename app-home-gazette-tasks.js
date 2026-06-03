@@ -538,7 +538,9 @@ function runGazetteAndTasksInit() {
         '<p class="gazette-article-comments__hint gazette-article-comments__hint--login"' +
         (cred ? " hidden" : "") +
         ">" +
+        '<span>' +
         esc(hintText) +
+        '</span><button type="button" class="gazette-article-comments__login-btn" data-poker-login-action="1">Войти</button>' +
         '</p>' +
         '<div class="gazette-article-comments__feed" data-gazette-article-comments-article-id="' +
         esc(aid) +
@@ -605,7 +607,11 @@ function runGazetteAndTasksInit() {
           return;
         }
         if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
-          if (st) st.textContent = "Войдите в приложение, чтобы комментировать.";
+          if (st) {
+            st.innerHTML =
+              '<span>Войдите в приложение, чтобы комментировать.</span>' +
+              '<button type="button" class="gazette-article-comments__login-btn gazette-article-comments__login-btn--inline" data-poker-login-action="1">Войти</button>';
+          }
           return;
         }
         var basePost = typeof getApiBase === "function" ? getApiBase() : "";

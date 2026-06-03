@@ -98,9 +98,24 @@
     setLiveText(resultEl, text || "");
     if (resultEl) {
       resultEl.classList.toggle("daily-poker__result--error", !!isError);
-      resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer");
+      resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer", "daily-poker__result--login");
       resultEl.dataset.dailyPokerPrompt = "";
     }
+    setLiveText($("dailyPokerReward"), "");
+  }
+
+  function showLoginRequiredMessage(text) {
+    var resultEl = $("dailyPokerResult");
+    if (!resultEl) return;
+    resultEl.innerHTML =
+      '<span class="daily-poker__result-primary">' +
+      esc(text || "Войдите в аккаунт, чтобы продолжить.") +
+      "</span>" +
+      '<button type="button" class="daily-poker__login-btn" data-poker-login-action="1">Войти</button>';
+    resultEl.hidden = false;
+    resultEl.classList.add("daily-poker__result--error", "daily-poker__result--login");
+    resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer");
+    resultEl.dataset.dailyPokerPrompt = "";
     setLiveText($("dailyPokerReward"), "");
   }
 
@@ -125,6 +140,7 @@
     resultEl.hidden = !String(primary || "").trim();
     resultEl.classList.remove("daily-poker__result--error");
     resultEl.classList.add("daily-poker__result--prompt");
+    resultEl.classList.remove("daily-poker__result--login");
     resultEl.classList.toggle("daily-poker__result--timer", !!isTimer);
     resultEl.dataset.dailyPokerPrompt = "1";
     setLiveText($("dailyPokerReward"), "");
@@ -732,7 +748,7 @@
   function loadStatus() {
     var base = apiBase();
     if (!base || !hasCredential()) {
-      showMessage("Войдите в аккаунт, чтобы сыграть в Раздачу дня.", true);
+      showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть в Раздачу дня.");
       syncStatus({ canPlay: false, attemptsLeft: 0, bonusBalance: 0, nextFreeAttemptAt: "", serverTime: new Date().toISOString() });
       return Promise.resolve(false);
     }
@@ -757,7 +773,7 @@
       return;
     }
     if (!base || !hasCredential()) {
-      showMessage("Войдите в аккаунт, чтобы сыграть.", true);
+      showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть.");
       return;
     }
     dailyPokerState.revealing = true;

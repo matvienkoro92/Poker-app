@@ -819,6 +819,21 @@
     } catch (eOpenPwaLogin) {}
   }
   window.__pokerOpenSharedAccountAuthFlow = openSharedAccountAuthFlow;
+  window.__pokerOpenLogin = openSharedAccountAuthFlow;
+
+  function bindSharedLoginActionButtons() {
+    var root = document.documentElement || document.body;
+    if (!root || root.dataset.pokerLoginActionBound === "1") return;
+    root.dataset.pokerLoginActionBound = "1";
+    document.addEventListener("click", function (e) {
+      var target = e && e.target;
+      var btn = target && target.closest ? target.closest("[data-poker-login-action]") : null;
+      if (!btn) return;
+      handleSharedAccountAuthClick(e);
+    });
+  }
+  window.__pokerBindSharedLoginActionButtons = bindSharedLoginActionButtons;
+  bindSharedLoginActionButtons();
 
   function isWebsiteGuestProfileMode() {
     var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());

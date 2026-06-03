@@ -185,18 +185,11 @@ function initVideoLessons() {
       gate.className = "video-lessons__guest-gate";
       gate.innerHTML =
         '<p class="video-lessons__guest-gate-text">Чтобы посмотреть видео бесплатно, войдите в\u00a0аккаунт.</p>' +
-        '<button type="button" class="profile-exit-btn" id="videoLessonsGuestLoginBtn">Войти в аккаунт</button>';
+        '<button type="button" class="profile-exit-btn" id="videoLessonsGuestLoginBtn" data-poker-login-action="1">Войти в аккаунт</button>';
       intro.parentNode.insertBefore(gate, intro.nextSibling);
     }
     gate.hidden = false;
     gate.classList.remove("video-lessons__guest-gate--hidden");
-    var gBtn = document.getElementById("videoLessonsGuestLoginBtn");
-    if (gBtn && gBtn.dataset.vlGateBound !== "1") {
-      gBtn.dataset.vlGateBound = "1";
-      gBtn.addEventListener("click", function () {
-        if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
-      });
-    }
   } else if (gate) {
     gate.hidden = true;
     gate.classList.add("video-lessons__guest-gate--hidden");
@@ -372,4 +365,3 @@ function initVideoLessons() {
   }
   bind(document.querySelector(SEL));
 })();
-
