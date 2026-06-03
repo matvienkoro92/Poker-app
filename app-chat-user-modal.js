@@ -363,7 +363,7 @@ if (chatUserModalEl) {
           modalLevelText.hidden = false;
         }
         if (modalStatusLevel != null) {
-          var modalLevel = Math.min(55, Math.max(1, parseInt(modalStatusLevel, 10) || 1));
+          var modalLevel = Math.min(55, Math.max(0, parseInt(modalStatusLevel, 10) || 0));
           if (modalStatusCards[0]) modalStatusCards[0].textContent = pokerProfileStatusCardLabel(modalLevel);
           if (modalStatusCards[1]) modalStatusCards[1].textContent = pokerProfileStatusCardLabel(Math.min(55, modalLevel + 1));
           if (modalStatusSection) modalStatusSection.hidden = false;

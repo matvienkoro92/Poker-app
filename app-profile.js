@@ -428,7 +428,9 @@ function pokerProfileStatusFromRake(value) {
 }
 
 function pokerProfileStatusCardLabel(level) {
-  var n = Math.min(55, Math.max(1, parseInt(level, 10) || 1));
+  var n = parseInt(level, 10);
+  if (!isFinite(n)) n = 1;
+  n = Math.min(55, Math.max(0, n));
   return String(n).replace(/[^\d]/g, "");
 }
 
@@ -495,16 +497,18 @@ var POKER_PROFILE_STATUS_FISH_ASSETS = [
   "./assets/profile-status-fish-level-55.png",
 ];
 
-var POKER_PROFILE_CURRENT_STATUS_LEVEL = 1;
+var POKER_PROFILE_CURRENT_STATUS_LEVEL = 0;
 
 function pokerProfileStatusFishLevel(level) {
   var n = parseInt(level, 10);
-  if (!isFinite(n) || n < 1) n = 1;
+  if (!isFinite(n)) n = 0;
+  if (n < 0) n = 0;
   return Math.min(POKER_PROFILE_STATUS_FISH_ASSETS.length, n);
 }
 
 function pokerProfileStatusFishSrc(level) {
-  return POKER_PROFILE_STATUS_FISH_ASSETS[pokerProfileStatusFishLevel(level) - 1];
+  var assetLevel = Math.max(1, pokerProfileStatusFishLevel(level));
+  return POKER_PROFILE_STATUS_FISH_ASSETS[assetLevel - 1];
 }
 
 function pokerProfileStatusFishIconHtml(level, extraClass) {
@@ -632,6 +636,37 @@ function setProfileStatus(value) {
   var val = Math.min(100, Math.max(0, parseInt(value, 10) || 0));
   input.value = val;
   visual.style.setProperty("--status-value", String(val));
+}
+
+function setProfileStatusUnlinked() {
+  var section = document.getElementById("profileStatusSection");
+  var title = document.getElementById("profileStatusTitle");
+  var progressText = document.getElementById("profileStatusProgressText");
+  var input = document.getElementById("profileStatusInput");
+  var visual = document.getElementById("profileStatusVisual");
+  var fish = visual ? visual.querySelector(".profile-status__fish") : null;
+  var cards = document.querySelectorAll("#profileStatusSection .profile-status__card");
+  if (!input || !visual) return;
+  POKER_PROFILE_CURRENT_STATUS_LEVEL = 0;
+  if (section && section.classList) section.classList.add("profile-status--unlinked");
+  input.value = 0;
+  visual.style.setProperty("--status-value", "0");
+  if (title) {
+    title.hidden = false;
+    title.textContent = "Ваш уровень 0 из 55";
+  }
+  if (progressText) {
+    progressText.hidden = false;
+    progressText.textContent = "Привяжите Poker21, чтобы уровень начал обновляться.";
+  }
+  if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(0);
+  if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(1);
+  if (fish) {
+    pokerProfileApplyStatusFish(fish, 0);
+    fish.setAttribute("aria-label", "Уровень 0. Привяжите Poker21, чтобы уровень начал обновляться.");
+    fish.removeAttribute("title");
+    fish.removeAttribute("data-status-tip");
+  }
 }
 
 function setProfileStatusFromRake(value) {

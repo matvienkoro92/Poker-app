@@ -113,6 +113,7 @@ function initProfilePokerPlus() {
 
   function notifyPokerPlusStatusChange(linked, profile) {
     var detail = { linked: !!linked };
+    if (!linked) detail.level = 0;
     var p = profile && typeof profile === "object" ? profile : null;
     if (p && p.pokerPlusUserId) detail.p21Id = String(p.pokerPlusUserId);
     if (linked && p) {
@@ -221,10 +222,12 @@ function initProfilePokerPlus() {
     if (statusSection && statusSection.classList) {
       statusSection.classList.toggle("profile-status--unlinked", !pokerPlusProfileLinked);
     }
+    var canRenderUnlinkedStatus = !pokerPlusProfileLinked && !pokerPlusProfileLoading && typeof setProfileStatusUnlinked === "function";
+    if (canRenderUnlinkedStatus) setProfileStatusUnlinked();
     if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
-    if (!pokerPlusProfileLinked && profileStatusTitle) profileStatusTitle.textContent = "Статус Poker21";
-    if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || !pokerPlusProfileLinked;
-    if (!pokerPlusProfileLinked && profileStatusProgressText) profileStatusProgressText.textContent = "";
+    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Ваш уровень 0 из 55";
+    if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || (!pokerPlusProfileLinked && !canRenderUnlinkedStatus);
+    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusProgressText) profileStatusProgressText.textContent = "";
     if (statusLinkHint) {
       var state = auth();
       statusLinkHint.hidden = !!pokerPlusProfileLoading || !!pokerPlusProfileLinked || !state.isVerified || !!state.isGuest;

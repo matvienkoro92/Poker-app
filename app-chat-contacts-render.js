@@ -65,7 +65,6 @@ function chatContactsRowDisplayTitle(c, friendSet) {
 function chatContactStatusLevelHtml(level) {
   if (level == null || level === "") return "";
   var statusLevel = chatContactsStatusFishLevel(level);
-  if (!statusLevel) return "";
   return '<span class="chat-contact__status-level">Уровень: ' + chatContactsRenderEscapeHtml(String(statusLevel)) + "</span>";
 }
 
@@ -89,10 +88,11 @@ function syncChatContactStatusMeta(btn, level, isVerified) {
       nameLineEl.insertBefore(verifiedEl, labelEl.nextSibling);
     }
   }
-  var statusLevel = level != null && level !== "" ? chatContactsStatusFishLevel(level) : 0;
+  var hasStatusLevel = level != null && level !== "";
+  var statusLevel = hasStatusLevel ? chatContactsStatusFishLevel(level) : 0;
   var levelEl = nameLineEl.querySelector(".chat-contact__status-level");
   var fishEl = nameLineEl.querySelector(".chat-contact__status-fish");
-  if (statusLevel) {
+  if (hasStatusLevel) {
     if (!levelEl) {
       levelEl = document.createElement("span");
       levelEl.className = "chat-contact__status-level";

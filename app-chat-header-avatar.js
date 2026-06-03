@@ -20,8 +20,9 @@ function initChatHeaderAvatarRuntime(opts) {
   }
   function setChatConvTitleFish(level) {
     if (!convTitleFish) return;
-    var fishLevel = level != null && level !== "" ? pokerProfileStatusFishLevel(level) : 0;
-    if (!fishLevel) {
+    var hasLevel = level != null && level !== "";
+    var fishLevel = hasLevel ? pokerProfileStatusFishLevel(level) : 0;
+    if (!hasLevel) {
       convTitleFish.hidden = true;
       convTitleFish.removeAttribute("src");
       convTitleFish.removeAttribute("data-status-fish-level");

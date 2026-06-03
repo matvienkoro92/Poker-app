@@ -1310,7 +1310,6 @@ function initChat() {
   function chatContactStatusLevelHtml(level) {
     if (level == null || level === "") return "";
     var statusLevel = pokerProfileStatusFishLevel(level);
-    if (!statusLevel) return "";
     return '<span class="chat-contact__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
   }
   var chatMessageBodyBuilders = initChatMessageBodyBuilders({

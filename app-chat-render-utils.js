@@ -37,9 +37,12 @@ function pokerSanitizeContactsPayloadForUi(data) {
       var nextRow = Object.assign({}, row);
       if (nextRow.name != null) nextRow.name = pokerNormalizeLegacyAccountLabel(nextRow.name);
       if (nextRow.contactName != null) nextRow.contactName = pokerNormalizeLegacyAccountLabel(nextRow.contactName);
-      if (nextRow.pokerPlusVerified !== true && !nextRow.p21Id) {
+      var explicitLevelZero = nextRow.statusLevel != null && String(nextRow.statusLevel).trim() === "0";
+      if (nextRow.pokerPlusVerified !== true && !nextRow.p21Id && !explicitLevelZero) {
         nextRow.statusLevel = null;
         nextRow.statusValue = null;
+      } else if (explicitLevelZero && (nextRow.statusValue == null || String(nextRow.statusValue).trim() === "")) {
+        nextRow.statusValue = 0;
       }
       return nextRow;
     });

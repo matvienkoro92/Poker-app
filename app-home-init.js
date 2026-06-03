@@ -198,11 +198,12 @@
   var headerStatusLevel = document.getElementById("headerPokerStatusLevel");
   var headerStatusFish = document.getElementById("headerPokerStatusFish");
   if (!headerStatus) return;
-  var loadedLinked = false;
+  var loadedStatus = false;
   var hallFishRatingLoading = false;
   function fishSrcForLevel(level) {
     if (typeof pokerProfileStatusFishSrc === "function") return pokerProfileStatusFishSrc(level);
-    var n = Math.max(1, Math.min(55, parseInt(level, 10) || 1));
+    var raw = parseInt(level, 10);
+    var n = isFinite(raw) && raw > 0 ? Math.min(55, raw) : 1;
     return "./assets/profile-status-fish-level-" + (n < 10 ? "0" : "") + n + ".png";
   }
   function poker21NicknameFromData(data) {
@@ -273,17 +274,21 @@
   function applyStatus(data) {
     var hasAuthoritativeStatus = !!(data && data.ok);
     var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
-    if (!hasAuthoritativeStatus && loadedLinked) return;
+    if (!hasAuthoritativeStatus && loadedStatus) return;
     var level = data && data.level != null ? parseInt(data.level, 10) : NaN;
-    var safeLevel = isFinite(level) && level > 0 ? level : 1;
+    var safeLevel = linked ? (isFinite(level) && level > 0 ? Math.min(55, level) : 1) : 0;
     var nickname = linked ? poker21NicknameFromData(data) : "";
-    loadedLinked = linked;
+    var showStatus = hasAuthoritativeStatus || loadedStatus;
+    if (hasAuthoritativeStatus) {
+      loadedStatus = true;
+      showStatus = true;
+    }
     syncHeaderPoker21State(linked, nickname);
     if (headerStatus) {
-      headerStatus.classList.toggle("header-status--hidden", !linked);
-      headerStatus.setAttribute("aria-hidden", linked ? "false" : "true");
-      headerStatus.setAttribute("tabindex", linked ? "0" : "-1");
-      if (linked) {
+      headerStatus.classList.toggle("header-status--hidden", !showStatus);
+      headerStatus.setAttribute("aria-hidden", showStatus ? "false" : "true");
+      headerStatus.setAttribute("tabindex", showStatus ? "0" : "-1");
+      if (showStatus) {
         headerStatus.setAttribute("title", "Игроки по уровню");
         headerStatus.setAttribute("aria-label", "Открыть игроков по уровню");
       } else {
