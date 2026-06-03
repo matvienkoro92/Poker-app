@@ -33,6 +33,7 @@ function initRafflesCompletedRuntime(opts) {
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
     var prizeIssued = status === "ok";
+    var prizeDeclined = status === "fail";
     var winnerReady = w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true";
     var readyExpired = !prizeIssued && !winnerReady && raffleWinnerReadyExpired(w);
     var viewerIds = [];
@@ -44,12 +45,14 @@ function initRafflesCompletedRuntime(opts) {
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
     var readyBadge = prizeIssued
       ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Выдано</span>"
+      : prizeDeclined
+      ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--declined\">Отказано</span>"
       : winnerReady
       ? "<span class=\"raffle-winner-ready-badge\">Готов</span>"
       : readyExpired
         ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
         : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
-    var readyAction = isMyWin && status !== "ok" && !readyExpired
+    var readyAction = isMyWin && status !== "ok" && status !== "fail" && !readyExpired
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
         (winnerReady ? " raffle-winner-ready-btn--active" : "") +
         "\" data-raffle-id=\"" +
@@ -101,6 +104,7 @@ function initRafflesCompletedRuntime(opts) {
     var rowClass = "raffle-winner-row" +
       (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
       (prizeIssued ? " raffle-winner-row--issued" : "") +
+      (prizeDeclined ? " raffle-winner-row--declined" : "") +
       (readyExpired ? " raffle-winner-row--missed" : "") +
       (raffleWinnerIsReroll(w) ? " raffle-winner-row--reroll" : "");
     var numberValue = parseInt(winnerNumber, 10);
