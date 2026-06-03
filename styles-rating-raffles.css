@@ -482,9 +482,15 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-empty { color: var(--text-muted); margin: 12px 0; }
 .raffle-empty .raffle-loading__text { display: inline-block; vertical-align: middle; }
 .raffles-active-chooser {
-  display: grid;
+  display: flex;
   gap: 8px;
   margin: 0 0 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 .raffles-active-chooser--hidden {
   display: none;
@@ -494,7 +500,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  width: 100%;
+  flex: 1 0 270px;
+  width: auto;
+  min-width: 0;
   min-height: 58px;
   padding: 9px 12px;
   border: 1px solid rgba(251, 191, 36, 0.28);
@@ -503,6 +511,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: var(--text);
   text-align: left;
   cursor: pointer;
+  scroll-snap-align: start;
 }
 .raffles-active-chooser__item--active,
 .raffles-active-chooser__item[aria-selected="true"] {
