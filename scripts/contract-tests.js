@@ -1545,13 +1545,20 @@ async function testDailyPokerWinners(redis) {
     });
     return ids.size;
   };
+  const expectedTotalForDates = (dateSet) =>
+    publicSpinDates.reduce((sum, pair) => sum + (dateSet.has(pair[1]) ? 1 : 0), 0) + (dateSet.has(meta.gameDate) ? 1 : 0);
   const expectedSpinStats = {
     totalUniquePlayers: new Set(publicSpinDates.map(([accountId]) => accountId)).size,
     todayUniquePlayers: expectedUniqueForDates(new Set([meta.gameDate])),
+    todayTotalSpins: expectedTotalForDates(new Set([meta.gameDate])),
     weekUniquePlayers: expectedUniqueForDates(weekDateSet),
+    weekTotalSpins: expectedTotalForDates(weekDateSet),
     previousWeekUniquePlayers: expectedUniqueForDates(previousWeekDateSet),
+    previousWeekTotalSpins: expectedTotalForDates(previousWeekDateSet),
     monthUniquePlayers: expectedUniqueForDates(monthDateSet),
+    monthTotalSpins: expectedTotalForDates(monthDateSet),
     previousMonthUniquePlayers: expectedUniqueForDates(previousMonthDateSet),
+    previousMonthTotalSpins: expectedTotalForDates(previousMonthDateSet),
     firstSpinAt: "2026-05-20T08:00:00.000Z",
     firstSpinDate: "2026-05-20",
   };
@@ -1691,10 +1698,15 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
   assert.strictEqual(r.body.totalUniquePlayers, expectedSpinStats.totalUniquePlayers, "daily poker winners exposes all-time unique public spinners");
   assert.strictEqual(r.body.todayUniquePlayers, expectedSpinStats.todayUniquePlayers, "daily poker winners exposes unique public spinners today");
+  assert.strictEqual(r.body.todayTotalSpins, expectedSpinStats.todayTotalSpins, "daily poker winners exposes public spins total today");
   assert.strictEqual(r.body.weekUniquePlayers, expectedSpinStats.weekUniquePlayers, "daily poker winners exposes unique public spinners this week");
+  assert.strictEqual(r.body.weekTotalSpins, expectedSpinStats.weekTotalSpins, "daily poker winners exposes public spins total this week");
   assert.strictEqual(r.body.previousWeekUniquePlayers, expectedSpinStats.previousWeekUniquePlayers, "daily poker winners exposes unique public spinners previous week");
+  assert.strictEqual(r.body.previousWeekTotalSpins, expectedSpinStats.previousWeekTotalSpins, "daily poker winners exposes public spins total previous week");
   assert.strictEqual(r.body.monthUniquePlayers, expectedSpinStats.monthUniquePlayers, "daily poker winners exposes unique public spinners this month");
+  assert.strictEqual(r.body.monthTotalSpins, expectedSpinStats.monthTotalSpins, "daily poker winners exposes public spins total this month");
   assert.strictEqual(r.body.previousMonthUniquePlayers, expectedSpinStats.previousMonthUniquePlayers, "daily poker winners exposes unique public spinners previous month");
+  assert.strictEqual(r.body.previousMonthTotalSpins, expectedSpinStats.previousMonthTotalSpins, "daily poker winners exposes public spins total previous month");
   assert.strictEqual(r.body.firstSpinAt, expectedSpinStats.firstSpinAt, "daily poker winners exposes first public spin timestamp");
   assert.strictEqual(r.body.firstSpinDate, expectedSpinStats.firstSpinDate, "daily poker winners exposes first public spin date");
   assert.deepStrictEqual(r.body.spinStats, expectedSpinStats, "daily poker winners exposes grouped spin stats");
