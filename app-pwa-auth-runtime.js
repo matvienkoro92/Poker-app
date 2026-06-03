@@ -691,24 +691,18 @@
     var isSiteMode = isSiteHomeInstructionMode();
     var isTelegramMode = isTelegramHomeInstructionMode();
     var showInstructionBtn = isSiteMode || isTelegramMode;
-    var showAuthBtn = showInstructionBtn && !hasResolvedAuth;
     var instructionBtn = document.getElementById("siteHomeInstructionBtn");
     var authBtn = document.getElementById("siteHomeAuthBtn");
     var pwaInstallBtn = document.getElementById("pwaInstallBtn");
     var greetingArrow = document.getElementById("headerGreetingArrow");
     var hideInstructionBtn = !showInstructionBtn || isStandaloneMode;
-    var hideAuthBtn = !showAuthBtn || isStandaloneMode;
     if (root) root.classList.toggle("site-home-header-mode", isSiteMode);
     if (instructionBtn) {
       instructionBtn.hidden = hideInstructionBtn;
       if (hideInstructionBtn) instructionBtn.style.display = "none";
       else instructionBtn.style.removeProperty("display");
     }
-    if (authBtn) {
-      authBtn.hidden = hideAuthBtn;
-      if (hideAuthBtn) authBtn.style.display = "none";
-      else authBtn.style.removeProperty("display");
-    }
+    if (authBtn) syncHeaderAuthMenuButton();
     if (pwaInstallBtn && isTelegramMode) {
       pwaInstallBtn.hidden = true;
       pwaInstallBtn.style.display = "none";
@@ -727,12 +721,73 @@
     openSharedAccountAuthFlow();
   }
 
+  function headerAuthMenuHasAccountSession() {
+    var hasSession = false;
+    var isGuest = false;
+    try {
+      hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    } catch (eSession) {}
+    try {
+      var auth = window.__pokerTelegramAuth;
+      isGuest = !!(auth && auth.status === "guest");
+      if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
+    } catch (eGuest) {}
+    return !!(hasSession && !isGuest);
+  }
+
+  function closeHeaderMoreMenuFromAction(btn) {
+    var menu = btn && btn.closest ? btn.closest(".header-more-menu") : null;
+    if (!menu) return;
+    menu.hidden = true;
+    var toggle = document.getElementById("headerMoreMenuBtn");
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Открыть меню");
+    }
+  }
+
+  function syncHeaderAuthMenuButton() {
+    var authBtn = document.getElementById("siteHomeAuthBtn");
+    if (!authBtn) return;
+    var isLogout = headerAuthMenuHasAccountSession();
+    var label = authBtn.querySelector(".header-menu-action__title");
+    var hint = authBtn.querySelector(".header-menu-action__hint");
+    var icon = authBtn.querySelector(".header-menu-action__icon");
+    var text = isLogout ? "Выйти из аккаунта" : "Войти в аккаунт";
+    authBtn.hidden = false;
+    authBtn.style.removeProperty("display");
+    authBtn.dataset.headerAuthAction = isLogout ? "logout" : "login";
+    authBtn.classList.toggle("header-menu-action--logout", isLogout);
+    authBtn.title = text;
+    authBtn.setAttribute("aria-label", text);
+    if (label) label.textContent = text;
+    if (hint) hint.textContent = isLogout ? "Сменить пользователя" : "Аккаунт клуба";
+    if (icon) icon.textContent = isLogout ? "🚪" : "🔐";
+  }
+  window.__pokerSyncHeaderAuthMenuButton = syncHeaderAuthMenuButton;
+
+  function handleHeaderAuthMenuClick(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+    var target = e && e.currentTarget ? e.currentTarget : e && e.target;
+    closeHeaderMoreMenuFromAction(target);
+    if (headerAuthMenuHasAccountSession()) {
+      if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") {
+        window.__pokerClearSessionsAndReloadForLogin();
+      } else if (window.location && typeof window.location.reload === "function") {
+        window.location.reload();
+      }
+      return;
+    }
+    openSharedAccountAuthFlow();
+  }
+
   function bindSharedAccountAuthTriggers() {
     var authBtn = document.getElementById("siteHomeAuthBtn");
     var greetingBtn = document.getElementById("headerGreeting");
-    if (authBtn && authBtn.dataset.authEntryBound !== "1") {
-      authBtn.dataset.authEntryBound = "1";
-      authBtn.addEventListener("click", handleSharedAccountAuthClick);
+    if (authBtn && authBtn.dataset.accountMenuBound !== "1") {
+      authBtn.dataset.accountMenuBound = "1";
+      authBtn.addEventListener("click", handleHeaderAuthMenuClick);
     }
     if (greetingBtn && greetingBtn.dataset.authEntryBound !== "1") {
       greetingBtn.dataset.authEntryBound = "1";

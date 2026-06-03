@@ -237,6 +237,9 @@ function updateProfileExitBtnVisibility() {
   btn.hidden = !show;
   btn.classList.toggle("profile-exit-btn--auth-cta", !hasAccountSession || !isVerified);
   btn.textContent = hasAccountSession ? "Выйти из аккаунта" : "Войти в аккаунт";
+  try {
+    if (typeof window.__pokerSyncHeaderAuthMenuButton === "function") window.__pokerSyncHeaderAuthMenuButton();
+  } catch (eHeaderAuthMenu) {}
   syncProfileStatusVisibility(showProfileShell);
   syncProfileVerifiedContentVisibility(showProfileShell);
   syncProfileLoadingVisibility(!!(hasAccountSession && isLoading && !isVerified));

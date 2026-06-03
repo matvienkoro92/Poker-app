@@ -132,10 +132,13 @@
     }
     var authBtn = document.getElementById("siteHomeAuthBtn");
     if (authBtn) {
-      authBtn.title = t.loginShort;
-      authBtn.setAttribute("aria-label", t.loginShort);
+      authBtn.title = "Войти в аккаунт";
+      authBtn.setAttribute("aria-label", "Войти в аккаунт");
     }
-    setText("siteHomeAuthBtnLabel", t.loginShort);
+    setText("siteHomeAuthBtnLabel", "Войти в аккаунт");
+    try {
+      if (typeof window.__pokerSyncHeaderAuthMenuButton === "function") window.__pokerSyncHeaderAuthMenuButton();
+    } catch (eAuthMenuSync) {}
     setText("homeWelcomeTitleText", t.welcome);
     setText("homeSubtitle", t.homeSubtitle);
     setText("homeMiniChatLabel", t.tgChat);
