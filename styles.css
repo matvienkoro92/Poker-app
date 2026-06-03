@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.478");
-@import url("./styles-home-rating-promo.css?v=3.478");
-@import url("./styles-auth.css?v=3.478");
-@import url("./styles-home.css?v=3.478");
-@import url("./styles-chat.css?v=3.478");
-@import url("./styles-learning-games.css?v=3.478");
-@import url("./styles-raffles.css?v=3.478");
-@import url("./styles-daily-poker.css?v=3.478");
-@import url("./styles-home-legacy-prelude.css?v=3.478");
-@import url("./styles-download.css?v=3.478");
-@import url("./styles-home-legacy-tail.css?v=3.478");
-@import url("./styles-home-rating-promo-legacy.css?v=3.478");
-@import url("./styles-rating.css?v=3.478");
-@import url("./styles-hall.css?v=3.478");
-@import url("./styles-admin.css?v=3.478");
-@import url("./styles-player-crm.css?v=3.478");
-@import url("./styles-profile.css?v=3.478");
-@import url("./styles-layout.css?v=3.478");
-@import url("./styles-chat-overlays.css?v=3.478");
-@import url("./styles-home-overrides.css?v=3.478");
-@import url("./styles-layout-touch-targets.css?v=3.478");
-@import url("./styles-home-rating-promo-late.css?v=3.478");
+@import url("./styles-base.css?v=3.479");
+@import url("./styles-home-rating-promo.css?v=3.479");
+@import url("./styles-auth.css?v=3.479");
+@import url("./styles-home.css?v=3.479");
+@import url("./styles-chat.css?v=3.479");
+@import url("./styles-learning-games.css?v=3.479");
+@import url("./styles-raffles.css?v=3.479");
+@import url("./styles-daily-poker.css?v=3.479");
+@import url("./styles-home-legacy-prelude.css?v=3.479");
+@import url("./styles-download.css?v=3.479");
+@import url("./styles-home-legacy-tail.css?v=3.479");
+@import url("./styles-home-rating-promo-legacy.css?v=3.479");
+@import url("./styles-rating.css?v=3.479");
+@import url("./styles-hall.css?v=3.479");
+@import url("./styles-admin.css?v=3.479");
+@import url("./styles-player-crm.css?v=3.479");
+@import url("./styles-profile.css?v=3.479");
+@import url("./styles-layout.css?v=3.479");
+@import url("./styles-chat-overlays.css?v=3.479");
+@import url("./styles-home-overrides.css?v=3.479");
+@import url("./styles-layout-touch-targets.css?v=3.479");
+@import url("./styles-home-rating-promo-late.css?v=3.479");
 
 :root {
   --daily-poker-page-bg:
@@ -710,6 +710,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   max-width: 214px;
   flex-direction: column;
   align-items: flex-start;
+  transform: translateY(9px);
 }
 
 .home-daily-deal-hero__admin-version {
@@ -834,22 +835,22 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 13px;
-  width: clamp(178px, 54%, 256px);
-  min-height: 54px;
+  gap: 11px;
+  width: clamp(157px, 47.5%, 225px);
+  min-height: 48px;
   margin: 0;
-  padding: 0 24px;
+  padding: 0 21px;
   box-sizing: border-box;
   overflow: hidden;
   transform: translateX(-50%);
   border: 2px solid rgba(255, 239, 176, 0.92);
-  border-radius: 28px;
+  border-radius: 25px;
   background:
     linear-gradient(180deg, rgba(255, 245, 178, 0.72) 0%, rgba(255, 183, 41, 0.24) 26%, rgba(255, 128, 0, 0) 34%),
     radial-gradient(ellipse at 50% -20%, rgba(255, 237, 158, 0.7), rgba(255, 136, 0, 0.18) 54%, transparent 74%),
     linear-gradient(180deg, #ffb018 0%, #ff7900 45%, #f14d00 100%);
   color: #fff9e8;
-  font-size: clamp(24px, 7vw, 34px);
+  font-size: clamp(21px, 6.15vw, 30px);
   font-weight: 1000;
   line-height: 1;
   text-transform: none;
@@ -871,7 +872,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: absolute;
   inset: 4px;
   border: 1px solid rgba(255, 255, 220, 0.28);
-  border-radius: 23px;
+  border-radius: 21px;
   pointer-events: none;
 }
 
@@ -895,7 +896,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-daily-deal-hero__arrow {
-  font-size: 37px;
+  font-size: 33px;
   line-height: 0.8;
 }
 
@@ -3353,11 +3354,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   .home-daily-deal-hero__cta {
     bottom: -16px;
-    width: clamp(178px, 58%, 232px);
-    min-height: 52px;
-    gap: 12px;
-    padding: 0 22px;
-    font-size: clamp(24px, 7vw, 32px);
+    width: clamp(157px, 51%, 204px);
+    min-height: 46px;
+    gap: 11px;
+    padding: 0 19px;
+    font-size: clamp(21px, 6.15vw, 28px);
   }
 
   .home-daily-deal-hero__timer {
@@ -3447,10 +3448,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   .home-daily-deal-hero__cta {
     bottom: -15px;
-    width: clamp(168px, 58%, 210px);
-    min-height: 48px;
-    padding: 0 18px;
-    font-size: 25px;
+    width: clamp(148px, 51%, 185px);
+    min-height: 42px;
+    padding: 0 16px;
+    font-size: 22px;
   }
 
   .home-daily-deal-hero__timer {
