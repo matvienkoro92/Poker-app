@@ -772,6 +772,24 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: var(--accent-2, #fb923c);
   outline: none;
 }
+.raffle-participant-status-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 3px;
+  color: rgba(255, 236, 184, 0.92);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.raffle-participant-status-fish {
+  width: 16px;
+  height: 16px;
+  margin-left: 0;
+  vertical-align: -3px;
+}
 .raffle-participants-empty { color: var(--text-muted); list-style: none; margin-left: -20px; }
 .raffle-winners-wrap--hidden { display: none; }
 .raffle-winners-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--accent-2); }

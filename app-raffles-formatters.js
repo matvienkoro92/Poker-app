@@ -56,12 +56,32 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
   var namePart = safeName
     ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
     : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
+  var fishLevelHtml = pokerRafflesParticipantFishLevelHtml(p);
+  if (namePart && fishLevelHtml) namePart += " " + fishLevelHtml;
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
   }
-  if (!namePart) return pokerRafflesEscapeHtml(raffleIdText);
+  if (!namePart) return pokerRafflesEscapeHtml(raffleIdText) + (fishLevelHtml ? " " + fishLevelHtml : "");
   return raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart;
+}
+
+function pokerRafflesParticipantFishLevelHtml(p) {
+  if (!p || p.pokerPlusStatusLevel == null || p.pokerPlusStatusLevel === "") return "";
+  var level = parseInt(p.pokerPlusStatusLevel, 10);
+  if (!isFinite(level) || level < 0) return "";
+  level = Math.min(55, level);
+  var fishHtml = "";
+  if (typeof pokerProfileStatusFishIconHtml === "function") {
+    fishHtml = pokerProfileStatusFishIconHtml(level, "raffle-participant-status-fish");
+  }
+  return (
+    '<span class="raffle-participant-status-level">' +
+    fishHtml +
+    "Уровень " +
+    pokerRafflesEscapeHtml(String(level)) +
+    "</span>"
+  );
 }
 
 function pokerRafflesParticipantLineHtml(p, showTelegramLogins) {

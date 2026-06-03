@@ -945,8 +945,8 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   redis.l("poker_app:raffle_ids").push("contract_raffle_tg_privacy");
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player_public");
   redis.h("poker_app:pokerplus_user_ids").set("ID400800", "208238");
-  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({ nickname: "Poker21Nick" }));
-  redis.h("poker_app:pokerplus_profiles").set("ID400800", JSON.stringify({ nickname: "Роман" }));
+  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({ nickname: "Poker21Nick", totalCounter: { fee: 12000 } }));
+  redis.h("poker_app:pokerplus_profiles").set("ID400800", JSON.stringify({ nickname: "Роман", totalCounter: { fee: 32000 } }));
 
   let r = await call(raffles, req("GET", { pwaSession: s.user, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "non-admin can load raffle");
@@ -957,7 +957,9 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.raffle.winners[0].name, "Участник", "non-admin does not receive winner telegram login as name");
   assert.strictEqual(r.body.raffle.participants[1].name, "Роман", "non-admin receives Poker21 participant name by p21 id");
   assert.strictEqual(r.body.raffle.participants[1].pokerPlusNickname, "Роман", "non-admin receives Poker21 participant nickname by p21 id");
+  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 4, "non-admin receives Poker21 participant fish level");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin receives winner Poker21 nickname");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 2, "non-admin receives winner fish level");
 
   r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "admin can load raffle");
@@ -968,7 +970,9 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.raffle.winners[0].name, "@player_public", "admin receives winner telegram login name");
   assert.strictEqual(r.body.raffle.participants[1].name, "Роман", "admin receives Poker21 participant name by p21 id");
   assert.strictEqual(r.body.raffle.participants[1].pokerPlusNickname, "Роман", "admin receives Poker21 participant nickname by p21 id");
+  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 4, "admin receives Poker21 participant fish level");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "admin receives winner Poker21 nickname");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 2, "admin receives winner fish level");
 
   r = await call(raffles, req("GET", { pwaSession: s.user }));
   const listed = (r.body.raffles || []).find((item) => item.id === "contract_raffle_tg_privacy");
@@ -996,6 +1000,7 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.statusCode, 200, "non-admin can load p21-only participant raffle");
   assert.strictEqual(r.body.raffle.participants[0].name, "Роман", "non-admin receives Poker21 name without user id");
   assert.strictEqual(r.body.raffle.participants[0].pokerPlusNickname, "Роман", "non-admin receives Poker21 nickname without user id");
+  assert.strictEqual(r.body.raffle.participants[0].pokerPlusStatusLevel, 4, "non-admin receives Poker21 fish level without user id");
 }
 
 async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
