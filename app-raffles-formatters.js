@@ -57,18 +57,27 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
     ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
     : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
   var fishLevelHtml = pokerRafflesParticipantFishLevelHtml(p);
-  if (namePart && fishLevelHtml) namePart += " " + fishLevelHtml;
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
   }
-  if (!namePart) return pokerRafflesEscapeHtml(raffleIdText) + (fishLevelHtml ? " " + fishLevelHtml : "");
-  return raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart;
+  var mainLine = !namePart
+    ? pokerRafflesEscapeHtml(raffleIdText)
+    : (raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart);
+  return (
+    '<span class="raffle-participant-line">' +
+    '<span class="raffle-participant-line__main">' +
+    mainLine +
+    "</span>" +
+    (fishLevelHtml ? '<span class="raffle-participant-line__level">' + fishLevelHtml + "</span>" : "") +
+    "</span>"
+  );
 }
 
 function pokerRafflesParticipantFishLevelHtml(p) {
-  if (!p || p.pokerPlusStatusLevel == null || p.pokerPlusStatusLevel === "") return "";
-  var level = parseInt(p.pokerPlusStatusLevel, 10);
+  if (!p) return "";
+  var hasLevel = p.pokerPlusStatusLevel != null && p.pokerPlusStatusLevel !== "";
+  var level = hasLevel ? parseInt(p.pokerPlusStatusLevel, 10) : 0;
   if (!isFinite(level) || level < 0) return "";
   level = Math.min(55, level);
   var fishHtml = "";
