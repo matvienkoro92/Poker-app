@@ -32,8 +32,9 @@ function initRafflesCompletedRuntime(opts) {
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
+    var prizeIssued = status === "ok";
     var winnerReady = w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true";
-    var readyExpired = !winnerReady && raffleWinnerReadyExpired(w);
+    var readyExpired = !prizeIssued && !winnerReady && raffleWinnerReadyExpired(w);
     var viewerIds = [];
     try {
       viewerIds = typeof collectRaffleIdentityIds === "function" ? collectRaffleIdentityIds() : [];
@@ -41,7 +42,9 @@ function initRafflesCompletedRuntime(opts) {
       viewerIds = [];
     }
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
-    var readyBadge = winnerReady
+    var readyBadge = prizeIssued
+      ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Выдано</span>"
+      : winnerReady
       ? "<span class=\"raffle-winner-ready-badge\">Готов</span>"
       : readyExpired
         ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
@@ -95,7 +98,11 @@ function initRafflesCompletedRuntime(opts) {
         "</a>"
       : "";
     var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + readyBadge + "</span>";
-    var rowClass = "raffle-winner-row" + (readyExpired ? " raffle-winner-row--missed" : "") + (raffleWinnerIsReroll(w) ? " raffle-winner-row--reroll" : "");
+    var rowClass = "raffle-winner-row" +
+      (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
+      (prizeIssued ? " raffle-winner-row--issued" : "") +
+      (readyExpired ? " raffle-winner-row--missed" : "") +
+      (raffleWinnerIsReroll(w) ? " raffle-winner-row--reroll" : "");
     var numberValue = parseInt(winnerNumber, 10);
     var numberHtml = isFinite(numberValue) && numberValue > 0
       ? "<span class=\"raffle-winner-row__number\" aria-hidden=\"true\">" + escapeHtml(numberValue) + "</span>"
@@ -357,10 +364,20 @@ function initRafflesCompletedRuntime(opts) {
       .then(function (data) {
         if (data && data.ok) {
           if (btn) {
+            var row = btn.closest ? btn.closest(".raffle-winner-row") : null;
+            var badge = row && row.querySelector ? row.querySelector(".raffle-winner-ready-badge") : null;
             btn.textContent = "Готов";
             btn.disabled = true;
             btn.setAttribute("aria-disabled", "true");
             btn.classList.add("raffle-winner-ready-btn--active");
+            if (row) {
+              row.classList.add("raffle-winner-row--ready");
+              row.classList.remove("raffle-winner-row--missed");
+            }
+            if (badge) {
+              badge.textContent = "Готов";
+              badge.classList.remove("raffle-winner-ready-badge--pending", "raffle-winner-ready-badge--missed");
+            }
           }
           loadRaffles();
         } else if (tg && tg.showAlert) {

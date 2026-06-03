@@ -166,6 +166,7 @@ const files = {
   stylesHomeRatingPromoLate: read("styles-home-rating-promo-late.css"),
   stylesLayoutTouchTargets: read("styles-layout-touch-targets.css"),
   stylesRating: read("styles-rating.css"),
+  stylesRatingRaffles: read("styles-rating-raffles.css"),
 };
 
 files.globalModalsAll = [
@@ -1891,7 +1892,16 @@ add("Raffles delegates public, admin, completed, broadcast, subscribe, and share
     "function initRafflesCompletedRuntime",
     "function renderCompletedRafflesPanel",
     "function setRaffleWinnerStatus",
+    'raffle-winner-ready-badge--issued',
+    'raffle-winner-row--ready',
+    'raffle-winner-row--issued',
+    "Выдано",
     "raffle-completed-card__delete-btn",
+  ]) &&
+  hasAll("stylesRatingRaffles", [
+    ".raffle-winner-row--ready",
+    ".raffle-winner-row--issued",
+    ".raffle-winner-ready-badge--issued",
   ]) &&
   hasAll("appRafflesPublic", [
     "function initRafflesPublicRuntime",
