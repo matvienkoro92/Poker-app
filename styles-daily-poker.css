@@ -1521,7 +1521,7 @@
 }
 
 .daily-poker-card__rank {
-  font-size: clamp(18px, 4vw, 30px);
+  font-size: clamp(36px, 8vw, 60px);
   line-height: 1;
   font-weight: 900;
 }
