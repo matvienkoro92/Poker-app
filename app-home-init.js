@@ -356,27 +356,95 @@ if (startButton) {
   });
 }
 
-function updateRaffleBadge(activeCount) {
+function pokerHomeRaffleParsePrizeValue(prizeStr) {
+  if (prizeStr == null || prizeStr === "") return 0;
+  var m = String(prizeStr).trim().match(/\d+(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(",", ".")) : 0;
+}
+
+function pokerHomeRaffleTotalPrize(raffle) {
+  if (!raffle || !Array.isArray(raffle.groups)) return 0;
+  return raffle.groups.reduce(function (sum, g) {
+    var count = Math.max(0, parseInt(g && g.count, 10) || 0);
+    var nominal = pokerHomeRaffleParsePrizeValue(g && g.prize);
+    return sum + (nominal > 0 ? nominal * count : 0);
+  }, 0);
+}
+
+function pokerHomeRafflesTotalPrize(raffles) {
+  return (Array.isArray(raffles) ? raffles : []).reduce(function (sum, raffle) {
+    return sum + pokerHomeRaffleTotalPrize(raffle);
+  }, 0);
+}
+
+function pokerHomeFormatRaffleSum(rub) {
+  var n = Math.round(rub);
+  if (!n) return "";
+  return String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
+}
+
+function pokerHomeFormatCompactRaffleSum(rub) {
+  var n = Math.round(rub);
+  if (!n) return "";
+  var sign = n < 0 ? "-" : "";
+  var abs = Math.abs(n);
+  function compact(value) {
+    var rounded = value >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
+    return String(rounded).replace(".", ",").replace(/,0$/, "");
+  }
+  if (abs >= 1000000) return sign + compact(abs / 1000000) + "м ₽";
+  if (abs >= 1000) return sign + compact(abs / 1000) + "к ₽";
+  return sign + String(abs).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
+}
+
+function updateRaffleBadge(activeCount, activeTotalRub) {
   var count = 0;
+  var totalRub = 0;
   if (Array.isArray(activeCount)) {
     count = activeCount.length;
+    totalRub = pokerHomeRafflesTotalPrize(activeCount);
   } else if (typeof activeCount === "number") {
     count = Math.max(0, Math.floor(activeCount));
+    totalRub = Math.max(0, Number(activeTotalRub) || 0);
   } else {
     count = activeCount ? 1 : 0;
+    totalRub = Math.max(0, Number(activeTotalRub) || 0);
   }
   var hasActive = count > 0;
   var badge = document.getElementById("raffleActiveBadge");
+  var amountBadge = document.getElementById("raffleActiveAmountBadge");
+  var sumText = pokerHomeFormatRaffleSum(totalRub);
+  var compactSumText = pokerHomeFormatCompactRaffleSum(totalRub);
   if (badge) {
     badge.textContent = String(Math.min(count, 99));
     badge.classList.toggle("feature__badge--hidden", !hasActive);
     badge.setAttribute("aria-hidden", hasActive ? "false" : "true");
     badge.setAttribute("aria-label", hasActive ? "Активных розыгрышей: " + count : "Нет активных розыгрышей");
   }
+  if (amountBadge) {
+    var showAmount = hasActive && !!sumText;
+    amountBadge.textContent = showAmount ? "Идут на " + compactSumText : "";
+    amountBadge.classList.toggle("raffle-active-amount-badge--hidden", !showAmount);
+    amountBadge.setAttribute("aria-hidden", showAmount ? "false" : "true");
+    if (showAmount) {
+      amountBadge.setAttribute("aria-label", "Активные розыгрыши идут на " + sumText);
+      amountBadge.setAttribute("title", "Идут на " + sumText);
+    } else {
+      amountBadge.removeAttribute("aria-label");
+      amountBadge.removeAttribute("title");
+    }
+  }
   try {
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("poker_raffle_active_badge", hasActive ? "1" : "0");
       localStorage.setItem("poker_raffle_active_badge_count", String(count));
+      if (sumText) {
+        localStorage.setItem("poker_raffle_active_badge_sum", compactSumText);
+        localStorage.setItem("poker_raffle_active_badge_full_sum", sumText);
+      } else {
+        localStorage.removeItem("poker_raffle_active_badge_sum");
+        localStorage.removeItem("poker_raffle_active_badge_full_sum");
+      }
     }
   } catch (eRaffleHint) {}
   var cache = (typeof window !== "undefined" && window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.activeRaffle) ? window._rafflesCache.data.activeRaffle : null;
