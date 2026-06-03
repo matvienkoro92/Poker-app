@@ -494,13 +494,13 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   min-width: 0;
-  min-height: 58px;
-  padding: 9px 12px;
+  min-height: 62px;
+  padding: 8px 10px;
   border: 1px solid rgba(251, 191, 36, 0.28);
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.54);
@@ -520,8 +520,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 8px;
   background: rgba(251, 191, 36, 0.16);
   color: #fde68a;
@@ -542,9 +542,15 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   white-space: nowrap;
 }
 .raffles-active-chooser__title {
-  font-size: 14px;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 13px;
   font-weight: 850;
-  line-height: 1.22;
+  line-height: 1.14;
   color: var(--text);
 }
 .raffles-active-chooser__meta {

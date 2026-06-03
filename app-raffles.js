@@ -309,6 +309,8 @@ function initRaffles() {
   }
 
   function activeRaffleShortTitle(raffle) {
+    var compact = activeRaffleChooserPrizeTitle(raffle);
+    if (compact) return compact;
     var title = "";
     try {
       title =
@@ -322,8 +324,36 @@ function initRaffles() {
     title = String(title || "Розыгрыш").replace(/\s+/g, " ").trim();
     var split = title.match(/^(.+?[.!?])\s+(.+)$/);
     if (split && split[1]) title = split[1];
+    title = title.replace(/^Розыгрыш[:\s]+/i, "").trim();
     if (title.length > 78) title = title.slice(0, 77).trim() + "...";
     return title;
+  }
+
+  function activeRaffleChooserPrizeTitle(raffle) {
+    if (!raffle) return "";
+    var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
+    if (!groups.length) return "";
+    var totalCount = Math.max(0, parseInt(raffle.totalWinners, 10) || 0);
+    if (!totalCount) {
+      totalCount = groups.reduce(function (sum, g) {
+        return sum + Math.max(0, parseInt(g && g.count, 10) || 0);
+      }, 0);
+    }
+    if (!totalCount) return "";
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    if (isCashPrize) {
+      return totalCount + " " + pokerRafflesPluralizeCashBuyinsForHeading(totalCount) + " на кеш";
+    }
+    var nominals = [];
+    groups.forEach(function (g) {
+      var nominal = parsePrizeValue(g && g.prize);
+      if (nominal > 0 && nominals.indexOf(nominal) === -1) nominals.push(nominal);
+    });
+    var ticketWord = pokerRafflesPluralizeBackingTicketsForHeading(totalCount);
+    if (nominals.length === 1) {
+      return totalCount + " " + ticketWord + " за " + formatRaffleSum(nominals[0]);
+    }
+    return totalCount + " " + ticketWord;
   }
 
   function activeRaffleMetaText(raffle) {
