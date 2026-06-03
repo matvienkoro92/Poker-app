@@ -401,6 +401,20 @@ async function testAuthAndAdmin(redis) {
   r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "create", title: "X" }));
   assert.strictEqual(r.statusCode, 403, "raffle create is admin-only");
 
+  const countBeforePastCreate = redis.l("poker_app:raffle_ids").length;
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "create",
+    title: "Past raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() - 60_000).toISOString(),
+    createIdempotencyKey: "contract-create-past",
+  }));
+  assert.strictEqual(r.statusCode, 400, "admin cannot create raffle with past end date");
+  assert.ok(String(r.body.error || "").includes("будущем"), "past create error explains future deadline");
+  assert.strictEqual(redis.l("poker_app:raffle_ids").length, countBeforePastCreate, "past create does not save raffle id");
+
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
     action: "create",

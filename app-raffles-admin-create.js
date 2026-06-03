@@ -574,6 +574,11 @@ function initRafflesAdminCreateRuntime(opts) {
         if (tg && tg.showAlert) tg.showAlert("Некорректная дата");
         return;
       }
+      if (endDate <= new Date()) {
+        if (tg && tg.showAlert) tg.showAlert("Время итогов должно быть в будущем");
+        else if (typeof alert === "function") alert("Время итогов должно быть в будущем");
+        return;
+      }
       var totalWinners;
       var groups;
       var title = "";
