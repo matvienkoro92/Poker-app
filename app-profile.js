@@ -156,7 +156,7 @@ function initProfileExitBtn() {
       if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
       return;
     }
-    if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
+    if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow({ forceOverlay: true });
   });
 }
 

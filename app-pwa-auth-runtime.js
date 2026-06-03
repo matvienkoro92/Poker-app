@@ -721,7 +721,7 @@
   function handleSharedAccountAuthClick(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     if (e && typeof e.stopPropagation === "function") e.stopPropagation();
-    openSharedAccountAuthFlow();
+    openSharedAccountAuthFlow({ forceOverlay: true });
   }
 
   function headerAuthMenuHasAccountSession() {
@@ -782,7 +782,7 @@
       }
       return;
     }
-    openSharedAccountAuthFlow();
+    openSharedAccountAuthFlow({ forceOverlay: true });
   }
 
   function bindSharedAccountAuthTriggers() {
@@ -867,11 +867,12 @@
   }
   window.__pokerInitSiteHomeInstructionModal = initSiteHomeInstructionModal;
 
-  function openSharedAccountAuthFlow() {
+  function openSharedAccountAuthFlow(opts) {
     try {
+      var forceOverlay = !!(opts && opts.forceOverlay === true);
       var wtg = getTelegramWebAppNow();
       if (wtg && wtg.initData) { runVerifyFlow(); return; }
-      if (shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();
+      if (forceOverlay || shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();
       else { resetBannerForPwaLogin(); mountTelegramLoginWidgetForPwa();
         if (banner) { banner.classList.remove("auth-banner--hidden"); try { banner.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (eScroll) {} } }
     } catch (eOpenPwaLogin) {}

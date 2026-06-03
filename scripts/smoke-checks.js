@@ -141,7 +141,9 @@ const files = {
   chatRoutePostSend: read("lib/chat-route-post-send.js"),
   chatRoutePostMedia: read("lib/chat-route-post-media.js"),
   chatRoutePostNotify: read("lib/chat-route-post-notify.js"),
+  apiRouter: read("api/[[...slug]].js"),
   rafflesHandler: read("lib/api-handlers/raffles.js"),
+  cronRafflesHandler: read("lib/api-handlers/cron-raffles.js"),
   respectHandler: read("lib/api-handlers/respect.js"),
   usersHandler: read("lib/api-handlers/users.js"),
   chatWebpushNotify: read("lib/chat-webpush-notify.js"),
@@ -558,6 +560,17 @@ add("PWA auth shell is present", () =>
     "pokerReadPwaGuestMode",
     "__pokerOpenSharedAccountAuthFlow",
     "pwaAuthScreen",
+  ])
+);
+
+add("Profile login button opens visible auth overlay", () =>
+  hasAll("client", [
+    "function openSharedAccountAuthFlow(opts)",
+    "opts && opts.forceOverlay === true",
+    "if (forceOverlay || shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();",
+    "function handleSharedAccountAuthClick(e)",
+    "openSharedAccountAuthFlow({ forceOverlay: true });",
+    "window.__pokerOpenSharedAccountAuthFlow({ forceOverlay: true });",
   ])
 );
 
@@ -1086,6 +1099,26 @@ add("Shared Redis layer has no local pipeline clones left in project code", () =
       !/fetch\([^)]*\/pipeline/.test(text);
   });
 });
+
+add("Daily raffles have a cron tick entrypoint and QStash schedule", () =>
+  hasAll("apiRouter", [
+    '"cron-raffles"',
+    '"cron-raffles.js"',
+  ]) &&
+  hasAll("cronRafflesHandler", [
+    'require("./raffles")',
+    'action: "tick"',
+    '"x-cron-secret": CRON_SECRET',
+  ]) &&
+  hasAll("rafflesHandler", [
+    "const QSTASH_TOKEN = process.env.QSTASH_TOKEN",
+    "function scheduleDailyRaffleTick(raffle)",
+    "CRON_TZ=Europe/Moscow",
+    "/api/cron-raffles?seriesId=",
+    "const isCronTick = req.method === \"GET\" && actionParam === \"tick\"",
+    'mode: "raffles_tick"',
+  ])
+);
 
 add("Chat sender label hides Telegram login when a name exists", () =>
   has("chatDisplayLabel", "if (nameParts) return nameParts;") &&

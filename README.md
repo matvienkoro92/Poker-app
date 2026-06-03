@@ -224,6 +224,7 @@ http://localhost:3000
    - `CRON_SECRET` — любой длинный секрет (например, из randomkeygen.com). Vercel при вызове cron автоматически подставляет его в заголовок `Authorization: Bearer <CRON_SECRET>`.
    - `TELEGRAM_BOT_TOKEN` — токен бота (уже нужен для подписки).
    - `UPSTASH_REDIS_REST_URL` и `UPSTASH_REDIS_REST_TOKEN` — Redis (уже нужен для подписки).
+   - `QSTASH_TOKEN` — для точного запуска ежедневных розыгрышей в заданное время через `/api/cron-raffles`.
    - `VERCEL_URL` или `APP_URL` / `MINI_APP_URL` — базовый URL приложения (для ссылок в сообщениях).
 
 2. После добавления или изменения `CRON_SECRET` сделайте **Redeploy**.

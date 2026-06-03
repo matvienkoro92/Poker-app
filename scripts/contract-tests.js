@@ -1771,6 +1771,53 @@ async function testRaffleDailyRecurring(redis) {
   assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
 }
 
+async function testRaffleDailyCronTick(redis) {
+  const cronRaffles = loadHandler("cron-raffles");
+  const dueStart = new Date(Date.now() - 4 * 60_000);
+  const durationMs = 45 * 60_000;
+  const source = {
+    id: "daily_contract_cron_source",
+    createdBy: "tg_388008256",
+    title: "Daily cron source",
+    totalWinners: 1,
+    groups: [{ prize: "Cron daily ticket", count: 1 }],
+    endDate: new Date(Date.now() - 20 * 60_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+    daily: true,
+    recurrence: {
+      type: "daily",
+      timeZone: "Europe/Moscow",
+      startTime: "12:15",
+      seriesId: "contract_daily_cron_series",
+      scheduledStartAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      nextStartAt: dueStart.toISOString(),
+      durationMs,
+      template: {
+        title: "Daily cron source",
+        totalWinners: 1,
+        groups: [{ prize: "Cron daily ticket", count: 1 }],
+      },
+    },
+  };
+  redis.kv.set("poker_app:raffle:daily_contract_cron_source", JSON.stringify(source));
+  redis.l("poker_app:raffle_ids").push("daily_contract_cron_source");
+
+  const r = await call(cronRaffles, req("POST", {}, {}, { authorization: "Bearer contract-cron-secret" }));
+  assert.strictEqual(r.statusCode, 200, "raffle cron tick succeeds without user session");
+  assert.strictEqual(r.body.mode, "raffles_tick", "raffle cron tick returns tick mode");
+  assert.strictEqual(r.body.dailyCreated, 1, "raffle cron tick creates due daily raffle");
+  const ids = redis.l("poker_app:raffle_ids");
+  const createdId = ids.find((id) => id !== source.id && String(id).indexOf("raffle_") === 0);
+  assert.ok(createdId, "raffle cron tick stores generated raffle id");
+  const generated = JSON.parse(redis.kv.get("poker_app:raffle:" + createdId));
+  assert.strictEqual(generated.status, "active", "cron generated daily raffle is active");
+  assert.strictEqual(generated.createdAt, dueStart.toISOString(), "cron generated daily raffle starts at scheduled time");
+  assert.strictEqual(generated.endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "cron generated daily raffle keeps duration");
+}
+
 async function testRaffleDuplicateOptions(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -3742,6 +3789,7 @@ async function main() {
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],
+    ["raffle daily cron tick", testRaffleDailyCronTick],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],

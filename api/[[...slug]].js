@@ -54,6 +54,7 @@ const handlers = {
   "send-to-user": () => require(path.join(handlersDir, "send-to-user.js")),
   "send-bulk": () => require(path.join(handlersDir, "send-bulk.js")),
   "cron-reminder-10min": () => require(path.join(handlersDir, "cron-reminder-10min.js")),
+  "cron-raffles": () => require(path.join(handlersDir, "cron-raffles.js")),
   "freeroll-reminder-subscribe": () => require(path.join(handlersDir, "freeroll-reminder-subscribe.js")),
   "gazette-subscribe": () => require(path.join(handlersDir, "gazette-subscribe.js")),
   "gazette-article-comments": () => require(path.join(handlersDir, "gazette-article-comments.js")),
