@@ -77,6 +77,9 @@ function initPwaAuthEntryScreenRuntime(deps) {
         } catch (eAuth) {}
         if (typeof deps.updateHeaderGreeting === "function") deps.updateHeaderGreeting();
         if (typeof deps.updateProfileExitBtnVisibility === "function") deps.updateProfileExitBtnVisibility();
+        try {
+          if (typeof window.__pokerResetHeaderPoker21GuestStatus === "function") window.__pokerResetHeaderPoker21GuestStatus();
+        } catch (eGuestFish) {}
         if (typeof deps.hidePwaAuthScreen === "function") deps.hidePwaAuthScreen();
         if (typeof deps.hideIdentifyingMini === "function") deps.hideIdentifyingMini();
         try {

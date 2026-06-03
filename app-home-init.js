@@ -193,6 +193,37 @@
   });
 })();
 
+(function installHeaderPoker21GuestReset() {
+  function applyGuestHeaderPoker21Status() {
+    var headerStatus = document.getElementById("headerPokerStatus");
+    var headerStatusLevel = document.getElementById("headerPokerStatusLevel");
+    var headerStatusFish = document.getElementById("headerPokerStatusFish");
+    try {
+      window.__pokerHeaderPoker21Linked = false;
+      window.__pokerHeaderPoker21Nickname = "";
+    } catch (eState) {}
+    if (headerStatus) {
+      headerStatus.classList.remove("header-status--hidden");
+      headerStatus.setAttribute("aria-hidden", "false");
+      headerStatus.setAttribute("tabindex", "0");
+      headerStatus.setAttribute("title", "Игроки по уровню");
+      headerStatus.setAttribute("aria-label", "Открыть игроков по уровню");
+    }
+    if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ 0";
+    if (headerStatusFish) {
+      headerStatusFish.src = "./assets/profile-status-fish-level-01.png";
+      headerStatusFish.setAttribute("data-status-fish-level", "0");
+    }
+    try {
+      if (typeof window.__pokerUpdateHeaderGreeting === "function") window.__pokerUpdateHeaderGreeting();
+    } catch (eGreeting) {}
+  }
+  try {
+    window.__pokerApplyGuestHeaderPoker21Status = applyGuestHeaderPoker21Status;
+    window.__pokerResetHeaderPoker21GuestStatus = applyGuestHeaderPoker21Status;
+  } catch (eExport) {}
+})();
+
 (function initHomeFishPoker21Status() {
   var headerStatus = document.getElementById("headerPokerStatus");
   var headerStatusLevel = document.getElementById("headerPokerStatusLevel");
@@ -205,6 +236,16 @@
     var raw = parseInt(level, 10);
     var n = isFinite(raw) && raw > 0 ? Math.min(55, raw) : 1;
     return "./assets/profile-status-fish-level-" + (n < 10 ? "0" : "") + n + ".png";
+  }
+  function isGuestAuthMode() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.status === "guest") return true;
+    } catch (eAuthGuest) {}
+    try {
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return true;
+    } catch (ePwaGuest) {}
+    return false;
   }
   function poker21NicknameFromData(data) {
     var raw = data && (data.pokerPlusNickname || data.poker21Nickname || data.nickname || data.Nike || data.nick || data.name);
@@ -269,6 +310,12 @@
   try {
     window.__pokerOpenHallFishRatingModal = openHeaderFishRatingModal;
   } catch (eOpenExport) {}
+  try {
+    window.__pokerResetHeaderPoker21GuestStatus = function () {
+      loadedStatus = false;
+      applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "", level: 0 });
+    };
+  } catch (eResetExport) {}
   function applyStatus(data) {
     var hasAuthoritativeStatus = !!(data && data.ok);
     var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
@@ -295,7 +342,10 @@
       }
     }
     if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ " + safeLevel;
-    if (headerStatusFish) headerStatusFish.src = fishSrcForLevel(safeLevel);
+    if (headerStatusFish) {
+      headerStatusFish.src = fishSrcForLevel(safeLevel);
+      headerStatusFish.setAttribute("data-status-fish-level", String(safeLevel));
+    }
   }
   function authQuery() {
     if (typeof pokerApiAuthQuery === "function") return pokerApiAuthQuery("?");
@@ -307,6 +357,11 @@
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     var q = authQuery();
+    if (isGuestAuthMode()) {
+      loadedStatus = false;
+      applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "", level: 0 });
+      return;
+    }
     if (!base || !hasCred || !q || q === "?initData=") {
       if (attempt < 12) setTimeout(function () { loadStatus(attempt + 1); }, 500);
       else applyStatus(null);

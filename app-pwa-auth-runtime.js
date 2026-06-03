@@ -524,6 +524,9 @@
           window.__pokerTelegramAuth = { status: "guest", user: null, error: null };
         } catch (eGuest) {}
         updateHeaderGreeting();
+        try {
+          if (typeof window.__pokerResetHeaderPoker21GuestStatus === "function") window.__pokerResetHeaderPoker21GuestStatus();
+        } catch (eGuestFish) {}
         hidePwaAuthScreen();
         hideIdentifyingMini();
         if (banner) banner.classList.add("auth-banner--hidden");
@@ -1721,6 +1724,9 @@
     try {
       updateHeaderGreeting();
     } catch (eHdr) {}
+    try {
+      if (typeof window.__pokerResetHeaderPoker21GuestStatus === "function") window.__pokerResetHeaderPoker21GuestStatus();
+    } catch (eGuestFish) {}
     try {
       openOverlayAuthEntryScreen();
     } catch (eShowEntry) {}
