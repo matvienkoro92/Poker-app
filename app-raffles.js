@@ -91,6 +91,7 @@ function initRaffles() {
   var rafflesLoadSeq = 0;
   var rafflesDeadlineRefreshInFlight = false;
   var rafflesPendingCompletedId = "";
+  var rafflesActiveBroadcastList = [];
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -926,6 +927,7 @@ function initRaffles() {
         if (!active) active = activeList[0] || null;
         var activeCount = activeList.length;
         var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0);
+        rafflesActiveBroadcastList = activeList.slice();
         if (rafflesTabActiveCount) rafflesTabActiveCount.textContent = String(activeCount);
         if (rafflesTabActiveSum) rafflesTabActiveSum.textContent = formatRaffleSum(activeSumRub);
 
@@ -950,6 +952,7 @@ function initRaffles() {
           }
           currentRaffleId = null;
           currentRaffleEndDate = null;
+          rafflesActiveBroadcastList = [];
           if (raffleTimerInterval) {
             clearInterval(raffleTimerInterval);
             raffleTimerInterval = null;
@@ -983,7 +986,8 @@ function initRaffles() {
   if (typeof initRafflesBroadcastRuntime === "function") {
     var rafflesBroadcastRuntimeDeps = {};
     Object.defineProperties(rafflesBroadcastRuntimeDeps, {
-      currentRaffleData: { get: function () { return currentRaffleData; } }
+      currentRaffleData: { get: function () { return currentRaffleData; } },
+      rafflesActiveBroadcastList: { get: function () { return rafflesActiveBroadcastList; } }
     });
     Object.assign(rafflesBroadcastRuntimeDeps, {
       base: base,
@@ -994,6 +998,7 @@ function initRaffles() {
       rafflesRetryFailedBroadcastBtn: rafflesRetryFailedBroadcastBtn,
       rafflesPurgeBlockedSubsBtn: rafflesPurgeBlockedSubsBtn,
       parsePrizeValue: parsePrizeValue,
+      getRaffleTotalPrize: getRaffleTotalPrize,
       formatRaffleSum: formatRaffleSum,
       showRaffleFeedback: showRaffleFeedback,
       confirmRaffleAdminAction: confirmRaffleAdminAction

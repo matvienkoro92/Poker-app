@@ -1018,6 +1018,23 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
   assert.ok(!String(subscriberMessage.body.text).includes("беккинг-билетов"), "cash broadcast does not say backing tickets");
 
   sentMessages.length = 0;
+  r = await call(manual, req("POST", {}, {
+    pwaSession: s.admin,
+    activeRafflesSummary: true,
+    activeRafflesCount: 2,
+    activeRafflesTotalPrize: 22000,
+    broadcastIdempotencyKey: "contract-active-raffles-summary-broadcast",
+  }));
+  assert.strictEqual(r.statusCode, 200, "active raffles summary broadcast succeeds");
+  const summaryMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
+  assert.ok(summaryMessage, "subscriber receives active raffles summary message");
+  const summaryText = String(summaryMessage.body.text || "");
+  assert.ok(summaryText.includes("идут 2 розыгрыша"), "summary broadcast says two raffles are active");
+  assert.ok(summaryText.includes("22 000 ₽"), "summary broadcast includes total active raffle prize");
+  assert.ok(summaryText.includes("startapp=raffles"), "summary broadcast includes raffle participation link");
+  assert.ok(!summaryText.includes("стартовал новый розыгрыш"), "summary broadcast does not append single-raffle default text");
+
+  sentMessages.length = 0;
   const raffles = loadHandler("raffles");
   const webpush = require("web-push");
   const keys = webpush.generateVAPIDKeys();

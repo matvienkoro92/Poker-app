@@ -23,6 +23,14 @@ function initRafflesBroadcastRuntime(opts) {
 
   /** Поля для POST raffle-manual-subscribers (текущий активный розыгрыш в форме) */
   function raffleManualBroadcastBodyFromCurrentRaffle() {
+    function pluralizeRaffles(n) {
+      var v = Math.abs(n) % 100;
+      var d = v % 10;
+      if (v >= 11 && v <= 19) return "розыгрышей";
+      if (d === 1) return "розыгрыш";
+      if (d >= 2 && d <= 4) return "розыгрыша";
+      return "розыгрышей";
+    }
     var endDate =
       currentRaffleData && currentRaffleData.endDate
         ? currentRaffleData.endDate
@@ -47,6 +55,48 @@ function initRafflesBroadcastRuntime(opts) {
       typeof pokerRafflesIsCashPrize === "function" &&
       currentRaffleData &&
       pokerRafflesIsCashPrize(currentRaffleData);
+    var activeRaffles = [];
+    try {
+      var activeSource = Array.isArray(rafflesActiveBroadcastList)
+        ? rafflesActiveBroadcastList
+        : [];
+      var activeSeen = {};
+      activeRaffles = activeSource.filter(function (raffle) {
+        var id = String((raffle && raffle.id) || "");
+        if (!id || activeSeen[id]) return false;
+        activeSeen[id] = true;
+        return raffle && raffle.status === "active";
+      });
+    } catch (eActiveRaffles) {
+      activeRaffles = [];
+    }
+    if (activeRaffles.length > 1) {
+      var activeTotalPrize = activeRaffles.reduce(function (sum, raffle) {
+        if (typeof getRaffleTotalPrize === "function") return sum + getRaffleTotalPrize(raffle);
+        var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+        return (
+          sum +
+          groups.reduce(function (groupSum, group) {
+            var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+            var nominal = parsePrizeValue(group && group.prize);
+            return groupSum + (nominal > 0 ? nominal * count : 0);
+          }, 0)
+        );
+      }, 0);
+      return {
+        message:
+          "🎲 Сейчас идут " +
+          activeRaffles.length +
+          " " +
+          pluralizeRaffles(activeRaffles.length) +
+          " на общую сумму " +
+          formatRaffleSum(activeTotalPrize) +
+          ".\n\nЗаходи и участвуй.",
+        activeRafflesSummary: true,
+        activeRafflesCount: activeRaffles.length,
+        activeRafflesTotalPrize: activeTotalPrize,
+      };
+    }
     var ticketCount = 0;
     // Разбивка по номиналам (например: 3 за 1000 и 12 за 300)
     var nominalToCount = {};
