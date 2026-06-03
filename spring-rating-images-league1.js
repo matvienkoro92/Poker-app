@@ -699,5 +699,23 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-24-05-2026-league1-main-2mln-18h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-nlh-knockout-21h.jpg",
     "rating-compressed-preview/rating-24-05-2026-league1-sunday-tournament-18h.jpg"
+  ],
+  "25.05.2026": [
+    "rating-compressed-preview/rating-25-05-2026-league1-dv-rebuy-12h.jpg"
+  ],
+  "27.05.2026": [
+    "rating-compressed-preview/rating-27-05-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-27-05-2026-league1-hok-19h.jpg"
+  ],
+  "28.05.2026": [
+    "rating-compressed-preview/rating-28-05-2026-league1-tournir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-28-05-2026-league1-classic-tournament-21h.jpg"
+  ],
+  "29.05.2026": [
+    "rating-compressed-preview/rating-29-05-2026-league1-friday-progressive-18h.jpg",
+    "rating-compressed-preview/rating-29-05-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "31.05.2026": [
+    "rating-compressed-preview/rating-31-05-2026-league1-turnir-mesyaca-18h.jpg"
   ]
 };
