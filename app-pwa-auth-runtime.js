@@ -583,11 +583,15 @@
       window.openHallFishRatingModal();
       return;
     }
-    if (typeof window.pokerEnsureScriptDomains === "function") {
-      Promise.resolve(window.pokerEnsureScriptDomains(["hall"]))
-        .then(function () { if (typeof window.openHallFishRatingModal === "function") window.openHallFishRatingModal(); })
-        .catch(function () {});
+    var deadline = Date.now() + 6000;
+    function openWhenReady() {
+      if (typeof window.openHallFishRatingModal === "function") {
+        window.openHallFishRatingModal();
+        return;
+      }
+      if (Date.now() <= deadline) setTimeout(openWhenReady, 32);
     }
+    openWhenReady();
   }
 
   function formatHeaderGreeting(name) {

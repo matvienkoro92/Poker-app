@@ -47,7 +47,7 @@
 - `app-rating-core.js`, `app-rating.js`, `app-rating-week-tops.js`, `winter-rating-data.js` — рейтинги, lightbox, недельные топы, share/admin actions; eager из-за весеннего рейтинга.
 - `app-games.js` — игры/рыбка и связанные быстрые действия; eager.
 - `app-raffles.js` — розыгрыши; eager, активный список рендерится первым, тяжелый архив завершенных откладывается, если вкладка не видима.
-- `app-hall-fame.js`, `app-equilator.js`, `app-club-tasks.js`, `app-streams.js`, `app-video-lessons.js`, `app-video-lessons-modals.js` — редкие тяжелые разделы, догружаются через `app-lazy-loader.js`.
+- `app-equilator.js`, `app-club-tasks.js`, `app-streams.js`, `app-video-lessons.js`, `app-video-lessons-modals.js` — редкие тяжелые разделы, догружаются через `app-lazy-loader.js`; `app-hall-fame.js` грузится eager, чтобы Зал славы и рыбка в шапке были готовы сразу.
 
 ## Profile And Admin
 

@@ -2209,13 +2209,16 @@ add("Winter rating archive fragment does not ship static date DOM", () =>
   ])
 );
 
-add("Selected heavy views use JavaScript lazy gates", () =>
+add("Selected heavy views use JavaScript lazy gates while hall loads eagerly", () =>
   hasAll("html", [
     'src="./app-lazy-loader.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="video" src="./app-video-lessons-modals.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="tools" src="./app-equilator.js',
+    'defer data-poker-eager-domain="app" src="./app-hall-fame.js',
+    'defer src="./app-video-lessons.js',
+    'defer src="./app-video-lessons-modals.js',
+    'defer src="./app-equilator.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm.js',
     'type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js',
     'type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./winter-rating-data.js',
   ]) &&
@@ -2226,13 +2229,15 @@ add("Selected heavy views use JavaScript lazy gates", () =>
     "setView(target)",
   ]) &&
   hasAll("appLazyLoader", [
-    '"hall-of-fame": ["hall"]',
-    '"video-lessons": ["video"]',
-    '"learn-play-hub": ["video"]',
     '"winter-rating": ["rating-winter"]',
-    'equilator: ["tools"]',
+    '"poker-tasks": ["club-tasks"]',
+    '"player-crm": ["player-crm"]',
+    '"admin-bonuses": ["admin-bonuses"]',
+    '"#adminReportBtn,#adminBroadcastReportsBtn"',
     "window.pokerEnsureViewScripts",
-  ])
+  ]) &&
+  !has("html", 'data-poker-lazy-domain="hall"') &&
+  !has("appLazyLoader", '"hall-of-fame": ["hall"]')
 );
 
 add("Home fish rating moved to the header without duplicate content button", () =>
@@ -2241,8 +2246,7 @@ add("Home fish rating moved to the header without duplicate content button", () 
   !has("html", "fish-king-home.png") &&
   hasAll("appHomeInit", [
     "function openHeaderFishRatingModal",
-    "waitForHallFishLazyLoader",
-    "window.pokerEnsureScriptDomains",
+    "waitForHallFishModal",
     "__pokerOpenHallFishRatingModal",
   ]) &&
   hasAll("appPwaAuthRuntime", [
@@ -2252,9 +2256,7 @@ add("Home fish rating moved to the header without duplicate content button", () 
   hasAll("appHallFame", [
     '"#headerPokerStatus,.header-greeting--status"',
   ]) &&
-  hasAll("appLazyLoader", [
-    '"#headerPokerStatus,.header-greeting--status"',
-  ])
+  !has("appLazyLoader", '"#headerPokerStatus,.header-greeting--status"')
 );
 
 add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>
@@ -2323,10 +2325,10 @@ add("Chat JavaScript domain is eager-loaded before router", () =>
   has("appViewRouter", "pokerEnsureViewScripts")
 );
 
-add("Spring rating, fish game, and raffles stay eager while selected heavy domains are lazy", () => {
+add("Spring rating, fish game, hall, tools, and raffles stay eager while selected heavy domains are lazy", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"];
-  const lazyFiles = ["app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"];
+  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"];
+  const lazyFiles = ["app-club-tasks.js", "app-rating-winter-runtime.js", "winter-rating-data.js"];
   return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`src="./${file}`)) &&
     lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
 });

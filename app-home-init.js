@@ -219,15 +219,13 @@
       if (typeof window.__pokerUpdateHeaderGreeting === "function") window.__pokerUpdateHeaderGreeting();
     } catch (eGreeting) {}
   }
-  function waitForHallFishLazyLoader(deadline) {
-    if (typeof window.pokerEnsureScriptDomains === "function") {
-      return Promise.resolve(window.pokerEnsureScriptDomains(["hall"]));
-    }
-    if (Date.now() > deadline) return Promise.reject(new Error("hall-fish-lazy-loader-timeout"));
+  function waitForHallFishModal(deadline) {
+    if (typeof window.openHallFishRatingModal === "function") return Promise.resolve(true);
+    if (Date.now() > deadline) return Promise.reject(new Error("hall-fish-modal-timeout"));
     return new Promise(function (resolve) {
       setTimeout(resolve, 32);
     }).then(function () {
-      return waitForHallFishLazyLoader(deadline);
+      return waitForHallFishModal(deadline);
     });
   }
   function showHallFishLoadError(err) {
@@ -236,7 +234,7 @@
       if (tg && tg.showAlert) tg.showAlert("Не удалось загрузить список игроков. Попробуйте ещё раз.");
     } catch (eAlert) {}
     try {
-      if (window.console && console.warn) console.warn("fish rating lazy load failed", err);
+      if (window.console && console.warn) console.warn("fish rating modal open failed", err);
     } catch (eWarn) {}
   }
   function openHeaderFishRatingModal(e) {
@@ -248,7 +246,7 @@
     }
     if (hallFishRatingLoading) return;
     hallFishRatingLoading = true;
-    waitForHallFishLazyLoader(Date.now() + 6000)
+    waitForHallFishModal(Date.now() + 6000)
       .then(function () {
         hallFishRatingLoading = false;
         if (typeof window.openHallFishRatingModal === "function") window.openHallFishRatingModal();

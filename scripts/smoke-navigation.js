@@ -366,14 +366,15 @@ async function main() {
     if (initialLazy.chatScripts.length < 30) throw new Error("chat scripts must be eager-loaded before first chat open");
     const startupTags = new Set(initialLazy.startupScriptTags);
     const lazyTags = new Set(initialLazy.lazyScriptTags);
-    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
+    ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating-spring-runtime.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-hall-fame.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"].forEach((file) => {
       if (!startupTags.has(file)) throw new Error(`expected eager script tag before navigation: ${file}`);
     });
-    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"].forEach((file) => {
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "app-rating-winter-runtime.js", "winter-rating-data.js"].forEach((file) => {
       if (!lazyTags.has(file)) throw new Error(`expected lazy script tag before navigation: ${file}`);
     });
     const initialHeavy = new Set(initialLazy.heavyScripts);
-    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-hall-fame.js", "app-equilator.js"].forEach((file) => {
+    if (!initialHeavy.has("app-hall-fame.js")) throw new Error("hall script should be eager before navigation");
+    ["app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js"].forEach((file) => {
       if (initialHeavy.has(file)) throw new Error(`expected lazy script after navigation only: ${file}`);
     });
     if (initialHeavy.has("app-rating-winter-runtime.js")) throw new Error("winter rating runtime should be lazy before winter navigation");
@@ -624,12 +625,12 @@ async function main() {
     const fishModalState = await page.evaluate(() => ({
       modalOpen: !!(document.getElementById("hallFishRatingModal") && document.getElementById("hallFishRatingModal").hidden === false),
       initFunction: typeof window.pokerInitHallFishRatingModal,
-      lazyScriptExecuted: Array.from(document.scripts || [])
-        .some((script) => /app-hall-fame\.js/.test(script.src || "") && script.getAttribute("data-poker-lazy-loaded-from") === "hall"),
+      eagerScriptPresent: Array.from(document.scripts || [])
+        .some((script) => /app-hall-fame\.js/.test(script.src || "") && script.type !== "application/poker-lazy"),
     }));
     if (!fishModalState.modalOpen) throw new Error("header fish rating modal did not open on first click");
     if (fishModalState.initFunction !== "function") throw new Error("hall fish modal init function did not load");
-    if (!fishModalState.lazyScriptExecuted) throw new Error("hall script was not lazy-loaded by header fish entry");
+    if (!fishModalState.eagerScriptPresent) throw new Error("hall script was not eager-loaded before header fish entry");
     await page.evaluate(() => {
       const close = document.querySelector("#hallFishRatingModal [data-hall-fish-close]");
       if (close) close.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));

@@ -3,12 +3,9 @@
   var loadedDomains = Object.create(null);
   var scriptPromises = Object.create(null);
 
-  var DOMAIN_DEPS = {
-    hall: ["rating"]
-  };
+  var DOMAIN_DEPS = {};
 
   var VIEW_DOMAINS = {
-    "hall-of-fame": ["hall"],
     "winter-rating": ["rating-winter"],
     "poker-tasks": ["club-tasks"],
     "player-crm": ["player-crm"],
@@ -16,7 +13,6 @@
   };
 
   var GLOBAL_MODAL_DOMAIN_SELECTORS = [
-    { selector: "#headerPokerStatus,.header-greeting--status", domains: ["hall"] },
     { selector: "#adminReportBtn,#adminBroadcastReportsBtn", domains: ["admin-reports"] },
     { selector: "#adminAuthDebugBtn", domains: ["auth-debug"] },
     { selector: "#adminShareStatsBtn", domains: ["share-stats"] },
