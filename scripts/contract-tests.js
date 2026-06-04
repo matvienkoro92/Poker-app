@@ -1868,6 +1868,48 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "participant-shaped overflow does not notify first participant");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1005").length, 0, "participant-shaped overflow does not notify second participant");
   assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100004" || item.memberId === "ID100005").length, 0, "participant-shaped overflow does not push participants");
+
+  const exactParticipantRows = [
+    { userId: "tg_1006", accountId: "ID100006", name: "Participant 6" },
+    { userId: "tg_1007", accountId: "ID100007", name: "Participant 7" },
+  ];
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_exact_participants_as_winners", {
+    id: "contract_raffle_notify_exact_participants_as_winners",
+    title: "Participants copied into exact winner slots",
+    totalWinners: 2,
+    groups: [{ prize: "Ticket 500 ₽", count: 2 }],
+    participants: exactParticipantRows,
+    winners: exactParticipantRows.map((row) => ({ ...row })),
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  });
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1006").length, 0, "participant-shaped exact list does not notify first participant");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1007").length, 0, "participant-shaped exact list does not notify second participant");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100006" || item.memberId === "ID100007").length, 0, "participant-shaped exact list does not push participants");
+
+  const readyParticipantRows = [
+    { userId: "tg_1008", accountId: "ID100008", name: "Participant 8" },
+    { userId: "tg_1009", accountId: "ID100009", name: "Participant 9" },
+  ];
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_ready_participants_as_winners", {
+    id: "contract_raffle_notify_ready_participants_as_winners",
+    title: "Participants copied into winners with ready window",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    participants: readyParticipantRows,
+    winners: readyParticipantRows.map((row, index) => ({
+      ...row,
+      winnerReadySlotId: "initial_" + index,
+      winnerReadyWindowStartedAt: new Date().toISOString(),
+      winnerReadyDeadlineAt: new Date(Date.now() + 600_000).toISOString(),
+      winnerReadyState: "pending",
+    })),
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  });
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1008").length, 0, "participant rows with ready timers do not notify first participant");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1009").length, 0, "participant rows with ready timers do not notify second participant");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100008" || item.memberId === "ID100009").length, 0, "participant rows with ready timers do not push participants");
 }
 
 async function testRaffleAutoCompleteNotificationDedup(redis) {

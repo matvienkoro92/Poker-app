@@ -643,7 +643,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-stats-block {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
   margin: 8px 0 16px;
 }
 .raffle-stat {
@@ -718,6 +718,27 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 [data-theme="light"] .raffle-timer__value {
   color: #78350f;
   text-shadow: 0 0 12px rgba(217, 119, 6, 0.18);
+}
+.raffle-notification-test-warning {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(248, 113, 113, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.44), rgba(15, 23, 42, 0.86));
+  color: #fee2e2;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 18px rgba(248, 113, 113, 0.14);
+}
+[data-theme="light"] .raffle-notification-test-warning {
+  border-color: rgba(185, 28, 28, 0.38);
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.98), rgba(255, 247, 237, 0.94));
+  color: #7f1d1d;
+  text-shadow: none;
 }
 .raffle-meta { margin: 0 0 4px; font-size: 14px; color: var(--text-muted); }
 .raffle-end { margin: 0; font-size: inherit; color: inherit; }

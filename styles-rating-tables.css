@@ -605,6 +605,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
 }
 .winter-rating__table-wrap--collapsed .winter-rating__table tbody tr:nth-child(n+11) {
   display: none;
@@ -934,6 +935,43 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 .winter-rating__spring-league-share-wrap .winter-rating__share-btn.winter-rating__share-btn--copy-icon:hover {
   transform: translateY(-1px);
+}
+.winter-rating__spring-league-share-wrap .winter-rating__share-btn--copied {
+  border-color: rgba(255, 247, 214, 0.96);
+  box-shadow:
+    0 6px 22px rgba(251, 191, 36, 0.64),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.winter-rating__spring-league-copy-feedback {
+  position: absolute;
+  z-index: 4;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  padding: 4px 12px 5px;
+  border: 1px solid rgba(255, 221, 143, 0.52);
+  border-radius: 999px;
+  background: rgba(10, 12, 18, 0.92);
+  color: #fff3c4;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.36),
+    0 0 16px rgba(251, 191, 36, 0.24);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.winter-rating__spring-league-copy-feedback[hidden] {
+  display: none !important;
+}
+.winter-rating__spring-league-copy-feedback--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 .winter-rating.spring-rating .winter-rating__spring-league-share-wrap .winter-rating__share-btn {
   box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);

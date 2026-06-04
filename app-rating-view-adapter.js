@@ -999,6 +999,34 @@ function initWinterRating() {
       });
     }, true);
   }
+  function showSpringLeagueCopyFeedback(shareBtn) {
+    if (!shareBtn || !shareBtn.closest) return;
+    var wrap = shareBtn.closest(".winter-rating__spring-league-share-wrap");
+    if (!wrap) return;
+    var feedback = wrap.querySelector(".winter-rating__spring-league-copy-feedback");
+    if (!feedback) {
+      feedback = document.createElement("span");
+      feedback.className = "winter-rating__spring-league-copy-feedback";
+      feedback.setAttribute("role", "status");
+      feedback.setAttribute("aria-live", "polite");
+      feedback.hidden = true;
+      wrap.appendChild(feedback);
+    }
+    if (!shareBtn.dataset.originalAriaLabel) shareBtn.dataset.originalAriaLabel = shareBtn.getAttribute("aria-label") || "";
+    feedback.textContent = "Скопировано";
+    feedback.hidden = false;
+    feedback.classList.add("winter-rating__spring-league-copy-feedback--visible");
+    shareBtn.classList.add("winter-rating__share-btn--copied");
+    shareBtn.setAttribute("aria-label", "Скопировано");
+    if (shareBtn.__springLeagueCopyFeedbackTimer) clearTimeout(shareBtn.__springLeagueCopyFeedbackTimer);
+    shareBtn.__springLeagueCopyFeedbackTimer = setTimeout(function () {
+      feedback.classList.remove("winter-rating__spring-league-copy-feedback--visible");
+      feedback.hidden = true;
+      shareBtn.classList.remove("winter-rating__share-btn--copied");
+      shareBtn.setAttribute("aria-label", shareBtn.dataset.originalAriaLabel || "Скопировать ссылку");
+    }, 1800);
+  }
+
   if (document.body.getAttribute("data-spring-league-share-bound") !== "1") {
     document.body.setAttribute("data-spring-league-share-bound", "1");
     document.body.addEventListener("click", function (e) {
@@ -1010,11 +1038,10 @@ function initWinterRating() {
         typeof buildMiniAppStartLink === "function"
           ? buildMiniAppStartLink((typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + shareBtn.dataset.springLeague)
           : "";
-      var msg = shareBtn.dataset.springLeague === "1" ? "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 1." : "Ссылка скопирована. Отправьте другу — откроется рейтинг Лиги 2.";
       pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (copied) {
-          if (tg && tg.showAlert) tg.showAlert(msg); else alert("Ссылка скопирована.");
+          showSpringLeagueCopyFeedback(shareBtn);
         } else if (tg && tg.showAlert) {
           tg.showAlert("Ссылка: " + link);
         } else {
