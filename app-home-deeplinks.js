@@ -176,7 +176,7 @@ function pokerInitHomeDeepLinks(opts) {
     if (startParam === "raffles" || raffleCompletedTargetId) {
       if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
       setTimeout(function () {
-        if (typeof setView === "function") setView("raffles");
+        if (typeof setView === "function") setView("raffles", raffleCompletedTargetId ? { raffleCompletedTarget: true } : undefined);
       }, 0);
       return;
     }

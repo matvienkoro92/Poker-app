@@ -8,6 +8,7 @@ function initRaffles() {
       document.getElementById("raffleCompleteBtn") === initRaffles.__boundRaffleCompleteBtn &&
       document.getElementById("rafflesCompleted") === initRaffles.__boundRafflesCompleted;
     if (sameRoot && sameControls) {
+      if (typeof initRaffles.__openRequestedActiveTab === "function") initRaffles.__openRequestedActiveTab();
       if (typeof initRaffles.__reload === "function") initRaffles.__reload();
       return;
     }
@@ -93,6 +94,17 @@ function initRaffles() {
   var rafflesDeadlineRefreshInFlight = false;
   var rafflesPendingCompletedId = "";
   var rafflesActiveBroadcastList = [];
+
+  function consumeRafflesOpenActiveTabRequest() {
+    try {
+      if (typeof window === "undefined" || !window.__pokerRafflesOpenActiveTab) return false;
+      window.__pokerRafflesOpenActiveTab = false;
+      window.__pendingRaffleCompletedId = "";
+      return true;
+    } catch (eConsumeActiveTab) {
+      return false;
+    }
+  }
 
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
@@ -548,6 +560,13 @@ function initRaffles() {
     var selector = completedRaffleCardSelector(targetId);
     var card = selector ? rafflesCompleted.querySelector(selector) : null;
     if (!card) return false;
+    try {
+      var node = card.parentNode;
+      while (node && node !== rafflesCompleted) {
+        if (node.tagName && String(node.tagName).toLowerCase() === "details") node.open = true;
+        node = node.parentNode;
+      }
+    } catch (eOpenCompletedArchive) {}
     try {
       rafflesCompleted.querySelectorAll(".raffle-completed-card--target").forEach(function (node) {
         if (node !== card) node.classList.remove("raffle-completed-card--target");
@@ -1384,8 +1403,12 @@ function initRaffles() {
   initRaffles.__boundRaffleDeleteBtn = raffleDeleteBtn;
   initRaffles.__boundRaffleCompleteBtn = raffleCompleteBtn;
   initRaffles.__boundRafflesCompleted = rafflesCompleted;
+  initRaffles.__openRequestedActiveTab = function () {
+    if (consumeRafflesOpenActiveTabRequest()) setRafflesTab("active");
+  };
   initRaffles.__reload = function () {
     loadRaffles();
   };
+  initRaffles.__openRequestedActiveTab();
   loadRaffles();
 }

@@ -283,7 +283,7 @@ function initImageLightbox() {
         : "";
       if ((startApp === "raffles" || raffleCompletedTargetId) && typeof setView === "function") {
         if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
-        setView("raffles");
+        setView("raffles", raffleCompletedTargetId ? { raffleCompletedTarget: true } : undefined);
         return;
       }
       if (startApp === "video_lessons" && typeof setView === "function") {

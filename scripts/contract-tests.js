@@ -339,6 +339,12 @@ function installRecordingFetch(redis, sentMessages) {
   };
 }
 
+function persistContractRaffle(redis, raffle, id) {
+  const raffleId = String(id || (raffle && raffle.id) || "").trim();
+  assert.ok(raffleId, "contract raffle id is required");
+  redis.kv.set("poker_app:raffle:" + raffleId, JSON.stringify(raffle));
+}
+
 function clearProjectRequireCache() {
   const prefix = root + path.sep;
   Object.keys(require.cache).forEach((file) => {
@@ -1721,6 +1727,7 @@ async function testRaffleWinnerNotificationDedup(redis) {
     status: "drawn",
     drawnAt: new Date().toISOString(),
   };
+  persistContractRaffle(redis, raffle);
   await Promise.all(Array.from({ length: 60 }, () =>
     service.notifyWinnersRaffleCompleted("contract_raffle_notify_dedup", JSON.parse(JSON.stringify(raffle)))
   ));
@@ -1761,6 +1768,7 @@ async function testRaffleWinnerNotificationRetriesPushAfterZero(redis) {
     status: "drawn",
     drawnAt: new Date().toISOString(),
   };
+  persistContractRaffle(redis, raffle);
   await service.notifyWinnersRaffleCompleted("contract_raffle_notify_push_retry", JSON.parse(JSON.stringify(raffle)));
   await service.notifyWinnersRaffleCompleted("contract_raffle_notify_push_retry", JSON.parse(JSON.stringify(raffle)));
   const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1001");
@@ -1802,6 +1810,7 @@ async function testRaffleWinnerNotificationResolvesAccountId(redis) {
     status: "drawn",
     drawnAt: new Date().toISOString(),
   };
+  persistContractRaffle(redis, raffle);
   await service.notifyWinnersRaffleCompleted("contract_raffle_notify_account_id", raffle);
   const winnerMessages = sentMessages.filter((msg) => String(msg.body.chat_id) === "1002");
   assert.strictEqual(winnerMessages.length, 1, "account-id winner resolves Telegram recipient");
@@ -1843,6 +1852,7 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     status: "drawn",
     drawnAt: new Date().toISOString(),
   };
+  persistContractRaffle(redis, raffle);
   await service.notifyWinnersRaffleCompleted("contract_raffle_notify_caps_overflow", raffle);
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length, 1, "real winner receives Telegram notification");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1002").length, 0, "overflow participant 2 does not receive Telegram notification");
@@ -1855,7 +1865,7 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     { userId: "tg_1004", accountId: "ID100004", name: "Participant 4" },
     { userId: "tg_1005", accountId: "ID100005", name: "Participant 5" },
   ];
-  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_participants_as_winners", {
+  const participantRaffle = {
     id: "contract_raffle_notify_participants_as_winners",
     title: "Participants copied into winners",
     totalWinners: 1,
@@ -1864,7 +1874,9 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     winners: participantRows.map((row) => ({ ...row })),
     status: "drawn",
     drawnAt: new Date().toISOString(),
-  });
+  };
+  persistContractRaffle(redis, participantRaffle);
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_participants_as_winners", participantRaffle);
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "participant-shaped overflow does not notify first participant");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1005").length, 0, "participant-shaped overflow does not notify second participant");
   assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100004" || item.memberId === "ID100005").length, 0, "participant-shaped overflow does not push participants");
@@ -1873,7 +1885,7 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     { userId: "tg_1006", accountId: "ID100006", name: "Participant 6" },
     { userId: "tg_1007", accountId: "ID100007", name: "Participant 7" },
   ];
-  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_exact_participants_as_winners", {
+  const exactParticipantRaffle = {
     id: "contract_raffle_notify_exact_participants_as_winners",
     title: "Participants copied into exact winner slots",
     totalWinners: 2,
@@ -1882,7 +1894,9 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     winners: exactParticipantRows.map((row) => ({ ...row })),
     status: "drawn",
     drawnAt: new Date().toISOString(),
-  });
+  };
+  persistContractRaffle(redis, exactParticipantRaffle);
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_exact_participants_as_winners", exactParticipantRaffle);
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1006").length, 0, "participant-shaped exact list does not notify first participant");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1007").length, 0, "participant-shaped exact list does not notify second participant");
   assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100006" || item.memberId === "ID100007").length, 0, "participant-shaped exact list does not push participants");
@@ -1891,7 +1905,7 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     { userId: "tg_1008", accountId: "ID100008", name: "Participant 8" },
     { userId: "tg_1009", accountId: "ID100009", name: "Participant 9" },
   ];
-  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_ready_participants_as_winners", {
+  const readyParticipantRaffle = {
     id: "contract_raffle_notify_ready_participants_as_winners",
     title: "Participants copied into winners with ready window",
     totalWinners: 1,
@@ -1906,10 +1920,65 @@ async function testRaffleWinnerNotificationCapsOverflow(redis) {
     })),
     status: "drawn",
     drawnAt: new Date().toISOString(),
-  });
+  };
+  persistContractRaffle(redis, readyParticipantRaffle);
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_ready_participants_as_winners", readyParticipantRaffle);
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1008").length, 0, "participant rows with ready timers do not notify first participant");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1009").length, 0, "participant rows with ready timers do not notify second participant");
   assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100008" || item.memberId === "ID100009").length, 0, "participant rows with ready timers do not push participants");
+}
+
+async function testRaffleWinnerNotificationRequiresStoredWinner(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const { createRaffleNotificationService } = require(path.join(root, "lib/raffle-notifications"));
+  const sentPushes = [];
+  const service = createRaffleNotificationService({
+    botToken: BOT_TOKEN,
+    adminIds: [],
+    miniAppUrl: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+    rafflePrefix: "poker_app:raffle:",
+    redisPipeline: async (commands) => redis.pipeline(commands),
+    sendWebPushToMember: async (memberId, payload) => {
+      sentPushes.push({ memberId, payload });
+      return 1;
+    },
+  });
+  const storedRaffle = {
+    id: "contract_raffle_notify_requires_stored_winner",
+    title: "Stored winner check raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Stored Winner",
+      prize: "Ticket 500 ₽",
+      groupIndex: 0,
+      winnerReadySlotId: "initial_0",
+    }],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  persistContractRaffle(redis, storedRaffle);
+  const staleCandidateRaffle = {
+    ...storedRaffle,
+    winners: [{
+      userId: "tg_1002",
+      accountId: "ID100002",
+      name: "Wrong Candidate",
+      prize: "Ticket 500 ₽",
+      groupIndex: 0,
+      winnerReadySlotId: "initial_0",
+    }],
+  };
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_requires_stored_winner", staleCandidateRaffle);
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1002").length, 0, "candidate missing from stored winners is not notified");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100002").length, 0, "candidate missing from stored winners does not receive push");
+
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_requires_stored_winner", storedRaffle);
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length, 1, "stored winner still receives Telegram notification");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100001").length, 1, "stored winner still receives web push");
 }
 
 async function testRaffleAutoCompleteNotificationDedup(redis) {
@@ -4068,6 +4137,7 @@ async function main() {
     ["raffle winner push retry after zero", testRaffleWinnerNotificationRetriesPushAfterZero],
     ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
     ["raffle winner notification caps overflow", testRaffleWinnerNotificationCapsOverflow],
+    ["raffle winner notification requires stored winner", testRaffleWinnerNotificationRequiresStoredWinner],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],

@@ -327,7 +327,9 @@ function initRafflesCompletedRuntime(opts) {
         )
       : "";
     var rerollBadge = raffleWinnerIsReroll(w) ? "<span class=\"raffle-winner-reroll-badge\">РЕРОЛЛ</span>" : "";
-    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + rerollBadge + tgOpen + readyBadge + readyTimer + "</span>";
+    var metaItems = rerollBadge + readyBadge + readyTimer;
+    var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
+    var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"raffle-winner-row__identity\">" + profileOpen + tgOpen + "</span>" + profileMeta + "</span>";
     var rowClass = "raffle-winner-row" +
       (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
       (prizeIssued ? " raffle-winner-row--issued" : "") +
@@ -772,6 +774,106 @@ function initRafflesCompletedRuntime(opts) {
       burnedHtml + "</div>";
   }
 
+  function raffleCompletedDate(raffle) {
+    var raw = raffle && (raffle.endDate || raffle.drawnAt || raffle.createdAt);
+    if (!raw) return null;
+    var d = new Date(raw);
+    return isFinite(d.getTime()) ? d : null;
+  }
+
+  function startOfCompletedWeek(date) {
+    var d = date instanceof Date && isFinite(date.getTime()) ? new Date(date.getTime()) : new Date();
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var day = d.getDay();
+    var mondayOffset = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + mondayOffset);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function raffleCompletedIsCurrentWeek(raffle, now) {
+    var d = raffleCompletedDate(raffle);
+    if (!d) return false;
+    var weekStart = startOfCompletedWeek(now);
+    var nextWeekStart = new Date(weekStart.getTime());
+    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+    return d >= weekStart && d < nextWeekStart;
+  }
+
+  function raffleCompletedMonthKey(raffle) {
+    var d = raffleCompletedDate(raffle);
+    if (!d) return "unknown";
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+
+  function raffleCompletedMonthLabel(key, raffle) {
+    var d = raffleCompletedDate(raffle);
+    if (!d && key !== "unknown") {
+      var parts = String(key || "").split("-");
+      if (parts.length === 2) d = new Date(parseInt(parts[0], 10), (parseInt(parts[1], 10) || 1) - 1, 1);
+    }
+    if (!d || !isFinite(d.getTime())) return "Без даты";
+    try {
+      var label = d.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+      return label ? label.charAt(0).toUpperCase() + label.slice(1) : "Без даты";
+    } catch (eMonthLabel) {
+      return String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear();
+    }
+  }
+
+  function buildCompletedArchiveHtml(archive) {
+    if (!archive.length) return "";
+    var byMonth = {};
+    var order = [];
+    archive.forEach(function (raffle) {
+      var key = raffleCompletedMonthKey(raffle);
+      if (!byMonth[key]) {
+        byMonth[key] = [];
+        order.push(key);
+      }
+      byMonth[key].push(raffle);
+    });
+    var monthsHtml = order.map(function (key) {
+      var items = byMonth[key] || [];
+      var first = items[0] || null;
+      return "<details class=\"raffles-completed-archive-month\">" +
+        "<summary class=\"raffles-completed-archive-month__summary\">" +
+        "<span class=\"raffles-completed-archive-month__title\">" + escapeHtml(raffleCompletedMonthLabel(key, first)) + "</span>" +
+        "<span class=\"raffles-completed-spoiler__count\">" + escapeHtml(items.length) + "</span>" +
+        "</summary>" +
+        "<div class=\"raffles-completed-archive-month__body\">" +
+        items.map(buildCompletedRaffleCardHtml).join("") +
+        "</div>" +
+        "</details>";
+    }).join("");
+    return "<details class=\"raffles-completed-spoiler raffles-completed-archive\">" +
+      "<summary class=\"raffles-completed-spoiler__summary\">" +
+      "<span class=\"raffles-completed-spoiler__title\">Архив</span>" +
+      "<span class=\"raffles-completed-spoiler__count\">" + escapeHtml(archive.length) + "</span>" +
+      "</summary>" +
+      "<div class=\"raffles-completed-spoiler__body raffles-completed-archive__body\">" +
+      monthsHtml +
+      "</div>" +
+      "</details>";
+  }
+
+  function buildCompletedRafflesListHtml(completed) {
+    var list = Array.isArray(completed) ? completed : [];
+    if (list.length <= 0) return "";
+    var now = new Date();
+    var currentWeek = [];
+    var archive = [];
+    list.forEach(function (raffle) {
+      if (raffleCompletedIsCurrentWeek(raffle, now)) currentWeek.push(raffle);
+      else archive.push(raffle);
+    });
+    var currentHtml = currentWeek.map(buildCompletedRaffleCardHtml).join("");
+    if (!currentHtml && archive.length) {
+      currentHtml = "<p class=\"raffles-completed-current-empty\">На этой неделе завершённых розыгрышей нет.</p>";
+    }
+    return currentHtml + buildCompletedArchiveHtml(archive);
+  }
+
   function refreshCompletedRaffleCard(refreshBtn) {
     if (!refreshBtn || refreshBtn.disabled) return;
     if (!base || !pokerApiHasCredential()) {
@@ -818,7 +920,7 @@ function initRafflesCompletedRuntime(opts) {
           if (!rafflesCompleted) return;
           if (completed.length > 0) {
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");
-            rafflesCompleted.innerHTML = completed.map(buildCompletedRaffleCardHtml).join("");
+            rafflesCompleted.innerHTML = buildCompletedRafflesListHtml(completed);
             syncRaffleCompletedTimers();
           } else {
             rafflesCompleted.innerHTML = "";

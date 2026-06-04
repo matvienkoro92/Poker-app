@@ -1191,8 +1191,22 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   line-height: 1.18;
+}
+.raffle-winner-row__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.raffle-winner-row__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
 }
 .raffle-winner-row__profile.raffle-participants__profile-btn {
   flex: 0 1 auto;
@@ -1295,7 +1309,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-size: 11px;
   font-weight: 800;
   line-height: 1.15;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 .raffle-winner-ready-timer--burn {
   border-color: rgba(248, 113, 113, 0.48);
@@ -1332,6 +1346,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-winner-ready-btn {
   flex: 0 0 auto;
   min-height: 28px;
+  margin-left: auto;
   padding: 0 10px;
   border: 1px solid rgba(34, 197, 94, 0.45);
   border-radius: 6px;
@@ -1610,6 +1625,120 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-completed-list:empty + .raffles-completed-empty { display: block; }
 .raffles-completed-list:not(:empty) + .raffles-completed-empty { display: none; }
 .raffles-completed-empty { color: var(--text-muted); margin: 12px 0; }
+.raffles-completed-spoiler {
+  display: block;
+  border: 1px solid rgba(245, 158, 11, 0.34);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.32);
+  overflow: hidden;
+}
+.raffles-completed-spoiler__summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: #fde68a;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+.raffles-completed-spoiler__summary::-webkit-details-marker {
+  display: none;
+}
+.raffles-completed-spoiler__summary::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.16s ease;
+}
+.raffles-completed-spoiler[open] .raffles-completed-spoiler__summary::before {
+  transform: rotate(45deg);
+}
+.raffles-completed-spoiler__title {
+  min-width: 0;
+}
+.raffles-completed-spoiler__count {
+  min-width: 24px;
+  height: 24px;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fff7ed;
+  font-size: 12px;
+  font-weight: 900;
+}
+.raffles-completed-spoiler__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 12px 12px;
+}
+.raffles-completed-current-empty {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.22);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+.raffles-completed-archive__body {
+  gap: 10px;
+}
+.raffles-completed-archive-month {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 9px;
+  background: rgba(2, 6, 23, 0.22);
+  overflow: hidden;
+}
+.raffles-completed-archive-month__summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  color: #fff7ed;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+.raffles-completed-archive-month__summary::-webkit-details-marker {
+  display: none;
+}
+.raffles-completed-archive-month__summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.16s ease;
+}
+.raffles-completed-archive-month[open] .raffles-completed-archive-month__summary::before {
+  transform: rotate(45deg);
+}
+.raffles-completed-archive-month__title {
+  min-width: 0;
+}
+.raffles-completed-archive-month__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 10px 10px;
+}
 
 .raffles-hero__share-row .raffles-subscribe-btn:disabled {
   opacity: 0.7;

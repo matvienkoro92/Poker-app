@@ -573,6 +573,16 @@ function setView(viewName, navOpts) {
   try {
     if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
+  try {
+    if (viewName === "raffles" && prevView === "home" && typeof window !== "undefined") {
+      if (navOpts && navOpts.raffleCompletedTarget) {
+        window.__pokerRafflesOpenActiveTab = false;
+      } else {
+        window.__pendingRaffleCompletedId = "";
+        window.__pokerRafflesOpenActiveTab = true;
+      }
+    }
+  } catch (eRafflesHomeEntry) {}
   /* Уход с чата по таббару/жесту: blur и полный сброс клавиатуры/ visualViewport — иначе на iOS залипают
      html.chat-keyboard-open (overflow:hidden), inset и таббар «парит» с зазором снизу до главной. */
   if (prevView === "chat" && viewName !== "chat") {
