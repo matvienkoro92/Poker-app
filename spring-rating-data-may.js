@@ -5477,7 +5477,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
       "time": "18:00",
       "name": "PLO5 - PKO 200k",
       "buyin": 25000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "pinachet",

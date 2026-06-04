@@ -728,6 +728,7 @@ var SPRING_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-28-05-2026-league1-tai-7-ko-06h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league1-dv-bounty-13h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league1-tournir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-28-05-2026-league2-plo5-pko-18h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league1-classic-tournament-21h.jpg",
     "rating-compressed-preview/rating-28-05-2026-league1-nlh-knockout-21h.jpg"
   ],

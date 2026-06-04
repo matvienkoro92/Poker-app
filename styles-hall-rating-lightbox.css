@@ -1278,7 +1278,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 
   .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab,
   html.app-view-spring-rating .winter-rating__spring-main-tab {
-    padding: 9px 8px;
+    padding: 5px 8px;
     font-size: 14px;
     line-height: 1.1;
   }
@@ -1286,11 +1286,11 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab--conditions,
   html.app-view-spring-rating .winter-rating__spring-main-tab--conditions {
     flex-basis: 96px;
-    min-height: 48px;
-    padding: 7px 6px;
+    min-height: 29px;
+    padding: 3px 6px;
     border-radius: 0 12px 12px 0;
     font-size: 11px;
-    line-height: 1.05;
+    line-height: 0.98;
   }
 
   .view--active[data-view="spring-rating"] .winter-rating__spring-league-caption,
