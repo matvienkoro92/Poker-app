@@ -197,6 +197,9 @@
       if (passwordRow && registerMode && passwordConfirmRow && passwordRow.nextSibling !== passwordConfirmRow) {
         wrap.insertBefore(passwordRow, passwordConfirmRow);
       }
+      if (registerMode && passwordConfirmRow && rememberPasswordRow && passwordConfirmRow.nextSibling !== rememberPasswordRow) {
+        wrap.insertBefore(rememberPasswordRow, passwordConfirmRow.nextSibling);
+      }
       if (passwordRow && !registerMode && rememberPasswordRow && passwordRow.nextSibling !== rememberPasswordRow) {
         wrap.insertBefore(passwordRow, rememberPasswordRow);
       }

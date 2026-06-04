@@ -1632,6 +1632,67 @@ async function testRaffleWinnerNotificationResolvesAccountId(redis) {
   assert.strictEqual(sentPushes[0].memberId, "ID100002", "push is addressed to account id");
 }
 
+async function testRaffleWinnerNotificationCapsOverflow(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const { createRaffleNotificationService } = require(path.join(root, "lib/raffle-notifications"));
+  const sentPushes = [];
+  const service = createRaffleNotificationService({
+    botToken: BOT_TOKEN,
+    adminIds: [],
+    miniAppUrl: "https://t.me/Poker_dvatuza_bot/DvaTuza",
+    rafflePrefix: "poker_app:raffle:",
+    redisPipeline: async (commands) => redis.pipeline(commands),
+    sendWebPushToMember: async (memberId, payload) => {
+      sentPushes.push({ memberId, payload });
+      return 1;
+    },
+  });
+  const raffle = {
+    id: "contract_raffle_notify_caps_overflow",
+    title: "Overflow winner raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    participants: [
+      { userId: "tg_1001", accountId: "ID100001", name: "Winner" },
+      { userId: "tg_1002", accountId: "ID100002", name: "Participant 2" },
+      { userId: "tg_1003", accountId: "ID100003", name: "Participant 3" },
+    ],
+    winners: [
+      { userId: "tg_1001", accountId: "ID100001", name: "Winner", prize: "Ticket 500 ₽", groupIndex: 0 },
+      { userId: "tg_1002", accountId: "ID100002", name: "Participant 2" },
+      { userId: "tg_1003", accountId: "ID100003", name: "Participant 3" },
+    ],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_caps_overflow", raffle);
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length, 1, "real winner receives Telegram notification");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1002").length, 0, "overflow participant 2 does not receive Telegram notification");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 0, "overflow participant 3 does not receive Telegram notification");
+  const winnerPushes = sentPushes.filter((item) => item.payload && item.payload.kind === "raffle_winner");
+  assert.strictEqual(winnerPushes.length, 1, "only capped winner receives web push");
+  assert.strictEqual(winnerPushes[0].memberId, "ID100001", "web push is addressed to capped winner");
+
+  const participantRows = [
+    { userId: "tg_1004", accountId: "ID100004", name: "Participant 4" },
+    { userId: "tg_1005", accountId: "ID100005", name: "Participant 5" },
+  ];
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_participants_as_winners", {
+    id: "contract_raffle_notify_participants_as_winners",
+    title: "Participants copied into winners",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    participants: participantRows,
+    winners: participantRows.map((row) => ({ ...row })),
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  });
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "participant-shaped overflow does not notify first participant");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1005").length, 0, "participant-shaped overflow does not notify second participant");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100004" || item.memberId === "ID100005").length, 0, "participant-shaped overflow does not push participants");
+}
+
 async function testRaffleAutoCompleteNotificationDedup(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -3786,6 +3847,7 @@ async function main() {
     ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],
     ["raffle winner push retry after zero", testRaffleWinnerNotificationRetriesPushAfterZero],
     ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
+    ["raffle winner notification caps overflow", testRaffleWinnerNotificationCapsOverflow],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],

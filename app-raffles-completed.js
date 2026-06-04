@@ -13,6 +13,10 @@ function initRafflesCompletedRuntime(opts) {
     var raffleWinnerLeadersModalList = document.getElementById("raffleWinnerLeadersModalList");
     var raffleWinnerLeaderRows = [];
     var RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT = 5;
+    var RAFFLE_READY_WINDOW_FALLBACK_MS = 10 * 60 * 1000;
+    var raffleCompletedTimersInterval = null;
+    var raffleCompletedTimerRefreshAfter = 0;
+    var raffleCompletedTimerRefreshMarks = {};
 
   function raffleWinnerReadyExpired(w) {
     if (!w) return false;
@@ -20,10 +24,189 @@ function initRafflesCompletedRuntime(opts) {
     return w.winnerReadyExpired === true || w.winnerBurned === true || state === "missed" || state === "burned";
   }
 
+  function raffleWinnerIsReady(w) {
+    return !!(w && (w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true"));
+  }
+
   function raffleWinnerIsReroll(w) {
     if (!w) return false;
     var round = parseInt(w.winnerReadyRound, 10);
     return w.winnerReroll === true || (isFinite(round) && round > 0);
+  }
+
+  function raffleWinnerReadyDeadlineMs(w) {
+    if (!w || !w.winnerReadyDeadlineAt) return 0;
+    var d = new Date(w.winnerReadyDeadlineAt);
+    var ms = d.getTime();
+    return isFinite(ms) ? ms : 0;
+  }
+
+  function raffleWinnerReadyStartMs(w, deadlineMs) {
+    var dMs = parseInt(deadlineMs, 10) || raffleWinnerReadyDeadlineMs(w);
+    var raw = w && w.winnerReadyWindowStartedAt ? new Date(w.winnerReadyWindowStartedAt).getTime() : 0;
+    if (isFinite(raw) && raw > 0 && (!dMs || raw < dMs)) return raw;
+    return dMs ? Math.max(0, dMs - RAFFLE_READY_WINDOW_FALLBACK_MS) : 0;
+  }
+
+  function raffleWinnerReadyTimerKey(w, raffleId, mode, deadlineMs, startMs) {
+    var parts = [
+      String(raffleId || ""),
+      mode === "burn" ? "burn" : "reroll",
+      String(w && (w.winnerReadySlotId || w.userId || w.accountId || w.p21Id || w.name) || ""),
+      String(startMs || ""),
+      String(deadlineMs || "")
+    ];
+    return parts.join(":");
+  }
+
+  function raffleWinnerReadyTimerInfo(w, raffleId, mode) {
+    var deadlineMs = raffleWinnerReadyDeadlineMs(w);
+    if (!deadlineMs) return null;
+    var startMs = raffleWinnerReadyStartMs(w, deadlineMs);
+    return {
+      deadlineMs: deadlineMs,
+      startMs: startMs,
+      key: raffleWinnerReadyTimerKey(w, raffleId, mode, deadlineMs, startMs)
+    };
+  }
+
+  function raffleWinnerHasPendingReadyDeadline(w) {
+    if (!w) return false;
+    var status = String(w.winnerStatus || "").toLowerCase();
+    if (status === "ok" || status === "fail") return false;
+    if (raffleWinnerIsReady(w) || raffleWinnerReadyExpired(w)) return false;
+    return raffleWinnerReadyDeadlineMs(w) > 0;
+  }
+
+  function raffleReadyCountdownText(deadlineMs) {
+    var d = new Date(deadlineMs);
+    if (!isFinite(d.getTime())) return "";
+    if (d.getTime() <= Date.now()) return "0 сек.";
+    if (typeof pokerRafflesFormatCountdown === "function") {
+      return pokerRafflesFormatCountdown(d).replace(/^Завершён$/, "0 сек.");
+    }
+    var ms = Math.max(0, d.getTime() - Date.now());
+    var sec = Math.floor(ms / 1000) % 60;
+    var min = Math.floor(ms / 60000) % 60;
+    var hours = Math.floor(ms / 3600000) % 24;
+    var days = Math.floor(ms / 86400000);
+    var parts = [];
+    if (days > 0) parts.push(days + " д.");
+    if (hours > 0 || parts.length) parts.push(hours + " ч.");
+    if (min > 0 || parts.length) parts.push(min + " мин.");
+    parts.push(sec + " сек.");
+    return parts.join(" ");
+  }
+
+  function raffleReadyTimerLabel(mode) {
+    return mode === "burn" ? "До сгорания" : "До рерола";
+  }
+
+  function raffleReadyTimerHtml(timerInfo, mode, className) {
+    var info = timerInfo && typeof timerInfo === "object" ? timerInfo : { deadlineMs: timerInfo };
+    var deadlineMs = parseInt(info.deadlineMs, 10) || 0;
+    if (!deadlineMs) return "";
+    var d = new Date(deadlineMs);
+    if (!isFinite(d.getTime())) return "";
+    var startMs = parseInt(info.startMs, 10) || 0;
+    var timerAttrs = " data-raffle-ready-deadline=\"" + escapeHtml(d.toISOString()) + "\"";
+    if (startMs) {
+      var startDate = new Date(startMs);
+      if (isFinite(startDate.getTime())) timerAttrs += " data-raffle-ready-start=\"" + escapeHtml(startDate.toISOString()) + "\"";
+    }
+    if (info.key) timerAttrs += " data-raffle-ready-refresh-key=\"" + escapeHtml(info.key) + "\"";
+    var label = raffleReadyTimerLabel(mode);
+    var baseClass = className || "raffle-winner-ready-timer";
+    return "<span class=\"" +
+      escapeHtml(baseClass + " " + baseClass + "--" + (mode === "burn" ? "burn" : "reroll")) +
+      "\"" +
+      timerAttrs +
+      " data-raffle-ready-timer-mode=\"" +
+      escapeHtml(mode === "burn" ? "burn" : "reroll") +
+      "\" data-raffle-ready-timer-label=\"" +
+      escapeHtml(label) +
+      "\" aria-live=\"polite\">" +
+      escapeHtml(label + ": " + raffleReadyCountdownText(d.getTime())) +
+      "</span>";
+  }
+
+  function nearestRaffleReadyTimerInfo(rows, raffleId, mode) {
+    var nearest = null;
+    (Array.isArray(rows) ? rows : []).forEach(function (w) {
+      if (!raffleWinnerHasPendingReadyDeadline(w)) return;
+      var info = raffleWinnerReadyTimerInfo(w, raffleId, mode);
+      if (info && info.deadlineMs && (!nearest || info.deadlineMs < nearest.deadlineMs)) nearest = info;
+    });
+    return nearest;
+  }
+
+  function requestRaffleTimerRefresh(refreshKey) {
+    var key = String(refreshKey || "");
+    if (key && raffleCompletedTimerRefreshMarks[key]) return;
+    var now = Date.now();
+    if (now < raffleCompletedTimerRefreshAfter) return;
+    if (key) raffleCompletedTimerRefreshMarks[key] = true;
+    raffleCompletedTimerRefreshAfter = now + 7000;
+    setTimeout(function () {
+      if (typeof clearRafflesCache === "function") clearRafflesCache();
+      if (typeof loadRaffles === "function") {
+        loadRaffles(false, { skipCache: true, keepCurrentOnLoading: true, deadlineRefresh: true });
+      }
+    }, 250);
+  }
+
+  function refreshRaffleTimerAtMilestones(el, now, deadlineMs) {
+    var startRaw = el.getAttribute("data-raffle-ready-start") || "";
+    var startMs = startRaw ? new Date(startRaw).getTime() : 0;
+    if (!isFinite(startMs) || startMs <= 0 || startMs >= deadlineMs) {
+      startMs = Math.max(0, deadlineMs - RAFFLE_READY_WINDOW_FALLBACK_MS);
+    }
+    if (!startMs || startMs >= deadlineMs) return;
+    var refreshKeyBase = el.getAttribute("data-raffle-ready-refresh-key") || el.getAttribute("data-raffle-ready-deadline") || "";
+    var midpointMs = startMs + Math.floor((deadlineMs - startMs) / 2);
+    var minuteBeforeMs = deadlineMs - 60000;
+    var hasMinuteBefore = minuteBeforeMs > startMs && minuteBeforeMs < deadlineMs;
+    if (now >= midpointMs && now < deadlineMs && (!hasMinuteBefore || now < minuteBeforeMs)) {
+      requestRaffleTimerRefresh(refreshKeyBase + ":midpoint");
+    }
+    if (hasMinuteBefore && now >= minuteBeforeMs && now < deadlineMs) {
+      requestRaffleTimerRefresh(refreshKeyBase + ":minute-before");
+    }
+  }
+
+  function updateRaffleCompletedTimers() {
+    var timers = document.querySelectorAll("[data-raffle-ready-deadline]");
+    if (!timers.length) {
+      if (raffleCompletedTimersInterval) {
+        clearInterval(raffleCompletedTimersInterval);
+        raffleCompletedTimersInterval = null;
+      }
+      return;
+    }
+    var now = Date.now();
+    timers.forEach(function (el) {
+      var raw = el.getAttribute("data-raffle-ready-deadline") || "";
+      var deadlineMs = new Date(raw).getTime();
+      if (!isFinite(deadlineMs)) return;
+      var mode = el.getAttribute("data-raffle-ready-timer-mode") || "reroll";
+      var label = el.getAttribute("data-raffle-ready-timer-label") || raffleReadyTimerLabel(mode);
+      var expired = deadlineMs <= now;
+      el.textContent = label + ": " + (expired ? "0 сек." : raffleReadyCountdownText(deadlineMs));
+      el.classList.toggle("raffle-ready-timer--expired", expired);
+      if (expired) {
+        var refreshKeyBase = el.getAttribute("data-raffle-ready-refresh-key") || raw;
+        requestRaffleTimerRefresh(refreshKeyBase + ":expired");
+      } else {
+        refreshRaffleTimerAtMilestones(el, now, deadlineMs);
+      }
+    });
+  }
+
+  function syncRaffleCompletedTimers() {
+    updateRaffleCompletedTimers();
+    if (!raffleCompletedTimersInterval && document.querySelector("[data-raffle-ready-deadline]")) {
+      raffleCompletedTimersInterval = setInterval(updateRaffleCompletedTimers, 1000);
+    }
   }
 
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
@@ -34,7 +217,7 @@ function initRafflesCompletedRuntime(opts) {
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
     var prizeIssued = status === "ok";
     var prizeDeclined = status === "fail";
-    var winnerReady = w.winnerReady === true || String(w.winnerReady || "").toLowerCase() === "true";
+    var winnerReady = raffleWinnerIsReady(w);
     var readyExpired = !prizeIssued && !winnerReady && raffleWinnerReadyExpired(w);
     var viewerIds = [];
     try {
@@ -100,7 +283,14 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(tgLogin) +
         "</a>"
       : "";
-    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + readyBadge + "</span>";
+    var readyTimer = raffleWinnerHasPendingReadyDeadline(w)
+      ? raffleReadyTimerHtml(
+          raffleWinnerReadyTimerInfo(w, raffleId, raffleWinnerIsReroll(w) ? "burn" : "reroll"),
+          raffleWinnerIsReroll(w) ? "burn" : "reroll",
+          "raffle-winner-ready-timer"
+        )
+      : "";
+    var profileBlock = "<span class=\"raffle-winner-row__person\">" + profileOpen + tgOpen + readyBadge + readyTimer + "</span>";
     var rowClass = "raffle-winner-row" +
       (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
       (prizeIssued ? " raffle-winner-row--issued" : "") +
@@ -397,6 +587,7 @@ function initRafflesCompletedRuntime(opts) {
 
   function bindRaffleWinnerStatusButtons(container, raffleId) {
     if (!container || !base) return;
+    syncRaffleCompletedTimers();
     container.querySelectorAll(".raffle-winner-ready-btn").forEach(function (btn) {
       if (btn.dataset.readyBound === "1") return;
       btn.dataset.readyBound = "1";
@@ -479,6 +670,14 @@ function initRafflesCompletedRuntime(opts) {
     });
     var winHtml = raffleCompletedWinnerGroupsHtml(raffle, originalWinners);
     var rerollHtml = raffleCompletedWinnerGroupsHtml(raffle, rerollWinners);
+    var rerollTimerInfo = nearestRaffleReadyTimerInfo(originalWinners, raffle.id, "reroll");
+    var burnTimerInfo = nearestRaffleReadyTimerInfo(rerollWinners, raffle.id, "burn");
+    var rerollTimerHtml = rerollTimerInfo
+      ? raffleReadyTimerHtml(rerollTimerInfo, "reroll", "raffle-completed-card__timer")
+      : "";
+    var burnTimerHtml = burnTimerInfo
+      ? raffleReadyTimerHtml(burnTimerInfo, "burn", "raffle-completed-card__timer")
+      : "";
     var burnedHtml = raffleCompletedBurnedSummaryHtml(raffle);
     var adminActionsHtml = rafflesIsAdmin
       ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
@@ -487,9 +686,10 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
       : "";
     return "<div class=\"raffle-completed-card\" data-raffle-id=\"" + escapeHtml(raffle.id || "") + "\" data-raffle-number=\"" + escapeHtml(raffle.completedNumber || "") + "\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
+      rerollTimerHtml +
       adminActionsHtml +
       (winHtml ? "<p class=\"raffle-completed-card__winners-title\">Победители</p><ul class=\"raffle-completed-card__winners\">" + winHtml + "</ul>" : "") +
-      (rerollHtml ? "<p class=\"raffle-completed-card__reroll-title\">Реролл</p><ul class=\"raffle-completed-card__winners raffle-completed-card__winners--reroll\">" + rerollHtml + "</ul>" : "") +
+      (rerollHtml ? "<div class=\"raffle-completed-card__reroll-head\"><p class=\"raffle-completed-card__reroll-title\">Реролл</p>" + burnTimerHtml + "</div><ul class=\"raffle-completed-card__winners raffle-completed-card__winners--reroll\">" + rerollHtml + "</ul>" : "") +
       burnedHtml + "</div>";
   }
 
@@ -522,7 +722,10 @@ function initRafflesCompletedRuntime(opts) {
         var wrap = document.createElement("div");
         wrap.innerHTML = nextHtml;
         var nextCard = wrap.firstElementChild;
-        if (nextCard) card.replaceWith(nextCard);
+        if (nextCard) {
+          card.replaceWith(nextCard);
+          syncRaffleCompletedTimers();
+        }
       })
       .catch(function () {
         refreshBtn.disabled = false;
@@ -537,9 +740,11 @@ function initRafflesCompletedRuntime(opts) {
           if (completed.length > 0) {
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");
             rafflesCompleted.innerHTML = completed.map(buildCompletedRaffleCardHtml).join("");
+            syncRaffleCompletedTimers();
           } else {
             rafflesCompleted.innerHTML = "";
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.remove("raffle-empty--hidden");
+            syncRaffleCompletedTimers();
           }
         }
 

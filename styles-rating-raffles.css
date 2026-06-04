@@ -747,6 +747,14 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   margin: 0;
   padding-left: 18px;
 }
+.raffle-subscribe-requirements__note {
+  display: block;
+  margin-top: 2px;
+  color: rgba(248, 234, 208, 0.58);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+}
 .raffle-subscribe-requirements a {
   color: #fde68a;
   font-weight: 800;
@@ -764,6 +772,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 [data-theme="light"] .raffle-subscribe-requirements__title,
 [data-theme="light"] .raffle-subscribe-requirements a {
   color: #92400e;
+}
+[data-theme="light"] .raffle-subscribe-requirements__note {
+  color: rgba(67, 20, 7, 0.58);
 }
 .raffle-invite-wide-row {
   width: 100%;
@@ -1234,6 +1245,29 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background: rgba(127, 29, 29, 0.32);
   color: #fecaca;
 }
+.raffle-winner-ready-timer {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  padding: 2px 7px;
+  border: 1px solid rgba(250, 204, 21, 0.38);
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.1);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.raffle-winner-ready-timer--burn {
+  border-color: rgba(248, 113, 113, 0.48);
+  background: rgba(127, 29, 29, 0.26);
+  color: #fecaca;
+}
+.raffle-ready-timer--expired {
+  opacity: 0.72;
+}
 .raffle-winner-row--missed .raffle-winner-row__primary {
   color: rgba(226, 232, 240, 0.72);
 }
@@ -1550,6 +1584,27 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.18), 0 0 22px rgba(251, 191, 36, 0.18);
 }
 .raffle-completed-card__meta { margin: 0 0 6px; font-size: 13px; color: var(--text-muted); }
+.raffle-completed-card__timer {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  margin: 2px 0 8px;
+  padding: 4px 9px;
+  border: 1px solid rgba(250, 204, 21, 0.44);
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.raffle-completed-card__timer--burn {
+  border-color: rgba(248, 113, 113, 0.48);
+  background: rgba(127, 29, 29, 0.24);
+  color: #fecaca;
+}
 .raffle-completed-card__actions {
   margin: 6px 0;
   display: flex;
@@ -1581,12 +1636,22 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-completed-card__winners { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text); }
 .raffle-completed-card__winners-title { margin: 8px 0 4px; font-size: 13px; font-weight: 600; color: var(--accent-2); }
+.raffle-completed-card__reroll-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 12px 0 5px;
+}
+.raffle-completed-card__reroll-head .raffle-completed-card__timer {
+  margin: 0;
+}
 .raffle-completed-card__reroll-title {
   display: inline-flex;
   align-items: center;
   width: max-content;
   max-width: 100%;
-  margin: 12px 0 5px;
+  margin: 0;
   padding: 3px 10px;
   border: 1px solid rgba(250, 204, 21, 0.42);
   border-radius: 999px;
