@@ -13,7 +13,7 @@ function initRafflesCompletedRuntime(opts) {
     var raffleWinnerLeadersModalList = document.getElementById("raffleWinnerLeadersModalList");
     var raffleWinnerLeaderRows = [];
     var RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT = 5;
-    var RAFFLE_READY_WINDOW_FALLBACK_MS = 10 * 60 * 1000;
+    var RAFFLE_READY_WINDOW_FALLBACK_MS = 15 * 60 * 1000;
     var raffleCompletedTimersInterval = null;
     var raffleCompletedTimerRefreshAfter = 0;
     var raffleCompletedTimerRefreshMarks = {};

@@ -1304,7 +1304,7 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
     status: "drawn",
     createdAt: new Date(now - 7200_000).toISOString(),
     drawnAt: new Date(now - 1800_000).toISOString(),
-    winnerReadyWindowMs: 10 * 60 * 1000,
+    winnerReadyWindowMs: 15 * 60 * 1000,
   };
   redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll", JSON.stringify(raffle));
   redis.l("poker_app:raffle_ids").push("contract_raffle_ready_reroll");
