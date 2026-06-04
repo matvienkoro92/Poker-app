@@ -4422,7 +4422,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "XP4100469",
           "place": 1,
-          "reward": 78100,
+          "reward": 7810,
           "points": 135
         }
       ]
@@ -4436,13 +4436,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "хер вам)))))",
           "place": 2,
-          "reward": 64960,
+          "reward": 6496,
           "points": 110
         },
         {
           "nick": "Бардюр",
           "place": 0,
-          "reward": 4120,
+          "reward": 412,
           "points": 0
         },
         {
@@ -4474,7 +4474,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 4,
-          "reward": 85710,
+          "reward": 8571,
           "points": 70
         },
         {
@@ -4544,7 +4544,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Бардюр",
           "place": 2,
-          "reward": 114100,
+          "reward": 11410,
           "points": 110
         },
         {
@@ -4582,19 +4582,19 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "FizzBuzz",
           "place": 1,
-          "reward": 254680,
+          "reward": 25468,
           "points": 135
         },
         {
           "nick": "AlenaSt",
           "place": 8,
-          "reward": 10580,
+          "reward": 1058,
           "points": 30
         },
         {
           "nick": "Annie1609",
           "place": 20,
-          "reward": 6130,
+          "reward": 613,
           "points": 0
         },
         {
@@ -4660,13 +4660,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Рыбнадзор",
           "place": 8,
-          "reward": 45820,
+          "reward": 4582,
           "points": 30
         },
         {
           "nick": "Бардюр",
           "place": 14,
-          "reward": 32250,
+          "reward": 3225,
           "points": 0
         },
         {
@@ -4698,7 +4698,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 1,
-          "reward": 85300,
+          "reward": 8530,
           "points": 135
         },
         {
@@ -4718,7 +4718,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "shockin",
           "place": 4,
-          "reward": 51780,
+          "reward": 5178,
           "points": 70
         },
         {
@@ -4756,13 +4756,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Бардюр",
           "place": 4,
-          "reward": 159800,
+          "reward": 15980,
           "points": 70
         },
         {
           "nick": "Em13!!",
           "place": 6,
-          "reward": 27550,
+          "reward": 2755,
           "points": 50
         },
         {
@@ -4794,7 +4794,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Неизвестны",
           "place": 2,
-          "reward": 77200,
+          "reward": 7720,
           "points": 110
         }
       ]
@@ -4884,7 +4884,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "AlenaSt",
           "place": 1,
-          "reward": 546860,
+          "reward": 54686,
           "points": 135
         },
         {
@@ -4962,7 +4962,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 7,
-          "reward": 40930,
+          "reward": 4093,
           "points": 40
         },
         {
@@ -4982,7 +4982,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 2,
-          "reward": 66390,
+          "reward": 6639,
           "points": 110
         }
       ]
@@ -4996,13 +4996,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "хер вам)))))",
           "place": 3,
-          "reward": 19010,
+          "reward": 1901,
           "points": 90
         },
         {
           "nick": "Sarmat1305",
           "place": 4,
-          "reward": 2340,
+          "reward": 234,
           "points": 70
         },
         {
@@ -5060,7 +5060,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "хер вам)))))",
           "place": 5,
-          "reward": 17290,
+          "reward": 1729,
           "points": 60
         },
         {
@@ -5086,13 +5086,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "AlenaSt",
           "place": 6,
-          "reward": 14670,
+          "reward": 1467,
           "points": 50
         },
         {
           "nick": "B551OB",
           "place": 8,
-          "reward": 13420,
+          "reward": 1342,
           "points": 30
         },
         {
@@ -5124,7 +5124,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "ABevege",
           "place": 1,
-          "reward": 224040,
+          "reward": 22404,
           "points": 135
         },
         {
@@ -5238,7 +5238,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Sarmat1305",
           "place": 5,
-          "reward": 17460,
+          "reward": 1746,
           "points": 60
         },
         {
@@ -5264,7 +5264,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Рыбнадзор",
           "place": 3,
-          "reward": 389360,
+          "reward": 38936,
           "points": 90
         },
         {
@@ -5304,7 +5304,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 2,
-          "reward": 54420,
+          "reward": 5442,
           "points": 110
         },
         {
@@ -5330,7 +5330,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 8,
-          "reward": 22660,
+          "reward": 2266,
           "points": 30
         },
         {
@@ -5368,19 +5368,19 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Бабник",
           "place": 4,
-          "reward": 37480,
+          "reward": 3748,
           "points": 70
         },
         {
           "nick": "B551OB",
           "place": 5,
-          "reward": 31630,
+          "reward": 3163,
           "points": 60
         },
         {
           "nick": "AlenaSt",
           "place": 8,
-          "reward": 3170,
+          "reward": 317,
           "points": 30
         },
         {
@@ -5482,7 +5482,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "pinachet",
           "place": 1,
-          "reward": 749500,
+          "reward": 74950,
           "points": 135
         },
         {
@@ -5558,19 +5558,19 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "outsider",
           "place": 3,
-          "reward": 167840,
+          "reward": 16784,
           "points": 90
         },
         {
           "nick": "Em13!!",
           "place": 5,
-          "reward": 115720,
+          "reward": 11572,
           "points": 60
         },
         {
           "nick": "cap888881",
           "place": 17,
-          "reward": 51230,
+          "reward": 5123,
           "points": 0
         },
         {
@@ -5636,7 +5636,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 2,
-          "reward": 140680,
+          "reward": 14068,
           "points": 110
         },
         {
@@ -5674,7 +5674,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 2,
-          "reward": 56380,
+          "reward": 5638,
           "points": 110
         },
         {
@@ -5828,7 +5828,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "nikola233",
           "place": 3,
-          "reward": 31360,
+          "reward": 3136,
           "points": 90
         },
         {
@@ -5848,7 +5848,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Sarmat1305",
           "place": 3,
-          "reward": 30140,
+          "reward": 3014,
           "points": 90
         },
         {
@@ -5868,13 +5868,13 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Lesnov",
           "place": 1,
-          "reward": 343530,
+          "reward": 34353,
           "points": 135
         },
         {
           "nick": "nikola233",
           "place": 17,
-          "reward": 11940,
+          "reward": 1194,
           "points": 0
         },
         {
@@ -5982,7 +5982,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Sarmat1305",
           "place": 3,
-          "reward": 14450,
+          "reward": 1445,
           "points": 90
         },
         {
@@ -6002,19 +6002,19 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "MORPEH",
           "place": 3,
-          "reward": 155230,
+          "reward": 15523,
           "points": 90
         },
         {
           "nick": "Lesnov",
           "place": 13,
-          "reward": 30810,
+          "reward": 3081,
           "points": 0
         },
         {
           "nick": "Olegan393",
           "place": 0,
-          "reward": 3500,
+          "reward": 350,
           "points": 0
         },
         {
@@ -6042,7 +6042,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "хер вам)))))",
           "place": 2,
-          "reward": 7620,
+          "reward": 762,
           "points": 110
         }
       ]
@@ -6094,7 +6094,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 4,
-          "reward": 17090,
+          "reward": 1709,
           "points": 70
         },
         {
@@ -6196,7 +6196,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "AlenaSt",
           "place": 6,
-          "reward": 17010,
+          "reward": 1701,
           "points": 50
         },
         {
@@ -6216,7 +6216,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "pryanik2la",
           "place": 3,
-          "reward": 280060,
+          "reward": 28006,
           "points": 90
         },
         {
@@ -6236,7 +6236,7 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
         {
           "nick": "PapaRabotaet",
           "place": 5,
-          "reward": 137800,
+          "reward": 13780,
           "points": 60
         },
         {
