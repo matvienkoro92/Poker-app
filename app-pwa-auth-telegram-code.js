@@ -120,6 +120,21 @@
       hint.classList.toggle("auth-banner__code-hint--error", !!isError);
       hint.classList.toggle("auth-banner__code-hint--hidden", !display);
     }
+    function isUnregisteredTelegramUsernameError(raw) {
+      var s = raw != null ? String(raw).toLowerCase() : "";
+      return !!s && (
+        s.indexOf("@username ещё не привязан") !== -1 ||
+        s.indexOf("@username еще не привязан") !== -1 ||
+        s.indexOf("ещё не привязан") !== -1 ||
+        s.indexOf("еще не привязан") !== -1 ||
+        s.indexOf("not linked") !== -1 ||
+        s.indexOf("not registered") !== -1
+      );
+    }
+    function telegramLoginErrorMessage(data, fallbackMessage) {
+      var raw = (data && data.error) || fallbackMessage || "";
+      return isUnregisteredTelegramUsernameError(raw) ? pwaAuthT("registerFirst") : (raw || pwaAuthT("loginFailed"));
+    }
     function showCodeSentToBotHint() {
       if (!hint) {
         if ((deps.shouldUseOverlayAuthScreen ? deps.shouldUseOverlayAuthScreen() : false)) {
@@ -299,7 +314,7 @@
             switchTelegramToPasswordSetup();
             return true;
           }
-          setHint(fallbackMessage || (data && data.error) || pwaAuthT("loginFailed"), true);
+          setHint(telegramLoginErrorMessage(data, fallbackMessage), true);
           return false;
         })
         .catch(function () {

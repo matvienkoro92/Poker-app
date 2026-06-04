@@ -36,22 +36,18 @@ function initRafflesActiveViewRuntime(opts) {
     raffleCard.classList.toggle("raffle-card--cash", isCashPrize);
     raffleCard.classList.toggle("raffle-card--ticket", !isCashPrize);
     setRaffleCardHeadingText(buildActiveRaffleCardHeading(raffle));
-    var total = raffle.totalWinners || 0;
-    var groups = raffle.groups || [];
-    var totalPrize = getRaffleTotalPrize(raffle);
     var endDate = raffle.endDate ? new Date(raffle.endDate) : null;
     var isActive = raffle.status === "active";
     currentRaffleEndDate = isActive && endDate ? endDate : null;
-    if (raffleStatWinners) raffleStatWinners.textContent = "Победителей: " + total;
-    if (raffleStatPrizeValue) raffleStatPrizeValue.textContent = totalPrize > 0 ? totalPrize + " р" : "—";
-    if (raffleStatGroups) raffleStatGroups.textContent = "Групп призов: " + (groups.length > 0 ? groups.length : "—");
     if (currentRaffleEndDate) {
       updateRaffleEndText();
       raffleTimerInterval = setInterval(updateRaffleEndText, 1000);
     } else {
-      raffleEnd.textContent = raffle.status === "drawn"
+      var fallbackEndText = raffle.status === "drawn"
         ? "Завершён"
-        : (endDate ? "Завершится через " + endDate.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) : "");
+        : (endDate ? endDate.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) : "");
+      if (typeof setRaffleEndStatusText === "function") setRaffleEndStatusText(fallbackEndText);
+      else if (raffleEnd) raffleEnd.textContent = fallbackEndText;
     }
     if (raffleCompleteBtn) {
       var showComplete = rafflesIsAdmin && raffle.status === "active";
@@ -73,13 +69,10 @@ function initRafflesActiveViewRuntime(opts) {
       raffleDeleteBtn.classList.toggle("raffle-cancel-btn--hidden", !showDelete);
       raffleDeleteBtn.disabled = !showDelete;
     }
-    var prizesHtml = "";
-    groups.forEach(function (g, i) {
-      var cnt = g.count != null ? parseInt(g.count, 10) : 0;
-      var cntStr = isNaN(cnt) ? "0" : String(cnt);
-      prizesHtml += "<div class=\"raffle-prize\">Группа " + (i + 1) + " (" + cntStr + " побед.): " + escapeHtml(raffleDisplayPrizeText(g.prize || "—")) + "</div>";
-    });
-    rafflePrizes.innerHTML = prizesHtml || "<p class=\"raffle-no-prizes\">Призы не указаны</p>";
+    if (rafflePrizes) {
+      rafflePrizes.innerHTML = "";
+      rafflePrizes.hidden = true;
+    }
     var raffleIds = collectRaffleIdentityIds();
     var iAmIn =
       raffleIds.length > 0 &&

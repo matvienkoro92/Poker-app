@@ -69,7 +69,7 @@ function initRafflesPublicRuntime(opts) {
 
   function openRaffleRequirementLink(data) {
     var url = data && data.openUrl ? String(data.openUrl) : "";
-    if (!url && data && data.code === "CHANNEL_REQUIRED") url = "https://t.me/Dva_tuza_club";
+    if (!url && data && data.code === "CHANNEL_REQUIRED") url = "https://t.me/dva_tuza_club";
     if (!url && data && data.code === "BOT_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
     if (!url && data && data.code === "SUBSCRIPTION_REQUIRED") url = "https://t.me/Poker_dvatuza_bot";
     if (!url) return;
@@ -79,6 +79,23 @@ function initRafflesPublicRuntime(opts) {
       return;
     }
     if (typeof window.open === "function") window.open(url, "_blank");
+  }
+
+  if (!document.documentElement.dataset.raffleTelegramLinksBound) {
+    document.documentElement.dataset.raffleTelegramLinksBound = "1";
+    document.addEventListener("click", function (e) {
+      var target = e && e.target;
+      var link = target && target.closest ? target.closest("[data-raffle-telegram-link]") : null;
+      if (!link) return;
+      var url = String(link.getAttribute("href") || "").trim();
+      if (!/^https:\/\/t\.me\/[A-Za-z0-9_]{3,64}(?:[/?#].*)?$/i.test(url)) return;
+      var tgLink = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgLink && tgLink.openTelegramLink) {
+        e.preventDefault();
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+        tgLink.openTelegramLink(url);
+      }
+    });
   }
 
   if (raffleJoinToggleBtn) {

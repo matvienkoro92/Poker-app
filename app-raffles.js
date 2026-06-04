@@ -123,7 +123,7 @@ function initRaffles() {
     add(raffleFeedbackTelegramLink(opts.botUrl));
     add(raffleFeedbackTelegramLink(opts.channelUrl));
     add({ text: "@Poker_dvatuza_bot", url: "https://t.me/Poker_dvatuza_bot" });
-    add({ text: "@Dva_tuza_club", url: "https://t.me/Dva_tuza_club" });
+    add({ text: "@dva_tuza_club", url: "https://t.me/dva_tuza_club" });
     return links;
   }
 
@@ -225,11 +225,43 @@ function initRaffles() {
   var formatRaffleSum = pokerRafflesFormatSum;
   var buildActiveRaffleCardHeading = pokerRafflesBuildActiveCardHeading;
 
+  function rafflePadTimerUnit(value) {
+    var n = parseInt(value, 10);
+    if (isNaN(n) || n < 0) n = 0;
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function formatRaffleTimerValue(endDate) {
+    if (!endDate) return "";
+    var ms = endDate.getTime() - Date.now();
+    if (ms <= 0) return "";
+    var totalSeconds = Math.floor(ms / 1000);
+    var days = Math.floor(totalSeconds / 86400);
+    var hours = Math.floor((totalSeconds % 86400) / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    var seconds = totalSeconds % 60;
+    return (days > 0 ? days + " д " : "") + rafflePadTimerUnit(hours) + ":" + rafflePadTimerUnit(minutes) + ":" + rafflePadTimerUnit(seconds);
+  }
+
+  function setRaffleEndStatusText(text) {
+    if (!raffleEnd) return;
+    raffleEnd.classList.add("raffle-stat--timer-state");
+    raffleEnd.innerHTML = "<span class=\"raffle-timer__value\">" + escapeHtml(text || "") + "</span>";
+  }
+
+  function setRaffleEndTimerValue(value) {
+    if (!raffleEnd) return;
+    raffleEnd.classList.remove("raffle-stat--timer-state");
+    raffleEnd.innerHTML =
+      "<span class=\"raffle-timer__label\">До итогов</span>" +
+      "<span class=\"raffle-timer__value\">" + escapeHtml(value || "") + "</span>";
+  }
+
   function updateRaffleEndText() {
     if (!raffleEnd || !currentRaffleEndDate) return;
     var text = formatRaffleCountdown(currentRaffleEndDate);
     if (text === "Завершён") {
-      raffleEnd.textContent = rafflesDeadlineRefreshInFlight ? "Подводим итоги…" : "Завершён";
+      setRaffleEndStatusText(rafflesDeadlineRefreshInFlight ? "Подводим итоги…" : "Завершён");
       if (raffleTimerInterval) {
         clearInterval(raffleTimerInterval);
         raffleTimerInterval = null;
@@ -241,7 +273,7 @@ function initRaffles() {
       }
       return;
     }
-    raffleEnd.textContent = "Завершится через " + text;
+    setRaffleEndTimerValue(formatRaffleTimerValue(currentRaffleEndDate) || text);
   }
 
   /** Все варианты member id (tg/vk/guest) без одного «первого попавшегося» кэша — чтобы кнопка «Отменить участие» не терялась при гонке initData/PWA. */
@@ -725,6 +757,7 @@ function initRaffles() {
       raffleStatPrizeValue: raffleStatPrizeValue,
       raffleStatGroups: raffleStatGroups,
       raffleEnd: raffleEnd,
+      setRaffleEndStatusText: setRaffleEndStatusText,
       rafflePrizes: rafflePrizes,
       raffleJoinToggleBtn: raffleJoinToggleBtn,
       raffleJoinedMsg: raffleJoinedMsg,

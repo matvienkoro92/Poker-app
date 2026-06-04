@@ -192,16 +192,39 @@ html.app-view-home .home-welcome-outline::before {
   width: 100%;
 }
 .auth-banner__mode-link {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #fb923c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid rgba(134, 239, 172, 0.36);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(22, 101, 52, 0.42), rgba(15, 23, 42, 0.9));
+  color: #dcfce7;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+}
+.auth-banner__mode-link:hover {
+  border-color: rgba(134, 239, 172, 0.56);
+  background: linear-gradient(180deg, rgba(22, 101, 52, 0.52), rgba(15, 23, 42, 0.92));
+}
+.auth-banner__mode-link:active {
+  transform: scale(0.99);
+}
+[data-theme="light"] .auth-banner__mode-link {
+  border-color: rgba(22, 163, 74, 0.38);
+  background: linear-gradient(180deg, rgba(220, 252, 231, 0.95), rgba(187, 247, 208, 0.82));
+  color: #14532d;
+}
+[data-theme="light"] .auth-banner__mode-link:hover {
+  border-color: rgba(22, 163, 74, 0.58);
+  background: linear-gradient(180deg, rgba(240, 253, 244, 0.98), rgba(187, 247, 208, 0.9));
 }
 .auth-banner__primary-action {
   display: flex;

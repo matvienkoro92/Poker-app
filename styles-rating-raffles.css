@@ -619,8 +619,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-stats-block {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 12px;
+  gap: 0;
+  margin: 8px 0 16px;
 }
 .raffle-stat {
   margin: 0;
@@ -632,11 +632,112 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.raffle-stat--timer { color: var(--accent-2); font-weight: 600; }
+.raffle-stat--timer {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 74px;
+  padding: 10px 14px 12px;
+  border: 1px solid rgba(250, 204, 21, 0.48);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.2), transparent 62%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(3, 7, 18, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.24),
+    0 0 24px rgba(250, 204, 21, 0.12);
+  color: #fde68a !important;
+  font-style: normal;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.raffle-timer__label {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  color: rgba(254, 243, 199, 0.72);
+}
+.raffle-timer__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: clamp(28px, 8vw, 38px);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff7cc;
+  text-shadow: 0 0 14px rgba(250, 204, 21, 0.42);
+}
+.raffle-stat--timer-state {
+  min-height: 58px;
+  align-content: center;
+}
+.raffle-stat--timer-state .raffle-timer__value {
+  font-size: clamp(20px, 6vw, 28px);
+  white-space: normal;
+  text-align: center;
+}
+[data-theme="light"] .raffle-stat--timer {
+  border-color: rgba(217, 119, 6, 0.34);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.34), transparent 62%),
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(254, 243, 199, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 0 22px rgba(217, 119, 6, 0.16);
+}
+[data-theme="light"] .raffle-timer__label {
+  color: rgba(120, 53, 15, 0.7);
+}
+[data-theme="light"] .raffle-timer__value {
+  color: #78350f;
+  text-shadow: 0 0 12px rgba(217, 119, 6, 0.18);
+}
 .raffle-meta { margin: 0 0 4px; font-size: 14px; color: var(--text-muted); }
 .raffle-end { margin: 0; font-size: inherit; color: inherit; }
 .raffle-prizes { margin-bottom: 14px; }
 .raffle-prize { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+.raffle-subscribe-requirements {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.48);
+  color: rgba(248, 234, 208, 0.9);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.raffle-subscribe-requirements__title {
+  margin: 0 0 6px;
+  font-weight: 800;
+  color: #fff7cc;
+}
+.raffle-subscribe-requirements__list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding-left: 18px;
+}
+.raffle-subscribe-requirements a {
+  color: #fde68a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.raffle-subscribe-requirements a:hover {
+  color: #fff7cc;
+}
+[data-theme="light"] .raffle-subscribe-requirements {
+  border-color: rgba(217, 119, 6, 0.22);
+  background: rgba(255, 251, 235, 0.84);
+  color: rgba(67, 20, 7, 0.9);
+}
+[data-theme="light"] .raffle-subscribe-requirements__title,
+[data-theme="light"] .raffle-subscribe-requirements a {
+  color: #92400e;
+}
 .raffle-join-invite-row {
   display: flex;
   flex-wrap: nowrap;
