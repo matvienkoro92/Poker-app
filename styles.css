@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.491");
-@import url("./styles-home-rating-promo.css?v=3.491");
-@import url("./styles-auth.css?v=3.491");
-@import url("./styles-home.css?v=3.491");
-@import url("./styles-chat.css?v=3.491");
-@import url("./styles-learning-games.css?v=3.491");
-@import url("./styles-raffles.css?v=3.491");
-@import url("./styles-daily-poker.css?v=3.491");
-@import url("./styles-home-legacy-prelude.css?v=3.491");
-@import url("./styles-download.css?v=3.491");
-@import url("./styles-home-legacy-tail.css?v=3.491");
-@import url("./styles-home-rating-promo-legacy.css?v=3.491");
-@import url("./styles-rating.css?v=3.491");
-@import url("./styles-hall.css?v=3.491");
-@import url("./styles-admin.css?v=3.491");
-@import url("./styles-player-crm.css?v=3.491");
-@import url("./styles-profile.css?v=3.491");
-@import url("./styles-layout.css?v=3.491");
-@import url("./styles-chat-overlays.css?v=3.491");
-@import url("./styles-home-overrides.css?v=3.491");
-@import url("./styles-layout-touch-targets.css?v=3.491");
-@import url("./styles-home-rating-promo-late.css?v=3.491");
+@import url("./styles-base.css?v=3.492");
+@import url("./styles-home-rating-promo.css?v=3.492");
+@import url("./styles-auth.css?v=3.492");
+@import url("./styles-home.css?v=3.492");
+@import url("./styles-chat.css?v=3.492");
+@import url("./styles-learning-games.css?v=3.492");
+@import url("./styles-raffles.css?v=3.492");
+@import url("./styles-daily-poker.css?v=3.492");
+@import url("./styles-home-legacy-prelude.css?v=3.492");
+@import url("./styles-download.css?v=3.492");
+@import url("./styles-home-legacy-tail.css?v=3.492");
+@import url("./styles-home-rating-promo-legacy.css?v=3.492");
+@import url("./styles-rating.css?v=3.492");
+@import url("./styles-hall.css?v=3.492");
+@import url("./styles-admin.css?v=3.492");
+@import url("./styles-player-crm.css?v=3.492");
+@import url("./styles-profile.css?v=3.492");
+@import url("./styles-layout.css?v=3.492");
+@import url("./styles-chat-overlays.css?v=3.492");
+@import url("./styles-home-overrides.css?v=3.492");
+@import url("./styles-layout-touch-targets.css?v=3.492");
+@import url("./styles-home-rating-promo-late.css?v=3.492");
 
 :root {
   --daily-poker-page-bg:
@@ -1604,13 +1604,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .app.app--view-home .home-compact-link--spring-strip {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   grid-column: 1 / -1;
-  height: 30px;
-  min-height: 30px;
-  max-height: 30px;
-  padding: 0 10px;
+  gap: 4px;
+  height: 52px;
+  min-height: 52px;
+  max-height: 52px;
+  padding: 6px 12px;
   overflow: hidden;
   border-radius: 999px;
   outline-offset: -2px;
@@ -1650,6 +1652,25 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-shadow:
     0 1px 0 rgba(255, 248, 219, 0.72),
     0 0 10px rgba(255, 246, 202, 0.48);
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-compact-link--spring-strip .home-compact-link__strip-winners {
+  position: relative;
+  z-index: 3;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: #4b2a00;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow:
+    0 1px 0 rgba(255, 248, 219, 0.62),
+    0 0 8px rgba(255, 246, 202, 0.38);
   white-space: nowrap;
 }
 
