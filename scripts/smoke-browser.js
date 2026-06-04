@@ -426,6 +426,10 @@ async function enableCrmAdmin(page) {
 }
 
 async function openRakebackTab(page) {
+  if (!(await page.locator("#adminReportBtn").isVisible())) {
+    await page.locator("#headerMoreMenuBtn").click();
+    await page.waitForFunction(() => !!document.getElementById("adminReportBtn")?.offsetParent, null, { timeout: 5000 });
+  }
   await page.locator("#adminReportBtn").click();
   await page.waitForFunction(() => document.getElementById("adminReportModal")?.getAttribute("aria-hidden") === "false", null, { timeout: 5000 });
   await page.locator("[data-admin-report-tab='rakeback']").click();

@@ -750,17 +750,17 @@ function initAdminReportModal() {
       var ids = [u.id, u.memberId, u.telegramId, u.telegram_id, u.uid, u.userId, u.user_id];
       for (var idIndex = 0; idIndex < ids.length; idIndex++) {
         var rawId = ids[idIndex] != null ? String(ids[idIndex]).replace(/^tg_/, "").trim() : "";
-        if (rawId === "388008256" || rawId === "2144406710") return true;
+        if (REPORT_EDITOR_IDS.indexOf(rawId) >= 0) return true;
       }
       var names = [u.username, u.telegramUsername, u.pwaUsername];
       for (var j = 0; j < names.length; j++) {
         var username = names[j] != null ? String(names[j]).replace(/^@+/, "").trim().toLowerCase() : "";
-        if (username === "roman1787443" || username === "roman1_matvienko") return true;
+        if (REPORT_EDITOR_USERNAMES.indexOf(username) >= 0) return true;
       }
       var emails = [u.email, u.pwaEmail, u.mail];
       for (var emailIndex = 0; emailIndex < emails.length; emailIndex++) {
         var email = emails[emailIndex] != null ? String(emails[emailIndex]).trim().toLowerCase() : "";
-        if (email === "matvienkoro92@gmail.com") return true;
+        if (REPORT_EDITOR_EMAILS.indexOf(email) >= 0) return true;
       }
     }
     return false;
@@ -867,6 +867,12 @@ function initAdminReportModal() {
   function resetRakebackAccessCache() {
     rakebackAccessCache = null;
   }
+
+  try {
+    if (window && typeof window.addEventListener === "function") {
+      window.addEventListener("poker-telegram-auth", resetRakebackAccessCache);
+    }
+  } catch (eRakebackAuthEvent) {}
 
   function canManageAllRakebackRows() {
     return !!getRakebackAccessState().canEdit;

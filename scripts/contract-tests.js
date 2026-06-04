@@ -383,6 +383,7 @@ function sessions() {
     peer: signPwaSession({ id: 1002, username: "peer", first_name: "Peer" }, BOT_TOKEN),
     admin: signPwaSession({ id: 388008256, username: "admin", first_name: "Admin" }, BOT_TOKEN),
     adminSecondary: signPwaSession({ id: 2144406710, username: "admin_two", first_name: "Admin Two" }, BOT_TOKEN),
+    rakebackEditor: signPwaSession({ id: 1897001087, username: "vika", first_name: "Vika" }, BOT_TOKEN),
   };
 }
 
@@ -586,6 +587,77 @@ async function testAuthAndAdmin(redis) {
   shiftReportRes = await call(reportHandler, req("GET", { pwaSession: roman178ReportToken, scope: "all" }));
   assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can list sent reports after delete");
   assert.strictEqual((shiftReportRes.body.reports || []).some((report) => report.id === shiftReportId), false, "deleted sent report is gone");
+
+  let draftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman178ReportToken,
+    action: "rakeback_draft_save",
+    date: "shared",
+    rakebackRows: [{
+      groupId: "contract_vika_rakeback_editor",
+      kind: "base",
+      room: "P21",
+      playerId: "P21-VIKA-EDIT",
+      rake: 100,
+      percent: 50,
+      roomAmount: 50,
+      amount: 50,
+      saved: true,
+    }],
+    deletedTemplates: [],
+    deletedRows: [],
+  }));
+  assert.strictEqual(draftRes.statusCode, 200, "roman178 can save own rakeback draft row");
+  let contractRakebackRow = (draftRes.body.rakebackDraft.rows || []).find((row) => row.groupId === "contract_vika_rakeback_editor");
+  assert.strictEqual(contractRakebackRow && contractRakebackRow.ownerId, "tg_388008256", "rakeback draft row is owned by creator");
+
+  draftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: reportToken,
+    action: "rakeback_draft_save",
+    date: "shared",
+    rakebackPatch: true,
+    rakebackRows: [{
+      groupId: "contract_vika_rakeback_editor",
+      kind: "base",
+      room: "P21",
+      playerId: "P21-VIKA-EDIT",
+      rake: 250,
+      percent: 50,
+      roomAmount: 125,
+      amount: 125,
+      saved: true,
+      ownerId: "tg_388008256",
+    }],
+    deletedTemplates: [],
+    deletedRows: [],
+  }));
+  assert.strictEqual(draftRes.statusCode, 200, "admin report writer save request succeeds");
+  contractRakebackRow = (draftRes.body.rakebackDraft.rows || []).find((row) => row.groupId === "contract_vika_rakeback_editor");
+  assert.strictEqual(contractRakebackRow && contractRakebackRow.rake, 100, "admin report writer cannot overwrite another owner rakeback row");
+
+  draftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: s.rakebackEditor,
+    action: "rakeback_draft_save",
+    date: "shared",
+    rakebackPatch: true,
+    rakebackRows: [{
+      groupId: "contract_vika_rakeback_editor",
+      kind: "base",
+      room: "P21",
+      playerId: "P21-VIKA-EDIT",
+      rake: 700,
+      percent: 50,
+      roomAmount: 350,
+      amount: 350,
+      saved: true,
+      ownerId: "tg_388008256",
+    }],
+    deletedTemplates: [],
+    deletedRows: [],
+  }));
+  assert.strictEqual(draftRes.statusCode, 200, "Vika can save another owner rakeback draft row");
+  contractRakebackRow = (draftRes.body.rakebackDraft.rows || []).find((row) => row.groupId === "contract_vika_rakeback_editor");
+  assert.strictEqual(contractRakebackRow && contractRakebackRow.rake, 700, "Vika rakeback editor update is applied");
+  assert.strictEqual(contractRakebackRow && contractRakebackRow.ownerId, "tg_388008256", "Vika edit preserves original row owner");
 }
 
 async function testChatSendEditDelete() {
@@ -749,8 +821,18 @@ async function testParticipationRequiresBotAndChannel(redis) {
   redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
 
-  installTelegramGateFetch(redis, { botOk: false, channelOk: true });
   let r = await call(raffles, req("POST", {}, {
+    guestDeviceId: "guest-raffle-gate-device",
+    action: "join",
+    raffleId: "contract_raffle_gate",
+    deviceId: "guest-raffle-gate-device",
+  }));
+  assert.strictEqual(r.statusCode, 403, "guest raffle join requires login before Telegram subscription gate");
+  assert.strictEqual(r.body.code, "RAFFLE_LOGIN_REQUIRED", "guest raffle join returns login-required code");
+  assert.ok(!r.body.botUrl && !r.body.channelUrl, "guest raffle join does not show subscription links before login");
+
+  installTelegramGateFetch(redis, { botOk: false, channelOk: true });
+  r = await call(raffles, req("POST", {}, {
     pwaSession: s.user,
     action: "join",
     raffleId: "contract_raffle_gate",
@@ -1241,6 +1323,13 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
     sentMessages.find((msg) => String(msg.body.chat_id) === String(replacement.userId).replace(/^tg_/, "")),
     "replacement winner receives reroll notification"
   );
+  const rerollWinnerMessages = sentMessages.filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш"));
+  assert.strictEqual(rerollWinnerMessages.length, 1, "reroll sends exactly one winner notification");
+  assert.strictEqual(
+    String(rerollWinnerMessages[0].body.chat_id),
+    String(replacement.userId).replace(/^tg_/, ""),
+    "reroll winner notification is addressed to replacement only"
+  );
   assert.ok(
     !sentMessages.find((msg) => String(msg.body.chat_id) === "1002"),
     "missed original winner is not notified after reroll"
@@ -1509,6 +1598,94 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
     assert.strictEqual(winnerPush.payload.openUrl, "./?startapp=raffle_2", "winner push opens short completed raffle link");
     assert.strictEqual(winnerPush.payload.raffleId, "contract_cash_raffle", "winner push carries raffle id");
     assert.ok(String(winnerPush.payload.body || "").includes("Я готов"), "winner push asks to press ready");
+  } finally {
+    webpush.sendNotification = originalSendNotification;
+  }
+}
+
+async function testRaffleCompleteNotifiesOnlyDrawnWinners(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const webpush = require("web-push");
+  const keys = webpush.generateVAPIDKeys();
+  process.env.WEBPUSH_VAPID_PUBLIC_KEY = keys.publicKey;
+  process.env.WEBPUSH_VAPID_PRIVATE_KEY = keys.privateKey;
+  process.env.WEBPUSH_CONTACT_EMAIL = "mailto:contract@example.test";
+  const sentPushes = [];
+  const originalSendNotification = webpush.sendNotification;
+  webpush.sendNotification = async function sendNotificationMock(subscription, payload, opts) {
+    sentPushes.push({
+      subscription,
+      payload: JSON.parse(payload),
+      opts,
+    });
+    return { statusCode: 201 };
+  };
+  try {
+    const s = sessions();
+    const participants = [1001, 1002, 1003, 1004].map((id) => ({
+      userId: "tg_" + id,
+      accountId: "ID" + String(100000 + id),
+      name: "Player " + id,
+      p21Id: "P21-" + id,
+    }));
+    participants.forEach((participant) => {
+      redis.h("poker_app:visitor_dt_ids").set(participant.userId, participant.accountId);
+      redis.h("poker_app:id_to_user").set(participant.accountId, participant.userId);
+      redis.s("poker_app:chat_push_registry").add(participant.accountId);
+      redis.h("poker_app:chat_push_sub:" + participant.accountId).set("contract-endpoint", JSON.stringify({
+        endpoint: "https://push.example.test/raffle-complete-" + participant.accountId,
+        expirationTime: null,
+        keys: {
+          p256dh: "BN-complete-" + participant.accountId,
+          auth: "auth-" + participant.accountId,
+        },
+      }));
+    });
+
+    const raffle = {
+      id: "contract_raffle_complete_only_winners",
+      title: "Complete only winners raffle",
+      totalWinners: 2,
+      groups: [{ prize: "Ticket 500 ₽", count: 2 }],
+      endDate: new Date(Date.now() - 60_000).toISOString(),
+      participants,
+      winners: [],
+      status: "active",
+      createdAt: new Date(Date.now() - 3600_000).toISOString(),
+    };
+    redis.kv.set("poker_app:raffle:contract_raffle_complete_only_winners", JSON.stringify(raffle));
+    redis.l("poker_app:raffle_ids").push("contract_raffle_complete_only_winners");
+
+    const r = await call(raffles, req("POST", {}, {
+      pwaSession: s.admin,
+      action: "complete",
+      raffleId: "contract_raffle_complete_only_winners",
+    }));
+    assert.strictEqual(r.statusCode, 200, "raffle complete succeeds");
+    const winners = r.body.raffle.winners || [];
+    assert.strictEqual(winners.length, 2, "draw produces exactly two winners");
+    const winnerTelegramIds = new Set(winners.map((w) => String(w.userId || "").replace(/^tg_/, "")));
+    const winnerAccountIds = new Set(winners.map((w) => String(w.accountId || "").trim()).filter(Boolean));
+    const participantTelegramIds = new Set(participants.map((p) => p.userId.replace(/^tg_/, "")));
+    const participantAccountIds = new Set(participants.map((p) => p.accountId));
+
+    const winnerMessages = sentMessages.filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш"));
+    assert.strictEqual(winnerMessages.length, winners.length, "winner Telegram notification count matches drawn winners");
+    const notifiedTelegramIds = new Set(winnerMessages.map((msg) => String(msg.body.chat_id)));
+    assert.deepStrictEqual(notifiedTelegramIds, winnerTelegramIds, "winner Telegram recipients match drawn winners");
+    participantTelegramIds.forEach((id) => {
+      assert.strictEqual(notifiedTelegramIds.has(id), winnerTelegramIds.has(id), "non-winner Telegram recipient is not notified " + id);
+    });
+
+    const winnerPushes = sentPushes.filter((item) => item.payload && item.payload.kind === "raffle_winner");
+    assert.strictEqual(winnerPushes.length, winners.length, "winner push count matches drawn winners");
+    const pushedAccountIds = new Set(winnerPushes.map((item) => String(item.payload.accountId || "").trim()).filter(Boolean));
+    assert.deepStrictEqual(pushedAccountIds, winnerAccountIds, "winner push recipients match drawn winner accounts");
+    participantAccountIds.forEach((id) => {
+      assert.strictEqual(pushedAccountIds.has(id), winnerAccountIds.has(id), "non-winner push recipient is not notified " + id);
+    });
   } finally {
     webpush.sendNotification = originalSendNotification;
   }
@@ -3844,6 +4021,7 @@ async function main() {
     ["raffle winner ready reroll and burn", testRaffleWinnerReadyRerollAndBurn],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
+    ["raffle complete notifies only drawn winners", testRaffleCompleteNotifiesOnlyDrawnWinners],
     ["raffle winner notification dedup", testRaffleWinnerNotificationDedup],
     ["raffle winner push retry after zero", testRaffleWinnerNotificationRetriesPushAfterZero],
     ["raffle winner notification account id", testRaffleWinnerNotificationResolvesAccountId],
