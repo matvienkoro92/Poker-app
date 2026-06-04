@@ -481,6 +481,30 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-empty--hidden { display: none; }
 .raffle-empty { color: var(--text-muted); margin: 12px 0; }
 .raffle-empty .raffle-loading__text { display: inline-block; vertical-align: middle; }
+.raffle-empty--login {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(244, 197, 92, 0.32);
+  border-radius: 12px;
+  background: rgba(12, 18, 31, 0.72);
+  color: var(--text);
+}
+.raffle-empty--login .profile-exit-btn {
+  margin-left: 0;
+}
+.raffle-empty__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.raffle-empty__text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
 .raffles-active-chooser {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -708,6 +732,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: rgba(248, 234, 208, 0.9);
   font-size: 13px;
   line-height: 1.35;
+}
+.raffle-subscribe-requirements--hidden {
+  display: none !important;
 }
 .raffle-subscribe-requirements__title {
   margin: 0 0 6px;

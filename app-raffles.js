@@ -57,6 +57,7 @@ function initRaffles() {
   var raffleStatGroups = document.getElementById("raffleStatGroups");
   var raffleEnd = document.getElementById("raffleEnd");
   var rafflePrizes = document.getElementById("rafflePrizes");
+  var raffleSubscribeRequirements = document.getElementById("raffleSubscribeRequirements");
   var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
   var raffleGuestGate = document.getElementById("raffleGuestGate");
@@ -322,6 +323,18 @@ function initRaffles() {
       var auth = window.__pokerTelegramAuth;
       if (auth && auth.user && auth.status && auth.status !== "guest") return false;
     } catch (eAuth) {}
+    return true;
+  }
+
+  function rafflesViewerNeedsLoginForParticipation() {
+    if (rafflesViewerIsGuestOnly()) return true;
+    try {
+      if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) return false;
+    } catch (eCredParticipation) {}
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.user && auth.status && auth.status !== "guest") return false;
+    } catch (eAuthParticipation) {}
     return true;
   }
 
@@ -759,6 +772,7 @@ function initRaffles() {
       raffleEnd: raffleEnd,
       setRaffleEndStatusText: setRaffleEndStatusText,
       rafflePrizes: rafflePrizes,
+      raffleSubscribeRequirements: raffleSubscribeRequirements,
       raffleJoinToggleBtn: raffleJoinToggleBtn,
       raffleJoinedMsg: raffleJoinedMsg,
       raffleGuestGate: raffleGuestGate,
@@ -772,6 +786,7 @@ function initRaffles() {
       getRaffleTotalPrize: getRaffleTotalPrize,
       collectRaffleIdentityIds: collectRaffleIdentityIds,
       rafflesViewerIsGuestOnly: rafflesViewerIsGuestOnly,
+      rafflesViewerNeedsLoginForParticipation: rafflesViewerNeedsLoginForParticipation,
       raffleParticipantLineHtml: raffleParticipantLineHtml,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
       escapeHtml: escapeHtml
@@ -808,17 +823,38 @@ function initRaffles() {
       }
       if (raffleEmpty) {
         raffleEmpty.innerHTML = "<span class=\"raffle-loading__spinner\" aria-hidden=\"true\"></span><span class=\"raffle-loading__text\">Подождите, Розыгрыш загружается</span>";
+        raffleEmpty.classList.remove("raffle-empty--login");
         raffleEmpty.classList.remove("raffle-empty--hidden");
       }
       if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
     }
-    function showRafflesError() {
+
+    function raffleLoadErrorNeedsLogin(data) {
+      if (rafflesViewerIsGuestOnly()) return true;
+      var status = data && data.__status != null ? parseInt(data.__status, 10) : 0;
+      if (status === 401) return true;
+      var code = String((data && data.code) || "").toUpperCase();
+      if (code.indexOf("AUTH") !== -1 || code === "LOGIN_REQUIRED") return true;
+      var errorText = String((data && data.error) || "").toLowerCase();
+      return /войдите|telegram|pwa|auth required|login required/.test(errorText);
+    }
+
+    function showRafflesError(data) {
       if (loadOptions.keepCurrentOnLoading) {
         if (raffleEnd) raffleEnd.textContent = "Не удалось обновить итоги. Обновите раздел.";
         return;
       }
       if (raffleEmpty) {
-        raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть или перезайдите.";
+        if (raffleLoadErrorNeedsLogin(data)) {
+          raffleEmpty.innerHTML =
+            "<span class=\"raffle-empty__title\">Войдите в аккаунт</span>" +
+            "<span class=\"raffle-empty__text\">Чтобы открыть розыгрыши и участвовать, войдите в аккаунт.</span>" +
+            "<button type=\"button\" class=\"profile-exit-btn\" data-poker-login-action=\"1\">Войти в аккаунт</button>";
+          raffleEmpty.classList.add("raffle-empty--login");
+        } else {
+          raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть или перезайдите.";
+          raffleEmpty.classList.remove("raffle-empty--login");
+        }
         raffleEmpty.classList.remove("raffle-empty--hidden");
       }
       if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
@@ -835,12 +871,19 @@ function initRaffles() {
     function startFetch() {
       var url = base + "/api/raffles" + qLead + "&_t=" + Date.now() + (isLocal ? "&demo=1" : "");
       fetch(url)
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r.json().catch(function () {
+            return { ok: false, error: "bad_json" };
+          }).then(function (data) {
+            if (data && typeof data === "object") data.__status = r.status;
+            return data;
+          });
+        })
         .then(function (data) {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
           if (loadSeq !== rafflesLoadSeq) return;
           if (!data || !data.ok) {
-            if (!cacheUsable) showRafflesError();
+            if (!cacheUsable) showRafflesError(data);
             return;
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
@@ -1002,6 +1045,7 @@ function initRaffles() {
           if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
           if (raffleEmpty) {
             raffleEmpty.textContent = "Нет активных розыгрышей.";
+            raffleEmpty.classList.remove("raffle-empty--login");
             raffleEmpty.classList.remove("raffle-empty--hidden");
           }
           var rgGate = document.getElementById("raffleGuestGate");

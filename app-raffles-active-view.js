@@ -38,6 +38,13 @@ function initRafflesActiveViewRuntime(opts) {
     setRaffleCardHeadingText(buildActiveRaffleCardHeading(raffle));
     var endDate = raffle.endDate ? new Date(raffle.endDate) : null;
     var isActive = raffle.status === "active";
+    var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
+    var total = Math.max(0, parseInt(raffle.totalWinners, 10) || 0);
+    if (!total && groups.length) {
+      total = groups.reduce(function (sum, group) {
+        return sum + Math.max(0, parseInt(group && group.count, 10) || 0);
+      }, 0);
+    }
     currentRaffleEndDate = isActive && endDate ? endDate : null;
     if (currentRaffleEndDate) {
       updateRaffleEndText();
@@ -81,11 +88,19 @@ function initRafflesActiveViewRuntime(opts) {
         var uid = String(p.userId != null ? p.userId : "").trim();
         return uid && raffleIds.indexOf(uid) !== -1;
       });
-    var guestRaffleBlock = rafflesViewerIsGuestOnly();
-    var showRaffleGuestGate = !!(guestRaffleBlock && isActive && !iAmIn);
+    var needsLoginForParticipation =
+      typeof rafflesViewerNeedsLoginForParticipation === "function"
+        ? rafflesViewerNeedsLoginForParticipation()
+        : rafflesViewerIsGuestOnly();
+    var showRaffleGuestGate = !!(needsLoginForParticipation && isActive && !iAmIn);
     if (raffleGuestGate) {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
       raffleGuestGate.hidden = !showRaffleGuestGate;
+    }
+    if (raffleSubscribeRequirements) {
+      var showSubscribeRequirements = !!(isActive && !needsLoginForParticipation);
+      raffleSubscribeRequirements.classList.toggle("raffle-subscribe-requirements--hidden", !showSubscribeRequirements);
+      raffleSubscribeRequirements.hidden = !showSubscribeRequirements;
     }
     if (raffleJoinToggleBtn) {
       var showToggle = raffle.status === "active" && !showRaffleGuestGate;
