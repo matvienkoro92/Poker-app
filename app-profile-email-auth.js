@@ -14,18 +14,10 @@ function syncProfileEmailAuthUi() {
   var feedbackEl = document.getElementById("profileEmailAuthFeedback");
   var tgSection = document.getElementById("profileTelegramLinkSection");
   var auth = window.__pokerTelegramAuth;
-  var isGuest = !!(auth && auth.status === "guest");
-  if (!isGuest) {
-    try {
-      isGuest = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
-    } catch (eGuestMode) {}
-  }
-  var isVerified = !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
-  var hasStoredSession = false;
-  try {
-    hasStoredSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-  } catch (eProfileSession) {}
-  var showProfileShell = !isGuest && (isVerified || hasStoredSession);
+  var authState = typeof pokerProfileAuthState === "function" ? pokerProfileAuthState() : null;
+  var isGuest = authState ? authState.isGuest : !!(auth && auth.status === "guest");
+  var isVerified = authState ? authState.isVerified : !!(auth && (auth.status === "verified" || auth.status === "dev_skip"));
+  var showProfileShell = authState ? authState.showProfileShell : !isGuest && isVerified;
   syncProfileStatusVisibility(showProfileShell);
   syncProfileVerifiedContentVisibility(showProfileShell);
   var authMethod = pokerGetAuthMethod();

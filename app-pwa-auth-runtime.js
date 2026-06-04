@@ -466,6 +466,10 @@
     if (bannerRetry) bannerRetry.hidden = true;
     syncSiteHomeInstructionMode();
     try {
+      if (typeof updateProfileExitBtnVisibility === "function") updateProfileExitBtnVisibility();
+      if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
+    } catch (eProfileSyncAuth) {}
+    try {
       if (typeof pokerForceClosePwaAuthScreenAfterSuccess === "function") pokerForceClosePwaAuthScreenAfterSuccess();
     } catch (eForceCloseAuthUi) {}
   }

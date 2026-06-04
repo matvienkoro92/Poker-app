@@ -145,14 +145,22 @@ function initProfileExitBtn() {
   if (btn.dataset.bound === "1") return;
   btn.dataset.bound = "1";
   btn.addEventListener("click", function () {
-    var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
-    var isGuest = false;
+    var authState = null;
     try {
-      var auth = window.__pokerTelegramAuth;
-      isGuest = !!(auth && auth.status === "guest");
-      if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
-    } catch (eGuestClick) {}
-    if (hasSession && !isGuest) {
+      authState = typeof pokerProfileAuthState === "function" ? pokerProfileAuthState() : null;
+    } catch (eProfileAuthClick) {}
+    var hasAccountSession = !!(authState && authState.hasAccountSession);
+    if (!authState) {
+      try {
+        var hasSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+        var isGuest = false;
+        var auth = window.__pokerTelegramAuth;
+        isGuest = !!(auth && auth.status === "guest");
+        if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
+        hasAccountSession = hasSession && !isGuest;
+      } catch (eGuestClick) {}
+    }
+    if (hasAccountSession) {
       if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") window.__pokerClearSessionsAndReloadForLogin();
       return;
     }

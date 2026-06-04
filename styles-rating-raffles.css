@@ -1221,6 +1221,22 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   text-decoration: underline;
   outline: none;
 }
+.raffle-winner-reroll-badge {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  padding: 2px 8px;
+  border: 1px solid rgba(250, 204, 21, 0.58);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.24), rgba(180, 83, 9, 0.18));
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
 .raffle-winner-status {
   font-weight: 600;
   min-width: 1.2em;
@@ -1293,8 +1309,25 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: rgba(226, 232, 240, 0.72);
 }
 .raffle-winner-row--reroll {
-  border-left: 2px solid rgba(250, 204, 21, 0.48);
+  border-color: rgba(250, 204, 21, 0.38);
+  border-left: 2px solid rgba(250, 204, 21, 0.62);
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(120, 83, 20, 0.08)),
+    rgba(8, 13, 24, 0.62);
   padding-left: 7px;
+}
+.raffle-winner-reroll-nest {
+  margin: -1px 0 4px;
+  padding: 0 0 0 22px;
+  list-style: none;
+}
+.raffle-winner-reroll-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0 0 10px;
+  border-left: 1px dashed rgba(250, 204, 21, 0.34);
+  list-style: none;
 }
 .raffle-winner-ready-btn {
   flex: 0 0 auto;
