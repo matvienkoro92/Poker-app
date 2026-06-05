@@ -44,6 +44,10 @@ function initRaffles() {
   var rafflesTabActiveSum = document.getElementById("rafflesTabActiveSum");
   var rafflesTabCompletedCount = document.getElementById("rafflesTabCompletedCount");
   var rafflesTabCompletedSum = document.getElementById("rafflesTabCompletedSum");
+  var rafflesHeroDoneCount = document.getElementById("rafflesHeroDoneCount");
+  var rafflesHeroPrizeSum = document.getElementById("rafflesHeroPrizeSum");
+  var rafflesHeroUniqueParticipants = document.getElementById("rafflesHeroUniqueParticipants");
+  var rafflesHeroWinnersCount = document.getElementById("rafflesHeroWinnersCount");
   var rafflesCompleted = document.getElementById("rafflesCompleted");
   var raffleCard = document.getElementById("raffleCard");
   var raffleCardHeading = document.getElementById("raffleCardHeading");
@@ -437,6 +441,50 @@ function initRaffles() {
       }
     }
     return parts.join(" · ");
+  }
+
+  function formatRaffleHeroCount(value) {
+    var n = Math.max(0, Math.round(parseFloat(value) || 0));
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+  }
+
+  function raffleHeroPersonKey(row) {
+    if (!row) return "";
+    var accountId = String(row.accountId || row.dtId || "").trim();
+    if (accountId) return "account:" + accountId;
+    var userId = String(row.userId != null ? row.userId : "").trim();
+    if (userId) return "user:" + userId;
+    var p21Id = String(row.p21Id != null ? row.p21Id : "").trim();
+    if (p21Id) return "p21:" + p21Id;
+    var name = String(row.name || row.pokerPlusNickname || "").trim().toLowerCase();
+    return name ? "name:" + name : "";
+  }
+
+  function updateRafflesHeroStats(allRaffles, completedRaffles, completedSumRub) {
+    var all = Array.isArray(allRaffles) ? allRaffles : [];
+    var completedList = Array.isArray(completedRaffles) ? completedRaffles : [];
+    var participants = {};
+    var winners = {};
+    all.forEach(function (raffle) {
+      (Array.isArray(raffle && raffle.participants) ? raffle.participants : []).forEach(function (row) {
+        var key = raffleHeroPersonKey(row);
+        if (key) participants[key] = true;
+      });
+      (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (row) {
+        var key = raffleHeroPersonKey(row);
+        if (key) participants[key] = true;
+      });
+    });
+    completedList.forEach(function (raffle) {
+      (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (row) {
+        var key = raffleHeroPersonKey(row);
+        if (key) winners[key] = true;
+      });
+    });
+    if (rafflesHeroDoneCount) rafflesHeroDoneCount.textContent = formatRaffleHeroCount(completedList.length);
+    if (rafflesHeroPrizeSum) rafflesHeroPrizeSum.textContent = formatRaffleSum(completedSumRub || 0);
+    if (rafflesHeroUniqueParticipants) rafflesHeroUniqueParticipants.textContent = formatRaffleHeroCount(Object.keys(participants).length);
+    if (rafflesHeroWinnersCount) rafflesHeroWinnersCount.textContent = formatRaffleHeroCount(Object.keys(winners).length);
   }
 
   function renderRafflesActiveChooser(activeList, activeId) {
@@ -1189,6 +1237,7 @@ function initRaffles() {
         var completedSumRub = completed.reduce(function (s, r) { return s + getRaffleTotalPrize(r); }, 0);
         if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = String(completedCount);
         if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = formatRaffleSum(completedSumRub);
+        updateRafflesHeroStats(allRaffles, completed, completedSumRub);
 
         var completedPanelVisible =
           !!(

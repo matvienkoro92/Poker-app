@@ -1,18 +1,38 @@
 <div class="view" data-view="raffles" data-html-fragment-view="raffles">
             <header class="raffles-hero">
-              <picture>
-                <source srcset="./assets/raffles-hero.avif" type="image/avif" />
-                <source srcset="./assets/raffles-hero.webp" type="image/webp" />
-                <img src="./assets/raffles-hero.png" alt="" class="raffles-hero__img" width="720" height="288" loading="lazy" decoding="async" />
-              </picture>
               <button type="button" class="bonus-game-back raffles-hero__back" data-view-target="home" aria-label="На главную">←</button>
-              <p class="raffles-tagline">Розыгрыши беккинг-билетов и байинов клуба</p>
-              <div class="raffles-hero__share-row">
+              <div class="raffles-hero__copy">
+                <p class="raffles-tagline">Розыгрыши для всех</p>
+                <h1 class="raffles-hero__title">Розыгрыши от 12 000р каждый день</h1>
+                <div class="raffles-hero__chips" aria-label="Что разыгрываем">
+                  <span class="raffles-hero__chip">Билеты на турниры вечера</span>
+                  <span class="raffles-hero__chip">12 000р байинов на кеш холдем 20/40 и 5/10</span>
+                </div>
+              </div>
+              <div class="raffles-hero__share-row" aria-label="Поделиться розыгрышами">
                 <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="rafflesInviteFriendBtn" aria-label="Позвать друга">Позвать друга</button>
                 <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="rafflesCopyLinkBtn" aria-label="Скопировать ссылку на розыгрыши"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                 <span class="raffles-copy-feedback" id="rafflesCopyFeedback" role="status" aria-live="polite" hidden></span>
                 <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary raffles-subscribe-btn" id="rafflesSubscribeBtn">Подписаться</button>
               </div>
+              <dl class="raffles-hero__stats" aria-label="Статистика розыгрышей">
+                <div class="raffles-hero__stat">
+                  <dt>Проведено розыгрышей</dt>
+                  <dd id="rafflesHeroDoneCount">0</dd>
+                </div>
+                <div class="raffles-hero__stat">
+                  <dt>Разыграно</dt>
+                  <dd id="rafflesHeroPrizeSum">0 ₽</dd>
+                </div>
+                <div class="raffles-hero__stat">
+                  <dt>Уникальных участников</dt>
+                  <dd id="rafflesHeroUniqueParticipants">0</dd>
+                </div>
+                <div class="raffles-hero__stat">
+                  <dt>Победителей</dt>
+                  <dd id="rafflesHeroWinnersCount">0</dd>
+                </div>
+              </dl>
             </header>
 
             <div class="raffles-admin-wrap raffles-admin-wrap--hidden" id="rafflesAdminWrap">
@@ -135,8 +155,8 @@
 
             <div class="raffles-tabs" id="rafflesTabs">
               <button type="button" class="raffles-tab raffles-tab--create raffles-tab--hidden" id="rafflesTabCreate" data-raffle-tab="create" aria-selected="false">Создать</button>
-              <button type="button" class="raffles-tab raffles-tab--active" id="rafflesTabActive" data-raffle-tab="active" aria-selected="true">Активные (<span id="rafflesTabActiveCount">0</span>) — <span id="rafflesTabActiveSum">0</span></button>
-              <button type="button" class="raffles-tab" id="rafflesTabCompleted" data-raffle-tab="completed" aria-selected="false">Завершённые (<span id="rafflesTabCompletedCount">0</span>) — <span id="rafflesTabCompletedSum">0</span></button>
+              <button type="button" class="raffles-tab raffles-tab--active" id="rafflesTabActive" data-raffle-tab="active" aria-selected="true"><span class="raffles-tab__label">Активные</span><span class="raffles-tab__meta"><span id="rafflesTabActiveCount">0</span> · <span id="rafflesTabActiveSum">0</span></span></button>
+              <button type="button" class="raffles-tab" id="rafflesTabCompleted" data-raffle-tab="completed" aria-selected="false"><span class="raffles-tab__label">Завершённые</span><span class="raffles-tab__meta"><span id="rafflesTabCompletedCount">0</span> · <span id="rafflesTabCompletedSum">0</span></span></button>
             </div>
 
             <div class="raffles-panel raffles-panel--hidden raffles-panel--create" id="rafflesPanelCreate" data-raffle-panel="create"></div>
