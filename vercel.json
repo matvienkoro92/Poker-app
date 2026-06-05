@@ -1,6 +1,18 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "public",
+  "routes": [
+    {
+      "src": "/",
+      "has": [
+        { "type": "query", "key": "startapp", "value": "r_.+" }
+      ],
+      "missing": [
+        { "type": "query", "key": "open" }
+      ],
+      "dest": "/api/raffle-preview"
+    }
+  ],
   "headers": [
     {
       "source": "/",
@@ -34,16 +46,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/",
-      "has": [
-        { "type": "query", "key": "startapp", "value": "r_(?<code>[^&]+)" }
-      ],
-      "missing": [
-        { "type": "query", "key": "open" }
-      ],
-      "destination": "/api/raffle-preview?code=:code"
-    },
     {
       "source": "/r/:code",
       "destination": "/api/raffle-preview?code=:code"
