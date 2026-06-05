@@ -904,25 +904,6 @@ function initRafflesCompletedRuntime(opts) {
     });
   }
 
-  function startOfCompletedWeek(date) {
-    var d = date instanceof Date && isFinite(date.getTime()) ? new Date(date.getTime()) : new Date();
-    d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    var day = d.getDay();
-    var mondayOffset = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + mondayOffset);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-
-  function raffleCompletedIsCurrentWeek(raffle, now) {
-    var d = raffleCompletedDate(raffle);
-    if (!d) return false;
-    var weekStart = startOfCompletedWeek(now);
-    var nextWeekStart = new Date(weekStart.getTime());
-    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
-    return d >= weekStart && d < nextWeekStart;
-  }
-
   function raffleCompletedMonthKey(raffle) {
     var d = raffleCompletedDate(raffle);
     if (!d) return "unknown";
@@ -946,9 +927,25 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleCompletedArchiveSum(items) {
     return (Array.isArray(items) ? items : []).reduce(function (sum, raffle) {
-      var amount = typeof getRaffleTotalPrize === "function" ? getRaffleTotalPrize(raffle) : 0;
-      amount = parseFloat(amount);
+      var amount = raffleCompletedPrizeSum(raffle);
       return sum + (isFinite(amount) ? amount : 0);
+    }, 0);
+  }
+
+  function raffleCompletedPrizeSum(raffle) {
+    var amount = typeof getRaffleTotalPrize === "function" ? parseFloat(getRaffleTotalPrize(raffle)) : 0;
+    if (isFinite(amount) && amount > 0) return amount;
+    var winners = raffle && Array.isArray(raffle.winners) ? raffle.winners : [];
+    var total = winners.reduce(function (sum, winner) {
+      if (raffleWinnerIsReroll(winner)) return sum;
+      return sum + raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, winner));
+    }, 0);
+    if (total > 0) return total;
+    var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+    return groups.reduce(function (sum, group) {
+      var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+      var nominal = raffleWinnerPrizeAmount(group && group.prize);
+      return sum + (nominal > 0 ? nominal * (count || 1) : 0);
     }, 0);
   }
 
@@ -1004,17 +1001,8 @@ function initRafflesCompletedRuntime(opts) {
   function buildCompletedRafflesListHtml(completed) {
     var list = sortCompletedRafflesNewestFirst(completed);
     if (list.length <= 0) return "";
-    var now = new Date();
-    var currentWeek = [];
-    var archive = [];
-    list.forEach(function (raffle) {
-      if (raffleCompletedIsCurrentWeek(raffle, now)) currentWeek.push(raffle);
-      else archive.push(raffle);
-    });
-    var currentHtml = currentWeek.map(buildCompletedRaffleCardHtml).join("");
-    if (!currentHtml && archive.length) {
-      currentHtml = "<p class=\"raffles-completed-current-empty\">На этой неделе завершённых розыгрышей нет.</p>";
-    }
+    var currentHtml = buildCompletedRaffleCardHtml(list[0]);
+    var archive = list.slice(1);
     return currentHtml + buildCompletedArchiveHtml(archive);
   }
 

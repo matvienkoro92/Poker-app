@@ -127,7 +127,7 @@
     }).filter(Boolean) : [];
     var primaryHtml = esc(primary || "");
     if (primary === DAILY_POKER_START_PROMPT) {
-      primaryHtml = '<span class="daily-poker__result-nowrap">Нажмите на кнопку «Раздать карты»</span><span>, чтобы начать</span>';
+      primaryHtml = '<span class="daily-poker__result-nowrap">Нажмите на кнопку «Раздать карты», чтобы начать</span>';
     }
     var html = '<span class="daily-poker__result-primary">' + primaryHtml + '</span>';
     if (details.length) {

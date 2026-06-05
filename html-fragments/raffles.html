@@ -153,44 +153,12 @@
               <button type="button" class="raffles-tab raffles-tab--create raffles-tab--hidden" id="rafflesTabCreate" data-raffle-tab="create" aria-selected="false">Создать</button>
               <button type="button" class="raffles-tab raffles-tab--active" id="rafflesTabActive" data-raffle-tab="active" aria-selected="true"><span class="raffles-tab__label">Активные</span><span class="raffles-tab__meta"><span id="rafflesTabActiveCount">0</span> · <span id="rafflesTabActiveSum">0</span></span></button>
               <button type="button" class="raffles-tab" id="rafflesTabCompleted" data-raffle-tab="completed" aria-selected="false"><span class="raffles-tab__label">Завершённые</span><span class="raffles-tab__meta"><span id="rafflesTabCompletedCount">0</span> · <span id="rafflesTabCompletedSum">0</span></span></button>
+              <button type="button" class="raffles-tab raffles-tab--leaders" id="rafflesTabLeaders" data-raffle-tab="leaders" aria-selected="false" aria-label="Кто выигрывал чаще всех" title="Кто выигрывал чаще всех"><span class="raffles-tab__winner-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.6V17c0 .6-.4 1-1 1.3C7.8 18.8 7 20.2 7 22"></path><path d="M14 14.6V17c0 .6.4 1 1 1.3 1.2.5 2 1.9 2 3.7"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg></span></button>
             </div>
 
             <div class="raffles-panel raffles-panel--hidden raffles-panel--create" id="rafflesPanelCreate" data-raffle-panel="create"></div>
 
             <div class="raffles-panel raffles-panel--active" id="rafflesPanelActive" data-raffle-panel="active">
-              <div class="raffles-admin-row raffles-admin-row--active raffles-admin-row--hidden" id="rafflesSubscribersRow" aria-hidden="true">
-                <div class="raffles-admin-actions raffles-admin-actions--broadcast">
-                  <button
-                    type="button"
-                    class="raffles-admin-btn"
-                    id="rafflesNotifySubsBtn"
-                  >
-                    Разослать подписчикам розыгрыша
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesLastBroadcastReportBtn"
-                  >
-                    Отчёт последней рассылки
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesRetryFailedBroadcastBtn"
-                  >
-                    Дослать кому не дошло
-                  </button>
-                  <button
-                    type="button"
-                    class="raffles-admin-btn raffles-admin-btn--ghost"
-                    id="rafflesPurgeBlockedSubsBtn"
-                  >
-                    Удалить отписавшихся / заблокировавших бота
-                  </button>
-                </div>
-                <p class="raffles-admin-hint" id="rafflesNotifySubsHint"></p>
-              </div>
               <div class="raffles-active-chooser raffles-active-chooser--hidden" id="rafflesActiveChooser" aria-label="Активные розыгрыши" hidden></div>
               <p class="raffle-empty raffle-empty--hidden" id="raffleEmpty">Нет активных розыгрышей.</p>
               <div class="raffle-current raffle-current--hidden" id="raffleCurrent">
@@ -201,7 +169,7 @@
                     <li>Проверьте ваш ID из Poker21 в профиле <span class="raffle-id-note__hint">(на него будет начисляться выигранный приз)</span>.</li>
                     <li>У вас будет 15 минут, чтобы забрать выигрыш <span class="raffle-id-note__hint">(нажать «Готов»)</span>, если не забрали — выбирается другой участник.</li>
                   </ul>
-                  <div class="raffle-stats-block">
+                  <div class="raffle-stats-block raffle-stats-block--hidden" aria-hidden="true">
                     <p class="raffle-stat raffle-stat--timer" id="raffleEnd"></p>
                   </div>
                   <div class="raffle-invite-wide-row">
@@ -240,6 +208,39 @@
                   <h3 class="raffle-participants-title">Участники <span class="raffle-participants-count" id="raffleParticipantsCount">(0)</span></h3>
                   <p class="raffle-participants-chance" id="raffleParticipantsChance"></p>
                   <ul class="raffle-participants" id="raffleParticipants"></ul>
+                  <div class="raffles-admin-row raffles-admin-row--active raffles-admin-row--hidden" id="rafflesSubscribersRow" aria-hidden="true">
+                    <div class="raffles-admin-actions raffles-admin-actions--broadcast">
+                      <button
+                        type="button"
+                        class="raffles-admin-btn"
+                        id="rafflesNotifySubsBtn"
+                      >
+                        Разослать подписчикам розыгрыша
+                      </button>
+                      <button
+                        type="button"
+                        class="raffles-admin-btn raffles-admin-btn--ghost"
+                        id="rafflesLastBroadcastReportBtn"
+                      >
+                        Отчёт последней рассылки
+                      </button>
+                      <button
+                        type="button"
+                        class="raffles-admin-btn raffles-admin-btn--ghost"
+                        id="rafflesRetryFailedBroadcastBtn"
+                      >
+                        Дослать кому не дошло
+                      </button>
+                      <button
+                        type="button"
+                        class="raffles-admin-btn raffles-admin-btn--ghost"
+                        id="rafflesPurgeBlockedSubsBtn"
+                      >
+                        Удалить отписавшихся / заблокировавших бота
+                      </button>
+                    </div>
+                    <p class="raffles-admin-hint" id="rafflesNotifySubsHint"></p>
+                  </div>
                   <div class="raffle-winners-wrap raffle-winners-wrap--hidden" id="raffleWinnersWrap">
                     <h3 class="raffle-winners-title">Победители</h3>
                     <ul class="raffle-winners" id="raffleWinners"></ul>
@@ -248,7 +249,7 @@
               </div>
             </div>
 
-            <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelCompleted" data-raffle-panel="completed">
+            <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelLeaders" data-raffle-panel="leaders">
               <section class="raffle-winner-leaders raffle-winner-leaders--hidden" id="raffleWinnerLeaders" hidden>
                 <div class="raffle-winner-leaders__head">
                   <h3 class="raffle-winner-leaders__title">Кто выигрывал чаще всех</h3>
@@ -257,6 +258,9 @@
                 <p class="raffle-winner-leaders__summary" id="raffleWinnerLeadersSummary"></p>
                 <ol class="raffle-winner-leaders__list" id="raffleWinnerLeadersList"></ol>
               </section>
+            </div>
+
+            <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelCompleted" data-raffle-panel="completed">
               <div class="raffles-completed-list" id="rafflesCompleted"></div>
               <p class="raffle-empty raffles-completed-empty" id="rafflesCompletedEmpty">Нет завершённых розыгрышей.</p>
             </div>

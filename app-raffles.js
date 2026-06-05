@@ -37,9 +37,11 @@ function initRaffles() {
   var rafflesTabCreate = document.getElementById("rafflesTabCreate");
   var rafflesTabActive = document.getElementById("rafflesTabActive");
   var rafflesTabCompleted = document.getElementById("rafflesTabCompleted");
+  var rafflesTabLeaders = document.getElementById("rafflesTabLeaders");
   var rafflesPanelCreate = document.getElementById("rafflesPanelCreate");
   var rafflesPanelActive = document.getElementById("rafflesPanelActive");
   var rafflesPanelCompleted = document.getElementById("rafflesPanelCompleted");
+  var rafflesPanelLeaders = document.getElementById("rafflesPanelLeaders");
   var rafflesTabActiveCount = document.getElementById("rafflesTabActiveCount");
   var rafflesTabActiveSum = document.getElementById("rafflesTabActiveSum");
   var rafflesTabCompletedCount = document.getElementById("rafflesTabCompletedCount");
@@ -492,6 +494,63 @@ function initRaffles() {
     return isCashPrize ? "на кеш" : "за билет";
   }
 
+  function activeRaffleBuyinWord(count) {
+    var n = Math.abs(parseInt(count, 10) || 0);
+    var mod100 = n % 100;
+    var mod10 = n % 10;
+    if (mod100 >= 11 && mod100 <= 19) return "байинов";
+    if (mod10 === 1) return "байин";
+    if (mod10 >= 2 && mod10 <= 4) return "байина";
+    return "байинов";
+  }
+
+  function activeRaffleBuyinAmountText(amount) {
+    var n = Math.max(0, parseInt(amount, 10) || 0);
+    return n > 0 ? String(n) + "р" : "";
+  }
+
+  function activeRaffleCashNominal(prize) {
+    var text = String(prize || "");
+    var m = text.match(/(\d+(?:[\s\u00a0\u202f]\d{3})*(?:[.,]\d+)?)\s*(?:₽|р|руб)/i);
+    if (m && m[1]) {
+      var normalized = m[1].replace(/[\s\u00a0\u202f]/g, "").replace(",", ".");
+      var parsed = parseFloat(normalized);
+      if (isFinite(parsed) && parsed > 0) return parsed;
+    }
+    return parsePrizeValue(prize);
+  }
+
+  function activeRaffleCashStakeText(prize, nominal) {
+    var text = String(prize || "");
+    var m = text.match(/(?:^|[^\d])(\d{1,3}\s*\/\s*\d{1,3})(?:[^\d]|$)/);
+    if (m && m[1]) return m[1].replace(/\s+/g, "");
+    if (nominal === 1000) return "20/40";
+    if (nominal === 200) return "5/10";
+    return "";
+  }
+
+  function activeRaffleBuyinChipLabels(raffle) {
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    if (!isCashPrize) return [];
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    return groups
+      .map(function (group) {
+        var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+        var nominal = activeRaffleCashNominal(group && group.prize);
+        if (count <= 0 || nominal <= 0) return "";
+        var stake = activeRaffleCashStakeText(group && group.prize, nominal);
+        return (
+          count +
+          " " +
+          activeRaffleBuyinWord(count) +
+          " по " +
+          activeRaffleBuyinAmountText(nominal) +
+          (stake ? " на " + stake : "")
+        );
+      })
+      .filter(Boolean);
+  }
+
   function activeRaffleParticipantIn(raffle, raffleIds) {
     var ids = Array.isArray(raffleIds) ? raffleIds : [];
     if (!ids.length || !raffle || !Array.isArray(raffle.participants)) return false;
@@ -773,6 +832,12 @@ function initRaffles() {
         var totalPrize = getRaffleTotalPrize(raffle);
         var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
+        var buyinChipLabels = activeRaffleBuyinChipLabels(raffle);
+        var buyinChipsHtml = buyinChipLabels
+          .map(function (label) {
+            return '<span class="raffles-active-chooser__buyin-chip">' + escapeHtml(label) + "</span>";
+          })
+          .join("");
         var buttonLabel = needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
         var buttonAction = needsLogin ? "login" : isIn ? "leave" : "join";
         var buttonPressed = !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
@@ -808,13 +873,16 @@ function initRaffles() {
           escapeHtml(formatRaffleSum(totalPrize)) +
           "</span>" +
           "</span>" +
-          '<span class="raffles-active-chooser__facts">' +
-          '<span class="raffles-active-chooser__fact" aria-label="' +
-          escapeHtml(winners + " победителей") +
-          '"><span class="raffles-active-chooser__fact-icon">#</span><span class="raffles-active-chooser__fact-count">' +
-          escapeHtml(winners) +
-          '</span><span class="raffles-active-chooser__fact-word"> победителей</span>' +
-          "</span>" +
+          '<span class="raffles-active-chooser__facts' +
+          (buyinChipsHtml ? " raffles-active-chooser__facts--promo" : "") +
+          '">' +
+          (buyinChipsHtml ||
+            ('<span class="raffles-active-chooser__fact" aria-label="' +
+              escapeHtml(winners + " победителей") +
+              '"><span class="raffles-active-chooser__fact-icon">#</span><span class="raffles-active-chooser__fact-count">' +
+              escapeHtml(winners) +
+              '</span><span class="raffles-active-chooser__fact-word"> победителей</span>' +
+              "</span>")) +
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--timer"><span class="raffles-active-chooser__fact-icon">⏱</span><span class="raffles-active-chooser__timer-label">Осталось </span><span data-raffle-active-timer="' +
           escapeHtml(endMs) +
           '">' +
@@ -1571,7 +1639,8 @@ function initRaffles() {
         var completedPanelVisible =
           !!(
             switchToCompleted ||
-            (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden"))
+            (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden")) ||
+            (rafflesPanelLeaders && !rafflesPanelLeaders.classList.contains("raffles-panel--hidden"))
           );
         rafflesLastCompleted = completed;
         if (completedPanelVisible) {
@@ -1622,7 +1691,8 @@ function initRaffles() {
     var isCreate = tab === "create";
     var isActive = tab === "active";
     var isCompleted = tab === "completed";
-    if (!isCreate && !isActive && !isCompleted) {
+    var isLeaders = tab === "leaders";
+    if (!isCreate && !isActive && !isCompleted && !isLeaders) {
       tab = "active";
       isActive = true;
     }
@@ -1641,6 +1711,10 @@ function initRaffles() {
       rafflesTabCompleted.classList.toggle("raffles-tab--active", isCompleted);
       rafflesTabCompleted.setAttribute("aria-selected", isCompleted ? "true" : "false");
     }
+    if (rafflesTabLeaders) {
+      rafflesTabLeaders.classList.toggle("raffles-tab--active", isLeaders);
+      rafflesTabLeaders.setAttribute("aria-selected", isLeaders ? "true" : "false");
+    }
     if (rafflesPanelCreate) {
       rafflesPanelCreate.classList.toggle("raffles-panel--active", isCreate);
       rafflesPanelCreate.classList.toggle("raffles-panel--hidden", !isCreate);
@@ -1653,17 +1727,22 @@ function initRaffles() {
       rafflesPanelCompleted.classList.toggle("raffles-panel--active", isCompleted);
       rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
     }
+    if (rafflesPanelLeaders) {
+      rafflesPanelLeaders.classList.toggle("raffles-panel--active", isLeaders);
+      rafflesPanelLeaders.classList.toggle("raffles-panel--hidden", !isLeaders);
+    }
     if (isCreate && typeof window !== "undefined" && typeof window.pokerRafflesOpenCreateActionTab === "function") {
       window.pokerRafflesOpenCreateActionTab();
     }
     rafflesCurrentTab = tab;
-    if (isCompleted && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
+    if ((isCompleted || isLeaders) && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (isCompleted) schedulePendingCompletedRaffleFocus();
     if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
   }
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
+  if (rafflesTabLeaders) rafflesTabLeaders.addEventListener("click", function () { setRafflesTab("leaders"); });
 
   if (typeof initRafflesPublicRuntime === "function") {
     var rafflesPublicRuntimeDeps = {};
