@@ -24,10 +24,14 @@ var streamsCloudflareEgressRoomId = "";
 var streamsCloudflareEgressStopping = false;
 var streamsCloudflareHls = null;
 var streamsCloudflareDelayInterval = null;
+var streamsCloudflareRetryTimer = null;
+var streamsCloudflarePlayerGeneration = 0;
 var streamsBroadcastLaunchMode = "delayed";
 var streamsBroadcastActiveMode = "";
 
 var STREAMS_RECONNECT_DELAYS_MS = [900, 1600, 2600, 4200, 6500, 9000, 12000];
+var STREAMS_CLOUDFLARE_READY_RETRY_DELAYS_MS = [3000, 5000, 8000, 12000, 16000, 22000, 30000, 30000];
+var STREAMS_EGRESS_START_RETRY_DELAYS_MS = [1500, 3000, 5000];
 var STREAMS_LIVEKIT_CDN_URLS = [
   "https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js",
   "https://unpkg.com/livekit-client@2/dist/livekit-client.umd.min.js"
@@ -86,13 +90,26 @@ function streamsGetHlsClient() {
 
 function streamsLoadScript(src) {
   return new Promise(function (resolve, reject) {
+    var settled = false;
     var script = document.createElement("script");
+    var timeout = setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      try { script.remove(); } catch (eRemove) {}
+      reject(new Error("Timed out loading " + src));
+    }, 9000);
+    function finish(fn, value) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      fn(value);
+    }
     script.src = src;
     script.async = true;
     script.crossOrigin = "anonymous";
     script.referrerPolicy = "no-referrer";
-    script.onload = function () { resolve(true); };
-    script.onerror = function () { reject(new Error("Failed to load " + src)); };
+    script.onload = function () { finish(resolve, true); };
+    script.onerror = function () { finish(reject, new Error("Failed to load " + src)); };
     (document.head || document.documentElement).appendChild(script);
   });
 }
@@ -332,6 +349,11 @@ function streamsClearCloudflareDelayTimer() {
   streamsCloudflareDelayInterval = null;
 }
 
+function streamsClearCloudflareRetry() {
+  if (streamsCloudflareRetryTimer) clearTimeout(streamsCloudflareRetryTimer);
+  streamsCloudflareRetryTimer = null;
+}
+
 function streamsDestroyCloudflareHls() {
   if (!streamsCloudflareHls) return;
   try { streamsCloudflareHls.destroy(); } catch (eDestroy) {}
@@ -377,6 +399,8 @@ function streamsResetCloudflarePlayer(clearStatus) {
   var wrap = document.getElementById("streamsCloudflareWrap");
   var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
   streamsClearCloudflareDelayTimer();
+  streamsClearCloudflareRetry();
+  streamsCloudflarePlayerGeneration += 1;
   streamsDestroyCloudflareHls();
   if (frame) frame.src = "about:blank";
   if (video) {
@@ -394,13 +418,14 @@ function streamsResetCloudflarePlayer(clearStatus) {
   if (clearStatus) streamsSetCloudflareStatus("", "");
 }
 
-function streamsStartCloudflareEgress(roomId, generation) {
+function streamsStartCloudflareEgress(roomId, generation, attempt) {
+  attempt = Math.max(0, Math.round(Number(attempt) || 0));
   if (!roomId) return Promise.resolve(false);
   if (streamsCloudflareEgressId && streamsCloudflareEgressRoomId === roomId) {
     streamsSetEgressStatus("Режим с задержкой уже отправляет поток в Cloudflare.", "ok");
     return Promise.resolve(true);
   }
-  streamsSetEgressStatus("Подключаю Cloudflare Stream без OBS…", "warn");
+  streamsSetEgressStatus(attempt > 0 ? "Повторно подключаю Cloudflare Stream…" : "Подключаю Cloudflare Stream без OBS…", "warn");
   return streamsFetchLiveKitEgress("start", roomId, "")
     .then(function (data) {
       var egressId = String(data && data.egressId || "").trim();
@@ -416,6 +441,19 @@ function streamsStartCloudflareEgress(roomId, generation) {
     })
     .catch(function (err) {
       if (generation !== streamsBroadcastGeneration) return false;
+      if (
+        String(err && err.message || "") === "livekit_egress_start_failed" &&
+        attempt < STREAMS_EGRESS_START_RETRY_DELAYS_MS.length
+      ) {
+        var delay = STREAMS_EGRESS_START_RETRY_DELAYS_MS[attempt];
+        streamsSetEgressStatus("LiveKit ещё готовит комнату для Cloudflare. Повтор через " + Math.ceil(delay / 1000) + " сек.", "warn");
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            if (generation !== streamsBroadcastGeneration) return resolve(false);
+            resolve(streamsStartCloudflareEgress(roomId, generation, attempt + 1));
+          }, delay);
+        });
+      }
       streamsSetEgressStatus(streamsEgressErrorText(err), "error");
       return false;
     });
@@ -533,7 +571,7 @@ function streamsOpenDelayedWatch(forceRefresh) {
   streamsResetWatchConnection(false, false);
   streamsSetWatchStatus("Открываю текущий стрим с задержкой…", "warn");
   return streamsInitCloudflarePlayer(!!forceRefresh).then(function (ok) {
-    if (ok) streamsSetWatchStatus("Смотрим текущий стрим с задержкой через Cloudflare.", "ok");
+    if (ok) streamsSetWatchStatus("Открыл задержанный стрим. Если Cloudflare ещё готовит поток, плеер обновится сам.", "warn");
     return ok;
   });
 }
@@ -617,6 +655,73 @@ function streamsCloudflareDvrHlsUrl(data) {
   return url ? streamsAppendQueryParam(url, "dvrEnabled", "true") : "";
 }
 
+function streamsCloudflareDvrIframeUrl(data) {
+  return String(data && (data.iframeDvrUrl || data.iframeUrl) || "").trim();
+}
+
+function streamsProbeCloudflareHls(hlsUrl) {
+  hlsUrl = String(hlsUrl || "").trim();
+  if (!hlsUrl) return Promise.reject(new Error("hls_url_missing"));
+  var url = streamsAppendQueryParam(hlsUrl, "_streamsTs", String(Date.now()));
+  return fetch(url, {
+    method: "HEAD",
+    cache: "no-store",
+    mode: "cors",
+  }).then(function (res) {
+    if (res && res.status === 200) return true;
+    var err = new Error(res && res.status === 204 ? "cloudflare_hls_not_ready" : "cloudflare_hls_" + (res ? res.status : "no_response"));
+    err.status = res ? res.status : 0;
+    throw err;
+  });
+}
+
+function streamsShowCloudflareIframeFallback(data, reason) {
+  var wrap = document.getElementById("streamsCloudflareWrap");
+  var frame = document.getElementById("streamsCloudflareFrame");
+  var video = document.getElementById("streamsCloudflareVideo");
+  var iframeUrl = streamsCloudflareDvrIframeUrl(data);
+  streamsClearCloudflareDelayTimer();
+  streamsDestroyCloudflareHls();
+  if (!frame || !iframeUrl) {
+    streamsSetCloudflareStatus(reason || "Cloudflare пока не отдал поток. Нажмите «Обновить эфир» через минуту.", "error");
+    return false;
+  }
+  if (video) {
+    try { video.pause(); } catch (ePause) {}
+    video.removeAttribute("src");
+    video.hidden = true;
+    try { video.load(); } catch (eLoad) {}
+  }
+  if (wrap) wrap.classList.remove("streams-cloudflare-wrap--hidden");
+  frame.hidden = false;
+  frame.src = iframeUrl;
+  streamsSetCloudflareStatus("DVR-HLS пока не открылся, показываю встроенный плеер Cloudflare. Если эфира нет, нажмите «Обновить эфир» через минуту.", "warn");
+  return true;
+}
+
+function streamsScheduleCloudflareRetry(data, forceRefresh, attempt, generation, reason) {
+  if (generation !== streamsCloudflarePlayerGeneration) return false;
+  streamsClearCloudflareRetry();
+  var delays = STREAMS_CLOUDFLARE_READY_RETRY_DELAYS_MS;
+  var index = Math.max(0, Math.min(delays.length - 1, attempt || 0));
+  if ((attempt || 0) >= delays.length) {
+    return streamsShowCloudflareIframeFallback(data, reason);
+  }
+  var delay = delays[index];
+  var seconds = Math.max(1, Math.ceil(delay / 1000));
+  streamsDestroyCloudflareHls();
+  streamsSetCloudflareStatus(
+    (reason || "Cloudflare ещё готовит поток.") + " Проверю снова через " + seconds + " сек.",
+    "warn"
+  );
+  streamsCloudflareRetryTimer = setTimeout(function () {
+    streamsCloudflareRetryTimer = null;
+    if (generation !== streamsCloudflarePlayerGeneration) return;
+    streamsLoadCloudflareDelayedVideo(data, !!forceRefresh, (attempt || 0) + 1, generation);
+  }, delay);
+  return true;
+}
+
 function streamsCloudflareSeekableInfo(video) {
   if (!video || !video.seekable || video.seekable.length < 1) return null;
   try {
@@ -682,16 +787,19 @@ function streamsPlayCloudflareVideo(video, delaySeconds) {
   }
 }
 
-function streamsLoadCloudflareDelayedVideo(data, forceRefresh) {
+function streamsLoadCloudflareDelayedVideo(data, forceRefresh, attempt, generation) {
   var wrap = document.getElementById("streamsCloudflareWrap");
   var frame = document.getElementById("streamsCloudflareFrame");
   var video = document.getElementById("streamsCloudflareVideo");
   var hlsUrl = streamsCloudflareDvrHlsUrl(data);
   var delaySeconds = streamsCloudflareDelaySeconds(data);
   var label = streamsCloudflareDelayLabel(delaySeconds);
+  attempt = Math.max(0, Math.round(Number(attempt) || 0));
+  generation = generation || streamsCloudflarePlayerGeneration;
   if (!video || !hlsUrl) return Promise.resolve(false);
 
   streamsClearCloudflareDelayTimer();
+  streamsClearCloudflareRetry();
   streamsDestroyCloudflareHls();
   if (frame) {
     frame.hidden = true;
@@ -706,11 +814,14 @@ function streamsLoadCloudflareDelayedVideo(data, forceRefresh) {
     streamsApplyCloudflareDelay(video, delaySeconds, true);
   };
   video.oncanplay = function () {
+    if (generation !== streamsCloudflarePlayerGeneration) return;
     streamsStartCloudflareDelayLoop(video, delaySeconds);
     streamsPlayCloudflareVideo(video, delaySeconds);
+    streamsSetWatchStatus("Смотрим текущий стрим с задержкой через Cloudflare.", "ok");
   };
   video.onerror = function () {
-    streamsSetCloudflareStatus("Не удалось открыть DVR-HLS поток Cloudflare.", "error");
+    if (generation !== streamsCloudflarePlayerGeneration) return;
+    streamsScheduleCloudflareRetry(data, true, attempt, generation, "DVR-HLS Cloudflare ещё не готов.");
   };
   if (!video.__streamsCloudflareClickHandlerAttached) {
     video.__streamsCloudflareClickHandlerAttached = true;
@@ -721,42 +832,59 @@ function streamsLoadCloudflareDelayedVideo(data, forceRefresh) {
   }
 
   streamsSetCloudflareStatus((forceRefresh ? "Обновляю" : "Загружаю") + " плеер с задержкой " + label + "…", "warn");
-  if (video.canPlayType && video.canPlayType("application/vnd.apple.mpegurl")) {
-    if (forceRefresh || video.src !== hlsUrl) video.src = hlsUrl;
-    try { video.load(); } catch (eLoad) {}
-    return Promise.resolve(true);
-  }
-  return streamsEnsureHlsClient().then(function (Hls) {
-    var hls = new Hls({
-      liveSyncDuration: delaySeconds,
-      liveMaxLatencyDuration: delaySeconds + 45,
-      maxLiveSyncPlaybackRate: 1,
-      lowLatencyMode: false,
+  return streamsProbeCloudflareHls(hlsUrl)
+    .then(function () {
+      if (generation !== streamsCloudflarePlayerGeneration) return false;
+      if (video.canPlayType && video.canPlayType("application/vnd.apple.mpegurl")) {
+        if (forceRefresh || video.src !== hlsUrl) video.src = hlsUrl;
+        try { video.load(); } catch (eLoad) {}
+        return true;
+      }
+      return streamsEnsureHlsClient().then(function (Hls) {
+        if (generation !== streamsCloudflarePlayerGeneration) return false;
+        var hls = new Hls({
+          liveSyncDuration: delaySeconds,
+          liveMaxLatencyDuration: delaySeconds + 45,
+          maxLiveSyncPlaybackRate: 1,
+          lowLatencyMode: false,
+          manifestLoadingMaxRetry: 4,
+          manifestLoadingRetryDelay: 1200,
+          manifestLoadingMaxRetryTimeout: 8000,
+        });
+        streamsCloudflareHls = hls;
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+          hls.loadSource(hlsUrl);
+        });
+        hls.on(Hls.Events.ERROR, function (event, dataErr) {
+          if (!dataErr || !dataErr.fatal) return;
+          if (generation !== streamsCloudflarePlayerGeneration) return;
+          streamsScheduleCloudflareRetry(data, true, attempt, generation, "HLS-плеер Cloudflare потерял поток.");
+        });
+        return true;
+      });
+    })
+    .catch(function (err) {
+      if (generation !== streamsCloudflarePlayerGeneration) return false;
+      var message = err && err.status === 204
+        ? "Cloudflare принял трансляцию, но manifest ещё пустой."
+        : "Cloudflare пока не отдал DVR-HLS поток.";
+      return streamsScheduleCloudflareRetry(data, true, attempt, generation, message);
     });
-    streamsCloudflareHls = hls;
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-      hls.loadSource(hlsUrl);
-    });
-    hls.on(Hls.Events.ERROR, function (event, dataErr) {
-      if (!dataErr || !dataErr.fatal) return;
-      streamsSetCloudflareStatus("HLS-плеер Cloudflare остановился. Нажмите «Обновить плеер».", "error");
-    });
-    return true;
-  }).catch(function () {
-    streamsSetCloudflareStatus("Этот браузер не смог загрузить HLS-плеер для задержки " + label + ".", "error");
-    return false;
-  });
 }
 
 function streamsInitCloudflarePlayer(forceRefresh) {
   var refreshBtn = document.getElementById("streamsCloudflareRefreshBtn");
   var video = document.getElementById("streamsCloudflareVideo");
   if (!video) return Promise.resolve(false);
+  streamsCloudflarePlayerGeneration += 1;
+  var generation = streamsCloudflarePlayerGeneration;
+  streamsClearCloudflareRetry();
   if (refreshBtn) refreshBtn.disabled = true;
   streamsSetCloudflareStatus(forceRefresh ? "Обновляю Cloudflare-плеер…" : "Загружаю Cloudflare-плеер…", "warn");
   return streamsFetchCloudflareConfig(!!forceRefresh)
     .then(function (data) {
+      if (generation !== streamsCloudflarePlayerGeneration) return false;
       if (!data || data.configured !== true) {
         streamsResetCloudflarePlayer(false);
         streamsSetCloudflareStatus(
@@ -765,9 +893,10 @@ function streamsInitCloudflarePlayer(forceRefresh) {
         );
         return false;
       }
-      return streamsLoadCloudflareDelayedVideo(data, forceRefresh);
+      return streamsLoadCloudflareDelayedVideo(data, forceRefresh, 0, generation);
     })
     .catch(function (err) {
+      if (generation !== streamsCloudflarePlayerGeneration) return false;
       streamsResetCloudflarePlayer(false);
       streamsSetCloudflareStatus(streamsCloudflareErrorText(err), "error");
       return false;
@@ -802,8 +931,16 @@ function streamsPlayVideo(video, showAlert) {
   } catch (e) {}
 }
 
+function streamsTrackMediaStreamTrack(track) {
+  if (!track) return null;
+  if (track.mediaStreamTrack) return track.mediaStreamTrack;
+  if (typeof MediaStreamTrack !== "undefined" && track instanceof MediaStreamTrack) return track;
+  if (track.track && track.track.mediaStreamTrack) return track.track.mediaStreamTrack;
+  return null;
+}
+
 function streamsAddRemoteTrack(track, remoteVideo, remoteWrap, showAlert) {
-  var mediaTrack = track && track.mediaStreamTrack ? track.mediaStreamTrack : null;
+  var mediaTrack = streamsTrackMediaStreamTrack(track);
   if (!mediaTrack || !streamsWatchRemoteStream) return;
   var exists = streamsWatchRemoteStream.getTracks().some(function (t) { return t.id === mediaTrack.id; });
   if (!exists) streamsWatchRemoteStream.addTrack(mediaTrack);
@@ -816,7 +953,7 @@ function streamsAddRemoteTrack(track, remoteVideo, remoteWrap, showAlert) {
 }
 
 function streamsRemoveRemoteTrack(track, remoteWrap) {
-  var mediaTrack = track && track.mediaStreamTrack ? track.mediaStreamTrack : null;
+  var mediaTrack = streamsTrackMediaStreamTrack(track);
   if (!mediaTrack || !streamsWatchRemoteStream) return;
   try { streamsWatchRemoteStream.removeTrack(mediaTrack); } catch (eRemove) {}
   if (streamsWatchRemoteStream.getTracks().length === 0) {
@@ -825,14 +962,33 @@ function streamsRemoveRemoteTrack(track, remoteWrap) {
   }
 }
 
+function streamsSubscribeRemotePublication(publication, remoteVideo, remoteWrap, showAlert) {
+  if (!publication) return;
+  try {
+    if (typeof publication.setSubscribed === "function") publication.setSubscribed(true);
+  } catch (eSubscribe) {}
+  var track = publication.track || publication.videoTrack || publication.audioTrack || null;
+  if (track) streamsAddRemoteTrack(track, remoteVideo, remoteWrap, showAlert);
+}
+
+function streamsAttachParticipantLiveKitTracks(participant, remoteVideo, remoteWrap, showAlert) {
+  var publications = participant && (participant.trackPublications || participant.tracks || participant.audioTrackPublications || participant.videoTrackPublications);
+  if (!publications) return;
+  if (typeof publications.forEach === "function") {
+    publications.forEach(function (publication) {
+      streamsSubscribeRemotePublication(publication, remoteVideo, remoteWrap, showAlert);
+    });
+    return;
+  }
+  Object.keys(publications).forEach(function (key) {
+    streamsSubscribeRemotePublication(publications[key], remoteVideo, remoteWrap, showAlert);
+  });
+}
+
 function streamsAttachExistingLiveKitTracks(room, remoteVideo, remoteWrap, showAlert) {
   if (!room || !room.remoteParticipants || typeof room.remoteParticipants.forEach !== "function") return;
   room.remoteParticipants.forEach(function (participant) {
-    var publications = participant && participant.trackPublications;
-    if (!publications || typeof publications.forEach !== "function") return;
-    publications.forEach(function (publication) {
-      if (publication && publication.track) streamsAddRemoteTrack(publication.track, remoteVideo, remoteWrap, showAlert);
-    });
+    streamsAttachParticipantLiveKitTracks(participant, remoteVideo, remoteWrap, showAlert);
   });
 }
 
@@ -1209,6 +1365,15 @@ function initStreams() {
         remoteVideo.srcObject = streamsWatchRemoteStream;
         var room = new LK.Room({ adaptiveStream: true, dynacast: true });
         streamsLiveKitWatchRoom = room;
+        room.on(events.ParticipantConnected || "participantConnected", function (participant) {
+          if (generation !== streamsWatchGeneration) return;
+          streamsAttachParticipantLiveKitTracks(participant, remoteVideo, remoteWrap, showAlert);
+        });
+        room.on(events.TrackPublished || "trackPublished", function (publication, participant) {
+          if (generation !== streamsWatchGeneration) return;
+          streamsSubscribeRemotePublication(publication, remoteVideo, remoteWrap, showAlert);
+          if (participant) streamsAttachParticipantLiveKitTracks(participant, remoteVideo, remoteWrap, showAlert);
+        });
         room.on(events.TrackSubscribed || "trackSubscribed", function (track) {
           if (generation !== streamsWatchGeneration) return;
           streamsAddRemoteTrack(track, remoteVideo, remoteWrap, showAlert);

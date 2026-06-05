@@ -605,10 +605,13 @@ function initRaffles() {
           "</span>" +
           "</span>" +
           '<span class="raffles-active-chooser__facts">' +
-          '<span class="raffles-active-chooser__fact"><span class="raffles-active-chooser__fact-icon">#</span>' +
+          '<span class="raffles-active-chooser__fact" aria-label="' +
           escapeHtml(winners + " победителей") +
+          '"><span class="raffles-active-chooser__fact-icon">#</span><span class="raffles-active-chooser__fact-count">' +
+          escapeHtml(winners) +
+          '</span><span class="raffles-active-chooser__fact-word"> победителей</span>' +
           "</span>" +
-          '<span class="raffles-active-chooser__fact"><span class="raffles-active-chooser__fact-icon">⏱</span>Осталось <span data-raffle-active-timer="' +
+          '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--timer"><span class="raffles-active-chooser__fact-icon">⏱</span><span class="raffles-active-chooser__timer-label">Осталось </span><span data-raffle-active-timer="' +
           escapeHtml(endMs) +
           '">' +
           escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || "Завершён") : "—") +
