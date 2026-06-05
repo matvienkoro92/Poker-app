@@ -446,7 +446,22 @@ function initRaffles() {
 
   function activeRaffleBadgeText(raffle) {
     if (raffle && raffle.daily) return "Ежедневный";
-    return "Только сегодня";
+    return "Сегодня";
+  }
+
+  function activeRaffleResultsTimeText(raffle) {
+    if (!raffle || !raffle.endDate) return "";
+    var end = new Date(raffle.endDate);
+    if (isNaN(end.getTime())) return "";
+    return (
+      "Итоги в " +
+      end.toLocaleTimeString("ru-RU", {
+        timeZone: "Europe/Moscow",
+        hour: "2-digit",
+        minute: "2-digit",
+      }) +
+      " МСК"
+    );
   }
 
   function activeRafflePrizeLabel(raffle) {
@@ -578,8 +593,9 @@ function initRaffles() {
         var totalPrize = getRaffleTotalPrize(raffle);
         var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
-        var buttonLabel = needsLogin ? "Войти" : isIn ? "Участвую" : "Участвовать";
-        var buttonAction = !isIn ? ' data-raffle-active-action="' + (needsLogin ? "login" : "join") + '"' : "";
+        var buttonLabel = needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
+        var buttonAction = ' data-raffle-active-action="' + (needsLogin ? "login" : isIn ? "leave" : "join") + '"';
+        var resultsTimeText = activeRaffleResultsTimeText(raffle);
         return (
           '<button type="button" class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
@@ -589,8 +605,15 @@ function initRaffles() {
           '" aria-selected="' +
           (selected ? "true" : "false") +
           '">' +
+          '<span class="raffles-active-chooser__head">' +
           '<span class="raffles-active-chooser__badge">' +
           escapeHtml(activeRaffleBadgeText(raffle)) +
+          "</span>" +
+          (resultsTimeText
+            ? '<span class="raffles-active-chooser__results-time">' +
+              escapeHtml(resultsTimeText) +
+              "</span>"
+            : "") +
           "</span>" +
           '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
           '<span class="raffles-active-chooser__body">' +
@@ -623,9 +646,6 @@ function initRaffles() {
           buttonAction +
           ">" +
           escapeHtml(buttonLabel) +
-          '<small>' +
-          escapeHtml(activeRaffleEntryText(raffle)) +
-          "</small>" +
           "</span>" +
           "</button>"
         );
@@ -657,7 +677,7 @@ function initRaffles() {
           }
           if (!raffleJoinToggleBtn || raffleJoinToggleBtn.disabled) return;
           if (raffleJoinToggleBtn.classList.contains("raffle-join-toggle-btn--hidden")) return;
-          if ((raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join") === "join") raffleJoinToggleBtn.click();
+          if ((raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join") === action) raffleJoinToggleBtn.click();
         }, 80);
       }
       var cache = typeof window !== "undefined" ? window._rafflesCache : null;
