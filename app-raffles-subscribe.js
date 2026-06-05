@@ -5,12 +5,31 @@ function initRafflesSubscribeRuntime(opts) {
   with (opts) {
   // Подписка на уведомления о новых розыгрышах
   (function initRafflesSubscribe() {
-    if (!rafflesSubscribeBtn) return;
+    var raffleSubscribeInlineBtn = document.getElementById("raffleSubscribeInlineBtn");
+    var raffleSubscribeButtons = [];
+    if (rafflesSubscribeBtn) raffleSubscribeButtons.push(rafflesSubscribeBtn);
+    if (raffleSubscribeInlineBtn && raffleSubscribeInlineBtn !== rafflesSubscribeBtn) {
+      raffleSubscribeButtons.push(raffleSubscribeInlineBtn);
+    }
+    if (!raffleSubscribeButtons.length) return;
     var RAFFLE_SUBSCRIBED_KEY = "poker_raffles_subscribed";
+    function forEachRaffleSubscribeButton(callback) {
+      raffleSubscribeButtons.forEach(function (btn) {
+        if (btn) callback(btn);
+      });
+    }
     function setRaffleSubscribeState(subscribed) {
-      rafflesSubscribeBtn.disabled = false;
-      rafflesSubscribeBtn.textContent = subscribed ? "Отписаться" : "Подписаться";
-      rafflesSubscribeBtn.dataset.subscribed = subscribed ? "1" : "0";
+      forEachRaffleSubscribeButton(function (btn) {
+        btn.disabled = false;
+        btn.textContent = subscribed ? "Отписаться" : "Подписаться";
+        btn.dataset.subscribed = subscribed ? "1" : "0";
+      });
+    }
+    function setRaffleSubscribePending() {
+      forEachRaffleSubscribeButton(function (btn) {
+        btn.disabled = true;
+        btn.textContent = "Подписываем…";
+      });
     }
     function openRaffleSubscribeBotLink(data) {
       var url = data && data.openUrl ? String(data.openUrl) : "";
@@ -44,7 +63,10 @@ function initRafflesSubscribeRuntime(opts) {
     } catch (e) {
       setRaffleSubscribeState(false);
     }
-    rafflesSubscribeBtn.addEventListener("click", function () {
+    forEachRaffleSubscribeButton(function (subscribeBtn) {
+      if (subscribeBtn.getAttribute("data-raffle-subscribe-bound") === "1") return;
+      subscribeBtn.setAttribute("data-raffle-subscribe-bound", "1");
+      subscribeBtn.addEventListener("click", function () {
       var tgLocal = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       var baseUrl = getApiBase();
       if (!baseUrl) {
@@ -62,7 +84,7 @@ function initRafflesSubscribeRuntime(opts) {
         }
         return;
       }
-      var subscribed = rafflesSubscribeBtn.dataset.subscribed === "1";
+      var subscribed = subscribeBtn.dataset.subscribed === "1";
       var payload =
         typeof pokerApiAuthJsonBody === "function"
           ? pokerApiAuthJsonBody({ unsubscribe: subscribed })
@@ -72,8 +94,7 @@ function initRafflesSubscribeRuntime(opts) {
         else alert("Не удалось определить аккаунт. Обновите страницу или войдите снова.");
         return;
       }
-      rafflesSubscribeBtn.disabled = true;
-      rafflesSubscribeBtn.textContent = "Подписываем…";
+      setRaffleSubscribePending();
       fetch(baseUrl.replace(/\/$/, "") + "/api/raffle-subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,8 +140,11 @@ function initRafflesSubscribeRuntime(opts) {
           setRaffleSubscribeState(subscribed);
         })
         .finally(function () {
-          rafflesSubscribeBtn.disabled = false;
+          forEachRaffleSubscribeButton(function (btn) {
+            btn.disabled = false;
+          });
         });
+      });
     });
   })();
   }

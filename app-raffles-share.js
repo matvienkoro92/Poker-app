@@ -19,22 +19,30 @@ function pokerInitRafflesHeroShare() {
   }
   function showRafflesCopyFeedback(text) {
     var feedback = document.getElementById("rafflesCopyFeedback");
-    var btn = document.getElementById("rafflesCopyLinkBtn");
+    var copyButtons = [
+      document.getElementById("rafflesCopyLinkBtn"),
+      document.getElementById("raffleCopyLinkInlineBtn"),
+    ].filter(function (btn) {
+      return !!btn;
+    });
     if (!feedback) return false;
     if (showRafflesCopyFeedback.timer) clearTimeout(showRafflesCopyFeedback.timer);
     feedback.textContent = text || "";
     feedback.hidden = !feedback.textContent;
-    if (btn) {
+    copyButtons.forEach(function (btn) {
+      if (!btn.dataset.copyDefaultLabel) {
+        btn.dataset.copyDefaultLabel = btn.getAttribute("aria-label") || "Скопировать ссылку на розыгрыши";
+      }
       btn.classList.add("raffles-hero__share-btn--copied");
       btn.setAttribute("aria-label", text || "Ссылка скопирована");
-    }
+    });
     showRafflesCopyFeedback.timer = setTimeout(function () {
       feedback.hidden = true;
       feedback.textContent = "";
-      if (btn) {
+      copyButtons.forEach(function (btn) {
         btn.classList.remove("raffles-hero__share-btn--copied");
-        btn.setAttribute("aria-label", "Скопировать ссылку на розыгрыши");
-      }
+        btn.setAttribute("aria-label", btn.dataset.copyDefaultLabel || "Скопировать ссылку на розыгрыши");
+      });
       showRafflesCopyFeedback.timer = null;
     }, 2200);
     return true;
@@ -115,18 +123,20 @@ function pokerInitRafflesHeroShare() {
     }
     return "Клуб «Два туза» снова разыгрывает беккинг-билеты на турниры бесплатно. Заходи и участвуй!";
   }
-  var rafflesCopyLinkBtn = document.getElementById("rafflesCopyLinkBtn");
-  if (rafflesCopyLinkBtn && rafflesCopyLinkBtn.getAttribute("data-share-bound") !== "1") {
-    rafflesCopyLinkBtn.setAttribute("data-share-bound", "1");
-    rafflesCopyLinkBtn.addEventListener("click", function () {
+  function bindRafflesCopyButton(btn, trackingName) {
+    if (!btn || btn.getAttribute("data-share-bound") === "1") return;
+    btn.setAttribute("data-share-bound", "1");
+    btn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       var link = rafflesDeepLink();
       copyRafflesLinkText(link).then(function (copied) {
         showRafflesCopyResult(link, copied);
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_hero_copy");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick(trackingName || "raffle_hero_copy");
       });
     });
   }
+  bindRafflesCopyButton(document.getElementById("rafflesCopyLinkBtn"), "raffle_hero_copy");
+  bindRafflesCopyButton(document.getElementById("raffleCopyLinkInlineBtn"), "raffle_card_copy");
   var rafflesInviteFriendBtn = document.getElementById("rafflesInviteFriendBtn");
   if (rafflesInviteFriendBtn && rafflesInviteFriendBtn.getAttribute("data-share-bound") !== "1") {
     rafflesInviteFriendBtn.setAttribute("data-share-bound", "1");

@@ -28,12 +28,16 @@
 }
 .raffles-hero {
   margin: 0 0 12px;
-  min-height: 420px;
+  min-height: 280px;
   padding: 0;
-  background:
+  background-color: #020305;
+  background-image:
     linear-gradient(90deg, rgba(1, 2, 5, 0.98) 0%, rgba(1, 2, 5, 0.84) 34%, rgba(1, 2, 5, 0.36) 64%, rgba(1, 2, 5, 0.08) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.9) 100%),
-    url("./assets/raffles-daily-giveaway-banner.webp") center center / cover no-repeat;
+    url("./assets/raffles-daily-giveaway-banner.webp");
+  background-position: center center, center center, 60% 44%;
+  background-size: 100% 100%, 100% 100%, auto 88%;
+  background-repeat: no-repeat;
   border: 1px solid rgba(255, 183, 56, 0.42);
   border-radius: 18px;
   text-align: left;
@@ -99,7 +103,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   left: 10px;
   right: 10px;
   bottom: 8px;
-  height: 72px;
+  height: 60px;
   z-index: 1;
   border-radius: 22px;
   background: linear-gradient(90deg, rgba(255, 189, 70, 0.2), transparent 24%, transparent 76%, rgba(255, 189, 70, 0.16));
@@ -107,18 +111,18 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-hero__copy {
   position: absolute;
-  top: 78px;
+  top: 72px;
   left: 14px;
   z-index: 2;
-  width: min(300px, 78%);
+  width: min(306px, 76%);
 }
 .raffles-hero__title {
-  margin: 0 0 8px;
-  max-width: 6.6ch;
+  margin: 0 0 7px;
+  max-width: 11.5ch;
   color: #ffd45f;
-  font-size: clamp(42px, 12vw, 54px);
+  font-size: clamp(27px, 8.2vw, 40px);
   font-weight: 1000;
-  line-height: 0.86;
+  line-height: 0.9;
   letter-spacing: 0;
   text-transform: uppercase;
   text-shadow:
@@ -127,12 +131,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 12px 26px rgba(0, 0, 0, 0.72);
 }
 .raffles-hero__subtitle {
-  margin: 0 0 9px;
-  max-width: 13.5ch;
+  margin: 0;
+  max-width: 18ch;
   color: #f8ead0;
-  font-size: clamp(15px, 4.8vw, 20px);
+  font-size: clamp(12px, 3.5vw, 16px);
   font-weight: 1000;
-  line-height: 0.98;
+  line-height: 1.02;
   letter-spacing: 0;
   text-transform: uppercase;
   text-shadow:
@@ -304,13 +308,13 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   z-index: 2;
   left: clamp(10px, 3vw, 24px);
   right: clamp(10px, 3vw, 24px);
-  bottom: 10px;
+  bottom: 8px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
-  padding: 7px 5px;
+  padding: 5px;
   border: 1px solid rgba(255, 203, 83, 0.56);
-  border-radius: 20px;
+  border-radius: 17px;
   background:
     linear-gradient(180deg, rgba(18, 14, 8, 0.84), rgba(4, 6, 10, 0.82)),
     rgba(5, 6, 8, 0.78);
@@ -323,44 +327,19 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto;
   min-width: 0;
   align-items: center;
   justify-items: center;
   justify-content: center;
-  row-gap: 2px;
-  min-height: 48px;
+  row-gap: 1px;
+  min-height: 42px;
   padding: 0 3px;
   text-align: center;
 }
 .raffles-hero__stat::before {
-  content: "#";
-  grid-column: 1;
-  grid-row: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 20%, rgba(255, 232, 166, 0.26), transparent 52%),
-    rgba(255, 203, 83, 0.13);
-  color: #ffd976;
-  border: 1px solid rgba(255, 203, 83, 0.24);
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.16);
-  font-size: 10px;
-  font-weight: 1000;
-  line-height: 1;
-}
-.raffles-hero__stat:nth-child(2)::before {
-  content: "₽";
-}
-.raffles-hero__stat:nth-child(3)::before {
-  content: "◎";
-}
-.raffles-hero__stat:nth-child(4)::before {
-  content: "✓";
+  content: "";
+  display: none;
 }
 .raffles-hero__stat:not(:last-child)::after {
   content: "";
@@ -373,12 +352,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-hero__stat dt {
   grid-column: 1;
-  grid-row: 3;
+  grid-row: 2;
   margin: 0;
   width: 100%;
   min-width: 0;
   color: rgba(255, 245, 210, 0.78);
-  font-size: 6.4px;
+  font-size: 6px;
   font-weight: 900;
   line-height: 0.98;
   text-transform: uppercase;
@@ -387,12 +366,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-hero__stat dd {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 1;
   margin: 0;
   width: 100%;
   min-width: 0;
   color: #fff3c4;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 1000;
   line-height: 0.98;
   white-space: nowrap;
@@ -404,22 +383,23 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 @media (max-width: 560px) {
   .raffles-hero {
     padding: 0;
-    background-position: 62% center;
+    background-position: center center, center center, 62% 42%;
+    background-size: 100% 100%, 100% 100%, auto 86%;
   }
   .raffles-hero__copy {
-    top: 78px;
+    top: 70px;
     left: 14px;
-    width: min(300px, 78%);
+    width: min(296px, 76%);
   }
   .raffles-hero__title {
-    font-size: clamp(38px, 12.2vw, 54px);
-    max-width: 6.4ch;
-    margin-bottom: 6px;
+    font-size: clamp(27px, 8.2vw, 36px);
+    max-width: 11.4ch;
+    margin-bottom: 7px;
   }
   .raffles-hero__subtitle {
-    max-width: 13.5ch;
-    margin-bottom: 9px;
-    font-size: clamp(15px, 4.8vw, 20px);
+    max-width: 18ch;
+    margin-bottom: 0;
+    font-size: clamp(12px, 3.5vw, 15px);
   }
   .raffles-hero__chips {
     width: min(270px, 100%);
@@ -437,26 +417,23 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   .raffles-hero__stats {
     left: 8px;
     right: 8px;
-    bottom: 10px;
+    bottom: 8px;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0;
-    padding: 7px 5px;
+    padding: 5px;
     border-radius: 17px;
   }
   .raffles-hero__stat {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     justify-items: center;
-    row-gap: 2px;
-    min-height: 48px;
+    row-gap: 1px;
+    min-height: 42px;
     padding: 0 3px;
     text-align: center;
   }
   .raffles-hero__stat::before {
-    grid-column: 1;
-    grid-row: 1;
-    width: 20px;
-    height: 20px;
-    font-size: 10px;
+    display: none;
   }
   .raffles-hero__stat:not(:last-child)::after {
     display: block;
@@ -465,24 +442,24 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-hero__stat dt {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 2;
     width: 100%;
-    font-size: 6.4px;
+    font-size: 6px;
     line-height: 0.98;
     white-space: normal;
     overflow-wrap: anywhere;
   }
   .raffles-hero__stat dd {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
     width: 100%;
-    font-size: clamp(10px, 3vw, 13px);
+    font-size: 12px;
     white-space: nowrap;
   }
 }
 @media (max-width: 390px) {
   .raffles-hero {
-    min-height: 420px;
+    min-height: 280px;
   }
   .raffles-hero__stat dt {
     font-size: 6px;
@@ -1376,15 +1353,35 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: rgba(67, 20, 7, 0.58);
 }
 .raffle-invite-wide-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   margin: -2px 0 16px;
 }
-.raffle-invite-wide-row .raffle-invite-wide-btn {
-  width: 100%;
+.raffle-invite-wide-row .raffles-hero__share-btn {
+  min-width: 0;
   min-height: 54px;
-  padding: 12px 16px;
   border-radius: 14px;
+  white-space: nowrap;
+}
+.raffle-invite-wide-row .raffle-invite-wide-btn {
+  flex: 1 1 42%;
+  width: auto;
+  padding: 12px 10px;
   font-size: 15px;
+}
+.raffle-invite-wide-row .raffle-copy-inline-btn {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+}
+.raffle-invite-wide-row .raffle-subscribe-inline-btn {
+  flex: 0.9 1 32%;
+  padding: 12px 10px;
+  font-size: 14px;
 }
 .raffle-invite-wide-row .raffles-hero__share-btn--inline.raffles-hero__share-btn--primary {
   color: #fff1c2;
@@ -1409,6 +1406,28 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 0 0 1px rgba(255, 214, 127, 0.14),
     0 0 26px rgba(214, 163, 84, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+@media (max-width: 390px) {
+  .raffle-invite-wide-row {
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .raffle-invite-wide-row .raffles-hero__share-btn {
+    min-height: 46px;
+  }
+  .raffle-invite-wide-row .raffle-invite-wide-btn {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+  .raffle-invite-wide-row .raffle-copy-inline-btn {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+  }
+  .raffle-invite-wide-row .raffle-subscribe-inline-btn {
+    padding: 10px 5px;
+    font-size: 11px;
+  }
 }
 .raffle-join-invite-row {
   display: flex;
@@ -2381,17 +2400,20 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   padding: 0 10px 10px;
 }
 
-.raffles-hero__share-row .raffles-subscribe-btn:disabled {
+.raffles-hero__share-row .raffles-subscribe-btn:disabled,
+.raffle-invite-wide-row .raffles-subscribe-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
-.raffles-hero__share-row .raffles-subscribe-btn[data-subscribed="1"] {
+.raffles-hero__share-row .raffles-subscribe-btn[data-subscribed="1"],
+.raffle-invite-wide-row .raffles-subscribe-btn[data-subscribed="1"] {
   opacity: 0.4;
   color: rgba(15, 23, 42, 0.6);
   background: rgba(251, 191, 36, 0.2);
   border-color: rgba(251, 191, 36, 0.35);
 }
-.raffles-hero__share-row .raffles-subscribe-btn[data-subscribed="1"]:hover {
+.raffles-hero__share-row .raffles-subscribe-btn[data-subscribed="1"]:hover,
+.raffle-invite-wide-row .raffles-subscribe-btn[data-subscribed="1"]:hover {
   opacity: 0.55;
   background: rgba(251, 191, 36, 0.28);
   border-color: rgba(251, 191, 36, 0.5);
@@ -2550,10 +2572,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 
 [data-theme="light"] .raffles-hero {
-  background:
+  background-color: #120d07;
+  background-image:
     linear-gradient(90deg, rgba(15, 10, 3, 0.88) 0%, rgba(15, 10, 3, 0.72) 34%, rgba(15, 10, 3, 0.3) 64%, rgba(15, 10, 3, 0.12) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0.78) 100%),
-    url("./assets/raffles-daily-giveaway-banner.webp") center center / cover no-repeat;
+    url("./assets/raffles-daily-giveaway-banner.webp");
   border-color: rgba(249, 115, 22, 0.35);
 }
 [data-theme="light"] .raffle-create-form,
