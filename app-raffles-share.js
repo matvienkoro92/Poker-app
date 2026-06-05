@@ -2,6 +2,8 @@
 function pokerInitRafflesHeroShare() {
   function currentRaffleStartParam() {
     var card = document.getElementById("raffleCard");
+    var number = card && card.dataset ? parseInt(String(card.dataset.raffleShareNumber || ""), 10) : 0;
+    if (Number.isFinite(number) && number > 0) return "r_" + String(number);
     var id = card && card.dataset ? String(card.dataset.raffleId || "").trim() : "";
     if (id && typeof window.pokerBuildRaffleActiveStartParam === "function") {
       return window.pokerBuildRaffleActiveStartParam(id);
@@ -10,7 +12,10 @@ function pokerInitRafflesHeroShare() {
   }
 
   function rafflesDeepLink() {
-    return buildMiniAppStartLink(currentRaffleStartParam());
+    var startParam = currentRaffleStartParam();
+    return typeof window.pokerBuildRaffleShareLink === "function"
+      ? window.pokerBuildRaffleShareLink(startParam)
+      : buildMiniAppStartLink(startParam);
   }
   function showRafflesCopyFeedback(text) {
     var feedback = document.getElementById("rafflesCopyFeedback");

@@ -147,10 +147,25 @@ function pokerNormalizeRaffleActiveId(raw) {
   return s.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
 }
 
+function pokerRaffleActiveNumber(raw) {
+  if (!raw || typeof raw !== "object") return 0;
+  var n = parseInt(String(raw.shareNumber || raw.activeShareNumber || raw.active_number || raw.activeNumber || ""), 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+function pokerRaffleActiveShortCode(raw) {
+  var id = pokerNormalizeRaffleActiveId(raw);
+  if (!id) return "";
+  var m = id.match(/^raffle_\d+_([A-Za-z0-9_-]+)$/);
+  return m && m[1] ? m[1] : id;
+}
+
 function pokerBuildRaffleActiveStartParam(raffleId) {
+  var number = pokerRaffleActiveNumber(raffleId);
+  if (number > 0) return "r_" + String(number);
   var rawId = raffleId && typeof raffleId === "object" ? raffleId.id || raffleId.raffleId || raffleId.raffle_id : raffleId;
-  var id = pokerNormalizeRaffleActiveId(rawId);
-  return id ? "r_" + id : "raffles";
+  var code = pokerRaffleActiveShortCode(rawId);
+  return code ? "r_" + code : "raffles";
 }
 
 function pokerParseRaffleActiveStartParam(rawStartParam) {
@@ -159,6 +174,22 @@ function pokerParseRaffleActiveStartParam(rawStartParam) {
   var m = start.match(/^r_(.+)$/) || start.match(/^raffle_active_(.+)$/);
   if (!m || !m[1]) return "";
   return pokerNormalizeRaffleActiveId(m[1]);
+}
+
+function pokerBuildRaffleShareLink(startParam) {
+  var start = pokerNormalizeWebAppStartParam(startParam) || "raffles";
+  var raffleCode = pokerParseRaffleActiveStartParam(start);
+  if (raffleCode) {
+    try {
+      var web = typeof getWebsiteOriginBaseForLinks === "function" ? getWebsiteOriginBaseForLinks() : "";
+      web = String(web || "").trim().replace(/\/+$/, "");
+      if (web) return web + "/r/" + encodeURIComponent(raffleCode);
+    } catch (eRaffleShareWeb) {}
+  }
+  if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
+  var base = typeof getAppBaseUrlForLinks === "function" ? String(getAppBaseUrlForLinks() || "").replace(/\/+$/, "") : "";
+  if (!base) return "";
+  return base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(start);
 }
 
 function pokerBuildRaffleCompletedStartParam(raffleId) {
@@ -181,8 +212,11 @@ function pokerParseRaffleCompletedStartParam(rawStartParam) {
 try {
   if (typeof window !== "undefined") {
     window.pokerNormalizeRaffleActiveId = pokerNormalizeRaffleActiveId;
+    window.pokerRaffleActiveNumber = pokerRaffleActiveNumber;
+    window.pokerRaffleActiveShortCode = pokerRaffleActiveShortCode;
     window.pokerBuildRaffleActiveStartParam = pokerBuildRaffleActiveStartParam;
     window.pokerParseRaffleActiveStartParam = pokerParseRaffleActiveStartParam;
+    window.pokerBuildRaffleShareLink = pokerBuildRaffleShareLink;
     window.pokerNormalizeRaffleCompletedId = pokerNormalizeRaffleCompletedId;
     window.pokerBuildRaffleCompletedStartParam = pokerBuildRaffleCompletedStartParam;
     window.pokerParseRaffleCompletedStartParam = pokerParseRaffleCompletedStartParam;

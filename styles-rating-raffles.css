@@ -746,38 +746,44 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-prize { font-size: 13px; color: var(--text); margin-bottom: 4px; }
 .raffle-subscribe-requirements {
   margin: 0 0 12px;
-  padding: 10px 12px;
+  padding: 9px 11px;
   border: 1px solid rgba(250, 204, 21, 0.22);
   border-radius: 12px;
   background: rgba(15, 23, 42, 0.48);
   color: rgba(248, 234, 208, 0.9);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: 11px;
+  line-height: 1.25;
 }
 .raffle-subscribe-requirements--hidden {
   display: none !important;
 }
 .raffle-subscribe-requirements__title {
-  margin: 0 0 6px;
+  margin: 0 0 5px;
+  font-size: 11px;
   font-weight: 800;
+  line-height: 1.18;
   color: #fff7cc;
 }
 .raffle-subscribe-requirements__list {
   display: grid;
-  gap: 3px;
+  gap: 2px;
   margin: 0;
-  padding-left: 18px;
+  padding-left: 15px;
+}
+.raffle-subscribe-requirements__list li {
+  line-height: 1.25;
 }
 .raffle-subscribe-requirements__note {
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
   color: rgba(248, 234, 208, 0.58);
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.18;
 }
 .raffle-subscribe-requirements a {
   color: #fde68a;
+  font-size: 12px;
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 3px;

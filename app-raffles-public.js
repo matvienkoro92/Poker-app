@@ -21,7 +21,10 @@ function initRafflesPublicRuntime(opts) {
         typeof window.pokerBuildRaffleActiveStartParam === "function"
           ? window.pokerBuildRaffleActiveStartParam(raffle)
           : "raffles";
-      var link = buildMiniAppStartLink(startParam);
+      var link =
+        typeof window.pokerBuildRaffleShareLink === "function"
+          ? window.pokerBuildRaffleShareLink(startParam)
+          : buildMiniAppStartLink(startParam);
       var text = isCashPrize
         ? "Разыгрываем " + (total || 0) + " " + cashPrizeWord + " на кеш. Сумма " + (totalPrize || 0) + "₽. Столы Бонус гейм на Poker21"
         : "Разыгрываем " +
