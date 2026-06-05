@@ -355,8 +355,7 @@ function initRafflesCompletedRuntime(opts) {
           "raffle-winner-ready-timer"
         )
       : "";
-    var rerollBadge = raffleWinnerIsReroll(w) ? "<span class=\"raffle-winner-reroll-badge\">РЕРОЛЛ</span>" : "";
-    var metaItems = rerollBadge + readyBadge + readyTimer;
+    var metaItems = readyBadge + readyTimer;
     var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
     var identityClass = "raffle-winner-row__identity" + (isAdmin ? " raffle-winner-row__identity--admin" : "");
     var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"" + identityClass + "\">" + profileOpen + (adminLevelLine || tgOpen) + "</span></span>";
@@ -725,7 +724,11 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleCompletedRerollRowsHtml(raffle, rows, winnerNumber) {
     if (!Array.isArray(rows) || !rows.length) return "";
-    var html = "<li class=\"raffle-winner-reroll-nest\"><ul class=\"raffle-winner-reroll-list\">";
+    var html =
+      "<li class=\"raffle-winner-reroll-nest\">" +
+      "<span class=\"raffle-winner-reroll-arrow\" aria-hidden=\"true\">" +
+      "<span class=\"raffle-winner-reroll-arrow__label\">Рерролл</span>" +
+      "</span><ul class=\"raffle-winner-reroll-list\">";
     rows.forEach(function (w) {
       html += buildRaffleWinnerRowHtml(w, raffle.id, rafflesIsAdmin, winnerNumber);
     });
