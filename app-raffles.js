@@ -518,6 +518,27 @@ function initRaffles() {
     return normalizePendingCompletedRaffleId(raw);
   }
 
+  function normalizePendingActiveRaffleId(raw) {
+    var rawText = String(raw || "").trim();
+    if (!rawText || rawText === "raffles") return "";
+    if (typeof window !== "undefined" && typeof window.pokerParseRaffleActiveStartParam === "function") {
+      var parsed = window.pokerParseRaffleActiveStartParam(rawText);
+      if (parsed) return parsed;
+    }
+    if (typeof window !== "undefined" && typeof window.pokerNormalizeRaffleActiveId === "function") {
+      return window.pokerNormalizeRaffleActiveId(rawText);
+    }
+    return rawText.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
+  }
+
+  function readPendingActiveRaffleId() {
+    var raw = "";
+    try {
+      raw = typeof window !== "undefined" ? window.__pendingRaffleActiveId || "" : "";
+    } catch (ePendingActiveRead) {}
+    return normalizePendingActiveRaffleId(raw);
+  }
+
   function completedRaffleCardSelector(raffleId) {
     var id = normalizePendingCompletedRaffleId(raffleId);
     if (!id) return "";
@@ -929,6 +950,8 @@ function initRaffles() {
   function applyRafflesData(data, switchToCompleted) {
         if (!data || !data.ok) return;
         var pendingCompletedId = readPendingCompletedRaffleId();
+        var pendingActiveId = readPendingActiveRaffleId();
+        var switchToActive = false;
         if (pendingCompletedId) {
           rafflesPendingCompletedId = pendingCompletedId;
           switchToCompleted = true;
@@ -994,6 +1017,13 @@ function initRaffles() {
           return false;
         }
 
+        function completedRaffleTime(r) {
+          var raw = r && (r.drawnAt || r.completedAt || r.completed_at || r.endDate || r.createdAt);
+          if (!raw) return 0;
+          var t = new Date(raw).getTime();
+          return isFinite(t) ? t : 0;
+        }
+
         var activeSeen = {};
         var activeSource = Array.isArray(data.activeRaffles) ? data.activeRaffles : allRaffles;
         var activeList = activeSource.filter(function (r) {
@@ -1020,10 +1050,48 @@ function initRaffles() {
           return end && end <= now;
         });
         completed.sort(function (a, b) {
-          var endA = a.endDate ? new Date(a.endDate).getTime() : 0;
-          var endB = b.endDate ? new Date(b.endDate).getTime() : 0;
-          return endB - endA;
+          var timeDiff = completedRaffleTime(b) - completedRaffleTime(a);
+          if (timeDiff) return timeDiff;
+          return (parseInt(b && b.completedNumber, 10) || 0) - (parseInt(a && a.completedNumber, 10) || 0);
         });
+        if (pendingActiveId) {
+          var pendingActiveFound = false;
+          for (var pai = 0; pai < activeList.length; pai++) {
+            if (String(activeList[pai].id || "") === pendingActiveId) {
+              pendingActiveFound = true;
+              break;
+            }
+          }
+          if (pendingActiveFound) {
+            focusRaffleAfterMutation(pendingActiveId);
+            switchToActive = true;
+            switchToCompleted = false;
+            try {
+              if (typeof window !== "undefined") {
+                window.__pendingRaffleActiveId = "";
+                window.__pendingRaffleCompletedId = "";
+              }
+            } catch (eClearPendingActive) {}
+          } else {
+            var pendingCompletedFound = false;
+            for (var pci = 0; pci < completed.length; pci++) {
+              if (String(completed[pci].id || "") === pendingActiveId) {
+                pendingCompletedFound = true;
+                break;
+              }
+            }
+            try {
+              if (typeof window !== "undefined") window.__pendingRaffleActiveId = "";
+            } catch (eClearStalePendingActive) {}
+            if (pendingCompletedFound) {
+              rafflesPendingCompletedId = pendingActiveId;
+              try {
+                if (typeof window !== "undefined") window.__pendingRaffleCompletedId = pendingActiveId;
+              } catch (eSetPendingCompletedFromActive) {}
+              switchToCompleted = true;
+            }
+          }
+        }
 
         // Вкладка «Активные»: карточка показывает выбранный розыгрыш, а переключатель
         // выше даёт доступ ко всем текущим активным.
@@ -1074,6 +1142,7 @@ function initRaffles() {
           }
           currentRaffleId = null;
           currentRaffleEndDate = null;
+          if (raffleCard && raffleCard.dataset) delete raffleCard.dataset.raffleId;
           rafflesActiveBroadcastList = [];
           if (raffleTimerInterval) {
             clearInterval(raffleTimerInterval);
@@ -1082,7 +1151,8 @@ function initRaffles() {
         }
         updateRaffleBadge(activeList.length, activeSumRub);
 
-        if (switchToCompleted && typeof setRafflesTab === "function") setRafflesTab("completed");
+        if (switchToActive && typeof setRafflesTab === "function") setRafflesTab("active");
+        else if (switchToCompleted && typeof setRafflesTab === "function") setRafflesTab("completed");
 
         // Вкладка «Завершённые»: счётчики обновляем сразу, а тяжёлую разметку списка
         // откладываем, чтобы активный розыгрыш появлялся без ожидания большого архива.

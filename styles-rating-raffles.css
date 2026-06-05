@@ -1665,17 +1665,28 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-completed-spoiler__count {
   min-width: 24px;
-  height: 24px;
+  min-height: 24px;
   margin-left: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 7px;
+  gap: 6px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: rgba(245, 158, 11, 0.18);
   color: #fff7ed;
   font-size: 12px;
   font-weight: 900;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.raffles-completed-spoiler__sum {
+  color: #fde68a;
+}
+.raffles-completed-spoiler__count-number::after {
+  content: "·";
+  margin-left: 6px;
+  color: rgba(253, 230, 138, 0.72);
 }
 .raffles-completed-spoiler__body {
   display: flex;

@@ -281,9 +281,20 @@ function initImageLightbox() {
       var raffleCompletedTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleCompletedStartParam === "function"
         ? window.pokerParseRaffleCompletedStartParam(startApp)
         : "";
-      if ((startApp === "raffles" || raffleCompletedTargetId) && typeof setView === "function") {
+      var raffleActiveTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleActiveStartParam === "function"
+        ? window.pokerParseRaffleActiveStartParam(startApp)
+        : "";
+      if ((startApp === "raffles" || raffleActiveTargetId || raffleCompletedTargetId) && typeof setView === "function") {
+        if (raffleActiveTargetId) window.__pendingRaffleActiveId = raffleActiveTargetId;
         if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
-        setView("raffles", raffleCompletedTargetId ? { raffleCompletedTarget: true } : undefined);
+        setView(
+          "raffles",
+          raffleCompletedTargetId
+            ? { raffleCompletedTarget: true }
+            : raffleActiveTargetId
+              ? { raffleActiveTarget: true }
+              : undefined
+        );
         return;
       }
       if (startApp === "video_lessons" && typeof setView === "function") {

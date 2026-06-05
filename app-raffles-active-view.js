@@ -32,6 +32,7 @@ function initRafflesActiveViewRuntime(opts) {
     currentRaffleId = raffle.id;
     currentRaffleData = raffle;
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    raffleCard.dataset.raffleId = String(raffle.id || "");
     raffleCard.dataset.rafflePrizeKind = isCashPrize ? "cash" : "tournament_ticket";
     raffleCard.classList.toggle("raffle-card--cash", isCashPrize);
     raffleCard.classList.toggle("raffle-card--ticket", !isCashPrize);

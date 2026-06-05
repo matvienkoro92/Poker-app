@@ -17,7 +17,11 @@ function initRafflesPublicRuntime(opts) {
         ? pokerRafflesPluralizeCashBuyinsForHeading(total || 0)
         : "беккинг-байинов";
       var tournamentName = raffleDisplayPrizeText((raffle.title || (groups[0] && groups[0].prize) || "").trim()) || "турнир клуба";
-      var link = buildMiniAppStartLink("raffles");
+      var startParam =
+        typeof window.pokerBuildRaffleActiveStartParam === "function"
+          ? window.pokerBuildRaffleActiveStartParam(raffle)
+          : "raffles";
+      var link = buildMiniAppStartLink(startParam);
       var text = isCashPrize
         ? "Разыгрываем " + (total || 0) + " " + cashPrizeWord + " на кеш. Сумма " + (totalPrize || 0) + "₽. Столы Бонус гейм на Poker21"
         : "Разыгрываем " +

@@ -745,7 +745,8 @@ function initRafflesCompletedRuntime(opts) {
 
   function buildCompletedRaffleCardHtml(raffle) {
     var created = raffle.createdAt ? new Date(raffle.createdAt).toLocaleDateString("ru-RU") : "";
-    var end = raffle.endDate ? new Date(raffle.endDate).toLocaleString("ru-RU") : "";
+    var completedAt = raffleCompletedDate(raffle);
+    var end = completedAt ? completedAt.toLocaleString("ru-RU") : "";
     var meta = "Розыгрыш" + (created ? " от " + created : "") + (end ? " · Завершён " + end : "");
     var winners = raffle.winners || [];
     var originalWinners = [];
@@ -775,10 +776,23 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function raffleCompletedDate(raffle) {
-    var raw = raffle && (raffle.endDate || raffle.drawnAt || raffle.createdAt);
+    var raw = raffle && (raffle.drawnAt || raffle.completedAt || raffle.completed_at || raffle.endDate || raffle.createdAt);
     if (!raw) return null;
     var d = new Date(raw);
     return isFinite(d.getTime()) ? d : null;
+  }
+
+  function raffleCompletedSortValue(raffle) {
+    var d = raffleCompletedDate(raffle);
+    return d ? d.getTime() : 0;
+  }
+
+  function sortCompletedRafflesNewestFirst(items) {
+    return (Array.isArray(items) ? items.slice() : []).sort(function (a, b) {
+      var timeDiff = raffleCompletedSortValue(b) - raffleCompletedSortValue(a);
+      if (timeDiff) return timeDiff;
+      return (parseInt(b && b.completedNumber, 10) || 0) - (parseInt(a && a.completedNumber, 10) || 0);
+    });
   }
 
   function startOfCompletedWeek(date) {
@@ -821,7 +835,28 @@ function initRafflesCompletedRuntime(opts) {
     }
   }
 
+  function raffleCompletedArchiveSum(items) {
+    return (Array.isArray(items) ? items : []).reduce(function (sum, raffle) {
+      var amount = typeof getRaffleTotalPrize === "function" ? getRaffleTotalPrize(raffle) : 0;
+      amount = parseFloat(amount);
+      return sum + (isFinite(amount) ? amount : 0);
+    }, 0);
+  }
+
+  function raffleCompletedArchiveBadgeHtml(items) {
+    var list = Array.isArray(items) ? items : [];
+    var sum = raffleCompletedArchiveSum(list);
+    var sumText = typeof formatRaffleSum === "function"
+      ? formatRaffleSum(sum)
+      : String(Math.round(sum)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
+    return "<span class=\"raffles-completed-spoiler__count\">" +
+      "<span class=\"raffles-completed-spoiler__count-number\">" + escapeHtml(list.length) + "</span>" +
+      "<span class=\"raffles-completed-spoiler__sum\">" + escapeHtml(sumText) + "</span>" +
+      "</span>";
+  }
+
   function buildCompletedArchiveHtml(archive) {
+    archive = sortCompletedRafflesNewestFirst(archive);
     if (!archive.length) return "";
     var byMonth = {};
     var order = [];
@@ -839,7 +874,7 @@ function initRafflesCompletedRuntime(opts) {
       return "<details class=\"raffles-completed-archive-month\">" +
         "<summary class=\"raffles-completed-archive-month__summary\">" +
         "<span class=\"raffles-completed-archive-month__title\">" + escapeHtml(raffleCompletedMonthLabel(key, first)) + "</span>" +
-        "<span class=\"raffles-completed-spoiler__count\">" + escapeHtml(items.length) + "</span>" +
+        raffleCompletedArchiveBadgeHtml(items) +
         "</summary>" +
         "<div class=\"raffles-completed-archive-month__body\">" +
         items.map(buildCompletedRaffleCardHtml).join("") +
@@ -849,7 +884,7 @@ function initRafflesCompletedRuntime(opts) {
     return "<details class=\"raffles-completed-spoiler raffles-completed-archive\">" +
       "<summary class=\"raffles-completed-spoiler__summary\">" +
       "<span class=\"raffles-completed-spoiler__title\">Архив</span>" +
-      "<span class=\"raffles-completed-spoiler__count\">" + escapeHtml(archive.length) + "</span>" +
+      raffleCompletedArchiveBadgeHtml(archive) +
       "</summary>" +
       "<div class=\"raffles-completed-spoiler__body raffles-completed-archive__body\">" +
       monthsHtml +
@@ -858,7 +893,7 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function buildCompletedRafflesListHtml(completed) {
-    var list = Array.isArray(completed) ? completed : [];
+    var list = sortCompletedRafflesNewestFirst(completed);
     if (list.length <= 0) return "";
     var now = new Date();
     var currentWeek = [];

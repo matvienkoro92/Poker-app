@@ -141,6 +141,26 @@ function pokerNormalizeRaffleCompletedId(raw) {
   return s.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
 }
 
+function pokerNormalizeRaffleActiveId(raw) {
+  var s = String(raw || "").trim();
+  if (!s) return "";
+  return s.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 72);
+}
+
+function pokerBuildRaffleActiveStartParam(raffleId) {
+  var rawId = raffleId && typeof raffleId === "object" ? raffleId.id || raffleId.raffleId || raffleId.raffle_id : raffleId;
+  var id = pokerNormalizeRaffleActiveId(rawId);
+  return id ? "r_" + id : "raffles";
+}
+
+function pokerParseRaffleActiveStartParam(rawStartParam) {
+  var start = pokerNormalizeWebAppStartParam(rawStartParam);
+  if (!start || start === "raffles") return "";
+  var m = start.match(/^r_(.+)$/) || start.match(/^raffle_active_(.+)$/);
+  if (!m || !m[1]) return "";
+  return pokerNormalizeRaffleActiveId(m[1]);
+}
+
 function pokerBuildRaffleCompletedStartParam(raffleId) {
   var numberSource = raffleId && typeof raffleId === "object" ? raffleId.completedNumber || raffleId.completed_number : "";
   var n = parseInt(String(numberSource || ""), 10);
@@ -160,6 +180,9 @@ function pokerParseRaffleCompletedStartParam(rawStartParam) {
 
 try {
   if (typeof window !== "undefined") {
+    window.pokerNormalizeRaffleActiveId = pokerNormalizeRaffleActiveId;
+    window.pokerBuildRaffleActiveStartParam = pokerBuildRaffleActiveStartParam;
+    window.pokerParseRaffleActiveStartParam = pokerParseRaffleActiveStartParam;
     window.pokerNormalizeRaffleCompletedId = pokerNormalizeRaffleCompletedId;
     window.pokerBuildRaffleCompletedStartParam = pokerBuildRaffleCompletedStartParam;
     window.pokerParseRaffleCompletedStartParam = pokerParseRaffleCompletedStartParam;

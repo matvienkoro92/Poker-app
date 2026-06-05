@@ -173,10 +173,23 @@ function pokerInitHomeDeepLinks(opts) {
     var raffleCompletedTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleCompletedStartParam === "function"
       ? window.pokerParseRaffleCompletedStartParam(startParam)
       : "";
-    if (startParam === "raffles" || raffleCompletedTargetId) {
+    var raffleActiveTargetId = typeof window !== "undefined" && typeof window.pokerParseRaffleActiveStartParam === "function"
+      ? window.pokerParseRaffleActiveStartParam(startParam)
+      : "";
+    if (startParam === "raffles" || raffleActiveTargetId || raffleCompletedTargetId) {
+      if (raffleActiveTargetId) window.__pendingRaffleActiveId = raffleActiveTargetId;
       if (raffleCompletedTargetId) window.__pendingRaffleCompletedId = raffleCompletedTargetId;
       setTimeout(function () {
-        if (typeof setView === "function") setView("raffles", raffleCompletedTargetId ? { raffleCompletedTarget: true } : undefined);
+        if (typeof setView === "function") {
+          setView(
+            "raffles",
+            raffleCompletedTargetId
+              ? { raffleCompletedTarget: true }
+              : raffleActiveTargetId
+                ? { raffleActiveTarget: true }
+                : undefined
+          );
+        }
       }, 0);
       return;
     }

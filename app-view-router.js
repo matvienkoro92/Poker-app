@@ -577,6 +577,9 @@ function setView(viewName, navOpts) {
     if (viewName === "raffles" && prevView === "home" && typeof window !== "undefined") {
       if (navOpts && navOpts.raffleCompletedTarget) {
         window.__pokerRafflesOpenActiveTab = false;
+      } else if (navOpts && navOpts.raffleActiveTarget) {
+        window.__pendingRaffleCompletedId = "";
+        window.__pokerRafflesOpenActiveTab = true;
       } else {
         window.__pendingRaffleCompletedId = "";
         window.__pokerRafflesOpenActiveTab = true;

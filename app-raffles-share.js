@@ -1,7 +1,16 @@
 // Кнопки шаринга в шапке розыгрышей. Разметка приходит lazy-фрагментом, поэтому init можно безопасно повторять.
 function pokerInitRafflesHeroShare() {
+  function currentRaffleStartParam() {
+    var card = document.getElementById("raffleCard");
+    var id = card && card.dataset ? String(card.dataset.raffleId || "").trim() : "";
+    if (id && typeof window.pokerBuildRaffleActiveStartParam === "function") {
+      return window.pokerBuildRaffleActiveStartParam(id);
+    }
+    return "raffles";
+  }
+
   function rafflesDeepLink() {
-    return buildMiniAppStartLink("raffles");
+    return buildMiniAppStartLink(currentRaffleStartParam());
   }
   function showRafflesCopyFeedback(text) {
     var feedback = document.getElementById("rafflesCopyFeedback");
@@ -27,7 +36,7 @@ function pokerInitRafflesHeroShare() {
   }
   function showRafflesCopyResult(link, copied) {
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    var successMsg = "Ссылка скопирована. Отправьте другу — откроется раздел розыгрышей.";
+    var successMsg = "Ссылка скопирована. Отправьте другу — откроется этот розыгрыш.";
     var fallbackMsg = "Ссылка: " + link;
     if (copied) {
       var showedInline = showRafflesCopyFeedback("Скопировано");
