@@ -153,8 +153,8 @@ function pokerRafflesDisplayPrizeText(s) {
 
 function pokerRafflesParsePrizeValue(prizeStr) {
   if (prizeStr == null || prizeStr === "") return 0;
-  var m = String(prizeStr).trim().match(/\d+(?:[.,]\d+)?/);
-  return m ? parseFloat(m[0].replace(",", ".")) : 0;
+  var m = String(prizeStr).trim().match(/\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) : 0;
 }
 
 function pokerRafflesGetTotalPrize(raffle) {

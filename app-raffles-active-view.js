@@ -98,6 +98,10 @@ function initRafflesActiveViewRuntime(opts) {
         ? rafflesViewerNeedsLoginForParticipation()
         : rafflesViewerIsGuestOnly();
     var adminTicketEntry = typeof raffleUsesAdminTicketEntry === "function" && raffleUsesAdminTicketEntry(raffle);
+    if (raffleIdNote) {
+      raffleIdNote.hidden = !!adminTicketEntry;
+      raffleIdNote.setAttribute("aria-hidden", adminTicketEntry ? "true" : "false");
+    }
     var showRaffleGuestGate = !!(!adminTicketEntry && needsLoginForParticipation && isActive && !iAmIn);
     if (raffleGuestGate) {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);

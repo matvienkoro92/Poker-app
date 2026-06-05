@@ -116,8 +116,8 @@ function initRafflesAdminCreateRuntime(opts) {
           drawMode: "weighted_tickets",
           ticketEntryMode: "admin",
           promoGuarantee: "700 000р",
-          cardTitle: "3 билета на нокаут",
-          cardSubtitle: "по 10 000р · гарантия 700 000р",
+          cardTitle: "Розыгрыш 30 000р",
+          cardSubtitle: "3 билета за 10 000р · нокаут с гарантией 700 000р",
           cardTheme: "knockout_ticket",
           createIdempotencyKey: idemKey,
         })
