@@ -566,6 +566,186 @@ function initRaffles() {
     if (rafflesHeroWinnersCount) rafflesHeroWinnersCount.textContent = formatRaffleHeroCount(Object.keys(winners).length);
   }
 
+  function parseRaffleActionResponse(r) {
+    return r
+      .json()
+      .then(function (data) {
+        if (data && typeof data === "object") return data;
+        return { ok: false, error: "Пустой ответ сервера", code: "EMPTY_RESPONSE" };
+      })
+      .catch(function () {
+        return {
+          ok: false,
+          error:
+            "Сервер вернул некорректный ответ" +
+            (r && r.status ? " (HTTP " + r.status + "). Перезайдите в мини-приложение и попробуйте снова через 10–30 секунд." : ". Перезайдите в мини-приложение и попробуйте снова через 10–30 секунд."),
+          code: "INVALID_SERVER_RESPONSE",
+        };
+      });
+  }
+
+  function replaceRaffleInArray(list, raffle) {
+    if (!Array.isArray(list) || !raffle || !raffle.id) return false;
+    var targetId = String(raffle.id);
+    for (var i = 0; i < list.length; i += 1) {
+      if (list[i] && String(list[i].id || "") === targetId) {
+        list[i] = raffle;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function mergeActiveRaffleState(raffle) {
+    if (!raffle || !raffle.id) return false;
+    var targetId = String(raffle.id);
+    var touched = replaceRaffleInArray(rafflesActiveBroadcastList, raffle);
+    if (!touched && raffle.status === "active") {
+      rafflesActiveBroadcastList.push(raffle);
+      touched = true;
+    }
+    if (currentRaffleData && String(currentRaffleData.id || "") === targetId) currentRaffleData = raffle;
+    var cache = typeof window !== "undefined" ? window._rafflesCache : null;
+    if (cache && cache.data) {
+      touched = replaceRaffleInArray(cache.data.raffles, raffle) || touched;
+      touched = replaceRaffleInArray(cache.data.activeRaffles, raffle) || touched;
+      if (cache.data.activeRaffle && String(cache.data.activeRaffle.id || "") === targetId) {
+        cache.data.activeRaffle = raffle;
+        touched = true;
+      }
+      cache.time = Date.now();
+    }
+    return touched;
+  }
+
+  function refreshActiveChooserAfterAction(raffle) {
+    if (raffle && raffle.id) mergeActiveRaffleState(raffle);
+    var cache = typeof window !== "undefined" ? window._rafflesCache : null;
+    if (cache && cache.data && cache.data.ok) {
+      applyRafflesData(cache.data, false);
+      return;
+    }
+    if (raffle && currentRaffleId && String(raffle.id || "") === String(currentRaffleId || "")) renderRaffle(raffle);
+    renderRafflesActiveChooser(rafflesActiveBroadcastList, currentRaffleId || rafflesFocusedActiveId || (raffle && raffle.id) || "");
+  }
+
+  function restoreActiveChooserActionButton(btn, label) {
+    if (!btn || !btn.isConnected) return;
+    btn.disabled = false;
+    btn.removeAttribute("aria-busy");
+    if (label) btn.textContent = label;
+  }
+
+  function showActiveChooserActionError(data, fallback) {
+    var err = (data && data.error) || fallback || "Ошибка";
+    var isRequirementError =
+      data &&
+      (data.code === "CHANNEL_REQUIRED" ||
+        data.code === "BOT_REQUIRED" ||
+        data.code === "SUBSCRIPTION_REQUIRED" ||
+        data.code === "TELEGRAM_REQUIRED");
+    if (isRequirementError) {
+      showRaffleFeedback(err, "err", {
+        botUrl: data.botUrl,
+        channelUrl: data.channelUrl,
+        openUrl: data.openUrl,
+        sticky: true,
+      });
+    } else {
+      showRaffleFeedback(err, "err");
+    }
+    if (data && data.code === "P21_REQUIRED") {
+      if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш. После сохранения вернитесь в «Розыгрыши» и нажмите «Участвовать» снова.");
+      if (typeof setView === "function") setView("profile");
+    } else if (isRequirementError) {
+      if (tg && tg.showAlert) tg.showAlert(err);
+    } else if (data && data.code === "AUTH_INVALID") {
+      showRaffleFeedback(err || "Сессия входа не подтвердилась. Войдите ещё раз.", "err", { sticky: true });
+      if (tg && tg.showAlert) tg.showAlert(err || "Сессия входа не подтвердилась. Войдите ещё раз.");
+      if (typeof window.__pokerOpenSharedAccountAuthFlow === "function") window.__pokerOpenSharedAccountAuthFlow();
+    } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
+      if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+      else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+    } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
+      if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
+    } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
+      if (tg && tg.showAlert) tg.showAlert(err + " Если повторяется — напишите администратору.");
+    } else if (tg && tg.showAlert) {
+      tg.showAlert(err + " Попробуйте снова через 10–30 секунд. Если не поможет — перезайдите в мини-приложение.");
+    } else if (typeof alert === "function") {
+      alert(err);
+    }
+  }
+
+  function handleRafflesActiveChooserAction(actionBtn) {
+    if (!actionBtn) return;
+    var action = String(actionBtn.getAttribute("data-raffle-active-action") || "").trim();
+    var raffleId = String(actionBtn.getAttribute("data-raffle-active-id") || "").trim();
+    if (!raffleId) {
+      var card = actionBtn.closest ? actionBtn.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
+      raffleId = card ? String(card.getAttribute("data-raffle-active-id") || "").trim() : "";
+    }
+    if (!raffleId) return;
+    if (action === "login") {
+      var loginBtn = document.getElementById("raffleGuestLoginBtn");
+      if (loginBtn && typeof loginBtn.click === "function") loginBtn.click();
+      else if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+      else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+      return;
+    }
+    if (action !== "join" && action !== "leave") return;
+    if (action === "join" && rafflesViewerIsGuestOnly()) {
+      if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+      else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+      return;
+    }
+    if (!base || !rafflesViewerApiReady()) {
+      if (tg && tg.showAlert) tg.showAlert("Нет доступа к серверу. Проверьте сеть.");
+      else if (typeof alert === "function") alert("Нет доступа к серверу. Проверьте сеть.");
+      return;
+    }
+    var originalText = actionBtn.textContent;
+    actionBtn.disabled = true;
+    actionBtn.setAttribute("aria-busy", "true");
+    actionBtn.textContent = action === "leave" ? "Отмена..." : "Отправка...";
+    var body = { action: action, raffleId: raffleId };
+    if (action === "join") body.deviceId = getRaffleDeviceId();
+    fetch(base + "/api/raffles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerGuestOrAuthedPostBody(body)),
+    })
+      .then(parseRaffleActionResponse)
+      .then(function (data) {
+        if (data && data.ok) {
+          if (data.raffle) refreshActiveChooserAfterAction(data.raffle);
+          else {
+            clearRafflesCache();
+            loadRaffles(false, { skipCache: true, keepCurrentOnLoading: true });
+          }
+          showRaffleFeedback(
+            action === "leave"
+              ? data.alreadyLeft
+                ? "Вы не были в списке участников."
+                : "Участие отменено."
+              : data.alreadyJoined
+                ? "Вы уже участвуете."
+                : "Вы участвуете в розыгрыше.",
+            "ok"
+          );
+        } else {
+          restoreActiveChooserActionButton(actionBtn, originalText);
+          showActiveChooserActionError(data, "Ошибка");
+        }
+      })
+      .catch(function () {
+        restoreActiveChooserActionButton(actionBtn, originalText);
+        showRaffleFeedback(POKER_NET_ERR + " Попробуйте снова.", "err");
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR + " Перезайдите в мини-приложение и попробуйте снова.");
+        else if (typeof alert === "function") alert(POKER_NET_ERR);
+      });
+  }
+
   function renderRafflesActiveChooser(activeList, activeId) {
     if (!rafflesActiveChooser) return;
     var list = Array.isArray(activeList) ? activeList : [];
@@ -594,13 +774,14 @@ function initRaffles() {
         var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
         var buttonLabel = needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
-        var buttonAction = ' data-raffle-active-action="' + (needsLogin ? "login" : isIn ? "leave" : "join") + '"';
+        var buttonAction = needsLogin ? "login" : isIn ? "leave" : "join";
+        var buttonPressed = !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
         return (
-          '<button type="button" class="raffles-active-chooser__item' +
+          '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
           (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
-          '" data-raffle-active-id="' +
+          '" role="button" tabindex="0" data-raffle-active-id="' +
           escapeHtml(id) +
           '" aria-selected="' +
           (selected ? "true" : "false") +
@@ -640,14 +821,18 @@ function initRaffles() {
           escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || "Завершён") : "—") +
           "</span></span>" +
           "</span>" +
-          '<span class="raffles-active-chooser__cta' +
+          '<button type="button" class="raffles-active-chooser__cta' +
           (isIn ? " raffles-active-chooser__cta--joined" : "") +
+          '" data-raffle-active-id="' +
+          escapeHtml(id) +
+          '" data-raffle-active-action="' +
+          escapeHtml(buttonAction) +
           '"' +
-          buttonAction +
+          buttonPressed +
           ">" +
           escapeHtml(buttonLabel) +
-          "</span>" +
-          "</button>"
+          "</button>" +
+          "</div>"
         );
       })
       .join("");
@@ -658,36 +843,34 @@ function initRaffles() {
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
     rafflesActiveChooser.dataset.bound = "1";
     rafflesActiveChooser.addEventListener("click", function (e) {
-      var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-id]") : null;
-      if (!btn || !rafflesActiveChooser.contains(btn)) return;
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
-      var action = actionBtn && btn.contains(actionBtn) ? String(actionBtn.getAttribute("data-raffle-active-action") || "") : "";
+      if (actionBtn && rafflesActiveChooser.contains(actionBtn)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleRafflesActiveChooserAction(actionBtn);
+        return;
+      }
+      var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
+      if (!btn || !rafflesActiveChooser.contains(btn)) return;
       var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
       if (!id) return;
       focusRaffleAfterMutation(id);
-      function runActionAfterSelect() {
-        if (!action) return;
-        setTimeout(function () {
-          if (action === "login") {
-            var loginBtn = document.getElementById("raffleGuestLoginBtn");
-            if (loginBtn && typeof loginBtn.click === "function") loginBtn.click();
-            else if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
-            else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
-            return;
-          }
-          if (!raffleJoinToggleBtn || raffleJoinToggleBtn.disabled) return;
-          if (raffleJoinToggleBtn.classList.contains("raffle-join-toggle-btn--hidden")) return;
-          if ((raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join") === action) raffleJoinToggleBtn.click();
-        }, 80);
-      }
       var cache = typeof window !== "undefined" ? window._rafflesCache : null;
       if (cache && cache.data && cache.data.ok) {
         applyRafflesData(cache.data, false);
-        runActionAfterSelect();
       } else {
         loadRaffles(false, { keepCurrentOnLoading: true });
-        if (action) setTimeout(runActionAfterSelect, 700);
       }
+    });
+    rafflesActiveChooser.addEventListener("keydown", function (e) {
+      var key = e && (e.key || e.code);
+      if (key !== "Enter" && key !== " " && key !== "Spacebar") return;
+      var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
+      if (actionBtn && rafflesActiveChooser.contains(actionBtn)) return;
+      var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
+      if (!btn || !rafflesActiveChooser.contains(btn)) return;
+      e.preventDefault();
+      if (typeof btn.click === "function") btn.click();
     });
   }
 

@@ -183,7 +183,17 @@
 
   function formatBonus(value) {
     var n = Math.max(0, parseInt(value || "0", 10) || 0);
-    return "Бонусный баланс: " + n + " бонусов";
+    return "Баланс Беккинг-бонусов: " + n + " бонусов";
+  }
+
+  function buildDailyPokerBalanceHtml(value) {
+    var n = Math.max(0, parseInt(value || "0", 10) || 0);
+    return (
+      '<span class="daily-poker__balance-label">Баланс Беккинг-бонусов</span> ' +
+      "<strong>" + n + "</strong> " +
+      '<span class="daily-poker__balance-unit">бонусов</span>' +
+      '<span class="daily-poker__balance-note">Поменяйте через менеджера на беккинг-билеты от 300 ₽. 1 бонус = 1 рубль</span>'
+    );
   }
 
   function formatCompactAmount(value) {
@@ -405,8 +415,7 @@
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) {
-      var bonusValue = Math.max(0, parseInt(data.bonusBalance || "0", 10) || 0);
-      balanceEl.innerHTML = '<span class="daily-poker__balance-label">Бонусный баланс:</span> <strong>' + bonusValue + '</strong> <span>бонусов</span>';
+      balanceEl.innerHTML = buildDailyPokerBalanceHtml(data.bonusBalance);
     }
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);

@@ -1040,6 +1040,20 @@
   flex: 0 0 100%;
 }
 
+.daily-poker__balance-unit {
+  align-self: center;
+}
+
+.daily-poker__balance-note {
+  flex: 0 0 100%;
+  max-width: 520px;
+  margin-top: 3px;
+  color: rgba(255, 239, 199, 0.82);
+  font-size: clamp(8.5px, 0.58em, 12px);
+  font-weight: 900;
+  line-height: 1.12;
+}
+
 .daily-poker__balance strong {
   color: var(--daily-poker-gold);
   font-size: 1.34em;
