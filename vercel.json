@@ -1,1 +1,79 @@
-{"buildCommand":"npm run build","outputDirectory":"public","headers":[{"source":"/","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]},{"source":"/index.html","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]},{"source":"/styles.css","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]},{"source":"/app.js","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]},{"source":"/telegram-web-app.js","headers":[{"key":"Cache-Control","value":"no-store, max-age=0"}]}],"rewrites":[{"source":"/r/:code","destination":"/api/raffle-preview?code=:code"},{"source":"/api/promo/:path*","destination":"/api/promo?path=:path*"},{"source":"/api/user/:path*","destination":"/api/user?path=:path*"},{"source":"/api/admin/:path*","destination":"/api/admin?path=:path*"}],"functions":{"api/[[...slug]].js":{"maxDuration":60}},"crons":[{"path":"/api/cron-reminder-10min","schedule":"21 21 * * 0"},{"path":"/api/deploy-hook","schedule":"0 12 * * *"}]}
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/styles.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/app.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/telegram-web-app.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        { "type": "query", "key": "startapp", "value": "r_(?<code>[^&]+)" }
+      ],
+      "missing": [
+        { "type": "query", "key": "open" }
+      ],
+      "destination": "/api/raffle-preview?code=:code"
+    },
+    {
+      "source": "/r/:code",
+      "destination": "/api/raffle-preview?code=:code"
+    },
+    {
+      "source": "/api/promo/:path*",
+      "destination": "/api/promo?path=:path*"
+    },
+    {
+      "source": "/api/user/:path*",
+      "destination": "/api/user?path=:path*"
+    },
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin?path=:path*"
+    }
+  ],
+  "functions": {
+    "api/[[...slug]].js": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron-reminder-10min",
+      "schedule": "21 21 * * 0"
+    },
+    {
+      "path": "/api/deploy-hook",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

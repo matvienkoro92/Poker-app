@@ -199,8 +199,21 @@ function pokerBuildWebsiteStartLink(startParam) {
   return base + "/?startapp=" + encodeURIComponent(start);
 }
 
+function pokerBuildRafflePreviewLink(startParam) {
+  var start = pokerNormalizeWebAppStartParam(startParam);
+  var m = start.match(/^r_(.+)$/) || start.match(/^raffle_active_(.+)$/);
+  if (!m || !m[1]) return "";
+  var code = pokerNormalizeRaffleActiveId(m[1]);
+  if (!code) return "";
+  var base = pokerGetWebsiteRootBaseForLinks();
+  if (!base) return "";
+  return base + "/r/" + encodeURIComponent(code);
+}
+
 function pokerBuildRaffleShareLink(startParam) {
   var start = pokerNormalizeWebAppStartParam(startParam) || "raffles";
+  var previewLink = pokerBuildRafflePreviewLink(start);
+  if (previewLink) return previewLink;
   var webLink = pokerBuildWebsiteStartLink(start);
   if (webLink) return webLink;
   if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
@@ -233,6 +246,7 @@ try {
     window.pokerRaffleActiveShortCode = pokerRaffleActiveShortCode;
     window.pokerBuildRaffleActiveStartParam = pokerBuildRaffleActiveStartParam;
     window.pokerParseRaffleActiveStartParam = pokerParseRaffleActiveStartParam;
+    window.pokerBuildRafflePreviewLink = pokerBuildRafflePreviewLink;
     window.pokerBuildRaffleShareLink = pokerBuildRaffleShareLink;
     window.pokerNormalizeRaffleCompletedId = pokerNormalizeRaffleCompletedId;
     window.pokerBuildRaffleCompletedStartParam = pokerBuildRaffleCompletedStartParam;

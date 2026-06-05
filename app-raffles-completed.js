@@ -329,7 +329,8 @@ function initRafflesCompletedRuntime(opts) {
     var rerollBadge = raffleWinnerIsReroll(w) ? "<span class=\"raffle-winner-reroll-badge\">РЕРОЛЛ</span>" : "";
     var metaItems = rerollBadge + readyBadge + readyTimer;
     var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
-    var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"raffle-winner-row__identity\">" + profileOpen + tgOpen + "</span>" + profileMeta + "</span>";
+    var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"raffle-winner-row__identity\">" + profileOpen + tgOpen + "</span></span>";
+    var statusHtml = "<span class=\"raffle-winner-status " + statusClass + "\">" + statusIcon + "</span>";
     var rowClass = "raffle-winner-row" +
       (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
       (prizeIssued ? " raffle-winner-row--issued" : "") +
@@ -343,15 +344,9 @@ function initRafflesCompletedRuntime(opts) {
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
-      return (
-        "<li class=\"" + rowClass + "\">" +
-        numberHtml +
-        profileBlock +
-        "<span class=\"raffle-winner-status " +
-        statusClass +
-        "\">" +
-        statusIcon +
-        "</span>" +
+      var adminControls =
+        "<span class=\"raffle-winner-row__controls\">" +
+        statusHtml +
         readyAction +
         "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" +
         okActive +
@@ -366,19 +361,30 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(raffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
-        "\" title=\"Отклонить\">✗</button></span></li>"
+        "\" title=\"Отклонить\">✗</button></span></span>";
+      return (
+        "<li class=\"" + rowClass + "\">" +
+        numberHtml +
+        profileBlock +
+        "<span class=\"raffle-winner-row__actions\">" +
+        profileMeta +
+        adminControls +
+        "</span></li>"
       );
     }
+    var userActions = profileMeta || readyAction || statusIcon
+      ? "<span class=\"raffle-winner-row__actions\">" +
+        profileMeta +
+        "<span class=\"raffle-winner-row__controls\">" +
+        statusHtml +
+        readyAction +
+        "</span></span>"
+      : "";
     return (
       "<li class=\"" + rowClass + "\">" +
       numberHtml +
       profileBlock +
-      "<span class=\"raffle-winner-status " +
-      statusClass +
-      "\">" +
-      statusIcon +
-      "</span>" +
-      readyAction +
+      userActions +
       "</li>"
     );
   }

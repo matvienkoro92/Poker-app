@@ -16,10 +16,13 @@ function initRafflesActiveViewRuntime(opts) {
 
   function setRaffleCardHeadingText(text) {
     var parts = splitRaffleCardHeadingText(text);
-    if (raffleCardHeading) raffleCardHeading.textContent = parts.title;
+    if (raffleCardHeading) {
+      raffleCardHeading.textContent = parts.title;
+      raffleCardHeading.hidden = true;
+    }
     if (raffleCardSubheading) {
       raffleCardSubheading.textContent = parts.subtitle;
-      raffleCardSubheading.hidden = !parts.subtitle;
+      raffleCardSubheading.hidden = true;
     }
   }
 

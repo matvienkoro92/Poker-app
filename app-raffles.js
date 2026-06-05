@@ -655,7 +655,7 @@ function initRaffles() {
       showRaffleFeedback(err, "err");
     }
     if (data && data.code === "P21_REQUIRED") {
-      if (tg && tg.showAlert) tg.showAlert("Заполните свой ID в профиле. На него будет начисляться выигрыш. После сохранения вернитесь в «Розыгрыши» и нажмите «Участвовать» снова.");
+      if (tg && tg.showAlert) tg.showAlert("Для участия нужен ваш айди из Poker21, чтобы на него выдать выигрыш, для этого привяжите его в разделе Профиль.");
       if (typeof setView === "function") setView("profile");
     } else if (isRequirementError) {
       if (tg && tg.showAlert) tg.showAlert(err);

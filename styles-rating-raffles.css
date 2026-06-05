@@ -1470,27 +1470,6 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: #78350f;
   text-shadow: 0 0 12px rgba(217, 119, 6, 0.18);
 }
-.raffle-notification-test-warning {
-  margin: 0;
-  padding: 10px 12px;
-  border: 1px solid rgba(248, 113, 113, 0.55);
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(127, 29, 29, 0.44), rgba(15, 23, 42, 0.86));
-  color: #fee2e2;
-  font-size: 15px;
-  font-weight: 900;
-  line-height: 1.25;
-  text-align: center;
-  text-transform: uppercase;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
-  box-shadow: 0 0 18px rgba(248, 113, 113, 0.14);
-}
-[data-theme="light"] .raffle-notification-test-warning {
-  border-color: rgba(185, 28, 28, 0.38);
-  background: linear-gradient(135deg, rgba(254, 226, 226, 0.98), rgba(255, 247, 237, 0.94));
-  color: #7f1d1d;
-  text-shadow: none;
-}
 .raffle-meta { margin: 0 0 4px; font-size: 14px; color: var(--text-muted); }
 .raffle-end { margin: 0; font-size: inherit; color: inherit; }
 .raffle-prizes { margin-bottom: 14px; }
@@ -1953,8 +1932,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   margin-bottom: 0;
-  padding: 8px;
+  padding: 6px 8px;
   border: 1px solid rgba(214, 163, 84, 0.24);
   border-radius: 8px;
   background: rgba(8, 13, 24, 0.58);
@@ -1981,7 +1964,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 8px 22px rgba(34, 197, 94, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
-.raffle-winner-row--declined {
+.raffle-winner-row--declined,
+.raffle-winner-row--missed {
   border-color: rgba(248, 113, 113, 0.72);
   background:
     linear-gradient(135deg, rgba(239, 68, 68, 0.28), rgba(127, 29, 29, 0.2)),
@@ -2009,11 +1993,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-winner-row__text { flex: 1; min-width: 0; }
 .raffle-winner-row__person {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
   line-height: 1.18;
 }
 .raffle-winner-row__identity {
@@ -2025,9 +2007,27 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-winner-row__meta {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 4px;
   max-width: 100%;
+  min-width: 0;
+}
+.raffle-winner-row__actions {
+  display: flex;
+  flex: 0 1 min(210px, 48%);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 48%;
+  min-width: 0;
+  margin-left: auto;
+}
+.raffle-winner-row__controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
   min-width: 0;
 }
 .raffle-winner-row__profile.raffle-participants__profile-btn {
@@ -2077,6 +2077,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-weight: 600;
   min-width: 1.2em;
 }
+.raffle-winner-status:empty { display: none; }
 .raffle-winner-status--ok { color: #22c55e; }
 .raffle-winner-status--fail { color: #ef4444; }
 .raffle-winner-ready-badge {
@@ -2123,6 +2124,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   align-items: center;
   width: max-content;
   max-width: 100%;
+  min-width: 0;
   padding: 2px 7px;
   border: 1px solid rgba(250, 204, 21, 0.38);
   border-radius: 999px;
@@ -2152,6 +2154,17 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     rgba(8, 13, 24, 0.62);
   padding-left: 7px;
 }
+.raffle-winner-row--reroll.raffle-winner-row--missed {
+  border-color: rgba(248, 113, 113, 0.72);
+  border-left-color: rgba(248, 113, 113, 0.82);
+  background:
+    linear-gradient(135deg, rgba(239, 68, 68, 0.28), rgba(127, 29, 29, 0.2)),
+    rgba(24, 8, 12, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(239, 68, 68, 0.16),
+    0 8px 22px rgba(239, 68, 68, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
 .raffle-winner-reroll-nest {
   margin: -1px 0 4px;
   padding: 0 0 0 22px;
@@ -2168,7 +2181,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-winner-ready-btn {
   flex: 0 0 auto;
   min-height: 28px;
-  margin-left: auto;
+  margin-left: 0;
   padding: 0 10px;
   border: 1px solid rgba(34, 197, 94, 0.45);
   border-radius: 6px;
@@ -2186,6 +2199,15 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-winner-ready-btn:disabled {
   cursor: default;
   opacity: 0.82;
+}
+.raffle-completed-card,
+.raffle-completed-card__winners,
+.raffle-winner-group,
+.raffle-winner-group ul,
+.raffle-winner-reroll-nest,
+.raffle-winner-reroll-list {
+  min-width: 0;
+  box-sizing: border-box;
 }
 .raffle-winner-btns { display: flex; flex: 0 0 auto; gap: 4px; }
 .raffle-winner-btn {
@@ -2735,6 +2757,58 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-completed-card__winners--reroll {
   padding-left: 16px;
+}
+@media (max-width: 430px) {
+  .raffle-completed-card {
+    padding: 12px 10px;
+  }
+  .raffle-completed-card__winners {
+    padding-left: 12px;
+  }
+  .raffle-completed-card__winners--reroll {
+    padding-left: 10px;
+  }
+  .raffle-winner-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+  }
+  .raffle-winner-row__number {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+  .raffle-winner-row__person {
+    flex: 1 1 calc(100% - 32px);
+    max-width: calc(100% - 32px);
+  }
+  .raffle-winner-row__actions {
+    flex: 1 1 100%;
+    align-items: flex-start;
+    width: 100%;
+    max-width: calc(100% - 32px);
+    margin-left: 32px;
+  }
+  .raffle-winner-row__meta,
+  .raffle-winner-row__controls {
+    justify-content: flex-start;
+  }
+  .raffle-winner-row__controls {
+    flex-wrap: wrap;
+  }
+  .raffle-winner-ready-timer {
+    width: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .raffle-winner-reroll-nest {
+    padding-left: 14px;
+  }
+  .raffle-winner-reroll-list {
+    padding-left: 8px;
+  }
 }
 .raffle-burned-summary {
   display: grid;

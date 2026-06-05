@@ -141,6 +141,8 @@ function collectReferencedAssets() {
     }
   }
   addDirFiles(path.join(root, 'html-fragments'));
+  addDirFiles(path.join(root, 'api'));
+  addDirFiles(path.join(root, 'lib', 'api-handlers'));
   for (const rel of scanFiles) {
     const p = path.join(root, rel);
     if (!fs.existsSync(p) || fs.statSync(p).isDirectory()) continue;
