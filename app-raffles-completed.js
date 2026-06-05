@@ -248,6 +248,8 @@ function initRafflesCompletedRuntime(opts) {
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
     var uidAttr = escapeHtml(uidRaw);
+    var winnerSlotId = String((w && (w.winnerReadySlotId || w.winnerSlotId)) || "").trim();
+    var winnerSlotAttr = escapeHtml(winnerSlotId);
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
@@ -278,6 +280,8 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(raffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
+        "\" data-winner-slot-id=\"" +
+        winnerSlotAttr +
         "\"" +
         (winnerReady ? " disabled aria-disabled=\"true\"" : "") +
         ">" +
@@ -384,6 +388,8 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(raffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
+        "\" data-winner-slot-id=\"" +
+        winnerSlotAttr +
         "\" title=\"Подтвердить\">✓</button>" +
         "<button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--fail" +
         failActive +
@@ -391,6 +397,8 @@ function initRafflesCompletedRuntime(opts) {
         escapeHtml(raffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
+        "\" data-winner-slot-id=\"" +
+        winnerSlotAttr +
         "\" title=\"Отклонить\">✗</button></span></span>";
       return (
         "<li class=\"" + rowClass + "\">" +
@@ -601,13 +609,13 @@ function initRafflesCompletedRuntime(opts) {
     raffleWinnerLeadersModal.setAttribute("aria-hidden", "true");
   }
 
-  function setRaffleWinnerStatus(rid, wid, btnIsOk, currentStatus, onDone) {
+  function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone) {
     var newStatus = btnIsOk ? "ok" : "fail";
     if ((btnIsOk && currentStatus === "ok") || (!btnIsOk && currentStatus === "fail")) newStatus = null;
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerStatus", raffleId: rid, winnerUserId: wid, status: newStatus })),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerStatus", raffleId: rid, winnerUserId: wid, winnerSlotId: winnerSlotId || "", status: newStatus })),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -619,15 +627,15 @@ function initRafflesCompletedRuntime(opts) {
       });
   }
 
-  function setRaffleWinnerReady(rid, wid, btn, onDone) {
-    if (!rid || !wid || !base) {
+  function setRaffleWinnerReady(rid, wid, winnerSlotId, btn, onDone) {
+    if (!rid || (!wid && !winnerSlotId) || !base) {
       if (onDone) onDone(false);
       return;
     }
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerReady", raffleId: rid, winnerUserId: wid })),
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerReady", raffleId: rid, winnerUserId: wid, winnerSlotId: winnerSlotId || "" })),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -670,9 +678,10 @@ function initRafflesCompletedRuntime(opts) {
         if (btn.disabled) return;
         var rid = this.getAttribute("data-raffle-id") || raffleId;
         var wid = this.getAttribute("data-winner-user-id");
-        if (!rid || !wid) return;
+        var winnerSlotId = this.getAttribute("data-winner-slot-id") || "";
+        if (!rid || (!wid && !winnerSlotId)) return;
         btn.disabled = true;
-        setRaffleWinnerReady(rid, wid, btn, function (ok) { if (!ok) btn.disabled = false; });
+        setRaffleWinnerReady(rid, wid, winnerSlotId, btn, function (ok) { if (!ok) btn.disabled = false; });
       });
     });
     if (!rafflesIsAdmin) return;
@@ -680,12 +689,13 @@ function initRafflesCompletedRuntime(opts) {
       btn.addEventListener("click", function () {
         var rid = this.getAttribute("data-raffle-id");
         var wid = this.getAttribute("data-winner-user-id");
+        var winnerSlotId = this.getAttribute("data-winner-slot-id") || "";
         var row = this.closest(".raffle-winner-row");
         var statusEl = row && row.querySelector(".raffle-winner-status");
         var currentStatus = statusEl && statusEl.classList.contains("raffle-winner-status--ok") ? "ok" : statusEl && statusEl.classList.contains("raffle-winner-status--fail") ? "fail" : null;
-        if (!rid || !wid) return;
+        if (!rid || (!wid && !winnerSlotId)) return;
         btn.disabled = true;
-        setRaffleWinnerStatus(rid, wid, this.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) btn.disabled = false; });
+        setRaffleWinnerStatus(rid, wid, winnerSlotId, this.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) btn.disabled = false; });
       });
     });
   }
@@ -1090,9 +1100,10 @@ function initRafflesCompletedRuntime(opts) {
         if (readyBtn.disabled) return;
         var readyRid = readyBtn.getAttribute("data-raffle-id");
         var readyWid = readyBtn.getAttribute("data-winner-user-id");
-        if (!readyRid || !readyWid) return;
+        var readySlotId = readyBtn.getAttribute("data-winner-slot-id") || "";
+        if (!readyRid || (!readyWid && !readySlotId)) return;
         readyBtn.disabled = true;
-        setRaffleWinnerReady(readyRid, readyWid, readyBtn, function (ok) { if (!ok) readyBtn.disabled = false; });
+        setRaffleWinnerReady(readyRid, readyWid, readySlotId, readyBtn, function (ok) { if (!ok) readyBtn.disabled = false; });
         return;
       }
       var winnerBtn = e.target.closest(".raffle-winner-btn");
@@ -1103,12 +1114,13 @@ function initRafflesCompletedRuntime(opts) {
         }
         var rid = winnerBtn.getAttribute("data-raffle-id");
         var wid = winnerBtn.getAttribute("data-winner-user-id");
+        var winnerSlotId = winnerBtn.getAttribute("data-winner-slot-id") || "";
         var row = winnerBtn.closest(".raffle-winner-row");
         var statusEl = row && row.querySelector(".raffle-winner-status");
         var currentStatus = statusEl && statusEl.classList.contains("raffle-winner-status--ok") ? "ok" : statusEl && statusEl.classList.contains("raffle-winner-status--fail") ? "fail" : null;
-        if (rid && wid) {
+        if (rid && (wid || winnerSlotId)) {
           winnerBtn.disabled = true;
-          setRaffleWinnerStatus(rid, wid, winnerBtn.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) winnerBtn.disabled = false; });
+          setRaffleWinnerStatus(rid, wid, winnerSlotId, winnerBtn.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) winnerBtn.disabled = false; });
         }
         return;
       }

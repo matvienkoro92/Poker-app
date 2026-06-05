@@ -71,6 +71,11 @@ function initRaffles() {
   var raffleParticipantsCount = document.getElementById("raffleParticipantsCount");
   var raffleParticipantsChance = document.getElementById("raffleParticipantsChance");
   var raffleParticipants = document.getElementById("raffleParticipants");
+  var raffleAdminTicketForm = document.getElementById("raffleAdminTicketForm");
+  var raffleAdminTicketP21Id = document.getElementById("raffleAdminTicketP21Id");
+  var raffleAdminTicketName = document.getElementById("raffleAdminTicketName");
+  var raffleAdminTicketTelegram = document.getElementById("raffleAdminTicketTelegram");
+  var raffleAdminTicketCount = document.getElementById("raffleAdminTicketCount");
   var raffleWinnersWrap = document.getElementById("raffleWinnersWrap");
   var raffleWinners = document.getElementById("raffleWinners");
   var raffleActionFeedback = document.getElementById("raffleActionFeedback");
@@ -374,6 +379,8 @@ function initRaffles() {
   }
 
   function activeRaffleShortTitle(raffle) {
+    var cardTitle = String(raffle && (raffle.cardTitle || raffle.card_title) || "").trim();
+    if (cardTitle) return cardTitle;
     var compact = activeRaffleChooserPrizeTitle(raffle);
     if (compact) return compact;
     var title = "";
@@ -396,6 +403,8 @@ function initRaffles() {
 
   function activeRaffleChooserPrizeTitle(raffle) {
     if (!raffle) return "";
+    var cardTitle = String(raffle.cardTitle || raffle.card_title || "").trim();
+    if (cardTitle) return cardTitle;
     var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
     if (!groups.length) return "";
     var totalCount = Math.max(0, parseInt(raffle.totalWinners, 10) || 0);
@@ -467,6 +476,8 @@ function initRaffles() {
   }
 
   function activeRafflePrizeLabel(raffle) {
+    var subtitle = String(raffle && (raffle.cardSubtitle || raffle.card_subtitle) || "").trim();
+    if (subtitle) return subtitle;
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     return isCashPrize ? "Байинов на кеш" : "Турнирных билетов";
   }
@@ -549,6 +560,66 @@ function initRaffles() {
         );
       })
       .filter(Boolean);
+  }
+
+  function raffleParticipantTicketCount(row) {
+    if (!row) return 1;
+    var raw = row.ticketCount != null
+      ? row.ticketCount
+      : row.tickets != null
+        ? row.tickets
+        : row.entryTicketCount != null
+          ? row.entryTicketCount
+          : row.raffleTickets;
+    var n = parseInt(String(raw == null ? "" : raw), 10);
+    if (!isFinite(n) || n <= 0) return 1;
+    return Math.max(1, Math.min(1000, n));
+  }
+
+  function raffleTicketWord(count) {
+    var n = Math.abs(parseInt(count, 10) || 0);
+    var mod100 = n % 100;
+    var mod10 = n % 10;
+    if (mod100 >= 11 && mod100 <= 19) return "билетов";
+    if (mod10 === 1) return "билет";
+    if (mod10 >= 2 && mod10 <= 4) return "билета";
+    return "билетов";
+  }
+
+  function raffleParticipantsTotalTickets(parts) {
+    return (Array.isArray(parts) ? parts : []).reduce(function (sum, row) {
+      return sum + raffleParticipantTicketCount(row);
+    }, 0);
+  }
+
+  function raffleViewerTicketCount(parts, raffleIds) {
+    var ids = Array.isArray(raffleIds) ? raffleIds : [];
+    if (!ids.length) return 0;
+    return (Array.isArray(parts) ? parts : []).reduce(function (sum, row) {
+      var uid = String(row && row.userId != null ? row.userId : "").trim();
+      return uid && ids.indexOf(uid) !== -1 ? sum + raffleParticipantTicketCount(row) : sum;
+    }, 0);
+  }
+
+  function raffleUsesTicketWeights(raffle) {
+    if (!raffle) return false;
+    var mode = String(raffle.drawMode || raffle.draw_mode || "").trim().toLowerCase();
+    if (mode === "weighted_tickets" || mode === "ticket_pool" || mode === "tickets_weighted") return true;
+    if (raffle.weightedTickets === true || raffle.weighted_tickets === true) return true;
+    var parts = Array.isArray(raffle.participants) ? raffle.participants : [];
+    return parts.some(function (row) { return raffleParticipantTicketCount(row) > 1; });
+  }
+
+  function activeRaffleGuaranteeText(raffle) {
+    var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim();
+    if (guarantee) return "Гарантия " + guarantee;
+    var text = String(raffle && (raffle.title || "") || "");
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    groups.forEach(function (group) {
+      text += " " + String(group && group.prize || "");
+    });
+    var m = text.match(/гаранти[яиейю]\s+(\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?)\s*(?:₽|р|руб)/i);
+    return m && m[1] ? "Гарантия " + m[1].replace(/[\u00a0\u202f]/g, " ").trim() + "р" : "";
   }
 
   function activeRaffleParticipantIn(raffle, raffleIds) {
@@ -832,6 +903,8 @@ function initRaffles() {
         var totalPrize = getRaffleTotalPrize(raffle);
         var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
+        var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
+        var guaranteeText = activeRaffleGuaranteeText(raffle);
         var buyinChipLabels = activeRaffleBuyinChipLabels(raffle);
         var buyinChipsHtml = buyinChipLabels
           .map(function (label) {
@@ -846,6 +919,7 @@ function initRaffles() {
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
           (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
+          (cardTheme === "knockout_ticket" ? " raffles-active-chooser__item--knockout" : "") +
           '" role="button" tabindex="0" data-raffle-active-id="' +
           escapeHtml(id) +
           '" aria-selected="' +
@@ -869,6 +943,7 @@ function initRaffles() {
           '<span class="raffles-active-chooser__label">' +
           escapeHtml(activeRafflePrizeLabel(raffle)) +
           "</span>" +
+          (guaranteeText ? '<span class="raffles-active-chooser__guarantee">' + escapeHtml(guaranteeText) + "</span>" : "") +
           '<span class="raffles-active-chooser__amount">' +
           escapeHtml(formatRaffleSum(totalPrize)) +
           "</span>" +
@@ -939,6 +1014,72 @@ function initRaffles() {
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       e.preventDefault();
       if (typeof btn.click === "function") btn.click();
+    });
+  }
+
+  if (raffleAdminTicketForm && raffleAdminTicketForm.dataset.bound !== "1") {
+    raffleAdminTicketForm.dataset.bound = "1";
+    raffleAdminTicketForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!rafflesIsAdmin || !currentRaffleId || !base) return;
+      var p21Id = raffleAdminTicketP21Id ? raffleAdminTicketP21Id.value.trim() : "";
+      var name = raffleAdminTicketName ? raffleAdminTicketName.value.trim() : "";
+      var telegram = raffleAdminTicketTelegram ? raffleAdminTicketTelegram.value.trim() : "";
+      var tickets = raffleAdminTicketCount ? parseInt(raffleAdminTicketCount.value, 10) || 1 : 1;
+      tickets = Math.max(1, Math.min(1000, tickets));
+      if (!p21Id && !name && !telegram) {
+        if (tg && tg.showAlert) tg.showAlert("Укажите ID, имя или Telegram участника");
+        else if (typeof alert === "function") alert("Укажите ID, имя или Telegram участника");
+        return;
+      }
+      var submitBtn = raffleAdminTicketForm.querySelector("button[type='submit']");
+      var prevText = submitBtn ? submitBtn.textContent : "";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Выдаём...";
+      }
+      fetch(base + "/api/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          pokerGuestOrAuthedPostBody({
+            action: "adminUpsertParticipant",
+            raffleId: currentRaffleId,
+            p21Id: p21Id,
+            name: name,
+            telegramUsername: telegram,
+            ticketCount: tickets,
+          })
+        ),
+      })
+        .then(parseRaffleActionResponse)
+        .then(function (data) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = prevText || "Выдать билеты";
+          }
+          if (data && data.ok && data.raffle) {
+            refreshActiveChooserAfterAction(data.raffle);
+            renderRaffle(data.raffle);
+            if (raffleAdminTicketP21Id) raffleAdminTicketP21Id.value = "";
+            if (raffleAdminTicketName) raffleAdminTicketName.value = "";
+            if (raffleAdminTicketTelegram) raffleAdminTicketTelegram.value = "";
+            if (raffleAdminTicketCount) raffleAdminTicketCount.value = "1";
+            showRaffleFeedback(data.updated ? "Билеты участника обновлены." : "Билеты участнику выданы.", "ok");
+            return;
+          }
+          var err = (data && data.error) || "Не удалось выдать билеты";
+          showRaffleFeedback(err, "err");
+          if (tg && tg.showAlert) tg.showAlert(err);
+        })
+        .catch(function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = prevText || "Выдать билеты";
+          }
+          showRaffleFeedback(POKER_NET_ERR, "err");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
     });
   }
 
@@ -1283,6 +1424,7 @@ function initRaffles() {
       raffleParticipantsCount: raffleParticipantsCount,
       raffleParticipantsChance: raffleParticipantsChance,
       raffleParticipants: raffleParticipants,
+      raffleAdminTicketForm: raffleAdminTicketForm,
       raffleWinnersWrap: raffleWinnersWrap,
       raffleWinners: raffleWinners,
       buildActiveRaffleCardHeading: buildActiveRaffleCardHeading,
@@ -1292,6 +1434,11 @@ function initRaffles() {
       rafflesViewerIsGuestOnly: rafflesViewerIsGuestOnly,
       rafflesViewerNeedsLoginForParticipation: rafflesViewerNeedsLoginForParticipation,
       raffleParticipantLineHtml: raffleParticipantLineHtml,
+      raffleParticipantTicketCount: raffleParticipantTicketCount,
+      raffleTicketWord: raffleTicketWord,
+      raffleParticipantsTotalTickets: raffleParticipantsTotalTickets,
+      raffleViewerTicketCount: raffleViewerTicketCount,
+      raffleUsesTicketWeights: raffleUsesTicketWeights,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
       escapeHtml: escapeHtml
     });
@@ -1679,6 +1826,7 @@ function initRaffles() {
       base: base,
       tg: tg,
       parseMoscowDateTimeLocal: parseMoscowDateTimeLocal,
+      formatMoscowDateTimeLocalForInput: formatMoscowDateTimeLocalForInput,
       clearRafflesCache: clearRafflesCache,
       focusRaffleAfterMutation: focusRaffleAfterMutation,
       loadRaffles: loadRaffles,

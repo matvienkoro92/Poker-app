@@ -57,6 +57,7 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
     ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
     : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
   var fishLevelHtml = pokerRafflesParticipantFishLevelHtml(p);
+  var ticketsHtml = pokerRafflesParticipantTicketsHtml(p);
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
@@ -70,8 +71,39 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
     mainLine +
     "</span>" +
     (fishLevelHtml ? '<span class="raffle-participant-line__level">' + fishLevelHtml + "</span>" : "") +
+    (ticketsHtml ? '<span class="raffle-participant-line__tickets">' + ticketsHtml + "</span>" : "") +
     "</span>"
   );
+}
+
+function pokerRafflesParticipantTicketCount(p) {
+  if (!p) return 1;
+  var raw = p.ticketCount != null
+    ? p.ticketCount
+    : p.tickets != null
+      ? p.tickets
+      : p.entryTicketCount != null
+        ? p.entryTicketCount
+        : p.raffleTickets;
+  var n = parseInt(String(raw == null ? "" : raw), 10);
+  if (!isFinite(n) || n <= 0) return 1;
+  return Math.max(1, Math.min(1000, n));
+}
+
+function pokerRafflesTicketWord(n) {
+  n = Math.abs(parseInt(n, 10) || 0);
+  var mod100 = n % 100;
+  var mod10 = n % 10;
+  if (mod100 >= 11 && mod100 <= 19) return "билетов";
+  if (mod10 === 1) return "билет";
+  if (mod10 >= 2 && mod10 <= 4) return "билета";
+  return "билетов";
+}
+
+function pokerRafflesParticipantTicketsHtml(p) {
+  var count = pokerRafflesParticipantTicketCount(p);
+  if (count <= 1) return "";
+  return pokerRafflesEscapeHtml(String(count) + " " + pokerRafflesTicketWord(count));
 }
 
 function pokerRafflesParticipantFishLevelHtml(p) {

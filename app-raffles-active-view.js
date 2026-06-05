@@ -130,13 +130,31 @@ function initRafflesActiveViewRuntime(opts) {
     var parts = raffle.participants || [];
     if (raffleParticipantsCount) raffleParticipantsCount.textContent = "(" + parts.length + ")";
     var chancePct = "";
-    if (parts.length > 0 && total > 0) {
+    var totalTickets = typeof raffleParticipantsTotalTickets === "function" ? raffleParticipantsTotalTickets(parts) : parts.length;
+    var myTickets = typeof raffleViewerTicketCount === "function" ? raffleViewerTicketCount(parts, raffleIds) : 0;
+    var usesTicketWeights = typeof raffleUsesTicketWeights === "function" && raffleUsesTicketWeights(raffle);
+    if (usesTicketWeights && totalTickets > 0) {
+      var ticketsWord = typeof raffleTicketWord === "function" ? raffleTicketWord(totalTickets) : "билетов";
+      if (myTickets > 0) {
+        var myPct = Math.min(100, (myTickets / totalTickets) * 100);
+        var myWord = typeof raffleTicketWord === "function" ? raffleTicketWord(myTickets) : "билетов";
+        chancePct = "В пуле " + totalTickets + " " + ticketsWord + ". У вас " + myTickets + " " + myWord + " — шанс " + (myPct >= 100 ? "100" : myPct.toFixed(1)) + "%.";
+      } else {
+        chancePct = "В пуле " + totalTickets + " " + ticketsWord + ". Рандомайзер выбирает среди всех билетов.";
+      }
+    } else if (parts.length > 0 && total > 0) {
       var pct = Math.min(100, (total / parts.length) * 100);
       chancePct = "Ваш шанс выиграть: " + (pct >= 100 ? "100" : pct.toFixed(1)) + "%";
     }
     if (raffleParticipantsChance) {
       raffleParticipantsChance.textContent = chancePct;
       raffleParticipantsChance.style.display = chancePct ? "" : "none";
+    }
+    if (raffleAdminTicketForm) {
+      var showTicketForm = !!(rafflesIsAdmin && isActive && !isCashPrize && usesTicketWeights);
+      raffleAdminTicketForm.classList.toggle("raffle-admin-ticket-form--hidden", !showTicketForm);
+      raffleAdminTicketForm.hidden = !showTicketForm;
+      raffleAdminTicketForm.setAttribute("aria-hidden", showTicketForm ? "false" : "true");
     }
     raffleParticipants.innerHTML =
       parts.length === 0

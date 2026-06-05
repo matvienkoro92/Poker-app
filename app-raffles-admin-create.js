@@ -3,6 +3,7 @@ function initRafflesAdminCreateRuntime(opts) {
   with (opts) {
     var createToggle = document.getElementById("rafflesCreateToggle");
     var duplicateLastBtn = document.getElementById("rafflesDuplicateLastBtn");
+    var knockoutPresetBtn = document.getElementById("rafflesCreateKnockoutPresetBtn");
     var createForm = document.getElementById("raffleCreateForm");
     var raffleTypeTickets = document.getElementById("raffleTypeTickets");
     var raffleTypeOther = document.getElementById("raffleTypeOther");
@@ -27,6 +28,123 @@ function initRafflesAdminCreateRuntime(opts) {
 
   function getRafflePrizeKind() {
     return getRaffleCreateType() === "tickets" ? "tournament_ticket" : "cash";
+  }
+
+  function raffleAdminCreateFormatMoscowInput(date) {
+    if (typeof formatMoscowDateTimeLocalForInput === "function") return formatMoscowDateTimeLocalForInput(date);
+    if (!date) return "";
+    try {
+      var s = date.toLocaleString("sv-SE", { timeZone: "Europe/Moscow", hour12: false });
+      return s.replace(" ", "T").slice(0, 16);
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function nextMoscowWeekdayDateTime(weekday, hour, minute) {
+    var now = new Date();
+    var moscowOffsetMs = 3 * 60 * 60 * 1000;
+    var moscowNow = new Date(now.getTime() + moscowOffsetMs);
+    var currentWeekday = moscowNow.getUTCDay();
+    var addDays = (weekday - currentWeekday + 7) % 7;
+    var targetUtc = new Date(Date.UTC(
+      moscowNow.getUTCFullYear(),
+      moscowNow.getUTCMonth(),
+      moscowNow.getUTCDate() + addDays,
+      hour - 3,
+      minute || 0,
+      0,
+      0
+    ));
+    if (targetUtc <= now) {
+      targetUtc = new Date(Date.UTC(
+        moscowNow.getUTCFullYear(),
+        moscowNow.getUTCMonth(),
+        moscowNow.getUTCDate() + addDays + 7,
+        hour - 3,
+        minute || 0,
+        0,
+        0
+      ));
+    }
+    return targetUtc;
+  }
+
+  function createKnockoutTicketPreset() {
+    if (!knockoutPresetBtn || window.__pokerRaffleCreateInFlight) return;
+    var endDate = nextMoscowWeekdayDateTime(0, 16, 0);
+    var endInput = raffleAdminCreateFormatMoscowInput(endDate);
+    if (raffleEndDateInput && endInput) raffleEndDateInput.value = endInput;
+    if (raffleTypeTickets) raffleTypeTickets.checked = true;
+    if (raffleTypeOther) raffleTypeOther.checked = false;
+    if (raffleTicketGroupCount) raffleTicketGroupCount.value = "1";
+    if (raffleTicketWinnersCount) raffleTicketWinnersCount.value = "3";
+    if (raffleTicketTournamentSelect) {
+      raffleTicketTournamentSelect.value = "custom";
+      syncSingleTicketCustomInputs();
+      if (raffleTicketCustomName) raffleTicketCustomName.value = "Нокаут с гарантией 700 000р";
+      if (raffleTicketCustomPrice) raffleTicketCustomPrice.value = "10000";
+    }
+    updateRaffleCreateTotal();
+
+    window.__pokerRaffleCreateInFlight = true;
+    knockoutPresetBtn.disabled = true;
+    var prevText = knockoutPresetBtn.textContent;
+    knockoutPresetBtn.textContent = "Создаём...";
+    var idemKey =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + "_" + Math.random().toString(36).slice(2, 11);
+    function resetPresetBtn() {
+      window.__pokerRaffleCreateInFlight = false;
+      knockoutPresetBtn.disabled = false;
+      knockoutPresetBtn.textContent = prevText || "Нокаут 10к";
+    }
+    fetch(base + "/api/raffles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+        pokerGuestOrAuthedPostBody({
+          action: "create",
+          totalWinners: 3,
+          groups: [{ count: 3, prize: "Билет на нокаут за 10 000р — гарантия 700 000р" }],
+          endDate: endDate.toISOString(),
+          title: "3 билета по 10 000р на нокаут с гарантией 700 000р",
+          prizeKind: "tournament_ticket",
+          drawMode: "weighted_tickets",
+          ticketEntryMode: "admin",
+          promoGuarantee: "700 000р",
+          cardTitle: "3 билета на нокаут",
+          cardSubtitle: "по 10 000р · гарантия 700 000р",
+          cardTheme: "knockout_ticket",
+          createIdempotencyKey: idemKey,
+        })
+      ),
+    })
+      .then(raffleDuplicateParseResponse)
+      .then(function (data) {
+        resetPresetBtn();
+        if (data && data.ok && data.raffle) {
+          setRaffleAdminActionTab("");
+          focusRaffleAfterMutation(data.raffle.id);
+          clearRafflesCache();
+          if (typeof setRafflesTab === "function") setRafflesTab("active");
+          loadRaffles();
+          if (!data.idempotentReplay) {
+            if (tg && tg.showAlert) tg.showAlert("Нокаут-розыгрыш создан");
+            else if (typeof alert === "function") alert("Нокаут-розыгрыш создан");
+          }
+        } else {
+          var errMsg = (data && data.error) || "Ошибка";
+          if (tg && tg.showAlert) tg.showAlert(errMsg);
+          else if (typeof alert === "function") alert(errMsg);
+        }
+      })
+      .catch(function () {
+        resetPresetBtn();
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        else if (typeof alert === "function") alert(POKER_NET_ERR);
+      });
   }
 
   function getRaffleCreateType() {
@@ -523,6 +641,7 @@ function initRafflesAdminCreateRuntime(opts) {
         });
     });
   }
+  if (knockoutPresetBtn) knockoutPresetBtn.addEventListener("click", createKnockoutTicketPreset);
   if (duplicateOptionsEl) {
     duplicateOptionsEl.addEventListener("click", function (e) {
       var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-duplicate-source]") : null;
