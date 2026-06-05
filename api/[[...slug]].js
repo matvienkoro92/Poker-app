@@ -32,6 +32,7 @@ const handlers = {
   "livekit-token": () => require(path.join(handlersDir, "livekit-token.js")),
   "livekit-egress": () => require(path.join(handlersDir, "livekit-egress.js")),
   "cloudflare-stream": () => require(path.join(handlersDir, "cloudflare-stream.js")),
+  "streams-current": () => require(path.join(handlersDir, "streams-current.js")),
   "auth-vk-pwa": () => require(path.join(handlersDir, "auth-vk-pwa.js")),
   avatar: () => require(path.join(handlersDir, "avatar.js")),
   chat: () => require(path.join(handlersDir, "chat.js")),

@@ -1,25 +1,27 @@
 <div class="view" data-view="streams">
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title streams-title">Стримы</h1>
-            <p class="streams-intro">Без задержки через LiveKit Cloud, с задержкой через Cloudflare Stream.</p>
+            <p class="streams-intro">Запускайте эфир с задержкой или без неё. Смотреть можно сразу, без выбора комнаты.</p>
             <div class="streams-role-tabs" role="tablist" aria-label="Роль в стриме">
-              <button type="button" class="streams-role-tab streams-role-tab--active" id="streamsWatchTab" data-streams-tab-target="watch" role="tab" aria-selected="true" aria-controls="streamsWatchPanel">Без задержки</button>
               <button type="button" class="streams-role-tab" id="streamsBroadcastTab" data-streams-tab-target="broadcast" role="tab" aria-selected="false" aria-controls="streamsBroadcastPanel">Запустить</button>
-              <button type="button" class="streams-role-tab" id="streamsDelayedTab" data-streams-tab-target="delayed" role="tab" aria-selected="false" aria-controls="streamsDelayedPanel">С задержкой</button>
+              <button type="button" class="streams-role-tab streams-role-tab--active" id="streamsWatchTab" data-streams-tab-target="watch" role="tab" aria-selected="true" aria-controls="streamsWatchPanel">Смотреть</button>
             </div>
             <div class="streams-actions">
               <div class="streams-block streams-block--watch" id="streamsWatchPanel" data-streams-tab-panel="watch" role="tabpanel" aria-labelledby="streamsWatchTab">
-                <h2 class="streams-block__title">Смотреть трансляцию</h2>
-                <p class="streams-block__hint">Вставьте ссылку или код комнаты от ведущего.</p>
-                <div class="streams-watch-row">
-                  <input type="text" id="streamsRoomInput" class="streams-room-input" inputmode="numeric" placeholder="6 цифр или ссылка с streams_" aria-label="Код комнаты" maxlength="256" />
-                  <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Смотреть</button>
-                </div>
+                <h2 class="streams-block__title">Смотреть текущий стрим</h2>
+                <p class="streams-block__hint">Если эфир запущен, он откроется здесь автоматически.</p>
+                <input type="hidden" id="streamsRoomInput" aria-label="Код комнаты" />
+                <button type="button" class="streams-btn streams-btn--watch" id="streamsWatchBtn">Обновить эфир</button>
                 <p id="streamsWatchStatus" class="streams-status" aria-live="polite" hidden></p>
                 <div class="streams-remote-wrap streams-remote-wrap--hidden" id="streamsRemoteWrap">
                   <video id="streamsRemoteVideo" class="streams-remote-video" autoplay playsinline controls aria-label="Трансляция"></video>
                   <button type="button" class="streams-btn streams-btn--stop" id="streamsStopWatchBtn">Отключиться</button>
                   <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsRemoteFullscreenBtn">Во весь экран</button>
+                </div>
+                <p id="streamsCloudflareStatus" class="streams-status" aria-live="polite" hidden></p>
+                <div class="streams-cloudflare-wrap streams-cloudflare-wrap--hidden" id="streamsCloudflareWrap">
+                  <iframe id="streamsCloudflareFrame" class="streams-cloudflare-frame" title="Cloudflare Stream" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
+                  <video id="streamsCloudflareVideo" class="streams-cloudflare-video" playsinline hidden aria-label="Cloudflare Stream HLS"></video>
                 </div>
               </div>
               <div class="streams-block streams-block--broadcast" id="streamsBroadcastPanel" data-streams-tab-panel="broadcast" role="tabpanel" aria-labelledby="streamsBroadcastTab" hidden>
@@ -60,16 +62,6 @@
                   <button type="button" class="streams-btn streams-btn--stop" id="streamsStopBtn">Остановить</button>
                   <p id="streamsBroadcastTimer" class="streams-broadcast-timer" aria-live="polite"></p>
                   <button type="button" class="streams-btn streams-btn--fullscreen" id="streamsPreviewFullscreenBtn">Во весь экран</button>
-                </div>
-              </div>
-              <div class="streams-block streams-block--delayed" id="streamsDelayedPanel" data-streams-tab-panel="delayed" role="tabpanel" aria-labelledby="streamsDelayedTab" hidden>
-                <h2 class="streams-block__title">Смотреть с задержкой 2 минуты</h2>
-                <p class="streams-block__hint">Cloudflare DVR-HLS держит эфир примерно на две минуты позади live.</p>
-                <button type="button" class="streams-btn streams-btn--watch" id="streamsCloudflareRefreshBtn">Запустить плеер</button>
-                <p id="streamsCloudflareStatus" class="streams-status" aria-live="polite" hidden></p>
-                <div class="streams-cloudflare-wrap streams-cloudflare-wrap--hidden" id="streamsCloudflareWrap">
-                  <iframe id="streamsCloudflareFrame" class="streams-cloudflare-frame" title="Cloudflare Stream" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
-                  <video id="streamsCloudflareVideo" class="streams-cloudflare-video" playsinline hidden aria-label="Cloudflare Stream HLS"></video>
                 </div>
               </div>
             </div>

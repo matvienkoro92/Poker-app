@@ -228,6 +228,49 @@ function streamsFetchLiveKitEgress(action, roomId, egressId) {
   });
 }
 
+function streamsFetchCurrentStream() {
+  var base = streamsApiBase();
+  if (!base) return Promise.reject(new Error("api_base_missing"));
+  var request = typeof pokerAuthFetch === "function" ? pokerAuthFetch : fetch;
+  return request(base.replace(/\/$/, "") + "/api/streams-current", {
+    method: "GET",
+    cache: "no-store",
+  }).then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      if (!res.ok || !data || data.ok !== true) {
+        var code = data && data.error ? String(data.error) : "streams_current_error";
+        var err = new Error(code);
+        err.status = res.status;
+        err.data = data || {};
+        throw err;
+      }
+      return data;
+    });
+  });
+}
+
+function streamsPostCurrentStream(action, roomId, mode) {
+  var base = streamsApiBase();
+  if (!base) return Promise.resolve(false);
+  var request = typeof pokerAuthFetch === "function" ? pokerAuthFetch : fetch;
+  return request(base.replace(/\/$/, "") + "/api/streams-current", {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(streamsAuthBody({
+      action: action || "start",
+      room: roomId || streamsBroadcastRoomId,
+      mode: streamsNormalizeBroadcastMode(mode || streamsBroadcastActiveMode || streamsBroadcastLaunchMode),
+    })),
+  }).then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      return !!(res.ok && data && data.ok === true);
+    });
+  }).catch(function () {
+    return false;
+  });
+}
+
 function streamsTokenErrorText(err, role) {
   var code = String(err && err.message || "");
   if (code === "livekit_not_configured") return "LiveKit ещё не настроен на сервере. Проверьте LIVEKIT_URL/API_KEY/API_SECRET и redeploy.";
@@ -368,7 +411,7 @@ function streamsStartCloudflareEgress(roomId, generation) {
       streamsCloudflareEgressId = egressId;
       streamsCloudflareEgressRoomId = roomId;
       streamsCloudflareEgressStopping = false;
-      streamsSetEgressStatus("Cloudflare-мост включён. Зрители могут открыть вкладку «С задержкой».", "ok");
+      streamsSetEgressStatus("Cloudflare-мост включён. Зрители увидят задержанный поток во вкладке «Смотреть».", "ok");
       return true;
     })
     .catch(function (err) {
@@ -403,6 +446,8 @@ function streamsStopCloudflareEgress(clearStatus) {
 }
 
 function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
+  var activeRoomId = streamsBroadcastRoomId;
+  var activeMode = streamsBroadcastActiveMode || streamsBroadcastLaunchMode;
   streamsClearBroadcastReconnect();
   streamsBroadcastIntentActive = false;
   streamsBroadcastRoomId = "";
@@ -434,6 +479,7 @@ function streamsResetBroadcastRuntime(btnText, disconnectRoom) {
     startBtn.disabled = false;
     if (btnText) startBtn.textContent = btnText;
   }
+  if (disconnectRoom && activeRoomId) streamsPostCurrentStream("stop", activeRoomId, activeMode);
 }
 
 function streamsCleanup() {
@@ -467,7 +513,7 @@ function streamsUpdateBroadcastTimerText() {
 
 function streamsNormalizeRoleTabName(name) {
   name = String(name || "").trim();
-  return name === "broadcast" || name === "delayed" ? name : "watch";
+  return name === "broadcast" ? "broadcast" : "watch";
 }
 
 function streamsSetRoleTab(name) {
@@ -480,6 +526,45 @@ function streamsSetRoleTab(name) {
   Array.prototype.slice.call(document.querySelectorAll("[data-streams-tab-panel]")).forEach(function (panel) {
     panel.hidden = panel.getAttribute("data-streams-tab-panel") !== name;
   });
+}
+
+function streamsOpenDelayedWatch(forceRefresh) {
+  streamsSetRoleTab("watch");
+  streamsResetWatchConnection(false, false);
+  streamsSetWatchStatus("Открываю текущий стрим с задержкой…", "warn");
+  return streamsInitCloudflarePlayer(!!forceRefresh).then(function (ok) {
+    if (ok) streamsSetWatchStatus("Смотрим текущий стрим с задержкой через Cloudflare.", "ok");
+    return ok;
+  });
+}
+
+function streamsWatchCurrentStream(forceRefresh) {
+  streamsSetRoleTab("watch");
+  streamsSetWatchStatus(forceRefresh ? "Обновляю текущий эфир…" : "Ищу запущенный эфир…", "warn");
+  return streamsFetchCurrentStream()
+    .then(function (data) {
+      var stream = data && data.active ? data.stream : null;
+      var roomId = stream ? streamsNormalizeRoomId(stream.room) : "";
+      var mode = stream ? streamsNormalizeBroadcastMode(stream.mode) : "";
+      if (!stream || !roomId) {
+        streamsResetWatchConnection(false, false);
+        streamsResetCloudflarePlayer(true);
+        streamsSetWatchStatus("Сейчас нет запущенного стрима.", "warn");
+        return false;
+      }
+      if (mode === "delayed") return streamsOpenDelayedWatch(!!forceRefresh);
+      streamsResetCloudflarePlayer(true);
+      if (typeof window.startStreamsWatchByRoomId === "function") {
+        window.startStreamsWatchByRoomId(roomId);
+        return true;
+      }
+      streamsSetWatchStatus("Стрим найден, но плеер ещё не готов. Нажмите «Обновить эфир».", "warn");
+      return false;
+    })
+    .catch(function () {
+      streamsSetWatchStatus("Не удалось проверить текущий эфир. Попробуйте обновить.", "error");
+      return false;
+    });
 }
 
 function streamsNormalizeBroadcastMode(mode) {
@@ -895,20 +980,28 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting, m
           var egressPromise = mode === "delayed"
             ? streamsStartCloudflareEgress(roomId, generation)
             : Promise.resolve(false);
-          return egressPromise.then(function () {
-            return ctx.tokenData;
+          return egressPromise.then(function (egressOk) {
+            return {
+              tokenData: ctx.tokenData,
+              egressOk: !!egressOk,
+            };
           });
         });
       });
     })
-    .then(function () {
+    .then(function (result) {
       if (generation !== streamsBroadcastGeneration) return;
-      var link = mode === "delayed"
-        ? buildMiniAppStartLink("streams_delayed")
-        : buildMiniAppStartLink("streams_" + roomId);
+      var activeMode = mode === "delayed" && !(result && result.egressOk) ? "instant" : mode;
+      streamsBroadcastActiveMode = activeMode;
+      var link = buildMiniAppStartLink("streams");
       if (shareLinkInput) shareLinkInput.value = link;
       if (browserLinkInput && typeof isTelegramWebApp === "function" && isTelegramWebApp()) browserLinkInput.value = link;
       if (roomInput) roomInput.placeholder = roomId;
+      streamsPostCurrentStream("start", roomId, activeMode).then(function (saved) {
+        if (!saved && generation === streamsBroadcastGeneration) {
+          streamsSetEgressStatus("Стрим запущен, но автооткрытие для зрителей не сохранилось. Скопируйте ссылку ещё раз через пару секунд.", "warn");
+        }
+      });
       streamsBroadcastStartedAt = streamsBroadcastStartedAt || Date.now();
       if (streamsBroadcastTimerInterval) clearInterval(streamsBroadcastTimerInterval);
       streamsUpdateBroadcastTimerText();
@@ -918,12 +1011,12 @@ function streamsConnectLiveKitBroadcast(roomId, stream, btnText, reconnecting, m
         startBtn.disabled = false;
         startBtn.textContent = btnText;
       }
-      streamsSetBroadcastStatus(
-        mode === "delayed"
-          ? "Трансляция активна. Для зрителей включён режим против подсматривания."
-          : "Трансляция активна без задержки через LiveKit.",
-        "ok"
-      );
+      var broadcastStatusText = activeMode === "delayed"
+        ? "Трансляция активна. Для зрителей включён режим против подсматривания."
+        : mode === "delayed"
+          ? "Трансляция активна без задержки: Cloudflare-задержка не включилась."
+          : "Трансляция активна без задержки через LiveKit.";
+      streamsSetBroadcastStatus(broadcastStatusText, mode === "delayed" && activeMode !== "delayed" ? "warn" : "ok");
     })
     .catch(function (err) {
       if (String(err && err.message || "") === "stale") return;
@@ -942,8 +1035,7 @@ function consumePendingStreamsWatchRoom() {
     if (window.__pendingStreamsDelayed) {
       window.__pendingStreamsDelayed = false;
       setTimeout(function () {
-        streamsSetRoleTab("delayed");
-        streamsInitCloudflarePlayer(false);
+        streamsOpenDelayedWatch(false);
       }, 0);
       return;
     }
@@ -954,7 +1046,16 @@ function consumePendingStreamsWatchRoom() {
     setTimeout(function () {
       window.startStreamsWatchByRoomId(pendingRoomId);
     }, 0);
+    return;
   } catch (e) {}
+  try {
+    var watchTab = document.querySelector('[data-streams-tab-target="watch"][aria-selected="true"]');
+    var cfWrap = document.getElementById("streamsCloudflareWrap");
+    var cfVisible = cfWrap && !cfWrap.classList.contains("streams-cloudflare-wrap--hidden");
+    if (watchTab && !streamsWatchIntentActive && !streamsLiveKitWatchRoom && !cfVisible) {
+      setTimeout(function () { streamsWatchCurrentStream(false); }, 0);
+    }
+  } catch (eAutoWatch) {}
 }
 
 function initStreams() {
@@ -1048,7 +1149,7 @@ function initStreams() {
     tab.addEventListener("click", function () {
       var target = streamsNormalizeRoleTabName(tab.getAttribute("data-streams-tab-target"));
       streamsSetRoleTab(target);
-      if (target === "delayed") streamsInitCloudflarePlayer(false);
+      if (target === "watch") streamsWatchCurrentStream(false);
     });
   });
 
@@ -1264,12 +1365,7 @@ function initStreams() {
   if (watchBtn && roomInput && remoteWrap && remoteVideo && !watchBtn.__streamsWatchHandlerAttached) {
     watchBtn.__streamsWatchHandlerAttached = true;
     watchBtn.addEventListener("click", function () {
-      var roomId = streamsNormalizeRoomId(roomInput.value);
-      if (!roomId) {
-        showAlert("Введите код комнаты или ссылку от ведущего.");
-        return;
-      }
-      window.startStreamsWatchByRoomId(roomId);
+      streamsWatchCurrentStream(true);
     });
   }
 

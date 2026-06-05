@@ -10,7 +10,7 @@
   width: max-content;
   max-width: 100%;
   margin: 0 0 10px;
-  padding: 8px 13px;
+  padding: 7px 13px;
   border: 1px solid rgba(255, 203, 83, 0.72);
   border-radius: 999px;
   background:
@@ -20,7 +20,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 245, 190, 0.25),
     0 0 18px rgba(249, 164, 28, 0.28);
-  font-size: clamp(11px, 2.2vw, 15px);
+  font-size: clamp(10px, 1.7vw, 15px);
   font-weight: 900;
   line-height: 1;
   text-align: left;
@@ -28,11 +28,11 @@
 }
 .raffles-hero {
   margin: 0 0 12px;
-  min-height: clamp(326px, 52vw, 456px);
-  padding: clamp(60px, 7vw, 82px) clamp(16px, 4vw, 30px) 88px;
+  min-height: 420px;
+  padding: 0;
   background:
-    linear-gradient(90deg, rgba(1, 2, 5, 0.96) 0%, rgba(1, 2, 5, 0.86) 28%, rgba(1, 2, 5, 0.42) 58%, rgba(1, 2, 5, 0.18) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.14) 48%, rgba(0, 0, 0, 0.86) 100%),
+    linear-gradient(90deg, rgba(1, 2, 5, 0.98) 0%, rgba(1, 2, 5, 0.84) 34%, rgba(1, 2, 5, 0.36) 64%, rgba(1, 2, 5, 0.08) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.9) 100%),
     url("./assets/raffles-daily-giveaway-banner.webp") center center / cover no-repeat;
   border: 1px solid rgba(255, 183, 56, 0.42);
   border-radius: 18px;
@@ -99,24 +99,26 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   left: 10px;
   right: 10px;
   bottom: 8px;
-  height: 84px;
+  height: 72px;
   z-index: 1;
   border-radius: 22px;
   background: linear-gradient(90deg, rgba(255, 189, 70, 0.2), transparent 24%, transparent 76%, rgba(255, 189, 70, 0.16));
   pointer-events: none;
 }
 .raffles-hero__copy {
-  position: relative;
+  position: absolute;
+  top: 78px;
+  left: 14px;
   z-index: 2;
-  width: min(510px, 62%);
+  width: min(300px, 78%);
 }
 .raffles-hero__title {
-  margin: 0 0 12px;
-  max-width: 11ch;
+  margin: 0 0 8px;
+  max-width: 6.6ch;
   color: #ffd45f;
-  font-size: clamp(30px, 7.2vw, 64px);
+  font-size: clamp(42px, 12vw, 54px);
   font-weight: 1000;
-  line-height: 0.94;
+  line-height: 0.86;
   letter-spacing: 0;
   text-transform: uppercase;
   text-shadow:
@@ -124,16 +126,29 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 0 20px rgba(255, 190, 56, 0.55),
     0 12px 26px rgba(0, 0, 0, 0.72);
 }
+.raffles-hero__subtitle {
+  margin: 0 0 9px;
+  max-width: 13.5ch;
+  color: #f8ead0;
+  font-size: clamp(15px, 4.8vw, 20px);
+  font-weight: 1000;
+  line-height: 0.98;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.74),
+    0 0 14px rgba(255, 245, 210, 0.22);
+}
 .raffles-hero__chips {
   display: grid;
-  gap: 8px;
-  width: min(440px, 100%);
+  gap: 6px;
+  width: min(270px, 100%);
 }
 .raffles-hero__chip {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 8px 13px;
+  min-height: 28px;
+  padding: 6px 10px;
   border: 1px solid rgba(255, 203, 83, 0.58);
   border-radius: 999px;
   background:
@@ -143,7 +158,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.13),
     0 0 18px rgba(245, 158, 11, 0.24);
-  font-size: clamp(12px, 2.4vw, 16px);
+  font-size: 10px;
   font-weight: 900;
   line-height: 1.12;
 }
@@ -157,10 +172,17 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-hero > .raffles-hero__share-row {
   position: absolute;
   z-index: 3;
-  left: clamp(14px, 4vw, 30px);
-  bottom: clamp(82px, 15vw, 104px);
-  justify-content: flex-start;
-  width: min(450px, calc(100% - 28px));
+  top: 12px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  justify-content: flex-end;
+  width: auto;
+  gap: 0;
+}
+.raffles-hero > .raffles-hero__share-row #rafflesInviteFriendBtn,
+.raffles-hero > .raffles-hero__share-row .raffles-subscribe-btn {
+  display: none !important;
 }
 .raffles-copy-feedback {
   position: absolute;
@@ -253,8 +275,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25);
 }
 .raffles-hero__share-btn--copy-icon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -282,11 +304,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   z-index: 2;
   left: clamp(10px, 3vw, 24px);
   right: clamp(10px, 3vw, 24px);
-  bottom: 14px;
+  bottom: 10px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
-  padding: 9px 8px;
+  padding: 7px 5px;
   border: 1px solid rgba(255, 203, 83, 0.56);
   border-radius: 20px;
   background:
@@ -299,15 +321,46 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-hero__stat {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
   min-width: 0;
-  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
+  row-gap: 2px;
+  min-height: 48px;
+  padding: 0 3px;
+  text-align: center;
+}
+.raffles-hero__stat::before {
+  content: "#";
+  grid-column: 1;
+  grid-row: 1;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  min-height: 46px;
-  padding: 0 5px;
-  text-align: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 232, 166, 0.26), transparent 52%),
+    rgba(255, 203, 83, 0.13);
+  color: #ffd976;
+  border: 1px solid rgba(255, 203, 83, 0.24);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.16);
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+}
+.raffles-hero__stat:nth-child(2)::before {
+  content: "₽";
+}
+.raffles-hero__stat:nth-child(3)::before {
+  content: "◎";
+}
+.raffles-hero__stat:nth-child(4)::before {
+  content: "✓";
 }
 .raffles-hero__stat:not(:last-child)::after {
   content: "";
@@ -319,58 +372,63 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background: linear-gradient(180deg, transparent, rgba(255, 213, 127, 0.3), transparent);
 }
 .raffles-hero__stat dt {
+  grid-column: 1;
+  grid-row: 3;
   margin: 0;
+  width: 100%;
+  min-width: 0;
   color: rgba(255, 245, 210, 0.78);
-  font-size: clamp(7px, 1.7vw, 12px);
+  font-size: 6.4px;
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 0.98;
   text-transform: uppercase;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .raffles-hero__stat dd {
-  order: -1;
+  grid-column: 1;
+  grid-row: 2;
   margin: 0;
+  width: 100%;
+  min-width: 0;
   color: #fff3c4;
-  font-size: clamp(15px, 3.3vw, 34px);
+  font-size: 13px;
   font-weight: 1000;
   line-height: 0.98;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
   text-shadow:
     0 0 18px rgba(255, 220, 119, 0.48),
     0 2px 0 rgba(0, 0, 0, 0.7);
 }
 @media (max-width: 560px) {
   .raffles-hero {
-    min-height: 408px;
-    padding: 62px 14px 122px;
-    background-position: 58% center;
+    padding: 0;
+    background-position: 62% center;
   }
   .raffles-hero__copy {
-    width: min(318px, 88%);
+    top: 78px;
+    left: 14px;
+    width: min(300px, 78%);
   }
   .raffles-hero__title {
-    font-size: 28px;
-    max-width: 10.5ch;
-    margin-bottom: 10px;
+    font-size: clamp(38px, 12.2vw, 54px);
+    max-width: 6.4ch;
+    margin-bottom: 6px;
+  }
+  .raffles-hero__subtitle {
+    max-width: 13.5ch;
+    margin-bottom: 9px;
+    font-size: clamp(15px, 4.8vw, 20px);
   }
   .raffles-hero__chips {
-    width: min(316px, 100%);
-    gap: 7px;
+    width: min(270px, 100%);
+    gap: 6px;
   }
   .raffles-hero__chip {
-    min-height: 30px;
-    padding: 7px 10px;
-    font-size: 11.5px;
-  }
-  .raffles-hero > .raffles-hero__share-row {
-    top: 12px;
-    right: 12px;
-    bottom: auto;
-    left: auto;
-    width: auto;
-    gap: 0;
-  }
-  .raffles-hero > .raffles-hero__share-row #rafflesInviteFriendBtn,
-  .raffles-hero .raffles-subscribe-btn {
-    display: none;
+    min-height: 28px;
+    padding: 6px 10px;
+    font-size: 10px;
   }
   .raffles-hero__share-btn--copy-icon {
     width: 40px;
@@ -380,42 +438,57 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     left: 8px;
     right: 8px;
     bottom: 10px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    padding: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    padding: 7px 5px;
     border-radius: 17px;
   }
   .raffles-hero__stat {
-    min-height: 38px;
-    padding: 0 5px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 2px;
+    min-height: 48px;
+    padding: 0 3px;
+    text-align: center;
+  }
+  .raffles-hero__stat::before {
+    grid-column: 1;
+    grid-row: 1;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
   }
   .raffles-hero__stat:not(:last-child)::after {
-    display: none;
-  }
-  .raffles-hero__stat:nth-child(odd)::after {
     display: block;
     top: 4px;
     bottom: 4px;
   }
   .raffles-hero__stat dt {
-    font-size: 8px;
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    font-size: 6.4px;
+    line-height: 0.98;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .raffles-hero__stat dd {
-    font-size: 17px;
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    font-size: clamp(10px, 3vw, 13px);
+    white-space: nowrap;
   }
 }
 @media (max-width: 390px) {
   .raffles-hero {
-    min-height: 408px;
-  }
-  .raffles-hero > .raffles-hero__share-row {
-    width: auto;
+    min-height: 420px;
   }
   .raffles-hero__stat dt {
-    font-size: 7.5px;
+    font-size: 6px;
   }
   .raffles-hero__stat dd {
-    font-size: 16px;
+    font-size: 10.5px;
   }
 }
 /* Карточка розыгрыша в виде беккинг-билета */
@@ -745,8 +818,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  gap: 12px;
   margin: 0 0 14px;
   width: 100%;
   overflow: visible;
@@ -760,16 +833,16 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   display: grid;
   grid-template-rows: auto 1fr auto auto;
   align-items: stretch;
-  gap: 7px;
+  gap: 6px;
   width: 100%;
   min-width: 0;
-  min-height: 208px;
-  padding: 12px;
-  border: 1px solid rgba(251, 191, 36, 0.42);
+  min-height: 164px;
+  padding: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.56);
   border-radius: 14px;
   background:
-    radial-gradient(circle at 78% 22%, rgba(255, 213, 127, 0.24), transparent 26%),
-    radial-gradient(circle at 62% 4%, rgba(255, 123, 20, 0.18), transparent 32%),
+    linear-gradient(90deg, rgba(2, 6, 23, 0.98) 0%, rgba(7, 11, 22, 0.82) 48%, rgba(8, 12, 20, 0.18) 100%),
+    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
     linear-gradient(135deg, rgba(18, 24, 36, 0.96), rgba(4, 7, 14, 0.97));
   color: var(--text);
   text-align: left;
@@ -783,46 +856,28 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__item::before {
   content: "";
   position: absolute;
-  z-index: -2;
+  z-index: 1;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 48%, rgba(2, 6, 23, 0.24) 100%),
-    radial-gradient(circle at 82% 44%, rgba(255, 183, 56, 0.34), transparent 28%),
-    radial-gradient(circle at 98% 0%, rgba(255, 255, 255, 0.14), transparent 28%);
+    linear-gradient(90deg, rgba(2, 6, 23, 0.88) 0%, rgba(2, 6, 23, 0.62) 49%, rgba(2, 6, 23, 0.12) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.48));
+  pointer-events: none;
 }
 .raffles-active-chooser__item::after {
   content: "";
-  position: absolute;
-  z-index: -1;
-  width: 150px;
-  height: 150px;
-  right: -28px;
-  top: 24px;
-  border-radius: 50%;
-  background:
-    repeating-conic-gradient(from 10deg, rgba(255, 217, 118, 0.86) 0 10deg, rgba(118, 63, 10, 0.92) 10deg 20deg),
-    radial-gradient(circle, rgba(255, 241, 190, 0.86), rgba(245, 158, 11, 0.76) 42%, rgba(8, 12, 20, 0.92) 43%);
-  opacity: 0.42;
-  filter: blur(0.2px);
-  transform: rotate(-14deg);
+  display: none;
 }
 .raffles-active-chooser__item--cash {
   border-color: rgba(217, 70, 239, 0.56);
   background:
-    radial-gradient(circle at 78% 22%, rgba(217, 70, 239, 0.25), transparent 26%),
-    radial-gradient(circle at 62% 4%, rgba(168, 85, 247, 0.22), transparent 32%),
+    linear-gradient(90deg, rgba(9, 5, 24, 0.98) 0%, rgba(18, 7, 37, 0.82) 48%, rgba(30, 11, 54, 0.16) 100%),
+    url("./assets/raffles-active-cash-bg.png") center center / cover no-repeat,
     linear-gradient(135deg, rgba(24, 16, 42, 0.97), rgba(4, 7, 14, 0.98));
 }
 .raffles-active-chooser__item--cash::before {
   background:
-    linear-gradient(90deg, rgba(9, 5, 24, 0.94) 0%, rgba(24, 8, 46, 0.74) 48%, rgba(24, 8, 46, 0.24) 100%),
-    radial-gradient(circle at 82% 44%, rgba(217, 70, 239, 0.42), transparent 30%),
-    radial-gradient(circle at 98% 0%, rgba(255, 255, 255, 0.12), transparent 28%);
-}
-.raffles-active-chooser__item--cash::after {
-  background:
-    repeating-conic-gradient(from 10deg, rgba(232, 121, 249, 0.86) 0 10deg, rgba(68, 18, 98, 0.92) 10deg 20deg),
-    radial-gradient(circle, rgba(250, 232, 255, 0.88), rgba(168, 85, 247, 0.8) 42%, rgba(8, 12, 20, 0.94) 43%);
+    linear-gradient(90deg, rgba(9, 5, 24, 0.88) 0%, rgba(24, 8, 46, 0.58) 49%, rgba(24, 8, 46, 0.08) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5));
 }
 .raffles-active-chooser__item:hover {
   transform: translateY(-1px);
@@ -841,17 +896,19 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 16px 30px rgba(0, 0, 0, 0.42);
 }
 .raffles-active-chooser__badge {
+  position: relative;
+  z-index: 2;
   align-self: start;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: max-content;
-  max-width: 72%;
-  min-height: 24px;
-  padding: 4px 11px;
-  border: 1px solid rgba(255, 213, 127, 0.58);
-  border-radius: 999px;
-  background: rgba(5, 6, 12, 0.56);
+  max-width: 66%;
+  min-height: 21px;
+  padding: 3px 12px;
+  border: 1px solid rgba(255, 213, 127, 0.72);
+  border-radius: 8px;
+  background: rgba(5, 6, 12, 0.6);
   color: #ffe88d;
   font-size: 10px;
   font-weight: 900;
@@ -863,34 +920,27 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   color: #f5d0fe;
 }
 .raffles-active-chooser__art {
-  position: absolute;
-  right: 16px;
-  top: 18px;
-  width: 78px;
-  height: 78px;
-  border-radius: 22px;
-  transform: rotate(-12deg);
-  opacity: 0.92;
+  display: none;
 }
 .raffles-active-chooser__art::before,
 .raffles-active-chooser__art::after,
 .raffles-active-chooser__art span {
   content: "";
   position: absolute;
-  inset: 10px 16px;
+  inset: 12px 30px;
   border: 1px solid rgba(255, 232, 166, 0.75);
-  border-radius: 8px;
+  border-radius: 7px;
   background:
-    linear-gradient(135deg, rgba(255, 245, 205, 0.94), rgba(245, 158, 11, 0.86)),
+    linear-gradient(135deg, rgba(255, 245, 205, 0.96), rgba(245, 158, 11, 0.88)),
     #f59e0b;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.42);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.46);
 }
 .raffles-active-chooser__art::before {
-  transform: translateX(-16px) rotate(-13deg);
+  transform: translateX(-19px) rotate(-16deg);
   opacity: 0.72;
 }
 .raffles-active-chooser__art::after {
-  transform: translateX(16px) rotate(13deg);
+  transform: translateX(19px) rotate(16deg);
   opacity: 0.72;
 }
 .raffles-active-chooser__art span {
@@ -908,11 +958,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__body {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   min-width: 0;
+  align-content: start;
   gap: 2px;
-  padding-right: 72px;
+  padding-right: 100px;
 }
 .raffles-active-chooser__title {
   display: block;
@@ -920,7 +971,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   max-width: 100%;
   overflow: hidden;
   color: #fff5d2;
-  font-size: clamp(18px, 4vw, 26px);
+  font-size: 19px;
   font-weight: 1000;
   line-height: 0.98;
   letter-spacing: 0;
@@ -931,25 +982,25 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   display: -webkit-box;
 }
 .raffles-active-chooser__label {
-  margin-top: 5px;
+  margin-top: 2px;
   color: rgba(255, 245, 210, 0.82);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 850;
   line-height: 1.05;
 }
 .raffles-active-chooser__amount {
   color: #fff9dc;
-  font-size: clamp(24px, 6vw, 40px);
+  font-size: 30px;
   font-weight: 1000;
   line-height: 0.98;
   text-shadow: 0 0 18px rgba(255, 224, 150, 0.42), 0 2px 0 rgba(0, 0, 0, 0.72);
 }
 .raffles-active-chooser__facts {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 7px;
 }
 .raffles-active-chooser__fact {
   display: inline-flex;
@@ -957,11 +1008,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   justify-content: center;
   gap: 5px;
   min-width: 0;
-  min-height: 30px;
-  padding: 5px 8px;
+  min-height: 28px;
+  padding: 4px 8px;
   border: 1px solid rgba(255, 213, 127, 0.36);
-  border-radius: 9px;
-  background: rgba(3, 5, 10, 0.7);
+  border-radius: 10px;
+  background: rgba(3, 5, 10, 0.74);
   color: #f8ead0;
   font-size: 11px;
   font-weight: 800;
@@ -978,21 +1029,21 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   height: 15px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: rgba(255, 213, 127, 0.14);
+  background: rgba(255, 213, 127, 0.16);
   color: #ffe88d;
   font-size: 9px;
   font-weight: 1000;
 }
 .raffles-active-chooser__cta {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-width: 0;
-  min-height: 38px;
-  padding: 8px 14px;
+  min-height: 35px;
+  padding: 7px 14px;
   border: 1px solid rgba(255, 232, 166, 0.96);
   border-radius: 999px;
   background:
@@ -1037,6 +1088,72 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-weight: 900;
   line-height: 1;
   text-transform: none;
+}
+@media (min-width: 700px) {
+  .raffles-active-chooser__item {
+    min-height: 160px;
+    padding: 10px;
+  }
+  .raffles-active-chooser__title {
+    font-size: 18px;
+  }
+  .raffles-active-chooser__amount {
+    font-size: 29px;
+  }
+  .raffles-active-chooser__art {
+    right: 8px;
+    width: 94px;
+  }
+  .raffles-active-chooser__body {
+    padding-right: 86px;
+  }
+}
+@media (max-width: 390px) {
+  .raffles-active-chooser {
+    gap: 10px;
+  }
+  .raffles-active-chooser__item {
+    min-height: 158px;
+    padding: 10px;
+  }
+  .raffles-active-chooser__badge {
+    max-width: 72%;
+    min-height: 21px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+  .raffles-active-chooser__title {
+    font-size: 17px;
+  }
+  .raffles-active-chooser__label {
+    font-size: 11px;
+  }
+  .raffles-active-chooser__amount {
+    font-size: 26px;
+  }
+  .raffles-active-chooser__body {
+    padding-right: 86px;
+  }
+  .raffles-active-chooser__art {
+    right: 0;
+    width: 88px;
+    opacity: 0.66;
+  }
+  .raffles-active-chooser__facts {
+    gap: 5px;
+  }
+  .raffles-active-chooser__fact {
+    min-height: 29px;
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  .raffles-active-chooser__cta {
+    min-height: 36px;
+    font-size: 12px;
+  }
+  .raffles-active-chooser__cta small {
+    font-size: 9px;
+  }
 }
 .raffle-loading__spinner {
   display: inline-block;
