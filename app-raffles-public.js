@@ -112,6 +112,10 @@ function initRafflesPublicRuntime(opts) {
         return;
       }
       var act = raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join";
+      if (act === "locked") {
+        if (tg && tg.showAlert) tg.showAlert("Участников этого розыгрыша добавляет админ.");
+        return;
+      }
       if (act === "leave") {
         if (!base || !rafflesViewerApiReady()) return;
         raffleJoinToggleBtn.disabled = true;

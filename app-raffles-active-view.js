@@ -97,13 +97,14 @@ function initRafflesActiveViewRuntime(opts) {
       typeof rafflesViewerNeedsLoginForParticipation === "function"
         ? rafflesViewerNeedsLoginForParticipation()
         : rafflesViewerIsGuestOnly();
-    var showRaffleGuestGate = !!(needsLoginForParticipation && isActive && !iAmIn);
+    var adminTicketEntry = typeof raffleUsesAdminTicketEntry === "function" && raffleUsesAdminTicketEntry(raffle);
+    var showRaffleGuestGate = !!(!adminTicketEntry && needsLoginForParticipation && isActive && !iAmIn);
     if (raffleGuestGate) {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
       raffleGuestGate.hidden = !showRaffleGuestGate;
     }
     if (raffleSubscribeRequirements) {
-      var showSubscribeRequirements = !!(isActive && !needsLoginForParticipation);
+      var showSubscribeRequirements = !!(isActive && !adminTicketEntry && !needsLoginForParticipation);
       raffleSubscribeRequirements.classList.toggle("raffle-subscribe-requirements--hidden", !showSubscribeRequirements);
       raffleSubscribeRequirements.hidden = !showSubscribeRequirements;
     }
@@ -114,12 +115,19 @@ function initRafflesActiveViewRuntime(opts) {
         raffleJoinToggleBtn.disabled = true;
       } else {
         var pastEnd = !!(endDate && endDate <= new Date());
-        raffleJoinToggleBtn.disabled = pastEnd;
-        if (iAmIn) {
+        raffleJoinToggleBtn.classList.toggle("raffle-join-toggle-btn--locked", adminTicketEntry);
+        if (adminTicketEntry) {
+          raffleJoinToggleBtn.disabled = true;
+          raffleJoinToggleBtn.textContent = "Участников добавляет админ";
+          raffleJoinToggleBtn.setAttribute("data-raffle-action", "locked");
+          raffleJoinToggleBtn.classList.remove("raffle-join-toggle-btn--leave");
+        } else if (iAmIn) {
+          raffleJoinToggleBtn.disabled = pastEnd;
           raffleJoinToggleBtn.textContent = "Отменить участие";
           raffleJoinToggleBtn.setAttribute("data-raffle-action", "leave");
           raffleJoinToggleBtn.classList.add("raffle-join-toggle-btn--leave");
         } else {
+          raffleJoinToggleBtn.disabled = pastEnd;
           raffleJoinToggleBtn.textContent = "Участвовать";
           raffleJoinToggleBtn.setAttribute("data-raffle-action", "join");
           raffleJoinToggleBtn.classList.remove("raffle-join-toggle-btn--leave");

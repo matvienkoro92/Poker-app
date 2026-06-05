@@ -41,12 +41,14 @@ function initRafflesAdminCreateRuntime(opts) {
     }
   }
 
-  function nextMoscowWeekdayDateTime(weekday, hour, minute) {
+  function nextMoscowWeekdayDateTime(weekday, hour, minute, minDaysAhead) {
     var now = new Date();
     var moscowOffsetMs = 3 * 60 * 60 * 1000;
     var moscowNow = new Date(now.getTime() + moscowOffsetMs);
     var currentWeekday = moscowNow.getUTCDay();
     var addDays = (weekday - currentWeekday + 7) % 7;
+    var minDays = Math.max(0, parseInt(minDaysAhead, 10) || 0);
+    while (addDays < minDays) addDays += 7;
     var targetUtc = new Date(Date.UTC(
       moscowNow.getUTCFullYear(),
       moscowNow.getUTCMonth(),
@@ -72,7 +74,7 @@ function initRafflesAdminCreateRuntime(opts) {
 
   function createKnockoutTicketPreset() {
     if (!knockoutPresetBtn || window.__pokerRaffleCreateInFlight) return;
-    var endDate = nextMoscowWeekdayDateTime(0, 16, 0);
+    var endDate = nextMoscowWeekdayDateTime(0, 16, 0, 7);
     var endInput = raffleAdminCreateFormatMoscowInput(endDate);
     if (raffleEndDateInput && endInput) raffleEndDateInput.value = endInput;
     if (raffleTypeTickets) raffleTypeTickets.checked = true;

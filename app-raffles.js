@@ -610,6 +610,12 @@ function initRaffles() {
     return parts.some(function (row) { return raffleParticipantTicketCount(row) > 1; });
   }
 
+  function raffleUsesAdminTicketEntry(raffle) {
+    if (!raffle) return false;
+    var entryMode = String(raffle.ticketEntryMode || raffle.ticket_entry_mode || "").trim().toLowerCase();
+    return entryMode === "admin" || entryMode === "manual" || entryMode === "admin_tickets";
+  }
+
   function activeRaffleGuaranteeText(raffle) {
     var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim();
     if (guarantee) return "Гарантия " + guarantee;
@@ -903,6 +909,7 @@ function initRaffles() {
         var totalPrize = getRaffleTotalPrize(raffle);
         var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
+        var adminTicketEntry = raffleUsesAdminTicketEntry(raffle);
         var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
         var guaranteeText = activeRaffleGuaranteeText(raffle);
         var buyinChipLabels = activeRaffleBuyinChipLabels(raffle);
@@ -911,9 +918,9 @@ function initRaffles() {
             return '<span class="raffles-active-chooser__buyin-chip">' + escapeHtml(label) + "</span>";
           })
           .join("");
-        var buttonLabel = needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
-        var buttonAction = needsLogin ? "login" : isIn ? "leave" : "join";
-        var buttonPressed = !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
+        var buttonLabel = adminTicketEntry ? "Участников добавляет админ" : needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
+        var buttonAction = adminTicketEntry ? "locked" : needsLogin ? "login" : isIn ? "leave" : "join";
+        var buttonPressed = !adminTicketEntry && !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
         return (
           '<div class="raffles-active-chooser__item' +
@@ -966,12 +973,14 @@ function initRaffles() {
           "</span>" +
           '<button type="button" class="raffles-active-chooser__cta' +
           (isIn ? " raffles-active-chooser__cta--joined" : "") +
+          (adminTicketEntry ? " raffles-active-chooser__cta--locked" : "") +
           '" data-raffle-active-id="' +
           escapeHtml(id) +
           '" data-raffle-active-action="' +
           escapeHtml(buttonAction) +
           '"' +
           buttonPressed +
+          (adminTicketEntry ? " disabled aria-disabled=\"true\"" : "") +
           ">" +
           escapeHtml(buttonLabel) +
           "</button>" +
@@ -988,6 +997,7 @@ function initRaffles() {
     rafflesActiveChooser.addEventListener("click", function (e) {
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
       if (actionBtn && rafflesActiveChooser.contains(actionBtn)) {
+        if (actionBtn.disabled) return;
         e.preventDefault();
         e.stopPropagation();
         handleRafflesActiveChooserAction(actionBtn);
@@ -1439,6 +1449,7 @@ function initRaffles() {
       raffleParticipantsTotalTickets: raffleParticipantsTotalTickets,
       raffleViewerTicketCount: raffleViewerTicketCount,
       raffleUsesTicketWeights: raffleUsesTicketWeights,
+      raffleUsesAdminTicketEntry: raffleUsesAdminTicketEntry,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
       escapeHtml: escapeHtml
     });
