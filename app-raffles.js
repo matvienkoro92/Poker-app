@@ -86,6 +86,7 @@ function initRaffles() {
   var currentRaffleEndDate = null;
   var currentRaffleData = null;
   var raffleTimerInterval = null;
+  var rafflesActiveChooserTimerInterval = null;
   var rafflesCompletedRuntime = null;
   var rafflesIsAdmin = false;
   var myRaffleUserId = null;
@@ -443,6 +444,69 @@ function initRaffles() {
     return parts.join(" · ");
   }
 
+  function activeRaffleBadgeText(raffle) {
+    if (raffle && raffle.daily) return "Ежедневный";
+    return "Только сегодня";
+  }
+
+  function activeRafflePrizeLabel(raffle) {
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    return isCashPrize ? "Байинов на кеш" : "Турнирных билетов";
+  }
+
+  function activeRaffleWinnersCount(raffle) {
+    var total = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    if (!total && groups.length) {
+      total = groups.reduce(function (sum, group) {
+        return sum + Math.max(0, parseInt(group && group.count, 10) || 0);
+      }, 0);
+    }
+    return total;
+  }
+
+  function activeRaffleEntryText(raffle) {
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var nominals = [];
+    groups.forEach(function (group) {
+      var nominal = parsePrizeValue(group && group.prize);
+      if (nominal > 0 && nominals.indexOf(nominal) === -1) nominals.push(nominal);
+    });
+    if (nominals.length === 1) return "за " + formatRaffleSum(nominals[0]);
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    return isCashPrize ? "на кеш" : "за билет";
+  }
+
+  function activeRaffleParticipantIn(raffle, raffleIds) {
+    var ids = Array.isArray(raffleIds) ? raffleIds : [];
+    if (!ids.length || !raffle || !Array.isArray(raffle.participants)) return false;
+    return raffle.participants.some(function (p) {
+      var uid = String(p && p.userId != null ? p.userId : "").trim();
+      return uid && ids.indexOf(uid) !== -1;
+    });
+  }
+
+  function updateRafflesActiveChooserTimers() {
+    if (!rafflesActiveChooser) return;
+    var timers = rafflesActiveChooser.querySelectorAll("[data-raffle-active-timer]");
+    timers.forEach(function (node) {
+      var ms = parseInt(String(node.getAttribute("data-raffle-active-timer") || ""), 10);
+      var end = Number.isFinite(ms) && ms > 0 ? new Date(ms) : null;
+      node.textContent = end ? (formatRaffleTimerValue(end) || "Завершён") : "—";
+    });
+  }
+
+  function ensureRafflesActiveChooserTimer() {
+    if (rafflesActiveChooserTimerInterval) return;
+    rafflesActiveChooserTimerInterval = setInterval(updateRafflesActiveChooserTimers, 1000);
+  }
+
+  function stopRafflesActiveChooserTimer() {
+    if (!rafflesActiveChooserTimerInterval) return;
+    clearInterval(rafflesActiveChooserTimerInterval);
+    rafflesActiveChooserTimerInterval = null;
+  }
+
   function formatRaffleHeroCount(value) {
     var n = Math.max(0, Math.round(parseFloat(value) || 0));
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
@@ -490,42 +554,82 @@ function initRaffles() {
   function renderRafflesActiveChooser(activeList, activeId) {
     if (!rafflesActiveChooser) return;
     var list = Array.isArray(activeList) ? activeList : [];
-    if (list.length <= 1) {
+    if (!list.length) {
       rafflesActiveChooser.innerHTML = "";
       rafflesActiveChooser.classList.add("raffles-active-chooser--hidden");
       rafflesActiveChooser.hidden = true;
+      stopRafflesActiveChooserTimer();
       return;
     }
     var selectedId = String(activeId || "");
+    var viewerIds = collectRaffleIdentityIds();
+    var needsLogin = typeof rafflesViewerNeedsLoginForParticipation === "function"
+      ? rafflesViewerNeedsLoginForParticipation()
+      : rafflesViewerIsGuestOnly();
     rafflesActiveChooser.hidden = false;
     rafflesActiveChooser.classList.remove("raffles-active-chooser--hidden");
     rafflesActiveChooser.innerHTML = list
       .map(function (raffle, index) {
         var id = String((raffle && raffle.id) || "");
         var selected = selectedId && id === selectedId;
+        var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+        var endDate = raffle && raffle.endDate ? new Date(raffle.endDate) : null;
+        var endMs = endDate && !isNaN(endDate.getTime()) ? endDate.getTime() : 0;
+        var totalPrize = getRaffleTotalPrize(raffle);
+        var winners = activeRaffleWinnersCount(raffle);
+        var isIn = activeRaffleParticipantIn(raffle, viewerIds);
+        var buttonLabel = needsLogin ? "Войти" : isIn ? "Участвую" : "Участвовать";
+        var buttonAction = !isIn ? ' data-raffle-active-action="' + (needsLogin ? "login" : "join") + '"' : "";
         return (
           '<button type="button" class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
+          (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
           '" data-raffle-active-id="' +
           escapeHtml(id) +
           '" aria-selected="' +
           (selected ? "true" : "false") +
           '">' +
-          '<span class="raffles-active-chooser__index">' +
-          (index + 1) +
+          '<span class="raffles-active-chooser__badge">' +
+          escapeHtml(activeRaffleBadgeText(raffle)) +
           "</span>" +
-          '<span class="raffles-active-chooser__text">' +
+          '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
+          '<span class="raffles-active-chooser__body">' +
           '<span class="raffles-active-chooser__title">' +
           escapeHtml(activeRaffleShortTitle(raffle)) +
           "</span>" +
-          '<span class="raffles-active-chooser__meta">' +
-          escapeHtml(activeRaffleMetaText(raffle)) +
+          '<span class="raffles-active-chooser__label">' +
+          escapeHtml(activeRafflePrizeLabel(raffle)) +
           "</span>" +
+          '<span class="raffles-active-chooser__amount">' +
+          escapeHtml(formatRaffleSum(totalPrize)) +
+          "</span>" +
+          "</span>" +
+          '<span class="raffles-active-chooser__facts">' +
+          '<span class="raffles-active-chooser__fact"><span class="raffles-active-chooser__fact-icon">#</span>' +
+          escapeHtml(winners + " победителей") +
+          "</span>" +
+          '<span class="raffles-active-chooser__fact"><span class="raffles-active-chooser__fact-icon">⏱</span>Осталось <span data-raffle-active-timer="' +
+          escapeHtml(endMs) +
+          '">' +
+          escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || "Завершён") : "—") +
+          "</span></span>" +
+          "</span>" +
+          '<span class="raffles-active-chooser__cta' +
+          (isIn ? " raffles-active-chooser__cta--joined" : "") +
+          '"' +
+          buttonAction +
+          ">" +
+          escapeHtml(buttonLabel) +
+          '<small>' +
+          escapeHtml(activeRaffleEntryText(raffle)) +
+          "</small>" +
           "</span>" +
           "</button>"
         );
       })
       .join("");
+    updateRafflesActiveChooserTimers();
+    ensureRafflesActiveChooserTimer();
   }
 
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
@@ -533,14 +637,33 @@ function initRaffles() {
     rafflesActiveChooser.addEventListener("click", function (e) {
       var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
+      var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
+      var action = actionBtn && btn.contains(actionBtn) ? String(actionBtn.getAttribute("data-raffle-active-action") || "") : "";
       var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
       if (!id) return;
       focusRaffleAfterMutation(id);
+      function runActionAfterSelect() {
+        if (!action) return;
+        setTimeout(function () {
+          if (action === "login") {
+            var loginBtn = document.getElementById("raffleGuestLoginBtn");
+            if (loginBtn && typeof loginBtn.click === "function") loginBtn.click();
+            else if (tg && tg.showAlert) tg.showAlert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+            else if (typeof alert === "function") alert("Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+            return;
+          }
+          if (!raffleJoinToggleBtn || raffleJoinToggleBtn.disabled) return;
+          if (raffleJoinToggleBtn.classList.contains("raffle-join-toggle-btn--hidden")) return;
+          if ((raffleJoinToggleBtn.getAttribute("data-raffle-action") || "join") === "join") raffleJoinToggleBtn.click();
+        }, 80);
+      }
       var cache = typeof window !== "undefined" ? window._rafflesCache : null;
       if (cache && cache.data && cache.data.ok) {
         applyRafflesData(cache.data, false);
+        runActionAfterSelect();
       } else {
         loadRaffles(false, { keepCurrentOnLoading: true });
+        if (action) setTimeout(runActionAfterSelect, 700);
       }
     });
   }

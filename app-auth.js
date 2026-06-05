@@ -176,16 +176,33 @@ function pokerParseRaffleActiveStartParam(rawStartParam) {
   return pokerNormalizeRaffleActiveId(m[1]);
 }
 
+function pokerGetWebsiteRootBaseForLinks() {
+  try {
+    var app = document.getElementById("app");
+    var dataBase = app && app.getAttribute("data-api-base");
+    dataBase = String(dataBase || "").trim().replace(/\/+$/, "");
+    if (/^https?:\/\//i.test(dataBase)) return dataBase;
+  } catch (eDataBase) {}
+  try {
+    var origin = String(window.location && window.location.origin ? window.location.origin : "")
+      .trim()
+      .replace(/\/+$/, "");
+    if (/^https?:\/\//i.test(origin)) return origin;
+  } catch (eOriginBase) {}
+  return "";
+}
+
+function pokerBuildWebsiteStartLink(startParam) {
+  var start = pokerNormalizeWebAppStartParam(startParam) || "raffles";
+  var base = pokerGetWebsiteRootBaseForLinks();
+  if (!base) return "";
+  return base + "/?startapp=" + encodeURIComponent(start);
+}
+
 function pokerBuildRaffleShareLink(startParam) {
   var start = pokerNormalizeWebAppStartParam(startParam) || "raffles";
-  var raffleCode = pokerParseRaffleActiveStartParam(start);
-  if (raffleCode) {
-    try {
-      var web = typeof getWebsiteOriginBaseForLinks === "function" ? getWebsiteOriginBaseForLinks() : "";
-      web = String(web || "").trim().replace(/\/+$/, "");
-      if (web) return web + "/r/" + encodeURIComponent(raffleCode);
-    } catch (eRaffleShareWeb) {}
-  }
+  var webLink = pokerBuildWebsiteStartLink(start);
+  if (webLink) return webLink;
   if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
   var base = typeof getAppBaseUrlForLinks === "function" ? String(getAppBaseUrlForLinks() || "").replace(/\/+$/, "") : "";
   if (!base) return "";
