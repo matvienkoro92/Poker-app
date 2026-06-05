@@ -4,6 +4,7 @@
  */
 const pathSegment = (req) => {
   const pathname = (req.url || "").split("?")[0];
+  if (/^\/r\/[^/]+\/?$/i.test(pathname)) return "raffle-preview";
   const segment = pathname.replace(/^\/api\/?/, "").split("/")[0];
   return segment || null;
 };
