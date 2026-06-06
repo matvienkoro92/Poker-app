@@ -109,6 +109,9 @@ function initRaffles() {
   var rafflesDeadlineRefreshInFlight = false;
   var rafflesPendingCompletedId = "";
   var rafflesActiveBroadcastList = [];
+  var rafflesActiveInfoOpenId = "";
+  var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
+  var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
 
   function consumeRafflesOpenActiveTabRequest() {
     try {
@@ -218,6 +221,58 @@ function initRaffles() {
     raffleInfoToggleBtn.classList.toggle("raffle-info-toggle-btn--open", shouldOpen);
     raffleInfoPanel.classList.toggle("raffle-info-panel--hidden", !shouldOpen);
     raffleInfoPanel.hidden = !shouldOpen;
+  }
+
+  function raffleActiveInfoPanelHasContent() {
+    var hasIdNote = !!(
+      raffleIdNote &&
+      !raffleIdNote.hidden &&
+      String(raffleIdNote.textContent || "").trim()
+    );
+    var hasSubscribeRequirements = !!(
+      raffleSubscribeRequirements &&
+      !raffleSubscribeRequirements.hidden &&
+      String(raffleSubscribeRequirements.textContent || "").trim()
+    );
+    return hasIdNote || hasSubscribeRequirements;
+  }
+
+  function getRafflesActiveInfoDetailsHost(raffleId) {
+    var target = String(raffleId || "");
+    if (!target || !rafflesActiveChooser) return null;
+    var hosts = rafflesActiveChooser.querySelectorAll("[data-raffle-active-details-host]");
+    for (var i = 0; i < hosts.length; i++) {
+      if (String(hosts[i].getAttribute("data-raffle-active-details-host") || "") === target) return hosts[i];
+    }
+    return null;
+  }
+
+  function restoreRaffleCurrentHome() {
+    if (!raffleCurrent || !raffleCurrentHomeParent) return;
+    if (raffleCurrent.parentNode === raffleCurrentHomeParent) return;
+    if (raffleCurrentHomeNext && raffleCurrentHomeNext.parentNode === raffleCurrentHomeParent) {
+      raffleCurrentHomeParent.insertBefore(raffleCurrent, raffleCurrentHomeNext);
+    } else {
+      raffleCurrentHomeParent.appendChild(raffleCurrent);
+    }
+  }
+
+  function syncRafflesActiveInfoDetailsMount() {
+    if (!raffleCurrent) return;
+    var host = getRafflesActiveInfoDetailsHost(rafflesActiveInfoOpenId);
+    if (host) {
+      if (raffleCurrent.parentNode !== host) host.appendChild(raffleCurrent);
+      host.hidden = false;
+      host.setAttribute("aria-hidden", "false");
+      raffleCurrent.classList.add("raffle-current--inside-active-info");
+      raffleCurrent.classList.remove("raffle-current--hidden");
+      setRaffleInfoPanelOpen(raffleActiveInfoPanelHasContent());
+      return;
+    }
+    restoreRaffleCurrentHome();
+    raffleCurrent.classList.remove("raffle-current--inside-active-info");
+    raffleCurrent.classList.add("raffle-current--hidden");
+    setRaffleInfoPanelOpen(false);
   }
 
   function raffleCanUseTelegramPopup() {
@@ -388,6 +443,15 @@ function initRaffles() {
 
   function focusRaffleAfterMutation(raffleId) {
     rafflesFocusedActiveId = raffleId ? String(raffleId) : null;
+  }
+
+  function raffleListHasId(list, raffleId) {
+    var target = String(raffleId || "");
+    if (!target || !Array.isArray(list)) return false;
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i] && list[i].id || "") === target) return true;
+    }
+    return false;
   }
 
   function activeRaffleShortTitle(raffle) {
@@ -652,7 +716,12 @@ function initRaffles() {
 
   function activeRaffleKnockoutTitle(raffle) {
     var totalPrize = getRaffleTotalPrize(raffle);
-    return "Розыгрыш " + activeRaffleRubText(totalPrize || 30000);
+    return (
+      '<span class="raffles-active-chooser__knockout-title-kicker">Розыгрыш</span>' +
+      '<span class="raffles-active-chooser__knockout-title-amount">' +
+      escapeHtml(activeRaffleRubText(totalPrize || 30000)) +
+      "</span>"
+    );
   }
 
   function activeRaffleKnockoutLabelHtml(raffle) {
@@ -663,9 +732,34 @@ function initRaffles() {
     var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim() || "700 000р";
     var ticketsWord = pokerRafflesTicketWord(winners);
     return (
-      escapeHtml(winners + " " + ticketsWord + " за " + activeRaffleRubText(nominal)) +
-      "<br>" +
-      escapeHtml("на нокаут с гарантией " + guarantee)
+      '<span class="raffles-active-chooser__knockout-prize">' +
+      '<strong>' +
+      escapeHtml(winners + " " + ticketsWord) +
+      "</strong>" +
+      '<span>за ' +
+      escapeHtml(activeRaffleRubText(nominal)) +
+      "</span>" +
+      "</span>" +
+      '<span class="raffles-active-chooser__knockout-guarantee">Нокаут · гарантия <strong>' +
+      escapeHtml(guarantee) +
+      "</strong></span>"
+    );
+  }
+
+  function activeRaffleKnockoutInfoHtml() {
+    return (
+      '<span class="raffles-active-chooser__knockout-info">' +
+      '<span class="raffles-active-chooser__knockout-info-title">Как получить билеты</span>' +
+      '<span class="raffles-active-chooser__knockout-rule">' +
+      '<strong>100 раздач</strong>' +
+      '<span>на 20/40 Бонус гейм</span>' +
+      "</span>" +
+      '<span class="raffles-active-chooser__knockout-rule">' +
+      '<strong>250 раздач</strong>' +
+      '<span>на 5/10 Бонус гейм</span>' +
+      '<small>если вы не с беккинг-розыгрыша</small>' +
+      "</span>" +
+      "</span>"
     );
   }
 
@@ -836,6 +930,7 @@ function initRaffles() {
     }
     if (raffle && currentRaffleId && String(raffle.id || "") === String(currentRaffleId || "")) renderRaffle(raffle);
     renderRafflesActiveChooser(rafflesActiveBroadcastList, currentRaffleId || rafflesFocusedActiveId || (raffle && raffle.id) || "");
+    syncRafflesActiveInfoDetailsMount();
   }
 
   function restoreActiveChooserActionButton(btn, label) {
@@ -955,6 +1050,30 @@ function initRaffles() {
       });
   }
 
+  function handleRafflesActiveChooserInfoToggle(infoBtn) {
+    if (!infoBtn) return;
+    var raffleId = String(infoBtn.getAttribute("data-raffle-active-info-id") || "").trim();
+    if (!raffleId) return;
+    var shouldOpen = rafflesActiveInfoOpenId !== raffleId;
+    rafflesActiveInfoOpenId = shouldOpen ? raffleId : "";
+    focusRaffleAfterMutation(raffleId);
+    var cache = typeof window !== "undefined" ? window._rafflesCache : null;
+    if (cache && cache.data && cache.data.ok) {
+      applyRafflesData(cache.data, false);
+    } else if (rafflesActiveBroadcastList.length) {
+      renderRafflesActiveChooser(rafflesActiveBroadcastList, raffleId);
+      for (var i = 0; i < rafflesActiveBroadcastList.length; i++) {
+        if (String(rafflesActiveBroadcastList[i] && rafflesActiveBroadcastList[i].id || "") === raffleId) {
+          renderRaffle(rafflesActiveBroadcastList[i]);
+          break;
+        }
+      }
+      syncRafflesActiveInfoDetailsMount();
+    } else {
+      loadRaffles(false, { keepCurrentOnLoading: true });
+    }
+  }
+
   function renderRafflesActiveChooser(activeList, activeId) {
     if (!rafflesActiveChooser) return;
     var list = Array.isArray(activeList) ? activeList : [];
@@ -984,6 +1103,7 @@ function initRaffles() {
       .map(function (raffle, index) {
         var id = String((raffle && raffle.id) || "");
         var selected = selectedId && id === selectedId;
+        var infoOpen = !!(id && rafflesActiveInfoOpenId === id);
         var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
         var endDate = raffle && raffle.endDate ? new Date(raffle.endDate) : null;
         var endMs = endDate && !isNaN(endDate.getTime()) ? endDate.getTime() : 0;
@@ -1021,7 +1141,7 @@ function initRaffles() {
             );
         var titleClass = "raffles-active-chooser__title" + (isCashPrize ? " raffles-active-chooser__title--cash" : "");
         var titleHtml = knockoutCard
-          ? '<span class="raffles-active-chooser__title raffles-active-chooser__title--knockout">' + escapeHtml(activeRaffleKnockoutTitle(raffle)) + "</span>"
+          ? '<span class="raffles-active-chooser__title raffles-active-chooser__title--knockout">' + activeRaffleKnockoutTitle(raffle) + "</span>"
           : isCashPrize
             ? '<span class="' + titleClass + '">' + activeRaffleCashTitleHtml(raffle, totalPrize) + "</span>"
           : '<span class="' + titleClass + '">' + escapeHtml(activeRaffleShortTitle(raffle)) + "</span>";
@@ -1055,6 +1175,7 @@ function initRaffles() {
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
+          (infoOpen ? " raffles-active-chooser__item--info-open" : "") +
           (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
           (cardTheme === "knockout_ticket" ? " raffles-active-chooser__item--knockout" : "") +
           '" role="button" tabindex="0" data-raffle-active-id="' +
@@ -1067,6 +1188,7 @@ function initRaffles() {
           '<span class="raffles-active-chooser__body">' +
           titleHtml +
           labelHtml +
+          (knockoutCard ? activeRaffleKnockoutInfoHtml() : "") +
           (guaranteeText ? '<span class="raffles-active-chooser__guarantee">' + escapeHtml(guaranteeText) + "</span>" : "") +
           amountHtml +
           "</span>" +
@@ -1089,6 +1211,26 @@ function initRaffles() {
           ">" +
           escapeHtml(buttonLabel) +
           "</button>" +
+          '<button type="button" class="raffles-active-chooser__info-toggle' +
+          (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
+          '" data-raffle-active-info-id="' +
+          escapeHtml(id) +
+          '" aria-expanded="' +
+          (infoOpen ? "true" : "false") +
+          '" aria-controls="raffleCurrent">' +
+          '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
+          '<span>Инфо</span>' +
+          '<span class="raffles-active-chooser__info-chevron" aria-hidden="true"></span>' +
+          "</button>" +
+          '<div class="raffles-active-chooser__details' +
+          (infoOpen ? "" : " raffles-active-chooser__details--hidden") +
+          '" data-raffle-active-details-host="' +
+          escapeHtml(id) +
+          '" aria-hidden="' +
+          (infoOpen ? "false" : "true") +
+          '"' +
+          (infoOpen ? "" : " hidden") +
+          "></div>" +
           "</div>"
         );
       })
@@ -1100,6 +1242,13 @@ function initRaffles() {
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
     rafflesActiveChooser.dataset.bound = "1";
     rafflesActiveChooser.addEventListener("click", function (e) {
+      var infoBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-info-id]") : null;
+      if (infoBtn && rafflesActiveChooser.contains(infoBtn)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleRafflesActiveChooserInfoToggle(infoBtn);
+        return;
+      }
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
       if (actionBtn && rafflesActiveChooser.contains(actionBtn)) {
         if (actionBtn.disabled) return;
@@ -1108,6 +1257,8 @@ function initRaffles() {
         handleRafflesActiveChooserAction(actionBtn);
         return;
       }
+      var detailsRoot = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__details") : null;
+      if (detailsRoot && rafflesActiveChooser.contains(detailsRoot)) return;
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
@@ -1123,8 +1274,12 @@ function initRaffles() {
     rafflesActiveChooser.addEventListener("keydown", function (e) {
       var key = e && (e.key || e.code);
       if (key !== "Enter" && key !== " " && key !== "Spacebar") return;
+      var infoBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-info-id]") : null;
+      if (infoBtn && rafflesActiveChooser.contains(infoBtn)) return;
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
       if (actionBtn && rafflesActiveChooser.contains(actionBtn)) return;
+      var detailsRoot = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__details") : null;
+      if (detailsRoot && rafflesActiveChooser.contains(detailsRoot)) return;
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       e.preventDefault();
@@ -1858,18 +2013,23 @@ function initRaffles() {
         var activeCount = activeList.length;
         var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0);
         rafflesActiveBroadcastList = activeList.slice();
+        if (rafflesActiveInfoOpenId && !raffleListHasId(activeList, rafflesActiveInfoOpenId)) {
+          rafflesActiveInfoOpenId = "";
+        }
         if (rafflesTabActiveCount) rafflesTabActiveCount.textContent = String(activeCount);
         if (rafflesTabActiveSum) rafflesTabActiveSum.textContent = formatRaffleSum(activeSumRub);
 
         if (active) {
           renderRafflesActiveChooser(activeList, active.id);
           setRafflesSubscribersRowVisible(rafflesIsAdmin);
-          if (raffleCurrent) raffleCurrent.classList.remove("raffle-current--hidden");
           if (raffleEmpty) raffleEmpty.classList.add("raffle-empty--hidden");
           renderRaffle(active);
+          syncRafflesActiveInfoDetailsMount();
         } else {
           renderRafflesActiveChooser([], "");
           setRafflesSubscribersRowVisible(false);
+          rafflesActiveInfoOpenId = "";
+          syncRafflesActiveInfoDetailsMount();
           if (raffleCurrent) raffleCurrent.classList.add("raffle-current--hidden");
           if (raffleEmpty) {
             raffleEmpty.textContent = "Нет активных розыгрышей.";
