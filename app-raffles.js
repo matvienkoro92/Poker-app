@@ -68,7 +68,6 @@ function initRaffles() {
   var raffleSubscribeRequirements = document.getElementById("raffleSubscribeRequirements");
   var raffleInfoToggleBtn = document.getElementById("raffleInfoToggleBtn");
   var raffleInfoPanel = document.getElementById("raffleInfoPanel");
-  var raffleNotificationsSetupNote = document.getElementById("raffleNotificationsSetupNote");
   var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
   var raffleGuestGate = document.getElementById("raffleGuestGate");
@@ -235,12 +234,7 @@ function initRaffles() {
       !raffleSubscribeRequirements.hidden &&
       String(raffleSubscribeRequirements.textContent || "").trim()
     );
-    var hasNotificationsSetupNote = !!(
-      raffleNotificationsSetupNote &&
-      !raffleNotificationsSetupNote.hidden &&
-      String(raffleNotificationsSetupNote.textContent || "").trim()
-    );
-    return hasNotificationsSetupNote || hasIdNote || hasSubscribeRequirements;
+    return hasIdNote || hasSubscribeRequirements;
   }
 
   function getRafflesActiveInfoDetailsHost(raffleId) {
@@ -1697,7 +1691,6 @@ function initRaffles() {
       raffleSubscribeRequirements: raffleSubscribeRequirements,
       raffleInfoToggleBtn: raffleInfoToggleBtn,
       raffleInfoPanel: raffleInfoPanel,
-      raffleNotificationsSetupNote: raffleNotificationsSetupNote,
       raffleJoinToggleBtn: raffleJoinToggleBtn,
       raffleJoinedMsg: raffleJoinedMsg,
       raffleGuestGate: raffleGuestGate,

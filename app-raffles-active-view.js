@@ -73,12 +73,7 @@ function initRafflesActiveViewRuntime(opts) {
       !raffleSubscribeRequirements.hidden &&
       String(raffleSubscribeRequirements.textContent || "").trim()
     );
-    var hasNotificationsSetupNote = !!(
-      raffleNotificationsSetupNote &&
-      !raffleNotificationsSetupNote.hidden &&
-      String(raffleNotificationsSetupNote.textContent || "").trim()
-    );
-    var visible = hasNotificationsSetupNote || hasIdNote || hasSubscribeRequirements;
+    var visible = hasIdNote || hasSubscribeRequirements;
     raffleInfoToggleBtn.classList.toggle("raffle-info-toggle-btn--hidden", !visible);
     raffleInfoToggleBtn.hidden = !visible;
     raffleInfoToggleBtn.disabled = !visible;

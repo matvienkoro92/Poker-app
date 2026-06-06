@@ -2169,6 +2169,9 @@ async function testRaffleDailyRecurring(redis) {
       scheduledStartAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
       nextStartAt: dueStart.toISOString(),
       durationMs,
+      qstashScheduleId: "contract_daily_schedule_id",
+      qstashCron: "CRON_TZ=Europe/Moscow 30 11 * * *",
+      qstashScheduledAt: new Date(Date.now() - 3600_000).toISOString(),
       template: {
         title: "Daily source",
         totalWinners: 1,
@@ -2186,6 +2189,83 @@ async function testRaffleDailyRecurring(redis) {
   assert.strictEqual(generated[0].status, "active", "generated daily raffle is active");
   assert.strictEqual(generated[0].createdAt, dueStart.toISOString(), "generated daily raffle starts at scheduled time");
   assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
+  assert.strictEqual(
+    generated[0].recurrence.qstashScheduleId,
+    "contract_daily_schedule_id",
+    "generated daily raffle inherits existing QStash schedule id",
+  );
+}
+
+async function testRaffleDailyScheduleDedupe(redis) {
+  const previousQstashToken = process.env.QSTASH_TOKEN;
+  const previousAppUrl = process.env.APP_URL;
+  const previousFetch = global.fetch;
+  const scheduleCalls = [];
+
+  process.env.QSTASH_TOKEN = "contract-qstash-token";
+  process.env.APP_URL = "https://contract.test";
+  global.fetch = async function fetchScheduleDedupeMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("/v2/schedules/")) {
+      scheduleCalls.push({ url: u, headers: Object.assign({}, (opts && opts.headers) || {}) });
+      return {
+        ok: true,
+        async json() { return { ok: true }; },
+        async text() { return JSON.stringify({ ok: true }); },
+      };
+    }
+    return previousFetch(url, opts);
+  };
+
+  try {
+    const raffles = loadHandler("raffles");
+    const s = sessions();
+    let r = await call(raffles, req("POST", {}, {
+      pwaSession: s.admin,
+      action: "create",
+      title: "Daily schedule dedupe",
+      totalWinners: 1,
+      groups: [{ prize: "Ticket", count: 1 }],
+      endDate: new Date(Date.now() + 3600_000).toISOString(),
+      daily: true,
+      dailyStartTime: "10:40",
+      idemKey: "contract-daily-schedule-dedupe",
+    }));
+    assert.strictEqual(r.statusCode, 200, "admin can create scheduled daily raffle");
+    assert.strictEqual(scheduleCalls.length, 1, "initial daily raffle creates one QStash schedule");
+    const sourceId = r.body.raffle.id;
+    const stored = JSON.parse(redis.kv.get("poker_app:raffle:" + sourceId));
+    assert.ok(stored.recurrence.qstashScheduleId, "stored daily raffle keeps QStash schedule id");
+
+    const dueStart = new Date(Date.now() - 5 * 60_000);
+    const firstStart = new Date(Date.now() - 2 * 3600_000).toISOString();
+    const durationMs = 60 * 60_000;
+    stored.status = "drawn";
+    stored.createdAt = firstStart;
+    stored.startedAt = firstStart;
+    stored.endDate = new Date(Date.now() - 30 * 60_000).toISOString();
+    stored.recurrence.scheduledStartAt = firstStart;
+    stored.recurrence.nextStartAt = dueStart.toISOString();
+    stored.recurrence.durationMs = durationMs;
+    redis.kv.set("poker_app:raffle:" + sourceId, JSON.stringify(stored));
+
+    r = await call(raffles, req("GET", { pwaSession: s.user }));
+    assert.strictEqual(r.statusCode, 200, "raffles list creates due scheduled daily raffle");
+    const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === stored.recurrence.seriesId && raffle.id !== sourceId);
+    assert.strictEqual(generated.length, 1, "scheduled daily series creates one generated raffle");
+    assert.strictEqual(
+      generated[0].recurrence.qstashScheduleId,
+      stored.recurrence.qstashScheduleId,
+      "generated daily raffle reuses the original QStash schedule id",
+    );
+    assert.strictEqual(scheduleCalls.length, 1, "generated daily raffle does not create a second QStash schedule");
+  } finally {
+    if (previousQstashToken === undefined) delete process.env.QSTASH_TOKEN;
+    else process.env.QSTASH_TOKEN = previousQstashToken;
+    if (previousAppUrl === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = previousAppUrl;
+    global.fetch = previousFetch;
+  }
 }
 
 async function testRaffleDailyCronTick(redis) {
@@ -2239,6 +2319,7 @@ async function testRaffleDuplicateOptions(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
   for (let i = 1; i <= 4; i += 1) {
+    const createdAt = new Date(Date.now() - (5 - i) * 3600_000).toISOString();
     const raffle = {
       id: "duplicate_option_" + i,
       title: "Duplicate source " + i,
@@ -2248,8 +2329,25 @@ async function testRaffleDuplicateOptions(redis) {
       participants: [],
       winners: [],
       status: i % 2 === 0 ? "drawn" : "active",
-      createdAt: new Date(Date.now() - (5 - i) * 3600_000).toISOString(),
+      createdAt,
     };
+    if (i === 2) {
+      raffle.daily = true;
+      raffle.recurrence = {
+        type: "daily",
+        timeZone: "Europe/Moscow",
+        startTime: "10:15",
+        seriesId: "duplicate_option_daily_series",
+        scheduledStartAt: createdAt,
+        nextStartAt: new Date(Date.now() + 24 * 3600_000).toISOString(),
+        durationMs: 3600_000,
+        template: {
+          title: raffle.title,
+          totalWinners: raffle.totalWinners,
+          groups: raffle.groups,
+        },
+      };
+    }
     redis.kv.set("poker_app:raffle:" + raffle.id, JSON.stringify(raffle));
     redis.l("poker_app:raffle_ids").push(raffle.id);
   }
@@ -2262,6 +2360,7 @@ async function testRaffleDuplicateOptions(redis) {
     "duplicate options return three latest raffles",
   );
   assert.strictEqual(r.body.raffles[2].groups[0].prize, "Prize 2", "duplicate options include group params");
+  assert.strictEqual(r.body.raffles[2].daily, true, "duplicate options can show a daily source");
 
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
@@ -2272,6 +2371,8 @@ async function testRaffleDuplicateOptions(redis) {
   assert.strictEqual(r.statusCode, 200, "admin can duplicate selected raffle");
   assert.strictEqual(r.body.raffle.title, "Duplicate source 2", "selected duplicate keeps source title");
   assert.strictEqual(r.body.raffle.groups[0].prize, "Prize 2", "selected duplicate keeps source prize");
+  assert.strictEqual(r.body.raffle.daily, undefined, "selected duplicate does not create another daily series");
+  assert.strictEqual(r.body.raffle.recurrence, undefined, "selected duplicate drops source recurrence");
 }
 
 async function testRespectVoteWithdraw(redis) {
@@ -4209,6 +4310,7 @@ async function main() {
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],
+    ["raffle daily schedule dedupe", testRaffleDailyScheduleDedupe],
     ["raffle daily cron tick", testRaffleDailyCronTick],
     ["raffle duplicate options", testRaffleDuplicateOptions],
     ["respect vote/withdraw", testRespectVoteWithdraw],

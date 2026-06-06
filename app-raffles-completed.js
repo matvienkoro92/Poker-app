@@ -359,10 +359,11 @@ function initRafflesCompletedRuntime(opts) {
           "raffle-winner-ready-timer"
         )
       : "";
-    var metaItems = readyBadge + readyTimer;
+    var readyTimerLine = readyTimer ? '<span class="raffle-winner-row__ready-timer-line">' + readyTimer + "</span>" : "";
+    var metaItems = readyBadge;
     var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
     var identityClass = "raffle-winner-row__identity" + (isAdmin ? " raffle-winner-row__identity--admin" : "");
-    var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"" + identityClass + "\">" + profileOpen + (adminLevelLine || tgOpen) + "</span></span>";
+    var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"" + identityClass + "\">" + profileOpen + (adminLevelLine || tgOpen) + readyTimerLine + "</span></span>";
     var statusHtml = "<span class=\"raffle-winner-status " + statusClass + "\">" + statusIcon + "</span>";
     var rowClass = "raffle-winner-row" +
       (isAdmin ? " raffle-winner-row--admin" : "") +
