@@ -483,6 +483,19 @@ function initRaffles() {
     return isCashPrize ? "Байинов на кеш" : "Турнирных билетов";
   }
 
+  function activeRaffleTicketPrizeDetailsHtml(raffle) {
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var details = [];
+    groups.forEach(function (group) {
+      var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+      var prize = String(group && group.prize || "").replace(/\s+/g, " ").trim();
+      if (!count || !prize) return;
+      details.push(escapeHtml(count + " × " + prize));
+    });
+    if (!details.length) return escapeHtml(activeRafflePrizeLabel(raffle));
+    return details.join('<span class="raffles-active-chooser__label-separator"> · </span>');
+  }
+
   function activeRaffleWinnersCount(raffle) {
     var total = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
@@ -995,7 +1008,11 @@ function initRaffles() {
           : '<span class="' + titleClass + '">' + escapeHtml(activeRaffleShortTitle(raffle)) + "</span>";
         var labelHtml = knockoutCard
           ? '<span class="raffles-active-chooser__label raffles-active-chooser__label--knockout">' + activeRaffleKnockoutLabelHtml(raffle) + "</span>"
-          : (isCashPrize ? "" : '<span class="raffles-active-chooser__label">' + escapeHtml(activeRafflePrizeLabel(raffle)) + "</span>");
+          : (
+              isCashPrize
+                ? ""
+                : '<span class="raffles-active-chooser__label raffles-active-chooser__label--ticket-details">' + activeRaffleTicketPrizeDetailsHtml(raffle) + "</span>"
+            );
         var amountHtml = knockoutCard || isCashPrize
           ? ""
           : '<span class="raffles-active-chooser__amount">' + escapeHtml(formatRaffleSum(totalPrize)) + "</span>";

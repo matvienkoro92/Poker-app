@@ -1137,10 +1137,23 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-weight: 850;
   line-height: 1.05;
 }
+.raffles-active-chooser__label--ticket-details {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.08;
+}
+.raffles-active-chooser__label-separator {
+  color: rgba(255, 213, 127, 0.72);
+}
 .raffles-active-chooser__item:only-child .raffles-active-chooser__label {
   margin-top: 4px;
   font-size: clamp(14px, 2vw, 18px);
   line-height: 1;
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__label--ticket-details {
+  line-height: 1.05;
 }
 .raffles-active-chooser__label--knockout,
 .raffles-active-chooser__item:only-child .raffles-active-chooser__label--knockout {
@@ -1525,6 +1538,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   .raffles-active-chooser__label {
     font-size: 9px;
   }
+  .raffles-active-chooser__label--ticket-details {
+    font-size: 8.5px;
+    -webkit-line-clamp: 2;
+  }
   .raffles-active-chooser__item--knockout .raffles-active-chooser__label--knockout {
     font-size: 10.5px;
     line-height: 1.05;
@@ -1606,6 +1623,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-active-chooser__label {
     font-size: 8px;
+  }
+  .raffles-active-chooser__label--ticket-details {
+    font-size: 7.6px;
   }
   .raffles-active-chooser__item--knockout .raffles-active-chooser__label--knockout {
     font-size: 10px;
