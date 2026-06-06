@@ -1258,6 +1258,48 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     1,
     "repeated ok status does not duplicate prize notification"
   );
+
+  redis.h("poker_app:visitor_usernames").set("tg_1003", "real_prize_winner");
+  redis.h("poker_app:visitor_usernames").set("tg_1004", "wrong_prize_owner");
+  redis.h("poker_app:id_to_user").set("ID100004", "tg_1004");
+  const usernameRaffle = {
+    id: "contract_raffle_prize_notify_username",
+    title: "Prize notification username raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Беккинг-билет 1 000 ₽", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [{
+      userId: "manual_raffle_prize_winner",
+      accountId: "ID100004",
+      telegramUsername: "real_prize_winner",
+      name: "Manual Prize Winner",
+      p21Id: "799756",
+      groupIndex: 0,
+      prize: "Беккинг-билет 1 000 ₽",
+      winnerReady: true,
+      winnerReadyState: "ready",
+      winnerReadySlotId: "initial_0",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_prize_notify_username", JSON.stringify(usernameRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_prize_notify_username");
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: "contract_raffle_prize_notify_username",
+    winnerUserId: "manual_raffle_prize_winner",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can mark username winner prize issued");
+  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1003"); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "prize notification resolves explicit Telegram username");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "prize notification skips mismatched account owner");
 }
 
 async function testRaffleWinnerReadyRerollAndBurn(redis) {
@@ -1816,6 +1858,32 @@ async function testRaffleWinnerNotificationResolvesAccountId(redis) {
   assert.strictEqual(winnerMessages.length, 1, "account-id winner resolves Telegram recipient");
   assert.strictEqual(sentPushes.length, 1, "account-id winner receives push attempt");
   assert.strictEqual(sentPushes[0].memberId, "ID100002", "push is addressed to account id");
+
+  redis.h("poker_app:visitor_usernames").set("tg_1003", "real_winner");
+  redis.h("poker_app:visitor_usernames").set("tg_1004", "wrong_owner");
+  redis.h("poker_app:id_to_user").set("ID100004", "tg_1004");
+  const usernameRaffle = {
+    id: "contract_raffle_notify_username_preferred",
+    title: "Username preferred raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket 500 ₽", count: 1 }],
+    winners: [{
+      userId: "manual_raffle_real_winner",
+      accountId: "ID100004",
+      telegramUsername: "real_winner",
+      name: "Manual Winner",
+      prize: "Ticket 500 ₽",
+      groupIndex: 0,
+    }],
+    status: "drawn",
+    drawnAt: new Date().toISOString(),
+  };
+  persistContractRaffle(redis, usernameRaffle);
+  await service.notifyWinnersRaffleCompleted("contract_raffle_notify_username_preferred", usernameRaffle);
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "manual winner resolves by explicit Telegram username");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "account-id owner with mismatched username is not notified");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "ID100004").length, 0, "mismatched account id does not receive winner push");
+  assert.strictEqual(sentPushes.filter((item) => item.memberId === "tg_1003").length, 1, "resolved Telegram user receives winner push fallback");
 }
 
 async function testRaffleWinnerNotificationCapsOverflow(redis) {
