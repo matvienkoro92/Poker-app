@@ -645,6 +645,26 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleCashTitleHtml(raffle, totalPrize) {
+    var title = activeRaffleShortTitle(raffle).replace(/\s+/g, " ").trim();
+    var amountText = formatRaffleSum(totalPrize || getRaffleTotalPrize(raffle));
+    var lineOne = title || "Розыгрыш";
+    var lineTwo = amountText;
+    var cashTitle = lineOne.match(/^(.+?)\s+на\s+кеш$/i);
+    if (cashTitle && cashTitle[1]) {
+      lineOne = cashTitle[1].trim();
+      lineTwo = "на кеш " + amountText;
+    }
+    return (
+      '<span class="raffles-active-chooser__title-line">' +
+      escapeHtml(lineOne) +
+      "</span>" +
+      '<span class="raffles-active-chooser__title-line raffles-active-chooser__title-line--amount">' +
+      escapeHtml(lineTwo) +
+      "</span>"
+    );
+  }
+
   function activeRaffleGuaranteeText(raffle) {
     var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim();
     if (guarantee) return "Гарантия " + guarantee;
@@ -970,11 +990,13 @@ function initRaffles() {
         var titleClass = "raffles-active-chooser__title" + (isCashPrize ? " raffles-active-chooser__title--cash" : "");
         var titleHtml = knockoutCard
           ? '<span class="raffles-active-chooser__title raffles-active-chooser__title--knockout">' + escapeHtml(activeRaffleKnockoutTitle(raffle)) + "</span>"
+          : isCashPrize
+            ? '<span class="' + titleClass + '">' + activeRaffleCashTitleHtml(raffle, totalPrize) + "</span>"
           : '<span class="' + titleClass + '">' + escapeHtml(activeRaffleShortTitle(raffle)) + "</span>";
         var labelHtml = knockoutCard
           ? '<span class="raffles-active-chooser__label raffles-active-chooser__label--knockout">' + activeRaffleKnockoutLabelHtml(raffle) + "</span>"
           : (isCashPrize ? "" : '<span class="raffles-active-chooser__label">' + escapeHtml(activeRafflePrizeLabel(raffle)) + "</span>");
-        var amountHtml = knockoutCard
+        var amountHtml = knockoutCard || isCashPrize
           ? ""
           : '<span class="raffles-active-chooser__amount">' + escapeHtml(formatRaffleSum(totalPrize)) + "</span>";
         var timerHtml =

@@ -19,9 +19,12 @@ if (document.readyState === "loading") {
   pokerRunShellReadyBootstrap();
 }
 
-setTimeout(function () {
+function pokerRefreshRaffleBadgeSoon() {
   if (typeof fetchRaffleBadge === "function") fetchRaffleBadge();
-}, 300);
+}
+
+pokerRefreshRaffleBadgeSoon();
+setTimeout(pokerRefreshRaffleBadgeSoon, 300);
 
 (function pokerTrackVisitorOnceWithTelegramIdFix() {
   var v0 = typeof getVisitorId === "function" ? getVisitorId() : "";

@@ -109,8 +109,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-hero__copy {
   position: absolute;
-  top: clamp(84px, 10vw, 104px);
-  left: clamp(18px, 3.4vw, 28px);
+  left: clamp(10px, 3vw, 24px);
+  bottom: clamp(70px, 9vw, 82px);
   z-index: 2;
   width: min(430px, 56%);
 }
@@ -129,6 +129,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     0 12px 26px rgba(0, 0, 0, 0.72);
 }
 .raffles-hero__subtitle {
+  display: none;
   margin: 0;
   max-width: 20ch;
   color: #f8ead0;
@@ -390,8 +391,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     background-size: 100% 100%, 100% 100%, auto 86%;
   }
   .raffles-hero__copy {
-    top: clamp(82px, 17vw, 96px);
-    left: clamp(14px, 4vw, 22px);
+    left: 8px;
+    bottom: 72px;
     width: min(310px, 58%);
   }
   .raffles-hero__title {
@@ -465,7 +466,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     min-height: 280px;
   }
   .raffles-hero__copy {
-    top: clamp(88px, 24vw, 98px);
+    bottom: 70px;
+    left: 8px;
     width: min(248px, 64%);
   }
   .raffles-hero__title {
@@ -902,8 +904,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__item--knockout {
   --raffles-active-card-accent: rgba(255, 232, 166, 0.98);
   --raffles-active-card-glow: rgba(245, 158, 11, 0.52);
-  grid-template-rows: auto auto auto;
-  align-content: space-between;
+  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
   border-color: rgba(255, 209, 103, 0.72);
   background:
     linear-gradient(90deg, rgba(2, 5, 14, 0.98) 0%, rgba(4, 7, 16, 0.78) 44%, rgba(16, 10, 4, 0.12) 100%),
@@ -1103,18 +1105,28 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__title--cash {
   display: block;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  white-space: normal;
+  text-overflow: clip;
   -webkit-line-clamp: 1;
   font-size: 16px;
-  line-height: 1;
+  line-height: 0.98;
 }
 .raffles-active-chooser__item:only-child .raffles-active-chooser__title--cash {
   font-size: 22px;
 }
+.raffles-active-chooser__title-line {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.raffles-active-chooser__title-line--amount {
+  margin-top: 1px;
+}
 .raffles-active-chooser__title--knockout,
 .raffles-active-chooser__item:only-child .raffles-active-chooser__title--knockout {
-  font-size: clamp(21px, 3.4vw, 30px);
+  font-size: clamp(24px, 3.8vw, 32px);
   line-height: 0.96;
   -webkit-line-clamp: 2;
 }
@@ -1134,7 +1146,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__item:only-child .raffles-active-chooser__label--knockout {
   margin-top: 5px;
   color: rgba(255, 245, 210, 0.92);
-  font-size: clamp(13px, 1.8vw, 18px);
+  font-size: clamp(15px, 2.2vw, 20px);
   font-weight: 900;
   line-height: 1.05;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7);
@@ -1187,6 +1199,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__facts--timer-only {
   grid-template-columns: minmax(0, 1fr);
+}
+.raffles-active-chooser__item--knockout .raffles-active-chooser__facts--timer-only {
+  align-self: end;
+  width: 100%;
+  min-width: 0;
 }
 .raffles-active-chooser__fact {
   display: inline-flex;
@@ -1252,8 +1269,12 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer {
   grid-column: 1 / -1;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   min-height: 48px;
   gap: 8px;
+  padding-inline: 8px;
   border-color: rgba(255, 213, 127, 0.5);
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 213, 127, 0.2), transparent 64%),
@@ -1280,7 +1301,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer [data-raffle-active-timer] {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: clamp(22px, 4vw, 34px);
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(18px, 3.1vw, 28px);
   font-weight: 1000;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -1489,10 +1514,20 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     -webkit-line-clamp: 3;
   }
   .raffles-active-chooser__title--cash {
-    font-size: 10px;
+    font-size: 11px;
+    line-height: 0.98;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__title--knockout {
+    font-size: 15px;
+    line-height: 0.96;
+    -webkit-line-clamp: 2;
   }
   .raffles-active-chooser__label {
     font-size: 9px;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__label--knockout {
+    font-size: 10.5px;
+    line-height: 1.05;
   }
   .raffles-active-chooser__amount {
     font-size: 22px;
@@ -1519,6 +1554,14 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-active-chooser__fact [data-raffle-active-timer] {
     min-width: auto;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer {
+    min-height: 44px;
+    padding-inline: 6px;
+    gap: 4px;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer [data-raffle-active-timer] {
+    font-size: clamp(17px, 5.5vw, 24px);
   }
   .raffles-active-chooser__cta {
     min-height: 48px;
@@ -1556,10 +1599,16 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     font-size: 11px;
   }
   .raffles-active-chooser__title--cash {
-    font-size: 9px;
+    font-size: 10px;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__title--knockout {
+    font-size: 14px;
   }
   .raffles-active-chooser__label {
     font-size: 8px;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__label--knockout {
+    font-size: 10px;
   }
   .raffles-active-chooser__amount {
     font-size: 20px;
@@ -1585,6 +1634,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     width: 11px;
     height: 11px;
     font-size: 6px;
+  }
+  .raffles-active-chooser__item--knockout .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer [data-raffle-active-timer] {
+    font-size: clamp(16px, 5.2vw, 22px);
   }
   .raffles-active-chooser__cta {
     min-height: 47px;
