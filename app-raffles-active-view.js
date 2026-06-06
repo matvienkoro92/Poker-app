@@ -26,6 +26,28 @@ function initRafflesActiveViewRuntime(opts) {
     }
   }
 
+  function raffleActiveViewIsKnockoutTicketCard(raffle) {
+    var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
+    return cardTheme === "knockout_ticket";
+  }
+
+  function setRaffleIdNoteContent(raffle, adminTicketEntry) {
+    if (!raffleIdNote) return;
+    var knockoutTicketCard = raffleActiveViewIsKnockoutTicketCard(raffle);
+    if (knockoutTicketCard) {
+      raffleIdNote.innerHTML =
+        "<li>Получайте по билету на розыгрыш за каждые:</li>" +
+        "<li>100 раздач на 20/40 Бонус гейм</li>" +
+        '<li>250 раздач на 5/10 бонус гейм <span class="raffle-id-note__hint">(если вы не с беккинг-розыгрыша)</span></li>';
+    } else {
+      raffleIdNote.innerHTML =
+        '<li>Проверьте ваш ID из Poker21 в профиле <span class="raffle-id-note__hint">(на него будет начисляться выигранный приз)</span>.</li>' +
+        '<li>У вас будет 15 минут, чтобы забрать выигрыш <span class="raffle-id-note__hint">(нажать «Готов»)</span>, если не забрали — выбирается другой участник.</li>';
+    }
+    raffleIdNote.hidden = !!(adminTicketEntry && !knockoutTicketCard);
+    raffleIdNote.setAttribute("aria-hidden", raffleIdNote.hidden ? "true" : "false");
+  }
+
   function renderRaffle(raffle) {
     if (!raffle || !raffleCard) return;
     if (raffleTimerInterval) {
@@ -98,10 +120,7 @@ function initRafflesActiveViewRuntime(opts) {
         ? rafflesViewerNeedsLoginForParticipation()
         : rafflesViewerIsGuestOnly();
     var adminTicketEntry = typeof raffleUsesAdminTicketEntry === "function" && raffleUsesAdminTicketEntry(raffle);
-    if (raffleIdNote) {
-      raffleIdNote.hidden = !!adminTicketEntry;
-      raffleIdNote.setAttribute("aria-hidden", adminTicketEntry ? "true" : "false");
-    }
+    setRaffleIdNoteContent(raffle, adminTicketEntry);
     var showRaffleGuestGate = !!(!adminTicketEntry && needsLoginForParticipation && isActive && !iAmIn);
     if (raffleGuestGate) {
       raffleGuestGate.classList.toggle("raffle-guest-gate--hidden", !showRaffleGuestGate);
