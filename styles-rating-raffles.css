@@ -902,6 +902,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__item--knockout {
   --raffles-active-card-accent: rgba(255, 232, 166, 0.98);
   --raffles-active-card-glow: rgba(245, 158, 11, 0.52);
+  grid-template-rows: auto auto auto;
+  align-content: space-between;
   border-color: rgba(255, 209, 103, 0.72);
   background:
     linear-gradient(90deg, rgba(2, 5, 14, 0.98) 0%, rgba(4, 7, 16, 0.78) 44%, rgba(16, 10, 4, 0.12) 100%),
@@ -1069,6 +1071,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   gap: 2px;
   padding-right: 100px;
 }
+.raffles-active-chooser__item--cash .raffles-active-chooser__body {
+  padding-right: 0;
+}
 .raffles-active-chooser__item:only-child .raffles-active-chooser__body {
   width: min(58%, 430px);
   padding-right: 0;
@@ -1096,14 +1101,16 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   line-height: 0.92;
   -webkit-line-clamp: 3;
 }
-.raffles-active-chooser__title--cash,
-.raffles-active-chooser__item:only-child .raffles-active-chooser__title--cash {
+.raffles-active-chooser__title--cash {
   display: block;
   white-space: nowrap;
   text-overflow: ellipsis;
   -webkit-line-clamp: 1;
-  font-size: clamp(18px, 3vw, 27px);
+  font-size: 16px;
   line-height: 1;
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__title--cash {
+  font-size: 22px;
 }
 .raffles-active-chooser__title--knockout,
 .raffles-active-chooser__item:only-child .raffles-active-chooser__title--knockout {
@@ -1245,8 +1252,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer {
   grid-column: 1 / -1;
-  min-height: 54px;
-  gap: 9px;
+  min-height: 48px;
+  gap: 8px;
   border-color: rgba(255, 213, 127, 0.5);
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 213, 127, 0.2), transparent 64%),
@@ -1273,7 +1280,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer [data-raffle-active-timer] {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: clamp(23px, 4.2vw, 36px);
+  font-size: clamp(22px, 4vw, 34px);
   font-weight: 1000;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -1481,6 +1488,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     line-height: 0.98;
     -webkit-line-clamp: 3;
   }
+  .raffles-active-chooser__title--cash {
+    font-size: 10px;
+  }
   .raffles-active-chooser__label {
     font-size: 9px;
   }
@@ -1544,6 +1554,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-active-chooser__title {
     font-size: 11px;
+  }
+  .raffles-active-chooser__title--cash {
+    font-size: 9px;
   }
   .raffles-active-chooser__label {
     font-size: 8px;
