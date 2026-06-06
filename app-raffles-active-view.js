@@ -48,14 +48,50 @@ function initRafflesActiveViewRuntime(opts) {
     raffleIdNote.setAttribute("aria-hidden", raffleIdNote.hidden ? "true" : "false");
   }
 
+  function setRaffleActiveInfoOpen(open) {
+    if (typeof setRaffleInfoPanelOpen === "function") {
+      setRaffleInfoPanelOpen(open);
+      return;
+    }
+    if (!raffleInfoToggleBtn || !raffleInfoPanel) return;
+    var shouldOpen = !!open;
+    raffleInfoToggleBtn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+    raffleInfoToggleBtn.classList.toggle("raffle-info-toggle-btn--open", shouldOpen);
+    raffleInfoPanel.classList.toggle("raffle-info-panel--hidden", !shouldOpen);
+    raffleInfoPanel.hidden = !shouldOpen;
+  }
+
+  function syncRaffleActiveInfoVisibility() {
+    if (!raffleInfoToggleBtn || !raffleInfoPanel) return;
+    var hasIdNote = !!(
+      raffleIdNote &&
+      !raffleIdNote.hidden &&
+      String(raffleIdNote.textContent || "").trim()
+    );
+    var hasSubscribeRequirements = !!(
+      raffleSubscribeRequirements &&
+      !raffleSubscribeRequirements.hidden &&
+      String(raffleSubscribeRequirements.textContent || "").trim()
+    );
+    var visible = hasIdNote || hasSubscribeRequirements;
+    raffleInfoToggleBtn.classList.toggle("raffle-info-toggle-btn--hidden", !visible);
+    raffleInfoToggleBtn.hidden = !visible;
+    raffleInfoToggleBtn.disabled = !visible;
+    if (!visible) setRaffleActiveInfoOpen(false);
+  }
+
   function renderRaffle(raffle) {
     if (!raffle || !raffleCard) return;
     if (raffleTimerInterval) {
       clearInterval(raffleTimerInterval);
       raffleTimerInterval = null;
     }
+    var previousRaffleId = currentRaffleId;
     currentRaffleId = raffle.id;
     currentRaffleData = raffle;
+    if (String(previousRaffleId || "") !== String(currentRaffleId || "")) {
+      setRaffleActiveInfoOpen(false);
+    }
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     raffleCard.dataset.raffleId = String(raffle.id || "");
     raffleCard.dataset.raffleShareNumber = String(raffle.shareNumber || raffle.activeShareNumber || "");
@@ -131,6 +167,7 @@ function initRafflesActiveViewRuntime(opts) {
       raffleSubscribeRequirements.classList.toggle("raffle-subscribe-requirements--hidden", !showSubscribeRequirements);
       raffleSubscribeRequirements.hidden = !showSubscribeRequirements;
     }
+    syncRaffleActiveInfoVisibility();
     if (raffleJoinToggleBtn) {
       var showToggle = raffle.status === "active" && !showRaffleGuestGate;
       raffleJoinToggleBtn.classList.toggle("raffle-join-toggle-btn--hidden", !showToggle);

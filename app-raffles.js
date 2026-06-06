@@ -66,6 +66,8 @@ function initRaffles() {
   var rafflePrizes = document.getElementById("rafflePrizes");
   var raffleIdNote = document.getElementById("raffleIdNote");
   var raffleSubscribeRequirements = document.getElementById("raffleSubscribeRequirements");
+  var raffleInfoToggleBtn = document.getElementById("raffleInfoToggleBtn");
+  var raffleInfoPanel = document.getElementById("raffleInfoPanel");
   var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
   var raffleGuestGate = document.getElementById("raffleGuestGate");
@@ -207,6 +209,15 @@ function initRaffles() {
     } else if (typeof alert === "function") {
       alert(message);
     }
+  }
+
+  function setRaffleInfoPanelOpen(open) {
+    if (!raffleInfoToggleBtn || !raffleInfoPanel) return;
+    var shouldOpen = !!open;
+    raffleInfoToggleBtn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+    raffleInfoToggleBtn.classList.toggle("raffle-info-toggle-btn--open", shouldOpen);
+    raffleInfoPanel.classList.toggle("raffle-info-panel--hidden", !shouldOpen);
+    raffleInfoPanel.hidden = !shouldOpen;
   }
 
   function raffleCanUseTelegramPopup() {
@@ -961,6 +972,14 @@ function initRaffles() {
       : rafflesViewerIsGuestOnly();
     rafflesActiveChooser.hidden = false;
     rafflesActiveChooser.classList.remove("raffles-active-chooser--hidden");
+    rafflesActiveChooser.classList.remove(
+      "raffles-active-chooser--count-1",
+      "raffles-active-chooser--count-2",
+      "raffles-active-chooser--count-3"
+    );
+    if (list.length <= 3) {
+      rafflesActiveChooser.classList.add("raffles-active-chooser--count-" + list.length);
+    }
     rafflesActiveChooser.innerHTML = list
       .map(function (raffle, index) {
         var id = String((raffle && raffle.id) || "");
@@ -1515,6 +1534,8 @@ function initRaffles() {
       rafflePrizes: rafflePrizes,
       raffleIdNote: raffleIdNote,
       raffleSubscribeRequirements: raffleSubscribeRequirements,
+      raffleInfoToggleBtn: raffleInfoToggleBtn,
+      raffleInfoPanel: raffleInfoPanel,
       raffleJoinToggleBtn: raffleJoinToggleBtn,
       raffleJoinedMsg: raffleJoinedMsg,
       raffleGuestGate: raffleGuestGate,
@@ -1538,6 +1559,7 @@ function initRaffles() {
       raffleUsesTicketWeights: raffleUsesTicketWeights,
       raffleUsesAdminTicketEntry: raffleUsesAdminTicketEntry,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
+      setRaffleInfoPanelOpen: setRaffleInfoPanelOpen,
       escapeHtml: escapeHtml
     });
     rafflesActiveViewRuntime = initRafflesActiveViewRuntime(rafflesActiveViewDeps) || {};
@@ -1861,6 +1883,12 @@ function initRaffles() {
           }
           currentRaffleId = null;
           currentRaffleEndDate = null;
+          setRaffleInfoPanelOpen(false);
+          if (raffleInfoToggleBtn) {
+            raffleInfoToggleBtn.classList.add("raffle-info-toggle-btn--hidden");
+            raffleInfoToggleBtn.hidden = true;
+            raffleInfoToggleBtn.disabled = true;
+          }
           if (raffleCard && raffleCard.dataset) delete raffleCard.dataset.raffleId;
           rafflesActiveBroadcastList = [];
           if (raffleTimerInterval) {
@@ -1989,6 +2017,12 @@ function initRaffles() {
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
   if (rafflesTabLeaders) rafflesTabLeaders.addEventListener("click", function () { setRafflesTab("leaders"); });
+  if (raffleInfoToggleBtn) {
+    raffleInfoToggleBtn.addEventListener("click", function () {
+      if (raffleInfoToggleBtn.disabled) return;
+      setRaffleInfoPanelOpen(raffleInfoToggleBtn.getAttribute("aria-expanded") !== "true");
+    });
+  }
 
   if (typeof initRafflesPublicRuntime === "function") {
     var rafflesPublicRuntimeDeps = {};

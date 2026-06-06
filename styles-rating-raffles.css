@@ -843,6 +843,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   min-height: 244px;
   padding: 14px 14px 16px;
 }
+.raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child {
+  grid-column: 1 / -1;
+}
 .raffles-active-chooser__item {
   --raffles-active-card-accent: rgba(255, 221, 138, 0.96);
   --raffles-active-card-glow: rgba(245, 158, 11, 0.42);
@@ -1872,6 +1875,144 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 [data-theme="light"] .raffle-subscribe-requirements__note {
   color: rgba(67, 20, 7, 0.58);
+}
+.raffle-info-block {
+  display: grid;
+  gap: 8px;
+  margin: -4px 0 12px;
+}
+.raffle-info-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid rgba(214, 163, 84, 0.78);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 214, 127, 0.12), rgba(214, 163, 84, 0.05)),
+    rgba(8, 12, 20, 0.86);
+  color: #fff1c2;
+  box-shadow:
+    0 0 0 1px rgba(255, 214, 127, 0.08),
+    0 0 16px rgba(214, 163, 84, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.raffle-info-toggle-btn::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.8;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.18s;
+}
+.raffle-info-toggle-btn--open::after {
+  transform: translateY(2px) rotate(225deg);
+}
+.raffle-info-toggle-btn:hover:not(:disabled) {
+  color: #fff7dc;
+  border-color: rgba(255, 218, 130, 0.94);
+  background:
+    linear-gradient(180deg, rgba(255, 226, 150, 0.18), rgba(214, 163, 84, 0.08)),
+    rgba(10, 15, 24, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(255, 214, 127, 0.12),
+    0 0 22px rgba(214, 163, 84, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+.raffle-info-toggle-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.raffle-info-toggle-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.raffle-info-toggle-btn--hidden {
+  display: none !important;
+}
+.raffle-info-toggle-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(255, 226, 150, 0.72);
+  border-radius: 50%;
+  color: #ffe8a6;
+  font-size: 12px;
+  font-weight: 950;
+  font-style: italic;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.raffle-info-toggle-btn__text {
+  min-width: 0;
+}
+.raffle-info-panel {
+  padding: 10px 12px;
+  border: 1px solid rgba(250, 204, 21, 0.24);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.08), transparent 64%),
+    rgba(8, 13, 24, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 18px rgba(245, 158, 11, 0.1);
+}
+.raffle-info-panel--hidden {
+  display: none !important;
+}
+.raffle-info-panel .raffle-id-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.32;
+}
+.raffle-info-panel .raffle-subscribe-requirements {
+  margin: 10px 0 0;
+}
+.raffle-info-panel .raffle-id-note + .raffle-subscribe-requirements:not([hidden]) {
+  padding-top: 10px;
+  border-top-color: rgba(250, 204, 21, 0.28);
+}
+[data-theme="light"] .raffle-info-toggle-btn {
+  color: #78350f;
+  border-color: rgba(217, 119, 6, 0.34);
+  background:
+    linear-gradient(180deg, rgba(251, 191, 36, 0.28), rgba(254, 243, 199, 0.7)),
+    rgba(255, 251, 235, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 0 16px rgba(217, 119, 6, 0.14);
+}
+[data-theme="light"] .raffle-info-toggle-btn::after {
+  color: rgba(120, 53, 15, 0.7);
+}
+[data-theme="light"] .raffle-info-toggle-btn__icon {
+  color: #92400e;
+  border-color: rgba(217, 119, 6, 0.46);
+}
+[data-theme="light"] .raffle-info-panel {
+  border-color: rgba(217, 119, 6, 0.22);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.16), transparent 64%),
+    rgba(255, 251, 235, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 0 18px rgba(217, 119, 6, 0.1);
 }
 .raffle-invite-wide-row {
   display: flex;
