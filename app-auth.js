@@ -563,23 +563,37 @@ function pokerMinimalPwaSessionCookiePayload(token, authMethod, sessionExtra) {
 
 function pokerOpenPwaAuthDb() {
   return new Promise(function (resolve) {
+    var settled = false;
+    var timer = null;
+    function finish(db) {
+      if (settled) {
+        try { if (db) db.close(); } catch (eLateClose) {}
+        return;
+      }
+      settled = true;
+      if (timer) clearTimeout(timer);
+      resolve(db || null);
+    }
     try {
       if (!("indexedDB" in window)) {
-        resolve(null);
+        finish(null);
         return;
       }
       var req = indexedDB.open(POKER_PWA_IDB_NAME, 1);
+      timer = setTimeout(function () {
+        finish(null);
+      }, 1400);
       req.onupgradeneeded = function () {
         try {
           var db = req.result;
           if (db && !db.objectStoreNames.contains(POKER_PWA_IDB_STORE)) db.createObjectStore(POKER_PWA_IDB_STORE);
         } catch (eUpgrade) {}
       };
-      req.onsuccess = function () { resolve(req.result || null); };
-      req.onerror = function () { resolve(null); };
-      req.onblocked = function () { resolve(null); };
+      req.onsuccess = function () { finish(req.result || null); };
+      req.onerror = function () { finish(null); };
+      req.onblocked = function () { finish(null); };
     } catch (e) {
-      resolve(null);
+      finish(null);
     }
   });
 }
@@ -605,17 +619,31 @@ function pokerReadPwaSessionFromIdb(key) {
   return pokerOpenPwaAuthDb().then(function (db) {
     if (!db) return "";
     return new Promise(function (resolve) {
+      var settled = false;
+      var timer = null;
+      function finish(value, closeNow) {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        if (closeNow) {
+          try { db.close(); } catch (eCloseNow) {}
+        }
+        resolve(value || "");
+      }
       try {
         var tx = db.transaction(POKER_PWA_IDB_STORE, "readonly");
         var req = tx.objectStore(POKER_PWA_IDB_STORE).get(key);
-        req.onsuccess = function () { resolve(req.result != null ? String(req.result) : ""); };
-        req.onerror = function () { resolve(""); };
+        timer = setTimeout(function () {
+          finish("", true);
+        }, 1400);
+        req.onsuccess = function () { finish(req.result != null ? String(req.result) : ""); };
+        req.onerror = function () { finish(""); };
         tx.oncomplete = tx.onerror = tx.onabort = function () {
           try { db.close(); } catch (eClose) {}
         };
       } catch (eTx) {
         try { db.close(); } catch (eClose2) {}
-        resolve("");
+        finish("");
       }
     });
   }).catch(function () { return ""; });

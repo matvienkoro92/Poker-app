@@ -17,6 +17,7 @@ function initPwaAuthRestoreRuntime(deps) {
   var identifyMinMs = deps.identifyMinMs || 620;
   var tgSessionKey = deps.tgSessionKey || (typeof POKER_PWA_TG_SESSION_KEY !== "undefined" ? POKER_PWA_TG_SESSION_KEY : "");
   var vkSessionKey = deps.vkSessionKey || (typeof POKER_PWA_VK_SESSION_KEY !== "undefined" ? POKER_PWA_VK_SESSION_KEY : "");
+  var restoreTimeoutMs = deps.restoreTimeoutMs || 2200;
 
   function shouldKeepGuestMode() {
     try {
@@ -145,16 +146,50 @@ function initPwaAuthRestoreRuntime(deps) {
   function attemptPwaSideAuthRestoreAsync(hideBootOverlay) {
     if (attemptPwaSideAuthRestore(hideBootOverlay)) return Promise.resolve(true);
     if (typeof pokerReadPwaSessionRecordAsync !== "function") return Promise.resolve(false);
-    return pokerReadPwaSessionRecordAsync(tgSessionKey)
+    return pokerRestoreWithTimeout(pokerReadPwaSessionRecordSafely(tgSessionKey)
       .then(function (so) {
         if (restorePwaSideAuthRecord(so, { hideBootOverlay: hideBootOverlay })) return true;
-        return pokerReadPwaSessionRecordAsync(vkSessionKey).then(function (soV) {
+        return pokerReadPwaSessionRecordSafely(vkSessionKey).then(function (soV) {
           return restorePwaSideAuthRecord(soV, { hideBootOverlay: hideBootOverlay, vk: true });
         });
       })
       .catch(function () {
         return false;
+      }));
+  }
+
+  function pokerReadPwaSessionRecordSafely(key) {
+    try {
+      return Promise.resolve(pokerReadPwaSessionRecordAsync(key)).catch(function () {
+        return null;
       });
+    } catch (eReadSession) {
+      return Promise.resolve(null);
+    }
+  }
+
+  function pokerRestoreWithTimeout(promise) {
+    return new Promise(function (resolve) {
+      var settled = false;
+      var timer = setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        resolve(false);
+      }, restoreTimeoutMs);
+      promise
+        .then(function (value) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(!!value);
+        })
+        .catch(function () {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(false);
+        });
+    });
   }
 
   /** PWA без initData: сначала видимый экран идентификации, затем вход (или сразу в приложение при restore сессии). */

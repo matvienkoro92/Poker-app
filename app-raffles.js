@@ -85,6 +85,12 @@ function initRaffles() {
   var rafflesNotifySubsBtn = document.getElementById("rafflesNotifySubsBtn");
   var rafflesNotifySubsHint = document.getElementById("rafflesNotifySubsHint");
   var rafflesActiveChooser = document.getElementById("rafflesActiveChooser");
+  var raffleActiveActions = document.getElementById("raffleActiveActions");
+  var raffleActiveInfoModal = document.getElementById("raffleActiveInfoModal");
+  var raffleActiveInfoModalBackdrop = document.getElementById("raffleActiveInfoModalBackdrop");
+  var raffleActiveInfoModalClose = document.getElementById("raffleActiveInfoModalClose");
+  var raffleActiveInfoModalContent = document.getElementById("raffleActiveInfoModalContent");
+  var raffleActiveInfoModalTitle = document.getElementById("raffleActiveInfoModalTitle");
   var rafflesLastBroadcastReportBtn = document.getElementById(
     "rafflesLastBroadcastReportBtn"
   );
@@ -112,6 +118,7 @@ function initRaffles() {
   var rafflesActiveInfoOpenId = "";
   var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
   var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
+  var raffleActiveInfoModalLastFocus = null;
 
   function consumeRafflesOpenActiveTabRequest() {
     try {
@@ -132,6 +139,13 @@ function initRaffles() {
     if (!rafflesSubscribersRow) return;
     rafflesSubscribersRow.classList.toggle("raffles-admin-row--hidden", !visible);
     rafflesSubscribersRow.setAttribute("aria-hidden", visible ? "false" : "true");
+  }
+
+  function setRaffleActiveActionsVisible(visible) {
+    if (!raffleActiveActions) return;
+    raffleActiveActions.classList.toggle("raffle-active-actions--hidden", !visible);
+    raffleActiveActions.hidden = !visible;
+    raffleActiveActions.setAttribute("aria-hidden", visible ? "false" : "true");
   }
 
   function raffleFeedbackTelegramLink(url) {
@@ -237,16 +251,6 @@ function initRaffles() {
     return hasIdNote || hasSubscribeRequirements;
   }
 
-  function getRafflesActiveInfoDetailsHost(raffleId) {
-    var target = String(raffleId || "");
-    if (!target || !rafflesActiveChooser) return null;
-    var hosts = rafflesActiveChooser.querySelectorAll("[data-raffle-active-details-host]");
-    for (var i = 0; i < hosts.length; i++) {
-      if (String(hosts[i].getAttribute("data-raffle-active-details-host") || "") === target) return hosts[i];
-    }
-    return null;
-  }
-
   function restoreRaffleCurrentHome() {
     if (!raffleCurrent || !raffleCurrentHomeParent) return;
     if (raffleCurrent.parentNode === raffleCurrentHomeParent) return;
@@ -257,22 +261,90 @@ function initRaffles() {
     }
   }
 
+  function getRafflesActiveById(raffleId) {
+    var target = String(raffleId || "");
+    if (!target) return null;
+    for (var i = 0; i < rafflesActiveBroadcastList.length; i++) {
+      if (String(rafflesActiveBroadcastList[i] && rafflesActiveBroadcastList[i].id || "") === target) {
+        return rafflesActiveBroadcastList[i];
+      }
+    }
+    return null;
+  }
+
+  function setRaffleActiveInfoModalTitle(raffleId) {
+    if (!raffleActiveInfoModalTitle) return;
+    var raffle = getRafflesActiveById(raffleId) || currentRaffleData;
+    var title = "";
+    if (raffle && activeRaffleIsKnockoutTicketCard(raffle)) {
+      title = "Главный розыгрыш";
+    } else if (raffle) {
+      title = activeRaffleShortTitle(raffle);
+    }
+    raffleActiveInfoModalTitle.textContent = title ? "Инфо: " + title : "Инфо о розыгрыше";
+  }
+
+  function setRaffleActiveInfoModalOpen(open) {
+    if (!raffleActiveInfoModal) return;
+    var shouldOpen = !!open;
+    raffleActiveInfoModal.classList.toggle("raffle-active-info-modal--hidden", !shouldOpen);
+    raffleActiveInfoModal.hidden = !shouldOpen;
+    raffleActiveInfoModal.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    try {
+      if (document && document.body) {
+        document.body.classList.toggle("raffle-active-info-modal-open", shouldOpen);
+      }
+    } catch (eBodyClass) {}
+    if (shouldOpen) {
+      try {
+        raffleActiveInfoModalLastFocus = document.activeElement || null;
+      } catch (eFocusRead) {
+        raffleActiveInfoModalLastFocus = null;
+      }
+      setTimeout(function () {
+        try {
+          if (raffleActiveInfoModalClose && typeof raffleActiveInfoModalClose.focus === "function") {
+            raffleActiveInfoModalClose.focus();
+          }
+        } catch (eFocusClose) {}
+      }, 0);
+    } else if (raffleActiveInfoModalLastFocus && typeof raffleActiveInfoModalLastFocus.focus === "function") {
+      try {
+        raffleActiveInfoModalLastFocus.focus();
+      } catch (eRestoreFocus) {}
+      raffleActiveInfoModalLastFocus = null;
+    }
+  }
+
   function syncRafflesActiveInfoDetailsMount() {
     if (!raffleCurrent) return;
-    var host = getRafflesActiveInfoDetailsHost(rafflesActiveInfoOpenId);
-    if (host) {
-      if (raffleCurrent.parentNode !== host) host.appendChild(raffleCurrent);
-      host.hidden = false;
-      host.setAttribute("aria-hidden", "false");
+    if (rafflesActiveInfoOpenId && raffleActiveInfoModalContent) {
+      if (raffleCurrent.parentNode !== raffleActiveInfoModalContent) {
+        raffleActiveInfoModalContent.appendChild(raffleCurrent);
+      }
       raffleCurrent.classList.add("raffle-current--inside-active-info");
+      raffleCurrent.classList.add("raffle-current--inside-active-modal");
       raffleCurrent.classList.remove("raffle-current--hidden");
       setRaffleInfoPanelOpen(raffleActiveInfoPanelHasContent());
+      setRaffleActiveInfoModalTitle(rafflesActiveInfoOpenId);
+      setRaffleActiveInfoModalOpen(true);
       return;
     }
     restoreRaffleCurrentHome();
     raffleCurrent.classList.remove("raffle-current--inside-active-info");
+    raffleCurrent.classList.remove("raffle-current--inside-active-modal");
     raffleCurrent.classList.add("raffle-current--hidden");
     setRaffleInfoPanelOpen(false);
+    setRaffleActiveInfoModalOpen(false);
+  }
+
+  function closeRafflesActiveInfoModal() {
+    if (!rafflesActiveInfoOpenId && (!raffleActiveInfoModal || raffleActiveInfoModal.classList.contains("raffle-active-info-modal--hidden"))) return;
+    rafflesActiveInfoOpenId = "";
+    syncRafflesActiveInfoDetailsMount();
+    if (rafflesActiveBroadcastList.length) {
+      renderRafflesActiveChooser(rafflesActiveBroadcastList, currentRaffleId || rafflesFocusedActiveId || "");
+    }
   }
 
   function raffleCanUseTelegramPopup() {
@@ -1054,8 +1126,7 @@ function initRaffles() {
     if (!infoBtn) return;
     var raffleId = String(infoBtn.getAttribute("data-raffle-active-info-id") || "").trim();
     if (!raffleId) return;
-    var shouldOpen = rafflesActiveInfoOpenId !== raffleId;
-    rafflesActiveInfoOpenId = shouldOpen ? raffleId : "";
+    rafflesActiveInfoOpenId = raffleId;
     focusRaffleAfterMutation(raffleId);
     var cache = typeof window !== "undefined" ? window._rafflesCache : null;
     if (cache && cache.data && cache.data.ok) {
@@ -1175,7 +1246,6 @@ function initRaffles() {
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
-          (infoOpen ? " raffles-active-chooser__item--info-open" : "") +
           (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
           (cardTheme === "knockout_ticket" ? " raffles-active-chooser__item--knockout" : "") +
           '" role="button" tabindex="0" data-raffle-active-id="' +
@@ -1186,6 +1256,7 @@ function initRaffles() {
           headHtml +
           '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
           '<span class="raffles-active-chooser__body">' +
+          (knockoutCard ? '<span class="raffles-active-chooser__main-badge">Главный розыгрыш</span>' : "") +
           titleHtml +
           labelHtml +
           (knockoutCard ? activeRaffleKnockoutInfoHtml() : "") +
@@ -1217,20 +1288,10 @@ function initRaffles() {
           escapeHtml(id) +
           '" aria-expanded="' +
           (infoOpen ? "true" : "false") +
-          '" aria-controls="raffleCurrent">' +
+          '" aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">' +
           '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
           '<span>Инфо</span>' +
-          '<span class="raffles-active-chooser__info-chevron" aria-hidden="true"></span>' +
           "</button>" +
-          '<div class="raffles-active-chooser__details' +
-          (infoOpen ? "" : " raffles-active-chooser__details--hidden") +
-          '" data-raffle-active-details-host="' +
-          escapeHtml(id) +
-          '" aria-hidden="' +
-          (infoOpen ? "false" : "true") +
-          '"' +
-          (infoOpen ? "" : " hidden") +
-          "></div>" +
           "</div>"
         );
       })
@@ -1257,8 +1318,6 @@ function initRaffles() {
         handleRafflesActiveChooserAction(actionBtn);
         return;
       }
-      var detailsRoot = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__details") : null;
-      if (detailsRoot && rafflesActiveChooser.contains(detailsRoot)) return;
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
@@ -1278,8 +1337,6 @@ function initRaffles() {
       if (infoBtn && rafflesActiveChooser.contains(infoBtn)) return;
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
       if (actionBtn && rafflesActiveChooser.contains(actionBtn)) return;
-      var detailsRoot = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__details") : null;
-      if (detailsRoot && rafflesActiveChooser.contains(detailsRoot)) return;
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       e.preventDefault();
@@ -1747,6 +1804,7 @@ function initRaffles() {
         if (raffleEnd) raffleEnd.textContent = "Подводим итоги…";
         return;
       }
+      setRaffleActiveActionsVisible(false);
       if (raffleEmpty) {
         raffleEmpty.innerHTML = "<span class=\"raffle-loading__spinner\" aria-hidden=\"true\"></span><span class=\"raffle-loading__text\">Подождите, Розыгрыш загружается</span>";
         raffleEmpty.classList.remove("raffle-empty--login");
@@ -1770,6 +1828,7 @@ function initRaffles() {
         if (raffleEnd) raffleEnd.textContent = "Не удалось обновить итоги. Обновите раздел.";
         return;
       }
+      setRaffleActiveActionsVisible(false);
       if (raffleEmpty) {
         if (raffleLoadErrorNeedsLogin(data)) {
           raffleEmpty.innerHTML =
@@ -2021,12 +2080,14 @@ function initRaffles() {
 
         if (active) {
           renderRafflesActiveChooser(activeList, active.id);
+          setRaffleActiveActionsVisible(true);
           setRafflesSubscribersRowVisible(rafflesIsAdmin);
           if (raffleEmpty) raffleEmpty.classList.add("raffle-empty--hidden");
           renderRaffle(active);
           syncRafflesActiveInfoDetailsMount();
         } else {
           renderRafflesActiveChooser([], "");
+          setRaffleActiveActionsVisible(false);
           setRafflesSubscribersRowVisible(false);
           rafflesActiveInfoOpenId = "";
           syncRafflesActiveInfoDetailsMount();
@@ -2168,6 +2229,7 @@ function initRaffles() {
     if (isCreate && typeof window !== "undefined" && typeof window.pokerRafflesOpenCreateActionTab === "function") {
       window.pokerRafflesOpenCreateActionTab();
     }
+    if (!isActive) closeRafflesActiveInfoModal();
     rafflesCurrentTab = tab;
     if ((isCompleted || isLeaders) && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (isCompleted) schedulePendingCompletedRaffleFocus();
@@ -2181,6 +2243,25 @@ function initRaffles() {
     raffleInfoToggleBtn.addEventListener("click", function () {
       if (raffleInfoToggleBtn.disabled) return;
       setRaffleInfoPanelOpen(raffleInfoToggleBtn.getAttribute("aria-expanded") !== "true");
+    });
+  }
+  if (raffleActiveInfoModal && raffleActiveInfoModal.dataset.bound !== "1") {
+    raffleActiveInfoModal.dataset.bound = "1";
+    if (raffleActiveInfoModalClose) {
+      raffleActiveInfoModalClose.addEventListener("click", function () {
+        closeRafflesActiveInfoModal();
+      });
+    }
+    if (raffleActiveInfoModalBackdrop) {
+      raffleActiveInfoModalBackdrop.addEventListener("click", function () {
+        closeRafflesActiveInfoModal();
+      });
+    }
+    raffleActiveInfoModal.addEventListener("keydown", function (e) {
+      var key = e && (e.key || e.code);
+      if (key !== "Escape" && key !== "Esc") return;
+      e.preventDefault();
+      closeRafflesActiveInfoModal();
     });
   }
 
