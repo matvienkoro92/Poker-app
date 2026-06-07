@@ -1588,7 +1588,7 @@ function initRaffles() {
             if (raffleAdminTicketName) raffleAdminTicketName.value = "";
             if (raffleAdminTicketTelegram) raffleAdminTicketTelegram.value = "";
             if (raffleAdminTicketCount) raffleAdminTicketCount.value = "1";
-            showRaffleFeedback(data.updated ? "Билеты участника обновлены." : "Билеты участнику выданы.", "ok");
+            showRaffleFeedback(data.updated ? "Билеты участнику добавлены." : "Билеты участнику выданы.", "ok");
             return;
           }
           var err = (data && data.error) || "Не удалось выдать билеты";

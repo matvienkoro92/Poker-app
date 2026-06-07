@@ -772,6 +772,51 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_admin_upsert_tickets",
+    title: "Contract admin upsert tickets",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    ticketEntryMode: "admin",
+    drawMode: "weighted_tickets",
+    weightedTickets: true,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_admin_upsert_tickets", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_admin_upsert_tickets");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminUpsertParticipant",
+    raffleId: "contract_admin_upsert_tickets",
+    p21Id: "P21ADD",
+    ticketCount: 2,
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin upsert adds participant");
+  assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin upsert creates one participant");
+  assert.strictEqual(r.body.raffle.participants[0].ticketCount, 2, "raffle admin upsert stores first ticket count");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminUpsertParticipant",
+    raffleId: "contract_admin_upsert_tickets",
+    p21Id: "P21ADD",
+    ticketCount: 3,
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin upsert can add tickets to existing participant");
+  assert.strictEqual(r.body.updated, true, "raffle admin upsert reports existing participant update");
+  assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin upsert keeps one row for same participant");
+  assert.strictEqual(r.body.raffle.participants[0].ticketCount, 5, "raffle admin upsert adds new tickets to previous count");
+  assert.strictEqual(r.body.raffle.participants[0].entryTicketCount, 5, "raffle admin upsert keeps entry ticket count in sync");
+}
+
 async function testRaffleAdminRemoveParticipant(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -4514,6 +4559,7 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle admin upsert participant tickets", testRaffleAdminUpsertParticipantAddsTickets],
     ["raffle admin remove participant", testRaffleAdminRemoveParticipant],
     ["raffle active list includes daily sibling", testRaffleActiveListIncludesDailySibling],
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
