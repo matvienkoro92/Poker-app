@@ -265,7 +265,7 @@ function initRafflesAdminCreateRuntime(opts) {
     if (raffleDailyStartWrap) raffleDailyStartWrap.classList.toggle("raffle-create-form__daily-time--hidden", !enabled);
     if (raffleDailyStartTime) {
       raffleDailyStartTime.disabled = !enabled;
-      if (enabled && !raffleDailyStartTime.value) raffleDailyStartTime.value = "12:00";
+      if (enabled) raffleDailyStartTime.value = "20:16";
     }
   }
 
@@ -774,7 +774,11 @@ function initRafflesAdminCreateRuntime(opts) {
         if (!title) title = "Розыгрыш беккинг-байинов на кеш";
       }
       var dailyEnabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
-      var dailyStartTime = dailyEnabled ? normalizeRaffleDailyStartTime(raffleDailyStartTime && raffleDailyStartTime.value) : "";
+      if (dailyEnabled && prizeKind !== "cash") {
+        if (tg && tg.showAlert) tg.showAlert("Ежедневный розыгрыш сейчас доступен только на кеш.");
+        return;
+      }
+      var dailyStartTime = dailyEnabled ? "20:16" : "";
       if (dailyEnabled && !dailyStartTime) {
         if (tg && tg.showAlert) tg.showAlert("Укажите время ежедневного старта");
         return;

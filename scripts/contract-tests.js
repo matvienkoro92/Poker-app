@@ -7,6 +7,33 @@ const path = require("path");
 
 const root = path.join(__dirname, "..");
 const BOT_TOKEN = "contract-test-bot-token";
+const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
+const DAILY_CASH_START_TIME = "20:16";
+const DAILY_CASH_DURATION_MS = (23 * 60 + 59) * 60 * 1000;
+const DAILY_CASH_SERIES_ID = "raffle_daily_cash_20_16";
+
+function contractMoscowParts(date) {
+  const d = new Date(date.getTime() + MSK_OFFSET_MS);
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    day: d.getUTCDate(),
+  };
+}
+
+function contractMoscowDateTimeToUtc(parts, time) {
+  const [hh, mm] = String(time).split(":").map((n) => parseInt(n, 10) || 0);
+  return new Date(Date.UTC(parts.year, parts.month - 1, parts.day, hh - 3, mm, 0, 0));
+}
+
+function contractMoscowStartOnOrBefore(date, time) {
+  const parts = contractMoscowParts(date);
+  let start = contractMoscowDateTimeToUtc(parts, time);
+  if (start > date) {
+    start = contractMoscowDateTimeToUtc({ year: parts.year, month: parts.month, day: parts.day - 1 }, time);
+  }
+  return start;
+}
 
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";
 process.env.UPSTASH_REDIS_REST_TOKEN = "mock-token";
@@ -2195,51 +2222,66 @@ async function testRaffleDrawnGetDoesNotNotifyWinners(redis) {
 async function testRaffleDailyRecurring(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
+  const createStart = contractMoscowStartOnOrBefore(new Date(Date.now() + 24 * 3600_000), DAILY_CASH_START_TIME);
   let r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
     action: "create",
-    title: "Daily contract raffle",
+    title: "20 беккинг-байинов на кеш",
     totalWinners: 2,
-    groups: [{ prize: "Ticket", count: 2 }],
-    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    groups: [{ prize: "10 байинов по 1000р на 20/40", count: 1 }, { prize: "10 байинов по 200р на 5/10", count: 1 }],
+    endDate: new Date(createStart.getTime() + DAILY_CASH_DURATION_MS).toISOString(),
     daily: true,
     dailyStartTime: "9:05",
     idemKey: "contract-daily-create",
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create a daily raffle");
   assert.strictEqual(r.body.raffle.daily, true, "daily raffle is marked daily");
-  assert.strictEqual(r.body.raffle.recurrence.startTime, "09:05", "daily start time is normalized");
-  assert.ok(new Date(r.body.raffle.recurrence.nextStartAt) > new Date(r.body.raffle.createdAt), "daily next start is after first launch");
+  assert.strictEqual(r.body.raffle.recurrence.startTime, DAILY_CASH_START_TIME, "cash daily start time is canonical");
+  assert.strictEqual(r.body.raffle.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cash daily uses one canonical series");
+  assert.strictEqual(r.body.raffle.recurrence.durationMs, DAILY_CASH_DURATION_MS, "cash daily lasts until 20:15 next day");
+  assert.strictEqual(
+    r.body.raffle.endDate,
+    new Date(new Date(r.body.raffle.createdAt).getTime() + DAILY_CASH_DURATION_MS).toISOString(),
+    "cash daily end date is canonical",
+  );
+  const createdDailyId = r.body.raffle.id;
+  redis.kv.delete("poker_app:raffle:" + createdDailyId);
+  const dailyIds = redis.l("poker_app:raffle_ids");
+  const dailyIdx = dailyIds.indexOf(createdDailyId);
+  if (dailyIdx !== -1) dailyIds.splice(dailyIdx, 1);
 
-  const dueStart = new Date(Date.now() - 5 * 60_000);
-  const durationMs = 60 * 60_000;
+  const dueStart = contractMoscowStartOnOrBefore(new Date(), DAILY_CASH_START_TIME);
+  const oldStart = new Date(dueStart.getTime() - 24 * 3600_000);
+  const durationMs = DAILY_CASH_DURATION_MS;
   const source = {
     id: "daily_contract_source",
     createdBy: "tg_388008256",
-    title: "Daily source",
+    title: "Daily cash source",
     totalWinners: 1,
-    groups: [{ prize: "Daily ticket", count: 1 }],
-    endDate: new Date(Date.now() - 30 * 60_000).toISOString(),
+    groups: [{ prize: "10 байинов по 1000р на кеш", count: 1 }],
+    prizeKind: "cash",
+    endDate: new Date(oldStart.getTime() + durationMs).toISOString(),
     participants: [],
     winners: [],
     status: "drawn",
-    createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+    createdAt: oldStart.toISOString(),
     daily: true,
     recurrence: {
       type: "daily",
       timeZone: "Europe/Moscow",
       startTime: "11:30",
       seriesId: "contract_daily_series",
-      scheduledStartAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      scheduledStartAt: oldStart.toISOString(),
       nextStartAt: dueStart.toISOString(),
       durationMs,
       qstashScheduleId: "contract_daily_schedule_id",
       qstashCron: "CRON_TZ=Europe/Moscow 30 11 * * *",
       qstashScheduledAt: new Date(Date.now() - 3600_000).toISOString(),
       template: {
-        title: "Daily source",
+        title: "Daily cash source",
         totalWinners: 1,
-        groups: [{ prize: "Daily ticket", count: 1 }],
+        groups: [{ prize: "10 байинов по 1000р на кеш", count: 1 }],
+        prizeKind: "cash",
       },
     },
   };
@@ -2248,15 +2290,15 @@ async function testRaffleDailyRecurring(redis) {
 
   r = await call(raffles, req("GET", { pwaSession: s.user }));
   assert.strictEqual(r.statusCode, 200, "raffles list succeeds with daily series");
-  const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === "contract_daily_series" && raffle.id !== source.id);
+  const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === DAILY_CASH_SERIES_ID && raffle.id !== source.id);
   assert.strictEqual(generated.length, 1, "due daily series creates one next raffle");
   assert.strictEqual(generated[0].status, "active", "generated daily raffle is active");
   assert.strictEqual(generated[0].createdAt, dueStart.toISOString(), "generated daily raffle starts at scheduled time");
   assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
   assert.strictEqual(
     generated[0].recurrence.qstashScheduleId,
-    "contract_daily_schedule_id",
-    "generated daily raffle inherits existing QStash schedule id",
+    undefined,
+    "generated daily raffle drops stale non-canonical QStash schedule id",
   );
 }
 
@@ -2284,13 +2326,14 @@ async function testRaffleDailyScheduleDedupe(redis) {
   try {
     const raffles = loadHandler("raffles");
     const s = sessions();
+    const createStart = contractMoscowStartOnOrBefore(new Date(Date.now() + 24 * 3600_000), DAILY_CASH_START_TIME);
     let r = await call(raffles, req("POST", {}, {
       pwaSession: s.admin,
       action: "create",
-      title: "Daily schedule dedupe",
+      title: "Daily schedule cash dedupe",
       totalWinners: 1,
-      groups: [{ prize: "Ticket", count: 1 }],
-      endDate: new Date(Date.now() + 3600_000).toISOString(),
+      groups: [{ prize: "10 байинов по 1000р на кеш", count: 1 }],
+      endDate: new Date(createStart.getTime() + DAILY_CASH_DURATION_MS).toISOString(),
       daily: true,
       dailyStartTime: "10:40",
       idemKey: "contract-daily-schedule-dedupe",
@@ -2300,14 +2343,15 @@ async function testRaffleDailyScheduleDedupe(redis) {
     const sourceId = r.body.raffle.id;
     const stored = JSON.parse(redis.kv.get("poker_app:raffle:" + sourceId));
     assert.ok(stored.recurrence.qstashScheduleId, "stored daily raffle keeps QStash schedule id");
+    assert.strictEqual(stored.recurrence.startTime, DAILY_CASH_START_TIME, "stored cash daily keeps canonical time");
 
-    const dueStart = new Date(Date.now() - 5 * 60_000);
-    const firstStart = new Date(Date.now() - 2 * 3600_000).toISOString();
-    const durationMs = 60 * 60_000;
+    const dueStart = contractMoscowStartOnOrBefore(new Date(), DAILY_CASH_START_TIME);
+    const firstStart = new Date(dueStart.getTime() - 24 * 3600_000).toISOString();
+    const durationMs = DAILY_CASH_DURATION_MS;
     stored.status = "drawn";
     stored.createdAt = firstStart;
     stored.startedAt = firstStart;
-    stored.endDate = new Date(Date.now() - 30 * 60_000).toISOString();
+    stored.endDate = new Date(new Date(firstStart).getTime() + durationMs).toISOString();
     stored.recurrence.scheduledStartAt = firstStart;
     stored.recurrence.nextStartAt = dueStart.toISOString();
     stored.recurrence.durationMs = durationMs;
@@ -2315,7 +2359,7 @@ async function testRaffleDailyScheduleDedupe(redis) {
 
     r = await call(raffles, req("GET", { pwaSession: s.user }));
     assert.strictEqual(r.statusCode, 200, "raffles list creates due scheduled daily raffle");
-    const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === stored.recurrence.seriesId && raffle.id !== sourceId);
+    const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === DAILY_CASH_SERIES_ID && raffle.id !== sourceId);
     assert.strictEqual(generated.length, 1, "scheduled daily series creates one generated raffle");
     assert.strictEqual(
       generated[0].recurrence.qstashScheduleId,
@@ -2334,32 +2378,35 @@ async function testRaffleDailyScheduleDedupe(redis) {
 
 async function testRaffleDailyCronTick(redis) {
   const cronRaffles = loadHandler("cron-raffles");
-  const dueStart = new Date(Date.now() - 4 * 60_000);
-  const durationMs = 45 * 60_000;
+  const dueStart = contractMoscowStartOnOrBefore(new Date(), DAILY_CASH_START_TIME);
+  const previousStart = new Date(dueStart.getTime() - 24 * 3600_000);
+  const durationMs = DAILY_CASH_DURATION_MS;
   const source = {
     id: "daily_contract_cron_source",
     createdBy: "tg_388008256",
-    title: "Daily cron source",
+    title: "Daily cron cash source",
     totalWinners: 1,
-    groups: [{ prize: "Cron daily ticket", count: 1 }],
-    endDate: new Date(Date.now() - 20 * 60_000).toISOString(),
+    groups: [{ prize: "10 байинов по 1000р на кеш", count: 1 }],
+    prizeKind: "cash",
+    endDate: new Date(previousStart.getTime() + durationMs).toISOString(),
     participants: [],
     winners: [],
     status: "drawn",
-    createdAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+    createdAt: previousStart.toISOString(),
     daily: true,
     recurrence: {
       type: "daily",
       timeZone: "Europe/Moscow",
       startTime: "12:15",
       seriesId: "contract_daily_cron_series",
-      scheduledStartAt: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      scheduledStartAt: previousStart.toISOString(),
       nextStartAt: dueStart.toISOString(),
       durationMs,
       template: {
-        title: "Daily cron source",
+        title: "Daily cron cash source",
         totalWinners: 1,
-        groups: [{ prize: "Cron daily ticket", count: 1 }],
+        groups: [{ prize: "10 байинов по 1000р на кеш", count: 1 }],
+        prizeKind: "cash",
       },
     },
   };
@@ -2377,6 +2424,7 @@ async function testRaffleDailyCronTick(redis) {
   assert.strictEqual(generated.status, "active", "cron generated daily raffle is active");
   assert.strictEqual(generated.createdAt, dueStart.toISOString(), "cron generated daily raffle starts at scheduled time");
   assert.strictEqual(generated.endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "cron generated daily raffle keeps duration");
+  assert.strictEqual(generated.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cron generated daily raffle uses canonical cash series");
 }
 
 async function testRaffleDuplicateOptions(redis) {
