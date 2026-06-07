@@ -36,6 +36,11 @@ function pokerRafflesLooksLikeTelegramLogin(raw, telegramUsername) {
   return !!(tgLogin && normalized.toLowerCase() === tgLogin.toLowerCase());
 }
 
+function pokerRafflesIsManualPlaceholderUserId(raw) {
+  var uid = raw != null ? String(raw).trim() : "";
+  return /^manual_raffle_[a-f0-9]+$/i.test(uid);
+}
+
 function pokerRafflesParticipantPublicName(p, showTelegramLogins) {
   var raw = p && p.name != null ? String(p.name).trim() : "";
   if (raw === "Участник") return "";
@@ -43,12 +48,99 @@ function pokerRafflesParticipantPublicName(p, showTelegramLogins) {
   return raw;
 }
 
+function pokerRafflesParticipantIdentityKeys(p) {
+  if (!p) return [];
+  var keys = [];
+  var seen = {};
+  function add(prefix, value) {
+    var text = value != null ? String(value).trim() : "";
+    if (!text) return;
+    var key = prefix + ":" + text.toLowerCase();
+    if (seen[key]) return;
+    seen[key] = true;
+    keys.push(key);
+  }
+  add("p21", p.p21Id || p.poker21Id || p.pokerPlusId);
+  add("account", p.accountId || p.dtId || p.memberId);
+  var uid = p.userId != null ? String(p.userId).trim() : "";
+  if (uid && !pokerRafflesIsManualPlaceholderUserId(uid)) add("user", uid);
+  var tg = pokerRafflesNormalizeTelegramLogin(p.telegramUsername || p.telegram || p.telegramLogin);
+  if (tg) add("tg", tg);
+  var name = pokerRafflesParticipantPublicName(p, true);
+  if (p.manualRaffleParticipant === true && name && name !== "Участник") add("manual-name", name);
+  if (uid && !keys.length) add("row", uid);
+  return keys;
+}
+
+function pokerRafflesParticipantCanOpenProfile(p) {
+  var uid = p && p.userId != null ? String(p.userId).trim() : "";
+  return !!(uid && (uid.indexOf("tg_") === 0 || uid.indexOf("vk_") === 0));
+}
+
+function pokerRafflesMergeParticipantForDisplay(base, row) {
+  var merged = Object.assign({}, base || {});
+  var ticketCount =
+    pokerRafflesParticipantTicketCount(base) +
+    pokerRafflesParticipantTicketCount(row);
+  if (!pokerRafflesParticipantCanOpenProfile(merged) && pokerRafflesParticipantCanOpenProfile(row)) {
+    merged.userId = row.userId;
+  }
+  [
+    "accountId",
+    "p21Id",
+    "poker21Id",
+    "pokerPlusId",
+    "name",
+    "telegramUsername",
+    "pokerPlusNickname",
+    "pokerPlusStatusLevel"
+  ].forEach(function (key) {
+    var current = merged[key] != null ? String(merged[key]).trim() : "";
+    var next = row && row[key] != null ? String(row[key]).trim() : "";
+    if ((!current || current === "Участник") && next) merged[key] = row[key];
+  });
+  merged.ticketCount = ticketCount;
+  merged.entryTicketCount = ticketCount;
+  merged.raffleTickets = ticketCount;
+  return merged;
+}
+
+function pokerRafflesGroupParticipantsForDisplay(parts) {
+  var rows = Array.isArray(parts) ? parts : [];
+  var groups = [];
+  var byKey = {};
+  rows.forEach(function (row, index) {
+    var keys = pokerRafflesParticipantIdentityKeys(row);
+    var groupIndex = -1;
+    keys.some(function (key) {
+      if (byKey[key] != null) {
+        groupIndex = byKey[key];
+        return true;
+      }
+      return false;
+    });
+    if (groupIndex < 0) {
+      groupIndex = groups.length;
+      groups.push(Object.assign({}, row || {}));
+      if (!keys.length) keys.push("display-row:" + index);
+    } else {
+      groups[groupIndex] = pokerRafflesMergeParticipantForDisplay(groups[groupIndex], row || {});
+    }
+    keys.forEach(function (key) {
+      byKey[key] = groupIndex;
+    });
+  });
+  return groups;
+}
+
 function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
   var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
   var uid0 = String(p.userId != null ? p.userId : "").trim();
   var raffleIdText = p.p21Id != null && String(p.p21Id).trim()
     ? String(p.p21Id).trim()
-    : (p.accountId != null && String(p.accountId).trim() ? String(p.accountId).trim() : uid0);
+    : (p.accountId != null && String(p.accountId).trim()
+      ? String(p.accountId).trim()
+      : (pokerRafflesIsManualPlaceholderUserId(uid0) ? "" : uid0));
   var pokerNick = p && p.pokerPlusNickname != null ? String(p.pokerPlusNickname).trim() : "";
   if (pokerNick === "Участник") pokerNick = "";
   if (pokerNick && raffleIdText && pokerNick === raffleIdText) pokerNick = "";
@@ -65,6 +157,7 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
   var mainLine = !namePart
     ? pokerRafflesEscapeHtml(raffleIdText)
     : (raffleIdText ? namePart + " — " + pokerRafflesEscapeHtml(raffleIdText) : namePart);
+  if (!mainLine) mainLine = "Участник";
   return (
     '<span class="raffle-participant-line">' +
     '<span class="raffle-participant-line__main">' +
@@ -125,23 +218,57 @@ function pokerRafflesParticipantFishLevelHtml(p) {
   );
 }
 
+function pokerRafflesParticipantRemoveLabel(p, safeName) {
+  var uid = p && p.userId != null ? String(p.userId).trim() : "";
+  var accountId = p && p.accountId != null ? String(p.accountId).trim() : "";
+  var p21Id = p && (p.p21Id || p.poker21Id || p.pokerPlusId) != null ? String(p.p21Id || p.poker21Id || p.pokerPlusId).trim() : "";
+  var pokerNick = p && p.pokerPlusNickname != null ? String(p.pokerPlusNickname).trim() : "";
+  if (pokerNick === "Участник") pokerNick = "";
+  return safeName || pokerNick || p21Id || accountId || (pokerRafflesIsManualPlaceholderUserId(uid) ? "" : uid) || "участника";
+}
+
+function pokerRafflesParticipantRemoveButtonHtml(p, safeName) {
+  var uid = p && p.userId != null ? String(p.userId).trim() : "";
+  var accountId = p && p.accountId != null ? String(p.accountId).trim() : "";
+  var p21Id = p && (p.p21Id || p.poker21Id || p.pokerPlusId) != null ? String(p.p21Id || p.poker21Id || p.pokerPlusId).trim() : "";
+  var telegramUsername = pokerRafflesNormalizeTelegramLogin(p && (p.telegramUsername || p.telegram || p.telegramLogin));
+  var name = p && p.name != null ? String(p.name).trim() : "";
+  var label = pokerRafflesParticipantRemoveLabel(p, safeName);
+  return (
+    '<button type="button" class="raffle-participants__remove-btn" data-raffle-participant-remove="1"' +
+    ' data-user-id="' + pokerRafflesEscapeHtml(uid) + '"' +
+    ' data-account-id="' + pokerRafflesEscapeHtml(accountId) + '"' +
+    ' data-p21-id="' + pokerRafflesEscapeHtml(p21Id) + '"' +
+    ' data-telegram-username="' + pokerRafflesEscapeHtml(telegramUsername) + '"' +
+    ' data-participant-name="' + pokerRafflesEscapeHtml(name) + '"' +
+    ' data-participant-label="' + pokerRafflesEscapeHtml(label) + '"' +
+    ' aria-label="Удалить ' + pokerRafflesEscapeHtml(label) + '"' +
+    ' title="Удалить участника">×</button>'
+  );
+}
+
 function pokerRafflesParticipantLineHtml(p, showTelegramLogins) {
   var uid = String(p.userId != null ? p.userId : "").trim();
   var line = pokerRafflesParticipantDisplayLine(p, !!showTelegramLogins);
   var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
+  var removeHtml = showTelegramLogins ? pokerRafflesParticipantRemoveButtonHtml(p, safeName) : "";
+  var itemClass = "raffle-participants-item" + (removeHtml ? " raffle-participants-item--with-remove" : "");
+  var contentClass = "raffle-participants-item__content";
   if (!uid || (uid.indexOf("tg_") !== 0 && uid.indexOf("vk_") !== 0)) {
-    return "<li class=\"raffle-participants-item\">" + line + "</li>";
+    return "<li class=\"" + itemClass + "\"><span class=\"" + contentClass + "\">" + line + "</span>" + removeHtml + "</li>";
   }
   var dataName = safeName || (p && p.pokerPlusNickname != null ? String(p.pokerPlusNickname).trim() : "");
   if (dataName === "Участник") dataName = "";
   return (
-    "<li class=\"raffle-participants-item\"><button type=\"button\" class=\"raffle-participants__profile-btn\" data-user-id=\"" +
+    "<li class=\"" + itemClass + "\"><button type=\"button\" class=\"raffle-participants__profile-btn " + contentClass + "\" data-user-id=\"" +
     pokerRafflesEscapeHtml(uid) +
     "\" data-user-name=\"" +
     pokerRafflesEscapeHtml(dataName || "") +
     "\">" +
     line +
-    "</button></li>"
+    "</button>" +
+    removeHtml +
+    "</li>"
   );
 }
 

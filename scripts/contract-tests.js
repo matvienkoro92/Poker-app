@@ -772,6 +772,88 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleAdminRemoveParticipant(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const raffle = {
+    id: "contract_admin_remove",
+    title: "Contract admin remove",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [
+      {
+        userId: "manual_raffle_remove_me",
+        name: "Remove Me",
+        p21Id: "P21REMOVE",
+        ticketCount: 2,
+        entryTicketCount: 2,
+        manualRaffleParticipant: true,
+        ip: "10.10.0.1",
+        deviceId: "dev-remove-me",
+      },
+      {
+        userId: "manual_raffle_keep_me",
+        name: "Keep Me",
+        p21Id: "P21KEEP",
+        ticketCount: 1,
+        entryTicketCount: 1,
+        manualRaffleParticipant: true,
+        ip: "10.10.0.2",
+        deviceId: "dev-keep-me",
+      },
+    ],
+    winners: [],
+    status: "active",
+    ticketEntryMode: "admin",
+    drawMode: "weighted_tickets",
+    weightedTickets: true,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_admin_remove", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_admin_remove");
+  redis.h("poker_app:raffle_ips:contract_admin_remove").set("10.10.0.1", "manual_raffle_remove_me");
+  redis.h("poker_app:raffle_devices:contract_admin_remove").set("dev-remove-me", "manual_raffle_remove_me");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "adminRemoveParticipant",
+    raffleId: "contract_admin_remove",
+    p21Id: "P21REMOVE",
+  }));
+  assert.strictEqual(r.statusCode, 403, "raffle admin remove is admin-only");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminRemoveParticipant",
+    raffleId: "contract_admin_remove",
+    p21Id: "P21REMOVE",
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin remove succeeds");
+  assert.strictEqual(r.body.removedCount, 1, "raffle admin remove returns removed count");
+  assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin remove keeps other participants");
+  assert.strictEqual(r.body.raffle.participants[0].p21Id, "P21KEEP", "raffle admin remove removes selected participant");
+  assert.strictEqual(
+    redis.h("poker_app:raffle_ips:contract_admin_remove").has("10.10.0.1"),
+    false,
+    "raffle admin remove clears removed participant ip lock"
+  );
+  assert.strictEqual(
+    redis.h("poker_app:raffle_devices:contract_admin_remove").has("dev-remove-me"),
+    false,
+    "raffle admin remove clears removed participant device lock"
+  );
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminRemoveParticipant",
+    raffleId: "contract_admin_remove",
+    p21Id: "P21REMOVE",
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin remove is idempotent");
+  assert.strictEqual(r.body.alreadyRemoved, true, "raffle admin remove reports already removed participant");
+}
+
 async function testRaffleActiveListIncludesDailySibling(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -4403,6 +4485,7 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle admin remove participant", testRaffleAdminRemoveParticipant],
     ["raffle active list includes daily sibling", testRaffleActiveListIncludesDailySibling],
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
     ["raffle email account subscription gate", testRaffleEmailAccountSubscriptionGate],

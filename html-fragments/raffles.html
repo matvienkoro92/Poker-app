@@ -226,6 +226,27 @@
                       <button type="button" class="primary-button raffle-join-toggle-btn" id="raffleJoinToggleBtn" data-raffle-action="join">Участвовать</button>
                     </div>
                   </div>
+                  <form class="raffle-admin-ticket-form raffle-admin-ticket-form--hidden" id="raffleAdminTicketForm" aria-hidden="true">
+                    <div class="raffle-admin-ticket-form__grid">
+                      <label class="raffle-admin-ticket-form__field">
+                        <span>ID / ник</span>
+                        <input type="text" id="raffleAdminTicketP21Id" class="randomizer-input" maxlength="48" placeholder="Poker21 ID" />
+                      </label>
+                      <label class="raffle-admin-ticket-form__field">
+                        <span>Имя</span>
+                        <input type="text" id="raffleAdminTicketName" class="randomizer-input" maxlength="120" placeholder="Имя в списке" />
+                      </label>
+                      <label class="raffle-admin-ticket-form__field">
+                        <span>Telegram</span>
+                        <input type="text" id="raffleAdminTicketTelegram" class="randomizer-input" maxlength="40" placeholder="@username" />
+                      </label>
+                      <label class="raffle-admin-ticket-form__field raffle-admin-ticket-form__field--tickets">
+                        <span>Билетов</span>
+                        <input type="number" id="raffleAdminTicketCount" class="randomizer-input" min="1" max="1000" value="1" inputmode="numeric" />
+                      </label>
+                    </div>
+                    <button type="submit" class="raffle-admin-ticket-form__submit">Выдать билеты</button>
+                  </form>
                   <div class="raffle-info-block" id="raffleInfoBlock">
                     <button type="button" class="raffle-info-toggle-btn" id="raffleInfoToggleBtn" aria-expanded="false" aria-controls="raffleInfoPanel">
                       <span class="raffle-info-toggle-btn__icon" aria-hidden="true">i</span>
@@ -255,27 +276,6 @@
                   </div>
                   <h3 class="raffle-participants-title">Участники <span class="raffle-participants-count" id="raffleParticipantsCount">(0)</span></h3>
                   <p class="raffle-participants-chance" id="raffleParticipantsChance"></p>
-                  <form class="raffle-admin-ticket-form raffle-admin-ticket-form--hidden" id="raffleAdminTicketForm" aria-hidden="true">
-                    <div class="raffle-admin-ticket-form__grid">
-                      <label class="raffle-admin-ticket-form__field">
-                        <span>ID / ник</span>
-                        <input type="text" id="raffleAdminTicketP21Id" class="randomizer-input" maxlength="48" placeholder="Poker21 ID" />
-                      </label>
-                      <label class="raffle-admin-ticket-form__field">
-                        <span>Имя</span>
-                        <input type="text" id="raffleAdminTicketName" class="randomizer-input" maxlength="120" placeholder="Имя в списке" />
-                      </label>
-                      <label class="raffle-admin-ticket-form__field">
-                        <span>Telegram</span>
-                        <input type="text" id="raffleAdminTicketTelegram" class="randomizer-input" maxlength="40" placeholder="@username" />
-                      </label>
-                      <label class="raffle-admin-ticket-form__field raffle-admin-ticket-form__field--tickets">
-                        <span>Билетов</span>
-                        <input type="number" id="raffleAdminTicketCount" class="randomizer-input" min="1" max="1000" value="1" inputmode="numeric" />
-                      </label>
-                    </div>
-                    <button type="submit" class="raffle-admin-ticket-form__submit">Выдать билеты</button>
-                  </form>
                   <ul class="raffle-participants" id="raffleParticipants"></ul>
                   <div class="raffle-winners-wrap raffle-winners-wrap--hidden" id="raffleWinnersWrap">
                     <h3 class="raffle-winners-title">Победители</h3>

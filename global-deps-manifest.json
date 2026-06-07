@@ -762,6 +762,27 @@
       ]
     },
     {
+      "name": "pokerRafflesGroupParticipantsForDisplay",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-formatters.js"
+      ],
+      "consumedBy": [
+        "app-raffles-active-view.js",
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "pokerRafflesIsManualPlaceholderUserId",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles-formatters.js"
+      ],
+      "consumedBy": [
+        "app-raffles-completed.js"
+      ]
+    },
+    {
       "name": "updateProfileUserName",
       "domain": "profile",
       "exportedBy": [

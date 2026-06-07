@@ -1980,9 +1980,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   z-index: 3600;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: max(18px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+  padding: max(18px, env(safe-area-inset-top)) 12px calc(104px + env(safe-area-inset-bottom));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .raffle-active-info-modal--hidden {
   display: none !important;
@@ -1999,7 +2001,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   position: relative;
   z-index: 1;
   width: min(650px, calc(100vw - 24px));
-  max-height: min(82dvh, 740px);
+  max-height: calc(100dvh - max(18px, env(safe-area-inset-top)) - 104px - env(safe-area-inset-bottom));
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   padding: 16px;
@@ -2085,14 +2087,14 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .raffle-active-info-modal {
-    align-items: flex-end;
-    padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+    align-items: flex-start;
+    padding: max(10px, env(safe-area-inset-top)) 8px calc(104px + env(safe-area-inset-bottom));
   }
   .raffle-active-info-modal__box {
     width: 100%;
-    max-height: 86dvh;
+    max-height: calc(100dvh - max(10px, env(safe-area-inset-top)) - 104px - env(safe-area-inset-bottom));
     padding: 14px;
-    border-radius: 18px 18px 0 0;
+    border-radius: 18px;
   }
   .raffle-active-info-modal__title {
     margin-right: 40px;
@@ -4133,6 +4135,15 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-participants-chance { margin: 0 0 8px; font-size: 12px; color: var(--text-muted); }
 .raffle-participants { margin: 0 0 12px; padding-left: 20px; font-size: 13px; color: var(--text); }
 .raffle-participants-item { list-style: disc; margin-bottom: 4px; }
+.raffle-participants-item--with-remove {
+  position: relative;
+  min-height: 24px;
+  padding-right: 34px;
+}
+.raffle-participants-item__content {
+  display: block;
+  min-width: 0;
+}
 .raffle-participants__profile-btn {
   display: block;
   width: 100%;
@@ -4151,6 +4162,39 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-participants__profile-btn:focus-visible {
   color: var(--accent-2, #fb923c);
   outline: none;
+}
+.raffle-participants__remove-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  top: -2px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid rgba(248, 113, 113, 0.48);
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.26);
+  color: #fecaca;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.raffle-participants__remove-btn:hover,
+.raffle-participants__remove-btn:focus-visible {
+  border-color: rgba(248, 113, 113, 0.82);
+  background: rgba(153, 27, 27, 0.44);
+  color: #fff;
+  outline: none;
+}
+.raffle-participants__remove-btn:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 .raffle-admin-ticket-form {
   display: grid;

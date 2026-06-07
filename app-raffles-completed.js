@@ -247,6 +247,9 @@ function initRafflesCompletedRuntime(opts) {
 
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
+    var isManualPlaceholderUserId = typeof pokerRafflesIsManualPlaceholderUserId === "function"
+      ? pokerRafflesIsManualPlaceholderUserId(uidRaw)
+      : /^manual_raffle_[a-f0-9]+$/i.test(uidRaw);
     var uidAttr = escapeHtml(uidRaw);
     var winnerSlotId = String((w && (w.winnerReadySlotId || w.winnerSlotId)) || "").trim();
     var winnerSlotAttr = escapeHtml(winnerSlotId);
@@ -290,7 +293,9 @@ function initRafflesCompletedRuntime(opts) {
       : "";
     var raffleIdText = w.p21Id != null && String(w.p21Id).trim()
       ? String(w.p21Id).trim()
-      : (w.accountId != null && String(w.accountId).trim() ? String(w.accountId).trim() : uidRaw);
+      : (w.accountId != null && String(w.accountId).trim()
+        ? String(w.accountId).trim()
+        : (isManualPlaceholderUserId ? "" : uidRaw));
     var rawName = String(w.name || "").trim();
     if (rawName === "Участник") rawName = "";
     if (!isAdmin && typeof pokerRafflesLooksLikeTelegramLogin === "function" && pokerRafflesLooksLikeTelegramLogin(rawName, w.telegramUsername)) rawName = "";
@@ -299,7 +304,7 @@ function initRafflesCompletedRuntime(opts) {
       primaryHtml = raffleParticipantDisplayLine(w, false);
     }
     if (!primaryHtml) {
-      var primaryLabel = rawName || raffleIdText || uidRaw || "Игрок";
+      var primaryLabel = rawName || raffleIdText || (isManualPlaceholderUserId ? "" : uidRaw) || "Игрок";
       primaryHtml = escapeHtml(raffleIdText && primaryLabel !== raffleIdText ? primaryLabel + " — " + raffleIdText : primaryLabel);
     }
     var tgLogin = w.telegramUsername != null ? String(w.telegramUsername).trim().replace(/^@+/g, "") : "";
@@ -322,7 +327,7 @@ function initRafflesCompletedRuntime(opts) {
         ? escapeHtml(rawName) + (adminPokerNick ? " (" + escapeHtml(adminPokerNick) + ")" : "")
         : (adminPokerNick ? escapeHtml(adminPokerNick) : "");
       var adminMainLine = !adminNamePart
-        ? escapeHtml(raffleIdText || uidRaw || "Игрок")
+        ? escapeHtml(raffleIdText || (isManualPlaceholderUserId ? "" : uidRaw) || "Игрок")
         : (raffleIdText ? adminNamePart + " — " + escapeHtml(raffleIdText) : adminNamePart);
       var adminFishLevelHtml = typeof pokerRafflesParticipantFishLevelHtml === "function"
         ? pokerRafflesParticipantFishLevelHtml(w)

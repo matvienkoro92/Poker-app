@@ -196,11 +196,14 @@ function initRafflesActiveViewRuntime(opts) {
     }
     if (raffleJoinedMsg) raffleJoinedMsg.classList.toggle("raffle-joined-msg--hidden", !iAmIn);
     var parts = raffle.participants || [];
-    if (raffleParticipantsCount) raffleParticipantsCount.textContent = "(" + parts.length + ")";
+    var displayParts = typeof pokerRafflesGroupParticipantsForDisplay === "function"
+      ? pokerRafflesGroupParticipantsForDisplay(parts)
+      : parts;
+    if (raffleParticipantsCount) raffleParticipantsCount.textContent = "(" + displayParts.length + ")";
     var chancePct = "";
-    var totalTickets = typeof raffleParticipantsTotalTickets === "function" ? raffleParticipantsTotalTickets(parts) : parts.length;
-    var myTickets = typeof raffleViewerTicketCount === "function" ? raffleViewerTicketCount(parts, raffleIds) : 0;
-    var usesTicketWeights = typeof raffleUsesTicketWeights === "function" && raffleUsesTicketWeights(raffle);
+    var totalTickets = typeof raffleParticipantsTotalTickets === "function" ? raffleParticipantsTotalTickets(displayParts) : displayParts.length;
+    var myTickets = typeof raffleViewerTicketCount === "function" ? raffleViewerTicketCount(displayParts, raffleIds) : 0;
+    var usesTicketWeights = (typeof raffleUsesTicketWeights === "function" && raffleUsesTicketWeights(raffle)) || totalTickets > displayParts.length;
     if (usesTicketWeights && totalTickets > 0) {
       var ticketsWord = typeof raffleTicketWord === "function" ? raffleTicketWord(totalTickets) : "билетов";
       if (myTickets > 0) {
@@ -210,8 +213,8 @@ function initRafflesActiveViewRuntime(opts) {
       } else {
         chancePct = "В пуле " + totalTickets + " " + ticketsWord + ". Рандомайзер выбирает среди всех билетов.";
       }
-    } else if (parts.length > 0 && total > 0) {
-      var pct = Math.min(100, (total / parts.length) * 100);
+    } else if (displayParts.length > 0 && total > 0) {
+      var pct = Math.min(100, (total / displayParts.length) * 100);
       chancePct = "Ваш шанс выиграть: " + (pct >= 100 ? "100" : pct.toFixed(1)) + "%";
     }
     if (raffleParticipantsChance) {
@@ -225,9 +228,9 @@ function initRafflesActiveViewRuntime(opts) {
       raffleAdminTicketForm.setAttribute("aria-hidden", showTicketForm ? "false" : "true");
     }
     raffleParticipants.innerHTML =
-      parts.length === 0
+      displayParts.length === 0
         ? "<li class=\"raffle-participants-empty\">Пока никого</li>"
-        : parts.map(function (p) {
+        : displayParts.map(function (p) {
             return raffleParticipantLineHtml(p, rafflesIsAdmin);
           }).join("");
     if (raffle.status === "drawn" && raffle.winners && raffle.winners.length > 0) {

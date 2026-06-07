@@ -840,7 +840,11 @@ function initRaffles() {
   }
 
   function activeRaffleParticipantsCount(raffle) {
-    if (Array.isArray(raffle && raffle.participants)) return raffle.participants.length;
+    if (Array.isArray(raffle && raffle.participants)) {
+      return typeof pokerRafflesGroupParticipantsForDisplay === "function"
+        ? pokerRafflesGroupParticipantsForDisplay(raffle.participants).length
+        : raffle.participants.length;
+    }
     var raw = raffle && (
       raffle.participantsCount != null
         ? raffle.participantsCount
@@ -1599,6 +1603,67 @@ function initRaffles() {
           showRaffleFeedback(POKER_NET_ERR, "err");
           if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
         });
+    });
+  }
+
+  function handleRaffleParticipantRemove(btn) {
+    if (!btn || !rafflesIsAdmin || !currentRaffleId || !base) return;
+    var payload = {
+      action: "adminRemoveParticipant",
+      raffleId: currentRaffleId,
+      userId: btn.getAttribute("data-user-id") || "",
+      accountId: btn.getAttribute("data-account-id") || "",
+      p21Id: btn.getAttribute("data-p21-id") || "",
+      telegramUsername: btn.getAttribute("data-telegram-username") || "",
+      name: btn.getAttribute("data-participant-name") || "",
+    };
+    if (!payload.userId && !payload.accountId && !payload.p21Id && !payload.telegramUsername && !payload.name) {
+      var missingMsg = "Не удалось определить участника для удаления";
+      showRaffleFeedback(missingMsg, "err");
+      if (tg && tg.showAlert) tg.showAlert(missingMsg);
+      return;
+    }
+    var label = (btn.getAttribute("data-participant-label") || "").trim() || "участника";
+    confirmRaffleAdminAction("Удалить " + label + " из розыгрыша?", function () {
+      var prevText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "…";
+      fetch(base + "/api/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerGuestOrAuthedPostBody(payload)),
+      })
+        .then(parseRaffleActionResponse)
+        .then(function (data) {
+          btn.disabled = false;
+          btn.textContent = prevText || "×";
+          if (data && data.ok && data.raffle) {
+            refreshActiveChooserAfterAction(data.raffle);
+            renderRaffle(data.raffle);
+            showRaffleFeedback(data.alreadyRemoved ? "Участника уже нет в списке." : "Участник удалён из розыгрыша.", "ok");
+            return;
+          }
+          var err = (data && data.error) || "Не удалось удалить участника";
+          showRaffleFeedback(err, "err");
+          if (tg && tg.showAlert) tg.showAlert(err);
+        })
+        .catch(function () {
+          btn.disabled = false;
+          btn.textContent = prevText || "×";
+          showRaffleFeedback(POKER_NET_ERR, "err");
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
+    });
+  }
+
+  if (raffleParticipants && raffleParticipants.dataset.removeBound !== "1") {
+    raffleParticipants.dataset.removeBound = "1";
+    raffleParticipants.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-raffle-participant-remove]") : null;
+      if (!btn || !raffleParticipants.contains(btn)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      handleRaffleParticipantRemove(btn);
     });
   }
 
