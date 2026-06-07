@@ -1026,6 +1026,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser__item--active,
 .raffles-active-chooser__item[aria-selected="true"] {
+  z-index: 3;
   transform: translateY(-3px);
   border-color: var(--raffles-active-card-accent);
   outline: 2px solid rgba(255, 249, 219, 0.18);
@@ -3403,35 +3404,47 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
 }
 .raffles-active-chooser:has(.raffles-active-chooser__item--active) .raffles-active-chooser__item:not(.raffles-active-chooser__item--active),
-.raffles-active-chooser:has(.raffles-active-chooser__item[aria-selected="true"]) .raffles-active-chooser__item:not([aria-selected="true"]),
+.raffles-active-chooser:has(.raffles-active-chooser__item[aria-selected="true"]) .raffles-active-chooser__item:not([aria-selected="true"]) {
+  opacity: 0.72;
+  filter: saturate(0.58) brightness(0.72) contrast(0.96);
+}
 .raffles-active-chooser:has(.raffles-active-chooser__item--active) .raffles-active-chooser__item:not(.raffles-active-chooser__item--active):hover,
 .raffles-active-chooser:has(.raffles-active-chooser__item[aria-selected="true"]) .raffles-active-chooser__item:not([aria-selected="true"]):hover {
-  opacity: 1;
-  filter: none;
+  opacity: 0.82;
+  filter: saturate(0.7) brightness(0.82) contrast(0.98);
 }
 .raffles-active-chooser__fact--countdown {
-  border-color: rgba(255, 232, 166, 0.58);
+  border-color: rgba(255, 232, 166, 0.78);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 232, 166, 0.26), transparent 62%),
-    linear-gradient(180deg, rgba(255, 246, 220, 0.12), rgba(255, 232, 166, 0.05));
+    radial-gradient(circle at 50% 0%, rgba(255, 232, 166, 0.34), transparent 58%),
+    linear-gradient(180deg, rgba(255, 246, 220, 0.2), rgba(255, 232, 166, 0.09)),
+    rgba(5, 6, 12, 0.68);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 0 18px rgba(255, 213, 127, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.28),
+    0 0 24px rgba(255, 213, 127, 0.22);
 }
 .raffles-active-chooser__countdown-label,
 .raffles-active-chooser__countdown-units {
-  color: rgba(255, 246, 224, 0.98);
-  opacity: 1;
-  filter: none;
-}
-.raffles-active-chooser__countdown-digits,
-.raffles-active-chooser__countdown-separator {
-  color: #fffdf4;
+  color: #fff0c4;
   opacity: 1;
   filter: none;
   text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.58),
-    0 0 18px rgba(255, 232, 166, 0.42);
+    0 1px 0 rgba(0, 0, 0, 0.72),
+    0 0 10px rgba(255, 232, 166, 0.42);
+}
+.raffles-active-chooser__countdown-digits,
+.raffles-active-chooser__countdown-separator {
+  color: #fffefa;
+  opacity: 1;
+  filter: none;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(255, 255, 255, 0.38),
+    0 0 22px rgba(255, 232, 166, 0.54);
+}
+.raffles-active-chooser__item:not([aria-selected="true"]) .raffles-active-chooser__fact--countdown {
+  filter: brightness(1.18) saturate(1.12);
 }
 .raffles-active-chooser__detail-pill:only-child {
   grid-column: 1 / -1;
