@@ -2941,6 +2941,322 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     font-size: 10px;
   }
 }
+.raffles-active-chooser {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child,
+.raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout {
+  grid-column: auto;
+}
+.raffles-active-chooser__item,
+.raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout {
+  min-height: 430px;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 17px;
+}
+.raffles-active-chooser__item:only-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 420px;
+}
+.raffles-active-chooser__head {
+  gap: 6px;
+}
+.raffles-active-chooser__badge,
+.raffles-active-chooser__badge--main {
+  min-height: 24px;
+  padding: 5px 10px 4px;
+  font-size: 10px;
+}
+.raffles-active-chooser__results-time {
+  font-size: 9px;
+  line-height: 1.05;
+}
+.raffles-active-chooser__body {
+  gap: 8px;
+}
+.raffles-active-chooser__hero-line--count {
+  font-size: 14px;
+  line-height: 1.05;
+}
+.raffles-active-chooser__hero-line--kind {
+  font-size: 27px;
+  line-height: 0.95;
+}
+.raffles-active-chooser__hero-line--amount {
+  font-size: 42px;
+  line-height: 0.92;
+}
+.raffles-active-chooser__buyin-tiles,
+.raffles-active-chooser__detail-pills {
+  gap: 6px;
+}
+.raffles-active-chooser__buyin-tile {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px;
+  min-height: 58px;
+  padding: 7px 6px;
+  border-radius: 12px;
+}
+.raffles-active-chooser__buyin-tile-icon {
+  width: 22px;
+  height: 22px;
+}
+.raffles-active-chooser__buyin-tile-icon::after {
+  inset: 7px;
+}
+.raffles-active-chooser__buyin-tile-text,
+.raffles-active-chooser__detail-pill {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.08;
+}
+.raffles-active-chooser__buyin-tile-text span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.raffles-active-chooser__detail-pill {
+  min-height: 50px;
+  padding: 7px 6px;
+  border-radius: 12px;
+}
+.raffles-active-chooser__facts,
+.raffles-active-chooser__facts--with-participants {
+  gap: 7px;
+}
+.raffles-active-chooser__fact--participants {
+  min-height: 33px;
+  padding: 4px 4px 4px 10px;
+  gap: 5px;
+}
+.raffles-active-chooser__participants-track {
+  flex-basis: 50px;
+  min-width: 36px;
+  max-width: 34%;
+  height: 4px;
+}
+.raffles-active-chooser__participants-label {
+  font-size: 8px;
+}
+.raffles-active-chooser__participants-icon {
+  flex-basis: 30px;
+  min-height: 24px;
+  font-size: 14px;
+}
+.raffles-active-chooser__fact--countdown {
+  min-height: 86px;
+  gap: 4px;
+  padding: 10px 8px 8px;
+  border-radius: 14px;
+}
+.raffles-active-chooser__countdown-label {
+  font-size: 9px;
+}
+.raffles-active-chooser__countdown-digits {
+  font-size: 31px;
+}
+.raffles-active-chooser__countdown-separator {
+  padding: 0 1px;
+}
+.raffles-active-chooser__countdown-units {
+  font-size: 7px;
+}
+.raffles-active-chooser__cta,
+.raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+  min-height: 48px;
+  padding: 9px 8px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+.raffles-active-chooser__cta--locked,
+.raffles-active-chooser__cta--locked:disabled {
+  min-height: 48px;
+  font-size: 9px;
+  line-height: 1.05;
+}
+.raffles-active-chooser__info-toggle {
+  min-height: 42px;
+  gap: 7px;
+  padding: 7px 9px;
+  border-radius: 14px;
+}
+.raffles-active-chooser__info-icon {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+}
+.raffles-active-chooser__info-copy {
+  font-size: 9px;
+}
+.raffles-active-chooser__info-copy span + span {
+  font-size: 7px;
+}
+@media (max-width: 760px) {
+  .raffles-active-chooser {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .raffles-active-chooser__item,
+  .raffles-active-chooser__item:only-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout {
+    justify-self: stretch;
+    max-width: none;
+  }
+  .raffles-active-chooser__item:only-child {
+    justify-self: center;
+    max-width: 420px;
+  }
+}
+@media (max-width: 430px) {
+  .raffles-active-chooser__item,
+  .raffles-active-chooser__item:only-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout {
+    min-height: 390px;
+    gap: 6px;
+    padding: 7px;
+    border-radius: 14px;
+  }
+  .raffles-active-chooser__badge,
+  .raffles-active-chooser__badge--main {
+    min-height: 21px;
+    padding: 4px 7px 3px;
+    font-size: 8px;
+  }
+  .raffles-active-chooser__results-time {
+    font-size: 7px;
+  }
+  .raffles-active-chooser__body {
+    gap: 6px;
+  }
+  .raffles-active-chooser__hero-line--count {
+    font-size: 11px;
+  }
+  .raffles-active-chooser__hero-line--kind {
+    font-size: 20px;
+  }
+  .raffles-active-chooser__hero-line--amount {
+    font-size: 30px;
+  }
+  .raffles-active-chooser__buyin-tiles,
+  .raffles-active-chooser__detail-pills {
+    gap: 5px;
+  }
+  .raffles-active-chooser__buyin-tile {
+    min-height: 49px;
+    gap: 4px;
+    padding: 6px 5px;
+    border-radius: 10px;
+  }
+  .raffles-active-chooser__buyin-tile-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .raffles-active-chooser__buyin-tile-icon::after {
+    inset: 6px;
+  }
+  .raffles-active-chooser__buyin-tile-text,
+  .raffles-active-chooser__detail-pill {
+    font-size: 7.2px;
+  }
+  .raffles-active-chooser__detail-pill {
+    min-height: 43px;
+    padding: 6px 4px;
+    border-radius: 10px;
+  }
+  .raffles-active-chooser__fact--participants {
+    min-height: 28px;
+    padding-left: 8px;
+    gap: 4px;
+  }
+  .raffles-active-chooser__participants-track {
+    flex-basis: 33px;
+    min-width: 26px;
+    max-width: 28%;
+  }
+  .raffles-active-chooser__participants-label {
+    font-size: 6.7px;
+  }
+  .raffles-active-chooser__participants-icon {
+    flex-basis: 24px;
+    min-height: 20px;
+    font-size: 12px;
+  }
+  .raffles-active-chooser__fact--countdown {
+    min-height: 72px;
+    gap: 3px;
+    padding: 8px 6px 7px;
+    border-radius: 12px;
+  }
+  .raffles-active-chooser__countdown-label {
+    font-size: 7px;
+  }
+  .raffles-active-chooser__countdown-digits {
+    font-size: 23px;
+  }
+  .raffles-active-chooser__countdown-units {
+    font-size: 6px;
+  }
+  .raffles-active-chooser__cta,
+  .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+    min-height: 40px;
+    padding: 7px 5px;
+    border-radius: 13px;
+    font-size: 10px;
+  }
+  .raffles-active-chooser__cta--locked,
+  .raffles-active-chooser__cta--locked:disabled {
+    font-size: 7px;
+  }
+  .raffles-active-chooser__info-toggle {
+    min-height: 36px;
+    gap: 5px;
+    padding: 6px 7px;
+    border-radius: 12px;
+  }
+  .raffles-active-chooser__info-icon {
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+  .raffles-active-chooser__info-copy {
+    font-size: 7px;
+  }
+  .raffles-active-chooser__info-copy span + span {
+    font-size: 6px;
+  }
+}
+@media (max-width: 350px) {
+  .raffles-active-chooser {
+    gap: 6px;
+  }
+  .raffles-active-chooser__item,
+  .raffles-active-chooser__item:only-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child,
+  .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout {
+    min-height: 374px;
+    padding: 6px;
+  }
+  .raffles-active-chooser__hero-line--amount {
+    font-size: 26px;
+  }
+  .raffles-active-chooser__hero-line--kind {
+    font-size: 18px;
+  }
+  .raffles-active-chooser__countdown-digits {
+    font-size: 20px;
+  }
+  .raffles-active-chooser__buyin-tile-text,
+  .raffles-active-chooser__detail-pill {
+    font-size: 6.4px;
+  }
+}
 .raffle-loading__spinner {
   display: inline-block;
   width: 20px;
