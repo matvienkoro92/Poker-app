@@ -835,6 +835,90 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleParticipantsCount(raffle) {
+    if (Array.isArray(raffle && raffle.participants)) return raffle.participants.length;
+    var raw = raffle && (
+      raffle.participantsCount != null
+        ? raffle.participantsCount
+        : raffle.participants_count != null
+          ? raffle.participants_count
+          : raffle.participantCount
+    );
+    var count = parseInt(raw, 10);
+    return isFinite(count) && count > 0 ? count : 0;
+  }
+
+  function activeRaffleParticipantWord(count) {
+    var n = Math.abs(parseInt(count, 10) || 0);
+    var mod100 = n % 100;
+    var mod10 = n % 10;
+    if (mod100 >= 11 && mod100 <= 19) return "участников";
+    if (mod10 === 1) return "участник";
+    if (mod10 >= 2 && mod10 <= 4) return "участника";
+    return "участников";
+  }
+
+  function activeRaffleParticipantsScaleFill(count) {
+    var n = Math.max(0, parseInt(count, 10) || 0);
+    if (!n) return 8;
+    return Math.max(18, Math.min(84, Math.round(18 + Math.log(n + 1) * 12)));
+  }
+
+  function activeRaffleSumTitleHtml(raffle, totalPrize) {
+    var sum = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
+    return (
+      '<span class="raffles-active-chooser__sum-kicker">Розыгрыш</span> ' +
+      '<span class="raffles-active-chooser__sum-amount">' +
+      escapeHtml(sum > 0 ? activeRaffleRubText(sum) : activeRaffleShortTitle(raffle)) +
+      "</span>"
+    );
+  }
+
+  function activeRaffleDetailPillLabels(raffle) {
+    var labels = [];
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    var knockoutCard = activeRaffleIsKnockoutTicketCard(raffle);
+    if (knockoutCard) {
+      var winners = activeRaffleWinnersCount(raffle) || 3;
+      var nominal = groups.length ? parsePrizeValue(groups[0] && groups[0].prize) : 10000;
+      if (!nominal) nominal = 10000;
+      var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim() || "700 000р";
+      labels.push(winners + " " + pokerRafflesTicketWord(winners) + " за " + activeRaffleRubText(nominal));
+      labels.push("Нокаут · гарантия " + guarantee);
+      return labels;
+    }
+    var compactTitle = activeRaffleChooserPrizeTitle(raffle);
+    if (compactTitle) labels.push(compactTitle.replace(/\s*₽/g, "р"));
+    if (isCashPrize) {
+      activeRaffleBuyinChipLabels(raffle).forEach(function (label) {
+        if (labels.indexOf(label) === -1) labels.push(label);
+      });
+      return labels;
+    }
+    groups.forEach(function (group) {
+      var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+      var prize = raffleDisplayPrizeText(String(group && group.prize || "").replace(/\s+/g, " ").trim());
+      if (!count || !prize) return;
+      var label = count + " " + pokerRafflesTicketWord(count) + " за " + prize.replace(/\s*₽/g, "р");
+      if (labels.indexOf(label) === -1) labels.push(label);
+    });
+    if (!labels.length) labels.push(activeRafflePrizeLabel(raffle));
+    return labels;
+  }
+
+  function activeRaffleDetailPillsHtml(raffle) {
+    var labels = activeRaffleDetailPillLabels(raffle);
+    if (!labels.length) return "";
+    return (
+      '<span class="raffles-active-chooser__detail-pills">' +
+      labels.map(function (label) {
+        return '<span class="raffles-active-chooser__detail-pill">' + escapeHtml(label) + "</span>";
+      }).join("") +
+      "</span>"
+    );
+  }
+
   function activeRaffleCashTitleHtml(raffle, totalPrize) {
     var title = activeRaffleShortTitle(raffle).replace(/\s+/g, " ").trim();
     var amountText = formatRaffleSum(totalPrize || getRaffleTotalPrize(raffle));
@@ -1179,19 +1263,12 @@ function initRaffles() {
         var endDate = raffle && raffle.endDate ? new Date(raffle.endDate) : null;
         var endMs = endDate && !isNaN(endDate.getTime()) ? endDate.getTime() : 0;
         var totalPrize = getRaffleTotalPrize(raffle);
-        var winners = activeRaffleWinnersCount(raffle);
         var isIn = activeRaffleParticipantIn(raffle, viewerIds);
         var adminTicketEntry = raffleUsesAdminTicketEntry(raffle);
         var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
-        var guaranteeText = activeRaffleGuaranteeText(raffle);
         var knockoutCard = activeRaffleIsKnockoutTicketCard(raffle);
-        if (knockoutCard) guaranteeText = "";
-        var buyinChipLabels = activeRaffleBuyinChipLabels(raffle);
-        var buyinChipsHtml = buyinChipLabels
-          .map(function (label) {
-            return '<span class="raffles-active-chooser__buyin-chip">' + escapeHtml(label) + "</span>";
-          })
-          .join("");
+        var participantCount = activeRaffleParticipantsCount(raffle);
+        var participantWord = activeRaffleParticipantWord(participantCount);
         var buttonLabel = adminTicketEntry ? "Участников добавляет админ" : needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
         var buttonAction = adminTicketEntry ? "locked" : needsLogin ? "login" : isIn ? "leave" : "join";
         var buttonPressed = !adminTicketEntry && !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
@@ -1210,39 +1287,24 @@ function initRaffles() {
                 : "") +
               "</span>"
             );
-        var titleClass = "raffles-active-chooser__title" + (isCashPrize ? " raffles-active-chooser__title--cash" : "");
-        var titleHtml = knockoutCard
-          ? '<span class="raffles-active-chooser__title raffles-active-chooser__title--knockout">' + activeRaffleKnockoutTitle(raffle) + "</span>"
-          : isCashPrize
-            ? '<span class="' + titleClass + '">' + activeRaffleCashTitleHtml(raffle, totalPrize) + "</span>"
-          : '<span class="' + titleClass + '">' + escapeHtml(activeRaffleShortTitle(raffle)) + "</span>";
-        var labelHtml = knockoutCard
-          ? '<span class="raffles-active-chooser__label raffles-active-chooser__label--knockout">' + activeRaffleKnockoutLabelHtml(raffle) + "</span>"
-          : (
-              isCashPrize
-                ? ""
-                : '<span class="raffles-active-chooser__label raffles-active-chooser__label--ticket-details">' + activeRaffleTicketPrizeDetailsHtml(raffle) + "</span>"
-            );
-        var amountHtml = knockoutCard || isCashPrize
-          ? ""
-          : '<span class="raffles-active-chooser__amount">' + escapeHtml(formatRaffleSum(totalPrize)) + "</span>";
+        var titleHtml = '<span class="raffles-active-chooser__title raffles-active-chooser__title--sum">' + activeRaffleSumTitleHtml(raffle, totalPrize) + "</span>";
+        var detailPillsHtml = activeRaffleDetailPillsHtml(raffle);
+        var participantsHtml =
+          '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--participants" aria-label="' +
+          escapeHtml(participantCount + " " + participantWord) +
+          '" style="--raffles-participants-fill: ' +
+          escapeHtml(activeRaffleParticipantsScaleFill(participantCount)) +
+          '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-label">Участников: <strong>' +
+          escapeHtml(participantCount) +
+          '</strong></span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span>' +
+          "</span></span>";
         var timerHtml =
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--timer"><span class="raffles-active-chooser__fact-icon">⏱</span><span class="raffles-active-chooser__timer-label">Осталось </span><span data-raffle-active-timer="' +
           escapeHtml(endMs) +
           '">' +
           escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || "Завершён") : "—") +
           "</span></span>";
-        var factsHtml = knockoutCard
-          ? timerHtml
-          : (
-              buyinChipsHtml ||
-              ('<span class="raffles-active-chooser__fact" aria-label="' +
-                escapeHtml(winners + " победителей") +
-                '"><span class="raffles-active-chooser__fact-icon">#</span><span class="raffles-active-chooser__fact-count">' +
-                escapeHtml(winners) +
-                '</span><span class="raffles-active-chooser__fact-word"> победителей</span>' +
-                "</span>")
-            ) + timerHtml;
+        var factsHtml = participantsHtml + timerHtml;
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
@@ -1258,15 +1320,9 @@ function initRaffles() {
           '<span class="raffles-active-chooser__body">' +
           (knockoutCard ? '<span class="raffles-active-chooser__main-badge">Главный розыгрыш</span>' : "") +
           titleHtml +
-          labelHtml +
-          (knockoutCard ? activeRaffleKnockoutInfoHtml() : "") +
-          (guaranteeText ? '<span class="raffles-active-chooser__guarantee">' + escapeHtml(guaranteeText) + "</span>" : "") +
-          amountHtml +
+          detailPillsHtml +
           "</span>" +
-          '<span class="raffles-active-chooser__facts' +
-          (buyinChipsHtml ? " raffles-active-chooser__facts--promo" : "") +
-          (knockoutCard ? " raffles-active-chooser__facts--timer-only" : "") +
-          '">' +
+          '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
           '<button type="button" class="raffles-active-chooser__cta' +
@@ -2276,6 +2332,7 @@ function initRaffles() {
       tg: tg,
       showRaffleFeedback: showRaffleFeedback,
       renderRaffle: renderRaffle,
+      refreshActiveChooserAfterAction: refreshActiveChooserAfterAction,
       rafflesViewerIsGuestOnly: rafflesViewerIsGuestOnly,
       rafflesViewerApiReady: rafflesViewerApiReady,
       getRaffleDeviceId: getRaffleDeviceId,

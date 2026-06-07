@@ -88,6 +88,15 @@ function initRafflesPublicRuntime(opts) {
     if (typeof window.open === "function") window.open(url, "_blank");
   }
 
+  function renderRaffleAfterParticipation(data) {
+    if (data && data.raffle) {
+      if (typeof refreshActiveChooserAfterAction === "function") refreshActiveChooserAfterAction(data.raffle);
+      renderRaffle(data.raffle);
+      return;
+    }
+    if (currentRaffleData) renderRaffle(currentRaffleData);
+  }
+
   if (!document.documentElement.dataset.raffleTelegramLinksBound) {
     document.documentElement.dataset.raffleTelegramLinksBound = "1";
     document.addEventListener("click", function (e) {
@@ -128,8 +137,7 @@ function initRafflesPublicRuntime(opts) {
           .then(parseRaffleApiResponse)
           .then(function (data) {
             if (data && data.ok) {
-              if (data.raffle) renderRaffle(data.raffle);
-              else if (currentRaffleData) renderRaffle(currentRaffleData);
+              renderRaffleAfterParticipation(data);
               var leaveMsg = data.alreadyLeft ? "Вы не были в списке участников." : "Участие отменено.";
               showRaffleFeedback(leaveMsg, "ok");
             } else {
@@ -173,8 +181,7 @@ function initRafflesPublicRuntime(opts) {
         .then(parseRaffleApiResponse)
         .then(function (data) {
           if (data && data.ok) {
-            if (data.raffle) renderRaffle(data.raffle);
-            else if (currentRaffleData) renderRaffle(currentRaffleData);
+            renderRaffleAfterParticipation(data);
             showRaffleFeedback(data.alreadyJoined ? "Вы уже участвуете." : "Вы участвуете в розыгрыше.", "ok");
           } else {
             if (currentRaffleData) renderRaffle(currentRaffleData);

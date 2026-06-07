@@ -1,5 +1,10 @@
 // Summer rating season constants and external top links.
 
+var SUMMER_HOME_JUNE_DAYS_1_7 = ["01.06.2026", "02.06.2026", "03.06.2026", "04.06.2026", "05.06.2026", "06.06.2026", "07.06.2026"];
+var SUMMER_VIEW_JUNE_WEEK_BLOCKS = [
+  { label: "1—7 июня", dates: SUMMER_HOME_JUNE_DAYS_1_7 }
+];
+
 var SUMMER_RATING_SEASON = {
   key: "summer",
   view: "summer-rating",
@@ -23,9 +28,9 @@ var SUMMER_RATING_SEASON = {
   viewMonths: [
     { title: "Август", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: [] },
     { title: "Июль", totalId: "springRatingViewAprilTotal", weeksHostId: "springRatingViewAprilWeeks", blocks: [] },
-    { title: "Июнь", totalId: "springRatingViewMarchTotal", weeksHostId: "springRatingViewMarchWeeks", blocks: [] },
+    { title: "Июнь", totalId: "springRatingViewMarchTotal", weeksHostId: "springRatingViewMarchWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },
   ],
   pastWeekDates: [],
-  currentWeekDates: [],
+  currentWeekDates: SUMMER_HOME_JUNE_DAYS_1_7,
   nextWeekDates: [],
 };

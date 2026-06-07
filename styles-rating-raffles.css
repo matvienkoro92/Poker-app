@@ -1183,18 +1183,20 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   position: relative;
   z-index: 2;
   display: grid;
+  width: 100%;
   min-width: 0;
   align-content: start;
-  gap: 2px;
-  padding-right: 100px;
+  justify-items: center;
+  gap: 7px;
+  padding-right: 0;
 }
 .raffles-active-chooser__item--cash .raffles-active-chooser__body {
   padding-right: 0;
 }
 .raffles-active-chooser__item:only-child .raffles-active-chooser__body {
-  width: min(58%, 430px);
+  width: 100%;
   padding-right: 0;
-  gap: 3px;
+  gap: 8px;
   align-content: start;
 }
 .raffles-active-chooser__title {
@@ -1214,7 +1216,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   -webkit-box-orient: vertical;
   display: -webkit-box;
 }
-.raffles-active-chooser__body:not(:has(.raffles-active-chooser__title--cash, .raffles-active-chooser__title--knockout)) .raffles-active-chooser__title {
+.raffles-active-chooser__body:not(:has(.raffles-active-chooser__title--cash, .raffles-active-chooser__title--knockout, .raffles-active-chooser__title--sum)) .raffles-active-chooser__title {
   width: calc(100% + 100px);
   max-width: calc(100% + 100px);
 }
@@ -1256,6 +1258,46 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   text-shadow:
     0 2px 0 rgba(0, 0, 0, 0.78),
     0 0 18px rgba(255, 213, 127, 0.32);
+}
+.raffles-active-chooser__title--sum,
+.raffles-active-chooser__item:only-child .raffles-active-chooser__title--sum,
+.raffles-active-chooser__item--knockout .raffles-active-chooser__title--sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  gap: 2px 8px;
+  overflow: visible;
+  text-align: center;
+  -webkit-line-clamp: initial;
+  -webkit-box-orient: initial;
+  text-transform: uppercase;
+}
+.raffles-active-chooser__sum-kicker {
+  display: block;
+  color: rgba(255, 232, 166, 0.84);
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1;
+}
+.raffles-active-chooser__sum-amount {
+  display: block;
+  color: #fff7d8;
+  font-size: 30px;
+  font-weight: 1000;
+  line-height: 0.9;
+  overflow-wrap: anywhere;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.78),
+    0 0 20px rgba(255, 213, 127, 0.38);
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__sum-kicker {
+  font-size: 24px;
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__sum-amount {
+  font-size: 48px;
 }
 .raffles-active-chooser__knockout-title-kicker {
   display: block;
@@ -1343,7 +1385,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body,
 .raffles-active-chooser__item:only-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body {
-  width: min(66%, 520px);
+  width: 100%;
   padding-right: 0;
   gap: 7px;
 }
@@ -1427,6 +1469,47 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   padding: 6px 10px;
   font-size: clamp(12px, 1.8vw, 16px);
 }
+.raffles-active-chooser__detail-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+.raffles-active-chooser__detail-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 27px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 232, 166, 0.42);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 232, 166, 0.14), rgba(4, 7, 14, 0.74)),
+    rgba(4, 7, 14, 0.78);
+  color: rgba(255, 245, 210, 0.92);
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.raffles-active-chooser__item--cash .raffles-active-chooser__detail-pill {
+  border-color: rgba(245, 208, 254, 0.48);
+  background:
+    linear-gradient(180deg, rgba(245, 208, 254, 0.16), rgba(20, 7, 34, 0.76)),
+    rgba(8, 5, 20, 0.8);
+  color: #fbe8ff;
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__detail-pill {
+  min-height: 32px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
 .raffles-active-chooser__amount {
   color: #fff9dc;
   font-size: 30px;
@@ -1452,6 +1535,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__facts--timer-only {
   grid-template-columns: minmax(0, 1fr);
 }
+.raffles-active-chooser__facts--with-participants {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
 .raffles-active-chooser__item--knockout .raffles-active-chooser__facts--timer-only {
   align-self: end;
   width: 100%;
@@ -1475,6 +1562,88 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.raffles-active-chooser__fact--participants {
+  position: relative;
+  isolation: isolate;
+  justify-content: stretch;
+  gap: 8px;
+  min-height: 42px;
+  padding: 5px 5px 5px 18px;
+  border-color: rgba(255, 232, 166, 0.5);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 92% 50%, rgba(255, 232, 166, 0.3), transparent 30%),
+    linear-gradient(180deg, rgba(255, 232, 166, 0.11), rgba(27, 20, 34, 0.82)),
+    rgba(4, 6, 12, 0.78);
+  color: #fff1bf;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 1px rgba(255, 232, 166, 0.08),
+    0 0 20px rgba(168, 85, 247, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.raffles-active-chooser__item--cash .raffles-active-chooser__fact--participants {
+  border-color: rgba(245, 208, 254, 0.52);
+  background:
+    radial-gradient(circle at 92% 50%, rgba(245, 208, 254, 0.34), transparent 30%),
+    linear-gradient(180deg, rgba(245, 208, 254, 0.13), rgba(24, 11, 38, 0.84)),
+    rgba(6, 4, 18, 0.8);
+  color: #fbe8ff;
+}
+.raffles-active-chooser__participants-track {
+  position: relative;
+  flex: 1 1 92px;
+  max-width: 34%;
+  min-width: 52px;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 232, 166, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 166, 0.08);
+}
+.raffles-active-chooser__participants-track span {
+  display: block;
+  width: var(--raffles-participants-fill, 26%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8b5cf6, #d946ef);
+  box-shadow:
+    0 0 10px rgba(217, 70, 239, 0.76),
+    0 0 18px rgba(168, 85, 247, 0.42);
+}
+.raffles-active-chooser__participants-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 245, 221, 0.9);
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+.raffles-active-chooser__participants-label strong {
+  color: #fff9dc;
+  font-weight: 1000;
+}
+.raffles-active-chooser__participants-icon {
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  min-height: 30px;
+  margin: -3px -3px -3px 0;
+  border-left: 1px solid rgba(255, 232, 166, 0.26);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 232, 166, 0.42), transparent 48%),
+    linear-gradient(180deg, rgba(255, 232, 166, 0.16), rgba(45, 31, 20, 0.82));
+  color: #ffe8a6;
+  font-size: 19px;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(255, 232, 166, 0.42);
 }
 .raffles-active-chooser__buyin-chip {
   display: inline-flex;
@@ -1518,6 +1687,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     radial-gradient(circle at 50% 0%, rgba(245, 208, 254, 0.2), transparent 64%),
     rgba(4, 4, 14, 0.8);
   color: #fce7ff;
+}
+.raffles-active-chooser__item:only-child .raffles-active-chooser__fact--participants {
+  grid-column: 1 / -1;
+  min-height: 46px;
 }
 .raffles-active-chooser__facts--timer-only .raffles-active-chooser__fact--timer {
   grid-column: 1 / -1;
@@ -1883,10 +2056,21 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-current--inside-active-modal .raffle-card--ticket::after {
   display: none;
 }
-.raffle-current--inside-active-modal .raffle-join-invite-row,
 .raffle-current--inside-active-modal .raffle-joined-msg,
 .raffle-current--inside-active-modal .raffle-guest-gate {
   display: none !important;
+}
+.raffle-current--inside-active-modal .raffle-join-invite-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.raffle-current--inside-active-modal .raffle-join-leave-cell {
+  width: 100%;
+}
+.raffle-current--inside-active-modal .raffle-join-toggle-btn {
+  width: 100%;
 }
 @media (max-width: 560px) {
   .raffle-active-actions {
@@ -1974,7 +2158,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     width: 94px;
   }
   .raffles-active-chooser__body {
-    padding-right: 86px;
+    padding-right: 0;
   }
 }
 @media (max-width: 560px) {
@@ -2021,6 +2205,21 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     line-height: 0.98;
     -webkit-line-clamp: 3;
   }
+  .raffles-active-chooser__sum-kicker {
+    font-size: 9px;
+  }
+  .raffles-active-chooser__sum-amount {
+    font-size: 21px;
+  }
+  .raffles-active-chooser__detail-pills {
+    gap: 4px;
+  }
+  .raffles-active-chooser__detail-pill {
+    min-height: 22px;
+    padding: 4px 6px;
+    font-size: 7.8px;
+    line-height: 1.05;
+  }
   .raffles-active-chooser__title--cash {
     font-size: 11px;
     line-height: 0.98;
@@ -2043,7 +2242,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body,
   .raffles-active-chooser__item:only-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body {
-    width: min(72%, 310px);
+    width: 100%;
     gap: 5px;
   }
   .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout .raffles-active-chooser__knockout-info,
@@ -2081,6 +2280,27 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     gap: 2px;
     border-radius: 8px;
     font-size: 8px;
+  }
+  .raffles-active-chooser__fact--participants {
+    min-height: 31px;
+    padding: 3px 3px 3px 9px;
+    gap: 5px;
+    border-radius: 999px;
+  }
+  .raffles-active-chooser__participants-track {
+    flex-basis: 42px;
+    min-width: 32px;
+    max-width: 28%;
+    height: 4px;
+  }
+  .raffles-active-chooser__participants-label {
+    font-size: 7.6px;
+  }
+  .raffles-active-chooser__participants-icon {
+    flex-basis: 29px;
+    min-height: 23px;
+    margin: -2px -2px -2px 0;
+    font-size: 14px;
   }
   .raffles-active-chooser__fact-icon {
     width: 12px;
@@ -2169,6 +2389,34 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   .raffles-active-chooser__title {
     font-size: 11px;
   }
+  .raffles-active-chooser__sum-kicker {
+    font-size: 8px;
+  }
+  .raffles-active-chooser__sum-amount {
+    font-size: 19px;
+  }
+  .raffles-active-chooser__detail-pill {
+    min-height: 21px;
+    padding: 4px 5px;
+    font-size: 7px;
+  }
+  .raffles-active-chooser__fact--participants {
+    min-height: 30px;
+    padding-left: 8px;
+    gap: 4px;
+  }
+  .raffles-active-chooser__participants-track {
+    flex-basis: 34px;
+    min-width: 28px;
+    max-width: 26%;
+  }
+  .raffles-active-chooser__participants-label {
+    font-size: 7px;
+  }
+  .raffles-active-chooser__participants-icon {
+    flex-basis: 27px;
+    font-size: 13px;
+  }
   .raffles-active-chooser__title--cash {
     font-size: 10px;
   }
@@ -2186,7 +2434,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   }
   .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body,
   .raffles-active-chooser__item:only-child.raffles-active-chooser__item--knockout .raffles-active-chooser__body {
-    width: min(76%, 285px);
+    width: 100%;
   }
   .raffles-active-chooser__amount {
     font-size: 20px;
