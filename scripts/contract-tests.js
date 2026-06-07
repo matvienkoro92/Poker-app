@@ -2,6 +2,7 @@
 "use strict";
 
 const assert = require("assert");
+const crypto = require("crypto");
 const path = require("path");
 
 const root = path.join(__dirname, "..");
@@ -1405,6 +1406,65 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
   assert.strictEqual(burnedReplacement.winnerBurned, true, "burned reroll winner is locked");
   assert.strictEqual(r.body.raffle.readyBurned.count, 1, "one prize is counted as burned");
   assert.strictEqual(r.body.raffle.readyBurned.totalPrizeAmount, 500, "burned prize amount is summed");
+}
+
+async function testRaffleReadyRerollSettlementLock(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const now = Date.now();
+  const pastDeadline = new Date(now - 60_000).toISOString();
+  const startedAt = new Date(now - 16 * 60_000).toISOString();
+  const prize = "Беккинг-билет 500 ₽";
+  const participants = [
+    { userId: "tg_1001", accountId: "ID100001", name: "Late Player", p21Id: "P21-1001" },
+    { userId: "tg_1002", accountId: "ID100002", name: "Backup One", p21Id: "P21-1002" },
+  ];
+  const raffle = {
+    id: "contract_raffle_ready_reroll_lock",
+    title: "Ready reroll lock raffle",
+    totalWinners: 1,
+    groups: [{ prize, count: 1 }],
+    endDate: new Date(now - 3600_000).toISOString(),
+    participants,
+    winners: [{
+      ...participants[0],
+      groupIndex: 0,
+      prize,
+      winnerReadyRound: 0,
+      winnerReadyWindowStartedAt: startedAt,
+      winnerReadyDeadlineAt: pastDeadline,
+      winnerReadyState: "pending",
+    }],
+    status: "drawn",
+    createdAt: new Date(now - 7200_000).toISOString(),
+    drawnAt: new Date(now - 1800_000).toISOString(),
+    winnerReadyWindowMs: 15 * 60 * 1000,
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll_lock", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_ready_reroll_lock");
+  const lockKey = "poker_app:raffle_ready_settle_lock:" +
+    crypto.createHash("sha1").update("contract_raffle_ready_reroll_lock").digest("hex").slice(0, 32);
+  redis.kv.set(lockKey, "external-lock");
+
+  let r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll_lock" }));
+  assert.strictEqual(r.statusCode, 200, "locked reroll detail GET still succeeds");
+  assert.strictEqual((r.body.raffle.winners || []).filter((w) => w && w.winnerReroll === true).length, 0, "locked reroll does not append replacement");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш")).length, 0, "locked reroll does not notify a replacement");
+  let stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_reroll_lock"));
+  assert.strictEqual((stored.winners || []).filter((w) => w && w.winnerReroll === true).length, 0, "locked reroll does not write replacement");
+
+  redis.kv.delete(lockKey);
+  r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll_lock" }));
+  assert.strictEqual(r.statusCode, 200, "unlocked reroll detail GET succeeds");
+  const replacement = (r.body.raffle.winners || []).find((w) => w && w.winnerReroll === true);
+  assert.ok(replacement, "unlocked reroll appends replacement");
+  assert.strictEqual(
+    sentMessages.filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш")).length,
+    1,
+    "unlocked reroll notifies replacement once",
+  );
 }
 
 async function testRaffleTelegramUsernamesAdminOnly(redis) {
@@ -4299,6 +4359,7 @@ async function main() {
     ["raffle winner ready admin notifications", testRaffleWinnerReadyAdminNotifications],
     ["raffle winner status prize notification", testRaffleWinnerStatusPrizeNotification],
     ["raffle winner ready reroll and burn", testRaffleWinnerReadyRerollAndBurn],
+    ["raffle ready reroll settlement lock", testRaffleReadyRerollSettlementLock],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],
     ["raffle complete notifies only drawn winners", testRaffleCompleteNotifiesOnlyDrawnWinners],

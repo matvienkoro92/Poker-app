@@ -786,6 +786,10 @@ function initRaffles() {
     return formatRaffleSum(amount).replace(/\s*₽/g, "р");
   }
 
+  function activeRaffleLargeRubText(amount) {
+    return activeRaffleRubText(amount).replace(/\s*р$/i, " Р");
+  }
+
   function activeRaffleKnockoutTitle(raffle) {
     var totalPrize = getRaffleTotalPrize(raffle);
     return (
@@ -874,6 +878,34 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleHeroTitleHtml(raffle, totalPrize) {
+    var sum = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
+    var amountText = sum > 0 ? activeRaffleLargeRubText(sum) : activeRaffleShortTitle(raffle);
+    var compactTitle = activeRaffleChooserPrizeTitle(raffle).replace(/\s+/g, " ").trim();
+    var cashTitle = compactTitle.match(/^(.+?)\s+на\s+кеш$/i);
+    if (cashTitle && cashTitle[1]) {
+      return (
+        '<span class="raffles-active-chooser__hero-title raffles-active-chooser__hero-title--cash">' +
+        '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--count">' +
+        escapeHtml(cashTitle[1].trim()) +
+        "</span>" +
+        '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--kind">На кеш</span>' +
+        '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--amount">' +
+        escapeHtml(amountText) +
+        "</span>" +
+        "</span>"
+      );
+    }
+    return (
+      '<span class="raffles-active-chooser__hero-title">' +
+      '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--count">Розыгрыш</span>' +
+      '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--amount">' +
+      escapeHtml(amountText) +
+      "</span>" +
+      "</span>"
+    );
+  }
+
   function activeRaffleDetailPillLabels(raffle) {
     var labels = [];
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
@@ -915,6 +947,103 @@ function initRaffles() {
       labels.map(function (label) {
         return '<span class="raffles-active-chooser__detail-pill">' + escapeHtml(label) + "</span>";
       }).join("") +
+      "</span>"
+    );
+  }
+
+  function activeRaffleBuyinTilesHtml(raffle) {
+    var labels = activeRaffleBuyinChipLabels(raffle);
+    if (!labels.length) return "";
+    return (
+      '<span class="raffles-active-chooser__buyin-tiles">' +
+      labels.map(function (label, index) {
+        var split = String(label || "").match(/^(.+?)\s+(по\s+.+)$/i);
+        var top = split && split[1] ? split[1] : label;
+        var bottom = split && split[2] ? split[2] : "";
+        return (
+          '<span class="raffles-active-chooser__buyin-tile">' +
+          '<span class="raffles-active-chooser__buyin-tile-icon raffles-active-chooser__buyin-tile-icon--' +
+          (index % 2 ? "gold" : "violet") +
+          '" aria-hidden="true"></span>' +
+          '<span class="raffles-active-chooser__buyin-tile-text">' +
+          '<span>' +
+          escapeHtml(top) +
+          "</span>" +
+          (bottom ? "<span>" + escapeHtml(bottom) + "</span>" : "") +
+          "</span>" +
+          "</span>"
+        );
+      }).join("") +
+      "</span>"
+    );
+  }
+
+  function activeRaffleCountdownParts(endDate) {
+    if (!endDate) return { hours: "00", minutes: "00", seconds: "00" };
+    var ms = endDate.getTime() - Date.now();
+    if (ms <= 0) return { hours: "00", minutes: "00", seconds: "00" };
+    var totalSeconds = Math.floor(ms / 1000);
+    var totalHours = Math.floor(totalSeconds / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    var seconds = totalSeconds % 60;
+    return {
+      hours: rafflePadTimerUnit(totalHours),
+      minutes: rafflePadTimerUnit(minutes),
+      seconds: rafflePadTimerUnit(seconds),
+    };
+  }
+
+  function activeRaffleCountdownAria(parts) {
+    return (
+      "До окончания " +
+      String(parts.hours || "00") +
+      " часов " +
+      String(parts.minutes || "00") +
+      " минут " +
+      String(parts.seconds || "00") +
+      " секунд"
+    );
+  }
+
+  function activeRaffleCountdownHtml(endDate, endMs) {
+    var parts = activeRaffleCountdownParts(endDate);
+    return (
+      '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--timer raffles-active-chooser__fact--countdown" data-raffle-active-countdown="' +
+      escapeHtml(endMs || 0) +
+      '" aria-label="' +
+      escapeHtml(activeRaffleCountdownAria(parts)) +
+      '">' +
+      '<span class="raffles-active-chooser__countdown-label">До окончания</span>' +
+      '<span class="raffles-active-chooser__countdown-digits" aria-hidden="true">' +
+      '<span data-raffle-countdown-hours>' +
+      escapeHtml(parts.hours) +
+      "</span>" +
+      '<span class="raffles-active-chooser__countdown-separator">:</span>' +
+      '<span data-raffle-countdown-minutes>' +
+      escapeHtml(parts.minutes) +
+      "</span>" +
+      '<span class="raffles-active-chooser__countdown-separator">:</span>' +
+      '<span data-raffle-countdown-seconds>' +
+      escapeHtml(parts.seconds) +
+      "</span>" +
+      "</span>" +
+      '<span class="raffles-active-chooser__countdown-units" aria-hidden="true">' +
+      "<span>Часов</span><span>Минут</span><span>Секунд</span>" +
+      "</span>" +
+      "</span>"
+    );
+  }
+
+  function activeRaffleInfoSummaryHtml(raffle) {
+    var labels = activeRaffleDetailPillLabels(raffle);
+    var primary = labels[0] || "Инфо";
+    var secondary = labels[1] || "";
+    return (
+      '<span class="raffles-active-chooser__info-copy">' +
+      '<span>' +
+      escapeHtml(primary) +
+      "</span>" +
+      (secondary ? "<span>" + escapeHtml(secondary) + "</span>" : "") +
       "</span>"
     );
   }
@@ -967,6 +1096,19 @@ function initRaffles() {
       var ms = parseInt(String(node.getAttribute("data-raffle-active-timer") || ""), 10);
       var end = Number.isFinite(ms) && ms > 0 ? new Date(ms) : null;
       node.textContent = end ? (formatRaffleTimerValue(end) || "Завершён") : "—";
+    });
+    var countdowns = rafflesActiveChooser.querySelectorAll("[data-raffle-active-countdown]");
+    countdowns.forEach(function (node) {
+      var ms = parseInt(String(node.getAttribute("data-raffle-active-countdown") || ""), 10);
+      var end = Number.isFinite(ms) && ms > 0 ? new Date(ms) : null;
+      var parts = activeRaffleCountdownParts(end);
+      var hours = node.querySelector("[data-raffle-countdown-hours]");
+      var minutes = node.querySelector("[data-raffle-countdown-minutes]");
+      var seconds = node.querySelector("[data-raffle-countdown-seconds]");
+      if (hours) hours.textContent = parts.hours;
+      if (minutes) minutes.textContent = parts.minutes;
+      if (seconds) seconds.textContent = parts.seconds;
+      node.setAttribute("aria-label", activeRaffleCountdownAria(parts));
     });
   }
 
@@ -1272,23 +1414,22 @@ function initRaffles() {
         var buttonLabel = adminTicketEntry ? "Участников добавляет админ" : needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
         var buttonAction = adminTicketEntry ? "locked" : needsLogin ? "login" : isIn ? "leave" : "join";
         var buttonPressed = !adminTicketEntry && !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
-        var resultsTimeText = knockoutCard ? "" : activeRaffleResultsTimeText(raffle);
-        var headHtml = knockoutCard
-          ? ""
-          : (
-              '<span class="raffles-active-chooser__head">' +
-              '<span class="raffles-active-chooser__badge">' +
-              escapeHtml(activeRaffleBadgeText(raffle)) +
-              "</span>" +
-              (resultsTimeText
-                ? '<span class="raffles-active-chooser__results-time">' +
-                  escapeHtml(resultsTimeText) +
-                  "</span>"
-                : "") +
+        var resultsTimeText = activeRaffleResultsTimeText(raffle);
+        var headHtml =
+          '<span class="raffles-active-chooser__head">' +
+          '<span class="raffles-active-chooser__badge' +
+          (knockoutCard ? " raffles-active-chooser__badge--main" : "") +
+          '">' +
+          escapeHtml(knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle)) +
+          "</span>" +
+          (resultsTimeText
+            ? '<span class="raffles-active-chooser__results-time">' +
+              escapeHtml(resultsTimeText) +
               "</span>"
-            );
-        var titleHtml = '<span class="raffles-active-chooser__title raffles-active-chooser__title--sum">' + activeRaffleSumTitleHtml(raffle, totalPrize) + "</span>";
-        var detailPillsHtml = activeRaffleDetailPillsHtml(raffle);
+            : "") +
+          "</span>";
+        var titleHtml = activeRaffleHeroTitleHtml(raffle, totalPrize);
+        var detailPillsHtml = isCashPrize ? activeRaffleBuyinTilesHtml(raffle) : activeRaffleDetailPillsHtml(raffle);
         var participantsHtml =
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--participants" aria-label="' +
           escapeHtml(participantCount + " " + participantWord) +
@@ -1298,12 +1439,7 @@ function initRaffles() {
           escapeHtml(participantCount) +
           '</strong></span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span>' +
           "</span></span>";
-        var timerHtml =
-          '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--timer"><span class="raffles-active-chooser__fact-icon">⏱</span><span class="raffles-active-chooser__timer-label">Осталось </span><span data-raffle-active-timer="' +
-          escapeHtml(endMs) +
-          '">' +
-          escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || "Завершён") : "—") +
-          "</span></span>";
+        var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
         var factsHtml = participantsHtml + timerHtml;
         return (
           '<div class="raffles-active-chooser__item' +
@@ -1318,7 +1454,6 @@ function initRaffles() {
           headHtml +
           '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
           '<span class="raffles-active-chooser__body">' +
-          (knockoutCard ? '<span class="raffles-active-chooser__main-badge">Главный розыгрыш</span>' : "") +
           titleHtml +
           detailPillsHtml +
           "</span>" +
@@ -1346,7 +1481,7 @@ function initRaffles() {
           (infoOpen ? "true" : "false") +
           '" aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">' +
           '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
-          '<span>Инфо</span>' +
+          activeRaffleInfoSummaryHtml(raffle) +
           "</button>" +
           "</div>"
         );

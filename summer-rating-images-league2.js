@@ -1,9 +1,22 @@
 // Summer rating screenshots: League 2.
 var SUMMER_RATING_IMAGES_LEAGUE2 = {
-  "01.06.2026": [],
-  "02.06.2026": [],
-  "03.06.2026": [],
-  "04.06.2026": [],
+  "01.06.2026": [
+    "rating-compressed-preview/rating-01-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "02.06.2026": [
+    "rating-compressed-preview/rating-02-06-2026-league2-tournir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-02-06-2026-league2-energetik-22h.jpg"
+  ],
+  "03.06.2026": [
+    "rating-compressed-preview/rating-03-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-03-06-2026-league2-tournir-sredy-18h.jpg",
+    "rating-compressed-preview/rating-03-06-2026-league2-energetik-22h.jpg"
+  ],
+  "04.06.2026": [
+    "rating-compressed-preview/rating-04-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-04-06-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-04-06-2026-league2-energetik-22h.jpg"
+  ],
   "05.06.2026": [],
   "06.06.2026": [],
   "07.06.2026": []
