@@ -852,6 +852,35 @@ async function testRaffleAdminRemoveParticipant(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "raffle admin remove is idempotent");
   assert.strictEqual(r.body.alreadyRemoved, true, "raffle admin remove reports already removed participant");
+
+  const ambiguous = {
+    id: "contract_admin_remove_ambiguous",
+    title: "Contract admin remove ambiguous",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [
+      { userId: "manual_raffle_same_a", name: "Участник", ticketCount: 1, manualRaffleParticipant: true },
+      { userId: "manual_raffle_same_b", name: "Участник", ticketCount: 1, manualRaffleParticipant: true },
+    ],
+    winners: [],
+    status: "active",
+    ticketEntryMode: "admin",
+    drawMode: "weighted_tickets",
+    weightedTickets: true,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_admin_remove_ambiguous", JSON.stringify(ambiguous));
+  redis.l("poker_app:raffle_ids").push("contract_admin_remove_ambiguous");
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminRemoveParticipant",
+    raffleId: "contract_admin_remove_ambiguous",
+    name: "Участник",
+  }));
+  assert.strictEqual(r.statusCode, 400, "raffle admin remove rejects generic participant names");
+  const ambiguousStored = JSON.parse(redis.kv.get("poker_app:raffle:contract_admin_remove_ambiguous"));
+  assert.strictEqual(ambiguousStored.participants.length, 2, "raffle admin remove keeps all participants on ambiguous target");
 }
 
 async function testRaffleActiveListIncludesDailySibling(redis) {
