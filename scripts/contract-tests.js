@@ -926,6 +926,18 @@ async function testRaffleAdminRemoveParticipant(redis) {
   assert.strictEqual(r.statusCode, 400, "raffle admin remove rejects generic participant names");
   const ambiguousStored = JSON.parse(redis.kv.get("poker_app:raffle:contract_admin_remove_ambiguous"));
   assert.strictEqual(ambiguousStored.participants.length, 2, "raffle admin remove keeps all participants on ambiguous target");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminRemoveParticipant",
+    raffleId: "contract_admin_remove_ambiguous",
+    userId: "manual_raffle_same_a",
+    name: "Участник",
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin remove allows exact manual row id with generic name");
+  assert.strictEqual(r.body.removedCount, 1, "raffle admin remove deletes one exact manual row");
+  assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin remove leaves other generic rows");
+  assert.strictEqual(r.body.raffle.participants[0].userId, "manual_raffle_same_b", "raffle admin remove keeps the non-selected manual row");
 }
 
 async function testRaffleActiveListIncludesDailySibling(redis) {
