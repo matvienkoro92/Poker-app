@@ -928,6 +928,7 @@ function initRaffles() {
       });
       return labels;
     }
+    if (labels.length && groups.length <= 1) return labels;
     groups.forEach(function (group) {
       var count = Math.max(0, parseInt(group && group.count, 10) || 0);
       var prize = raffleDisplayPrizeText(String(group && group.prize || "").replace(/\s+/g, " ").trim());
@@ -1435,9 +1436,9 @@ function initRaffles() {
           escapeHtml(participantCount + " " + participantWord) +
           '" style="--raffles-participants-fill: ' +
           escapeHtml(activeRaffleParticipantsScaleFill(participantCount)) +
-          '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-label">Участников: <strong>' +
+          '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-label">Участников</span><span class="raffles-active-chooser__participants-side"><span class="raffles-active-chooser__participants-count">' +
           escapeHtml(participantCount) +
-          '</strong></span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span>' +
+          '</span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span></span>' +
           "</span></span>";
         var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
         var factsHtml = participantsHtml + timerHtml;
