@@ -1358,8 +1358,12 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
 
   let r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll" }));
   assert.strictEqual(r.statusCode, 200, "admin can load and settle expired ready window");
+  const readyOriginal = r.body.raffle.winners.find((w) => w.userId === "tg_1001");
   const missed = r.body.raffle.winners.find((w) => w.userId === "tg_1002");
   const replacement = r.body.raffle.winners.find((w) => w.winnerReroll === true);
+  assert.ok(readyOriginal, "ready original winner is still shown");
+  assert.strictEqual(readyOriginal.winnerReadyState, "ready", "expired ready winner stays ready");
+  assert.notStrictEqual(readyOriginal.winnerStatus, "ok", "expired ready winner is not auto-issued");
   assert.ok(missed, "late original winner is still shown");
   assert.strictEqual(missed.winnerReadyState, "missed", "late original winner is marked missed");
   assert.strictEqual(missed.winnerReadyExpired, true, "late original winner cannot confirm later");

@@ -3275,9 +3275,40 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   justify-items: center;
   width: 100%;
 }
+.raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash {
+  container-type: inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 4px;
+}
+.raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--count,
+.raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--kind {
+  flex: 0 0 auto;
+  max-width: none;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  font-size: 10px;
+  font-size: clamp(8px, 5.2cqw, 20px);
+  line-height: 1;
+}
+.raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--kind {
+  margin-top: 0;
+}
+.raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--amount {
+  flex: 0 0 100%;
+}
 @media (max-width: 430px) {
   .raffles-active-chooser__item--cash .raffles-active-chooser__hero-line--count {
     font-size: 9px;
+  }
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash {
+    gap: 0 3px;
+  }
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--count,
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--kind {
+    font-size: 8px;
+    font-size: clamp(8px, 5.2cqw, 10px);
   }
   .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
     padding-inline: 6px;
@@ -3289,6 +3320,14 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 @media (max-width: 350px) {
   .raffles-active-chooser__item--cash .raffles-active-chooser__hero-line--count {
     font-size: 8px;
+  }
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash {
+    gap: 0 2px;
+  }
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--count,
+  .raffles-active-chooser__item--cash .raffles-active-chooser__hero-title--cash .raffles-active-chooser__hero-line--kind {
+    font-size: 7px;
+    font-size: clamp(7px, 5.2cqw, 8px);
   }
   .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
     padding-inline: 5px;
@@ -3373,16 +3412,26 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__fact--countdown {
   border-color: rgba(255, 232, 166, 0.58);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 232, 166, 0.24), transparent 62%),
-    linear-gradient(180deg, rgba(35, 28, 34, 0.7), rgba(10, 9, 16, 0.78));
+    radial-gradient(circle at 50% 0%, rgba(255, 232, 166, 0.26), transparent 62%),
+    linear-gradient(180deg, rgba(255, 246, 220, 0.12), rgba(255, 232, 166, 0.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 18px rgba(255, 213, 127, 0.12);
 }
 .raffles-active-chooser__countdown-label,
 .raffles-active-chooser__countdown-units {
-  color: rgba(255, 245, 224, 0.9);
+  color: rgba(255, 246, 224, 0.98);
+  opacity: 1;
+  filter: none;
 }
 .raffles-active-chooser__countdown-digits,
 .raffles-active-chooser__countdown-separator {
-  color: #fff8ea;
+  color: #fffdf4;
+  opacity: 1;
+  filter: none;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.58),
+    0 0 18px rgba(255, 232, 166, 0.42);
 }
 .raffles-active-chooser__detail-pill:only-child {
   grid-column: 1 / -1;
@@ -4344,14 +4393,14 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   flex-wrap: nowrap;
 }
 .raffle-winner-row--ready {
-  border-color: rgba(250, 204, 21, 0.62);
+  border-color: rgba(250, 204, 21, 0.86);
   background:
-    linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(120, 83, 20, 0.14)),
-    rgba(8, 13, 24, 0.72);
+    linear-gradient(135deg, rgba(250, 204, 21, 0.42), rgba(180, 83, 9, 0.26)),
+    rgba(54, 37, 8, 0.94);
   box-shadow:
-    0 0 0 1px rgba(250, 204, 21, 0.12),
-    0 8px 22px rgba(250, 204, 21, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 0 0 1px rgba(250, 204, 21, 0.22),
+    0 8px 24px rgba(250, 204, 21, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .raffle-winner-row--issued {
   border-color: rgba(34, 197, 94, 0.84);
@@ -4588,6 +4637,17 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(120, 83, 20, 0.08)),
     rgba(8, 13, 24, 0.62);
   padding-left: 7px;
+}
+.raffle-winner-row--reroll.raffle-winner-row--ready {
+  border-color: rgba(250, 204, 21, 0.86);
+  border-left-color: rgba(250, 204, 21, 0.96);
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.42), rgba(180, 83, 9, 0.26)),
+    rgba(54, 37, 8, 0.94);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.22),
+    0 8px 24px rgba(250, 204, 21, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .raffle-winner-row--reroll.raffle-winner-row--issued {
   border-color: rgba(34, 197, 94, 0.84);
