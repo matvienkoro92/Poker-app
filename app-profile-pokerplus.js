@@ -98,9 +98,34 @@ function initProfilePokerPlus() {
   }
 
   function pokerPlusAuthBody(extra) {
-    if (typeof pokerGuestOrAuthedPostBody === "function") return pokerGuestOrAuthedPostBody(extra || {});
-    if (typeof pokerApiAuthJsonBody === "function") return pokerApiAuthJsonBody(extra || {});
-    return Object.assign({}, extra || {});
+    var body = typeof pokerGuestOrAuthedPostBody === "function"
+      ? pokerGuestOrAuthedPostBody(extra || {})
+      : typeof pokerApiAuthJsonBody === "function"
+        ? pokerApiAuthJsonBody(extra || {})
+        : Object.assign({}, extra || {});
+    var emailSessionToken = pokerPlusEmailSessionToken();
+    if (emailSessionToken) {
+      body.pwaSession = emailSessionToken;
+      delete body.initData;
+      delete body.pwaVkSession;
+    }
+    return body;
+  }
+
+  function pokerPlusEmailSessionToken() {
+    var method = "";
+    try {
+      method = typeof pokerGetAuthMethod === "function" ? pokerGetAuthMethod() : "";
+    } catch (eMethod) {}
+    try {
+      var record = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+      var recordMethod = record && record.authMethod ? String(record.authMethod || "").trim().toLowerCase() : "";
+      if (recordMethod) method = recordMethod;
+      if (method !== "email") return "";
+      return typeof pokerReadPwaTgSessionToken === "function" ? String(pokerReadPwaTgSessionToken() || "").trim() : "";
+    } catch (eEmailSession) {
+      return "";
+    }
   }
 
   function pokerPlusAuthBodyHasCredential(body) {
@@ -1425,7 +1450,13 @@ function initProfilePokerPlus() {
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     var body = pokerPlusAuthBody({});
     if (!state.isVerified || state.isGuest || !base || !pokerPlusAuthBodyHasCredential(body)) {
+      setPokerPlusInitialLoading(false);
       setProfileStatusLoading(false);
+      if (state.isVerified && !state.isGuest) {
+        renderProfile(null, false);
+        if (!base) setFeedback("Сервер профиля недоступен. Попробуйте обновить страницу.", "warn");
+        else if (!pokerPlusAuthBodyHasCredential(body)) setFeedback(pokerPlusMissingAuthMessage(), "warn");
+      }
       return Promise.resolve();
     }
     setProfileStatusLoading(true);

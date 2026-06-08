@@ -1040,15 +1040,11 @@ function initRaffles() {
   }
 
   function activeRaffleInfoSummaryHtml(raffle) {
-    var labels = activeRaffleDetailPillLabels(raffle);
-    var primary = labels[0] || "Инфо";
-    var secondary = labels[1] || "";
     return (
       '<span class="raffles-active-chooser__info-copy">' +
       '<span>' +
-      escapeHtml(primary) +
+      escapeHtml("Инфо") +
       "</span>" +
-      (secondary ? "<span>" + escapeHtml(secondary) + "</span>" : "") +
       "</span>"
     );
   }

@@ -22,7 +22,17 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-04-06-2026-league1-hok-19h.jpg",
     "rating-compressed-preview/rating-04-06-2026-league1-rebuy-evening-20h.jpg"
   ],
-  "05.06.2026": [],
-  "06.06.2026": [],
+  "05.06.2026": [
+    "rating-compressed-preview/rating-05-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-05-06-2026-league1-friday-progressive-18h.jpg",
+    "rating-compressed-preview/rating-05-06-2026-league1-hok-magic-19h.jpg",
+    "rating-compressed-preview/rating-05-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "06.06.2026": [
+    "rating-compressed-preview/rating-06-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-06-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-06-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-06-06-2026-league1-classic-tournament-21h.jpg"
+  ],
   "07.06.2026": []
 };
