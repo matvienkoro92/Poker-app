@@ -97,6 +97,16 @@ function initProfilePokerPlus() {
     feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
   }
 
+  function pokerPlusRunFinally(promise, cleanup) {
+    return Promise.resolve(promise).then(function (value) {
+      try { cleanup(); } catch (eCleanup) {}
+      return value;
+    }, function (err) {
+      try { cleanup(); } catch (eCleanup) {}
+      throw err;
+    });
+  }
+
   function pokerPlusAuthBody(extra) {
     var body = typeof pokerGuestOrAuthedPostBody === "function"
       ? pokerGuestOrAuthedPostBody(extra || {})
@@ -388,29 +398,31 @@ function initProfilePokerPlus() {
     if (!base || !pokerPlusAuthBodyHasCredential(body)) return;
     setPokerPlusStatsVisibilityMap(nextMap);
     renderPokerPlusStatsVisibilityToggle(savingKind);
-    fetch(base + "/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
-      .then(function (data) {
-        if (!data || !data.ok) {
+    pokerPlusRunFinally(
+      fetch(base + "/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(function (data) {
+          if (!data || !data.ok) {
+            setPokerPlusStatsVisibilityMap(prevMap);
+            setFeedback((data && data.error) || "Не удалось сохранить видимость статистики.", true);
+          } else {
+            pokerProfileUserInfoCache = null;
+            pokerProfileUserInfoCacheAt = 0;
+            setFeedback("", false);
+          }
+        })
+        .catch(function () {
           setPokerPlusStatsVisibilityMap(prevMap);
-          setFeedback((data && data.error) || "Не удалось сохранить видимость статистики.", true);
-        } else {
-          pokerProfileUserInfoCache = null;
-          pokerProfileUserInfoCacheAt = 0;
-          setFeedback("", false);
-        }
-      })
-      .catch(function () {
-        setPokerPlusStatsVisibilityMap(prevMap);
-        setFeedback(POKER_NET_ERR, true);
-      })
-      .finally(function () {
+          setFeedback(POKER_NET_ERR, true);
+        }),
+      function () {
         renderPokerPlusStatsVisibilityToggle(false);
-      });
+      }
+    );
   }
 
   function pokerPlusShortStat(value) {
@@ -1365,11 +1377,13 @@ function initProfilePokerPlus() {
         try { controller.abort(); } catch (eAbort) {}
       }, timeoutMs);
     }
-    return fetch(url, options)
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
-      .finally(function () {
+    return pokerPlusRunFinally(
+      fetch(url, options)
+        .then(function (r) { return r.json().catch(function () { return {}; }); }),
+      function () {
         if (timer) clearTimeout(timer);
-      });
+      }
+    );
   }
 
   function isPokerPlusAbortError(err) {
@@ -1473,73 +1487,75 @@ function initProfilePokerPlus() {
         body.ciphertext = refreshCiphertext;
       }
     }
-    return pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      cache: "no-store",
-      body: JSON.stringify(body),
-    }, 15000)
-      .then(function (data) {
-        if (!data || !data.ok) {
-          renderProfile(null, false);
-          setProfileStatusLoading(false);
-          if (data && data.error) setFeedback(data.error, true);
-          return;
-        }
-        if (data && data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
-        if (refreshCiphertext && data && data.linked) savePokerPlusLocalCiphertext(pokerPlusAccountId, refreshCiphertext);
-        try {
-          renderProfile(data.profile, !!data.linked);
-          notifyPokerPlusStatusChange(!!data.linked, data.profile);
-        } catch (renderErr) {
-          try { console.error("PokerPlus profile render failed", renderErr); } catch (eLogPpRender) {}
-          setProfileStatusLoading(false);
-          setFeedback("Данные Poker21 пришли, но не удалось отобразить профиль. Обновите страницу.", true);
-          return;
-        }
-        if (!data.linked) {
-          setFeedback("", false);
-          if (emailRow) emailRow.hidden = true;
-          unbindBtn.hidden = true;
-          return;
-        }
-        if (data.syncError) {
-          var syncError = String(data.syncError || "");
-          if (data.needsCiphertext || /сохран[её]нн(?:ый|ого)\s+ключ|saved\s+key|нужен\s+ключ/i.test(syncError)) {
-            setPokerPlusRefreshNeedsKeyMode();
+    return pokerPlusRunFinally(
+      pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify(body),
+      }, 15000)
+        .then(function (data) {
+          if (!data || !data.ok) {
+            renderProfile(null, false);
+            setProfileStatusLoading(false);
+            if (data && data.error) setFeedback(data.error, true);
+            return;
           }
-          var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
-          setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
-        } else if (refresh && refreshCiphertext) {
-          if (section && section.classList) section.classList.remove("profile-pokerplus-card--needs-key");
-          removePokerPlusRefreshKeyInlineForm();
-          input.value = "";
-          setFeedback("Данные Poker21 обновлены, ключ сохранён.", false);
-        } else if (refresh) {
-          setFeedback("Данные Poker21 обновлены.", false);
-        } else {
-          setFeedback("", false);
-        }
-      })
-      .catch(function (err) {
-        var aborted = isPokerPlusAbortError(err);
-        if (refresh && aborted) {
-          schedulePokerPlusSavedProfileCheck(
-            refreshCiphertext ? "Данные Poker21 обновлены, ключ сохранён." : "Данные Poker21 обновлены.",
-            "Poker21 ответил поздно. Проверяем, сохранилось ли свежее обновление...",
-            "Пока не увидели свежее обновление Poker21. Старые данные оставили.",
-            refreshCiphertext,
-            refreshPreviousSyncedAt ? refreshPreviousSyncedAt + 1 : refreshStartedAt
-          );
-        } else {
-          setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
-          renderPokerPlusStatsFallbackIfVisible();
-        }
-      })
-      .finally(function () {
+          if (data && data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
+          if (refreshCiphertext && data && data.linked) savePokerPlusLocalCiphertext(pokerPlusAccountId, refreshCiphertext);
+          try {
+            renderProfile(data.profile, !!data.linked);
+            notifyPokerPlusStatusChange(!!data.linked, data.profile);
+          } catch (renderErr) {
+            try { console.error("PokerPlus profile render failed", renderErr); } catch (eLogPpRender) {}
+            setProfileStatusLoading(false);
+            setFeedback("Данные Poker21 пришли, но не удалось отобразить профиль. Обновите страницу.", true);
+            return;
+          }
+          if (!data.linked) {
+            setFeedback("", false);
+            if (emailRow) emailRow.hidden = true;
+            unbindBtn.hidden = true;
+            return;
+          }
+          if (data.syncError) {
+            var syncError = String(data.syncError || "");
+            if (data.needsCiphertext || /сохран[её]нн(?:ый|ого)\s+ключ|saved\s+key|нужен\s+ключ/i.test(syncError)) {
+              setPokerPlusRefreshNeedsKeyMode();
+            }
+            var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
+            setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
+          } else if (refresh && refreshCiphertext) {
+            if (section && section.classList) section.classList.remove("profile-pokerplus-card--needs-key");
+            removePokerPlusRefreshKeyInlineForm();
+            input.value = "";
+            setFeedback("Данные Poker21 обновлены, ключ сохранён.", false);
+          } else if (refresh) {
+            setFeedback("Данные Poker21 обновлены.", false);
+          } else {
+            setFeedback("", false);
+          }
+        })
+        .catch(function (err) {
+          var aborted = isPokerPlusAbortError(err);
+          if (refresh && aborted) {
+            schedulePokerPlusSavedProfileCheck(
+              refreshCiphertext ? "Данные Poker21 обновлены, ключ сохранён." : "Данные Poker21 обновлены.",
+              "Poker21 ответил поздно. Проверяем, сохранилось ли свежее обновление...",
+              "Пока не увидели свежее обновление Poker21. Старые данные оставили.",
+              refreshCiphertext,
+              refreshPreviousSyncedAt ? refreshPreviousSyncedAt + 1 : refreshStartedAt
+            );
+          } else {
+            setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
+            renderPokerPlusStatsFallbackIfVisible();
+          }
+        }),
+      function () {
         setPokerPlusInitialLoading(false);
         setProfileStatusLoading(false);
-      });
+      }
+    );
   }
 
   function bindPokerPlus() {
@@ -1566,15 +1582,44 @@ function initProfilePokerPlus() {
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
     setFeedback(wasLinked ? "Обновляем Poker21 по ключу…" : "Привязываем Poker21…", false);
-    pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-bind", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign(body, { ciphertext: ciphertext })),
-    }, 15000)
-      .then(function (data) {
-        if (!data || !data.ok) {
-          var errorText = (data && data.error) || "Не удалось привязать Poker21.";
-          if (/15\s*секунд|timeout|timed?\s*out|долго\s+не\s+отвечает/i.test(errorText)) {
+    pokerPlusRunFinally(
+      pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-bind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign(body, { ciphertext: ciphertext })),
+      }, 15000)
+        .then(function (data) {
+          if (!data || !data.ok) {
+            var errorText = (data && data.error) || "Не удалось привязать Poker21.";
+            if (/15\s*секунд|timeout|timed?\s*out|долго\s+не\s+отвечает/i.test(errorText)) {
+              schedulePokerPlusSavedProfileCheck(
+                wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.",
+                wasLinked ? "Poker21 ответил поздно. Проверяем, сохранилось ли обновление..." : "Poker21 ответил поздно. Проверяем, сохранилась ли привязка...",
+                wasLinked ? "Пока не увидели обновление Poker21. Попробуйте еще раз." : "Пока не увидели привязку Poker21. Попробуйте еще раз.",
+                ciphertext
+              );
+            } else {
+              setFeedback(errorText, true);
+            }
+            return;
+          }
+          pokerPlusPostTimeoutCheckSeq += 1;
+          pokerPlusAccountId = data && data.accountId ? String(data.accountId || "").trim() : pokerPlusAccountId;
+          savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
+          var statsPending = pokerPlusProfileHasOnlyZeroStats(data.profile);
+          renderProfile(statsPending ? pokerPlusProfileWithoutStats(data.profile) : data.profile, true);
+          removePokerPlusRefreshKeyInlineForm();
+          notifyPokerPlusStatusChange(true, data.profile);
+          input.value = "";
+          if (statsPending) {
+            refreshPokerPlusStatsAfterKeyBind(ciphertext, wasLinked);
+          } else {
+            setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
+          }
+        })
+        .catch(function (err) {
+          var aborted = isPokerPlusAbortError(err);
+          if (aborted) {
             schedulePokerPlusSavedProfileCheck(
               wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.",
               wasLinked ? "Poker21 ответил поздно. Проверяем, сохранилось ли обновление..." : "Poker21 ответил поздно. Проверяем, сохранилась ли привязка...",
@@ -1582,42 +1627,15 @@ function initProfilePokerPlus() {
               ciphertext
             );
           } else {
-            setFeedback(errorText, true);
+            setFeedback(POKER_NET_ERR, true);
           }
-          return;
-        }
-        pokerPlusPostTimeoutCheckSeq += 1;
-        pokerPlusAccountId = data && data.accountId ? String(data.accountId || "").trim() : pokerPlusAccountId;
-        savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
-        var statsPending = pokerPlusProfileHasOnlyZeroStats(data.profile);
-        renderProfile(statsPending ? pokerPlusProfileWithoutStats(data.profile) : data.profile, true);
-        removePokerPlusRefreshKeyInlineForm();
-        notifyPokerPlusStatusChange(true, data.profile);
-        input.value = "";
-        if (statsPending) {
-          refreshPokerPlusStatsAfterKeyBind(ciphertext, wasLinked);
-        } else {
-          setFeedback(wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.", false);
-        }
-      })
-      .catch(function (err) {
-        var aborted = isPokerPlusAbortError(err);
-        if (aborted) {
-          schedulePokerPlusSavedProfileCheck(
-            wasLinked ? "Данные Poker21 обновлены, ключ сохранён." : "Poker21 привязан.",
-            wasLinked ? "Poker21 ответил поздно. Проверяем, сохранилось ли обновление..." : "Poker21 ответил поздно. Проверяем, сохранилась ли привязка...",
-            wasLinked ? "Пока не увидели обновление Poker21. Попробуйте еще раз." : "Пока не увидели привязку Poker21. Попробуйте еще раз.",
-            ciphertext
-          );
-        } else {
-          setFeedback(POKER_NET_ERR, true);
-        }
-      })
-      .finally(function () {
+        }),
+      function () {
         bindBtn.disabled = false;
         refreshBtn.disabled = false;
         unbindBtn.disabled = false;
-      });
+      }
+    );
   }
 
   function unbindPokerPlus() {
@@ -1641,33 +1659,35 @@ function initProfilePokerPlus() {
     refreshBtn.disabled = true;
     unbindBtn.disabled = true;
     setFeedback("Отвязываем Poker21...", false);
-    pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-unbind", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }, 10000)
-      .then(function (data) {
-        if (!data || !data.ok) {
-          setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
-          return;
-        }
-        pokerPlusPostTimeoutCheckSeq += 1;
-        clearPokerPlusLocalCiphertext(pokerPlusAccountId || (data && data.accountId));
-        pokerPlusAccountId = "";
-        renderProfile(null, false);
-        notifyPokerPlusStatusChange(false, null);
-        input.value = "";
-        setFeedback("Poker21 отвязан.", false);
-      })
-      .catch(function (err) {
-        var aborted = isPokerPlusAbortError(err);
-        setFeedback(aborted ? "Не успели получить ответ за 10 секунд. Попробуйте еще раз." : POKER_NET_ERR, true);
-      })
-      .finally(function () {
+    pokerPlusRunFinally(
+      pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-unbind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }, 10000)
+        .then(function (data) {
+          if (!data || !data.ok) {
+            setFeedback((data && data.error) || "Не удалось отвязать Poker21.", true);
+            return;
+          }
+          pokerPlusPostTimeoutCheckSeq += 1;
+          clearPokerPlusLocalCiphertext(pokerPlusAccountId || (data && data.accountId));
+          pokerPlusAccountId = "";
+          renderProfile(null, false);
+          notifyPokerPlusStatusChange(false, null);
+          input.value = "";
+          setFeedback("Poker21 отвязан.", false);
+        })
+        .catch(function (err) {
+          var aborted = isPokerPlusAbortError(err);
+          setFeedback(aborted ? "Не успели получить ответ за 10 секунд. Попробуйте еще раз." : POKER_NET_ERR, true);
+        }),
+      function () {
         bindBtn.disabled = false;
         refreshBtn.disabled = false;
         unbindBtn.disabled = false;
-      });
+      }
+    );
   }
 
   if (bindBtn.dataset.bound !== "1") {
@@ -1678,7 +1698,9 @@ function initProfilePokerPlus() {
     refreshBtn.dataset.bound = "1";
     refreshBtn.addEventListener("click", function () {
       setFeedback("Обновляем данные Poker21...", false);
-      loadProfile(true).finally(function () {});
+      try {
+        Promise.resolve(loadProfile(true)).catch(function () {});
+      } catch (eRefreshLoad) {}
     });
   }
   if (unbindBtn.dataset.bound !== "1") {
@@ -1765,9 +1787,35 @@ function initProfilePokerPlus() {
   var activeProfileTab = profileRoot && profileRoot.dataset ? profileRoot.dataset.profileActiveTab : "";
   if (initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
     section.dataset.profilePokerPlusLoaded = "1";
-    if (activeProfileTab === "poker21" && !section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusInitialLoading(true);
-    loadProfile(false).catch(function () {
+    var showInitialPokerPlusLoading = activeProfileTab === "poker21" && !section.classList.contains("profile-pokerplus-card--linked");
+    var initialPokerPlusLoadingTimer = null;
+    if (showInitialPokerPlusLoading) {
+      setPokerPlusInitialLoading(true);
+      initialPokerPlusLoadingTimer = setTimeout(function () {
+        if (!section.classList.contains("profile-pokerplus-card--loading")) return;
+        renderProfile(null, false);
+        setProfileStatusLoading(false);
+        setFeedback("Poker21 долго не отвечает. Попробуйте обновить профиль позже.", "warn");
+      }, 18000);
+    }
+    try {
+      pokerPlusRunFinally(
+        Promise.resolve(loadProfile(false)).catch(function () {
+          section.dataset.profilePokerPlusLoaded = "";
+          setPokerPlusInitialLoading(false);
+          setProfileStatusLoading(false);
+          setFeedback("Не удалось загрузить Poker21. Попробуйте обновить страницу.", "warn");
+        }),
+        function () {
+          if (initialPokerPlusLoadingTimer) clearTimeout(initialPokerPlusLoadingTimer);
+        }
+      );
+    } catch (initialLoadErr) {
+      if (initialPokerPlusLoadingTimer) clearTimeout(initialPokerPlusLoadingTimer);
       section.dataset.profilePokerPlusLoaded = "";
-    });
+      setPokerPlusInitialLoading(false);
+      setProfileStatusLoading(false);
+      setFeedback("Не удалось загрузить Poker21. Обновите страницу.", "warn");
+    }
   }
 }
