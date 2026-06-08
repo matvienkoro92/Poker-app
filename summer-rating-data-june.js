@@ -2,6 +2,32 @@
 var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
   "01.06.2026": [
     {
+      "time": "08:00",
+      "name": "Bali Yana 20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 0,
+          "reward": 2820,
+          "points": 0
+        },
+        {
+          "nick": "nikola233",
+          "place": 16,
+          "reward": 1290,
+          "points": 0
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 4,
+          "reward": 656,
+          "points": 70
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -36,6 +62,86 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 7,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 1,
+          "reward": 11904,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 3,
+          "reward": 12171,
+          "points": 90
+        },
+        {
+          "nick": "Coonie Lee",
+          "place": 5,
+          "reward": 4376,
+          "points": 60
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 0,
+          "reward": 12,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 1415,
+          "points": 40
+        },
+        {
+          "nick": "AndrushaMorf",
+          "place": 14,
+          "reward": 1407,
+          "points": 0
+        },
+        {
+          "nick": "Annie1609",
+          "place": 17,
+          "reward": 172,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 9227,
+          "points": 110
         }
       ]
     },
@@ -190,9 +296,55 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 7,
+          "reward": 4046,
+          "points": 40
+        },
+        {
+          "nick": "Фокс",
+          "place": 11,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Неизвестны",
+          "place": 47,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 0,
+          "reward": 0,
+          "points": 0
+        }
+      ]
     }
   ],
   "02.06.2026": [
+    {
+      "time": "08:00",
+      "name": "Bali Yana 20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 5,
+          "reward": 1431,
+          "points": 60
+        }
+      ]
+    },
     {
       "time": "12:00",
       "name": "DV Rebuy",
@@ -228,6 +380,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 13,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Micro 200 50K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 1746,
+          "points": 40
         }
       ]
     },
@@ -380,6 +546,32 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 5,
           "reward": 3300,
           "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "comotd",
+          "place": 3,
+          "reward": 14435,
+          "points": 90
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 29,
+          "reward": 2150,
+          "points": 0
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 0,
+          "reward": 350,
+          "points": 0
         }
       ]
     },

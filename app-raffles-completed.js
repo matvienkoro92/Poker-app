@@ -326,9 +326,10 @@ function initRafflesCompletedRuntime(opts) {
       var adminNamePart = rawName
         ? escapeHtml(rawName) + (adminPokerNick ? " (" + escapeHtml(adminPokerNick) + ")" : "")
         : (adminPokerNick ? escapeHtml(adminPokerNick) : "");
-      var adminMainLine = !adminNamePart
-        ? escapeHtml(raffleIdText || (isManualPlaceholderUserId ? "" : uidRaw) || "Игрок")
-        : (raffleIdText ? adminNamePart + " — " + escapeHtml(raffleIdText) : adminNamePart);
+      var adminMainLine = adminNamePart || escapeHtml(raffleIdText || (isManualPlaceholderUserId ? "" : uidRaw) || "Игрок");
+      var adminIdLine = adminNamePart && raffleIdText
+        ? '<span class="raffle-participant-line__id">' + escapeHtml(raffleIdText) + "</span>"
+        : "";
       var adminFishLevelHtml = typeof pokerRafflesParticipantFishLevelHtml === "function"
         ? pokerRafflesParticipantFishLevelHtml(w)
         : "";
@@ -336,7 +337,9 @@ function initRafflesCompletedRuntime(opts) {
         '<span class="raffle-participant-line raffle-participant-line--admin-compact">' +
         '<span class="raffle-participant-line__main">' +
         adminMainLine +
-        "</span></span>";
+        "</span>" +
+        adminIdLine +
+        "</span>";
       adminLevelLine = adminFishLevelHtml || tgOpen
         ?
         '<span class="raffle-winner-row__admin-level-line">' +

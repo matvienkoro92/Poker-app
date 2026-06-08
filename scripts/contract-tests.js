@@ -451,6 +451,7 @@ async function testAuthAndAdmin(redis) {
   assert.ok(String(r.body.error || "").includes("будущем"), "past create error explains future deadline");
   assert.strictEqual(redis.l("poker_app:raffle_ids").length, countBeforePastCreate, "past create does not save raffle id");
 
+  const chatBeforeRaffleCreate = redis.l("poker_app:chat_messages").length;
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
     action: "create",
@@ -462,6 +463,7 @@ async function testAuthAndAdmin(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create raffle");
   assert.ok(r.body && r.body.ok && r.body.raffle && r.body.raffle.id, "create returns raffle");
+  assert.strictEqual(redis.l("poker_app:chat_messages").length, chatBeforeRaffleCreate, "raffle create does not post to general chat");
   const createdRaffleId = r.body.raffle.id;
 
   r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "delete", raffleId: createdRaffleId }));
