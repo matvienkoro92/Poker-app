@@ -34,5 +34,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-06-06-2026-league1-rebuy-evening-20h.jpg",
     "rating-compressed-preview/rating-06-06-2026-league1-classic-tournament-21h.jpg"
   ],
-  "07.06.2026": []
+  "07.06.2026": [
+    "rating-compressed-preview/rating-07-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-07-06-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-07-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-07-06-2026-league1-classic-tournament-21h.jpg"
+  ]
 };
