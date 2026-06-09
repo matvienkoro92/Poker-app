@@ -3123,6 +3123,63 @@ async function testPokerPlusKeyBindFallbackMatrix(redis) {
   assert.strictEqual(redis.h("poker_app:pokerplus_user_ids").get("ID100001"), "P21-42", "bind stores PokerPlus user id");
 }
 
+async function testPokerPlusFastBindWithEmailUsesMail(redis) {
+  process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
+  process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
+  process.env.POKERPLUS_SECRET_KEY = "secret-contract";
+  process.env.POKERPLUS_STORAGE_SECRET = "storage-contract";
+  clearProjectRequireCache();
+
+  const attempts = [];
+  global.fetch = async function fetchMock(url, opts) {
+    const u = String(url || "");
+    if (u.includes("mock-redis.local")) {
+      const body = opts && opts.body ? JSON.parse(opts.body) : [];
+      const payload = u.endsWith("/pipeline") ? redis.pipeline(body) : { result: null };
+      return {
+        ok: true,
+        async json() { return payload; },
+        async text() { return JSON.stringify(payload); },
+      };
+    }
+    const form = opts && opts.body && typeof opts.body.entries === "function"
+      ? Object.fromEntries(opts.body.entries())
+      : {};
+    if (u.endsWith("/getToken")) {
+      return {
+        ok: true,
+        async json() { return { status: 1, message: "success", data: { token: "token-contract" }, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    if (u.endsWith("/getBindMiniAppPlayer")) {
+      attempts.push(form);
+      if (form.ciphertext === "ABC123" && form.user_app_id === "ID100001" && form.mail === "Player@Test.com") {
+        return {
+          ok: true,
+          async json() { return { status: 1, message: "success", data: { Id: "P21-MAIL", Nike: "Mail Player" }, code: 0 }; },
+          async text() { return ""; },
+        };
+      }
+      return {
+        ok: true,
+        async json() { return { status: 0, message: "Parameter error", data: {}, code: 0 }; },
+        async text() { return ""; },
+      };
+    }
+    throw new Error("Unexpected fetch URL: " + u);
+  };
+
+  const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
+  const profile = await bindMiniAppPlayer("ID100001", [], "ABC123", "Player@Test.com", { fast: true });
+  assert.strictEqual(profile.pokerPlusUserId, "P21-MAIL", "fast-requested bind still uses mail when email is available");
+  assert.ok(
+    attempts.some((payload) => payload.user_app_id === "ID100001" && payload.mail === "Player@Test.com"),
+    "bind retries with dtId and linked email for email-only accounts",
+  );
+  assert.strictEqual(redis.h("poker_app:pokerplus_emails").get("ID100001"), "Player@Test.com", "successful email bind stores the matched Poker21 mail");
+}
+
 async function testPokerPlusKeyBindFailurePrefersBindingFailed(redis) {
   process.env.POKERPLUS_BASE_URL = "https://pokerplus.test/service_v1";
   process.env.POKERPLUS_MERCHANT_ID = "merchant-contract";
@@ -4650,6 +4707,7 @@ async function main() {
     ["profile/user lookup", testProfileUserLookup],
     ["daily poker winners", testDailyPokerWinners],
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
+    ["pokerplus fast bind with email uses mail", testPokerPlusFastBindWithEmailUsesMail],
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],
     ["pokerplus key bind account id fallback", testPokerPlusKeyBindFallsBackToAccountId],
     ["pokerplus refresh saved key", testPokerPlusRefreshUsesSavedKey],
