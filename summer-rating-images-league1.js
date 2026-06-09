@@ -72,7 +72,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-07-06-2026-league1-nlh-knockout-220k-21h.jpg",
     "rating-compressed-preview/rating-07-06-2026-league1-magic-500-120k-22h.jpg"
   ],
-  "08.06.2026": [],
+  "08.06.2026": [
+    "rating-compressed-preview/rating-08-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-08-06-2026-league1-tournir-ponedelnika-18h.jpg"
+  ],
   "09.06.2026": [],
   "10.06.2026": [],
   "11.06.2026": [],

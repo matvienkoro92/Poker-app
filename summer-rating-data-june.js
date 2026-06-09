@@ -2462,7 +2462,160 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     }
   ],
-  "08.06.2026": [],
+  "08.06.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 17000,
+          "points": 135
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 6700,
+          "points": 90
+        },
+        {
+          "nick": "techno",
+          "place": 4,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Виталька",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "мистерFox",
+          "place": 7,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Аспирин",
+          "place": 1,
+          "reward": 3000,
+          "points": 135
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 2030,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 970,
+          "points": 70
+        },
+        {
+          "nick": "Виталька",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "Sarmat1305",
+          "place": 8,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 13810,
+          "points": 110
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 34335,
+          "points": 70
+        },
+        {
+          "nick": "GhooSt",
+          "place": 5,
+          "reward": 5280,
+          "points": 60
+        },
+        {
+          "nick": "Stepchik",
+          "place": 6,
+          "reward": 27220,
+          "points": 50
+        },
+        {
+          "nick": "аБыРвалГ",
+          "place": 10,
+          "reward": 2630,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MORPEH",
+          "place": 2,
+          "reward": 3830,
+          "points": 110
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 6,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "DemonDen",
+          "place": 9,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "аБыРвалГ",
+          "place": 10,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    }
+  ],
   "09.06.2026": [],
   "10.06.2026": [],
   "11.06.2026": [],

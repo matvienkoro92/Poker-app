@@ -1442,7 +1442,7 @@ function initWinterRating() {
     });
   }
   function renderSpringLeagueDateCaption(label) {
-    return "<p class=\"winter-rating__date-tournaments-caption\"><span class=\"winter-rating__date-tournaments-caption-text\">" + label + "</span><span class=\"winter-rating__date-tournaments-updated\">обновлено 7.06</span></p>";
+    return "<p class=\"winter-rating__date-tournaments-caption\"><span class=\"winter-rating__date-tournaments-caption-text\">" + label + "</span><span class=\"winter-rating__date-tournaments-updated\">обновлено 8.06</span></p>";
   }
   function fillSpringLeagueBlocks(leaguesWrap, dateStr) {
     if (!leaguesWrap || leaguesWrap.getAttribute("data-spring-filled") === "1") return;
