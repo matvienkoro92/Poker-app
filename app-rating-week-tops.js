@@ -144,6 +144,17 @@ function pokerInitWinterRatingWeekTops() {
     }
     return fallbackDates;
   }
+  function getSingleTopActualSpringTournamentsByDate() {
+    return typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  }
+  function getSingleTopActiveSeasonTournamentsByDate() {
+    if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) {
+      if (typeof getSummerRatingTournamentsByDate === "function") return getSummerRatingTournamentsByDate() || {};
+      return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+    }
+    if (typeof getSpringRatingTournamentsByDate === "function") return getSpringRatingTournamentsByDate() || {};
+    return getSingleTopActualSpringTournamentsByDate();
+  }
   /**
    * Топ заносов за один турнир: зима и весна отдельно. Индекс скрина = порядок турнира в массиве
    * WINTER_RATING_TOURNAMENTS_BY_DATE / SPRING (должен совпадать с порядком файлов в *_IMAGES).
@@ -187,11 +198,11 @@ function pokerInitWinterRatingWeekTops() {
         });
       });
     }
-    if (typeof getSpringRatingTournamentsByDate === "function") {
-      var springByDate = getSpringRatingTournamentsByDate() || {};
-      Object.keys(springByDate).forEach(function (dateStr) {
+    function pushSeasonTournaments(seasonByDate) {
+      if (!seasonByDate || typeof seasonByDate !== "object") return;
+      Object.keys(seasonByDate).forEach(function (dateStr) {
         if (!dateAllowed(dateStr)) return;
-        var list = springByDate[dateStr];
+        var list = seasonByDate[dateStr];
         if (!Array.isArray(list) || !list.length) return;
         var l1 = 0;
         var l2 = 0;
@@ -228,6 +239,13 @@ function pokerInitWinterRatingWeekTops() {
           }
         }
       });
+    }
+    var actualSpringByDate = getSingleTopActualSpringTournamentsByDate();
+    pushSeasonTournaments(actualSpringByDate);
+    if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) {
+      pushSeasonTournaments(getSingleTopActiveSeasonTournamentsByDate());
+    } else if (!actualSpringByDate || !Object.keys(actualSpringByDate).length) {
+      pushSeasonTournaments(getSingleTopActiveSeasonTournamentsByDate());
     }
     if (!wins.length) return [];
     wins.sort(function (a, b) {
