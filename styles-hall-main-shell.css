@@ -361,8 +361,8 @@
   align-items: center;
   justify-content: center;
   width: clamp(78px, 23vw, 106px);
-  min-height: 42px;
-  padding: 0 8px;
+  min-height: 44px;
+  padding: 1px 8px 0;
   overflow: hidden;
   opacity: 0.96;
   color: rgba(102, 57, 14, 0.98);
@@ -380,7 +380,7 @@
   max-width: 100%;
   font-family: Arial, "Helvetica Neue", sans-serif;
   font-size: clamp(10px, 2.35vw, 13px);
-  font-style: italic;
+  font-style: normal;
   font-weight: 900;
   line-height: 1.02;
   letter-spacing: 0;
@@ -396,10 +396,22 @@
 .hall-of-fame__top2026-plaque strong {
   position: relative;
   z-index: 1;
-  margin-top: 3px;
-  font-size: clamp(6px, 1.5vw, 8px);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 2px;
+  color: rgba(112, 65, 18, 0.92);
+  font-family: Arial, "Helvetica Neue", sans-serif;
+  font-size: clamp(6.2px, 1.55vw, 8.2px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
+  text-shadow: 0 1px 0 rgba(255, 247, 226, 0.9), 0 2px 5px rgba(92, 51, 13, 0.16);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  transform-origin: center;
 }
 .hall-of-fame__top2026-plaque small:empty,
 .hall-of-fame__top2026-plaque strong:empty {
@@ -842,7 +854,7 @@
   }
   .hall-of-fame__top2026-plaque {
     width: clamp(76px, 23vw, 98px);
-    min-height: 40px;
+    min-height: 42px;
     opacity: 0.96;
   }
   .hall-of-fame__top2026-plaque span:first-child {
@@ -857,7 +869,7 @@
   }
   .hall-of-fame__top2026-plaque small,
   .hall-of-fame__top2026-plaque strong {
-    font-size: clamp(5.5px, 1.6vw, 7.5px);
+    font-size: clamp(5.7px, 1.58vw, 7.7px);
   }
   .hall-of-fame__top2026-plaque--sarmat {
     top: clamp(100px, 26vw, 112px);

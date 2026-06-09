@@ -68,29 +68,45 @@ function getHallTop2026PlaqueNick(nick, place) {
   return text;
 }
 
-function getHallTop2026PlaqueLabel(nick, place) {
-  var text = String(nick || "").trim().toLowerCase();
-  if (place === 5 || place === 7) return "";
-  if (text === "botezgambit" || text === "fishkopcheny") return "";
-  return "Legend";
+function normalizeHallTop2026PlaqueAmount(text) {
+  var value = String(text || "").replace(/\s*₽/g, "р").replace(/\s+/g, " ").trim();
+  return value.replace(/\s+р$/i, "р");
+}
+
+function readHallTop2026Rows(list) {
+  return Array.prototype.map.call(list.querySelectorAll(".winter-rating__single-top-item"), function (item) {
+    var nickEl = item.querySelector(".winter-rating__single-top-nick");
+    var amountEl = item.querySelector(".winter-rating__single-top-amount");
+    return {
+      nick: String(nickEl && nickEl.textContent || "").trim(),
+      amount: normalizeHallTop2026PlaqueAmount(amountEl && amountEl.textContent)
+    };
+  }).filter(function (row) {
+    return !!row.nick;
+  });
+}
+
+function fitHallTop2026TextLine(el, minSize) {
+  if (!el) return;
+  el.style.fontSize = "";
+  el.style.transform = "";
+  if (!el.clientWidth) return;
+  var size = parseFloat(window.getComputedStyle ? window.getComputedStyle(el).fontSize : "") || 10;
+  while (el.scrollWidth > el.clientWidth && size > minSize) {
+    size -= 0.25;
+    el.style.fontSize = size.toFixed(2) + "px";
+  }
+  if (el.scrollWidth > el.clientWidth) {
+    var scale = Math.max(0.78, Math.min(1, el.clientWidth / Math.max(1, el.scrollWidth)));
+    el.style.transform = "scaleX(" + scale.toFixed(3) + ")";
+  }
 }
 
 function fitHallTop2026PlaqueText(plaque) {
   var nameEl = plaque && plaque.querySelector("span:first-child");
-  if (!nameEl) return;
-  nameEl.style.fontSize = "";
-  nameEl.style.transform = "";
-  if (!nameEl.clientWidth) return;
-  var size = parseFloat(window.getComputedStyle ? window.getComputedStyle(nameEl).fontSize : "") || 10;
-  var minSize = 6.2;
-  while (nameEl.scrollWidth > nameEl.clientWidth && size > minSize) {
-    size -= 0.25;
-    nameEl.style.fontSize = size.toFixed(2) + "px";
-  }
-  if (nameEl.scrollWidth > nameEl.clientWidth) {
-    var scale = Math.max(0.8, Math.min(1, nameEl.clientWidth / Math.max(1, nameEl.scrollWidth)));
-    nameEl.style.transform = "scaleX(" + scale.toFixed(3) + ")";
-  }
+  var amountEl = plaque && plaque.querySelector("small");
+  fitHallTop2026TextLine(nameEl, 6.2);
+  fitHallTop2026TextLine(amountEl, 5.2);
 }
 
 function fitHallTop2026Plaques() {
@@ -100,19 +116,19 @@ function fitHallTop2026Plaques() {
 function updateHallTop2026Plaques() {
   var list = document.getElementById("hallFameSingleTopList");
   if (!list) return false;
-  var nicks = Array.prototype.map.call(list.querySelectorAll(".winter-rating__single-top-nick"), function (el) {
-    return String(el.textContent || "").trim();
-  }).filter(Boolean);
-  if (!nicks.length) return false;
+  var rows = readHallTop2026Rows(list);
+  if (!rows.length) return false;
   Array.prototype.forEach.call(document.querySelectorAll("[data-hall-top2026-place]"), function (plaque) {
     var place = Number(plaque.getAttribute("data-hall-top2026-place"));
-    if (!place || !nicks[place - 1]) return;
-    var nameEl = plaque.querySelector("span:first-child");
-    var placeEl = plaque.querySelector("small");
     var fixedName = String(plaque.getAttribute("data-hall-top2026-fixed-name") || "").trim();
-    var plaqueNick = fixedName || getHallTop2026PlaqueNick(nicks[place - 1], place);
+    if (!place || (!fixedName && !rows[place - 1])) return;
+    var row = rows[place - 1] || {};
+    var nameEl = plaque.querySelector("span:first-child");
+    var amountEl = plaque.querySelector("small");
+    var fixedAmount = String(plaque.getAttribute("data-hall-top2026-fixed-amount") || "").trim();
+    var plaqueNick = fixedName || getHallTop2026PlaqueNick(row.nick, place);
     if (nameEl) nameEl.textContent = plaqueNick;
-    if (placeEl) placeEl.textContent = getHallTop2026PlaqueLabel(plaqueNick, place);
+    if (amountEl) amountEl.textContent = fixedAmount || row.amount || "";
   });
   var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
   raf(fitHallTop2026Plaques);
