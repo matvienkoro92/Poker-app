@@ -4175,6 +4175,34 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-feedback-link:hover {
   color: #fecdd3;
 }
+.raffle-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.raffle-feedback-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 11px;
+  color: #071019;
+  background: linear-gradient(180deg, #ffe8a3 0%, #f6bd55 100%);
+  border: 1px solid rgba(250, 204, 21, 0.62);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-decoration: none;
+  text-underline-offset: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+.raffle-feedback-action:active,
+.raffle-feedback-action:hover {
+  color: #071019;
+  background: linear-gradient(180deg, #fff1bd 0%, #ffcc6b 100%);
+}
 .raffle-guest-gate {
   display: flex;
   flex-direction: column;

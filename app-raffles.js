@@ -172,6 +172,54 @@ function initRaffles() {
     return links;
   }
 
+  function raffleFeedbackRequirementActions(options) {
+    var opts = options && typeof options === "object" ? options : {};
+    var actions = [];
+    function add(text, url, key) {
+      var raw = String(url || "").trim();
+      if (!/^https:\/\/t\.me\/[A-Za-z0-9_]{3,64}(?:[/?#].*)?$/i.test(raw)) return;
+      for (var i = 0; i < actions.length; i++) {
+        if (actions[i].url === raw) return;
+      }
+      actions.push({ text: text, url: raw, key: key || "" });
+    }
+    if (Array.isArray(opts.missingRequirements)) {
+      opts.missingRequirements.forEach(function (item) {
+        if (!item || typeof item !== "object") return;
+        add(item.action || item.label || "Открыть", item.url, item.key || item.type);
+      });
+    }
+    if (!actions.length && Array.isArray(opts.missing)) {
+      var missing = opts.missing.map(function (item) { return String(item || "").trim(); });
+      if (missing.indexOf("telegram") !== -1 || missing.indexOf("bot") !== -1) {
+        add("Открыть бота", opts.botUrl || "https://t.me/Poker_dvatuza_bot", "bot");
+      }
+      if (missing.indexOf("telegram") !== -1 || missing.indexOf("channel") !== -1) {
+        add("Подписаться на канал", opts.channelUrl || "https://t.me/dva_tuza_club", "channel");
+      }
+    }
+    return actions;
+  }
+
+  function appendRaffleFeedbackActions(target, options) {
+    var actions = raffleFeedbackRequirementActions(options);
+    if (!actions.length) return;
+    target.appendChild(document.createElement("br"));
+    var wrap = document.createElement("span");
+    wrap.className = "raffle-feedback-actions";
+    actions.forEach(function (action) {
+      var a = document.createElement("a");
+      a.className = "raffle-feedback-link raffle-feedback-action";
+      a.href = action.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = action.text;
+      if (action.key) a.setAttribute("data-raffle-requirement", action.key);
+      wrap.appendChild(a);
+    });
+    target.appendChild(wrap);
+  }
+
   function appendRaffleFeedbackMessage(target, message, options) {
     var text = String(message || "");
     var links = raffleFeedbackLinks(options);
@@ -197,6 +245,7 @@ function initRaffles() {
       target.appendChild(a);
       pos = found.idx + found.link.text.length;
     }
+    appendRaffleFeedbackActions(target, options);
   }
 
   function showRaffleFeedback(message, kind, options) {
@@ -1252,6 +1301,8 @@ function initRaffles() {
         botUrl: data.botUrl,
         channelUrl: data.channelUrl,
         openUrl: data.openUrl,
+        missing: data.missing,
+        missingRequirements: data.missingRequirements,
         sticky: true,
       });
     } else {

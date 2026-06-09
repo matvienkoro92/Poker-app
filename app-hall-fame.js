@@ -16,12 +16,14 @@ var HALL_TOP2026_QUOTES = [
 ];
 
 function initHallTop2026Quotes() {
-  var wrap = document.getElementById("hallTop2026Quotes");
+  var openBtn = document.getElementById("hallTop2026QuotesOpen");
+  var wrap = document.getElementById("hallTop2026QuoteModal");
   var textEl = document.getElementById("hallTop2026QuoteText");
   var countEl = document.getElementById("hallTop2026QuoteCount");
   var prevBtn = document.getElementById("hallTop2026QuotePrev");
   var nextBtn = document.getElementById("hallTop2026QuoteNext");
-  if (!wrap || !textEl || !prevBtn || !nextBtn) return;
+  var closeBtn = document.getElementById("hallTop2026QuoteClose");
+  if (!wrap || !openBtn || !textEl || !prevBtn || !nextBtn || !closeBtn) return;
   if (wrap.getAttribute("data-quote-bound") === "1") return;
   wrap.setAttribute("data-quote-bound", "1");
   var quoteIndex = 0;
@@ -33,6 +35,28 @@ function initHallTop2026Quotes() {
     quoteIndex = (quoteIndex + dir + HALL_TOP2026_QUOTES.length) % HALL_TOP2026_QUOTES.length;
     renderQuote();
   }
+  function setQuoteModalOpen(open) {
+    if (open) {
+      wrap.hidden = false;
+      wrap.setAttribute("aria-hidden", "false");
+      renderQuote();
+      setTimeout(function () {
+        try { closeBtn.focus({ preventScroll: true }); } catch (eFocus) {}
+      }, 0);
+      return;
+    }
+    wrap.hidden = true;
+    wrap.setAttribute("aria-hidden", "true");
+    try { openBtn.focus({ preventScroll: true }); } catch (eOpenFocus) {}
+  }
+  openBtn.addEventListener("click", function () { setQuoteModalOpen(true); });
+  closeBtn.addEventListener("click", function () { setQuoteModalOpen(false); });
+  wrap.addEventListener("click", function (e) {
+    if (e && e.target === wrap) setQuoteModalOpen(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!wrap.hidden && e && e.key === "Escape") setQuoteModalOpen(false);
+  });
   prevBtn.addEventListener("click", function () { moveQuote(-1); });
   nextBtn.addEventListener("click", function () { moveQuote(1); });
   renderQuote();
@@ -57,7 +81,7 @@ function updateHallTop2026Plaques() {
     var nameEl = plaque.querySelector("span:first-child");
     var placeEl = plaque.querySelector("small");
     if (nameEl) nameEl.textContent = getHallTop2026PlaqueNick(nicks[place - 1], place);
-    if (placeEl) placeEl.textContent = place === 1 ? "Legend" : place + " место";
+    if (placeEl) placeEl.textContent = "Legend";
   });
   return true;
 }

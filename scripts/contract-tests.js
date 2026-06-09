@@ -1093,6 +1093,10 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "raffle join requires bot");
   assert.strictEqual(r.body.code, "BOT_REQUIRED", "raffle join returns bot-required code");
   assert.ok(String(r.body.error || "").includes("/start"), "raffle bot error explains start command");
+  assert.ok(
+    Array.isArray(r.body.missingRequirements) && r.body.missingRequirements.some((item) => item && item.key === "bot" && item.url),
+    "raffle bot error includes concrete bot requirement"
+  );
 
   installTelegramGateFetch(redis, { botOk: true, channelOk: false });
   r = await call(raffles, req("POST", {}, {
@@ -1104,6 +1108,10 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "raffle join requires channel");
   assert.strictEqual(r.body.code, "CHANNEL_REQUIRED", "raffle join returns channel-required code");
   assert.ok(String(r.body.error || "").includes("@Dva_tuza_club"), "raffle channel error names club channel");
+  assert.ok(
+    Array.isArray(r.body.missingRequirements) && r.body.missingRequirements.some((item) => item && item.key === "channel" && item.url),
+    "raffle channel error includes concrete channel requirement"
+  );
 
   installTelegramGateFetch(redis, { botOk: true, channelOk: false });
   r = await call(promo, req("POST", { path: "daily-poker/play" }, {
@@ -1113,6 +1121,10 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "daily poker play requires channel");
   assert.strictEqual(r.body.code, "CHANNEL_REQUIRED", "daily poker returns channel-required code");
   assert.ok(String(r.body.error || "").includes("Раздать карты"), "daily poker channel error explains retry action");
+  assert.ok(
+    Array.isArray(r.body.missingRequirements) && r.body.missingRequirements.some((item) => item && item.key === "channel" && item.url),
+    "daily poker channel error includes concrete channel requirement"
+  );
 
   installTelegramGateFetch(redis, { botOk: false, channelOk: true });
   r = await call(promo, req("POST", { path: "daily-poker/play" }, {
@@ -1122,6 +1134,10 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "daily poker play requires bot");
   assert.strictEqual(r.body.code, "BOT_REQUIRED", "daily poker returns bot-required code");
   assert.ok(String(r.body.error || "").includes("@Poker_dvatuza_bot"), "daily poker bot error names club bot");
+  assert.ok(
+    Array.isArray(r.body.missingRequirements) && r.body.missingRequirements.some((item) => item && item.key === "bot" && item.url),
+    "daily poker bot error includes concrete bot requirement"
+  );
 }
 
 async function testRaffleEmailAccountSubscriptionGate(redis) {

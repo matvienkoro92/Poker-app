@@ -1371,17 +1371,30 @@ function initProfilePokerPlus() {
     timeoutMs = timeoutMs || 15000;
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = null;
+    var timedOut = false;
     if (controller) {
       options.signal = controller.signal;
-      timer = setTimeout(function () {
-        try { controller.abort(); } catch (eAbort) {}
-      }, timeoutMs);
     }
+    var timeoutPromise = new Promise(function (_, reject) {
+      timer = setTimeout(function () {
+        timedOut = true;
+        try {
+          if (controller) controller.abort();
+        } catch (eAbort) {}
+        var err = new Error("Poker21 profile request timeout");
+        err.name = "AbortError";
+        reject(err);
+      }, timeoutMs);
+    });
+    var fetchPromise = fetch(url, options)
+      .then(function (r) { return r.json().catch(function () { return {}; }); });
     return pokerPlusRunFinally(
-      fetch(url, options)
-        .then(function (r) { return r.json().catch(function () { return {}; }); }),
+      Promise.race([fetchPromise, timeoutPromise]),
       function () {
         if (timer) clearTimeout(timer);
+        if (timedOut) {
+          try { console.warn("Poker21 profile request timed out"); } catch (eLogTimeout) {}
+        }
       }
     );
   }
@@ -1466,6 +1479,7 @@ function initProfilePokerPlus() {
     if (!state.isVerified || state.isGuest || !base || !pokerPlusAuthBodyHasCredential(body)) {
       setPokerPlusInitialLoading(false);
       setProfileStatusLoading(false);
+      if (section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
       if (state.isVerified && !state.isGuest) {
         renderProfile(null, false);
         if (!base) setFeedback("Сервер профиля недоступен. Попробуйте обновить страницу.", "warn");
@@ -1493,9 +1507,10 @@ function initProfilePokerPlus() {
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
         body: JSON.stringify(body),
-      }, 15000)
+      }, refresh ? 15000 : 9000)
         .then(function (data) {
           if (!data || !data.ok) {
+            if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
             renderProfile(null, false);
             setProfileStatusLoading(false);
             if (data && data.error) setFeedback(data.error, true);
@@ -1547,7 +1562,8 @@ function initProfilePokerPlus() {
               refreshPreviousSyncedAt ? refreshPreviousSyncedAt + 1 : refreshStartedAt
             );
           } else {
-            setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : POKER_NET_ERR, true);
+            if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
+            setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : "Poker21 не ответил. Проверьте сеть и попробуйте открыть профиль ещё раз.", true);
             renderPokerPlusStatsFallbackIfVisible();
           }
         }),
@@ -1795,8 +1811,9 @@ function initProfilePokerPlus() {
         if (!section.classList.contains("profile-pokerplus-card--loading")) return;
         renderProfile(null, false);
         setProfileStatusLoading(false);
-        setFeedback("Poker21 долго не отвечает. Попробуйте обновить профиль позже.", "warn");
-      }, 18000);
+        section.dataset.profilePokerPlusLoaded = "";
+        setFeedback("Poker21 не ответил в PWA. Проверьте сеть и откройте вкладку «Профиль Poker21» ещё раз.", "warn");
+      }, 11000);
     }
     try {
       pokerPlusRunFinally(

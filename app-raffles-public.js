@@ -197,6 +197,8 @@ function initRafflesPublicRuntime(opts) {
                 botUrl: data.botUrl,
                 channelUrl: data.channelUrl,
                 openUrl: data.openUrl,
+                missing: data.missing,
+                missingRequirements: data.missingRequirements,
                 sticky: true,
               });
             } else {
