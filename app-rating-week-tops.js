@@ -155,8 +155,12 @@ function pokerInitWinterRatingWeekTops() {
     if (typeof getSpringRatingTournamentsByDate === "function") return getSpringRatingTournamentsByDate() || {};
     return getSingleTopActualSpringTournamentsByDate();
   }
+  function getSingleTopSummerTournamentsByDate() {
+    if (typeof getSummerRatingTournamentsByDate === "function") return getSummerRatingTournamentsByDate() || {};
+    return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  }
   /**
-   * Топ заносов за один турнир: зима и весна отдельно. Индекс скрина = порядок турнира в массиве
+   * Топ заносов за один турнир: все сезоны 2026. Индекс скрина = порядок турнира в массиве
    * WINTER_RATING_TOURNAMENTS_BY_DATE / SPRING (должен совпадать с порядком файлов в *_IMAGES).
    * У турнира можно задать lightboxImageIndex (число) — индекс файла в массиве скринов за день, если порядок турниров ≠ порядок PNG.
    */
@@ -242,11 +246,10 @@ function pokerInitWinterRatingWeekTops() {
     }
     var actualSpringByDate = getSingleTopActualSpringTournamentsByDate();
     pushSeasonTournaments(actualSpringByDate);
-    if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) {
-      pushSeasonTournaments(getSingleTopActiveSeasonTournamentsByDate());
-    } else if (!actualSpringByDate || !Object.keys(actualSpringByDate).length) {
+    if (!actualSpringByDate || !Object.keys(actualSpringByDate).length) {
       pushSeasonTournaments(getSingleTopActiveSeasonTournamentsByDate());
     }
+    pushSeasonTournaments(getSingleTopSummerTournamentsByDate());
     if (!wins.length) return [];
     wins.sort(function (a, b) {
       var dr = (b.reward || 0) - (a.reward || 0);
