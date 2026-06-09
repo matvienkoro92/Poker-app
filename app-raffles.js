@@ -58,6 +58,16 @@ function initRaffles() {
   var raffleCancelBtn = document.getElementById("raffleCancelBtn");
   var raffleUpdateEndBtn = document.getElementById("raffleUpdateEndBtn");
   var raffleDeleteBtn = document.getElementById("raffleDeleteBtn");
+  var raffleAddPrizesToggleBtn = document.getElementById("raffleAddPrizesToggleBtn");
+  var raffleAddPrizesForm = document.getElementById("raffleAddPrizesForm");
+  var raffleAddPrizeModeExisting = document.getElementById("raffleAddPrizeModeExisting");
+  var raffleAddPrizeModeNew = document.getElementById("raffleAddPrizeModeNew");
+  var raffleAddPrizeGroupSelect = document.getElementById("raffleAddPrizeGroupSelect");
+  var raffleAddPrizeExistingGroupWrap = document.getElementById("raffleAddPrizeExistingGroupWrap");
+  var raffleAddPrizeNewGroupWrap = document.getElementById("raffleAddPrizeNewGroupWrap");
+  var raffleAddPrizeCount = document.getElementById("raffleAddPrizeCount");
+  var raffleAddPrizeText = document.getElementById("raffleAddPrizeText");
+  var raffleAddPrizesSubmit = document.getElementById("raffleAddPrizesSubmit");
   var raffleStatWinners = document.getElementById("raffleStatWinners");
   var raffleStatPrize = document.getElementById("raffleStatPrize");
   var raffleStatPrizeValue = document.getElementById("raffleStatPrizeValue");
@@ -891,6 +901,15 @@ function initRaffles() {
     return formatRaffleSum(amount).replace(/\s*₽/g, "р");
   }
 
+  function activeRaffleTicketGroupShortLabel(count, prize) {
+    var total = Math.max(0, parseInt(count, 10) || 0);
+    if (!total) return "";
+    var nominal = parsePrizeValue(prize);
+    var label = total + " " + pokerRafflesTicketWord(total);
+    if (nominal > 0) label += " за " + activeRaffleRubText(nominal).replace(/[\s\u00a0\u202f]/g, "");
+    return label;
+  }
+
   function activeRaffleLargeRubText(amount) {
     return activeRaffleRubText(amount).replace(/\s*р$/i, " Р");
   }
@@ -1029,23 +1048,24 @@ function initRaffles() {
       labels.push("Нокаут · гарантия " + guarantee);
       return labels;
     }
-    var compactTitle = activeRaffleChooserPrizeTitle(raffle);
-    if (compactTitle) labels.push(compactTitle.replace(/\s*₽/g, "р"));
     if (isCashPrize) {
+      var compactTitle = activeRaffleChooserPrizeTitle(raffle);
+      if (compactTitle) labels.push(compactTitle.replace(/\s*₽/g, "р"));
       activeRaffleBuyinChipLabels(raffle).forEach(function (label) {
         if (labels.indexOf(label) === -1) labels.push(label);
       });
       return labels;
     }
-    if (labels.length && groups.length <= 1) return labels;
     groups.forEach(function (group) {
       var count = Math.max(0, parseInt(group && group.count, 10) || 0);
-      var prize = raffleDisplayPrizeText(String(group && group.prize || "").replace(/\s+/g, " ").trim());
-      if (!count || !prize) return;
-      var label = count + " " + pokerRafflesTicketWord(count) + " за " + prize.replace(/\s*₽/g, "р");
+      var label = activeRaffleTicketGroupShortLabel(count, group && group.prize);
+      if (!label) return;
       if (labels.indexOf(label) === -1) labels.push(label);
     });
-    if (!labels.length) labels.push(activeRafflePrizeLabel(raffle));
+    if (!labels.length) {
+      var fallbackTitle = activeRaffleChooserPrizeTitle(raffle);
+      labels.push(fallbackTitle ? fallbackTitle.replace(/\s*₽/g, "р") : activeRafflePrizeLabel(raffle));
+    }
     return labels;
   }
 
@@ -2077,7 +2097,9 @@ function initRaffles() {
   var rafflesActiveViewRuntime = null;
   function renderRaffle(raffle) {
     if (rafflesActiveViewRuntime && typeof rafflesActiveViewRuntime.renderRaffle === "function") {
-      return rafflesActiveViewRuntime.renderRaffle(raffle);
+      var rendered = rafflesActiveViewRuntime.renderRaffle(raffle);
+      if (raffleAddPrizesForm && !raffleAddPrizesForm.hidden) syncRaffleAddPrizesMode();
+      return rendered;
     }
   }
 
@@ -2648,6 +2670,198 @@ function initRaffles() {
       buildActiveRaffleCardHeading: buildActiveRaffleCardHeading
     });
     initRafflesPublicRuntime(rafflesPublicRuntimeDeps);
+  }
+
+  function raffleAddPrizeGroups() {
+    return Array.isArray(currentRaffleData && currentRaffleData.groups) ? currentRaffleData.groups : [];
+  }
+
+  function raffleAddPrizeGroupOptionLabel(group, index) {
+    var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+    var prize = raffleDisplayPrizeText(group && group.prize ? String(group.prize).trim() : "Приз");
+    return "Группа " + (index + 1) + " · " + count + " мест · " + prize;
+  }
+
+  function getRaffleAddPrizeMode() {
+    var groups = raffleAddPrizeGroups();
+    if (!groups.length) return "new";
+    return raffleAddPrizeModeNew && raffleAddPrizeModeNew.checked ? "new" : "existing";
+  }
+
+  function syncRaffleAddPrizesMode() {
+    var groups = raffleAddPrizeGroups();
+    if (raffleAddPrizeGroupSelect) {
+      var previous = raffleAddPrizeGroupSelect.value;
+      raffleAddPrizeGroupSelect.innerHTML = "";
+      groups.forEach(function (group, index) {
+        var opt = document.createElement("option");
+        opt.value = String(index);
+        opt.textContent = raffleAddPrizeGroupOptionLabel(group, index);
+        raffleAddPrizeGroupSelect.appendChild(opt);
+      });
+      if (previous && raffleAddPrizeGroupSelect.querySelector('option[value="' + previous.replace(/"/g, '\\"') + '"]')) {
+        raffleAddPrizeGroupSelect.value = previous;
+      }
+    }
+    if (raffleAddPrizeModeExisting) {
+      raffleAddPrizeModeExisting.disabled = !groups.length;
+      if (!groups.length) raffleAddPrizeModeExisting.checked = false;
+    }
+    if (raffleAddPrizeModeNew && !groups.length) raffleAddPrizeModeNew.checked = true;
+    var mode = getRaffleAddPrizeMode();
+    if (raffleAddPrizeExistingGroupWrap) raffleAddPrizeExistingGroupWrap.hidden = mode !== "existing";
+    if (raffleAddPrizeNewGroupWrap) raffleAddPrizeNewGroupWrap.hidden = mode !== "new";
+    if (raffleAddPrizeText) raffleAddPrizeText.disabled = mode !== "new";
+    var hint = raffleAddPrizesForm ? raffleAddPrizesForm.querySelector(".raffle-add-prizes-form__hint") : null;
+    if (hint) {
+      hint.textContent = mode === "existing"
+        ? "Количество добавится в выбранную существующую группу призов."
+        : "Добавится новая группа победителей в текущий активный розыгрыш.";
+    }
+  }
+
+  function setRaffleAddPrizesFormVisible(visible) {
+    if (!raffleAddPrizesForm) return;
+    raffleAddPrizesForm.classList.toggle("raffle-add-prizes-form--hidden", !visible);
+    raffleAddPrizesForm.hidden = !visible;
+    raffleAddPrizesForm.setAttribute("aria-hidden", visible ? "false" : "true");
+    if (raffleAddPrizesToggleBtn) raffleAddPrizesToggleBtn.setAttribute("aria-expanded", visible ? "true" : "false");
+    if (!visible) return;
+    if (raffleAddPrizeCount && (!raffleAddPrizeCount.value || parseInt(raffleAddPrizeCount.value, 10) <= 0)) {
+      raffleAddPrizeCount.value = "1";
+    }
+    syncRaffleAddPrizesMode();
+    if (raffleAddPrizeText && !raffleAddPrizeText.value.trim()) {
+      var groups = raffleAddPrizeGroups();
+      var fallbackPrize = groups.length && groups[groups.length - 1] && groups[groups.length - 1].prize
+        ? String(groups[groups.length - 1].prize || "").trim()
+        : "";
+      if (!fallbackPrize) {
+        var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(currentRaffleData);
+        fallbackPrize = isCashPrize ? "Беккинг-байин на кеш 1000р" : "Беккинг-билет 300р";
+      }
+      raffleAddPrizeText.value = fallbackPrize;
+    }
+    if (getRaffleAddPrizeMode() === "existing" && raffleAddPrizeGroupSelect && typeof raffleAddPrizeGroupSelect.focus === "function") {
+      raffleAddPrizeGroupSelect.focus();
+    } else if (raffleAddPrizeText && typeof raffleAddPrizeText.focus === "function") {
+      raffleAddPrizeText.focus();
+    }
+  }
+
+  function resetRaffleAddPrizesSubmit() {
+    if (!raffleAddPrizesSubmit) return;
+    raffleAddPrizesSubmit.disabled = false;
+    raffleAddPrizesSubmit.textContent = "Добавить";
+  }
+
+  function submitRaffleAddPrizes() {
+    if (!rafflesIsAdmin) return;
+    if (!currentRaffleId) {
+      if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
+      return;
+    }
+    if (!base || !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+      return;
+    }
+    var count = Math.max(0, Math.min(100, parseInt(raffleAddPrizeCount && raffleAddPrizeCount.value, 10) || 0));
+    var prize = String(raffleAddPrizeText && raffleAddPrizeText.value || "").replace(/\s+/g, " ").trim();
+    if (count <= 0) {
+      if (tg && tg.showAlert) tg.showAlert("Укажите количество призовых мест");
+      return;
+    }
+    var mode = getRaffleAddPrizeMode();
+    var selectedGroupIndex = -1;
+    var selectedGroup = null;
+    if (mode === "existing") {
+      selectedGroupIndex = parseInt(raffleAddPrizeGroupSelect && raffleAddPrizeGroupSelect.value, 10);
+      var groups = raffleAddPrizeGroups();
+      selectedGroup = Number.isInteger(selectedGroupIndex) && selectedGroupIndex >= 0 ? groups[selectedGroupIndex] : null;
+      if (!selectedGroup) {
+        if (tg && tg.showAlert) tg.showAlert("Выберите группу призов");
+        return;
+      }
+      prize = String(selectedGroup.prize || "").replace(/\s+/g, " ").trim();
+    }
+    if (mode === "new" && !prize) {
+      if (tg && tg.showAlert) tg.showAlert("Укажите приз");
+      return;
+    }
+    var groupLabel = mode === "existing"
+      ? (count + " мест в " + raffleAddPrizeGroupOptionLabel(selectedGroup, selectedGroupIndex))
+      : (activeRaffleTicketGroupShortLabel(count, prize) || (count + " приз(ов): " + prize));
+    var doAdd = function () {
+      if (raffleAddPrizesSubmit) {
+        raffleAddPrizesSubmit.disabled = true;
+        raffleAddPrizesSubmit.textContent = "Добавляем...";
+      }
+      var addPayload = {
+        action: "addPrizeGroups",
+        raffleId: currentRaffleId,
+        count: count,
+      };
+      if (mode === "existing") {
+        addPayload.targetGroupIndex = selectedGroupIndex;
+      } else {
+        addPayload.groups = [{ count: count, prize: prize }];
+      }
+      fetch(base + "/api/raffles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerGuestOrAuthedPostBody(addPayload)),
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; });
+        })
+        .then(function (data) {
+          resetRaffleAddPrizesSubmit();
+          if (data && data.ok) {
+            if (data.raffle && data.raffle.id) focusRaffleAfterMutation(data.raffle.id);
+            clearRafflesCache();
+            setRaffleAddPrizesFormVisible(false);
+            if (raffleAddPrizeCount) raffleAddPrizeCount.value = "1";
+            if (mode === "new" && raffleAddPrizeText) raffleAddPrizeText.value = "";
+            if (tg && tg.showAlert) tg.showAlert("Призы добавлены");
+            else showRaffleFeedback("Призы добавлены", "ok");
+            loadRaffles();
+          } else if (tg && tg.showAlert) {
+            tg.showAlert((data && data.error) || "Ошибка добавления призов");
+          } else {
+            showRaffleFeedback((data && data.error) || "Ошибка добавления призов", "err");
+          }
+        })
+        .catch(function () {
+          resetRaffleAddPrizesSubmit();
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+          else showRaffleFeedback(POKER_NET_ERR, "err");
+        });
+    };
+    confirmRaffleAdminAction("Добавить в текущий розыгрыш: " + groupLabel + "?", doAdd);
+  }
+
+  if (raffleAddPrizesToggleBtn) {
+    raffleAddPrizesToggleBtn.addEventListener("click", function () {
+      if (!rafflesIsAdmin) return;
+      setRaffleAddPrizesFormVisible(!raffleAddPrizesForm || raffleAddPrizesForm.hidden);
+    });
+  }
+
+  if (raffleAddPrizeModeExisting) {
+    raffleAddPrizeModeExisting.addEventListener("change", syncRaffleAddPrizesMode);
+  }
+  if (raffleAddPrizeModeNew) {
+    raffleAddPrizeModeNew.addEventListener("change", syncRaffleAddPrizesMode);
+  }
+  if (raffleAddPrizeGroupSelect) {
+    raffleAddPrizeGroupSelect.addEventListener("change", syncRaffleAddPrizesMode);
+  }
+
+  if (raffleAddPrizesForm) {
+    raffleAddPrizesForm.addEventListener("submit", function (e) {
+      if (e) e.preventDefault();
+      submitRaffleAddPrizes();
+    });
   }
 
 

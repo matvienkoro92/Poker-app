@@ -285,6 +285,18 @@ function installFetch(redis) {
 
 function installTelegramGateFetch(redis, options) {
   const opts = Object.assign({ botOk: true, channelOk: true }, options || {});
+  function queryValue(url, key) {
+    try {
+      return new URL(String(url)).searchParams.get(key) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+  function expectedTelegramIdOk(url, key) {
+    const expected = opts.expectedTelegramId != null ? String(opts.expectedTelegramId).trim() : "";
+    if (!expected) return true;
+    return queryValue(url, key) === expected;
+  }
   global.fetch = async function fetchGateMock(url, requestOpts) {
     const u = String(url || "");
     if (u.includes("mock-redis.local")) {
@@ -297,17 +309,19 @@ function installTelegramGateFetch(redis, options) {
       };
     }
     if (u.includes("/getChat?")) {
-      const payload = opts.botOk
+      const ok = !!opts.botOk && expectedTelegramIdOk(u, "chat_id");
+      const payload = ok
         ? { ok: true, result: { id: 1001, type: "private" } }
         : { ok: false, error_code: 400, description: "Bad Request: chat not found" };
       return {
-        ok: !!opts.botOk,
+        ok,
         async json() { return payload; },
         async text() { return JSON.stringify(payload); },
       };
     }
     if (u.includes("/getChatMember?")) {
-      const payload = opts.channelOk
+      const ok = !!opts.channelOk && expectedTelegramIdOk(u, "user_id");
+      const payload = ok
         ? { ok: true, result: { status: "member" } }
         : { ok: true, result: { status: "left" } };
       return {
@@ -894,6 +908,54 @@ async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   assert.strictEqual(sentMessages[0].body.chat_id, "1001", "raffle admin upsert notifies linked user after legacy manual row update");
 }
 
+async function testRaffleAdminAddPrizeGroups(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  installFetch(redis);
+  const raffle = {
+    id: "contract_admin_add_prizes",
+    title: "Contract admin add prizes",
+    totalWinners: 3,
+    groups: [
+      { prize: "Ticket 300", count: 2 },
+      { prize: "Ticket 500", count: 1 },
+    ],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_admin_add_prizes", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_admin_add_prizes");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "addPrizeGroups",
+    raffleId: "contract_admin_add_prizes",
+    groups: [{ count: 2, prize: "Ticket 1000" }],
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin add prizes can append a new group");
+  assert.strictEqual(r.body.raffle.groups.length, 3, "raffle admin add prizes appends one group");
+  assert.strictEqual(r.body.raffle.groups[2].count, 2, "raffle admin add prizes stores new group count");
+  assert.strictEqual(r.body.raffle.groups[2].prize, "Ticket 1000", "raffle admin add prizes stores new group prize");
+  assert.strictEqual(r.body.raffle.totalWinners, 5, "raffle admin add prizes updates total winners after append");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "addPrizeGroups",
+    raffleId: "contract_admin_add_prizes",
+    targetGroupIndex: 0,
+    count: 3,
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin add prizes can increase existing group");
+  assert.strictEqual(r.body.updatedGroupIndex, 0, "raffle admin add prizes reports updated group index");
+  assert.strictEqual(r.body.raffle.groups.length, 3, "raffle admin add prizes keeps group count when updating existing group");
+  assert.strictEqual(r.body.raffle.groups[0].count, 5, "raffle admin add prizes increases selected group count");
+  assert.strictEqual(r.body.raffle.groups[0].prize, "Ticket 300", "raffle admin add prizes keeps selected group prize");
+  assert.strictEqual(r.body.raffle.totalWinners, 8, "raffle admin add prizes updates total winners after existing group increase");
+}
+
 async function testRaffleAdminRemoveParticipant(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -1235,6 +1297,37 @@ async function testRaffleEmailAccountSubscriptionGate(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "linked email account with bot access can join raffle");
   assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100003", "email join stores dt account id");
+
+  redis.h("poker_app:email_links").set("player@example.test", "ID100003");
+  redis.h("poker_app:visitor_dt_ids").set("mail_pending_contract_old", "ID199999");
+  redis.h("poker_app:id_to_user").set("ID199999", "mail_pending_contract_old");
+  const staleNumericEmailToken = pwa.signPwaSession(
+    { id: 9999, memberId: "mail_pending_contract_old", username: "", email: "player@example.test" },
+    BOT_TOKEN
+  );
+  const staleNumericRaffle = {
+    id: "contract_raffle_email_gate_stale_numeric",
+    title: "Contract email gated raffle stale numeric",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_email_gate_stale_numeric", JSON.stringify(staleNumericRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_email_gate_stale_numeric");
+
+  installTelegramGateFetch(redis, { botOk: true, channelOk: true, expectedTelegramId: "1003" });
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: staleNumericEmailToken,
+    action: "join",
+    raffleId: "contract_raffle_email_gate_stale_numeric",
+    deviceId: "email-gate-dev-2",
+  }));
+  assert.strictEqual(r.statusCode, 200, "email join uses linked Telegram id before stale pwa numeric id");
+  assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100003", "stale numeric email join still stores dt account id");
 }
 
 async function testRaffleWinnerReady(redis) {
@@ -4775,6 +4868,7 @@ async function main() {
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle admin upsert participant tickets", testRaffleAdminUpsertParticipantAddsTickets],
+    ["raffle admin add prize groups", testRaffleAdminAddPrizeGroups],
     ["raffle admin remove participant", testRaffleAdminRemoveParticipant],
     ["raffle active list includes daily sibling", testRaffleActiveListIncludesDailySibling],
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],

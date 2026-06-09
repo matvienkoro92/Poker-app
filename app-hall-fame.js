@@ -68,6 +68,13 @@ function getHallTop2026PlaqueNick(nick, place) {
   return text;
 }
 
+function getHallTop2026PlaqueLabel(nick, place) {
+  var text = String(nick || "").trim().toLowerCase();
+  if (place === 5 || place === 7) return "";
+  if (text === "botezgambit" || text === "fishkopcheny") return "";
+  return "Legend";
+}
+
 function updateHallTop2026Plaques() {
   var list = document.getElementById("hallFameSingleTopList");
   if (!list) return false;
@@ -81,7 +88,7 @@ function updateHallTop2026Plaques() {
     var nameEl = plaque.querySelector("span:first-child");
     var placeEl = plaque.querySelector("small");
     if (nameEl) nameEl.textContent = getHallTop2026PlaqueNick(nicks[place - 1], place);
-    if (placeEl) placeEl.textContent = "Legend";
+    if (placeEl) placeEl.textContent = getHallTop2026PlaqueLabel(nicks[place - 1], place);
   });
   return true;
 }
