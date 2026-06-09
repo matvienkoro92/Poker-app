@@ -2464,6 +2464,40 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
   ],
   "08.06.2026": [
     {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 4,
+          "reward": 541,
+          "points": 70
+        },
+        {
+          "nick": "Danger",
+          "place": 13,
+          "reward": 496,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 4,
+          "reward": 7547,
+          "points": 70
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -2541,6 +2575,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
     },
     {
       "time": "18:00",
+      "name": "Monday 🏆 200k GTD",
+      "buyin": 7500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 2,
+          "reward": 39157,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "18:00",
       "name": "Турнир Понедельника",
       "buyin": 500,
       "league": 1,
@@ -2574,6 +2622,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 10,
           "reward": 2630,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "PLO5 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 3,
+          "reward": 3151,
+          "points": 90
         }
       ]
     },

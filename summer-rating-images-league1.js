@@ -73,7 +73,9 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-07-06-2026-league1-magic-500-120k-22h.jpg"
   ],
   "08.06.2026": [
+    "rating-compressed-preview/rating-08-06-2026-league1-dv-turbo-500-80k-10h.jpg",
     "rating-compressed-preview/rating-08-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-08-06-2026-league1-monday-200k-gtd-18h.jpg",
     "rating-compressed-preview/rating-08-06-2026-league1-tournir-ponedelnika-18h.jpg"
   ],
   "09.06.2026": [
