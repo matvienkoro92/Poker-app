@@ -5093,6 +5093,13 @@ button.raffle-feedback-action {
   cursor: default;
   opacity: 0.82;
 }
+.raffle-winner-ready-btn--active,
+.raffle-winner-ready-btn--active:disabled,
+.raffle-winner-row--ready .raffle-winner-ready-btn {
+  border-color: rgba(250, 204, 21, 0.64);
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+}
 .raffle-completed-card,
 .raffle-completed-card__winners,
 .raffle-winner-group,

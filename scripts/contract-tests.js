@@ -1780,9 +1780,33 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
   const stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_reroll"));
   const storedReplacement = stored.winners.find((w) => w.winnerReroll === true);
   assert.ok(storedReplacement, "stored raffle keeps replacement winner");
+  storedReplacement.winnerReady = true;
+  storedReplacement.winnerReadyAt = new Date(Date.now() - 5 * 60_000).toISOString();
+  storedReplacement.winnerReadyBy = storedReplacement.userId;
+  storedReplacement.winnerReadyState = "ready";
   storedReplacement.winnerReadyWindowStartedAt = new Date(Date.now() - 11 * 60_000).toISOString();
   storedReplacement.winnerReadyDeadlineAt = new Date(Date.now() - 60_000).toISOString();
   redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll", JSON.stringify(stored));
+
+  r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll" }));
+  assert.strictEqual(r.statusCode, 200, "admin can load expired ready reroll window");
+  const readyReplacement = r.body.raffle.winners.find((w) => w.winnerReroll === true);
+  assert.strictEqual(readyReplacement.winnerReady, true, "ready reroll winner keeps ready flag after deadline");
+  assert.strictEqual(readyReplacement.winnerReadyState, "ready", "expired ready reroll winner stays ready");
+  assert.notStrictEqual(readyReplacement.winnerStatus, "ok", "expired ready reroll winner is not auto-issued");
+  assert.notStrictEqual(readyReplacement.winnerBurned, true, "expired ready reroll winner is not burned");
+
+  const storedForBurn = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_ready_reroll"));
+  const storedReplacementForBurn = storedForBurn.winners.find((w) => w.winnerReroll === true);
+  assert.ok(storedReplacementForBurn, "stored raffle keeps replacement winner for burn check");
+  delete storedReplacementForBurn.winnerReady;
+  delete storedReplacementForBurn.winnerReadyAt;
+  delete storedReplacementForBurn.winnerReadyBy;
+  delete storedReplacementForBurn.winnerReadyAccountId;
+  storedReplacementForBurn.winnerReadyState = "pending";
+  storedReplacementForBurn.winnerReadyWindowStartedAt = new Date(Date.now() - 11 * 60_000).toISOString();
+  storedReplacementForBurn.winnerReadyDeadlineAt = new Date(Date.now() - 60_000).toISOString();
+  redis.kv.set("poker_app:raffle:contract_raffle_ready_reroll", JSON.stringify(storedForBurn));
 
   r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_ready_reroll" }));
   assert.strictEqual(r.statusCode, 200, "admin can load and settle expired reroll window");
