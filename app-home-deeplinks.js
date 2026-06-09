@@ -16,6 +16,16 @@ function pokerInitHomeDeepLinks(opts) {
     if (/^\d{6}$/.test(val)) return val;
     return null;
   }
+  function resolveHallFameStartParamLocal(val) {
+    val = String(val || "").trim();
+    if (!val) return null;
+    if (val === "hall_fame" || val === "blog_top15" || val === "hall_top15" || val === "hall_fame_top2026") return "top2026";
+    if (val === "hall_fame_legends") return "legends";
+    if (val === "hall_fame_cups") return "cups";
+    if (val === "hall_fame_photos") return "photos";
+    if (val === "hall_fame_shame") return "shame";
+    return null;
+  }
   /**
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
@@ -163,10 +173,14 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
-    var hallSecStart = resolveHallFameSectionFromStartParam(startParam);
+    var hallSecStart = typeof resolveHallFameSectionFromStartParam === "function"
+      ? resolveHallFameSectionFromStartParam(startParam)
+      : resolveHallFameStartParamLocal(startParam);
     if (hallSecStart) {
+      window.__pendingHallFameSection = hallSecStart;
       setTimeout(function () {
-        navigateToHallFameSection(hallSecStart);
+        if (typeof navigateToHallFameSection === "function") navigateToHallFameSection(hallSecStart);
+        else if (typeof setView === "function") setView("hall-of-fame");
       }, 0);
       return;
     }

@@ -139,8 +139,8 @@
   function resolveHallStartParam(startParam) {
     var val = String(startParam || "").trim();
     if (!val) return null;
-    if (val === "blog_top15" || val === "hall_top15" || val === "hall_fame_top2026") return "top2026";
-    if (val === "hall_fame" || val === "hall_fame_legends") return "legends";
+    if (val === "hall_fame" || val === "blog_top15" || val === "hall_top15" || val === "hall_fame_top2026") return "top2026";
+    if (val === "hall_fame_legends") return "legends";
     if (val === "hall_fame_cups") return "cups";
     if (val === "hall_fame_photos") return "photos";
     if (val === "hall_fame_shame") return "shame";
@@ -152,7 +152,7 @@
   }
   if (typeof window.navigateToHallFameSection !== "function") {
     window.navigateToHallFameSection = function (section) {
-      window.__pendingHallFameSection = section || "legends";
+      window.__pendingHallFameSection = section || "top2026";
       if (typeof setView === "function") setView("hall-of-fame");
     };
   }

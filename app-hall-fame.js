@@ -274,7 +274,7 @@ function resolveHallFameSectionFromStartParam(startParam) {
   if (!startParam) return null;
   var p = String(startParam).trim();
   /* Литералы: эта функция вызывается из раннего runGazetteAndTasksInit до присвоения HALL_FAME_SECTION_STARTAPP */
-  if (p === "blog_top15" || p === "hall_top15" || p === "hall_fame_top2026") return "top2026";
+  if (p === "hall_fame" || p === "blog_top15" || p === "hall_top15" || p === "hall_fame_top2026") return "top2026";
   if (p === "hall_fame_legends") return "legends";
   if (p === "hall_fame_cups") return "cups";
   if (p === "hall_fame_photos") return "photos";
@@ -295,7 +295,7 @@ function navigateToHallFameSection(section) {
         }
       } catch (ePrev) {}
     }
-    if (typeof showHallOfFamePanel === "function") showHallOfFamePanel(section || "legends");
+    if (typeof showHallOfFamePanel === "function") showHallOfFamePanel(section || "top2026");
   }, 480);
 }
 

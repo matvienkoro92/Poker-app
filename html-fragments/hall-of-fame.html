@@ -1,18 +1,18 @@
           <!-- Зал славы -->
-          <div class="view" data-view="hall-of-fame" id="hallOfFameView">
+          <div class="view hall-of-fame--top2026" data-view="hall-of-fame" id="hallOfFameView">
             <h1 class="hall-of-fame__main-title hall-of-fame__main-title--top">Зал славы</h1>
             <div class="hall-of-fame__toolbar" role="navigation" aria-label="Разделы зала славы">
               <button type="button" class="bonus-game-back hall-of-fame__toolbar-back" data-view-target="home" aria-label="На главную">←</button>
               <div class="hall-of-fame__subtabs" role="tablist" aria-label="Разделы зала славы">
-                <button type="button" class="hall-of-fame__subtab hall-of-fame__subtab--active" role="tab" aria-selected="true" data-hall-section="legends">Легенды</button>
+                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="legends">Легенды</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="cups">Кубки</button>
-                <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="top2026">Топ2026</button>
+                <button type="button" class="hall-of-fame__subtab hall-of-fame__subtab--active" role="tab" aria-selected="true" data-hall-section="top2026">Топ2026</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="photos">Фото</button>
                 <button type="button" class="hall-of-fame__subtab" role="tab" aria-selected="false" data-hall-section="shame">Доска позора</button>
               </div>
             </div>
             <div class="hall-of-fame__panels">
-              <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" aria-labelledby="hallLegendsTitle">
+              <div class="hall-of-fame__panel" id="hallFamePanelLegends" data-hall-panel="legends" role="tabpanel" aria-labelledby="hallLegendsTitle" hidden>
                 <div class="hall-of-fame__panel-share-row raffles-hero__share-row" role="group" aria-label="Ссылка на раздел «Легенды»">
                   <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" data-hall-fame-share="legends" data-hall-fame-action="share">Поделиться</button>
                   <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" data-hall-fame-share="legends" data-hall-fame-action="copy" aria-label="Скопировать ссылку на раздел «Легенды»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
@@ -128,7 +128,7 @@
                   <p class="hall-of-fame__placeholder">Скоро здесь появятся данные.</p>
                 </section>
               </div>
-              <div class="hall-of-fame__panel" id="hallFamePanelTop2026" data-hall-panel="top2026" role="tabpanel" hidden aria-labelledby="hallFameSingleTopSummary">
+              <div class="hall-of-fame__panel hall-of-fame__panel--active" id="hallFamePanelTop2026" data-hall-panel="top2026" role="tabpanel" aria-labelledby="hallFameSingleTopSummary">
                 <div class="hall-of-fame__single-top-outer winter-rating__single-top-row hall-of-fame__top2026-stage">
                   <div class="hall-of-fame__top2026-inscriptions" aria-hidden="true">
                     <span class="hall-of-fame__top2026-plaque hall-of-fame__top2026-plaque--sarmat" data-hall-top2026-place="1"><span>Сармат</span><small>Legend</small></span>

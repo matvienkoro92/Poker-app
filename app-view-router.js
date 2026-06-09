@@ -1250,7 +1250,7 @@ function setView(viewName, navOpts) {
     if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
   } catch (eTgClear) {}
   if (viewName === "hall-of-fame") {
-    var hallSection = window.__pendingHallFameSection || "legends";
+    var hallSection = window.__pendingHallFameSection || "top2026";
     window.__pendingHallFameSection = "";
     var rafHall = window.requestAnimationFrame || function (fn) {
       setTimeout(fn, 16);
