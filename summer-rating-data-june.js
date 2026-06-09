@@ -2680,6 +2680,88 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
   ],
   "09.06.2026": [
     {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 6284,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Danger",
+          "place": 3,
+          "reward": 2435,
+          "points": 90
+        },
+        {
+          "nick": "idinaxyi",
+          "place": 5,
+          "reward": 1282,
+          "points": 60
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 6,
+          "reward": 855,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 4,
+          "reward": 560,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 4,
+          "reward": 11284,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 8,
+          "reward": 1278,
+          "points": 30
+        }
+      ]
+    },
+    {
       "time": "14:00",
       "name": "Tournament Rebuy",
       "buyin": 100,
@@ -2714,6 +2796,60 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 14,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 4,
+          "reward": 3607,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 3,
+          "reward": 2699,
+          "points": 90
+        },
+        {
+          "nick": "метl$",
+          "place": 6,
+          "reward": 1206,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Bounty Magic 400k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 131777,
+          "points": 135
+        },
+        {
+          "nick": "Waaarrr",
+          "place": 5,
+          "reward": 19566,
+          "points": 60
         }
       ]
     },

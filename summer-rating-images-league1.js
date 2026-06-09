@@ -79,6 +79,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-08-06-2026-league1-tournir-ponedelnika-18h.jpg"
   ],
   "09.06.2026": [
+    "rating-compressed-preview/rating-09-06-2026-league1-s-bounty-120k-00h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league1-magic-bounty-50k-11h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league1-new-hot-pko-15h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league1-bounty-magic-400k-18h.jpg",
     "rating-compressed-preview/rating-09-06-2026-league1-hok-19h.jpg",
     "rating-compressed-preview/rating-09-06-2026-league1-rebuy-evening-20h.jpg"
   ],
