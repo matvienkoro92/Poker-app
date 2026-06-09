@@ -46,7 +46,11 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-08-06-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-08-06-2026-league2-energetik-22h.jpg"
   ],
-  "09.06.2026": [],
+  "09.06.2026": [
+    "rating-compressed-preview/rating-09-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league2-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-09-06-2026-league2-energetik-22h.jpg"
+  ],
   "10.06.2026": [],
   "11.06.2026": [],
   "12.06.2026": [],

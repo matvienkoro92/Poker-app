@@ -2616,7 +2616,198 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     }
   ],
-  "09.06.2026": [],
+  "09.06.2026": [
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "⚡72⚡",
+          "place": 1,
+          "reward": 4030,
+          "points": 135
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 2730,
+          "points": 110
+        },
+        {
+          "nick": "zagrebnagreb",
+          "place": 3,
+          "reward": 1640,
+          "points": 90
+        },
+        {
+          "nick": "Палач",
+          "place": 10,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "DemonDen",
+          "place": 14,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "COBRA",
+          "place": 1,
+          "reward": 32500,
+          "points": 135
+        },
+        {
+          "nick": "AllySvin",
+          "place": 2,
+          "reward": 19900,
+          "points": 110
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 9900,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 8700,
+          "points": 70
+        },
+        {
+          "nick": "KaizenAce",
+          "place": 10,
+          "reward": 2000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "HOK🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 20240.63,
+          "points": 135
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 16640.63,
+          "points": 110
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 4400,
+          "points": 90
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 4934.37,
+          "points": 70
+        },
+        {
+          "nick": "Рамиль01",
+          "place": 6,
+          "reward": 4162.5,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 18800,
+          "points": 135
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 11240,
+          "points": 110
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 7400,
+          "points": 90
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 4,
+          "reward": 0,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 7,
+          "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 6000,
+          "points": 135
+        },
+        {
+          "nick": "PONOCHKA",
+          "place": 2,
+          "reward": 4050,
+          "points": 110
+        },
+        {
+          "nick": "Igorjn84",
+          "place": 3,
+          "reward": 2430,
+          "points": 90
+        },
+        {
+          "nick": "🔥INFERNO🔥",
+          "place": 4,
+          "reward": 1940,
+          "points": 70
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 1780,
+          "points": 60
+        }
+      ]
+    }
+  ],
   "10.06.2026": [],
   "11.06.2026": [],
   "12.06.2026": [],
