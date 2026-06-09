@@ -123,6 +123,9 @@ function initProfilePokerPlus() {
   }
 
   function pokerPlusEmailSessionToken() {
+    try {
+      if (typeof pokerReadEmailPwaSessionToken === "function") return pokerReadEmailPwaSessionToken();
+    } catch (eSharedEmailSession) {}
     var method = "";
     try {
       method = typeof pokerGetAuthMethod === "function" ? pokerGetAuthMethod() : "";
@@ -144,6 +147,20 @@ function initProfilePokerPlus() {
 
   function pokerPlusMissingAuthMessage() {
     return "Сессия входа не передалась. Нажмите «Выйти из аккаунта» и войдите снова.";
+  }
+
+  function pokerPlusUnlinkedHint() {
+    var method = "";
+    try {
+      method = typeof pokerGetAuthMethod === "function" ? pokerGetAuthMethod() : "";
+    } catch (eMethod) {}
+    if (method === "telegram") {
+      return "Poker21 не привязан к этому Telegram. Если вы регистрировались через email, откройте «Профиль в клубе» и привяжите Telegram к той же почте. Или вставьте ключ из Poker21 ниже.";
+    }
+    if (method === "email") {
+      return "Poker21 ещё не привязан к этой почте. Вставьте ключ из Poker21 ниже; после привязки профиль будет открываться в этом аккаунте.";
+    }
+    return "Poker21 ещё не привязан. Вставьте ключ из Poker21 ниже.";
   }
 
   function notifyPokerPlusStatusChange(linked, profile) {
@@ -1528,7 +1545,7 @@ function initProfilePokerPlus() {
             return;
           }
           if (!data.linked) {
-            setFeedback("", false);
+            setFeedback(pokerPlusUnlinkedHint(), "warn");
             if (emailRow) emailRow.hidden = true;
             unbindBtn.hidden = true;
             return;
@@ -1563,6 +1580,7 @@ function initProfilePokerPlus() {
             );
           } else {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
+            renderProfile(null, false);
             setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : "Poker21 не ответил. Проверьте сеть и попробуйте открыть профиль ещё раз.", true);
             renderPokerPlusStatsFallbackIfVisible();
           }
@@ -1812,7 +1830,7 @@ function initProfilePokerPlus() {
         renderProfile(null, false);
         setProfileStatusLoading(false);
         section.dataset.profilePokerPlusLoaded = "";
-        setFeedback("Poker21 не ответил в PWA. Проверьте сеть и откройте вкладку «Профиль Poker21» ещё раз.", "warn");
+        setFeedback("Poker21 не ответил. Показали форму привязки; попробуйте открыть вкладку ещё раз или вставьте ключ из Poker21.", "warn");
       }, 11000);
     }
     try {

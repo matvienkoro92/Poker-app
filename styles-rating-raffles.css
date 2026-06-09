@@ -4197,6 +4197,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   text-decoration: none;
   text-underline-offset: 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 8px 18px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+button.raffle-feedback-action {
+  appearance: none;
+  font-family: inherit;
 }
 .raffle-feedback-action:active,
 .raffle-feedback-action:hover {

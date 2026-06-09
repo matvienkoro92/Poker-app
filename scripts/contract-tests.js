@@ -421,6 +421,33 @@ function sessions() {
   };
 }
 
+function telegramLoginWidgetPayload(user) {
+  const payload = Object.assign({
+    auth_date: String(Math.floor(Date.now() / 1000)),
+  }, user || {});
+  const dataCheckString = Object.keys(payload)
+    .filter((key) => payload[key] != null && String(payload[key]) !== "")
+    .sort()
+    .map((key) => key + "=" + payload[key])
+    .join("\n");
+  const secretKey = crypto.createHash("sha256").update(BOT_TOKEN).digest();
+  payload.hash = crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
+  return payload;
+}
+
+function telegramWebAppInitData(user) {
+  const params = new URLSearchParams();
+  params.set("auth_date", String(Math.floor(Date.now() / 1000)));
+  params.set("user", JSON.stringify(user || {}));
+  const dataCheckString = [...params.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => k + "=" + v)
+    .join("\n");
+  const secretKey = crypto.createHmac("sha256", "WebAppData").update(BOT_TOKEN).digest();
+  params.set("hash", crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex"));
+  return params.toString();
+}
+
 async function call(handler, request) {
   const response = res();
   await handler(request, response);
@@ -2772,7 +2799,12 @@ async function testProfileUserLookup(redis) {
     },
   }));
 
-  let r = await call(users, req("GET", { pwaSession: s.user, userId: "ID100002" }));
+  let r = await call(users, req("GET", { pwaSession: s.user, dtIdHint: "ID999999" }));
+  assert.strictEqual(r.statusCode, 200, "profile self lookup succeeds with ignored hint");
+  assert.strictEqual(r.body.dtId, "ID100001", "profile self lookup keeps existing account id");
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_1001"), "ID100001", "profile self lookup does not relink to untrusted hint");
+
+  r = await call(users, req("GET", { pwaSession: s.user, userId: "ID100002" }));
   assert.strictEqual(r.statusCode, 200, "profile user lookup succeeds");
   assert.strictEqual(r.body.userId, "ID100002", "lookup returns dt id");
   assert.strictEqual(r.body.chatUserId, "tg_1002", "lookup resolves chat user id");
@@ -4206,6 +4238,7 @@ async function testAuthEmailAndPwaCode(redis) {
   process.env.EMAIL_AUTH_FROM = "TWO ACES <login@example.test>";
 
   const authEmail = loadHandler("auth-email");
+  redis.h("poker_app:id_to_user").set("ID123456", "tg_reserved");
   let r = await call(authEmail, req("POST", {}, {
     action: "request",
     email: "Player@Test.com",
@@ -4215,8 +4248,10 @@ async function testAuthEmailAndPwaCode(redis) {
   assert.strictEqual(r.body.sent, true, "email code request marks sent");
 
   const emailCode = JSON.parse(redis.kv.get("poker_app:email_code:player@test.com"));
-  assert.strictEqual(emailCode.dtId, "ID123456", "email code keeps hinted account id");
+  assert.ok(/^ID\d{6}$/.test(emailCode.dtId), "email code creates account id");
+  assert.notStrictEqual(emailCode.dtId, "ID123456", "email code ignores untrusted account id hint");
   assert.ok(/^\d{6}$/.test(emailCode.code), "email code is 6 digits");
+  const emailDtId = emailCode.dtId;
 
   r = await call(authEmail, req("POST", {}, {
     action: "verify",
@@ -4233,9 +4268,9 @@ async function testAuthEmailAndPwaCode(redis) {
     password: "secret123",
   }));
   assert.strictEqual(r.statusCode, 200, "email verify with password succeeds");
-  assert.strictEqual(r.body.dtId, "ID123456", "email verify returns account id");
+  assert.strictEqual(r.body.dtId, emailDtId, "email verify returns account id");
   assert.ok(r.body.pwaSession, "email verify returns PWA session");
-  assert.strictEqual(redis.h("poker_app:email_links").get("player@test.com"), "ID123456", "email verify links email");
+  assert.strictEqual(redis.h("poker_app:email_links").get("player@test.com"), emailDtId, "email verify links email");
   assert.strictEqual(redis.kv.has("poker_app:email_code:player@test.com"), false, "email verify clears code");
 
   r = await call(authEmail, req("POST", {}, {
@@ -4244,7 +4279,52 @@ async function testAuthEmailAndPwaCode(redis) {
     password: "secret123",
   }));
   assert.strictEqual(r.statusCode, 200, "email password login succeeds");
-  assert.strictEqual(r.body.dtId, "ID123456", "email password login returns linked account");
+  assert.strictEqual(r.body.dtId, emailDtId, "email password login returns linked account");
+  const emailPwaSession = r.body.pwaSession;
+
+  const authTelegramLogin = loadHandler("auth-telegram-login");
+  redis.h("poker_app:visitor_dt_ids").set("tg_2002", "ID222222");
+  redis.h("poker_app:id_to_user").set("ID222222", "tg_2002");
+  r = await call(authTelegramLogin, req("POST", {}, Object.assign(
+    telegramLoginWidgetPayload({
+      id: 2002,
+      first_name: "Linked",
+      last_name: "Player",
+      username: "linked_player",
+      photo_url: "https://contract.test/player.jpg",
+    }),
+    {
+      dtIdHint: "ID222222",
+      linkPwaSession: emailPwaSession,
+      existingPwaSession: "local-field-ignored-by-telegram-signature",
+    }
+  )));
+  assert.strictEqual(r.statusCode, 200, "telegram login can link from email pwa session");
+  assert.strictEqual(r.body.dtId, emailDtId, "telegram login reuses linked email account id");
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_2002"), emailDtId, "telegram id is linked to email account");
+  assert.strictEqual(redis.h("poker_app:id_to_user").get(emailDtId), "tg_2002", "telegram id becomes preferred account login");
+
+  redis.h("poker_app:id_to_user").set("ID654321", "tg_victim");
+  r = await call(authTelegramLogin, req("POST", {}, Object.assign(
+    telegramLoginWidgetPayload({
+      id: 2003,
+      first_name: "Hint",
+      username: "hint_player",
+    }),
+    { dtIdHint: "ID654321" }
+  )));
+  assert.strictEqual(r.statusCode, 200, "telegram login ignores untrusted account hint");
+  assert.notStrictEqual(r.body.dtId, "ID654321", "telegram login does not reuse untrusted hint");
+  assert.notStrictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_2003"), "ID654321", "telegram id is not linked to untrusted hint");
+
+  const authTelegram = loadHandler("auth-telegram");
+  r = await call(authTelegram, req("POST", {}, {
+    initData: telegramWebAppInitData({ id: 2004, first_name: "Mini", username: "mini_hint" }),
+    dtIdHint: "ID654321",
+    wantPwaSession: true,
+  }));
+  assert.strictEqual(r.statusCode, 200, "mini app auth ignores untrusted account hint");
+  assert.notStrictEqual(r.body.dtId, "ID654321", "mini app auth does not reuse untrusted hint");
 
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
   const authPwaCode = loadHandler("auth-pwa-code");

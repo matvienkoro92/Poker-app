@@ -101,6 +101,13 @@ function initRafflesPublicRuntime(opts) {
     document.documentElement.dataset.raffleTelegramLinksBound = "1";
     document.addEventListener("click", function (e) {
       var target = e && e.target;
+      var authAction = target && target.closest ? target.closest("[data-raffle-auth-action='profile-telegram']") : null;
+      if (authAction) {
+        e.preventDefault();
+        if (typeof openRaffleTelegramLinkingFlow === "function") openRaffleTelegramLinkingFlow();
+        else if (typeof setView === "function") setView("profile");
+        return;
+      }
       var link = target && target.closest ? target.closest("[data-raffle-telegram-link]") : null;
       if (!link) return;
       var url = String(link.getAttribute("href") || "").trim();
@@ -199,6 +206,7 @@ function initRafflesPublicRuntime(opts) {
                 openUrl: data.openUrl,
                 missing: data.missing,
                 missingRequirements: data.missingRequirements,
+                code: data.code,
                 sticky: true,
               });
             } else {
@@ -209,7 +217,7 @@ function initRafflesPublicRuntime(opts) {
               if (typeof setView === "function") setView("profile");
             } else if (isRequirementError) {
               if (tg && tg.showAlert) tg.showAlert(err);
-              openRaffleRequirementLink(data);
+              if (!(data && data.code === "TELEGRAM_REQUIRED")) openRaffleRequirementLink(data);
             } else if (data && data.code === "AUTH_INVALID") {
               showRaffleFeedback(err || "Сессия входа не подтвердилась. Войдите ещё раз.", "err", { sticky: true });
               if (tg && tg.showAlert) tg.showAlert(err || "Сессия входа не подтвердилась. Войдите ещё раз.");

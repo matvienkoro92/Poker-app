@@ -867,6 +867,21 @@ function pokerReadPwaTgSessionRecord() {
   } catch (e2) {}
   return pokerParsePwaSessionRaw(pokerReadAuthCookie(POKER_PWA_TG_SESSION_KEY), true);
 }
+function pokerReadEmailPwaSessionToken() {
+  var method = "";
+  try {
+    method = typeof pokerGetAuthMethod === "function" ? pokerGetAuthMethod() : "";
+  } catch (eMethod) {}
+  try {
+    var record = pokerReadPwaTgSessionRecord();
+    var recordMethod = record && record.authMethod ? String(record.authMethod || "").trim().toLowerCase() : "";
+    if (recordMethod) method = recordMethod;
+    if (method !== "email") return "";
+    return typeof pokerReadPwaTgSessionToken === "function" ? String(pokerReadPwaTgSessionToken() || "").trim() : "";
+  } catch (eEmailToken) {
+    return "";
+  }
+}
 function pokerReadPwaVkSessionRecord() {
   try {
     var oL = pokerParsePwaSessionRaw(localStorage.getItem(POKER_PWA_VK_SESSION_KEY), true);

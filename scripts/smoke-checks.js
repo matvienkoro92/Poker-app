@@ -708,7 +708,11 @@ add("PWA Telegram code requests use current auth and avoid stale username binds"
 );
 
 add("Email login prefers the linked email account over stale device hints", () =>
-  has("authEmailHandler", "let dtId = existingLinkedDtId || hintedDtId") &&
+  hasAll("authEmailHandler", [
+    "let dtId = existingLinkedDtId",
+    "\"mail_pending_\"",
+  ]) &&
+  !has("authEmailHandler", "existingLinkedDtId || hintedDtId") &&
   hasAll("client", [
     "function switchEmailToPasswordSetup()",
     "emailPasswordSetupHint",

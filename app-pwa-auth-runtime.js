@@ -1058,6 +1058,11 @@
       if (window.__pokerTgLoginInflightSig === sig) return;
       window.__pokerTgLoginInflightSig = sig;
     }
+    var authLinkDtIdHint =
+      (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+      sessionStorage.getItem("poker_dt_id") ||
+      "";
+    var authLinkPwaSession = typeof pokerReadEmailPwaSessionToken === "function" ? pokerReadEmailPwaSessionToken() : "";
     setBannerVerifying();
     showUnauthorized();
     pokerAuthFetch(base + "/api/auth-telegram-login", {
@@ -1065,10 +1070,8 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
         Object.assign({}, payload, {
-          dtIdHint:
-            (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
-            sessionStorage.getItem("poker_dt_id") ||
-            "",
+          dtIdHint: authLinkDtIdHint,
+          linkPwaSession: authLinkPwaSession,
         })
       ),
     })
@@ -1309,6 +1312,11 @@
   function postAuthTelegram(initData, wantPwaSession) {
     var base = getTelegramAuthApiBase();
     if (!base) return Promise.reject(new Error("no_base"));
+    var authLinkDtIdHint =
+      (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+      sessionStorage.getItem("poker_dt_id") ||
+      "";
+    var authLinkPwaSession = typeof pokerReadEmailPwaSessionToken === "function" ? pokerReadEmailPwaSessionToken() : "";
     return pokerFetchRetry(
       base + "/api/auth-telegram",
       {
@@ -1317,10 +1325,8 @@
         body: JSON.stringify({
           initData: initData,
           wantPwaSession: !!wantPwaSession,
-          dtIdHint:
-            (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
-            sessionStorage.getItem("poker_dt_id") ||
-            "",
+          dtIdHint: authLinkDtIdHint,
+          linkPwaSession: authLinkPwaSession,
         }),
         cache: "no-store",
       },

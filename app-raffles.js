@@ -198,6 +198,9 @@ function initRaffles() {
         add("Подписаться на канал", opts.channelUrl || "https://t.me/dva_tuza_club", "channel");
       }
     }
+    if (opts.code === "TELEGRAM_REQUIRED") {
+      actions.unshift({ text: "Привязать Telegram", internal: "profile-telegram", key: "telegram" });
+    }
     return actions;
   }
 
@@ -208,6 +211,16 @@ function initRaffles() {
     var wrap = document.createElement("span");
     wrap.className = "raffle-feedback-actions";
     actions.forEach(function (action) {
+      if (action.internal === "profile-telegram") {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "raffle-feedback-action raffle-feedback-auth-action";
+        btn.textContent = action.text;
+        btn.setAttribute("data-raffle-auth-action", action.internal);
+        if (action.key) btn.setAttribute("data-raffle-requirement", action.key);
+        wrap.appendChild(btn);
+        return;
+      }
       var a = document.createElement("a");
       a.className = "raffle-feedback-link raffle-feedback-action";
       a.href = action.url;
@@ -275,6 +288,36 @@ function initRaffles() {
     } else if (typeof alert === "function") {
       alert(message);
     }
+  }
+
+  function openRaffleTelegramLinkingFlow() {
+    if (typeof setView === "function") setView("profile");
+    var opened = false;
+    [120, 420, 900].forEach(function (delay) {
+      setTimeout(function () {
+        if (opened) return;
+        try {
+          if (typeof setProfileTab === "function") setProfileTab("club");
+        } catch (eProfileTab) {}
+        try {
+          if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
+        } catch (eProfileEmailSync) {}
+        try {
+          var linkBtn = document.getElementById("profileTelegramLinkBtn");
+          if (linkBtn && typeof linkBtn.click === "function") {
+            opened = true;
+            linkBtn.click();
+            return;
+          }
+        } catch (eProfileTgBtn) {}
+        try {
+          if (typeof window.__pokerOpenPwaLoginScreen === "function") {
+            opened = true;
+            window.__pokerOpenPwaLoginScreen();
+          }
+        } catch (ePwaLoginOpen) {}
+      }, delay);
+    });
   }
 
   function setRaffleInfoPanelOpen(open) {
@@ -1303,6 +1346,7 @@ function initRaffles() {
         openUrl: data.openUrl,
         missing: data.missing,
         missingRequirements: data.missingRequirements,
+        code: data.code,
         sticky: true,
       });
     } else {
@@ -2579,6 +2623,7 @@ function initRaffles() {
       base: base,
       tg: tg,
       showRaffleFeedback: showRaffleFeedback,
+      openRaffleTelegramLinkingFlow: openRaffleTelegramLinkingFlow,
       renderRaffle: renderRaffle,
       refreshActiveChooserAfterAction: refreshActiveChooserAfterAction,
       rafflesViewerIsGuestOnly: rafflesViewerIsGuestOnly,
