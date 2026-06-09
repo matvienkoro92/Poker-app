@@ -1642,18 +1642,17 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: block;
   max-width: 100%;
   overflow: hidden;
-  color: #fff4c4;
-  font-size: 15px;
+  color: #1d1004;
+  font-size: clamp(11px, 3.2vw, 15px);
   font-weight: 1000;
   letter-spacing: 0;
-  line-height: 0.98;
+  line-height: 1.02;
   text-align: center;
   text-overflow: ellipsis;
-  -webkit-text-stroke: 0.35px rgba(45, 20, 0, 0.95);
+  -webkit-text-stroke: 0;
   text-shadow:
-    0 1px 0 rgba(58, 25, 0, 0.98),
-    0 2px 2px rgba(35, 12, 0, 0.72),
-    0 0 9px rgba(255, 237, 150, 0.88);
+    0 1px 0 rgba(255, 234, 166, 0.52),
+    0 0 4px rgba(255, 220, 130, 0.36);
   white-space: nowrap;
 }
 
@@ -1666,17 +1665,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   max-width: 100%;
   padding: 0 4px;
   overflow: visible;
-  color: #fff8df;
-  font-size: 13px;
+  color: #1d1004;
+  font-size: clamp(11px, 3vw, 14px);
   font-weight: 1000;
   letter-spacing: 0;
-  line-height: 0.98;
+  line-height: 1.02;
   text-align: center;
-  -webkit-text-stroke: 0.3px rgba(45, 20, 0, 0.95);
+  -webkit-text-stroke: 0;
   text-shadow:
-    0 1px 0 rgba(58, 25, 0, 0.98),
-    0 2px 2px rgba(35, 12, 0, 0.7),
-    0 0 8px rgba(255, 237, 150, 0.82);
+    0 1px 0 rgba(255, 234, 166, 0.52),
+    0 0 4px rgba(255, 220, 130, 0.34);
   white-space: nowrap;
 }
 
