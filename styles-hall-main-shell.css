@@ -505,6 +505,21 @@
 .hall-of-fame__top2026-stage .winter-rating__single-top-item--loading .winter-rating__single-top-static {
   cursor: default;
 }
+.hall-of-fame__top2026-stage .winter-rating__single-top-loading {
+  min-height: 42px;
+  padding: 9px 8px;
+  color: #6d5539;
+  background: rgba(255, 252, 246, 0.52);
+  border-color: rgba(173, 119, 45, 0.3);
+  border-radius: 8px;
+  font-size: 11px;
+}
+.hall-of-fame__top2026-stage .winter-rating__single-top-loading-spinner {
+  width: 14px;
+  height: 14px;
+  border-color: rgba(155, 107, 47, 0.2);
+  border-top-color: rgba(155, 107, 47, 0.86);
+}
 .hall-of-fame__top2026-stage .winter-rating__single-top-item--loading .winter-rating__single-top-link::before,
 .hall-of-fame__top2026-stage .winter-rating__single-top-item--loading .winter-rating__single-top-static::before {
   color: rgba(155, 107, 47, 0.28);

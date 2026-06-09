@@ -335,6 +335,49 @@
   margin: 0 0 2px;
   white-space: nowrap;
 }
+.winter-rating__single-top-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  color: var(--text);
+  background: rgba(30, 41, 59, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
+}
+.winter-rating__single-top-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(251, 191, 36, 0.25);
+  border-top-color: rgba(251, 191, 36, 0.95);
+  border-radius: 999px;
+  animation: winter-rating-list-loading-spin 0.75s linear infinite;
+}
+.winter-rating__single-top-loading-text {
+  min-width: 0;
+}
+[data-theme="light"] .winter-rating__single-top-loading {
+  background: rgba(248, 250, 252, 0.88);
+  border-color: rgba(148, 163, 184, 0.44);
+}
+[data-theme="light"] .winter-rating__single-top-loading-spinner {
+  border-color: rgba(3, 105, 161, 0.22);
+  border-top-color: rgba(3, 105, 161, 0.88);
+}
+@keyframes winter-rating-list-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* Топ-15: карточка по центру (рейтинг + зал славы) */
 #winterRatingSingleTopWrap,

@@ -283,21 +283,14 @@ function pokerInitWinterRatingWeekTops() {
       .join("");
   }
   function buildSingleTopLoadingHtml(count) {
-    var rows = [];
-    var total = count || 15;
-    for (var i = 0; i < total; i++) {
-      rows.push(
-        '<li class="winter-rating__single-top-item winter-rating__single-top-item--loading">' +
-          '<span class="winter-rating__single-top-static" aria-hidden="true">' +
-            '<span class="winter-rating__single-top-rank">' + (i + 1) + ".</span>" +
-            '<span class="winter-rating__single-top-nick"></span>' +
-            '<span class="winter-rating__single-top-separator">—</span>' +
-            '<span class="winter-rating__single-top-amount"></span>' +
-          "</span>" +
-        "</li>"
-      );
-    }
-    return rows.join("");
+    return (
+      '<li class="winter-rating__single-top-item winter-rating__single-top-item--loading">' +
+        '<span class="winter-rating__single-top-loading" role="status" aria-live="polite">' +
+          '<span class="winter-rating__single-top-loading-spinner" aria-hidden="true"></span>' +
+          '<span class="winter-rating__single-top-loading-text">Список загружается</span>' +
+        "</span>" +
+      "</li>"
+    );
   }
   function updateButtonPreviews() {
     var pastTop = getTopByDates(getSeasonalWeekTopDates("past", GAZETTE_DATES));
