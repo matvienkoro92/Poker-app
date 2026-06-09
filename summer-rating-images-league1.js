@@ -31,6 +31,8 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
   ],
   "04.06.2026": [
     "rating-compressed-preview/rating-04-06-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-04-06-2026-league1-wow-pko-11h.jpg",
+    "rating-compressed-preview/rating-04-06-2026-league1-fast-deep-waaar.jpg",
     "rating-compressed-preview/rating-04-06-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-compressed-preview/rating-04-06-2026-league1-tournir-chetverga-18h.jpg",
     "rating-compressed-preview/rating-04-06-2026-league1-shr-175-2-3-pko-18h.jpg",

@@ -8,9 +8,48 @@
 }
 /* Модалка игрока: таблица может шире экрана — горизонтальный скролл в обёртке */
 .winter-rating-player-modal__table.winter-rating__table {
-  width: max-content;
-  min-width: 100%;
-  table-layout: auto;
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+.winter-rating-player-modal__table-wrap {
+  overflow-x: hidden;
+}
+.winter-rating-player-modal__table.winter-rating__table th,
+.winter-rating-player-modal__table.winter-rating__table td {
+  box-sizing: border-box;
+  padding: 6px 5px;
+}
+.winter-rating-player-modal__table.winter-rating__table th:first-child,
+.winter-rating-player-modal__table.winter-rating__table td:first-child,
+.winter-rating-player-modal__table.winter-rating__table th:nth-last-child(1),
+.winter-rating-player-modal__table.winter-rating__table tbody td:nth-last-child(1),
+.winter-rating-player-modal__table.winter-rating__table tfoot td:nth-last-child(1) {
+  min-width: 0;
+}
+.winter-rating-player-modal__th-date,
+.winter-rating-player-modal__td-date {
+  width: clamp(78px, 17%, 104px);
+}
+.winter-rating-player-modal__th-place,
+.winter-rating-player-modal__td-place {
+  width: clamp(44px, 10%, 60px);
+}
+.winter-rating-player-modal__th-points,
+.winter-rating-player-modal__td-points {
+  width: clamp(48px, 10%, 64px);
+}
+.winter-rating-player-modal__th-reward,
+.winter-rating-player-modal__td-reward,
+.winter-rating-player-modal__table.winter-rating__table tfoot td:nth-last-child(1) {
+  width: clamp(64px, 15%, 92px);
+  text-align: right;
+}
+.winter-rating-player-modal__th-tournament,
+.winter-rating-player-modal__td-tournament {
+  width: auto;
+  min-width: 0;
+  max-width: none;
 }
 /* Итоговая таблица — крупный шрифт */
 #winterRatingTableWrap .winter-rating__table {
@@ -1293,11 +1332,25 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
     line-height: 0.98;
   }
 
+  .view--active[data-view="spring-rating"] .winter-rating__spring-league-header,
+  html.app-view-spring-rating .winter-rating__spring-league-header {
+    margin: 0 8px 10px;
+    padding-right: 112px;
+  }
+
   .view--active[data-view="spring-rating"] .winter-rating__spring-league-caption,
   html.app-view-spring-rating .winter-rating__spring-league-caption {
-    margin: 0 8px 10px;
+    margin: 0;
     font-size: 16px;
     line-height: 1.15;
+  }
+
+  .view--active[data-view="spring-rating"] .winter-rating__spring-league-updated,
+  html.app-view-spring-rating .winter-rating__spring-league-updated {
+    top: 1px;
+    max-width: 108px;
+    padding: 4px 7px;
+    font-size: 10px;
   }
 
   .view--active[data-view="spring-rating"] .spring-rating-top3,
@@ -1648,10 +1701,30 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   margin-bottom: 12px;
 }
 .winter-rating__date-tournaments-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
   color: var(--text-secondary);
+}
+.winter-rating__date-tournaments-caption-text {
+  min-width: 0;
+}
+.winter-rating__date-tournaments-updated {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(252, 211, 77, 0.48);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.68);
+  box-shadow: 0 0 12px rgba(252, 211, 77, 0.18);
+  color: #fde68a;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 .winter-rating__screenshots {
   display: grid;

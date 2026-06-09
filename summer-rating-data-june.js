@@ -710,6 +710,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "11:00",
+      "name": "WOW PKO + Два туза.Доллары MTT FAST DEEP",
+      "buyin": 0,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 31050,
+          "points": 160
+        }
+      ]
+    },
+    {
       "time": "13:00",
       "name": "DV Bounty 100k",
       "buyin": 10000,

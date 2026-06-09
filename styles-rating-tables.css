@@ -501,14 +501,46 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating__spring-league:last-child {
   margin-bottom: 0;
 }
-.winter-rating__spring-league-caption {
+.winter-rating__spring-league-header {
+  position: relative;
+  min-height: 28px;
   margin: 0 12px 14px;
+  padding-right: 124px;
+}
+.winter-rating__spring-league-caption {
+  margin: 0;
   font-size: 20px;
   font-weight: 700;
   color: #bae6fd;
+  text-align: left;
+}
+.winter-rating__spring-league-updated {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 118px;
+  padding: 4px 8px;
+  border: 1px solid rgba(252, 211, 77, 0.52);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 0 14px rgba(252, 211, 77, 0.22);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
   text-align: center;
+  white-space: nowrap;
 }
 [data-theme="light"] .winter-rating__spring-league-caption {
+  color: #0369a1;
+}
+[data-theme="light"] .winter-rating__spring-league-updated {
+  border-color: rgba(3, 105, 161, 0.28);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0 10px rgba(3, 105, 161, 0.12);
   color: #0369a1;
 }
 .spring-rating-final-countdown {
