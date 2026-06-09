@@ -616,6 +616,48 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
   ],
   "03.06.2026": [
     {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Фартовый",
+          "place": 1,
+          "reward": 6395,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Фартовый",
+          "place": 2,
+          "reward": 6097,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 7,
+          "reward": 4195,
+          "points": 40
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -649,6 +691,46 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "nick": "RUS22RUS",
           "place": 12,
           "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 4,
+          "reward": 1802,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 34745,
+          "points": 135
+        },
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 4900,
+          "points": 60
+        },
+        {
+          "nick": "Фартовый",
+          "place": 12,
+          "reward": 1362,
           "points": 0
         }
       ]
@@ -692,6 +774,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 4,
+          "reward": 6245,
+          "points": 70
+        }
+      ]
+    },
+    {
       "time": "18:00",
       "name": "Турнир Среды",
       "buyin": 100,
@@ -725,6 +821,44 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "nick": "mr.Freeman",
           "place": 14,
           "reward": 1470,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "1.000.000 GTD",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "cap888881",
+          "place": 5,
+          "reward": 48618,
+          "points": 60
+        },
+        {
+          "nick": "Djonne",
+          "place": 69,
+          "reward": 1861,
+          "points": 0
+        },
+        {
+          "nick": "Coonie Lee",
+          "place": 109,
+          "reward": 425,
+          "points": 0
+        },
+        {
+          "nick": "Бэха",
+          "place": 112,
+          "reward": 425,
+          "points": 0
+        },
+        {
+          "nick": "kream89",
+          "place": 139,
+          "reward": 425,
           "points": 0
         }
       ]
@@ -806,6 +940,26 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 4,
+          "reward": 4485,
+          "points": 70
+        },
+        {
+          "nick": "Фартовый",
+          "place": 17,
+          "reward": 214,
+          "points": 0
+        }
+      ]
+    },
+    {
       "time": "22:00",
       "name": "EnergetikTournament",
       "buyin": 200,
@@ -842,9 +996,71 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 8842,
+          "points": 90
+        },
+        {
+          "nick": "Бабник",
+          "place": 6,
+          "reward": 7629,
+          "points": 50
+        }
+      ]
     }
   ],
   "04.06.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "@Felix",
+          "place": 2,
+          "reward": 13899,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "@Felix",
+          "place": 6,
+          "reward": 339,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 4,
+          "reward": 7350,
+          "points": 70
+        }
+      ]
+    },
     {
       "time": "14:00",
       "name": "Tournament Rebuy",
@@ -960,6 +1176,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "18:00",
+      "name": "SHR 175$ - 2/3 PKO",
+      "buyin": 25000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 1,
+          "reward": 283598,
+          "points": 135
+        }
+      ]
+    },
+    {
       "time": "19:00",
       "name": "HOK🥊",
       "buyin": 1000,
@@ -1036,6 +1266,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "20:00",
+      "name": "HR 5000 250K",
+      "buyin": 25000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 34484,
+          "points": 110
+        }
+      ]
+    },
+    {
       "time": "22:00",
       "name": "EnergetikTournament",
       "buyin": 200,
@@ -1072,9 +1316,43 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "VORON💰💰💰",
+          "place": 8,
+          "reward": 6100,
+          "points": 30
+        }
+      ]
     }
   ],
   "05.06.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 16390,
+          "points": 110
+        },
+        {
+          "nick": "Бардюр",
+          "place": 8,
+          "reward": 3949,
+          "points": 30
+        }
+      ]
+    },
     {
       "time": "12:00",
       "name": "DV Rebuy",
@@ -1228,6 +1506,32 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "18:00",
+      "name": "NLH Bounty 400K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "VORON💰💰💰",
+          "place": 1,
+          "reward": 96280,
+          "points": 135
+        },
+        {
+          "nick": "Бардюр",
+          "place": 4,
+          "reward": 18284,
+          "points": 70
+        },
+        {
+          "nick": "Em13!!",
+          "place": 12,
+          "reward": 3716,
+          "points": 0
+        }
+      ]
+    },
+    {
       "time": "19:00",
       "name": "HOK🥊Magic",
       "buyin": 1000,
@@ -1304,6 +1608,38 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Lesnov",
+          "place": 4,
+          "reward": 9703,
+          "points": 70
+        },
+        {
+          "nick": "Виктор",
+          "place": 22,
+          "reward": 3791,
+          "points": 0
+        },
+        {
+          "nick": "outsider",
+          "place": 21,
+          "reward": 2441,
+          "points": 0
+        },
+        {
+          "nick": "МВД",
+          "place": 42,
+          "reward": 1250,
+          "points": 0
+        }
+      ]
+    },
+    {
       "time": "22:00",
       "name": "EnergetikTournament",
       "buyin": 200,
@@ -1344,6 +1680,26 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
   ],
   "06.06.2026": [
     {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 16777,
+          "points": 110
+        },
+        {
+          "nick": "Неизвестны",
+          "place": 6,
+          "reward": 3880,
+          "points": 50
+        }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
@@ -1382,6 +1738,46 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "novosibb",
+          "place": 2,
+          "reward": 5552,
+          "points": 110
+        },
+        {
+          "nick": "Виктор",
+          "place": 5,
+          "reward": 1621,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV Bounty 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 2,
+          "reward": 16449,
+          "points": 110
+        },
+        {
+          "nick": "Olegan393",
+          "place": 5,
+          "reward": 6935,
+          "points": 60
+        }
+      ]
+    },
+    {
       "time": "14:00",
       "name": "Tournament Rebuy",
       "buyin": 100,
@@ -1416,6 +1812,26 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 7,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 5599,
+          "points": 110
+        },
+        {
+          "nick": "novosibb",
+          "place": 4,
+          "reward": 2297,
+          "points": 70
         }
       ]
     },
@@ -1572,6 +1988,26 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 7,
+          "reward": 9786,
+          "points": 40
+        },
+        {
+          "nick": "novosibb",
+          "place": 8,
+          "reward": 3302,
+          "points": 30
+        }
+      ]
+    },
+    {
       "time": "22:00",
       "name": "EnergetikTournament",
       "buyin": 200,
@@ -1608,9 +2044,63 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 4,
+          "reward": 3883,
+          "points": 70
+        },
+        {
+          "nick": "Фокс",
+          "place": 17,
+          "reward": 470,
+          "points": 0
+        },
+        {
+          "nick": "СлонФартов",
+          "place": 21,
+          "reward": 425,
+          "points": 0
+        }
+      ]
     }
   ],
   "07.06.2026": [
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "МВД",
+          "place": 1,
+          "reward": 4137,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Неизвестны",
+          "place": 4,
+          "reward": 7476,
+          "points": 70
+        }
+      ]
+    },
     {
       "time": "12:00",
       "name": "DV Rebuy",
@@ -1684,6 +2174,20 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 12,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 1,
+          "reward": 5183,
+          "points": 135
         }
       ]
     },
@@ -1861,6 +2365,46 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "nick": "tatarin_1",
           "place": 6,
           "reward": 0,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 15,
+          "reward": 3075,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 7,
+          "reward": 2479,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "21:59",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "cheb43",
+          "place": 7,
+          "reward": 10225,
+          "points": 40
+        },
+        {
+          "nick": "PONOCKA43",
+          "place": 14,
+          "reward": 107,
           "points": 0
         }
       ]

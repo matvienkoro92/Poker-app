@@ -777,6 +777,8 @@ async function testRaffleJoinLeave(redis) {
 async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
   const raffle = {
     id: "contract_admin_upsert_tickets",
     title: "Contract admin upsert tickets",
@@ -793,6 +795,17 @@ async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   };
   redis.kv.set("poker_app:raffle:contract_admin_upsert_tickets", JSON.stringify(raffle));
   redis.l("poker_app:raffle_ids").push("contract_admin_upsert_tickets");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "P21ADD");
+  redis.h("poker_app:visitor_p21_ids").set("tg_1001", "P21ADD");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_usernames").set("tg_1001", "ticket_player");
+  redis.h("poker_app:visitor_usernames").set("tg_1002", "other_player");
+  redis.h("poker_app:visitor_chat_display_names").set("tg_1001", "Ticket Player");
+  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({
+    nickname: "Ticket Nick",
+    totalCounter: { fee: 12000 },
+  }));
 
   let r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
@@ -804,6 +817,14 @@ async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   assert.strictEqual(r.statusCode, 200, "raffle admin upsert adds participant");
   assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin upsert creates one participant");
   assert.strictEqual(r.body.raffle.participants[0].ticketCount, 2, "raffle admin upsert stores first ticket count");
+  assert.strictEqual(r.body.raffle.participants[0].userId, "tg_1001", "raffle admin upsert links participant by p21 profile");
+  assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100001", "raffle admin upsert stores linked account id");
+  assert.strictEqual(r.body.raffle.participants[0].telegramUsername, "ticket_player", "raffle admin upsert fills telegram username");
+  assert.strictEqual(r.body.raffle.participants[0].pokerPlusNickname, "Ticket Nick", "raffle admin upsert fills pokerplus nickname");
+  assert.strictEqual(sentMessages.length, 1, "raffle admin upsert notifies linked player once");
+  assert.strictEqual(sentMessages[0].body.chat_id, "1001", "raffle admin upsert sends ticket notice only to linked player");
+  assert.match(sentMessages[0].body.text, /Вам добавили 2 билета/i, "raffle admin upsert notice includes added tickets");
+  assert.ok(!sentMessages.some((msg) => msg.body.chat_id === "1002"), "raffle admin upsert does not notify unrelated players");
 
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,
@@ -817,6 +838,33 @@ async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 1, "raffle admin upsert keeps one row for same participant");
   assert.strictEqual(r.body.raffle.participants[0].ticketCount, 5, "raffle admin upsert adds new tickets to previous count");
   assert.strictEqual(r.body.raffle.participants[0].entryTicketCount, 5, "raffle admin upsert keeps entry ticket count in sync");
+  assert.strictEqual(sentMessages.length, 2, "raffle admin upsert notifies linked player on every ticket add");
+  assert.strictEqual(sentMessages[1].body.chat_id, "1001", "raffle admin upsert sends second ticket notice only to linked player");
+  assert.match(sentMessages[1].body.text, /Теперь у вас 5 билетов/i, "raffle admin upsert notice includes total tickets");
+
+  const storedManualRow = JSON.parse(redis.kv.get("poker_app:raffle:contract_admin_upsert_tickets"));
+  storedManualRow.participants = [{
+    userId: "manual_raffle_legacy",
+    name: "Legacy Manual",
+    p21Id: "P21ADD",
+    ticketCount: 1,
+    entryTicketCount: 1,
+    manualRaffleParticipant: true,
+  }];
+  redis.kv.set("poker_app:raffle:contract_admin_upsert_tickets", JSON.stringify(storedManualRow));
+  sentMessages.length = 0;
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "adminUpsertParticipant",
+    raffleId: "contract_admin_upsert_tickets",
+    p21Id: "P21ADD",
+    ticketCount: 1,
+  }));
+  assert.strictEqual(r.statusCode, 200, "raffle admin upsert links legacy manual row");
+  assert.strictEqual(r.body.raffle.participants[0].userId, "tg_1001", "raffle admin upsert replaces legacy manual id with linked user");
+  assert.strictEqual(r.body.raffle.participants[0].ticketCount, 2, "raffle admin upsert keeps legacy manual tickets and adds new ones");
+  assert.strictEqual(sentMessages.length, 1, "raffle admin upsert notifies after linking legacy manual row");
+  assert.strictEqual(sentMessages[0].body.chat_id, "1001", "raffle admin upsert notifies linked user after legacy manual row update");
 }
 
 async function testRaffleAdminRemoveParticipant(redis) {
