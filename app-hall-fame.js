@@ -9,6 +9,74 @@ function setHallOfFameSubtabActive(section) {
   });
 }
 
+var HALL_TOP2026_QUOTES = [
+  "Да какие проценты, это покер, ты хоть все проценты пересчитай тебе это не поможет, понимаю когда фул на каре, стрит флэш на флэш рояль вот это жëтское, а это так флэш закрыл сет, несчастный детский уровень (C) Владимир",
+  "Ты пасть закрой башка лошадиная,чепушило ты (с) Морпех",
+  "А почему ты а не Я?, ебать дахуище мозга, как дало так и дало, все одинаковые, мне вообще раз в год прет и че теперь, говорить что всё вокруг гавно а вот мне не повезло, иди умойся в себя приди, сколько соплей это пиздэсь,!!! (с) John"
+];
+
+function initHallTop2026Quotes() {
+  var wrap = document.getElementById("hallTop2026Quotes");
+  var textEl = document.getElementById("hallTop2026QuoteText");
+  var countEl = document.getElementById("hallTop2026QuoteCount");
+  var prevBtn = document.getElementById("hallTop2026QuotePrev");
+  var nextBtn = document.getElementById("hallTop2026QuoteNext");
+  if (!wrap || !textEl || !prevBtn || !nextBtn) return;
+  if (wrap.getAttribute("data-quote-bound") === "1") return;
+  wrap.setAttribute("data-quote-bound", "1");
+  var quoteIndex = 0;
+  function renderQuote() {
+    textEl.textContent = HALL_TOP2026_QUOTES[quoteIndex] || "";
+    if (countEl) countEl.textContent = (quoteIndex + 1) + "/" + HALL_TOP2026_QUOTES.length;
+  }
+  function moveQuote(dir) {
+    quoteIndex = (quoteIndex + dir + HALL_TOP2026_QUOTES.length) % HALL_TOP2026_QUOTES.length;
+    renderQuote();
+  }
+  prevBtn.addEventListener("click", function () { moveQuote(-1); });
+  nextBtn.addEventListener("click", function () { moveQuote(1); });
+  renderQuote();
+}
+
+function getHallTop2026PlaqueNick(nick, place) {
+  var text = String(nick || "").trim();
+  if (place === 1 && /^sarmat1305$/i.test(text)) return "Сармат";
+  return text;
+}
+
+function updateHallTop2026Plaques() {
+  var list = document.getElementById("hallFameSingleTopList");
+  if (!list) return false;
+  var nicks = Array.prototype.map.call(list.querySelectorAll(".winter-rating__single-top-nick"), function (el) {
+    return String(el.textContent || "").trim();
+  }).filter(Boolean);
+  if (!nicks.length) return false;
+  Array.prototype.forEach.call(document.querySelectorAll("[data-hall-top2026-place]"), function (plaque) {
+    var place = Number(plaque.getAttribute("data-hall-top2026-place"));
+    if (!place || !nicks[place - 1]) return;
+    var nameEl = plaque.querySelector("span:first-child");
+    var placeEl = plaque.querySelector("small");
+    if (nameEl) nameEl.textContent = getHallTop2026PlaqueNick(nicks[place - 1], place);
+    if (placeEl) placeEl.textContent = place === 1 ? "Legend" : place + " место";
+  });
+  return true;
+}
+
+function initHallTop2026PlaqueSync() {
+  var list = document.getElementById("hallFameSingleTopList");
+  if (!list) return;
+  updateHallTop2026Plaques();
+  if (list.getAttribute("data-hall-top2026-plaque-bound") === "1") return;
+  list.setAttribute("data-hall-top2026-plaque-bound", "1");
+  if (typeof MutationObserver === "function") {
+    list.__hallTop2026PlaqueObserver = new MutationObserver(updateHallTop2026Plaques);
+    list.__hallTop2026PlaqueObserver.observe(list, { childList: true, subtree: true });
+  }
+  [80, 240, 700, 1400].forEach(function (delay) {
+    setTimeout(updateHallTop2026Plaques, delay);
+  });
+}
+
 /**
  * Переключение разделов зала славы в одном экране (как лиги в рейтинге), без модалок.
  * @param {string} section
@@ -42,6 +110,8 @@ function showHallOfFamePanel(section, opts) {
       if (typeof window.updateWinterRatingWeekTopPreviews === "function") window.updateWinterRatingWeekTopPreviews();
     } catch (eTop2026Init) {}
     scheduleHallTop2026ViewerLoginUpdate();
+    initHallTop2026Quotes();
+    initHallTop2026PlaqueSync();
   }
 
   function applyHallFameScroll() {
@@ -77,6 +147,8 @@ function showHallOfFamePanel(section, opts) {
     setTimeout(applyHallFameScroll, 32);
   }
 }
+
+window.pokerUpdateHallTop2026Plaques = updateHallTop2026Plaques;
 
 window.showHallOfFamePanel = showHallOfFamePanel;
 window.openHallOfFameSectionModal = showHallOfFamePanel;
