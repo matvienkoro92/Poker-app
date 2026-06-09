@@ -5887,3 +5887,14 @@ button.raffle-feedback-action {
   border-color: rgba(21, 128, 61, 0.45);
   font-weight: 600;
 }
+
+.raffles-active-chooser {
+  align-items: stretch;
+}
+
+.raffles-active-chooser__item {
+  align-self: stretch;
+  height: 100%;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  align-content: stretch;
+}

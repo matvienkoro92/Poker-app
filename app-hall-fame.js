@@ -75,6 +75,28 @@ function getHallTop2026PlaqueLabel(nick, place) {
   return "Legend";
 }
 
+function fitHallTop2026PlaqueText(plaque) {
+  var nameEl = plaque && plaque.querySelector("span:first-child");
+  if (!nameEl) return;
+  nameEl.style.fontSize = "";
+  nameEl.style.transform = "";
+  if (!nameEl.clientWidth) return;
+  var size = parseFloat(window.getComputedStyle ? window.getComputedStyle(nameEl).fontSize : "") || 10;
+  var minSize = 6.2;
+  while (nameEl.scrollWidth > nameEl.clientWidth && size > minSize) {
+    size -= 0.25;
+    nameEl.style.fontSize = size.toFixed(2) + "px";
+  }
+  if (nameEl.scrollWidth > nameEl.clientWidth) {
+    var scale = Math.max(0.8, Math.min(1, nameEl.clientWidth / Math.max(1, nameEl.scrollWidth)));
+    nameEl.style.transform = "scaleX(" + scale.toFixed(3) + ")";
+  }
+}
+
+function fitHallTop2026Plaques() {
+  Array.prototype.forEach.call(document.querySelectorAll("[data-hall-top2026-place]"), fitHallTop2026PlaqueText);
+}
+
 function updateHallTop2026Plaques() {
   var list = document.getElementById("hallFameSingleTopList");
   if (!list) return false;
@@ -87,9 +109,13 @@ function updateHallTop2026Plaques() {
     if (!place || !nicks[place - 1]) return;
     var nameEl = plaque.querySelector("span:first-child");
     var placeEl = plaque.querySelector("small");
-    if (nameEl) nameEl.textContent = getHallTop2026PlaqueNick(nicks[place - 1], place);
-    if (placeEl) placeEl.textContent = getHallTop2026PlaqueLabel(nicks[place - 1], place);
+    var fixedName = String(plaque.getAttribute("data-hall-top2026-fixed-name") || "").trim();
+    var plaqueNick = fixedName || getHallTop2026PlaqueNick(nicks[place - 1], place);
+    if (nameEl) nameEl.textContent = plaqueNick;
+    if (placeEl) placeEl.textContent = getHallTop2026PlaqueLabel(plaqueNick, place);
   });
+  var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+  raf(fitHallTop2026Plaques);
   return true;
 }
 
@@ -247,6 +273,7 @@ if (document.readyState === "loading") {
 window.addEventListener("poker-telegram-auth", scheduleHallTop2026ViewerLoginUpdate);
 window.addEventListener("resize", function () {
   setTimeout(updateHallTop2026ViewerLogin, 80);
+  setTimeout(fitHallTop2026Plaques, 80);
 });
 
 /** Уникальный startapp для каждой вкладки зала славы (плюс legacy для топ‑15). */
