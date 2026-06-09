@@ -315,6 +315,27 @@ function copyWinterRatingPlayerOptions(options) {
   return out;
 }
 
+function mergeWinterRatingDateMap(target, source) {
+  if (!target || !source || typeof source !== "object") return target;
+  Object.keys(source).forEach(function (key) {
+    target[key] = source[key];
+  });
+  return target;
+}
+
+function getWinterRatingActualSpringTournamentsByDate() {
+  return typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE || {} : {};
+}
+
+function getWinterRatingActiveSeasonTournamentsByDate() {
+  if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) {
+    if (typeof getSummerRatingTournamentsByDate === "function") return getSummerRatingTournamentsByDate() || {};
+    return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  }
+  if (typeof getSpringRatingTournamentsByDate === "function") return getSpringRatingTournamentsByDate() || {};
+  return getWinterRatingActualSpringTournamentsByDate();
+}
+
 function ensureWinterRatingPlayerHistoryData(options) {
   if (!shouldLoadWinterRatingPlayerHistory(options) || hasWinterRatingPlayerHistoryData()) return Promise.resolve(true);
   if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(true);
@@ -354,9 +375,9 @@ function getWinterRatingPlayerSummary(nick) {
   if (isSpringRatingMode()) {
     tournamentsByDate = {};
     var winterT = typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? WINTER_RATING_TOURNAMENTS_BY_DATE : {};
-    var springT = getSpringRatingTournamentsByDate() || {};
-    Object.keys(winterT).forEach(function (k) { tournamentsByDate[k] = winterT[k]; });
-    Object.keys(springT).forEach(function (k) { tournamentsByDate[k] = springT[k]; });
+    mergeWinterRatingDateMap(tournamentsByDate, winterT);
+    mergeWinterRatingDateMap(tournamentsByDate, getWinterRatingActualSpringTournamentsByDate());
+    mergeWinterRatingDateMap(tournamentsByDate, getWinterRatingActiveSeasonTournamentsByDate());
   } else {
     tournamentsByDate = getRatingTournamentsByDate();
   }
@@ -385,7 +406,7 @@ function getWinterRatingPlayerSummary(nick) {
         if (p) {
           var reward = p.reward != null ? p.reward : 0;
           var league = t.league != null ? Number(t.league) : null;
-          var seasonToneRegex = typeof getRatingSeasonMonthToneRegex === "function" ? getRatingSeasonMonthToneRegex() : /\.(03|04|05)\./;
+          var seasonToneRegex = /\.(03|04|05|06|07|08)\./;
           if (league == null && isSpringRatingMode() && seasonToneRegex.test(String(dateStr)) && t.buyin != null) {
             var buyin = Number(t.buyin);
             if (buyin === buyin) {
