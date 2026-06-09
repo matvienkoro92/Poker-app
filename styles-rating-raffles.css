@@ -902,20 +902,44 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-active-actions--hidden {
   display: none !important;
 }
+.raffle-active-admin-footer--hidden {
+  display: none !important;
+}
+.raffle-active-admin-footer {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 213, 127, 0.28);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 213, 127, 0.08), rgba(7, 11, 19, 0.68)),
+    rgba(5, 8, 15, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 12px 28px rgba(0, 0, 0, 0.22),
+    0 0 22px rgba(245, 158, 11, 0.1);
+}
 .raffle-active-actions .raffle-invite-wide-row {
   margin: 0;
 }
-.raffle-active-actions > .raffle-admin-actions {
+.raffle-active-actions > .raffle-admin-actions,
+.raffle-active-admin-footer > .raffle-admin-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   width: 100%;
 }
 .raffle-active-actions > .raffle-admin-actions .raffle-complete-btn,
-.raffle-active-actions > .raffle-admin-actions .raffle-cancel-btn {
+.raffle-active-actions > .raffle-admin-actions .raffle-cancel-btn,
+.raffle-active-admin-footer > .raffle-admin-actions .raffle-complete-btn,
+.raffle-active-admin-footer > .raffle-admin-actions .raffle-cancel-btn {
   min-height: 42px;
 }
-.raffle-active-actions .raffles-admin-row {
+.raffle-active-actions .raffles-admin-row,
+.raffle-active-admin-footer .raffles-admin-row,
+.raffle-active-admin-footer .raffles-admin-actions--broadcast {
   margin: 0;
 }
 .raffle-active-actions .raffle-action-feedback {
@@ -2128,6 +2152,8 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     border-radius: 14px;
   }
   .raffle-active-actions > .raffle-admin-actions,
+  .raffle-active-admin-footer > .raffle-admin-actions,
+  .raffle-active-admin-footer .raffles-admin-actions--broadcast,
   .raffle-active-actions .raffles-admin-actions--broadcast {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2154,7 +2180,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     padding: 8px;
   }
   .raffle-active-actions > .raffle-admin-actions .raffle-complete-btn,
-  .raffle-active-actions > .raffle-admin-actions .raffle-cancel-btn {
+  .raffle-active-actions > .raffle-admin-actions .raffle-cancel-btn,
+  .raffle-active-admin-footer > .raffle-admin-actions .raffle-complete-btn,
+  .raffle-active-admin-footer > .raffle-admin-actions .raffle-cancel-btn {
     min-height: 38px;
     font-size: 10px;
   }

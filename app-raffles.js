@@ -86,6 +86,7 @@ function initRaffles() {
   var rafflesNotifySubsHint = document.getElementById("rafflesNotifySubsHint");
   var rafflesActiveChooser = document.getElementById("rafflesActiveChooser");
   var raffleActiveActions = document.getElementById("raffleActiveActions");
+  var raffleActiveAdminFooter = document.getElementById("raffleActiveAdminFooter");
   var raffleActiveInfoModal = document.getElementById("raffleActiveInfoModal");
   var raffleActiveInfoModalBackdrop = document.getElementById("raffleActiveInfoModalBackdrop");
   var raffleActiveInfoModalClose = document.getElementById("raffleActiveInfoModalClose");
@@ -146,6 +147,18 @@ function initRaffles() {
     raffleActiveActions.classList.toggle("raffle-active-actions--hidden", !visible);
     raffleActiveActions.hidden = !visible;
     raffleActiveActions.setAttribute("aria-hidden", visible ? "false" : "true");
+    syncRaffleActiveAdminFooterVisibility(visible);
+  }
+
+  function syncRaffleActiveAdminFooterVisibility(activeVisible) {
+    if (!raffleActiveAdminFooter) return;
+    var actionVisible = typeof activeVisible === "boolean"
+      ? activeVisible
+      : !!(raffleActiveActions && !raffleActiveActions.hidden);
+    var show = !!(actionVisible && rafflesIsAdmin);
+    raffleActiveAdminFooter.classList.toggle("raffle-active-admin-footer--hidden", !show);
+    raffleActiveAdminFooter.hidden = !show;
+    raffleActiveAdminFooter.setAttribute("aria-hidden", show ? "false" : "true");
   }
 
   function raffleFeedbackTelegramLink(url) {
@@ -2280,6 +2293,7 @@ function initRaffles() {
           raffleAdminActions.classList.toggle("raffle-admin-actions--hidden", !rafflesIsAdmin);
           raffleAdminActions.setAttribute("aria-hidden", rafflesIsAdmin ? "false" : "true");
         }
+        syncRaffleActiveAdminFooterVisibility();
         if (raffleCompleteBtn) {
           raffleCompleteBtn.classList.toggle("raffle-cancel-btn--hidden", !rafflesIsAdmin);
           raffleCompleteBtn.disabled = !rafflesIsAdmin;
