@@ -1144,13 +1144,19 @@ function initWinterRating() {
         var nickStr = row.nick != null ? String(row.nick) : "";
         var nickEsc = escapeHtmlRating(nickStr);
         var nickAttr = nickStr.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var nickInner = nickEsc;
+        if (seasonConfig.key === "summer") {
+          nickInner = "<span class=\"summer-rating-table-player summer-rating-table-player--place-" + place + "\">" +
+            (place <= 3 ? "<span class=\"summer-rating-table-avatar summer-rating-table-avatar--place-" + place + "\" aria-hidden=\"true\"></span>" : "") +
+            "<span class=\"summer-rating-table-name\">" + nickEsc + "</span></span>";
+        }
         var prizeCell = "";
         if (hasPrizeColumn) {
           var prizeVal = prizesByPlace && prizesByPlace[place] != null ? prizesByPlace[place] : null;
           var prizeStr = prizeVal != null && prizeVal >= 1000 ? (prizeVal / 1000) + "К₽" : (prizeVal != null && prizeVal > 0 ? prizeVal + "₽" : "—");
           prizeCell = "<td class=\"winter-rating__td-prize\" title=\"" + (prizeVal ? formatRewardRound(prizeVal) + " ₽" : "—") + "\">" + prizeStr + "</td>";
         }
-        parts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td>" + prizeCell + "</tr>");
+        parts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickInner + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td>" + prizeCell + "</tr>");
       }
       bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">" + (seasonConfig.emptyDataText || "Данные с 1 марта") + "</td></tr>";
       bodyEl.removeEventListener("click", bodyEl._leagueNickClick);

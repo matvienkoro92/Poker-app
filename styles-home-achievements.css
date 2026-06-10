@@ -1,3 +1,43 @@
+.app.app--view-home .home-club-achievements-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
+  margin: 23px calc(-1 * var(--card-padding-x, 16px) + 3px) 8px;
+  color: #e8ad54;
+  font-size: clamp(8.4px, 2.38vw, 11.2px);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(28, 13, 0, 0.9),
+    0 0 10px rgba(255, 181, 49, 0.42);
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-club-achievements-title::before,
+.app.app--view-home .home-club-achievements-title::after {
+  content: "";
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1px;
+  background:
+    radial-gradient(circle at var(--home-achievements-line-dot, 100%) 50%, rgba(255, 199, 89, 0.95) 0 1px, transparent 2px),
+    linear-gradient(var(--home-achievements-line-angle, 90deg), transparent 0%, rgba(179, 111, 32, 0.18) 34%, rgba(255, 181, 49, 0.72) 100%);
+  box-shadow: 0 0 8px rgba(255, 181, 49, 0.26);
+}
+
+.app.app--view-home .home-club-achievements-title::after {
+  --home-achievements-line-angle: 270deg;
+  --home-achievements-line-dot: 0%;
+}
+
+.app.app--view-home .home-club-achievements-title + .home-club-hero-banner {
+  margin-top: 0;
+}
+
 .app.app--view-home .home-compact-link--hall .home-compact-link__hall-title {
   position: absolute;
   left: 12px;
@@ -33,6 +73,13 @@
 }
 
 @media (max-width: 360px) {
+  .app.app--view-home .home-club-achievements-title {
+    margin-top: 21px;
+    gap: 8px;
+    font-size: 7.7px;
+    letter-spacing: 0.24em;
+  }
+
   .app.app--view-home .home-compact-link--hall .home-compact-link__hall-title {
     left: 9px;
     right: 9px;
