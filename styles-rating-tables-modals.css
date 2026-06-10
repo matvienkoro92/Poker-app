@@ -1,4 +1,4 @@
 /* styles-rating-tables-modals.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-rating-tables.css?v=3.281");
 @import url("./styles-rating-modals.css?v=3.120");
-@import url("./styles-rating-late.css?v=3.546");
+@import url("./styles-rating-late.css?v=3.549");
