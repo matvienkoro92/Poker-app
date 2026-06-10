@@ -228,6 +228,17 @@ function initProfilePokerPlus() {
   }
 
   function auth() {
+    try {
+      if (typeof pokerProfileAuthState === "function") {
+        var profileState = pokerProfileAuthState();
+        if (profileState) {
+          return {
+            isGuest: !!profileState.isGuest,
+            isVerified: !!profileState.isVerified,
+          };
+        }
+      }
+    } catch (eProfileAuthState) {}
     var authState = window.__pokerTelegramAuth;
     var isGuest = !!(authState && authState.status === "guest");
     if (!isGuest) {

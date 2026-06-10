@@ -1466,7 +1466,7 @@ function initWinterRating() {
       var tableEl = block.querySelector(".winter-rating__date-table-wrap[data-league=\"" + leagueNum + "\"]");
       if (screensEl) fillScreensForDate(screensEl, dateStr, leagueNum);
       if (tournamentsEl) {
-        var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига2. Турниры от 100р до 499р";
+        var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100р до 499р";
         tournamentsEl.innerHTML = renderSpringLeagueDateCaption(label);
       }
       if (tableEl) {
@@ -1494,7 +1494,7 @@ function initWinterRating() {
           if (!block) return;
           var tournamentsEl = block.querySelector(".winter-rating__date-tournaments-list[data-league=\"" + leagueNum + "\"]");
           if (tournamentsEl) {
-            var capLabel = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига2. Турниры от 100р до 499р";
+            var capLabel = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100р до 499р";
             tournamentsEl.innerHTML = renderSpringLeagueDateCaption(capLabel);
           }
         });

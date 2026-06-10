@@ -158,6 +158,47 @@ function loadCurrentProfileUserInfo() {
   return pokerProfileUserInfoPromise;
 }
 
+function pokerProfileStoredSessionAuth() {
+  try {
+    if (typeof pokerReadPwaTgSessionRecord === "function") {
+      var tgRecord = pokerReadPwaTgSessionRecord();
+      if (tgRecord && tgRecord.token && tgRecord.user && tgRecord.user.id != null) {
+        return { record: tgRecord, user: tgRecord.user, method: tgRecord.authMethod || "telegram", vk: false };
+      }
+    }
+  } catch (eProfileTgRecord) {}
+  try {
+    if (typeof pokerReadPwaVkSessionRecord === "function") {
+      var vkRecord = pokerReadPwaVkSessionRecord();
+      if (vkRecord && vkRecord.token && vkRecord.user && vkRecord.user.id != null) {
+        return { record: vkRecord, user: vkRecord.user, method: vkRecord.authMethod || "vk", vk: true };
+      }
+    }
+  } catch (eProfileVkRecord) {}
+  return null;
+}
+
+function pokerProfileRehydrateStoredAuthIfNeeded() {
+  var current = null;
+  try {
+    current = window.__pokerTelegramAuth;
+    if (current && current.user && (current.status === "verified" || current.status === "dev_skip")) return null;
+  } catch (eCurrentAuth) {}
+  var stored = pokerProfileStoredSessionAuth();
+  if (!stored || !stored.user) return null;
+  try {
+    var nextAuth = { status: "verified", user: stored.user, error: null };
+    if (stored.record && stored.record.gazettePlannerAccess === true) nextAuth.gazettePlannerAccess = true;
+    if (stored.record && stored.record.adminAccess === true) nextAuth.adminAccess = true;
+    if (stored.record && stored.record.adminReportAccess === true) nextAuth.adminReportAccess = true;
+    window.__pokerTelegramAuth = nextAuth;
+  } catch (eSetStoredAuth) {}
+  try {
+    if (typeof pokerSetAuthMethod === "function") pokerSetAuthMethod(stored.method || (stored.vk ? "vk" : "telegram"));
+  } catch (eStoredMethod) {}
+  return stored;
+}
+
 function updateProfileDtId() {
   var el = document.getElementById("profileUserId");
   if (el) updateProfileHeroPokerPlusId(typeof window !== "undefined" ? window.__pokerPlusUserId : "");
@@ -225,6 +266,10 @@ function pokerProfileAuthState() {
     hasStoredSession: false,
     hasCredential: false,
   };
+  var storedAuth = null;
+  try {
+    storedAuth = pokerProfileRehydrateStoredAuthIfNeeded() || pokerProfileStoredSessionAuth();
+  } catch (eStoredProfileAuth) {}
   try {
     var auth = window.__pokerTelegramAuth;
     state.isGuest = !!(auth && auth.status === "guest");
@@ -235,7 +280,10 @@ function pokerProfileAuthState() {
     if (!state.isGuest && typeof pokerReadPwaGuestMode === "function") state.isGuest = !!pokerReadPwaGuestMode();
   } catch (eGuestModeState) {}
   try {
-    state.hasStoredSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    state.hasStoredSession = !!storedAuth;
+    if (!state.hasStoredSession && typeof pokerReadPwaTgSessionRecord !== "function" && typeof pokerReadPwaVkSessionRecord !== "function") {
+      state.hasStoredSession = !!(pokerReadPwaTgSessionToken() || pokerReadPwaVkSessionToken());
+    }
   } catch (eSessionState) {}
   try {
     state.hasCredential = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
@@ -308,6 +356,23 @@ function pokerClearSessionsAndReloadForLogin() {
   window.location.reload();
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
+window.addEventListener("poker-telegram-auth", function () {
+  pokerProfileUserInfoCache = null;
+  pokerProfileUserInfoCacheAt = 0;
+  try { updateProfileExitBtnVisibility(); } catch (eProfileAuthVisibility) {}
+  try { if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi(); } catch (eProfileEmailSync) {}
+  try {
+    var root = document.getElementById("profileView");
+    if (
+      root &&
+      root.dataset &&
+      root.dataset.profileActiveTab === "poker21" &&
+      typeof initProfilePokerPlus === "function"
+    ) {
+      initProfilePokerPlus();
+    }
+  } catch (eProfilePokerPlusAuthSync) {}
+});
 window.addEventListener("poker-raffle-subscription-change", function (ev) {
   var detail = ev && ev.detail ? ev.detail : {};
   pokerProfileUserInfoCache = null;

@@ -2033,6 +2033,8 @@ html.app-view-summer-rating-html-scroll #app.app > .card > .card__content {
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
   width: 100%;
   background:
+    linear-gradient(180deg, rgba(1, 5, 12, 0.08), rgba(1, 5, 12, 0.38)),
+    url("./assets/summer-rating-stage-bg.webp") center top / min(430px, 100%) auto no-repeat,
     radial-gradient(ellipse at -18% 31%, rgba(247, 178, 58, 0.18), transparent 32%),
     radial-gradient(ellipse at 118% 32%, rgba(247, 178, 58, 0.16), transparent 32%),
     radial-gradient(ellipse at 50% 18%, rgba(11, 42, 73, 0.56), transparent 48%),
@@ -2047,6 +2049,8 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
   border-radius: 28px;
   border: 1px solid rgba(188, 116, 26, 0.88) !important;
   background:
+    linear-gradient(180deg, rgba(2, 7, 15, 0.04), rgba(2, 7, 15, 0.34) 58%, rgba(1, 5, 11, 0.74) 100%),
+    url("./assets/summer-rating-stage-bg.webp") center top / cover no-repeat,
     radial-gradient(ellipse at -28% 34%, rgba(255, 188, 66, 0.16), transparent 34%),
     radial-gradient(ellipse at 128% 35%, rgba(255, 188, 66, 0.14), transparent 34%),
     radial-gradient(ellipse at 50% 24%, rgba(11, 43, 74, 0.62), transparent 48%),
@@ -2058,8 +2062,8 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
 
 .winter-rating.spring-rating.summer-rating::before {
   background:
-    radial-gradient(ellipse at 50% 34%, rgba(1, 6, 13, 0.18), transparent 54%),
-    linear-gradient(90deg, rgba(9, 41, 70, 0.5) 0%, transparent 20%, transparent 80%, rgba(9, 41, 70, 0.46) 100%);
+    radial-gradient(ellipse at 50% 34%, rgba(1, 6, 13, 0.08), transparent 54%),
+    linear-gradient(90deg, rgba(9, 41, 70, 0.22) 0%, transparent 20%, transparent 80%, rgba(9, 41, 70, 0.2) 100%);
   opacity: 1;
 }
 
@@ -2200,7 +2204,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   margin: 0;
   position: relative;
   overflow: hidden;
-  background: url("./assets/summer-rating-podium.webp") center / cover no-repeat;
+  background:
+    url("./assets/summer-rating-monkey-place-1.webp") 50% -10% / 38% auto no-repeat,
+    url("./assets/summer-rating-monkey-place-2.webp") 14% 25% / 30% auto no-repeat,
+    url("./assets/summer-rating-monkey-place-3.webp") 86% 34% / 29% auto no-repeat,
+    url("./assets/summer-rating-podium-base.webp") center 101% / 116% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3--league::before {
@@ -2235,21 +2243,21 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card:nth-child(1) {
-  left: 12.8%;
-  bottom: 7.3%;
-  width: 24.8%;
+  left: 8.6%;
+  bottom: 7.0%;
+  width: 29.2%;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card:nth-child(2) {
-  left: 38.2%;
+  left: 38.6%;
   bottom: 7.7%;
   width: 24.2%;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card:nth-child(3) {
-  right: 10.4%;
-  bottom: 7.2%;
-  width: 24.2%;
+  right: 7.2%;
+  bottom: 7.0%;
+  width: 27.6%;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__rank,
@@ -2263,7 +2271,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   margin: 0 0 2px;
   overflow: hidden;
   color: #ffffff;
-  font-size: clamp(11px, 3.25vw, 15px);
+  font-size: clamp(10.5px, 3vw, 14px);
   font-weight: 900;
   line-height: 1.02;
   text-overflow: ellipsis;

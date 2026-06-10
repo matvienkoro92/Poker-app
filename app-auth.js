@@ -545,6 +545,7 @@ function pokerBuildUserFromPwaSessionToken(token, isVk) {
     username: data.un || "",
     first_name: data.fn || "",
     last_name: data.ln || "",
+    email: data.em || "",
     photo_url: "",
     language_code: "",
     is_premium: false
@@ -875,8 +876,12 @@ function pokerReadEmailPwaSessionToken() {
   try {
     var record = pokerReadPwaTgSessionRecord();
     var recordMethod = record && record.authMethod ? String(record.authMethod || "").trim().toLowerCase() : "";
-    if (recordMethod) method = recordMethod;
-    if (method !== "email") return "";
+    var recordUser = record && record.user ? record.user : null;
+    var recordEmail = recordUser && recordUser.email != null ? String(recordUser.email || "").trim() : "";
+    var recordMemberId = recordUser && recordUser.memberId != null ? String(recordUser.memberId || "").trim() : "";
+    var isEmailRecord = recordMethod === "email" || (/^mail_/.test(recordMemberId) && (recordEmail || method === "email"));
+    if (recordMethod && recordMethod !== "email") return "";
+    if (!isEmailRecord) return "";
     return typeof pokerReadPwaTgSessionToken === "function" ? String(pokerReadPwaTgSessionToken() || "").trim() : "";
   } catch (eEmailToken) {
     return "";
@@ -1059,6 +1064,10 @@ function pokerApiAuthQuery(lead) {
   } catch (eGuestQuery) {}
   var tok = pokerReadPwaTgSessionToken();
   var vkt = pokerReadPwaVkSessionToken();
+  try {
+    var emailTok = pokerReadEmailPwaSessionToken();
+    if (emailTok) return lead + "pwaSession=" + encodeURIComponent(emailTok);
+  } catch (eEmailQuery) {}
   try {
     if (typeof pokerIsPwaDisplayStandalone === "function" && pokerIsPwaDisplayStandalone()) {
       if (tok) return lead + "pwaSession=" + encodeURIComponent(tok);
