@@ -1746,30 +1746,32 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
 }
 
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonus-game-back {
-  top: 112px;
-  left: max(18px, calc((100% - min(430px, 100%)) / 2 + 14px));
-  width: 52px;
-  height: 52px;
-  border-radius: 20px;
-  font-size: 31px;
+  top: 103px;
+  left: max(18px, calc((100% - min(430px, 100%)) / 2 + 18px));
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  font-size: 25px;
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
-  min-height: 86px;
-  margin: 0 0 13px;
-  padding: 0 70px;
+  min-height: 62px;
+  margin: 0 0 8px;
+  padding: 0 62px;
   align-items: center;
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
-  font-size: 20px;
-  line-height: 1.02;
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.04;
   white-space: nowrap;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__title-accent {
-  margin-top: 4px;
-  font-size: 1.5em;
+  margin-top: 3px;
+  font-size: 1.42em;
+  font-weight: 900;
   line-height: 0.98;
   letter-spacing: 0;
   text-shadow:
@@ -1778,10 +1780,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup {
-  right: 8px;
-  width: 48px;
-  font-size: 42px;
-  filter: drop-shadow(0 0 16px rgba(245, 196, 85, 0.48));
+  right: 14px;
+  width: 40px;
+  font-size: 35px;
+  filter: drop-shadow(0 0 13px rgba(245, 196, 85, 0.42));
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__title-snow {
@@ -1789,23 +1791,24 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
-  margin: 0 0 20px;
-  min-height: 61px;
-  border-radius: 23px;
+  margin: 0 0 16px;
+  min-height: 39px;
+  border-radius: 18px;
   border-color: rgba(185, 111, 24, 0.82);
   background:
     linear-gradient(180deg, rgba(10, 17, 29, 0.94), rgba(3, 9, 17, 0.98));
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab {
-  min-height: 60px;
-  padding: 0 10px;
-  font-size: 21px;
+  min-height: 38px;
+  padding: 0 8px;
+  font-size: 15px;
+  font-weight: 850;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--conditions {
-  font-size: 18px;
-  line-height: 1.13;
+  font-size: 13px;
+  line-height: 1.12;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--active {
@@ -1815,28 +1818,30 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
     linear-gradient(180deg, #fff2a0 0%, #f5c84e 45%, #d9921d 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 230, 0.82),
-    inset 0 -7px 0 rgba(128, 72, 8, 0.16),
+    inset 0 -4px 0 rgba(128, 72, 8, 0.14),
     0 0 18px rgba(245, 196, 85, 0.24);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league-header {
-  margin: 0 14px 9px;
+  margin: 0 14px 7px;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league-caption {
-  font-size: 17px;
+  font-size: 15px;
+  font-weight: 850;
   line-height: 1.08;
   white-space: nowrap;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league-updated {
-  min-height: 36px;
-  padding: 5px 14px;
+  min-height: 30px;
+  padding: 4px 12px;
   border: 1px solid rgba(245, 196, 85, 0.78);
   border-radius: 999px;
   background: rgba(7, 12, 21, 0.72);
   color: #ffde8c;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3--league {
@@ -1998,11 +2003,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   }
 
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab {
-    font-size: clamp(17px, 5vw, 21px);
+    font-size: clamp(14px, 3.9vw, 16px);
   }
 
   body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
-    font-size: clamp(21px, 6.2vw, 25px);
+    font-size: clamp(17px, 4.9vw, 20px);
   }
 
   .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes {
