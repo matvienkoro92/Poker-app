@@ -194,8 +194,8 @@
 
 #hallOfFameView.hall-of-fame--top2026 {
   --hall-top2026-header-overlap: 104px;
-  --hall-top2026-bg-width: 452px;
-  --hall-top2026-bg-y: 0px;
+  --hall-top2026-bg-width: min(100%, 386px);
+  --hall-top2026-bg-y: -2px;
   --hall-top2026-list-offset: 20px;
   --hall-top2026-stage-min-height: 852px;
   --hall-top2026-trophy-right: clamp(-24px, -6vw, -10px);
@@ -360,6 +360,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  display: none !important;
   pointer-events: none;
 }
 .hall-of-fame__top2026-plaque {
@@ -491,17 +492,17 @@
 .hall-of-fame__top2026-quotes {
   position: absolute;
   z-index: 6;
-  top: clamp(286px, 73vw, 306px);
+  top: clamp(266px, 68vw, 286px);
   left: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: auto;
-  min-height: 0;
-  padding: 2px 4px 3px;
+  width: clamp(116px, 30vw, 144px);
+  min-height: 34px;
+  padding: 0;
   box-sizing: border-box;
   appearance: none;
-  color: #f6d79d !important;
+  color: transparent !important;
   background: transparent !important;
   border: 0;
   border-radius: 0;
@@ -510,22 +511,22 @@
   font-weight: 900;
   line-height: 1.08;
   text-align: center;
-  text-decoration: underline;
+  text-decoration: none;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(17, 8, 2, 0.88), 0 0 10px rgba(255, 190, 92, 0.32);
+  text-shadow: none;
   transform: translateX(-50%);
   pointer-events: auto;
   cursor: pointer;
 }
 .hall-of-fame__top2026-quotes:hover,
 .hall-of-fame__top2026-quotes:focus-visible {
-  color: #3f2408 !important;
+  color: transparent !important;
   background: transparent !important;
   outline: 1px solid rgba(111, 77, 45, 0.48);
   outline-offset: 3px;
-  text-decoration-thickness: 2px;
+  text-decoration: none;
 }
 .hall-of-fame__top2026-quote-modal[hidden] {
   display: none !important;
@@ -834,8 +835,8 @@
 @media (max-width: 380px) {
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-header-overlap: 102px;
-    --hall-top2026-bg-width: 430px;
-    --hall-top2026-bg-y: 0px;
+    --hall-top2026-bg-width: min(100%, 360px);
+    --hall-top2026-bg-y: -2px;
     --hall-top2026-list-offset: 14px;
     --hall-top2026-stage-min-height: 806px;
   }
@@ -915,7 +916,7 @@
     right: clamp(16px, 5vw, 22px);
   }
   .hall-of-fame__top2026-quotes {
-    top: clamp(280px, 73vw, 298px);
+    top: clamp(260px, 67vw, 280px);
     font-size: clamp(9px, 2.35vw, 12px);
   }
   .hall-of-fame__top2026-quote-text {
@@ -964,6 +965,7 @@
 }
 @media (max-width: 480px) {
   #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-bg-width: min(100%, 350px);
     --hall-top2026-list-offset: 8px;
   }
   .hall-of-fame__top2026-list-card {
