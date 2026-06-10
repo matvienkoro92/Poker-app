@@ -728,3 +728,598 @@
   color: #14532d;
 }
 
+/* Summer 2026 rating: dark gold reference theme. */
+.summer-rating__brand-bar {
+  display: none;
+}
+
+body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
+  --summer-rating-gold: #f5c455;
+  --summer-rating-gold-soft: #ffe7a8;
+  --summer-rating-gold-dark: #a96814;
+  --summer-rating-ink: #050911;
+  --summer-rating-panel: #0d121d;
+  --summer-rating-line: rgba(245, 196, 85, 0.52);
+}
+
+body[data-view="summer-rating"] #app.app > .card > .card__header {
+  display: none !important;
+}
+
+body[data-view="summer-rating"] .view--active[data-view="summer-rating"] .bonus-game-back {
+  top: 102px;
+  left: 18px;
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 196, 85, 0.78);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 236, 166, 0.2), transparent 38%),
+    linear-gradient(145deg, rgba(9, 13, 22, 0.94), rgba(16, 22, 34, 0.96));
+  color: var(--summer-rating-gold-soft);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.08),
+    0 0 18px rgba(245, 196, 85, 0.18);
+  font-size: 34px;
+  line-height: 1;
+}
+
+.winter-rating.spring-rating.summer-rating {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  max-width: 720px;
+  margin: 0 auto 24px;
+  padding: 14px 10px 24px;
+  border: 1px solid rgba(245, 196, 85, 0.7);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(245, 170, 46, 0.18), transparent 36%),
+    radial-gradient(circle at 8% 16%, rgba(245, 196, 85, 0.1), transparent 26%),
+    linear-gradient(180deg, #08111d 0%, #050914 48%, #070b12 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.08),
+    0 16px 42px rgba(0, 0, 0, 0.36),
+    0 0 30px rgba(186, 128, 30, 0.12);
+  color: #f9efd2;
+}
+
+.winter-rating.spring-rating.summer-rating::before {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 12% 2%, rgba(255, 198, 91, 0.34), transparent 18%),
+    radial-gradient(ellipse at 88% 2%, rgba(255, 198, 91, 0.3), transparent 18%),
+    radial-gradient(circle at 50% 39%, rgba(251, 191, 36, 0.14), transparent 28%),
+    linear-gradient(90deg, rgba(20, 41, 65, 0.36), transparent 22%, transparent 78%, rgba(114, 66, 14, 0.28));
+  opacity: 1;
+}
+
+.winter-rating.spring-rating.summer-rating > * {
+  position: relative;
+  z-index: 1;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating__brand-bar {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  margin: 0 0 16px;
+  padding: 9px 12px;
+  border: 1px solid rgba(245, 196, 85, 0.48);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(11, 18, 30, 0.96), rgba(7, 12, 21, 0.94)),
+    radial-gradient(circle at 14% 20%, rgba(245, 196, 85, 0.18), transparent 38%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 206, 0.1),
+    0 0 18px rgba(245, 196, 85, 0.12);
+}
+
+.summer-rating__brand-logo {
+  width: 54px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: url("./assets/logo-two-aces.png") center / cover no-repeat;
+  box-shadow:
+    0 0 0 1px rgba(255, 225, 133, 0.7),
+    0 0 18px rgba(245, 196, 85, 0.3);
+}
+
+.summer-rating__brand-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.summer-rating__brand-title {
+  overflow: hidden;
+  color: #f4d194;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.04;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+}
+
+.summer-rating__brand-subtitle {
+  color: rgba(235, 231, 219, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  line-height: 1;
+}
+
+.summer-rating__brand-menu {
+  width: 52px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(245, 196, 85, 0.72);
+  border-radius: 50%;
+  color: var(--summer-rating-gold-soft);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  background: rgba(6, 10, 17, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 206, 0.06);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__winter-decor {
+  margin: 2px 0 6px;
+  color: rgba(245, 196, 85, 0.76);
+  letter-spacing: 0.9em;
+  text-shadow: 0 0 10px rgba(245, 196, 85, 0.34);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__winter-decor .winter-rating__suit {
+  color: rgba(245, 196, 85, 0.62);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__winter-decor .winter-rating__snow::before {
+  color: rgba(245, 196, 85, 0.82);
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
+  margin: 0 0 18px;
+  padding-inline: 22px 58px;
+  color: #fff4d0;
+  text-shadow: 0 2px 7px rgba(0, 0, 0, 0.55);
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
+  font-size: 29px;
+  font-weight: 900;
+  line-height: 1.06;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__title-accent {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--summer-rating-gold);
+  font-size: 1.18em;
+  font-weight: 950;
+  text-shadow:
+    0 3px 0 rgba(95, 52, 8, 0.54),
+    0 0 22px rgba(255, 209, 94, 0.55);
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup {
+  right: 12px;
+  display: grid;
+  width: 46px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--summer-rating-gold-soft);
+  font-size: 30px;
+  filter: drop-shadow(0 0 12px rgba(255, 196, 55, 0.45));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+  overflow: hidden;
+  margin: 0 0 22px;
+  border: 1px solid rgba(245, 196, 85, 0.62);
+  border-radius: 18px;
+  background: rgba(7, 12, 21, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 206, 0.08),
+    0 0 22px rgba(245, 196, 85, 0.14);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab {
+  min-height: 58px;
+  border: 0;
+  border-right: 1px solid rgba(245, 196, 85, 0.26);
+  border-radius: 0;
+  background: linear-gradient(180deg, rgba(15, 21, 34, 0.94), rgba(9, 13, 22, 0.94));
+  color: rgba(245, 232, 201, 0.72);
+  font-size: 16px;
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab:last-child {
+  border-right: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--conditions {
+  flex-basis: clamp(116px, 28%, 170px);
+  color: #fff0c6;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab:hover {
+  color: #fff4d0;
+  background: linear-gradient(180deg, rgba(25, 33, 50, 0.96), rgba(10, 15, 25, 0.96));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 0;
+  margin: 0 6px 12px;
+  padding: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-caption {
+  color: #ffe8ad;
+  font-size: 22px;
+  line-height: 1.12;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-updated {
+  position: static;
+  flex: 0 0 auto;
+  max-width: none;
+  min-height: 32px;
+  padding: 7px 14px;
+  border-color: rgba(245, 196, 85, 0.72);
+  color: #ffe8ad;
+  font-size: 13px;
+  background: rgba(6, 10, 17, 0.7);
+  box-shadow: 0 0 18px rgba(245, 196, 85, 0.2);
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-final-countdown {
+  display: none;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3--league {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  min-height: 260px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 1px solid rgba(245, 196, 85, 0.72);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(4, 8, 14, 0.02), rgba(5, 7, 11, 0.18) 58%, rgba(3, 5, 9, 0.66) 100%),
+    url("./assets/summer-rating-podium.webp") center / cover no-repeat;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.08),
+    0 16px 36px rgba(0, 0, 0, 0.34),
+    0 0 24px rgba(245, 196, 85, 0.16);
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3--league::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(180deg, transparent, rgba(3, 5, 9, 0.84));
+  pointer-events: none;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__podium {
+  position: absolute;
+  inset: auto 4.2% 4.4%;
+  display: grid;
+  grid-template-columns: 30% 36% 30%;
+  align-items: end;
+  justify-content: center;
+  gap: 2%;
+  min-height: 118px;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
+  width: 100%;
+  max-width: none;
+  min-height: 86px;
+  margin: 0;
+  padding: 8px 6px;
+  border: 1px solid rgba(245, 196, 85, 0.54);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(18, 20, 24, 0.9), rgba(2, 4, 7, 0.92)),
+    radial-gradient(circle at 50% 0%, rgba(245, 196, 85, 0.2), transparent 54%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.06),
+    0 8px 18px rgba(0, 0, 0, 0.34);
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__card--first {
+  min-height: 100px;
+  transform: translateY(-4%);
+  border-color: rgba(255, 219, 119, 0.88);
+  background:
+    linear-gradient(180deg, rgba(26, 22, 15, 0.94), rgba(4, 4, 5, 0.94)),
+    radial-gradient(circle at 50% 0%, rgba(255, 210, 84, 0.24), transparent 58%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.12),
+    0 10px 24px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(245, 196, 85, 0.2);
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__rank,
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__avatar {
+  display: none;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__nick {
+  margin: 0 0 5px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1.04;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
+  gap: 3px;
+  color: #fff1c7;
+  font-size: 12px;
+  line-height: 1.08;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__points {
+  color: #fff6db;
+  font-weight: 800;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__reward {
+  color: var(--summer-rating-gold);
+  font-size: 1.08em;
+  font-weight: 950;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.76), 0 0 12px rgba(245, 196, 85, 0.28);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table-wrap--league {
+  overflow: hidden;
+  margin: 0 0 2px;
+  border: 1px solid rgba(245, 196, 85, 0.55);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(15, 20, 31, 0.94), rgba(8, 12, 19, 0.96)),
+    radial-gradient(circle at 50% 0%, rgba(245, 196, 85, 0.14), transparent 28%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 206, 0.06),
+    0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes {
+  width: 100%;
+  min-width: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes th,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td {
+  padding: 7px 5px;
+  border-bottom: 1px solid rgba(245, 196, 85, 0.24);
+  color: #f8ead0;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.58);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes thead th {
+  color: #f7d889;
+  font-weight: 900;
+  background: rgba(5, 8, 14, 0.72);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td {
+  background:
+    linear-gradient(90deg, rgba(130, 75, 16, 0.76), rgba(32, 28, 24, 0.82));
+  color: #fff2d1;
+  font-weight: 900;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:first-child td {
+  color: #fff7dc;
+  background:
+    linear-gradient(90deg, rgba(170, 99, 17, 0.9), rgba(78, 51, 19, 0.82));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-place,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(1) {
+  width: 17%;
+  min-width: 0;
+  text-align: center;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
+  width: 32%;
+  min-width: 0;
+  max-width: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-points,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(3) {
+  width: 14%;
+  min-width: 0;
+  text-align: right;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-reward,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(4) {
+  width: 23%;
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__td-prize {
+  width: 14%;
+  min-width: 0;
+  max-width: none;
+  padding-right: 5px;
+  color: var(--summer-rating-gold);
+  font-size: 1em;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__nick-btn {
+  max-width: 100%;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: left;
+  text-decoration-color: rgba(245, 196, 85, 0.76);
+  text-underline-offset: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__show-all-wrap--league {
+  margin-top: 12px;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__show-all-btn {
+  min-width: 168px;
+  min-height: 42px;
+  padding: 8px 26px;
+  border: 1px solid rgba(245, 196, 85, 0.52);
+  border-radius: 999px;
+  background: rgba(7, 12, 21, 0.82);
+  color: #f6d58a;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 244, 206, 0.08), 0 0 14px rgba(245, 196, 85, 0.12);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__search-wrap--league {
+  display: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-share-wrap {
+  margin-top: 16px;
+}
+
+@media (max-width: 430px) {
+  body[data-view="summer-rating"] .view--active[data-view="summer-rating"] .bonus-game-back {
+    top: 96px;
+    left: 14px;
+    width: 50px;
+    height: 50px;
+    border-radius: 17px;
+    font-size: 30px;
+  }
+
+  .winter-rating.spring-rating.summer-rating {
+    padding: 10px 8px 22px;
+    border-radius: 22px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .summer-rating__brand-bar {
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    gap: 9px;
+    min-height: 62px;
+    padding: 8px 9px;
+    border-radius: 19px;
+  }
+
+  .summer-rating__brand-logo,
+  .summer-rating__brand-menu {
+    width: 46px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__winter-decor {
+    letter-spacing: 0.55em;
+  }
+
+  body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
+    padding-inline: 18px 56px;
+  }
+
+  body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
+    font-size: 27px;
+  }
+
+  body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup {
+    width: 40px;
+    font-size: 26px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .spring-rating-top3--league {
+    min-height: 238px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .spring-rating-top3__podium {
+    inset-inline: 3.5%;
+    bottom: 3.6%;
+    gap: 1.4%;
+  }
+
+  .winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .summer-rating__brand-subtitle {
+    letter-spacing: 0.2em;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes th,
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td {
+    padding-inline: 4px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-place,
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(1) {
+    width: 15%;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
+    width: 31%;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-reward,
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(4) {
+    width: 24%;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize,
+  .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__td-prize {
+    width: 16%;
+  }
+}
