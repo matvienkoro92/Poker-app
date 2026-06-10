@@ -625,6 +625,13 @@ function renderHomeFreerollSchedule() {
       card.classList.add("home-freeroll-schedule__item--poker21");
       row.classList.add("home-freeroll-schedule__row--poker21");
     }
+    if (item.daily) {
+      card.classList.add("home-freeroll-schedule__item--daily");
+      row.classList.add("home-freeroll-schedule__row--daily");
+    } else if (item.dow === 6) {
+      card.classList.add("home-freeroll-schedule__item--saturday");
+      row.classList.add("home-freeroll-schedule__row--saturday");
+    }
     if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
       card.classList.add("home-freeroll-schedule__item--next");
       row.classList.add("home-freeroll-schedule__row--next");

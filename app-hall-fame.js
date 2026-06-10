@@ -105,8 +105,8 @@ function fitHallTop2026TextLine(el, minSize) {
 function fitHallTop2026PlaqueText(plaque) {
   var nameEl = plaque && plaque.querySelector("span:first-child");
   var amountEl = plaque && plaque.querySelector("small");
-  fitHallTop2026TextLine(nameEl, 6.2);
-  fitHallTop2026TextLine(amountEl, 5.2);
+  fitHallTop2026TextLine(nameEl, 8.2);
+  fitHallTop2026TextLine(amountEl, 7.2);
 }
 
 function fitHallTop2026Plaques() {

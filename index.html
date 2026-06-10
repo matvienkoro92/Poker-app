@@ -297,7 +297,9 @@
     <link rel="preload" as="image" href="./assets/home-tournament-friday-knockout-progressive-130k.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-tournament-saturday-freeroll-200k.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-tournament-sunday-knockout-week-300k.webp" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.531" />
+    <link rel="preload" as="image" href="./assets/home-freeroll-bg-daily.webp" fetchpriority="low" />
+    <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
+    <link rel="stylesheet" href="./styles.css?v=3.537" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home {
@@ -737,8 +739,20 @@
             </div>
             <section class="home-freerolls-strip" aria-label="Фрироллы">
               <div class="home-freerolls-strip__head">
+                <span class="home-freerolls-strip__icon" aria-hidden="true">
+                  <svg class="home-freerolls-strip__trophy" viewBox="0 0 64 64" focusable="false">
+                    <path d="M18.6 13.2h26.8l-2.3 22.1c-.6 5.8-4.8 10.4-10.1 11.3v5.1h8.5v5.8h-19v-5.8H31v-5.1c-5.3-.9-9.5-5.5-10.1-11.3l-2.3-22.1Z" />
+                    <path d="M17.9 18.1H8.5v7c0 7.2 4.5 12.8 12.3 14.2l-.9-7.1c-3.8-1.2-5.8-3.8-5.8-7.3v-1.4h4.3l-.5-5.4Z" />
+                    <path d="M46.1 18.1h9.4v7c0 7.2-4.5 12.8-12.3 14.2l.9-7.1c3.8-1.2 5.8-3.8 5.8-7.3v-1.4h-4.3l.5-5.4Z" />
+                    <path class="home-freerolls-strip__trophy-star" d="m32 18.3 3.1 7 7.6.7-5.7 5 1.7 7.4-6.7-3.9-6.7 3.9 1.7-7.4-5.7-5 7.6-.7 3.1-7Z" />
+                  </svg>
+                </span>
                 <h2 class="home-freerolls-strip__title">Ближайшие фрироллы</h2>
                 <a class="home-freerolls-strip__all" href="#" data-view-target="download">Смотреть все <span aria-hidden="true">›</span></a>
+              </div>
+              <div class="home-freerolls-strip__tabs" aria-hidden="true">
+                <span class="home-freerolls-strip__tab home-freerolls-strip__tab--active">Ближайший</span>
+                <span class="home-freerolls-strip__tab">Следующий</span>
               </div>
               <div class="home-freeroll-schedule home-freeroll-schedule--cards" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
               <div class="home-freerolls-strip__hint" aria-hidden="true">
@@ -761,10 +775,7 @@
             </a>
             <div class="home-compact-links" aria-label="Рейтинг и зал славы клуба">
               <a href="#" class="home-compact-link home-compact-link--rating home-compact-link--spring-strip" data-view-target="spring-rating" aria-label="Рейтинг весны 2026. Waaar - 100 000р. Sarmat - 30 000р">
-                <span class="home-compact-link__strip-title">Рейтинг весны 2026: Waaar - 100 000р.</span>
-                <span class="home-compact-link__strip-winners">
-                  <span class="home-compact-link__strip-winner-line">Sarmat - 30 000р</span>
-                </span>
+                <span class="home-compact-link__strip-title">Рейтинг весны 2026: Waaar - 100 000р. Sarmat - 30 000р</span>
               </a>
               <a href="#" class="home-compact-link home-compact-link--rating" data-view-target="summer-rating" aria-label="Рейтинг турнирщиков лета на 250 000 рублей">
                 <span class="home-compact-link__body">
@@ -1557,7 +1568,7 @@
     <script defer src="./app-home-planner-runtime.js?v=3.524"></script>
     <script defer src="./app-home-planner.js?v=3.524"></script>
     <script defer src="./app-home-tasks.js?v=3.524"></script>
-    <script defer src="./app-tournament-day.js?v=3.524"></script>
+    <script defer src="./app-tournament-day.js?v=3.531"></script>
     <script defer src="./app-home-deeplinks.js?v=3.525"></script>
     <script defer src="./app-home-club-info-modals.js?v=3.524"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=3.524"></script>
@@ -1565,9 +1576,9 @@
     <script defer src="./app-home-gazette-tasks.js?v=3.524"></script>
     <script defer src="./app-rating-core.js?v=3.524"></script>
     <script defer src="./app-rating-spring-season.js?v=3.524"></script>
-    <script defer src="./app-rating-summer-season.js?v=3.524"></script>
+    <script defer src="./app-rating-summer-season.js?v=3.536"></script>
     <script defer src="./app-rating-view.js?v=3.524"></script>
-    <script defer src="./app-rating-view-adapter.js?v=3.525"></script>
+    <script defer src="./app-rating-view-adapter.js?v=3.536"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-utils.js?v=3.524"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-render-utils.js?v=3.524"></script>
     <script defer data-poker-eager-domain="chat" src="./app-chat-identity-formatters.js?v=3.524"></script>
@@ -1675,7 +1686,7 @@
     <script defer data-poker-eager-domain="app" src="./app-rating-data-registry.js?v=3.524"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating.js?v=3.524"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-week-tops.js?v=3.527"></script>
-    <script defer data-poker-eager-domain="app" src="./app-hall-fame.js?v=3.529"></script>
+    <script defer data-poker-eager-domain="app" src="./app-hall-fame.js?v=3.536"></script>
     <script defer src="./app-shell-layout.js?v=3.524"></script>
     <script defer src="./app-navigation-scroll.js?v=3.524"></script>
     <script defer src="./app-html-fragments.js?v=3.524"></script>

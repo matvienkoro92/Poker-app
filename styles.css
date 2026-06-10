@@ -12,7 +12,7 @@
 @import url("./styles-home-legacy-tail.css?v=3.524");
 @import url("./styles-home-rating-promo-legacy.css?v=3.524");
 @import url("./styles-rating.css?v=3.524");
-@import url("./styles-hall.css?v=3.535");
+@import url("./styles-hall.css?v=3.536");
 @import url("./styles-admin.css?v=3.524");
 @import url("./styles-player-crm.css?v=3.524");
 @import url("./styles-profile.css?v=3.524");
@@ -1132,124 +1132,239 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .home-freerolls-strip {
+  --home-freerolls-gold: #ffb21d;
+  --home-freerolls-gold-light: #ffe2a2;
+  --home-freerolls-gold-deep: #8b4d03;
   position: relative;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
   margin: 40px calc(-1 * var(--card-padding-x, 16px) + 3px) 0;
-  padding: 13px 0 8px;
-  overflow: visible;
+  padding: 12px 12px 10px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 12% 36%, rgba(255, 154, 18, 0.34), rgba(255, 154, 18, 0.12) 22%, transparent 48%),
+    radial-gradient(ellipse at 46% 84%, rgba(255, 178, 29, 0.1), transparent 40%),
+    linear-gradient(180deg, #05080d 0%, #020306 52%, #050403 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 214, 0.08),
+    inset 0 -22px 52px rgba(0, 0, 0, 0.62),
+    0 16px 34px rgba(0, 0, 0, 0.38);
 }
 
 .app.app--view-home .home-freerolls-strip::before {
   content: "";
   position: absolute;
   z-index: 0;
-  top: 18px;
-  right: 0;
-  bottom: 6px;
-  left: 0;
-  border: 1px solid rgba(255, 181, 49, 0.48);
-  border-radius: 20px;
+  inset: 11px 8px 7px 13px;
+  border: 1px solid rgba(255, 178, 29, 0.68);
+  border-radius: 21px;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 226, 166, 0.08),
-    0 0 18px rgba(255, 118, 0, 0.18);
+    inset 0 0 0 1px rgba(255, 226, 166, 0.07),
+    0 0 14px rgba(255, 143, 0, 0.32),
+    0 0 34px rgba(255, 143, 0, 0.12);
   pointer-events: none;
 }
 
 .app.app--view-home .home-freerolls-strip::after {
   content: "";
   position: absolute;
-  z-index: 4;
-  top: 62px;
-  right: 0;
-  bottom: 12px;
-  width: 30px;
+  z-index: 0;
+  inset: auto auto 12% -8%;
+  width: 42%;
+  height: 46%;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(4, 5, 8, 0), rgba(4, 5, 8, 0.9) 88%);
+  background: radial-gradient(ellipse at center, rgba(255, 143, 0, 0.2), transparent 68%);
+  filter: blur(10px);
 }
 
 .app.app--view-home .home-freerolls-strip__head {
   position: relative;
   z-index: 2;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 2px 10px;
+  gap: 7px;
+  padding: 8px 5px 10px;
+}
+
+.app.app--view-home .home-freerolls-strip__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--home-freerolls-gold-light);
+  border: 1.5px solid rgba(255, 178, 29, 0.9);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255, 246, 220, 0.24), transparent 31%),
+    radial-gradient(circle at 50% 54%, rgba(255, 178, 29, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(12, 11, 9, 0.96), rgba(4, 5, 8, 0.96));
+  box-shadow:
+    0 0 0 1px rgba(255, 178, 29, 0.18),
+    0 0 14px rgba(255, 143, 0, 0.34),
+    inset 0 0 12px rgba(255, 143, 0, 0.16);
+}
+
+.app.app--view-home .home-freerolls-strip__trophy {
+  display: block;
+  width: 64%;
+  height: 64%;
+  color: var(--home-freerolls-gold-light);
+  overflow: visible;
+  filter:
+    drop-shadow(0 1px 0 rgba(86, 41, 0, 0.72))
+    drop-shadow(0 0 10px rgba(255, 178, 29, 0.52));
+}
+
+.app.app--view-home .home-freerolls-strip__trophy path {
+  fill: currentColor;
+}
+
+.app.app--view-home .home-freerolls-strip__trophy-star {
+  color: #ffb21d;
 }
 
 .app.app--view-home .home-freerolls-strip__title {
   position: relative;
   z-index: 2;
-  flex: 0 1 auto;
   min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   margin: 0;
-  padding: 7px 10px 8px;
-  color: #ffdf9e;
-  border: 1px solid rgba(255, 181, 49, 0.72);
-  border-radius: 15px;
-  background:
-    linear-gradient(180deg, rgba(16, 12, 7, 0.98), rgba(4, 5, 8, 0.98));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 226, 166, 0.1),
-    0 0 16px rgba(255, 118, 0, 0.26);
-  font-size: 19px;
-  font-weight: 900;
-  line-height: 1;
+  padding: 0;
+  overflow: hidden;
+  color: var(--home-freerolls-gold-light);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 15.5px;
+  font-weight: 1000;
+  line-height: 0.95;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(255, 118, 0, 0.38);
+  text-overflow: ellipsis;
+  text-shadow:
+    0 2px 0 rgba(69, 31, 0, 0.92),
+    0 0 18px rgba(255, 178, 29, 0.44),
+    0 0 34px rgba(255, 118, 0, 0.24);
   white-space: nowrap;
 }
 
 .app.app--view-home .home-freerolls-strip__all {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
-  color: rgba(255, 234, 190, 0.72);
-  font-size: 8.5px;
-  font-weight: 800;
+  min-width: max-content;
+  color: rgba(255, 230, 184, 0.78);
+  font-size: 8px;
+  font-weight: 900;
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
+  text-shadow: 0 0 12px rgba(255, 178, 29, 0.22);
 }
 
 .app.app--view-home .home-freerolls-strip__all span {
-  color: #ffb531;
-  font-size: 16px;
+  color: var(--home-freerolls-gold);
+  font-size: 1.55em;
   line-height: 0.8;
+  transform: translateY(-0.02em);
+}
+
+.app.app--view-home .home-freerolls-strip__tabs {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  min-height: 24px;
+  margin: 0 0 -1px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 178, 29, 0.5);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background:
+    radial-gradient(ellipse at 17% 5%, rgba(255, 178, 29, 0.22), transparent 40%),
+    linear-gradient(180deg, rgba(13, 13, 11, 0.98), rgba(5, 5, 6, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 166, 0.06),
+    0 -1px 14px rgba(255, 143, 0, 0.12);
+}
+
+.app.app--view-home .home-freerolls-strip__tab {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  overflow: hidden;
+  color: rgba(255, 232, 190, 0.9);
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.62),
+    0 0 10px rgba(255, 178, 29, 0.2);
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-freerolls-strip__tab--active {
+  z-index: 1;
+  color: #211202;
+  border-right: 1px solid rgba(255, 216, 135, 0.82);
+  border-radius: 15px 20px 0 0;
+  background:
+    radial-gradient(ellipse at 22% 0%, rgba(255, 246, 220, 0.46), transparent 43%),
+    linear-gradient(180deg, #ffc638 0%, #f5a400 48%, #9a5705 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 252, 225, 0.66),
+    inset 0 -10px 18px rgba(86, 42, 0, 0.22),
+    0 0 18px rgba(255, 143, 0, 0.26);
+  text-shadow: 0 1px 0 rgba(255, 230, 156, 0.48);
+}
+
+.app.app--view-home .home-freerolls-strip__tab--active::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: -1px;
+  width: 22px;
+  height: 72%;
+  border-right: 1px solid rgba(255, 178, 29, 0.62);
+  border-bottom: 1px solid rgba(255, 178, 29, 0.5);
+  border-radius: 0 0 15px 0;
+  background: linear-gradient(180deg, rgba(245, 164, 0, 0.92), rgba(82, 47, 4, 0.08));
+  transform: skewX(22deg);
+  transform-origin: bottom left;
+  pointer-events: none;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(168px, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
   width: 100%;
-  padding: 0 8px 4px 1px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-padding-inline: 1px 8px;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 178, 29, 0.74);
+  border-radius: 0 0 17px 17px;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(255, 178, 29, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(7, 8, 8, 0.98), rgba(2, 3, 5, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 166, 0.1),
+    inset 0 0 22px rgba(255, 143, 0, 0.06);
 }
 
 .app.app--view-home .home-freerolls-strip__hint {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 8px;
-  margin-top: -1px;
-  pointer-events: none;
+  display: none;
 }
 
 .app.app--view-home .home-freerolls-strip__hint span {
@@ -1274,78 +1389,137 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: relative;
   display: flex;
   min-width: 0;
-  padding-top: 28px;
+  padding-top: 0;
   flex-direction: column;
   align-items: stretch;
-  scroll-snap-align: start;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row {
   position: relative;
   appearance: none;
   display: flex;
-  min-height: 108px;
-  padding: 9px 9px 8px;
+  min-height: 106px;
+  padding: 10px 10px 9px;
   overflow: hidden;
   flex-direction: column;
   align-items: stretch;
-  color: #f8fafc;
-  border: 1px solid rgba(255, 118, 0, 0.38);
-  border-radius: 11px;
+  color: #fff8dc;
+  border: 1px solid rgba(255, 144, 0, 0.52);
+  border-radius: 12px;
   background:
-    radial-gradient(circle at 82% 12%, rgba(255, 181, 49, 0.12), transparent 35%),
-    linear-gradient(145deg, rgba(5, 8, 12, 0.98), rgba(2, 5, 10, 0.96));
+    linear-gradient(90deg, rgba(5, 6, 7, 0.95) 0%, rgba(8, 7, 6, 0.68) 43%, rgba(9, 6, 3, 0.12) 100%),
+    radial-gradient(circle at 80% 58%, rgba(255, 156, 0, 0.32), transparent 44%),
+    linear-gradient(145deg, rgba(12, 10, 8, 0.94), rgba(4, 5, 7, 0.98));
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 226, 166, 0.06),
-    0 0 12px rgba(255, 118, 0, 0.16);
+    inset 0 1px 0 rgba(255, 226, 166, 0.12),
+    inset 0 0 0 1px rgba(255, 214, 118, 0.05),
+    0 0 17px rgba(255, 143, 0, 0.16);
   cursor: pointer;
 }
 
-.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row::after {
-  content: "🏆";
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row::before {
+  content: "";
   position: absolute;
-  top: 8px;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.14) 46%, rgba(0, 0, 0, 0) 100%),
+    radial-gradient(ellipse at 18% 28%, rgba(255, 178, 29, 0.12), transparent 46%);
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row::after {
+  content: "›";
+  position: absolute;
+  z-index: 2;
+  top: 11px;
   right: 9px;
-  color: #ffb531;
-  font-size: 12px;
+  color: var(--home-freerolls-gold);
+  font-size: 20px;
   line-height: 1;
-  filter: drop-shadow(0 0 8px rgba(255, 118, 0, 0.62));
+  text-shadow: 0 0 10px rgba(255, 143, 0, 0.54);
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--daily {
+  background-image:
+    linear-gradient(90deg, rgba(5, 6, 7, 0.95) 0%, rgba(8, 7, 6, 0.56) 42%, rgba(9, 6, 3, 0.02) 100%),
+    url("./assets/home-freeroll-bg-daily.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 116%;
+}
+
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--saturday {
+  background-image:
+    linear-gradient(90deg, rgba(5, 6, 7, 0.96) 0%, rgba(8, 7, 6, 0.58) 45%, rgba(9, 6, 3, 0.02) 100%),
+    url("./assets/home-freeroll-bg-saturday.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 120%;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__row--next {
-  border-color: rgba(255, 181, 49, 0.95);
-  background:
-    radial-gradient(circle at 76% 18%, rgba(255, 181, 49, 0.3), transparent 36%),
-    linear-gradient(145deg, rgba(30, 18, 8, 0.98), rgba(3, 6, 11, 0.96));
+  border-color: rgba(255, 174, 25, 0.72);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 246, 220, 0.12),
-    0 0 16px rgba(255, 118, 0, 0.36);
+    inset 0 1px 0 rgba(255, 246, 220, 0.16),
+    inset 0 0 0 1px rgba(255, 214, 118, 0.08),
+    0 0 20px rgba(255, 143, 0, 0.28);
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__day {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   width: fit-content;
-  max-width: calc(100% - 22px);
-  min-height: 20px;
-  padding: 0 8px;
-  color: #ffc247;
-  border: 1px solid rgba(255, 181, 49, 0.36);
-  border-radius: 999px;
-  background: rgba(255, 181, 49, 0.08);
-  font-size: 9.5px;
-  font-weight: 900;
+  max-width: calc(100% - 24px);
+  min-height: 24px;
+  padding: 0 10px 0 6px;
+  color: #ffbd2e;
+  border: 1px solid rgba(255, 164, 20, 0.48);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255, 231, 168, 0.24), transparent 36%),
+    linear-gradient(180deg, rgba(38, 24, 8, 0.88), rgba(8, 8, 8, 0.78));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 219, 131, 0.08),
+    0 0 13px rgba(255, 143, 0, 0.2);
+  font-size: 10px;
+  font-weight: 1000;
   line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 9px rgba(255, 178, 29, 0.38);
   white-space: nowrap;
 }
 
+.app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__day::before {
+  content: "";
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  background:
+    linear-gradient(currentColor, currentColor) 3px 5px / 7px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) 3px 8px / 7px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) 4px -1px / 1.5px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) 8px -1px / 1.5px 4px no-repeat;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 5px rgba(255, 178, 29, 0.55));
+}
+
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__main {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  padding-right: 0;
+  padding-right: 15px;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__title,
@@ -1356,88 +1530,55 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__title {
-  margin-top: 14px;
-  color: #f8fafc;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.08;
+  margin-top: 24px;
+  color: #f9fafb;
+  font-size: 13.5px;
+  font-weight: 1000;
+  line-height: 1;
   white-space: normal;
   overflow-wrap: anywhere;
+  text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.76),
+    0 0 10px rgba(255, 255, 255, 0.12);
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__meta {
-  margin-top: 3px;
-  color: rgba(255, 234, 190, 0.76);
-  font-size: 8px;
-  font-weight: 700;
+  margin-top: 8px;
+  color: rgba(255, 239, 214, 0.78);
+  font-size: 9.5px;
+  font-weight: 850;
   line-height: 1;
   white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.72);
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__entry {
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: 12px;
   padding-right: 0;
-  color: rgba(255, 234, 190, 0.78);
-  border-top: 1px solid rgba(255, 118, 0, 0.2);
-  font-size: 8px;
-  font-weight: 800;
+  color: rgba(255, 224, 170, 0.84);
+  border-top: 1px solid rgba(255, 143, 0, 0.22);
+  font-size: 10px;
+  font-weight: 950;
   line-height: 1;
   white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.72);
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__stamp {
-  position: absolute;
-  z-index: 3;
-  top: 0;
-  left: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 96px;
-  min-height: 25px;
-  padding: 0 10px;
-  color: #2b1602;
-  border: 1px solid rgba(255, 226, 166, 0.72);
-  border-radius: 12px 12px 8px 8px;
-  background:
-    linear-gradient(180deg, #ffe4a5, #ffb531 58%, #d97706);
-  box-shadow:
-    0 0 12px rgba(255, 118, 0, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.56);
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transform: translateY(3px);
-  pointer-events: none;
+  display: none;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__stamp::after {
-  content: "";
-  position: absolute;
-  left: 16px;
-  bottom: -7px;
-  width: 13px;
-  height: 7px;
-  background: linear-gradient(180deg, #d97706, rgba(217, 119, 6, 0));
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  filter: drop-shadow(0 3px 4px rgba(255, 118, 0, 0.22));
+  display: none;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__item--following .home-freeroll-schedule__stamp {
-  color: rgba(255, 234, 190, 0.9);
-  border-color: rgba(255, 181, 49, 0.5);
-  background:
-    linear-gradient(180deg, rgba(255, 181, 49, 0.18), rgba(255, 118, 0, 0.08));
-  box-shadow:
-    0 0 10px rgba(255, 118, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: none;
 }
 
 .app.app--view-home .home-freeroll-schedule--cards .home-freeroll-schedule__item--following .home-freeroll-schedule__stamp::after {
-  background: linear-gradient(180deg, rgba(255, 118, 0, 0.3), rgba(255, 118, 0, 0));
+  display: none;
 }
 
 .app.app--view-home .home-club-hero-banner {
@@ -1604,7 +1745,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .app.app--view-home .home-compact-link--spring-strip {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   grid-column: 1 / -1;
@@ -1612,7 +1753,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   height: 52px;
   min-height: 52px;
   max-height: 52px;
-  padding: 3px 16px;
+  container-type: inline-size;
+  padding: 3px 12px;
   overflow: hidden;
   border-radius: 999px;
   outline-offset: -2px;
@@ -1643,10 +1785,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   max-width: 100%;
   overflow: hidden;
   color: #1d1004;
-  font-size: clamp(11px, 3.2vw, 15px);
+  font-size: 12px;
+  font-size: clamp(8.5px, 2.95cqw, 12.5px);
   font-weight: 1000;
   letter-spacing: 0;
-  line-height: 1.02;
+  line-height: 1;
   text-align: center;
   text-overflow: ellipsis;
   -webkit-text-stroke: 0;
