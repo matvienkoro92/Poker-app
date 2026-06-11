@@ -661,7 +661,7 @@ function setProfileStatusUnlinked() {
   visual.style.setProperty("--status-value", "0");
   if (title) {
     title.hidden = false;
-    title.textContent = "Ваш уровень 0 из 55";
+    title.textContent = "Привяжите ваш аккаунт";
   }
   if (progressText) {
     progressText.hidden = false;

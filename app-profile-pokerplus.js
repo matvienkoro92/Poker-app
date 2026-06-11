@@ -288,12 +288,11 @@ function initProfilePokerPlus() {
     var canRenderUnlinkedStatus = !pokerPlusProfileLinked && !pokerPlusProfileLoading && typeof setProfileStatusUnlinked === "function";
     if (canRenderUnlinkedStatus) setProfileStatusUnlinked();
     if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
-    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Ваш уровень 0 из 55";
+    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Привяжите ваш аккаунт";
     if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || (!pokerPlusProfileLinked && !canRenderUnlinkedStatus);
     if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusProgressText) profileStatusProgressText.textContent = "";
     if (statusLinkHint) {
-      var state = auth();
-      statusLinkHint.hidden = !!pokerPlusProfileLoading || !!pokerPlusProfileLinked || !state.isVerified || !!state.isGuest;
+      statusLinkHint.hidden = true;
     }
   }
 

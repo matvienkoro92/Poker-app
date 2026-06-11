@@ -273,6 +273,10 @@
   position: relative;
   display: grid;
   gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin: 16px 0 22px;
   padding: 18px 18px 16px;
   overflow: hidden;
@@ -305,6 +309,7 @@
   justify-items: center;
   gap: 4px;
   width: 100%;
+  min-width: 0;
   text-align: center;
 }
 .profile-hero-card__name {
@@ -329,13 +334,14 @@
 }
 .profile-hero-card__name-text {
   display: block;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
-  max-width: min(calc(100% - 44px), 460px);
+  max-width: min(100%, 460px);
   overflow: hidden;
   font-size: var(--profile-name-font-size, inherit);
   text-align: center;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .profile-hero-card__name--empty .profile-hero-card__name-text {
   color: rgba(226, 232, 240, 0.74);
@@ -370,7 +376,7 @@
 .profile-hero-card__respect-btn {
   position: absolute;
   top: 66px;
-  right: 0;
+  right: 10px;
   z-index: 4;
 }
 .profile-hero-card__id {

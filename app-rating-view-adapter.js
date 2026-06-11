@@ -1108,6 +1108,38 @@ function ratingSeasonDataIsLoading(seasonConfig) {
   return false;
 }
 
+function pokerRefreshRatingSeasonAfterDataReady(seasonKey) {
+  var season = String(seasonKey || "").trim().toLowerCase();
+  if (season !== "spring" && season !== "summer") return;
+  try {
+    window.__pokerRatingSeasonDataReady = window.__pokerRatingSeasonDataReady || {};
+    window.__pokerRatingSeasonDataReady[season] = true;
+  } catch (eReadyFlag) {}
+  var viewName = season + "-rating";
+  var currentView = document.body && document.body.getAttribute ? document.body.getAttribute("data-view") : "";
+  if (currentView !== viewName) return;
+  try {
+    window.__pokerRatingSeasonDataRefreshTimers = window.__pokerRatingSeasonDataRefreshTimers || {};
+    if (window.__pokerRatingSeasonDataRefreshTimers[season]) {
+      clearTimeout(window.__pokerRatingSeasonDataRefreshTimers[season]);
+    }
+    window.__pokerRatingSeasonDataRefreshTimers[season] = setTimeout(function () {
+      try {
+        if (!document.body || document.body.getAttribute("data-view") !== viewName) return;
+        if (typeof initWinterRating === "function") initWinterRating();
+        if (typeof initSpringRatingViewScrollButton === "function") initSpringRatingViewScrollButton();
+        if (typeof updateSpringRatingViewScrollButton === "function") {
+          var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+          raf(updateSpringRatingViewScrollButton);
+        }
+      } catch (eRefresh) {
+        if (typeof console !== "undefined" && console.warn) console.warn("rating season data refresh", eRefresh);
+      }
+    }, 0);
+  } catch (eScheduleRefresh) {}
+}
+window.__pokerRefreshRatingSeasonAfterDataReady = pokerRefreshRatingSeasonAfterDataReady;
+
 function initWinterRating() {
   try {
     var schedPrev = window.requestIdleCallback
@@ -1133,8 +1165,8 @@ function initWinterRating() {
     if (isSummerRatingMode) {
       conditionsBtn.dataset.springMainLeague = "top";
       conditionsBtn.classList.remove("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
-      conditionsBtn.innerHTML = "<span>Топ заносы</span><span>лета</span>";
-      conditionsBtn.setAttribute("aria-label", "Топ заносы лета");
+      conditionsBtn.innerHTML = "<span>по дням</span>";
+      conditionsBtn.setAttribute("aria-label", "по дням");
     } else {
       delete conditionsBtn.dataset.springMainLeague;
       conditionsBtn.classList.add("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");

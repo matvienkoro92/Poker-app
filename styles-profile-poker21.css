@@ -169,6 +169,28 @@
   .profile-hero-card {
     padding: 16px 12px 14px;
   }
+  .profile-hero-card__name {
+    gap: 0;
+    min-width: 0;
+    padding: 0 48px;
+  }
+  .profile-hero-card__edit-name {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 34px;
+    height: 34px;
+    transform: translateY(-50%);
+  }
+  .profile-hero-card__name-text {
+    max-width: 100%;
+  }
+  .profile-lang-switch {
+    right: 0;
+  }
+  .profile-hero-card__respect-btn {
+    right: 8px;
+  }
   .profile-lang-switch__btn {
     min-width: 38px;
     height: 26px;

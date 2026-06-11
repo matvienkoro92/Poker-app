@@ -1645,6 +1645,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 .winter-rating.spring-rating.summer-rating .winter-rating__actions-wrap,
 .winter-rating.spring-rating.summer-rating .winter-rating__week-tops-hint,
 .winter-rating.spring-rating.summer-rating .winter-rating__week-tops-row,
+.winter-rating.spring-rating.summer-rating .winter-rating__single-top-row,
 .winter-rating.spring-rating.summer-rating .spring-rating-view-totals-stack,
 .winter-rating.spring-rating.summer-rating .winter-rating__dates-caption,
 .winter-rating.spring-rating.summer-rating .winter-rating__dates-hint,
@@ -2775,6 +2776,73 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: flex !important;
 }
 
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-panel {
+  background:
+    radial-gradient(ellipse at 50% 0%, #172238 0%, #111b2d 46%, #0c1525 100%),
+    linear-gradient(180deg, #121d30 0%, #0b1424 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-week {
+  background:
+    radial-gradient(circle at top left, #14213a 0%, #101a2d 52%, #0b1424 100%),
+    linear-gradient(180deg, #101b2e 0%, #0a1322 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-week[open] {
+  background:
+    radial-gradient(circle at top left, #172640 0%, #111d31 52%, #0c1525 100%),
+    linear-gradient(180deg, #121f34 0%, #0a1424 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-week .winter-rating__past-week-wrap {
+  background: #0b1424;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar {
+  background:
+    radial-gradient(ellipse at 50% 0%, #172238 0%, #101a2c 45%, #091321 100%),
+    linear-gradient(180deg, #111c2e 0%, #081220 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-nav {
+  background: #111b2c;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-nav:hover:not(:disabled) {
+  background: #172338;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day {
+  background: #0b1321;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--no-data {
+  background: #070d18;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day:hover,
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--active {
+  background: #18233a;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--green {
+  background: linear-gradient(180deg, #176534 0%, #0f3f25 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--brown {
+  background: linear-gradient(180deg, #8b430d 0%, #4f2609 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--green:hover,
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--green.winter-rating__calendar-cell--active {
+  background: linear-gradient(180deg, #1d7d40 0%, #14532d 100%);
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--brown:hover,
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell--day.winter-rating__calendar-cell--brown.winter-rating__calendar-cell--active {
+  background: linear-gradient(180deg, #a45312 0%, #71320c 100%);
+}
+
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
   order: 1;
   height: 292px;
@@ -2794,9 +2862,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   margin: 6px 0 0;
   overflow: visible;
   background:
-    url("./assets/summer-rating-league2-player-alena.webp") calc(50% + 6px) calc(27% - 15px) / 18.9% auto no-repeat,
-    url("./assets/summer-rating-league2-player-shkarubo.webp") 14% 47% / 30.1% auto no-repeat,
-    url("./assets/summer-rating-league2-player-sarmat.webp") 88% calc(46% - 4px) / 21.7% auto no-repeat;
+    url("./assets/summer-rating-league2-player-alena.webp") calc(50% + 6px) calc(27% - 10px) / 18.9% auto no-repeat,
+    url("./assets/summer-rating-league2-player-shkarubo.webp") 14% calc(47% + 5px) / 30.1% auto no-repeat,
+    url("./assets/summer-rating-league2-player-sarmat.webp") 88% calc(46% + 1px) / 21.7% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
@@ -3066,6 +3134,18 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   transform: translateY(-3px);
 }
 
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+  transform: translateY(-2px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  transform: translateY(-3px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
+  transform: translate(-2px, -2px);
+}
+
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
   color: #ffe6ad;
   font-size: clamp(6.9px, 1.86vw, 8px);
@@ -3139,7 +3219,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
   position: absolute;
-  top: 84px;
+  top: 89px;
   display: block;
   min-width: 0;
   overflow: hidden;
