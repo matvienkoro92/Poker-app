@@ -2464,6 +2464,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 0 7px rgba(255, 228, 174, 0.16);
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin .home-tournament-bonus__amount {
+  font-size: clamp(12px, 2.4vw, 19px);
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive {
   border-color: rgba(62, 44, 26, 0.9);
   background:

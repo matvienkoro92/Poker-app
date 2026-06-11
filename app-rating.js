@@ -27,6 +27,7 @@ function getRatingSeasonConfig() {
     topLabel: "Топы весны",
     maxWinLabel: "за весну",
     top3WinsLabel: "за весну",
+    loadingDataText: "Загружаем рейтинг",
     emptyDataText: "Данные с 1 марта",
     monthRegex: /\.(03|04|05)\.2026$/,
     monthToneRegex: /\.(03|04|05)\./,

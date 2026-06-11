@@ -13,6 +13,7 @@ var SPRING_RATING_SEASON = {
   top3WinsLabel: "за весну",
   finalAt: new Date(2026, 4, 31, 23, 59, 59, 999),
   finalText: "Итоги 31-го мая",
+  loadingDataText: "Загружаем рейтинг",
   emptyDataText: "Данные с 1 марта",
   monthRegex: /\.(03|04|05)\.2026$/,
   monthToneRegex: /\.(03|04|05)\./,

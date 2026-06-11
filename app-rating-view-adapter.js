@@ -844,6 +844,13 @@ function getWinterRatingOverall() {
   return arr;
 }
 
+function ratingSeasonDataIsLoading(seasonConfig) {
+  if (!seasonConfig || !seasonConfig.key || !isSpringRatingMode()) return false;
+  if (seasonConfig.key === "summer") return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined";
+  if (seasonConfig.key === "spring") return typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined";
+  return false;
+}
+
 function initWinterRating() {
   try {
     var schedPrev = window.requestIdleCallback
@@ -1158,7 +1165,10 @@ function initWinterRating() {
         }
         parts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickInner + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td>" + prizeCell + "</tr>");
       }
-      bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">" + (seasonConfig.emptyDataText || "Данные с 1 марта") + "</td></tr>";
+      var placeholderText = ratingSeasonDataIsLoading(seasonConfig)
+        ? (seasonConfig.loadingDataText || "Загружаем рейтинг")
+        : (seasonConfig.emptyDataText || "Данные с 1 марта");
+      bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">" + placeholderText + "</td></tr>";
       bodyEl.removeEventListener("click", bodyEl._leagueNickClick);
       bodyEl._leagueNickClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".winter-rating__nick-btn");
