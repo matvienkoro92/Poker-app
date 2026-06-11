@@ -39,6 +39,9 @@
               <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
             </div>
           </div>
+          <div class="chat-user-modal__rating-art" id="chatUserModalRatingArt" hidden>
+            <img class="chat-user-modal__rating-art-img" id="chatUserModalRatingArtImg" alt="" loading="lazy" decoding="async" />
+          </div>
           <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
           <div class="chat-user-modal__level">
             <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
@@ -53,6 +56,19 @@
               <span class="chat-user-modal__status-card">3</span>
             </div>
           </section>
+          <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" hidden>
+            <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">Турнирный рейтинг</button>
+          </div>
+          <div class="chat-user-modal__rating-ranks" id="chatUserModalRatingRanks" hidden>
+            <div class="chat-user-modal__rating-rank-row">
+              <span class="chat-user-modal__rating-rank-label">Место в рейтинге весны 2026</span>
+              <span class="chat-user-modal__rating-rank-value" id="chatUserModalSpringRank">—</span>
+            </div>
+            <div class="chat-user-modal__rating-rank-row">
+              <span class="chat-user-modal__rating-rank-label">Место в рейтинге Зима 2025-2026</span>
+              <span class="chat-user-modal__rating-rank-value" id="chatUserModalWinterRank">—</span>
+            </div>
+          </div>
           <section class="chat-user-modal__section chat-user-modal__player-stats">
             <h4 class="chat-user-modal__section-title">Статистика игрока:</h4>
             <div class="chat-user-modal__player-stats-body" id="chatUserModalPlayerStats">Загрузка...</div>

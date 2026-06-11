@@ -297,8 +297,240 @@ function winterRatingDateKeyToStamp(dateStr) {
   return (y * 10000 + m * 100 + d) || 0;
 }
 
+function normalizeWinterRatingPlayerSeasonKey(value) {
+  var key = String(value || "").trim().toLowerCase();
+  if (key === "current" || key === "latest") key = "summer";
+  if (key === "summer" || key === "spring" || key === "winter") return key;
+  return "";
+}
+
+function getWinterRatingPlayerSeasonKey(options) {
+  options = options || {};
+  var forced = normalizeWinterRatingPlayerSeasonKey(options.season || options.ratingSeason || options.forceSeason);
+  if (forced) return forced;
+  if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) return "summer";
+  if (typeof isSpringRatingMode === "function" && isSpringRatingMode()) return "spring";
+  return "winter";
+}
+
+function isWinterRatingPlayerSeasonalKey(seasonKey) {
+  return seasonKey === "spring" || seasonKey === "summer";
+}
+
+function getWinterRatingPlayerSeasonConfig(seasonKey) {
+  if (seasonKey === "summer" && typeof SUMMER_RATING_SEASON !== "undefined") return SUMMER_RATING_SEASON;
+  if (seasonKey === "spring" && typeof SPRING_RATING_SEASON !== "undefined") return SPRING_RATING_SEASON;
+  if (typeof getRatingSeasonConfig === "function" && isWinterRatingPlayerSeasonalKey(seasonKey)) return getRatingSeasonConfig();
+  return null;
+}
+
+function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
+  var config = getWinterRatingPlayerSeasonConfig(seasonKey);
+  if (config) {
+    if (kind === "date") return config.datePrefix || "spring_rating_date_";
+    if (kind === "league") return config.leaguePrefix || "spring_rating_league_";
+    if (kind === "player") return config.playerPrefix || "spring_rating_player_";
+  }
+  return kind === "player" ? "winter_rating_player_" : "rating_";
+}
+
+var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "waaar": { src: "./assets/summer-rating-player-waaar.webp", place: 1, league: 1 },
+  "покерманки": { src: "./assets/summer-rating-player-pokermanki.webp?v=3.546", place: 2, league: 1 },
+  "coo1er91": { src: "./assets/summer-rating-player-cooler.webp", place: 3, league: 1 },
+  "em13!!": { src: "./assets/summer-rating-player-emil.webp", place: 4, league: 1 },
+  "winifly": { src: "./assets/summer-rating-player-winifly.webp", place: 5, league: 1 },
+  "missclick": { src: "./assets/summer-rating-player-missclick.webp", place: 6, league: 1 },
+  "nikola233": { src: "./assets/summer-rating-player-nikola233.webp", place: 7, league: 1 },
+  "milkyway77": { src: "./assets/summer-rating-player-milkyway.webp", place: 8, league: 1 },
+  "prushnik": { src: "./assets/summer-rating-player-prushnik.webp", place: 9, league: 1 },
+  "хер вам)))))": { src: "./assets/summer-rating-player-khervam.webp", place: 10, league: 1 },
+  "alenast": { src: "./assets/summer-rating-league2-player-alena.webp", place: 1, league: 2 },
+  "shkarubo": { src: "./assets/summer-rating-league2-player-shkarubo.webp", place: 2, league: 2 },
+  "sarmat1305": { src: "./assets/summer-rating-league2-player-sarmat.webp", place: 3, league: 2 },
+  "виктор": { src: "./assets/summer-rating-league2-player-viktor.webp", place: 5, league: 2 },
+  "мистерfox": { src: "./assets/summer-rating-league2-player-mr-fox.webp", place: 7, league: 2 },
+  "babyshark": { src: "./assets/summer-rating-league2-player-babyshark.webp", place: 8, league: 2 },
+  "аспирин": { src: "./assets/summer-rating-league2-player-aspirin.webp", place: 9, league: 2 },
+  "ksuha": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+  "ksuha🐍": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+  "ksuha🐊": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+  "ksuha🦖": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+  "ksuha🐉": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+};
+
+function getSummerRatingPlayerArtKey(nick) {
+  var normalized = typeof normalizeWinterNick === "function" ? normalizeWinterNick(nick) : String(nick || "").trim();
+  return String(normalized || "").trim().toLowerCase();
+}
+
+function pokerGetSummerRatingPlayerArt(nick) {
+  var key = getSummerRatingPlayerArtKey(nick);
+  var art = key ? SUMMER_RATING_PLAYER_ART_BY_NICK[key] : null;
+  if (!art) return null;
+  var normalizedNick = typeof normalizeWinterNick === "function" ? normalizeWinterNick(nick) : String(nick || "").trim();
+  return {
+    nick: normalizedNick,
+    src: art.src,
+    place: art.place,
+    league: art.league,
+  };
+}
+
+window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
+
+function getTournamentRatingTournamentsBySeason(seasonKey) {
+  seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
+  if (seasonKey === "summer") {
+    if (typeof getSummerRatingTournamentsByDate === "function") return getSummerRatingTournamentsByDate() || {};
+    return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  }
+  if (seasonKey === "spring") {
+    if (typeof getSpringRatingTournamentsByDate === "function" && !(typeof isSummerRatingMode === "function" && isSummerRatingMode())) return getSpringRatingTournamentsByDate() || {};
+    return typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  }
+  return {};
+}
+
+function getTournamentRatingOverallByLeagueForSeason(seasonKey, leagueNum) {
+  seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
+  var tournamentsByDate = getTournamentRatingTournamentsBySeason(seasonKey);
+  var seasonConfig = getWinterRatingPlayerSeasonConfig(seasonKey) || {};
+  var monthRegex = seasonConfig.monthRegex || (seasonKey === "summer" ? /\.(06|07|08)\.2026$/ : /\.(03|04|05)\.2026$/);
+  var byNick = {};
+  var dateStrs = Object.keys(tournamentsByDate || {}).filter(function (d) { return monthRegex.test(d); });
+  for (var i = 0; i < dateStrs.length; i++) {
+    var list = tournamentsByDate[dateStrs[i]];
+    if (!Array.isArray(list) || !list.length) continue;
+    for (var j = 0; j < list.length; j++) {
+      var t = list[j];
+      var forcedLeague = t.league != null ? Number(t.league) : NaN;
+      var buyin = t.buyin != null ? Number(t.buyin) : NaN;
+      var inLeague1 = forcedLeague === 1 || (forcedLeague !== forcedLeague && (buyin >= 500 || (buyin !== buyin)));
+      var inLeague2 = forcedLeague === 2 || (forcedLeague !== forcedLeague && buyin >= 100 && buyin < 500);
+      var include = (leagueNum === 1 && inLeague1) || (leagueNum === 2 && inLeague2);
+      if (!include) continue;
+      var players = t.players || [];
+      for (var k = 0; k < players.length; k++) {
+        var p = players[k];
+        var n = normalizeWinterNickForFinalTable(p && p.nick);
+        if (!n) continue;
+        var pts = winterRatingTournamentPlayerPoints(p);
+        var rew = p.reward != null ? Number(p.reward) : 0;
+        if (rew !== rew) rew = 0;
+        if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
+        byNick[n].points += pts;
+        byNick[n].reward += rew;
+      }
+    }
+  }
+  var arr = Object.keys(byNick).map(function (n) { return byNick[n]; });
+  arr = arr.filter(function (r) {
+    var p = Number(r.points);
+    var w = Number(r.reward);
+    return (p === p && p !== 0) || (w === w && w !== 0);
+  });
+  arr.sort(function (a, b) {
+    var ap = Number(a.points);
+    var bp = Number(b.points);
+    var aw = Number(a.reward);
+    var bw = Number(b.reward);
+    if (ap !== ap) ap = 0;
+    if (bp !== bp) bp = 0;
+    if (aw !== aw) aw = 0;
+    if (bw !== bw) bw = 0;
+    return (bp - ap) || (bw - aw);
+  });
+  return arr;
+}
+
+function buildWinterRatingOverallRowsFromData(data) {
+  var byNick = {};
+  var dateStrs = Object.keys(data || {});
+  for (var i = 0; i < dateStrs.length; i++) {
+    var dateStr = dateStrs[i];
+    var list = data[dateStr];
+    if (!Array.isArray(list) || !list.length) continue;
+    for (var j = 0; j < list.length; j++) {
+      var r = list[j];
+      var n = normalizeWinterNick(r && r.nick);
+      if (!n) continue;
+      var pts = Number(r.points);
+      var rew = Number(r.reward);
+      if (pts !== pts) pts = 0;
+      if (rew !== rew) rew = 0;
+      if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
+      byNick[n].points += pts;
+      byNick[n].reward += rew;
+    }
+  }
+  if (byNick["Coo1er91"]) byNick["Coo1er91"].points += 55; else byNick["Coo1er91"] = { nick: "Coo1er91", points: 55, reward: 0 };
+  if (byNick["Waaar"]) byNick["Waaar"].points += 325; else byNick["Waaar"] = { nick: "Waaar", points: 325, reward: 0 };
+  if (byNick["Waaar"]) { byNick["Waaar"].points += 765; byNick["Waaar"].reward += 588225; } else { byNick["Waaar"] = { nick: "Waaar", points: 765, reward: 588225 }; }
+  if (byNick["Waaar"]) { byNick["Waaar"].points -= 405; byNick["Waaar"].reward -= 475000; }
+  if (byNick["Em13!!"]) byNick["Em13!!"].points += 135; else byNick["Em13!!"] = { nick: "Em13!!", points: 135, reward: 0 };
+  var arr = Object.keys(byNick).map(function (n) { return byNick[n]; });
+  arr = arr.filter(function (r) {
+    var p = Number(r.points);
+    var w = Number(r.reward);
+    return (p === p && p !== 0) || (w === w && w !== 0);
+  });
+  arr.sort(function (a, b) {
+    var ap = Number(a.points);
+    var bp = Number(b.points);
+    var aw = Number(a.reward);
+    var bw = Number(b.reward);
+    if (ap !== ap) ap = 0;
+    if (bp !== bp) bp = 0;
+    if (aw !== aw) aw = 0;
+    if (bw !== bw) bw = 0;
+    return (bp - ap) || (bw - aw);
+  });
+  return arr;
+}
+
+function getTournamentRatingPlaceRows(nick, seasonKey) {
+  var normalizedNick = normalizeWinterNick(nick);
+  if (!normalizedNick) return [];
+  seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
+  if (seasonKey === "spring" || seasonKey === "summer") {
+    var places = [];
+    [1, 2].forEach(function (leagueNum) {
+      var rows = getTournamentRatingOverallByLeagueForSeason(seasonKey, leagueNum);
+      for (var i = 0; i < rows.length; i++) {
+        if (winterRatingSamePlayer(rows[i].nick, normalizedNick)) {
+          places.push({ league: leagueNum, place: i + 1, nick: rows[i].nick });
+          break;
+        }
+      }
+    });
+    return places;
+  }
+  if (typeof WINTER_RATING_BY_DATE === "undefined") return [];
+  var winterData = WINTER_RATING_BY_DATE || {};
+  var winterRows = buildWinterRatingOverallRowsFromData(winterData);
+  for (var wi = 0; wi < winterRows.length; wi++) {
+    if (winterRatingSamePlayer(winterRows[wi].nick, normalizedNick)) return [{ place: wi + 1, nick: winterRows[wi].nick }];
+  }
+  return [];
+}
+
+function pokerGetTournamentRatingPlacesReady(nick, seasonKey) {
+  seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
+  if (seasonKey === "winter" && typeof WINTER_RATING_BY_DATE === "undefined" && typeof window.pokerEnsureScriptDomains === "function") {
+    return Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter"]))
+      .then(function () { return getTournamentRatingPlaceRows(nick, seasonKey); })
+      .catch(function () { return getTournamentRatingPlaceRows(nick, seasonKey); });
+  }
+  return Promise.resolve(getTournamentRatingPlaceRows(nick, seasonKey));
+}
+
+window.pokerGetTournamentRatingPlaces = getTournamentRatingPlaceRows;
+window.pokerGetTournamentRatingPlacesReady = pokerGetTournamentRatingPlacesReady;
+
 function shouldLoadWinterRatingPlayerHistory(options) {
-  if (typeof isSpringRatingMode !== "function" || !isSpringRatingMode()) return false;
+  var seasonKey = getWinterRatingPlayerSeasonKey(options);
+  if (!isWinterRatingPlayerSeasonalKey(seasonKey)) return false;
   return !(options && Array.isArray(options.onlyDates) && options.onlyDates.length);
 }
 
@@ -327,8 +559,9 @@ function getWinterRatingActualSpringTournamentsByDate() {
   return typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE || {} : {};
 }
 
-function getWinterRatingActiveSeasonTournamentsByDate() {
-  if (typeof isSummerRatingMode === "function" && isSummerRatingMode()) {
+function getWinterRatingActiveSeasonTournamentsByDate(seasonKey) {
+  seasonKey = getWinterRatingPlayerSeasonKey({ season: seasonKey });
+  if (seasonKey === "summer") {
     if (typeof getSummerRatingTournamentsByDate === "function") return getSummerRatingTournamentsByDate() || {};
     return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
   }
@@ -368,21 +601,24 @@ function syncWinterRatingPlayerMonthOptions(monthSelect, summary) {
   monthSelect.innerHTML = html;
 }
 
-function getWinterRatingPlayerSummary(nick) {
+function getWinterRatingPlayerSummary(nick, options) {
   nick = normalizeWinterNick(nick);
+  var seasonKey = getWinterRatingPlayerSeasonKey(options);
+  var isSeasonal = isWinterRatingPlayerSeasonalKey(seasonKey);
+  var seasonConfig = getWinterRatingPlayerSeasonConfig(seasonKey) || {};
   var dateSet = {};
   var tournamentsByDate;
-  if (isSpringRatingMode()) {
+  if (isSeasonal) {
     tournamentsByDate = {};
     var winterT = typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? WINTER_RATING_TOURNAMENTS_BY_DATE : {};
     mergeWinterRatingDateMap(tournamentsByDate, winterT);
     mergeWinterRatingDateMap(tournamentsByDate, getWinterRatingActualSpringTournamentsByDate());
-    mergeWinterRatingDateMap(tournamentsByDate, getWinterRatingActiveSeasonTournamentsByDate());
+    mergeWinterRatingDateMap(tournamentsByDate, getWinterRatingActiveSeasonTournamentsByDate(seasonKey));
   } else {
     tournamentsByDate = getRatingTournamentsByDate();
   }
   var byDate = getRatingByDate();
-  if (isSpringRatingMode() && typeof WINTER_RATING_BY_DATE !== "undefined") {
+  if (isSeasonal && typeof WINTER_RATING_BY_DATE !== "undefined") {
     var mergedByDate = {};
     Object.keys(WINTER_RATING_BY_DATE || {}).forEach(function (k) { mergedByDate[k] = WINTER_RATING_BY_DATE[k]; });
     Object.keys(byDate || {}).forEach(function (k) { mergedByDate[k] = byDate[k]; });
@@ -406,8 +642,8 @@ function getWinterRatingPlayerSummary(nick) {
         if (p) {
           var reward = p.reward != null ? p.reward : 0;
           var league = t.league != null ? Number(t.league) : null;
-          var seasonToneRegex = /\.(03|04|05|06|07|08)\./;
-          if (league == null && isSpringRatingMode() && seasonToneRegex.test(String(dateStr)) && t.buyin != null) {
+          var seasonToneRegex = seasonConfig.monthToneRegex || /\.(03|04|05|06|07|08)\./;
+          if (league == null && isSeasonal && seasonToneRegex.test(String(dateStr)) && t.buyin != null) {
             var buyin = Number(t.buyin);
             if (buyin === buyin) {
               league = buyin >= 500 ? 1 : (buyin >= 100 ? 2 : 1);
@@ -464,6 +700,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var leagueVal = leagueSelect && leagueSelect.value ? leagueSelect.value : "all";
   var sortBy = (sortByBtn && sortByBtn.textContent.indexOf("выигрыш") !== -1) ? "reward" : "date";
   var sortDesc = (sortDirBtn && sortDirBtn.textContent.indexOf("↑") === -1);
+  var modalSeasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
   var list = monthVal === "all" ? fullSummary.slice() : fullSummary.filter(function (s) {
     var parts = String(s.date).split(".");
     return parts.length === 3 && parts[1] + "." + parts[2] === monthVal;
@@ -491,7 +728,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     for (var pi = 0; pi < list.length; pi++) { totalPointsFiltered += Number(list[pi].points) || 0; }
     var totalRewardFiltered = 0;
     for (var ri = 0; ri < list.length; ri++) { totalRewardFiltered += Number(list[ri].reward) || 0; }
-    if (monthVal === "all" && modal._winterPlayerModalNick === "Waaar" && !isSpringRatingMode()) totalRewardFiltered += 588225;
+    if (monthVal === "all" && modal._winterPlayerModalNick === "Waaar" && !isWinterRatingPlayerSeasonalKey(modalSeasonKey)) totalRewardFiltered += 588225;
     var totalRewardFilteredStr = totalRewardFiltered ? formatRewardRound(totalRewardFiltered) : "0";
     var headers = "<th class=\"winter-rating-player-modal__th-date\">Дата</th><th class=\"winter-rating-player-modal__th-tournament\">Турнир</th><th class=\"winter-rating-player-modal__th-place\">Место</th>";
     if (showPoints) headers += "<th class=\"winter-rating-player-modal__th-points\">Баллы</th>";
@@ -538,7 +775,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     var thirdsRewardStr = thirdsReward ? formatRewardRound(thirdsReward) : "0";
     var totalReward = 0;
     for (var i = 0; i < list.length; i++) { totalReward += Number(list[i].reward) || 0; }
-    if (monthVal === "all" && modal._winterPlayerModalNick === "Waaar" && !isSpringRatingMode()) totalReward += 588225;
+    if (monthVal === "all" && modal._winterPlayerModalNick === "Waaar" && !isWinterRatingPlayerSeasonalKey(modalSeasonKey)) totalReward += 588225;
     var totalStr = totalReward ? formatRewardRound(totalReward) : "0";
     var topReward = 0;
     for (var ri = 0; ri < list.length; ri++) {
@@ -606,7 +843,8 @@ function openWinterRatingPlayerModal(nick, options) {
   var sortByBtn = document.getElementById("winterRatingPlayerModalSortBy");
   var sortDirBtn = document.getElementById("winterRatingPlayerModalSortDir");
   if (!modal || !titleEl || !tableWrap) return;
-  var summary = getWinterRatingPlayerSummary(nick);
+  var seasonKey = getWinterRatingPlayerSeasonKey(options);
+  var summary = getWinterRatingPlayerSummary(nick, options);
   var fromGazette = options.onlyDates && Array.isArray(options.onlyDates) && options.onlyDates.length;
   if (fromGazette) {
     var allowedSet = {};
@@ -620,11 +858,12 @@ function openWinterRatingPlayerModal(nick, options) {
   modal._winterPlayerModalTableExpanded = false;
   modal._winterPlayerModalShowPoints = !useGazetteStyle;
   modal._winterPlayerModalNick = normalizeWinterNick(nick);
+  modal._winterPlayerModalSeasonKey = seasonKey;
   syncWinterRatingPlayerMonthOptions(monthSelect, summary);
   if (monthSelect) monthSelect.value = "all";
   var leagueWrap = document.getElementById("winterRatingPlayerModalLeagueWrap");
   var leagueSelect = document.getElementById("winterRatingPlayerModalLeague");
-  if (leagueWrap) leagueWrap.style.display = (isSpringRatingMode() && summary.length) ? "" : "none";
+  if (leagueWrap) leagueWrap.style.display = (isWinterRatingPlayerSeasonalKey(seasonKey) && summary.length) ? "" : "none";
   if (leagueSelect) leagueSelect.value = "all";
   if (sortByBtn) sortByBtn.textContent = "Сортировать: По дате";
   if (sortDirBtn) { sortDirBtn.textContent = "↓"; sortDirBtn.title = "По убыванию"; }
@@ -672,10 +911,28 @@ function openWinterRatingPlayerModalReady(nick, options) {
   ensureHistoryAndOpen();
 }
 
+function getLatestTournamentRatingSeasonKey() {
+  if (typeof SUMMER_RATING_SEASON !== "undefined") return "summer";
+  if (typeof SPRING_RATING_SEASON !== "undefined") return "spring";
+  return "winter";
+}
+
+function pokerOpenLatestTournamentRatingPlayerModal(nick, options) {
+  if (!nick) return;
+  var nextOptions = copyWinterRatingPlayerOptions(options || {});
+  if (!nextOptions.season && !nextOptions.ratingSeason && !nextOptions.forceSeason) {
+    nextOptions.season = getLatestTournamentRatingSeasonKey();
+  }
+  openWinterRatingPlayerModalReady(nick, nextOptions);
+}
+
+window.pokerOpenLatestTournamentRatingPlayerModal = pokerOpenLatestTournamentRatingPlayerModal;
+
 function closeWinterRatingPlayerModal() {
   var modal = document.getElementById("winterRatingPlayerModal");
   if (modal) {
     modal.setAttribute("aria-hidden", "true");
+    delete modal._winterPlayerModalSeasonKey;
     document.body.style.overflow = "";
   }
 }
@@ -744,8 +1001,8 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
-      var startApp = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("player") : "winter_rating_player_";
+      var seasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
+      var startApp = getWinterRatingPlayerSeasonStartAppPrefix("player", seasonKey);
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
       pokerCopyTextToClipboard(link).then(function (copied) {
@@ -767,8 +1024,8 @@ function initWinterRatingPlayerModal() {
       var titleEl = modal.querySelector(".winter-rating-player-modal__title");
       var nick = modal._winterPlayerModalNick || (titleEl && titleEl.textContent) || "";
       if (!nick) return;
-      var isSpring = typeof isSpringRatingMode === "function" && isSpringRatingMode();
-      var startApp = isSpring && typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("player") : "winter_rating_player_";
+      var seasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
+      var startApp = getWinterRatingPlayerSeasonStartAppPrefix("player", seasonKey);
       var link =
         typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
       if (!link) return;
@@ -1187,6 +1444,7 @@ function initWinterRating() {
         }
         parts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickInner + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td>" + prizeCell + "</tr>");
       }
+      renderSummerRatingPedestalLabels(leagueNum, leagueRows);
       var placeholderText = ratingSeasonDataIsLoading(seasonConfig)
         ? (seasonConfig.loadingDataText || "Загружаем рейтинг")
         : (seasonConfig.emptyDataText || "Данные с 1 марта");
@@ -1197,6 +1455,28 @@ function initWinterRating() {
         if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
       };
       bodyEl.addEventListener("click", bodyEl._leagueNickClick);
+    }
+    function renderSummerRatingPedestalLabels(leagueNum, leagueRows) {
+      var showAllWrap = document.getElementById("winterRatingLeague" + leagueNum + "ShowAllWrap");
+      if (!showAllWrap) return;
+      var labels = showAllWrap.querySelector(".summer-rating-pedestal-labels");
+      if (seasonConfig.key !== "summer" || (leagueNum !== 1 && leagueNum !== 2) || !leagueRows || leagueRows.length < 4) {
+        if (labels) labels.remove();
+        return;
+      }
+      if (!labels) {
+        labels = document.createElement("span");
+        labels.setAttribute("aria-hidden", "true");
+        showAllWrap.insertBefore(labels, showAllWrap.firstChild);
+      }
+      labels.className = "summer-rating-pedestal-labels summer-rating-pedestal-labels--league-" + leagueNum;
+      var html = "";
+      for (var place = 4; place <= 10; place++) {
+        var labelRow = leagueRows[place - 1];
+        var labelNick = labelRow && labelRow.nick != null ? String(labelRow.nick) : "";
+        html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + escapeHtmlRating(labelNick) + "</span>";
+      }
+      labels.innerHTML = html;
     }
     function setupLeagueCollapse(bodyEl, leagueNum) {
       if (!bodyEl) return;

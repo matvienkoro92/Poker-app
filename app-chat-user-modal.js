@@ -72,12 +72,19 @@ if (chatUserModalEl) {
   }
   var modalAvatar = document.getElementById("chatUserModalAvatar");
   var modalAvatarPlaceholder = document.getElementById("chatUserModalAvatarPlaceholder");
+  var modalRatingArt = document.getElementById("chatUserModalRatingArt");
+  var modalRatingArtImg = document.getElementById("chatUserModalRatingArtImg");
   var modalP21 = document.getElementById("chatUserModalP21");
   var modalPersonal = document.getElementById("chatUserModalPersonal");
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
   var modalLevelText = document.getElementById("chatUserModalLevelText");
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
+  var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
+  var modalRatingTab = document.getElementById("chatUserModalRatingTab");
+  var modalRatingRanks = document.getElementById("chatUserModalRatingRanks");
+  var modalSpringRank = document.getElementById("chatUserModalSpringRank");
+  var modalWinterRank = document.getElementById("chatUserModalWinterRank");
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
   var modalStatusFish = modalStatusScale ? modalStatusScale.querySelector(".chat-user-modal__status-fish") : null;
   var modalStatusSection = modalStatusScale && modalStatusScale.closest ? modalStatusScale.closest(".chat-user-modal__status") : null;
@@ -98,9 +105,88 @@ if (chatUserModalEl) {
   var modalClose = chatUserModalEl.querySelector(".chat-user-modal__close");
   var chatUserModalPeerLogin = "";
   var chatUserModalContactName = "";
+  var chatUserModalRatingNick = "";
+  var chatUserModalRanksSeq = 0;
   function closeChatUserModal() {
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
+  }
+  function chatUserModalRatingNickFromData(data) {
+    var raw =
+      data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
+    return String(raw || "").trim();
+  }
+  function syncChatUserModalRatingTab(nick) {
+    chatUserModalRatingNick = String(nick || "").trim();
+    var hasNick = !!chatUserModalRatingNick;
+    if (modalRatingTabs) modalRatingTabs.hidden = !hasNick;
+    if (modalRatingTab) {
+      modalRatingTab.hidden = !hasNick;
+      modalRatingTab.disabled = !hasNick;
+      modalRatingTab.setAttribute("aria-disabled", hasNick ? "false" : "true");
+      if (hasNick) {
+        modalRatingTab.setAttribute("title", "Открыть турнирный рейтинг " + chatUserModalRatingNick);
+        modalRatingTab.setAttribute("aria-label", "Открыть турнирный рейтинг " + chatUserModalRatingNick);
+      } else {
+        modalRatingTab.removeAttribute("title");
+        modalRatingTab.setAttribute("aria-label", "Турнирный рейтинг");
+      }
+    }
+  }
+  function syncChatUserModalRatingArt(nick) {
+    var art = null;
+    if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+      art = window.pokerGetSummerRatingPlayerArt(nick);
+    }
+    if (!modalRatingArt || !modalRatingArtImg) return;
+    if (!art || !art.src) {
+      modalRatingArt.hidden = true;
+      modalRatingArtImg.removeAttribute("src");
+      modalRatingArtImg.alt = "";
+      return;
+    }
+    modalRatingArtImg.src = art.src;
+    modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
+    modalRatingArt.hidden = false;
+  }
+  function chatUserModalRatingPlacesText(places) {
+    if (!Array.isArray(places) || !places.length) return "—";
+    return places.map(function (row) {
+      var place = row && row.place != null ? parseInt(row.place, 10) : 0;
+      var placeText = place > 0 ? String(place) : "—";
+      if (row && row.league) return "Лига " + row.league + " — " + placeText;
+      return placeText;
+    }).join(" · ");
+  }
+  function syncChatUserModalRatingRanks(nick) {
+    chatUserModalRanksSeq += 1;
+    var seq = chatUserModalRanksSeq;
+    var ratingNick = String(nick || "").trim();
+    var hasNick = !!ratingNick;
+    if (modalRatingRanks) modalRatingRanks.hidden = !hasNick;
+    if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
+    if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
+    if (!hasNick) return;
+    var getPlaces = typeof window.pokerGetTournamentRatingPlacesReady === "function"
+      ? window.pokerGetTournamentRatingPlacesReady
+      : null;
+    if (!getPlaces) {
+      if (modalSpringRank) modalSpringRank.textContent = "—";
+      if (modalWinterRank) modalWinterRank.textContent = "—";
+      return;
+    }
+    Promise.all([
+      getPlaces(ratingNick, "spring"),
+      getPlaces(ratingNick, "winter"),
+    ]).then(function (results) {
+      if (seq !== chatUserModalRanksSeq) return;
+      if (modalSpringRank) modalSpringRank.textContent = chatUserModalRatingPlacesText(results && results[0]);
+      if (modalWinterRank) modalWinterRank.textContent = chatUserModalRatingPlacesText(results && results[1]);
+    }).catch(function () {
+      if (seq !== chatUserModalRanksSeq) return;
+      if (modalSpringRank) modalSpringRank.textContent = "—";
+      if (modalWinterRank) modalWinterRank.textContent = "—";
+    });
   }
   function syncChatUserModalTitleFromProfileData(data, fallbackName) {
     chatUserModalPeerLogin = data && data.userName ? String(data.userName) : "";
@@ -292,6 +378,9 @@ if (chatUserModalEl) {
     chatUserModalUserName = userName;
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
+    syncChatUserModalRatingTab("");
+    syncChatUserModalRatingRanks("");
+    syncChatUserModalRatingArt("");
     if (modalLoginSub) {
       modalLoginSub.textContent = "";
       modalLoginSub.hidden = true;
@@ -381,6 +470,10 @@ if (chatUserModalEl) {
         renderChatUserModalPlayerStats(data);
         if (data && data.ok) {
           if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
+          var ratingNick = chatUserModalRatingNickFromData(data);
+          syncChatUserModalRatingTab(ratingNick);
+          syncChatUserModalRatingRanks(ratingNick);
+          syncChatUserModalRatingArt(ratingNick);
           var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
           if (modalAvatar && modalAvatarPlaceholder && modalAvatar.style.display !== "none") {
             modalAvatar.alt = titleDisp;
@@ -409,6 +502,8 @@ if (chatUserModalEl) {
       .catch(function () {
         if (modalPersonal) modalPersonal.textContent = "—";
         if (modalLastSeen) modalLastSeen.hidden = true;
+        syncChatUserModalRatingRanks("");
+        syncChatUserModalRatingArt("");
       });
     fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
@@ -432,6 +527,17 @@ if (chatUserModalEl) {
         if (typeof setView === "function") setView("chat");
         if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs(uid, uname);
         else openConversation(uid, uname, null);
+      }
+    });
+  }
+  if (modalRatingTab) {
+    modalRatingTab.addEventListener("click", function () {
+      var nick = String(chatUserModalRatingNick || "").trim();
+      if (!nick || modalRatingTab.disabled) return;
+      if (typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function") {
+        window.pokerOpenLatestTournamentRatingPlayerModal(nick);
+      } else if (typeof openWinterRatingPlayerModalReady === "function") {
+        openWinterRatingPlayerModalReady(nick, { season: "summer" });
       }
     });
   }
