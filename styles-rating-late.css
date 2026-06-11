@@ -2794,9 +2794,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   margin: 6px 0 0;
   overflow: visible;
   background:
-    url("./assets/summer-rating-league2-player-alena.webp") 50% 27% / 27% auto no-repeat,
-    url("./assets/summer-rating-league2-player-shkarubo.webp") 14% 47% / 43% auto no-repeat,
-    url("./assets/summer-rating-league2-player-sarmat.webp") 88% 46% / 31% auto no-repeat;
+    url("./assets/summer-rating-league2-player-alena.webp") calc(50% + 6px) calc(27% - 15px) / 18.9% auto no-repeat,
+    url("./assets/summer-rating-league2-player-shkarubo.webp") 14% 47% / 30.1% auto no-repeat,
+    url("./assets/summer-rating-league2-player-sarmat.webp") 88% calc(46% - 4px) / 21.7% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
@@ -2976,7 +2976,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
-  top: -38px;
+  top: -42px;
   width: 32px;
   height: 32px;
   background:
@@ -3004,13 +3004,27 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
+  left: calc(50% - 2px);
+  top: -32px;
   background:
-    radial-gradient(circle at 34% 22%, #ffe6bb 0%, #d88a3a 25%, transparent 46%),
-    linear-gradient(145deg, #f2b56d 0%, #a85a20 55%, #4f2108 100%);
+    radial-gradient(circle at 32% 18%, rgba(255, 244, 207, 0.98) 0%, rgba(255, 212, 138, 0.72) 20%, transparent 45%),
+    radial-gradient(circle at 68% 76%, rgba(94, 38, 8, 0.58) 0%, transparent 46%),
+    linear-gradient(145deg, #ffd09b 0%, #bd6c24 48%, #5b2609 100%);
+  border-color: rgba(255, 220, 154, 0.88);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.72),
+    inset 0 -3px 5px rgba(76, 31, 6, 0.5),
+    0 2px 0 rgba(255, 225, 156, 0.26),
+    0 5px 13px rgba(0, 0, 0, 0.62),
+    0 0 12px rgba(255, 151, 49, 0.22);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank::before {
   content: "3";
+  font-size: 19px;
+  text-shadow:
+    0 1px 0 rgba(255, 243, 205, 0.36),
+    0 2px 5px rgba(37, 14, 2, 0.72);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
@@ -3037,6 +3051,19 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   text-overflow: ellipsis;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.86);
   white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
+  transform: translate(-3px, -4px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  transform: translateY(-5px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+  font-size: clamp(7.4px, 2.09vw, 9.2px);
+  transform: translateY(-3px);
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
@@ -3112,7 +3139,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
   position: absolute;
-  top: 78px;
+  top: 84px;
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -3126,6 +3153,61 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     0 1px 4px rgba(0, 0, 0, 0.9),
     0 0 7px rgba(255, 184, 55, 0.28);
   white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  display: block;
+  height: 84px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox:focus-visible {
+  outline: 2px solid rgba(255, 216, 121, 0.82);
+  outline-offset: -4px;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-4 {
+  left: 0;
+  width: 14.8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-5 {
+  left: 14.5%;
+  width: 15.2%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-6 {
+  left: 30%;
+  width: 15.2%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-7 {
+  left: 45.5%;
+  width: 15.2%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-8 {
+  left: 61.2%;
+  width: 15.4%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-9 {
+  left: 76.5%;
+  width: 14.8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox--place-10 {
+  left: 89%;
+  width: 11%;
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-4 {

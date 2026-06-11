@@ -1466,17 +1466,28 @@ function initWinterRating() {
       }
       if (!labels) {
         labels = document.createElement("span");
-        labels.setAttribute("aria-hidden", "true");
         showAllWrap.insertBefore(labels, showAllWrap.firstChild);
       }
+      labels.removeAttribute("aria-hidden");
       labels.className = "summer-rating-pedestal-labels summer-rating-pedestal-labels--league-" + leagueNum;
       var html = "";
       for (var place = 4; place <= 10; place++) {
         var labelRow = leagueRows[place - 1];
         var labelNick = labelRow && labelRow.nick != null ? String(labelRow.nick) : "";
-        html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + escapeHtmlRating(labelNick) + "</span>";
+        var labelNickAttr = labelNick.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var labelNickEsc = escapeHtmlRating(labelNick);
+        html += "<button type=\"button\" class=\"summer-rating-pedestal-hitbox summer-rating-pedestal-hitbox--place-" + place + "\" data-nick=\"" + labelNickAttr + "\" aria-label=\"Подробнее: " + labelNickEsc + "\"></button>";
+        html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + labelNickEsc + "</span>";
       }
       labels.innerHTML = html;
+      if (showAllWrap._summerPedestalClick) showAllWrap.removeEventListener("click", showAllWrap._summerPedestalClick);
+      showAllWrap._summerPedestalClick = function (e) {
+        var btn = e.target && e.target.closest && e.target.closest(".summer-rating-pedestal-hitbox");
+        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") {
+          openWinterRatingPlayerModalReady(btn.dataset.nick);
+        }
+      };
+      showAllWrap.addEventListener("click", showAllWrap._summerPedestalClick);
     }
     function setupLeagueCollapse(bodyEl, leagueNum) {
       if (!bodyEl) return;

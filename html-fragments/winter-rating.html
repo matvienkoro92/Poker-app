@@ -143,30 +143,6 @@
               <div class="winter-rating__search-wrap" id="winterRatingSearchWrap">
                 <input type="text" class="winter-rating__search-input" id="winterRatingSearchInput" placeholder="Введите ник для поиска, как в приложении" autocomplete="off" aria-label="Поиск по нику в итоговой таблице" />
               </div>
-              <div class="winter-rating__actions-wrap">
-                <div class="winter-rating__actions-row winter-rating__actions-row--admin winter-rating__admin-row--hidden" id="winterRatingAdminRow">
-                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifyBtn">Сообщить в чат об обновлении рейтинга</button>
-                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifySubsBtn">Разослать подписчикам рейтинга</button>
-                </div>
-                <p class="winter-rating__admin-hint" id="winterRatingNotifyHint"></p>
-              </div>
-              <p class="winter-rating__week-tops-hint">
-                Топ‑3 недели получают от клуба дополнительные бонусы: 1‑е место — билеты на турниры на 5000₽, 2‑е — билеты за 3000₽, 3‑е — билет за 1000₽.
-              </p>
-              <div class="winter-rating__week-tops-row">
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopCurrentWeekBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы текущей недели</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopCurrentWeekPreview"></span>
-                </button>
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopPastWeekBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы прошлой недели</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopPastWeekPreview"></span>
-                </button>
-                <button type="button" class="winter-rating__week-top-btn" id="winterRatingTopFebruaryBtn">
-                  <span class="winter-rating__week-top-btn-label">Топы Февраля</span>
-                  <span class="winter-rating__week-top-btn-preview" id="winterRatingTopFebruaryPreview"></span>
-                </button>
-              </div>
               <div class="spring-rating-view-totals-stack" id="springRatingViewTotals" hidden>
                 <div class="spring-rating-home-promo-stats spring-rating-view-totals-panel spring-rating-view-totals-panel--may">
                   <div class="spring-rating-view-totals__month-head">
@@ -220,6 +196,13 @@
                   </div>
                 </div>
                 <!-- Архивные даты зимы создаются рантаймом только при открытии архива. -->
+              </div>
+              <div class="winter-rating__actions-wrap">
+                <div class="winter-rating__actions-row winter-rating__actions-row--admin winter-rating__admin-row--hidden" id="winterRatingAdminRow">
+                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifyBtn">Сообщить в чат об обновлении рейтинга</button>
+                  <button type="button" class="winter-rating__admin-btn" id="winterRatingNotifySubsBtn">Разослать подписчикам рейтинга</button>
+                </div>
+                <p class="winter-rating__admin-hint" id="winterRatingNotifyHint"></p>
               </div>
             </section>
           </div>
