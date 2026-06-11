@@ -2737,9 +2737,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   margin: 6px 0 0;
   overflow: visible;
   background:
-    url("./assets/summer-rating-player-waaar.webp") 50% 3% / 48% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki-stage.webp?v=1") 17% 38% / 17% auto no-repeat,
-    url("./assets/summer-rating-player-cooler-stage.webp?v=2") 83% 34% / 23% auto no-repeat;
+    url("./assets/summer-rating-player-waaar.webp") 50% 32% / 34% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki-stage.webp?v=1") 17% 45% / 12% auto no-repeat,
+    url("./assets/summer-rating-player-cooler-stage.webp?v=2") 83% 48% / 16% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
@@ -2758,20 +2758,76 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) {
   left: 10%;
-  bottom: 21px;
+  bottom: 8px;
   width: 33%;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) {
   left: 38%;
-  bottom: 34px;
+  bottom: 20px;
   width: 24%;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) {
   right: 9%;
-  bottom: 21px;
+  bottom: 8px;
   width: 28%;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank {
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  z-index: 3;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 230, 166, 0.76);
+  color: transparent;
+  font-size: 0;
+  font-weight: 950;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.82);
+  transform: translateX(-50%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.42),
+    0 3px 9px rgba(0, 0, 0, 0.46);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank::before {
+  color: #261404;
+  font-size: 18px;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__rank {
+  background: linear-gradient(180deg, #f5efe2 0%, #a9a9a9 56%, #6f7276 100%);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__rank::before {
+  content: "2";
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
+  top: -34px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(180deg, #fff0a8 0%, #d58b18 58%, #8d4b08 100%);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank::before {
+  content: "1";
+  font-size: 21px;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
+  background: linear-gradient(180deg, #ffd59a 0%, #bf6d24 56%, #71340d 100%);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank::before {
+  content: "3";
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__nick {
@@ -2796,7 +2852,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: block !important;
   width: 100%;
   height: 112px;
-  margin: -16px 0 4px;
+  margin: -16px 0 18px;
   padding: 0;
 }
 
@@ -2829,30 +2885,50 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes {
-  font-size: clamp(12px, 3.5vw, 14px);
+  width: 100%;
+  table-layout: fixed;
+  font-size: clamp(9px, 2.55vw, 10.8px);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes th:nth-child(4),
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(4),
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__td-prize {
-  display: none;
+  display: table-cell;
+  min-width: 0;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-place,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(1) {
-  width: 17%;
+  width: 13%;
+  text-align: center;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
-  width: 58%;
+  width: 32%;
+  text-align: left;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-points,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(3) {
-  width: 25%;
+  width: 14%;
   text-align: right;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-reward,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(4) {
+  width: 24%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__td-prize {
+  width: 17%;
+  color: #ffc64b;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick {
@@ -2863,50 +2939,68 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick::before {
   content: "Игрок";
   color: #ffbd42;
-  font-size: clamp(12px, 3.5vw, 14px);
+  font-size: clamp(9px, 2.55vw, 10.8px);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-reward {
-  display: none;
+  display: table-cell;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize {
+  color: transparent;
+  font-size: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize::before {
+  content: "Призы";
+  color: #ffbd42;
+  font-size: clamp(9px, 2.55vw, 10.8px);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes thead th {
-  height: 30px;
+  height: 28px;
+  padding: 4px 3px;
   color: #ffbd42;
   background: transparent !important;
   border-bottom-color: rgba(191, 121, 27, 0.62);
-  font-size: clamp(12px, 3.5vw, 14px);
+  font-size: clamp(9px, 2.55vw, 10.8px);
   text-align: center;
+  line-height: 1.05;
+  white-space: nowrap;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody td {
-  height: 29px;
+  height: 27px;
+  padding: 3px 3px;
   color: #ffe8b8;
   border-bottom-color: rgba(191, 121, 27, 0.48);
   font-weight: 800;
+  line-height: 1.05;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td {
-  height: 38px;
-  font-size: clamp(16px, 4.6vw, 20px);
+  height: 35px;
+  font-size: clamp(11px, 3.2vw, 13px);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td:nth-child(2) {
-  font-size: clamp(14px, 4vw, 17px);
+  font-size: clamp(10.5px, 3vw, 12.5px);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td:nth-child(3) {
   color: #ffc64b;
-  font-size: clamp(18px, 5.2vw, 22px);
+  font-size: clamp(12px, 3.4vw, 14px);
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-player {
-  gap: 8px;
+  gap: 5px;
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-avatar {
-  width: 25px;
-  height: 25px;
+  width: 21px;
+  height: 21px;
   background-color: #050911;
   background-repeat: no-repeat;
   background-size: 165% auto;
