@@ -868,13 +868,31 @@ function initWinterRating() {
   } catch (e) {
     if (typeof console !== "undefined" && console.error) console.error("initWinterRating lightbox/modal", e);
   }
+  var ratingSectionEl = document.getElementById("winterRatingSection");
+  var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
+  var isSummerRatingMode = isSpringRatingMode() && seasonConfig.key === "summer";
   var conditionsBtn = document.getElementById("springRatingConditionsBtn");
+  if (conditionsBtn) {
+    if (isSummerRatingMode) {
+      conditionsBtn.dataset.springMainLeague = "top";
+      conditionsBtn.classList.remove("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
+      conditionsBtn.innerHTML = "<span>Топ заносы</span><span>лета</span>";
+      conditionsBtn.setAttribute("aria-label", "Топ заносы лета");
+    } else {
+      delete conditionsBtn.dataset.springMainLeague;
+      conditionsBtn.classList.add("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
+      conditionsBtn.innerHTML = "<span>Условия</span><span>и призы</span>";
+      conditionsBtn.removeAttribute("aria-label");
+    }
+  }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
-    conditionsBtn.addEventListener("click", function () { openSpringRatingInfoModal(); });
+    conditionsBtn.addEventListener("click", function () {
+      if (conditionsBtn.dataset.springMainLeague) return;
+      openSpringRatingInfoModal();
+    });
   }
   var febBtnLabel = document.querySelector("#winterRatingTopFebruaryBtn .winter-rating__week-top-btn-label");
-  var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
   if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? (seasonConfig.topLabel || "Топы весны") : "Топы Февраля";
   var titleTextEl = document.querySelector("#winterRatingSection .winter-rating__title-text");
   if (titleTextEl) {
@@ -991,10 +1009,13 @@ function initWinterRating() {
   }
   function switchSpringRatingMainTab(league) {
     if (!springMainTabsEl || !springLeaguesEl) return;
+    var targetLeague = league === "top" ? "top" : (String(league) === "2" ? "2" : "1");
+    if (isSummerRatingMode && ratingSectionEl) ratingSectionEl.setAttribute("data-summer-filter", targetLeague);
+    else if (ratingSectionEl) ratingSectionEl.removeAttribute("data-summer-filter");
     var tabs = springMainTabsEl.querySelectorAll(".winter-rating__spring-main-tab");
     var leagues = springLeaguesEl.querySelectorAll(".winter-rating__spring-league--main");
-    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle("winter-rating__spring-main-tab--active", tabs[i].dataset.springMainLeague === league);
-    for (var j = 0; j < leagues.length; j++) leagues[j].style.display = leagues[j].getAttribute("data-spring-league") === league ? "" : "none";
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle("winter-rating__spring-main-tab--active", tabs[i].dataset.springMainLeague === targetLeague);
+    for (var j = 0; j < leagues.length; j++) leagues[j].style.display = targetLeague !== "top" && leagues[j].getAttribute("data-spring-league") === targetLeague ? "" : "none";
   }
   window.switchSpringRatingMainTab = switchSpringRatingMainTab;
   if (springMainTabsEl && springMainTabsEl.getAttribute("data-inited") !== "1") {
@@ -1006,6 +1027,7 @@ function initWinterRating() {
       switchSpringRatingMainTab(league);
     });
   }
+  if (isSummerRatingMode) switchSpringRatingMainTab((ratingSectionEl && ratingSectionEl.getAttribute("data-summer-filter")) || "1");
   if (document.body.getAttribute("data-rating-date-share-bound") !== "1") {
     document.body.setAttribute("data-rating-date-share-bound", "1");
     document.body.addEventListener("click", function (e) {
@@ -1242,7 +1264,7 @@ function initWinterRating() {
       var rewardStr = r && r.reward != null ? String(r.reward) : "0";
       var rewardFormatted = rewardStr + " ₽";
       var placeClass = place === 1 ? "spring-rating-top3__card--first" : "";
-      podiumHtml += "<div class=\"spring-rating-top3__card " + placeClass + "\"><span class=\"spring-rating-top3__rank\">#" + place + "</span><div class=\"spring-rating-top3__avatar\" aria-hidden=\"true\">" + initial + "</div><span class=\"spring-rating-top3__nick\">" + nickEsc + "</span><div class=\"spring-rating-top3__stats\"><span class=\"spring-rating-top3__points\">" + pointsStr + " баллов</span><span class=\"spring-rating-top3__reward\">" + rewardFormatted + "</span></div><button type=\"button\" class=\"spring-rating-top3__nick-btn\" data-nick=\"" + nickAttr + "\" aria-label=\"Подробнее: " + nickEsc + "\"></button></div>";
+      podiumHtml += "<div class=\"spring-rating-top3__card " + placeClass + "\"><span class=\"spring-rating-top3__rank\">#" + place + "</span><div class=\"spring-rating-top3__avatar\" aria-hidden=\"true\">" + initial + "</div><span class=\"spring-rating-top3__nick\">" + nickEsc + "</span><div class=\"spring-rating-top3__stats\"><span class=\"spring-rating-top3__points\"><span class=\"spring-rating-top3__points-value\">" + pointsStr + "</span> <span class=\"spring-rating-top3__points-label\">баллов</span></span><span class=\"spring-rating-top3__reward\">" + rewardFormatted + "</span></div><button type=\"button\" class=\"spring-rating-top3__nick-btn\" data-nick=\"" + nickAttr + "\" aria-label=\"Подробнее: " + nickEsc + "\"></button></div>";
     }
     podiumHtml += "</div>";
     return podiumHtml;
