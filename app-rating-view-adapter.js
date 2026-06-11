@@ -1147,7 +1147,7 @@ function initWinterRating() {
         var nickInner = nickEsc;
         if (seasonConfig.key === "summer") {
           nickInner = "<span class=\"summer-rating-table-player summer-rating-table-player--place-" + place + "\">" +
-            (place <= 3 ? "<span class=\"summer-rating-table-avatar summer-rating-table-avatar--place-" + place + "\" aria-hidden=\"true\"></span>" : "") +
+            (place <= 10 ? "<span class=\"summer-rating-table-avatar summer-rating-table-avatar--place-" + place + "\" aria-hidden=\"true\"></span>" : "") +
             "<span class=\"summer-rating-table-name\">" + nickEsc + "</span></span>";
         }
         var prizeCell = "";

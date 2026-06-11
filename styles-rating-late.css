@@ -2195,9 +2195,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   aspect-ratio: 1.43 / 1;
   min-height: 280px;
   background:
-    url("./assets/summer-rating-player-waaar.webp") 50% 34% / 31% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki.webp") 19% 43% / 32% auto no-repeat,
-    url("./assets/summer-rating-player-cooler.webp") 80% 43% / 31% auto no-repeat,
+    url("./assets/summer-rating-player-waaar.webp") 50% 18% / 31% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki.webp") 18% 22% / 32% auto no-repeat,
+    url("./assets/summer-rating-player-cooler.webp") 82% 22% / 31% auto no-repeat,
     url("./assets/summer-rating-podium-base.webp") center 70% / 116% auto no-repeat;
 }
 
@@ -2568,4 +2568,381 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes {
     font-size: clamp(11.4px, 3.05vw, 12.6px);
   }
+}
+
+/* Summer 2026 rating: podium hall reference composition. */
+body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
+  background: #020812;
+}
+
+body[data-view="summer-rating"] #app.app > .card > .card__content,
+html.app-view-summer-rating-html-scroll #app.app > .card > .card__content {
+  background: #020812;
+}
+
+body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonus-game-back {
+  top: 19px;
+  left: max(22px, calc((100% - min(430px, 100%)) / 2 + 22px));
+  z-index: 8;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffd579;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.winter-rating.spring-rating.summer-rating {
+  position: relative;
+  width: min(430px, 100%);
+  max-width: 430px;
+  min-height: max(844px, 100svh);
+  margin: 0 auto;
+  padding: 16px 14px 30px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: url("./assets/summer-rating-stage-bg.webp?v=1") center top / 100% 100% no-repeat !important;
+  box-shadow: none;
+}
+
+@supports (height: 100dvh) {
+  .winter-rating.spring-rating.summer-rating {
+    min-height: max(844px, 100dvh);
+  }
+}
+
+.winter-rating.spring-rating.summer-rating::before,
+.winter-rating.spring-rating.summer-rating::after,
+.winter-rating.spring-rating.summer-rating .summer-rating__brand-bar,
+.winter-rating.spring-rating.summer-rating .winter-rating__winter-decor,
+.winter-rating.spring-rating.summer-rating .winter-rating__table-caption-row,
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-header,
+.winter-rating.spring-rating.summer-rating .spring-rating-final-countdown,
+.winter-rating.spring-rating.summer-rating .winter-rating__search-wrap--league,
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league-share-wrap {
+  display: none !important;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
+  min-height: 42px;
+  margin: 0 0 6px;
+  padding: 0 108px 0 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup,
+.winter-rating.spring-rating.summer-rating .winter-rating__title-accent {
+  display: none !important;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  color: #ffe9bd;
+  font-size: 0;
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
+  white-space: nowrap;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::before {
+  content: "РЕЙТИНГ";
+  font-size: clamp(17px, 5.2vw, 22px);
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::after {
+  content: "POKER21";
+  color: #ffc64b;
+  font-size: clamp(17px, 5.2vw, 22px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+  position: absolute;
+  top: 18px;
+  right: max(22px, calc((100% - min(430px, 100%)) / 2 + 22px));
+  z-index: 7;
+  display: flex !important;
+  width: 95px;
+  height: 35px;
+  min-height: 35px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(191, 121, 27, 0.78);
+  border-radius: 18px;
+  background: rgba(4, 10, 18, 0.56);
+  box-shadow: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab {
+  display: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--active {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 0;
+  padding: 0 8px;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffe9bd;
+  font-size: 0;
+  font-weight: 900;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.68);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--active::before {
+  content: "Все время";
+  font-size: 13px;
+  line-height: 1;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab--active::after {
+  content: "⌄";
+  color: #ffd579;
+  font-size: 15px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-leagues {
+  display: block !important;
+  margin: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-league[data-spring-league="1"] {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+  order: 1;
+  height: 292px;
+  min-height: 0;
+  margin: 6px 0 0;
+  overflow: visible;
+  background:
+    url("./assets/summer-rating-player-waaar.webp") 50% 3% / 48% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki-stage.webp?v=1") 17% 38% / 17% auto no-repeat,
+    url("./assets/summer-rating-player-cooler-stage.webp?v=2") 83% 34% / 23% auto no-repeat;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
+  min-height: 42px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #ffe9bd;
+  transform: none;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__card--first {
+  transform: none;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) {
+  left: 10%;
+  bottom: 21px;
+  width: 33%;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) {
+  left: 38%;
+  bottom: 34px;
+  width: 24%;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) {
+  right: 9%;
+  bottom: 21px;
+  width: 28%;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__nick {
+  color: #ffda78;
+  font-size: clamp(10.8px, 3.25vw, 14px);
+  line-height: 1.02;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.86);
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
+  color: #ffe6ad;
+  font-size: clamp(8.4px, 2.4vw, 10px);
+  line-height: 1.04;
+}
+
+.winter-rating.spring-rating.summer-rating .spring-rating-top3__reward {
+  display: none;
+}
+
+.winter-rating.spring-rating.summer-rating #winterRatingLeague1ShowAllWrap {
+  order: 2;
+  display: block !important;
+  width: 100%;
+  height: 112px;
+  margin: -16px 0 4px;
+  padding: 0;
+}
+
+.winter-rating.spring-rating.summer-rating #winterRatingLeague1ShowAllWrap::before {
+  width: 100%;
+  height: 112px;
+  background:
+    url("./assets/summer-rating-player-emil.webp") 4% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-winifly.webp") 19% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-missclick.webp") 34% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-nikola233.webp") 49% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-milkyway.webp") 64% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-prushnik.webp") 79% 100% / 18.2% auto no-repeat,
+    url("./assets/summer-rating-player-khervam.webp") 95% 100% / 17.4% auto no-repeat;
+}
+
+.winter-rating.spring-rating.summer-rating #winterRatingLeague1ShowAllWrap .winter-rating__show-all-btn {
+  display: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table-wrap--league {
+  order: 3;
+  width: 100%;
+  margin: 0;
+  border-color: rgba(191, 121, 27, 0.82);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(3, 9, 17, 0.68), rgba(3, 9, 17, 0.72));
+  box-shadow: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes {
+  font-size: clamp(12px, 3.5vw, 14px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes th:nth-child(4),
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(4),
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-prize,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__td-prize {
+  display: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-place,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(1) {
+  width: 17%;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
+  width: 58%;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-points,
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(3) {
+  width: 25%;
+  text-align: right;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick {
+  color: transparent;
+  font-size: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick::before {
+  content: "Игрок";
+  color: #ffbd42;
+  font-size: clamp(12px, 3.5vw, 14px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-reward {
+  display: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes thead th {
+  height: 30px;
+  color: #ffbd42;
+  background: transparent !important;
+  border-bottom-color: rgba(191, 121, 27, 0.62);
+  font-size: clamp(12px, 3.5vw, 14px);
+  text-align: center;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody td {
+  height: 29px;
+  color: #ffe8b8;
+  border-bottom-color: rgba(191, 121, 27, 0.48);
+  font-weight: 800;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td {
+  height: 38px;
+  font-size: clamp(16px, 4.6vw, 20px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td:nth-child(2) {
+  font-size: clamp(14px, 4vw, 17px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) td:nth-child(3) {
+  color: #ffc64b;
+  font-size: clamp(18px, 5.2vw, 22px);
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-player {
+  gap: 8px;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar {
+  width: 25px;
+  height: 25px;
+  background-color: #050911;
+  background-repeat: no-repeat;
+  background-size: 165% auto;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-4 {
+  background-image: url("./assets/summer-rating-player-emil.webp");
+  background-position: 47% 9%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-5 {
+  background-image: url("./assets/summer-rating-player-winifly.webp");
+  background-position: 52% 9%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-6 {
+  background-image: url("./assets/summer-rating-player-missclick.webp");
+  background-position: 50% 8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-7 {
+  background-image: url("./assets/summer-rating-player-nikola233.webp");
+  background-position: 50% 8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-8 {
+  background-image: url("./assets/summer-rating-player-milkyway.webp");
+  background-position: 50% 8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-9 {
+  background-image: url("./assets/summer-rating-player-prushnik.webp");
+  background-position: 50% 8%;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-10 {
+  background-image: url("./assets/summer-rating-player-khervam.webp");
+  background-position: 50% 8%;
 }
