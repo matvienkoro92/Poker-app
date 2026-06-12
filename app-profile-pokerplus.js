@@ -22,6 +22,7 @@ function initProfilePokerPlus() {
   var positionRow = document.getElementById("profilePokerPlusPositionRow");
   var positionValue = document.getElementById("profilePokerPlusPositionValue");
   var leagueRow = document.getElementById("profilePokerPlusLeagueRow");
+  var leagueLabel = document.getElementById("profilePokerPlusLeagueLabel");
   var leagueValue = document.getElementById("profilePokerPlusLeagueValue");
   var groupRow = document.getElementById("profilePokerPlusGroupRow");
   var groupValue = document.getElementById("profilePokerPlusGroupValue");
@@ -90,6 +91,7 @@ function initProfilePokerPlus() {
   var pokerPlusStatsCalendarMonth = "";
   var pokerPlusStatsActivePeriod = "today";
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
+  var pokerPlusRatingRetryTimer = null;
 
   function setFeedback(text, tone) {
     if (!feedback) return;
@@ -256,6 +258,125 @@ function initProfilePokerPlus() {
 
   function pokerPlusLocale() {
     return typeof getPwaAuthLocale === "function" && getPwaAuthLocale() === "en" ? "en" : "ru";
+  }
+
+  function pokerPlusRatingNumberText(value) {
+    var n = Number(value);
+    if (n !== n || !isFinite(n)) n = 0;
+    return Math.round(n).toLocaleString("ru-RU");
+  }
+
+  function pokerPlusRatingNickKey(nick) {
+    var text = pokerPlusText(nick);
+    if (typeof normalizeWinterNickForFinalTable === "function") text = normalizeWinterNickForFinalTable(text);
+    else if (typeof normalizeWinterNick === "function") text = normalizeWinterNick(text);
+    return pokerPlusText(text).toLowerCase();
+  }
+
+  function pokerPlusRatingNickMatches(a, b) {
+    var ak = pokerPlusRatingNickKey(a);
+    var bk = pokerPlusRatingNickKey(b);
+    return !!ak && !!bk && ak === bk;
+  }
+
+  function pokerPlusProfileRatingNick(profile) {
+    var p = profile && typeof profile === "object" ? profile : {};
+    return pokerPlusText(p.nickname || p.Nike || p.nick || p.name || p.displayName || p.display_name);
+  }
+
+  function pokerPlusSummerRatingRowsByLeague(leagueNum) {
+    if (typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined") return null;
+    var tournamentsByDate = SUMMER_RATING_TOURNAMENTS_BY_DATE || {};
+    var season = typeof SUMMER_RATING_SEASON !== "undefined" ? SUMMER_RATING_SEASON : {};
+    var monthRegex = season.monthRegex || /\.(06|07|08)\.2026$/;
+    var dateStrs = Object.keys(tournamentsByDate).filter(function (d) { return monthRegex.test(d); });
+    var byNick = {};
+    for (var i = 0; i < dateStrs.length; i++) {
+      var list = tournamentsByDate[dateStrs[i]];
+      if (!Array.isArray(list) || !list.length) continue;
+      for (var j = 0; j < list.length; j++) {
+        var t = list[j] || {};
+        var forcedLeague = t.league != null ? Number(t.league) : NaN;
+        var buyin = t.buyin != null ? Number(t.buyin) : NaN;
+        var inLeague1 = forcedLeague === 1 || (forcedLeague !== forcedLeague && (buyin >= 500 || (buyin !== buyin)));
+        var inLeague2 = forcedLeague === 2 || (forcedLeague !== forcedLeague && buyin >= 100 && buyin < 500);
+        var include = (leagueNum === 1 && inLeague1) || (leagueNum === 2 && inLeague2);
+        if (!include) continue;
+        var players = t.players || [];
+        for (var k = 0; k < players.length; k++) {
+          var player = players[k] || {};
+          var nick = typeof normalizeWinterNickForFinalTable === "function" ? normalizeWinterNickForFinalTable(player.nick) : pokerPlusText(player.nick);
+          if (!nick) continue;
+          var points = typeof winterRatingTournamentPlayerPoints === "function" ? winterRatingTournamentPlayerPoints(player) : 0;
+          var reward = player.reward != null ? Number(player.reward) : 0;
+          if (points !== points || !isFinite(points)) points = 0;
+          if (reward !== reward || !isFinite(reward)) reward = 0;
+          if (!byNick[nick]) byNick[nick] = { nick: nick, points: 0, reward: 0 };
+          byNick[nick].points += points;
+          byNick[nick].reward += reward;
+        }
+      }
+    }
+    return Object.keys(byNick).map(function (nick) {
+      return byNick[nick];
+    }).filter(function (row) {
+      return Number(row.points) !== 0 || Number(row.reward) !== 0;
+    }).sort(function (a, b) {
+      return (Number(b.points) - Number(a.points)) || (Number(b.reward) - Number(a.reward));
+    });
+  }
+
+  function pokerPlusFindSummerRating(profile) {
+    var targetNick = pokerPlusProfileRatingNick(profile);
+    if (!targetNick) return { state: "no-nick" };
+    var leagueRows1 = pokerPlusSummerRatingRowsByLeague(1);
+    var leagueRows2 = pokerPlusSummerRatingRowsByLeague(2);
+    if (!leagueRows1 || !leagueRows2) return { state: "loading" };
+    var leagues = [
+      { league: 1, rows: leagueRows1 },
+      { league: 2, rows: leagueRows2 },
+    ];
+    for (var i = 0; i < leagues.length; i++) {
+      var rows = leagues[i].rows || [];
+      for (var j = 0; j < rows.length; j++) {
+        if (pokerPlusRatingNickMatches(rows[j].nick, targetNick)) {
+          return {
+            state: "found",
+            league: leagues[i].league,
+            place: j + 1,
+            points: rows[j].points,
+            reward: rows[j].reward,
+          };
+        }
+      }
+    }
+    return { state: "missing" };
+  }
+
+  function renderPokerPlusSummerRating(profile) {
+    if (!leagueRow || !leagueValue) return;
+    if (leagueLabel) leagueLabel.textContent = "Рейтинг лета:";
+    leagueRow.hidden = false;
+    var rating = pokerPlusFindSummerRating(profile);
+    if (rating.state === "found") {
+      leagueValue.textContent =
+        "Лига " + rating.league +
+        ", #" + rating.place +
+        ", " + pokerPlusRatingNumberText(rating.points) + " баллов" +
+        ", " + pokerPlusRatingNumberText(rating.reward) + " ₽";
+      return;
+    }
+    if (rating.state === "loading") {
+      leagueValue.textContent = "Рейтинг загружается";
+      if (!pokerPlusRatingRetryTimer) {
+        pokerPlusRatingRetryTimer = setTimeout(function () {
+          pokerPlusRatingRetryTimer = null;
+          renderPokerPlusSummerRating(profile);
+        }, 900);
+      }
+      return;
+    }
+    leagueValue.textContent = rating.state === "no-nick" ? "Ник Poker21 не найден" : "Нет в летнем рейтинге";
   }
 
   function setPokerPlusRefreshButtonText(linked) {
@@ -1320,6 +1441,8 @@ function initProfilePokerPlus() {
       if (registerRow) registerRow.hidden = true;
       if (positionRow) positionRow.hidden = true;
       if (leagueRow) leagueRow.hidden = true;
+      if (leagueLabel) leagueLabel.textContent = "Лига:";
+      if (leagueValue) leagueValue.textContent = "—";
       if (groupRow) groupRow.hidden = true;
       if (countryRow) countryRow.hidden = true;
       if (roleRow) roleRow.hidden = true;
@@ -1366,8 +1489,7 @@ function initProfilePokerPlus() {
     if (registerValue) registerValue.textContent = pokerPlusDate(p.registerDate) || "—";
     if (positionRow) positionRow.hidden = true;
     if (positionValue) positionValue.textContent = "—";
-    if (leagueRow) leagueRow.hidden = true;
-    if (leagueValue) leagueValue.textContent = "—";
+    renderPokerPlusSummerRating(p);
     if (groupRow) groupRow.hidden = true;
     if (groupValue) groupValue.textContent = "—";
     setPokerPlusRow(countryRow, countryValue, p.country);

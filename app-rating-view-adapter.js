@@ -1108,6 +1108,98 @@ function ratingSeasonDataIsLoading(seasonConfig) {
   return false;
 }
 
+function getSummerRatingInitialLoader() {
+  return document.getElementById("summerRatingInitialLoader");
+}
+
+function setSummerRatingInitialLoading(active, ratingSectionEl) {
+  var loader = getSummerRatingInitialLoader();
+  if (loader) {
+    if (active) loader.removeAttribute("hidden");
+    else loader.setAttribute("hidden", "");
+  }
+  if (ratingSectionEl) {
+    ratingSectionEl.classList.toggle("summer-rating--boot-loading", !!active);
+  }
+}
+
+function getSummerRatingInitialAssetUrls() {
+  return [
+    "./assets/summer-rating-podium.webp",
+    "./assets/summer-rating-player-waaar.webp",
+    "./assets/summer-rating-player-pokermanki.webp?v=3.546",
+    "./assets/summer-rating-player-cooler.webp",
+    "./assets/summer-rating-player-emil.webp",
+    "./assets/summer-rating-player-winifly.webp",
+    "./assets/summer-rating-player-missclick.webp",
+    "./assets/summer-rating-player-nikola233.webp",
+    "./assets/summer-rating-player-milkyway.webp",
+    "./assets/summer-rating-player-prushnik.webp",
+    "./assets/summer-rating-player-khervam.webp",
+    "./assets/summer-rating-league2-player-alena.webp",
+    "./assets/summer-rating-league2-player-shkarubo.webp",
+    "./assets/summer-rating-league2-player-sarmat.webp",
+    "./assets/summer-rating-league2-player-viktor.webp",
+    "./assets/summer-rating-league2-player-mr-fox.webp",
+    "./assets/summer-rating-league2-player-babyshark.webp",
+    "./assets/summer-rating-league2-player-aspirin.webp",
+    "./assets/summer-rating-league2-player-ksyukha.webp"
+  ];
+}
+
+function preloadSummerRatingImage(src) {
+  return new Promise(function (resolve) {
+    if (!src || typeof Image === "undefined") {
+      resolve(false);
+      return;
+    }
+    var done = false;
+    var img = new Image();
+    var finish = function (ok) {
+      if (done) return;
+      done = true;
+      resolve(!!ok);
+    };
+    img.onload = function () { finish(true); };
+    img.onerror = function () { finish(false); };
+    setTimeout(function () { finish(false); }, 4500);
+    img.src = src;
+  });
+}
+
+function waitForSummerRatingInitialAssets() {
+  try {
+    if (window.__pokerSummerRatingInitialAssetsPromise) return window.__pokerSummerRatingInitialAssetsPromise;
+    window.__pokerSummerRatingInitialAssetsPromise = Promise.all(getSummerRatingInitialAssetUrls().map(preloadSummerRatingImage));
+    return window.__pokerSummerRatingInitialAssetsPromise;
+  } catch (e) {
+    return Promise.resolve([]);
+  }
+}
+
+function finishSummerRatingInitialLoadWhenReady(ratingSectionEl) {
+  if (!ratingSectionEl || !document.body || document.body.getAttribute("data-view") !== "summer-rating") return;
+  if (window.__pokerSummerRatingBootReady) {
+    setSummerRatingInitialLoading(false, ratingSectionEl);
+    return;
+  }
+  setSummerRatingInitialLoading(true, ratingSectionEl);
+  waitForSummerRatingInitialAssets().then(function () {
+    var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+    raf(function () {
+      raf(function () {
+        if (!document.body || document.body.getAttribute("data-view") !== "summer-rating") return;
+        window.__pokerSummerRatingBootReady = true;
+        setSummerRatingInitialLoading(false, ratingSectionEl);
+        if (typeof updateSpringRatingViewScrollButton === "function") updateSpringRatingViewScrollButton();
+      });
+    });
+  }).catch(function () {
+    window.__pokerSummerRatingBootReady = true;
+    setSummerRatingInitialLoading(false, ratingSectionEl);
+  });
+}
+
 function pokerRefreshRatingSeasonAfterDataReady(seasonKey) {
   var season = String(seasonKey || "").trim().toLowerCase();
   if (season !== "spring" && season !== "summer") return;
@@ -1160,6 +1252,15 @@ function initWinterRating() {
   var ratingSectionEl = document.getElementById("winterRatingSection");
   var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
   var isSummerRatingMode = isSpringRatingMode() && seasonConfig.key === "summer";
+  if (isSummerRatingMode) {
+    if (ratingSeasonDataIsLoading(seasonConfig)) {
+      setSummerRatingInitialLoading(true, ratingSectionEl);
+      return;
+    }
+    if (!window.__pokerSummerRatingBootReady) setSummerRatingInitialLoading(true, ratingSectionEl);
+  } else {
+    setSummerRatingInitialLoading(false, ratingSectionEl);
+  }
   var conditionsBtn = document.getElementById("springRatingConditionsBtn");
   if (conditionsBtn) {
     if (isSummerRatingMode) {
@@ -1489,16 +1590,34 @@ function initWinterRating() {
       bodyEl.addEventListener("click", bodyEl._leagueNickClick);
     }
     function renderSummerRatingPedestalLabels(leagueNum, leagueRows) {
+      var pedestalWrap = document.getElementById("winterRatingLeague" + leagueNum + "PedestalWrap");
       var showAllWrap = document.getElementById("winterRatingLeague" + leagueNum + "ShowAllWrap");
-      if (!showAllWrap) return;
-      var labels = showAllWrap.querySelector(".summer-rating-pedestal-labels");
+      if (!pedestalWrap && showAllWrap) {
+        pedestalWrap = document.createElement("div");
+        pedestalWrap.className = "summer-rating-pedestal-wrap";
+        pedestalWrap.id = "winterRatingLeague" + leagueNum + "PedestalWrap";
+        var tableWrapForPedestal = showAllWrap.previousElementSibling;
+        if (tableWrapForPedestal && tableWrapForPedestal.classList && tableWrapForPedestal.classList.contains("winter-rating__table-wrap--league")) {
+          showAllWrap.parentNode.insertBefore(pedestalWrap, tableWrapForPedestal);
+        } else {
+          showAllWrap.parentNode.insertBefore(pedestalWrap, showAllWrap);
+        }
+      }
+      if (!pedestalWrap) return;
+      if (showAllWrap) {
+        var staleLabels = showAllWrap.querySelector(".summer-rating-pedestal-labels");
+        if (staleLabels) staleLabels.remove();
+      }
+      var labels = pedestalWrap.querySelector(".summer-rating-pedestal-labels");
       if (seasonConfig.key !== "summer" || (leagueNum !== 1 && leagueNum !== 2) || !leagueRows || leagueRows.length < 4) {
         if (labels) labels.remove();
+        pedestalWrap.setAttribute("hidden", "");
         return;
       }
+      pedestalWrap.removeAttribute("hidden");
       if (!labels) {
         labels = document.createElement("span");
-        showAllWrap.insertBefore(labels, showAllWrap.firstChild);
+        pedestalWrap.appendChild(labels);
       }
       labels.removeAttribute("aria-hidden");
       labels.className = "summer-rating-pedestal-labels summer-rating-pedestal-labels--league-" + leagueNum;
@@ -1512,14 +1631,14 @@ function initWinterRating() {
         html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + labelNickEsc + "</span>";
       }
       labels.innerHTML = html;
-      if (showAllWrap._summerPedestalClick) showAllWrap.removeEventListener("click", showAllWrap._summerPedestalClick);
-      showAllWrap._summerPedestalClick = function (e) {
+      if (pedestalWrap._summerPedestalClick) pedestalWrap.removeEventListener("click", pedestalWrap._summerPedestalClick);
+      pedestalWrap._summerPedestalClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".summer-rating-pedestal-hitbox");
         if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") {
           openWinterRatingPlayerModalReady(btn.dataset.nick);
         }
       };
-      showAllWrap.addEventListener("click", showAllWrap._summerPedestalClick);
+      pedestalWrap.addEventListener("click", pedestalWrap._summerPedestalClick);
     }
     function setupLeagueCollapse(bodyEl, leagueNum) {
       if (!bodyEl) return;
@@ -1535,15 +1654,22 @@ function initWinterRating() {
         tableWrap.classList.add("winter-rating__table-wrap--collapsed");
         showAllWrap.style.display = "";
         showAllBtn.textContent = "Ещё";
+        showAllBtn.classList.remove("winter-rating__show-all-btn--expanded");
+        showAllBtn.setAttribute("aria-expanded", "false");
+        if (bodyEl.id) showAllBtn.setAttribute("aria-controls", bodyEl.id);
         showAllBtn.onclick = function () {
           var scrollTop = tableWrap && tableWrap.scrollTop != null ? tableWrap.scrollTop : 0;
           var docScrollTop = (document.scrollingElement && document.scrollingElement.scrollTop) || document.documentElement.scrollTop || 0;
           if (tableWrap.classList.contains("winter-rating__table-wrap--collapsed")) {
             tableWrap.classList.remove("winter-rating__table-wrap--collapsed");
             showAllBtn.textContent = "Свернуть";
+            showAllBtn.classList.add("winter-rating__show-all-btn--expanded");
+            showAllBtn.setAttribute("aria-expanded", "true");
           } else {
             tableWrap.classList.add("winter-rating__table-wrap--collapsed");
             showAllBtn.textContent = "Ещё";
+            showAllBtn.classList.remove("winter-rating__show-all-btn--expanded");
+            showAllBtn.setAttribute("aria-expanded", "false");
           }
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
@@ -1555,6 +1681,10 @@ function initWinterRating() {
         };
       } else if (showAllWrap) {
         showAllWrap.style.display = "none";
+        if (showAllBtn) {
+          showAllBtn.classList.remove("winter-rating__show-all-btn--expanded");
+          showAllBtn.setAttribute("aria-expanded", "false");
+        }
       }
       if (searchInput && bodyEl) {
         searchInput.value = "";
@@ -1710,7 +1840,10 @@ function initWinterRating() {
     });
   }
   var datesContainer = document.getElementById("winterRatingDates");
-  if (!datesContainer) return;
+  if (!datesContainer) {
+    if (isSummerRatingMode) finishSummerRatingInitialLoadWhenReady(ratingSectionEl);
+    return;
+  }
   var alreadyInited = datesContainer.getAttribute("data-rating-inited") === "1";
   if (!alreadyInited) {
     datesContainer.setAttribute("data-rating-inited", "1");
@@ -1935,7 +2068,10 @@ function initWinterRating() {
         .sort(function (a, b) { return b.localeCompare(a); })
         .map(function (k) { return monthSetSpring[k]; });
     }
-    if (!availableMonths.length) return;
+    if (!availableMonths.length) {
+      if (isSummerRatingMode) finishSummerRatingInitialLoadWhenReady(ratingSectionEl);
+      return;
+    }
     calendarWrap._availableMonths = availableMonths;
     calendarWrap._availableDates = availableDates;
     calendarWrap._calendarMonthIndex = typeof calendarWrap._calendarMonthIndex === "number" ? calendarWrap._calendarMonthIndex : 0;
@@ -2125,4 +2261,5 @@ function initWinterRating() {
     renderCalendarMonth(calendarWrap._calendarMonthIndex);
     calendarWrap.setAttribute("aria-hidden", "false");
   }
+  if (isSummerRatingMode) finishSummerRatingInitialLoadWhenReady(ratingSectionEl);
 }
