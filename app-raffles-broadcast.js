@@ -23,6 +23,40 @@ function initRafflesBroadcastRuntime(opts) {
 
   /** Поля для POST raffle-manual-subscribers (текущий активный розыгрыш в форме) */
   function raffleManualBroadcastBodyFromCurrentRaffle() {
+    function raffleBroadcastTotalPrize(raffle) {
+      if (!raffle) return 0;
+      if (typeof getRaffleTotalPrize === "function") return getRaffleTotalPrize(raffle);
+      var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
+      return groups.reduce(function (sum, group) {
+        var count = Math.max(0, parseInt(group && group.count, 10) || 0);
+        var nominal = parsePrizeValue(group && group.prize);
+        return sum + (nominal > 0 ? nominal * count : 0);
+      }, 0);
+    }
+    function raffleBroadcastNominalParts(raffle) {
+      var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+      var nominalToCount = {};
+      for (var i = 0; i < groups.length; i++) {
+        var count = Math.max(0, parseInt(groups[i] && groups[i].count, 10) || 0);
+        var nominal = parsePrizeValue(groups[i] && groups[i].prize);
+        if (count > 0 && nominal > 0) nominalToCount[nominal] = (nominalToCount[nominal] || 0) + count;
+      }
+      return Object.keys(nominalToCount)
+        .map(function (k) {
+          return { nominal: Number(k) || 0, count: nominalToCount[k] || 0 };
+        })
+        .filter(function (part) { return part.nominal > 0 && part.count > 0; })
+        .sort(function (a, b) { return b.nominal - a.nominal; });
+    }
+    function raffleBroadcastJoinParts(parts) {
+      if (!parts.length) return "";
+      var labels = parts.map(function (part) {
+        return part.count + " за " + formatRaffleSum(part.nominal);
+      });
+      if (labels.length === 1) return labels[0];
+      if (labels.length === 2) return labels[0] + " и " + labels[1];
+      return labels.slice(0, -1).join(", ") + " и " + labels[labels.length - 1];
+    }
     function pluralizeRaffles(n) {
       var v = Math.abs(n) % 100;
       var d = v % 10;
@@ -31,10 +65,6 @@ function initRafflesBroadcastRuntime(opts) {
       if (d >= 2 && d <= 4) return "розыгрыша";
       return "розыгрышей";
     }
-    var endDate =
-      currentRaffleData && currentRaffleData.endDate
-        ? currentRaffleData.endDate
-        : undefined;
     function pluralizeTickets(n) {
       var v = Math.abs(n) % 100;
       var d = v % 10;
@@ -51,10 +81,92 @@ function initRafflesBroadcastRuntime(opts) {
       if (d >= 2 && d <= 4) return "беккинг-байина";
       return "беккинг-байинов";
     }
+    function raffleBroadcastSummaryTitle(raffle) {
+      var title = String(
+        raffle && (raffle.cardTitle || raffle.card_title || raffle.title || raffle.name) || ""
+      )
+        .replace(/\s+/g, " ")
+        .trim();
+      if (title.length > 54) title = title.slice(0, 53).trim() + "...";
+      return title;
+    }
+    function raffleBroadcastIsThirtyKSummary(raffle) {
+      var title = raffleBroadcastSummaryTitle(raffle);
+      var totalPrize = Math.round(raffleBroadcastTotalPrize(raffle));
+      return totalPrize === 30000 || /30[\s\u00a0\u202f]*000\s*(?:р|₽|руб\.?)?/i.test(title);
+    }
+    function raffleBroadcastShortSummary(raffle) {
+      var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+      var count = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
+      if (!count) {
+        count = groups.reduce(function (sum, group) {
+          return sum + Math.max(0, parseInt(group && group.count, 10) || 0);
+        }, 0);
+      }
+      var isCash =
+        typeof pokerRafflesIsCashPrize === "function" &&
+        raffle &&
+        pokerRafflesIsCashPrize(raffle);
+      var nominalParts = raffleBroadcastNominalParts(raffle);
+      var partsText = raffleBroadcastJoinParts(nominalParts);
+      var prizeSuffix =
+        nominalParts.length === 1 && nominalParts[0].count === count
+          ? " за " + formatRaffleSum(nominalParts[0].nominal)
+          : partsText
+            ? ": " + partsText
+            : "";
+      if (count > 0) {
+        var summaryText = "";
+        if (isCash) {
+          summaryText =
+            count +
+            " " +
+            pluralizeCashBuyins(count) +
+            " на кеш" +
+            prizeSuffix;
+        } else {
+          summaryText =
+            count +
+            " " +
+            pluralizeTickets(count) +
+            prizeSuffix;
+        }
+        var title = raffleBroadcastSummaryTitle(raffle);
+        return title ? title + ": " + summaryText : summaryText;
+      }
+      var totalPrize = raffleBroadcastTotalPrize(raffle);
+      if (totalPrize > 0) return "призовой фонд " + formatRaffleSum(totalPrize);
+      return "розыгрыш";
+    }
+    function raffleBroadcastActiveSummaryMessage(list) {
+      var ordered = list
+        .map(function (raffle, index) {
+          return { raffle: raffle, index: index, isThirtyK: raffleBroadcastIsThirtyKSummary(raffle) };
+        })
+        .sort(function (a, b) {
+          if (a.isThirtyK !== b.isThirtyK) return a.isThirtyK ? 1 : -1;
+          return a.index - b.index;
+        })
+        .map(function (item) { return item.raffle; });
+      var lines = ordered
+        .map(function (raffle) { return raffleBroadcastShortSummary(raffle); })
+        .filter(function (line) { return !!line; });
+      if (!lines.length) return "";
+      return (
+        "🎲 Сейчас идут " +
+        lines.length +
+        " " +
+        pluralizeRaffles(lines.length) +
+        ":\n" +
+        lines.map(function (line) { return "• " + line; }).join("\n") +
+        "\n\nЗаходи и участвуй."
+      );
+    }
+    var broadcastRaffleData = currentRaffleData || null;
     var isCashPrize =
       typeof pokerRafflesIsCashPrize === "function" &&
-      currentRaffleData &&
-      pokerRafflesIsCashPrize(currentRaffleData);
+      broadcastRaffleData &&
+      pokerRafflesIsCashPrize(broadcastRaffleData);
     var activeRaffles = [];
     try {
       var activeSource = Array.isArray(rafflesActiveBroadcastList)
@@ -70,28 +182,17 @@ function initRafflesBroadcastRuntime(opts) {
     } catch (eActiveRaffles) {
       activeRaffles = [];
     }
+    var endDate =
+      broadcastRaffleData && broadcastRaffleData.endDate
+        ? broadcastRaffleData.endDate
+        : undefined;
     if (activeRaffles.length > 1) {
       var activeTotalPrize = activeRaffles.reduce(function (sum, raffle) {
-        if (typeof getRaffleTotalPrize === "function") return sum + getRaffleTotalPrize(raffle);
-        var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
-        return (
-          sum +
-          groups.reduce(function (groupSum, group) {
-            var count = Math.max(0, parseInt(group && group.count, 10) || 0);
-            var nominal = parsePrizeValue(group && group.prize);
-            return groupSum + (nominal > 0 ? nominal * count : 0);
-          }, 0)
-        );
+        return sum + raffleBroadcastTotalPrize(raffle);
       }, 0);
+      var summaryMessage = raffleBroadcastActiveSummaryMessage(activeRaffles);
       return {
-        message:
-          "🎲 Сейчас идут " +
-          activeRaffles.length +
-          " " +
-          pluralizeRaffles(activeRaffles.length) +
-          " на общую сумму " +
-          formatRaffleSum(activeTotalPrize) +
-          ".\n\nЗаходи и участвуй.",
+        message: summaryMessage || undefined,
         activeRafflesSummary: true,
         activeRafflesCount: activeRaffles.length,
         activeRafflesTotalPrize: activeTotalPrize,
@@ -102,8 +203,8 @@ function initRafflesBroadcastRuntime(opts) {
     var nominalToCount = {};
     try {
       var groups =
-        currentRaffleData && Array.isArray(currentRaffleData.groups)
-          ? currentRaffleData.groups
+        broadcastRaffleData && Array.isArray(broadcastRaffleData.groups)
+          ? broadcastRaffleData.groups
           : [];
       for (var gi = 0; gi < groups.length; gi++) {
         var c = Math.max(0, parseInt(groups[gi].count, 10) || 0);
