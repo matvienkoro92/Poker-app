@@ -164,6 +164,7 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+var HOME_TOURNAMENT_TWO_BUBBLE_BUYIN_DAYS = { 1: true, 2: true, 3: true, 5: true };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -464,6 +465,19 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
     bonus.classList.toggle("home-tournament-bonus--inactive", !active);
     bonus.setAttribute("aria-disabled", active ? "false" : "true");
   });
+}
+
+function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
+  var amountEl = document.getElementById("homeTournamentBubbleBuyinAmount");
+  var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
+  if (!amountEl || !labelEl) return;
+  if (HOME_TOURNAMENT_TWO_BUBBLE_BUYIN_DAYS[Number(activeWeekday)]) {
+    amountEl.textContent = "Возврат БИ";
+    labelEl.textContent = "2ум баббл-боям";
+  } else {
+    amountEl.textContent = "Возврат";
+    labelEl.textContent = "БИ бабблу";
+  }
 }
 
 function updateHomeTournamentFocusFlow() {
@@ -944,6 +958,7 @@ function updateTournamentDayBlock() {
       tdWeekTime.textContent = pokerMskWeekdayShortAt(detailState.target.getTime()) + ", 18:00 МСК";
     }
     syncHomeTournamentBonusAvailability(selectedWeekday);
+    syncHomeTournamentBubbleBuyinLabel(selectedWeekday);
     var frBuy = document.getElementById("freerollHomeBuyin");
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");

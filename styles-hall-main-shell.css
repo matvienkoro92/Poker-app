@@ -195,7 +195,7 @@
 #hallOfFameView.hall-of-fame--top2026 {
   --hall-top2026-header-overlap: 104px;
   --hall-top2026-bg-width: 100%;
-  --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) + 15px);
+  --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
   --hall-top2026-list-offset: 46px;
   --hall-top2026-list-width: min(66%, 258px);
   --hall-top2026-list-max-width: 258px;
@@ -864,7 +864,7 @@
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-header-overlap: 102px;
     --hall-top2026-bg-width: 100%;
-    --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) + 15px);
+    --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
     --hall-top2026-list-offset: 38px;
     --hall-top2026-list-left: max(56px, calc(50% - 102px));
     --hall-top2026-stage-min-height: 838px;
@@ -996,7 +996,7 @@
 @media (max-width: 480px) {
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-bg-width: 100%;
-    --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) + 15px);
+    --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
     --hall-top2026-list-offset: 38px;
     --hall-top2026-list-width: min(66%, 248px);
     --hall-top2026-list-max-width: 248px;
