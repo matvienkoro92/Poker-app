@@ -379,6 +379,32 @@ function pokerGetSummerRatingPlayerArt(nick) {
 
 window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
 
+function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {
+  if (!modal) return;
+  var artWrap = document.getElementById("winterRatingPlayerModalArt") || modal.querySelector(".winter-rating-player-modal__art");
+  if (!artWrap) {
+    var summary = document.getElementById("winterRatingPlayerModalSummary") || modal.querySelector(".winter-rating-player-modal__summary");
+    artWrap = document.createElement("div");
+    artWrap.id = "winterRatingPlayerModalArt";
+    artWrap.className = "winter-rating-player-modal__art";
+    artWrap.hidden = true;
+    if (summary && summary.parentNode) summary.parentNode.insertBefore(artWrap, summary);
+    else modal.appendChild(artWrap);
+  }
+  var art = seasonKey === "summer" && typeof pokerGetSummerRatingPlayerArt === "function" ? pokerGetSummerRatingPlayerArt(nick) : null;
+  if (!art || !art.src) {
+    artWrap.hidden = true;
+    artWrap.innerHTML = "";
+    artWrap.className = "winter-rating-player-modal__art";
+    return;
+  }
+  var nickEsc = escapeHtml(art.nick || nick || "");
+  var srcEsc = escapeHtml(art.src);
+  artWrap.hidden = false;
+  artWrap.className = "winter-rating-player-modal__art winter-rating-player-modal__art--league-" + art.league + " winter-rating-player-modal__art--place-" + art.place;
+  artWrap.innerHTML = "<img class=\"winter-rating-player-modal__art-img\" src=\"" + srcEsc + "\" alt=\"" + nickEsc + "\" loading=\"eager\" decoding=\"async\" />";
+}
+
 function getTournamentRatingTournamentsBySeason(seasonKey) {
   seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
   if (seasonKey === "summer") {
@@ -859,6 +885,7 @@ function openWinterRatingPlayerModal(nick, options) {
   modal._winterPlayerModalShowPoints = !useGazetteStyle;
   modal._winterPlayerModalNick = normalizeWinterNick(nick);
   modal._winterPlayerModalSeasonKey = seasonKey;
+  syncWinterRatingPlayerModalArt(modal, nick, seasonKey);
   syncWinterRatingPlayerMonthOptions(monthSelect, summary);
   if (monthSelect) monthSelect.value = "all";
   var leagueWrap = document.getElementById("winterRatingPlayerModalLeagueWrap");

@@ -126,6 +126,43 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.winter-rating-player-modal__art {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 124px;
+  margin: -8px 0 12px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 194, 70, 0.2), transparent 44%),
+    linear-gradient(180deg, rgba(8, 14, 22, 0.3), rgba(8, 14, 22, 0.78));
+}
+.winter-rating-player-modal__art[hidden] {
+  display: none !important;
+}
+.winter-rating-player-modal__art::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 12px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45), transparent 68%);
+}
+.winter-rating-player-modal__art-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  max-width: min(72%, 220px);
+  max-height: 156px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+}
 .winter-rating-player-modal__toolbar {
   display: flex;
   flex-wrap: nowrap;
