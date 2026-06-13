@@ -164,7 +164,8 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_TWO_BUBBLE_BUYIN_DAYS = { 1: true, 2: true, 3: true, 5: true };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1500 ₽", 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
+var HOME_TOURNAMENT_ACES_PREFLOP_BONUSES = { 0: "1500 ₽", 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -468,16 +469,33 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
 }
 
 function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
+  var bonusEl = document.querySelector(".home-tournament-bonus--bubble-buyin");
   var amountEl = document.getElementById("homeTournamentBubbleBuyinAmount");
   var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
   if (!amountEl || !labelEl) return;
-  if (HOME_TOURNAMENT_TWO_BUBBLE_BUYIN_DAYS[Number(activeWeekday)]) {
-    amountEl.textContent = "Возврат БИ";
-    labelEl.textContent = "2ум баббл-боям";
-  } else {
-    amountEl.textContent = "Возврат";
-    labelEl.textContent = "БИ бабблу";
+  var amount = HOME_TOURNAMENT_BUBBLE_BONUSES[Number(activeWeekday)] || "";
+  var active = !!amount;
+  amountEl.textContent = amount || "—";
+  labelEl.textContent = "бабблу";
+  if (bonusEl) {
+    bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
+    bonusEl.setAttribute("aria-disabled", active ? "false" : "true");
+    bonusEl.setAttribute("aria-label", active ? amount + " бабблу" : "Бонус бабблу недоступен в этот день");
   }
+}
+
+function syncHomeTournamentAcesPreflopBonus(activeWeekday) {
+  var bonusEl = document.getElementById("homeTournamentAcesPreflopBonus");
+  var amountEl = document.getElementById("homeTournamentAcesPreflopAmount");
+  var labelEl = document.getElementById("homeTournamentAcesPreflopLabel");
+  if (!bonusEl || !amountEl || !labelEl) return;
+  var amount = HOME_TOURNAMENT_ACES_PREFLOP_BONUSES[Number(activeWeekday)] || "";
+  var active = !!amount;
+  amountEl.textContent = amount || "—";
+  labelEl.textContent = "за вылет на тузах префлоп";
+  bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
+  bonusEl.setAttribute("aria-disabled", active ? "false" : "true");
+  bonusEl.setAttribute("aria-label", active ? amount + " за вылет на тузах префлоп" : "Бонус за вылет на тузах префлоп недоступен в этот день");
 }
 
 function updateHomeTournamentFocusFlow() {
@@ -959,6 +977,7 @@ function updateTournamentDayBlock() {
     }
     syncHomeTournamentBonusAvailability(selectedWeekday);
     syncHomeTournamentBubbleBuyinLabel(selectedWeekday);
+    syncHomeTournamentAcesPreflopBonus(selectedWeekday);
     var frBuy = document.getElementById("freerollHomeBuyin");
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");

@@ -11,7 +11,7 @@
 @import url("./styles-download.css?v=3.559");
 @import url("./styles-home-legacy-tail.css?v=3.559");
 @import url("./styles-home-rating-promo-legacy.css?v=3.559");
-@import url("./styles-rating.css?v=3.568");
+@import url("./styles-rating.css?v=3.570");
 @import url("./styles-hall.css?v=3.559");
 @import url("./styles-admin.css?v=3.559");
 @import url("./styles-player-crm.css?v=3.559");
@@ -2378,6 +2378,19 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   transform: scaleX(-1);
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__hint {
+  position: relative;
+  z-index: 1;
+  margin: -3px 0 0;
+  padding: 0 10px;
+  color: rgba(255, 238, 202, 0.72);
+  font-size: clamp(8px, 1.25vw, 11px);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(29, 16, 8, 0.9);
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid {
   position: relative;
   z-index: 1;
@@ -2466,6 +2479,24 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin .home-tournament-bonus__amount {
   font-size: clamp(12px, 2.4vw, 19px);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop {
+  grid-column: 1 / -1;
+  min-height: clamp(34px, 6.2vw, 48px);
+  flex-direction: row;
+  gap: 8px;
+  padding: 7px 10px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop .home-tournament-bonus__amount {
+  font-size: clamp(14px, 2.7vw, 22px);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop .home-tournament-bonus__label {
+  margin-top: 0;
+  font-size: clamp(9px, 1.85vw, 14px);
+  text-align: left;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {

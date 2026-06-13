@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.568">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.570">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -299,7 +299,7 @@
     <link rel="preload" as="image" href="./assets/home-tournament-sunday-knockout-week-300k.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-daily.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.568" />
+    <link rel="stylesheet" href="./styles.css?v=3.570" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.559" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -899,6 +899,7 @@
               </div>
               <div class="home-tournament-bonuses" aria-label="Бонусы турниров">
                 <div class="home-tournament-bonuses__title">Бонусы</div>
+                <p class="home-tournament-bonuses__hint">Нажмите на бонус чтобы узнать условие выдачи</p>
                 <div class="home-tournament-bonuses__grid" role="list">
                   <div class="home-tournament-bonus" role="listitem">
                     <span class="home-tournament-bonus__amount">1000 ₽</span>
@@ -917,8 +918,12 @@
                     <span class="home-tournament-bonus__label">за нокаут топ10 Лиги1</span>
                   </div>
                   <div class="home-tournament-bonus home-tournament-bonus--bubble-buyin" role="listitem">
-                    <span class="home-tournament-bonus__amount" id="homeTournamentBubbleBuyinAmount">Возврат</span>
-                    <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">БИ бабблу</span>
+                    <span class="home-tournament-bonus__amount" id="homeTournamentBubbleBuyinAmount">500 ₽</span>
+                    <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">бабблу</span>
+                  </div>
+                  <div class="home-tournament-bonus home-tournament-bonus--aces-preflop" id="homeTournamentAcesPreflopBonus" role="listitem">
+                    <span class="home-tournament-bonus__amount" id="homeTournamentAcesPreflopAmount">500 ₽</span>
+                    <span class="home-tournament-bonus__label" id="homeTournamentAcesPreflopLabel">за вылет на тузах префлоп</span>
                   </div>
                 </div>
                 <p class="home-tournament-bonuses__note">Для тех, у кого от 1500 ₽ комиссии на прошлой или на этой неделе</p>
@@ -1578,7 +1583,7 @@
     <script defer src="./app-home-planner-runtime.js?v=3.559"></script>
     <script defer src="./app-home-planner.js?v=3.559"></script>
     <script defer src="./app-home-tasks.js?v=3.559"></script>
-    <script defer src="./app-tournament-day.js?v=3.559"></script>
+    <script defer src="./app-tournament-day.js?v=3.570"></script>
     <script defer src="./app-home-deeplinks.js?v=3.559"></script>
     <script defer src="./app-home-club-info-modals.js?v=3.559"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=3.559"></script>
