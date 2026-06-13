@@ -3041,7 +3041,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank {
   position: absolute;
   left: 50%;
-  top: -60px;
+  top: -92px;
   z-index: 3;
   display: inline-flex !important;
   align-items: center;
@@ -3068,7 +3068,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__rank {
   position: absolute;
   left: 50%;
-  top: -60px;
+  top: -92px;
   z-index: 3;
   display: inline-flex !important;
   align-items: center;
@@ -3165,7 +3165,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
-  top: -72px;
+  top: -104px;
   width: 32px;
   height: 32px;
   background:
@@ -3179,7 +3179,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
-  top: -72px;
+  top: -104px;
   width: 32px;
   height: 32px;
   background:
@@ -3194,7 +3194,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
   left: calc(50% - 2px);
-  top: -62px;
+  top: -94px;
   background:
     radial-gradient(circle at 32% 18%, rgba(255, 244, 207, 0.98) 0%, rgba(255, 212, 138, 0.72) 20%, transparent 45%),
     radial-gradient(circle at 68% 76%, rgba(94, 38, 8, 0.58) 0%, transparent 46%),
@@ -3218,7 +3218,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
   left: calc(50% - 2px);
-  top: -62px;
+  top: -94px;
   background:
     radial-gradient(circle at 34% 22%, #ffe6bb 0%, #d88a3a 25%, transparent 46%),
     linear-gradient(145deg, #f2b56d 0%, #a85a20 55%, #4f2108 100%);
@@ -3245,29 +3245,29 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
-  transform: translate(-3px, -34px);
+  transform: translate(-3px, -49px);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  transform: translateY(-35px);
+  transform: translateY(-50px);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
   font-size: clamp(7.4px, 2.09vw, 9.2px);
-  transform: translateY(-33px);
+  transform: translateY(-48px);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
   font-size: clamp(7.4px, 2.09vw, 9.2px);
-  transform: translateY(-33px);
+  transform: translateY(-48px);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  transform: translateY(-35px);
+  transform: translateY(-50px);
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
-  transform: translate(-3px, -34px);
+  transform: translate(-3px, -49px);
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
