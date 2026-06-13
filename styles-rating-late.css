@@ -3332,6 +3332,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: none;
 }
 
+/* Летний топ-4..топ-10: прямоугольные площадки на фоне над таблицей - это подставки; ноги персонажей должны стоять на их верхней границе. */
 .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap {
   order: 2;
   display: block !important;
@@ -3354,7 +3355,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     url("./assets/summer-rating-player-milkyway.webp") 67.5% calc(76% - 10px) / 15.1% auto no-repeat,
     url("./assets/summer-rating-player-prushnik.webp") 84% calc(79% - 11px) / 14.1% auto no-repeat,
     url("./assets/summer-rating-player-khervam.webp") 100% calc(77% - 10px) / 14.4% auto no-repeat;
-  transform: translateY(-28px);
+  transform: translateY(2px);
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-labels {
@@ -3367,7 +3368,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
   position: absolute;
-  top: 112px;
+  top: 142px;
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -3385,7 +3386,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
   position: absolute;
-  top: 20px;
+  top: 50px;
   z-index: 2;
   display: block;
   height: 98px;
@@ -3498,7 +3499,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% - 11px) / 14.6% auto no-repeat,
     url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% - 11px) / 13.8% auto no-repeat;
   pointer-events: none;
-  transform: translateY(-28px);
+  transform: translateY(2px);
 }
 
 .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap[hidden],
@@ -3880,11 +3881,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
-    top: 136px;
+    top: 150px;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
-    top: 50px;
+    top: 80px;
     height: 90px;
   }
 }
