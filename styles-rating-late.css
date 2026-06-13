@@ -2898,6 +2898,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: flex !important;
   flex-direction: column;
   min-height: 0;
+  transform: translateY(6px);
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__spring-leagues {
