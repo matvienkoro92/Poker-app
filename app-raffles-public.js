@@ -225,6 +225,9 @@ function initRafflesPublicRuntime(opts) {
             } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
               else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+            } else if (data && data.code === "RAFFLE_LEVEL_REQUIRED") {
+              if (tg && tg.showAlert) tg.showAlert(err || "Повысьте свой уровень в игре.");
+              else if (typeof alert === "function") alert(err || "Повысьте свой уровень в игре.");
             } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
               if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
             } else if (data && data.code === "INVALID_SERVER_RESPONSE") {

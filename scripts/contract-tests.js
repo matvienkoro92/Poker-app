@@ -815,6 +815,78 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.body.raffle.participants.length, 0, "leave removes participant");
 }
 
+async function testRaffleAccessLevelGate(redis) {
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  installTelegramGateFetch(redis, { botOk: true, channelOk: true });
+
+  const allAccessRaffle = {
+    id: "contract_raffle_access_all",
+    title: "Contract all access raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    accessLevel: 0,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_access_all", JSON.stringify(allAccessRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_access_all");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "join",
+    raffleId: "contract_raffle_access_all",
+    deviceId: "access-all-device",
+  }));
+  assert.strictEqual(r.statusCode, 200, "access level 0 allows a user without Poker21 profile");
+  assert.strictEqual(r.body.raffle.participants[0].p21Id, "", "access level 0 stores empty p21 id when not linked");
+
+  const gatedRaffle = {
+    id: "contract_raffle_access_level",
+    title: "Contract level gated raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    accessLevel: 3,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_access_level", JSON.stringify(gatedRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_access_level");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  redis.h("poker_app:visitor_p21_ids").set("ID100002", "P21-LOW");
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Low Level", totalCounter: { fee: 12000 } }));
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "join",
+    raffleId: "contract_raffle_access_level",
+    deviceId: "access-level-device-low",
+  }, { "x-forwarded-for": "10.0.0.22" }));
+  assert.strictEqual(r.statusCode, 403, "raffle blocks a player below required Poker21 level");
+  assert.strictEqual(r.body.code, "RAFFLE_LEVEL_REQUIRED", "low level response has stable code");
+  assert.ok(String(r.body.error || "").includes("Повысьте свой уровень"), "low level response explains upgrade");
+
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Enough Level", totalCounter: { fee: 32000 } }));
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "join",
+    raffleId: "contract_raffle_access_level",
+    deviceId: "access-level-device-ok",
+  }, { "x-forwarded-for": "10.0.0.23" }));
+  assert.strictEqual(r.statusCode, 200, "raffle allows a player at or above required Poker21 level");
+  assert.strictEqual(r.body.raffle.accessLevel, 3, "raffle payload keeps access level");
+  assert.strictEqual(r.body.raffle.participants[0].pokerPlusStatusLevel, 4, "join stores hydrated Poker21 level");
+}
+
 async function testRaffleAdminUpsertParticipantAddsTickets(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -4907,6 +4979,7 @@ async function main() {
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle access level gate", testRaffleAccessLevelGate],
     ["raffle admin upsert participant tickets", testRaffleAdminUpsertParticipantAddsTickets],
     ["raffle admin add prize groups", testRaffleAdminAddPrizeGroups],
     ["raffle admin remove participant", testRaffleAdminRemoveParticipant],

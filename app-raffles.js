@@ -75,6 +75,7 @@ function initRaffles() {
   var raffleEnd = document.getElementById("raffleEnd");
   var rafflePrizes = document.getElementById("rafflePrizes");
   var raffleIdNote = document.getElementById("raffleIdNote");
+  var raffleAccessLevelNote = document.getElementById("raffleAccessLevelNote");
   var raffleSubscribeRequirements = document.getElementById("raffleSubscribeRequirements");
   var raffleInfoToggleBtn = document.getElementById("raffleInfoToggleBtn");
   var raffleInfoPanel = document.getElementById("raffleInfoPanel");
@@ -721,6 +722,40 @@ function initRaffles() {
   function activeRaffleBadgeText(raffle) {
     if (raffle && raffle.daily) return "Ежедневный";
     return "Сегодня";
+  }
+
+  function normalizeRaffleAccessLevel(value) {
+    var n = parseInt(String(value == null ? "" : value), 10);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.max(0, Math.min(55, n));
+  }
+
+  function raffleAccessLevel(raffle) {
+    if (!raffle || typeof raffle !== "object") return 0;
+    var raw = raffle.accessLevel != null
+      ? raffle.accessLevel
+      : raffle.minAccessLevel != null
+        ? raffle.minAccessLevel
+        : raffle.requiredLevel != null
+          ? raffle.requiredLevel
+          : raffle.minimumLevel;
+    return normalizeRaffleAccessLevel(raw);
+  }
+
+  function raffleAccessLevelText(raffle) {
+    var level = raffleAccessLevel(raffle);
+    return level > 0 ? "Уровень " + level + "+" : "для всех";
+  }
+
+  function activeRaffleAccessLevelHtml(raffle) {
+    return (
+      '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу">' +
+      '<span class="raffles-active-chooser__access-label">Доступ</span>' +
+      '<span class="raffles-active-chooser__access-value">' +
+      escapeHtml(raffleAccessLevelText(raffle)) +
+      "</span>" +
+      "</span>"
+    );
   }
 
   function activeRaffleResultsTimeText(raffle) {
@@ -1397,6 +1432,9 @@ function initRaffles() {
     } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
       if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
       else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
+    } else if (data && data.code === "RAFFLE_LEVEL_REQUIRED") {
+      if (tg && tg.showAlert) tg.showAlert(err || "Повысьте свой уровень в игре.");
+      else if (typeof alert === "function") alert(err || "Повысьте свой уровень в игре.");
     } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
       if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
     } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
@@ -1570,6 +1608,7 @@ function initRaffles() {
           "</span></span>";
         var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
         var factsHtml = participantsHtml + timerHtml;
+        var accessHtml = activeRaffleAccessLevelHtml(raffle);
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
@@ -1589,6 +1628,7 @@ function initRaffles() {
           '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
+          accessHtml +
           '<button type="button" class="raffles-active-chooser__cta' +
           (isIn ? " raffles-active-chooser__cta--joined" : "") +
           (adminTicketEntry ? " raffles-active-chooser__cta--locked" : "") +
@@ -2128,6 +2168,7 @@ function initRaffles() {
       setRaffleEndStatusText: setRaffleEndStatusText,
       rafflePrizes: rafflePrizes,
       raffleIdNote: raffleIdNote,
+      raffleAccessLevelNote: raffleAccessLevelNote,
       raffleSubscribeRequirements: raffleSubscribeRequirements,
       raffleInfoToggleBtn: raffleInfoToggleBtn,
       raffleInfoPanel: raffleInfoPanel,
@@ -2153,6 +2194,8 @@ function initRaffles() {
       raffleViewerTicketCount: raffleViewerTicketCount,
       raffleUsesTicketWeights: raffleUsesTicketWeights,
       raffleUsesAdminTicketEntry: raffleUsesAdminTicketEntry,
+      raffleAccessLevel: raffleAccessLevel,
+      raffleAccessLevelText: raffleAccessLevelText,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
       setRaffleInfoPanelOpen: setRaffleInfoPanelOpen,
       escapeHtml: escapeHtml

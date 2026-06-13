@@ -22,6 +22,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleDailyEnabled = document.getElementById("raffleDailyEnabled");
     var raffleDailyStartWrap = document.getElementById("raffleDailyStartWrap");
     var raffleDailyStartTime = document.getElementById("raffleDailyStartTime");
+    var raffleAccessLevel = document.getElementById("raffleAccessLevel");
     var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
     var raffleAdminActionMode = "";
@@ -115,6 +116,7 @@ function initRafflesAdminCreateRuntime(opts) {
           prizeKind: "tournament_ticket",
           drawMode: "weighted_tickets",
           ticketEntryMode: "admin",
+          accessLevel: 0,
           promoGuarantee: "700 000р",
           cardTitle: "Розыгрыш 30 000р",
           cardSubtitle: "3 билета за 10 000р · нокаут с гарантией 700 000р",
@@ -151,6 +153,33 @@ function initRafflesAdminCreateRuntime(opts) {
 
   function getRaffleCreateType() {
     return raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other";
+  }
+
+  function normalizeRaffleCreateAccessLevel(value) {
+    var n = parseInt(String(value == null ? "" : value), 10);
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.max(0, Math.min(55, n));
+  }
+
+  function setupRaffleAccessLevelSelect() {
+    if (!raffleAccessLevel || raffleAccessLevel.dataset.ready === "1") return;
+    raffleAccessLevel.dataset.ready = "1";
+    var existing = {};
+    Array.prototype.forEach.call(raffleAccessLevel.options || [], function (opt) {
+      existing[String(opt.value)] = true;
+    });
+    for (var level = 1; level <= 55; level += 1) {
+      if (existing[String(level)]) continue;
+      var opt = document.createElement("option");
+      opt.value = String(level);
+      opt.textContent = "Уровень " + level + "+";
+      raffleAccessLevel.appendChild(opt);
+    }
+    raffleAccessLevel.value = "0";
+  }
+
+  function getRaffleCreateAccessLevel() {
+    return normalizeRaffleCreateAccessLevel(raffleAccessLevel ? raffleAccessLevel.value : 0);
   }
 
   function getRaffleTournamentSelectedOption(select) {
@@ -259,6 +288,8 @@ function initRafflesAdminCreateRuntime(opts) {
       buildGroupInputs();
     }
   }
+
+  setupRaffleAccessLevelSelect();
 
   function syncRaffleDailyControls() {
     var enabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
@@ -807,6 +838,7 @@ function initRafflesAdminCreateRuntime(opts) {
             endDate: endDate.toISOString(),
             title: title || undefined,
             prizeKind: prizeKind,
+            accessLevel: getRaffleCreateAccessLevel(),
             daily: dailyEnabled,
             dailyStartTime: dailyStartTime || undefined,
             createIdempotencyKey: idemKey,

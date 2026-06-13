@@ -135,6 +135,12 @@
                 </div>
 
                 <div class="raffle-create-form__daily">
+                  <label class="randomizer-label">
+                    <span class="randomizer-label__text">Доступ:</span>
+                    <select id="raffleAccessLevel" class="randomizer-input raffle-access-level-select" aria-label="Минимальный уровень доступа">
+                      <option value="0" selected>для всех</option>
+                    </select>
+                  </label>
                   <label class="raffle-create-form__daily-toggle">
                     <input type="checkbox" id="raffleDailyEnabled" />
                     <span>Ежедневный</span>
@@ -182,6 +188,7 @@
                     <p class="raffle-stat raffle-stat--timer" id="raffleEnd"></p>
                   </div>
                   <div class="raffle-prizes" id="rafflePrizes"></div>
+                  <div class="raffle-access-level-note" id="raffleAccessLevelNote" aria-label="Доступ к розыгрышу">Доступ: для всех</div>
                   <div class="raffle-join-invite-row">
                     <div class="raffle-join-leave-cell">
                       <button type="button" class="primary-button raffle-join-toggle-btn" id="raffleJoinToggleBtn" data-raffle-action="join">Участвовать</button>

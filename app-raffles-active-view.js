@@ -34,14 +34,22 @@ function initRafflesActiveViewRuntime(opts) {
   function setRaffleIdNoteContent(raffle, adminTicketEntry) {
     if (!raffleIdNote) return;
     var knockoutTicketCard = raffleActiveViewIsKnockoutTicketCard(raffle);
+    var accessLevel = typeof raffleAccessLevel === "function" ? raffleAccessLevel(raffle) : 0;
     if (knockoutTicketCard) {
       raffleIdNote.innerHTML =
         "<li>Получайте по билету на розыгрыш за каждые:</li>" +
         "<li>100 раздач на 20/40 Бонус гейм</li>" +
         '<li>250 раздач на 5/10 бонус гейм <span class="raffle-id-note__hint">(если вы не с беккинг-розыгрыша)</span></li>';
+    } else if (accessLevel > 0) {
+      raffleIdNote.innerHTML =
+        "<li>Для участия нужен уровень " +
+        escapeHtml(accessLevel) +
+        '+ в профиле Poker21.</li>' +
+        '<li>Если уровень ниже, повысьте свой уровень в игре и попробуйте снова.</li>';
     } else {
       raffleIdNote.innerHTML =
-        '<li>Проверьте ваш ID из Poker21 в профиле <span class="raffle-id-note__hint">(на него будет начисляться выигранный приз)</span>.</li>' +
+        '<li>Доступ открыт для всех, привязка Poker21 не обязательна.</li>' +
+        '<li>Если Poker21 привязан, проверьте ID в профиле <span class="raffle-id-note__hint">(так проще выдать выигранный приз)</span>.</li>' +
         '<li>У вас будет 15 минут, чтобы забрать выигрыш <span class="raffle-id-note__hint">(нажать «Готов»)</span>, если не забрали — выбирается другой участник.</li>';
     }
     raffleIdNote.hidden = !!(adminTicketEntry && !knockoutTicketCard);
@@ -142,6 +150,12 @@ function initRafflesActiveViewRuntime(opts) {
     if (rafflePrizes) {
       rafflePrizes.innerHTML = "";
       rafflePrizes.hidden = true;
+    }
+    if (raffleAccessLevelNote) {
+      var accessText = typeof raffleAccessLevelText === "function" ? raffleAccessLevelText(raffle) : "для всех";
+      raffleAccessLevelNote.textContent = "Доступ: " + accessText;
+      raffleAccessLevelNote.hidden = false;
+      raffleAccessLevelNote.setAttribute("aria-hidden", "false");
     }
     var raffleIds = collectRaffleIdentityIds();
     var iAmIn =
