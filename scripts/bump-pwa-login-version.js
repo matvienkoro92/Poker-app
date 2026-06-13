@@ -2,8 +2,7 @@
 /**
  * Увеличивает data-app-version на <html> в index.html на 0.001 (1.005 → 1.006).
  * Оверлей загрузки, PWA-экран входа и футер читают версию из этого атрибута.
- * Вызывается из scripts/pre-push (после npm run install-hooks).
- * Пропуск: SKIP_PWA_VERSION_BUMP=1 git push
+ * Запускается вручную: npm run bump:pwa-version.
  */
 const fs = require("fs");
 const path = require("path");

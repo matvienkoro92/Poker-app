@@ -483,7 +483,7 @@
       })();
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
-      <!-- Версия: атрибут data-app-version на <html> — оверлей загрузки, экран входа PWA и футер главной. +0.001 на push / npm run bump:pwa-version -->
+      <!-- Версия: атрибут data-app-version на <html> — оверлей загрузки, экран входа PWA и футер главной. Обновлять вручную через npm run bump:pwa-version, когда нужен cache-bust. -->
       <div class="pwa-auth-screen__identifying" id="pwaAuthIdentifyingPanel" aria-live="polite" aria-busy="true" hidden>
         <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
