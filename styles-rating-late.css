@@ -3379,8 +3379,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: block !important;
   position: relative;
   width: 100%;
-  height: 154px;
-  margin: 2px 0 32px;
+  height: 120px;
+  margin: 2px 0 16px;
   overflow: visible;
   padding: 0;
 }
@@ -3396,7 +3396,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     url("./assets/summer-rating-player-milkyway.webp") 67.5% calc(76% - 10px) / 15.1% auto no-repeat,
     url("./assets/summer-rating-player-prushnik.webp") 84% calc(79% - 11px) / 14.1% auto no-repeat,
     url("./assets/summer-rating-player-khervam.webp") 100% calc(77% - 10px) / 14.4% auto no-repeat;
-  transform: translateY(2px);
+  transform: translateY(-62px);
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-labels {
@@ -3409,7 +3409,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
   position: absolute;
-  top: 158px;
+  top: 100px;
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -3427,7 +3427,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
   position: absolute;
-  top: 50px;
+  top: -12px;
   z-index: 2;
   display: block;
   height: 112px;
@@ -3520,8 +3520,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: block !important;
   position: relative;
   width: 100%;
-  height: 154px;
-  margin: 2px 0 32px;
+  height: 120px;
+  margin: 2px 0 16px;
   overflow: visible;
   padding: 0;
 }
@@ -3540,7 +3540,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% - 11px) / 14.6% auto no-repeat,
     url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% - 11px) / 13.8% auto no-repeat;
   pointer-events: none;
-  transform: translateY(2px);
+  transform: translateY(-62px);
 }
 
 .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap[hidden],
@@ -3885,17 +3885,23 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) {
-    bottom: -66px;
+    bottom: 28px;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2),
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) {
-    bottom: -56px;
+    bottom: 40px;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3),
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) {
-    bottom: -66px;
+    bottom: 28px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
+  .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
+    height: 128px;
+    margin-bottom: 16px;
   }
 
   .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap::before {
@@ -3921,11 +3927,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
-    top: 166px;
+    top: 108px;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
-    top: 80px;
+    top: 18px;
     height: 90px;
   }
 }
