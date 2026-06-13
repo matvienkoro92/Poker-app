@@ -3035,6 +3035,20 @@ async function testDailyPokerWinners(redis) {
     previousMonthTotalSpins: expectedTotalForDates(previousMonthDateSet),
     firstSpinAt: "2026-05-20T08:00:00.000Z",
     firstSpinDate: "2026-05-20",
+    handCounts: {
+      royal_flush: 0,
+      straight_flush: 0,
+      four_of_a_kind: 1,
+      full_house: 1,
+      flush: 2,
+      straight: 0,
+      three_of_a_kind: 1,
+      two_pair: 0,
+      pair: 1,
+      high_card: 0,
+    },
+    consolationBonusCount: 0,
+    consolationBonusAmount: 0,
   };
   redis.s("poker_app:daily_poker_users").add("ID100002");
   redis.s("poker_app:daily_poker_users").add("ID100003");
@@ -3104,7 +3118,7 @@ async function testDailyPokerWinners(redis) {
     game_date: meta.gameDate,
     hand_rank: "full_house",
     hand_name: "Фулл-хаус",
-    ticket_balance_credited: 500,
+    ticket_balance_credited: 300,
     bonus_credited: 0,
     extra_attempt_granted: false,
     created_at: "2026-05-30T08:00:00.000Z",
@@ -3137,7 +3151,7 @@ async function testDailyPokerWinners(redis) {
     game_date: meta.gameDate,
     hand_rank: "four_of_a_kind",
     hand_name: "Каре",
-    ticket_balance_credited: 1200,
+    ticket_balance_credited: 500,
     bonus_credited: 0,
     extra_attempt_granted: false,
     created_at: "2026-05-30T10:00:00.000Z",
@@ -3181,7 +3195,7 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.ok, true, "daily poker winners returns ok");
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
   assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
-  assert.strictEqual(r.body.totalPrizeRubles, 1700, "daily poker winners exposes all-time ruble total");
+  assert.strictEqual(r.body.totalPrizeRubles, 800, "daily poker winners exposes all-time ruble total");
   assert.strictEqual(r.body.totalUniquePlayers, expectedSpinStats.totalUniquePlayers, "daily poker winners exposes all-time unique public spinners");
   assert.strictEqual(r.body.todayUniquePlayers, expectedSpinStats.todayUniquePlayers, "daily poker winners exposes unique public spinners today");
   assert.strictEqual(r.body.todayTotalSpins, expectedSpinStats.todayTotalSpins, "daily poker winners exposes public spins total today");
@@ -3203,13 +3217,15 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.winners[0].pokerPlusStatusLevel, 4, "daily poker winners exposes leader fish level");
   assert.strictEqual(r.body.winners[0].telegramUsername, undefined, "daily poker winners hides Telegram username publicly");
   assert.strictEqual(r.body.winners[0].telegramDisplayName, undefined, "daily poker winners hides Telegram display publicly");
-  assert.strictEqual(r.body.winners[0].totalPrizeAmount, 1200, "daily poker winners exposes leader total");
-  assert.strictEqual(r.body.winners[0].prize, "Всего: 1 200 ₽", "daily poker winners formats total ticket prize");
+  assert.strictEqual(r.body.winners[0].totalPrizeAmount, 500, "daily poker winners exposes leader total");
+  assert.strictEqual(r.body.winners[0].prize, "Всего: 500 ₽", "daily poker winners formats total ticket prize");
+  assert.strictEqual(r.body.winners[0].spinCount, 1, "daily poker winners exposes leader spin count");
   assert.strictEqual(r.body.winners[1].displayName, "Peer Poker21 Name", "daily poker winners resolves Poker21 display names");
   assert.strictEqual(r.body.winners[1].pokerPlusNickname, "PeerPoker21Nick", "daily poker winners exposes peer Poker21 nick");
   assert.strictEqual(r.body.winners[1].pokerPlusStatusLevel, 2, "daily poker winners exposes peer fish level");
-  assert.strictEqual(r.body.winners[1].totalPrizeAmount, 550, "daily poker winners aggregates all-time prizes");
-  assert.strictEqual(r.body.winners[1].prize, "Всего: 500 ₽ + 50 бонусов", "daily poker winners formats mixed total prize");
+  assert.strictEqual(r.body.winners[1].totalPrizeAmount, 350, "daily poker winners aggregates all-time prizes");
+  assert.strictEqual(r.body.winners[1].prize, "Всего: 300 ₽ + 50 бонусов", "daily poker winners formats mixed total prize");
+  assert.strictEqual(r.body.winners[1].spinCount, 3, "daily poker winners exposes peer spin count");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Admin Display"), false, "daily poker winners hides admins");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Attempt Display"), false, "daily poker winners hides attempt-only prizes");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), false, "daily poker winners hides bonus-only prizes");

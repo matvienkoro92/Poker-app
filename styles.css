@@ -6,7 +6,7 @@
 @import url("./styles-chat.css?v=3.559");
 @import url("./styles-learning-games.css?v=3.559");
 @import url("./styles-raffles.css?v=3.559");
-@import url("./styles-daily-poker.css?v=3.559");
+@import url("./styles-daily-poker.css?v=3.568");
 @import url("./styles-home-legacy-prelude.css?v=3.559");
 @import url("./styles-download.css?v=3.559");
 @import url("./styles-home-legacy-tail.css?v=3.559");
@@ -2466,6 +2466,22 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin .home-tournament-bonus__amount {
   font-size: clamp(12px, 2.4vw, 19px);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 10px 1px;
+  color: rgba(255, 236, 190, 0.88);
+  font-size: clamp(9px, 1.45vw, 13px);
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow:
+    0 1px 0 rgba(29, 16, 8, 0.9),
+    0 0 7px rgba(255, 190, 73, 0.18);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive {

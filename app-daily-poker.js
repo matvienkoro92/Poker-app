@@ -14,6 +14,30 @@
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
+  var DAILY_POKER_HAND_ORDER = [
+    "royal_flush",
+    "straight_flush",
+    "four_of_a_kind",
+    "full_house",
+    "flush",
+    "straight",
+    "three_of_a_kind",
+    "two_pair",
+    "pair",
+    "high_card",
+  ];
+  var DAILY_POKER_HAND_LABELS = {
+    royal_flush: "Роял-флеш",
+    straight_flush: "Стрит-флеш",
+    four_of_a_kind: "Каре",
+    full_house: "Фулл-хаус",
+    flush: "Флеш",
+    straight: "Стрит",
+    three_of_a_kind: "Сет",
+    two_pair: "Две пары",
+    pair: "Пара",
+    high_card: "Старшая карта",
+  };
 
   var suitSymbols = {
     spades: "♠",
@@ -205,6 +229,27 @@
     return formatCompactAmount(value) + " ₽";
   }
 
+  function dailyPokerHandStatsHtml(stats) {
+    var counts = stats && stats.handCounts && typeof stats.handCounts === "object" ? stats.handCounts : {};
+    var parts = DAILY_POKER_HAND_ORDER.map(function (rank) {
+      var count = Math.max(0, parseInt(counts[rank] || "0", 10) || 0);
+      if (count <= 0) return "";
+      return DAILY_POKER_HAND_LABELS[rank] + " " + formatCompactAmount(count);
+    }).filter(Boolean);
+    return parts.length
+      ? '<span>Комбинации: <strong>' + esc(parts.join(" · ")) + '</strong></span>'
+      : "";
+  }
+
+  function dailyPokerConsolationStatsHtml(stats) {
+    var count = Math.max(0, parseInt(stats && stats.consolationBonusCount || "0", 10) || 0);
+    var amount = Math.max(0, parseInt(stats && stats.consolationBonusAmount || "0", 10) || 0);
+    if (count <= 0 && amount <= 0) return "";
+    return '<span>Утешительные бонус-билеты: <strong>' +
+      esc(formatCompactAmount(count)) + " на " + esc(formatRubles(amount)) +
+    "</strong></span>";
+  }
+
   function pluralRu(count, one, few, many) {
     var n = Math.abs(parseInt(count || "0", 10) || 0);
     var mod10 = n % 10;
@@ -216,7 +261,9 @@
 
   function winnerSubline(row) {
     var wins = Math.max(0, parseInt(row && row.winsCount || "0", 10) || 0);
+    var spins = Math.max(0, parseInt(row && row.spinCount || "0", 10) || 0);
     var parts = [];
+    if (spins > 0) parts.push(spins + " " + pluralRu(spins, "крутка", "крутки", "круток"));
     if (wins > 0) parts.push(wins + " " + pluralRu(wins, "выигрыш", "выигрыша", "выигрышей"));
     if (row && row.bestPrize) parts.push("лучший: " + row.bestPrize);
     return parts.join(" · ");
@@ -305,6 +352,8 @@
     var previousMonth = Math.max(0, parseInt(stats.previousMonthUniquePlayers || data.previousMonthUniquePlayers || "0", 10) || 0);
     var previousMonthTotal = Math.max(0, parseInt(stats.previousMonthTotalSpins || data.previousMonthTotalSpins || "0", 10) || 0);
     var firstSpinDate = formatDailyPokerStartDate(stats.firstSpinDate || data.firstSpinDate || stats.firstSpinAt || data.firstSpinAt);
+    var handStatsHtml = dailyPokerHandStatsHtml(stats);
+    var consolationStatsHtml = dailyPokerConsolationStatsHtml(stats);
     el.hidden = false;
     el.innerHTML =
       (firstSpinDate ? '<span>Игра запущена: <strong>' + esc(firstSpinDate) + '</strong></span>' : "") +
@@ -316,7 +365,9 @@
       '<span>В этом месяце крутили уникальных: <strong>' + esc(formatCompactAmount(month)) + '</strong></span>' +
       '<span>В этом месяце крутили всего: <strong>' + esc(formatCompactAmount(monthTotal || month)) + '</strong></span>' +
       '<span>В прошлом месяце крутили уникальных: <strong>' + esc(formatCompactAmount(previousMonth)) + '</strong></span>' +
-      '<span>В прошлом месяце крутили всего: <strong>' + esc(formatCompactAmount(previousMonthTotal || previousMonth)) + '</strong></span>';
+      '<span>В прошлом месяце крутили всего: <strong>' + esc(formatCompactAmount(previousMonthTotal || previousMonth)) + '</strong></span>' +
+      handStatsHtml +
+      consolationStatsHtml;
   }
 
   function winnerHtml(winner, index) {

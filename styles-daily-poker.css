@@ -402,6 +402,16 @@
   cursor: default;
 }
 
+.daily-poker__streak-note {
+  flex: 1 1 100%;
+  margin: -2px 0 0;
+  color: rgba(255, 237, 194, 0.9);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .admin-bonuses__refresh {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -1658,6 +1668,29 @@
 
 .daily-poker .daily-poker__play-btn::before {
   content: none;
+}
+
+.daily-poker__streak-note {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: -2px 0 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 204, 91, 0.32);
+  border-radius: 14px;
+  color: rgba(255, 237, 194, 0.92);
+  background:
+    linear-gradient(180deg, rgba(255, 204, 91, 0.08), rgba(255, 204, 91, 0.02)),
+    rgba(3, 5, 8, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 194, 0.1),
+    0 8px 14px rgba(0, 0, 0, 0.22);
+  font-size: clamp(12px, 2.9vw, 15px);
+  font-weight: 850;
+  line-height: 1.22;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.72);
 }
 
 .daily-poker__share-actions {
