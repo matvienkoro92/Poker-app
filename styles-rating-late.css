@@ -2113,7 +2113,7 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
   width: 100%;
   background:
     linear-gradient(180deg, rgba(1, 5, 12, 0.08), rgba(1, 5, 12, 0.38)),
-    url("./assets/summer-rating-stage-bg.webp") center top / max(430px, 100%) auto no-repeat,
+    url("./assets/summer-rating-stage-bg.webp?v=2") center top / max(430px, 100%) auto no-repeat,
     radial-gradient(ellipse at -18% 31%, rgba(247, 178, 58, 0.18), transparent 32%),
     radial-gradient(ellipse at 118% 32%, rgba(247, 178, 58, 0.16), transparent 32%),
     radial-gradient(ellipse at 50% 18%, rgba(11, 42, 73, 0.56), transparent 48%),
@@ -2703,22 +2703,23 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
 }
 
 .winter-rating.spring-rating.summer-rating {
+  --summer-rating-stage-bg-height: max(844px, 100svh);
   position: relative;
   width: min(430px, 100%);
   max-width: 430px;
-  min-height: max(844px, 100svh);
+  min-height: var(--summer-rating-stage-bg-height);
   margin: 0 auto;
   padding: 16px 14px 30px;
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: url("./assets/summer-rating-stage-bg.webp?v=1") center top / 100% 100% no-repeat !important;
+  background: url("./assets/summer-rating-stage-bg.webp?v=2") center top / 100% var(--summer-rating-stage-bg-height) no-repeat !important;
   box-shadow: none;
 }
 
 @supports (height: 100dvh) {
   .winter-rating.spring-rating.summer-rating {
-    min-height: max(844px, 100dvh);
+    --summer-rating-stage-bg-height: max(844px, 100dvh);
   }
 }
 
@@ -3292,6 +3293,46 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   transform: translate(-3px, -43px);
 }
 
+/* Летний топ-3: цифры и ники закреплены на лицевой стороне каждого пьедестала. */
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card {
+  overflow: visible;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__rank {
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
+  top: 2px;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
+  top: 6px;
+  left: 50%;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 34px;
+  width: auto;
+  max-width: none;
+  transform: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  top: 37px;
+}
+
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
   color: #ffe6ad;
   font-size: clamp(6.9px, 1.86vw, 8px);
@@ -3332,13 +3373,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: none;
 }
 
-/* Летний топ-4..топ-10: подставки на фоне держат персонажей; ники идут под ногами с зазором 7px, таблица начинается ниже ников. */
+/* Летний топ-4..топ-10: подставки на фоне держат персонажей; ники закреплены на лицевой стороне подставок, таблица начинается ниже ников. */
 .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap {
   order: 2;
   display: block !important;
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 154px;
   margin: 2px 0 32px;
   overflow: visible;
   padding: 0;
@@ -3368,7 +3409,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
   position: absolute;
-  top: 149px;
+  top: 158px;
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -3479,7 +3520,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: block !important;
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 154px;
   margin: 2px 0 32px;
   overflow: visible;
   padding: 0;
@@ -3604,10 +3645,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   order: 3;
   width: 100%;
   margin: 0;
-  border-color: rgba(191, 121, 27, 0.82);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(3, 9, 17, 0.68), rgba(3, 9, 17, 0.72));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -3881,7 +3921,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
-    top: 157px;
+    top: 166px;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
