@@ -3989,16 +3989,16 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 @media (max-width: 700px) {
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
-      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 31% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 66px) / 37% auto no-repeat,
-      url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 24% auto no-repeat;
+      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 44px) / 31% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 51px) / 37% auto no-repeat,
+      url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 51px) / 24% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
-      url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 59px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 66px) / 30.1% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 66px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 44px) / 18.9% auto no-repeat,
+      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 51px) / 30.1% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 51px) / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -4258,20 +4258,20 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
-    top: 88px;
+    top: 73px;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-    top: 78px;
+    top: 63px;
   }
 
   .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
   .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
     --summer-rating-mobile-lower-podium-height: 164px;
     --summer-rating-mobile-lower-podium-table-gap: 22px;
-    --summer-rating-mobile-lower-podium-players-y: -12px;
-    --summer-rating-mobile-lower-podium-label-y: 160px;
+    --summer-rating-mobile-lower-podium-players-y: -37px;
+    --summer-rating-mobile-lower-podium-label-y: 135px;
     --summer-rating-mobile-lower-podium-hitbox-y: 54px;
     --summer-rating-mobile-lower-podium-hitbox-height: 98px;
     height: var(--summer-rating-mobile-lower-podium-height);
