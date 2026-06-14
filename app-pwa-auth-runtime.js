@@ -728,7 +728,7 @@
     openSharedAccountAuthFlow({ forceOverlay: true });
   }
 
-  function headerAuthMenuHasAccountSession() {
+  function headerAuthMenuHasStoredSwitchableSession() {
     var hasSession = false;
     var isGuest = false;
     try {
@@ -740,6 +740,38 @@
       if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
     } catch (eGuest) {}
     return !!(hasSession && !isGuest);
+  }
+
+  function headerAuthMenuHasCurrentAccountSession() {
+    var isGuest = false;
+    if (headerAuthMenuHasStoredSwitchableSession()) return true;
+    try {
+      var auth = window.__pokerTelegramAuth;
+      isGuest = !!(auth && auth.status === "guest");
+      if (!isGuest && auth && auth.user && (auth.status === "verified" || auth.status === "dev_skip")) return true;
+    } catch (eAuth) {}
+    try {
+      if (!isGuest && typeof pokerReadPwaGuestMode === "function") isGuest = !!pokerReadPwaGuestMode();
+    } catch (eGuest) {}
+    if (isGuest) return false;
+    try {
+      var tgNow = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tgNow && tgNow.initData) return true;
+    } catch (eTg) {}
+    try {
+      return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    } catch (eCred) {
+      return false;
+    }
+  }
+
+  function headerAuthMenuAction() {
+    if (headerAuthMenuHasCurrentAccountSession()) return "logout";
+    return "login";
+  }
+
+  function headerAuthMenuShouldShowPoker21Bind() {
+    return headerAuthMenuHasCurrentAccountSession() && !pokerHeaderPoker21Linked();
   }
 
   function closeHeaderMoreMenuFromAction(btn) {
@@ -755,15 +787,23 @@
 
   function syncHeaderAuthMenuButton() {
     var authBtn = document.getElementById("siteHomeAuthBtn");
+    var bindBtn = document.getElementById("siteHomePoker21BindBtn");
     if (!authBtn) return;
-    var isLogout = headerAuthMenuHasAccountSession();
+    var action = headerAuthMenuAction();
+    var isLogout = action === "logout";
     var label = authBtn.querySelector(".header-menu-action__title");
     var hint = authBtn.querySelector(".header-menu-action__hint");
     var icon = authBtn.querySelector(".header-menu-action__icon");
     var text = isLogout ? "Выйти из аккаунта" : "Войти в аккаунт";
+    var showBind = headerAuthMenuShouldShowPoker21Bind();
+    if (bindBtn) {
+      bindBtn.hidden = !showBind;
+      if (showBind) bindBtn.style.removeProperty("display");
+      else bindBtn.style.display = "none";
+    }
     authBtn.hidden = false;
     authBtn.style.removeProperty("display");
-    authBtn.dataset.headerAuthAction = isLogout ? "logout" : "login";
+    authBtn.dataset.headerAuthAction = action;
     authBtn.classList.toggle("header-menu-action--logout", isLogout);
     authBtn.title = text;
     authBtn.setAttribute("aria-label", text);
@@ -773,12 +813,28 @@
   }
   window.__pokerSyncHeaderAuthMenuButton = syncHeaderAuthMenuButton;
 
+  function openHeaderPoker21Profile() {
+    try {
+      if (typeof setView === "function") setView("profile");
+    } catch (eSetProfile) {}
+    setTimeout(function () {
+      try {
+        if (typeof setProfileTab === "function") setProfileTab("poker21");
+      } catch (eTab) {}
+      try {
+        var input = document.getElementById("profilePokerPlusCiphertextInput");
+        if (input && !input.hidden && typeof input.focus === "function") input.focus({ preventScroll: false });
+      } catch (eFocus) {}
+    }, 0);
+  }
+
   function handleHeaderAuthMenuClick(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     if (e && typeof e.stopPropagation === "function") e.stopPropagation();
     var target = e && e.currentTarget ? e.currentTarget : e && e.target;
     closeHeaderMoreMenuFromAction(target);
-    if (headerAuthMenuHasAccountSession()) {
+    var action = headerAuthMenuAction();
+    if (action === "logout") {
       if (typeof window.__pokerClearSessionsAndReloadForLogin === "function") {
         window.__pokerClearSessionsAndReloadForLogin();
       } else if (window.location && typeof window.location.reload === "function") {
@@ -789,12 +845,25 @@
     openSharedAccountAuthFlow({ forceOverlay: true });
   }
 
+  function handleHeaderPoker21BindClick(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
+    var target = e && e.currentTarget ? e.currentTarget : e && e.target;
+    closeHeaderMoreMenuFromAction(target);
+    openHeaderPoker21Profile();
+  }
+
   function bindSharedAccountAuthTriggers() {
     var authBtn = document.getElementById("siteHomeAuthBtn");
+    var bindBtn = document.getElementById("siteHomePoker21BindBtn");
     var greetingBtn = document.getElementById("headerGreeting");
     if (authBtn && authBtn.dataset.accountMenuBound !== "1") {
       authBtn.dataset.accountMenuBound = "1";
       authBtn.addEventListener("click", handleHeaderAuthMenuClick);
+    }
+    if (bindBtn && bindBtn.dataset.poker21BindBound !== "1") {
+      bindBtn.dataset.poker21BindBound = "1";
+      bindBtn.addEventListener("click", handleHeaderPoker21BindClick);
     }
     if (greetingBtn && greetingBtn.dataset.authEntryBound !== "1") {
       greetingBtn.dataset.authEntryBound = "1";
