@@ -211,6 +211,18 @@ function testRewardsAndLedger() {
   }), /amount_must_be_positive/, "zero bonus operation is rejected");
 }
 
+function testPrizeMessages() {
+  const ticketMessage = promoInternals.prizeTextForHand("full_house", rewardForHandRank("full_house", {}), null);
+  assert.ok(ticketMessage.includes("Бонус начислен на ваш баланс выше"), "ticket reward explains the credited balance");
+  assert.ok(ticketMessage.includes("обменять на билеты от 300 ₽"), "ticket reward explains exchange threshold");
+
+  const bonusMessage = promoInternals.prizeTextForHand("flush", rewardForHandRank("flush", {}), null);
+  assert.ok(bonusMessage.includes("Бонус начислен на ваш баланс выше"), "bonus reward explains the credited balance");
+
+  const extraAttemptMessage = promoInternals.prizeTextForHand("three_of_a_kind", rewardForHandRank("three_of_a_kind", {}), null);
+  assert.ok(!extraAttemptMessage.includes("Бонус начислен"), "extra attempt without balance credit does not mention credited bonus");
+}
+
 function testRomanDailyPokerLimit() {
   assert.strictEqual(promoInternals.isRomanDailyPokerIdentity({
     memberId: "tg_388008256",
@@ -257,6 +269,7 @@ testHandRanks();
 testAttemptEconomy();
 testTicketlessStreak();
 testRewardsAndLedger();
+testPrizeMessages();
 testRomanDailyPokerLimit();
 
 console.log("Daily poker tests passed.");
