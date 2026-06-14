@@ -165,7 +165,7 @@ var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
-var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 };
+var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 1, 3: 2, 4: 1, 5: 2 };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -459,12 +459,22 @@ function renderHomeTournamentWeekList(activeWeekday) {
 
 function syncHomeTournamentBonusAvailability(activeWeekday) {
   var league2Active = activeWeekday === 2 || activeWeekday === 3;
+  var leagueNum = league2Active ? 2 : 1;
   var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
   bonuses.forEach(function (bonus) {
     var kind = bonus.getAttribute("data-home-tournament-bonus");
-    var active = kind === "league2" ? league2Active : !league2Active;
-    bonus.classList.toggle("home-tournament-bonus--inactive", !active);
-    bonus.setAttribute("aria-disabled", active ? "false" : "true");
+    if (kind === "league1" || kind === "league2") {
+      var amountEl = bonus.querySelector(".home-tournament-bonus__amount");
+      var labelEl = bonus.querySelector(".home-tournament-bonus__label");
+      var amount = leagueNum === 1 ? "500-1500 ₽" : "1000 ₽";
+      bonus.setAttribute("data-home-tournament-bonus", "league" + leagueNum);
+      bonus.setAttribute("data-home-tournament-league-top", String(leagueNum));
+      bonus.setAttribute("aria-label", "Актуальный топ-10 Лиги " + leagueNum);
+      bonus.classList.remove("home-tournament-bonus--inactive");
+      bonus.setAttribute("aria-disabled", "false");
+      if (amountEl) amountEl.textContent = amount;
+      if (labelEl) labelEl.textContent = "за нокаут топ10 Лиги" + leagueNum;
+    }
   });
 }
 
@@ -481,6 +491,8 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   labelEl.textContent = "бабблу";
   if (bonusEl) {
     bonusEl.hidden = !active;
+    if (active) bonusEl.style.removeProperty("display");
+    else bonusEl.style.display = "none";
     bonusEl.setAttribute("data-home-tournament-bubble-amount", amount || "");
     bonusEl.setAttribute("data-home-tournament-bubble-count", String(count));
     bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
@@ -499,8 +511,10 @@ function fillHomeTournamentBonusModal(kind) {
   var info = HOME_TOURNAMENT_BONUS_INFO[kind] || HOME_TOURNAMENT_BONUS_INFO["four-kind"];
   var title = document.getElementById("homeTournamentBonusModalTitle");
   var meta = document.getElementById("homeTournamentBonusModalMeta");
+  var fourKindRule = document.getElementById("homeTournamentBonusModalFourKindRule");
   if (title) title.textContent = info.title;
   if (meta) meta.textContent = "Выплата: " + info.amount;
+  if (fourKindRule) fourKindRule.hidden = kind !== "four-kind";
 }
 
 function closeHomeTournamentBonusModal() {
@@ -745,6 +759,15 @@ function escapeHomeTournamentLeagueTopText(value) {
     .replace(/'/g, "&#39;");
 }
 
+function getHomeTournamentLeagueTopBounty(index, leagueNum) {
+  if (Number(leagueNum) !== 1) return "";
+  var place = Number(index) + 1;
+  if (place >= 1 && place <= 3) return "1500 ₽";
+  if (place >= 4 && place <= 5) return "1000 ₽";
+  if (place >= 6 && place <= 10) return "500 ₽";
+  return "";
+}
+
 function renderHomeTournamentLeagueTopList(leagueNum) {
   var title = document.getElementById("homeTournamentLeagueTopModalTitle");
   var updated = document.getElementById("homeTournamentLeagueTopModalUpdated");
@@ -762,12 +785,17 @@ function renderHomeTournamentLeagueTopList(leagueNum) {
     var nick = String(row && row.nick ? row.nick : "—");
     var points = formatHomeTournamentLeagueTopNumber(row && row.points);
     var reward = formatHomeTournamentLeagueTopNumber(row && row.reward);
-    return "<li class=\"home-league-top-modal__item\">" +
+    var bounty = getHomeTournamentLeagueTopBounty(index, leagueNum);
+    var bountyHtml = bounty
+      ? "<span class=\"home-league-top-modal__bounty\"><span aria-hidden=\"true\">🎯</span>" + bounty + "</span>"
+      : "";
+    return "<li class=\"home-league-top-modal__item" + (bounty ? " home-league-top-modal__item--with-bounty" : "") + "\">" +
       "<span class=\"home-league-top-modal__place\">" + (index + 1) + "</span>" +
       "<span class=\"home-league-top-modal__player\">" +
         "<span class=\"home-league-top-modal__nick\">" + escapeHomeTournamentLeagueTopText(nick) + "</span>" +
         "<span class=\"home-league-top-modal__stats\">" + points + " очк. · " + reward + " ₽</span>" +
       "</span>" +
+      bountyHtml +
     "</li>";
   }).join("");
 }
