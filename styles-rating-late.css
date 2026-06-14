@@ -3874,9 +3874,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 @media (max-width: 700px) {
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
-      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 55px) / 31% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 55px) / 37% auto no-repeat,
-      url("./assets/summer-rating-player-cooler.webp") calc(89% - 6px) calc(50% + 62px) / 24% auto no-repeat;
+      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 57px) / 31% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 59px) / 37% auto no-repeat,
+      url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 64px) / 24% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
@@ -3915,7 +3915,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
     top: 58px;
-    left: calc(50% - 7px);
+    left: calc(50% - 11px);
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick {
@@ -3934,7 +3934,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
     left: 0;
-    right: 14px;
+    right: 22px;
   }
 
   /* Mobile lower podium anchor: top-4..10 players stand with their feet on the square stands painted in the background. */
