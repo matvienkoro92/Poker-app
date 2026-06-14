@@ -4148,3 +4148,34 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     height: var(--summer-rating-mobile-lower-podium-hitbox-height);
   }
 }
+
+@media (max-width: 700px) and (min-aspect-ratio: 4 / 5) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    background:
+      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 8px) / 31% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 10px) / 37% auto no-repeat,
+      url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 10px) / 24% auto no-repeat;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+    background:
+      url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 8px) / 18.9% auto no-repeat,
+      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 10px) / 30.1% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 10px) / 21.7% auto no-repeat;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) {
+    bottom: 78px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) {
+    bottom: 90px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) {
+    bottom: 78px;
+  }
+}
