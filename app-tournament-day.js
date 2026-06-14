@@ -164,8 +164,8 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1500 ₽", 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
-var HOME_TOURNAMENT_ACES_PREFLOP_BONUSES = { 0: "1500 ₽", 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
+var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -474,28 +474,369 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
   if (!amountEl || !labelEl) return;
   var amount = HOME_TOURNAMENT_BUBBLE_BONUSES[Number(activeWeekday)] || "";
+  var count = Number(HOME_TOURNAMENT_BUBBLE_COUNTS[Number(activeWeekday)] || 1);
+  if (!Number.isFinite(count) || count < 1) count = 1;
   var active = !!amount;
   amountEl.textContent = amount || "—";
   labelEl.textContent = "бабблу";
   if (bonusEl) {
+    bonusEl.hidden = !active;
+    bonusEl.setAttribute("data-home-tournament-bubble-amount", amount || "");
+    bonusEl.setAttribute("data-home-tournament-bubble-count", String(count));
     bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
     bonusEl.setAttribute("aria-disabled", active ? "false" : "true");
-    bonusEl.setAttribute("aria-label", active ? amount + " бабблу" : "Бонус бабблу недоступен в этот день");
+    bonusEl.setAttribute("aria-label", active ? "Условия бонуса бабблу: " + amount : "Бонус бабблу недоступен в этот день");
   }
 }
 
-function syncHomeTournamentAcesPreflopBonus(activeWeekday) {
-  var bonusEl = document.getElementById("homeTournamentAcesPreflopBonus");
-  var amountEl = document.getElementById("homeTournamentAcesPreflopAmount");
-  var labelEl = document.getElementById("homeTournamentAcesPreflopLabel");
-  if (!bonusEl || !amountEl || !labelEl) return;
-  var amount = HOME_TOURNAMENT_ACES_PREFLOP_BONUSES[Number(activeWeekday)] || "";
-  var active = !!amount;
-  amountEl.textContent = amount || "—";
-  labelEl.textContent = "за вылет на тузах префлоп";
-  bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
-  bonusEl.setAttribute("aria-disabled", active ? "false" : "true");
-  bonusEl.setAttribute("aria-label", active ? amount + " за вылет на тузах префлоп" : "Бонус за вылет на тузах префлоп недоступен в этот день");
+var HOME_TOURNAMENT_BONUS_INFO = {
+  "four-kind": { title: "Бонус за каре", amount: "1000 ₽" },
+  "straight-flush": { title: "Бонус за стрит-флеш", amount: "2500 ₽" },
+  "royal-flush": { title: "Бонус за роял", amount: "5000 ₽" }
+};
+
+function fillHomeTournamentBonusModal(kind) {
+  var info = HOME_TOURNAMENT_BONUS_INFO[kind] || HOME_TOURNAMENT_BONUS_INFO["four-kind"];
+  var title = document.getElementById("homeTournamentBonusModalTitle");
+  var meta = document.getElementById("homeTournamentBonusModalMeta");
+  if (title) title.textContent = info.title;
+  if (meta) meta.textContent = "Выплата: " + info.amount;
+}
+
+function closeHomeTournamentBonusModal() {
+  var modal = document.getElementById("homeTournamentBonusModal");
+  if (!modal) return;
+  modal.classList.add("home-bonus-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function openHomeTournamentBonusModal(kind) {
+  function show() {
+    var modal = document.getElementById("homeTournamentBonusModal");
+    if (!modal) return;
+    initHomeTournamentBonusModal();
+    fillHomeTournamentBonusModal(kind);
+    modal.classList.remove("home-bonus-modal--hidden");
+    modal.setAttribute("aria-hidden", "false");
+    var closeBtn = modal.querySelector("[data-home-bonus-close]");
+    if (closeBtn && closeBtn.focus) {
+      setTimeout(function () {
+        try {
+          closeBtn.focus({ preventScroll: true });
+        } catch (eFocus) {
+          closeBtn.focus();
+        }
+      }, 0);
+    }
+  }
+  if (document.getElementById("homeTournamentBonusModal")) {
+    show();
+    return;
+  }
+  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+    window.pokerEnsureGlobalModalsHtml().then(show).catch(function () {});
+  }
+}
+
+function initHomeTournamentBonusModal() {
+  var modal = document.getElementById("homeTournamentBonusModal");
+  if (!modal || modal.__initedHomeTournamentBonus) return;
+  modal.__initedHomeTournamentBonus = true;
+  modal.addEventListener("click", function (e) {
+    var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-bonus-close]") : null;
+    if (closeBtn) {
+      e.preventDefault();
+      closeHomeTournamentBonusModal();
+    }
+  });
+  if (!window.__homeTournamentBonusEscBound) {
+    window.__homeTournamentBonusEscBound = true;
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      var activeModal = document.getElementById("homeTournamentBonusModal");
+      if (activeModal && activeModal.getAttribute("aria-hidden") === "false") closeHomeTournamentBonusModal();
+    });
+  }
+}
+
+function initHomeTournamentBonusButtons() {
+  var buttons = document.querySelectorAll("[data-home-tournament-bonus-info]");
+  buttons.forEach(function (btn) {
+    if (btn.__homeTournamentBonusButtonBound) return;
+    btn.__homeTournamentBonusButtonBound = true;
+    btn.addEventListener("click", function () {
+      openHomeTournamentBonusModal(btn.getAttribute("data-home-tournament-bonus-info"));
+    });
+  });
+}
+
+function fillHomeTournamentBubbleModal(amount, count) {
+  amount = amount || "—";
+  count = Number(count) === 2 ? 2 : 1;
+  var title = document.getElementById("homeTournamentBubbleModalTitle");
+  var meta = document.getElementById("homeTournamentBubbleModalMeta");
+  var zone = document.getElementById("homeTournamentBubbleModalZone");
+  var condition = document.getElementById("homeTournamentBubbleModalCondition");
+  if (title) title.textContent = "Бонус бабблу";
+  if (meta) meta.textContent = "Выплата: " + amount;
+  if (zone) zone.textContent = count === 2 ? "2 баббла" : "1 баббл";
+  if (condition) {
+    condition.textContent =
+      count === 2
+        ? "Если вы вылетели в шаге или в двух шагах от призов, вы получаете бонус " + amount + "."
+        : "Если вы вылетели в шаге от призов, вы получаете бонус " + amount + ".";
+  }
+}
+
+function closeHomeTournamentBubbleModal() {
+  var modal = document.getElementById("homeTournamentBubbleModal");
+  if (!modal) return;
+  modal.classList.add("home-bonus-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function openHomeTournamentBubbleModal(trigger) {
+  trigger = trigger || document.querySelector("[data-home-tournament-bubble-bonus]");
+  if (trigger && trigger.getAttribute("aria-disabled") === "true") return;
+  var amount = trigger ? trigger.getAttribute("data-home-tournament-bubble-amount") : "";
+  var count = trigger ? trigger.getAttribute("data-home-tournament-bubble-count") : "1";
+  function show() {
+    var modal = document.getElementById("homeTournamentBubbleModal");
+    if (!modal) return;
+    initHomeTournamentBubbleModal();
+    fillHomeTournamentBubbleModal(amount, count);
+    modal.classList.remove("home-bonus-modal--hidden");
+    modal.setAttribute("aria-hidden", "false");
+    var closeBtn = modal.querySelector("[data-home-bubble-close]");
+    if (closeBtn && closeBtn.focus) {
+      setTimeout(function () {
+        try {
+          closeBtn.focus({ preventScroll: true });
+        } catch (eFocus) {
+          closeBtn.focus();
+        }
+      }, 0);
+    }
+  }
+  if (document.getElementById("homeTournamentBubbleModal")) {
+    show();
+    return;
+  }
+  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+    window.pokerEnsureGlobalModalsHtml().then(show).catch(function () {});
+  }
+}
+
+function initHomeTournamentBubbleModal() {
+  var modal = document.getElementById("homeTournamentBubbleModal");
+  if (!modal || modal.__initedHomeTournamentBubble) return;
+  modal.__initedHomeTournamentBubble = true;
+  modal.addEventListener("click", function (e) {
+    var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-bubble-close]") : null;
+    if (closeBtn) {
+      e.preventDefault();
+      closeHomeTournamentBubbleModal();
+    }
+  });
+  if (!window.__homeTournamentBubbleEscBound) {
+    window.__homeTournamentBubbleEscBound = true;
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      var activeModal = document.getElementById("homeTournamentBubbleModal");
+      if (activeModal && activeModal.getAttribute("aria-hidden") === "false") closeHomeTournamentBubbleModal();
+    });
+  }
+}
+
+function initHomeTournamentBubbleButtons() {
+  var buttons = document.querySelectorAll("[data-home-tournament-bubble-bonus]");
+  buttons.forEach(function (btn) {
+    if (btn.__homeTournamentBubbleButtonBound) return;
+    btn.__homeTournamentBubbleButtonBound = true;
+    btn.addEventListener("click", function () {
+      openHomeTournamentBubbleModal(btn);
+    });
+  });
+}
+
+function getHomeTournamentLeagueLabel(leagueNum) {
+  return "Лига " + (Number(leagueNum) === 2 ? "2" : "1");
+}
+
+function getHomeTournamentLeagueUpdatedLabel() {
+  if (typeof SUMMER_RATING_UPDATED !== "undefined" && SUMMER_RATING_UPDATED) return SUMMER_RATING_UPDATED;
+  var season = typeof SUMMER_RATING_SEASON !== "undefined" ? SUMMER_RATING_SEASON : null;
+  if (season && season.updatedLabel) return season.updatedLabel;
+  return "актуально сейчас";
+}
+
+function sortHomeTournamentLeagueTopRows(rows) {
+  rows.sort(function (a, b) {
+    var ap = Number(a && a.points);
+    var bp = Number(b && b.points);
+    var aw = Number(a && a.reward);
+    var bw = Number(b && b.reward);
+    if (ap !== ap) ap = 0;
+    if (bp !== bp) bp = 0;
+    if (aw !== aw) aw = 0;
+    if (bw !== bw) bw = 0;
+    return (bp - ap) || (bw - aw);
+  });
+  return rows;
+}
+
+function getHomeTournamentLeagueTopRows(leagueNum) {
+  leagueNum = Number(leagueNum) === 2 ? 2 : 1;
+  if (typeof getTournamentRatingOverallByLeagueForSeason === "function") {
+    try {
+      var adapterRows = getTournamentRatingOverallByLeagueForSeason("summer", leagueNum);
+      if (Array.isArray(adapterRows) && adapterRows.length) return adapterRows.slice(0, 10);
+    } catch (eAdapterRows) {}
+  }
+  var tournamentsByDate = {};
+  if (typeof pokerRatingGetSummerTournamentsByDate === "function") tournamentsByDate = pokerRatingGetSummerTournamentsByDate() || {};
+  else if (typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined") tournamentsByDate = SUMMER_RATING_TOURNAMENTS_BY_DATE || {};
+  var byNick = {};
+  var monthRegex = /\.(06|07|08)\.2026$/;
+  Object.keys(tournamentsByDate || {}).forEach(function (dateStr) {
+    if (!monthRegex.test(dateStr)) return;
+    var list = tournamentsByDate[dateStr];
+    if (!Array.isArray(list)) return;
+    list.forEach(function (t) {
+      var forcedLeague = t && t.league != null ? Number(t.league) : NaN;
+      var buyin = t && t.buyin != null ? Number(t.buyin) : NaN;
+      var inLeague1 = forcedLeague === 1 || (forcedLeague !== forcedLeague && (buyin >= 500 || (buyin !== buyin)));
+      var inLeague2 = forcedLeague === 2 || (forcedLeague !== forcedLeague && buyin >= 100 && buyin < 500);
+      var include = (leagueNum === 1 && inLeague1) || (leagueNum === 2 && inLeague2);
+      if (!include) return;
+      var players = t.players || [];
+      players.forEach(function (p) {
+        var nick = typeof normalizeWinterNickForFinalTable === "function" ? normalizeWinterNickForFinalTable(p && p.nick) : String((p && p.nick) || "").trim();
+        if (!nick) return;
+        var points = typeof winterRatingTournamentPlayerPoints === "function" ? winterRatingTournamentPlayerPoints(p) : Number(p && p.points);
+        var reward = p && p.reward != null ? Number(p.reward) : 0;
+        if (points !== points) points = 0;
+        if (reward !== reward) reward = 0;
+        if (!byNick[nick]) byNick[nick] = { nick: nick, points: 0, reward: 0 };
+        byNick[nick].points += points;
+        byNick[nick].reward += reward;
+      });
+    });
+  });
+  return sortHomeTournamentLeagueTopRows(Object.keys(byNick).map(function (nick) {
+    return byNick[nick];
+  }).filter(function (row) {
+    return Number(row.points || 0) !== 0 || Number(row.reward || 0) !== 0;
+  })).slice(0, 10);
+}
+
+function formatHomeTournamentLeagueTopNumber(value) {
+  var n = Number(value);
+  if (n !== n || !isFinite(n)) n = 0;
+  return Math.round(n).toLocaleString("ru-RU");
+}
+
+function escapeHomeTournamentLeagueTopText(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderHomeTournamentLeagueTopList(leagueNum) {
+  var title = document.getElementById("homeTournamentLeagueTopModalTitle");
+  var updated = document.getElementById("homeTournamentLeagueTopModalUpdated");
+  var list = document.getElementById("homeTournamentLeagueTopList");
+  var leagueLabel = getHomeTournamentLeagueLabel(leagueNum);
+  if (title) title.textContent = "Топ-10 Лиги " + (Number(leagueNum) === 2 ? "2" : "1");
+  if (updated) updated.textContent = getHomeTournamentLeagueUpdatedLabel();
+  if (!list) return;
+  var rows = getHomeTournamentLeagueTopRows(leagueNum);
+  if (!rows.length) {
+    list.innerHTML = "<li class=\"home-league-top-modal__empty\">Список пока загружается</li>";
+    return;
+  }
+  list.innerHTML = rows.map(function (row, index) {
+    var nick = String(row && row.nick ? row.nick : "—");
+    var points = formatHomeTournamentLeagueTopNumber(row && row.points);
+    var reward = formatHomeTournamentLeagueTopNumber(row && row.reward);
+    return "<li class=\"home-league-top-modal__item\">" +
+      "<span class=\"home-league-top-modal__place\">" + (index + 1) + "</span>" +
+      "<span class=\"home-league-top-modal__player\">" +
+        "<span class=\"home-league-top-modal__nick\">" + escapeHomeTournamentLeagueTopText(nick) + "</span>" +
+        "<span class=\"home-league-top-modal__stats\">" + points + " очк. · " + reward + " ₽</span>" +
+      "</span>" +
+    "</li>";
+  }).join("");
+}
+
+function closeHomeTournamentLeagueTopModal() {
+  var modal = document.getElementById("homeTournamentLeagueTopModal");
+  if (!modal) return;
+  modal.classList.add("home-league-top-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function openHomeTournamentLeagueTopModal(leagueNum) {
+  function show() {
+    var modal = document.getElementById("homeTournamentLeagueTopModal");
+    if (!modal) return;
+    initHomeTournamentLeagueTopModal();
+    renderHomeTournamentLeagueTopList(leagueNum);
+    modal.classList.remove("home-league-top-modal--hidden");
+    modal.setAttribute("aria-hidden", "false");
+    var closeBtn = modal.querySelector("[data-home-league-top-close]");
+    if (closeBtn && closeBtn.focus) {
+      setTimeout(function () {
+        try {
+          closeBtn.focus({ preventScroll: true });
+        } catch (eFocusLeagueTop) {
+          closeBtn.focus();
+        }
+      }, 0);
+    }
+  }
+  if (document.getElementById("homeTournamentLeagueTopModal")) {
+    show();
+    return;
+  }
+  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+    window.pokerEnsureGlobalModalsHtml().then(show).catch(function () {});
+  }
+}
+
+function initHomeTournamentLeagueTopModal() {
+  var modal = document.getElementById("homeTournamentLeagueTopModal");
+  if (!modal || modal.__initedHomeTournamentLeagueTop) return;
+  modal.__initedHomeTournamentLeagueTop = true;
+  modal.addEventListener("click", function (e) {
+    var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-league-top-close]") : null;
+    if (closeBtn) {
+      e.preventDefault();
+      closeHomeTournamentLeagueTopModal();
+    }
+  });
+  if (!window.__homeTournamentLeagueTopEscBound) {
+    window.__homeTournamentLeagueTopEscBound = true;
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      var activeModal = document.getElementById("homeTournamentLeagueTopModal");
+      if (activeModal && activeModal.getAttribute("aria-hidden") === "false") closeHomeTournamentLeagueTopModal();
+    });
+  }
+}
+
+function initHomeTournamentLeagueTopButtons() {
+  var buttons = document.querySelectorAll("[data-home-tournament-league-top]");
+  buttons.forEach(function (btn) {
+    if (btn.__homeTournamentLeagueTopButtonBound) return;
+    btn.__homeTournamentLeagueTopButtonBound = true;
+    btn.addEventListener("click", function () {
+      openHomeTournamentLeagueTopModal(btn.getAttribute("data-home-tournament-league-top"));
+    });
+  });
 }
 
 function updateHomeTournamentFocusFlow() {
@@ -775,6 +1116,12 @@ window.initHomeFreerollModal = initHomeFreerollModal;
 function updateTournamentDayBlock() {
   try {
     initHomeFreerollModal();
+    initHomeTournamentBonusModal();
+    initHomeTournamentBonusButtons();
+    initHomeTournamentBubbleModal();
+    initHomeTournamentBubbleButtons();
+    initHomeTournamentLeagueTopModal();
+    initHomeTournamentLeagueTopButtons();
     renderHomeFreerollSchedule();
     pokerUpdateDownloadInfoSubsections();
   } catch (eHomeFreerolls) {}
@@ -977,7 +1324,6 @@ function updateTournamentDayBlock() {
     }
     syncHomeTournamentBonusAvailability(selectedWeekday);
     syncHomeTournamentBubbleBuyinLabel(selectedWeekday);
-    syncHomeTournamentAcesPreflopBonus(selectedWeekday);
     var frBuy = document.getElementById("freerollHomeBuyin");
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");

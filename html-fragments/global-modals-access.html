@@ -12,6 +12,72 @@
       </div>
     </div>
 
+    <div class="home-bonus-modal home-bonus-modal--hidden" id="homeTournamentBonusModal" aria-hidden="true">
+      <div class="home-bonus-modal__backdrop" data-home-bonus-close="1"></div>
+      <div class="home-bonus-modal__panel" role="dialog" aria-labelledby="homeTournamentBonusModalTitle">
+        <button type="button" class="home-bonus-modal__close" data-home-bonus-close="1" aria-label="Закрыть">×</button>
+        <p class="home-bonus-modal__eyebrow">Условия бонуса</p>
+        <h3 class="home-bonus-modal__title" id="homeTournamentBonusModalTitle">Бонус</h3>
+        <p class="home-bonus-modal__meta" id="homeTournamentBonusModalMeta">—</p>
+        <table class="home-bonus-modal__table" aria-label="Условия получения бонуса">
+          <tbody>
+            <tr>
+              <th scope="row">Карты</th>
+              <td>Две карты на руках должны участвовать в сборе комбинации.</td>
+            </tr>
+            <tr>
+              <th scope="row">Каре</th>
+              <td>Каре собирается по 2м парам на руках.</td>
+            </tr>
+            <tr>
+              <th scope="row">Скрин</th>
+              <td>Скиньте скрин с комбинацией менеджеру сразу, пока вы ещё за столом.</td>
+            </tr>
+            <tr>
+              <th scope="row">Менеджеры</th>
+              <td>
+                <span class="home-bonus-modal__manager">06:00–18:00 мск — Анна: <a href="https://t.me/qweenpoker" target="_blank" rel="noopener noreferrer">@qweenpoker</a></span>
+                <span class="home-bonus-modal__manager">18:00–02:00 мск — Вика: <a href="https://t.me/vikipoker" target="_blank" rel="noopener noreferrer">@vikipoker</a></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="home-bonus-modal home-bonus-modal--hidden" id="homeTournamentBubbleModal" aria-hidden="true">
+      <div class="home-bonus-modal__backdrop" data-home-bubble-close="1"></div>
+      <div class="home-bonus-modal__panel" role="dialog" aria-labelledby="homeTournamentBubbleModalTitle">
+        <button type="button" class="home-bonus-modal__close" data-home-bubble-close="1" aria-label="Закрыть">×</button>
+        <p class="home-bonus-modal__eyebrow">Бонус к турниру</p>
+        <h3 class="home-bonus-modal__title" id="homeTournamentBubbleModalTitle">Бонус бабблу</h3>
+        <p class="home-bonus-modal__meta" id="homeTournamentBubbleModalMeta">—</p>
+        <table class="home-bonus-modal__table" aria-label="Условия получения баббл-бонуса">
+          <tbody>
+            <tr>
+              <th scope="row">Где</th>
+              <td id="homeTournamentBubbleModalZone">1 баббл</td>
+            </tr>
+            <tr>
+              <th scope="row">Условие</th>
+              <td id="homeTournamentBubbleModalCondition">Если вы вылетели в шаге от призов, вы получаете бонус.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="home-league-top-modal home-league-top-modal--hidden" id="homeTournamentLeagueTopModal" aria-hidden="true">
+      <div class="home-league-top-modal__backdrop" data-home-league-top-close="1"></div>
+      <div class="home-league-top-modal__panel" role="dialog" aria-labelledby="homeTournamentLeagueTopModalTitle">
+        <button type="button" class="home-league-top-modal__close" data-home-league-top-close="1" aria-label="Закрыть">×</button>
+        <p class="home-league-top-modal__eyebrow" id="homeTournamentLeagueTopModalUpdated">Актуальный список</p>
+        <h3 class="home-league-top-modal__title" id="homeTournamentLeagueTopModalTitle">Топ-10 Лиги 1</h3>
+        <p class="home-league-top-modal__meta">Бонус за нокаут начисляется за выбивание игрока из этого списка.</p>
+        <ol class="home-league-top-modal__list" id="homeTournamentLeagueTopList"></ol>
+      </div>
+    </div>
+
     <div id="chatClubAccessModal" class="chat-club-access-modal chat-club-access-modal--hidden" aria-hidden="true">
       <div class="chat-club-access-modal__backdrop" data-chat-club-modal-close="1"></div>
       <div class="chat-club-access-modal__panel" role="dialog" aria-labelledby="chatClubAccessModalTitle">

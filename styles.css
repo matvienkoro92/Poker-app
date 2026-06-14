@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.559");
-@import url("./styles-home-rating-promo.css?v=3.559");
-@import url("./styles-auth.css?v=3.559");
-@import url("./styles-home.css?v=3.559");
-@import url("./styles-chat.css?v=3.559");
-@import url("./styles-learning-games.css?v=3.559");
-@import url("./styles-raffles.css?v=3.559");
-@import url("./styles-daily-poker.css?v=3.568");
-@import url("./styles-home-legacy-prelude.css?v=3.559");
-@import url("./styles-download.css?v=3.559");
-@import url("./styles-home-legacy-tail.css?v=3.559");
-@import url("./styles-home-rating-promo-legacy.css?v=3.559");
-@import url("./styles-rating.css?v=3.573");
-@import url("./styles-hall.css?v=3.559");
-@import url("./styles-admin.css?v=3.559");
-@import url("./styles-player-crm.css?v=3.559");
-@import url("./styles-profile.css?v=3.559");
-@import url("./styles-layout.css?v=3.559");
-@import url("./styles-chat-overlays.css?v=3.559");
-@import url("./styles-home-overrides.css?v=3.559");
-@import url("./styles-layout-touch-targets.css?v=3.559");
-@import url("./styles-home-rating-promo-late.css?v=3.559");
+@import url("./styles-base.css?v=3.576");
+@import url("./styles-home-rating-promo.css?v=3.576");
+@import url("./styles-auth.css?v=3.576");
+@import url("./styles-home.css?v=3.576");
+@import url("./styles-chat.css?v=3.576");
+@import url("./styles-learning-games.css?v=3.576");
+@import url("./styles-raffles.css?v=3.576");
+@import url("./styles-daily-poker.css?v=3.576");
+@import url("./styles-home-legacy-prelude.css?v=3.576");
+@import url("./styles-download.css?v=3.576");
+@import url("./styles-home-legacy-tail.css?v=3.576");
+@import url("./styles-home-rating-promo-legacy.css?v=3.576");
+@import url("./styles-rating.css?v=3.576");
+@import url("./styles-hall.css?v=3.576");
+@import url("./styles-admin.css?v=3.576");
+@import url("./styles-player-crm.css?v=3.576");
+@import url("./styles-profile.css?v=3.576");
+@import url("./styles-layout.css?v=3.576");
+@import url("./styles-chat-overlays.css?v=3.576");
+@import url("./styles-home-overrides.css?v=3.576");
+@import url("./styles-layout-touch-targets.css?v=3.576");
+@import url("./styles-home-rating-promo-late.css?v=3.576");
 
 :root {
   --daily-poker-page-bg:
@@ -2401,6 +2401,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus {
+  appearance: none;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -2417,12 +2418,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     radial-gradient(ellipse at 50% 100%, rgba(255, 118, 0, 0.16), transparent 64%),
     linear-gradient(180deg, rgba(36, 24, 11, 0.88), rgba(11, 11, 10, 0.9));
   text-align: center;
+  font-family: inherit;
   box-shadow:
     0 0 0 1px rgba(88, 37, 0, 0.72),
     0 0 14px rgba(255, 145, 0, 0.28),
     inset 0 1px 0 rgba(255, 242, 196, 0.18),
     inset 0 -10px 16px rgba(0, 0, 0, 0.22);
   overflow: hidden;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--info {
+  cursor: pointer;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--info:hover,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--info:focus-visible {
+  border-color: rgba(255, 239, 190, 0.98);
+  box-shadow:
+    0 0 0 1px rgba(126, 56, 0, 0.78),
+    0 0 20px rgba(255, 184, 36, 0.44),
+    inset 0 1px 0 rgba(255, 249, 219, 0.28),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.2);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--info:focus-visible {
+  outline: 2px solid rgba(255, 238, 184, 0.95);
+  outline-offset: 2px;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before {
@@ -2481,24 +2502,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   font-size: clamp(12px, 2.4vw, 19px);
 }
 
-.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop {
-  grid-column: 1 / -1;
-  min-height: clamp(34px, 6.2vw, 48px);
-  flex-direction: row;
-  gap: 8px;
-  padding: 7px 10px;
-}
-
-.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop .home-tournament-bonus__amount {
-  font-size: clamp(14px, 2.7vw, 22px);
-}
-
-.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--aces-preflop .home-tournament-bonus__label {
-  margin-top: 0;
-  font-size: clamp(9px, 1.85vw, 14px);
-  text-align: left;
-}
-
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {
   position: relative;
   z-index: 1;
@@ -2534,6 +2537,365 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive .home-tournament-bonus__label {
   color: rgba(255, 232, 184, 0.42);
   text-shadow: none;
+}
+
+.home-bonus-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1650;
+}
+
+.home-bonus-modal--hidden {
+  display: none !important;
+}
+
+.home-bonus-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.76);
+  backdrop-filter: blur(7px);
+}
+
+.home-bonus-modal__panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  box-sizing: border-box;
+  width: min(92vw, 500px);
+  max-height: min(86svh, 680px);
+  overflow: auto;
+  padding: 18px 16px 16px;
+  border: 1px solid rgba(255, 184, 36, 0.6);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 185, 52, 0.18), transparent 48%),
+    linear-gradient(180deg, rgba(31, 21, 12, 0.98), rgba(8, 9, 12, 0.98));
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.56),
+    0 0 28px rgba(255, 145, 0, 0.22),
+    inset 0 1px 0 rgba(255, 244, 207, 0.14);
+  transform: translate(-50%, -50%);
+}
+
+.home-bonus-modal__close {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 239, 207, 0.78);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.home-bonus-modal__eyebrow {
+  margin: 0 48px 6px 0;
+  color: #ffbd38;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.home-bonus-modal__title {
+  margin: 0 48px 6px 0;
+  color: #fff7ed;
+  font-size: clamp(22px, 5.3vw, 30px);
+  font-weight: 1000;
+  line-height: 1.05;
+}
+
+.home-bonus-modal__meta {
+  margin: 0 0 14px;
+  color: #fde68a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.home-bonus-modal__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 184, 36, 0.28);
+  border-radius: 14px;
+  background: rgba(3, 7, 18, 0.46);
+}
+
+.home-bonus-modal__table th,
+.home-bonus-modal__table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255, 184, 36, 0.16);
+  vertical-align: top;
+  text-align: left;
+}
+
+.home-bonus-modal__table tr:last-child th,
+.home-bonus-modal__table tr:last-child td {
+  border-bottom: 0;
+}
+
+.home-bonus-modal__table th {
+  width: 104px;
+  color: #ffbd38;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1.25;
+}
+
+.home-bonus-modal__table td {
+  color: rgba(255, 247, 237, 0.92);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+.home-bonus-modal__manager {
+  display: block;
+}
+
+.home-bonus-modal__manager + .home-bonus-modal__manager {
+  margin-top: 6px;
+}
+
+.home-bonus-modal__table a {
+  color: #fbbf24;
+  font-weight: 1000;
+  text-decoration: none;
+}
+
+.home-bonus-modal__table a:hover {
+  text-decoration: underline;
+}
+
+.home-league-top-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1660;
+}
+
+.home-league-top-modal--hidden {
+  display: none !important;
+}
+
+.home-league-top-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.76);
+  backdrop-filter: blur(7px);
+}
+
+.home-league-top-modal__panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  box-sizing: border-box;
+  width: min(92vw, 460px);
+  max-height: min(92svh, 700px);
+  overflow: auto;
+  padding: 18px 14px 16px;
+  border: 1px solid rgba(255, 184, 36, 0.64);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 185, 52, 0.2), transparent 48%),
+    linear-gradient(180deg, rgba(32, 21, 12, 0.99), rgba(6, 8, 12, 0.99));
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.56),
+    0 0 28px rgba(255, 145, 0, 0.22),
+    inset 0 1px 0 rgba(255, 244, 207, 0.14);
+  transform: translate(-50%, -50%);
+}
+
+.home-league-top-modal__close {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 239, 207, 0.78);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.home-league-top-modal__eyebrow {
+  margin: 0 48px 6px 0;
+  color: #ffbd38;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.home-league-top-modal__title {
+  margin: 0 48px 6px 0;
+  color: #fff7ed;
+  font-size: clamp(22px, 5.4vw, 30px);
+  font-weight: 1000;
+  line-height: 1.05;
+}
+
+.home-league-top-modal__meta {
+  margin: 0 0 13px;
+  color: rgba(255, 247, 237, 0.82);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.home-league-top-modal__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-league-top-modal__item,
+.home-league-top-modal__empty {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 184, 36, 0.2);
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(255, 184, 36, 0.1), transparent 58%),
+    rgba(3, 7, 18, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 207, 0.05);
+}
+
+.home-league-top-modal__empty {
+  grid-template-columns: minmax(0, 1fr);
+  color: rgba(255, 247, 237, 0.88);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.home-league-top-modal__place {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffd979, #f59e0b);
+  color: #221307;
+  font-size: 15px;
+  font-weight: 1000;
+  line-height: 1;
+  box-shadow:
+    0 0 14px rgba(255, 184, 36, 0.26),
+    inset 0 1px 0 rgba(255, 250, 219, 0.54);
+}
+
+.home-league-top-modal__player {
+  min-width: 0;
+}
+
+.home-league-top-modal__nick {
+  display: block;
+  overflow: hidden;
+  color: #fff7ed;
+  font-size: 15px;
+  font-weight: 1000;
+  line-height: 1.18;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-league-top-modal__stats {
+  display: block;
+  margin-top: 2px;
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+[data-theme="light"] .home-bonus-modal__panel {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 210, 119, 0.42), transparent 50%),
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.98));
+  border-color: rgba(217, 119, 6, 0.32);
+}
+
+[data-theme="light"] .home-bonus-modal__title,
+[data-theme="light"] .home-bonus-modal__table td {
+  color: #1f2937;
+}
+
+[data-theme="light"] .home-bonus-modal__table {
+  background: rgba(255, 248, 237, 0.78);
+  border-color: rgba(217, 119, 6, 0.22);
+}
+
+[data-theme="light"] .home-league-top-modal__panel {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 210, 119, 0.42), transparent 50%),
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.98));
+  border-color: rgba(217, 119, 6, 0.32);
+}
+
+[data-theme="light"] .home-league-top-modal__title,
+[data-theme="light"] .home-league-top-modal__nick {
+  color: #1f2937;
+}
+
+[data-theme="light"] .home-league-top-modal__meta,
+[data-theme="light"] .home-league-top-modal__empty {
+  color: #475569;
+}
+
+[data-theme="light"] .home-league-top-modal__item,
+[data-theme="light"] .home-league-top-modal__empty {
+  background: rgba(255, 248, 237, 0.78);
+  border-color: rgba(217, 119, 6, 0.18);
+}
+
+@media (max-width: 430px) {
+  .home-bonus-modal__panel {
+    width: min(94vw, 390px);
+    padding: 16px 12px 12px;
+  }
+
+  .home-league-top-modal__panel {
+    width: min(94vw, 390px);
+    padding: 16px 12px 12px;
+  }
+
+  .home-league-top-modal__item {
+    grid-template-columns: 34px minmax(0, 1fr);
+    min-height: 44px;
+    padding: 6px 9px;
+  }
+
+  .home-bonus-modal__table th,
+  .home-bonus-modal__table td {
+    display: block;
+    width: auto;
+    padding: 10px 11px;
+  }
+
+  .home-bonus-modal__table th {
+    padding-bottom: 3px;
+    border-bottom: 0;
+  }
+
+  .home-bonus-modal__table td {
+    padding-top: 0;
+  }
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-actions-row {
