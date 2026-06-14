@@ -675,6 +675,237 @@ function initHomeTournamentBubbleButtons() {
   });
 }
 
+var HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS = 60000;
+var homeTournamentRaffleBonusLoadedAt = 0;
+var homeTournamentRaffleBonusInFlight = false;
+var homeTournamentRaffleBonusData = null;
+var homeTournamentRaffleBonusTimer = null;
+var homeTournamentRaffleBonusRefreshTimer = null;
+
+function homeTournamentRaffleBonusText(raffle) {
+  var parts = [];
+  if (!raffle || typeof raffle !== "object") return "";
+  parts.push(raffle.title, raffle.cardTitle, raffle.cardSubtitle);
+  if (Array.isArray(raffle.groups)) {
+    raffle.groups.forEach(function (group) {
+      if (group) parts.push(group.prize, group.title);
+    });
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function homeTournamentRaffleBonusIsCash(raffle) {
+  if (!raffle) return false;
+  if (typeof pokerRafflesIsCashPrize === "function") return pokerRafflesIsCashPrize(raffle);
+  var explicit = String(raffle.prizeKind || raffle.prize_kind || "").trim().toLowerCase();
+  if (explicit === "cash" || explicit === "cash_buyin" || explicit === "cash_buyins" || explicit === "other") return true;
+  if (explicit === "tournament_ticket" || explicit === "ticket" || explicit === "tickets") return false;
+  var text = homeTournamentRaffleBonusText(raffle).toLowerCase();
+  return text.indexOf("на кеш") !== -1 || text.indexOf("кеш") !== -1 || text.indexOf("cash") !== -1 || text.indexOf("бонус гейм") !== -1 || text.indexOf("bonus game") !== -1;
+}
+
+function homeTournamentRaffleBonusTicketWord(count) {
+  var n = Math.abs(parseInt(String(count || 0), 10) || 0);
+  var mod100 = n % 100;
+  var mod10 = n % 10;
+  if (mod100 >= 11 && mod100 <= 19) return "билетов";
+  if (mod10 === 1) return "билет";
+  if (mod10 >= 2 && mod10 <= 4) return "билета";
+  return "билетов";
+}
+
+function homeTournamentRaffleBonusFormatCountdown(diff) {
+  if (diff <= 0) return "Скоро";
+  var h = Math.floor(diff / 3600000);
+  var m = Math.floor((diff % 3600000) / 60000);
+  var s = Math.floor((diff % 60000) / 1000);
+  return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function homeTournamentRaffleBonusTicketCount(raffle) {
+  var total = Math.max(0, parseInt(String(raffle && raffle.totalWinners || ""), 10) || 0);
+  var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+  if (!total && groups.length) {
+    total = groups.reduce(function (sum, group) {
+      return sum + Math.max(0, parseInt(String(group && group.count || ""), 10) || 0);
+    }, 0);
+  }
+  return total;
+}
+
+function homeTournamentRaffleBonusScore(raffle) {
+  var text = homeTournamentRaffleBonusText(raffle).toLowerCase();
+  var score = 0;
+  if (text.indexOf("турнир дня") !== -1) score += 20;
+  if (text.indexOf("турнир вечера") !== -1 || text.indexOf("вечер") !== -1) score += 18;
+  if (text.indexOf("турнир") !== -1) score += 6;
+  if (text.indexOf("билет") !== -1 || text.indexOf("беккинг") !== -1) score += 6;
+  var currentNames = [];
+  try {
+    TOURNAMENT_OF_DAY_BY_WEEKDAY.forEach(function (item) {
+      var name = String(item && item.name || "").trim().toLowerCase();
+      if (name && currentNames.indexOf(name) === -1) currentNames.push(name);
+    });
+  } catch (eNames) {}
+  currentNames.forEach(function (name) {
+    if (name && text.indexOf(name) !== -1) score += 4;
+  });
+  return score;
+}
+
+function chooseHomeTournamentRaffleBonus(activeRaffles) {
+  var now = Date.now();
+  var rows = Array.isArray(activeRaffles) ? activeRaffles : [];
+  var candidates = rows.filter(function (raffle) {
+    if (!raffle || raffle.status !== "active") return false;
+    if (homeTournamentRaffleBonusIsCash(raffle)) return false;
+    if (homeTournamentRaffleBonusTicketCount(raffle) <= 0) return false;
+    if (!raffle.endDate) return false;
+    var end = new Date(raffle.endDate).getTime();
+    return isFinite(end) && end > now;
+  });
+  candidates.sort(function (a, b) {
+    var scoreDiff = homeTournamentRaffleBonusScore(b) - homeTournamentRaffleBonusScore(a);
+    if (scoreDiff) return scoreDiff;
+    return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
+  });
+  return candidates[0] || null;
+}
+
+function hideHomeTournamentRaffleBonus() {
+  var btn = document.getElementById("homeTournamentRaffleBonus");
+  if (btn) {
+    btn.hidden = true;
+    btn.style.display = "none";
+    btn.removeAttribute("data-raffle-id");
+  }
+  if (homeTournamentRaffleBonusTimer) {
+    clearInterval(homeTournamentRaffleBonusTimer);
+    homeTournamentRaffleBonusTimer = null;
+  }
+}
+
+function renderHomeTournamentRaffleBonus() {
+  var btn = document.getElementById("homeTournamentRaffleBonus");
+  var ticketsEl = document.getElementById("homeTournamentRaffleBonusTickets");
+  var timerEl = document.getElementById("homeTournamentRaffleBonusTimer");
+  var raffle = homeTournamentRaffleBonusData;
+  if (!btn || !ticketsEl || !timerEl || !raffle) return;
+  var end = new Date(raffle.endDate);
+  var diff = end.getTime() - Date.now();
+  if (!isFinite(diff) || diff <= 0) {
+    hideHomeTournamentRaffleBonus();
+    return;
+  }
+  var count = homeTournamentRaffleBonusTicketCount(raffle);
+  ticketsEl.textContent = String(count) + " " + homeTournamentRaffleBonusTicketWord(count);
+  timerEl.textContent = homeTournamentRaffleBonusFormatCountdown(diff);
+  btn.hidden = false;
+  btn.style.removeProperty("display");
+  btn.setAttribute("data-raffle-id", String(raffle.id || ""));
+  btn.setAttribute("aria-label", "Открыть розыгрыш " + count + " " + homeTournamentRaffleBonusTicketWord(count));
+}
+
+function setHomeTournamentRaffleBonus(raffle) {
+  homeTournamentRaffleBonusData = raffle || null;
+  if (!homeTournamentRaffleBonusData) {
+    hideHomeTournamentRaffleBonus();
+    return;
+  }
+  renderHomeTournamentRaffleBonus();
+  if (!homeTournamentRaffleBonusTimer) {
+    homeTournamentRaffleBonusTimer = setInterval(renderHomeTournamentRaffleBonus, 1000);
+  }
+}
+
+function loadHomeTournamentRaffleBonus(force) {
+  if (homeTournamentRaffleBonusInFlight) return;
+  var btn = document.getElementById("homeTournamentRaffleBonus");
+  if (!btn) return;
+  var now = Date.now();
+  if (!force && homeTournamentRaffleBonusLoadedAt && now - homeTournamentRaffleBonusLoadedAt < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS) {
+    renderHomeTournamentRaffleBonus();
+    return;
+  }
+  var cached = null;
+  try {
+    var raffleCache = window._rafflesCache || null;
+    cached = raffleCache && raffleCache.data && raffleCache.data.ok && raffleCache.time && now - raffleCache.time < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS ? raffleCache.data : null;
+  } catch (eCache) {}
+  if (cached) {
+    homeTournamentRaffleBonusLoadedAt = now;
+    setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(cached.activeRaffles || cached.raffles || []));
+    return;
+  }
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base) return;
+  var q = typeof pokerRafflesApiQueryLeading === "function"
+    ? pokerRafflesApiQueryLeading()
+    : (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=");
+  var isLocal = false;
+  try {
+    isLocal = /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(window.location.hostname || "");
+  } catch (eLocal) {}
+  homeTournamentRaffleBonusInFlight = true;
+  fetch(base + "/api/raffles" + q + "&homeBonus=1&_t=" + Date.now() + (isLocal ? "&demo=1" : ""), { cache: "no-store" })
+    .then(function (r) { return r.json().catch(function () { return null; }); })
+    .then(function (data) {
+      homeTournamentRaffleBonusLoadedAt = Date.now();
+      if (data && data.ok) {
+        try { window._rafflesCache = { data: data, time: Date.now() }; } catch (eSetCache) {}
+        setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(data.activeRaffles || data.raffles || []));
+      } else {
+        hideHomeTournamentRaffleBonus();
+      }
+    })
+    .catch(function () {
+      hideHomeTournamentRaffleBonus();
+    })
+    .finally(function () {
+      homeTournamentRaffleBonusInFlight = false;
+    });
+}
+
+function initHomeTournamentRaffleBonus() {
+  var btn = document.getElementById("homeTournamentRaffleBonus");
+  if (!btn) return;
+  if (btn.__homeTournamentRaffleBonusBound !== "1") {
+    btn.__homeTournamentRaffleBonusBound = "1";
+    btn.addEventListener("click", function () {
+      var raffleId = btn.getAttribute("data-raffle-id") || "";
+      if (raffleId) window.__pendingRaffleActiveId = raffleId;
+      if (typeof setView === "function") setView("raffles");
+    });
+  }
+  if (!window.__homeTournamentRaffleBonusRefreshBound) {
+    window.__homeTournamentRaffleBonusRefreshBound = true;
+    window.addEventListener("focus", function () {
+      loadHomeTournamentRaffleBonus(true);
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) loadHomeTournamentRaffleBonus(true);
+    });
+  }
+  if (!homeTournamentRaffleBonusRefreshTimer) {
+    homeTournamentRaffleBonusRefreshTimer = setInterval(function () {
+      loadHomeTournamentRaffleBonus(true);
+    }, HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS);
+  }
+  loadHomeTournamentRaffleBonus();
+}
+
+function initHomeTournamentRaffleBonusWhenReady() {
+  try {
+    initHomeTournamentRaffleBonus();
+  } catch (eHomeTournamentRaffleReady) {}
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initHomeTournamentRaffleBonusWhenReady);
+} else {
+  initHomeTournamentRaffleBonusWhenReady();
+}
+window.addEventListener("load", initHomeTournamentRaffleBonusWhenReady);
+
 function getHomeTournamentLeagueLabel(leagueNum) {
   return "Лига " + (Number(leagueNum) === 2 ? "2" : "1");
 }
@@ -1155,6 +1386,9 @@ function updateTournamentDayBlock() {
     renderHomeFreerollSchedule();
     pokerUpdateDownloadInfoSubsections();
   } catch (eHomeFreerolls) {}
+  try {
+    initHomeTournamentRaffleBonus();
+  } catch (eHomeTournamentRaffleBonus) {}
   var buyinEls = [document.getElementById("tournamentDayBuyin"), document.getElementById("scheduleTournamentDayBuyin")].filter(Boolean);
   var guaranteeEls = [document.getElementById("tournamentDayGuarantee"), document.getElementById("scheduleTournamentDayGuarantee")].filter(Boolean);
   var timerLabelEls = [
