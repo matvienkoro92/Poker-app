@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.598">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v88" data-app-version="3.599">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -299,7 +299,7 @@
     <link rel="preload" as="image" href="./assets/home-tournament-sunday-knockout-progressive-700k.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-daily.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.598" />
+    <link rel="stylesheet" href="./styles.css?v=3.599" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.593" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -621,6 +621,13 @@
                       <span class="header-menu-action__hint">Правила розыгрышей и общения</span>
                     </span>
                   </button>
+                  <button type="button" class="header-menu-action header-menu-action--gazette" data-gazette-open="1" title="Газета клуба" aria-label="Открыть газету Вестник Два туза" role="menuitem" data-header-menu-close>
+                    <span class="header-menu-action__icon" aria-hidden="true">📰</span>
+                    <span class="header-menu-action__body">
+                      <span class="header-menu-action__title">Газета клуба</span>
+                      <span class="header-menu-action__hint">Вестник Два туза</span>
+                    </span>
+                  </button>
                   <button type="button" class="header-menu-action header-menu-action--radio radio-toggle" id="radioToggle" title="Радио: выкл" aria-label="Радио: выкл" role="menuitem">
                     <span class="header-menu-action__icon radio-toggle__icon radio-toggle__icon--off" aria-hidden="true">🎵</span>
                     <span class="header-menu-action__icon radio-toggle__icon radio-toggle__icon--chill" aria-hidden="true">🎧</span>
@@ -740,66 +747,9 @@
                 <img class="home-mini-icon__image home-mini-icon__image--raffles" src="./assets/home-menu-raffles-button.jpg?v=3.222" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
                 <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
               </a>
-              <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--gazette" data-gazette-open="1" title="Газета клуба" aria-label="Газета клуба">
-                <img class="home-mini-icon__image home-mini-icon__image--gazette" src="./assets/home-menu-gazette-button.jpg?v=3.222" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
-                <span class="home-mini-icon__label" id="homeMiniGazetteLabel">Газета клуба</span>
-              </a>
-            </div>
-            <section class="home-freerolls-strip" aria-label="Фрироллы">
-              <div class="home-freerolls-strip__head">
-                <span class="home-freerolls-strip__icon" aria-hidden="true">
-                  <svg class="home-freerolls-strip__trophy" viewBox="0 0 64 64" focusable="false">
-                    <path d="M18.6 13.2h26.8l-2.3 22.1c-.6 5.8-4.8 10.4-10.1 11.3v5.1h8.5v5.8h-19v-5.8H31v-5.1c-5.3-.9-9.5-5.5-10.1-11.3l-2.3-22.1Z" />
-                    <path d="M17.9 18.1H8.5v7c0 7.2 4.5 12.8 12.3 14.2l-.9-7.1c-3.8-1.2-5.8-3.8-5.8-7.3v-1.4h4.3l-.5-5.4Z" />
-                    <path d="M46.1 18.1h9.4v7c0 7.2-4.5 12.8-12.3 14.2l.9-7.1c3.8-1.2 5.8-3.8 5.8-7.3v-1.4h-4.3l.5-5.4Z" />
-                    <path class="home-freerolls-strip__trophy-star" d="m32 18.3 3.1 7 7.6.7-5.7 5 1.7 7.4-6.7-3.9-6.7 3.9 1.7-7.4-5.7-5 7.6-.7 3.1-7Z" />
-                  </svg>
-                </span>
-                <h2 class="home-freerolls-strip__title">Ближайшие фрироллы</h2>
-                <a class="home-freerolls-strip__all" href="#" data-view-target="download">Смотреть все <span aria-hidden="true">›</span></a>
-              </div>
-              <div class="home-freerolls-strip__tabs" aria-hidden="true">
-                <span class="home-freerolls-strip__tab home-freerolls-strip__tab--active">Ближайший</span>
-                <span class="home-freerolls-strip__tab">Следующий</span>
-              </div>
-              <div class="home-freeroll-schedule home-freeroll-schedule--cards" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
-              <div class="home-freerolls-strip__hint" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </section>
-            <h2 class="home-club-achievements-title">Достижения клуба</h2>
-            <a href="#" class="home-club-hero-banner" data-view-target="hall-of-fame" aria-label="Герой клуба: Эмиль Ахмедов, победа года">
-              <img
-                class="home-club-hero-banner__image"
-                src="./assets/home-club-hero-emil-ahmedov.webp"
-                alt=""
-                width="2172"
-                height="724"
-                loading="lazy"
-                decoding="async"
-                aria-hidden="true"
-              />
-            </a>
-            <div class="home-compact-links" aria-label="Рейтинг и зал славы клуба">
-              <a href="#" class="home-compact-link home-compact-link--rating home-compact-link--spring-strip" data-view-target="spring-rating" aria-label="Рейтинг весны 2026. Waaar - 100 000р. Sarmat - 30 000р">
-                <span class="home-compact-link__strip-title">Рейтинг весны 2026: Waaar - 100 000р. Sarmat - 30 000р</span>
-              </a>
-              <a href="#" class="home-compact-link home-compact-link--rating" data-view-target="summer-rating" aria-label="Рейтинг турнирщиков лета на 250 000 рублей">
-                <span class="home-compact-link__body">
-                  <span class="home-compact-link__eyebrow">
-                    <span>Рейтинг</span>
-                    <span>турнирщиков</span>
-                  </span>
-                  <span class="home-compact-link__title">на 250 000 ₽</span>
-                  <span class="home-compact-link__sub">Лето 2026 <span aria-hidden="true">☀</span></span>
-                </span>
-                <span class="home-compact-link__cta">Смотреть рейтинг</span>
-                <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey.png?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
-              </a>
-              <a href="#" class="home-compact-link home-compact-link--hall" data-view-target="hall-of-fame" aria-label="Зал славы клуба">
-                <img class="home-compact-link__banner" src="./assets/home-hall-of-fame-banner-gold.jpg" alt="" width="1672" height="941" loading="lazy" decoding="async" aria-hidden="true" />
+              <a href="#homeFreerollsStrip" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--freerolls" data-home-scroll-target="homeFreerollsStrip" title="Фрироллы" aria-label="Ближайшие фрироллы">
+                <img class="home-mini-icon__image home-mini-icon__image--freerolls" src="./assets/home-freeroll-bg-saturday.webp?v=3.222" alt="" width="900" height="540" loading="lazy" decoding="async" aria-hidden="true" />
+                <span class="home-mini-icon__label" id="homeMiniFreerollsLabel">Фрироллы</span>
               </a>
             </div>
             <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
@@ -949,6 +899,63 @@
                 ><span id="tournamentDayDetailsBtnText">Сыграть</span></a>
               </div>
             </div>
+            <h2 class="home-club-achievements-title">Достижения клуба</h2>
+            <a href="#" class="home-club-hero-banner" data-view-target="hall-of-fame" aria-label="Герой клуба: Эмиль Ахмедов, победа года">
+              <img
+                class="home-club-hero-banner__image"
+                src="./assets/home-club-hero-emil-ahmedov.webp"
+                alt=""
+                width="2172"
+                height="724"
+                loading="lazy"
+                decoding="async"
+                aria-hidden="true"
+              />
+            </a>
+            <div class="home-compact-links" aria-label="Рейтинг и зал славы клуба">
+              <a href="#" class="home-compact-link home-compact-link--rating home-compact-link--spring-strip" data-view-target="spring-rating" aria-label="Рейтинг весны 2026. Waaar - 100 000р. Sarmat - 30 000р">
+                <span class="home-compact-link__strip-title">Рейтинг весны 2026: Waaar - 100 000р. Sarmat - 30 000р</span>
+              </a>
+              <a href="#" class="home-compact-link home-compact-link--rating" data-view-target="summer-rating" aria-label="Рейтинг турнирщиков лета на 250 000 рублей">
+                <span class="home-compact-link__body">
+                  <span class="home-compact-link__eyebrow">
+                    <span>Рейтинг</span>
+                    <span>турнирщиков</span>
+                  </span>
+                  <span class="home-compact-link__title">на 250 000 ₽</span>
+                  <span class="home-compact-link__sub">Лето 2026 <span aria-hidden="true">☀</span></span>
+                </span>
+                <span class="home-compact-link__cta">Смотреть рейтинг</span>
+                <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey.png?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
+              </a>
+              <a href="#" class="home-compact-link home-compact-link--hall" data-view-target="hall-of-fame" aria-label="Зал славы клуба">
+                <img class="home-compact-link__banner" src="./assets/home-hall-of-fame-banner-gold.jpg" alt="" width="1672" height="941" loading="lazy" decoding="async" aria-hidden="true" />
+              </a>
+            </div>
+            <section class="home-freerolls-strip" id="homeFreerollsStrip" aria-label="Фрироллы">
+              <div class="home-freerolls-strip__head">
+                <span class="home-freerolls-strip__icon" aria-hidden="true">
+                  <svg class="home-freerolls-strip__trophy" viewBox="0 0 64 64" focusable="false">
+                    <path d="M18.6 13.2h26.8l-2.3 22.1c-.6 5.8-4.8 10.4-10.1 11.3v5.1h8.5v5.8h-19v-5.8H31v-5.1c-5.3-.9-9.5-5.5-10.1-11.3l-2.3-22.1Z" />
+                    <path d="M17.9 18.1H8.5v7c0 7.2 4.5 12.8 12.3 14.2l-.9-7.1c-3.8-1.2-5.8-3.8-5.8-7.3v-1.4h4.3l-.5-5.4Z" />
+                    <path d="M46.1 18.1h9.4v7c0 7.2-4.5 12.8-12.3 14.2l.9-7.1c3.8-1.2 5.8-3.8 5.8-7.3v-1.4h-4.3l.5-5.4Z" />
+                    <path class="home-freerolls-strip__trophy-star" d="m32 18.3 3.1 7 7.6.7-5.7 5 1.7 7.4-6.7-3.9-6.7 3.9 1.7-7.4-5.7-5 7.6-.7 3.1-7Z" />
+                  </svg>
+                </span>
+                <h2 class="home-freerolls-strip__title">Ближайшие фрироллы</h2>
+                <a class="home-freerolls-strip__all" href="#" data-view-target="download">Смотреть все <span aria-hidden="true">›</span></a>
+              </div>
+              <div class="home-freerolls-strip__tabs" aria-hidden="true">
+                <span class="home-freerolls-strip__tab home-freerolls-strip__tab--active">Ближайший</span>
+                <span class="home-freerolls-strip__tab">Следующий</span>
+              </div>
+              <div class="home-freeroll-schedule home-freeroll-schedule--cards" id="freerollHomeScheduleList" aria-label="Расписание фрироллов по дням"></div>
+              <div class="home-freerolls-strip__hint" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </section>
             <div class="home-live-tournament" id="homeLiveTournament" role="region" aria-label="Сейчас идет турнир">
               <div class="home-live-tournament__status">
                 <span class="home-live-tournament__status-title" id="homeLiveTournamentTitle">Идет сейчас</span>

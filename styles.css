@@ -11,7 +11,7 @@
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
 @import url("./styles-home-rating-promo-legacy.css?v=3.593");
-@import url("./styles-rating.css?v=3.598");
+@import url("./styles-rating.css?v=3.599");
 @import url("./styles-hall.css?v=3.593");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
@@ -1077,7 +1077,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-daily-shortcuts .home-mini-icon-item--raffles .home-mini-icon__image--raffles,
-.home-daily-shortcuts .home-mini-icon-item--gazette .home-mini-icon__image--gazette {
+.home-daily-shortcuts .home-mini-icon-item--gazette .home-mini-icon__image--gazette,
+.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls {
   inset: 0;
   width: 100%;
   height: 100%;
@@ -1086,6 +1087,35 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     saturate(1.1)
     contrast(1.07)
     brightness(1.04);
+}
+
+.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls {
+  object-fit: cover;
+  object-position: center;
+}
+
+.home-daily-shortcuts .home-mini-icon-item--freerolls::after {
+  content: "Фрироллы";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  display: block;
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 196, 72, 0.58);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #ffe6a7;
+  font-size: clamp(10px, 2.5vw, 15px);
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.82),
+    0 0 10px rgba(255, 159, 22, 0.62);
+  pointer-events: none;
 }
 
 .home-daily-shortcuts .home-mini-icon {
