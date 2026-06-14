@@ -3901,6 +3901,36 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     bottom: 28px;
   }
 
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank {
+    top: 32px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
+    top: 28px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
+    top: 32px;
+    left: calc(50% - 3px);
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick {
+    top: 62px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+    top: 64px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+    font-size: clamp(5.9px, 1.65vw, 7.3px);
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
+    left: 1px;
+    right: 7px;
+  }
+
   /* Mobile lower podium anchor: top-4..10 players stand with their feet on the square stands painted in the background. */
   .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
   .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
