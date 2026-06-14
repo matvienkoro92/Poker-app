@@ -3901,10 +3901,17 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     bottom: 28px;
   }
 
+  /* Mobile lower podium anchor: top-4..10 players stand with their feet on the square stands painted in the background. */
   .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
   .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
-    height: 152px;
-    margin-bottom: 10px;
+    --summer-rating-mobile-lower-podium-height: 152px;
+    --summer-rating-mobile-lower-podium-table-gap: 22px;
+    --summer-rating-mobile-lower-podium-players-y: -12px;
+    --summer-rating-mobile-lower-podium-label-y: 144px;
+    --summer-rating-mobile-lower-podium-hitbox-y: 54px;
+    --summer-rating-mobile-lower-podium-hitbox-height: 98px;
+    height: var(--summer-rating-mobile-lower-podium-height);
+    margin-bottom: var(--summer-rating-mobile-lower-podium-table-gap);
   }
 
   .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap::before {
@@ -3916,7 +3923,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
       url("./assets/summer-rating-player-milkyway.webp") 67.5% calc(76% + 4px) / 15.1% auto no-repeat,
       url("./assets/summer-rating-player-prushnik.webp") 84% calc(79% + 3px) / 14.1% auto no-repeat,
       url("./assets/summer-rating-player-khervam.webp") 100% calc(77% + 4px) / 14.4% auto no-repeat;
-    transform: translateY(-12px);
+    transform: translateY(var(--summer-rating-mobile-lower-podium-players-y));
   }
 
   .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap::before {
@@ -3928,15 +3935,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
       url("./assets/summer-rating-league2-player-babyshark.webp") 67.5% calc(78% + 3px) / 15.4% auto no-repeat,
       url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% + 3px) / 14.6% auto no-repeat,
       url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% + 3px) / 13.8% auto no-repeat;
-    transform: translateY(-12px);
+    transform: translateY(var(--summer-rating-mobile-lower-podium-players-y));
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
-    top: 144px;
+    top: var(--summer-rating-mobile-lower-podium-label-y);
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
-    top: 54px;
-    height: 98px;
+    top: var(--summer-rating-mobile-lower-podium-hitbox-y);
+    height: var(--summer-rating-mobile-lower-podium-hitbox-height);
   }
 }
