@@ -29,7 +29,7 @@ if (!CRON_SECRET || !BASE_URL) {
 }
 
 const TOURNAMENT_DAY_BY_MSK_WEEKDAY = {
-  0: { name: "Нокаут недели", buyin: 2000 },
+  0: { name: "Нокаут Прогрессив", buyin: 10000 },
   1: { name: "Magic MKO", buyin: 500 },
   2: { name: "Турнир Тракториста", buyin: 300 },
   3: { name: "Турнир Стольник", buyin: 100 },
