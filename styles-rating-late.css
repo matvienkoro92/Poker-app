@@ -3363,6 +3363,35 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 @media (min-width: 701px) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    background:
+      url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 12px) / 31% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% - 4px) / 37% auto no-repeat,
+      url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 4px) / 24% auto no-repeat;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+    background:
+      url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% - 12px) / 18.9% auto no-repeat,
+      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% - 4px) / 30.1% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% - 4px) / 21.7% auto no-repeat;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) {
+    bottom: 66px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) {
+    bottom: 78px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3),
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) {
+    bottom: 66px;
+  }
+
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank,
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__rank {
     top: 20px;

@@ -186,10 +186,12 @@
     max-width: 100%;
   }
   .profile-lang-switch {
-    right: 0;
+    top: 44px;
+    right: 18px;
   }
   .profile-hero-card__respect-btn {
-    right: 8px;
+    top: 112px;
+    right: 18px;
   }
   .profile-lang-switch__btn {
     min-width: 38px;
