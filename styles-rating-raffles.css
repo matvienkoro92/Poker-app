@@ -4212,8 +4212,21 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-join-leave-cell {
   display: flex;
+  flex-direction: column;
   min-width: 0;
   flex: 1 1 auto;
+}
+.raffle-join-error {
+  margin: 0 0 8px;
+  color: #f87171;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.raffle-join-error--hidden {
+  display: none !important;
 }
 .raffle-join-leave-cell .raffle-join-toggle-btn {
   margin: 0;

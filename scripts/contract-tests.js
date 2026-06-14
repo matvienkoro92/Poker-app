@@ -846,6 +846,32 @@ async function testRaffleAccessLevelGate(redis) {
   assert.strictEqual(r.statusCode, 200, "access level 0 allows a user without Poker21 profile");
   assert.strictEqual(r.body.raffle.participants[0].p21Id, "", "access level 0 stores empty p21 id when not linked");
 
+  const firstLevelRaffle = {
+    id: "contract_raffle_access_first_level",
+    title: "Contract first level gated raffle",
+    totalWinners: 1,
+    groups: [{ prize: "Ticket", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    participants: [],
+    winners: [],
+    status: "active",
+    accessLevel: 1,
+    createdAt: new Date().toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_access_first_level", JSON.stringify(firstLevelRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_access_first_level");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "join",
+    raffleId: "contract_raffle_access_first_level",
+    deviceId: "access-first-level-device",
+  }, { "x-forwarded-for": "10.0.0.21" }));
+  assert.strictEqual(r.statusCode, 403, "access level 1 blocks a user without Poker21 profile");
+  assert.strictEqual(r.body.code, "RAFFLE_LEVEL_REQUIRED", "missing Poker21 first level response keeps level code");
+  assert.strictEqual(r.body.error, "Привяжите аккаунт Poker21 в профиле.", "missing Poker21 first level response explains binding");
+  assert.strictEqual(r.body.requiresPoker21Profile, true, "missing Poker21 first level response marks profile requirement");
+
   const gatedRaffle = {
     id: "contract_raffle_access_level",
     title: "Contract level gated raffle",

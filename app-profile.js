@@ -12,6 +12,9 @@ function setProfileTab(tab) {
     btn.classList.toggle("profile-tabs__btn--active", isActive);
     btn.setAttribute("aria-selected", isActive ? "true" : "false");
   });
+  try {
+    if (typeof updateProfileExitBtnVisibility === "function") updateProfileExitBtnVisibility();
+  } catch (eProfileTabAuthSync) {}
   if (activeTab === "poker21" && typeof initProfilePokerPlus === "function") {
     try {
       setTimeout(function () {

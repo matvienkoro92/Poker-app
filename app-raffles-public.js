@@ -123,6 +123,7 @@ function initRafflesPublicRuntime(opts) {
 
   if (raffleJoinToggleBtn) {
     raffleJoinToggleBtn.addEventListener("click", function () {
+      if (typeof clearRaffleJoinError === "function") clearRaffleJoinError();
       if (!currentRaffleId) {
         if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
         return;
@@ -145,6 +146,7 @@ function initRafflesPublicRuntime(opts) {
           .then(function (data) {
             if (data && data.ok) {
               renderRaffleAfterParticipation(data);
+              if (typeof clearRaffleJoinError === "function") clearRaffleJoinError();
               var leaveMsg = data.alreadyLeft ? "Вы не были в списке участников." : "Участие отменено.";
               showRaffleFeedback(leaveMsg, "ok");
             } else {
@@ -189,6 +191,7 @@ function initRafflesPublicRuntime(opts) {
         .then(function (data) {
           if (data && data.ok) {
             renderRaffleAfterParticipation(data);
+            if (typeof clearRaffleJoinError === "function") clearRaffleJoinError();
             showRaffleFeedback(data.alreadyJoined ? "Вы уже участвуете." : "Вы участвуете в розыгрыше.", "ok");
           } else {
             if (currentRaffleData) renderRaffle(currentRaffleData);
@@ -199,6 +202,9 @@ function initRafflesPublicRuntime(opts) {
                 data.code === "BOT_REQUIRED" ||
                 data.code === "SUBSCRIPTION_REQUIRED" ||
                 data.code === "TELEGRAM_REQUIRED");
+            var isJoinInlineError =
+              data &&
+              (data.code === "P21_REQUIRED" || data.code === "RAFFLE_LEVEL_REQUIRED");
             if (isRequirementError) {
               showRaffleFeedback(err, "err", {
                 botUrl: data.botUrl,
@@ -209,11 +215,12 @@ function initRafflesPublicRuntime(opts) {
                 code: data.code,
                 sticky: true,
               });
+            } else if (isJoinInlineError && typeof showRaffleJoinError === "function") {
+              showRaffleJoinError(err);
             } else {
               showRaffleFeedback(err, "err");
             }
             if (data && data.code === "P21_REQUIRED") {
-              if (tg && tg.showAlert) tg.showAlert("Для участия нужен ваш айди из Poker21, чтобы на него выдать выигрыш, для этого привяжите его в разделе Профиль.");
               if (typeof setView === "function") setView("profile");
             } else if (isRequirementError) {
               if (tg && tg.showAlert) tg.showAlert(err);
@@ -225,9 +232,6 @@ function initRafflesPublicRuntime(opts) {
             } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
               if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
               else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
-            } else if (data && data.code === "RAFFLE_LEVEL_REQUIRED") {
-              if (tg && tg.showAlert) tg.showAlert(err || "Повысьте свой уровень в игре.");
-              else if (typeof alert === "function") alert(err || "Повысьте свой уровень в игре.");
             } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
               if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
             } else if (data && data.code === "INVALID_SERVER_RESPONSE") {

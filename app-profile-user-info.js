@@ -39,6 +39,8 @@ var pokerProfileUserInfoCache = null;
 var pokerProfileUserInfoPromise = null;
 var pokerProfileUserInfoCacheAt = 0;
 var POKER_PROFILE_USER_INFO_CACHE_MS = 15000;
+var POKER_PROFILE_AUTH_LOADING_FALLBACK_MS = 12000;
+var pokerProfileAuthLoadingSince = 0;
 var POKER_PROFILE_LINKED_EMAIL_CACHE_KEY = "poker_profile_linked_email";
 var POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY = "poker_profile_telegram_username";
 var POKER_PROFILE_RESPECT_CACHE_KEY = "poker_profile_respect_score";
@@ -288,6 +290,21 @@ function pokerProfileAuthState() {
   try {
     state.hasCredential = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
   } catch (eCredentialState) {}
+  try {
+    if (!state.hasCredential && typeof pokerReadEmailPwaSessionToken === "function") {
+      state.hasCredential = !!pokerReadEmailPwaSessionToken();
+    }
+  } catch (eEmailCredentialState) {}
+  if (state.isLoading) {
+    if (!pokerProfileAuthLoadingSince) pokerProfileAuthLoadingSince = Date.now();
+    if (state.hasCredential && Date.now() - pokerProfileAuthLoadingSince > POKER_PROFILE_AUTH_LOADING_FALLBACK_MS) {
+      state.isLoading = false;
+      state.isVerified = true;
+      state.usedCredentialFallback = true;
+    }
+  } else {
+    pokerProfileAuthLoadingSince = 0;
+  }
   state.hasAccountSession = !state.isGuest && (state.hasStoredSession || state.hasCredential || state.isVerified);
   state.showProfileShell = state.hasAccountSession;
   return state;
@@ -308,6 +325,24 @@ function updateProfileExitBtnVisibility() {
   syncProfileStatusVisibility(authState.showProfileShell);
   syncProfileVerifiedContentVisibility(authState.showProfileShell);
   syncProfileLoadingVisibility(!!(authState.hasAccountSession && authState.isLoading && !authState.isVerified));
+  if (authState.hasAccountSession && authState.isLoading && !authState.isVerified && !btn.dataset.profileLoadingFallbackTimer) {
+    btn.dataset.profileLoadingFallbackTimer = "1";
+    setTimeout(function () {
+      btn.dataset.profileLoadingFallbackTimer = "";
+      updateProfileExitBtnVisibility();
+      try {
+        var root = document.getElementById("profileView");
+        if (
+          root &&
+          root.dataset &&
+          root.dataset.profileActiveTab === "poker21" &&
+          typeof initProfilePokerPlus === "function"
+        ) {
+          initProfilePokerPlus();
+        }
+      } catch (eProfileLoadingFallbackP21) {}
+    }, POKER_PROFILE_AUTH_LOADING_FALLBACK_MS + 250);
+  }
 }
 
 function pokerClearSessionsAndReloadForLogin() {

@@ -80,6 +80,7 @@ function initRaffles() {
   var raffleInfoToggleBtn = document.getElementById("raffleInfoToggleBtn");
   var raffleInfoPanel = document.getElementById("raffleInfoPanel");
   var raffleJoinToggleBtn = document.getElementById("raffleJoinToggleBtn");
+  var raffleJoinError = document.getElementById("raffleJoinError");
   var raffleJoinedMsg = document.getElementById("raffleJoinedMsg");
   var raffleGuestGate = document.getElementById("raffleGuestGate");
   var raffleParticipantsCount = document.getElementById("raffleParticipantsCount");
@@ -312,6 +313,27 @@ function initRaffles() {
     } else if (typeof alert === "function") {
       alert(message);
     }
+  }
+
+  function clearRaffleJoinError() {
+    if (!raffleJoinError) return;
+    raffleJoinError.textContent = "";
+    raffleJoinError.classList.add("raffle-join-error--hidden");
+  }
+
+  function showRaffleJoinError(message) {
+    if (!message) return;
+    if (tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred) {
+      try {
+        tg.HapticFeedback.notificationOccurred("error");
+      } catch (eH) {}
+    }
+    if (!raffleJoinError) {
+      showRaffleFeedback(message, "err");
+      return;
+    }
+    raffleJoinError.textContent = String(message || "");
+    raffleJoinError.classList.remove("raffle-join-error--hidden");
   }
 
   function openRaffleTelegramLinkingFlow() {
@@ -1407,6 +1429,9 @@ function initRaffles() {
         data.code === "BOT_REQUIRED" ||
         data.code === "SUBSCRIPTION_REQUIRED" ||
         data.code === "TELEGRAM_REQUIRED");
+    var isJoinInlineError =
+      data &&
+      (data.code === "P21_REQUIRED" || data.code === "RAFFLE_LEVEL_REQUIRED");
     if (isRequirementError) {
       showRaffleFeedback(err, "err", {
         botUrl: data.botUrl,
@@ -1417,11 +1442,12 @@ function initRaffles() {
         code: data.code,
         sticky: true,
       });
+    } else if (isJoinInlineError) {
+      showRaffleJoinError(err);
     } else {
       showRaffleFeedback(err, "err");
     }
     if (data && data.code === "P21_REQUIRED") {
-      if (tg && tg.showAlert) tg.showAlert("Для участия нужен ваш айди из Poker21, чтобы на него выдать выигрыш, для этого привяжите его в разделе Профиль.");
       if (typeof setView === "function") setView("profile");
     } else if (isRequirementError) {
       if (tg && tg.showAlert) tg.showAlert(err);
@@ -1432,9 +1458,6 @@ function initRaffles() {
     } else if (data && data.code === "RAFFLE_LOGIN_REQUIRED") {
       if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
       else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
-    } else if (data && data.code === "RAFFLE_LEVEL_REQUIRED") {
-      if (tg && tg.showAlert) tg.showAlert(err || "Повысьте свой уровень в игре.");
-      else if (typeof alert === "function") alert(err || "Повысьте свой уровень в игре.");
     } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
       if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
     } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
@@ -1448,6 +1471,7 @@ function initRaffles() {
 
   function handleRafflesActiveChooserAction(actionBtn) {
     if (!actionBtn) return;
+    clearRaffleJoinError();
     var action = String(actionBtn.getAttribute("data-raffle-active-action") || "").trim();
     var raffleId = String(actionBtn.getAttribute("data-raffle-active-id") || "").trim();
     if (!raffleId) {
@@ -1492,6 +1516,7 @@ function initRaffles() {
             clearRafflesCache();
             loadRaffles(false, { skipCache: true, keepCurrentOnLoading: true });
           }
+          clearRaffleJoinError();
           showRaffleFeedback(
             action === "leave"
               ? data.alreadyLeft
@@ -2173,6 +2198,7 @@ function initRaffles() {
       raffleInfoToggleBtn: raffleInfoToggleBtn,
       raffleInfoPanel: raffleInfoPanel,
       raffleJoinToggleBtn: raffleJoinToggleBtn,
+      clearRaffleJoinError: clearRaffleJoinError,
       raffleJoinedMsg: raffleJoinedMsg,
       raffleGuestGate: raffleGuestGate,
       raffleParticipantsCount: raffleParticipantsCount,
@@ -2702,6 +2728,8 @@ function initRaffles() {
       base: base,
       tg: tg,
       showRaffleFeedback: showRaffleFeedback,
+      showRaffleJoinError: showRaffleJoinError,
+      clearRaffleJoinError: clearRaffleJoinError,
       openRaffleTelegramLinkingFlow: openRaffleTelegramLinkingFlow,
       renderRaffle: renderRaffle,
       refreshActiveChooserAfterAction: refreshActiveChooserAfterAction,

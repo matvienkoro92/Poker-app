@@ -90,6 +90,7 @@ function initRafflesActiveViewRuntime(opts) {
 
   function renderRaffle(raffle) {
     if (!raffle || !raffleCard) return;
+    if (typeof clearRaffleJoinError === "function") clearRaffleJoinError();
     if (raffleTimerInterval) {
       clearInterval(raffleTimerInterval);
       raffleTimerInterval = null;
