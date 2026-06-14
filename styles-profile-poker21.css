@@ -353,11 +353,6 @@
 .profile-pokerplus-panel {
   min-width: 0;
 }
-.profile-pokerplus-panel--skills .profile-skills {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
 .profile-email-auth__text {
   margin: 0 0 12px;
   font-size: 13px;
@@ -725,12 +720,6 @@
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusStatsPanel[hidden] {
   display: none !important;
 }
-#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusSkillsPanel {
-  grid-column: 1 / -1;
-  order: 5;
-  width: 100%;
-  z-index: 1;
-}
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusForm {
   display: none !important;
 }
@@ -974,7 +963,7 @@
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before { content: "₽"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRegisterRow::before { content: "□"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusPositionRow::before { content: "#"; }
-#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before { content: "L"; }
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before { content: none; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusGroupRow::before { content: "G"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusCountryRow::before { content: "◎"; }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusRoleRow::before { content: "♙"; }
@@ -989,6 +978,69 @@
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceRow::before {
   display: none;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  padding: 12px;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before {
+  display: none;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueLabel {
+  color: rgba(191, 219, 254, 0.9);
+  font-size: 14px;
+  font-weight: 850;
+  text-align: center;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueValue {
+  display: block;
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating {
+  display: block;
+  width: 100%;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__leagues {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__league {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 8px;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  text-align: center;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__league--missing {
+  opacity: 0.72;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__league-name {
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__place {
+  color: #f8fafc;
+  font-size: clamp(16px, 4.8vw, 22px);
+  font-weight: 950;
+  line-height: 1.05;
+}
+#profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-summer-rating__meta {
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.15;
 }
 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusBalanceLabel {
   font-size: 15px;
@@ -1703,6 +1755,21 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 6px;
+    padding: 10px;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueRow::before {
+    display: none;
+  }
+  #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusLeagueValue {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
   }
   #profilePokerPlusSection.profile-pokerplus-card--linked .profile-pokerplus-stats-period__sections {
     gap: 10px;

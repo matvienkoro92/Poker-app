@@ -326,7 +326,7 @@ function initProfilePokerPlus() {
     });
   }
 
-  function pokerPlusFindSummerRating(profile) {
+  function pokerPlusFindSummerRatings(profile) {
     var targetNick = pokerPlusProfileRatingNick(profile);
     if (!targetNick) return { state: "no-nick" };
     var leagueRows1 = pokerPlusSummerRatingRowsByLeague(1);
@@ -336,34 +336,67 @@ function initProfilePokerPlus() {
       { league: 1, rows: leagueRows1 },
       { league: 2, rows: leagueRows2 },
     ];
+    var results = [];
     for (var i = 0; i < leagues.length; i++) {
       var rows = leagues[i].rows || [];
+      var found = null;
       for (var j = 0; j < rows.length; j++) {
         if (pokerPlusRatingNickMatches(rows[j].nick, targetNick)) {
-          return {
-            state: "found",
+          found = {
             league: leagues[i].league,
             place: j + 1,
             points: rows[j].points,
             reward: rows[j].reward,
           };
+          break;
         }
       }
+      results.push(found || { league: leagues[i].league, missing: true });
     }
-    return { state: "missing" };
+    return {
+      state: results.some(function (row) { return row && !row.missing; }) ? "found" : "missing",
+      leagues: results,
+    };
+  }
+
+  function pokerPlusSummerRatingLeagueHtml(row) {
+    var league = row && row.league ? Number(row.league) : 0;
+    if (!row || row.missing) {
+      return (
+        '<span class="profile-pokerplus-summer-rating__league profile-pokerplus-summer-rating__league--missing">' +
+          '<span class="profile-pokerplus-summer-rating__league-name">Лига ' + escapeHtml(league || "") + "</span>" +
+          '<span class="profile-pokerplus-summer-rating__place">нет места</span>' +
+          '<span class="profile-pokerplus-summer-rating__meta">0 баллов · 0 ₽</span>' +
+        "</span>"
+      );
+    }
+    return (
+      '<span class="profile-pokerplus-summer-rating__league">' +
+        '<span class="profile-pokerplus-summer-rating__league-name">Лига ' + escapeHtml(league) + "</span>" +
+        '<span class="profile-pokerplus-summer-rating__place">место ' + escapeHtml(row.place) + "</span>" +
+        '<span class="profile-pokerplus-summer-rating__meta">' +
+          escapeHtml(pokerPlusRatingNumberText(row.points)) +
+          " баллов · " +
+          escapeHtml(pokerPlusRatingNumberText(row.reward)) +
+          " ₽" +
+        "</span>" +
+      "</span>"
+    );
   }
 
   function renderPokerPlusSummerRating(profile) {
     if (!leagueRow || !leagueValue) return;
-    if (leagueLabel) leagueLabel.textContent = "Рейтинг лета:";
+    if (leagueLabel) leagueLabel.textContent = "Рейтинг лета 2026";
     leagueRow.hidden = false;
-    var rating = pokerPlusFindSummerRating(profile);
-    if (rating.state === "found") {
-      leagueValue.textContent =
-        "Лига " + rating.league +
-        ", #" + rating.place +
-        ", " + pokerPlusRatingNumberText(rating.points) + " баллов" +
-        ", " + pokerPlusRatingNumberText(rating.reward) + " ₽";
+    var rating = pokerPlusFindSummerRatings(profile);
+    if (rating.state === "found" || rating.state === "missing") {
+      var leagues = Array.isArray(rating.leagues) ? rating.leagues : [];
+      leagueValue.innerHTML =
+        '<span class="profile-pokerplus-summer-rating">' +
+          '<span class="profile-pokerplus-summer-rating__leagues">' +
+            leagues.map(pokerPlusSummerRatingLeagueHtml).join("") +
+          "</span>" +
+        "</span>";
       return;
     }
     if (rating.state === "loading") {
