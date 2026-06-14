@@ -3950,7 +3950,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     --summer-rating-mobile-lower-podium-height: 164px;
     --summer-rating-mobile-lower-podium-table-gap: 22px;
     --summer-rating-mobile-lower-podium-players-y: -12px;
-    --summer-rating-mobile-lower-podium-label-y: 149px;
+    --summer-rating-mobile-lower-podium-label-y: 155px;
     --summer-rating-mobile-lower-podium-hitbox-y: 54px;
     --summer-rating-mobile-lower-podium-hitbox-height: 98px;
     height: var(--summer-rating-mobile-lower-podium-height);
