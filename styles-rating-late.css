@@ -2704,7 +2704,7 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
 
 .winter-rating.spring-rating.summer-rating {
   --summer-rating-stage-bg-height: max(844px, 100svh);
-  --summer-rating-stage-bg-offset-y: 22px;
+  --summer-rating-stage-bg-offset-y: 32px;
   position: relative;
   width: min(430px, 100%);
   max-width: 430px;
