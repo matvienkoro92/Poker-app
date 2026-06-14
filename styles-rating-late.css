@@ -3950,7 +3950,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     --summer-rating-mobile-lower-podium-height: 164px;
     --summer-rating-mobile-lower-podium-table-gap: 22px;
     --summer-rating-mobile-lower-podium-players-y: -12px;
-    --summer-rating-mobile-lower-podium-label-y: 155px;
+    --summer-rating-mobile-lower-podium-label-y: 160px;
     --summer-rating-mobile-lower-podium-hitbox-y: 54px;
     --summer-rating-mobile-lower-podium-hitbox-height: 98px;
     height: var(--summer-rating-mobile-lower-podium-height);
@@ -3991,6 +3991,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-4 {
     left: 0;
+    transform: translateX(-3px);
     width: 14.285%;
   }
 
@@ -4001,26 +4002,31 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-6 {
     left: 28.57%;
+    transform: translateX(4px);
     width: 14.285%;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-7 {
     left: 42.855%;
+    transform: translateX(4px);
     width: 14.285%;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-8 {
     left: 57.14%;
+    transform: translateX(4px);
     width: 14.285%;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-9 {
     left: 71.425%;
+    transform: translateX(4px);
     width: 14.285%;
   }
 
   .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label--place-10 {
     left: 85.71%;
+    transform: translateX(4px);
     width: 14.285%;
   }
 
