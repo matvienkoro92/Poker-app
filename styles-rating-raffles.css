@@ -1638,11 +1638,11 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser__access {
   position: relative;
   z-index: 2;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 4px;
   min-width: 0;
   min-height: 34px;
   padding: 7px 10px;
@@ -1663,18 +1663,21 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .raffles-active-chooser__access-value {
-  flex: 1 1 120px;
+  flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
   color: #fff6d5;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 1000;
-  line-height: 1.12;
-  text-align: right;
-  white-space: normal;
+  line-height: 1;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .raffles-active-chooser__fact--participants {
   position: relative;
@@ -2848,10 +2851,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-radius: 17px;
 }
 .raffles-active-chooser__access-label {
-  font-size: 12px;
+  font-size: 11px;
 }
 .raffles-active-chooser__access-value {
-  font-size: 17px;
+  font-size: 11px;
 }
 .raffles-active-chooser__fact--countdown {
   display: grid;
@@ -5988,19 +5991,19 @@ button.raffle-feedback-action {
 }
 
 .raffles-active-chooser__access {
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   min-width: 0;
 }
 
 .raffles-active-chooser__access-value {
-  flex: 1 1 120px !important;
+  flex: 0 1 auto !important;
   min-width: 0;
   max-width: 100%;
-  overflow: visible !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.12;
-  text-overflow: clip !important;
-  white-space: normal !important;
+  overflow: hidden !important;
+  overflow-wrap: normal !important;
+  line-height: 1;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 .raffle-access-level-note {
