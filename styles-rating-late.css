@@ -3875,7 +3875,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 31% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 63px) / 37% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 66px) / 37% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 24% auto no-repeat;
   }
 
