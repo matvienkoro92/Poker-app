@@ -3362,6 +3362,33 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   right: 22px;
 }
 
+@media (min-width: 701px) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__rank,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__rank {
+    top: 20px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__rank {
+    top: 16px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__rank {
+    top: 20px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
+    top: 50px;
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+    top: 52px;
+  }
+}
+
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__stats {
   color: #ffe6ad;
   font-size: clamp(6.9px, 1.86vw, 8px);
