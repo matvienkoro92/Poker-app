@@ -1,3 +1,3 @@
 /* Rating CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-rating-tables-modals.css?v=3.603");
+@import url("./styles-rating-tables-modals.css?v=3.605");
 @import url("./styles-rating-chat-modals.css?v=3.527");
