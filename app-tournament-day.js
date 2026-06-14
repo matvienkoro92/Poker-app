@@ -480,6 +480,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
 
 function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   var bonusEl = document.querySelector(".home-tournament-bonus--bubble-buyin");
+  var gridEl = document.querySelector(".home-tournament-bonuses__grid");
   var amountEl = document.getElementById("homeTournamentBubbleBuyinAmount");
   var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
   if (!amountEl || !labelEl) return;
@@ -489,6 +490,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   var active = !!amount;
   amountEl.textContent = amount || "—";
   labelEl.textContent = "бабблу";
+  if (gridEl) gridEl.classList.toggle("home-tournament-bonuses__grid--has-bubble", active);
   if (bonusEl) {
     bonusEl.hidden = !active;
     if (active) bonusEl.style.removeProperty("display");
