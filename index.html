@@ -983,6 +983,29 @@
                   aria-label="Играть в текущий турнир"
                 ><span id="homeLiveTournamentCtaText">Играть</span><span aria-hidden="true">›</span></a>
               </div>
+              <div class="home-live-tournament__notify-actions" aria-label="Уведомления о турнирах">
+                <button type="button" class="home-live-tournament__notify-btn" id="homeTournamentNotifyBtn">
+                  Подписаться на уведомления о турнирах
+                </button>
+                <button type="button" class="home-live-tournament__pick-btn" id="homeTournamentPickBtn">
+                  Выбрать турнир
+                </button>
+                <span class="home-live-tournament__notify-count" id="homeTournamentNotifyCount" aria-live="polite"></span>
+              </div>
+            </div>
+            <div class="home-tournament-notify-modal home-tournament-notify-modal--hidden" id="homeTournamentNotifyModal" aria-hidden="true">
+              <button type="button" class="home-tournament-notify-modal__backdrop" data-home-tournament-notify-close aria-label="Закрыть выбор турниров"></button>
+              <div class="home-tournament-notify-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="homeTournamentNotifyModalTitle">
+                <div class="home-tournament-notify-modal__head">
+                  <h3 id="homeTournamentNotifyModalTitle">Выбрать турнир</h3>
+                  <button type="button" class="home-tournament-notify-modal__close" data-home-tournament-notify-close aria-label="Закрыть">×</button>
+                </div>
+                <div class="home-tournament-notify-modal__list" id="homeTournamentNotifyList"></div>
+                <div class="home-tournament-notify-modal__foot">
+                  <button type="button" class="home-tournament-notify-modal__save" id="homeTournamentNotifySaveBtn">Сохранить</button>
+                  <button type="button" class="home-tournament-notify-modal__cancel" data-home-tournament-notify-close>Отмена</button>
+                </div>
+              </div>
             </div>
             <div class="home-welcome-outline home-welcome-outline--removed" hidden>
             <div class="welcome-title-row">
@@ -1261,6 +1284,14 @@
                 <p class="daily-poker__streak-note">Если за 7 круток подряд вы ни разу не выиграли, то получите утешительный бонус-билет за 300 ₽.</p>
                 <div class="daily-poker__share-actions">
                   <button type="button" class="daily-poker__invite-btn" id="dailyPokerInviteBtn">Позвать друга</button>
+                  <button type="button" class="daily-poker__notify-btn" id="dailyPokerNotifyBtn" aria-label="Получать уведомление об окончании таймера" title="Получать уведомление">
+                    <span class="daily-poker__notify-icon" aria-hidden="true">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                      </svg>
+                    </span>
+                  </button>
                   <button type="button" class="daily-poker__copy-btn" id="dailyPokerCopyLinkBtn" aria-label="Скопировать ссылку на Раздачу дня" title="Скопировать ссылку">
                     <span class="daily-poker__copy-icon" aria-hidden="true">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -1270,7 +1301,7 @@
                     </span>
                   </button>
                 </div>
-                <div class="daily-poker__subscribe-requirements" aria-label="Условия участия">
+                <div class="daily-poker__subscribe-requirements" aria-label="Условия участия" hidden>
                   <p class="daily-poker__subscribe-title">Чтобы участвовать, подпишитесь</p>
                   <ul class="daily-poker__subscribe-list">
                     <li>

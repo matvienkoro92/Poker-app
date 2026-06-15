@@ -1695,7 +1695,7 @@
 
 .daily-poker__share-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px;
+  grid-template-columns: minmax(0, 1fr) 58px 58px;
   align-items: stretch;
   gap: 10px;
   min-width: 0;
@@ -1730,6 +1730,8 @@
 
 .daily-poker__invite-btn:hover,
 .daily-poker__invite-btn:focus-visible,
+.daily-poker__notify-btn:hover,
+.daily-poker__notify-btn:focus-visible,
 .daily-poker__copy-btn:hover,
 .daily-poker__copy-btn:focus-visible {
   border-color: rgba(255, 214, 128, 0.96);
@@ -1739,6 +1741,7 @@
     0 0 22px rgba(255, 118, 0, 0.3);
 }
 
+.daily-poker__notify-btn,
 .daily-poker__copy-btn {
   width: 58px;
   min-height: 58px;
@@ -1759,8 +1762,22 @@
   transition: transform 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
+.daily-poker__notify-btn:active,
 .daily-poker__copy-btn:active {
   transform: translateY(1px) scale(0.98);
+}
+
+.daily-poker__notify-btn[data-subscribed="1"] {
+  color: #fef3c7;
+  border-color: rgba(255, 184, 42, 0.98);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 211, 112, 0.34), transparent 48%),
+    linear-gradient(180deg, rgba(255, 152, 24, 0.22), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #21130a 0%, #070707 52%, #150c06 100%);
+  box-shadow:
+    0 0 16px rgba(255, 146, 24, 0.54),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.42),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.56);
 }
 
 .daily-poker__copy-btn--copied {
@@ -1768,6 +1785,7 @@
   border-color: rgba(155, 220, 246, 0.95);
 }
 
+.daily-poker__notify-icon,
 .daily-poker__copy-icon {
   display: inline-flex;
   width: 22px;
@@ -1775,6 +1793,7 @@
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
 }
 
+.daily-poker__notify-icon svg,
 .daily-poker__copy-icon svg {
   width: 100%;
   height: 100%;
@@ -1795,6 +1814,10 @@
   font-size: clamp(9px, 1.9vw, 12px);
   line-height: 1.24;
   text-align: left;
+}
+
+.daily-poker__subscribe-requirements[hidden] {
+  display: none !important;
 }
 
 .daily-poker__subscribe-title {

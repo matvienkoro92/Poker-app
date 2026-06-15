@@ -9,6 +9,7 @@
     dealStage: "idle",
     activeDealButtonId: "",
     copyFeedbackTimer: null,
+    reminderSubscribed: false,
   };
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
@@ -460,6 +461,10 @@
   function syncStatus(data) {
     if (!data) return;
     dailyPokerState.status = data;
+    setSubscribeRequirementsVisible(!!(data.subscriptionRequired || isDailyPokerRequirementCode(data.code)));
+    if (Object.prototype.hasOwnProperty.call(data, "dailyPokerReminderSubscribed")) {
+      setReminderButtonState(!!data.dailyPokerReminderSubscribed, false);
+    }
     var serverMs = Date.parse(data.serverTime || "");
     if (Number.isFinite(serverMs)) dailyPokerState.serverDeltaMs = serverMs - Date.now();
     var balanceEl = $("dailyPokerBalance");
@@ -683,6 +688,26 @@
     return code === "CHANNEL_REQUIRED" || code === "BOT_REQUIRED" || code === "SUBSCRIPTION_REQUIRED" || code === "TELEGRAM_REQUIRED";
   }
 
+  function setSubscribeRequirementsVisible(visible) {
+    var el = document.querySelector(".daily-poker__subscribe-requirements");
+    if (!el) return;
+    el.hidden = !visible;
+    el.setAttribute("aria-hidden", visible ? "false" : "true");
+  }
+
+  function setReminderButtonState(subscribed, busy) {
+    dailyPokerState.reminderSubscribed = !!subscribed;
+    var btn = $("dailyPokerNotifyBtn");
+    if (!btn) return;
+    btn.disabled = !!busy;
+    btn.dataset.subscribed = subscribed ? "1" : "0";
+    btn.setAttribute(
+      "aria-label",
+      subscribed ? "Отключить уведомление об окончании таймера" : "Получать уведомление об окончании таймера"
+    );
+    btn.setAttribute("title", subscribed ? "Уведомление включено" : "Получать уведомление");
+  }
+
   function readJson(r) {
     return r.text().then(function (text) {
       if (!text) return {};
@@ -805,6 +830,49 @@
     });
   }
 
+  function toggleDailyPokerReminder(evt) {
+    if (evt && typeof evt.preventDefault === "function") evt.preventDefault();
+    if (!apiBase() || !hasCredential()) {
+      showLoginRequiredMessage("Войдите в аккаунт, чтобы включить уведомление.");
+      return;
+    }
+    var current = dailyPokerState.status || {};
+    var previousSubscribed = dailyPokerState.reminderSubscribed === true;
+    var unsubscribe = previousSubscribed;
+    setReminderButtonState(previousSubscribed, true);
+    fetch(apiBase().replace(/\/$/, "") + "/api/daily-poker-reminder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(authBody({
+        unsubscribe: unsubscribe,
+        canPlay: current.canPlay,
+        attemptsLeft: current.attemptsLeft,
+        baseAttemptUsedToday: current.baseAttemptUsedToday,
+        nextFreeAttemptAt: current.nextFreeAttemptAt || "",
+      })),
+    })
+      .then(function (r) {
+        return readJson(r).then(function (data) {
+          if (!r.ok || !data || data.ok === false) {
+            throw new Error(data && data.error ? data.error : "Не удалось обновить уведомление.");
+          }
+          return data;
+        });
+      })
+      .then(function (data) {
+        setReminderButtonState(!!data.subscribed, false);
+        var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tgw && tgw.HapticFeedback && typeof tgw.HapticFeedback.notificationOccurred === "function") {
+          tgw.HapticFeedback.notificationOccurred(data.subscribed ? "success" : "warning");
+        }
+        showMessage(data.subscribed ? "Уведомление включено. Напишем в бот, когда таймер закончится." : "Уведомление отключено.", false);
+      })
+      .catch(function (err) {
+        setReminderButtonState(previousSubscribed, false);
+        showMessage(errorTextFrom(err, "Не удалось обновить уведомление."), true);
+      });
+  }
+
   function loadStatus() {
     var base = apiBase();
     if (!base || !hasCredential()) {
@@ -870,6 +938,7 @@
           restoreOptimisticSpend();
         }
         if (err && err.data && isDailyPokerRequirementCode(err.data.code)) {
+          setSubscribeRequirementsVisible(true);
           showMessage(errorTextFrom(err, "Для игры нужно открыть бота и подписаться на канал."), true);
           openDailyPokerRequirementLink(err.data);
         } else {
@@ -882,6 +951,7 @@
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     var inviteBtn = $("dailyPokerInviteBtn");
+    var notifyBtn = $("dailyPokerNotifyBtn");
     var copyBtn = $("dailyPokerCopyLinkBtn");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
@@ -894,6 +964,10 @@
     if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {
       inviteBtn.dataset.dailyPokerBound = "1";
       inviteBtn.addEventListener("click", openDailyPokerInvite);
+    }
+    if (notifyBtn && notifyBtn.dataset.dailyPokerBound !== "1") {
+      notifyBtn.dataset.dailyPokerBound = "1";
+      notifyBtn.addEventListener("click", toggleDailyPokerReminder);
     }
     if (copyBtn && copyBtn.dataset.dailyPokerBound !== "1") {
       copyBtn.dataset.dailyPokerBound = "1";

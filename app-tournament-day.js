@@ -401,6 +401,278 @@ function renderHomeLiveTournament(now) {
   }
 }
 
+var HOME_TOURNAMENT_NOTIFY_STATE = {
+  subscribed: false,
+  selectedIds: [],
+  busy: false,
+  loaded: false
+};
+
+function homeTournamentNotifySlug(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^a-z0-9а-я]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+}
+
+function homeTournamentReminderId(item) {
+  if (!item) return "";
+  var scope = item.date
+    ? "date-" + item.date
+    : item.repeat === "weekly"
+      ? "weekly-" + String(item.dow)
+      : "daily";
+  return [
+    scope,
+    pokerFormatScheduleTime(item).replace(":", ""),
+    homeTournamentNotifySlug(item.name || "tournament")
+  ].join("-");
+}
+
+function getHomeTournamentNotifyItems() {
+  var now = new Date();
+  var list = (Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE) ? POKER_FULL_TOURNAMENT_SCHEDULE : []).filter(function (item) {
+    if (!item || !item.name) return false;
+    if (!item.date) return true;
+    var start = new Date(String(item.date) + "T" + pokerFormatScheduleTime(item) + ":00+03:00");
+    return !(start && Number.isFinite(start.getTime()) && start.getTime() < now.getTime() - 3600000);
+  });
+  return list.map(function (item) {
+    return Object.assign({ reminderId: homeTournamentReminderId(item) }, item);
+  });
+}
+
+function homeTournamentNotifyApiBase() {
+  return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
+}
+
+function homeTournamentNotifyAuthBody(extra) {
+  return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra || {}) : extra || {};
+}
+
+function homeTournamentNotifyHasCredential() {
+  return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+}
+
+function homeTournamentNotifyReadJson(r) {
+  return r.text().then(function (text) {
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error("Сервер вернул неожиданный ответ.");
+    }
+  });
+}
+
+function homeTournamentNotifyMessage(text, isError) {
+  text = String(text || "").trim();
+  if (!text) return;
+  var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tgw && typeof tgw.showPopup === "function") {
+    tgw.showPopup({ title: isError ? "Не получилось" : "Готово", message: text, buttons: [{ type: "ok" }] });
+  } else {
+    window.alert(text);
+  }
+}
+
+function setHomeTournamentNotifyBusy(busy) {
+  HOME_TOURNAMENT_NOTIFY_STATE.busy = !!busy;
+  ["homeTournamentNotifyBtn", "homeTournamentPickBtn", "homeTournamentNotifySaveBtn"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.disabled = !!busy;
+  });
+}
+
+function renderHomeTournamentNotifyState() {
+  var notifyBtn = document.getElementById("homeTournamentNotifyBtn");
+  var countEl = document.getElementById("homeTournamentNotifyCount");
+  var selectedCount = HOME_TOURNAMENT_NOTIFY_STATE.selectedIds.length;
+  if (notifyBtn) {
+    notifyBtn.dataset.subscribed = HOME_TOURNAMENT_NOTIFY_STATE.subscribed ? "1" : "0";
+    notifyBtn.textContent = HOME_TOURNAMENT_NOTIFY_STATE.subscribed ? "Уведомления включены" : "Подписаться на уведомления о турнирах";
+    notifyBtn.setAttribute(
+      "aria-label",
+      HOME_TOURNAMENT_NOTIFY_STATE.subscribed
+        ? "Отключить уведомления о турнирах"
+        : "Подписаться на уведомления о турнирах"
+    );
+  }
+  if (countEl) {
+    if (HOME_TOURNAMENT_NOTIFY_STATE.subscribed && selectedCount > 0) {
+      countEl.textContent = "Выбрано: " + selectedCount;
+    } else {
+      countEl.textContent = "";
+    }
+  }
+}
+
+function syncHomeTournamentNotifyFromResponse(data) {
+  if (!data) return;
+  HOME_TOURNAMENT_NOTIFY_STATE.subscribed = data.subscribed === true;
+  HOME_TOURNAMENT_NOTIFY_STATE.selectedIds = Array.isArray(data.selectedTournamentIds)
+    ? data.selectedTournamentIds.map(String).filter(Boolean)
+    : [];
+  HOME_TOURNAMENT_NOTIFY_STATE.loaded = true;
+  renderHomeTournamentNotifyState();
+}
+
+function postHomeTournamentNotify(payload) {
+  var base = homeTournamentNotifyApiBase();
+  if (!base || !homeTournamentNotifyHasCredential()) {
+    return Promise.reject(new Error("Войдите через Telegram, чтобы включить уведомления."));
+  }
+  return fetch(base + "/api/tournament-reminder", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(homeTournamentNotifyAuthBody(payload || {})),
+  }).then(function (r) {
+    return homeTournamentNotifyReadJson(r).then(function (data) {
+      if (!r.ok || !data || data.ok === false) {
+        throw new Error(data && data.error ? data.error : "Не удалось обновить уведомления.");
+      }
+      return data;
+    });
+  });
+}
+
+function loadHomeTournamentNotifyStatus(force) {
+  if (!force && HOME_TOURNAMENT_NOTIFY_STATE.loaded) return;
+  if (!document.getElementById("homeTournamentNotifyBtn")) return;
+  if (!homeTournamentNotifyApiBase() || !homeTournamentNotifyHasCredential()) {
+    renderHomeTournamentNotifyState();
+    return;
+  }
+  postHomeTournamentNotify({ action: "status" })
+    .then(syncHomeTournamentNotifyFromResponse)
+    .catch(function () {
+      HOME_TOURNAMENT_NOTIFY_STATE.loaded = true;
+      renderHomeTournamentNotifyState();
+    });
+}
+
+function closeHomeTournamentNotifyModal() {
+  var modal = document.getElementById("homeTournamentNotifyModal");
+  if (!modal) return;
+  modal.classList.add("home-tournament-notify-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function openHomeTournamentNotifyModal() {
+  var modal = document.getElementById("homeTournamentNotifyModal");
+  var listEl = document.getElementById("homeTournamentNotifyList");
+  if (!modal || !listEl) return;
+  var items = getHomeTournamentNotifyItems();
+  var selected = HOME_TOURNAMENT_NOTIFY_STATE.selectedIds.length
+    ? HOME_TOURNAMENT_NOTIFY_STATE.selectedIds
+    : items.map(function (item) { return item.reminderId; });
+  listEl.innerHTML = "";
+  items.forEach(function (item) {
+    var label = document.createElement("label");
+    label.className = "home-tournament-notify-modal__item";
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = item.reminderId;
+    input.checked = selected.indexOf(item.reminderId) !== -1;
+    var body = document.createElement("span");
+    var title = document.createElement("span");
+    title.className = "home-tournament-notify-modal__item-title";
+    title.textContent = item.name || "Турнир";
+    var meta = document.createElement("span");
+    meta.className = "home-tournament-notify-modal__item-meta";
+    meta.textContent =
+      (item.category || "Турнир") +
+      " · " +
+      pokerFormatScheduleTime(item) +
+      " МСК · " +
+      pokerFormatRubSpacing(item.buyin || "—") +
+      " · приз " +
+      pokerFormatRubSpacing(item.guarantee || "—");
+    body.appendChild(title);
+    body.appendChild(meta);
+    label.appendChild(input);
+    label.appendChild(body);
+    listEl.appendChild(label);
+  });
+  modal.classList.remove("home-tournament-notify-modal--hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function saveHomeTournamentNotifySelection(unsubscribe, ids) {
+  setHomeTournamentNotifyBusy(true);
+  return postHomeTournamentNotify({
+    action: unsubscribe ? "unsubscribe" : "subscribe",
+    unsubscribe: !!unsubscribe,
+    selectedTournamentIds: Array.isArray(ids) ? ids : []
+  })
+    .then(function (data) {
+      syncHomeTournamentNotifyFromResponse(data);
+      homeTournamentNotifyMessage(
+        data.subscribed ? "Уведомления о турнирах включены." : "Уведомления о турнирах отключены.",
+        false
+      );
+      return data;
+    })
+    .catch(function (err) {
+      homeTournamentNotifyMessage(err && err.message ? err.message : "Не удалось обновить уведомления.", true);
+    })
+    .finally(function () {
+      setHomeTournamentNotifyBusy(false);
+    });
+}
+
+function initHomeTournamentNotifyControls() {
+  var notifyBtn = document.getElementById("homeTournamentNotifyBtn");
+  var pickBtn = document.getElementById("homeTournamentPickBtn");
+  var saveBtn = document.getElementById("homeTournamentNotifySaveBtn");
+  var modal = document.getElementById("homeTournamentNotifyModal");
+  if (notifyBtn && notifyBtn.dataset.bound !== "1") {
+    notifyBtn.dataset.bound = "1";
+    notifyBtn.addEventListener("click", function () {
+      if (HOME_TOURNAMENT_NOTIFY_STATE.busy) return;
+      if (HOME_TOURNAMENT_NOTIFY_STATE.subscribed) {
+        saveHomeTournamentNotifySelection(true, []);
+        return;
+      }
+      var allIds = getHomeTournamentNotifyItems().map(function (item) { return item.reminderId; });
+      var ids = HOME_TOURNAMENT_NOTIFY_STATE.selectedIds.length ? HOME_TOURNAMENT_NOTIFY_STATE.selectedIds : allIds;
+      saveHomeTournamentNotifySelection(false, ids);
+    });
+  }
+  if (pickBtn && pickBtn.dataset.bound !== "1") {
+    pickBtn.dataset.bound = "1";
+    pickBtn.addEventListener("click", openHomeTournamentNotifyModal);
+  }
+  if (saveBtn && saveBtn.dataset.bound !== "1") {
+    saveBtn.dataset.bound = "1";
+    saveBtn.addEventListener("click", function () {
+      var checked = Array.prototype.slice.call(document.querySelectorAll("#homeTournamentNotifyList input:checked"))
+        .map(function (input) { return input.value; })
+        .filter(Boolean);
+      if (!checked.length) {
+        homeTournamentNotifyMessage("Выберите хотя бы один турнир.", true);
+        return;
+      }
+      saveHomeTournamentNotifySelection(false, checked).then(function (data) {
+        if (data && data.ok) closeHomeTournamentNotifyModal();
+      });
+    });
+  }
+  if (modal && modal.dataset.bound !== "1") {
+    modal.dataset.bound = "1";
+    modal.addEventListener("click", function (e) {
+      var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-tournament-notify-close]") : null;
+      if (!closeBtn) return;
+      e.preventDefault();
+      closeHomeTournamentNotifyModal();
+    });
+  }
+  renderHomeTournamentNotifyState();
+  loadHomeTournamentNotifyStatus(false);
+}
+
 function renderHomeTournamentWeekList(activeWeekday) {
   var el = document.getElementById("homeTournamentWeekList");
   if (!el) return;
@@ -1445,6 +1717,7 @@ function updateTournamentDayBlock() {
     initHomeTournamentBubbleButtons();
     initHomeTournamentLeagueTopModal();
     initHomeTournamentLeagueTopButtons();
+    initHomeTournamentNotifyControls();
     renderHomeFreerollSchedule();
     pokerUpdateDownloadInfoSubsections();
   } catch (eHomeFreerolls) {}

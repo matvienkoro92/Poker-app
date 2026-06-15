@@ -104,6 +104,14 @@
       "schedule": "21 21 * * 0"
     },
     {
+      "path": "/api/cron-daily-poker-reminders",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron-tournament-reminders",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/deploy-hook",
       "schedule": "0 12 * * *"
     }
