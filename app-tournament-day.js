@@ -1227,9 +1227,16 @@ function pokerMskWeekdayShortAt(utcMs) {
 }
 
 function renderHomeFreerollSchedule() {
-  var el = document.getElementById("freerollHomeScheduleList");
-  if (!el) return;
-  el.innerHTML = "";
+  var lists = [
+    document.getElementById("freerollHomeScheduleList"),
+    document.getElementById("freerollModalScheduleList")
+  ].filter(function (list) {
+    return !!list;
+  });
+  if (!lists.length) return;
+  lists.forEach(function (list) {
+    list.innerHTML = "";
+  });
   var nextIndex = -1;
   var displayItems = HOME_FREEROLL_SCHEDULE.slice();
   var nearestItem = null;
@@ -1248,82 +1255,127 @@ function renderHomeFreerollSchedule() {
     nearestItem = displayItems[0] || null;
     followingItem = displayItems[1] || null;
   } catch (eNextFreeroll) {}
-  displayItems.forEach(function (item) {
-    var card = document.createElement("div");
-    card.className = "home-freeroll-schedule__item";
-    var row = document.createElement("div");
-    row.className = "home-freeroll-schedule__row";
-    row.setAttribute("role", "button");
-    row.setAttribute("tabindex", "0");
-    if (item.room === "Poker21") {
-      card.classList.add("home-freeroll-schedule__item--poker21");
-      row.classList.add("home-freeroll-schedule__row--poker21");
-    }
-    if (item.daily) {
-      card.classList.add("home-freeroll-schedule__item--daily");
-      row.classList.add("home-freeroll-schedule__row--daily");
-    } else if (item.dow === 6) {
-      card.classList.add("home-freeroll-schedule__item--saturday");
-      row.classList.add("home-freeroll-schedule__row--saturday");
-    }
-    if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
-      card.classList.add("home-freeroll-schedule__item--next");
-      row.classList.add("home-freeroll-schedule__row--next");
-    }
-    var stampText = "";
-    if (nearestItem === item) {
-      card.classList.add("home-freeroll-schedule__item--nearest");
-      row.classList.add("home-freeroll-schedule__row--nearest");
-      stampText = "Ближайший";
-    } else if (followingItem === item) {
-      card.classList.add("home-freeroll-schedule__item--following");
-      row.classList.add("home-freeroll-schedule__row--following");
-      stampText = "Следующий";
-    }
-    var day = document.createElement("span");
-    day.className = "home-freeroll-schedule__day";
-    day.textContent = pokerGetFreerollDayLabel(item);
-    var main = document.createElement("span");
-    main.className = "home-freeroll-schedule__main";
-    var title = document.createElement("span");
-    title.className = "home-freeroll-schedule__title";
-    title.textContent = pokerFormatRubSpacing(item.title);
-    var meta = document.createElement("span");
-    meta.className = "home-freeroll-schedule__meta";
-    meta.textContent = item.meta;
-    var entry = document.createElement("span");
-    entry.className = "home-freeroll-schedule__entry";
-    entry.textContent = "Вход: " + pokerFormatRubSpacing(item.buyin || "0₽");
-    main.appendChild(title);
-    main.appendChild(meta);
-    main.appendChild(entry);
-    row.appendChild(day);
-    row.appendChild(main);
-    if (stampText) {
-      var stamp = document.createElement("span");
-      stamp.className = "home-freeroll-schedule__stamp";
-      stamp.textContent = stampText;
-      card.appendChild(stamp);
-    }
-    row.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      openHomeFreerollModal(item);
-    });
-    row.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openHomeFreerollModal(item);
+  lists.forEach(function (el) {
+    displayItems.forEach(function (item) {
+      var card = document.createElement("div");
+      card.className = "home-freeroll-schedule__item";
+      var row = document.createElement("div");
+      row.className = "home-freeroll-schedule__row";
+      row.setAttribute("role", "button");
+      row.setAttribute("tabindex", "0");
+      if (item.room === "Poker21") {
+        card.classList.add("home-freeroll-schedule__item--poker21");
+        row.classList.add("home-freeroll-schedule__row--poker21");
       }
+      if (item.daily) {
+        card.classList.add("home-freeroll-schedule__item--daily");
+        row.classList.add("home-freeroll-schedule__row--daily");
+      } else if (item.dow === 6) {
+        card.classList.add("home-freeroll-schedule__item--saturday");
+        row.classList.add("home-freeroll-schedule__row--saturday");
+      }
+      if (nextIndex >= 0 && HOME_FREEROLL_SCHEDULE[nextIndex] === item) {
+        card.classList.add("home-freeroll-schedule__item--next");
+        row.classList.add("home-freeroll-schedule__row--next");
+      }
+      var stampText = "";
+      if (nearestItem === item) {
+        card.classList.add("home-freeroll-schedule__item--nearest");
+        row.classList.add("home-freeroll-schedule__row--nearest");
+        stampText = "Ближайший";
+      } else if (followingItem === item) {
+        card.classList.add("home-freeroll-schedule__item--following");
+        row.classList.add("home-freeroll-schedule__row--following");
+        stampText = "Следующий";
+      }
+      var day = document.createElement("span");
+      day.className = "home-freeroll-schedule__day";
+      day.textContent = pokerGetFreerollDayLabel(item);
+      var main = document.createElement("span");
+      main.className = "home-freeroll-schedule__main";
+      var title = document.createElement("span");
+      title.className = "home-freeroll-schedule__title";
+      title.textContent = pokerFormatRubSpacing(item.title);
+      var meta = document.createElement("span");
+      meta.className = "home-freeroll-schedule__meta";
+      meta.textContent = item.meta;
+      var entry = document.createElement("span");
+      entry.className = "home-freeroll-schedule__entry";
+      entry.textContent = "Вход: " + pokerFormatRubSpacing(item.buyin || "0₽");
+      main.appendChild(title);
+      main.appendChild(meta);
+      main.appendChild(entry);
+      row.appendChild(day);
+      row.appendChild(main);
+      if (stampText) {
+        var stamp = document.createElement("span");
+        stamp.className = "home-freeroll-schedule__stamp";
+        stamp.textContent = stampText;
+        card.appendChild(stamp);
+      }
+      row.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openHomeFreerollModal(item);
+      });
+      row.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openHomeFreerollModal(item);
+        }
+      });
+      card.appendChild(row);
+      el.appendChild(card);
     });
-    card.appendChild(row);
-    el.appendChild(card);
+  });
+}
+
+function openHomeFreerollsListModal() {
+  var ensure =
+    typeof window.pokerEnsureGlobalModalsHtml === "function"
+      ? window.pokerEnsureGlobalModalsHtml()
+      : Promise.resolve(true);
+  ensure
+    .catch(function () {
+      return true;
+    })
+    .then(function () {
+      var modal = document.getElementById("homeFreerollsListModal");
+      if (!modal) return;
+      initHomeFreerollsListModal();
+      renderHomeFreerollSchedule();
+      modal.classList.remove("home-freerolls-list-modal--hidden");
+      modal.setAttribute("aria-hidden", "false");
+    });
+}
+
+function closeHomeFreerollsListModal() {
+  var modal = document.getElementById("homeFreerollsListModal");
+  if (!modal) return;
+  modal.classList.add("home-freerolls-list-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function initHomeFreerollsListModal() {
+  var modal = document.getElementById("homeFreerollsListModal");
+  if (!modal || modal.__initedHomeFreerollsList) return;
+  modal.__initedHomeFreerollsList = true;
+  modal.addEventListener("click", function (e) {
+    var closeBtn = e.target && e.target.closest ? e.target.closest("[data-home-freerolls-list-close]") : null;
+    if (closeBtn) {
+      e.preventDefault();
+      closeHomeFreerollsListModal();
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeHomeFreerollsListModal();
   });
 }
 
 function openHomeFreerollModal(item) {
   var modal = document.getElementById("homeFreerollModal");
   if (!modal || !item) return;
+  closeHomeFreerollsListModal();
   initHomeFreerollModal();
   var dayEl = document.getElementById("homeFreerollModalDay");
   var titleEl = document.getElementById("homeFreerollModalTitle");
@@ -1373,6 +1425,16 @@ function initHomeFreerollModal() {
   }
 }
 window.initHomeFreerollModal = initHomeFreerollModal;
+window.openHomeFreerollsListModal = openHomeFreerollsListModal;
+
+(function initHomeFreerollsShortcut() {
+  document.addEventListener("click", function (e) {
+    var trigger = e.target && e.target.closest ? e.target.closest("[data-home-freerolls-open]") : null;
+    if (!trigger) return;
+    e.preventDefault();
+    openHomeFreerollsListModal();
+  });
+})();
 
 function updateTournamentDayBlock() {
   try {
