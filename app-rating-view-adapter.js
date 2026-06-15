@@ -1279,6 +1279,8 @@ function initWinterRating() {
   var ratingSectionEl = document.getElementById("winterRatingSection");
   var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
   var isSummerRatingMode = isSpringRatingMode() && seasonConfig.key === "summer";
+  var prizesBtn = document.getElementById("springRatingPrizesBtn");
+  var tabsUpdatedEl = document.getElementById("springRatingTabsUpdated");
   if (isSummerRatingMode) {
     if (ratingSeasonDataIsLoading(seasonConfig)) {
       setSummerRatingInitialLoading(true, ratingSectionEl);
@@ -1302,11 +1304,33 @@ function initWinterRating() {
       conditionsBtn.removeAttribute("aria-label");
     }
   }
+  if (prizesBtn) {
+    prizesBtn.hidden = !isSummerRatingMode;
+    prizesBtn.style.display = isSummerRatingMode ? "" : "none";
+  }
+  if (tabsUpdatedEl) {
+    tabsUpdatedEl.hidden = !isSummerRatingMode;
+    tabsUpdatedEl.style.display = isSummerRatingMode ? "" : "none";
+    tabsUpdatedEl.textContent = "обновлено 9 июня";
+  }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
     conditionsBtn.addEventListener("click", function () {
       if (conditionsBtn.dataset.springMainLeague) return;
       openSpringRatingInfoModal();
+    });
+  }
+  if (prizesBtn && prizesBtn.getAttribute("data-inited") !== "1") {
+    prizesBtn.setAttribute("data-inited", "1");
+    prizesBtn.addEventListener("click", function () {
+      var open = function () {
+        if (typeof openSpringRatingInfoModal === "function") openSpringRatingInfoModal();
+      };
+      if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+        window.pokerEnsureGlobalModalsHtml().then(open).catch(open);
+      } else {
+        open();
+      }
     });
   }
   var febBtnLabel = document.querySelector("#winterRatingTopFebruaryBtn .winter-rating__week-top-btn-label");
