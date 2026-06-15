@@ -1,6 +1,6 @@
 var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.webp";
 var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.webp";
-var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-stolnik-70k.webp";
+var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-250k.jpg";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.webp";
 var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.webp";
@@ -35,13 +35,13 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Турнир Стольник",
-    buyin: "100₽",
-    guarantee: "70 000₽",
+    name: "Нокаут",
+    buyin: "5 000₽",
+    guarantee: "250 000₽",
     banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Турнир Стольник среды — призовые 70 000 ₽",
-    bannerWidth: 640,
-    bannerHeight: 915
+    bannerAlt: "Poker21 Нокаут среды — вход 5 000 ₽, гарантия 250 000 ₽",
+    bannerWidth: 941,
+    bannerHeight: 1534
   },
   {
     name: "Мистери+",
@@ -102,12 +102,12 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "daily", category: "Ежедневный", name: "PKO/MKO", buyin: "300₽", rebuy: "R:300₽", guarantee: "25 000₽", hour: 17, minute: 0, durationMinutes: 180, priority: 55 },
   { repeat: "weekly", dow: 1, category: "Турнир дня", name: "Magic MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "120 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Турнир Стольник", buyin: "100₽", rebuy: "R:100₽ / A:100₽", guarantee: "70 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут", buyin: "5 000₽", rebuy: "R:5 000₽", guarantee: "250 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери+", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "200 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Нокаут Прогрессив", buyin: "10 000₽", rebuy: "R:10 000₽", guarantee: "700 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
-  { repeat: "daily", category: "Сателлит", name: "К турниру месяца Нокаут", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
+  { repeat: "daily", category: "Сателлит", name: "К Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Ежедневный", name: "PLO4", buyin: "300₽", rebuy: "—", guarantee: "10 000₽", hour: 20, minute: 0, durationMinutes: 180, priority: 50 },
   { repeat: "daily", category: "Ежедневный", name: "Energetic Tournament", buyin: "200₽", rebuy: "R:200₽ / A:200₽", guarantee: "10 000₽", hour: 22, minute: 0, durationMinutes: 180, priority: 50 },
   { repeat: "daily", category: "Ежедневный", name: "MKO", buyin: "50₽", rebuy: "—", guarantee: "3 000₽", hour: 23, minute: 0, durationMinutes: 180, priority: 45 },
@@ -164,7 +164,7 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "300 ₽", 4: "1200 ₽", 5: "500 ₽" };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "5 000 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 1, 3: 2, 4: 1, 5: 2 };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
