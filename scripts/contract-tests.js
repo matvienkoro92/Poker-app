@@ -1978,6 +1978,91 @@ async function testRaffleWinnerReadyRerollAndBurn(redis) {
   assert.strictEqual(r.body.raffle.readyBurned.totalPrizeAmount, 500, "burned prize amount is summed");
 }
 
+async function testRaffleCashWinnerReadyThirdRerollBeforeBurn(redis) {
+  installRecordingFetch(redis, []);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const now = Date.now();
+  const pastDeadline = new Date(now - 60_000).toISOString();
+  const startedAt = new Date(now - 16 * 60_000).toISOString();
+  const prize = "Беккинг-байин 500 ₽ на кеш";
+  const participants = [
+    { userId: "tg_1001", accountId: "ID100001", name: "Late Cash Player", p21Id: "P21-1001" },
+    { userId: "tg_1002", accountId: "ID100002", name: "Cash Backup One", p21Id: "P21-1002" },
+    { userId: "tg_1003", accountId: "ID100003", name: "Cash Backup Two", p21Id: "P21-1003" },
+    { userId: "tg_1004", accountId: "ID100004", name: "Cash Backup Three", p21Id: "P21-1004" },
+  ];
+  const raffle = {
+    id: "contract_raffle_cash_ready_third_reroll",
+    title: "Розыгрыш беккинг-байинов на кеш",
+    totalWinners: 1,
+    groups: [{ prize, count: 1 }],
+    prizeKind: "cash",
+    endDate: new Date(now - 3600_000).toISOString(),
+    participants,
+    winners: [{
+      ...participants[0],
+      groupIndex: 0,
+      prize,
+      winnerReadyRound: 0,
+      winnerReadyWindowStartedAt: startedAt,
+      winnerReadyDeadlineAt: pastDeadline,
+      winnerReadyState: "pending",
+    }],
+    status: "drawn",
+    createdAt: new Date(now - 7200_000).toISOString(),
+    drawnAt: new Date(now - 1800_000).toISOString(),
+    winnerReadyWindowMs: 15 * 60 * 1000,
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_cash_ready_third_reroll", JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_cash_ready_third_reroll");
+
+  let r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_cash_ready_third_reroll" }));
+  assert.strictEqual(r.statusCode, 200, "cash raffle first missed winner settles");
+  assert.ok(
+    (r.body.raffle.winners || []).some((w) => w && w.winnerReroll === true && w.winnerReadyRound === 1),
+    "cash raffle appends first reroll winner",
+  );
+
+  for (let expectedRound = 2; expectedRound <= 3; expectedRound += 1) {
+    const stored = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_cash_ready_third_reroll"));
+    const previous = (stored.winners || []).find((w) => w && w.winnerReroll === true && w.winnerReadyRound === expectedRound - 1);
+    assert.ok(previous, "stored cash raffle keeps previous reroll winner");
+    previous.winnerReadyState = "pending";
+    previous.winnerReadyWindowStartedAt = startedAt;
+    previous.winnerReadyDeadlineAt = pastDeadline;
+    redis.kv.set("poker_app:raffle:contract_raffle_cash_ready_third_reroll", JSON.stringify(stored));
+
+    r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_cash_ready_third_reroll" }));
+    assert.strictEqual(r.statusCode, 200, "cash raffle reroll window settles");
+    assert.ok(
+      (r.body.raffle.winners || []).some((w) => w && w.winnerReroll === true && w.winnerReadyRound === expectedRound),
+      "cash raffle appends reroll round " + expectedRound,
+    );
+    assert.ok(!r.body.raffle.readyBurned || !r.body.raffle.readyBurned.count, "cash raffle does not burn before third reroll misses");
+  }
+
+  const storedForBurn = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle_cash_ready_third_reroll"));
+  const third = (storedForBurn.winners || []).find((w) => w && w.winnerReroll === true && w.winnerReadyRound === 3);
+  assert.ok(third, "stored cash raffle keeps third reroll winner");
+  third.winnerReadyState = "pending";
+  third.winnerReadyWindowStartedAt = startedAt;
+  third.winnerReadyDeadlineAt = pastDeadline;
+  redis.kv.set("poker_app:raffle:contract_raffle_cash_ready_third_reroll", JSON.stringify(storedForBurn));
+
+  r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_cash_ready_third_reroll" }));
+  assert.strictEqual(r.statusCode, 200, "cash raffle third reroll timeout settles");
+  const burnedThird = (r.body.raffle.winners || []).find((w) => w && w.winnerReroll === true && w.winnerReadyRound === 3);
+  assert.strictEqual(burnedThird.winnerReadyState, "burned", "cash raffle burns only after third reroll misses");
+  assert.strictEqual(burnedThird.winnerBurned, true, "cash raffle third reroll winner is locked after burn");
+  assert.strictEqual(r.body.raffle.readyBurned.count, 1, "cash raffle counts one burned prize after third reroll");
+  assert.strictEqual(
+    (r.body.raffle.winners || []).filter((w) => w && w.winnerReroll === true).length,
+    3,
+    "cash raffle stops at three reroll winners",
+  );
+}
+
 async function testRaffleReadyRerollSettlementLock(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -2775,6 +2860,8 @@ async function testRaffleDailyRecurring(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create a daily raffle");
   assert.strictEqual(r.body.raffle.daily, true, "daily raffle is marked daily");
+  assert.strictEqual(r.body.raffle.accessLevel, 1, "daily cash raffle defaults to level 1+ access");
+  assert.strictEqual(r.body.raffle.recurrence.template.accessLevel, 1, "daily cash template defaults to level 1+ access");
   assert.strictEqual(r.body.raffle.recurrence.startTime, DAILY_CASH_START_TIME, "cash daily start time is canonical");
   assert.strictEqual(r.body.raffle.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cash daily uses one canonical series");
   assert.strictEqual(r.body.raffle.recurrence.durationMs, DAILY_CASH_DURATION_MS, "cash daily lasts until 20:15 next day");
@@ -2832,6 +2919,8 @@ async function testRaffleDailyRecurring(redis) {
   const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === DAILY_CASH_SERIES_ID && raffle.id !== source.id);
   assert.strictEqual(generated.length, 1, "due daily series creates one next raffle");
   assert.strictEqual(generated[0].status, "active", "generated daily raffle is active");
+  assert.strictEqual(generated[0].accessLevel, 1, "generated daily cash raffle uses level 1+ access");
+  assert.strictEqual(generated[0].recurrence.template.accessLevel, 1, "generated daily cash template keeps level 1+ access");
   assert.strictEqual(generated[0].createdAt, dueStart.toISOString(), "generated daily raffle starts at scheduled time");
   assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
   assert.strictEqual(
@@ -2883,6 +2972,8 @@ async function testRaffleDailyScheduleDedupe(redis) {
     const stored = JSON.parse(redis.kv.get("poker_app:raffle:" + sourceId));
     assert.ok(stored.recurrence.qstashScheduleId, "stored daily raffle keeps QStash schedule id");
     assert.strictEqual(stored.recurrence.startTime, DAILY_CASH_START_TIME, "stored cash daily keeps canonical time");
+    assert.strictEqual(stored.accessLevel, 1, "stored cash daily keeps level 1+ access");
+    assert.strictEqual(stored.recurrence.template.accessLevel, 1, "stored cash daily template keeps level 1+ access");
 
     const dueStart = contractMoscowStartOnOrBefore(new Date(), DAILY_CASH_START_TIME);
     const firstStart = new Date(dueStart.getTime() - 24 * 3600_000).toISOString();
@@ -2905,6 +2996,7 @@ async function testRaffleDailyScheduleDedupe(redis) {
       stored.recurrence.qstashScheduleId,
       "generated daily raffle reuses the original QStash schedule id",
     );
+    assert.strictEqual(generated[0].accessLevel, 1, "scheduled daily generated raffle keeps level 1+ access");
     assert.strictEqual(scheduleCalls.length, 1, "generated daily raffle does not create a second QStash schedule");
   } finally {
     if (previousQstashToken === undefined) delete process.env.QSTASH_TOKEN;
@@ -2964,6 +3056,8 @@ async function testRaffleDailyCronTick(redis) {
   assert.strictEqual(generated.createdAt, dueStart.toISOString(), "cron generated daily raffle starts at scheduled time");
   assert.strictEqual(generated.endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "cron generated daily raffle keeps duration");
   assert.strictEqual(generated.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cron generated daily raffle uses canonical cash series");
+  assert.strictEqual(generated.accessLevel, 1, "cron generated daily cash raffle keeps level 1+ access");
+  assert.strictEqual(generated.recurrence.template.accessLevel, 1, "cron generated daily cash template keeps level 1+ access");
 }
 
 async function testRaffleDuplicateOptions(redis) {
@@ -5080,6 +5174,7 @@ async function main() {
     ["raffle winner ready admin notifications", testRaffleWinnerReadyAdminNotifications],
     ["raffle winner status prize notification", testRaffleWinnerStatusPrizeNotification],
     ["raffle winner ready reroll and burn", testRaffleWinnerReadyRerollAndBurn],
+    ["raffle cash winner ready third reroll before burn", testRaffleCashWinnerReadyThirdRerollBeforeBurn],
     ["raffle ready reroll settlement lock", testRaffleReadyRerollSettlementLock],
     ["raffle telegram usernames admin-only", testRaffleTelegramUsernamesAdminOnly],
     ["raffle cash broadcast and winner instruction", testRaffleCashBroadcastAndWinnerInstruction],

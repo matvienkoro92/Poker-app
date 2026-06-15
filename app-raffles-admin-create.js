@@ -298,6 +298,9 @@ function initRafflesAdminCreateRuntime(opts) {
       raffleDailyStartTime.disabled = !enabled;
       if (enabled) raffleDailyStartTime.value = "20:16";
     }
+    if (enabled && raffleAccessLevel && getRaffleCreateAccessLevel() < 1) {
+      raffleAccessLevel.value = "1";
+    }
   }
 
   function normalizeRaffleDailyStartTime(value) {
@@ -838,7 +841,7 @@ function initRafflesAdminCreateRuntime(opts) {
             endDate: endDate.toISOString(),
             title: title || undefined,
             prizeKind: prizeKind,
-            accessLevel: getRaffleCreateAccessLevel(),
+            accessLevel: dailyEnabled ? Math.max(1, getRaffleCreateAccessLevel()) : getRaffleCreateAccessLevel(),
             daily: dailyEnabled,
             dailyStartTime: dailyStartTime || undefined,
             createIdempotencyKey: idemKey,
