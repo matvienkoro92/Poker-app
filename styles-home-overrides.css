@@ -1105,14 +1105,43 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   max-width: 11.5em;
   min-width: 0;
 }
-.app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
-  content: "🎁";
-}
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn::before,
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::before,
 .app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
   flex: 0 0 auto;
   font-size: 27px;
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 184, 42, 0.98);
+  background:
+    linear-gradient(180deg, rgba(255, 152, 24, 0.12), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #21130a 0%, #070707 52%, #150c06 100%);
+  color: #ff9d22;
+  font-weight: 900;
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 1px 0 rgba(0, 0, 0, 0.82);
+  box-shadow:
+    0 0 0 2px rgba(96, 38, 8, 0.98),
+    0 0 18px rgba(255, 112, 20, 0.78),
+    0 0 34px rgba(255, 156, 32, 0.42),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.5),
+    inset 0 6px 16px rgba(255, 163, 43, 0.14),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.68);
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 13px solid #ffb129;
+  font-size: 0;
+  filter:
+    drop-shadow(0 0 5px rgba(255, 120, 24, 1))
+    drop-shadow(0 0 10px rgba(255, 194, 74, 0.78));
 }
 
 [data-theme="light"] .app.app--view-home .tournament-day-home-dual {

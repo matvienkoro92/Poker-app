@@ -216,13 +216,38 @@
   padding: 4px 8px 8px;
 }
 .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta {
-  padding: calc(7px * 1.2) calc(4px * 1.2);
+  position: relative;
+  isolation: isolate;
+  padding: calc(8px * 1.2) calc(10px * 1.2);
+  border: 1px solid rgba(255, 184, 42, 0.96);
+  background:
+    linear-gradient(180deg, rgba(255, 152, 24, 0.1), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #20120a 0%, #080807 52%, #140b06 100%);
+  color: #ff9d22;
+  box-shadow:
+    0 0 0 2px rgba(96, 38, 8, 0.96),
+    0 0 18px rgba(255, 112, 20, 0.78),
+    0 0 34px rgba(255, 156, 32, 0.42),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.48),
+    inset 0 6px 16px rgba(255, 163, 43, 0.14),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.68);
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 1px 0 rgba(0, 0, 0, 0.78);
 }
 .tournament-day-home-dual .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
-  font-size: calc(10px * 1.2);
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: calc(6px * 1.2) solid transparent;
+  border-bottom: calc(6px * 1.2) solid transparent;
+  border-left: calc(10px * 1.2) solid #ffb129;
+  filter:
+    drop-shadow(0 0 5px rgba(255, 120, 24, 1))
+    drop-shadow(0 0 10px rgba(255, 194, 74, 0.78));
   flex-shrink: 0;
 }
 .tournament-day-home-wrap .tournament-day-block--home .tournament-day-block__badge {
@@ -462,15 +487,68 @@
   margin-top: 16px;
 }
 .home-freeroll-modal__play {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   width: 100%;
-  min-height: 44px;
-  border: 0;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #fb923c, #f97316);
-  color: #111827;
-  font-size: 14px;
-  font-weight: 800;
+  min-height: 58px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 184, 42, 0.98);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% -30%, rgba(255, 202, 97, 0.2), transparent 52%),
+    linear-gradient(180deg, rgba(255, 152, 24, 0.14), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #20120a 0%, #070707 52%, #150c06 100%);
+  color: #ff9d22;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 0 18px rgba(255, 156, 32, 0.7),
+    0 1px 0 rgba(0, 0, 0, 0.84);
+  box-shadow:
+    0 0 0 3px rgba(96, 38, 8, 0.98),
+    0 0 22px rgba(255, 112, 20, 0.82),
+    0 0 46px rgba(255, 156, 32, 0.45),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.52),
+    inset 0 8px 18px rgba(255, 163, 43, 0.14),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.72);
   cursor: pointer;
+}
+.home-freeroll-modal__play::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 20px solid #ffb129;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 120, 24, 1))
+    drop-shadow(0 0 12px rgba(255, 194, 74, 0.82));
+}
+.home-freeroll-modal__play::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 117, 22, 0.5);
+  pointer-events: none;
+}
+.home-freeroll-modal__play:hover {
+  color: #ffc35b;
+  box-shadow:
+    0 0 0 3px rgba(122, 47, 8, 1),
+    0 0 28px rgba(255, 112, 20, 0.92),
+    0 0 58px rgba(255, 170, 35, 0.56),
+    inset 0 0 0 1px rgba(255, 232, 154, 0.68),
+    inset 0 8px 18px rgba(255, 163, 43, 0.18),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.72);
 }
 .home-freerolls-list-modal {
   position: fixed;
