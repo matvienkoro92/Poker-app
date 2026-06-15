@@ -47,6 +47,7 @@ function initAdminReportModal() {
   var calculationsCashTotalEl = document.getElementById("adminReportCalcCashTotal");
   var calculationsWinLossTotalEl = document.getElementById("adminReportCalcWinLossTotal");
   var calculationsWeekLabelEl = document.getElementById("adminReportCalcWeekLabel");
+  var calculationsClubDataRootEl = document.getElementById("adminReportClubData");
   var calculationsClubDataBodyEl = document.getElementById("adminReportClubDataBody");
   var calculationsClubDataStatusEl = document.getElementById("adminReportClubDataStatus");
   var calculationsDepositEl = document.getElementById("adminReportCalcDeposit");
@@ -646,6 +647,7 @@ function initAdminReportModal() {
 
   function loadCalculationClubData(forceRefresh) {
     if (!calculationsClubDataBodyEl) return undefined;
+    if (calculationsClubDataRootEl && calculationsClubDataRootEl.hidden) return undefined;
     var now = Date.now();
     if (!forceRefresh && calculationClubDataLoadedAt && now - calculationClubDataLoadedAt < CALCULATION_CLUB_DATA_CACHE_TTL_MS) return undefined;
     if (calculationClubDataLoading) return undefined;
