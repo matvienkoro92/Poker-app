@@ -1088,17 +1088,31 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
     inset 0 0 0 1px rgba(92, 47, 10, 0.16);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta {
+  position: relative;
+  isolation: isolate;
+  min-height: 58px;
+  border: 1px solid rgba(255, 184, 42, 0.98);
+  border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.08) 28%, transparent 29%),
-    radial-gradient(circle at 18% 10%, rgba(255, 239, 198, 0.46), transparent 30%),
-    linear-gradient(180deg, #ffc967 0%, #e89227 46%, #b9550f 100%);
-  color: #1b1208;
+    radial-gradient(circle at 50% -34%, rgba(255, 202, 97, 0.2), transparent 54%),
+    linear-gradient(180deg, rgba(255, 152, 24, 0.14), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #20120a 0%, #070707 52%, #150c06 100%);
+  color: #ff9d22;
+  font-size: clamp(30px, 5.8vw, 48px);
+  font-weight: 1000;
+  gap: 20px;
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 0 18px rgba(255, 156, 32, 0.7),
+    0 1px 0 rgba(0, 0, 0, 0.84);
   box-shadow:
-    0 10px 24px rgba(180, 83, 9, 0.26),
-    0 0 18px rgba(255, 198, 74, 0.14),
-    inset 0 1px 0 rgba(255, 250, 232, 0.64),
-    inset 0 -12px 20px rgba(120, 53, 15, 0.2),
-    inset 0 0 0 1px rgba(92, 47, 10, 0.16);
+    0 0 0 3px rgba(96, 38, 8, 0.98),
+    0 0 22px rgba(255, 112, 20, 0.82),
+    0 0 46px rgba(255, 156, 32, 0.45),
+    0 18px 32px rgba(0, 0, 0, 0.58),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.52),
+    inset 0 8px 18px rgba(255, 163, 43, 0.14),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.72);
 }
 .app.app--view-home .tournament-day-home-dual .tournament-day-share-btn span {
   display: inline-block;
@@ -1142,6 +1156,27 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   filter:
     drop-shadow(0 0 5px rgba(255, 120, 24, 1))
     drop-shadow(0 0 10px rgba(255, 194, 74, 0.78));
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 20px solid #ffb129;
+  font-size: 0;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 120, 24, 1))
+    drop-shadow(0 0 12px rgba(255, 194, 74, 0.82));
+}
+.app.app--view-home .tournament-day-home-dual .tournament-day-share-btn.tournament-day-schedule-cta::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border: 1px solid rgba(255, 117, 22, 0.5);
+  border-radius: 14px;
+  pointer-events: none;
 }
 
 [data-theme="light"] .app.app--view-home .tournament-day-home-dual {

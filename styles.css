@@ -3348,17 +3348,42 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayScheduleBtn {
-  color: #fff;
+  min-height: clamp(54px, 7vw, 72px);
+  border: 1px solid rgba(255, 184, 42, 0.98);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% -34%, rgba(255, 202, 97, 0.2), transparent 54%),
+    linear-gradient(180deg, rgba(255, 152, 24, 0.14), rgba(0, 0, 0, 0) 42%),
+    linear-gradient(180deg, #20120a 0%, #070707 52%, #150c06 100%);
+  color: #ff9d22;
+  font-size: clamp(30px, 5.8vw, 48px);
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 0 18px rgba(255, 156, 32, 0.7),
+    0 1px 0 rgba(0, 0, 0, 0.84);
+  box-shadow:
+    0 0 0 3px rgba(96, 38, 8, 0.98),
+    0 0 22px rgba(255, 112, 20, 0.82),
+    0 0 46px rgba(255, 156, 32, 0.45),
+    0 18px 32px rgba(0, 0, 0, 0.58),
+    inset 0 0 0 1px rgba(255, 224, 137, 0.52),
+    inset 0 8px 18px rgba(255, 163, 43, 0.14),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.72);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayScheduleBtn::before {
-  content: "▶";
-  color: #171006;
-  font-size: 0.72em;
-  line-height: 1;
-  margin-top: 0.04em;
-  text-shadow:
-    0 1px 0 rgba(255, 232, 149, 0.4);
+  content: "";
+  width: 0;
+  height: 0;
+  margin-top: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 20px solid #ffb129;
+  font-size: 0;
+  filter:
+    drop-shadow(0 0 6px rgba(255, 120, 24, 1))
+    drop-shadow(0 0 12px rgba(255, 194, 74, 0.82));
+  text-shadow: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-share-btn span {
@@ -3368,6 +3393,14 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   white-space: nowrap;
   text-shadow:
     0 1px 0 rgba(255, 232, 149, 0.42);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus #tournamentDayScheduleBtn span {
+  color: #ff9d22 !important;
+  text-shadow:
+    0 0 8px rgba(255, 127, 22, 0.95),
+    0 0 18px rgba(255, 156, 32, 0.7),
+    0 1px 0 rgba(0, 0, 0, 0.84);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap .tournament-day-block--home {
