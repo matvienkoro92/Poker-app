@@ -871,7 +871,6 @@
     var totalEl = config.totalEl || document.getElementById("adminReportRakebackTotal");
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
-    var reportTotalInput = config.rakebackTotalInput || config.reportTotalInput || document.getElementById("adminReportRakeback");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var rakeHeaderEl = config.rakeHeaderEl || document.getElementById("adminReportRakebackRakeHeader");
@@ -1775,13 +1774,6 @@
       return tr;
     }
 
-    function isManualRakebackReportInputTouched() {
-      if (typeof config.getManualRakebackInputTouched === "function") {
-        return !!config.getManualRakebackInputTouched();
-      }
-      return !!config.manualRakebackInputTouched;
-    }
-
     function getConfiguredReportDateKey() {
       var value = "";
       if (typeof config.getRakebackReportDateKey === "function") value = config.getRakebackReportDateKey();
@@ -1822,18 +1814,6 @@
       return latestDateKey ? rows.filter(function (row) {
         return getRowReportDateKey(row) === latestDateKey;
       }) : rows;
-    }
-
-    function sumReportRakebackRows(rows) {
-      return (Array.isArray(rows) ? rows : []).reduce(function (sum, row) {
-        return sum + parseNumber(row && row.amount);
-      }, 0);
-    }
-
-    function syncReportRakebackTotalInput() {
-      if (!reportTotalInput || isManualRakebackReportInputTouched()) return;
-      var total = sumReportRakebackRows(getUnsentReportRakebackRows());
-      reportTotalInput.value = String(Math.round(total * 100) / 100 || "");
     }
 
     function getPulledTemplateIdSet(room) {
@@ -2366,7 +2346,6 @@
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
       if (totalEl) totalEl.textContent = String(Math.round(allTotals.rake)) + " / " + String(Math.round(allTotals.amount));
-      syncReportRakebackTotalInput();
       if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
     }
 

@@ -2783,7 +2783,6 @@
         if (rakebackRoomTotalLabelEl) rakebackRoomTotalLabelEl.textContent = rakebackArchiveMode ? "Итого архив" : "Итого " + getRakebackRoomLabel(activeRakebackRoom);
         if (rakebackRoomTotalEl) rakebackRoomTotalEl.textContent = rakebackArchiveMode ? formatRakebackSummaryPair(rakeTotal, total) : formatRakebackSummaryPair(activeTotal.rake, activeTotal.report);
         if (rakebackTotalEl) rakebackTotalEl.textContent = formatRakebackSummaryPair(rakeTotal, total);
-        if (rakebackTotalInput && !manualRakebackInputTouched) rakebackTotalInput.value = String(Math.round(reportRakebackTotal) || "");
         if (rakebackTotalsModal && !rakebackTotalsModal.hidden) renderRakebackTotalsModal();
         updateFiguresTotals({ syncExtras: false });
         showRakebackStatus("");

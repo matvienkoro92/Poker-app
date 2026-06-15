@@ -665,6 +665,69 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can list sent reports after delete");
   assert.strictEqual((shiftReportRes.body.reports || []).some((report) => report.id === shiftReportId), false, "deleted sent report is gone");
 
+  shiftReportRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman178ReportToken,
+    date: "15.06.2026",
+    weekday: "Понедельник",
+    deposit: 100,
+    cashout: 0,
+    prodamus: 0,
+    robokassa: 0,
+    romaCrypto: 0,
+    botCryptoDep: 0,
+    botExchipDep: 0,
+    botExchipCashout: 0,
+    bonuses: 0,
+    transfers: 0,
+    ret: 0,
+    sergeyMarina: 0,
+    rakeback: 999,
+    extraFields: [],
+  }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can create a report before rakeback is issued");
+  const rakebackSyncReportId = shiftReportRes.body && shiftReportRes.body.report && shiftReportRes.body.report.id;
+  assert.strictEqual(shiftReportRes.body.report.rakeback, 0, "manual rakeback body is ignored without rows");
+
+  const issuedAt = new Date(Date.UTC(2026, 5, 15, 16, 0, 0, 0)).toISOString();
+  let syncDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman178ReportToken,
+    action: "rakeback_draft_save",
+    date: "shared",
+    rakebackRows: [{
+      groupId: "contract_report_sync_rakeback",
+      kind: "base",
+      room: "P21",
+      playerId: "P21-REPORT-SYNC",
+      rake: 150,
+      percent: 50,
+      roomAmount: 75,
+      amount: 75,
+      saved: true,
+      entryAddedAt: issuedAt,
+      createdAt: issuedAt,
+    }],
+    deletedTemplates: [],
+    deletedRows: [],
+  }));
+  assert.strictEqual(syncDraftRes.statusCode, 200, "rakeback draft save succeeds after sent report exists");
+  assert.strictEqual(syncDraftRes.body.reportSync && syncDraftRes.body.reportSync.rowsAttached, 1, "issued rakeback row is attached to the sent report");
+  const syncedDraftRow = (syncDraftRes.body.rakebackDraft.rows || []).find((row) => row.groupId === "contract_report_sync_rakeback");
+  assert.strictEqual(syncedDraftRow && syncedDraftRow.accounted, true, "attached rakeback row becomes accounted in draft");
+  assert.strictEqual(syncedDraftRow && syncedDraftRow.reportId, rakebackSyncReportId, "attached rakeback row points at the sent report");
+
+  shiftReportRes = await call(reportHandler, req("GET", { pwaSession: roman178ReportToken, scope: "all" }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can list reports after rakeback sync");
+  const syncedReport = (shiftReportRes.body.reports || []).find((report) => report.id === rakebackSyncReportId);
+  assert.strictEqual(syncedReport && syncedReport.rakeback, 75, "sent report rakeback is recalculated from attached rows");
+  assert.strictEqual(syncedReport && syncedReport.total, 175, "sent report total includes attached rakeback row");
+  assert.strictEqual(Array.isArray(syncedReport && syncedReport.rakebackRows) && syncedReport.rakebackRows.length, 1, "sent report stores attached rakeback row");
+  shiftReportRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman178ReportToken,
+    action: "delete",
+    id: rakebackSyncReportId,
+  }));
+  assert.strictEqual(shiftReportRes.statusCode, 200, "synced rakeback report cleanup succeeds");
+
   let draftRes = await call(reportHandler, req("POST", {}, {
     pwaSession: roman178ReportToken,
     action: "rakeback_draft_save",

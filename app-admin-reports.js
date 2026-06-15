@@ -213,10 +213,6 @@ function initAdminReportModal() {
       totalEl: rakebackTotalEl,
       roomTotalLabelEl: rakebackRoomTotalLabelEl,
       roomTotalEl: rakebackRoomTotalEl,
-      rakebackTotalInput: rakebackTotalInput,
-      getManualRakebackInputTouched: function () {
-        return manualRakebackInputTouched;
-      },
       statusEl: rakebackStatusEl,
       summaryEl: rakebackSummaryEl,
       rakebackGrandTotalBtn: rakebackGrandTotalBtn,
@@ -3574,14 +3570,6 @@ function initAdminReportModal() {
   btn.dataset.adminReportBound = "1";
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (backdrop) backdrop.addEventListener("click", closeModal);
-  if (rakebackTotalInput) {
-    rakebackTotalInput.addEventListener("input", function () {
-      manualRakebackInputTouched = true;
-    });
-    rakebackTotalInput.addEventListener("change", function () {
-      manualRakebackInputTouched = true;
-    });
-  }
   if (rakebackRefreshBtn) {
     if (!rakebackModule) syncRakebackRefreshButtonAccess();
     if (!rakebackModule) rakebackRefreshBtn.addEventListener("click", function () {

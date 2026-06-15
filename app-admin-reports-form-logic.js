@@ -9,27 +9,13 @@
           if (!el) return 0;
           return parseReportNumber(el.value);
         };
-        var getRawVal = function (id) {
-          var el = document.getElementById(id);
-          if (!el || el.value == null) return "";
-          return String(el.value).trim();
-        };
         syncRakebackTable();
         var rakebackRows = editingReportId && typeof collectRakebackRows === "function"
           ? collectRakebackRows(false, false)
           : getUnaccountedRakebackReportRows();
         var rakebackTotal = sumRakebackReportRows(rakebackRows);
         if (!isFinite(rakebackTotal)) rakebackTotal = 0;
-        var manualRakebackRaw = getRawVal("adminReportRakeback");
-        var manualRakebackTotal = parseReportNumber(manualRakebackRaw);
-        var manualRakebackRounded = Math.round(manualRakebackTotal * 100) / 100;
-        var rakebackRounded = Math.round(rakebackTotal * 100) / 100;
-        var keepManualRakeback =
-          manualRakebackInputTouched ||
-          !!editingReportId ||
-          (manualRakebackRaw !== "" && manualRakebackRounded !== rakebackRounded);
-        var reportRakebackTotal = keepManualRakeback ? manualRakebackTotal : rakebackTotal;
-        if (!isFinite(reportRakebackTotal)) reportRakebackTotal = 0;
+        var reportRakebackTotal = rakebackTotal;
         var extraRows = modal.querySelectorAll(".admin-report-extra-row");
         var extraFields = [];
         var extraTotal = 0;
@@ -47,6 +33,9 @@
           if (name || amount) {
             extraFields.push({ name: name, amount: amount });
             extraRawTotal += amount;
+            if (typeof isReportManualRakebackFieldName === "function" && isReportManualRakebackFieldName(name)) {
+              return;
+            }
             if (typeof isReportPreviousRakebackFieldName === "function" && isReportPreviousRakebackFieldName(name)) {
               extraExpenseTotal += amount;
             } else {
@@ -94,7 +83,7 @@
 
       function fillReportForm(report, options) {
         options = options || {};
-        manualRakebackInputTouched = !!(report && report.rakeback != null && report.rakeback !== "");
+        manualRakebackInputTouched = false;
         if (!report) {
           setFormVal("adminReportDeposit", "");
           setFormVal("adminReportCashout", "");
@@ -108,7 +97,6 @@
           setFormVal("adminReportTransfers", "");
           setFormVal("adminReportReturn", "");
           setFormVal("adminReportSergeyMarina", "");
-          setFormVal("adminReportRakeback", "");
           if (!options.skipRakeback) fillRakebackTable([], "");
           var tbody = document.getElementById("adminReportTableBody");
           if (tbody) {
@@ -135,7 +123,6 @@
         setFormVal("adminReportTransfers", report.transfers);
         setFormVal("adminReportReturn", report.ret);
         setFormVal("adminReportSergeyMarina", report.sergeyMarina);
-        setFormVal("adminReportRakeback", report.rakeback != null ? report.rakeback : "");
         fillRakebackTable(report.rakebackRows, report.rakeback);
         var tbody = document.getElementById("adminReportTableBody");
         if (tbody) {
