@@ -1,2 +1,2 @@
 /* Auth CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-pwa.css");
+@import url("./styles-pwa.css?v=3.609");

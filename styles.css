@@ -1,7 +1,7 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-base.css?v=3.593");
 @import url("./styles-home-rating-promo.css?v=3.593");
-@import url("./styles-auth.css?v=3.593");
+@import url("./styles-auth.css?v=3.609");
 @import url("./styles-home.css?v=3.593");
 @import url("./styles-chat.css?v=3.593");
 @import url("./styles-learning-games.css?v=3.593");

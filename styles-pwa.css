@@ -500,6 +500,7 @@ html.app-view-home .home-welcome-outline::before {
 }
 
 .pwa-auth-screen {
+  --pwa-auth-bottom-reserve: max(88px, calc(env(safe-area-inset-bottom, 0px) + 64px));
   position: fixed;
   inset: 0;
   z-index: 99990;
@@ -510,11 +511,16 @@ html.app-view-home .home-welcome-outline::before {
   justify-content: flex-start;
   /* При светлой теме приложения html задаёт тёмный --text; без своего color наследуется невидимый текст на тёмном фоне оверлея */
   color: rgba(241, 245, 249, 0.96);
-  /* Симметричные отступы с safe area; контент по центру в .pwa-auth-screen__inner, версия внизу */
-  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 0
+  /* Симметричные отступы с safe area; снизу есть запас под Android-навигацию и скролл формы. */
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) var(--pwa-auth-bottom-reserve)
     max(20px, env(safe-area-inset-left, 0px));
   min-height: 100dvh;
   min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   /* Тот же оттенок, что у html/body и theme-color (#0f172a), чтобы под статус-баром iOS не было «шва» */
   background-color: #0f172a;
   background-image: radial-gradient(880px 480px at 50% -42%, rgba(249, 115, 22, 0.28), transparent 52%),
@@ -523,7 +529,7 @@ html.app-view-home .home-welcome-outline::before {
 }
 /* PWA standalone: подъём формы входа над клавиатурой (--pwa-auth-vv-inset из JS по visualViewport) */
 html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pwa-auth-vv-inset, 0px));
+  padding-bottom: calc(var(--pwa-auth-bottom-reserve) + var(--pwa-auth-vv-inset, 0px));
 }
 .pwa-auth-screen--hidden {
   display: none !important;
@@ -594,6 +600,22 @@ html.pwa-auth-vv-lift .pwa-auth-screen:not(.pwa-auth-screen--hidden) {
   box-shadow: none;
   text-align: center;
   pointer-events: auto;
+}
+
+.pwa-auth-screen .auth-banner__primary-action,
+.pwa-auth-screen .auth-banner__secondary-action,
+.pwa-auth-screen .auth-banner__code-row--verify {
+  scroll-margin-bottom: var(--pwa-auth-bottom-reserve);
+}
+
+@media (max-width: 540px), (max-height: 760px) {
+  .pwa-auth-screen__inner {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    min-height: auto;
+    padding-top: 56px;
+    padding-bottom: 18px;
+  }
 }
 .pwa-auth-screen__lang-switch {
   position: absolute;
