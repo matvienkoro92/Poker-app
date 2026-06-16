@@ -823,7 +823,7 @@
       "radioToggle",
       "clubCharterOpenBtn"
     ];
-    var loggedInItems = ["clubReferralsOpenBtn"].concat(adminItems, ["clubCharterOpenBtn", "adminBonusBalancesHeaderBtn", "[data-gazette-open='1']", "radioToggle", "siteHomeAuthBtn"]);
+    var loggedInItems = ["clubReferralsOpenBtn"].concat(adminItems, ["adminBonusBalancesHeaderBtn", "[data-gazette-open='1']", "radioToggle", "clubCharterOpenBtn", "siteHomeAuthBtn"]);
     appendHeaderMenuItems(menu, isLogout ? loggedInItems : ["siteHomeAuthBtn", "clubReferralsOpenBtn"].concat(adminItems, bottomItems));
   }
 
