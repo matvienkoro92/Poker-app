@@ -107,16 +107,30 @@
         '<button type="button" class="club-referrals-modal__close" data-referrals-close aria-label="Закрыть">×</button>' +
         '<h2 class="club-referrals-modal__title">Приглашённые</h2>' +
         '<p class="club-referrals-modal__lead">Выберите любую ссылку ниже на любой раздел который будет интересен вашему другу</p>' +
+        '<div class="club-referrals-modal__promo">Билет за 10 000 ₽ тому, кто пригласит больше всех до 15 июля</div>' +
         '<div class="club-referrals-modal__status" id="clubReferralsStatus" aria-live="polite"></div>' +
         '<div class="club-referrals-modal__tabs" role="tablist" aria-label="Пригласительные ссылки">' +
           '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">Ссылки</button>' +
           '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">Ваши приглашенные</button>' +
+          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="ranking" role="tab" aria-selected="false">Рейтинг пригласивших</button>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab" data-referrals-panel="links">' +
+          '<div class="club-referrals-modal__rules">' +
+            '<strong>Как засчитывается приглашение</strong>' +
+            '<ul>' +
+              '<li>Игрок должен открыть вашу ссылку и создать новый аккаунт.</li>' +
+              '<li>Если игрок уже был зарегистрирован до перехода по ссылке, он не засчитывается.</li>' +
+              '<li>Один и тот же DT-ID, Telegram ID или Poker21 ID не может засчитаться повторно.</li>' +
+              '<li>Если игрок уже закреплён за другим пригласившим, привязка не перезаписывается.</li>' +
+            '</ul>' +
+          '</div>' +
           '<div class="club-referrals-modal__list" id="clubReferralsList"></div>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab club-referrals-modal__panel-tab--hidden" data-referrals-panel="invited">' +
           '<div class="club-referrals-modal__invited" id="clubReferralsInvited"></div>' +
+        '</div>' +
+        '<div class="club-referrals-modal__panel-tab club-referrals-modal__panel-tab--hidden" data-referrals-panel="ranking">' +
+          '<div class="club-referrals-modal__ranking" id="clubReferralsRanking"></div>' +
         '</div>' +
       '</section>';
     document.body.appendChild(modal);
@@ -140,7 +154,7 @@
   function switchTab(name) {
     var modal = document.getElementById("clubReferralsModal");
     if (!modal) return;
-    var active = name === "invited" ? "invited" : "links";
+    var active = name === "invited" || name === "ranking" ? name : "links";
     Array.prototype.slice.call(modal.querySelectorAll("[data-referrals-tab]")).forEach(function (btn) {
       var on = (btn.getAttribute("data-referrals-tab") || "") === active;
       btn.classList.toggle("club-referrals-modal__tab--active", on);
@@ -150,7 +164,7 @@
       var on = (panel.getAttribute("data-referrals-panel") || "") === active;
       panel.classList.toggle("club-referrals-modal__panel-tab--hidden", !on);
     });
-    if (active === "invited") loadInvited();
+    if (active === "invited" || active === "ranking") loadInvited();
   }
 
   function renderLinks() {
@@ -232,20 +246,59 @@
     root.innerHTML = summary + '<div class="club-referrals-modal__invited-list">' + rows + "</div>";
   }
 
+  function renderRanking() {
+    var root = document.getElementById("clubReferralsRanking");
+    if (!root) return;
+    if (invitedState.loading) {
+      root.innerHTML = invitedEmptyHtml("Загружаю рейтинг...");
+      return;
+    }
+    if (invitedState.error) {
+      root.innerHTML = invitedEmptyHtml(invitedState.error);
+      return;
+    }
+    var data = invitedState.data || {};
+    var ranking = Array.isArray(data.ranking) ? data.ranking : [];
+    if (!ranking.length) {
+      root.innerHTML = invitedEmptyHtml("Пока нет игроков с приглашёнными.");
+      return;
+    }
+    var rows = ranking.map(function (item) {
+      var name = item.telegramLogin || item.name || item.accountId || "Игрок";
+      var sub = [item.accountId, item.telegramLogin && item.name && item.telegramLogin !== item.name ? item.name : ""].filter(Boolean).join(" · ");
+      return '<article class="club-referrals-modal__invited-card club-referrals-modal__ranking-card">' +
+        '<div class="club-referrals-modal__invited-head">' +
+          '<strong><span class="club-referrals-modal__rank">#' + esc(item.rank || "") + '</span>' + esc(name) + '</strong>' +
+          '<span>' + esc(item.invitedCount || 0) + ' чел.</span>' +
+        '</div>' +
+        '<div class="club-referrals-modal__invited-sub">' + esc(sub) + '</div>' +
+        '<div class="club-referrals-modal__metrics club-referrals-modal__metrics--ranking">' +
+          '<span>Приглашено <strong>' + esc(item.invitedCount || 0) + '</strong></span>' +
+          '<span>Сумма уровней <strong>' + esc(item.totalPoker21Level || 0) + '</strong></span>' +
+          '<span>Poker21 привязали <strong>' + esc(item.poker21LinkedInvited || 0) + '</strong></span>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+    root.innerHTML = '<div class="club-referrals-modal__invited-list">' + rows + "</div>";
+  }
+
   function loadInvited() {
     if (invitedState.loading || invitedState.loaded) {
       renderInvited();
+      renderRanking();
       return;
     }
     var base = apiBase();
     if (!base || typeof fetch !== "function") {
       invitedState.error = "Не удалось загрузить приглашённых.";
       renderInvited();
+      renderRanking();
       return;
     }
     invitedState.loading = true;
     invitedState.error = "";
     renderInvited();
+    renderRanking();
     fetch(base + "/api/referrals" + authQuery("?"), { cache: "no-store" })
       .then(function (res) {
         return res.json().catch(function () { return {}; }).then(function (data) {
@@ -263,6 +316,7 @@
       .then(function () {
         invitedState.loading = false;
         renderInvited();
+        renderRanking();
       });
   }
 

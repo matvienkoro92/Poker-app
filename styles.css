@@ -185,9 +185,55 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
+.club-referrals-modal__promo {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  color: #1d1104;
+  border: 1px solid rgba(255, 226, 161, 0.66);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffe0a0, #ffad30);
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 1.15;
+  text-align: center;
+  box-shadow:
+    0 0 16px rgba(255, 171, 46, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.club-referrals-modal__rules {
+  margin: 0 0 12px;
+  padding: 11px 12px;
+  color: rgba(255, 239, 210, 0.76);
+  border: 1px solid rgba(255, 181, 49, 0.18);
+  border-radius: 12px;
+  background: rgba(2, 6, 14, 0.48);
+}
+
+.club-referrals-modal__rules strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #ffd173;
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.club-referrals-modal__rules ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.club-referrals-modal__rules li {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.22;
+}
+
 .club-referrals-modal__tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0 0 12px;
   padding: 4px;
@@ -205,7 +251,7 @@
   background: transparent;
   font-size: 13px;
   font-weight: 900;
-  white-space: nowrap;
+  line-height: 1.05;
 }
 
 .club-referrals-modal__tab--active,
@@ -336,6 +382,16 @@
   font-size: 14px;
 }
 
+.club-referrals-modal__metrics--ranking {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.club-referrals-modal__rank {
+  display: inline-block;
+  margin-right: 7px;
+  color: #ffd173;
+}
+
 @media (max-width: 520px) {
   .club-referrals-modal {
     place-items: center;
@@ -357,13 +413,14 @@
   }
 
   .club-referrals-modal__tabs {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
   }
 
   .club-referrals-modal__tab {
-    padding: 0 6px;
-    font-size: 12px;
+    min-height: 42px;
+    padding: 0 4px;
+    font-size: 10px;
   }
 
   .club-referrals-modal__summary,
