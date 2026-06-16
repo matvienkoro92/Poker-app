@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  color: #2a2118;
+  color: #fff4d8;
 }
 .site-home-instruction-modal__tabs {
   margin-bottom: 14px;
@@ -42,7 +42,15 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.45;
-  color: #2a2118;
+  color: #fff4d8;
+}
+
+.site-home-instruction-modal__body a {
+  color: #ffffff;
+}
+
+.site-home-instruction-modal__body a:hover {
+  color: #ffd173;
 }
 .site-home-instruction-modal__image {
   display: block;
@@ -54,7 +62,7 @@
 .site-home-instruction-modal .club-charter-modal__paper,
 .site-home-instruction-modal .club-charter-modal__kicker,
 .site-home-instruction-modal .club-charter-modal__title {
-  color: #2a2118;
+  color: #fff4d8;
 }
 html.app--telegram-miniapp,
 html.poker-telegram-miniapp {
