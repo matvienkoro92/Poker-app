@@ -2679,8 +2679,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 0 15px rgba(255, 125, 0, 0.42);
 }
 
-.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount {
-  font-size: clamp(12px, 2.35vw, 19px);
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
+  max-width: 100%;
+  font-size: 16px;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
@@ -3505,7 +3507,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   gap: 0;
   width: 100%;
   min-height: 0;
-  padding: 0;
+  padding: 0 0 0 2px;
   border: 0;
   border-radius: 0;
   overflow: hidden;
