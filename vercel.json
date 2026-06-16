@@ -112,6 +112,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron-bonus-balances-report",
+      "schedule": "0 13 * * 0"
+    },
+    {
       "path": "/api/deploy-hook",
       "schedule": "0 12 * * *"
     }

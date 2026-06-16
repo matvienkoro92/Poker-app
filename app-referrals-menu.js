@@ -1,10 +1,35 @@
 (function initClubReferralsMenu() {
+  var invitedState = {
+    loading: false,
+    loaded: false,
+    error: "",
+    data: null,
+  };
+
   function esc(value) {
     return String(value == null ? "" : value)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function apiBase() {
+    if (typeof getApiBase === "function") return String(getApiBase() || "").replace(/\/$/, "");
+    try {
+      var app = document.getElementById("app");
+      var dataBase = app && app.getAttribute("data-api-base");
+      if (dataBase && String(dataBase).trim()) return String(dataBase).trim().replace(/\/$/, "");
+    } catch (eDataBase) {}
+    try {
+      return String(location.origin || "").replace(/\/$/, "");
+    } catch (eLocation) {}
+    return "";
+  }
+
+  function authQuery(lead) {
+    if (typeof pokerApiAuthQuery === "function") return pokerApiAuthQuery(lead || "?");
+    return (lead || "?") + "initData=";
   }
 
   function closeHeaderMoreMenu() {
@@ -23,6 +48,24 @@
   function buildRaffleLink() {
     if (typeof pokerBuildRaffleShareLink === "function") return pokerBuildRaffleShareLink("r_1");
     return buildStartLink("r_1");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try {
+      return new Date(value).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" });
+    } catch (eDate) {
+      return "";
+    }
+  }
+
+  function pluralPlayers(n) {
+    var value = Math.abs(Number(n) || 0);
+    var mod10 = value % 10;
+    var mod100 = value % 100;
+    if (mod10 === 1 && mod100 !== 11) return "приглашенный";
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return "приглашенных";
+    return "приглашенных";
   }
 
   function referralLinks() {
@@ -63,14 +106,28 @@
       '<section class="club-referrals-modal__panel">' +
         '<button type="button" class="club-referrals-modal__close" data-referrals-close aria-label="Закрыть">×</button>' +
         '<h2 class="club-referrals-modal__title">Приглашённые</h2>' +
-        '<p class="club-referrals-modal__lead">Отправьте ссылку другу чтобы пригласить и закрепить за вами</p>' +
+        '<p class="club-referrals-modal__lead">Выберите любую ссылку ниже на любой раздел который будет интересен вашему другу</p>' +
         '<div class="club-referrals-modal__status" id="clubReferralsStatus" aria-live="polite"></div>' +
-        '<div class="club-referrals-modal__list" id="clubReferralsList"></div>' +
+        '<div class="club-referrals-modal__tabs" role="tablist" aria-label="Пригласительные ссылки">' +
+          '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">Ссылки</button>' +
+          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">Ваши приглашенные</button>' +
+        '</div>' +
+        '<div class="club-referrals-modal__panel-tab" data-referrals-panel="links">' +
+          '<div class="club-referrals-modal__list" id="clubReferralsList"></div>' +
+        '</div>' +
+        '<div class="club-referrals-modal__panel-tab club-referrals-modal__panel-tab--hidden" data-referrals-panel="invited">' +
+          '<div class="club-referrals-modal__invited" id="clubReferralsInvited"></div>' +
+        '</div>' +
       '</section>';
     document.body.appendChild(modal);
     modal.addEventListener("click", function (e) {
       var close = e.target && e.target.closest ? e.target.closest("[data-referrals-close]") : null;
       if (close && modal.contains(close)) closeModal();
+      var tab = e.target && e.target.closest ? e.target.closest("[data-referrals-tab]") : null;
+      if (tab && modal.contains(tab)) {
+        switchTab(tab.getAttribute("data-referrals-tab") || "links");
+        return;
+      }
       var copyBtn = e.target && e.target.closest ? e.target.closest("[data-referral-copy]") : null;
       if (copyBtn && modal.contains(copyBtn)) {
         var link = copyBtn.getAttribute("data-referral-copy") || "";
@@ -78,6 +135,22 @@
       }
     });
     return modal;
+  }
+
+  function switchTab(name) {
+    var modal = document.getElementById("clubReferralsModal");
+    if (!modal) return;
+    var active = name === "invited" ? "invited" : "links";
+    Array.prototype.slice.call(modal.querySelectorAll("[data-referrals-tab]")).forEach(function (btn) {
+      var on = (btn.getAttribute("data-referrals-tab") || "") === active;
+      btn.classList.toggle("club-referrals-modal__tab--active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    Array.prototype.slice.call(modal.querySelectorAll("[data-referrals-panel]")).forEach(function (panel) {
+      var on = (panel.getAttribute("data-referrals-panel") || "") === active;
+      panel.classList.toggle("club-referrals-modal__panel-tab--hidden", !on);
+    });
+    if (active === "invited") loadInvited();
   }
 
   function renderLinks() {
@@ -105,6 +178,94 @@
     }).join("");
   }
 
+  function invitedEmptyHtml(text) {
+    return '<div class="club-referrals-modal__empty">' + esc(text || "Пока нет приглашённых игроков.") + "</div>";
+  }
+
+  function renderInvited() {
+    var root = document.getElementById("clubReferralsInvited");
+    if (!root) return;
+    if (invitedState.loading) {
+      root.innerHTML = invitedEmptyHtml("Загружаю приглашённых...");
+      return;
+    }
+    if (invitedState.error) {
+      root.innerHTML = invitedEmptyHtml(invitedState.error);
+      return;
+    }
+    var data = invitedState.data || {};
+    var invited = Array.isArray(data.invited) ? data.invited : [];
+    var totals = data.totals || {};
+    if (!invited.length) {
+      root.innerHTML = invitedEmptyHtml("Пока никто не зарегистрировался по вашим ссылкам.");
+      return;
+    }
+    var summary =
+      '<div class="club-referrals-modal__summary">' +
+        '<span><strong>' + esc(totals.invited || invited.length) + '</strong> ' + esc(pluralPlayers(totals.invited || invited.length)) + '</span>' +
+        '<span><strong>' + esc(totals.dailySpins || 0) + '</strong>круток</span>' +
+        '<span><strong>' + esc(totals.rafflesParticipated || 0) + '</strong>участий</span>' +
+        '<span><strong>' + esc(totals.rafflesWon || 0) + '</strong>побед</span>' +
+      '</div>';
+    var rows = invited.map(function (item) {
+      var name = item.telegramLogin || item.name || item.accountId || "Игрок";
+      var sub = [item.accountId, item.invitedAt ? "с " + formatDate(item.invitedAt) : "", item.inviteSource || ""].filter(Boolean).join(" · ");
+      var linkedLabels = { telegram: "Telegram", email: "Email", poker21: "Poker21" };
+      var linked = Array.isArray(item.linked) && item.linked.length
+        ? item.linked.map(function (key) { return linkedLabels[key] || key; }).join(", ")
+        : "нет";
+      return '<article class="club-referrals-modal__invited-card">' +
+        '<div class="club-referrals-modal__invited-head">' +
+          '<strong>' + esc(name) + '</strong>' +
+          '<span>ур. ' + esc(item.level || 0) + '</span>' +
+        '</div>' +
+        '<div class="club-referrals-modal__invited-sub">' + esc(sub) + '</div>' +
+        '<div class="club-referrals-modal__metrics">' +
+          '<span>Крутки: <strong>' + esc(item.dailyPoker && item.dailyPoker.spins || 0) + '</strong></span>' +
+          '<span>Билеты: <strong>' + esc(item.dailyPoker && item.dailyPoker.ticketsWon || 0) + '</strong></span>' +
+          '<span>Розыгрыши: <strong>' + esc(item.raffles && item.raffles.participated || 0) + '</strong></span>' +
+          '<span>Победы: <strong>' + esc(item.raffles && item.raffles.won || 0) + '</strong></span>' +
+        '</div>' +
+        '<div class="club-referrals-modal__bindings">Привязки: ' + esc(linked) + '</div>' +
+      '</article>';
+    }).join("");
+    root.innerHTML = summary + '<div class="club-referrals-modal__invited-list">' + rows + "</div>";
+  }
+
+  function loadInvited() {
+    if (invitedState.loading || invitedState.loaded) {
+      renderInvited();
+      return;
+    }
+    var base = apiBase();
+    if (!base || typeof fetch !== "function") {
+      invitedState.error = "Не удалось загрузить приглашённых.";
+      renderInvited();
+      return;
+    }
+    invitedState.loading = true;
+    invitedState.error = "";
+    renderInvited();
+    fetch(base + "/api/referrals" + authQuery("?"), { cache: "no-store" })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok || !data || data.ok === false) throw new Error(data && data.error ? data.error : "load_failed");
+          return data;
+        });
+      })
+      .then(function (data) {
+        invitedState.data = data || {};
+        invitedState.loaded = true;
+      })
+      .catch(function () {
+        invitedState.error = "Не удалось загрузить приглашённых. Попробуйте позже.";
+      })
+      .then(function () {
+        invitedState.loading = false;
+        renderInvited();
+      });
+  }
+
   function copyReferralLink(link, btn) {
     if (!link) return;
     var original = btn ? btn.textContent : "";
@@ -126,6 +287,7 @@
   function openModal() {
     var modal = ensureModal();
     renderLinks();
+    switchTab("links");
     modal.classList.remove("club-referrals-modal--hidden");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("club-referrals-modal-open");

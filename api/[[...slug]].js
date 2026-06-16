@@ -59,6 +59,7 @@ const handlers = {
   "cron-raffles": () => require(path.join(handlersDir, "cron-raffles.js")),
   "cron-daily-poker-reminders": () => require(path.join(handlersDir, "cron-daily-poker-reminders.js")),
   "cron-tournament-reminders": () => require(path.join(handlersDir, "cron-tournament-reminders.js")),
+  "cron-bonus-balances-report": () => require(path.join(handlersDir, "cron-bonus-balances-report.js")),
   "freeroll-reminder-subscribe": () => require(path.join(handlersDir, "freeroll-reminder-subscribe.js")),
   "daily-poker-reminder": () => require(path.join(handlersDir, "daily-poker-reminder.js")),
   "tournament-reminder": () => require(path.join(handlersDir, "tournament-reminder.js")),
@@ -85,6 +86,7 @@ const handlers = {
   "tracking-links": () => require(path.join(handlersDir, "tracking-links.js")),
   "tracking-link-hit": () => require(path.join(handlersDir, "tracking-link-hit.js")),
   "tracking-link-event": () => require(path.join(handlersDir, "tracking-link-event.js")),
+  referrals: () => require(path.join(handlersDir, "referrals.js")),
   "yandex-disk-play": () => require(path.join(handlersDir, "yandex-disk-play.js")),
   "video-lesson-reviews": () => require(path.join(handlersDir, "video-lesson-reviews.js")),
 };
