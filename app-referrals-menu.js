@@ -33,6 +33,13 @@
     return (lead || "?") + "initData=";
   }
 
+  function referralsAuthQuery() {
+    var query = authQuery("?");
+    var refCode = typeof pokerGetMyReferralCode === "function" ? pokerGetMyReferralCode() : "";
+    if (!refCode) return query;
+    return query + (query.indexOf("?") >= 0 && query !== "?" ? "&" : "") + "dtIdHint=" + encodeURIComponent(refCode);
+  }
+
   function closeHeaderMoreMenu() {
     var menu = document.getElementById("headerMoreMenu");
     var toggle = document.getElementById("headerMoreMenuBtn");
@@ -307,7 +314,7 @@
     invitedState.requestId = requestId;
     renderInvited();
     renderRanking();
-    fetch(base + "/api/referrals" + authQuery("?"), { cache: "no-store" })
+    fetch(base + "/api/referrals" + referralsAuthQuery(), { cache: "no-store" })
       .then(function (res) {
         return res.json().catch(function () { return {}; }).then(function (data) {
           if (!res.ok || !data || data.ok === false) throw new Error(data && data.error ? data.error : "load_failed");

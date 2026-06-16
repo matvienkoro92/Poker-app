@@ -4767,6 +4767,30 @@ async function testAuthEmailAndPwaCode(redis) {
   assert.strictEqual(redis.h("poker_app:referrals:referrer").get(pendingDtId), "ID400800", "pending telegram PWA account records referral after verify");
 }
 
+async function testReferralsTrustedDtIdHint(redis) {
+  const referrals = loadHandler("referrals");
+  const s = sessions();
+  redis.h("poker_app:id_to_user").set("ID400800", "tg_1001");
+  redis.h("poker_app:id_to_user").set("ID999999", "tg_9999");
+  redis.h("poker_app:referrals:referrer").set("ID111111", "ID400800");
+  redis.h("poker_app:referrals:referrer").set("ID222222", "ID400800");
+  redis.h("poker_app:referrals:referrer").set("ID333333", "ID400800");
+  redis.h("poker_app:referrals:referrer").set("ID444444", "ID999999");
+  redis.h("poker_app:visitor_usernames").set("tg_1111", "one");
+  redis.h("poker_app:id_to_user").set("ID111111", "tg_1111");
+
+  let r = await call(referrals, req("GET", { pwaSession: s.user, dtIdHint: "ID999999" }));
+  assert.strictEqual(r.statusCode, 200, "referrals endpoint ignores untrusted dt id hint");
+  assert.notStrictEqual(r.body.accountId, "ID999999", "untrusted referrals hint is not used");
+  assert.strictEqual(r.body.invited.length, 0, "untrusted referrals hint does not expose another account invites");
+
+  r = await call(referrals, req("GET", { pwaSession: s.user, dtIdHint: "ID400800" }));
+  assert.strictEqual(r.statusCode, 200, "referrals endpoint accepts trusted id_to_user dt id hint");
+  assert.strictEqual(r.body.accountId, "ID400800", "trusted referrals hint selects the owner account");
+  assert.strictEqual(r.body.invited.length, 3, "trusted referrals hint returns own invited players");
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_1001"), "ID400800", "trusted referrals hint repairs reverse dt mapping");
+}
+
 async function testFriendsFlow(redis) {
   const friends = loadHandler("friends");
   const s = sessions();
@@ -5231,6 +5255,7 @@ async function main() {
     ["pokerplus admin bound cashier source chip logs", testPokerPlusChipLogsBoundPokerPlusIds],
     ["pokerplus admin shared bound cashier source chip logs", testPokerPlusChipLogsSharedBoundMailAndDtSource],
     ["auth email and pwa code", testAuthEmailAndPwaCode],
+    ["referrals trusted dt id hint", testReferralsTrustedDtIdHint],
     ["friends add/list/delete", testFriendsFlow],
     ["chat push subscribe/broadcast", testChatPushSubscribeAndBroadcast],
     ["tracking links hit/event/list", testTrackingLinksFlow],
