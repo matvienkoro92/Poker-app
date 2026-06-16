@@ -17,6 +17,45 @@ function initRafflesCompletedRuntime(opts) {
     var raffleCompletedTimersInterval = null;
     var raffleCompletedTimerRefreshAfter = 0;
     var raffleCompletedTimerRefreshMarks = {};
+    var raffleCompletedActiveWinnerTabs = {};
+
+  function raffleCompletedWinnerTabsKey(raffle) {
+    return String((raffle && (raffle.id || raffle.completedNumber)) || "completed");
+  }
+
+  function raffleCompletedWinnerTabsDomKey(element) {
+    if (!element || !element.closest) return "";
+    var tabsRoot = element.closest(".raffle-winner-groups-tabs");
+    var card = element.closest(".raffle-completed-card");
+    return String(
+      (tabsRoot && tabsRoot.getAttribute("data-raffle-winner-tabs-key")) ||
+      (card && (card.getAttribute("data-raffle-id") || card.getAttribute("data-raffle-number"))) ||
+      ""
+    );
+  }
+
+  function raffleCompletedWinnerTabIndex(index, count) {
+    var value = parseInt(index, 10);
+    var max = parseInt(count, 10) || 0;
+    if (!isFinite(value) || value < 0) return 0;
+    if (max > 0 && value >= max) return 0;
+    return value;
+  }
+
+  function rememberRaffleCompletedWinnerTab(element) {
+    if (!element || !element.closest) return;
+    var tabsRoot = element.closest(".raffle-winner-groups-tabs");
+    if (!tabsRoot) return;
+    var key = raffleCompletedWinnerTabsDomKey(element);
+    if (!key) return;
+    var activeTab = tabsRoot.querySelector(".raffle-winner-groups-tabs__tab--active");
+    var tabIndex = activeTab ? activeTab.getAttribute("data-raffle-winner-tab") : "";
+    if (tabIndex === "") {
+      var activePanel = tabsRoot.querySelector(".raffle-winner-groups-tabs__panel--active");
+      tabIndex = activePanel ? activePanel.getAttribute("data-raffle-winner-panel") : "";
+    }
+    raffleCompletedActiveWinnerTabs[key] = String(raffleCompletedWinnerTabIndex(tabIndex, tabsRoot.querySelectorAll("[data-raffle-winner-tab]").length));
+  }
 
   function raffleWinnerReadyExpired(w) {
     if (!w) return false;
@@ -780,10 +819,12 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleCompletedWinnerGroupsTabsHtml(raffle, groups, rerollsByOriginal) {
     var raffleKey = String((raffle && (raffle.id || raffle.completedNumber)) || "completed").replace(/[^A-Za-z0-9_-]/g, "-");
+    var rawRaffleKey = raffleCompletedWinnerTabsKey(raffle);
+    var activeIndex = raffleCompletedWinnerTabIndex(raffleCompletedActiveWinnerTabs[rawRaffleKey], groups.length);
     var tabsHtml = "";
     var panelsHtml = "";
     groups.forEach(function (group, index) {
-      var active = index === 0;
+      var active = index === activeIndex;
       var tabId = "raffleWinnersTab-" + raffleKey + "-" + index;
       var panelId = "raffleWinnersPanel-" + raffleKey + "-" + index;
       var label = raffleCompletedGroupTabLabel(group.name, group.prize);
@@ -814,7 +855,9 @@ function initRafflesCompletedRuntime(opts) {
         raffleCompletedWinnerGroupRowsHtml(raffle, group.rows, rerollsByOriginal) +
         "</ul></div>";
     });
-    return "<li class=\"raffle-winner-groups-tabs\"><div class=\"raffle-winner-groups-tabs__tabs\" role=\"tablist\">" +
+    return "<li class=\"raffle-winner-groups-tabs\" data-raffle-winner-tabs-key=\"" +
+      escapeHtml(rawRaffleKey) +
+      "\"><div class=\"raffle-winner-groups-tabs__tabs\" role=\"tablist\">" +
       tabsHtml +
       "</div><div class=\"raffle-winner-groups-tabs__panels\">" +
       panelsHtml +
@@ -1092,6 +1135,8 @@ function initRafflesCompletedRuntime(opts) {
         var tabsRoot = groupTab.closest(".raffle-winner-groups-tabs");
         var tabIndex = groupTab.getAttribute("data-raffle-winner-tab") || "0";
         if (!tabsRoot) return;
+        var tabsKey = raffleCompletedWinnerTabsDomKey(groupTab);
+        if (tabsKey) raffleCompletedActiveWinnerTabs[tabsKey] = String(raffleCompletedWinnerTabIndex(tabIndex, tabsRoot.querySelectorAll("[data-raffle-winner-tab]").length));
         tabsRoot.querySelectorAll("[data-raffle-winner-tab]").forEach(function (tab) {
           var active = tab === groupTab;
           tab.classList.toggle("raffle-winner-groups-tabs__tab--active", active);
@@ -1111,6 +1156,7 @@ function initRafflesCompletedRuntime(opts) {
         var readyWid = readyBtn.getAttribute("data-winner-user-id");
         var readySlotId = readyBtn.getAttribute("data-winner-slot-id") || "";
         if (!readyRid || (!readyWid && !readySlotId)) return;
+        rememberRaffleCompletedWinnerTab(readyBtn);
         readyBtn.disabled = true;
         setRaffleWinnerReady(readyRid, readyWid, readySlotId, readyBtn, function (ok) { if (!ok) readyBtn.disabled = false; });
         return;
@@ -1128,6 +1174,7 @@ function initRafflesCompletedRuntime(opts) {
         var statusEl = row && row.querySelector(".raffle-winner-status");
         var currentStatus = statusEl && statusEl.classList.contains("raffle-winner-status--ok") ? "ok" : statusEl && statusEl.classList.contains("raffle-winner-status--fail") ? "fail" : null;
         if (rid && (wid || winnerSlotId)) {
+          rememberRaffleCompletedWinnerTab(winnerBtn);
           winnerBtn.disabled = true;
           setRaffleWinnerStatus(rid, wid, winnerSlotId, winnerBtn.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) winnerBtn.disabled = false; });
         }
