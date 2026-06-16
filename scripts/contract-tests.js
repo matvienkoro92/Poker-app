@@ -4741,6 +4741,30 @@ async function testAuthEmailAndPwaCode(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "telegram PWA password login succeeds");
   assert.strictEqual(r.body.user.username, "player", "telegram PWA login returns username");
+
+  redis.h("poker_app:id_to_user").set("ID400800", "tg_referrer");
+  redis.h("poker_app:visitor_dt_ids").set("tg_referrer", "ID400800");
+  redis.h("poker_app:visitor_usernames").set("tg_3001", "late_ref");
+  r = await call(authPwaCode, req("POST", {}, { action: "request", username: "late_ref" }));
+  assert.strictEqual(r.statusCode, 200, "first telegram PWA code request can create pending technical account");
+  const pendingDtId = redis.h("poker_app:visitor_dt_ids").get("tg_3001");
+  assert.ok(/^ID\d{6}$/.test(pendingDtId), "pending telegram PWA request creates a dt id");
+  r = await call(authPwaCode, req("POST", {}, {
+    action: "request",
+    username: "late_ref",
+    referralStartParam: "home__ref_ID400800",
+  }));
+  assert.strictEqual(r.statusCode, 200, "second telegram PWA code request with referral succeeds before registration completes");
+  const lateRefCode = JSON.parse(redis.kv.get("poker_app:pwa_login_code:late_ref"));
+  assert.strictEqual(lateRefCode.referralAllowed, true, "pending technical account still allows referral");
+  r = await call(authPwaCode, req("POST", {}, {
+    action: "verify",
+    username: "late_ref",
+    code: lateRefCode.code,
+    password: "secret456",
+  }));
+  assert.strictEqual(r.statusCode, 200, "telegram PWA verify succeeds after pending referral request");
+  assert.strictEqual(redis.h("poker_app:referrals:referrer").get(pendingDtId), "ID400800", "pending telegram PWA account records referral after verify");
 }
 
 async function testFriendsFlow(redis) {

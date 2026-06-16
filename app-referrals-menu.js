@@ -4,6 +4,7 @@
     loaded: false,
     error: "",
     data: null,
+    requestId: 0,
   };
 
   function esc(value) {
@@ -164,7 +165,7 @@
       var on = (panel.getAttribute("data-referrals-panel") || "") === active;
       panel.classList.toggle("club-referrals-modal__panel-tab--hidden", !on);
     });
-    if (active === "invited" || active === "ranking") loadInvited();
+    if (active === "invited" || active === "ranking") loadInvited(true);
   }
 
   function renderLinks() {
@@ -282,8 +283,13 @@
     root.innerHTML = '<div class="club-referrals-modal__invited-list">' + rows + "</div>";
   }
 
-  function loadInvited() {
-    if (invitedState.loading || invitedState.loaded) {
+  function loadInvited(force) {
+    if (invitedState.loading && !force) {
+      renderInvited();
+      renderRanking();
+      return;
+    }
+    if (invitedState.loaded && !force) {
       renderInvited();
       renderRanking();
       return;
@@ -297,6 +303,8 @@
     }
     invitedState.loading = true;
     invitedState.error = "";
+    var requestId = invitedState.requestId + 1;
+    invitedState.requestId = requestId;
     renderInvited();
     renderRanking();
     fetch(base + "/api/referrals" + authQuery("?"), { cache: "no-store" })
@@ -307,13 +315,16 @@
         });
       })
       .then(function (data) {
+        if (requestId !== invitedState.requestId) return;
         invitedState.data = data || {};
         invitedState.loaded = true;
       })
       .catch(function () {
+        if (requestId !== invitedState.requestId) return;
         invitedState.error = "Не удалось загрузить приглашённых. Попробуйте позже.";
       })
       .then(function () {
+        if (requestId !== invitedState.requestId) return;
         invitedState.loading = false;
         renderInvited();
         renderRanking();
