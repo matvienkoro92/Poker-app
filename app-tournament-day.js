@@ -40,8 +40,8 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     guarantee: "250 000₽",
     banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
     bannerAlt: "Poker21 Нокаут среды — вход 5 000 ₽, гарантия 250 000 ₽",
-    bannerWidth: 941,
-    bannerHeight: 1534
+    bannerWidth: 640,
+    bannerHeight: 915
   },
   {
     name: "Мистери+",
