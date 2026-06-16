@@ -164,8 +164,8 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "5 000 ₽", 4: "1200 ₽", 5: "500 ₽" };
-var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 1, 3: 2, 4: 1, 5: 2 };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2500 ₽", 4: "1200 ₽", 5: "500 ₽" };
+var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 2, 4: 1, 5: 2 };
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -730,7 +730,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
 }
 
 function syncHomeTournamentBonusAvailability(activeWeekday) {
-  var league2Active = activeWeekday === 2 || activeWeekday === 3;
+  var league2Active = activeWeekday === 2;
   var leagueNum = league2Active ? 2 : 1;
   var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
   bonuses.forEach(function (bonus) {
@@ -738,7 +738,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
     if (kind === "league1" || kind === "league2") {
       var amountEl = bonus.querySelector(".home-tournament-bonus__amount");
       var labelEl = bonus.querySelector(".home-tournament-bonus__label");
-      var amount = leagueNum === 1 ? "500-1500 ₽" : "1000 ₽";
+      var amount = "500-1500 ₽";
       bonus.setAttribute("data-home-tournament-bonus", "league" + leagueNum);
       bonus.setAttribute("data-home-tournament-league-top", String(leagueNum));
       bonus.setAttribute("aria-label", "Актуальный топ-10 Лиги " + leagueNum);
@@ -761,7 +761,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   if (!Number.isFinite(count) || count < 1) count = 1;
   var active = !!amount;
   amountEl.textContent = amount || "—";
-  labelEl.textContent = "бабблу";
+  labelEl.textContent = count === 2 ? "2 баббла" : "бабблу";
   if (gridEl) gridEl.classList.toggle("home-tournament-bonuses__grid--has-bubble", active);
   if (bonusEl) {
     bonusEl.hidden = !active;
@@ -771,7 +771,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
     bonusEl.setAttribute("data-home-tournament-bubble-count", String(count));
     bonusEl.classList.toggle("home-tournament-bonus--inactive", !active);
     bonusEl.setAttribute("aria-disabled", active ? "false" : "true");
-    bonusEl.setAttribute("aria-label", active ? "Условия бонуса бабблу: " + amount : "Бонус бабблу недоступен в этот день");
+    bonusEl.setAttribute("aria-label", active ? "Условия бонуса: " + amount + " за " + (count === 2 ? "2 баббла" : "баббл") : "Бонус бабблу недоступен в этот день");
   }
 }
 
@@ -1265,7 +1265,6 @@ function escapeHomeTournamentLeagueTopText(value) {
 }
 
 function getHomeTournamentLeagueTopBounty(index, leagueNum) {
-  if (Number(leagueNum) !== 1) return "";
   var place = Number(index) + 1;
   if (place >= 1 && place <= 3) return "1500 ₽";
   if (place >= 4 && place <= 5) return "1000 ₽";
