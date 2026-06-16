@@ -652,6 +652,10 @@
     return "daily_" + Date.now() + "_" + Math.random().toString(36).slice(2, 12);
   }
 
+  function dailyPokerDeviceId() {
+    return typeof pokerGetRaffleStableDeviceId === "function" ? pokerGetRaffleStableDeviceId() : "";
+  }
+
   function setBusy(on) {
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
@@ -912,7 +916,7 @@
     fetch(authUrl("play"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(authBody({ idempotencyKey: idempotencyKey() })),
+      body: JSON.stringify(authBody({ idempotencyKey: idempotencyKey(), deviceId: dailyPokerDeviceId() })),
     })
       .then(function (r) {
         return readJson(r).then(function (data) {
