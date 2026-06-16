@@ -65,6 +65,8 @@ function getStreamsAppUrl() {
 }
 
 function buildMiniAppStartLink(startParam) {
+  var start = String(startParam || "");
+  if (typeof pokerBuildReferralStartParam === "function") start = pokerBuildReferralStartParam(start);
   var appUrl = String(getAppBaseUrlForLinks() || "")
     .trim()
     .replace(/\/+$/, "");
@@ -76,7 +78,7 @@ function buildMiniAppStartLink(startParam) {
     (needSlash ? "/" : "") +
     sep +
     "startapp=" +
-    encodeURIComponent(String(startParam))
+    encodeURIComponent(start)
   );
 }
 

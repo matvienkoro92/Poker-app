@@ -29,6 +29,193 @@
     linear-gradient(180deg, #030405 0%, #060606 58%, #020303 100%);
 }
 
+.club-referrals-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.club-referrals-modal--hidden {
+  display: none;
+}
+
+.club-referrals-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(7px);
+}
+
+.club-referrals-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  max-height: min(82vh, 720px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 18px;
+  color: #fff4d8;
+  border: 1px solid rgba(255, 181, 49, 0.5);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 181, 49, 0.14), transparent 36%),
+    linear-gradient(180deg, rgba(19, 22, 33, 0.98), rgba(5, 7, 12, 0.99));
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.62),
+    inset 0 0 0 1px rgba(255, 238, 184, 0.08);
+}
+
+.club-referrals-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #ffe8b8;
+  border: 1px solid rgba(255, 181, 49, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.club-referrals-modal__title {
+  margin: 0 42px 8px 0;
+  color: #ffe3a7;
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+.club-referrals-modal__lead {
+  margin: 0 0 12px;
+  color: rgba(255, 239, 210, 0.84);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.club-referrals-modal__status {
+  margin: 0 0 12px;
+  padding: 9px 11px;
+  color: #ffd173;
+  border: 1px solid rgba(255, 181, 49, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 181, 49, 0.08);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.club-referrals-modal__status--warn {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.36);
+  background: rgba(127, 29, 29, 0.22);
+}
+
+.club-referrals-modal__list {
+  display: grid;
+  gap: 10px;
+}
+
+.club-referrals-modal__item {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid rgba(255, 181, 49, 0.22);
+  border-radius: 12px;
+  background: rgba(2, 6, 14, 0.54);
+}
+
+.club-referrals-modal__item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.club-referrals-modal__item-head strong {
+  min-width: 0;
+  color: #fff4d8;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.club-referrals-modal__item-head span {
+  flex: 0 1 auto;
+  color: rgba(255, 236, 198, 0.62);
+  font-size: 11px;
+  line-height: 1.15;
+  text-align: right;
+}
+
+.club-referrals-modal__copy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.club-referrals-modal__link {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  overflow: hidden;
+  color: #fef3c7;
+  border: 1px solid rgba(255, 181, 49, 0.24);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.32);
+  font: 700 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-overflow: ellipsis;
+}
+
+.club-referrals-modal__copy-btn {
+  min-height: 38px;
+  padding: 0 12px;
+  color: #261301;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffd57c, #ff9f1c);
+  font-size: 12px;
+  font-weight: 1000;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+@media (max-width: 520px) {
+  .club-referrals-modal {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .club-referrals-modal__panel {
+    max-height: 86vh;
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  .club-referrals-modal__copy-row {
+    grid-template-columns: 1fr;
+  }
+
+  .club-referrals-modal__copy-btn {
+    width: 100%;
+  }
+
+  .club-referrals-modal__item-head {
+    display: block;
+  }
+
+  .club-referrals-modal__item-head span {
+    display: block;
+    margin-top: 3px;
+    text-align: left;
+  }
+}
+
 .view--active[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 html.app-view-spring-rating .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,
 body[data-view="spring-rating"] .winter-rating__spring-main-tab.winter-rating__spring-main-tab--active,

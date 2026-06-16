@@ -194,6 +194,7 @@ function pokerGetWebsiteRootBaseForLinks() {
 
 function pokerBuildWebsiteStartLink(startParam) {
   var start = pokerNormalizeWebAppStartParam(startParam) || "raffles";
+  if (typeof pokerBuildReferralStartParam === "function") start = pokerBuildReferralStartParam(start);
   var base = pokerGetWebsiteRootBaseForLinks();
   if (!base) return "";
   return base + "/?startapp=" + encodeURIComponent(start);
@@ -201,13 +202,18 @@ function pokerBuildWebsiteStartLink(startParam) {
 
 function pokerBuildRafflePreviewLink(startParam) {
   var start = pokerNormalizeWebAppStartParam(startParam);
+  var referralSplit = typeof pokerSplitReferralStartParam === "function"
+    ? pokerSplitReferralStartParam(start)
+    : { routeStartParam: start, referrerId: "" };
+  start = referralSplit.routeStartParam || start;
   var m = start.match(/^r_(.+)$/) || start.match(/^raffle_active_(.+)$/);
   if (!m || !m[1]) return "";
   var code = pokerNormalizeRaffleActiveId(m[1]);
   if (!code) return "";
   var base = pokerGetWebsiteRootBaseForLinks();
   if (!base) return "";
-  return base + "/r/" + encodeURIComponent(code);
+  var ref = referralSplit.referrerId || (typeof pokerGetMyReferralCode === "function" ? pokerGetMyReferralCode() : "");
+  return base + "/r/" + encodeURIComponent(code) + (ref ? "?ref=" + encodeURIComponent(ref) : "");
 }
 
 function pokerBuildRaffleShareLink(startParam) {

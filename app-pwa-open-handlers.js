@@ -14,6 +14,10 @@
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   }
   function getAppUrl() {
+    if (typeof buildMiniAppStartLink === "function") {
+      var link = buildMiniAppStartLink("home");
+      if (link) return link;
+    }
     return getAppBaseUrlForLinks();
   }
   function copyShareLink() {
