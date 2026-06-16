@@ -379,6 +379,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   max-height: calc(100vh - 112px);
   box-sizing: border-box;
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
   padding: 9px;
   overflow: auto;
@@ -528,6 +529,26 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.app.app--view-home .header-more-menu .header-menu-action--gazette,
+.app.app--view-home .header-more-menu .header-menu-action--radio {
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 7px;
+  padding-inline: 8px;
+}
+
+.app.app--view-home .header-more-menu .header-menu-action--gazette .header-menu-action__icon,
+.app.app--view-home .header-more-menu .header-menu-action--radio .header-menu-action__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.app.app--view-home .header-more-menu .header-menu-action--gazette .header-menu-action__title,
+.app.app--view-home .header-more-menu .header-menu-action--radio .header-menu-action__title {
+  font-size: 11px;
 }
 
 .app.app--view-home .radio-toggle {

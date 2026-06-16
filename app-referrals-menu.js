@@ -40,8 +40,8 @@
   }
 
   function buildStartLink(startParam) {
-    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(startParam);
     if (typeof pokerBuildPersonalInviteLink === "function") return pokerBuildPersonalInviteLink(startParam);
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(startParam);
     return "";
   }
 

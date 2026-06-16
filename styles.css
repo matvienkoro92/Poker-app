@@ -200,17 +200,22 @@
   min-height: 38px;
   padding: 0 10px;
   color: rgba(255, 239, 210, 0.76);
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
   font-size: 13px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
-.club-referrals-modal__tab--active {
+.club-referrals-modal__tab--active,
+.club-referrals-modal__tab[aria-selected="true"] {
   color: #1b1004;
+  border-color: rgba(255, 226, 161, 0.68);
   background: linear-gradient(180deg, #ffe2a1, #ffab2e);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 14px rgba(255, 171, 46, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .club-referrals-modal__panel-tab--hidden {
@@ -333,7 +338,7 @@
 
 @media (max-width: 520px) {
   .club-referrals-modal {
-    align-items: end;
+    place-items: center;
     padding: 10px;
   }
 
@@ -352,7 +357,13 @@
   }
 
   .club-referrals-modal__tabs {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .club-referrals-modal__tab {
+    padding: 0 6px;
+    font-size: 12px;
   }
 
   .club-referrals-modal__summary,
@@ -431,6 +442,7 @@ html.home-planner-access-granted #app:has(.view--active[data-view="daily-poker"]
   max-height: calc(100vh - 112px);
   box-sizing: border-box;
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
   padding: 9px;
   overflow: auto;
@@ -450,6 +462,32 @@ html.home-planner-access-granted #app:has(.view--active[data-view="daily-poker"]
 #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-admin-report--hidden,
 #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .welcome-planner-icon--hidden {
   display: none !important;
+}
+
+.header-more-menu__head,
+.header-more-menu .header-menu-action:not(.header-menu-action--gazette):not(.header-menu-action--radio) {
+  grid-column: 1 / -1;
+}
+
+.header-more-menu .header-menu-action--gazette,
+.header-more-menu .header-menu-action--radio {
+  grid-column: auto;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 7px;
+  padding-inline: 8px;
+}
+
+.header-more-menu .header-menu-action--gazette .header-menu-action__icon,
+.header-more-menu .header-menu-action--radio .header-menu-action__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.header-more-menu .header-menu-action--gazette .header-menu-action__title,
+.header-more-menu .header-menu-action--radio .header-menu-action__title {
+  font-size: 11px;
 }
 
 #app:has(.view--active[data-view="daily-poker"]) .header-more-menu .theme-toggle,
@@ -550,6 +588,26 @@ html[data-theme="neon"] #app:has(.view--active[data-view="daily-poker"]) .header
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--gazette,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--radio {
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 7px;
+  padding-inline: 8px !important;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--gazette .header-menu-action__icon,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--radio .header-menu-action__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--gazette .header-menu-action__title,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action--radio .header-menu-action__title {
+  font-size: 11px;
 }
 
 .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header,

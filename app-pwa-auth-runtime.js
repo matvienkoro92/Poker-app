@@ -606,6 +606,17 @@
     return displayName ? "Привет, " + displayName + "!" : "Привет!";
   }
 
+  function isHeaderGuestLoginMode() {
+    try {
+      var auth = window.__pokerTelegramAuth;
+      if (auth && auth.status === "guest") return true;
+    } catch (eAuthGuest) {}
+    try {
+      if (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) return true;
+    } catch (ePwaGuest) {}
+    return false;
+  }
+
   function updateHeaderGreeting() {
     var el = document.getElementById("headerGreeting");
     syncSiteHomeInstructionMode();
@@ -614,6 +625,11 @@
     }
     if (!el) return;
     if (isSiteHomeInstructionMode()) {
+      setHeaderGreetingLoginActive(true);
+      el.textContent = "Войти";
+      return;
+    }
+    if (isHeaderGuestLoginMode()) {
       setHeaderGreetingLoginActive(true);
       el.textContent = "Войти";
       return;
@@ -717,7 +733,7 @@
       pwaInstallBtn.style.removeProperty("display");
     }
     if (greetingArrow) greetingArrow.hidden = !isSiteMode;
-    setHeaderGreetingLoginActive(isSiteMode && !hasResolvedAuth && !isStandaloneMode);
+    setHeaderGreetingLoginActive((isSiteMode && !hasResolvedAuth && !isStandaloneMode) || isHeaderGuestLoginMode());
     bindSharedAccountAuthTriggers();
   }
   window.__pokerSyncSiteHomeInstructionMode = syncSiteHomeInstructionMode;
@@ -774,6 +790,43 @@
     return headerAuthMenuHasCurrentAccountSession() && !pokerHeaderPoker21Linked();
   }
 
+  function getHeaderMenuItem(menu, ref) {
+    if (!menu) return null;
+    if (!ref) return null;
+    var el = ref.charAt(0) === "#" || ref.charAt(0) === "." || ref.charAt(0) === "["
+      ? menu.querySelector(ref)
+      : document.getElementById(ref);
+    return el && el.parentElement === menu ? el : null;
+  }
+
+  function appendHeaderMenuItems(menu, refs) {
+    if (!menu || !Array.isArray(refs)) return;
+    refs.forEach(function (ref) {
+      var el = getHeaderMenuItem(menu, ref);
+      if (el) menu.appendChild(el);
+    });
+  }
+
+  function syncHeaderMoreMenuOrder(isLogout) {
+    var menu = document.getElementById("headerMoreMenu");
+    if (!menu) return;
+    var adminItems = [
+      "adminReportBtn",
+      "headerCrmBtn",
+      "romanTaskPlannerOpenBtn",
+      "siteHomePoker21BindBtn",
+      "siteHomeInstructionBtn"
+    ];
+    var bottomItems = [
+      "adminBonusBalancesHeaderBtn",
+      "[data-gazette-open='1']",
+      "radioToggle",
+      "clubCharterOpenBtn"
+    ];
+    var loggedInItems = ["clubReferralsOpenBtn"].concat(adminItems, ["clubCharterOpenBtn", "adminBonusBalancesHeaderBtn", "[data-gazette-open='1']", "radioToggle", "siteHomeAuthBtn"]);
+    appendHeaderMenuItems(menu, isLogout ? loggedInItems : ["siteHomeAuthBtn", "clubReferralsOpenBtn"].concat(adminItems, bottomItems));
+  }
+
   function closeHeaderMoreMenuFromAction(btn) {
     var menu = btn && btn.closest ? btn.closest(".header-more-menu") : null;
     if (!menu) return;
@@ -801,6 +854,7 @@
       if (showBind) bindBtn.style.removeProperty("display");
       else bindBtn.style.display = "none";
     }
+    syncHeaderMoreMenuOrder(isLogout);
     authBtn.hidden = false;
     authBtn.style.removeProperty("display");
     authBtn.dataset.headerAuthAction = action;
@@ -868,6 +922,10 @@
     if (greetingBtn && greetingBtn.dataset.authEntryBound !== "1") {
       greetingBtn.dataset.authEntryBound = "1";
       greetingBtn.addEventListener("click", function (e) {
+        if (isHeaderGuestLoginMode()) {
+          handleSharedAccountAuthClick(e);
+          return;
+        }
         if (pokerHeaderPoker21Linked()) {
           openHeaderPoker21Levels(e);
           return;

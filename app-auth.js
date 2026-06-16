@@ -265,10 +265,66 @@ function pokerGetMyReferralCode() {
   return "";
 }
 
+var POKER_REFERRAL_START_STORAGE_KEY = "poker_referral_start_param";
+var POKER_REFERRAL_START_TTL_MS = 24 * 60 * 60 * 1000;
+
+function pokerRememberReferralStartParam(startParam) {
+  var parsed = pokerSplitReferralStartParam(startParam);
+  if (!parsed.referrerId) return "";
+  var normalized = pokerBuildReferralStartParam(parsed.routeStartParam || "home", parsed.referrerId);
+  var payload = JSON.stringify({ value: normalized, at: Date.now() });
+  try {
+    if (typeof sessionStorage !== "undefined") sessionStorage.setItem(POKER_REFERRAL_START_STORAGE_KEY, payload);
+  } catch (eSessionRemember) {}
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(POKER_REFERRAL_START_STORAGE_KEY, payload);
+  } catch (eLocalRemember) {}
+  return normalized;
+}
+
+function pokerReadRememberedReferralStartParam() {
+  var stores = [];
+  try {
+    if (typeof sessionStorage !== "undefined") stores.push(sessionStorage);
+  } catch (eSessionStore) {}
+  try {
+    if (typeof localStorage !== "undefined") stores.push(localStorage);
+  } catch (eLocalStore) {}
+  for (var i = 0; i < stores.length; i += 1) {
+    try {
+      var raw = stores[i].getItem(POKER_REFERRAL_START_STORAGE_KEY);
+      if (!raw) continue;
+      var parsedRaw = JSON.parse(raw);
+      var value = parsedRaw && parsedRaw.value ? String(parsedRaw.value).trim() : "";
+      var at = Number(parsedRaw && parsedRaw.at);
+      if (!value || !Number.isFinite(at) || Date.now() - at > POKER_REFERRAL_START_TTL_MS) {
+        stores[i].removeItem(POKER_REFERRAL_START_STORAGE_KEY);
+        continue;
+      }
+      if (pokerSplitReferralStartParam(value).referrerId) return value;
+    } catch (eReadRemembered) {}
+  }
+  return "";
+}
+
 function pokerBuildReferralStartParam(startParam, referrerId) {
   var start = pokerSplitReferralStartParam(startParam).routeStartParam || pokerNormalizeWebAppStartParam(startParam) || "home";
   var ref = pokerNormalizeReferralAccountId(referrerId || pokerGetMyReferralCode());
   return ref ? start + "__ref_" + ref : start;
+}
+
+function pokerReferralRouteFromCurrentLocation(fallback) {
+  var route = pokerSplitReferralStartParam(fallback).routeStartParam || pokerNormalizeWebAppStartParam(fallback);
+  if (route) return route;
+  try {
+    var path = String(location && location.pathname ? location.pathname : "").trim();
+    var m = path.match(/\/r\/([^\/?#]+)/i);
+    if (m && m[1]) {
+      var code = pokerNormalizeRaffleActiveId(m[1]);
+      if (code) return "r_" + code;
+    }
+  } catch (ePathRoute) {}
+  return "home";
 }
 
 function pokerBuildPersonalInviteLink(startParam) {
@@ -285,13 +341,13 @@ function pokerBuildPersonalInviteLink(startParam) {
 function pokerReadReferralStartParam() {
   var start = typeof pokerReadTelegramLaunchStartParam === "function" ? pokerReadTelegramLaunchStartParam() : "";
   var parsed = pokerSplitReferralStartParam(start);
-  if (parsed.referrerId) return pokerBuildReferralStartParam(parsed.routeStartParam, parsed.referrerId);
+  if (parsed.referrerId) return pokerRememberReferralStartParam(pokerBuildReferralStartParam(parsed.routeStartParam, parsed.referrerId));
   try {
     var sp = new URLSearchParams(String(location && location.search ? location.search : ""));
     var ref = pokerNormalizeReferralAccountId(sp.get("ref") || sp.get("referrer"));
-    if (ref) return pokerBuildReferralStartParam(parsed.routeStartParam || "home", ref);
+    if (ref) return pokerRememberReferralStartParam(pokerBuildReferralStartParam(pokerReferralRouteFromCurrentLocation(parsed.routeStartParam), ref));
   } catch (eRefSearch) {}
-  return "";
+  return pokerReadRememberedReferralStartParam();
 }
 
 function pokerBuildRaffleCompletedStartParam(raffleId) {
@@ -323,6 +379,7 @@ try {
     window.pokerNormalizeReferralAccountId = pokerNormalizeReferralAccountId;
     window.pokerSplitReferralStartParam = pokerSplitReferralStartParam;
     window.pokerGetMyReferralCode = pokerGetMyReferralCode;
+    window.pokerRememberReferralStartParam = pokerRememberReferralStartParam;
     window.pokerBuildReferralStartParam = pokerBuildReferralStartParam;
     window.pokerBuildPersonalInviteLink = pokerBuildPersonalInviteLink;
     window.pokerReadReferralStartParam = pokerReadReferralStartParam;

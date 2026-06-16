@@ -197,6 +197,7 @@
   max-height: calc(100vh - 112px);
   box-sizing: border-box;
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
   padding: 9px;
   overflow: auto;
@@ -219,6 +220,32 @@
 .header-more-menu .header-admin-report--hidden,
 .header-more-menu .header-crm-btn--hidden {
   display: none !important;
+}
+
+.header-more-menu__head,
+.header-more-menu .header-menu-action:not(.header-menu-action--gazette):not(.header-menu-action--radio) {
+  grid-column: 1 / -1;
+}
+
+.header-more-menu .header-menu-action--gazette,
+.header-more-menu .header-menu-action--radio {
+  grid-column: auto;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 7px;
+  padding-inline: 8px;
+}
+
+.header-more-menu .header-menu-action--gazette .header-menu-action__icon,
+.header-more-menu .header-menu-action--radio .header-menu-action__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.header-more-menu .header-menu-action--gazette .header-menu-action__title,
+.header-more-menu .header-menu-action--radio .header-menu-action__title {
+  font-size: 11px;
 }
 
 .header-more-menu__head {

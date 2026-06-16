@@ -97,6 +97,33 @@
   });
 })();
 
+(function initHomeScrollTargets() {
+  function scrollToTarget(targetId) {
+    var target = targetId ? document.getElementById(targetId) : null;
+    if (!target) return;
+    try {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) {
+      target.scrollIntoView();
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var trigger = e.target && e.target.closest ? e.target.closest("[data-home-scroll-target]") : null;
+    if (!trigger) return;
+    var targetId = trigger.getAttribute("data-home-scroll-target") || "";
+    if (!targetId) return;
+    e.preventDefault();
+    if (document.body && document.body.getAttribute("data-view") !== "home" && typeof setView === "function") {
+      setView("home");
+      window.setTimeout(function () {
+        scrollToTarget(targetId);
+      }, 80);
+      return;
+    }
+    scrollToTarget(targetId);
+  });
+})();
+
 (function initHeaderMoreMenu() {
   var toggle = document.getElementById("headerMoreMenuBtn");
   var menu = document.getElementById("headerMoreMenu");
