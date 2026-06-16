@@ -3289,7 +3289,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   grid-column: 1 / -1;
   width: calc(100% + 14px);
   min-height: clamp(32px, 5.9vw, 55px);
-  margin: 3px -7px 0;
+  margin: 3px -7px -10px;
   align-items: stretch;
   justify-content: center;
   padding: 0;
@@ -3523,7 +3523,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   gap: 5px;
   width: 100%;
   min-height: 32px;
-  padding: 4px 5px;
+  padding: 4px 5px 4px 2px;
   color: #f8fafc;
   text-align: left;
   border: 0;
@@ -3785,7 +3785,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-items: center;
   gap: 4px 9px;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
-  margin: 12px calc(-1 * var(--card-padding-x, 16px) + 3px) 0;
+  margin: 15px calc(-1 * var(--card-padding-x, 16px) + 3px) 0;
   padding: 8px 7px;
   overflow: hidden;
   color: #f8fafc;

@@ -259,6 +259,7 @@
             password: passwordValue(),
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
+            referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
           }),
         })
           .then(function (res) {
@@ -300,6 +301,7 @@
             email: email,
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
+            referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
           }),
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
@@ -329,6 +331,7 @@
             code: code,
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
+            referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
           }),
         })
           .then(function (res) {
@@ -373,6 +376,7 @@
             password: passwordValue(),
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
+            referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
           }),
         })
           .then(function (res) {

@@ -1141,6 +1141,7 @@
         Object.assign({}, payload, {
           dtIdHint: authLinkDtIdHint,
           linkPwaSession: authLinkPwaSession,
+          referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
         })
       ),
     })
@@ -1396,6 +1397,7 @@
           wantPwaSession: !!wantPwaSession,
           dtIdHint: authLinkDtIdHint,
           linkPwaSession: authLinkPwaSession,
+          referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
         }),
         cache: "no-store",
       },

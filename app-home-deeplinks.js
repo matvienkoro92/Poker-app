@@ -35,6 +35,10 @@ function pokerInitHomeDeepLinks(opts) {
     var withPeerOpt = opts.withPeer != null ? String(opts.withPeer).trim() : "";
     var startParam = startParamRaw != null ? String(startParamRaw).trim() : "";
     if (!startParam) return;
+    if (typeof pokerSplitReferralStartParam === "function") {
+      var refSplit = pokerSplitReferralStartParam(startParam);
+      if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;
+    }
     if (startParam === "news" || startParam.indexOf("news_") === 0) {
       var articleNum = startParam === "news" ? undefined : parseInt(startParam.replace("news_", ""), 10);
       if (startParam !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;

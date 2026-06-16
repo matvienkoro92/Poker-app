@@ -222,6 +222,72 @@ function pokerBuildRaffleShareLink(startParam) {
   return base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(start);
 }
 
+function pokerNormalizeReferralAccountId(raw) {
+  var s = String(raw || "").trim();
+  return /^ID\d{6}$/.test(s) ? s : "";
+}
+
+function pokerSplitReferralStartParam(raw) {
+  var start = pokerNormalizeWebAppStartParam(raw);
+  if (!start) return { routeStartParam: "", referrerId: "" };
+  var m = start.match(/^(.*?)__ref_(ID\d{6})$/);
+  if (m) {
+    return {
+      routeStartParam: String(m[1] || "").trim() || "home",
+      referrerId: pokerNormalizeReferralAccountId(m[2]),
+    };
+  }
+  var direct = start.match(/^ref_(ID\d{6})$/);
+  if (direct) return { routeStartParam: "home", referrerId: pokerNormalizeReferralAccountId(direct[1]) };
+  return { routeStartParam: start, referrerId: "" };
+}
+
+function pokerGetMyReferralCode() {
+  var keys = ["poker_dt_id"];
+  for (var i = 0; i < keys.length; i += 1) {
+    try {
+      var local = typeof localStorage !== "undefined" ? localStorage.getItem(keys[i]) : "";
+      var id = pokerNormalizeReferralAccountId(local);
+      if (id) return id;
+    } catch (eLocalRef) {}
+    try {
+      var session = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(keys[i]) : "";
+      var sid = pokerNormalizeReferralAccountId(session);
+      if (sid) return sid;
+    } catch (eSessionRef) {}
+  }
+  return "";
+}
+
+function pokerBuildReferralStartParam(startParam, referrerId) {
+  var start = pokerSplitReferralStartParam(startParam).routeStartParam || pokerNormalizeWebAppStartParam(startParam) || "home";
+  var ref = pokerNormalizeReferralAccountId(referrerId || pokerGetMyReferralCode());
+  return ref ? start + "__ref_" + ref : start;
+}
+
+function pokerBuildPersonalInviteLink(startParam) {
+  var start = pokerBuildReferralStartParam(startParam || "home");
+  if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
+  var appUrl = "";
+  if (typeof getAppBaseUrlForLinks === "function") appUrl = getAppBaseUrlForLinks();
+  if (!appUrl && typeof location !== "undefined") appUrl = String(location.origin || "") + "/";
+  appUrl = String(appUrl || "").trim().replace(/\/+$/, "");
+  if (!appUrl) return "";
+  return appUrl + (appUrl.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(start);
+}
+
+function pokerReadReferralStartParam() {
+  var start = typeof pokerReadTelegramLaunchStartParam === "function" ? pokerReadTelegramLaunchStartParam() : "";
+  var parsed = pokerSplitReferralStartParam(start);
+  if (parsed.referrerId) return pokerBuildReferralStartParam(parsed.routeStartParam, parsed.referrerId);
+  try {
+    var sp = new URLSearchParams(String(location && location.search ? location.search : ""));
+    var ref = pokerNormalizeReferralAccountId(sp.get("ref") || sp.get("referrer"));
+    if (ref) return pokerBuildReferralStartParam(parsed.routeStartParam || "home", ref);
+  } catch (eRefSearch) {}
+  return "";
+}
+
 function pokerBuildRaffleCompletedStartParam(raffleId) {
   var numberSource = raffleId && typeof raffleId === "object" ? raffleId.completedNumber || raffleId.completed_number : "";
   var n = parseInt(String(numberSource || ""), 10);
@@ -248,6 +314,12 @@ try {
     window.pokerParseRaffleActiveStartParam = pokerParseRaffleActiveStartParam;
     window.pokerBuildRafflePreviewLink = pokerBuildRafflePreviewLink;
     window.pokerBuildRaffleShareLink = pokerBuildRaffleShareLink;
+    window.pokerNormalizeReferralAccountId = pokerNormalizeReferralAccountId;
+    window.pokerSplitReferralStartParam = pokerSplitReferralStartParam;
+    window.pokerGetMyReferralCode = pokerGetMyReferralCode;
+    window.pokerBuildReferralStartParam = pokerBuildReferralStartParam;
+    window.pokerBuildPersonalInviteLink = pokerBuildPersonalInviteLink;
+    window.pokerReadReferralStartParam = pokerReadReferralStartParam;
     window.pokerNormalizeRaffleCompletedId = pokerNormalizeRaffleCompletedId;
     window.pokerBuildRaffleCompletedStartParam = pokerBuildRaffleCompletedStartParam;
     window.pokerParseRaffleCompletedStartParam = pokerParseRaffleCompletedStartParam;
@@ -1123,6 +1195,12 @@ function pokerChatDisplayImageSrc(raw) {
 
 function pokerApiAuthJsonBody(extra) {
   var o = Object.assign({}, extra || {});
+  try {
+    if (!o.referralStartParam && typeof pokerReadReferralStartParam === "function") {
+      var refStart = pokerReadReferralStartParam();
+      if (refStart) o.referralStartParam = refStart;
+    }
+  } catch (eReferralBody) {}
   try {
     if (pokerReadPwaGuestMode()) {
       delete o.initData;

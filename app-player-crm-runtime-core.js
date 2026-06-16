@@ -382,6 +382,13 @@
     return "—";
   }
 
+  function registrationInviteLabel(row) {
+    if (!row || !row.invitedBy) return "—";
+    return row.invitedByName && row.invitedByName !== row.invitedBy
+      ? row.invitedByName + " · " + row.invitedBy
+      : row.invitedBy;
+  }
+
   function filteredRegistrations() {
     var rows = Array.isArray(state.registeredAccounts) ? state.registeredAccounts.slice() : [];
     rows = rows.filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
@@ -428,7 +435,7 @@
       return;
     }
     var table = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
-      "<th>Аккаунт</th><th>Регистрация</th><th>Email</th><th>Telegram-логин</th><th>Имя</th>" +
+      "<th>Аккаунт</th><th>Регистрация</th><th>Email</th><th>Telegram-логин</th><th>Имя</th><th>Пригласил</th>" +
       "</tr></thead><tbody>" + rows.map(function (r) {
         var tg = registrationTelegramLabel(r);
         return "<tr>" +
@@ -437,6 +444,7 @@
           "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(tg) + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
+          "<td>" + esc(registrationInviteLabel(r)) + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
     el.innerHTML = summary + table;

@@ -723,6 +723,7 @@
   }
 
   function buildDailyPokerInviteLink() {
+    if (typeof pokerBuildPersonalInviteLink === "function") return pokerBuildPersonalInviteLink("daily_poker");
     if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink("daily_poker");
     var appUrl = "";
     if (typeof getAppBaseUrlForLinks === "function") appUrl = getAppBaseUrlForLinks();
@@ -804,7 +805,7 @@
     if (dailyPokerState.copyFeedbackTimer) clearTimeout(dailyPokerState.copyFeedbackTimer);
     dailyPokerState.copyFeedbackTimer = setTimeout(function () {
       btn.classList.remove("daily-poker__copy-btn--copied");
-      btn.setAttribute("aria-label", "Скопировать ссылку на Раздачу дня");
+      btn.setAttribute("aria-label", "Скопировать личную пригласительную ссылку на Раздачу дня");
       dailyPokerState.copyFeedbackTimer = null;
     }, 1400);
   }

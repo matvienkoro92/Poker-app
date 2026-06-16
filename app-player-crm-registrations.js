@@ -30,6 +30,13 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     return sortRegistrationRows(rows, method);
   }
 
+  function registrationInviteLabel(row) {
+    if (!row || !row.invitedBy) return "—";
+    return row.invitedByName && row.invitedByName !== row.invitedBy
+      ? row.invitedByName + " · " + row.invitedBy
+      : row.invitedBy;
+  }
+
   function sortDateValue(value) {
     var ms = Date.parse(value || "");
     return Number.isFinite(ms) ? ms : null;
@@ -78,7 +85,7 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     var sortField = state.registrationModalSortField || "linkedAt";
     var sortDir = state.registrationModalSortDir || "desc";
     return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__registrations-table\"><thead><tr>" +
-      sortableTh("registration-modal", "linkedAt", "Дата регистрации", sortField, sortDir) + "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th>" +
+      sortableTh("registration-modal", "linkedAt", "Дата регистрации", sortField, sortDir) + "<th>Аккаунт</th><th>Telegram-логин</th><th>Email</th><th>Имя</th><th>Пригласил</th>" +
       "</tr></thead><tbody>" + visibleRows.map(function (r) {
         var tg = registrationTelegramLabel(r);
         return "<tr>" +
@@ -87,6 +94,7 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
           "<td>" + esc(tg || "—") + "</td>" +
           "<td>" + esc(r.email || "—") + "</td>" +
           "<td>" + esc(r.name || "—") + "</td>" +
+          "<td>" + esc(registrationInviteLabel(r)) + "</td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>" +
       "<div class=\"player-crm__modal-actions\">" +
@@ -133,7 +141,7 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
     var method = state.registrationModalMethod;
     if (method !== "email" && method !== "telegram" && method !== "both") return;
     var rows = registrationRowsByMethod(method);
-    var lines = [["registeredAt", "accountId", "telegramLogin", "email", "name"].map(csvCell).join(",")];
+    var lines = [["registeredAt", "accountId", "telegramLogin", "email", "name", "invitedBy", "inviteSource"].map(csvCell).join(",")];
     rows.forEach(function (r) {
       lines.push([
         dateTime(r.linkedAt) === "—" ? "" : dateTime(r.linkedAt),
@@ -141,6 +149,8 @@ function initPlayerCrmRegistrationsRuntime(ctx) {
         registrationTelegramLabel(r) === "—" ? "" : registrationTelegramLabel(r),
         r.email || "",
         r.name || "",
+        registrationInviteLabel(r) === "—" ? "" : registrationInviteLabel(r),
+        r.inviteSource || "",
       ].map(csvCell).join(","));
     });
     var blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
