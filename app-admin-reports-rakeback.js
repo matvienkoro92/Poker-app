@@ -2042,6 +2042,26 @@
       return merged;
     }
 
+    function mergeRowsWithPatchedLocalUpserts(rows, localRows, patch) {
+      rows = Array.isArray(rows) ? rows : [];
+      localRows = Array.isArray(localRows) ? localRows : [];
+      if (!patch || !patch.upsertGroupIds || !patch.upsertGroupIds.length) return rows;
+      var upsertSet = listToSet(patch.upsertGroupIds);
+      var presentGroups = {};
+      rows.forEach(function (row) {
+        var groupId = String(row && row.groupId || "").trim();
+        if (groupId) presentGroups[groupId] = true;
+      });
+      var missingRows = [];
+      localRows.forEach(function (row) {
+        var groupId = String(row && row.groupId || "").trim();
+        if (!groupId || !upsertSet[groupId] || presentGroups[groupId]) return;
+        if (row.saved !== true || !hasSharedDraftRowData(row) || hasNegativeSharedDraftRowValue(row)) return;
+        missingRows.push(row);
+      });
+      return missingRows.length ? missingRows.concat(rows) : rows;
+    }
+
     function listToSet(list) {
       var set = {};
       (Array.isArray(list) ? list : []).forEach(function (item) {
@@ -2159,7 +2179,8 @@
         body: JSON.stringify(buildAuthBody(payload)),
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
-          sharedRows = mergeRowsWithLocalUnsaved(filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows)), localRows);
+          var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows));
+          sharedRows = mergeRowsWithPatchedLocalUpserts(mergeRowsWithLocalUnsaved(serverRows, localRows), localRows, patchMode ? patch : null);
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
           if (!skipRender) {
             var scrollSnapshot = preserveScroll ? captureRakebackScroll(body) : null;
