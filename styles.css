@@ -2154,15 +2154,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts .home-mini-icon__label {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-.home-daily-shortcuts .home-mini-icon__label--levels {
   z-index: 3;
   right: 5px;
   bottom: 10px;
@@ -2179,6 +2170,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   letter-spacing: 0;
   text-transform: uppercase;
   white-space: nowrap;
+  pointer-events: none;
   text-shadow:
     0 2px 0 rgba(56, 24, 0, 0.88),
     0 0 9px rgba(255, 126, 0, 0.95),
