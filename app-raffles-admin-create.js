@@ -202,6 +202,18 @@ function initRafflesAdminCreateRuntime(opts) {
     return (opt.getAttribute("data-name") || opt.textContent || "").trim();
   }
 
+  function getRaffleTournamentPrizeName(select) {
+    var opt = getRaffleTournamentSelectedOption(select);
+    if (!opt) return "";
+    return (opt.getAttribute("data-prize-name") || "").trim();
+  }
+
+  function buildRaffleTicketPrizeText(buyin, tournamentName, prizeName) {
+    if (prizeName) return prizeName;
+    var prizeText = buyin > 0 ? "Беккинг-билет " + (buyin % 1 === 0 ? buyin : buyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
+    return prizeText + (tournamentName ? " — " + tournamentName : "");
+  }
+
   function setupTournamentDaySelect() {
     var select = document.getElementById("raffleTicketTournamentSelect");
     if (!select || select._tournamentDaySetupDone) return;
@@ -756,8 +768,8 @@ function initRafflesAdminCreateRuntime(opts) {
           } else if (raffleTicketTournamentSelect) {
             singleTournamentName = getRaffleTournamentName(raffleTicketTournamentSelect);
           }
-          var singlePrizeText = singleBuyin > 0 ? "Беккинг-билет " + (singleBuyin % 1 === 0 ? singleBuyin : singleBuyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
-          var singlePrize = singlePrizeText + (singleTournamentName ? " — " + singleTournamentName : "");
+          var singlePrizeName = getRaffleTournamentPrizeName(raffleTicketTournamentSelect);
+          var singlePrize = buildRaffleTicketPrizeText(singleBuyin, singleTournamentName, singlePrizeName);
           if (c > 0) groups.push({ count: c, prize: singlePrize });
         } else if (raffleTicketGroups) {
           var rows = raffleTicketGroups.querySelectorAll(".raffle-ticket-group-row");
@@ -779,8 +791,8 @@ function initRafflesAdminCreateRuntime(opts) {
             } else if (groupSelect) {
               groupTournamentName = getRaffleTournamentName(groupSelect);
             }
-            var groupPrizeText = groupBuyin > 0 ? "Беккинг-билет " + (groupBuyin % 1 === 0 ? groupBuyin : groupBuyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
-            var groupPrize = groupPrizeText + (groupTournamentName ? " — " + groupTournamentName : "");
+            var groupPrizeName = getRaffleTournamentPrizeName(groupSelect);
+            var groupPrize = buildRaffleTicketPrizeText(groupBuyin, groupTournamentName, groupPrizeName);
             totalWinners += cnt;
             if (cnt > 0) groups.push({ count: cnt, prize: groupPrize });
           }

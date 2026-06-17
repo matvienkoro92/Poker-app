@@ -84,6 +84,10 @@
       trophy: '<path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v5a5 5 0 0 1-10 0Z"></path><path d="M5 5H3v3a4 4 0 0 0 4 4"></path><path d="M19 5h2v3a4 4 0 0 1-4 4"></path>',
       star: '<path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"></path>',
       copy: '<rect x="9" y="9" width="13" height="13" rx="2"></rect><rect x="2" y="2" width="13" height="13" rx="2"></rect>',
+      send: '<path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path>',
+      gift: '<rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M7.5 8A2.5 2.5 0 1 1 12 5.5 2.5 2.5 0 1 1 16.5 8"></path>',
+      card: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 7h3"></path><path d="M9 17h6"></path><path d="m9 11 3-2 3 2-3 3Z"></path>',
+      newspaper: '<path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h6"></path><path d="M8 11h6"></path><path d="M8 15h4"></path>',
       message: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>',
       calendar: '<path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path>',
       play: '<path d="m8 5 11 7-11 7Z"></path>',
@@ -99,10 +103,10 @@
   function referralLinks() {
     return [
       { title: "Ссылка на розыгрыш", hint: "Открывает актуальный розыгрыш #1", icon: "link", link: buildRaffleLink() },
-      { title: "Блок розыгрышей", hint: "Все активные розыгрыши", icon: "trophy", link: buildStartLink("raffles") },
-      { title: "Раздача дня", hint: "Игра дня с личной ссылкой", icon: "ticket", link: buildStartLink("daily_poker") },
+      { title: "Блок розыгрышей", hint: "Все активные розыгрыши", icon: "gift", link: buildStartLink("raffles") },
+      { title: "Раздача дня", hint: "Игра дня с личной ссылкой", icon: "card", link: buildStartLink("daily_poker") },
       { title: "Общий чат", hint: "Чат клуба", icon: "message", link: buildStartLink("club_chat") },
-      { title: "Газета клуба", hint: "Новости и задачи клуба", icon: "book", link: buildStartLink("news") },
+      { title: "Газета клуба", hint: "Новости и задачи клуба", icon: "newspaper", link: buildStartLink("news") },
       { title: "Устав клуба", hint: "Правила клуба", icon: "star", link: buildStartLink("club_charter") },
       { title: "Рейтинг лета", hint: "Летний рейтинг", icon: "chart", link: buildStartLink("summer_rating") },
       { title: "Рейтинг весны", hint: "Весенний рейтинг", icon: "chart", link: buildStartLink("spring_rating") },
@@ -117,6 +121,26 @@
     ].filter(function (item) {
       return item.link;
     });
+  }
+
+  function shortReferralLink(link) {
+    var raw = String(link || "").trim();
+    if (!raw) return "";
+    try {
+      var url = new URL(raw);
+      var start = url.searchParams.get("startapp") || url.searchParams.get("start");
+      if (start) return ".../" + start;
+      if (url.pathname && url.pathname !== "/") return url.host.replace(/^www\./, "").replace(/^(.{9}).+$/, "$1...") + url.pathname;
+      return url.host.replace(/^www\./, "");
+    } catch (eUrl) {
+      return raw.length > 28 ? raw.slice(0, 12) + "..." + raw.slice(-12) : raw;
+    }
+  }
+
+  function referralShareText(item) {
+    var title = item && item.title ? String(item.title) : "раздел клуба";
+    var hint = item && item.hint ? String(item.hint) : "";
+    return "Заходи в " + title + " клуба «Два туза»" + (hint ? ": " + hint : "") + ".";
   }
 
   function ensureModal() {
@@ -182,6 +206,11 @@
       if (copyBtn && modal.contains(copyBtn)) {
         var link = copyBtn.getAttribute("data-referral-copy") || "";
         copyReferralLink(link, copyBtn);
+        return;
+      }
+      var shareBtn = e.target && e.target.closest ? e.target.closest("[data-referral-share]") : null;
+      if (shareBtn && modal.contains(shareBtn)) {
+        shareReferralLink(shareBtn.getAttribute("data-referral-share") || "", shareBtn.getAttribute("data-referral-share-title") || "", shareBtn.getAttribute("data-referral-share-text") || "");
       }
     });
     return modal;
@@ -220,12 +249,12 @@
         '<div class="club-referrals-modal__item-head">' +
           '<strong>' + esc(item.title) + '</strong>' +
           '<span>' + esc(item.hint) + '</span>' +
+          '<em class="club-referrals-modal__item-link-preview">' + referralIcon("link") + esc(shortReferralLink(item.link)) + '</em>' +
         '</div>' +
-        '<div class="club-referrals-modal__copy-row">' +
-          '<input class="club-referrals-modal__link" value="' + esc(item.link) + '" readonly aria-label="' + esc(item.title) + '">' +
-          '<button type="button" class="club-referrals-modal__copy-inline" data-referral-copy="' + esc(item.link) + '" aria-label="Скопировать ссылку">' + referralIcon("copy") + '</button>' +
+        '<div class="club-referrals-modal__item-actions" role="group" aria-label="Действия со ссылкой">' +
+          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--copy" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Копия</span></button>' +
+          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--share" data-referral-share="' + esc(item.link) + '" data-referral-share-title="' + esc(item.title) + '" data-referral-share-text="' + esc(referralShareText(item)) + '">' + referralIcon("send") + '<span>Отправить другу</span></button>' +
         '</div>' +
-        '<button type="button" class="club-referrals-modal__copy-btn" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Скопировать</span></button>' +
       '</article>';
     }).join("");
   }
@@ -372,13 +401,13 @@
 
   function copyReferralLink(link, btn) {
     if (!link) return;
-    var original = btn ? btn.textContent : "";
+    var originalHtml = btn ? btn.innerHTML : "";
     var done = function (ok) {
       if (!btn) return;
-      btn.textContent = ok ? "Скопировано" : "Не скопировано";
+      btn.innerHTML = ok ? '<span>Скопировано</span>' : '<span>Не скопировано</span>';
       clearTimeout(btn.__refCopyTimer);
       btn.__refCopyTimer = setTimeout(function () {
-        btn.textContent = original || "Скопировать";
+        btn.innerHTML = originalHtml || "Копия";
       }, 1300);
     };
     if (typeof pokerCopyTextToClipboard === "function") {
@@ -386,6 +415,33 @@
       return;
     }
     done(false);
+  }
+
+  function shareReferralLink(link, title, text) {
+    if (!link) return;
+    var shareText = text || ("Заходи в " + (title || "клуб «Два туза»") + ".");
+    var payloadText = shareText + "\n" + link;
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+      ? pokerBuildTelegramShareUrlDialog(link, shareText)
+      : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(shareText);
+    function fallback() {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else window.open(shareUrl, "_blank", "noopener");
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("referrals_link_share");
+    }
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: title || "Приглашение в клуб", text: payloadText, url: link }).then(function (ok) {
+        if (ok) {
+          if (typeof recordShareButtonClick === "function") recordShareButtonClick("referrals_link_share");
+          return;
+        }
+        fallback();
+      }).catch(fallback);
+      return;
+    }
+    fallback();
   }
 
   function openModal() {
