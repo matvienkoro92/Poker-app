@@ -76,24 +76,44 @@
     return "приглашенных";
   }
 
+  function referralIcon(kind) {
+    var paths = {
+      link: '<path d="M10 13a5 5 0 0 0 7.1.1l2.8-2.8a5 5 0 0 0-7.1-7.1l-1.6 1.6"></path><path d="M14 11a5 5 0 0 0-7.1-.1l-2.8 2.8a5 5 0 0 0 7.1 7.1l1.6-1.6"></path>',
+      ticket: '<path d="M3 9a3 3 0 0 0 0 6v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a3 3 0 0 0 0-6V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"></path><path d="m9 12 2 2 4-5"></path>',
+      users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+      trophy: '<path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v5a5 5 0 0 1-10 0Z"></path><path d="M5 5H3v3a4 4 0 0 0 4 4"></path><path d="M19 5h2v3a4 4 0 0 1-4 4"></path>',
+      star: '<path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8Z"></path>',
+      copy: '<rect x="9" y="9" width="13" height="13" rx="2"></rect><rect x="2" y="2" width="13" height="13" rx="2"></rect>',
+      message: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>',
+      calendar: '<path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path>',
+      play: '<path d="m8 5 11 7-11 7Z"></path>',
+      wallet: '<path d="M3 7h18v13H3z"></path><path d="M16 12h5v4h-5a2 2 0 0 1 0-4Z"></path><path d="M3 7l3-4h12l3 4"></path>',
+      home: '<path d="m3 11 9-8 9 8"></path><path d="M5 10v11h14V10"></path><path d="M9 21v-6h6v6"></path>',
+      chart: '<path d="M3 3v18h18"></path><path d="m7 14 4-4 3 3 5-7"></path>',
+      book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path>',
+      user: '<path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle>',
+    };
+    return '<svg class="club-referrals-modal__svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (paths[kind] || paths.link) + '</svg>';
+  }
+
   function referralLinks() {
     return [
-      { title: "Ссылка на розыгрыш", hint: "Открывает актуальный розыгрыш #1", link: buildRaffleLink() },
-      { title: "Блок розыгрышей", hint: "Все активные розыгрыши", link: buildStartLink("raffles") },
-      { title: "Раздача дня", hint: "Игра дня с личной ссылкой", link: buildStartLink("daily_poker") },
-      { title: "Общий чат", hint: "Чат клуба", link: buildStartLink("club_chat") },
-      { title: "Газета клуба", hint: "Новости и задачи клуба", link: buildStartLink("news") },
-      { title: "Устав клуба", hint: "Правила клуба", link: buildStartLink("club_charter") },
-      { title: "Рейтинг лета", hint: "Летний рейтинг", link: buildStartLink("summer_rating") },
-      { title: "Рейтинг весны", hint: "Весенний рейтинг", link: buildStartLink("spring_rating") },
-      { title: "Зал славы", hint: "Топ 2026", link: buildStartLink("hall_fame_top2026") },
-      { title: "Видеоуроки", hint: "Раздел обучения", link: buildStartLink("video_lessons") },
-      { title: "Научиться играть", hint: "Обучающий хаб", link: buildStartLink("learn_play_hub") },
-      { title: "Расписание", hint: "Турниры и фрироллы", link: buildStartLink("schedule") },
-      { title: "Стримы", hint: "Комнаты трансляций", link: buildStartLink("streams") },
-      { title: "Привязать Poker21", hint: "Профиль Poker21", link: buildStartLink("profile") },
-      { title: "Депозит", hint: "Касса клуба", link: buildStartLink("cashout") },
-      { title: "Главная", hint: "Главный экран приложения", link: buildStartLink("home") },
+      { title: "Ссылка на розыгрыш", hint: "Открывает актуальный розыгрыш #1", icon: "link", link: buildRaffleLink() },
+      { title: "Блок розыгрышей", hint: "Все активные розыгрыши", icon: "trophy", link: buildStartLink("raffles") },
+      { title: "Раздача дня", hint: "Игра дня с личной ссылкой", icon: "ticket", link: buildStartLink("daily_poker") },
+      { title: "Общий чат", hint: "Чат клуба", icon: "message", link: buildStartLink("club_chat") },
+      { title: "Газета клуба", hint: "Новости и задачи клуба", icon: "book", link: buildStartLink("news") },
+      { title: "Устав клуба", hint: "Правила клуба", icon: "star", link: buildStartLink("club_charter") },
+      { title: "Рейтинг лета", hint: "Летний рейтинг", icon: "chart", link: buildStartLink("summer_rating") },
+      { title: "Рейтинг весны", hint: "Весенний рейтинг", icon: "chart", link: buildStartLink("spring_rating") },
+      { title: "Зал славы", hint: "Топ 2026", icon: "trophy", link: buildStartLink("hall_fame_top2026") },
+      { title: "Видеоуроки", hint: "Раздел обучения", icon: "play", link: buildStartLink("video_lessons") },
+      { title: "Научиться играть", hint: "Обучающий хаб", icon: "book", link: buildStartLink("learn_play_hub") },
+      { title: "Расписание", hint: "Турниры и фрироллы", icon: "calendar", link: buildStartLink("schedule") },
+      { title: "Стримы", hint: "Комнаты трансляций", icon: "play", link: buildStartLink("streams") },
+      { title: "Привязать Poker21", hint: "Профиль Poker21", icon: "user", link: buildStartLink("profile") },
+      { title: "Депозит", hint: "Касса клуба", icon: "wallet", link: buildStartLink("cashout") },
+      { title: "Главная", hint: "Главный экран приложения", icon: "home", link: buildStartLink("home") },
     ].filter(function (item) {
       return item.link;
     });
@@ -113,24 +133,32 @@
       '<div class="club-referrals-modal__backdrop" data-referrals-close></div>' +
       '<section class="club-referrals-modal__panel">' +
         '<button type="button" class="club-referrals-modal__close" data-referrals-close aria-label="Закрыть">×</button>' +
-        '<h2 class="club-referrals-modal__title">Приглашённые</h2>' +
-        '<p class="club-referrals-modal__lead">Выберите любую ссылку ниже на любой раздел который будет интересен вашему другу</p>' +
-        '<div class="club-referrals-modal__promo">Билет за 10 000 ₽ тому, кто пригласит больше всех до 15 июля</div>' +
+        '<div class="club-referrals-modal__hero">' +
+          '<h2 class="club-referrals-modal__title">Приглашённые</h2>' +
+          '<p class="club-referrals-modal__lead">Выберите любую ссылку ниже на любой раздел который будет интересен вашему другу</p>' +
+        '</div>' +
+        '<div class="club-referrals-modal__promo">' +
+          '<span class="club-referrals-modal__promo-icon">' + referralIcon("ticket") + '</span>' +
+          '<span><strong>Билет за 10 000 ₽</strong><em>тому, кто пригласит больше всех до 15 июля</em></span>' +
+        '</div>' +
         '<div class="club-referrals-modal__status" id="clubReferralsStatus" aria-live="polite"></div>' +
         '<div class="club-referrals-modal__tabs" role="tablist" aria-label="Пригласительные ссылки">' +
-          '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">Ссылки</button>' +
-          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">Ваши приглашенные</button>' +
-          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="ranking" role="tab" aria-selected="false">Рейтинг пригласивших</button>' +
+          '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">' + referralIcon("link") + '<span>Ссылки</span></button>' +
+          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">' + referralIcon("users") + '<span>Ваши приглашенные</span></button>' +
+          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="ranking" role="tab" aria-selected="false">' + referralIcon("trophy") + '<span>Рейтинг пригласивших</span></button>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab" data-referrals-panel="links">' +
           '<div class="club-referrals-modal__rules">' +
-            '<strong>Как засчитывается приглашение</strong>' +
-            '<ul>' +
-              '<li>Игрок должен открыть вашу ссылку и создать новый аккаунт.</li>' +
-              '<li>Если игрок уже был зарегистрирован до перехода по ссылке, он не засчитывается.</li>' +
-              '<li>Один и тот же DT-ID, Telegram ID или Poker21 ID не может засчитаться повторно.</li>' +
-              '<li>Если игрок уже закреплён за другим пригласившим, привязка не перезаписывается.</li>' +
-            '</ul>' +
+            '<span class="club-referrals-modal__rules-icon">' + referralIcon("star") + '</span>' +
+            '<div>' +
+              '<strong>Как засчитывается приглашение</strong>' +
+              '<ul>' +
+                '<li>Игрок должен открыть вашу ссылку и создать новый аккаунт.</li>' +
+                '<li>Если игрок уже был зарегистрирован до перехода по ссылке, он не засчитывается.</li>' +
+                '<li>Один и тот же DT-ID, Telegram ID или Poker21 ID не может засчитаться повторно.</li>' +
+                '<li>Если игрок уже закреплён за другим пригласившим, привязка не перезаписывается.</li>' +
+              '</ul>' +
+            '</div>' +
           '</div>' +
           '<div class="club-referrals-modal__list" id="clubReferralsList"></div>' +
         '</div>' +
@@ -181,21 +209,23 @@
     if (!list) return;
     var refCode = typeof pokerGetMyReferralCode === "function" ? pokerGetMyReferralCode() : "";
     if (status) {
-      status.textContent = refCode
-        ? "Ваш код: " + refCode
-        : "Войдите в аккаунт, чтобы ссылки стали личными.";
+      status.innerHTML = refCode
+        ? '<span class="club-referrals-modal__status-icon">' + referralIcon("ticket") + '</span><span class="club-referrals-modal__status-label">Ваш код:</span> <strong>' + esc(refCode) + '</strong>'
+        : '<span class="club-referrals-modal__status-icon">' + referralIcon("user") + '</span><span>Войдите в аккаунт, чтобы ссылки стали личными.</span>';
       status.classList.toggle("club-referrals-modal__status--warn", !refCode);
     }
     list.innerHTML = referralLinks().map(function (item) {
       return '<article class="club-referrals-modal__item">' +
+        '<span class="club-referrals-modal__item-icon">' + referralIcon(item.icon) + '</span>' +
         '<div class="club-referrals-modal__item-head">' +
           '<strong>' + esc(item.title) + '</strong>' +
           '<span>' + esc(item.hint) + '</span>' +
         '</div>' +
         '<div class="club-referrals-modal__copy-row">' +
           '<input class="club-referrals-modal__link" value="' + esc(item.link) + '" readonly aria-label="' + esc(item.title) + '">' +
-          '<button type="button" class="club-referrals-modal__copy-btn" data-referral-copy="' + esc(item.link) + '">Скопировать</button>' +
+          '<button type="button" class="club-referrals-modal__copy-inline" data-referral-copy="' + esc(item.link) + '" aria-label="Скопировать ссылку">' + referralIcon("copy") + '</button>' +
         '</div>' +
+        '<button type="button" class="club-referrals-modal__copy-btn" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Скопировать</span></button>' +
       '</article>';
     }).join("");
   }
@@ -236,19 +266,21 @@
       var linked = Array.isArray(item.linked) && item.linked.length
         ? item.linked.map(function (key) { return linkedLabels[key] || key; }).join(", ")
         : "нет";
-      return '<article class="club-referrals-modal__invited-card">' +
-        '<div class="club-referrals-modal__invited-head">' +
-          '<strong>' + esc(name) + '</strong>' +
-          '<span>ур. ' + esc(item.level || 0) + '</span>' +
+      return '<article class="club-referrals-modal__invited-card club-referrals-modal__invited-card--list">' +
+        '<div class="club-referrals-modal__invited-main">' +
+          '<div class="club-referrals-modal__invited-head">' +
+            '<strong>' + esc(name) + '</strong>' +
+            '<span>ур. ' + esc(item.level || 0) + '</span>' +
+          '</div>' +
+          '<div class="club-referrals-modal__invited-sub">' + esc(sub) + '</div>' +
+          '<div class="club-referrals-modal__bindings">Привязки: ' + esc(linked) + '</div>' +
         '</div>' +
-        '<div class="club-referrals-modal__invited-sub">' + esc(sub) + '</div>' +
-        '<div class="club-referrals-modal__metrics">' +
-          '<span>Крутки: <strong>' + esc(item.dailyPoker && item.dailyPoker.spins || 0) + '</strong></span>' +
-          '<span>Билеты: <strong>' + esc(item.dailyPoker && item.dailyPoker.ticketsWon || 0) + '</strong></span>' +
-          '<span>Розыгрыши: <strong>' + esc(item.raffles && item.raffles.participated || 0) + '</strong></span>' +
-          '<span>Победы: <strong>' + esc(item.raffles && item.raffles.won || 0) + '</strong></span>' +
+        '<div class="club-referrals-modal__invited-stats" aria-label="Активность приглашенного">' +
+          '<span><b>' + esc(item.dailyPoker && item.dailyPoker.spins || 0) + '</b> крутки</span>' +
+          '<span><b>' + esc(item.dailyPoker && item.dailyPoker.ticketsWon || 0) + '</b> билеты</span>' +
+          '<span><b>' + esc(item.raffles && item.raffles.participated || 0) + '</b> розыгрыши</span>' +
+          '<span><b>' + esc(item.raffles && item.raffles.won || 0) + '</b> победы</span>' +
         '</div>' +
-        '<div class="club-referrals-modal__bindings">Привязки: ' + esc(linked) + '</div>' +
       '</article>';
     }).join("");
     root.innerHTML = summary + '<div class="club-referrals-modal__invited-list">' + rows + "</div>";
