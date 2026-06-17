@@ -445,16 +445,16 @@ if (chatUserModalEl) {
         }
         var modalStatusLevel = data && data.level != null ? data.level : null;
         if (modalLevelText && modalStatusLevel != null) {
-          modalLevelText.textContent = "Уровень " + modalStatusLevel + " из 55";
+          modalLevelText.textContent = "Уровень " + modalStatusLevel + " из 100";
           modalLevelText.hidden = false;
         } else if (modalLevelText) {
           modalLevelText.textContent = "Обновите свой уровень во вкладке Профиль Poker21";
           modalLevelText.hidden = false;
         }
         if (modalStatusLevel != null) {
-          var modalLevel = Math.min(55, Math.max(0, parseInt(modalStatusLevel, 10) || 0));
+          var modalLevel = Math.min(100, Math.max(0, parseInt(modalStatusLevel, 10) || 0));
           if (modalStatusCards[0]) modalStatusCards[0].textContent = pokerProfileStatusCardLabel(modalLevel);
-          if (modalStatusCards[1]) modalStatusCards[1].textContent = pokerProfileStatusCardLabel(Math.min(55, modalLevel + 1));
+          if (modalStatusCards[1]) modalStatusCards[1].textContent = pokerProfileStatusCardLabel(Math.min(100, modalLevel + 1));
           if (modalStatusSection) modalStatusSection.hidden = false;
           pokerProfileApplyStatusFish(modalLevelFish, modalStatusLevel);
           if (modalLevelFish) modalLevelFish.hidden = false;

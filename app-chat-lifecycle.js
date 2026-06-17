@@ -1734,7 +1734,7 @@ function initChat() {
     return Promise.reject(new Error("chat media layout runtime unavailable"));
   }
 
-  // Уровень 1 из 55 = двойка треф (2♣), уровень 2 = тройка треф (3♣), и т.д. параллельно по колоде (трефы 1–13, бубны 14–26, черви 27–39, пики 40–52, джокеры 53–54, 55 = Бог покера).
+  // Уровень приходит из Poker21 all-time формулы профиля; визуальная карточная/рыбная шкала больше не используется.
   function levelToStatusText(level) {
     var n = parseInt(level, 10);
     if (isNaN(n) || n < 1) return null;

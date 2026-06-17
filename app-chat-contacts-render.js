@@ -17,7 +17,7 @@ function chatContactsStatusFishLevel(level) {
   if (typeof pokerProfileStatusFishLevel === "function") return pokerProfileStatusFishLevel(level);
   var n = Math.max(0, Math.floor(Number(level) || 0));
   if (!n) return 0;
-  return Math.max(1, Math.min(55, n));
+  return Math.max(1, Math.min(100, n));
 }
 
 function chatContactsStatusFishIconHtml(level, extraClass) {

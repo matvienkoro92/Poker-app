@@ -4,6 +4,7 @@ function initProfilePokerPlus() {
   var input = document.getElementById("profilePokerPlusCiphertextInput");
   var bindBtn = document.getElementById("profilePokerPlusBindBtn");
   var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
+  var refreshAction = document.getElementById("profilePokerPlusRefreshAction");
   var unbindBtn = document.getElementById("profilePokerPlusUnbindBtn");
   var feedback = document.getElementById("profilePokerPlusFeedback");
   var form = document.getElementById("profilePokerPlusForm");
@@ -174,10 +175,9 @@ function initProfilePokerPlus() {
       var nickname = p.nickname || p.Nike || p.nick || p.name || "";
       if (nickname) detail.pokerPlusNickname = String(nickname).trim();
     }
-    if (linked && p && typeof pokerProfileStatusFromRake === "function") {
+    if (linked && p && (typeof pokerProfileStatusFromProfile === "function" || typeof pokerProfileStatusFromRake === "function")) {
       var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : null);
-      var fee = total && total.fee != null ? total.fee : null;
-      var status = pokerProfileStatusFromRake(fee);
+      var status = typeof pokerProfileStatusFromProfile === "function" ? pokerProfileStatusFromProfile(p, true) : pokerProfileStatusFromRake(total && total.fee != null ? total.fee : null);
       if (status && status.level != null) detail.level = status.level;
     }
     try {
@@ -1299,8 +1299,11 @@ function initProfilePokerPlus() {
     var today = source.todayCounter && typeof source.todayCounter === "object" ? source.todayCounter : (source.today_counter && typeof source.today_counter === "object" ? source.today_counter : null);
     var week = source.weekCounter && typeof source.weekCounter === "object" ? source.weekCounter : (source.week_counter && typeof source.week_counter === "object" ? source.week_counter : null);
     syncPokerPlusStatsDateFilterBounds(source, today);
-    var feeStat = pokerPlusPickStat(total, "fee", "fee");
-    setProfileStatusFromRake(feeStat);
+    if (typeof setProfileStatusFromProfile === "function") setProfileStatusFromProfile(source, true);
+    else {
+      var feeStat = pokerPlusPickStat(total, "fee", "fee");
+      setProfileStatusFromRake(feeStat);
+    }
     var groups = [];
     var selection = pokerPlusStatsDateSelection();
     if (pokerPlusStatsActivePeriod === "range") {
@@ -1402,6 +1405,7 @@ function initProfilePokerPlus() {
     input.setAttribute("aria-label", "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
     refreshBtn.hidden = !linked;
+    if (refreshAction) refreshAction.hidden = !linked;
     setPokerPlusRefreshButtonText(!!linked);
     unbindBtn.hidden = !linked;
   }
@@ -1439,7 +1443,7 @@ function initProfilePokerPlus() {
     });
     wrap.appendChild(keyInput);
     wrap.appendChild(keyBtn);
-    bottomActions.insertBefore(wrap, refreshBtn || unbindBtn || null);
+    bottomActions.insertBefore(wrap, unbindBtn || null);
     return keyInput;
   }
 

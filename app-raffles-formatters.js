@@ -204,7 +204,7 @@ function pokerRafflesParticipantFishLevelHtml(p) {
   var hasLevel = p.pokerPlusStatusLevel != null && p.pokerPlusStatusLevel !== "";
   var level = hasLevel ? parseInt(p.pokerPlusStatusLevel, 10) : 0;
   if (!isFinite(level) || level < 0) return "";
-  level = Math.min(55, level);
+  level = Math.min(100, level);
   var fishHtml = "";
   if (typeof pokerProfileStatusFishIconHtml === "function") {
     fishHtml = pokerProfileStatusFishIconHtml(level, "raffle-participant-status-fish");

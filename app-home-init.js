@@ -205,7 +205,7 @@
   function fishSrcForLevel(level) {
     if (typeof pokerProfileStatusFishSrc === "function") return pokerProfileStatusFishSrc(level);
     var raw = parseInt(level, 10);
-    var n = isFinite(raw) && raw > 0 ? Math.min(55, raw) : 1;
+    var n = isFinite(raw) && raw > 0 ? Math.min(100, raw) : 1;
     return "./assets/profile-status-fish-level-" + (n < 10 ? "0" : "") + n + ".png";
   }
   function isGuestAuthMode() {
@@ -292,7 +292,7 @@
     var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
     if (!hasAuthoritativeStatus && loadedStatus) return;
     var level = data && data.level != null ? parseInt(data.level, 10) : NaN;
-    var safeLevel = linked ? (isFinite(level) && level > 0 ? Math.min(55, level) : 1) : 0;
+    var safeLevel = linked ? (isFinite(level) && level > 0 ? Math.min(100, level) : 1) : 0;
     var nickname = linked ? poker21NicknameFromData(data) : "";
     var showStatus = hasAuthoritativeStatus || loadedStatus;
     if (hasAuthoritativeStatus) {

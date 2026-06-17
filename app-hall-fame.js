@@ -545,7 +545,6 @@ function hallFishRenderRows(rows) {
       '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
       '<span class="hall-fish-level-row__tg">' + hallFishEsc(row.telegram || "без TG") + '</span></span>' +
       '<span class="hall-fish-level-row__level">' + hallFishEsc(row.level) + ' ур.</span>' +
-      '<img class="hall-fish-level-row__fish" src="' + hallFishEsc(hallFishStatusFishSrc(row.level)) + '" alt="" aria-hidden="true" loading="lazy" decoding="async" data-status-fish-level="' + hallFishEsc(hallFishStatusFishLevel(row.level)) + '" />' +
     '</button>';
   }).join("") + '</div>';
 }
@@ -554,7 +553,7 @@ function hallFishStatusFishLevel(level) {
   if (typeof pokerProfileStatusFishLevel === "function") return pokerProfileStatusFishLevel(level);
   var n = parseInt(level, 10);
   if (!isFinite(n) || n < 1) n = 1;
-  return Math.min(55, n);
+  return Math.min(100, n);
 }
 
 function hallFishStatusFishSrc(level) {

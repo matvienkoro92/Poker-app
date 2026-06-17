@@ -282,7 +282,7 @@
     if (!row || row.pokerPlusStatusLevel == null || row.pokerPlusStatusLevel === "") return "";
     var level = parseInt(row.pokerPlusStatusLevel, 10);
     if (!isFinite(level)) return "";
-    level = Math.max(0, Math.min(55, level));
+    level = Math.max(0, Math.min(100, level));
     var fishHtml = "";
     if (typeof pokerProfileStatusFishIconHtml === "function") {
       fishHtml = pokerProfileStatusFishIconHtml(level, "daily-poker-winner__fish");

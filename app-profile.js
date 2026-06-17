@@ -396,52 +396,95 @@ function pokerProfileRakeNumber(value) {
   return isFinite(n) && n > 0 ? n : 0;
 }
 
-function pokerProfileStatusStepForLevel(level) {
-  if (level <= 5) return 10000;
-  if (level <= 15) return 20000;
-  if (level <= 25) return 35000;
-  if (level <= 35) return 50000;
-  if (level <= 45) return 75000;
-  return 100000;
+var POKER_PROFILE_MAX_STATUS_LEVEL = 100;
+var POKER_PROFILE_LEVEL_BANDS = [
+  { until: 10, step: 3000 },
+  { until: 25, step: 7000 },
+  { until: 40, step: 15000 },
+  { until: 60, step: 30000 },
+  { until: 80, step: 60000 },
+  { until: 100, step: 100000 },
+];
+
+function pokerProfilePickCounterNumber(total, keys) {
+  var src = total && typeof total === "object" ? total : {};
+  for (var i = 0; i < keys.length; i++) {
+    var value = src[keys[i]];
+    if (value != null && value !== "" && isFinite(Number(value))) return pokerProfileRakeNumber(value);
+  }
+  return 0;
 }
 
-function pokerProfileRakeForLevel(level) {
-  var target = Math.min(55, Math.max(1, parseInt(level, 10) || 1));
-  var rake = 0;
-  for (var lvl = 1; lvl < target; lvl++) {
-    rake += pokerProfileStatusStepForLevel(lvl);
+function pokerProfileTotalCounterFromProfile(profile) {
+  var p = profile && typeof profile === "object" ? profile : {};
+  if (p.totalCounter && typeof p.totalCounter === "object") return p.totalCounter;
+  if (p.total_counter && typeof p.total_counter === "object") return p.total_counter;
+  return p;
+}
+
+function pokerProfileStatusFromPoints(value) {
+  var points = pokerProfileRakeNumber(value);
+  var level = 1;
+  var levelStart = 0;
+  for (var b = 0; b < POKER_PROFILE_LEVEL_BANDS.length; b++) {
+    var band = POKER_PROFILE_LEVEL_BANDS[b];
+    while (level < band.until) {
+      var nextStartCandidate = levelStart + band.step;
+      if (points < nextStartCandidate) {
+        return {
+          points: points,
+          level: level,
+          nextLevel: Math.min(POKER_PROFILE_MAX_STATUS_LEVEL, level + 1),
+          levelStart: levelStart,
+          nextStart: nextStartCandidate,
+          valuePercent: Math.floor(Math.min(99, Math.max(0, ((points - levelStart) / Math.max(1, band.step)) * 100))),
+        };
+      }
+      levelStart = nextStartCandidate;
+      level++;
+    }
   }
-  return rake;
+  return {
+    points: points,
+    level: POKER_PROFILE_MAX_STATUS_LEVEL,
+    nextLevel: POKER_PROFILE_MAX_STATUS_LEVEL,
+    levelStart: levelStart,
+    nextStart: levelStart,
+    valuePercent: 100,
+  };
 }
 
 function pokerProfileStatusFromRake(value) {
-  var rake = pokerProfileRakeNumber(value);
-  var level = 1;
-  var levelStart = 0;
-  while (level < 55) {
-    var step = pokerProfileStatusStepForLevel(level);
-    if (rake < levelStart + step) break;
-    levelStart += step;
-    level++;
-  }
-  var nextLevel = Math.min(55, level + 1);
-  var nextStart = pokerProfileRakeForLevel(nextLevel);
-  var levelSize = Math.max(1, nextStart - levelStart);
-  var valuePercent = level >= 55 ? 100 : Math.floor(Math.min(99, Math.max(0, ((rake - levelStart) / levelSize) * 100)));
-  return {
-    rake: rake,
-    level: level,
-    nextLevel: nextLevel,
-    levelStart: levelStart,
-    nextStart: nextStart,
-    valuePercent: valuePercent,
-  };
+  return pokerProfileStatusFromPoints(value);
+}
+
+function pokerProfileStatusFromProfile(profile, linked) {
+  var total = pokerProfileTotalCounterFromProfile(profile);
+  var fee = pokerProfilePickCounterNumber(total, ["fee"]);
+  var mttCountRaw = pokerProfilePickCounterNumber(total, ["mttCount", "mtt_count"]);
+  var mttItm = pokerProfilePickCounterNumber(total, ["mttItmCount", "mtt_itm_count"]);
+  var mttFirst = pokerProfilePickCounterNumber(total, ["mttFirstCount", "mtt_1st_count", "mtt_first_count", "mttFirstPlaceCount", "mtt_first_place_count"]);
+  var sngCountRaw = pokerProfilePickCounterNumber(total, ["sngCount", "sng_count"]);
+  var sngItm = pokerProfilePickCounterNumber(total, ["sngItmCount", "sng_itm_count"]);
+  var sngFirst = pokerProfilePickCounterNumber(total, ["sngFirstCount", "sng_1st_count", "sng_first_count", "sngFirstPlaceCount", "sng_first_place_count"]);
+  var mttCount = Math.max(mttCountRaw, mttItm, mttFirst);
+  var sngCount = Math.max(sngCountRaw, sngItm, sngFirst);
+  var points =
+    fee +
+    mttCount * 300 +
+    Math.max(0, mttItm - mttFirst) * 700 +
+    mttFirst * 3000 +
+    sngCount * 60 +
+    Math.max(0, sngItm - sngFirst) * 140 +
+    sngFirst * 400 +
+    (linked === false ? 0 : 500);
+  return pokerProfileStatusFromPoints(points);
 }
 
 function pokerProfileStatusCardLabel(level) {
   var n = parseInt(level, 10);
   if (!isFinite(n)) n = 1;
-  n = Math.min(55, Math.max(0, n));
+  n = Math.min(POKER_PROFILE_MAX_STATUS_LEVEL, Math.max(0, n));
   return String(n).replace(/[^\d]/g, "");
 }
 
@@ -514,7 +557,7 @@ function pokerProfileStatusFishLevel(level) {
   var n = parseInt(level, 10);
   if (!isFinite(n)) n = 0;
   if (n < 0) n = 0;
-  return Math.min(POKER_PROFILE_STATUS_FISH_ASSETS.length, n);
+  return Math.min(POKER_PROFILE_MAX_STATUS_LEVEL, n);
 }
 
 function pokerProfileStatusFishSrc(level) {
@@ -523,27 +566,13 @@ function pokerProfileStatusFishSrc(level) {
 }
 
 function pokerProfileStatusFishIconHtml(level, extraClass) {
-  if (level == null || level === "") return "";
-  var fishLevel = pokerProfileStatusFishLevel(level);
-  var cls = "profile-status-fish-inline";
-  if (extraClass) cls += " " + String(extraClass);
-  return (
-    '<img class="' +
-    cls +
-    '" src="' +
-    escapeHtml(pokerProfileStatusFishSrc(fishLevel)) +
-    '" alt="" aria-hidden="true" loading="lazy" decoding="async" data-status-fish-level="' +
-    escapeHtml(String(fishLevel)) +
-    '" />'
-  );
+  return "";
 }
 
 function pokerProfileApplyStatusFish(fish, level) {
   if (!fish) return;
-  var fishLevel = pokerProfileStatusFishLevel(level);
-  var img = fish.tagName && String(fish.tagName).toLowerCase() === "img" ? fish : fish.querySelector("img");
-  if (img) img.src = pokerProfileStatusFishSrc(fishLevel);
-  fish.setAttribute("data-status-fish-level", String(fishLevel));
+  fish.hidden = true;
+  fish.setAttribute("aria-hidden", "true");
 }
 
 function pokerProfileRenderFishCollection() {
@@ -696,19 +725,19 @@ function setProfileStatusFromRake(value) {
   visual.style.setProperty("--status-value", String(status.valuePercent));
   if (title) {
     title.hidden = false;
-    title.textContent = "Ваш уровень " + status.level + " из 55";
+    title.textContent = "Ваш уровень " + status.level + " из " + POKER_PROFILE_MAX_STATUS_LEVEL;
   }
   if (progressText) progressText.hidden = false;
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(status.level);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(status.nextLevel);
   if (fish) {
     pokerProfileApplyStatusFish(fish, status.level);
-    var currentLevelRake = Math.max(0, status.rake - status.levelStart);
+    var currentLevelRake = Math.max(0, status.points - status.levelStart);
     var neededRake = Math.max(0, status.nextStart - status.levelStart);
-    var leftRake = Math.max(0, status.nextStart - status.rake);
+    var leftRake = Math.max(0, status.nextStart - status.points);
     var tip =
-      status.level >= 55
-        ? "Максимальный уровень. Набито " + pokerProfileFormatRake(status.rake) + " очков"
+      status.level >= POKER_PROFILE_MAX_STATUS_LEVEL
+        ? "Максимальный уровень. Набито " + pokerProfileFormatRake(status.points) + " очков"
         : "До уровня " +
           status.nextLevel +
           ": набито " +
@@ -723,6 +752,11 @@ function setProfileStatusFromRake(value) {
     fish.removeAttribute("title");
     fish.removeAttribute("data-status-tip");
   }
+}
+
+function setProfileStatusFromProfile(profile, linked) {
+  var status = pokerProfileStatusFromProfile(profile, linked);
+  setProfileStatusFromRake(status.points);
 }
 
 function loadProfileRespect() {
