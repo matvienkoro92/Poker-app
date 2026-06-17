@@ -540,10 +540,11 @@ function hallFishRenderRows(rows) {
   return '<div class="hall-fish-level-list">' + rows.map(function (row, idx) {
     var userId = String(row.accountId || "").trim();
     var name = row.name || row.telegram || "Игрок";
+    var sub = row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
     return '<button type="button" class="hall-fish-level-row" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
       '<span class="hall-fish-level-row__rank">' + hallFishEsc(idx + 1) + '</span>' +
       '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
-      '<span class="hall-fish-level-row__tg">' + hallFishEsc(row.telegram || "без TG") + '</span></span>' +
+      '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
       '<span class="hall-fish-level-row__level">' + hallFishEsc(row.level) + ' ур.</span>' +
     '</button>';
   }).join("") + '</div>';
