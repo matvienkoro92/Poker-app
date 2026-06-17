@@ -2049,8 +2049,19 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts .home-mini-icon-item--levels {
   background:
-    radial-gradient(circle at 50% 12%, rgba(255, 232, 160, 0.28), transparent 36%),
-    linear-gradient(180deg, rgba(34, 22, 8, 0.98), rgba(3, 4, 8, 0.99)) !important;
+    radial-gradient(circle at 50% 38%, rgba(255, 202, 84, 0.34), transparent 40%),
+    linear-gradient(135deg, rgba(91, 43, 4, 0.86), rgba(5, 4, 7, 0.98) 58%, rgba(0, 0, 0, 0.99)) !important;
+}
+
+.home-daily-shortcuts .home-mini-icon-item--levels::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 88%, rgba(255, 113, 0, 0.36), transparent 48%),
+    linear-gradient(145deg, rgba(255, 152, 28, 0.28), transparent 28% 65%, rgba(255, 215, 117, 0.12));
 }
 
 .home-daily-shortcuts .home-mini-icon-item + .home-mini-icon-item::before {
@@ -2075,7 +2086,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts .home-mini-icon-item--raffles .home-mini-icon__image--raffles,
 .home-daily-shortcuts .home-mini-icon-item--gazette .home-mini-icon__image--gazette,
-.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls {
+.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls,
+.home-daily-shortcuts .home-mini-icon-item--levels .home-mini-icon__image--levels {
   inset: 0;
   width: 100%;
   height: 100%;
@@ -2089,6 +2101,20 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls {
   object-fit: cover;
   object-position: center;
+}
+
+.home-daily-shortcuts .home-mini-icon-item--levels .home-mini-icon__image--levels {
+  inset: 5% 12% 23%;
+  z-index: 2;
+  width: 76%;
+  height: 72%;
+  object-fit: contain;
+  filter:
+    saturate(1.12)
+    contrast(1.08)
+    brightness(1.08)
+    drop-shadow(0 5px 7px rgba(0, 0, 0, 0.78))
+    drop-shadow(0 0 16px rgba(255, 138, 12, 0.76));
 }
 
 .home-daily-shortcuts .home-mini-icon {
@@ -2124,12 +2150,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     drop-shadow(0 0 16px rgba(255, 96, 0, 0.8));
 }
 
-.home-daily-shortcuts .home-mini-icon--levels,
-.home-daily-shortcuts .home-mini-icon--levels svg {
-  width: 42px;
-  height: 42px;
-}
-
 .home-daily-shortcuts .home-mini-icon__label {
   position: absolute;
   width: 1px;
@@ -2138,6 +2158,29 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+.home-daily-shortcuts .home-mini-icon__label--levels {
+  z-index: 3;
+  right: 5px;
+  bottom: 8px;
+  left: 5px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  color: #fff4df;
+  font-size: clamp(14px, 3.8vw, 23px);
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow:
+    0 2px 0 rgba(56, 24, 0, 0.88),
+    0 0 9px rgba(255, 126, 0, 0.95),
+    0 0 18px rgba(255, 80, 0, 0.62);
 }
 
 .app.app--view-home .home-freerolls-strip {
