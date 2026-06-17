@@ -2041,6 +2041,18 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   -webkit-tap-highlight-color: transparent;
 }
 
+.home-daily-shortcuts button.home-mini-icon-item {
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.home-daily-shortcuts .home-mini-icon-item--levels {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 232, 160, 0.28), transparent 36%),
+    linear-gradient(180deg, rgba(34, 22, 8, 0.98), rgba(3, 4, 8, 0.99)) !important;
+}
+
 .home-daily-shortcuts .home-mini-icon-item + .home-mini-icon-item::before {
   display: none;
 }
@@ -2110,6 +2122,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     brightness(1.1)
     drop-shadow(0 0 5px rgba(255, 232, 173, 0.7))
     drop-shadow(0 0 16px rgba(255, 96, 0, 0.8));
+}
+
+.home-daily-shortcuts .home-mini-icon--levels,
+.home-daily-shortcuts .home-mini-icon--levels svg {
+  width: 42px;
+  height: 42px;
 }
 
 .home-daily-shortcuts .home-mini-icon__label {

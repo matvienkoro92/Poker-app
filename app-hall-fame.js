@@ -621,7 +621,7 @@ function initHallFishRatingModal() {
   if (window.__pokerHallFishRatingBound) return;
   window.__pokerHallFishRatingBound = true;
   document.addEventListener("click", function (e) {
-    var openBtn = e.target && e.target.closest ? e.target.closest("#headerPokerStatus,.header-greeting--status") : null;
+    var openBtn = e.target && e.target.closest ? e.target.closest("#headerPokerStatus,.header-greeting--status,[data-hall-fish-open]") : null;
     if (openBtn) {
       e.preventDefault();
       openHallFishRatingModal();
