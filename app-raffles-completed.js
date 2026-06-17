@@ -106,6 +106,10 @@ function initRafflesCompletedRuntime(opts) {
     };
     add("account", w.winnerRerollFromAccountId);
     add("user", w.winnerRerollFromUserId);
+    add("p21", w.winnerRerollFromP21Id);
+    add("tg", w.winnerRerollFromTelegramUsername);
+    add("name", w.winnerRerollFromName);
+    add("slot", w.winnerRerollFromSlotId);
     return keys;
   }
 
@@ -752,28 +756,49 @@ function initRafflesCompletedRuntime(opts) {
   function raffleCompletedRerollPlacement(originalWinners, rerollWinners) {
     var identityToPrimary = {};
     var byOriginal = {};
+    var attachToPrimary = function (winner, primary) {
+      if (!winner || !primary) return;
+      raffleWinnerRenderKeys(winner).forEach(function (key) {
+        identityToPrimary[key] = primary;
+      });
+      var slotKey = raffleWinnerRenderKey("slot", winner.winnerReadySlotId || winner.winnerSlotId);
+      if (slotKey) identityToPrimary[slotKey] = primary;
+    };
     (Array.isArray(originalWinners) ? originalWinners : []).forEach(function (winner) {
       var primary = raffleWinnerPrimaryRenderKey(winner);
       if (!primary) return;
       byOriginal[primary] = [];
-      raffleWinnerRenderKeys(winner).forEach(function (key) {
-        identityToPrimary[key] = primary;
-      });
+      attachToPrimary(winner, primary);
     });
     var orphanRerolls = [];
-    (Array.isArray(rerollWinners) ? rerollWinners : []).forEach(function (winner) {
-      var sourceKeys = raffleWinnerRerollSourceKeys(winner);
-      var primary = "";
-      sourceKeys.some(function (key) {
-        if (identityToPrimary[key]) {
-          primary = identityToPrimary[key];
-          return true;
+    var pending = (Array.isArray(rerollWinners) ? rerollWinners : []).slice();
+    while (pending.length) {
+      var nextPending = [];
+      var placedAny = false;
+      pending.forEach(function (winner) {
+        var sourceKeys = raffleWinnerRerollSourceKeys(winner);
+        var primary = "";
+        sourceKeys.some(function (key) {
+          if (identityToPrimary[key]) {
+            primary = identityToPrimary[key];
+            return true;
+          }
+          return false;
+        });
+        if (primary) {
+          byOriginal[primary].push(winner);
+          attachToPrimary(winner, primary);
+          placedAny = true;
+        } else {
+          nextPending.push(winner);
         }
-        return false;
       });
-      if (primary) byOriginal[primary].push(winner);
-      else orphanRerolls.push(winner);
-    });
+      if (!placedAny) {
+        orphanRerolls = orphanRerolls.concat(nextPending);
+        break;
+      }
+      pending = nextPending;
+    }
     return {
       byOriginal: byOriginal,
       orphanRerolls: orphanRerolls
