@@ -606,9 +606,18 @@
   line-height: 1.25;
 }
 .chat-user-modal__rating-rank-value {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
   color: var(--text);
   font-size: 13px;
   font-weight: 850;
+  line-height: 1.2;
+  text-align: right;
+  white-space: normal;
+}
+.chat-user-modal__rating-rank-line {
+  display: block;
   white-space: nowrap;
 }
 .chat-user-modal__section {

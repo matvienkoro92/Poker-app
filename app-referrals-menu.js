@@ -110,7 +110,7 @@
       { title: "Устав клуба", hint: "Правила клуба", icon: "star", link: buildStartLink("club_charter") },
       { title: "Рейтинг лета", hint: "Летний рейтинг", icon: "chart", link: buildStartLink("summer_rating") },
       { title: "Рейтинг весны", hint: "Весенний рейтинг", icon: "chart", link: buildStartLink("spring_rating") },
-      { title: "Зал славы", hint: "Топ 2026", icon: "trophy", link: buildStartLink("hall_fame_top2026") },
+      { title: "Зал славы", hint: "Топ 2026", icon: "star", link: buildStartLink("hall_fame_top2026") },
       { title: "Видеоуроки", hint: "Раздел обучения", icon: "play", link: buildStartLink("video_lessons") },
       { title: "Научиться играть", hint: "Обучающий хаб", icon: "book", link: buildStartLink("learn_play_hub") },
       { title: "Расписание", hint: "Турниры и фрироллы", icon: "calendar", link: buildStartLink("schedule") },

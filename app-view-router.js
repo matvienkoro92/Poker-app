@@ -995,6 +995,7 @@ function setView(viewName, navOpts) {
     initProfileAvatar();
     syncProfileStatusVisual();
     initProfileFishCollectionModal();
+    if (typeof initProfilePointsInfoButton === "function") initProfilePointsInfoButton();
     loadProfileRespect();
     initProfileRespectVotersButton();
     initProfileFriends();

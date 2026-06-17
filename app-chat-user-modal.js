@@ -83,6 +83,7 @@ if (chatUserModalEl) {
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
   var modalRatingRanks = document.getElementById("chatUserModalRatingRanks");
+  var modalSummerRank = document.getElementById("chatUserModalSummerRank");
   var modalSpringRank = document.getElementById("chatUserModalSpringRank");
   var modalWinterRank = document.getElementById("chatUserModalWinterRank");
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
@@ -149,14 +150,23 @@ if (chatUserModalEl) {
     modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
     modalRatingArt.hidden = false;
   }
-  function chatUserModalRatingPlacesText(places) {
+  function chatUserModalRatingPlaceText(place) {
+    var n = place != null ? parseInt(place, 10) : 0;
+    return n > 0 ? String(n) + "е место" : "—";
+  }
+  function chatUserModalRatingPlacesHtml(places) {
     if (!Array.isArray(places) || !places.length) return "—";
     return places.map(function (row) {
-      var place = row && row.place != null ? parseInt(row.place, 10) : 0;
-      var placeText = place > 0 ? String(place) : "—";
-      if (row && row.league) return "Лига " + row.league + " — " + placeText;
-      return placeText;
-    }).join(" · ");
+      var placeText = chatUserModalRatingPlaceText(row && row.place);
+      if (row && row.league) {
+        return '<span class="chat-user-modal__rating-rank-line">Лига ' + escapeHtml(row.league) + " — " + escapeHtml(placeText) + "</span>";
+      }
+      return '<span class="chat-user-modal__rating-rank-line">' + escapeHtml(placeText) + "</span>";
+    }).join("");
+  }
+  function setChatUserModalRatingRankValue(el, places) {
+    if (!el) return;
+    el.innerHTML = chatUserModalRatingPlacesHtml(places);
   }
   function syncChatUserModalRatingRanks(nick) {
     chatUserModalRanksSeq += 1;
@@ -164,6 +174,7 @@ if (chatUserModalEl) {
     var ratingNick = String(nick || "").trim();
     var hasNick = !!ratingNick;
     if (modalRatingRanks) modalRatingRanks.hidden = !hasNick;
+    if (modalSummerRank) modalSummerRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
     if (!hasNick) return;
@@ -171,19 +182,31 @@ if (chatUserModalEl) {
       ? window.pokerGetTournamentRatingPlacesReady
       : null;
     if (!getPlaces) {
+      if (modalSummerRank) modalSummerRank.textContent = "—";
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
       return;
     }
+    function getSeasonPlacesReady(season) {
+      if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
+        return Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
+          .then(function () { return getPlaces(ratingNick, season); })
+          .catch(function () { return getPlaces(ratingNick, season); });
+      }
+      return getPlaces(ratingNick, season);
+    }
     Promise.all([
-      getPlaces(ratingNick, "spring"),
-      getPlaces(ratingNick, "winter"),
+      getSeasonPlacesReady("summer"),
+      getSeasonPlacesReady("spring"),
+      getSeasonPlacesReady("winter"),
     ]).then(function (results) {
       if (seq !== chatUserModalRanksSeq) return;
-      if (modalSpringRank) modalSpringRank.textContent = chatUserModalRatingPlacesText(results && results[0]);
-      if (modalWinterRank) modalWinterRank.textContent = chatUserModalRatingPlacesText(results && results[1]);
+      setChatUserModalRatingRankValue(modalSummerRank, results && results[0]);
+      setChatUserModalRatingRankValue(modalSpringRank, results && results[1]);
+      setChatUserModalRatingRankValue(modalWinterRank, results && results[2]);
     }).catch(function () {
       if (seq !== chatUserModalRanksSeq) return;
+      if (modalSummerRank) modalSummerRank.textContent = "—";
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
     });
@@ -247,6 +270,13 @@ if (chatUserModalEl) {
   function updateChatUserModalRespectButtons(myVote) {
     if (!modalRespectUp || !modalRespectDown) return;
     var v = myVote === "up" || myVote === "down" ? myVote : null;
+    function currentRespectText() {
+      var raw = modalRespectVal ? String(modalRespectVal.textContent || "").trim() : "";
+      return raw && raw !== "\u2014" ? raw : "\u2014";
+    }
+    function respectHintText(prefix) {
+      return prefix + ". Сейчас уважение: " + currentRespectText();
+    }
     if (!v) {
       modalRespectUp.disabled = false;
       modalRespectUp.textContent = "Поднять уважение";
@@ -268,7 +298,7 @@ if (chatUserModalEl) {
       modalRespectDown.textContent = "Отменить уважение";
       modalRespectDown.setAttribute("data-rv-action", "withdraw");
       if (modalRespectHint) {
-        modalRespectHint.textContent = "Вы уже подняли уважение игрока";
+        modalRespectHint.textContent = respectHintText("Вы уже подняли уважение игрока");
         modalRespectHint.hidden = false;
       }
       return;
@@ -281,7 +311,7 @@ if (chatUserModalEl) {
       modalRespectUp.textContent = "Вернуть уважение";
       modalRespectUp.setAttribute("data-rv-action", "withdraw");
       if (modalRespectHint) {
-        modalRespectHint.textContent = "Вы уменьшили уважение игроку";
+        modalRespectHint.textContent = respectHintText("Вы уменьшили уважение игроку");
         modalRespectHint.hidden = false;
       }
     }
@@ -508,8 +538,8 @@ if (chatUserModalEl) {
     fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data && data.ok && typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(data.myVote || null);
         if (modalRespectVal) modalRespectVal.textContent = (data && data.score !== undefined && data.score !== null) ? String(data.score) : "—";
+        if (data && data.ok && typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(data.myVote || null);
       })
       .catch(function () {
         if (typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(null);
@@ -570,8 +600,8 @@ if (chatUserModalEl) {
             })
             .then(function (data2) {
               if (data2 && data2.ok) {
-                updateChatUserModalRespectButtons(data2.myVote || null);
                 if (modalRespectVal && data2.score != null) modalRespectVal.textContent = String(data2.score);
+                updateChatUserModalRespectButtons(data2.myVote || null);
               }
             });
           var msg = (d && d.error) || "Ошибка";

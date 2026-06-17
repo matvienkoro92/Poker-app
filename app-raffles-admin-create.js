@@ -6,8 +6,10 @@ function initRafflesAdminCreateRuntime(opts) {
     var knockoutPresetBtn = document.getElementById("rafflesCreateKnockoutPresetBtn");
     var createForm = document.getElementById("raffleCreateForm");
     var raffleTypeTickets = document.getElementById("raffleTypeTickets");
+    var raffleTypePrizes = document.getElementById("raffleTypePrizes");
     var raffleTypeOther = document.getElementById("raffleTypeOther");
     var raffleCreatePanelTickets = document.getElementById("raffleCreatePanelTickets");
+    var raffleCreatePanelPrizes = document.getElementById("raffleCreatePanelPrizes");
     var raffleCreatePanelOther = document.getElementById("raffleCreatePanelOther");
     var raffleTicketGroupCount = document.getElementById("raffleTicketGroupCount");
     var raffleTicketWinnersWrap = document.getElementById("raffleTicketWinnersWrap");
@@ -18,6 +20,9 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleEndDateInput = document.getElementById("raffleEndDate");
     var groupCountInput = document.getElementById("raffleGroupCount");
     var raffleGroupsEl = document.getElementById("raffleGroups");
+    var rafflePhysicalGroupCount = document.getElementById("rafflePhysicalGroupCount");
+    var rafflePhysicalGroupsEl = document.getElementById("rafflePhysicalGroups");
+    var raffleEndDatePrizes = document.getElementById("raffleEndDatePrizes");
     var raffleEndDateOther = document.getElementById("raffleEndDateOther");
     var raffleDailyEnabled = document.getElementById("raffleDailyEnabled");
     var raffleDailyStartWrap = document.getElementById("raffleDailyStartWrap");
@@ -28,7 +33,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleAdminActionMode = "";
 
   function getRafflePrizeKind() {
-    return getRaffleCreateType() === "tickets" ? "tournament_ticket" : "cash";
+    return getRaffleCreateType() === "other" ? "cash" : "tournament_ticket";
   }
 
   function raffleAdminCreateFormatMoscowInput(date) {
@@ -152,7 +157,8 @@ function initRafflesAdminCreateRuntime(opts) {
   }
 
   function getRaffleCreateType() {
-    return raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other";
+    var checked = document.querySelector('input[name="raffleType"]:checked');
+    return checked ? checked.value : (raffleTypeTickets && raffleTypeTickets.checked ? "tickets" : "other");
   }
 
   function normalizeRaffleCreateAccessLevel(value) {
@@ -202,14 +208,7 @@ function initRafflesAdminCreateRuntime(opts) {
     return (opt.getAttribute("data-name") || opt.textContent || "").trim();
   }
 
-  function getRaffleTournamentPrizeName(select) {
-    var opt = getRaffleTournamentSelectedOption(select);
-    if (!opt) return "";
-    return (opt.getAttribute("data-prize-name") || "").trim();
-  }
-
-  function buildRaffleTicketPrizeText(buyin, tournamentName, prizeName) {
-    if (prizeName) return prizeName;
+  function buildRaffleTicketPrizeText(buyin, tournamentName) {
     var prizeText = buyin > 0 ? "Беккинг-билет " + (buyin % 1 === 0 ? buyin : buyin.toFixed(2)) + " ₽" : "Беккинг-билет на турнир";
     return prizeText + (tournamentName ? " — " + tournamentName : "");
   }
@@ -288,14 +287,19 @@ function initRafflesAdminCreateRuntime(opts) {
   }
 
   function switchRaffleCreatePanel() {
-    var isTickets = getRaffleCreateType() === "tickets";
+    var type = getRaffleCreateType();
+    var isTickets = type === "tickets";
+    var isPrizes = type === "prizes";
     if (raffleCreatePanelTickets) raffleCreatePanelTickets.classList.toggle("raffle-create-form__panel--hidden", !isTickets);
-    if (raffleCreatePanelOther) raffleCreatePanelOther.classList.toggle("raffle-create-form__panel--hidden", isTickets);
+    if (raffleCreatePanelPrizes) raffleCreatePanelPrizes.classList.toggle("raffle-create-form__panel--hidden", !isPrizes);
+    if (raffleCreatePanelOther) raffleCreatePanelOther.classList.toggle("raffle-create-form__panel--hidden", type !== "other");
     if (isTickets) {
       setupTournamentDaySelect();
       buildTicketGroupInputs();
       syncSingleTicketCustomInputs();
       updateRaffleCreateTotal();
+    } else if (isPrizes) {
+      buildPhysicalPrizeInputs();
     } else {
       buildGroupInputs();
     }
@@ -455,6 +459,28 @@ function initRafflesAdminCreateRuntime(opts) {
       div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " — мест:</span><input type=\"number\" class=\"raffle-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>" +
         "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Приз:</span><input type=\"text\" class=\"raffle-group-prize randomizer-input\" placeholder=\"Например: Беккинг-байин 500 ₽ на кеш\" data-group-index=\"" + i + "\" /></label>";
       raffleGroupsEl.appendChild(div);
+    }
+  }
+
+  function buildPhysicalPrizeInputs() {
+    if (!rafflePhysicalGroupCount || !rafflePhysicalGroupsEl) return;
+    var n = Math.max(1, Math.min(10, parseInt(rafflePhysicalGroupCount.value, 10) || 2));
+    var defaults = ["2 большие пиццы", "Поход в баню"];
+    rafflePhysicalGroupsEl.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var div = document.createElement("div");
+      div.className = "raffle-group-row raffle-physical-group-row";
+      var selected = defaults[i] || defaults[i % defaults.length];
+      div.innerHTML =
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " — приз:</span>" +
+        "<select class=\"raffle-physical-prize randomizer-input\" data-group-index=\"" + i + "\">" +
+        "<option value=\"2 большие пиццы\"" + (selected === "2 большие пиццы" ? " selected" : "") + ">2 большие пиццы</option>" +
+        "<option value=\"Поход в баню\"" + (selected === "Поход в баню" ? " selected" : "") + ">Поход в баню</option>" +
+        "</select></label>" +
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span>" +
+        "<input type=\"number\" class=\"raffle-physical-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" />" +
+        "</label>";
+      rafflePhysicalGroupsEl.appendChild(div);
     }
   }
 
@@ -698,6 +724,7 @@ function initRafflesAdminCreateRuntime(opts) {
     });
   }
   if (raffleTypeTickets) raffleTypeTickets.addEventListener("change", switchRaffleCreatePanel);
+  if (raffleTypePrizes) raffleTypePrizes.addEventListener("change", switchRaffleCreatePanel);
   if (raffleTypeOther) raffleTypeOther.addEventListener("change", switchRaffleCreatePanel);
   if (raffleDailyEnabled) raffleDailyEnabled.addEventListener("change", syncRaffleDailyControls);
   if (raffleTicketTournamentSelect) raffleTicketTournamentSelect.addEventListener("change", function () {
@@ -726,11 +753,17 @@ function initRafflesAdminCreateRuntime(opts) {
   if (groupCountInput && raffleGroupsEl) {
     groupCountInput.addEventListener("change", buildGroupInputs);
   }
+  if (rafflePhysicalGroupCount && rafflePhysicalGroupsEl) {
+    rafflePhysicalGroupCount.addEventListener("change", buildPhysicalPrizeInputs);
+    rafflePhysicalGroupCount.addEventListener("input", buildPhysicalPrizeInputs);
+  }
   if (createBtn) {
     createBtn.addEventListener("click", function () {
       if (window.__pokerRaffleCreateInFlight) return;
-      var isTickets = getRaffleCreateType() === "tickets";
-      var endDateEl = isTickets ? raffleEndDateInput : raffleEndDateOther;
+      var createType = getRaffleCreateType();
+      var isTickets = createType === "tickets";
+      var isPrizes = createType === "prizes";
+      var endDateEl = isTickets ? raffleEndDateInput : (isPrizes ? raffleEndDatePrizes : raffleEndDateOther);
       var endVal = endDateEl ? endDateEl.value : "";
       if (!endVal) {
         if (tg && tg.showAlert) tg.showAlert("Укажите дату и время завершения");
@@ -768,8 +801,7 @@ function initRafflesAdminCreateRuntime(opts) {
           } else if (raffleTicketTournamentSelect) {
             singleTournamentName = getRaffleTournamentName(raffleTicketTournamentSelect);
           }
-          var singlePrizeName = getRaffleTournamentPrizeName(raffleTicketTournamentSelect);
-          var singlePrize = buildRaffleTicketPrizeText(singleBuyin, singleTournamentName, singlePrizeName);
+          var singlePrize = buildRaffleTicketPrizeText(singleBuyin, singleTournamentName);
           if (c > 0) groups.push({ count: c, prize: singlePrize });
         } else if (raffleTicketGroups) {
           var rows = raffleTicketGroups.querySelectorAll(".raffle-ticket-group-row");
@@ -791,8 +823,7 @@ function initRafflesAdminCreateRuntime(opts) {
             } else if (groupSelect) {
               groupTournamentName = getRaffleTournamentName(groupSelect);
             }
-            var groupPrizeName = getRaffleTournamentPrizeName(groupSelect);
-            var groupPrize = buildRaffleTicketPrizeText(groupBuyin, groupTournamentName, groupPrizeName);
+            var groupPrize = buildRaffleTicketPrizeText(groupBuyin, groupTournamentName);
             totalWinners += cnt;
             if (cnt > 0) groups.push({ count: cnt, prize: groupPrize });
           }
@@ -802,6 +833,24 @@ function initRafflesAdminCreateRuntime(opts) {
           return;
         }
         title = "Розыгрыш беккинг-билетов на турниры";
+      } else if (isPrizes) {
+        var physicalRows = rafflePhysicalGroupsEl ? rafflePhysicalGroupsEl.querySelectorAll(".raffle-physical-group-row") : [];
+        groups = [];
+        totalWinners = 0;
+        for (var pj = 0; pj < physicalRows.length; pj++) {
+          var physicalCountInput = physicalRows[pj].querySelector(".raffle-physical-count");
+          var physicalPrizeSelect = physicalRows[pj].querySelector(".raffle-physical-prize");
+          var physicalCount = physicalCountInput ? Math.max(0, parseInt(physicalCountInput.value, 10) || 0) : 0;
+          var physicalPrize = physicalPrizeSelect ? String(physicalPrizeSelect.value || "").trim() : "";
+          if (!physicalPrize) physicalPrize = "2 большие пиццы";
+          totalWinners += physicalCount;
+          if (physicalCount > 0) groups.push({ count: physicalCount, prize: physicalPrize });
+        }
+        if (groups.length === 0) {
+          if (tg && tg.showAlert) tg.showAlert("Укажите количество победителей");
+          return;
+        }
+        title = "Розыгрыш пицц и бань";
       } else {
         var groupInputs = raffleGroupsEl ? raffleGroupsEl.querySelectorAll(".raffle-group-count") : [];
         var prizeInputs = raffleGroupsEl ? raffleGroupsEl.querySelectorAll(".raffle-group-prize") : [];

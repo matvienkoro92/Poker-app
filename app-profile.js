@@ -669,6 +669,72 @@ function initProfileFishCollectionModal() {
   });
 }
 
+function closeProfilePointsInfoModal() {
+  var modal = document.getElementById("profilePointsInfoModal");
+  if (!modal) return;
+  modal.classList.remove("profile-points-info-modal--open");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function ensureProfilePointsInfoModal() {
+  var modal = document.getElementById("profilePointsInfoModal");
+  if (modal) return modal;
+  modal = document.createElement("div");
+  modal.className = "profile-points-info-modal";
+  modal.id = "profilePointsInfoModal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML =
+    '<div class="profile-points-info-modal__backdrop" data-profile-points-info-close></div>' +
+    '<section class="profile-points-info-modal__panel" role="dialog" aria-modal="true" aria-labelledby="profilePointsInfoTitle">' +
+      '<header class="profile-points-info-modal__header">' +
+        '<h3 class="profile-points-info-modal__title" id="profilePointsInfoTitle">За что дают очки</h3>' +
+        '<button type="button" class="profile-points-info-modal__close" aria-label="Закрыть" data-profile-points-info-close>×</button>' +
+      "</header>" +
+      '<div class="profile-points-info-modal__body">' +
+        '<p class="profile-points-info-modal__lead">Уровень считается за всё время по привязанному профилю Poker21.</p>' +
+        '<ul class="profile-points-info-modal__list">' +
+          "<li><strong>Кеш:</strong> 1 очко за 1 ₽ рейка.</li>" +
+          "<li><strong>MTT:</strong> 300 очков за участие.</li>" +
+          "<li><strong>MTT ITM:</strong> 700 очков, если попал в призы.</li>" +
+          "<li><strong>Победа в MTT:</strong> 3000 очков вместо ITM-бонуса.</li>" +
+          "<li><strong>SNG:</strong> 60 очков за участие.</li>" +
+          "<li><strong>SNG ITM:</strong> 140 очков, если попал в призы.</li>" +
+          "<li><strong>Победа в SNG:</strong> 400 очков вместо ITM-бонуса.</li>" +
+          "<li><strong>Привязка Poker21:</strong> 500 очков.</li>" +
+        "</ul>" +
+        '<p class="profile-points-info-modal__note">Участие считается всегда. Если есть победа, бонус ITM за эту игру отдельно не складывается.</p>' +
+      "</div>" +
+    "</section>";
+  document.body.appendChild(modal);
+  modal.addEventListener("click", function (e) {
+    if (e.target && e.target.closest("[data-profile-points-info-close]")) {
+      closeProfilePointsInfoModal();
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("profile-points-info-modal--open")) {
+      closeProfilePointsInfoModal();
+    }
+  });
+  return modal;
+}
+
+function openProfilePointsInfoModal() {
+  var modal = ensureProfilePointsInfoModal();
+  modal.classList.add("profile-points-info-modal--open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function initProfilePointsInfoButton() {
+  var btn = document.getElementById("profileStatusPointsInfoBtn");
+  if (!btn || btn.getAttribute("data-profile-points-info-bound") === "1") return;
+  btn.setAttribute("data-profile-points-info-bound", "1");
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    openProfilePointsInfoModal();
+  });
+}
+
 function setProfileStatus(value) {
   var input = document.getElementById("profileStatusInput");
   var visual = document.getElementById("profileStatusVisual");

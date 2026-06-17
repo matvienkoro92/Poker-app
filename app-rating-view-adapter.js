@@ -515,6 +515,55 @@ function buildWinterRatingOverallRowsFromData(data) {
   return arr;
 }
 
+function buildWinterRatingOverallRowsFromTournamentsByLeague(leagueNum) {
+  var tournamentsByDate = typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? WINTER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+  var byNick = {};
+  var hasLeagueMeta = false;
+  Object.keys(tournamentsByDate || {}).forEach(function (dateStr) {
+    var list = tournamentsByDate[dateStr];
+    if (!Array.isArray(list) || !list.length) return;
+    list.forEach(function (t) {
+      var league = t && t.league != null ? Number(t.league) : null;
+      if ((league == null || league !== league) && t && t.buyin != null) {
+        var buyin = Number(t.buyin);
+        if (buyin === buyin) league = buyin >= 500 ? 1 : (buyin >= 100 ? 2 : 1);
+      }
+      if (league === 1 || league === 2) hasLeagueMeta = true;
+      if (league !== leagueNum) return;
+      var players = t && Array.isArray(t.players) ? t.players : [];
+      players.forEach(function (p) {
+        var n = normalizeWinterNick(p && p.nick);
+        if (!n) return;
+        var pts = winterRatingTournamentPlayerPoints(p);
+        var rew = p && p.reward != null ? Number(p.reward) : 0;
+        if (rew !== rew) rew = 0;
+        if (!byNick[n]) byNick[n] = { nick: n, points: 0, reward: 0 };
+        byNick[n].points += pts;
+        byNick[n].reward += rew;
+      });
+    });
+  });
+  if (!hasLeagueMeta) return null;
+  var arr = Object.keys(byNick).map(function (n) { return byNick[n]; });
+  arr = arr.filter(function (r) {
+    var p = Number(r.points);
+    var w = Number(r.reward);
+    return (p === p && p !== 0) || (w === w && w !== 0);
+  });
+  arr.sort(function (a, b) {
+    var ap = Number(a.points);
+    var bp = Number(b.points);
+    var aw = Number(a.reward);
+    var bw = Number(b.reward);
+    if (ap !== ap) ap = 0;
+    if (bp !== bp) bp = 0;
+    if (aw !== aw) aw = 0;
+    if (bw !== bw) bw = 0;
+    return (bp - ap) || (bw - aw);
+  });
+  return arr;
+}
+
 function getTournamentRatingPlaceRows(nick, seasonKey) {
   var normalizedNick = normalizeWinterNick(nick);
   if (!normalizedNick) return [];
@@ -534,9 +583,21 @@ function getTournamentRatingPlaceRows(nick, seasonKey) {
   }
   if (typeof WINTER_RATING_BY_DATE === "undefined") return [];
   var winterData = WINTER_RATING_BY_DATE || {};
+  var winterLeaguePlaces = [];
+  [1, 2].forEach(function (leagueNum) {
+    var leagueRows = buildWinterRatingOverallRowsFromTournamentsByLeague(leagueNum);
+    if (!leagueRows) return;
+    for (var li = 0; li < leagueRows.length; li++) {
+      if (winterRatingSamePlayer(leagueRows[li].nick, normalizedNick)) {
+        winterLeaguePlaces.push({ league: leagueNum, place: li + 1, nick: leagueRows[li].nick });
+        break;
+      }
+    }
+  });
+  if (winterLeaguePlaces.length) return winterLeaguePlaces;
   var winterRows = buildWinterRatingOverallRowsFromData(winterData);
   for (var wi = 0; wi < winterRows.length; wi++) {
-    if (winterRatingSamePlayer(winterRows[wi].nick, normalizedNick)) return [{ place: wi + 1, nick: winterRows[wi].nick }];
+    if (winterRatingSamePlayer(winterRows[wi].nick, normalizedNick)) return [{ league: 1, place: wi + 1, nick: winterRows[wi].nick }];
   }
   return [];
 }
