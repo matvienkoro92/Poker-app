@@ -728,47 +728,54 @@
 
 @media (max-width: 520px) {
   .club-referrals-modal {
-    place-items: center;
-    padding: 8px;
+    place-items: stretch;
+    padding: 0;
   }
 
   .club-referrals-modal__panel {
-    max-height: 90vh;
-    padding: 22px 14px 24px;
-    border-radius: 18px;
+    width: 100%;
+    max-height: 100dvh;
+    padding: max(18px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
+    border-radius: 0;
   }
 
   .club-referrals-modal__close {
-    top: 14px;
-    right: 14px;
-    width: 46px;
-    height: 46px;
-    border-radius: 15px;
-    font-size: 36px;
+    top: max(14px, env(safe-area-inset-top));
+    right: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    font-size: 34px;
   }
 
   .club-referrals-modal__title {
-    margin-right: 56px;
-    margin-bottom: 12px;
-    font-size: clamp(36px, 11vw, 52px);
+    margin: 18px 66px 10px 0;
+    max-width: calc(100vw - 108px);
+    overflow-wrap: anywhere;
+    font-size: clamp(32px, 9vw, 38px);
+    line-height: 1.04;
   }
 
   .club-referrals-modal__lead {
-    margin-bottom: 18px;
+    max-width: none;
+    margin: 0 0 18px;
     font-size: 18px;
+    line-height: 1.32;
   }
 
   .club-referrals-modal__promo {
-    grid-template-columns: 72px minmax(0, 1fr);
-    gap: 14px;
-    min-height: 104px;
-    padding: 16px;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 112px;
+    margin-bottom: 18px;
+    padding: 15px 16px;
     border-radius: 15px;
   }
 
   .club-referrals-modal__promo-icon {
-    width: 70px;
-    height: 50px;
+    width: 54px;
+    height: 42px;
+    margin-left: 0;
     border-radius: 12px;
   }
 
@@ -778,12 +785,14 @@
   }
 
   .club-referrals-modal__promo strong {
-    font-size: 28px;
+    font-size: clamp(26px, 8vw, 32px);
+    white-space: normal;
   }
 
   .club-referrals-modal__promo em {
     margin-top: 6px;
     font-size: 16px;
+    line-height: 1.24;
   }
 
   .club-referrals-modal__status {
@@ -814,12 +823,14 @@
     gap: 0;
     margin-bottom: 18px;
     border-radius: 15px;
+    min-height: 76px;
+    padding: 7px;
   }
 
   .club-referrals-modal__tab {
     flex-direction: column;
     gap: 5px;
-    min-height: 66px;
+    min-height: 62px;
     padding: 6px 4px;
     font-size: 11px;
     text-align: center;
