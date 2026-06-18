@@ -1469,3 +1469,79 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
   color: var(--text, #f4ead6) !important;
   transform: none !important;
 }
+
+/*
+ * Мобильный профиль: в Telegram/iOS WebView внутренний scrollport в .card__content
+ * иногда перехватывает жест и отбрасывает страницу назад. У профиля нет своего
+ * композера или виртуального списка, поэтому на телефонах надежнее document-scroll.
+ */
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  html:has(body[data-view="profile"]),
+  html.app-view-profile-html-scroll {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+  }
+
+  html:has(body[data-view="profile"]) body,
+  html:has(body[data-view="profile"]) body.app-view-long-scroll,
+  html.app-view-profile-html-scroll body,
+  html.app-view-profile-html-scroll body.app-view-long-scroll {
+    display: block !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+  }
+
+  body[data-view="profile"] #app.app,
+  html:has(body[data-view="profile"]) #app.app,
+  html.app-view-profile-html-scroll #app.app {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: var(--app-bottom-tabbar-pad, 105px) !important;
+  }
+
+  body[data-view="profile"] #app.app .card,
+  html:has(body[data-view="profile"]) #app.app .card,
+  html.app-view-profile-html-scroll #app.app .card {
+    flex: 0 0 auto !important;
+    min-height: min-content !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="profile"] #app.app .card .card__content,
+  html:has(body[data-view="profile"]) #app.app .card .card__content,
+  html.app-view-profile-html-scroll #app.app .card .card__content {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y pinch-zoom !important;
+    scroll-padding-bottom: 0 !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
+    min-height: min-content !important;
+    overflow: visible !important;
+  }
+}
