@@ -1052,11 +1052,14 @@ function initProfileFriends() {
     renderFriendsPreview(friends);
     var chunks = [];
     chunks.push(renderSection("Друзья", friends, "friends", function (row) {
+      var removeHtml = row && row.defaultFriend
+        ? ""
+        : '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove" data-delete-kind="friends">Удалить из друзей</button>';
       return renderRow(
         row,
         "friends",
         '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile">Открыть профиль</button>' +
-          '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove" data-delete-kind="friends">Удалить из друзей</button>'
+          removeHtml
       );
     }));
     chunks.push(renderSection("Входящие заявки", incoming, "incoming", function (row) {
