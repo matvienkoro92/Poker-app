@@ -25,37 +25,54 @@
         <div class="chat-user-modal__backdrop"></div>
         <div class="chat-user-modal__inner">
           <button type="button" class="chat-user-modal__close" aria-label="Закрыть">×</button>
-          <div class="chat-user-modal__header">
-            <div class="chat-user-modal__avatar-wrap">
-              <img id="chatUserModalAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
-              <span id="chatUserModalAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true"></span>
-            </div>
-            <div class="chat-user-modal__title-block">
-              <div class="chat-user-modal__title-row">
-                <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
-                <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="chatUserModalVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+          <div class="chat-user-modal__top">
+            <div class="chat-user-modal__header">
+              <div class="chat-user-modal__avatar-wrap">
+                <img id="chatUserModalAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
+                <span id="chatUserModalAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true"></span>
               </div>
-              <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
-              <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
+              <div class="chat-user-modal__title-block">
+                <div class="chat-user-modal__title-row">
+                  <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
+                  <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="chatUserModalVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+                </div>
+                <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
+                <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
+              </div>
+            </div>
+            <div class="chat-user-modal__top-actions">
+              <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
+              <div class="chat-user-modal__friend-row">
+                <div class="chat-user-modal__friend-buttons">
+                  <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
+                  <button type="button" class="chat-user-modal__edit-friend-name" id="chatUserModalEditFriendName" style="display: none;">Поменять имя</button>
+                  <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
+                </div>
+                <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
+              </div>
             </div>
           </div>
-          <div class="chat-user-modal__rating-art" id="chatUserModalRatingArt" hidden>
-            <img class="chat-user-modal__rating-art-img" id="chatUserModalRatingArtImg" alt="" loading="lazy" decoding="async" />
-          </div>
-          <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
-          <div class="chat-user-modal__level">
-            <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
-            <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
-            <p class="chat-user-modal__respect">Уважение в чате <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
-          </div>
-          <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
-            <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Уровень</h4>
-            <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
-              <span class="chat-user-modal__status-card">2</span>
-              <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
-              <span class="chat-user-modal__status-card">3</span>
+          <div class="chat-user-modal__hero">
+            <div class="chat-user-modal__rating-art" id="chatUserModalRatingArt" hidden>
+              <img class="chat-user-modal__rating-art-img" id="chatUserModalRatingArtImg" alt="" loading="lazy" decoding="async" />
             </div>
-          </section>
+            <div class="chat-user-modal__hero-status">
+              <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
+              <div class="chat-user-modal__level">
+                <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
+                <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
+                <p class="chat-user-modal__respect">Уважение в чате <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
+              </div>
+              <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
+                <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень</h4>
+                <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
+                  <span class="chat-user-modal__status-card">2</span>
+                  <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
+                  <span class="chat-user-modal__status-card">3</span>
+                </div>
+              </section>
+            </div>
+          </div>
           <section class="chat-user-modal__achievements" id="chatUserModalAchievements" hidden>
             <h4 class="chat-user-modal__achievements-title">Достижения</h4>
             <div class="chat-user-modal__achievements-list" id="chatUserModalAchievementsList"></div>
@@ -93,15 +110,6 @@
                 <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown" data-rv-action="down">Уменьшить уважение</button>
               </div>
             </div>
-            <div class="chat-user-modal__friend-row">
-              <div class="chat-user-modal__friend-buttons">
-                <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
-                <button type="button" class="chat-user-modal__edit-friend-name" id="chatUserModalEditFriendName" style="display: none;">Поменять имя</button>
-                <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
-              </div>
-              <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
-            </div>
-            <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
             <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блокировать</button>
           </div>
         </div>

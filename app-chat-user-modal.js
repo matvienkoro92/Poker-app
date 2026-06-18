@@ -74,6 +74,7 @@ if (chatUserModalEl) {
   var modalAvatarPlaceholder = document.getElementById("chatUserModalAvatarPlaceholder");
   var modalRatingArt = document.getElementById("chatUserModalRatingArt");
   var modalRatingArtImg = document.getElementById("chatUserModalRatingArtImg");
+  var modalHero = modalRatingArt && modalRatingArt.closest ? modalRatingArt.closest(".chat-user-modal__hero") : null;
   var modalP21 = document.getElementById("chatUserModalP21");
   var modalPersonal = document.getElementById("chatUserModalPersonal");
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
@@ -217,6 +218,7 @@ if (chatUserModalEl) {
     if (!modalRatingArt || !modalRatingArtImg) return;
     if (!art || !art.src) {
       modalRatingArt.hidden = true;
+      if (modalHero) modalHero.classList.remove("chat-user-modal__hero--art");
       modalRatingArtImg.removeAttribute("src");
       modalRatingArtImg.alt = "";
       return;
@@ -224,6 +226,7 @@ if (chatUserModalEl) {
     modalRatingArtImg.src = art.src;
     modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
     modalRatingArt.hidden = false;
+    if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
   }
   function chatUserModalRatingPlaceText(place) {
     var n = place != null ? parseInt(place, 10) : 0;
@@ -233,10 +236,16 @@ if (chatUserModalEl) {
     if (!Array.isArray(places) || !places.length) return "—";
     return places.map(function (row) {
       var placeText = chatUserModalRatingPlaceText(row && row.place);
+      var league = row && row.league != null ? String(row.league).trim() : "";
       if (row && row.league) {
-        return '<span class="chat-user-modal__rating-rank-line">Л' + escapeHtml(row.league) + ": " + escapeHtml(placeText) + "</span>";
+        return '<span class="chat-user-modal__rating-rank-line">' +
+          '<span class="chat-user-modal__rating-rank-league">Лига ' + escapeHtml(league) + "</span>" +
+          '<span class="chat-user-modal__rating-rank-place">' + escapeHtml(placeText) + "</span>" +
+        "</span>";
       }
-      return '<span class="chat-user-modal__rating-rank-line">' + escapeHtml(placeText) + "</span>";
+      return '<span class="chat-user-modal__rating-rank-line">' +
+        '<span class="chat-user-modal__rating-rank-place">' + escapeHtml(placeText) + "</span>" +
+      "</span>";
     }).join("");
   }
   function setChatUserModalRatingRankValue(el, places) {
@@ -298,25 +307,38 @@ if (chatUserModalEl) {
     }
     return Promise.resolve([]);
   }
+  function chatUserModalAchievementMeta(title) {
+    var key = String(title || "").toLowerCase();
+    if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
+    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
+    return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.png" };
+  }
   function chatUserModalAchievementCardHtml(icon, title, rows) {
     rows = Array.isArray(rows) ? rows : [];
-    if (!rows.length) return "";
+    var meta = chatUserModalAchievementMeta(title);
     var countHtml = rows.length > 1 ? '<span class="chat-user-modal__achievement-count">' + escapeHtml(rows.length) + "</span>" : "";
     var details = rows.map(function (item) {
       return '<span class="chat-user-modal__achievement-detail">' +
         escapeHtml(item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) +
         "</span>";
-    }).join("");
-    return '<article class="chat-user-modal__achievement">' +
-      '<span class="chat-user-modal__achievement-icon" aria-hidden="true">' + escapeHtml(icon) + "</span>" +
+    }).join("") || '<span class="chat-user-modal__achievement-detail">—</span>';
+    return '<article class="chat-user-modal__achievement chat-user-modal__achievement--' + escapeHtml(meta.mod) + (rows.length ? "" : " chat-user-modal__achievement--locked") + '">' +
+      '<span class="chat-user-modal__achievement-title">' + meta.label + countHtml + "</span>" +
+      '<span class="chat-user-modal__achievement-icon" aria-hidden="true"><img src="' + escapeHtml(meta.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
       '<span class="chat-user-modal__achievement-main">' +
-        '<span class="chat-user-modal__achievement-name">' + escapeHtml(title) + countHtml + "</span>" +
         '<span class="chat-user-modal__achievement-details">' + details + "</span>" +
       "</span>" +
+      '<span class="chat-user-modal__achievement-stars" aria-hidden="true">★ ★ ★</span>' +
     "</article>";
   }
   function renderChatUserModalAchievements(results, ratingNick) {
     if (!modalAchievements || !modalAchievementsList) return;
+    if (!String(ratingNick || "").trim()) {
+      modalAchievementsList.innerHTML = "";
+      modalAchievements.hidden = true;
+      return;
+    }
     var seasons = [
       { key: "summer", rows: results && results[0] },
       { key: "spring", rows: results && results[1] },
@@ -345,10 +367,10 @@ if (chatUserModalEl) {
       });
     });
     var html =
-      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
-      chatUserModalAchievementCardHtml("★", "Легенда", legends);
+      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
+      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1);
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;
   }
@@ -678,7 +700,9 @@ if (chatUserModalEl) {
         }
         var modalStatusLevel = data && data.level != null ? data.level : null;
         if (modalLevelText && modalStatusLevel != null) {
-          modalLevelText.textContent = "Уровень " + modalStatusLevel + " из 100";
+          modalLevelText.innerHTML = '<span class="chat-user-modal__level-num">' +
+            escapeHtml(modalStatusLevel) +
+            '</span><span class="chat-user-modal__level-rest">из 100</span>';
           modalLevelText.hidden = false;
         } else if (modalLevelText) {
           modalLevelText.textContent = "Обновите свой уровень во вкладке Профиль Poker21";
