@@ -283,8 +283,8 @@
           '<em class="club-referrals-modal__item-link-preview">' + referralIcon("link") + esc(shortReferralLink(item.link)) + '</em>' +
         '</div>' +
         '<div class="club-referrals-modal__item-actions" role="group" aria-label="Действия со ссылкой">' +
-          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--copy" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Копия</span></button>' +
           '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--share" data-referral-share="' + esc(item.link) + '" data-referral-share-title="' + esc(item.title) + '" data-referral-share-text="' + esc(referralShareText(item)) + '">' + referralIcon("send") + '<span>Отправить другу</span></button>' +
+          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--copy" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Скопировать ссылку</span></button>' +
         '</div>' +
       '</article>';
     }).join("");

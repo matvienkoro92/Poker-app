@@ -29,7 +29,7 @@ function initChatContactSwipeActions(opts) {
     var actions = w && w.querySelector ? w.querySelector(".chat-contact-swipe__actions") : null;
     var measured = actions && actions.getBoundingClientRect ? Math.ceil(actions.getBoundingClientRect().width) : 0;
     if (measured > 0) return measured;
-    if (w && w.classList.contains("chat-contact-swipe--pending-friend")) return 194;
+    if (w && w.classList.contains("chat-contact-swipe--pending-friend")) return 286;
     return w && w.classList.contains("chat-contact-swipe--wide-actions") ? 104 : 52;
   }
   var swipeState = null;
@@ -58,17 +58,40 @@ function initChatContactSwipeActions(opts) {
   function setSwipeFriendPending(btn, cbtn, pending) {
     if (!btn) return;
     var wrap = btn.closest(".chat-contact-swipe");
-    btn.disabled = !!pending;
-    btn.classList.toggle("chat-contact-swipe__friend--pending", !!pending);
-    btn.setAttribute("aria-label", pending ? "Заявка отправлена" : "В друзья");
-    btn.setAttribute("title", pending ? "Заявка отправлена" : "В друзья");
-    if (pending) btn.removeAttribute("data-chat-swipe-add-friend");
-    else btn.setAttribute("data-chat-swipe-add-friend", "1");
-    btn.innerHTML = pending
-      ? '<span class="chat-contact-swipe__friend-icon" aria-hidden="true">✓</span><span class="chat-contact-swipe__friend-text">Заявка отправлена</span>'
-      : '<span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span>';
+    var actions = wrap && wrap.querySelector ? wrap.querySelector(".chat-contact-swipe__actions") : null;
+    if (actions) {
+      actions.querySelectorAll(".chat-contact-swipe__friend, .chat-contact-swipe__friend-pending, .chat-contact-swipe__friend-cancel").forEach(function (el) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      });
+      if (pending) {
+        actions.insertAdjacentHTML("beforeend",
+          '<span class="chat-contact-swipe__friend-pending" aria-label="Заявка в друзья отправлена">Заявка в друзья отправлена</span>' +
+          '<button type="button" class="chat-contact-swipe__friend-cancel" data-chat-swipe-cancel-friend="1" aria-label="Отменить заявку" title="Отменить заявку">Отменить заявку</button>'
+        );
+      } else {
+        actions.insertAdjacentHTML("beforeend", '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>');
+      }
+    }
     if (wrap) wrap.classList.toggle("chat-contact-swipe--pending-friend", !!pending);
     if (cbtn) cbtn.setAttribute("data-chat-friend-pending", pending ? "1" : "0");
+  }
+  function clearLocalOutgoingFriendRequest(targetUserId) {
+    var uid = targetUserId != null ? String(targetUserId) : "";
+    if (!uid) return;
+    try {
+      var set = window.__pokerChatOutgoingFriendRequestIdsSet || {};
+      delete set[uid];
+      if (typeof normalizePeerIdForChat === "function") {
+        var nxUid = normalizePeerIdForChat(uid);
+        if (nxUid) delete set[nxUid];
+      }
+      try {
+        for (var key in set) {
+          if (set[key] && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(key, uid)) delete set[key];
+        }
+      } catch (eClearLoop) {}
+      window.__pokerChatOutgoingFriendRequestIdsSet = set;
+    } catch (eClearReq) {}
   }
 
   contactsEl.addEventListener(
@@ -82,6 +105,45 @@ function initChatContactSwipeActions(opts) {
         e.stopPropagation();
         cbtn._suppressNextClickUntil = 0;
       }
+    },
+    true
+  );
+
+  contactsEl.addEventListener(
+    "click",
+    function (e) {
+      var cancelB = e.target && e.target.closest ? e.target.closest(".chat-contact-swipe__friend-cancel") : null;
+      if (!cancelB || !contactsEl.contains(cancelB)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var wrap = cancelB.closest(".chat-contact-swipe");
+      var cbtn = wrap && wrap.querySelector(".chat-contact");
+      var cid = cbtn && cbtn.dataset.chatId;
+      var panel = wrap && wrap.querySelector(".chat-contact-swipe__panel");
+      if (!cid || !base) return;
+      cancelB.disabled = true;
+      fetch(base + "/api/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: "cancel", targetUserId: cid })),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.ok) {
+            clearLocalOutgoingFriendRequest(cid);
+            setSwipeFriendPending(cancelB, cbtn, false);
+            snapPanel(panel, true);
+            if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            if (typeof window.chatRefresh === "function") window.chatRefresh();
+          } else {
+            cancelB.disabled = false;
+            if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+          }
+        })
+        .catch(function () {
+          cancelB.disabled = false;
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
     },
     true
   );
