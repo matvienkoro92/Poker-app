@@ -148,16 +148,33 @@ function pokerSyncChatContactsFilterTabs() {
 
 /** Подписи «Друзья (N)» на кнопке профиля и вкладке списка чатов. count === null — без скобок (нет авторизации). */
 function pokerUpdateFriendsCountLabels(count) {
+  var hasCount = typeof count === "number" && !isNaN(count);
+  var safeCount = hasCount ? Math.max(0, Math.floor(count)) : 0;
   var text =
-    typeof count === "number" && !isNaN(count)
-      ? "Друзья (" + Math.max(0, Math.floor(count)) + ")"
+    hasCount
+      ? "Друзья (" + safeCount + ")"
       : "Друзья";
   try {
     var profileBtn = document.getElementById("profileFriendsBtn");
-    if (profileBtn) profileBtn.textContent = text;
+    if (profileBtn) {
+      if (profileBtn.classList && profileBtn.classList.contains("profile-friends__btn")) {
+        var label = profileBtn.querySelector("span");
+        if (label) label.textContent = "Смотреть все";
+      } else {
+        profileBtn.textContent = text;
+      }
+    }
+    var profileCount = document.getElementById("profileFriendsCount");
+    if (profileCount) profileCount.textContent = hasCount ? "(" + safeCount + ")" : "";
     var chatTab = document.getElementById("chatContactsFilterFriends");
     if (chatTab) chatTab.textContent = text;
   } catch (eLbl) {}
+}
+
+function pokerUpdateFriendsCountLabelsFromContactsData(data) {
+  if (!data || data.confirmedFriendIds !== true) return;
+  if (!Array.isArray(data.friendIds)) return;
+  pokerUpdateFriendsCountLabels(data.friendIds.length);
 }
 
 function pokerApplyLocalOutgoingFriendRequest(targetUserId) {
@@ -193,6 +210,9 @@ function pokerRefreshFriendsCountFromApi() {
     .then(function (data) {
       if (data && data.ok && Array.isArray(data.friends)) {
         pokerUpdateFriendsCountLabels(data.friends.length);
+        try {
+          if (typeof window.pokerUpdateFriendsUnreadFromData === "function") window.pokerUpdateFriendsUnreadFromData(data);
+        } catch (eFriendsUnread) {}
         if (Array.isArray(data.notices) && data.notices.length) {
           var messages = data.notices.map(function (row) {
             var name = row && (row.contactName || row.userName || row.userId) ? String(row.contactName || row.userName || row.userId) : "Игрок";
@@ -243,9 +263,7 @@ function pokerApplyLocalFriendToChatContacts(targetUserId, contactName) {
     if (typeof pokerApplyLocalFriendToFriendsPickCache === "function") pokerApplyLocalFriendToFriendsPickCache(uid, contactName);
   } catch (eFrCache) {}
   try {
-    if (typeof pokerUpdateFriendsCountLabels === "function" && data && Array.isArray(data.friendIds)) {
-      pokerUpdateFriendsCountLabels(data.friendIds.length);
-    }
+    pokerUpdateFriendsCountLabelsFromContactsData(data);
   } catch (eFrLbl) {}
   try {
     if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
@@ -483,9 +501,7 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
     });
   }
   try {
-    if (typeof pokerUpdateFriendsCountLabels === "function" && data && Array.isArray(data.friendIds)) {
-      pokerUpdateFriendsCountLabels(data.friendIds.length);
-    }
+    pokerUpdateFriendsCountLabelsFromContactsData(data);
     friendDebugLog("removeLocal:friendsCountUpdated", {
       uid: uid,
       friendIdsCount: data && Array.isArray(data.friendIds) ? data.friendIds.length : null,
@@ -590,7 +606,7 @@ function pokerApplyChatContactsUnreadState(data, opts) {
 
 function pokerBuildChatContactsFriendSet(data) {
   var friendSet = {};
-  if (data && data.friendIds && Array.isArray(data.friendIds)) {
+  if (data && data.confirmedFriendIds === true && data.friendIds && Array.isArray(data.friendIds)) {
     for (var fi = 0; fi < data.friendIds.length; fi++) {
       var fid = data.friendIds[fi];
       if (fid == null || String(fid) === "") continue;
@@ -602,7 +618,7 @@ function pokerBuildChatContactsFriendSet(data) {
       } catch (eFnFr) {}
     }
     try {
-      if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(data.friendIds.length);
+      pokerUpdateFriendsCountLabelsFromContactsData(data);
     } catch (eFc) {}
   }
   window.__pokerChatFriendIdsSet = friendSet;
@@ -634,7 +650,6 @@ function pokerBuildChatContactsFriendSet(data) {
         if (fn2 && fn2 !== um) window.__pokerChatFriendIdsSet[fn2] = true;
       } catch (eFn2) {}
     }
-    if (typeof pokerUpdateFriendsCountLabels === "function" && fpcM.length > 0) pokerUpdateFriendsCountLabels(fpcM.length);
   } catch (eFpcM) {}
   return friendSet;
 }

@@ -297,6 +297,20 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    var downloadPageByStartApp = {
+      download_poker21: "poker21",
+      download_xpoker: "xpoker",
+      download_pppoker: "pppoker",
+      download_supremapoker: "supremapoker",
+    };
+    if (downloadPageByStartApp[startParam]) {
+      var downloadPage = downloadPageByStartApp[startParam];
+      setTimeout(function () {
+        if (typeof setView === "function") setView("download", { downloadPage: downloadPage });
+        if (typeof setDownloadPage === "function") setDownloadPage(downloadPage);
+      }, 0);
+      return;
+    }
     var simpleViewByStartApp = {
       schedule: "schedule",
       download: "download",

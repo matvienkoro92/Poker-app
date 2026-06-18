@@ -53,6 +53,8 @@ function initProfilePokerPlus() {
   var profileStatusProgressText = document.getElementById("profileStatusProgressText");
   var profileStatusTitle = document.getElementById("profileStatusTitle");
   if (!section || !input || !bindBtn || !refreshBtn || !unbindBtn) return;
+  var refreshBtnHome = refreshBtn.parentNode;
+  var refreshBtnHomeNext = refreshBtn.nextSibling;
   var POKERPLUS_KEY_INVISIBLE_RE = /[\u200B-\u200D\u2060\uFEFF]/g;
   var POKERPLUS_KEY_LOOKALIKE_MAP = {
     "\u0410": "A",
@@ -1237,6 +1239,11 @@ function initProfilePokerPlus() {
       btn.classList.toggle("profile-pokerplus-stats-kind-tabs__btn--active", active);
       btn.setAttribute("aria-selected", active ? "true" : "false");
     });
+    if (statsRow) {
+      statsRow.classList.toggle("profile-pokerplus-stats-row--kind-cash", activeKind === "cash");
+      statsRow.classList.toggle("profile-pokerplus-stats-row--kind-mtt", activeKind === "mtt");
+      statsRow.classList.toggle("profile-pokerplus-stats-row--kind-sng", activeKind === "sng");
+    }
   }
 
   function clearPokerPlusStatsDateInputs() {
@@ -1245,7 +1252,7 @@ function initProfilePokerPlus() {
   }
 
   function pokerPlusStatsPeriodInfo(period, today, week, total) {
-    if (period === "week") return { title: "Текущая неделя", counter: week, empty: "Нет данных за текущую неделю." };
+    if (period === "week") return { title: "Неделя", counter: week, empty: "Нет данных за неделю." };
     if (period === "total") return { title: "Всего", counter: total, empty: "Нет общей статистики." };
     return { title: "Сегодня", counter: today, empty: "Нет данных за сегодня." };
   }
@@ -1404,11 +1411,23 @@ function initProfilePokerPlus() {
     if (valueEl) valueEl.textContent = text || "—";
   }
 
+  function setPokerPlusRefreshButtonLocation(linked) {
+    if (!refreshBtn) return;
+    if (linked && bottomActions && unbindBtn) {
+      if (refreshBtn.parentNode !== bottomActions) bottomActions.insertBefore(refreshBtn, unbindBtn);
+      return;
+    }
+    if (refreshBtnHome && refreshBtn.parentNode !== refreshBtnHome) {
+      refreshBtnHome.insertBefore(refreshBtn, refreshBtnHomeNext && refreshBtnHomeNext.parentNode === refreshBtnHome ? refreshBtnHomeNext : null);
+    }
+  }
+
   function setPokerPlusLinkedMode(linked) {
     pokerPlusProfileLinked = !!linked;
     if (section && section.classList) section.classList.toggle("profile-pokerplus-card--linked", !!linked);
     if (section && section.classList && !linked) section.classList.remove("profile-pokerplus-card--needs-key");
     if (!linked) removePokerPlusRefreshKeyInlineForm();
+    setPokerPlusRefreshButtonLocation(!!linked);
     updateProfileStatusTextVisibility();
     input.hidden = !!linked;
     if (linked) input.value = "";

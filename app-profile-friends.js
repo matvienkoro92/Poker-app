@@ -18,15 +18,140 @@ function pokerRemoveFriendFromOpenFriendsList(userId, chatUserId) {
   var remaining = listEl.querySelectorAll('.friends-list-modal__item[data-section="friends"]').length;
   try {
     if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(remaining);
+    if (typeof window.pokerRefreshProfileFriendsPreview === "function") window.pokerRefreshProfileFriendsPreview();
   } catch (eFriendCount) {}
   return true;
 }
 window.pokerRemoveFriendFromOpenFriendsList = pokerRemoveFriendFromOpenFriendsList;
 
+var POKER_FRIENDS_UNREAD_KEY = "poker_profile_friends_unread_v1";
+var POKER_FRIENDS_SEEN_KEY = "poker_profile_friends_seen_v1";
+
+function pokerFriendsReadJson(key, fallback) {
+  try {
+    var raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (eReadFriendsSeen) {
+    return fallback;
+  }
+}
+
+function pokerFriendsWriteJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value || {}));
+  } catch (eWriteFriendsSeen) {}
+}
+
+function pokerFriendsRowId(row) {
+  return String((row && (row.userId || row.chatUserId || row.id)) || "").trim();
+}
+
+function pokerFriendsUniqueSorted(ids) {
+  var seen = {};
+  var out = [];
+  (Array.isArray(ids) ? ids : []).forEach(function (id) {
+    var s = String(id || "").trim();
+    if (!s || seen[s]) return;
+    seen[s] = true;
+    out.push(s);
+  });
+  return out.sort();
+}
+
+function pokerFriendsDataState(data) {
+  var incoming = Array.isArray(data && data.incoming) ? data.incoming : [];
+  var friends = Array.isArray(data && data.friends) ? data.friends : [];
+  var notices = Array.isArray(data && data.notices) ? data.notices : [];
+  return {
+    incomingIds: pokerFriendsUniqueSorted(incoming.map(pokerFriendsRowId)),
+    friendIds: pokerFriendsUniqueSorted(friends.map(pokerFriendsRowId)),
+    acceptedNoticeIds: pokerFriendsUniqueSorted(notices.filter(function (row) {
+      return row && row.status === "accepted";
+    }).map(pokerFriendsRowId)),
+  };
+}
+
+function pokerFriendsHasNewIncoming(state, seen) {
+  var seenIncoming = {};
+  ((seen && Array.isArray(seen.incomingIds)) ? seen.incomingIds : []).forEach(function (id) {
+    seenIncoming[String(id || "").trim()] = true;
+  });
+  return (state.incomingIds || []).some(function (id) { return !seenIncoming[id]; });
+}
+
+function pokerReadFriendsUnreadFlag() {
+  var raw = pokerFriendsReadJson(POKER_FRIENDS_UNREAD_KEY, null);
+  return !!(raw && raw.unread);
+}
+
+function pokerWriteFriendsUnreadFlag(unread) {
+  pokerFriendsWriteJson(POKER_FRIENDS_UNREAD_KEY, {
+    unread: !!unread,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+function pokerApplyFriendsUnreadIndicators(unread) {
+  var active = !!unread;
+  try {
+    var profileNav = document.querySelector('.bottom-nav__item[data-view-target="profile"]');
+    if (profileNav) {
+      profileNav.classList.toggle("bottom-nav__item--friends-unread", active);
+      profileNav.setAttribute("data-friends-unread", active ? "1" : "0");
+    }
+  } catch (eNavUnread) {}
+  try {
+    var panel = document.getElementById("profileFriendsPanel");
+    if (panel) panel.classList.toggle("profile-friends--unread", active);
+    var btn = document.getElementById("profileFriendsBtn");
+    if (btn) {
+      btn.classList.toggle("profile-friends__btn--unread", active);
+      btn.setAttribute("data-friends-unread", active ? "1" : "0");
+    }
+  } catch (ePanelUnread) {}
+}
+
+function pokerRefreshFriendsUnreadIndicators() {
+  pokerApplyFriendsUnreadIndicators(pokerReadFriendsUnreadFlag());
+}
+
+function pokerUpdateFriendsUnreadFromData(data) {
+  if (!data || !data.ok) return;
+  var state = pokerFriendsDataState(data);
+  var seen = pokerFriendsReadJson(POKER_FRIENDS_SEEN_KEY, null);
+  var explicitNewFriend = state.acceptedNoticeIds.length > 0;
+  var explicitIncoming = state.incomingIds.length > 0 && pokerFriendsHasNewIncoming(state, seen);
+  if (!seen && !explicitIncoming && !explicitNewFriend) {
+    pokerFriendsWriteJson(POKER_FRIENDS_SEEN_KEY, {
+      incomingIds: state.incomingIds,
+      friendIds: state.friendIds,
+      seenAt: new Date().toISOString(),
+    });
+  }
+  if (explicitIncoming || explicitNewFriend) pokerWriteFriendsUnreadFlag(true);
+  pokerRefreshFriendsUnreadIndicators();
+}
+
+function pokerMarkFriendsSeen(data) {
+  var state = pokerFriendsDataState(data || {});
+  pokerFriendsWriteJson(POKER_FRIENDS_SEEN_KEY, {
+    incomingIds: state.incomingIds,
+    friendIds: state.friendIds,
+    seenAt: new Date().toISOString(),
+  });
+  pokerWriteFriendsUnreadFlag(false);
+  pokerRefreshFriendsUnreadIndicators();
+}
+
+window.pokerUpdateFriendsUnreadFromData = pokerUpdateFriendsUnreadFromData;
+window.pokerMarkFriendsSeen = pokerMarkFriendsSeen;
+window.pokerRefreshFriendsUnreadIndicators = pokerRefreshFriendsUnreadIndicators;
+
 function initProfileFriends() {
   var btn = document.getElementById("profileFriendsBtn");
   var modal = document.getElementById("friendsListModal");
   var listEl = document.getElementById("friendsListModalList");
+  var previewEl = document.getElementById("profileFriendsPreview");
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -55,6 +180,84 @@ function initProfileFriends() {
     var contact = row.contactName != null && String(row.contactName).trim() ? String(row.contactName).trim() : "";
     var modalName = contact ? contact : tgLine.indexOf("@") === 0 ? tgLine.slice(1) : tgLine;
     return { tgLine: tgLine, contact: contact, modalName: modalName };
+  }
+
+  function previewLevel(row) {
+    var raw = row && (row.statusLevel != null ? row.statusLevel : row.level != null ? row.level : row.pokerPlusStatusLevel);
+    var n = parseInt(String(raw == null ? 0 : raw), 10);
+    if (!isFinite(n) || n < 0) n = 0;
+    return Math.min(100, n);
+  }
+
+  function previewAvatar(row) {
+    return String((row && (row.avatarUrl || row.avatar || row.photoUrl)) || "./assets/avatar-chip.jpg").trim() || "./assets/avatar-chip.jpg";
+  }
+
+  function inviteSlotHtml() {
+    return (
+      '<button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">' +
+      '<span class="profile-friends__invite-plus" aria-hidden="true">+</span>' +
+      '<span class="profile-friends__invite-text">Пригласить<br>друга</span>' +
+      "</button>"
+    );
+  }
+
+  function wirePreviewButtons() {
+    if (!previewEl) return;
+    previewEl.querySelectorAll(".profile-friends__avatar-btn").forEach(function (avatarBtn) {
+      avatarBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var id = avatarBtn.dataset.userId || "";
+        var chatId = avatarBtn.dataset.chatUserId || "";
+        var name = avatarBtn.dataset.userName || "Игрок";
+        var avatar = avatarBtn.dataset.avatarUrl || "";
+        if ((id || chatId) && typeof window.openChatUserModalById === "function") {
+          window.openChatUserModalById(id || chatId, name, avatar);
+        } else {
+          btn.click();
+        }
+      });
+    });
+    previewEl.querySelectorAll(".profile-friends__invite").forEach(function (inviteBtn) {
+      inviteBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var refBtn = document.getElementById("clubReferralsOpenBtn");
+        if (refBtn && typeof refBtn.click === "function") refBtn.click();
+        else alertText("Откройте пригласительные ссылки в меню.");
+      });
+    });
+  }
+
+  function renderFriendsPreview(friends) {
+    if (!previewEl) return;
+    var rows = Array.isArray(friends) ? friends.slice(0, 3) : [];
+    var html = rows.map(function (row) {
+      var meta = displayData(row);
+      var avatar = previewAvatar(row);
+      var level = previewLevel(row);
+      return (
+        '<button type="button" class="profile-friends__avatar-btn" data-user-id="' + esc(row && row.userId || "") +
+        '" data-chat-user-id="' + esc(row && row.chatUserId || "") +
+        '" data-user-name="' + esc(meta.modalName) +
+        '" data-avatar-url="' + esc(avatar) +
+        '" aria-label="Открыть профиль ' + esc(meta.modalName) + '">' +
+        '<span class="profile-friends__avatar-ring"><img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async"></span>' +
+        '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
+        "</button>"
+      );
+    }).join("");
+    previewEl.innerHTML = html + inviteSlotHtml();
+    wirePreviewButtons();
+  }
+
+  function renderPreviewLoading() {
+    if (!previewEl) return;
+    previewEl.innerHTML =
+      '<span class="profile-friends__avatar-skeleton"></span>' +
+      '<span class="profile-friends__avatar-skeleton"></span>' +
+      '<span class="profile-friends__avatar-skeleton"></span>' +
+      inviteSlotHtml();
+    wirePreviewButtons();
   }
 
   function renderRow(row, section, actionsHtml, noteHtml) {
@@ -205,6 +408,8 @@ function initProfileFriends() {
     try {
       if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(friends.length);
     } catch (eFcModal) {}
+    try { pokerUpdateFriendsUnreadFromData(data); } catch (eUnreadData) {}
+    renderFriendsPreview(friends);
     var chunks = [];
     chunks.push(renderSection("Друзья", friends, "friends", function (row) {
       return renderRow(
@@ -260,9 +465,39 @@ function initProfileFriends() {
           return;
         }
         renderFriendsData(data);
+        try { pokerMarkFriendsSeen(data); } catch (eSeenFriends) {}
       })
       .catch(function () {
         listEl.innerHTML = '<p class="friends-list-modal__empty">' + esc(POKER_NET_ERR) + "</p>";
+      });
+  }
+
+  function loadFriendsPreview() {
+    var base = getApiBase();
+    if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
+      try {
+        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(null);
+      } catch (eNoCred) {}
+      renderFriendsPreview([]);
+      return;
+    }
+    renderPreviewLoading();
+    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    fetch(base + "/api/friends" + fq)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) {
+          renderFriendsPreview([]);
+          return;
+        }
+        try { pokerUpdateFriendsUnreadFromData(data); } catch (ePreviewUnread) {}
+        renderFriendsPreview(Array.isArray(data.friends) ? data.friends : []);
+        try {
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(data.friends) ? data.friends.length : 0);
+        } catch (ePreviewCount) {}
+      })
+      .catch(function () {
+        renderFriendsPreview([]);
       });
   }
 
@@ -281,4 +516,11 @@ function initProfileFriends() {
     modal.classList.add("friends-list-modal--open");
     loadFriends();
   });
+
+  window.pokerRefreshProfileFriendsPreview = loadFriendsPreview;
+  window.pokerRenderProfileFriendsPreview = renderFriendsPreview;
+  loadFriendsPreview();
 }
+
+pokerRefreshFriendsUnreadIndicators();
+document.addEventListener("DOMContentLoaded", pokerRefreshFriendsUnreadIndicators);

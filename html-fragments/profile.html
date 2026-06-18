@@ -77,8 +77,31 @@
                   </div>
                 </div>
               </section>
-              <section class="profile-friends">
-                <button type="button" class="profile-friends__btn" id="profileFriendsBtn">Друзья</button>
+              <section class="profile-friends" id="profileFriendsPanel" aria-label="Друзья">
+                <div class="profile-friends__head">
+                  <span class="profile-friends__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </span>
+                  <span class="profile-friends__copy">
+                    <span class="profile-friends__title">Друзья <span id="profileFriendsCount">(0)</span></span>
+                    <span class="profile-friends__subtitle">Ваш покерный круг</span>
+                  </span>
+                  <button type="button" class="profile-friends__btn" id="profileFriendsBtn">
+                    <span>Смотреть все</span>
+                    <span class="profile-friends__btn-arrow" aria-hidden="true">›</span>
+                  </button>
+                </div>
+                <div class="profile-friends__preview" id="profileFriendsPreview" aria-live="polite">
+                  <button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">
+                    <span class="profile-friends__invite-plus" aria-hidden="true">+</span>
+                    <span class="profile-friends__invite-text">Пригласить<br />друга</span>
+                  </button>
+                </div>
               </section>
             </section>
             <div id="profileVerifiedContent">
@@ -269,7 +292,7 @@
                   <button type="button" class="profile-pokerplus-stats-kind-tabs__btn" data-profile-pokerplus-stats-tab="sng" role="tab" aria-selected="false">СНГ</button>
                 </div>
                 <div class="profile-pokerplus-stats-tabs" id="profilePokerPlusStatsTabs" role="tablist" aria-label="Период статистики Poker21">
-                  <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="true">Текущая неделя</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="true">Неделя</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="today" role="tab" aria-selected="false">Сегодня</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="total" role="tab" aria-selected="false">Всего</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="range" role="tab" aria-selected="false">Период</button>

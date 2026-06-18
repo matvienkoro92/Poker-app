@@ -18,7 +18,104 @@ function setDownloadPage(pageName) {
   try {
     if (typeof window.pokerUpdateDownloadInfoSubsections === "function") window.pokerUpdateDownloadInfoSubsections();
   } catch (eDownloadInfo) {}
+  try {
+    if (typeof window.pokerInitDownloadRefActions === "function") window.pokerInitDownloadRefActions();
+  } catch (eDownloadRef) {}
 }
+
+var POKER_DOWNLOAD_REF_SECTIONS = {
+  poker21: {
+    title: "Poker21",
+    startParam: "download_poker21",
+    shareText: "Скачай Poker21 и подай заявку в клуб «Два туза».",
+  },
+  xpoker: {
+    title: "Xpoker",
+    startParam: "download_xpoker",
+    shareText: "Скачай Xpoker и вступай в клуб «Два туза» по ID.",
+  },
+  pppoker: {
+    title: "PPPoker",
+    startParam: "download_pppoker",
+    shareText: "Скачай PPPoker и вступай в клуб «Два туза» по ID.",
+  },
+  supremapoker: {
+    title: "Supremapoker",
+    startParam: "download_supremapoker",
+    shareText: "Скачай Supremapoker и вступай в клуб «Два туза» по ID.",
+  },
+};
+
+function pokerBuildDownloadReferralLink(sectionKey) {
+  var item = POKER_DOWNLOAD_REF_SECTIONS[String(sectionKey || "").trim()];
+  if (!item) return "";
+  if (typeof pokerBuildPersonalInviteLink === "function") return pokerBuildPersonalInviteLink(item.startParam);
+  if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(item.startParam);
+  return "";
+}
+
+function pokerShowDownloadRefFeedback(btn, ok) {
+  if (!btn) return;
+  var originalLabel = btn.getAttribute("aria-label") || "";
+  btn.classList.add("download-ref-action--copied");
+  btn.setAttribute("aria-label", ok ? "Ссылка скопирована" : "Не удалось скопировать ссылку");
+  clearTimeout(btn.__downloadRefTimer);
+  btn.__downloadRefTimer = setTimeout(function () {
+    btn.classList.remove("download-ref-action--copied");
+    if (originalLabel) btn.setAttribute("aria-label", originalLabel);
+  }, 1400);
+}
+
+function pokerCopyDownloadReferralLink(sectionKey, btn) {
+  var link = pokerBuildDownloadReferralLink(sectionKey);
+  if (!link) return;
+  var done = function (copied) {
+    pokerShowDownloadRefFeedback(btn, copied);
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (copied && tg && tg.showToast) tg.showToast("Скопировано");
+    else if (!copied && tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+    else if (!copied) alert("Ссылка: " + link);
+    if (typeof recordShareButtonClick === "function") recordShareButtonClick("download_ref_copy");
+  };
+  if (typeof pokerCopyTextToClipboard === "function") {
+    pokerCopyTextToClipboard(link).then(done).catch(function () { done(false); });
+    return;
+  }
+  done(false);
+}
+
+function pokerShareDownloadReferralLink(sectionKey) {
+  var item = POKER_DOWNLOAD_REF_SECTIONS[String(sectionKey || "").trim()];
+  var link = pokerBuildDownloadReferralLink(sectionKey);
+  if (!item || !link) return;
+  var text = item.shareText || ("Скачай " + item.title + " и вступай в клуб «Два туза».");
+  var textWithLink = text + "\n" + link;
+  var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+    ? pokerBuildTelegramShareUrlDialog(link, text)
+    : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+  function fallback() {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+    else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+    else window.open(shareUrl, "_blank", "noopener");
+    if (typeof recordShareButtonClick === "function") recordShareButtonClick("download_ref_share");
+  }
+  if (typeof pokerTryPwaWebShare === "function") {
+    pokerTryPwaWebShare({ title: item.title, text: textWithLink, url: link }).then(function (ok) {
+      if (ok) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("download_ref_share");
+        return;
+      }
+      fallback();
+    }).catch(fallback);
+    return;
+  }
+  fallback();
+}
+
+function pokerInitDownloadRefActions() {}
+
+window.pokerInitDownloadRefActions = pokerInitDownloadRefActions;
 
 function pokerGetViewNodes() {
   return document.querySelectorAll(".view[data-view]");
@@ -1872,6 +1969,20 @@ document.addEventListener("click", function (e) {
 });
 
 document.addEventListener("click", function (e) {
+  var downloadCopyBtn = e.target.closest("[data-download-ref-copy]");
+  if (downloadCopyBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    pokerCopyDownloadReferralLink(downloadCopyBtn.getAttribute("data-download-ref-copy"), downloadCopyBtn);
+    return;
+  }
+  var downloadShareBtn = e.target.closest("[data-download-ref-share]");
+  if (downloadShareBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    pokerShareDownloadReferralLink(downloadShareBtn.getAttribute("data-download-ref-share"));
+    return;
+  }
   var appBtn = e.target.closest("[data-download-app]");
   if (appBtn) {
     var app = appBtn.dataset.downloadApp;

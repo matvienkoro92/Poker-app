@@ -243,6 +243,13 @@ function loadContacts(opts) {
     window.__pokerChatContactsUnreadSoundPrimed = false;
     window.__pokerChatContactsUnreadSnap = {};
     window.chatPersonalUnreadTotalFromContacts = 0;
+    window.chatPersonalUnreadCount = 0;
+    window.chatGeneralUnreadCount = 0;
+    window.chatPersonalUnread = false;
+    window.chatGeneralUnread = false;
+    try {
+      updateChatNavDot();
+    } catch (eGuestUnreadBadge) {}
     var clubPrevG = document.getElementById("chatDialogClubPreview");
     if (clubPrevG) {
       clubPrevG.classList.remove("chat-dialog-item__preview--skeleton");
@@ -381,6 +388,9 @@ function applyContactsApiResponse(data, opts) {
           updatePreviewText: updateClubChatPreviewText,
         });
       } catch (eContactsMetaState) {}
+      try {
+        updateChatNavDot();
+      } catch (eContactsUnreadBadge) {}
       try {
         var openPeerId = getChatWithUserId();
         if (openPeerId) pokerHydrateOpenDmHeaderFromContacts(openPeerId);

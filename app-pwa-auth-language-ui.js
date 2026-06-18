@@ -79,7 +79,6 @@
     setText("profilePokerPlusTitle", t.pokerPlus);
     setText("profilePokerPlusText", t.pokerPlusText);
     setText("profilePokerPlusBindBtn", t.pokerPlusBind);
-    setText("profilePokerPlusRefreshBtn", t.pokerPlusRefresh);
     setText("profilePokerPlusUnbindBtn", t.pokerPlusUnbind);
     setText("profilePokerPlusEmailLabel", t.pokerPlusEmailLabel);
     setText("profilePokerPlusLinkedLabel", t.pokerPlusPlayer);

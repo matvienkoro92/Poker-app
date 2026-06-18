@@ -53,7 +53,10 @@
       }
     }
     if (viewName === "video-lessons") safeCall(window.pokerInitVideoLessonsModals);
-    if (viewName === "download") safeCall(window.pokerUpdateDownloadInfoSubsections);
+    if (viewName === "download") {
+      safeCall(window.pokerUpdateDownloadInfoSubsections);
+      safeCall(window.pokerInitDownloadRefActions);
+    }
     if (viewName === "schedule") safeCall(window.updateTournamentDayBlock);
     if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);
     if (viewName === "raffles") safeCall(window.pokerInitRafflesHeroShare);

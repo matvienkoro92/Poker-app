@@ -2070,9 +2070,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts .home-mini-icon-item--levels {
   background:
-    radial-gradient(circle at 50% 42%, rgba(255, 122, 0, 0.2), transparent 38%),
-    linear-gradient(145deg, rgba(255, 125, 0, 0.28) 0 2%, transparent 25%),
-    linear-gradient(180deg, rgba(13, 9, 7, 0.98), rgba(0, 0, 0, 0.99)) !important;
+    linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(0, 0, 0, 0.98)) !important;
 }
 
 .home-daily-shortcuts .home-mini-icon-item--levels::after {
@@ -2091,11 +2089,17 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: block;
 }
 
+.home-daily-shortcuts .home-mini-icon-item--white::after {
+  z-index: 2;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 228, 188, 0.14) 45%, transparent 55%);
+}
+
 .home-daily-shortcuts .home-mini-icon__image {
   position: absolute;
-  inset: -7%;
-  width: 114%;
-  height: 114%;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   border: 0;
@@ -2107,44 +2111,58 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     brightness(1.03);
 }
 
-.home-daily-shortcuts .home-mini-icon-item--raffles .home-mini-icon__image--raffles,
-.home-daily-shortcuts .home-mini-icon-item--gazette .home-mini-icon__image--gazette,
-.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls,
-.home-daily-shortcuts .home-mini-icon-item--levels .home-mini-icon__image--levels {
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.home-daily-shortcuts .home-mini-icon__image--stage {
   object-fit: fill;
+  object-position: center;
+  transform: none;
+  clip-path: none;
   filter:
     saturate(1.1)
     contrast(1.07)
     brightness(1.04);
 }
 
-.home-daily-shortcuts .home-mini-icon-item--freerolls .home-mini-icon__image--freerolls {
-  object-fit: cover;
-  object-position: center;
-}
-
-.home-daily-shortcuts .home-mini-icon-item:not(.home-mini-icon-item--levels) .home-mini-icon__image {
-  object-fit: cover;
-  object-position: center top;
-  transform: translateY(-7%) scale(1.03);
-  clip-path: inset(0 0 25% 0);
-}
-
-.home-daily-shortcuts .home-mini-icon-item--levels .home-mini-icon__image--levels {
-  inset: 5% 12% 23%;
-  z-index: 2;
-  width: 76%;
-  height: 72%;
+.home-daily-shortcuts .home-mini-icon__hero {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  z-index: 4;
+  width: 74%;
+  height: 61%;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transform: translateX(-50%);
   filter:
     saturate(1.12)
     contrast(1.08)
     brightness(1.08)
     drop-shadow(0 5px 7px rgba(0, 0, 0, 0.78))
     drop-shadow(0 0 16px rgba(255, 138, 12, 0.76));
+}
+
+.home-daily-shortcuts .home-mini-icon__hero--chat {
+  top: 12%;
+  width: 78%;
+  height: 51%;
+}
+
+.home-daily-shortcuts .home-mini-icon__hero--raffles {
+  top: 11%;
+  width: 74%;
+  height: 54%;
+}
+
+.home-daily-shortcuts .home-mini-icon__hero--freerolls {
+  top: 4%;
+  width: 77%;
+  height: 65%;
+}
+
+.home-daily-shortcuts .home-mini-icon__hero--levels {
+  top: 8%;
+  width: 67%;
+  height: 59%;
 }
 
 .home-daily-shortcuts .home-mini-icon {
@@ -2182,7 +2200,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts .home-mini-icon__label {
   position: absolute;
-  z-index: 4;
+  z-index: 5;
   right: 4px;
   bottom: 9px;
   left: 4px;
@@ -5533,7 +5551,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-daily-shortcuts .feature__badge {
   top: 5px;
   right: 14px;
-  z-index: 3;
+  z-index: 6;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -5549,7 +5567,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: absolute;
   left: 50%;
   bottom: 35px;
-  z-index: 4;
+  z-index: 6;
   max-width: calc(100% - 6px);
   padding: 2px 4px;
   border-radius: 999px;
@@ -5711,6 +5729,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     inset: -8%;
     width: 116%;
     height: 116%;
+  }
+
+  .home-daily-shortcuts .home-mini-icon__image--stage {
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .home-daily-shortcuts .feature__badge {
