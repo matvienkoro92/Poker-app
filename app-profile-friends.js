@@ -152,10 +152,12 @@ function initProfileFriends() {
   var modal = document.getElementById("friendsListModal");
   var listEl = document.getElementById("friendsListModalList");
   var previewEl = document.getElementById("profileFriendsPreview");
+  var panelEl = document.getElementById("profileFriendsPanel");
   var searchForm = document.getElementById("profileFriendsSearchForm");
   var searchInput = document.getElementById("profileFriendsSearchInput");
   var searchBtn = document.getElementById("profileFriendsSearchBtn");
   var searchResult = document.getElementById("profileFriendsSearchResult");
+  var searchFoundProfile = null;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -182,8 +184,72 @@ function initProfileFriends() {
     searchResult.classList.toggle("profile-friends__search-result--ok", kind === "ok");
   }
 
+  function setSearchFoundProfile(data, raw) {
+    searchFoundProfile = data ? {
+      id: String((data.userId || data.chatUserId || data.dtId) || "").trim(),
+      name: profileFriendsDisplayName(data, raw),
+    } : null;
+    if (!searchResult) return;
+    if (!searchFoundProfile || !searchFoundProfile.id) {
+      searchResult.removeAttribute("role");
+      searchResult.removeAttribute("tabindex");
+      return;
+    }
+    searchResult.innerHTML =
+      '<button type="button" class="profile-friends__search-open" id="profileFriendsSearchOpenBtn">' +
+      '<span>Игрок найден: ' + esc(searchFoundProfile.name) + '</span>' +
+      '<strong>Открыть профиль</strong>' +
+      "</button>";
+    searchResult.hidden = false;
+    searchResult.classList.remove("profile-friends__search-result--error");
+    searchResult.classList.add("profile-friends__search-result--ok");
+    searchResult.removeAttribute("role");
+    searchResult.removeAttribute("tabindex");
+    var openBtn = document.getElementById("profileFriendsSearchOpenBtn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openFoundProfile(searchFoundProfile, raw, true);
+      });
+    }
+  }
+
   function profileFriendsAuthQuery() {
     return typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "";
+  }
+
+  function readProfileFriendsScrollY() {
+    return typeof getMainDocumentScrollY === "function" ? getMainDocumentScrollY() : (window.pageYOffset || 0);
+  }
+
+  function restoreProfileFriendsScrollY(y) {
+    if (y == null) return;
+    if (typeof setMainDocumentScrollY === "function") setMainDocumentScrollY(y);
+    else if (typeof window.scrollTo === "function") window.scrollTo(0, y);
+  }
+
+  function restoreProfileFriendsScrollSoon(y) {
+    restoreProfileFriendsScrollY(y);
+    setTimeout(function () { restoreProfileFriendsScrollY(y); }, 0);
+    var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+    raf(function () { restoreProfileFriendsScrollY(y); });
+  }
+
+  function initProfileFriendsScrollGuard() {
+    if (!panelEl || panelEl.dataset.friendsScrollGuardBound === "1") return;
+    panelEl.dataset.friendsScrollGuardBound = "1";
+    var beforeY = null;
+    var remember = function () {
+      beforeY = readProfileFriendsScrollY();
+    };
+    ["pointerdown", "mousedown", "touchstart"].forEach(function (eventName) {
+      panelEl.addEventListener(eventName, remember, { capture: true, passive: true });
+    });
+    ["click", "touchend"].forEach(function (eventName) {
+      panelEl.addEventListener(eventName, function () {
+        restoreProfileFriendsScrollSoon(beforeY);
+      }, { capture: true, passive: true });
+    });
   }
 
   function profileFriendsDisplayName(data, fallback) {
@@ -231,43 +297,101 @@ function initProfileFriends() {
     });
   }
 
-  function openFoundProfile(data, raw) {
-    var id = String((data && (data.userId || data.chatUserId || data.dtId)) || "").trim();
+  function ensureProfileModalReady() {
+    if (typeof window.openChatUserModalById === "function") return true;
+    if (typeof initChatUserModals !== "function") return false;
+    try {
+      initChatUserModals({
+        base: typeof getApiBase === "function" ? getApiBase() : "",
+        tg: typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null,
+      });
+    } catch (eInitProfileModal) {}
+    return typeof window.openChatUserModalById === "function";
+  }
+
+  function openFoundProfile(data, raw, explicit) {
+    var id = String((data && data.id) || (data && (data.userId || data.chatUserId || data.dtId)) || "").trim();
     if (!id) {
       setSearchResult("Профиль найден, но не удалось открыть карточку.", "error");
       return;
     }
-    var name = profileFriendsDisplayName(data, raw);
-    if (typeof window.openChatUserModalById === "function") {
+    var name = data && data.name ? String(data.name) : profileFriendsDisplayName(data, raw);
+    var openNow = function () {
       window.openChatUserModalById(id, name, "");
-      setSearchResult("Открываю профиль: " + name, "ok");
+      if (explicit) setSearchResult("Открываю профиль: " + name, "ok");
+    };
+    if (ensureProfileModalReady()) {
+      openNow();
       return;
     }
-    setSearchResult("Игрок найден: " + name, "ok");
+    if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      var modalReady = null;
+      try {
+        modalReady = window.pokerEnsureGlobalModalsHtml();
+      } catch (eEnsureHtml) {
+        modalReady = null;
+      }
+      if (modalReady && typeof modalReady.then === "function") {
+        if (explicit) setSearchResult("Открываю карточку игрока...", "");
+        modalReady.then(function () {
+          if (ensureProfileModalReady()) {
+            openNow();
+            return;
+          }
+          setSearchFoundProfile({ userId: id, userName: name }, raw);
+          if (explicit) alertText("Не удалось открыть карточку. Попробуйте ещё раз.");
+        }).catch(function () {
+          setSearchFoundProfile({ userId: id, userName: name }, raw);
+          if (explicit) alertText("Не удалось открыть карточку. Попробуйте ещё раз.");
+        });
+        return;
+      }
+    }
+    setSearchFoundProfile({ userId: id, userName: name }, raw);
   }
 
   function initProfileFriendsSearch() {
     if (!searchForm || !searchInput || searchForm.dataset.friendsSearchBound) return;
     searchForm.dataset.friendsSearchBound = "1";
+    ["pointerdown", "mousedown", "touchend", "click"].forEach(function (eventName) {
+      searchForm.addEventListener(eventName, function (e) {
+        e.stopPropagation();
+      });
+    });
+    searchForm.addEventListener("touchend", function (e) {
+      e.stopPropagation();
+    }, { passive: true });
     searchForm.addEventListener("submit", function (e) {
       e.preventDefault();
+      e.stopPropagation();
+      var scrollY = readProfileFriendsScrollY();
+      var restoreScroll = function () { restoreProfileFriendsScrollSoon(scrollY); };
       var raw = String(searchInput.value || "").trim();
       if (!raw) {
+        searchFoundProfile = null;
         setSearchResult("Введите логин TG, ID Poker21 или ник.", "error");
         searchInput.focus();
+        restoreScroll();
         return;
       }
       if (searchBtn) searchBtn.disabled = true;
+      searchFoundProfile = null;
       setSearchResult("Ищу игрока...", "");
+      restoreScroll();
       runProfileSearch(buildProfileSearchSteps(raw), raw, 0, null)
         .then(function (data) {
-          openFoundProfile(data, raw);
+          setSearchFoundProfile(data, raw);
+          openFoundProfile(data, raw, false);
+          restoreScroll();
         })
         .catch(function (err) {
+          searchFoundProfile = null;
           setSearchResult((err && err.message) || "Игрок не найден", "error");
+          restoreScroll();
         })
         .then(function () {
           if (searchBtn) searchBtn.disabled = false;
+          restoreScroll();
         });
     });
   }
@@ -375,6 +499,7 @@ function initProfileFriends() {
     });
   }
 
+  initProfileFriendsScrollGuard();
   initProfileFriendsSearch();
 
   function renderFriendsPreview(friends) {
