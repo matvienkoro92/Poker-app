@@ -826,6 +826,7 @@
   margin: 0 auto;
   object-fit: contain;
   object-position: center bottom;
+  transform: translateY(-20px);
 }
 .chat-user-modal__rating-art-img {
   display: block;
@@ -1241,6 +1242,7 @@
   .chat-user-modal__hero--art .chat-user-modal__rating-art-img {
     width: min(108%, 198px);
     max-height: 172px;
+    transform: translateY(-20px);
   }
 
   .chat-user-modal__hero-status {
