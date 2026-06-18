@@ -195,6 +195,21 @@
   flex: 1;
   min-height: 0;
 }
+.friends-list-modal__section {
+  margin: 0 0 14px;
+}
+.friends-list-modal__section:last-child {
+  margin-bottom: 0;
+}
+.friends-list-modal__section-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--accent-2);
+  text-transform: uppercase;
+}
 .friends-list-modal__loading,
 .friends-list-modal__empty {
   margin: 0;
@@ -274,6 +289,16 @@
 .friends-list-modal__btn--profile:hover {
   filter: brightness(1.05);
 }
+.friends-list-modal__btn--accept {
+  color: #052e16;
+  background: linear-gradient(180deg, #86efac 0%, #22c55e 100%);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+.friends-list-modal__btn--reject {
+  color: #fee2e2;
+  background: rgba(127, 29, 29, 0.32);
+  border-color: rgba(248, 113, 113, 0.4);
+}
 .friends-list-modal__btn--remove {
   color: var(--text-muted);
   background: transparent;
@@ -283,6 +308,19 @@
   color: #f87171;
   border-color: rgba(248, 113, 113, 0.45);
   background: rgba(248, 113, 113, 0.08);
+}
+.friends-list-modal__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
 }
 
 .profile-personal {

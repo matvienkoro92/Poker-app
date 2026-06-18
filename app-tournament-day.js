@@ -4,17 +4,17 @@ var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.webp";
 var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.webp";
-var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-progressive-700k.webp";
+var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-week-300k.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
-    name: "Нокаут Прогрессив",
-    buyin: "10 000₽",
-    guarantee: "700 000₽",
+    name: "Мистери",
+    buyin: "2 000₽",
+    guarantee: "300 000₽",
     banner: HOME_TOURNAMENT_SUNDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут Прогрессив воскресенья — вход 10 000 ₽, призовые 700 000 ₽",
+    bannerAlt: "Poker21 Мистери воскресенья — вход 2 000 ₽, гарантия 300 000 ₽",
     bannerWidth: 640,
-    bannerHeight: 903
+    bannerHeight: 915
   },
   {
     name: "Magic MKO",
@@ -93,7 +93,7 @@ var HOME_FREEROLL_SCHEDULE = [
 var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [];
 
 var POKER_FULL_TOURNAMENT_SCHEDULE = [
-  { repeat: "daily", category: "Сателлит", name: "К турниру недели", buyin: "0₽", rebuy: "R:100₽ / A:150₽", guarantee: "1 билет за 10 000₽", hour: 10, minute: 0, durationMinutes: 180, priority: 30 },
+  { repeat: "daily", category: "Сателлит", name: "К турниру недели", buyin: "0₽", rebuy: "R:100₽ / A:150₽", guarantee: "1 билет за 2 000₽", hour: 10, minute: 0, durationMinutes: 180, priority: 30 },
   { repeat: "daily", category: "Ежедневный", name: "Rebuy DV", buyin: "800₽", rebuy: "R:800₽ / A:800₽", guarantee: "30 000₽", hour: 12, minute: 0, durationMinutes: 180, priority: 45 },
   { repeat: "daily", category: "Ежедневный", name: "Tournament Rebuy", buyin: "100₽", rebuy: "R:100₽ / A:100₽", guarantee: "5 000₽", hour: 14, minute: 0, durationMinutes: 180, priority: 45 },
   { repeat: "daily", category: "Сателлит", name: "К турниру месяца Нокаут", buyin: "50₽", rebuy: "R:200₽ / A:200₽", guarantee: "1 билет за 10 000₽", hour: 15, minute: 0, durationMinutes: 180, priority: 35 },
@@ -106,7 +106,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери+", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "200 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Нокаут Прогрессив", buyin: "10 000₽", rebuy: "R:10 000₽", guarantee: "700 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
+  { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Мистери", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту на 1 000 000₽", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 36 },
   { repeat: "daily", category: "Ежедневный", name: "PLO4", buyin: "300₽", rebuy: "—", guarantee: "10 000₽", hour: 20, minute: 0, durationMinutes: 180, priority: 50 },

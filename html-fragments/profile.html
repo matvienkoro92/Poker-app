@@ -83,15 +83,33 @@
             </section>
             <div id="profileVerifiedContent">
             <section class="profile-email-auth" id="profileEmailAuthSection" hidden data-profile-club-panel>
-              <h2 class="profile-section__title" id="profileEmailAuthTitle">Вход по почте</h2>
+              <h2 class="profile-section__title profile-account-card__title" id="profileEmailAuthTitle">Аккаунт и подписки</h2>
               <p class="profile-email-auth__text" id="profileEmailAuthText">Привяжите email, чтобы потом можно было входить в аккаунт по почте.</p>
-              <div class="profile-email-auth__linked" id="profileEmailAuthLinkedRow" hidden>
-                <span class="profile-email-auth__label" id="profileEmailAuthLinkedLabel">Ваш емейл:</span>
-                <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
+              <div class="profile-email-auth__linked profile-account-row profile-account-row--email" id="profileEmailAuthLinkedRow" hidden>
+                <span class="profile-account-row__icon" aria-hidden="true">✉</span>
+                <span class="profile-account-row__main">
+                  <span class="profile-email-auth__label" id="profileEmailAuthLinkedLabel">Ваш емейл</span>
+                  <span class="profile-email-auth__value" id="profileEmailAuthLinkedValue">—</span>
+                </span>
+                <span class="profile-account-row__status">✓ подтвержден</span>
+                <span class="profile-account-row__arrow" aria-hidden="true">›</span>
               </div>
-              <div class="profile-email-auth__linked" id="profileTelegramLinkedRow" hidden>
-                <span class="profile-email-auth__label" id="profileTelegramLinkedLabel">Ваш телеграм:</span>
-                <span class="profile-email-auth__value" id="profileTelegramLinkedValue">—</span>
+              <div class="profile-email-auth__linked profile-account-row profile-account-row--telegram" id="profileTelegramLinkedRow" hidden>
+                <span class="profile-account-row__icon" aria-hidden="true">➤</span>
+                <span class="profile-account-row__main">
+                  <span class="profile-email-auth__label" id="profileTelegramLinkedLabel">Ваш телеграм</span>
+                  <span class="profile-email-auth__value" id="profileTelegramLinkedValue">—</span>
+                </span>
+                <span class="profile-account-row__status">✓ подтвержден</span>
+                <span class="profile-account-row__arrow" aria-hidden="true">›</span>
+              </div>
+              <div class="profile-telegram-visibility" id="profileTelegramVisibilityRow" hidden>
+                <span class="profile-telegram-visibility__label">Показать мой телеграм</span>
+                <span class="profile-telegram-visibility__switch" role="group" aria-label="Показать мой телеграм другим игрокам">
+                  <button type="button" class="profile-telegram-visibility__btn" data-profile-telegram-visible="1" aria-pressed="false">Да</button>
+                  <button type="button" class="profile-telegram-visibility__btn profile-telegram-visibility__btn--active" data-profile-telegram-visible="0" aria-pressed="true">Нет</button>
+                </span>
+                <span class="profile-telegram-visibility__state profile-telegram-visibility__state--hidden" id="profileTelegramVisibilityState" aria-live="polite">Telegram скрыт от игроков.</span>
               </div>
               <div class="profile-subscription-checklist" id="profileSubscriptionChecklist" aria-label="Подписки Telegram">
                 <a
@@ -101,8 +119,10 @@
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span class="profile-subscription-checklist__mark" id="profileBotSubscriptionMark" aria-hidden="true"></span>
+                  <span class="profile-subscription-checklist__icon" aria-hidden="true">♛</span>
                   <span class="profile-subscription-checklist__text">Подписан на бот <span class="profile-subscription-checklist__handle">@poker_dvatuza_bot</span></span>
+                  <span class="profile-subscription-checklist__mark" id="profileBotSubscriptionMark" aria-hidden="true"></span>
+                  <span class="profile-subscription-checklist__arrow" aria-hidden="true">›</span>
                 </a>
                 <a
                   class="profile-subscription-checklist__item"
@@ -111,8 +131,10 @@
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span class="profile-subscription-checklist__mark" id="profileChannelSubscriptionMark" aria-hidden="true"></span>
+                  <span class="profile-subscription-checklist__icon" aria-hidden="true">◇</span>
                   <span class="profile-subscription-checklist__text">Подписан на канал клуба <span class="profile-subscription-checklist__handle">@dva_tuza_club</span></span>
+                  <span class="profile-subscription-checklist__mark" id="profileChannelSubscriptionMark" aria-hidden="true"></span>
+                  <span class="profile-subscription-checklist__arrow" aria-hidden="true">›</span>
                 </a>
               </div>
               <div class="profile-email-auth__form" id="profileEmailAuthForm">
@@ -241,9 +263,14 @@
               </div>
               <div class="profile-email-auth__linked" id="profilePokerPlusStatsRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusStatsLabel">Статистика:</span>
+                <div class="profile-pokerplus-stats-kind-tabs" id="profilePokerPlusStatsKindTabs" role="tablist" aria-label="Раздел статистики Poker21">
+                  <button type="button" class="profile-pokerplus-stats-kind-tabs__btn profile-pokerplus-stats-kind-tabs__btn--active" data-profile-pokerplus-stats-tab="cash" role="tab" aria-selected="true">Кеш</button>
+                  <button type="button" class="profile-pokerplus-stats-kind-tabs__btn" data-profile-pokerplus-stats-tab="mtt" role="tab" aria-selected="false">МТТ</button>
+                  <button type="button" class="profile-pokerplus-stats-kind-tabs__btn" data-profile-pokerplus-stats-tab="sng" role="tab" aria-selected="false">СНГ</button>
+                </div>
                 <div class="profile-pokerplus-stats-tabs" id="profilePokerPlusStatsTabs" role="tablist" aria-label="Период статистики Poker21">
-                  <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="today" role="tab" aria-selected="true">Сегодня</button>
-                  <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="false">Неделя</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn profile-pokerplus-stats-tabs__btn--active" data-profile-pokerplus-stats-period="week" role="tab" aria-selected="true">Текущая неделя</button>
+                  <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="today" role="tab" aria-selected="false">Сегодня</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="total" role="tab" aria-selected="false">Всего</button>
                   <button type="button" class="profile-pokerplus-stats-tabs__btn" data-profile-pokerplus-stats-period="range" role="tab" aria-selected="false">Период</button>
                 </div>
@@ -275,26 +302,6 @@
                         <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Выигрыш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">⌁</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
                       </span>
                       <span class="profile-pokerplus-stats-visibility profile-pokerplus-stats-visibility--section" data-profile-pokerplus-stats-visibility-kind="cash"><span class="profile-pokerplus-stats-visibility__label">Показывать другим</span><span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать блок Кеш другим"><button type="button" class="profile-pokerplus-stats-visibility__btn" data-profile-pokerplus-stats-kind="cash" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button><button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" data-profile-pokerplus-stats-kind="cash" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button></span><span class="profile-pokerplus-stats-visibility__state profile-pokerplus-stats-visibility__state--hidden" data-profile-pokerplus-stats-state="cash" aria-live="polite">Блок Кеш скрыт от других игроков.</span></span>
-                    </span>
-                    <span class="profile-pokerplus-stats-section profile-pokerplus-stats-section--mtt">
-                      <span class="profile-pokerplus-stats-section__title">МТТ</span>
-                      <span class="profile-pokerplus-stats">
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Выигрыш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">🏆</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">MTT игр</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">#</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                        <span class="profile-pokerplus-stat profile-pokerplus-stat--detail"><span class="profile-pokerplus-stat__label">MTT ITM</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">ITM</span></span><span class="profile-pokerplus-stat__lines"><span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Кол-во ITM:</span><span class="profile-pokerplus-stat__line-value">—</span></span><span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Процент ITM:</span><span class="profile-pokerplus-stat__line-value">—</span></span></span></span>
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">MTT 1-е</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">1</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                      </span>
-                      <span class="profile-pokerplus-stats-visibility profile-pokerplus-stats-visibility--section" data-profile-pokerplus-stats-visibility-kind="mtt"><span class="profile-pokerplus-stats-visibility__label">Показывать другим</span><span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать блок МТТ другим"><button type="button" class="profile-pokerplus-stats-visibility__btn" data-profile-pokerplus-stats-kind="mtt" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button><button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" data-profile-pokerplus-stats-kind="mtt" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button></span><span class="profile-pokerplus-stats-visibility__state profile-pokerplus-stats-visibility__state--hidden" data-profile-pokerplus-stats-state="mtt" aria-live="polite">Блок МТТ скрыт от других игроков.</span></span>
-                    </span>
-                    <span class="profile-pokerplus-stats-section profile-pokerplus-stats-section--sng">
-                      <span class="profile-pokerplus-stats-section__title">СНГ</span>
-                      <span class="profile-pokerplus-stats">
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">Выигрыш</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">♦</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">SNG игр</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">#</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                        <span class="profile-pokerplus-stat profile-pokerplus-stat--detail"><span class="profile-pokerplus-stat__label">SNG ITM</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">ITM</span></span><span class="profile-pokerplus-stat__lines"><span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Кол-во ITM:</span><span class="profile-pokerplus-stat__line-value">—</span></span><span class="profile-pokerplus-stat__line"><span class="profile-pokerplus-stat__line-label">Процент ITM:</span><span class="profile-pokerplus-stat__line-value">—</span></span></span></span>
-                        <span class="profile-pokerplus-stat"><span class="profile-pokerplus-stat__label">SNG 1-е</span><span class="profile-pokerplus-stat__ring"><span class="profile-pokerplus-stat__icon">1</span></span><span class="profile-pokerplus-stat__value">—</span><span class="profile-pokerplus-stat__raw">—</span></span>
-                      </span>
-                      <span class="profile-pokerplus-stats-visibility profile-pokerplus-stats-visibility--section" data-profile-pokerplus-stats-visibility-kind="sng"><span class="profile-pokerplus-stats-visibility__label">Показывать другим</span><span class="profile-pokerplus-stats-visibility__switch" role="group" aria-label="Показывать блок СНГ другим"><button type="button" class="profile-pokerplus-stats-visibility__btn" data-profile-pokerplus-stats-kind="sng" data-profile-pokerplus-stats-visible="1" aria-pressed="false">Да</button><button type="button" class="profile-pokerplus-stats-visibility__btn profile-pokerplus-stats-visibility__btn--active" data-profile-pokerplus-stats-kind="sng" data-profile-pokerplus-stats-visible="0" aria-pressed="true">Нет</button></span><span class="profile-pokerplus-stats-visibility__state profile-pokerplus-stats-visibility__state--hidden" data-profile-pokerplus-stats-state="sng" aria-live="polite">Блок СНГ скрыт от других игроков.</span></span>
                     </span>
                   </span>
                 </span>

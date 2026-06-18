@@ -554,12 +554,13 @@ function pokerInitWinterRatingWeekTops() {
     } else {
       listEl.classList.remove("winter-rating-week-top-modal__list--with-prize");
       listEl.innerHTML = top.map(function (r, i) {
-      var nickEsc = String(r.nick).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-      var nickAttr = String(r.nick).replace(/"/g, "&quot;");
-      var sum = formatRewardRound(r.totalReward);
-      return "<div class=\"winter-rating__week-top-item\"><span class=\"winter-rating__week-top-num\">" + (i + 1) + ".</span><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button><span class=\"winter-rating__week-top-reward\">" + sum + " ₽</span></div>";
+        var nickEsc = String(r.nick).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        var nickAttr = String(r.nick).replace(/"/g, "&quot;");
+        var sum = formatRewardRound(r.totalReward);
+        return "<div class=\"winter-rating__week-top-item\"><span class=\"winter-rating__week-top-num\">" + (i + 1) + ".</span><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button><span class=\"winter-rating__week-top-reward\">" + sum + " ₽</span></div>";
       }).join("");
-  }
+    }
+    if (window.pokerMarkVerifiedRatingNickButtons) window.pokerMarkVerifiedRatingNickButtons(listEl);
   }
   function openModal(panelTitle, dates, linkType) {
     var top = getTopByDates(dates);
@@ -684,7 +685,9 @@ function pokerInitWinterRatingWeekTops() {
     var btn = e.target && e.target.closest ? e.target.closest(".winter-rating__nick-btn") : null;
     if (!btn || !btn.dataset.nick) return;
     e.preventDefault();
-    if (typeof openWinterRatingPlayerModalReady === "function") {
+    if (typeof window.pokerOpenTournamentRatingPlayer === "function") {
+      window.pokerOpenTournamentRatingPlayer(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
+    } else if (typeof openWinterRatingPlayerModalReady === "function") {
       openWinterRatingPlayerModalReady(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });
     } else if (typeof openWinterRatingPlayerModal === "function") {
       openWinterRatingPlayerModal(btn.dataset.nick, { onlyDates: currentModalDates || GAZETTE_DATES, skipGazetteStyle: true });

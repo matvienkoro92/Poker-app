@@ -987,6 +987,7 @@ function initRaffles() {
     var nominal = groups.length ? parsePrizeValue(groups[0] && groups[0].prize) : 10000;
     if (!nominal) nominal = 10000;
     var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim() || "700 000р";
+    var tournamentName = String(raffle && (raffle.promoTournamentName || raffle.promo_tournament_name) || "").trim() || "Нокаут";
     var ticketsWord = pokerRafflesTicketWord(winners);
     return (
       '<span class="raffles-active-chooser__knockout-prize">' +
@@ -997,7 +998,9 @@ function initRaffles() {
       escapeHtml(activeRaffleRubText(nominal)) +
       "</span>" +
       "</span>" +
-      '<span class="raffles-active-chooser__knockout-guarantee">Нокаут · гарантия <strong>' +
+      '<span class="raffles-active-chooser__knockout-guarantee">' +
+      escapeHtml(tournamentName) +
+      ' · гарантия <strong>' +
       escapeHtml(guarantee) +
       "</strong></span>"
     );
@@ -1101,8 +1104,9 @@ function initRaffles() {
       var nominal = groups.length ? parsePrizeValue(groups[0] && groups[0].prize) : 10000;
       if (!nominal) nominal = 10000;
       var guarantee = String(raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || "").trim() || "700 000р";
+      var tournamentName = String(raffle && (raffle.promoTournamentName || raffle.promo_tournament_name) || "").trim() || "Нокаут";
       labels.push(winners + " " + pokerRafflesTicketWord(winners) + " за " + activeRaffleRubText(nominal));
-      labels.push("Нокаут · гарантия " + guarantee);
+      labels.push(tournamentName + " · гарантия " + guarantee);
       return labels;
     }
     if (isCashPrize) {

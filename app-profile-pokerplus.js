@@ -37,6 +37,7 @@ function initProfilePokerPlus() {
   var lastIpValue = document.getElementById("profilePokerPlusLastIpValue");
   var statsRow = document.getElementById("profilePokerPlusStatsRow");
   var statsValue = document.getElementById("profilePokerPlusStatsValue");
+  var statsKindTabs = Array.prototype.slice.call(document.querySelectorAll("[data-profile-pokerplus-stats-tab]"));
   var statsPeriodTabs = Array.prototype.slice.call(document.querySelectorAll("[data-profile-pokerplus-stats-period]"));
   var statsDateFilter = document.getElementById("profilePokerPlusStatsDateFilter");
   var statsDateFromInput = document.getElementById("profilePokerPlusStatsDateFrom");
@@ -90,7 +91,8 @@ function initProfilePokerPlus() {
   var pokerPlusLastStatsProfile = null;
   var pokerPlusStatsAvailableDateKeys = [];
   var pokerPlusStatsCalendarMonth = "";
-  var pokerPlusStatsActivePeriod = "today";
+  var pokerPlusStatsActiveKind = "cash";
+  var pokerPlusStatsActivePeriod = "week";
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
   var pokerPlusRatingRetryTimer = null;
 
@@ -930,10 +932,10 @@ function initProfilePokerPlus() {
   function pokerPlusStatsGroupHtml(title, totalSource, includeEmptyCore, options) {
     var total = totalSource && typeof totalSource === "object" ? totalSource : {};
     var opts = options && typeof options === "object" ? options : {};
+    var activeKind = POKERPLUS_STATS_KINDS.indexOf(opts.kind) !== -1 ? opts.kind : pokerPlusStatsActiveKind;
     var cashMetrics = [];
     var mttMetrics = [];
     var sngMetrics = [];
-    var sections = [];
     var handsStat = pokerPlusPickStat(total, "hands", "hands");
     var winningsStat = pokerPlusPickStat(total, "winnings", "winnings");
     var mttStat = pokerPlusStatOrZero(pokerPlusPickStat(total, "mttWinnings", "mtt_winnings"));
@@ -964,16 +966,14 @@ function initProfilePokerPlus() {
     sngMetrics.push(pokerPlusStatMetricHtml("SNG игр", sngCountStat.value, "", "#"));
     sngMetrics.push(pokerPlusItmMetricHtml("SNG ITM", sngItmStat, sngCountStat.percentTotal));
     sngMetrics.push(pokerPlusStatMetricHtml("SNG 1-е", sngFirstStat, "", "1"));
-    sections.push(pokerPlusStatsSectionHtml("cash", "Кеш", cashMetrics));
-    sections.push(pokerPlusStatsSectionHtml("mtt", "МТТ", mttMetrics));
-    sections.push(pokerPlusStatsSectionHtml("sng", "СНГ", sngMetrics));
-    sections = sections.filter(Boolean);
-    if (!sections.length) return "";
+    var metricsByKind = { cash: cashMetrics, mtt: mttMetrics, sng: sngMetrics };
+    var section = pokerPlusStatsSectionHtml(activeKind, pokerPlusStatsKindTitle(activeKind), metricsByKind[activeKind] || "");
+    if (!section) return pokerPlusStatsEmptyHtml("Нет данных в разделе " + pokerPlusStatsKindTitle(activeKind) + " за выбранный период.");
     return (
       '<span class="profile-pokerplus-stats-period" data-profile-pokerplus-stats-title="' +
       escapeHtml(title || "Статистика") +
       '"><span class="profile-pokerplus-stats-period__sections">' +
-      sections.join("") +
+      section +
       "</span></span>"
     );
   }
@@ -1230,13 +1230,22 @@ function initProfilePokerPlus() {
     });
   }
 
+  function setPokerPlusStatsKindTabs(activeKind) {
+    statsKindTabs.forEach(function (btn) {
+      var kind = btn.dataset.profilePokerplusStatsTab || "";
+      var active = !!activeKind && kind === activeKind;
+      btn.classList.toggle("profile-pokerplus-stats-kind-tabs__btn--active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
+
   function clearPokerPlusStatsDateInputs() {
     if (statsDateFromInput) statsDateFromInput.value = "";
     if (statsDateToInput) statsDateToInput.value = "";
   }
 
   function pokerPlusStatsPeriodInfo(period, today, week, total) {
-    if (period === "week") return { title: "Неделя", counter: week, empty: "Нет данных за неделю." };
+    if (period === "week") return { title: "Текущая неделя", counter: week, empty: "Нет данных за текущую неделю." };
     if (period === "total") return { title: "Всего", counter: total, empty: "Нет общей статистики." };
     return { title: "Сегодня", counter: today, empty: "Нет данных за сегодня." };
   }
@@ -1299,6 +1308,8 @@ function initProfilePokerPlus() {
     var today = source.todayCounter && typeof source.todayCounter === "object" ? source.todayCounter : (source.today_counter && typeof source.today_counter === "object" ? source.today_counter : null);
     var week = source.weekCounter && typeof source.weekCounter === "object" ? source.weekCounter : (source.week_counter && typeof source.week_counter === "object" ? source.week_counter : null);
     syncPokerPlusStatsDateFilterBounds(source, today);
+    if (POKERPLUS_STATS_KINDS.indexOf(pokerPlusStatsActiveKind) === -1) pokerPlusStatsActiveKind = "cash";
+    setPokerPlusStatsKindTabs(pokerPlusStatsActiveKind);
     if (typeof setProfileStatusFromProfile === "function") setProfileStatusFromProfile(source, true);
     else {
       var feeStat = pokerPlusPickStat(total, "fee", "fee");
@@ -1314,7 +1325,7 @@ function initProfilePokerPlus() {
       } else if (selection.mode === "range") {
         var selected = pokerPlusSelectedStatsGroup(selection, today, week, source);
         if (selected.counter && pokerPlusCounterHasValue(selected.counter)) {
-          groups.push(pokerPlusStatsGroupHtml(selected.title, selected.counter, false));
+          groups.push(pokerPlusStatsGroupHtml(selected.title, selected.counter, false, { kind: pokerPlusStatsActiveKind }));
           setPokerPlusStatsDateState(selected.state, false);
         } else {
           groups.push(pokerPlusStatsEmptyHtml(selected.state));
@@ -1325,14 +1336,17 @@ function initProfilePokerPlus() {
         setPokerPlusStatsDateState("", false);
       }
     } else {
-      if (["today", "week", "total"].indexOf(pokerPlusStatsActivePeriod) === -1) pokerPlusStatsActivePeriod = "today";
+      if (["today", "week", "total"].indexOf(pokerPlusStatsActivePeriod) === -1) pokerPlusStatsActivePeriod = "week";
       setPokerPlusStatsPeriodTabs(pokerPlusStatsActivePeriod);
       var periodInfo = pokerPlusStatsPeriodInfo(pokerPlusStatsActivePeriod, today, week, total);
       var periodOptions = {};
       if (pokerPlusStatsActivePeriod === "total") {
         periodOptions.isTotalPeriod = true;
+        periodOptions.kind = pokerPlusStatsActiveKind;
         var countedMtt = pokerPlusCountedTournamentWinningsFromSnapshots(source, today, "mtt");
         if (countedMtt && countedMtt.winnings != null) periodOptions.mttCountedWinnings = countedMtt.winnings;
+      } else {
+        periodOptions.kind = pokerPlusStatsActiveKind;
       }
       if (periodInfo.counter && pokerPlusCounterHasValue(periodInfo.counter)) {
         groups.push(pokerPlusStatsGroupHtml(periodInfo.title, periodInfo.counter, false, periodOptions));
@@ -1928,6 +1942,16 @@ function initProfilePokerPlus() {
       if (["today", "week", "total", "range"].indexOf(period) === -1) return;
       pokerPlusStatsActivePeriod = period;
       if (period !== "range") clearPokerPlusStatsDateInputs();
+      rerenderPokerPlusStatsDateFilter();
+    });
+  });
+  statsKindTabs.forEach(function (btn) {
+    if (!btn || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", function () {
+      var kind = btn.dataset.profilePokerplusStatsTab || "";
+      if (POKERPLUS_STATS_KINDS.indexOf(kind) === -1) return;
+      pokerPlusStatsActiveKind = kind;
       rerenderPokerPlusStatsDateFilter();
     });
   });

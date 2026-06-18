@@ -177,6 +177,12 @@
   opacity: 0.6;
   cursor: default;
 }
+.chat-user-modal__friend-btn--pending {
+  color: rgba(254, 243, 199, 0.9);
+  background: rgba(146, 64, 14, 0.22);
+  border-color: rgba(251, 191, 36, 0.32);
+  opacity: 1;
+}
 .chat-user-modal__friend-msg {
   font-size: 13px;
   color: var(--accent-2);

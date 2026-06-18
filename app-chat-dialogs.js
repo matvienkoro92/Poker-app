@@ -160,6 +160,25 @@ function pokerUpdateFriendsCountLabels(count) {
   } catch (eLbl) {}
 }
 
+function pokerApplyLocalOutgoingFriendRequest(targetUserId) {
+  var uid = targetUserId != null ? String(targetUserId) : "";
+  if (!uid) return;
+  window.__pokerChatOutgoingFriendRequestIdsSet = window.__pokerChatOutgoingFriendRequestIdsSet || {};
+  window.__pokerChatOutgoingFriendRequestIdsSet[uid] = true;
+  try {
+    var nxUid = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(uid) : uid;
+    if (nxUid && nxUid !== uid) window.__pokerChatOutgoingFriendRequestIdsSet[nxUid] = true;
+  } catch (eReqNorm) {}
+  try {
+    if (typeof window.__pokerForceRerenderChatContactsFromCache === "function") {
+      window.__pokerForceRerenderChatContactsFromCache();
+    } else if (window.__pokerLastContactsApiData && typeof window.__pokerApplyContactsApiResponse === "function") {
+      window.__pokerApplyContactsApiResponse(window.__pokerLastContactsApiData, { forceRerender: true });
+    }
+  } catch (eReqApply) {}
+}
+window.pokerApplyLocalOutgoingFriendRequest = pokerApplyLocalOutgoingFriendRequest;
+
 function pokerRefreshFriendsCountFromApi() {
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
@@ -174,6 +193,15 @@ function pokerRefreshFriendsCountFromApi() {
     .then(function (data) {
       if (data && data.ok && Array.isArray(data.friends)) {
         pokerUpdateFriendsCountLabels(data.friends.length);
+        if (Array.isArray(data.notices) && data.notices.length) {
+          var messages = data.notices.map(function (row) {
+            var name = row && (row.contactName || row.userName || row.userId) ? String(row.contactName || row.userName || row.userId) : "Игрок";
+            return name + (row && row.status === "accepted" ? " принял заявку в друзья" : " отклонил заявку в друзья");
+          });
+          var text = messages.join("\n");
+          if (text && tg && tg.showAlert) tg.showAlert(text);
+          else if (text && typeof alert === "function") alert(text);
+        }
       }
     })
     .catch(function () {});
@@ -578,6 +606,20 @@ function pokerBuildChatContactsFriendSet(data) {
     } catch (eFc) {}
   }
   window.__pokerChatFriendIdsSet = friendSet;
+  var requestSet = {};
+  if (data && Array.isArray(data.friendRequestOutgoingIds)) {
+    for (var rq = 0; rq < data.friendRequestOutgoingIds.length; rq++) {
+      var rid = data.friendRequestOutgoingIds[rq];
+      if (rid == null || String(rid) === "") continue;
+      var rstr = String(rid);
+      requestSet[rstr] = true;
+      try {
+        var rnorm = typeof normalizePeerIdForChat === "function" ? normalizePeerIdForChat(rstr) : rstr;
+        if (rnorm && rnorm !== rstr) requestSet[rnorm] = true;
+      } catch (eRqNorm) {}
+    }
+  }
+  window.__pokerChatOutgoingFriendRequestIdsSet = requestSet;
   try {
     var fpcM = window.__pokerFriendsPickCache && Array.isArray(window.__pokerFriendsPickCache.friends)
       ? window.__pokerFriendsPickCache.friends
@@ -846,6 +888,20 @@ function pokerChatPeerIdIsFriend(pid) {
   } catch (eR) {}
   return false;
 }
+
+function pokerChatPeerIdHasOutgoingFriendRequest(pid) {
+  if (!pid) return false;
+  var set = window.__pokerChatOutgoingFriendRequestIdsSet;
+  if (!set) return false;
+  if (set[String(pid)]) return true;
+  try {
+    for (var pk in set) {
+      if (set[pk] && peerChatIdsEqual(pk, pid)) return true;
+    }
+  } catch (eReq) {}
+  return false;
+}
+window.pokerChatPeerIdHasOutgoingFriendRequest = pokerChatPeerIdHasOutgoingFriendRequest;
 
 function pokerPeerIsInMyChatPartnerList(peerIdRaw) {
   if (peerIdRaw == null || peerIdRaw === "") return false;

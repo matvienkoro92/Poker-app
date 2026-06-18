@@ -326,7 +326,8 @@ function initSummerRating2025Modal() {
     var link = e.target && e.target.closest ? e.target.closest(".hall-of-fame__legend-link") : null;
     if (!link || !link.dataset.nick) return;
     e.preventDefault();
-    if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(link.dataset.nick);
+    if (typeof window.pokerOpenTournamentRatingPlayer === "function") window.pokerOpenTournamentRatingPlayer(link.dataset.nick);
+    else if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(link.dataset.nick);
   });
 })();
 

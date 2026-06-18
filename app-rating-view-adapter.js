@@ -615,6 +615,149 @@ function pokerGetTournamentRatingPlacesReady(nick, seasonKey) {
 window.pokerGetTournamentRatingPlaces = getTournamentRatingPlaceRows;
 window.pokerGetTournamentRatingPlacesReady = pokerGetTournamentRatingPlacesReady;
 
+function pokerOpenUnifiedPlayerProfileByRatingNick(nick, options) {
+  nick = String(nick || "").trim();
+  if (!nick) return Promise.resolve(false);
+  var fallbackOptions = copyWinterRatingPlayerOptions(options || {});
+  function openRatingFallback() {
+    if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(nick, fallbackOptions);
+    else if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, fallbackOptions);
+    return false;
+  }
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base || typeof fetch !== "function") return Promise.resolve(openRatingFallback());
+  var authQuery = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+  if (!authQuery || authQuery === "?") authQuery = "?";
+  var sep = authQuery.length > 1 ? "&" : "";
+  var url = base + "/api/users" + authQuery + sep + "ratingNick=" + encodeURIComponent(nick);
+  return fetch(url)
+    .then(function (r) { return r.json().catch(function () { return null; }); })
+    .then(function (data) {
+      if (!data || !data.ok) return openRatingFallback();
+      if (data.self) {
+        if (typeof setView === "function") setView("profile");
+        return true;
+      }
+      function openUnified() {
+        if (typeof window.openChatUserModalById !== "function") return openRatingFallback();
+        var displayName = data.chatDisplayName || data.contactName || data.pokerPlusNickname || data.userName || nick;
+        window.openChatUserModalById(data.userId, displayName, null);
+        return true;
+      }
+      if (typeof window.openChatUserModalById === "function") return openUnified();
+      if (typeof window.pokerEnsureGlobalModalsHtml === "function" || typeof window.pokerEnsureScriptDomains === "function") {
+        var modalPromise = typeof window.pokerEnsureGlobalModalsHtml === "function"
+          ? Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+          : Promise.resolve();
+        return modalPromise
+          .then(function () {
+            return typeof window.pokerEnsureScriptDomains === "function"
+              ? window.pokerEnsureScriptDomains(["chat"])
+              : null;
+          })
+          .then(openUnified)
+          .catch(openRatingFallback);
+      }
+      return openRatingFallback();
+    })
+    .catch(openRatingFallback);
+}
+
+function pokerOpenTournamentRatingPlayer(nick, options) {
+  if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
+    return window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, options);
+  }
+  if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(nick, options);
+  else if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, options);
+  return Promise.resolve(false);
+}
+
+window.pokerOpenUnifiedPlayerProfileByRatingNick = pokerOpenUnifiedPlayerProfileByRatingNick;
+window.pokerOpenTournamentRatingPlayer = pokerOpenTournamentRatingPlayer;
+
+var pokerRatingNickVerificationCache = {};
+var pokerRatingNickVerificationPending = {};
+
+function pokerRatingVerificationKey(nick) {
+  return String(nick || "").trim().replace(/^@+/, "").replace(/\s+/g, " ").toLowerCase();
+}
+
+function pokerSetRatingNickButtonVerified(btn, verified) {
+  if (!btn || !btn.classList) return;
+  btn.classList.toggle("winter-rating__nick-btn--verified", !!verified);
+  var badge = btn.querySelector(".winter-rating__verified-badge");
+  if (!badge) return;
+  badge.hidden = !verified;
+  badge.setAttribute("aria-hidden", verified ? "false" : "true");
+}
+
+function pokerEnsureRatingNickBadge(btn) {
+  if (!btn || btn.querySelector(".winter-rating__verified-badge")) return;
+  var badge = document.createElement("span");
+  badge.className = "winter-rating__verified-badge";
+  badge.textContent = "✓";
+  badge.title = "Профиль Poker21 привязан";
+  badge.setAttribute("aria-label", "Профиль Poker21 привязан");
+  badge.hidden = true;
+  btn.appendChild(badge);
+}
+
+function pokerCheckRatingNickVerified(nick) {
+  var key = pokerRatingVerificationKey(nick);
+  if (!key) return Promise.resolve(false);
+  if (Object.prototype.hasOwnProperty.call(pokerRatingNickVerificationCache, key)) {
+    return Promise.resolve(!!pokerRatingNickVerificationCache[key]);
+  }
+  if (pokerRatingNickVerificationPending[key]) return pokerRatingNickVerificationPending[key];
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  if (!base || typeof fetch !== "function") return Promise.resolve(false);
+  var authQuery = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+  if (!authQuery || authQuery === "?") authQuery = "?";
+  var sep = authQuery.length > 1 ? "&" : "";
+  var url = base + "/api/users" + authQuery + sep + "ratingNick=" + encodeURIComponent(nick);
+  pokerRatingNickVerificationPending[key] = fetch(url)
+    .then(function (r) { return r.json().catch(function () { return null; }); })
+    .then(function (data) {
+      var verified = !!(data && data.ok && (data.pokerPlusVerified || data.p21Id));
+      pokerRatingNickVerificationCache[key] = verified;
+      delete pokerRatingNickVerificationPending[key];
+      return verified;
+    })
+    .catch(function () {
+      pokerRatingNickVerificationCache[key] = false;
+      delete pokerRatingNickVerificationPending[key];
+      return false;
+    });
+  return pokerRatingNickVerificationPending[key];
+}
+
+function pokerMarkVerifiedRatingNickButtons(root) {
+  root = root || document;
+  if (!root || !root.querySelectorAll) return;
+  var buttons = Array.prototype.slice.call(root.querySelectorAll(".winter-rating__nick-btn[data-nick]"));
+  var seen = {};
+  buttons.forEach(function (btn) {
+    var nick = String(btn.dataset.nick || "").trim();
+    var key = pokerRatingVerificationKey(nick);
+    if (!key) return;
+    pokerEnsureRatingNickBadge(btn);
+    if (Object.prototype.hasOwnProperty.call(pokerRatingNickVerificationCache, key)) {
+      pokerSetRatingNickButtonVerified(btn, pokerRatingNickVerificationCache[key]);
+    }
+    if (seen[key]) return;
+    seen[key] = true;
+    pokerCheckRatingNickVerified(nick).then(function (verified) {
+      buttons.forEach(function (candidate) {
+        if (pokerRatingVerificationKey(candidate.dataset && candidate.dataset.nick) === key) {
+          pokerSetRatingNickButtonVerified(candidate, verified);
+        }
+      });
+    });
+  });
+}
+
+window.pokerMarkVerifiedRatingNickButtons = pokerMarkVerifiedRatingNickButtons;
+
 function shouldLoadWinterRatingPlayerHistory(options) {
   var seasonKey = getWinterRatingPlayerSeasonKey(options);
   if (!isWinterRatingPlayerSeasonalKey(seasonKey)) return false;
@@ -1694,10 +1837,11 @@ function initWinterRating() {
         ? (seasonConfig.loadingDataText || "Загружаем рейтинг")
         : (seasonConfig.emptyDataText || "Данные с 1 марта");
       bodyEl.innerHTML = parts.length ? parts.join("") : "<tr><td colspan=\"" + colspan + "\" class=\"winter-rating__spring-placeholder\">" + placeholderText + "</td></tr>";
+      pokerMarkVerifiedRatingNickButtons(bodyEl);
       bodyEl.removeEventListener("click", bodyEl._leagueNickClick);
       bodyEl._leagueNickClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".winter-rating__nick-btn");
-        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
+        if (btn && btn.dataset.nick && typeof pokerOpenTournamentRatingPlayer === "function") pokerOpenTournamentRatingPlayer(btn.dataset.nick);
       };
       bodyEl.addEventListener("click", bodyEl._leagueNickClick);
     }
@@ -1746,8 +1890,8 @@ function initWinterRating() {
       if (pedestalWrap._summerPedestalClick) pedestalWrap.removeEventListener("click", pedestalWrap._summerPedestalClick);
       pedestalWrap._summerPedestalClick = function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".summer-rating-pedestal-hitbox");
-        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") {
-          openWinterRatingPlayerModalReady(btn.dataset.nick);
+        if (btn && btn.dataset.nick && typeof pokerOpenTournamentRatingPlayer === "function") {
+          pokerOpenTournamentRatingPlayer(btn.dataset.nick);
         }
       };
       pedestalWrap.addEventListener("click", pedestalWrap._summerPedestalClick);
@@ -1843,7 +1987,7 @@ function initWinterRating() {
       sectionEl.setAttribute("data-spring-top3-inited", "1");
       sectionEl.addEventListener("click", function (e) {
         var btn = e.target && e.target.closest && e.target.closest(".spring-rating-top3__nick-btn");
-        if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
+        if (btn && btn.dataset.nick && typeof pokerOpenTournamentRatingPlayer === "function") pokerOpenTournamentRatingPlayer(btn.dataset.nick);
       });
     }
     if (isSpringRatingMode()) {
@@ -1902,6 +2046,7 @@ function initWinterRating() {
           htmlParts.push("<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td><button type=\"button\" class=\"winter-rating__nick-btn\" data-nick=\"" + nickAttr + "\">" + nickEsc + "</button></td><td>" + (row.points != null ? row.points : "") + "</td><td>" + (row.reward != null ? row.reward : "0") + "</td></tr>");
         }
         tbody.innerHTML = htmlParts.join("");
+        pokerMarkVerifiedRatingNickButtons(tbody);
       }
     } catch (e) {
       if (typeof console !== "undefined" && console.error) console.error("winter rating table render", e);
@@ -1909,7 +2054,7 @@ function initWinterRating() {
     }
     tbody.addEventListener("click", function (e) {
       var btn = e.target && e.target.closest(".winter-rating__nick-btn");
-      if (btn && btn.dataset.nick && typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(btn.dataset.nick);
+      if (btn && btn.dataset.nick && typeof pokerOpenTournamentRatingPlayer === "function") pokerOpenTournamentRatingPlayer(btn.dataset.nick);
     });
     var tableWrap = document.getElementById("winterRatingTableWrap");
     var showAllWrap = document.getElementById("winterRatingShowAllWrap");

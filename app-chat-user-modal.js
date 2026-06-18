@@ -243,11 +243,14 @@ if (chatUserModalEl) {
     }
     return titleDisp;
   }
-  function updateChatUserModalFriendState(isFriend, displayTitle) {
+  function updateChatUserModalFriendState(isFriend, displayTitle, requestOutgoing) {
+    var pending = !isFriend && !!requestOutgoing;
     if (modalAddFriend) {
       modalAddFriend.style.display = isFriend ? "none" : "";
-      modalAddFriend.disabled = !!isFriend;
+      modalAddFriend.disabled = !!isFriend || pending;
+      modalAddFriend.textContent = pending ? "Заявка отправлена" : "Добавить в друзья";
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--added", !!isFriend);
+      modalAddFriend.classList.toggle("chat-user-modal__friend-btn--pending", pending);
     }
     if (modalEditFriendName) {
       modalEditFriendName.style.display = isFriend ? "inline-flex" : "none";
@@ -260,6 +263,9 @@ if (chatUserModalEl) {
     if (modalFriendMsg) {
       if (isFriend) {
         modalFriendMsg.textContent = "Теперь " + (displayTitle || "Игрок") + " ваш друг";
+        modalFriendMsg.style.display = "";
+      } else if (pending) {
+        modalFriendMsg.textContent = "Заявка в друзья отправлена";
         modalFriendMsg.style.display = "";
       } else {
         modalFriendMsg.textContent = "";
@@ -510,7 +516,7 @@ if (chatUserModalEl) {
           } else if (modalAvatarPlaceholder) {
             modalAvatarPlaceholder.textContent = (titleDisp || "И")[0];
           }
-          if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(!!data.isFriend, titleDisp);
+          if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(!!data.isFriend, titleDisp, !!data.friendRequestOutgoing);
           if (modalLastSeen) {
             if (data.chatOnline) {
               modalLastSeen.textContent = "В сети";
@@ -640,21 +646,7 @@ if (chatUserModalEl) {
   if (modalAddFriend) {
     modalAddFriend.addEventListener("click", function () {
       if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalAddFriend.disabled) return;
-      var defaultContact = (chatUserModalUserName || "").trim();
-      var prompted = null;
-      try {
-        prompted =
-          typeof window.prompt === "function"
-            ? window.prompt(
-                "Имя контакта в списке друзей (над логином в Telegram).\nМожно оставить как есть или изменить:",
-                defaultContact
-              )
-            : defaultContact;
-      } catch (ePrompt) {
-        prompted = defaultContact;
-      }
-      if (prompted === null) return;
-      var contactName = String(prompted).trim();
+      var contactName = (chatUserModalUserName || chatUserModalPeerLogin || "").trim();
       modalAddFriend.disabled = true;
       fetch(base + "/api/friends", {
         method: "POST",
@@ -667,33 +659,17 @@ if (chatUserModalEl) {
           return r.json();
         })
         .then(function (d) {
+          modalAddFriend.disabled = false;
           if (d && d.ok) {
-            chatUserModalContactName = contactName;
-            var tdAdd =
-              contactName && contactName.length > 0
-                ? contactName
-                : chatUserModalPeerLogin || chatUserModalUserName || "Игрок";
-            if (modalTitle) modalTitle.textContent = tdAdd;
-            chatUserModalUserName = tdAdd;
-            if (modalLoginSub) {
-              if (contactName && contactName.length > 0 && chatUserModalPeerLogin) {
-                modalLoginSub.textContent = chatUserModalPeerLogin;
-                modalLoginSub.hidden = false;
-              } else {
-                modalLoginSub.textContent = "";
-                modalLoginSub.hidden = true;
-              }
+            if (d.pending && typeof window.pokerApplyLocalOutgoingFriendRequest === "function") {
+              window.pokerApplyLocalOutgoingFriendRequest(chatUserModalUserId);
             }
-            if (modalAvatar) modalAvatar.alt = tdAdd;
-            if (modalAvatarPlaceholder && (!modalAvatar || modalAvatar.style.display === "none")) {
-              modalAvatarPlaceholder.textContent = (tdAdd || "И")[0];
-            }
-            updateChatUserModalFriendState(true, tdAdd);
             if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
             if (typeof window.chatRefresh === "function") window.chatRefresh();
-            updateCurrentPeerTitle(chatUserModalUserId, tdAdd);
+            if (d.pending) updateChatUserModalFriendState(false, chatUserModalUserName || chatUserModalPeerLogin || "Игрок", true);
+            if (tg && tg.showAlert) tg.showAlert(d.message || "Заявка отправлена");
+            else if (typeof alert === "function") alert(d.message || "Заявка отправлена");
           } else {
-            modalAddFriend.disabled = false;
             if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
           }
         })

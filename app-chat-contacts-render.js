@@ -48,6 +48,17 @@ function chatContactsMatchesFriendSet(c, friendSet) {
   return false;
 }
 
+function chatContactsHasOutgoingFriendRequest(c) {
+  if (!c || c.isGroupChat) return false;
+  if (c.friendRequestOutgoing) return true;
+  if (typeof pokerChatPeerIdHasOutgoingFriendRequest !== "function") return false;
+  var keys = [c.id, c.dtId, c.accountId, c.userId, c.chatUserId, c.__friendAccountId];
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i] != null && keys[i] !== "" && pokerChatPeerIdHasOutgoingFriendRequest(keys[i])) return true;
+  }
+  return false;
+}
+
 function chatContactsRowAlias(c, friendSet) {
   if (typeof chatListRowAlias === "function") return chatListRowAlias(c, friendSet);
   if (!chatContactsMatchesFriendSet(c, friendSet) || !c) return "";
@@ -179,6 +190,8 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
     if (!wrap || !btn) return;
     var isGroupRow = !!(c && c.isGroupChat);
     var isFriendContact = chatContactsMatchesFriendSet(c, friendSet);
+    var isPendingFriendRequest = chatContactsHasOutgoingFriendRequest(c);
+    if (btn.getAttribute("data-chat-friend-pending") !== (isPendingFriendRequest ? "1" : "0")) return false;
     var displayTitle = chatContactsRowDisplayTitle(c, friendSet);
     var effectiveAlias = chatContactsRowAlias(c, friendSet);
     var hasAlias = effectiveAlias !== "";
@@ -191,6 +204,7 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
     if (nickEl) chatContactsRenderSetTextContentIfChanged(nickEl, hasAlias ? String(c.name || "") : "");
     btn.setAttribute("data-chat-name", displayTitle);
     btn.setAttribute("data-chat-friend", isFriendContact ? "1" : "0");
+    btn.setAttribute("data-chat-friend-pending", isPendingFriendRequest ? "1" : "0");
     btn.setAttribute("data-chat-group", isGroupRow ? "1" : "0");
     btn.dataset.chatOnline = c.online ? "1" : "0";
     syncChatContactAvatar(btn, c);
@@ -386,6 +400,8 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     chatContactsRenderEscapeHtml(displayTitle) +
     '" data-chat-friend="' +
     (isFriendContact ? "1" : "0") +
+    '" data-chat-friend-pending="' +
+    (chatContactsHasOutgoingFriendRequest(c) ? "1" : "0") +
     '" data-chat-group="' +
     (isGroupRow ? "1" : "0") +
     '" data-chat-initial="' +
@@ -427,8 +443,11 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
       "</div></div>"
     );
   }
+  var pendingFriendRequest = chatContactsHasOutgoingFriendRequest(c);
   var swipeFriendBtn = isFriendContact
     ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--remove" tabindex="-1" data-chat-swipe-remove-friend="1" aria-label="Удалить из друзей" title="Удалить из друзей"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">−</span></button>'
+    : pendingFriendRequest
+      ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--pending" tabindex="-1" disabled aria-label="Заявка отправлена" title="Заявка отправлена"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">✓</span></button>'
     : '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>';
   var swipeWrapClass = "chat-contact-swipe chat-contact-swipe--wide-actions";
   return (
@@ -476,6 +495,8 @@ function chatContactsSameList(existing, contactsForList, friendSet, pinOrderRend
     if ((btn.getAttribute("data-chat-name") || "") !== wantName) return false;
     var wantFriend = chatContactsMatchesFriendSet(c, friendSet);
     if ((btn.getAttribute("data-chat-friend") || "") !== (wantFriend ? "1" : "0")) return false;
+    var wantPending = chatContactsHasOutgoingFriendRequest(c);
+    if ((btn.getAttribute("data-chat-friend-pending") || "") !== (wantPending ? "1" : "0")) return false;
     if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
     var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(chatContactsStatusFishLevel(c.statusLevel)) : "";
     if ((btn.getAttribute("data-chat-status-level") || "") !== wantStatusLevel) return false;

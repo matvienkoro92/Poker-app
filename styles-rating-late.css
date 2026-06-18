@@ -2605,6 +2605,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 .winter-rating.spring-rating.summer-rating .winter-rating__nick-btn {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   max-width: 100%;
   padding: 0 !important;
   border: 0 !important;
@@ -2617,6 +2618,16 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
   appearance: none;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__nick-btn--verified {
+  overflow: visible;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__verified-badge {
+  width: 15px;
+  height: 15px;
+  font-size: 10px;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody tr:nth-child(-n+3) .winter-rating__nick-btn {

@@ -12,6 +12,14 @@ function initChatFriendActions(opts) {
   var pokerApplyLocalFriendToChatContacts = typeof opts.pokerApplyLocalFriendToChatContacts === "function" ? opts.pokerApplyLocalFriendToChatContacts : function () {};
   var pokerRemoveLocalFriendFromChatContacts = typeof opts.pokerRemoveLocalFriendFromChatContacts === "function" ? opts.pokerRemoveLocalFriendFromChatContacts : function () {};
   var pokerApiAuthJsonBody = typeof opts.pokerApiAuthJsonBody === "function" ? opts.pokerApiAuthJsonBody : function (x) { return x || {}; };
+  var pokerChatPeerIdHasOutgoingFriendRequest =
+    typeof opts.pokerChatPeerIdHasOutgoingFriendRequest === "function"
+      ? opts.pokerChatPeerIdHasOutgoingFriendRequest
+      : function (pid) {
+          return typeof window.pokerChatPeerIdHasOutgoingFriendRequest === "function"
+            ? window.pokerChatPeerIdHasOutgoingFriendRequest(pid)
+            : false;
+        };
 
 function pokerDebugChatFriendAction(stage, payload) {
   try {
@@ -30,6 +38,7 @@ function syncChatDialogPreviewAddFriendBtn() {
   }
   var uid = modal.dataset.previewUserId;
   var myId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
+  var pending = pokerChatPeerIdHasOutgoingFriendRequest(uid);
   var cant =
     !uid ||
     (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) ||
@@ -37,7 +46,11 @@ function syncChatDialogPreviewAddFriendBtn() {
     pokerChatPeerIdIsFriend(uid);
   btn.hidden = !!cant;
   btn.style.display = cant ? "none" : "";
-  if (!cant) btn.disabled = false;
+  if (!cant) {
+    btn.disabled = !!pending;
+    btn.textContent = pending ? "Заявка отправлена" : "В друзья";
+    btn.classList.toggle("chat-dialog-preview-modal__add-friend-btn--pending", !!pending);
+  }
 }
 function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
   pokerDebugChatFriendAction("addFriendWithPrompt:start", {
@@ -62,38 +75,11 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
     if (typeof onDone === "function") onDone();
     return;
   }
-  var defaultContact = (nameHint || "").trim();
-  var prompted = null;
-  try {
-    prompted =
-      typeof window.prompt === "function"
-        ? window.prompt(
-            "Имя контакта в списке друзей (над логином в Telegram).\nМожно оставить как есть или изменить:",
-            defaultContact
-          )
-        : defaultContact;
-  } catch (ePr) {
-    prompted = defaultContact;
-  }
-  pokerDebugChatFriendAction("addFriendWithPrompt:promptResult", {
-    targetUserId: targetUserId || "",
-    defaultContact: defaultContact,
-    promptedIsNull: prompted === null,
-    promptedValue: prompted === null ? null : String(prompted),
-  });
-  if (prompted === null) {
-    if (typeof onDone === "function") onDone();
-    return;
-  }
-  var contactName = String(prompted).trim();
-  pokerDebugChatFriendAction("addFriendWithPrompt:beforeOptimistic", {
+  var contactName = String(nameHint || "").trim();
+  pokerDebugChatFriendAction("addFriendWithPrompt:requestPrepared", {
     targetUserId: targetUserId || "",
     contactName: contactName,
-    isFriendBeforeOptimistic:
-      typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
   });
-  pokerApplyLocalFriendToChatContacts(targetUserId, contactName);
-  syncChatDialogPreviewAddFriendBtn();
   pokerDebugChatFriendAction("addFriendWithPrompt:request", {
     targetUserId: targetUserId || "",
     requestUrl: base + "/api/friends",
@@ -119,11 +105,15 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
           typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
       });
       if (d && d.ok) {
+        if (d.pending && typeof window.pokerApplyLocalOutgoingFriendRequest === "function") {
+          window.pokerApplyLocalOutgoingFriendRequest(targetUserId);
+        }
         if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
         if (typeof window.chatRefresh === "function") window.chatRefresh();
         syncChatDialogPreviewAddFriendBtn();
+        if (tg && tg.showAlert) tg.showAlert(d.message || "Заявка отправлена");
+        else if (typeof alert === "function") alert(d.message || "Заявка отправлена");
       } else if (tg && tg.showAlert) {
-        pokerRemoveLocalFriendFromChatContacts(targetUserId);
         syncChatDialogPreviewAddFriendBtn();
         tg.showAlert((d && d.error) || "Ошибка");
       }
@@ -133,7 +123,6 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
         targetUserId: targetUserId || "",
         requestUrl: base + "/api/friends",
       });
-      pokerRemoveLocalFriendFromChatContacts(targetUserId);
       syncChatDialogPreviewAddFriendBtn();
       if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
     })

@@ -577,6 +577,14 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
 .chat-contact-swipe__friend--remove:active {
   background: rgba(127, 29, 29, 0.32);
 }
+.chat-contact-swipe__friend--pending {
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(30, 41, 59, 0.34);
+  cursor: default;
+}
+.chat-contact-swipe__friend--pending:active {
+  background: rgba(30, 41, 59, 0.34);
+}
 .chat-contact-swipe__panel {
   position: relative;
   z-index: 1;

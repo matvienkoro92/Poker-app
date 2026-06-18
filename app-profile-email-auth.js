@@ -3,8 +3,10 @@ function syncProfileEmailAuthUi() {
   var titleEl = document.getElementById("profileEmailAuthTitle");
   var textEl = document.getElementById("profileEmailAuthText");
   var linkedRow = document.getElementById("profileEmailAuthLinkedRow");
+  var linkedLabel = document.getElementById("profileEmailAuthLinkedLabel");
   var linkedValue = document.getElementById("profileEmailAuthLinkedValue");
   var tgLinkedRow = document.getElementById("profileTelegramLinkedRow");
+  var tgLinkedLabel = document.getElementById("profileTelegramLinkedLabel");
   var tgLinkedValue = document.getElementById("profileTelegramLinkedValue");
   var formWrap = document.getElementById("profileEmailAuthForm");
   var emailInput = document.getElementById("profileEmailAuthInput");
@@ -65,11 +67,18 @@ function syncProfileEmailAuthUi() {
   if (linkedEmail && authMethod !== "telegram") authMethod = "email";
   if (section) section.hidden = !!isGuest || !isVerified;
   if (section && section.classList) section.classList.toggle("profile-email-auth--email-linked", !!linkedEmail);
-  if (titleEl) titleEl.hidden = true;
+  if (titleEl) {
+    titleEl.hidden = false;
+    titleEl.textContent = "Аккаунт и подписки";
+  }
   if (linkedRow) linkedRow.hidden = !linkedEmail;
+  if (linkedLabel) linkedLabel.textContent = "Ваш емейл";
   if (linkedValue && linkedEmail) linkedValue.textContent = linkedEmail;
   if (tgLinkedRow) tgLinkedRow.hidden = !linkedTelegramUsername;
+  if (tgLinkedLabel) tgLinkedLabel.textContent = "Ваш телеграм";
   if (tgLinkedValue && linkedTelegramUsername) tgLinkedValue.textContent = "@" + linkedTelegramUsername;
+  if (typeof pokerBindProfileTelegramVisibility === "function") pokerBindProfileTelegramVisibility();
+  if (typeof pokerRenderProfileTelegramVisibility === "function") pokerRenderProfileTelegramVisibility(false);
   if (tgSection) tgSection.hidden = !!isGuest || !isVerified || authMethod !== "email";
   if (textEl) {
     if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";

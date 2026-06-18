@@ -90,8 +90,8 @@ function initRafflesAdminCreateRuntime(opts) {
     if (raffleTicketTournamentSelect) {
       raffleTicketTournamentSelect.value = "custom";
       syncSingleTicketCustomInputs();
-      if (raffleTicketCustomName) raffleTicketCustomName.value = "Нокаут с гарантией 700 000р";
-      if (raffleTicketCustomPrice) raffleTicketCustomPrice.value = "10000";
+      if (raffleTicketCustomName) raffleTicketCustomName.value = "Мистери с гарантией 300 000р";
+      if (raffleTicketCustomPrice) raffleTicketCustomPrice.value = "2000";
     }
     updateRaffleCreateTotal();
 
@@ -106,7 +106,7 @@ function initRafflesAdminCreateRuntime(opts) {
     function resetPresetBtn() {
       window.__pokerRaffleCreateInFlight = false;
       knockoutPresetBtn.disabled = false;
-      knockoutPresetBtn.textContent = prevText || "Нокаут 10к";
+      knockoutPresetBtn.textContent = prevText || "Мистери 2к";
     }
     fetch(base + "/api/raffles", {
       method: "POST",
@@ -115,16 +115,17 @@ function initRafflesAdminCreateRuntime(opts) {
         pokerGuestOrAuthedPostBody({
           action: "create",
           totalWinners: 3,
-          groups: [{ count: 3, prize: "Билет на нокаут за 10 000р — гарантия 700 000р" }],
+          groups: [{ count: 3, prize: "Билет на Мистери за 2 000р — гарантия 300 000р" }],
           endDate: endDate.toISOString(),
-          title: "3 билета по 10 000р на нокаут с гарантией 700 000р",
+          title: "3 билета по 2 000р на Мистери с гарантией 300 000р",
           prizeKind: "tournament_ticket",
           drawMode: "weighted_tickets",
           ticketEntryMode: "admin",
           accessLevel: 0,
-          promoGuarantee: "700 000р",
-          cardTitle: "Розыгрыш 30 000р",
-          cardSubtitle: "3 билета за 10 000р · нокаут с гарантией 700 000р",
+          promoGuarantee: "300 000р",
+          promoTournamentName: "Мистери",
+          cardTitle: "Розыгрыш 6 000р",
+          cardSubtitle: "3 билета за 2 000р · Мистери с гарантией 300 000р",
           cardTheme: "knockout_ticket",
           createIdempotencyKey: idemKey,
         })
@@ -140,8 +141,8 @@ function initRafflesAdminCreateRuntime(opts) {
           if (typeof setRafflesTab === "function") setRafflesTab("active");
           loadRaffles();
           if (!data.idempotentReplay) {
-            if (tg && tg.showAlert) tg.showAlert("Нокаут-розыгрыш создан");
-            else if (typeof alert === "function") alert("Нокаут-розыгрыш создан");
+            if (tg && tg.showAlert) tg.showAlert("Мистери-розыгрыш создан");
+            else if (typeof alert === "function") alert("Мистери-розыгрыш создан");
           }
         } else {
           var errMsg = (data && data.error) || "Ошибка";

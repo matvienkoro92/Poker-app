@@ -171,6 +171,17 @@
 .chat-dialog-preview-modal__add-friend-btn:active {
   transform: scale(0.99);
 }
+.chat-dialog-preview-modal__add-friend-btn--pending,
+.chat-dialog-preview-modal__add-friend-btn:disabled {
+  cursor: default;
+  color: rgba(254, 243, 199, 0.88);
+  background: rgba(146, 64, 14, 0.18);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+.chat-dialog-preview-modal__add-friend-btn--pending:hover,
+.chat-dialog-preview-modal__add-friend-btn:disabled:hover {
+  filter: none;
+}
 .chat-dialog-preview-modal__footer-row .chat-dialog-preview-modal__open-btn {
   flex: 1;
   min-width: 0;

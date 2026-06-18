@@ -43,7 +43,88 @@ var POKER_PROFILE_AUTH_LOADING_FALLBACK_MS = 12000;
 var pokerProfileAuthLoadingSince = 0;
 var POKER_PROFILE_LINKED_EMAIL_CACHE_KEY = "poker_profile_linked_email";
 var POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY = "poker_profile_telegram_username";
+var POKER_PROFILE_TELEGRAM_VISIBLE_CACHE_KEY = "poker_profile_telegram_visible";
 var POKER_PROFILE_RESPECT_CACHE_KEY = "poker_profile_respect_score";
+var pokerProfileTelegramVisible = false;
+
+function pokerApplyProfileTelegramVisible(value) {
+  pokerProfileTelegramVisible = value === true || value === 1 || value === "1" || value === "true";
+  try {
+    pokerWriteProfileStorage(POKER_PROFILE_TELEGRAM_VISIBLE_CACHE_KEY, pokerProfileTelegramVisible ? "1" : "0");
+  } catch (eStorage) {}
+  pokerRenderProfileTelegramVisibility();
+}
+
+function pokerRenderProfileTelegramVisibility(saving) {
+  var row = document.getElementById("profileTelegramVisibilityRow");
+  var stateEl = document.getElementById("profileTelegramVisibilityState");
+  if (!row) return;
+  var visible = !!pokerProfileTelegramVisible;
+  var linkedUsername = "";
+  try {
+    linkedUsername = String(window.__pokerProfileTelegramUsername || "").trim();
+  } catch (eLinkedUsername) {}
+  if (!linkedUsername) linkedUsername = pokerReadProfileStorage(POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY);
+  row.hidden = !linkedUsername;
+  Array.prototype.slice.call(row.querySelectorAll("[data-profile-telegram-visible]")).forEach(function (btn) {
+    var targetVisible = btn.dataset.profileTelegramVisible === "1";
+    var active = visible === targetVisible;
+    btn.classList.toggle("profile-telegram-visibility__btn--active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+    btn.disabled = !!saving;
+  });
+  if (stateEl) {
+    stateEl.textContent = visible ? "Telegram показан другим игрокам." : "Telegram скрыт от игроков.";
+    stateEl.classList.toggle("profile-telegram-visibility__state--visible", visible);
+    stateEl.classList.toggle("profile-telegram-visibility__state--hidden", !visible);
+  }
+}
+
+function pokerSaveProfileTelegramVisible(value) {
+  var next = !!value;
+  if (next === !!pokerProfileTelegramVisible) return;
+  var prev = !!pokerProfileTelegramVisible;
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var body =
+    typeof pokerGuestOrAuthedPostBody === "function"
+      ? pokerGuestOrAuthedPostBody({ telegramVisible: next })
+      : { telegramVisible: next };
+  if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+  pokerProfileTelegramVisible = next;
+  pokerRenderProfileTelegramVisibility(true);
+  fetch(base + "/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+    .then(function (r) { return r.json().catch(function () { return {}; }); })
+    .then(function (data) {
+      if (!data || !data.ok) {
+        pokerProfileTelegramVisible = prev;
+      } else {
+        pokerProfileUserInfoCache = null;
+        pokerProfileUserInfoCacheAt = 0;
+      }
+      pokerRenderProfileTelegramVisibility(false);
+    })
+    .catch(function () {
+      pokerProfileTelegramVisible = prev;
+      pokerRenderProfileTelegramVisibility(false);
+    });
+}
+
+function pokerBindProfileTelegramVisibility() {
+  var row = document.getElementById("profileTelegramVisibilityRow");
+  if (!row || row.dataset.bound === "1") return;
+  row.dataset.bound = "1";
+  row.addEventListener("click", function (event) {
+    var btn = event && event.target ? event.target.closest("[data-profile-telegram-visible]") : null;
+    if (!btn || btn.disabled || !row.contains(btn)) return;
+    pokerSaveProfileTelegramVisible(btn.dataset.profileTelegramVisible === "1");
+  });
+  pokerRenderProfileTelegramVisibility(false);
+}
+
 function pokerProfileSubscriptionHandle(raw, fallback) {
   var text = String(raw || fallback || "").trim();
   if (!text) return "";
@@ -120,6 +201,9 @@ function pokerApplyProfileUserInfo(data) {
     window.__pokerProfileTelegramUsername = tgUsername;
     pokerWriteProfileStorage(POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY, tgUsername);
   } catch (eTgProfile) {}
+  try {
+    pokerApplyProfileTelegramVisible(data.telegramVisible === true || data.telegramVisible === 1 || data.telegramVisible === "1");
+  } catch (eTgVisible) {}
   try {
     if (data.pokerPlusStatsVisibility != null && typeof window.pokerApplyPokerPlusStatsVisibility === "function") {
       window.pokerApplyPokerPlusStatsVisibility(data.pokerPlusStatsVisibility);
