@@ -1351,9 +1351,6 @@ function initRaffles() {
           '<span class="raffles-active-chooser__badge raffles-active-chooser__badge--referrals">За приглашенных</span>' +
           '<span class="raffles-active-chooser__results-time">До 15 июля</span>' +
         "</span>" +
-        '<span class="raffles-active-chooser__referrals-art" aria-hidden="true">' +
-          '<span class="raffles-active-chooser__referrals-ticket">10 000 ₽</span>' +
-        "</span>" +
         '<span class="raffles-active-chooser__body">' +
           '<span class="raffles-active-chooser__hero-title raffles-active-chooser__hero-title--referrals">' +
             '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--count">Розыгрыш</span>' +

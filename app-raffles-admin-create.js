@@ -903,7 +903,7 @@ function initRafflesAdminCreateRuntime(opts) {
             endDate: endDate.toISOString(),
             title: title || undefined,
             prizeKind: prizeKind,
-            accessLevel: dailyEnabled ? Math.max(1, getRaffleCreateAccessLevel()) : getRaffleCreateAccessLevel(),
+            accessLevel: dailyEnabled ? Math.max(3, getRaffleCreateAccessLevel()) : getRaffleCreateAccessLevel(),
             daily: dailyEnabled,
             dailyStartTime: dailyStartTime || undefined,
             createIdempotencyKey: idemKey,
