@@ -96,6 +96,21 @@
                     <span class="profile-friends__btn-arrow" aria-hidden="true">›</span>
                   </button>
                 </div>
+                <form class="profile-friends__search" id="profileFriendsSearchForm" role="search" aria-label="Поиск игрока">
+                  <input
+                    type="search"
+                    class="profile-friends__search-input"
+                    id="profileFriendsSearchInput"
+                    placeholder="TG, ID Poker21 или ник"
+                    autocomplete="off"
+                    autocapitalize="none"
+                    autocorrect="off"
+                    spellcheck="false"
+                    aria-label="Найти игрока по логину Telegram, ID Poker21 или нику"
+                  />
+                  <button type="submit" class="profile-friends__search-btn" id="profileFriendsSearchBtn">Найти</button>
+                </form>
+                <p class="profile-friends__search-result" id="profileFriendsSearchResult" aria-live="polite" hidden></p>
                 <div class="profile-friends__preview" id="profileFriendsPreview" aria-live="polite">
                   <button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">
                     <span class="profile-friends__invite-plus" aria-hidden="true">+</span>

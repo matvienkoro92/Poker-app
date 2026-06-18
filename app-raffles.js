@@ -132,6 +132,8 @@ function initRaffles() {
   var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
   var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
   var raffleActiveInfoModalLastFocus = null;
+  var RAFFLES_REFERRAL_PROMO_ID = "__referrals_ticket_10000";
+  var RAFFLES_REFERRAL_PROMO_PRIZE_RUB = 10000;
 
   function consumeRafflesOpenActiveTabRequest() {
     try {
@@ -1310,6 +1312,66 @@ function initRaffles() {
     rafflesActiveChooserTimerInterval = null;
   }
 
+  function openRafflesReferralPromo() {
+    if (typeof window !== "undefined" && typeof window.openClubReferralsModal === "function") {
+      window.openClubReferralsModal({
+        tab: "invited",
+        from: "raffles",
+        returnToRaffles: true,
+      });
+      return;
+    }
+    if (typeof window !== "undefined" && typeof window.pokerOpenClubReferralsModal === "function") {
+      window.pokerOpenClubReferralsModal({
+        tab: "invited",
+        from: "raffles",
+        returnToRaffles: true,
+      });
+      return;
+    }
+    var fallbackBtn = document.getElementById("clubReferralsOpenBtn");
+    if (fallbackBtn && typeof fallbackBtn.click === "function") {
+      fallbackBtn.click();
+      return;
+    }
+    if (typeof setView === "function") setView("profile");
+  }
+
+  function renderRafflesReferralPromoCard() {
+    return (
+      '<div class="raffles-active-chooser__item raffles-active-chooser__item--referrals" role="button" tabindex="0" data-raffle-referrals-open="1" data-raffle-active-id="' +
+      escapeHtml(RAFFLES_REFERRAL_PROMO_ID) +
+      '" aria-selected="false">' +
+        '<span class="raffles-active-chooser__head">' +
+          '<span class="raffles-active-chooser__badge raffles-active-chooser__badge--referrals">За приглашенных</span>' +
+          '<span class="raffles-active-chooser__results-time">До 15 июля</span>' +
+        "</span>" +
+        '<span class="raffles-active-chooser__referrals-art" aria-hidden="true">' +
+          '<span class="raffles-active-chooser__referrals-ticket">10 000 ₽</span>' +
+        "</span>" +
+        '<span class="raffles-active-chooser__body">' +
+          '<span class="raffles-active-chooser__hero-title raffles-active-chooser__hero-title--referrals">' +
+            '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--count">Розыгрыш</span>' +
+            '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--kind">за приглашенных</span>' +
+            '<span class="raffles-active-chooser__hero-line raffles-active-chooser__hero-line--amount">Билет 10 000 ₽</span>' +
+          "</span>" +
+          '<span class="raffles-active-chooser__detail-pills raffles-active-chooser__detail-pills--referrals">' +
+            '<span class="raffles-active-chooser__detail-pill">Нокаут</span>' +
+            '<span class="raffles-active-chooser__detail-pill">Гарантия 1 000 000 ₽</span>' +
+          "</span>" +
+        "</span>" +
+        '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--referrals">' +
+          '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--referrals">Победит тот, кто приведет больше новых игроков.</span>' +
+        "</span>" +
+        '<button type="button" class="raffles-active-chooser__cta raffles-active-chooser__cta--referrals" data-raffle-referrals-open="1">Приглашенные</button>' +
+        '<span class="raffles-active-chooser__info-toggle raffles-active-chooser__info-toggle--referrals" aria-hidden="true">' +
+          '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
+          '<span class="raffles-active-chooser__info-copy"><span>Откроется модалка</span><span>Можно вернуться назад</span></span>' +
+        "</span>" +
+      "</div>"
+    );
+  }
+
   function formatRaffleHeroCount(value) {
     var n = Math.max(0, Math.round(parseFloat(value) || 0));
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
@@ -1570,7 +1632,8 @@ function initRaffles() {
   function renderRafflesActiveChooser(activeList, activeId) {
     if (!rafflesActiveChooser) return;
     var list = Array.isArray(activeList) ? activeList : [];
-    if (!list.length) {
+    var displayCount = list.length + 1;
+    if (!displayCount) {
       rafflesActiveChooser.innerHTML = "";
       rafflesActiveChooser.classList.add("raffles-active-chooser--hidden");
       rafflesActiveChooser.hidden = true;
@@ -1589,10 +1652,12 @@ function initRaffles() {
       "raffles-active-chooser--count-2",
       "raffles-active-chooser--count-3"
     );
-    if (list.length <= 3) {
-      rafflesActiveChooser.classList.add("raffles-active-chooser--count-" + list.length);
+    if (displayCount <= 3) {
+      rafflesActiveChooser.classList.add("raffles-active-chooser--count-" + displayCount);
     }
-    rafflesActiveChooser.innerHTML = list
+    rafflesActiveChooser.innerHTML =
+      renderRafflesReferralPromoCard() +
+      list
       .map(function (raffle, index) {
         var id = String((raffle && raffle.id) || "");
         var selected = selectedId && id === selectedId;
@@ -1686,12 +1751,20 @@ function initRaffles() {
       })
       .join("");
     updateRafflesActiveChooserTimers();
-    ensureRafflesActiveChooserTimer();
+    if (list.length) ensureRafflesActiveChooserTimer();
+    else stopRafflesActiveChooserTimer();
   }
 
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
     rafflesActiveChooser.dataset.bound = "1";
     rafflesActiveChooser.addEventListener("click", function (e) {
+      var referralsBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-referrals-open]") : null;
+      if (referralsBtn && rafflesActiveChooser.contains(referralsBtn)) {
+        e.preventDefault();
+        e.stopPropagation();
+        openRafflesReferralPromo();
+        return;
+      }
       var infoBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-info-id]") : null;
       if (infoBtn && rafflesActiveChooser.contains(infoBtn)) {
         e.preventDefault();
@@ -1722,6 +1795,12 @@ function initRaffles() {
     rafflesActiveChooser.addEventListener("keydown", function (e) {
       var key = e && (e.key || e.code);
       if (key !== "Enter" && key !== " " && key !== "Spacebar") return;
+      var referralsBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-referrals-open]") : null;
+      if (referralsBtn && rafflesActiveChooser.contains(referralsBtn)) {
+        e.preventDefault();
+        openRafflesReferralPromo();
+        return;
+      }
       var infoBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-info-id]") : null;
       if (infoBtn && rafflesActiveChooser.contains(infoBtn)) return;
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
@@ -2526,8 +2605,8 @@ function initRaffles() {
           }
         }
         if (!active) active = activeList[0] || null;
-        var activeCount = activeList.length;
-        var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0);
+        var activeCount = activeList.length + 1;
+        var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0) + RAFFLES_REFERRAL_PROMO_PRIZE_RUB;
         rafflesActiveBroadcastList = activeList.slice();
         if (rafflesActiveInfoOpenId && !raffleListHasId(activeList, rafflesActiveInfoOpenId)) {
           rafflesActiveInfoOpenId = "";
@@ -2543,7 +2622,7 @@ function initRaffles() {
           renderRaffle(active);
           syncRafflesActiveInfoDetailsMount();
         } else {
-          renderRafflesActiveChooser([], "");
+          renderRafflesActiveChooser(activeList, "");
           setRaffleActiveActionsVisible(false);
           setRafflesSubscribersRowVisible(false);
           rafflesActiveInfoOpenId = "";
@@ -2552,7 +2631,7 @@ function initRaffles() {
           if (raffleEmpty) {
             raffleEmpty.textContent = "Нет активных розыгрышей.";
             raffleEmpty.classList.remove("raffle-empty--login");
-            raffleEmpty.classList.remove("raffle-empty--hidden");
+            raffleEmpty.classList.add("raffle-empty--hidden");
           }
           var rgGate = document.getElementById("raffleGuestGate");
           if (rgGate) {
@@ -2574,7 +2653,7 @@ function initRaffles() {
             raffleTimerInterval = null;
           }
         }
-        updateRaffleBadge(activeList.length, activeSumRub);
+        updateRaffleBadge(activeCount, activeSumRub);
 
         if (switchToActive && typeof setRafflesTab === "function") setRafflesTab("active");
         else if (switchToCompleted && typeof setRafflesTab === "function") setRafflesTab("completed");

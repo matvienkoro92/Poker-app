@@ -1,4 +1,5 @@
 (function initClubReferralsMenu() {
+  var referralsReturnToRaffles = false;
   var invitedState = {
     loading: false,
     loaded: false,
@@ -157,6 +158,7 @@
       '<div class="club-referrals-modal__backdrop" data-referrals-close></div>' +
       '<section class="club-referrals-modal__panel">' +
         '<button type="button" class="club-referrals-modal__close" data-referrals-close aria-label="Закрыть">×</button>' +
+        '<button type="button" class="club-referrals-modal__return club-referrals-modal__return--hidden" data-referrals-return-raffles hidden>← К розыгрышам</button>' +
         '<div class="club-referrals-modal__hero">' +
           '<h2 class="club-referrals-modal__title">Приглашённые</h2>' +
           '<p class="club-referrals-modal__lead">Выберите любую ссылку ниже на любой раздел который будет интересен вашему другу</p>' +
@@ -197,6 +199,12 @@
     modal.addEventListener("click", function (e) {
       var close = e.target && e.target.closest ? e.target.closest("[data-referrals-close]") : null;
       if (close && modal.contains(close)) closeModal();
+      var returnBtn = e.target && e.target.closest ? e.target.closest("[data-referrals-return-raffles]") : null;
+      if (returnBtn && modal.contains(returnBtn)) {
+        closeModal();
+        returnToRaffles();
+        return;
+      }
       var tab = e.target && e.target.closest ? e.target.closest("[data-referrals-tab]") : null;
       if (tab && modal.contains(tab)) {
         switchTab(tab.getAttribute("data-referrals-tab") || "links");
@@ -214,6 +222,29 @@
       }
     });
     return modal;
+  }
+
+  function setReturnToRafflesVisible(modal, visible) {
+    referralsReturnToRaffles = !!visible;
+    if (!modal) modal = document.getElementById("clubReferralsModal");
+    if (modal) modal.classList.toggle("club-referrals-modal--from-raffles", referralsReturnToRaffles);
+    var btn = modal ? modal.querySelector("[data-referrals-return-raffles]") : null;
+    if (!btn) return;
+    btn.classList.toggle("club-referrals-modal__return--hidden", !referralsReturnToRaffles);
+    btn.hidden = !referralsReturnToRaffles;
+  }
+
+  function returnToRaffles() {
+    try {
+      if (typeof window !== "undefined") window.__pokerRafflesOpenActiveTab = true;
+    } catch (eSetRafflesFlag) {}
+    if (typeof setView === "function") {
+      setView("raffles");
+      return;
+    }
+    try {
+      if (location && location.hash !== "#raffles") location.hash = "#raffles";
+    } catch (eHash) {}
   }
 
   function switchTab(name) {
@@ -444,15 +475,23 @@
     fallback();
   }
 
-  function openModal() {
+  function openModal(options) {
+    var opts = options && typeof options === "object" ? options : {};
     var modal = ensureModal();
+    var initialTab = opts.tab || opts.initialTab || "links";
     renderLinks();
-    switchTab("links");
+    switchTab(initialTab);
+    setReturnToRafflesVisible(
+      modal,
+      !!(opts.from === "raffles" || opts.returnTo === "raffles" || opts.returnToRaffles)
+    );
     modal.classList.remove("club-referrals-modal--hidden");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("club-referrals-modal-open");
-    var closeBtn = modal.querySelector(".club-referrals-modal__close");
-    if (closeBtn && closeBtn.focus) setTimeout(function () { closeBtn.focus(); }, 0);
+    var focusBtn = referralsReturnToRaffles
+      ? modal.querySelector("[data-referrals-return-raffles]")
+      : modal.querySelector(".club-referrals-modal__close");
+    if (focusBtn && focusBtn.focus) setTimeout(function () { focusBtn.focus(); }, 0);
   }
 
   function closeModal() {
@@ -461,7 +500,14 @@
     modal.classList.add("club-referrals-modal--hidden");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("club-referrals-modal-open");
+    setReturnToRafflesVisible(modal, false);
   }
+
+  window.openClubReferralsModal = function (options) {
+    closeHeaderMoreMenu();
+    openModal(options || {});
+  };
+  window.pokerOpenClubReferralsModal = window.openClubReferralsModal;
 
   document.addEventListener("click", function (e) {
     var btn = e.target && e.target.closest ? e.target.closest("#clubReferralsOpenBtn") : null;

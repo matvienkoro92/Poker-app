@@ -152,6 +152,10 @@ function initProfileFriends() {
   var modal = document.getElementById("friendsListModal");
   var listEl = document.getElementById("friendsListModalList");
   var previewEl = document.getElementById("profileFriendsPreview");
+  var searchForm = document.getElementById("profileFriendsSearchForm");
+  var searchInput = document.getElementById("profileFriendsSearchInput");
+  var searchBtn = document.getElementById("profileFriendsSearchBtn");
+  var searchResult = document.getElementById("profileFriendsSearchResult");
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -167,6 +171,105 @@ function initProfileFriends() {
   function alertText(text) {
     if (tg && tg.showAlert) tg.showAlert(text);
     else if (typeof alert === "function") alert(text);
+  }
+
+  function setSearchResult(text, kind) {
+    if (!searchResult) return;
+    var msg = String(text || "").trim();
+    searchResult.textContent = msg;
+    searchResult.hidden = !msg;
+    searchResult.classList.toggle("profile-friends__search-result--error", kind === "error");
+    searchResult.classList.toggle("profile-friends__search-result--ok", kind === "ok");
+  }
+
+  function profileFriendsAuthQuery() {
+    return typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "";
+  }
+
+  function profileFriendsDisplayName(data, fallback) {
+    data = data || {};
+    var name = data.contactName || data.chatDisplayName || data.pokerPlusNickname || data.userName || data.dtId || data.userId || fallback || "Игрок";
+    name = String(name || "").trim();
+    return name.indexOf("@") === 0 ? name.slice(1) : name || "Игрок";
+  }
+
+  function fetchProfileSearch(step) {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base) base = "";
+    return fetch(base + "/api/users?" + step.param + "=" + encodeURIComponent(step.value) + profileFriendsAuthQuery(), { cache: "no-store" })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          data = data || {};
+          data.__status = r.status;
+          return data;
+        });
+      });
+  }
+
+  function buildProfileSearchSteps(raw) {
+    var value = String(raw || "").trim();
+    var clean = value.replace(/^@+/, "").trim();
+    var upper = value.toUpperCase();
+    if (/^ID\d{6}$/.test(upper)) return [{ param: "id", value: upper }];
+    if (/^\d+$/.test(clean) || /^(?:poker\s*21|p21|pp)\s*[:#-]?\s*\d+$/i.test(clean)) {
+      return [{ param: "ratingNick", value: clean }];
+    }
+    return [
+      { param: "username", value: clean },
+      { param: "ratingNick", value: clean },
+    ];
+  }
+
+  function runProfileSearch(steps, raw, index, lastError) {
+    if (index >= steps.length) {
+      var err = (lastError && lastError.error) || "Игрок не найден";
+      throw new Error(err);
+    }
+    return fetchProfileSearch(steps[index]).then(function (data) {
+      if (data && data.ok && (data.userId || data.chatUserId || data.dtId)) return data;
+      return runProfileSearch(steps, raw, index + 1, data);
+    });
+  }
+
+  function openFoundProfile(data, raw) {
+    var id = String((data && (data.userId || data.chatUserId || data.dtId)) || "").trim();
+    if (!id) {
+      setSearchResult("Профиль найден, но не удалось открыть карточку.", "error");
+      return;
+    }
+    var name = profileFriendsDisplayName(data, raw);
+    if (typeof window.openChatUserModalById === "function") {
+      window.openChatUserModalById(id, name, "");
+      setSearchResult("Открываю профиль: " + name, "ok");
+      return;
+    }
+    setSearchResult("Игрок найден: " + name, "ok");
+  }
+
+  function initProfileFriendsSearch() {
+    if (!searchForm || !searchInput || searchForm.dataset.friendsSearchBound) return;
+    searchForm.dataset.friendsSearchBound = "1";
+    searchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var raw = String(searchInput.value || "").trim();
+      if (!raw) {
+        setSearchResult("Введите логин TG, ID Poker21 или ник.", "error");
+        searchInput.focus();
+        return;
+      }
+      if (searchBtn) searchBtn.disabled = true;
+      setSearchResult("Ищу игрока...", "");
+      runProfileSearch(buildProfileSearchSteps(raw), raw, 0, null)
+        .then(function (data) {
+          openFoundProfile(data, raw);
+        })
+        .catch(function (err) {
+          setSearchResult((err && err.message) || "Игрок не найден", "error");
+        })
+        .then(function () {
+          if (searchBtn) searchBtn.disabled = false;
+        });
+    });
   }
 
   function closeFriendsModal() {
@@ -191,6 +294,52 @@ function initProfileFriends() {
 
   function previewAvatar(row) {
     return String((row && (row.avatarUrl || row.avatar || row.photoUrl)) || "./assets/avatar-chip.jpg").trim() || "./assets/avatar-chip.jpg";
+  }
+
+  function buildFriendInviteLink() {
+    if (typeof window !== "undefined" && typeof window.pokerBuildPersonalInviteLink === "function") return window.pokerBuildPersonalInviteLink("profile");
+    if (typeof pokerBuildPersonalInviteLink === "function") return pokerBuildPersonalInviteLink("profile");
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink("profile");
+    try {
+      return String(location && location.origin ? location.origin : "").replace(/\/+$/, "") + "/?startapp=profile";
+    } catch (eLocation) {
+      return "";
+    }
+  }
+
+  function shareFriendInvite() {
+    var link = buildFriendInviteLink();
+    if (!link) {
+      alertText("Не удалось создать ссылку приглашения.");
+      return;
+    }
+    var title = "Приглашение в покерный клуб";
+    var text = "Приглашение стать другом в покерном клубе";
+    var fullText = text + "\n" + link;
+    var done = function () {
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("profile_friend_invite");
+    };
+    var fallback = function () {
+      var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+        ? pokerBuildTelegramShareUrlDialog(link, text)
+        : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+      var tg = typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else if (typeof window !== "undefined" && typeof window.open === "function") window.open(shareUrl, "_blank", "noopener");
+      done();
+    };
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: title, text: fullText, url: link }).then(function (ok) {
+        if (ok) {
+          done();
+          return;
+        }
+        fallback();
+      }).catch(fallback);
+      return;
+    }
+    fallback();
   }
 
   function inviteSlotHtml() {
@@ -221,12 +370,12 @@ function initProfileFriends() {
     previewEl.querySelectorAll(".profile-friends__invite").forEach(function (inviteBtn) {
       inviteBtn.addEventListener("click", function (e) {
         e.preventDefault();
-        var refBtn = document.getElementById("clubReferralsOpenBtn");
-        if (refBtn && typeof refBtn.click === "function") refBtn.click();
-        else alertText("Откройте пригласительные ссылки в меню.");
+        shareFriendInvite();
       });
     });
   }
+
+  initProfileFriendsSearch();
 
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
