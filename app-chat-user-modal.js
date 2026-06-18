@@ -39,7 +39,7 @@ function pokerFormatChatLastSeenRu(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return "";
     return (
-      "был онлайн " +
+      "был онлайн\n" +
       d.toLocaleString("ru-RU", {
         day: "numeric",
         month: "short",
@@ -90,6 +90,7 @@ if (chatUserModalEl) {
   var modalAchievements = document.getElementById("chatUserModalAchievements");
   var modalAchievementsList = document.getElementById("chatUserModalAchievementsList");
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
+  var modalStatusXp = document.getElementById("chatUserModalStatusXp");
   var modalStatusFish = modalStatusScale ? modalStatusScale.querySelector(".chat-user-modal__status-fish") : null;
   var modalStatusSection = modalStatusScale && modalStatusScale.closest ? modalStatusScale.closest(".chat-user-modal__status") : null;
   var modalStatusCards = modalStatusScale ? modalStatusScale.querySelectorAll(".chat-user-modal__status-card") : [];
@@ -115,6 +116,32 @@ if (chatUserModalEl) {
   var chatUserModalBlockedByMe = false;
   var chatUserModalBlockBusy = false;
   var chatUserModalBlockSeq = 0;
+  function chatUserModalFormatXp(value) {
+    if (typeof pokerProfileFormatRake === "function") return pokerProfileFormatRake(value);
+    var n = Math.max(0, Math.floor(Number(value) || 0));
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+  function syncChatUserModalStatusXp(pointsValue) {
+    if (!modalStatusXp) return;
+    if (pointsValue == null || pointsValue === "" || typeof pokerProfileStatusFromRake !== "function") {
+      modalStatusXp.textContent = "";
+      modalStatusXp.hidden = true;
+      return;
+    }
+    var status = pokerProfileStatusFromRake(pointsValue);
+    if (!status) {
+      modalStatusXp.textContent = "";
+      modalStatusXp.hidden = true;
+      return;
+    }
+    var currentXp = Math.max(0, Math.floor((Number(status.points) || 0) - (Number(status.levelStart) || 0)));
+    var neededXp = Math.max(0, Math.floor((Number(status.nextStart) || 0) - (Number(status.levelStart) || 0)));
+    var leftXp = Math.max(0, Math.floor((Number(status.nextStart) || 0) - (Number(status.points) || 0)));
+    modalStatusXp.textContent = status.level >= 100 || neededXp <= 0
+      ? chatUserModalFormatXp(status.points) + " XP · максимум"
+      : chatUserModalFormatXp(currentXp) + " / " + chatUserModalFormatXp(neededXp) + " XP · до " + status.nextLevel + ": " + chatUserModalFormatXp(leftXp);
+    modalStatusXp.hidden = false;
+  }
   function closeChatUserModal() {
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
@@ -202,11 +229,11 @@ if (chatUserModalEl) {
       modalRatingTab.disabled = !hasNick;
       modalRatingTab.setAttribute("aria-disabled", hasNick ? "false" : "true");
       if (hasNick) {
-        modalRatingTab.setAttribute("title", "Открыть турнирный рейтинг " + chatUserModalRatingNick);
-        modalRatingTab.setAttribute("aria-label", "Открыть турнирный рейтинг " + chatUserModalRatingNick);
+        modalRatingTab.setAttribute("title", "Общий выигрыш в турнирах " + chatUserModalRatingNick);
+        modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах " + chatUserModalRatingNick + ". Подробнее");
       } else {
         modalRatingTab.removeAttribute("title");
-        modalRatingTab.setAttribute("aria-label", "Турнирный рейтинг");
+        modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах. Подробнее");
       }
     }
   }
@@ -465,8 +492,8 @@ if (chatUserModalEl) {
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--pending", pending);
     }
     if (modalEditFriendName) {
-      modalEditFriendName.style.display = isFriend ? "inline-flex" : "none";
-      modalEditFriendName.disabled = false;
+      modalEditFriendName.style.display = "none";
+      modalEditFriendName.disabled = true;
     }
     if (modalRemoveFriend) {
       modalRemoveFriend.style.display = isFriend ? "inline-flex" : "none";
@@ -643,6 +670,10 @@ if (chatUserModalEl) {
       modalLastSeen.textContent = "";
       modalLastSeen.hidden = true;
     }
+    if (modalStatusXp) {
+      modalStatusXp.textContent = "";
+      modalStatusXp.hidden = true;
+    }
     if (modalEditFriendName) modalEditFriendName.style.display = "none";
     if (modalRemoveFriend) modalRemoveFriend.style.display = "none";
     if (modalVerifiedBadge) modalVerifiedBadge.classList.add("chat-user-modal__verified--hidden");
@@ -723,6 +754,7 @@ if (chatUserModalEl) {
             modalTitleFish.hidden = false;
           }
         }
+        syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
         renderChatUserModalPlayerStats(data);
         if (data && data.ok) {
