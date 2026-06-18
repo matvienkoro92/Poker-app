@@ -1661,7 +1661,6 @@ function initRaffles() {
       rafflesActiveChooser.classList.add("raffles-active-chooser--count-" + displayCount);
     }
     rafflesActiveChooser.innerHTML =
-      renderRafflesReferralPromoCard() +
       list
       .map(function (raffle, index) {
         var id = String((raffle && raffle.id) || "");
@@ -1754,7 +1753,8 @@ function initRaffles() {
           "</div>"
         );
       })
-      .join("");
+      .join("") +
+      renderRafflesReferralPromoCard();
     updateRafflesActiveChooserTimers();
     if (list.length) ensureRafflesActiveChooserTimer();
     else stopRafflesActiveChooserTimer();

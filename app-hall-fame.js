@@ -446,6 +446,7 @@ initHallOfFamePanelShareButtons();
 var hallFishRatingRowsCache = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
+var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 
 function hallFishEsc(s) {
   if (s == null) return "";
@@ -570,6 +571,22 @@ function hallFishReadLocalCurrentIds() {
   return ids;
 }
 
+function hallFishCurrentPoker21Linked() {
+  try {
+    if (window.__pokerHallFishPoker21Linked === true) return true;
+    if (window.__pokerHeaderPoker21Linked === true) return true;
+    if (String(window.__pokerPlusUserId || "").trim()) return true;
+  } catch (eLinked) {}
+  return false;
+}
+
+function hallFishSetSubtitle(subtitle) {
+  if (!subtitle) return;
+  var linked = hallFishCurrentPoker21Linked();
+  subtitle.hidden = !!linked;
+  subtitle.textContent = linked ? "" : HALL_FISH_LINK_HINT;
+}
+
 function hallFishLoadCurrentIds() {
   if (hallFishCurrentIdsCache) return Promise.resolve(hallFishCurrentIdsCache.slice());
   if (hallFishCurrentIdsPromise) return hallFishCurrentIdsPromise;
@@ -594,6 +611,9 @@ function hallFishLoadCurrentIds() {
         if (s && ids.indexOf(s) === -1) ids.push(s);
       }
       if (data && data.ok) {
+        try {
+          window.__pokerHallFishPoker21Linked = !!(data.pokerPlusVerified || data.p21Id || data.pokerPlusUserId);
+        } catch (eLinkedFlag) {}
         add(data.p21Id);
         add(data.pokerPlusUserId);
         add(data.dtId);
@@ -678,7 +698,7 @@ function hallFishSetModalState(message, rows, currentIds) {
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var myRank = document.getElementById("hallFishRatingMyRank");
   var body = document.getElementById("hallFishRatingBody");
-  if (subtitle) subtitle.textContent = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
+  hallFishSetSubtitle(subtitle);
   if (myRank) myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
   if (body) body.innerHTML = rows ? hallFishRenderRows(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
   modal.hidden = false;
@@ -715,7 +735,7 @@ function openHallFishRatingModal() {
       var body = document.getElementById("hallFishRatingBody");
       var subtitle = document.getElementById("hallFishRatingSubtitle");
       var myRank = document.getElementById("hallFishRatingMyRank");
-      if (subtitle) subtitle.textContent = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
+      hallFishSetSubtitle(subtitle);
       if (myRank) myRank.textContent = "Ваш рейтинг —/—";
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
     });
