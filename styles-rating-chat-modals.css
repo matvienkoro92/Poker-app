@@ -492,9 +492,8 @@
 .chat-user-modal__hero--art {
   min-height: 204px;
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(5, 8, 14, 0.34) 52%, rgba(5, 8, 14, 0.94) 66%, rgba(5, 8, 14, 0.98) 100%),
-    url("./assets/chat-profile-hero-bg-21.png") center 54% / cover no-repeat,
-    linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
+    radial-gradient(circle at 86% 20%, rgba(214, 171, 83, 0.1), transparent 38%),
+    linear-gradient(115deg, rgba(6, 10, 18, 0.98), rgba(4, 7, 14, 0.98) 54%, rgba(3, 5, 10, 0.99));
 }
 .chat-user-modal__hero-status {
   min-width: 0;
@@ -801,7 +800,10 @@
   justify-content: center;
   min-height: 204px;
   padding: 8px 0 0;
-  background: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(2, 5, 10, 0.04) 70%, rgba(3, 5, 10, 0.9) 100%),
+    url("./assets/chat-profile-hero-bg-21.png") 46% 54% / cover no-repeat,
+    linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
 }
 .chat-user-modal__rating-art[hidden] {
   display: none !important;
@@ -1197,7 +1199,10 @@
   .chat-user-modal__hero--art .chat-user-modal__rating-art {
     min-height: 172px;
     padding-top: 6px;
-    background: none;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(2, 5, 10, 0.04) 68%, rgba(3, 5, 10, 0.88) 100%),
+      url("./assets/chat-profile-hero-bg-21.png") 46% 54% / cover no-repeat,
+      linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
   }
 
   .chat-user-modal__rating-art-img {
