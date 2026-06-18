@@ -157,8 +157,12 @@ function initProfileFriends() {
   var searchForm = document.getElementById("profileFriendsSearchForm");
   var searchInput = document.getElementById("profileFriendsSearchInput");
   var searchBtn = document.getElementById("profileFriendsSearchBtn");
+  var searchSuggestions = document.getElementById("profileFriendsSearchSuggestions");
   var searchResult = document.getElementById("profileFriendsSearchResult");
   var searchFoundProfile = null;
+  var searchSuggestRowsCache = null;
+  var searchSuggestRowsPromise = null;
+  var searchSuggestTimer = null;
   var focusIncomingOnOpen = false;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
@@ -184,6 +188,63 @@ function initProfileFriends() {
     searchResult.hidden = !msg;
     searchResult.classList.toggle("profile-friends__search-result--error", kind === "error");
     searchResult.classList.toggle("profile-friends__search-result--ok", kind === "ok");
+  }
+
+  function profileFriendsSearchErrorText(err) {
+    var msg = String((err && err.message) || err || "").trim();
+    if (msg === "rating_profile_not_linked" || msg === "Игрок не найден") return "Точного совпадения нет.";
+    return msg || "Игрок не найден";
+  }
+
+  function clearSearchSuggestions() {
+    if (!searchSuggestions) return;
+    searchSuggestions.innerHTML = "";
+    searchSuggestions.hidden = true;
+  }
+
+  function setSearchSuggestions(rows, raw) {
+    if (!searchSuggestions) return;
+    rows = Array.isArray(rows) ? rows.slice(0, 4) : [];
+    if (!rows.length) {
+      clearSearchSuggestions();
+      return;
+    }
+    searchSuggestions.innerHTML =
+      '<div class="profile-friends__search-suggestions-title">Похожие игроки</div>' +
+      rows.map(function (row, idx) {
+        var id = String((row && (row.accountId || row.userId || row.chatUserId)) || "").trim();
+        var name = profileFriendsDisplayName({
+          pokerPlusNickname: row && row.name,
+          userName: row && row.telegram,
+          userId: id,
+        }, raw);
+        var subParts = [];
+        if (id) subParts.push(id);
+        if (row && row.telegram) subParts.push(String(row.telegram));
+        if (row && row.level) subParts.push("ур. " + String(row.level));
+        return '<button type="button" class="profile-friends__search-suggestion" data-profile-search-suggestion="' + esc(String(idx)) + '">' +
+          '<span class="profile-friends__search-suggestion-name">' + esc(name) + '</span>' +
+          '<span class="profile-friends__search-suggestion-meta">' + esc(subParts.join(" · ") || "Открыть профиль") + '</span>' +
+        '</button>';
+      }).join("");
+    searchSuggestions.hidden = false;
+    Array.prototype.forEach.call(searchSuggestions.querySelectorAll("[data-profile-search-suggestion]"), function (item) {
+      item.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var index = parseInt(item.getAttribute("data-profile-search-suggestion") || "-1", 10);
+        var row = rows[index];
+        if (!row) return;
+        openFoundProfile({
+          id: row.accountId || row.userId || row.chatUserId,
+          userId: row.accountId || row.userId || row.chatUserId,
+          chatUserId: row.chatUserId || "",
+          pokerPlusNickname: row.name || "",
+          userName: row.telegram || "",
+          name: row.name || row.telegram || row.accountId || "Игрок",
+        }, raw, true);
+      });
+    });
   }
 
   function setSearchFoundProfile(data, raw) {
@@ -272,6 +333,183 @@ function initProfileFriends() {
           return data;
         });
       });
+  }
+
+  function profileSearchNormalizeText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/^@+/, "")
+      .replace(/ё/g, "е")
+      .replace(/[^0-9a-zа-я_]+/gi, "")
+      .trim();
+  }
+
+  function profileSearchKeyboardRuToEn(value) {
+    var map = {
+      "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[", "ъ": "]",
+      "ф": "a", "ы": "s", "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l", "ж": ";", "э": "'",
+      "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m", "б": ",", "ю": "."
+    };
+    return String(value || "").replace(/[А-Яа-яЁё]/g, function (ch) {
+      var low = ch.toLowerCase().replace(/ё/g, "е");
+      var next = map[low] || ch;
+      return ch === low ? next : String(next).toUpperCase();
+    });
+  }
+
+  function profileSearchRuToLatin(value) {
+    var map = {
+      "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z", "и": "i", "й": "y",
+      "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f",
+      "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya"
+    };
+    return String(value || "").replace(/[А-Яа-яЁё]/g, function (ch) {
+      var low = ch.toLowerCase();
+      var next = map[low] != null ? map[low] : ch;
+      return ch === low ? next : String(next).toUpperCase();
+    });
+  }
+
+  function profileSearchForms(value) {
+    var source = String(value || "").trim();
+    var variants = [
+      source,
+      source.replace(/^@+/, ""),
+      profileSearchKeyboardRuToEn(source),
+      profileSearchRuToLatin(source)
+    ];
+    var out = [];
+    variants.forEach(function (variant) {
+      var normalized = profileSearchNormalizeText(variant);
+      if (normalized && out.indexOf(normalized) === -1) out.push(normalized);
+      var noIdPrefix = normalized.replace(/^id/i, "");
+      if (noIdPrefix && noIdPrefix !== normalized && out.indexOf(noIdPrefix) === -1) out.push(noIdPrefix);
+    });
+    return out;
+  }
+
+  function profileSearchDistance(a, b, maxDistance) {
+    a = String(a || "");
+    b = String(b || "");
+    if (Math.abs(a.length - b.length) > maxDistance) return maxDistance + 1;
+    var prev = [];
+    var cur = [];
+    for (var j = 0; j <= b.length; j += 1) prev[j] = j;
+    for (var i = 1; i <= a.length; i += 1) {
+      cur[0] = i;
+      var rowMin = cur[0];
+      for (j = 1; j <= b.length; j += 1) {
+        var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (cur[j] < rowMin) rowMin = cur[j];
+      }
+      if (rowMin > maxDistance) return maxDistance + 1;
+      var tmp = prev;
+      prev = cur;
+      cur = tmp;
+    }
+    return prev[b.length];
+  }
+
+  function profileSearchRowForms(row) {
+    var values = [
+      row && row.name,
+      row && row.telegram,
+      row && row.accountId,
+      String((row && row.accountId) || "").replace(/^ID/i, "")
+    ];
+    var out = [];
+    values.forEach(function (value) {
+      profileSearchForms(value).forEach(function (form) {
+        if (form && out.indexOf(form) === -1) out.push(form);
+      });
+    });
+    return out;
+  }
+
+  function profileSearchSuggestionScore(row, queryForms) {
+    var rowForms = profileSearchRowForms(row);
+    var best = 0;
+    queryForms.forEach(function (q) {
+      rowForms.forEach(function (candidate) {
+        if (!q || !candidate) return;
+        if (candidate === q) best = Math.max(best, 120);
+        else if (candidate.indexOf(q) === 0) best = Math.max(best, 100 - Math.max(0, candidate.length - q.length));
+        else if (candidate.indexOf(q) !== -1) best = Math.max(best, 80 - candidate.indexOf(q));
+        else if (q.length >= 3) {
+          var maxDistance = q.length <= 5 ? 1 : 2;
+          var distance = profileSearchDistance(q, candidate.slice(0, Math.max(q.length, Math.min(candidate.length, q.length + 2))), maxDistance);
+          if (distance <= maxDistance) best = Math.max(best, 62 - distance * 12);
+        }
+      });
+    });
+    return best;
+  }
+
+  function profileSearchRowsFromCrmData(data) {
+    return (Array.isArray(data && data.levelRows) ? data.levelRows : [])
+      .map(function (row) {
+        return {
+          accountId: String((row && row.accountId) || "").trim(),
+          name: String((row && row.name) || "").trim(),
+          telegram: String((row && row.telegram) || "").trim(),
+          level: Number(row && row.level) || 0,
+        };
+      })
+      .filter(function (row) { return !!row.accountId && (row.name || row.telegram); });
+  }
+
+  function loadProfileSearchSuggestRows() {
+    if (searchSuggestRowsCache) return Promise.resolve(searchSuggestRowsCache);
+    if (searchSuggestRowsPromise) return searchSuggestRowsPromise;
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) throw new Error((data && data.error) || "suggestions_failed");
+        searchSuggestRowsCache = profileSearchRowsFromCrmData(data);
+        return searchSuggestRowsCache;
+      })
+      .catch(function () {
+        searchSuggestRowsCache = [];
+        return searchSuggestRowsCache;
+      })
+      .then(function (rows) {
+        searchSuggestRowsPromise = null;
+        return rows;
+      });
+    return searchSuggestRowsPromise;
+  }
+
+  function updateProfileSearchSuggestions(raw) {
+    raw = String(raw || "").trim();
+    var queryForms = profileSearchForms(raw).filter(function (form) { return form.length >= 2; });
+    if (!queryForms.length) {
+      clearSearchSuggestions();
+      return Promise.resolve([]);
+    }
+    return loadProfileSearchSuggestRows().then(function (rows) {
+      var suggestions = rows
+        .map(function (row) {
+          return { row: row, score: profileSearchSuggestionScore(row, queryForms) };
+        })
+        .filter(function (item) { return item.score >= 50; })
+        .sort(function (a, b) {
+          return b.score - a.score || (Number(b.row.level) || 0) - (Number(a.row.level) || 0) || String(a.row.name).localeCompare(String(b.row.name), "ru");
+        })
+        .slice(0, 4)
+        .map(function (item) { return item.row; });
+      setSearchSuggestions(suggestions, raw);
+      return suggestions;
+    });
+  }
+
+  function scheduleProfileSearchSuggestions() {
+    if (searchSuggestTimer) clearTimeout(searchSuggestTimer);
+    searchSuggestTimer = setTimeout(function () {
+      searchSuggestTimer = null;
+      updateProfileSearchSuggestions(searchInput && searchInput.value);
+    }, 180);
   }
 
   function buildProfileSearchSteps(raw) {
@@ -365,10 +603,30 @@ function initProfileFriends() {
       searchForm.addEventListener(eventName, function (e) {
         e.stopPropagation();
       });
+      if (searchSuggestions) {
+        searchSuggestions.addEventListener(eventName, function (e) {
+          e.stopPropagation();
+        });
+      }
     });
     searchForm.addEventListener("touchend", function (e) {
       e.stopPropagation();
     }, { passive: true });
+    if (searchSuggestions) {
+      searchSuggestions.addEventListener("touchend", function (e) {
+        e.stopPropagation();
+      }, { passive: true });
+    }
+    searchInput.addEventListener("input", function () {
+      var raw = String(searchInput.value || "").trim();
+      searchFoundProfile = null;
+      if (!raw) {
+        clearSearchSuggestions();
+        setSearchResult("", "");
+        return;
+      }
+      scheduleProfileSearchSuggestions();
+    });
     searchForm.addEventListener("submit", function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -389,13 +647,18 @@ function initProfileFriends() {
       restoreScroll();
       runProfileSearch(buildProfileSearchSteps(raw), raw, 0, null)
         .then(function (data) {
+          clearSearchSuggestions();
           setSearchFoundProfile(data, raw);
           openFoundProfile(data, raw, false);
           restoreScroll();
         })
         .catch(function (err) {
           searchFoundProfile = null;
-          setSearchResult((err && err.message) || "Игрок не найден", "error");
+          var errorText = profileFriendsSearchErrorText(err);
+          setSearchResult(errorText, "error");
+          updateProfileSearchSuggestions(raw).then(function (suggestions) {
+            if (suggestions && suggestions.length) setSearchResult("Точного совпадения нет. Похожие варианты ниже.", "error");
+          });
           restoreScroll();
         })
         .then(function () {

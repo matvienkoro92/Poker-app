@@ -247,8 +247,9 @@ if (chatUserModalEl) {
     var pending = !isFriend && !!requestOutgoing;
     if (modalAddFriend) {
       modalAddFriend.style.display = isFriend ? "none" : "";
-      modalAddFriend.disabled = !!isFriend || pending;
-      modalAddFriend.textContent = pending ? "Заявка отправлена" : "Добавить в друзья";
+      modalAddFriend.disabled = !!isFriend;
+      modalAddFriend.textContent = pending ? "Отменить заявку" : "Добавить в друзья";
+      modalAddFriend.setAttribute("data-chat-user-friend-pending", pending ? "1" : "0");
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--added", !!isFriend);
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--pending", pending);
     }
@@ -646,6 +647,46 @@ if (chatUserModalEl) {
   if (modalAddFriend) {
     modalAddFriend.addEventListener("click", function () {
       if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalAddFriend.disabled) return;
+      var isPendingCancel = modalAddFriend.getAttribute("data-chat-user-friend-pending") === "1";
+      if (isPendingCancel) {
+        modalAddFriend.disabled = true;
+        fetch(base + "/api/friends", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerApiAuthJsonBody({ action: "cancel", targetUserId: chatUserModalUserId })),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            modalAddFriend.disabled = false;
+            if (d && d.ok) {
+              try {
+                var set = window.__pokerChatOutgoingFriendRequestIdsSet || {};
+                delete set[String(chatUserModalUserId)];
+                if (typeof normalizePeerIdForChat === "function") {
+                  var nxUid = normalizePeerIdForChat(chatUserModalUserId);
+                  if (nxUid) delete set[nxUid];
+                }
+                for (var key in set) {
+                  if (set[key] && typeof peerChatIdsEqual === "function" && peerChatIdsEqual(key, chatUserModalUserId)) delete set[key];
+                }
+                window.__pokerChatOutgoingFriendRequestIdsSet = set;
+              } catch (eClearModalReq) {}
+              updateChatUserModalFriendState(false, chatUserModalUserName || chatUserModalPeerLogin || "Игрок", false);
+              if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+              if (typeof window.chatRefresh === "function") window.chatRefresh();
+              if (tg && tg.showAlert) tg.showAlert(d.message || "Заявка отменена");
+              else if (typeof alert === "function") alert(d.message || "Заявка отменена");
+            } else if (tg && tg.showAlert) {
+              tg.showAlert((d && d.error) || "Ошибка");
+            }
+          })
+          .catch(function () {
+            modalAddFriend.disabled = false;
+          });
+        return;
+      }
       var contactName = (chatUserModalUserName || chatUserModalPeerLogin || "").trim();
       modalAddFriend.disabled = true;
       fetch(base + "/api/friends", {
