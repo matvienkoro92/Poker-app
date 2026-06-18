@@ -2798,6 +2798,49 @@ async function testRaffleAutoCompleteNotificationDedup(redis) {
   assert.strictEqual((stored.winners || []).length, 1, "auto-complete stores one winner");
 }
 
+async function testRaffleCronRetriesMissingWinnerNotifications(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const now = Date.now();
+  const winners = [1001, 1002, 1003].map((id, index) => ({
+    userId: "tg_" + id,
+    accountId: "ID" + String(100000 + id),
+    name: "Player " + id,
+    prize: "Ticket " + (index + 1),
+    groupIndex: index,
+    winnerReadySlotId: "initial_" + index,
+    winnerReadyWindowStartedAt: new Date(now - 60_000).toISOString(),
+    winnerReadyDeadlineAt: new Date(now + 14 * 60_000).toISOString(),
+    winnerReadyState: "pending",
+  }));
+  const raffle = {
+    id: "contract_raffle_retry_missing_winner_notify",
+    title: "Retry missing notification raffle",
+    totalWinners: 3,
+    groups: [{ prize: "Ticket", count: 3 }],
+    participants: winners,
+    winners,
+    status: "drawn",
+    createdAt: new Date(now - 3600_000).toISOString(),
+    drawnAt: new Date(now - 60_000).toISOString(),
+    winnersNotifiedAt: new Date(now - 30_000).toISOString(),
+  };
+  persistContractRaffle(redis, raffle);
+  redis.l("poker_app:raffle_ids").push(raffle.id);
+  redis.kv.set("poker_app:raffle_winner_notify_sent:" + raffle.id + ":ID101001:tg", "1");
+
+  const r = await call(raffles, req("GET", {
+    action: "tick",
+    secret: process.env.CRON_SECRET,
+  }, undefined, { "x-cron-secret": process.env.CRON_SECRET }));
+  assert.strictEqual(r.statusCode, 200, "cron tick succeeds");
+  assert.strictEqual(r.body.winnerNotificationRetries, 1, "cron reports one raffle retried");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length, 0, "already sent winner is not duplicated");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1002").length, 1, "missing winner 1002 is retried");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "missing winner 1003 is retried");
+}
+
 async function testRaffleDrawnGetDoesNotNotifyWinners(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -5233,6 +5276,7 @@ async function main() {
     ["raffle winner notification caps overflow", testRaffleWinnerNotificationCapsOverflow],
     ["raffle winner notification requires stored winner", testRaffleWinnerNotificationRequiresStoredWinner],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
+    ["raffle cron retries missing winner notifications", testRaffleCronRetriesMissingWinnerNotifications],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle daily schedule dedupe", testRaffleDailyScheduleDedupe],
@@ -5262,7 +5306,12 @@ async function main() {
     ["rating/gazette notifications", testRatingGazetteNotifications],
   ];
   const results = [];
-  for (const [name, fn] of tests) {
+  const filter = String(process.env.CONTRACT_TEST_FILTER || "").trim().toLowerCase();
+  const selectedTests = filter ? tests.filter(([name]) => String(name).toLowerCase().includes(filter)) : tests;
+  if (filter && selectedTests.length === 0) {
+    throw new Error("No contract tests matched filter: " + filter);
+  }
+  for (const [name, fn] of selectedTests) {
     const redis = new MemoryRedis();
     installFetch(redis);
     await fn(redis);
