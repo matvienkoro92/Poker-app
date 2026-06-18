@@ -6459,3 +6459,27 @@ button.raffle-feedback-action {
     font-size: clamp(6px, 1.85vw, 8px) !important;
   }
 }
+
+/* После удаления верхней плашки 10 000 ₽ у referral-карточки не должно оставаться растянутой пустой зоны. */
+.raffles-active-chooser__item--referrals,
+.raffles-active-chooser__item:only-child.raffles-active-chooser__item--referrals,
+.raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child.raffles-active-chooser__item--referrals {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  grid-template-rows: auto auto auto auto auto !important;
+  align-content: start !important;
+  gap: 8px !important;
+  padding-bottom: 14px !important;
+}
+
+.raffles-active-chooser__item--referrals .raffles-active-chooser__body,
+.raffles-active-chooser__item--referrals .raffles-active-chooser__facts--referrals,
+.raffles-active-chooser__item--referrals .raffles-active-chooser__cta--referrals,
+.raffles-active-chooser__item--referrals .raffles-active-chooser__info-toggle--referrals {
+  align-self: start !important;
+}
+
+.raffles-active-chooser__item--referrals .raffles-active-chooser__facts--referrals {
+  margin-top: 2px !important;
+}

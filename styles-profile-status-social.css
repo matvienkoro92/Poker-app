@@ -311,6 +311,42 @@
   color: #ffd66d;
   font-weight: 950;
 }
+.profile-points-info-modal__subtitle {
+  margin: 6px 0 0;
+  color: #ffe4a0;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.15;
+}
+.profile-points-info-modal__level-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.profile-points-info-modal__level-list li {
+  min-width: 0;
+  padding: 9px 10px;
+  color: rgba(255, 244, 214, 0.92);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 12px;
+  background: rgba(5, 15, 32, 0.58);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.profile-points-info-modal__level-list strong {
+  color: #89d7ff;
+  font-weight: 950;
+  white-space: nowrap;
+}
+@media (max-width: 430px) {
+  .profile-points-info-modal__level-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .profile-status__labels--cards {
   display: flex;
   align-items: center;

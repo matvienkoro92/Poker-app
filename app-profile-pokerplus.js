@@ -4,6 +4,7 @@ function initProfilePokerPlus() {
   var input = document.getElementById("profilePokerPlusCiphertextInput");
   var bindBtn = document.getElementById("profilePokerPlusBindBtn");
   var refreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
+  var statusRefreshBtn = document.getElementById("profileStatusRefreshBtn");
   var refreshAction = document.getElementById("profilePokerPlusRefreshAction");
   var unbindBtn = document.getElementById("profilePokerPlusUnbindBtn");
   var feedback = document.getElementById("profilePokerPlusFeedback");
@@ -417,8 +418,14 @@ function initProfilePokerPlus() {
   }
 
   function setPokerPlusRefreshButtonText(linked) {
-    if (!refreshBtn) return;
-    refreshBtn.textContent = linked ? (pokerPlusLocale() === "en" ? "Refresh" : "Обновить") : "";
+    var text = linked ? (pokerPlusLocale() === "en" ? "Refresh" : "Обновить") : "";
+    if (refreshBtn) refreshBtn.textContent = text;
+    if (statusRefreshBtn) statusRefreshBtn.textContent = text;
+  }
+
+  function setPokerPlusRefreshButtonsDisabled(disabled) {
+    if (refreshBtn) refreshBtn.disabled = !!disabled;
+    if (statusRefreshBtn) statusRefreshBtn.disabled = !!disabled;
   }
 
   function setPokerPlusInitialLoading(loading) {
@@ -1438,6 +1445,7 @@ function initProfilePokerPlus() {
     input.setAttribute("aria-label", "Ключ из Poker21");
     bindBtn.textContent = "Привязать по ключу из Poker21";
     refreshBtn.hidden = !linked;
+    if (statusRefreshBtn) statusRefreshBtn.hidden = !linked;
     if (refreshAction) refreshAction.hidden = !linked;
     setPokerPlusRefreshButtonText(!!linked);
     unbindBtn.hidden = !linked;
@@ -1575,7 +1583,7 @@ function initProfilePokerPlus() {
     section.hidden = !state.isVerified || !!state.isGuest;
     if (state.isVerified && !state.isGuest && section.dataset.profilePokerPlusLoaded !== "1" && !section.classList.contains("profile-pokerplus-card--linked")) setPokerPlusLinkedMode(false);
     bindBtn.disabled = !state.isVerified || !!state.isGuest;
-    refreshBtn.disabled = !state.isVerified || !!state.isGuest;
+    setPokerPlusRefreshButtonsDisabled(!state.isVerified || !!state.isGuest);
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
     input.disabled = !state.isVerified || !!state.isGuest;
     if (!state.isVerified || state.isGuest) {
@@ -1815,7 +1823,7 @@ function initProfilePokerPlus() {
       return;
     }
     bindBtn.disabled = true;
-    refreshBtn.disabled = true;
+    setPokerPlusRefreshButtonsDisabled(true);
     unbindBtn.disabled = true;
     setFeedback(wasLinked ? "Обновляем Poker21 по ключу…" : "Привязываем Poker21…", false);
     pokerPlusRunFinally(
@@ -1868,7 +1876,7 @@ function initProfilePokerPlus() {
         }),
       function () {
         bindBtn.disabled = false;
-        refreshBtn.disabled = false;
+        setPokerPlusRefreshButtonsDisabled(false);
         unbindBtn.disabled = false;
       }
     );
@@ -1892,7 +1900,7 @@ function initProfilePokerPlus() {
       return;
     }
     bindBtn.disabled = true;
-    refreshBtn.disabled = true;
+    setPokerPlusRefreshButtonsDisabled(true);
     unbindBtn.disabled = true;
     setFeedback("Отвязываем Poker21...", false);
     pokerPlusRunFinally(
@@ -1920,7 +1928,7 @@ function initProfilePokerPlus() {
         }),
       function () {
         bindBtn.disabled = false;
-        refreshBtn.disabled = false;
+        setPokerPlusRefreshButtonsDisabled(false);
         unbindBtn.disabled = false;
       }
     );
@@ -1930,14 +1938,19 @@ function initProfilePokerPlus() {
     bindBtn.dataset.bound = "1";
     bindBtn.addEventListener("click", bindPokerPlus);
   }
+  function refreshPokerPlusFromButton() {
+    setFeedback("Обновляем данные Poker21...", false);
+    try {
+      Promise.resolve(loadProfile(true)).catch(function () {});
+    } catch (eRefreshLoad) {}
+  }
   if (refreshBtn.dataset.bound !== "1") {
     refreshBtn.dataset.bound = "1";
-    refreshBtn.addEventListener("click", function () {
-      setFeedback("Обновляем данные Poker21...", false);
-      try {
-        Promise.resolve(loadProfile(true)).catch(function () {});
-      } catch (eRefreshLoad) {}
-    });
+    refreshBtn.addEventListener("click", refreshPokerPlusFromButton);
+  }
+  if (statusRefreshBtn && statusRefreshBtn.dataset.bound !== "1") {
+    statusRefreshBtn.dataset.bound = "1";
+    statusRefreshBtn.addEventListener("click", refreshPokerPlusFromButton);
   }
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";

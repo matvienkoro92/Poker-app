@@ -702,6 +702,15 @@ function ensureProfilePointsInfoModal() {
           "<li><strong>Победа в SNG:</strong> 400 очков вместо ITM-бонуса.</li>" +
           "<li><strong>Привязка Poker21:</strong> 500 очков.</li>" +
         "</ul>" +
+        '<h4 class="profile-points-info-modal__subtitle">Сколько очков нужно на уровень</h4>' +
+        '<ul class="profile-points-info-modal__level-list">' +
+          "<li><strong>1-10:</strong> +3 000 очков за уровень.</li>" +
+          "<li><strong>10-25:</strong> +7 000 очков за уровень.</li>" +
+          "<li><strong>25-40:</strong> +15 000 очков за уровень.</li>" +
+          "<li><strong>40-60:</strong> +30 000 очков за уровень.</li>" +
+          "<li><strong>60-80:</strong> +60 000 очков за уровень.</li>" +
+          "<li><strong>80-100:</strong> +100 000 очков за уровень.</li>" +
+        "</ul>" +
         '<p class="profile-points-info-modal__note">Участие считается всегда. Если есть победа, бонус ITM за эту игру отдельно не складывается.</p>' +
       "</div>" +
     "</section>";

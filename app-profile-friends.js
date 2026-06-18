@@ -220,6 +220,7 @@ function initProfileFriends() {
         }, raw);
         var subParts = [];
         if (id) subParts.push(id);
+        if (row && row.p21Id) subParts.push("Poker21 " + String(row.p21Id));
         if (row && row.telegram) subParts.push(String(row.telegram));
         if (row && row.level) subParts.push("ур. " + String(row.level));
         return '<button type="button" class="profile-friends__search-suggestion" data-profile-search-suggestion="' + esc(String(idx)) + '">' +
@@ -239,6 +240,7 @@ function initProfileFriends() {
           id: row.accountId || row.userId || row.chatUserId,
           userId: row.accountId || row.userId || row.chatUserId,
           chatUserId: row.chatUserId || "",
+          p21Id: row.p21Id || "",
           pokerPlusNickname: row.name || "",
           userName: row.telegram || "",
           name: row.name || row.telegram || row.accountId || "Игрок",
@@ -388,6 +390,10 @@ function initProfileFriends() {
     return out;
   }
 
+  function profileSearchDigits(value) {
+    return String(value || "").replace(/\D+/g, "");
+  }
+
   function profileSearchDistance(a, b, maxDistance) {
     a = String(a || "");
     b = String(b || "");
@@ -415,6 +421,7 @@ function initProfileFriends() {
     var values = [
       row && row.name,
       row && row.telegram,
+      row && row.p21Id,
       row && row.accountId,
       String((row && row.accountId) || "").replace(/^ID/i, "")
     ];
@@ -431,6 +438,22 @@ function initProfileFriends() {
     var rowForms = profileSearchRowForms(row);
     var best = 0;
     queryForms.forEach(function (q) {
+      var qDigits = profileSearchDigits(q);
+      var rowDigitForms = [
+        profileSearchDigits(row && row.p21Id),
+        profileSearchDigits(row && row.accountId)
+      ].filter(Boolean);
+      if (qDigits.length >= 6) {
+        rowDigitForms.forEach(function (digits) {
+          if (digits === qDigits) best = Math.max(best, 130);
+          else if (digits.indexOf(qDigits) === 0) best = Math.max(best, 112 - Math.max(0, digits.length - qDigits.length));
+          else if (digits.indexOf(qDigits) !== -1) best = Math.max(best, 92 - digits.indexOf(qDigits));
+          else {
+            var numericDistance = profileSearchDistance(qDigits, digits.slice(0, Math.max(qDigits.length, Math.min(digits.length, qDigits.length + 1))), 1);
+            if (numericDistance <= 1) best = Math.max(best, 76 - numericDistance * 14);
+          }
+        });
+      }
       rowForms.forEach(function (candidate) {
         if (!q || !candidate) return;
         if (candidate === q) best = Math.max(best, 120);
@@ -451,6 +474,7 @@ function initProfileFriends() {
       .map(function (row) {
         return {
           accountId: String((row && row.accountId) || "").trim(),
+          p21Id: String((row && (row.p21Id || row.pokerPlusUserId)) || "").trim(),
           name: String((row && row.name) || "").trim(),
           telegram: String((row && row.telegram) || "").trim(),
           level: Number(row && row.level) || 0,
@@ -483,7 +507,17 @@ function initProfileFriends() {
 
   function updateProfileSearchSuggestions(raw) {
     raw = String(raw || "").trim();
-    var queryForms = profileSearchForms(raw).filter(function (form) { return form.length >= 2; });
+    var rawDigits = profileSearchDigits(raw);
+    var numericSource = raw.replace(/^@+/, "").replace(/^id/i, "").trim();
+    var numericQuery = !!rawDigits && /^\d+$/.test(numericSource);
+    if (numericQuery && rawDigits.length < 6) {
+      clearSearchSuggestions();
+      return Promise.resolve([]);
+    }
+    var queryForms = profileSearchForms(raw).filter(function (form) {
+      if (/^\d+$/.test(form)) return form.length >= 6;
+      return form.length >= 2;
+    });
     if (!queryForms.length) {
       clearSearchSuggestions();
       return Promise.resolve([]);
@@ -997,6 +1031,19 @@ function initProfileFriends() {
     var incoming = Array.isArray(data && data.incoming) ? data.incoming : [];
     var outgoing = Array.isArray(data && data.outgoing) ? data.outgoing : [];
     var notices = Array.isArray(data && data.notices) ? data.notices : [];
+    var friendIds = {};
+    friends.forEach(function (row) {
+      var id = pokerFriendsRowId(row);
+      if (id) friendIds[id] = true;
+    });
+    incoming = incoming.filter(function (row) {
+      var id = pokerFriendsRowId(row);
+      return !id || !friendIds[id];
+    });
+    outgoing = outgoing.filter(function (row) {
+      var id = pokerFriendsRowId(row);
+      return !id || !friendIds[id];
+    });
     try {
       if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(friends.length);
     } catch (eFcModal) {}
