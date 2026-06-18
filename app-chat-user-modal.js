@@ -86,6 +86,8 @@ if (chatUserModalEl) {
   var modalSummerRank = document.getElementById("chatUserModalSummerRank");
   var modalSpringRank = document.getElementById("chatUserModalSpringRank");
   var modalWinterRank = document.getElementById("chatUserModalWinterRank");
+  var modalAchievements = document.getElementById("chatUserModalAchievements");
+  var modalAchievementsList = document.getElementById("chatUserModalAchievementsList");
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
   var modalStatusFish = modalStatusScale ? modalStatusScale.querySelector(".chat-user-modal__status-fish") : null;
   var modalStatusSection = modalStatusScale && modalStatusScale.closest ? modalStatusScale.closest(".chat-user-modal__status") : null;
@@ -152,14 +154,14 @@ if (chatUserModalEl) {
   }
   function chatUserModalRatingPlaceText(place) {
     var n = place != null ? parseInt(place, 10) : 0;
-    return n > 0 ? String(n) + "е место" : "—";
+    return n > 0 ? String(n) : "—";
   }
   function chatUserModalRatingPlacesHtml(places) {
     if (!Array.isArray(places) || !places.length) return "—";
     return places.map(function (row) {
       var placeText = chatUserModalRatingPlaceText(row && row.place);
       if (row && row.league) {
-        return '<span class="chat-user-modal__rating-rank-line">Лига ' + escapeHtml(row.league) + " — " + escapeHtml(placeText) + "</span>";
+        return '<span class="chat-user-modal__rating-rank-line">Л' + escapeHtml(row.league) + ": " + escapeHtml(placeText) + "</span>";
       }
       return '<span class="chat-user-modal__rating-rank-line">' + escapeHtml(placeText) + "</span>";
     }).join("");
@@ -167,6 +169,115 @@ if (chatUserModalEl) {
   function setChatUserModalRatingRankValue(el, places) {
     if (!el) return;
     el.innerHTML = chatUserModalRatingPlacesHtml(places);
+  }
+  function chatUserModalSeasonLabel(season) {
+    if (season === "summer") return "Лето 2026";
+    if (season === "spring") return "Весна 2026";
+    if (season === "winter") return "Зима 2025-2026";
+    return "Рейтинг";
+  }
+  function chatUserModalAchievementPlaceLabel(row, season) {
+    var label = chatUserModalSeasonLabel(season);
+    var league = row && row.league != null ? String(row.league).trim() : "";
+    return label + (league ? ", лига " + league : "");
+  }
+  function chatUserModalFormatAchievementRub(value) {
+    var n = Number(value);
+    if (!isFinite(n) || !n) return "";
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
+  }
+  function chatUserModalSameRatingNick(a, b) {
+    if (typeof winterRatingSamePlayer === "function") return winterRatingSamePlayer(a, b);
+    var an = typeof normalizeWinterNick === "function" ? normalizeWinterNick(a) : String(a || "").trim();
+    var bn = typeof normalizeWinterNick === "function" ? normalizeWinterNick(b) : String(b || "").trim();
+    return !!an && !!bn && an.toLowerCase() === bn.toLowerCase();
+  }
+  function chatUserModalIsLegendNick(nick) {
+    var legends = [
+      "Waaarr",
+      "Coo1er91",
+      "Emil13",
+      "Рыбнадзор",
+      "AndrushaMorf",
+      "Shummmx",
+      "WhiskeyClub",
+      "Пряник",
+      "Siropchik",
+      "Хулинадо",
+      "Shockin",
+      "qoqoEpta",
+    ];
+    return legends.some(function (legendNick) {
+      return chatUserModalSameRatingNick(legendNick, nick);
+    });
+  }
+  function getChatUserModalSingleTopWinsReady() {
+    function readWins() {
+      return typeof window.pokerGetSingleTopWinsReady === "function"
+        ? window.pokerGetSingleTopWinsReady(15)
+        : Promise.resolve([]);
+    }
+    if (typeof window.pokerGetSingleTopWinsReady === "function") return readWins();
+    if (typeof window.pokerEnsureScriptDomains === "function") {
+      return Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
+        .then(readWins)
+        .catch(function () { return []; });
+    }
+    return Promise.resolve([]);
+  }
+  function chatUserModalAchievementCardHtml(icon, title, rows) {
+    rows = Array.isArray(rows) ? rows : [];
+    if (!rows.length) return "";
+    var countHtml = rows.length > 1 ? '<span class="chat-user-modal__achievement-count">' + escapeHtml(rows.length) + "</span>" : "";
+    var details = rows.map(function (item) {
+      return '<span class="chat-user-modal__achievement-detail">' +
+        escapeHtml(item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) +
+        "</span>";
+    }).join("");
+    return '<article class="chat-user-modal__achievement">' +
+      '<span class="chat-user-modal__achievement-icon" aria-hidden="true">' + escapeHtml(icon) + "</span>" +
+      '<span class="chat-user-modal__achievement-main">' +
+        '<span class="chat-user-modal__achievement-name">' + escapeHtml(title) + countHtml + "</span>" +
+        '<span class="chat-user-modal__achievement-details">' + details + "</span>" +
+      "</span>" +
+    "</article>";
+  }
+  function renderChatUserModalAchievements(results, ratingNick) {
+    if (!modalAchievements || !modalAchievementsList) return;
+    var seasons = [
+      { key: "summer", rows: results && results[0] },
+      { key: "spring", rows: results && results[1] },
+      { key: "winter", rows: results && results[2] },
+    ];
+    var top1 = [];
+    var top10 = [];
+    var topWins = [];
+    var legends = chatUserModalIsLegendNick(ratingNick)
+      ? [{ label: "Легенда Два туза" }]
+      : [];
+    seasons.forEach(function (season) {
+      (Array.isArray(season.rows) ? season.rows : []).forEach(function (row) {
+        var place = row && row.place != null ? parseInt(row.place, 10) : 0;
+        if (!place || place < 1) return;
+        var item = { season: season.key, row: row };
+        if (place === 1) top1.push(item);
+        if (place <= 10) top10.push(item);
+      });
+    });
+    (Array.isArray(results && results[3]) ? results[3] : []).forEach(function (row, index) {
+      if (!chatUserModalSameRatingNick(row && row.nick, ratingNick)) return;
+      var amount = chatUserModalFormatAchievementRub(row && row.reward);
+      topWins.push({
+        label: String(index + 1) + " место" + (amount ? ", " + amount : ""),
+      });
+    });
+    var html =
+      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1) +
+      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
+      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("★", "Легенда", legends);
+    modalAchievementsList.innerHTML = html;
+    modalAchievements.hidden = !html;
   }
   function syncChatUserModalRatingRanks(nick) {
     chatUserModalRanksSeq += 1;
@@ -177,6 +288,7 @@ if (chatUserModalEl) {
     if (modalSummerRank) modalSummerRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
+    renderChatUserModalAchievements(null);
     if (!hasNick) return;
     var getPlaces = typeof window.pokerGetTournamentRatingPlacesReady === "function"
       ? window.pokerGetTournamentRatingPlacesReady
@@ -185,6 +297,7 @@ if (chatUserModalEl) {
       if (modalSummerRank) modalSummerRank.textContent = "—";
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
+      renderChatUserModalAchievements(null);
       return;
     }
     function getSeasonPlacesReady(season) {
@@ -199,16 +312,19 @@ if (chatUserModalEl) {
       getSeasonPlacesReady("summer"),
       getSeasonPlacesReady("spring"),
       getSeasonPlacesReady("winter"),
+      getChatUserModalSingleTopWinsReady(),
     ]).then(function (results) {
       if (seq !== chatUserModalRanksSeq) return;
       setChatUserModalRatingRankValue(modalSummerRank, results && results[0]);
       setChatUserModalRatingRankValue(modalSpringRank, results && results[1]);
       setChatUserModalRatingRankValue(modalWinterRank, results && results[2]);
+      renderChatUserModalAchievements(results, ratingNick);
     }).catch(function () {
       if (seq !== chatUserModalRanksSeq) return;
       if (modalSummerRank) modalSummerRank.textContent = "—";
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
+      renderChatUserModalAchievements(null);
     });
   }
   function syncChatUserModalTitleFromProfileData(data, fallbackName) {

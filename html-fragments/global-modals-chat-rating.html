@@ -49,27 +49,31 @@
             <p class="chat-user-modal__respect">Уважение в чате <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
           </div>
           <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
-            <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Статус</h4>
+            <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Уровень</h4>
             <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
               <span class="chat-user-modal__status-card">2</span>
               <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
               <span class="chat-user-modal__status-card">3</span>
             </div>
           </section>
+          <section class="chat-user-modal__achievements" id="chatUserModalAchievements" hidden>
+            <h4 class="chat-user-modal__achievements-title">Достижения</h4>
+            <div class="chat-user-modal__achievements-list" id="chatUserModalAchievementsList"></div>
+          </section>
           <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" hidden>
             <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">Турнирный рейтинг</button>
           </div>
           <div class="chat-user-modal__rating-ranks" id="chatUserModalRatingRanks" hidden>
             <div class="chat-user-modal__rating-rank-row">
-              <span class="chat-user-modal__rating-rank-label">Место в рейтинге лета 2026</span>
+              <span class="chat-user-modal__rating-rank-label">Лето</span>
               <span class="chat-user-modal__rating-rank-value" id="chatUserModalSummerRank">—</span>
             </div>
             <div class="chat-user-modal__rating-rank-row">
-              <span class="chat-user-modal__rating-rank-label">Место в рейтинге весны 2026</span>
+              <span class="chat-user-modal__rating-rank-label">Весна</span>
               <span class="chat-user-modal__rating-rank-value" id="chatUserModalSpringRank">—</span>
             </div>
             <div class="chat-user-modal__rating-rank-row">
-              <span class="chat-user-modal__rating-rank-label">Место в рейтинге Зима 2025-2026</span>
+              <span class="chat-user-modal__rating-rank-label">Зима</span>
               <span class="chat-user-modal__rating-rank-value" id="chatUserModalWinterRank">—</span>
             </div>
           </div>

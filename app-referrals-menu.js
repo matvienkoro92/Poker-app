@@ -167,17 +167,19 @@
           '<span class="club-referrals-modal__promo-icon">' + referralIcon("ticket") + '</span>' +
           '<span><strong>Билет за 10 000 ₽</strong><em>тому, кто пригласит больше всех до 15 июля</em></span>' +
         '</div>' +
-        '<div class="club-referrals-modal__status" id="clubReferralsStatus" aria-live="polite"></div>' +
         '<div class="club-referrals-modal__tabs" role="tablist" aria-label="Пригласительные ссылки">' +
           '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">' + referralIcon("link") + '<span>Ссылки</span></button>' +
           '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">' + referralIcon("users") + '<span>Ваши приглашенные</span></button>' +
           '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="ranking" role="tab" aria-selected="false">' + referralIcon("trophy") + '<span>Рейтинг пригласивших</span></button>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab" data-referrals-panel="links">' +
-          '<div class="club-referrals-modal__rules">' +
-            '<span class="club-referrals-modal__rules-icon">' + referralIcon("star") + '</span>' +
-            '<div>' +
+          '<details class="club-referrals-modal__rules">' +
+            '<summary class="club-referrals-modal__rules-summary">' +
+              '<span class="club-referrals-modal__rules-icon">' + referralIcon("star") + '</span>' +
               '<strong>Как засчитывается приглашение</strong>' +
+              '<span class="club-referrals-modal__rules-chevron" aria-hidden="true">›</span>' +
+            '</summary>' +
+            '<div class="club-referrals-modal__rules-body">' +
               '<ul>' +
                 '<li>Игрок должен открыть вашу ссылку и создать новый аккаунт.</li>' +
                 '<li>Если игрок уже был зарегистрирован до перехода по ссылке, он не засчитывается.</li>' +
@@ -185,7 +187,7 @@
                 '<li>Если игрок уже закреплён за другим пригласившим, привязка не перезаписывается.</li>' +
               '</ul>' +
             '</div>' +
-          '</div>' +
+          '</details>' +
           '<div class="club-referrals-modal__list" id="clubReferralsList"></div>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab club-referrals-modal__panel-tab--hidden" data-referrals-panel="invited">' +
@@ -265,15 +267,7 @@
 
   function renderLinks() {
     var list = document.getElementById("clubReferralsList");
-    var status = document.getElementById("clubReferralsStatus");
     if (!list) return;
-    var refCode = typeof pokerGetMyReferralCode === "function" ? pokerGetMyReferralCode() : "";
-    if (status) {
-      status.innerHTML = refCode
-        ? '<span class="club-referrals-modal__status-icon">' + referralIcon("ticket") + '</span><span class="club-referrals-modal__status-label">Ваш код:</span> <strong>' + esc(refCode) + '</strong>'
-        : '<span class="club-referrals-modal__status-icon">' + referralIcon("user") + '</span><span>Войдите в аккаунт, чтобы ссылки стали личными.</span>';
-      status.classList.toggle("club-referrals-modal__status--warn", !refCode);
-    }
     list.innerHTML = referralLinks().map(function (item) {
       return '<article class="club-referrals-modal__item">' +
         '<span class="club-referrals-modal__item-icon">' + referralIcon(item.icon) + '</span>' +
@@ -283,8 +277,8 @@
           '<em class="club-referrals-modal__item-link-preview">' + referralIcon("link") + esc(shortReferralLink(item.link)) + '</em>' +
         '</div>' +
         '<div class="club-referrals-modal__item-actions" role="group" aria-label="Действия со ссылкой">' +
-          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--share" data-referral-share="' + esc(item.link) + '" data-referral-share-title="' + esc(item.title) + '" data-referral-share-text="' + esc(referralShareText(item)) + '">' + referralIcon("send") + '<span>Отправить другу</span></button>' +
-          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--copy" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Скопировать ссылку</span></button>' +
+          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--share" data-referral-share="' + esc(item.link) + '" data-referral-share-title="' + esc(item.title) + '" data-referral-share-text="' + esc(referralShareText(item)) + '">' + referralIcon("send") + '<span>Отправить</span></button>' +
+          '<button type="button" class="club-referrals-modal__action-btn club-referrals-modal__action-btn--copy" data-referral-copy="' + esc(item.link) + '">' + referralIcon("copy") + '<span>Копия</span></button>' +
         '</div>' +
       '</article>';
     }).join("");

@@ -81,12 +81,21 @@ function pokerInitWinterRatingWeekTops() {
   var prizeInfo = document.getElementById("winterRatingWeekTopPrizeInfo");
   var hasWeekTopControls = !!(pastBtn && currentBtn && pastPreview && currentPreview && modal && modalTitle && listEl);
   var hasSingleTopTarget = !!((singleTopSummary && singleTopList) || (hallFameSingleTopSummary && hallFameSingleTopList));
-  if (!hasWeekTopControls && !hasSingleTopTarget) return;
   var currentModalDates = null;
   var currentModalLinkType = null;
   var februaryDatesCache = null;
   var singleTopWinterLoadPromise = null;
   var singleTopWinterLoadAttempted = false;
+  window.pokerGetSingleTopWinsReady = function pokerGetSingleTopWinsReady(limit) {
+    var loading = ensureSingleTopWinterTournamentData();
+    if (loading && singleTopWinterLoadPromise) {
+      return singleTopWinterLoadPromise.then(function () {
+        return getSingleTopWins(null, limit);
+      });
+    }
+    return Promise.resolve(getSingleTopWins(null, limit));
+  };
+  if (!hasWeekTopControls && !hasSingleTopTarget) return;
   function escapePreview(s) {
     return String(s).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
