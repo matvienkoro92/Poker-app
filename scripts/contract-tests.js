@@ -800,8 +800,9 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(contractRakebackRow && contractRakebackRow.ownerId, "tg_388008256", "Vika edit preserves original row owner");
 }
 
-async function testChatSendEditDelete() {
+async function testChatSendEditDelete(redis) {
   const chat = loadHandler("chat");
+  const { convKey } = require(path.join(root, "lib", "chat-core.js"));
   const s = sessions();
   let r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "hello peer" }));
   assert.strictEqual(r.statusCode, 200, "chat DM send succeeds");
@@ -816,6 +817,77 @@ async function testChatSendEditDelete() {
   r = await call(chat, req("DELETE", {}, { pwaSession: s.user, with: "tg_1002", messageId }));
   assert.strictEqual(r.statusCode, 200, "chat delete succeeds");
   assert.strictEqual(r.body.deleted, true, "delete returns deleted flag");
+
+  const dmKey = convKey("tg_1001", "tg_1002");
+  const messagesBeforeBlockedSend = redis.l(dmKey).length;
+  r = await call(chat, req("POST", {}, { pwaSession: s.peer, action: "dmBlock", userId: "tg_1001" }));
+  assert.strictEqual(r.statusCode, 200, "chat DM block succeeds");
+  assert.strictEqual(r.body.blockedByMe, true, "block returns blocked state");
+
+  r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "blocked hello" }));
+  assert.strictEqual(r.statusCode, 403, "blocked player cannot send DM");
+  assert.strictEqual(r.body.blockedMe, true, "blocked send explains recipient block");
+  assert.strictEqual(redis.l(dmKey).length, messagesBeforeBlockedSend, "blocked DM send does not write message");
+
+  r = await call(chat, req("GET", { pwaSession: s.user, with: "tg_1002" }));
+  assert.strictEqual(r.statusCode, 200, "blocked DM status loads for sender");
+  assert.strictEqual(r.body.blockedMe, true, "thread exposes that peer blocked me");
+  assert.strictEqual(r.body.blockedByMe, false, "thread exposes that I did not block peer");
+
+  r = await call(chat, req("GET", { pwaSession: s.peer, with: "tg_1001" }));
+  assert.strictEqual(r.statusCode, 200, "block owner DM status loads");
+  assert.strictEqual(r.body.blockedByMe, true, "thread exposes my block");
+
+  r = await call(chat, req("POST", {}, { pwaSession: s.peer, action: "dmUnblock", userId: "tg_1001" }));
+  assert.strictEqual(r.statusCode, 200, "chat DM unblock succeeds");
+  assert.strictEqual(r.body.blockedByMe, false, "unblock returns unblocked state");
+
+  r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "after unblock" }));
+  assert.strictEqual(r.statusCode, 200, "unblocked player can send DM again");
+}
+
+async function testCrmAppUserBlock(redis) {
+  const crm = loadHandler("player-crm");
+  const chat = loadHandler("chat");
+  const user = loadHandler("user");
+  const s = sessions();
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
+  redis.s("poker_app:visitors").add("tg_1001");
+
+  let r = await call(crm, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "block_player",
+    targetId: "tg_1001",
+    reason: "contract block",
+  }));
+  assert.strictEqual(r.statusCode, 200, "CRM owner can block app user");
+  assert.strictEqual(r.body.blocked, true, "CRM block response marks blocked");
+
+  r = await call(crm, req("GET", { pwaSession: s.admin, mode: "core" }));
+  assert.strictEqual(r.statusCode, 200, "CRM loads blocked list");
+  assert.ok((r.body.blockedUsers || []).some((row) => row && row.reason === "contract block"), "CRM exposes blocked users list");
+  assert.ok((r.body.players || []).some((row) => row && row.appBlocked === true), "CRM marks blocked player rows");
+
+  r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "blocked globally" }));
+  assert.strictEqual(r.statusCode, 403, "globally blocked user cannot use chat");
+  assert.strictEqual(r.body.code, "APP_USER_BLOCKED", "chat returns app-blocked code");
+
+  r = await call(user, req("GET", { pwaSession: s.user, path: "bonus-balance" }));
+  assert.strictEqual(r.statusCode, 403, "globally blocked user cannot load user endpoint");
+  assert.strictEqual(r.body.code, "APP_USER_BLOCKED", "user endpoint returns app-blocked code");
+
+  r = await call(crm, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "unblock_player",
+    targetId: "tg_1001",
+  }));
+  assert.strictEqual(r.statusCode, 200, "CRM owner can unblock app user");
+  assert.strictEqual(r.body.blocked, false, "CRM unblock response marks unblocked");
+
+  r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "after global unblock" }));
+  assert.strictEqual(r.statusCode, 200, "unblocked app user can use chat again");
 }
 
 async function testRaffleJoinLeave(redis) {
@@ -5252,6 +5324,7 @@ async function main() {
     ["chat core invariants", testChatCoreInvariants],
     ["auth required and admin-only", testAuthAndAdmin],
     ["chat send/edit/delete", testChatSendEditDelete],
+    ["crm app user block", testCrmAppUserBlock],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle access level gate", testRaffleAccessLevelGate],
     ["raffle admin upsert participant tickets", testRaffleAdminUpsertParticipantAddsTickets],

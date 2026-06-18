@@ -11,6 +11,7 @@
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="stats">Статистика</button>
       <button type="button" class="player-crm__tab" data-crm-tab="overview">График</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players">Игроки</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="blocked">Блокировки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast">Рассылки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="links">Ссылки</button>
     </nav>
@@ -155,6 +156,20 @@
             </label>
           </div>
           <div class="player-crm__registrations" id="playerCrmRegistrations"></div>
+        </section>
+
+        <section class="player-crm__tab-panel" data-crm-panel="blocked">
+          <div class="player-crm__section-head">
+            <div>
+              <h3>Заблокированные</h3>
+              <span id="playerCrmBlockedSummary">глобальный доступ к приложению</span>
+            </div>
+            <button type="button" class="player-crm__send-section-btn" data-crm-refresh-blocked>Обновить</button>
+          </div>
+          <div class="player-crm__filters">
+            <input type="search" class="player-crm__search" id="playerCrmBlockedSearch" placeholder="Поиск: ник, ID, причина" autocomplete="off" />
+          </div>
+          <div class="player-crm__blocked-list" id="playerCrmBlockedList" aria-live="polite"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="pokerplus">

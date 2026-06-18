@@ -268,6 +268,13 @@ function loadMessages(opts) {
       if (data.isAdmin && typeof window.pokerMarkAdminAccess === "function") {
         window.pokerMarkAdminAccess("chat-personal");
       }
+      try {
+        if (loadForPeer && String(loadForPeer).indexOf("group_") !== 0) {
+          var blockMap = window.__pokerChatDmBlockStateByPeer || {};
+          blockMap[String(loadForPeer)] = data.blockedByMe === true;
+          window.__pokerChatDmBlockStateByPeer = blockMap;
+        }
+      } catch (ePersonalBlockStateCache) {}
       setChatPeerTypingActive(!!data.peerTyping);
       var prevPersonalMessages =
         getChatWithUserId() && personalMessagesCache[getChatWithUserId()] && Array.isArray(personalMessagesCache[getChatWithUserId()])

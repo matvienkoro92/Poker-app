@@ -17,6 +17,8 @@
     search: "",
     selectedId: "",
     players: [],
+    blockedUsers: [],
+    blockedSearch: "",
     registeredAccounts: [],
     registrationModalMethod: "",
     showAllRegistrationModal: false,
@@ -248,15 +250,58 @@
     }
     el.innerHTML = visibleItems.map(function (p) {
       var pd = periodData(p);
-      var cls = "player-crm__player" + (p.id === state.selectedId ? " player-crm__player--active" : "");
+      var cls = "player-crm__player" + (p.id === state.selectedId ? " player-crm__player--active" : "") + (p.appBlocked ? " player-crm__player--blocked" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-player=\"" + esc(p.id) + "\">" +
-        "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span></span>" +
+        "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span>" + (p.appBlocked ? "<span class=\"player-crm__blocked-badge\">заблокирован</span>" : "") + "</span>" +
         "<span class=\"player-crm__player-meta\">" + esc(p.handle) + " · " + esc(p.source) + " · " + esc(p.manager) + "</span>" +
         "<span class=\"player-crm__player-note\">" + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
         "</button>";
     }).join("") + (!state.showAllPlayers && total > visibleItems.length
       ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать всех " + esc(total) + "</button>"
       : "");
+  }
+
+  function renderBlockedList() {
+    var el = document.getElementById("playerCrmBlockedList");
+    var summary = document.getElementById("playerCrmBlockedSummary");
+    if (!el) return;
+    var q = String(state.blockedSearch || "").trim().toLowerCase();
+    var rows = Array.isArray(state.blockedUsers) ? state.blockedUsers.slice() : [];
+    if (q) {
+      rows = rows.filter(function (row) {
+        var player = row.player || {};
+        return [
+          row.id,
+          row.reason,
+          row.targetLabel,
+          row.adminName,
+          (row.aliases || []).join(" "),
+          player.name,
+          player.handle,
+          player.accountId,
+          player.dtId,
+        ].join(" ").toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    if (summary) summary.textContent = intFmt(rows.length) + " из " + intFmt((state.blockedUsers || []).length);
+    if (!rows.length) {
+      el.innerHTML = "<div class=\"player-crm__timeline-item\">Заблокированных игроков пока нет.</div>";
+      return;
+    }
+    el.innerHTML = rows.map(function (row) {
+      var player = row.player || {};
+      var title = row.targetLabel || player.name || player.handle || row.id || "Игрок";
+      var sub = [player.handle, player.accountId || row.id, (row.aliases || []).slice(0, 3).join(", ")].filter(Boolean).join(" · ");
+      var reason = row.reason || "без причины";
+      var date = row.createdAt ? new Date(row.createdAt).toLocaleString("ru-RU") : "дата неизвестна";
+      return "<article class=\"player-crm__blocked-row\">" +
+        "<div><strong>" + esc(title) + "</strong><span>" + esc(sub) + "</span><small>" + esc(reason) + " · " + esc(date) + "</small></div>" +
+        "<div class=\"player-crm__blocked-actions\">" +
+          (player.id ? "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-open-player=\"" + esc(player.id) + "\">Карточка</button>" : "") +
+          "<button type=\"button\" class=\"player-crm__danger-btn\" data-crm-unblock-id=\"" + esc(row.id || "") + "\">Разблокировать</button>" +
+        "</div>" +
+      "</article>";
+    }).join("");
   }
 
   function selectedPlayer() {
@@ -315,6 +360,7 @@
         metric("Telegram", (p.telegramIds && p.telegramIds[0]) || "—") +
         metric("PokerPlus", p.pokerPlusUserId || "—") +
       "</div>" +
+      (p.appBlocked ? "<div class=\"player-crm__block-warning\"><strong>Игрок заблокирован в приложении.</strong><span>" + esc((p.appBlock && p.appBlock.reason) || "Причина не указана") + "</span></div>" : "") +
       "<div class=\"player-crm__timeline-item\"><strong>Заметка:</strong> " + esc(p.note) + "</div>" +
       "<div class=\"player-crm__edit\" data-crm-edit-player=\"" + esc(p.accountId || p.id) + "\">" +
         "<h4 class=\"player-crm__edit-title\">Поля дашборда</h4>" +
@@ -340,6 +386,15 @@
         "</div>" +
         "<label class=\"player-crm__message-label\"><span>Комментарий к событию</span><input id=\"playerCrmEventNote\" placeholder=\"например: импорт из кассы / написал в бот\" /></label>" +
         "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__ghost-btn\" id=\"playerCrmAddEventBtn\">Добавить событие</button></div>" +
+        "<h4 class=\"player-crm__edit-title\">Доступ к приложению</h4>" +
+        "<div class=\"player-crm__form-grid\">" +
+          "<label><span>Причина блокировки</span><input id=\"playerCrmBlockReason\" value=\"" + esc((p.appBlock && p.appBlock.reason) || "") + "\" placeholder=\"мультиаккаунт / нарушение правил\" /></label>" +
+        "</div>" +
+        "<div class=\"player-crm__broadcast-actions\">" +
+          (p.appBlocked
+            ? "<button type=\"button\" class=\"player-crm__danger-btn\" id=\"playerCrmUnblockPlayerBtn\">Разблокировать игрока</button>"
+            : "<button type=\"button\" class=\"player-crm__danger-btn\" id=\"playerCrmBlockPlayerBtn\">Заблокировать насовсем</button>") +
+        "</div>" +
       "</div>" +
       "<div class=\"player-crm__timeline\">" +
         (p.timeline || []).map(function (row) { return "<div class=\"player-crm__timeline-item\">" + esc(row) + "</div>"; }).join("") +
@@ -751,7 +806,7 @@
 
   function applyBroadcastInnerFilters(players, filters) {
     var selected = Array.isArray(filters) ? filters.filter(Boolean) : [];
-    var list = Array.isArray(players) ? players : [];
+    var list = (Array.isArray(players) ? players : []).filter(function (player) { return !(player && player.appBlocked); });
     if (!selected.length) return list;
     return list.filter(function (player) {
       return selected.every(function (filter) { return broadcastMatchesInnerFilter(player, filter); });
@@ -1228,6 +1283,7 @@
     renderStats();
     renderChips();
     renderList();
+    renderBlockedList();
     renderDetail();
     renderRegistrations();
     renderPokerPlusAccounts();
@@ -1307,6 +1363,7 @@
     if (!data || !data.ok || !Array.isArray(data.players)) return false;
     if (!heavyOnly) {
       state.players = data.players;
+      state.blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : [];
       state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
       state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
@@ -1318,6 +1375,7 @@
       state.crmError = "";
     } else {
       state.players = data.players;
+      state.blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : state.blockedUsers;
       state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : state.registeredAccounts;
       state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : state.pokerPlusAccounts;
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : state.campaigns;
@@ -1395,6 +1453,7 @@
     } catch (eCred) {}
     if (!base || !hasCred) {
       state.players = [];
+      state.blockedUsers = [];
       state.registeredAccounts = [];
       state.pokerPlusAccounts = [];
       state.campaigns = [];
@@ -1438,6 +1497,7 @@
           shouldLoadHeavy = data && data.heavyPending === true;
         } else {
           state.players = [];
+          state.blockedUsers = [];
           state.registeredAccounts = [];
           state.pokerPlusAccounts = [];
           state.campaigns = [];
@@ -1452,6 +1512,7 @@
       })
       .catch(function (error) {
         state.players = [];
+        state.blockedUsers = [];
         state.registeredAccounts = [];
         state.pokerPlusAccounts = [];
         state.campaigns = [];
@@ -2256,6 +2317,33 @@
     }, "Связки ID сохранены.");
   }
 
+  function setSelectedPlayerBlocked(blocked, explicitId) {
+    var p = selectedPlayer();
+    var targetId = explicitId || (p && (p.accountId || p.id));
+    if (!targetId) return;
+    var reason = p ? val("playerCrmBlockReason") : "";
+    if (blocked) {
+      var ok = true;
+      try {
+        ok = !window.confirm || window.confirm("Заблокировать игрока насовсем в приложении?");
+      } catch (eConfirmBlock) {
+        ok = true;
+      }
+      if (!ok) return;
+      if (!reason && window.prompt) {
+        try {
+          reason = String(window.prompt("Причина блокировки", "") || "").trim();
+        } catch (ePromptBlock) {}
+      }
+    }
+    postCrmAction({
+      action: blocked ? "block_player" : "unblock_player",
+      targetId: targetId,
+      targetLabel: p && (p.name || p.handle || p.accountId || p.id),
+      reason: reason,
+    }, blocked ? "Игрок заблокирован." : "Игрок разблокирован.");
+  }
+
   function postCrmAction(payload, okText) {
     var base = getApiBaseSafe();
     var out = document.getElementById("playerCrmBroadcastResult");
@@ -2656,6 +2744,11 @@
           if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
           else renderCrmTrackingLinks();
         }
+        if (state.tab === "blocked") renderBlockedList();
+        return;
+      }
+      if (e.target.closest("[data-crm-refresh-blocked]")) {
+        loadCrmData("data");
         return;
       }
       var sendSection = e.target.closest("[data-crm-send-section]");
@@ -2932,6 +3025,13 @@
         renderDetail();
       });
     }
+    var blockedSearch = document.getElementById("playerCrmBlockedSearch");
+    if (blockedSearch) {
+      blockedSearch.addEventListener("input", function () {
+        state.blockedSearch = blockedSearch.value || "";
+        renderBlockedList();
+      });
+    }
     var period = document.getElementById("playerCrmPeriodSelect");
     if (period) {
       period.addEventListener("change", function () {
@@ -3092,6 +3192,13 @@
       if (e.target && e.target.id === "playerCrmSavePlayerBtn") saveSelectedPlayer();
       if (e.target && e.target.id === "playerCrmAddEventBtn") addSelectedEvent();
       if (e.target && e.target.id === "playerCrmLinkIdentityBtn") linkSelectedIdentity();
+      if (e.target && e.target.id === "playerCrmBlockPlayerBtn") setSelectedPlayerBlocked(true);
+      if (e.target && e.target.id === "playerCrmUnblockPlayerBtn") setSelectedPlayerBlocked(false);
+      var unblock = e.target.closest("[data-crm-unblock-id]");
+      if (unblock) {
+        setSelectedPlayerBlocked(false, unblock.getAttribute("data-crm-unblock-id") || "");
+        return;
+      }
       var chartToggle = e.target.closest("[data-crm-chart-series]");
       if (chartToggle) {
         state.chartSeriesEnabled[chartToggle.getAttribute("data-crm-chart-series") || ""] = chartToggle.checked;

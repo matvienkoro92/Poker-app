@@ -2009,7 +2009,7 @@
         if (key) localByKey[key] = row;
       });
       var unsaved = (Array.isArray(localRows) ? localRows : []).filter(function (row) {
-        return row && row.saved !== true;
+        return row && (row.saved !== true || row.persisted !== true);
       });
       var unsavedByKey = {};
       unsaved.forEach(function (row) {

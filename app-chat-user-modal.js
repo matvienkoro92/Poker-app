@@ -94,6 +94,7 @@ if (chatUserModalEl) {
   var modalStatusCards = modalStatusScale ? modalStatusScale.querySelectorAll(".chat-user-modal__status-card") : [];
   var modalPersonalBlock = document.getElementById("chatUserModalPersonalBlock");
   var modalWriteBtn = document.getElementById("chatUserModalWriteBtn");
+  var modalBlockBtn = document.getElementById("chatUserModalBlockBtn");
   var modalRespectUp = document.getElementById("chatUserModalRespectUp");
   var modalRespectDown = document.getElementById("chatUserModalRespectDown");
   var modalRespectHint = document.getElementById("chatUserModalRespectHint");
@@ -110,9 +111,81 @@ if (chatUserModalEl) {
   var chatUserModalContactName = "";
   var chatUserModalRatingNick = "";
   var chatUserModalRanksSeq = 0;
+  var chatUserModalBlockedByMe = false;
+  var chatUserModalBlockBusy = false;
+  var chatUserModalBlockSeq = 0;
   function closeChatUserModal() {
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
+  }
+  function chatUserModalIsSelf(id) {
+    try {
+      var myId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
+      if (!myId || !id) return false;
+      if (typeof peerChatIdsEqual === "function") return peerChatIdsEqual(myId, id);
+      return String(myId) === String(id);
+    } catch (eSelf) {
+      return false;
+    }
+  }
+  function setChatUserModalBlockState(blocked, busy) {
+    chatUserModalBlockedByMe = !!blocked;
+    chatUserModalBlockBusy = !!busy;
+    if (!modalBlockBtn) return;
+    var canUse = !!(base && typeof pokerApiHasCredential === "function" && pokerApiHasCredential() && chatUserModalUserId && !chatUserModalIsSelf(chatUserModalUserId));
+    modalBlockBtn.hidden = !canUse;
+    if (!canUse) return;
+    modalBlockBtn.disabled = chatUserModalBlockBusy;
+    modalBlockBtn.classList.toggle("chat-user-modal__block-btn--active", chatUserModalBlockedByMe);
+    modalBlockBtn.textContent = chatUserModalBlockBusy
+      ? "Сохраняем..."
+      : chatUserModalBlockedByMe
+        ? "Разблокировать"
+        : "Блокировать";
+    modalBlockBtn.setAttribute(
+      "aria-label",
+      chatUserModalBlockedByMe ? "Разблокировать игрока" : "Заблокировать игрока"
+    );
+  }
+  function rememberChatUserModalBlockState(userId, blocked) {
+    if (!userId) return;
+    try {
+      var map = window.__pokerChatDmBlockStateByPeer || {};
+      map[String(userId)] = !!blocked;
+      window.__pokerChatDmBlockStateByPeer = map;
+    } catch (eRememberBlock) {}
+  }
+  function refreshChatUserModalBlockState(id) {
+    if (!modalBlockBtn || !id || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      setChatUserModalBlockState(false, false);
+      return;
+    }
+    if (chatUserModalIsSelf(id)) {
+      setChatUserModalBlockState(false, false);
+      return;
+    }
+    var seq = ++chatUserModalBlockSeq;
+    setChatUserModalBlockState(chatUserModalBlockedByMe, true);
+    fetch(base + "/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: "dmBlockStatus", userId: id })),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (seq !== chatUserModalBlockSeq || !chatUserModalUserId || String(chatUserModalUserId) !== String(id)) return;
+        if (!data || !data.ok) {
+          setChatUserModalBlockState(chatUserModalBlockedByMe, false);
+          return;
+        }
+        var blocked = data.blockedByMe === true;
+        rememberChatUserModalBlockState(id, blocked);
+        setChatUserModalBlockState(blocked, false);
+      })
+      .catch(function () {
+        if (seq !== chatUserModalBlockSeq || !chatUserModalUserId || String(chatUserModalUserId) !== String(id)) return;
+        setChatUserModalBlockState(chatUserModalBlockedByMe, false);
+      });
   }
   function chatUserModalRatingNickFromData(data) {
     var raw =
@@ -531,6 +604,12 @@ if (chatUserModalEl) {
     chatUserModalUserName = userName;
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
+    var cachedBlockedByMe = false;
+    try {
+      cachedBlockedByMe = !!(window.__pokerChatDmBlockStateByPeer && window.__pokerChatDmBlockStateByPeer[String(id)] === true);
+    } catch (eCachedBlockState) {}
+    chatUserModalBlockedByMe = cachedBlockedByMe;
+    setChatUserModalBlockState(cachedBlockedByMe, true);
     syncChatUserModalRatingTab("");
     syncChatUserModalRatingRanks("");
     syncChatUserModalRatingArt("");
@@ -586,6 +665,7 @@ if (chatUserModalEl) {
     chatUserModalEl.setAttribute("aria-hidden", "false");
     chatUserModalEl.classList.add("chat-user-modal--open");
     if (modalPersonalBlock) modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
+    refreshChatUserModalBlockState(id);
     fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -681,6 +761,53 @@ if (chatUserModalEl) {
         if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs(uid, uname);
         else openConversation(uid, uname, null);
       }
+    });
+  }
+  if (modalBlockBtn) {
+    modalBlockBtn.addEventListener("click", function () {
+      if (!chatUserModalUserId || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential() || chatUserModalBlockBusy) return;
+      var uid = chatUserModalUserId;
+      var nextBlocked = !chatUserModalBlockedByMe;
+      if (nextBlocked) {
+        var ok = true;
+        try {
+          ok = typeof window.confirm === "function"
+            ? window.confirm("Заблокировать игрока? Он не сможет писать вам в личные сообщения.")
+            : true;
+        } catch (eConfirmBlock) {
+          ok = true;
+        }
+        if (!ok) return;
+      }
+      setChatUserModalBlockState(chatUserModalBlockedByMe, true);
+      fetch(base + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pokerApiAuthJsonBody({ action: nextBlocked ? "dmBlock" : "dmUnblock", userId: uid })),
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return { ok: false, error: "Ошибка ответа" }; });
+        })
+        .then(function (data) {
+          if (!chatUserModalUserId || String(chatUserModalUserId) !== String(uid)) return;
+          if (data && data.ok) {
+            var blocked = data.blockedByMe === true;
+            rememberChatUserModalBlockState(uid, blocked);
+            setChatUserModalBlockState(blocked, false);
+            if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
+            if (typeof window.chatRefresh === "function") window.chatRefresh();
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+            if (tg && tg.showAlert) tg.showAlert(blocked ? "Игрок заблокирован" : "Игрок разблокирован");
+          } else {
+            setChatUserModalBlockState(chatUserModalBlockedByMe, false);
+            if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка");
+          }
+        })
+        .catch(function () {
+          if (!chatUserModalUserId || String(chatUserModalUserId) !== String(uid)) return;
+          setChatUserModalBlockState(chatUserModalBlockedByMe, false);
+          if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        });
     });
   }
   if (modalRatingTab) {
