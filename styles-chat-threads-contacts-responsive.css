@@ -544,6 +544,9 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
 .chat-contact-swipe--wide-actions .chat-contact-swipe__actions {
   width: 104px;
 }
+.chat-contact-swipe--pending-friend .chat-contact-swipe__actions {
+  width: min(194px, 56vw);
+}
 .chat-contact-swipe__friend {
   flex: 1;
   margin: 0;
@@ -561,6 +564,7 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
 }
 .chat-contact-swipe__friend-icon {
   display: block;
@@ -581,6 +585,20 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
   color: rgba(255, 255, 255, 0.72);
   background: rgba(30, 41, 59, 0.34);
   cursor: default;
+  flex: 2.7 1 0;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.chat-contact-swipe__friend-text {
+  display: inline-block;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0;
 }
 .chat-contact-swipe__friend--pending:active {
   background: rgba(30, 41, 59, 0.34);

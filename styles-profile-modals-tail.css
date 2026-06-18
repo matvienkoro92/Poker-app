@@ -299,6 +299,11 @@
   background: rgba(127, 29, 29, 0.32);
   border-color: rgba(248, 113, 113, 0.4);
 }
+.friends-list-modal__btn--cancel {
+  color: #fee2e2;
+  background: rgba(127, 29, 29, 0.32);
+  border-color: rgba(248, 113, 113, 0.4);
+}
 .friends-list-modal__btn--remove {
   color: var(--text-muted);
   background: transparent;

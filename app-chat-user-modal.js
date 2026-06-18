@@ -1002,3 +1002,62 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
   }
 }
 }
+
+(function initChatUserModalFallbackOpen() {
+  function ensureReady(opts) {
+    if (
+      typeof window.openChatUserModalById === "function" &&
+      window.openChatUserModalById.__pokerFallback !== true
+    ) {
+      return true;
+    }
+    if (typeof initChatUserModals !== "function") return false;
+    if (!document.getElementById("chatUserModal")) return false;
+    try {
+      initChatUserModals(opts || {
+        base: typeof getApiBase === "function" ? getApiBase() : "",
+        tg: window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null,
+      });
+    } catch (eInitUserModal) {}
+    return (
+      typeof window.openChatUserModalById === "function" &&
+      window.openChatUserModalById.__pokerFallback !== true
+    );
+  }
+
+  window.pokerEnsureChatUserModalReady = ensureReady;
+
+  window.pokerOpenChatUserModalSafe = function (id, name, avatarUrl, opts) {
+    if (!id) return Promise.resolve(false);
+    if (ensureReady(opts)) {
+      window.openChatUserModalById(id, name || "Игрок", avatarUrl || "");
+      return Promise.resolve(true);
+    }
+    if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      var ready = null;
+      try {
+        ready = window.pokerEnsureGlobalModalsHtml();
+      } catch (eEnsureGlobalModal) {
+        ready = null;
+      }
+      if (ready && typeof ready.then === "function") {
+        return ready.then(function () {
+          if (!ensureReady(opts)) return false;
+          window.openChatUserModalById(id, name || "Игрок", avatarUrl || "");
+          return true;
+        }).catch(function () {
+          return false;
+        });
+      }
+    }
+    return Promise.resolve(false);
+  };
+
+  if (typeof window.openChatUserModalById !== "function") {
+    var fallbackOpenChatUserModalById = function (id, name, avatarUrl) {
+      return window.pokerOpenChatUserModalSafe(id, name, avatarUrl);
+    };
+    fallbackOpenChatUserModalById.__pokerFallback = true;
+    window.openChatUserModalById = fallbackOpenChatUserModalById;
+  }
+})();

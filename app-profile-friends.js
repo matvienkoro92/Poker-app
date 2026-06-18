@@ -326,6 +326,12 @@ function initProfileFriends() {
       openNow();
       return;
     }
+    if (typeof window.pokerOpenChatUserModalSafe === "function") {
+      window.pokerOpenChatUserModalSafe(id, name, "").then(function (ok) {
+        if (!ok) setSearchFoundProfile({ userId: id, userName: name }, raw);
+      });
+      return;
+    }
     if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
       var modalReady = null;
       try {
@@ -487,7 +493,9 @@ function initProfileFriends() {
         var chatId = avatarBtn.dataset.chatUserId || "";
         var name = avatarBtn.dataset.userName || "Игрок";
         var avatar = avatarBtn.dataset.avatarUrl || "";
-        if ((id || chatId) && typeof window.openChatUserModalById === "function") {
+        if ((id || chatId) && typeof window.pokerOpenChatUserModalSafe === "function") {
+          window.pokerOpenChatUserModalSafe(id || chatId, name, avatar);
+        } else if ((id || chatId) && typeof window.openChatUserModalById === "function") {
           window.openChatUserModalById(id || chatId, name, avatar);
         } else {
           btn.click();
@@ -611,7 +619,10 @@ function initProfileFriends() {
         var id = item.dataset.userId;
         var chatId = item.dataset.chatUserId || "";
         var name = item.dataset.userName;
-        if ((id || chatId) && typeof window.openChatUserModalById === "function") {
+        if ((id || chatId) && typeof window.pokerOpenChatUserModalSafe === "function") {
+          closeFriendsModal();
+          window.pokerOpenChatUserModalSafe(id || chatId, name);
+        } else if ((id || chatId) && typeof window.openChatUserModalById === "function") {
           closeFriendsModal();
           window.openChatUserModalById(id || chatId, name);
         }
@@ -638,7 +649,7 @@ function initProfileFriends() {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.ok) {
-          alertText(action === "accept" ? "Заявка принята" : "Заявка отклонена");
+          alertText(action === "accept" ? "Заявка принята" : action === "cancel" ? "Заявка отменена" : "Заявка отклонена");
           afterMutate();
         } else {
           if (button) button.disabled = false;
@@ -699,6 +710,14 @@ function initProfileFriends() {
         postFriendAction(item && item.dataset.userId, "reject", button);
       });
     });
+    listEl.querySelectorAll(".friends-list-modal__btn--cancel").forEach(function (button) {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var item = button.closest(".friends-list-modal__item");
+        postFriendAction(item && item.dataset.userId, "cancel", button);
+      });
+    });
     listEl.querySelectorAll(".friends-list-modal__btn--remove").forEach(function (button) {
       button.addEventListener("click", function (e) {
         e.preventDefault();
@@ -743,7 +762,8 @@ function initProfileFriends() {
         row,
         "outgoing",
         '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile">Открыть профиль</button>' +
-          '<span class="friends-list-modal__status">Ожидает ответа</span>'
+          '<span class="friends-list-modal__status">Ожидает ответа</span>' +
+          '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--cancel">Отменить заявку</button>'
       );
     }));
     chunks.push(renderSection("Ответы", notices, "notices", function (row) {

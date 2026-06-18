@@ -447,9 +447,9 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
   var swipeFriendBtn = isFriendContact
     ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--remove" tabindex="-1" data-chat-swipe-remove-friend="1" aria-label="Удалить из друзей" title="Удалить из друзей"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">−</span></button>'
     : pendingFriendRequest
-      ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--pending" tabindex="-1" disabled aria-label="Заявка отправлена" title="Заявка отправлена"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">✓</span></button>'
+      ? '<button type="button" class="chat-contact-swipe__friend chat-contact-swipe__friend--pending" tabindex="-1" disabled aria-label="Заявка отправлена" title="Заявка отправлена"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">✓</span><span class="chat-contact-swipe__friend-text">Заявка отправлена</span></button>'
     : '<button type="button" class="chat-contact-swipe__friend" tabindex="-1" data-chat-swipe-add-friend="1" aria-label="В друзья" title="В друзья"><span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span></button>';
-  var swipeWrapClass = "chat-contact-swipe chat-contact-swipe--wide-actions";
+  var swipeWrapClass = "chat-contact-swipe chat-contact-swipe--wide-actions" + (pendingFriendRequest ? " chat-contact-swipe--pending-friend" : "");
   return (
     '<div class="' +
     swipeWrapClass +

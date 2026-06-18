@@ -53,6 +53,8 @@ function syncChatDialogPreviewAddFriendBtn() {
   }
 }
 function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
+  var donePayload = null;
+  var doneError = null;
   pokerDebugChatFriendAction("addFriendWithPrompt:start", {
     targetUserId: targetUserId || "",
     nameHint: nameHint || "",
@@ -72,7 +74,7 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
       hasCredential:
         typeof pokerApiHasCredential === "function" ? !!pokerApiHasCredential() : false,
     });
-    if (typeof onDone === "function") onDone();
+    if (typeof onDone === "function") onDone({ ok: false, error: "Нет доступа" });
     return;
   }
   var contactName = String(nameHint || "").trim();
@@ -97,6 +99,7 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
       return r.json();
     })
     .then(function (d) {
+      donePayload = d || null;
       pokerDebugChatFriendAction("addFriendWithPrompt:response", {
         targetUserId: targetUserId || "",
         ok: !!(d && d.ok),
@@ -119,6 +122,7 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
       }
     })
     .catch(function () {
+      doneError = new Error(POKER_NET_ERR);
       pokerDebugChatFriendAction("addFriendWithPrompt:error", {
         targetUserId: targetUserId || "",
         requestUrl: base + "/api/friends",
@@ -132,7 +136,7 @@ function pokerChatAddFriendWithPrompt(targetUserId, nameHint, onDone) {
         isFriendAtFinally:
           typeof pokerChatPeerIdIsFriend === "function" ? !!pokerChatPeerIdIsFriend(targetUserId) : false,
       });
-      if (typeof onDone === "function") onDone();
+      if (typeof onDone === "function") onDone(donePayload, doneError);
     });
 }
 

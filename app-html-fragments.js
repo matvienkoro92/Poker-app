@@ -83,6 +83,7 @@
       safeCall(window.pokerInitPartnershipModal);
       safeCall(window.initHomeFreerollModal);
       safeCall(window.__pokerInitSiteHomeInstructionModal);
+      safeCall(window.pokerEnsureChatUserModalReady);
     }
   }
 

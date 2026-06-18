@@ -1338,10 +1338,15 @@ function initRaffles() {
   }
 
   function renderRafflesReferralPromoCard() {
+    var selected = String(rafflesFocusedActiveId || "") === RAFFLES_REFERRAL_PROMO_ID;
     return (
-      '<div class="raffles-active-chooser__item raffles-active-chooser__item--referrals" role="button" tabindex="0" data-raffle-referrals-open="1" data-raffle-active-id="' +
+      '<div class="raffles-active-chooser__item raffles-active-chooser__item--referrals' +
+      (selected ? " raffles-active-chooser__item--active" : "") +
+      '" role="button" tabindex="0" data-raffle-active-id="' +
       escapeHtml(RAFFLES_REFERRAL_PROMO_ID) +
-      '" aria-selected="false">' +
+      '" aria-selected="' +
+      (selected ? "true" : "false") +
+      '">' +
         '<span class="raffles-active-chooser__head">' +
           '<span class="raffles-active-chooser__badge raffles-active-chooser__badge--referrals">За приглашенных</span>' +
           '<span class="raffles-active-chooser__results-time">До 15 июля</span>' +
@@ -1363,7 +1368,7 @@ function initRaffles() {
         '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--referrals">' +
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--referrals">Победит тот, кто приведет больше новых игроков.</span>' +
         "</span>" +
-        '<button type="button" class="raffles-active-chooser__cta raffles-active-chooser__cta--referrals" data-raffle-referrals-open="1">Приглашенные</button>' +
+        '<button type="button" class="raffles-active-chooser__cta raffles-active-chooser__cta--referrals" data-raffle-referrals-open="1">Открыть</button>' +
         '<span class="raffles-active-chooser__info-toggle raffles-active-chooser__info-toggle--referrals" aria-hidden="true">' +
           '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
           '<span class="raffles-active-chooser__info-copy"><span>Откроется модалка</span><span>Можно вернуться назад</span></span>' +
@@ -2588,13 +2593,15 @@ function initRaffles() {
         // выше даёт доступ ко всем текущим активным.
         var active = null;
         if (rafflesFocusedActiveId) {
-          for (var afi = 0; afi < activeList.length; afi++) {
-            if (String(activeList[afi].id || "") === rafflesFocusedActiveId) {
-              active = activeList[afi];
-              break;
+          if (rafflesFocusedActiveId !== RAFFLES_REFERRAL_PROMO_ID) {
+            for (var afi = 0; afi < activeList.length; afi++) {
+              if (String(activeList[afi].id || "") === rafflesFocusedActiveId) {
+                active = activeList[afi];
+                break;
+              }
             }
+            if (!active) rafflesFocusedActiveId = null;
           }
-          if (!active) rafflesFocusedActiveId = null;
         }
         if (!active && currentRaffleId) {
           for (var aci = 0; aci < activeList.length; aci++) {
@@ -2615,7 +2622,7 @@ function initRaffles() {
         if (rafflesTabActiveSum) rafflesTabActiveSum.textContent = formatRaffleSum(activeSumRub);
 
         if (active) {
-          renderRafflesActiveChooser(activeList, active.id);
+          renderRafflesActiveChooser(activeList, rafflesFocusedActiveId === RAFFLES_REFERRAL_PROMO_ID ? RAFFLES_REFERRAL_PROMO_ID : active.id);
           setRaffleActiveActionsVisible(true);
           setRafflesSubscribersRowVisible(rafflesIsAdmin);
           if (raffleEmpty) raffleEmpty.classList.add("raffle-empty--hidden");

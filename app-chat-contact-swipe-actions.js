@@ -26,6 +26,10 @@ function initChatContactSwipeActions(opts) {
   function getSwipeRevealPx(panel) {
     if (!panel) return 52;
     var w = panel.closest(".chat-contact-swipe");
+    var actions = w && w.querySelector ? w.querySelector(".chat-contact-swipe__actions") : null;
+    var measured = actions && actions.getBoundingClientRect ? Math.ceil(actions.getBoundingClientRect().width) : 0;
+    if (measured > 0) return measured;
+    if (w && w.classList.contains("chat-contact-swipe--pending-friend")) return 194;
     return w && w.classList.contains("chat-contact-swipe--wide-actions") ? 104 : 52;
   }
   var swipeState = null;
@@ -50,6 +54,21 @@ function initChatContactSwipeActions(opts) {
     var rev = getSwipeRevealPx(panel);
     panel.style.transform = open ? "translateX(-" + rev + "px)" : "";
     panel.classList.toggle("chat-contact-swipe__panel--open", !!open);
+  }
+  function setSwipeFriendPending(btn, cbtn, pending) {
+    if (!btn) return;
+    var wrap = btn.closest(".chat-contact-swipe");
+    btn.disabled = !!pending;
+    btn.classList.toggle("chat-contact-swipe__friend--pending", !!pending);
+    btn.setAttribute("aria-label", pending ? "Заявка отправлена" : "В друзья");
+    btn.setAttribute("title", pending ? "Заявка отправлена" : "В друзья");
+    if (pending) btn.removeAttribute("data-chat-swipe-add-friend");
+    else btn.setAttribute("data-chat-swipe-add-friend", "1");
+    btn.innerHTML = pending
+      ? '<span class="chat-contact-swipe__friend-icon" aria-hidden="true">✓</span><span class="chat-contact-swipe__friend-text">Заявка отправлена</span>'
+      : '<span class="chat-contact-swipe__friend-icon" aria-hidden="true">+</span>';
+    if (wrap) wrap.classList.toggle("chat-contact-swipe--pending-friend", !!pending);
+    if (cbtn) cbtn.setAttribute("data-chat-friend-pending", pending ? "1" : "0");
   }
 
   contactsEl.addEventListener(
@@ -123,8 +142,19 @@ function initChatContactSwipeActions(opts) {
         chatGroup: cbtn && cbtn.getAttribute ? cbtn.getAttribute("data-chat-group") : "",
       });
       if (!cid) return;
-      closeOtherSwipePanels(null);
-      pokerChatAddFriendWithPrompt(cid, cnm || "", null);
+      var panel = wrap && wrap.querySelector(".chat-contact-swipe__panel");
+      closeOtherSwipePanels(panel);
+      setSwipeFriendPending(frB, cbtn, true);
+      snapPanel(panel, true);
+      pokerChatAddFriendWithPrompt(cid, cnm || "", function (d) {
+        if (d && d.ok) {
+          setSwipeFriendPending(frB, cbtn, true);
+          snapPanel(panel, true);
+          return;
+        }
+        setSwipeFriendPending(frB, cbtn, false);
+        snapPanel(panel, true);
+      });
     },
     true
   );
