@@ -758,7 +758,7 @@
   line-height: 1.05;
 }
 .chat-user-modal__achievement-count {
-  display: inline-grid;
+  display: none;
   place-items: center;
   min-width: 20px;
   height: 20px;

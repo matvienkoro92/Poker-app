@@ -344,19 +344,19 @@ if (chatUserModalEl) {
   function chatUserModalAchievementCardHtml(icon, title, rows) {
     rows = Array.isArray(rows) ? rows : [];
     var meta = chatUserModalAchievementMeta(title);
-    var countHtml = rows.length > 1 ? '<span class="chat-user-modal__achievement-count">' + escapeHtml(rows.length) + "</span>" : "";
+    var stars = rows.map(function () { return "★"; }).join(" ");
     var details = rows.map(function (item) {
       return '<span class="chat-user-modal__achievement-detail">' +
         escapeHtml(item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) +
         "</span>";
     }).join("") || '<span class="chat-user-modal__achievement-detail">—</span>';
     return '<article class="chat-user-modal__achievement chat-user-modal__achievement--' + escapeHtml(meta.mod) + (rows.length ? "" : " chat-user-modal__achievement--locked") + '">' +
-      '<span class="chat-user-modal__achievement-title">' + meta.label + countHtml + "</span>" +
+      '<span class="chat-user-modal__achievement-title">' + meta.label + "</span>" +
       '<span class="chat-user-modal__achievement-icon" aria-hidden="true"><img src="' + escapeHtml(meta.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
       '<span class="chat-user-modal__achievement-main">' +
         '<span class="chat-user-modal__achievement-details">' + details + "</span>" +
       "</span>" +
-      '<span class="chat-user-modal__achievement-stars" aria-hidden="true">★ ★ ★</span>' +
+      '<span class="chat-user-modal__achievement-stars" aria-hidden="true">' + escapeHtml(stars.trim()) + "</span>" +
     "</article>";
   }
   function renderChatUserModalAchievements(results, ratingNick) {
