@@ -153,11 +153,13 @@ function initProfileFriends() {
   var listEl = document.getElementById("friendsListModalList");
   var previewEl = document.getElementById("profileFriendsPreview");
   var panelEl = document.getElementById("profileFriendsPanel");
+  var incomingNoticeEl = null;
   var searchForm = document.getElementById("profileFriendsSearchForm");
   var searchInput = document.getElementById("profileFriendsSearchInput");
   var searchBtn = document.getElementById("profileFriendsSearchBtn");
   var searchResult = document.getElementById("profileFriendsSearchResult");
   var searchFoundProfile = null;
+  var focusIncomingOnOpen = false;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -375,6 +377,7 @@ function initProfileFriends() {
         return;
       }
       if (searchBtn) searchBtn.disabled = true;
+      try { searchInput.blur(); } catch (eSearchBlur) {}
       searchFoundProfile = null;
       setSearchResult("Ищу игрока...", "");
       restoreScroll();
@@ -522,6 +525,39 @@ function initProfileFriends() {
     }).join("");
     previewEl.innerHTML = html + inviteSlotHtml();
     wirePreviewButtons();
+  }
+
+  function ensureIncomingNoticeEl() {
+    if (incomingNoticeEl && incomingNoticeEl.parentNode) return incomingNoticeEl;
+    if (!panelEl || !previewEl) return null;
+    incomingNoticeEl = document.createElement("button");
+    incomingNoticeEl.type = "button";
+    incomingNoticeEl.className = "profile-friends__incoming";
+    incomingNoticeEl.id = "profileFriendsIncomingBtn";
+    incomingNoticeEl.hidden = true;
+    incomingNoticeEl.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      focusIncomingOnOpen = true;
+      btn.click();
+    });
+    panelEl.insertBefore(incomingNoticeEl, previewEl);
+    return incomingNoticeEl;
+  }
+
+  function renderIncomingNotice(count) {
+    var el = ensureIncomingNoticeEl();
+    if (!el) return;
+    var n = parseInt(count, 10);
+    if (!isFinite(n) || n <= 0) {
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+    el.hidden = false;
+    el.innerHTML =
+      '<span>Входящие заявки (' + esc(n) + ')</span>' +
+      '<strong>Принять</strong>';
   }
 
   function renderPreviewLoading() {
@@ -683,6 +719,7 @@ function initProfileFriends() {
       if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(friends.length);
     } catch (eFcModal) {}
     try { pokerUpdateFriendsUnreadFromData(data); } catch (eUnreadData) {}
+    renderIncomingNotice(incoming.length);
     renderFriendsPreview(friends);
     var chunks = [];
     chunks.push(renderSection("Друзья", friends, "friends", function (row) {
@@ -701,7 +738,7 @@ function initProfileFriends() {
           '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--reject">Отклонить</button>'
       );
     }));
-    chunks.push(renderSection("Исходящие заявки", outgoing, "outgoing", function (row) {
+    chunks.push(renderSection("Отправленные", outgoing, "outgoing", function (row) {
       return renderRow(
         row,
         "outgoing",
@@ -721,6 +758,15 @@ function initProfileFriends() {
     var html = chunks.join("");
     listEl.innerHTML = html || '<p class="friends-list-modal__empty">Пока нет друзей и заявок</p>';
     wireActionButtons();
+    if (focusIncomingOnOpen) {
+      focusIncomingOnOpen = false;
+      setTimeout(function () {
+        var incomingSection = listEl.querySelector('[data-friends-section="incoming"]');
+        if (incomingSection && typeof incomingSection.scrollIntoView === "function") {
+          incomingSection.scrollIntoView({ block: "start", behavior: "auto" });
+        }
+      }, 0);
+    }
   }
 
   function loadFriends() {
@@ -752,6 +798,7 @@ function initProfileFriends() {
       try {
         if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(null);
       } catch (eNoCred) {}
+      renderIncomingNotice(0);
       renderFriendsPreview([]);
       return;
     }
@@ -761,16 +808,19 @@ function initProfileFriends() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok) {
+          renderIncomingNotice(0);
           renderFriendsPreview([]);
           return;
         }
         try { pokerUpdateFriendsUnreadFromData(data); } catch (ePreviewUnread) {}
+        renderIncomingNotice(Array.isArray(data.incoming) ? data.incoming.length : 0);
         renderFriendsPreview(Array.isArray(data.friends) ? data.friends : []);
         try {
           if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(data.friends) ? data.friends.length : 0);
         } catch (ePreviewCount) {}
       })
       .catch(function () {
+        renderIncomingNotice(0);
         renderFriendsPreview([]);
       });
   }

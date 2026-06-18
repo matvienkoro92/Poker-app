@@ -459,6 +459,7 @@ function initProfileKeyboardViewportCleanup() {
       var t = ev.target;
       if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
       if (t.id === "profileAvatarInput") return;
+      if (t.id === "profileFriendsSearchInput") return;
       if (
         typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
         window.__pokerIsChatPhysicalKeyboardContext()
@@ -502,6 +503,7 @@ function initProfileKeyboardViewportCleanup() {
       var t = ev.target;
       if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
       if (t.id === "profileAvatarInput") return;
+      if (t.id === "profileFriendsSearchInput") return;
       scheduleFlush();
     },
     true
