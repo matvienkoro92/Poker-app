@@ -358,17 +358,20 @@
       return;
     }
     var data = invitedState.data || {};
-    var ranking = Array.isArray(data.ranking) ? data.ranking : [];
+    var myCode = typeof pokerGetMyReferralCode === "function" ? String(pokerGetMyReferralCode() || "").trim() : "";
+    var ranking = (Array.isArray(data.ranking) ? data.ranking : []).filter(function (item) {
+      return !myCode || String((item && item.accountId) || "").trim() !== myCode;
+    });
     if (!ranking.length) {
       root.innerHTML = invitedEmptyHtml("Пока нет игроков с приглашёнными.");
       return;
     }
-    var rows = ranking.map(function (item) {
+    var rows = ranking.map(function (item, index) {
       var name = item.telegramLogin || item.name || item.accountId || "Игрок";
       var sub = [item.accountId, item.telegramLogin && item.name && item.telegramLogin !== item.name ? item.name : ""].filter(Boolean).join(" · ");
       return '<article class="club-referrals-modal__invited-card club-referrals-modal__ranking-card">' +
         '<div class="club-referrals-modal__invited-head">' +
-          '<strong><span class="club-referrals-modal__rank">#' + esc(item.rank || "") + '</span>' + esc(name) + '</strong>' +
+          '<strong><span class="club-referrals-modal__rank">#' + esc(index + 1) + '</span>' + esc(name) + '</strong>' +
           '<span>' + esc(item.invitedCount || 0) + ' чел.</span>' +
         '</div>' +
         '<div class="club-referrals-modal__invited-sub">' + esc(sub) + '</div>' +
