@@ -73,7 +73,7 @@ function buildGeneralMessagesBodyHtml(messages) {
       else if (m.fromRespect < 0) respectClass += " chat-msg__respect--negative";
       var respectDataAttrs = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
       var metaLineTop = '<div class="chat-msg__meta-line">' + '<span class="chat-msg__name">' + nameStr + "</span>" + verifiedStr + levelStr + fishIconStr + "</div>";
-      var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение в чате">Ув: ' + escapeHtml(respectVal) + "</span></span>";
+      var respectPart = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrs + '><span class="' + respectClass + '" title="Уважение от игроков">Ув: ' + escapeHtml(respectVal) + "</span></span>";
       var metaLineRespect = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPart + "</div>";
       var pmAvatarAttr = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
       nameEl = '<div class="chat-msg__meta-stack"><button type="button" class="chat-msg__name-btn" data-pm-id="' + escapeHtml(m.from) + '" data-pm-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' + pmAvatarAttr + ">" + metaLineTop + "</button>" + metaLineRespect + "</div>";
@@ -224,7 +224,7 @@ function buildPersonalMessagesBodyHtml(messages) {
       else if (m.fromRespect < 0) respectClassP += " chat-msg__respect--negative";
       var respectDataAttrsP = m.from ? ' data-user-id="' + escapeHtml(m.from) + '" data-user-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' : "";
       var metaLineTopP = '<div class="chat-msg__meta-line"><span class="chat-msg__name">' + nameStrP + "</span>" + verifiedStrP + levelStrP + fishIconStrP + "</div>";
-      var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение в чате">Ув: ' + escapeHtml(respectValP) + "</span></span>";
+      var respectPartP = '<span class="chat-msg__respect-row chat-msg__respect-inline"' + respectDataAttrsP + '><span class="' + respectClassP + '" title="Уважение от игроков">Ув: ' + escapeHtml(respectValP) + "</span></span>";
       var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
       var pmAvatarAttrP = m.fromAvatar ? ' data-pm-avatar="' + escapeHtml(m.fromAvatar) + '"' : "";
       nameElP = '<div class="chat-msg__meta-stack"><button type="button" class="chat-msg__name-btn" data-pm-id="' + escapeHtml(m.from) + '" data-pm-name="' + escapeHtml(m.fromName || m.fromDtId || "Игрок") + '"' + pmAvatarAttrP + ">" + metaLineTopP + "</button>" + metaLineRespectP + "</div>";

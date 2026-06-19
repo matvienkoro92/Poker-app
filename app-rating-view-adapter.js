@@ -927,6 +927,19 @@ function pokerGetWinterRatingPlayerTotalReward(nick, options) {
 
 window.pokerGetWinterRatingPlayerTotalReward = pokerGetWinterRatingPlayerTotalReward;
 
+function pokerGetRatingPlayerTotalReward(nick, options) {
+  options = options || {};
+  var season = normalizeWinterRatingPlayerSeasonKey(options.season || options.ratingSeason || options.forceSeason);
+  if (!season) {
+    season = typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined"
+      ? "summer"
+      : (typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? "spring" : "winter");
+  }
+  return pokerGetWinterRatingPlayerTotalReward(nick, { season: season });
+}
+
+window.pokerGetRatingPlayerTotalReward = pokerGetRatingPlayerTotalReward;
+
 function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var fullSummary = modal._winterPlayerModalFullSummary;
   var showPoints = modal._winterPlayerModalShowPoints;

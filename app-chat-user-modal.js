@@ -276,18 +276,20 @@ if (chatUserModalEl) {
     return n > 0 ? String(n) : "—";
   }
   function chatUserModalRatingPlacesHtml(places) {
-    if (!Array.isArray(places) || !places.length) return "—";
-    return places.map(function (row) {
-      var placeText = chatUserModalRatingPlaceText(row && row.place);
+    places = Array.isArray(places) ? places : [];
+    var byLeague = {};
+    places.forEach(function (row) {
       var league = row && row.league != null ? String(row.league).trim() : "";
-      if (row && row.league) {
-        return '<span class="chat-user-modal__rating-rank-line">' +
-          '<span class="chat-user-modal__rating-rank-league">Лига ' + escapeHtml(league) + "</span>" +
-          '<span class="chat-user-modal__rating-rank-place">' + escapeHtml(placeText) + "</span>" +
-        "</span>";
-      }
-      return '<span class="chat-user-modal__rating-rank-line">' +
+      if (league !== "1" && league !== "2") league = "1";
+      if (!byLeague[league]) byLeague[league] = row;
+    });
+    return ["1", "2"].map(function (league) {
+      var row = byLeague[league];
+      var placeText = row ? chatUserModalRatingPlaceText(row.place) : "—";
+      return '<span class="chat-user-modal__rating-rank-line chat-user-modal__rating-rank-line--league-' + escapeHtml(league) + '">' +
+        '<span class="chat-user-modal__rating-rank-league">Лига ' + escapeHtml(league) + "</span>" +
         '<span class="chat-user-modal__rating-rank-place">' + escapeHtml(placeText) + "</span>" +
+        '<span class="chat-user-modal__rating-rank-place-label">место</span>' +
       "</span>";
     }).join("");
   }
@@ -314,12 +316,15 @@ if (chatUserModalEl) {
   function syncChatUserModalRatingTotalReward(nick) {
     if (!modalRatingTabSum) return;
     var ratingNick = String(nick || "").trim();
-    if (!ratingNick || typeof window.pokerGetWinterRatingPlayerTotalReward !== "function") {
+    var getTotalReward = typeof window.pokerGetRatingPlayerTotalReward === "function"
+      ? window.pokerGetRatingPlayerTotalReward
+      : (typeof window.pokerGetWinterRatingPlayerTotalReward === "function" ? window.pokerGetWinterRatingPlayerTotalReward : null);
+    if (!ratingNick || !getTotalReward) {
       modalRatingTabSum.textContent = "";
       modalRatingTabSum.hidden = true;
       return;
     }
-    var text = chatUserModalFormatAchievementRub(window.pokerGetWinterRatingPlayerTotalReward(ratingNick));
+    var text = chatUserModalFormatAchievementRub(getTotalReward(ratingNick));
     modalRatingTabSum.textContent = text;
     modalRatingTabSum.hidden = !text;
     if (modalRatingTab && text) {
@@ -370,9 +375,13 @@ if (chatUserModalEl) {
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
+    if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.png" };
+    if (key.indexOf("зим") >= 0) return { mod: "cup-winter", label: "КУБОК<br>ЗИМЫ", img: "./assets/chat-profile-achievement-cup-winter.png" };
+    if (key.indexOf("лет") >= 0) return { mod: "cup-summer", label: "КУБОК<br>ЛЕТА", img: "./assets/chat-profile-achievement-cup-summer.png" };
     return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.png" };
   }
-  function chatUserModalAchievementCardHtml(icon, title, rows) {
+  function chatUserModalAchievementCardHtml(icon, title, rows, options) {
+    options = options || {};
     rows = Array.isArray(rows) ? rows : [];
     var meta = chatUserModalAchievementMeta(title);
     var stars = rows.map(function () { return "★"; }).join(" ");
@@ -380,8 +389,16 @@ if (chatUserModalEl) {
       return '<span class="chat-user-modal__achievement-detail">' +
         escapeHtml(item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) +
         "</span>";
-    }).join("") || '<span class="chat-user-modal__achievement-detail">—</span>';
-    return '<article class="chat-user-modal__achievement chat-user-modal__achievement--' + escapeHtml(meta.mod) + (rows.length ? "" : " chat-user-modal__achievement--locked") + '">' +
+    }).join("") || '<span class="chat-user-modal__achievement-detail">' + escapeHtml(options.placeholder || "—") + "</span>";
+    var isLocked = options.locked === true || !rows.length;
+    var attrs = "";
+    if (options.action) {
+      attrs += ' role="button" tabindex="0" data-chat-achievement-action="' + escapeHtml(options.action) + '"';
+      attrs += ' aria-label="' + escapeHtml(options.ariaLabel || title) + '"';
+    }
+    return '<article class="chat-user-modal__achievement chat-user-modal__achievement--' + escapeHtml(meta.mod) +
+      (options.extraClass ? " " + escapeHtml(options.extraClass) : "") +
+      (isLocked ? " chat-user-modal__achievement--locked" : "") + '"' + attrs + ">" +
       '<span class="chat-user-modal__achievement-title">' + meta.label + "</span>" +
       '<span class="chat-user-modal__achievement-icon" aria-hidden="true"><img src="' + escapeHtml(meta.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
       '<span class="chat-user-modal__achievement-main">' +
@@ -390,11 +407,33 @@ if (chatUserModalEl) {
       '<span class="chat-user-modal__achievement-stars" aria-hidden="true">' + escapeHtml(stars.trim()) + "</span>" +
     "</article>";
   }
+  function chatUserModalSeasonCupRows(seasonKey, rows) {
+    if (seasonKey === "summer") return [];
+    rows = Array.isArray(rows) ? rows : [];
+    return rows.reduce(function (items, row) {
+      var place = row && row.place != null ? parseInt(row.place, 10) : 0;
+      if (!place || place < 1 || place > 3) return items;
+      var label = String(place) + " место";
+      if (seasonKey === "spring" && row.league) label += ", Лига " + row.league;
+      else if (seasonKey === "winter") label += ", зима";
+      items.push({ label: label, row: row, season: seasonKey });
+      return items;
+    }, []);
+  }
+  function chatUserModalSummerCupCardHtml() {
+    return chatUserModalAchievementCardHtml("🏆", "Кубок лета", [], {
+      locked: true,
+      placeholder: "Сейчас идет",
+      action: "summer-rating",
+      ariaLabel: "Кубок лета сейчас идет. Открыть рейтинг лета",
+      extraClass: "chat-user-modal__achievement--season-cup chat-user-modal__achievement--season-cup-current",
+    });
+  }
   function renderChatUserModalAchievements(results, ratingNick) {
     if (!modalAchievements || !modalAchievementsList) return;
     if (!String(ratingNick || "").trim()) {
-      modalAchievementsList.innerHTML = "";
-      modalAchievements.hidden = true;
+      modalAchievementsList.innerHTML = chatUserModalSummerCupCardHtml();
+      modalAchievements.hidden = false;
       return;
     }
     var seasons = [
@@ -413,7 +452,7 @@ if (chatUserModalEl) {
         var place = row && row.place != null ? parseInt(row.place, 10) : 0;
         if (!place || place < 1) return;
         var item = { season: season.key, row: row };
-        if (place === 1) top1.push(item);
+        if (season.key !== "summer" && place === 1) top1.push(item);
         if (place <= 10) top10.push(item);
       });
     });
@@ -428,7 +467,14 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
-      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1);
+      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1) +
+      chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
+        extraClass: "chat-user-modal__achievement--season-cup",
+      }) +
+      chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
+        extraClass: "chat-user-modal__achievement--season-cup",
+      }) +
+      chatUserModalSummerCupCardHtml();
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;
   }
@@ -921,6 +967,24 @@ if (chatUserModalEl) {
       } else if (typeof openWinterRatingPlayerModalReady === "function") {
         openWinterRatingPlayerModalReady(nick, { season: "summer" });
       }
+    });
+  }
+  function openChatUserModalSummerRatingFromAchievement() {
+    closeChatUserModal();
+    if (typeof setView === "function") setView("summer-rating");
+  }
+  if (modalAchievementsList) {
+    modalAchievementsList.addEventListener("click", function (e) {
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-action]") : null;
+      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
+      openChatUserModalSummerRatingFromAchievement();
+    });
+    modalAchievementsList.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-action]") : null;
+      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
+      e.preventDefault();
+      openChatUserModalSummerRatingFromAchievement();
     });
   }
   function chatUserModalPostRespect(action) {

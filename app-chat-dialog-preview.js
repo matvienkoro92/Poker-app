@@ -143,7 +143,7 @@ function initChatDialogPreviewRuntime(opts) {
           var respectPartP =
             '<span class="chat-msg__respect-row chat-msg__respect-inline"><span class="' +
             respectClassP +
-            '" title="Уважение в чате">Ув: ' +
+            '" title="Уважение от игроков">Ув: ' +
             escapeHtml(respectValP) +
             "</span></span>";
           var metaLineRespectP = '<div class="chat-msg__meta-line chat-msg__meta-sub">' + respectPartP + "</div>";
