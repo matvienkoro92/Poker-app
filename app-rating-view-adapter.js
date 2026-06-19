@@ -915,6 +915,18 @@ function getWinterRatingPlayerSummary(nick, options) {
   });
 }
 
+function pokerGetWinterRatingPlayerTotalReward(nick, options) {
+  var summary = getWinterRatingPlayerSummary(nick, options);
+  var total = 0;
+  for (var i = 0; i < summary.length; i++) total += Number(summary[i] && summary[i].reward) || 0;
+  if (String(normalizeWinterNick(nick)) === "Waaar" && !(options && isWinterRatingPlayerSeasonalKey(getWinterRatingPlayerSeasonKey(options)))) {
+    total += 588225;
+  }
+  return total;
+}
+
+window.pokerGetWinterRatingPlayerTotalReward = pokerGetWinterRatingPlayerTotalReward;
+
 function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var fullSummary = modal._winterPlayerModalFullSummary;
   var showPoints = modal._winterPlayerModalShowPoints;

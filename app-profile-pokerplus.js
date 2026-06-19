@@ -1313,9 +1313,16 @@ function initProfilePokerPlus() {
     };
   }
 
+  function renderPokerPlusProfileStatus(profileSource) {
+    var source = profileSource && typeof profileSource === "object" ? profileSource : {};
+    var total = source.totalCounter && typeof source.totalCounter === "object" ? source.totalCounter : (source.total_counter && typeof source.total_counter === "object" ? source.total_counter : source);
+    if (typeof setProfileStatusFromProfile === "function") setProfileStatusFromProfile(source, true);
+    else if (typeof setProfileStatusFromRake === "function") setProfileStatusFromRake(pokerPlusPickStat(total, "fee", "fee"));
+    setProfileStatusLoading(false);
+  }
+
   function renderPokerPlusStats(profileSource) {
     if (!statsValue) return;
-    setProfileStatusLoading(false);
     var source = profileSource && typeof profileSource === "object" ? profileSource : {};
     pokerPlusLastStatsProfile = source;
     var total = source.totalCounter && typeof source.totalCounter === "object" ? source.totalCounter : (source.total_counter && typeof source.total_counter === "object" ? source.total_counter : source);
@@ -1324,11 +1331,7 @@ function initProfilePokerPlus() {
     syncPokerPlusStatsDateFilterBounds(source, today);
     if (POKERPLUS_STATS_KINDS.indexOf(pokerPlusStatsActiveKind) === -1) pokerPlusStatsActiveKind = "cash";
     setPokerPlusStatsKindTabs(pokerPlusStatsActiveKind);
-    if (typeof setProfileStatusFromProfile === "function") setProfileStatusFromProfile(source, true);
-    else {
-      var feeStat = pokerPlusPickStat(total, "fee", "fee");
-      setProfileStatusFromRake(feeStat);
-    }
+    renderPokerPlusProfileStatus(source);
     var groups = [];
     var selection = pokerPlusStatsDateSelection();
     if (pokerPlusStatsActivePeriod === "range") {
@@ -1536,6 +1539,7 @@ function initProfilePokerPlus() {
     var syncedAt = pokerPlusSyncedAtValue(p);
     if (syncedAt) pokerPlusLastSyncedAt = Math.max(pokerPlusLastSyncedAt, syncedAt);
     if (title) title.textContent = pokerPlusLocale() === "en" ? "Poker21 Profile" : "Профиль в Poker21";
+    renderPokerPlusProfileStatus(p);
     if (emailRow) emailRow.hidden = !(p.email && String(p.email).trim());
     if (emailValue) emailValue.textContent = p.email && String(p.email).trim() ? String(p.email).trim() : "—";
     if (linkedRow) linkedRow.hidden = false;
@@ -1940,9 +1944,15 @@ function initProfilePokerPlus() {
   }
   function refreshPokerPlusFromButton() {
     setFeedback("Обновляем данные Poker21...", false);
+    setPokerPlusRefreshButtonsDisabled(true);
     try {
-      Promise.resolve(loadProfile(true)).catch(function () {});
-    } catch (eRefreshLoad) {}
+      pokerPlusRunFinally(
+        Promise.resolve(loadProfile(true)).catch(function () {}),
+        function () { setPokerPlusRefreshButtonsDisabled(false); }
+      );
+    } catch (eRefreshLoad) {
+      setPokerPlusRefreshButtonsDisabled(false);
+    }
   }
   if (refreshBtn.dataset.bound !== "1") {
     refreshBtn.dataset.bound = "1";

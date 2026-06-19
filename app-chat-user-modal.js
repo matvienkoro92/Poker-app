@@ -83,6 +83,7 @@ if (chatUserModalEl) {
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
+  var modalRatingTabSum = document.getElementById("chatUserModalRatingTabSum");
   var modalRatingRanks = document.getElementById("chatUserModalRatingRanks");
   var modalSummerRank = document.getElementById("chatUserModalSummerRank");
   var modalSpringRank = document.getElementById("chatUserModalSpringRank");
@@ -139,7 +140,7 @@ if (chatUserModalEl) {
     var leftXp = Math.max(0, Math.floor((Number(status.nextStart) || 0) - (Number(status.points) || 0)));
     modalStatusXp.textContent = status.level >= 100 || neededXp <= 0
       ? chatUserModalFormatXp(status.points) + " XP · максимум"
-      : chatUserModalFormatXp(currentXp) + " / " + chatUserModalFormatXp(neededXp) + " XP · до " + status.nextLevel + ": " + chatUserModalFormatXp(leftXp);
+      : chatUserModalFormatXp(currentXp) + " / " + chatUserModalFormatXp(neededXp) + " XP";
     modalStatusXp.hidden = false;
   }
   function closeChatUserModal() {
@@ -224,6 +225,10 @@ if (chatUserModalEl) {
     chatUserModalRatingNick = String(nick || "").trim();
     var hasNick = !!chatUserModalRatingNick;
     if (modalRatingTabs) modalRatingTabs.hidden = !hasNick;
+    if (modalRatingTabSum) {
+      modalRatingTabSum.textContent = "";
+      modalRatingTabSum.hidden = true;
+    }
     if (modalRatingTab) {
       modalRatingTab.hidden = !hasNick;
       modalRatingTab.disabled = !hasNick;
@@ -294,6 +299,21 @@ if (chatUserModalEl) {
     var n = Number(value);
     if (!isFinite(n) || !n) return "";
     return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
+  }
+  function syncChatUserModalRatingTotalReward(nick) {
+    if (!modalRatingTabSum) return;
+    var ratingNick = String(nick || "").trim();
+    if (!ratingNick || typeof window.pokerGetWinterRatingPlayerTotalReward !== "function") {
+      modalRatingTabSum.textContent = "";
+      modalRatingTabSum.hidden = true;
+      return;
+    }
+    var text = chatUserModalFormatAchievementRub(window.pokerGetWinterRatingPlayerTotalReward(ratingNick));
+    modalRatingTabSum.textContent = text;
+    modalRatingTabSum.hidden = !text;
+    if (modalRatingTab && text) {
+      modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах " + text + ". Подробнее");
+    }
   }
   function chatUserModalSameRatingNick(a, b) {
     if (typeof winterRatingSamePlayer === "function") return winterRatingSamePlayer(a, b);
@@ -440,6 +460,7 @@ if (chatUserModalEl) {
       setChatUserModalRatingRankValue(modalSummerRank, results && results[0]);
       setChatUserModalRatingRankValue(modalSpringRank, results && results[1]);
       setChatUserModalRatingRankValue(modalWinterRank, results && results[2]);
+      syncChatUserModalRatingTotalReward(ratingNick);
       renderChatUserModalAchievements(results, ratingNick);
     }).catch(function () {
       if (seq !== chatUserModalRanksSeq) return;
