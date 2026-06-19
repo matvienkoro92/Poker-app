@@ -880,6 +880,7 @@ if (chatUserModalEl) {
           var ratingNick = chatUserModalRatingNickFromData(data);
           syncChatUserModalRatingTab(ratingNick);
           ratingRanksPromise = syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
+          Promise.resolve(ratingRanksPromise).catch(function () {});
           syncChatUserModalRatingArt(ratingNick);
           var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
           if (modalAvatar && modalAvatarPlaceholder && modalAvatar.style.display !== "none") {
@@ -905,7 +906,7 @@ if (chatUserModalEl) {
             }
           }
         }
-        return ratingRanksPromise;
+        return null;
       })
       .catch(function () {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;

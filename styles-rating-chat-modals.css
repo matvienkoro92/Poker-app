@@ -1065,46 +1065,29 @@
   align-items: center;
   gap: 16px;
   width: 100%;
-  min-height: 184px;
+  min-height: 0;
+  aspect-ratio: 2172 / 724;
   min-width: 0;
   padding: 24px 42px 24px 37%;
   border: 0;
   border-radius: 0;
-  background: center / 100% auto no-repeat;
+  background: center / contain no-repeat;
   box-shadow: 0 0 18px color-mix(in srgb, var(--season-rank-accent) 25%, transparent);
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
 }
-.chat-user-modal__rating-rank-row::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 35%;
-  background: left center / 100% auto no-repeat;
-  pointer-events: none;
-  z-index: 0;
-}
 .chat-user-modal__rating-rank-row:nth-child(1) {
   --season-rank-accent: #f59e0b;
-  background-image: url("./assets/chat-profile-season-history-summer.webp");
-}
-.chat-user-modal__rating-rank-row:nth-child(1)::before {
-  background-image: url("./assets/chat-profile-season-history-summer-mark.webp");
+  background-image: url("./assets/chat-profile-season-history-summer-full.png");
 }
 .chat-user-modal__rating-rank-row:nth-child(2) {
   --season-rank-accent: #84cc16;
-  background-image: url("./assets/chat-profile-season-history-spring.webp");
-}
-.chat-user-modal__rating-rank-row:nth-child(2)::before {
-  background-image: url("./assets/chat-profile-season-history-spring-mark.webp");
+  background-image: url("./assets/chat-profile-season-history-spring-full.png");
 }
 .chat-user-modal__rating-rank-row:nth-child(3) {
   --season-rank-accent: #38bdf8;
-  background-image: url("./assets/chat-profile-season-history-winter.webp");
-}
-.chat-user-modal__rating-rank-row:nth-child(3)::before {
-  background-image: url("./assets/chat-profile-season-history-winter-mark.webp");
+  background-image: url("./assets/chat-profile-season-history-winter-full.png");
 }
 .chat-user-modal__rating-rank-label {
   min-width: 0;
@@ -1506,14 +1489,7 @@
   .chat-user-modal__rating-rank-row {
     grid-template-columns: minmax(70px, 0.86fr) minmax(128px, 1.14fr);
     gap: 7px;
-    min-height: 128px;
     padding: 16px 12px 16px 35%;
-    background-size: auto 100%;
-  }
-
-  .chat-user-modal__rating-rank-row::before {
-    width: 34%;
-    background-size: auto 100%;
   }
 
   .chat-user-modal__rating-rank-label {
@@ -1540,7 +1516,6 @@
 
   .chat-user-modal__rating-rank-row {
     grid-template-columns: minmax(58px, 0.82fr) minmax(112px, 1.18fr);
-    min-height: 116px;
     padding-left: 34%;
   }
 

@@ -316,6 +316,9 @@
   border-radius: 12px;
   background: rgba(15, 23, 42, 0.48);
 }
+.profile-pokerplus-view-tabs[hidden] {
+  display: none !important;
+}
 .profile-pokerplus-view-tabs__btn {
   min-width: 0;
   min-height: 40px;

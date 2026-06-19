@@ -446,7 +446,6 @@ initHallOfFamePanelShareButtons();
 var hallFishRatingRowsCache = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
-var hallFishProfileLoadingTimer = null;
 var hallFishProfileLoadingObserver = null;
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 
@@ -677,10 +676,6 @@ function hallFishRenderRows(rows) {
 }
 
 function hallFishClearProfileLoadingRows() {
-  if (hallFishProfileLoadingTimer) {
-    clearTimeout(hallFishProfileLoadingTimer);
-    hallFishProfileLoadingTimer = null;
-  }
   if (hallFishProfileLoadingObserver) {
     try {
       hallFishProfileLoadingObserver.disconnect();
@@ -725,7 +720,6 @@ function hallFishClearLoadingWhenProfileOpens() {
     });
     hallFishProfileLoadingObserver.observe(modal, { attributes: true, attributeFilter: ["class", "aria-hidden"] });
   }
-  hallFishProfileLoadingTimer = setTimeout(hallFishClearProfileLoadingRows, 12000);
 }
 
 function hallFishStatusFishLevel(level) {

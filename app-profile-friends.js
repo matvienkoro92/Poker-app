@@ -823,8 +823,11 @@ function initProfileFriends() {
         '" data-user-name="' + esc(meta.modalName) +
         '" data-avatar-url="' + esc(avatar) +
         '" aria-label="Открыть профиль ' + esc(meta.modalName) + '">' +
-        '<span class="profile-friends__avatar-ring"><img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async"></span>' +
-        '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
+        '<span class="profile-friends__avatar-stack">' +
+          '<span class="profile-friends__avatar-ring"><img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async"></span>' +
+          '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
+        "</span>" +
+        '<span class="profile-friends__friend-name">' + esc(meta.modalName) + "</span>" +
         "</button>"
       );
     }).join("");
