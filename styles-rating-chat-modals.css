@@ -1020,9 +1020,9 @@
 .chat-user-modal__rating-ranks {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
+  gap: 3px;
   margin: 18px 0 14px;
-  padding-top: 30px;
+  padding-top: 32px;
   position: relative;
 }
 .chat-user-modal__rating-ranks::before {
@@ -1061,16 +1061,16 @@
 .chat-user-modal__rating-rank-row {
   --season-rank-accent: #f0a23a;
   display: grid;
-  grid-template-columns: minmax(96px, 0.88fr) minmax(174px, 1.12fr);
+  grid-template-columns: minmax(150px, 0.95fr) minmax(230px, 1.05fr);
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
-  min-height: 106px;
+  min-height: 184px;
   min-width: 0;
-  padding: 18px 22px 18px 164px;
+  padding: 24px 42px 24px 37%;
   border: 0;
   border-radius: 0;
-  background: center / 100% 100% no-repeat;
+  background: center / 100% auto no-repeat;
   box-shadow: 0 0 18px color-mix(in srgb, var(--season-rank-accent) 25%, transparent);
   box-sizing: border-box;
   position: relative;
@@ -1080,8 +1080,8 @@
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 34%;
-  background: left center / 100% 100% no-repeat;
+  width: 35%;
+  background: left center / 100% auto no-repeat;
   pointer-events: none;
   z-index: 0;
 }
@@ -1109,7 +1109,7 @@
 .chat-user-modal__rating-rank-label {
   min-width: 0;
   color: var(--season-rank-accent);
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 1000;
   line-height: 0.92;
   text-align: left;
@@ -1124,10 +1124,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 10px;
+  gap: 18px;
   justify-items: stretch;
   color: rgba(255, 246, 224, 0.94);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 1000;
   line-height: 1.05;
   text-align: center;
@@ -1148,7 +1148,7 @@
 .chat-user-modal__rating-rank-league {
   display: block;
   color: #f6ead7;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   text-shadow:
     0 2px 2px rgba(0, 0, 0, 0.86),
@@ -1157,7 +1157,7 @@
 .chat-user-modal__rating-rank-place {
   display: block;
   color: var(--season-rank-accent);
-  font-size: 38px;
+  font-size: 58px;
   line-height: 0.86;
   text-shadow:
     0 2px 3px rgba(0, 0, 0, 0.92),
@@ -1166,7 +1166,7 @@
 .chat-user-modal__rating-rank-place-label {
   display: block;
   color: #f8ead0;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 1000;
   line-height: 1;
   text-transform: uppercase;
@@ -1499,34 +1499,37 @@
   }
 
   .chat-user-modal__rating-ranks {
-    gap: 6px;
+    gap: 3px;
     padding-top: 24px;
   }
 
   .chat-user-modal__rating-rank-row {
-    grid-template-columns: minmax(62px, 0.82fr) minmax(122px, 1.18fr);
-    min-height: 82px;
-    padding: 13px 12px 13px 118px;
+    grid-template-columns: minmax(70px, 0.86fr) minmax(128px, 1.14fr);
+    gap: 7px;
+    min-height: 128px;
+    padding: 16px 12px 16px 35%;
+    background-size: auto 100%;
   }
 
   .chat-user-modal__rating-rank-row::before {
-    width: 35%;
+    width: 34%;
+    background-size: auto 100%;
   }
 
   .chat-user-modal__rating-rank-label {
-    font-size: 19px;
+    font-size: 23px;
   }
 
   .chat-user-modal__rating-rank-league {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .chat-user-modal__rating-rank-place {
-    font-size: 26px;
+    font-size: 36px;
   }
 
   .chat-user-modal__rating-rank-place-label {
-    font-size: 8px;
+    font-size: 9px;
   }
 }
 
@@ -1536,16 +1539,17 @@
   }
 
   .chat-user-modal__rating-rank-row {
-    grid-template-columns: minmax(54px, 0.78fr) minmax(108px, 1.22fr);
-    padding-left: 100px;
+    grid-template-columns: minmax(58px, 0.82fr) minmax(112px, 1.18fr);
+    min-height: 116px;
+    padding-left: 34%;
   }
 
   .chat-user-modal__rating-rank-label {
-    font-size: 17px;
+    font-size: 20px;
   }
 
   .chat-user-modal__rating-rank-place {
-    font-size: 23px;
+    font-size: 31px;
   }
 }
 .chat-user-modal__title-fish {

@@ -450,6 +450,7 @@
 .hall-fish-level-row {
   appearance: none;
   -webkit-appearance: none;
+  position: relative;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 70px 54px;
   align-items: center;
@@ -470,6 +471,34 @@
   border-color: rgba(248, 217, 138, 0.34);
   background: rgba(30, 41, 59, 0.62);
   outline: none;
+}
+.hall-fish-level-row--loading {
+  cursor: wait;
+  opacity: 0.84;
+}
+.hall-fish-level-row--loading .hall-fish-level-row__level {
+  color: #fff1b8;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.42);
+}
+.hall-fish-level-row--loading::after {
+  content: "";
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid rgba(255, 237, 213, 0.24);
+  border-top-color: rgba(253, 230, 138, 0.95);
+  border-radius: 50%;
+  animation: hall-fish-row-loading-spin 0.72s linear infinite;
+}
+@keyframes hall-fish-row-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .hall-fish-level-row__rank {
   color: rgba(255, 237, 213, 0.72);
@@ -527,6 +556,9 @@
     grid-template-columns: 32px minmax(0, 1fr) 78px 42px;
     gap: 7px;
     padding: 8px;
+  }
+  .hall-fish-level-row--loading::after {
+    right: 8px;
   }
   .hall-fish-modal__my-rank {
     font-size: 11px;

@@ -508,8 +508,8 @@ if (chatUserModalEl) {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
-      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalSummerCupCardHtml();
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;

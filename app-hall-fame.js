@@ -446,6 +446,8 @@ initHallOfFamePanelShareButtons();
 var hallFishRatingRowsCache = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
+var hallFishProfileLoadingTimer = null;
+var hallFishProfileLoadingObserver = null;
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 
 function hallFishEsc(s) {
@@ -674,6 +676,58 @@ function hallFishRenderRows(rows) {
   }).join("") + '</div>';
 }
 
+function hallFishClearProfileLoadingRows() {
+  if (hallFishProfileLoadingTimer) {
+    clearTimeout(hallFishProfileLoadingTimer);
+    hallFishProfileLoadingTimer = null;
+  }
+  if (hallFishProfileLoadingObserver) {
+    try {
+      hallFishProfileLoadingObserver.disconnect();
+    } catch (eHallFishDisconnect) {}
+    hallFishProfileLoadingObserver = null;
+  }
+  document.querySelectorAll(".hall-fish-level-row--loading").forEach(function (row) {
+    row.classList.remove("hall-fish-level-row--loading");
+    row.removeAttribute("aria-busy");
+    row.disabled = false;
+    var level = row.querySelector(".hall-fish-level-row__level");
+    if (level && level.dataset.originalText) {
+      level.textContent = level.dataset.originalText;
+      delete level.dataset.originalText;
+    }
+  });
+}
+
+function hallFishSetProfileRowLoading(row) {
+  if (!row) return;
+  hallFishClearProfileLoadingRows();
+  var level = row.querySelector(".hall-fish-level-row__level");
+  if (level && !level.dataset.originalText) level.dataset.originalText = level.textContent || "";
+  if (level) level.textContent = "Загрузка...";
+  row.classList.add("hall-fish-level-row--loading");
+  row.setAttribute("aria-busy", "true");
+  row.disabled = true;
+}
+
+function hallFishClearLoadingWhenProfileOpens() {
+  var modal = document.getElementById("chatUserModal");
+  function isOpen() {
+    return !!(modal && modal.classList.contains("chat-user-modal--open"));
+  }
+  if (isOpen()) {
+    hallFishClearProfileLoadingRows();
+    return;
+  }
+  if (modal && typeof MutationObserver !== "undefined") {
+    hallFishProfileLoadingObserver = new MutationObserver(function () {
+      if (isOpen()) hallFishClearProfileLoadingRows();
+    });
+    hallFishProfileLoadingObserver.observe(modal, { attributes: true, attributeFilter: ["class", "aria-hidden"] });
+  }
+  hallFishProfileLoadingTimer = setTimeout(hallFishClearProfileLoadingRows, 12000);
+}
+
 function hallFishStatusFishLevel(level) {
   if (typeof pokerProfileStatusFishLevel === "function") return pokerProfileStatusFishLevel(level);
   var n = parseInt(level, 10);
@@ -710,6 +764,7 @@ function hallFishSetModalState(message, rows, currentIds) {
 }
 
 function hallFishCloseModal() {
+  hallFishClearProfileLoadingRows();
   var modal = document.getElementById("hallFishRatingModal");
   if (modal) modal.hidden = true;
   if (document.body) document.body.classList.remove("player-crm-dialog-modal-open");
@@ -767,7 +822,9 @@ function initHallFishRatingModal() {
     if (!userId || !hallFishEnsureProfileModal()) return;
     e.preventDefault();
     e.stopPropagation();
+    hallFishSetProfileRowLoading(row);
     window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null);
+    hallFishClearLoadingWhenProfileOpens();
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") hallFishCloseModal();
