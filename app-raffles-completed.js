@@ -679,43 +679,76 @@ function initRafflesCompletedRuntime(opts) {
       });
   }
 
-  function setRaffleWinnerReady(rid, wid, winnerSlotId, btn, onDone) {
+  function raffleWinnerReadySetButtonPending(btn, pending) {
+    if (!btn) return;
+    if (pending) {
+      if (!btn.dataset.readyIdleText) btn.dataset.readyIdleText = btn.textContent || "Я готов";
+      btn.textContent = "Отправляем...";
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
+      return;
+    }
+    btn.textContent = btn.dataset.readyIdleText || "Я готов";
+    btn.disabled = false;
+    btn.removeAttribute("aria-busy");
+  }
+
+  function raffleWinnerReadyApplySuccess(btn) {
+    if (!btn) return;
+    var row = btn.closest ? btn.closest(".raffle-winner-row") : null;
+    var badge = row && row.querySelector ? row.querySelector(".raffle-winner-ready-badge") : null;
+    btn.textContent = "Готов";
+    btn.disabled = true;
+    btn.setAttribute("aria-disabled", "true");
+    btn.removeAttribute("aria-busy");
+    btn.classList.add("raffle-winner-ready-btn--active");
+    if (row) {
+      row.classList.add("raffle-winner-row--ready");
+      row.classList.remove("raffle-winner-row--missed");
+    }
+    if (badge) {
+      badge.textContent = "Готов";
+      badge.classList.remove("raffle-winner-ready-badge--pending", "raffle-winner-ready-badge--missed");
+    }
+  }
+
+  function setRaffleWinnerReady(rid, wid, winnerSlotId, btn, onDone, attempt) {
     if (!rid || (!wid && !winnerSlotId) || !base) {
       if (onDone) onDone(false);
       return;
     }
+    var tryIndex = Math.max(0, parseInt(attempt, 10) || 0);
+    raffleWinnerReadySetButtonPending(btn, true);
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerReady", raffleId: rid, winnerUserId: wid, winnerSlotId: winnerSlotId || "" })),
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; })
+          .then(function (data) {
+            if (data && typeof data === "object") data.httpStatus = r.status;
+            return data;
+          });
+      })
       .then(function (data) {
         if (data && data.ok) {
-          if (btn) {
-            var row = btn.closest ? btn.closest(".raffle-winner-row") : null;
-            var badge = row && row.querySelector ? row.querySelector(".raffle-winner-ready-badge") : null;
-            btn.textContent = "Готов";
-            btn.disabled = true;
-            btn.setAttribute("aria-disabled", "true");
-            btn.classList.add("raffle-winner-ready-btn--active");
-            if (row) {
-              row.classList.add("raffle-winner-row--ready");
-              row.classList.remove("raffle-winner-row--missed");
-            }
-            if (badge) {
-              badge.textContent = "Готов";
-              badge.classList.remove("raffle-winner-ready-badge--pending", "raffle-winner-ready-badge--missed");
-            }
-          }
+          raffleWinnerReadyApplySuccess(btn);
           loadRaffles();
+        } else if (data && data.httpStatus === 409 && tryIndex < 2) {
+          window.setTimeout(function () {
+            setRaffleWinnerReady(rid, wid, winnerSlotId, btn, onDone, tryIndex + 1);
+          }, 800 + tryIndex * 700);
+          return;
         } else if (tg && tg.showAlert) {
           tg.showAlert((data && data.error) || "Не удалось подтвердить готовность.");
         }
+        if (!(data && data.ok)) raffleWinnerReadySetButtonPending(btn, false);
         if (onDone) onDone(!!(data && data.ok));
       })
       .catch(function () {
         if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        raffleWinnerReadySetButtonPending(btn, false);
         if (onDone) onDone(false);
       });
   }

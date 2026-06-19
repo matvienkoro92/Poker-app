@@ -666,7 +666,7 @@ function hallFishRenderRows(rows) {
     var userId = String(row.accountId || "").trim();
     var name = row.name || row.telegram || "Игрок";
     var sub = row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
-    return '<button type="button" class="hall-fish-level-row" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
+    return '<button type="button" class="hall-fish-level-row" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
       '<span class="hall-fish-level-row__rank">' + hallFishEsc(idx + 1) + '</span>' +
       '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
       '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
@@ -703,6 +703,16 @@ function hallFishSetProfileRowLoading(row) {
   row.classList.add("hall-fish-level-row--loading");
   row.setAttribute("aria-busy", "true");
   row.disabled = true;
+}
+
+function hallFishLevelFromRow(row) {
+  if (!row) return "";
+  var attr = String(row.getAttribute("data-user-level") || "").trim();
+  if (attr) return attr;
+  var level = row.querySelector(".hall-fish-level-row__level");
+  var text = String((level && (level.dataset.originalText || level.textContent)) || "").trim();
+  var match = text.match(/\d+/);
+  return match && match[0] ? match[0] : "";
 }
 
 function hallFishClearLoadingWhenProfileOpens() {
@@ -814,10 +824,14 @@ function initHallFishRatingModal() {
     if (!row) return;
     var userId = String(row.getAttribute("data-user-id") || "").trim();
     if (!userId || !hallFishEnsureProfileModal()) return;
+    var rowLevel = hallFishLevelFromRow(row);
     e.preventDefault();
     e.stopPropagation();
     hallFishSetProfileRowLoading(row);
-    window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null);
+    window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null, {
+      level: rowLevel,
+      ratingNick: row.getAttribute("data-user-name") || "",
+    });
     hallFishClearLoadingWhenProfileOpens();
   });
   document.addEventListener("keydown", function (e) {
