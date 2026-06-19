@@ -262,9 +262,21 @@ if (chatUserModalEl) {
     } catch (eFallbackAvatarRead) {}
     return "";
   }
+  function chatUserModalHeroFallbackPlaceholderUrl() {
+    var initial = String(chatUserModalUserName || "И").trim().charAt(0) || "И";
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">' +
+      '<defs><radialGradient id="g" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#4b5563"/><stop offset="1" stop-color="#111827"/></radialGradient></defs>' +
+      '<rect width="160" height="160" rx="80" fill="url(#g)"/>' +
+      '<text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="#fff3d4" font-family="Arial, sans-serif" font-size="76" font-weight="900">' +
+      initial.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
+      "</text></svg>";
+    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+  }
   function hideChatUserModalRatingArtImg() {
     if (!modalRatingArtImg) return;
     modalRatingArtImg.onerror = null;
+    modalRatingArtImg.style.display = "none";
     modalRatingArtImg.removeAttribute("src");
     modalRatingArtImg.alt = "";
     modalRatingArtImg.hidden = true;
@@ -273,19 +285,29 @@ if (chatUserModalEl) {
   function showChatUserModalRatingAvatarFallback() {
     if (!modalRatingArt || !modalRatingArtImg) return false;
     var avatar = chatUserModalHeroFallbackAvatarUrl();
-    if (!avatar) {
+    var placeholder = chatUserModalHeroFallbackPlaceholderUrl();
+    var fallbackSrc = avatar || placeholder;
+    if (!fallbackSrc) {
       hideChatUserModalRatingArtImg();
       modalRatingArt.hidden = false;
       if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
       return false;
     }
     modalRatingArtImg.onerror = function () {
+      if (modalRatingArtImg && modalRatingArtImg.src !== placeholder) {
+        modalRatingArtImg.onerror = function () {
+          hideChatUserModalRatingArtImg();
+        };
+        modalRatingArtImg.src = placeholder;
+        return;
+      }
       hideChatUserModalRatingArtImg();
     };
     modalRatingArtImg.classList.add("chat-user-modal__rating-art-img--avatar-fallback");
-    modalRatingArtImg.src = avatar;
+    modalRatingArtImg.src = fallbackSrc;
     modalRatingArtImg.alt = chatUserModalUserName ? "Аватар " + chatUserModalUserName : "Аватар игрока";
     modalRatingArtImg.hidden = false;
+    modalRatingArtImg.style.display = "";
     modalRatingArt.hidden = false;
     if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
     return true;
@@ -307,6 +329,7 @@ if (chatUserModalEl) {
     modalRatingArtImg.src = art.src;
     modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
     modalRatingArtImg.hidden = false;
+    modalRatingArtImg.style.display = "";
     modalRatingArt.hidden = false;
     if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
   }

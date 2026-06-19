@@ -924,6 +924,9 @@
 .chat-user-modal__rating-art[hidden] {
   display: none !important;
 }
+.chat-user-modal__rating-art-img[hidden] {
+  display: none !important;
+}
 .chat-user-modal__hero--art .chat-user-modal__rating-art-img {
   display: block;
   width: min(106%, 238px);
@@ -1060,6 +1063,7 @@
 }
 .chat-user-modal__rating-rank-row {
   --season-rank-accent: #f0a23a;
+  --season-rank-icon: none;
   display: grid;
   grid-template-columns: minmax(150px, 0.95fr) minmax(230px, 1.05fr);
   align-items: center;
@@ -1077,16 +1081,32 @@
   position: relative;
   overflow: hidden;
 }
+.chat-user-modal__rating-rank-row::before {
+  content: "";
+  position: absolute;
+  left: 3.8%;
+  top: 50%;
+  width: 20%;
+  height: 90%;
+  background: center / contain no-repeat var(--season-rank-icon);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--season-rank-accent) 52%, transparent));
+  pointer-events: none;
+  transform: translateY(-50%);
+  z-index: 1;
+}
 .chat-user-modal__rating-rank-row:nth-child(1) {
   --season-rank-accent: #f59e0b;
+  --season-rank-icon: url("./assets/chat-profile-season-icon-summer.png");
   background-image: url("./assets/chat-profile-season-history-summer-full.png");
 }
 .chat-user-modal__rating-rank-row:nth-child(2) {
   --season-rank-accent: #84cc16;
+  --season-rank-icon: url("./assets/chat-profile-season-icon-spring.png");
   background-image: url("./assets/chat-profile-season-history-spring-full.png");
 }
 .chat-user-modal__rating-rank-row:nth-child(3) {
   --season-rank-accent: #38bdf8;
+  --season-rank-icon: url("./assets/chat-profile-season-icon-winter.png");
   background-image: url("./assets/chat-profile-season-history-winter-full.png");
 }
 .chat-user-modal__rating-rank-label {
@@ -1490,6 +1510,12 @@
     grid-template-columns: minmax(70px, 0.86fr) minmax(128px, 1.14fr);
     gap: 7px;
     padding: 16px 12px 16px 35%;
+  }
+
+  .chat-user-modal__rating-rank-row::before {
+    left: 4%;
+    width: 22%;
+    height: 92%;
   }
 
   .chat-user-modal__rating-rank-label {
