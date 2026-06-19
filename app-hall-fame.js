@@ -505,9 +505,11 @@ function hallFishRowsFromCrmData(data) {
   if (Array.isArray(data && data.levelRows)) {
     return data.levelRows
       .map(function (row) {
+        var poker21Nick = String((row && (row.pokerPlusNickname || row.poker21Nickname || row.nickname)) || "").trim();
         return {
           accountId: String((row && row.accountId) || "").trim(),
-          name: String((row && row.name) || "").trim(),
+          name: String(poker21Nick || (row && row.name) || "").trim(),
+          pokerPlusNickname: poker21Nick,
           telegram: String((row && row.telegram) || "").trim(),
           level: Number(row && row.level) || 0,
           fee: Number(row && row.fee) || 0,
@@ -524,9 +526,11 @@ function hallFishRowsFromCrmData(data) {
       var accountId = String((row && row.accountId) || "").trim();
       var reg = registrations[accountId] || null;
       var level = Number(row && row.level) || 0;
+      var poker21Nick = String((row && (row.pokerPlusNickname || row.poker21Nickname || row.nickname)) || "").trim();
       return {
         accountId: accountId,
-        name: String((reg && reg.name) || (row && row.nickname) || accountId || "").trim(),
+        name: String(poker21Nick || (reg && reg.name) || accountId || "").trim(),
+        pokerPlusNickname: poker21Nick,
         telegram: hallFishTelegramLabel(reg),
         level: level,
         fee: Number(row && row.fee) || 0,

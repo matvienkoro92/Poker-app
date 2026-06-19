@@ -57,6 +57,7 @@ window.pokerFormatChatLastSeenRu = pokerFormatChatLastSeenRu;
 var chatUserModalEl = document.getElementById("chatUserModal");
 var chatUserModalUserId = null;
 var chatUserModalUserName = null;
+var chatUserModalHeroAvatarUrl = "";
 if (chatUserModalEl) {
   var modalTitle = document.getElementById("chatUserModalTitle");
   var modalTitleFish = null;
@@ -251,6 +252,44 @@ if (chatUserModalEl) {
       }
     }
   }
+  function chatUserModalHeroFallbackAvatarUrl() {
+    var raw = String(chatUserModalHeroAvatarUrl || "").trim();
+    if (raw) return raw;
+    try {
+      if (modalAvatar && modalAvatar.style.display !== "none") {
+        return String(modalAvatar.currentSrc || modalAvatar.src || "").trim();
+      }
+    } catch (eFallbackAvatarRead) {}
+    return "";
+  }
+  function hideChatUserModalRatingArtImg() {
+    if (!modalRatingArtImg) return;
+    modalRatingArtImg.onerror = null;
+    modalRatingArtImg.removeAttribute("src");
+    modalRatingArtImg.alt = "";
+    modalRatingArtImg.hidden = true;
+    modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+  }
+  function showChatUserModalRatingAvatarFallback() {
+    if (!modalRatingArt || !modalRatingArtImg) return false;
+    var avatar = chatUserModalHeroFallbackAvatarUrl();
+    if (!avatar) {
+      hideChatUserModalRatingArtImg();
+      modalRatingArt.hidden = false;
+      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
+      return false;
+    }
+    modalRatingArtImg.onerror = function () {
+      hideChatUserModalRatingArtImg();
+    };
+    modalRatingArtImg.classList.add("chat-user-modal__rating-art-img--avatar-fallback");
+    modalRatingArtImg.src = avatar;
+    modalRatingArtImg.alt = chatUserModalUserName ? "Аватар " + chatUserModalUserName : "Аватар игрока";
+    modalRatingArtImg.hidden = false;
+    modalRatingArt.hidden = false;
+    if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
+    return true;
+  }
   function syncChatUserModalRatingArt(nick) {
     var art = null;
     if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
@@ -258,13 +297,13 @@ if (chatUserModalEl) {
     }
     if (!modalRatingArt || !modalRatingArtImg) return;
     if (!art || !art.src) {
-      modalRatingArt.hidden = false;
-      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
-      modalRatingArtImg.removeAttribute("src");
-      modalRatingArtImg.alt = "";
-      modalRatingArtImg.hidden = true;
+      showChatUserModalRatingAvatarFallback();
       return;
     }
+    modalRatingArtImg.onerror = function () {
+      showChatUserModalRatingAvatarFallback();
+    };
+    modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
     modalRatingArtImg.src = art.src;
     modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
     modalRatingArtImg.hidden = false;
@@ -468,9 +507,9 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
+      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
-      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalSummerCupCardHtml();
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;
@@ -727,6 +766,7 @@ if (chatUserModalEl) {
     }
     chatUserModalUserId = id;
     chatUserModalUserName = userName;
+    chatUserModalHeroAvatarUrl = String(avatarUrl || "").trim();
     var openSeq = ++chatUserModalOpenSeq;
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
@@ -768,6 +808,7 @@ if (chatUserModalEl) {
         modalAvatarPlaceholder.style.display = "";
       }
     }
+    syncChatUserModalRatingArt("");
     if (modalP21) modalP21.textContent = "";
     if (modalPersonal) modalPersonal.textContent = "Загрузка…";
     if (modalPlayerStats) modalPlayerStats.textContent = "Загрузка...";

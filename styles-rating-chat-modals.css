@@ -934,6 +934,20 @@
   object-position: center bottom;
   transform: translateY(-20px);
 }
+.chat-user-modal__hero--art .chat-user-modal__rating-art-img--avatar-fallback {
+  width: clamp(92px, 28vw, 132px);
+  height: clamp(92px, 28vw, 132px);
+  max-height: none;
+  margin: auto;
+  border: 2px solid rgba(255, 214, 127, 0.72);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  box-shadow:
+    0 0 0 5px rgba(2, 5, 10, 0.5),
+    0 0 34px rgba(255, 166, 36, 0.46);
+  transform: none;
+}
 .chat-user-modal__rating-art-img {
   display: block;
   width: min(88%, 334px);
@@ -1407,6 +1421,13 @@
     width: min(108%, 198px);
     max-height: 172px;
     transform: translateY(-20px);
+  }
+
+  .chat-user-modal__hero--art .chat-user-modal__rating-art-img--avatar-fallback {
+    width: clamp(78px, 27vw, 108px);
+    height: clamp(78px, 27vw, 108px);
+    max-height: none;
+    transform: none;
   }
 
   .chat-user-modal__hero-status {
