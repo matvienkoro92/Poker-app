@@ -5,8 +5,8 @@
 @import url("./styles-home.css?v=3.593");
 @import url("./styles-chat.css?v=3.593");
 @import url("./styles-learning-games.css?v=3.593");
-@import url("./styles-raffles.css?v=3.595");
-@import url("./styles-daily-poker.css?v=3.593");
+@import url("./styles-raffles.css?v=3.596");
+@import url("./styles-daily-poker.css?v=3.594");
 @import url("./styles-home-legacy-prelude.css?v=3.593");
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
@@ -5616,8 +5616,9 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   padding: 2px 4px;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, #34d399, #16a34a);
-  color: #ecfdf5;
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 222, 0.88), transparent 50%),
+    linear-gradient(180deg, #ffe98a, #ffc12c 52%, #f08a10);
+  color: #2a1500;
   font-size: 8px;
   font-weight: 900;
   line-height: 1.1;
@@ -5626,9 +5627,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-overflow: ellipsis;
   transform: translateX(-50%);
   box-shadow:
-    0 0 0 1px rgba(220, 252, 231, 0.52),
-    0 0 14px rgba(34, 197, 94, 0.72);
-  text-shadow: 0 1px 1px rgba(5, 46, 22, 0.65);
+    0 0 0 1px rgba(255, 244, 184, 0.74),
+    0 0 14px rgba(255, 193, 44, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.46);
+  text-shadow: 0 1px 0 rgba(255, 242, 181, 0.58);
   pointer-events: none;
 }
 

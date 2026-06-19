@@ -6610,3 +6610,59 @@ button.raffle-feedback-action {
 .raffles-active-chooser__item--referrals .raffles-active-chooser__facts--referrals {
   margin-top: 2px !important;
 }
+
+/* Выравнивание referral-карточки в паре с ежедневным розыгрышем. */
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals {
+  align-self: stretch !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  grid-template-rows: auto auto auto 1fr auto !important;
+  align-content: stretch !important;
+  gap: clamp(7px, 1.7vw, 10px) !important;
+  padding: clamp(10px, 2vw, 14px) !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__head {
+  grid-template-columns: minmax(0, 1fr) minmax(34px, 42px) !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__badge--referrals {
+  min-height: 28px !important;
+  padding: 5px 6px 4px !important;
+  font-size: clamp(9px, 2.35vw, 12px) !important;
+  letter-spacing: 0 !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__results-time {
+  width: auto !important;
+  max-width: 42px !important;
+  font-size: clamp(8px, 2vw, 10px) !important;
+  line-height: 0.92 !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals {
+  gap: 2px !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals .raffles-active-chooser__hero-line--count {
+  font-size: clamp(15px, 3.9vw, 20px) !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals .raffles-active-chooser__hero-line--kind,
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals .raffles-active-chooser__hero-line--amount {
+  font-size: clamp(18px, 4.9vw, 25px) !important;
+  line-height: 0.98 !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__facts--referrals {
+  align-self: stretch !important;
+  display: grid !important;
+}
+
+.raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__fact--referrals {
+  min-height: 86px !important;
+  align-content: center !important;
+  font-size: clamp(13px, 3.35vw, 17px) !important;
+}

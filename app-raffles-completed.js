@@ -661,20 +661,54 @@ function initRafflesCompletedRuntime(opts) {
     raffleWinnerLeadersModal.setAttribute("aria-hidden", "true");
   }
 
-  function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone) {
+  function raffleWinnerStatusSetButtonPending(btn, pending) {
+    if (!btn) return;
+    if (pending) {
+      if (!btn.dataset.statusIdleText) btn.dataset.statusIdleText = btn.textContent || "";
+      btn.textContent = "...";
+      btn.disabled = true;
+      btn.setAttribute("aria-busy", "true");
+      return;
+    }
+    btn.textContent = btn.dataset.statusIdleText || "";
+    btn.disabled = false;
+    btn.removeAttribute("aria-busy");
+  }
+
+  function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, attempt) {
     var newStatus = btnIsOk ? "ok" : "fail";
     if ((btnIsOk && currentStatus === "ok") || (!btnIsOk && currentStatus === "fail")) newStatus = null;
+    var tryIndex = Math.max(0, parseInt(attempt, 10) || 0);
+    raffleWinnerStatusSetButtonPending(btn, true);
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerGuestOrAuthedPostBody({ action: "setWinnerStatus", raffleId: rid, winnerUserId: wid, winnerSlotId: winnerSlotId || "", status: newStatus })),
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; })
+          .then(function (data) {
+            if (data && typeof data === "object") data.httpStatus = r.status;
+            return data;
+          });
+      })
       .then(function (data) {
-        if (data && data.ok) loadRaffles();
+        if (data && data.ok) {
+          loadRaffles();
+        } else if (data && data.httpStatus === 409 && tryIndex < 2) {
+          window.setTimeout(function () {
+            setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, tryIndex + 1);
+          }, 800 + tryIndex * 700);
+          return;
+        } else if (tg && tg.showAlert) {
+          tg.showAlert((data && data.error) || "Не удалось обновить статус победителя.");
+        }
+        if (!(data && data.ok)) raffleWinnerStatusSetButtonPending(btn, false);
         if (onDone) onDone(!!(data && data.ok));
       })
       .catch(function () {
+        if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+        raffleWinnerStatusSetButtonPending(btn, false);
         if (onDone) onDone(false);
       });
   }
@@ -779,8 +813,7 @@ function initRafflesCompletedRuntime(opts) {
         var statusEl = row && row.querySelector(".raffle-winner-status");
         var currentStatus = statusEl && statusEl.classList.contains("raffle-winner-status--ok") ? "ok" : statusEl && statusEl.classList.contains("raffle-winner-status--fail") ? "fail" : null;
         if (!rid || (!wid && !winnerSlotId)) return;
-        btn.disabled = true;
-        setRaffleWinnerStatus(rid, wid, winnerSlotId, this.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) btn.disabled = false; });
+        setRaffleWinnerStatus(rid, wid, winnerSlotId, this.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) btn.disabled = false; }, btn);
       });
     });
   }
