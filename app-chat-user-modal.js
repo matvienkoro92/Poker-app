@@ -114,6 +114,7 @@ if (chatUserModalEl) {
   var chatUserModalContactName = "";
   var chatUserModalRatingNick = "";
   var chatUserModalRanksSeq = 0;
+  var chatUserModalOpenSeq = 0;
   var chatUserModalBlockedByMe = false;
   var chatUserModalBlockBusy = false;
   var chatUserModalBlockSeq = 0;
@@ -144,8 +145,14 @@ if (chatUserModalEl) {
     modalStatusXp.hidden = false;
   }
   function closeChatUserModal() {
+    chatUserModalOpenSeq += 1;
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
+  }
+  function revealChatUserModal(seq) {
+    if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
+    chatUserModalEl.setAttribute("aria-hidden", "false");
+    chatUserModalEl.classList.add("chat-user-modal--open");
   }
   function chatUserModalIsSelf(id) {
     try {
@@ -187,15 +194,15 @@ if (chatUserModalEl) {
   function refreshChatUserModalBlockState(id) {
     if (!modalBlockBtn || !id || !base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       setChatUserModalBlockState(false, false);
-      return;
+      return Promise.resolve(false);
     }
     if (chatUserModalIsSelf(id)) {
       setChatUserModalBlockState(false, false);
-      return;
+      return Promise.resolve(false);
     }
     var seq = ++chatUserModalBlockSeq;
     setChatUserModalBlockState(chatUserModalBlockedByMe, true);
-    fetch(base + "/api/chat", {
+    return fetch(base + "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(pokerApiAuthJsonBody({ action: "dmBlockStatus", userId: id })),
@@ -210,10 +217,12 @@ if (chatUserModalEl) {
         var blocked = data.blockedByMe === true;
         rememberChatUserModalBlockState(id, blocked);
         setChatUserModalBlockState(blocked, false);
+        return true;
       })
       .catch(function () {
         if (seq !== chatUserModalBlockSeq || !chatUserModalUserId || String(chatUserModalUserId) !== String(id)) return;
         setChatUserModalBlockState(chatUserModalBlockedByMe, false);
+        return false;
       });
   }
   function chatUserModalRatingNickFromData(data) {
@@ -249,14 +258,16 @@ if (chatUserModalEl) {
     }
     if (!modalRatingArt || !modalRatingArtImg) return;
     if (!art || !art.src) {
-      modalRatingArt.hidden = true;
-      if (modalHero) modalHero.classList.remove("chat-user-modal__hero--art");
+      modalRatingArt.hidden = false;
+      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
       modalRatingArtImg.removeAttribute("src");
       modalRatingArtImg.alt = "";
+      modalRatingArtImg.hidden = true;
       return;
     }
     modalRatingArtImg.src = art.src;
     modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
+    modalRatingArtImg.hidden = false;
     modalRatingArt.hidden = false;
     if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
   }
@@ -357,7 +368,7 @@ if (chatUserModalEl) {
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
-    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
     return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.png" };
   }
@@ -431,7 +442,7 @@ if (chatUserModalEl) {
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
     renderChatUserModalAchievements(null);
-    if (!hasNick) return;
+    if (!hasNick) return Promise.resolve([]);
     var getPlaces = typeof window.pokerGetTournamentRatingPlacesReady === "function"
       ? window.pokerGetTournamentRatingPlacesReady
       : null;
@@ -440,7 +451,7 @@ if (chatUserModalEl) {
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
       renderChatUserModalAchievements(null);
-      return;
+      return Promise.resolve([]);
     }
     function getSeasonPlacesReady(season) {
       if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
@@ -450,7 +461,7 @@ if (chatUserModalEl) {
       }
       return getPlaces(ratingNick, season);
     }
-    Promise.all([
+    return Promise.all([
       getSeasonPlacesReady("summer"),
       getSeasonPlacesReady("spring"),
       getSeasonPlacesReady("winter"),
@@ -468,6 +479,7 @@ if (chatUserModalEl) {
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
       renderChatUserModalAchievements(null);
+      return [];
     });
   }
   function syncChatUserModalTitleFromProfileData(data, fallbackName) {
@@ -672,6 +684,7 @@ if (chatUserModalEl) {
     }
     chatUserModalUserId = id;
     chatUserModalUserName = userName;
+    var openSeq = ++chatUserModalOpenSeq;
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
     var cachedBlockedByMe = false;
@@ -736,13 +749,12 @@ if (chatUserModalEl) {
       modalRespectHint.hidden = true;
     }
     if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(false, null);
-    chatUserModalEl.setAttribute("aria-hidden", "false");
-    chatUserModalEl.classList.add("chat-user-modal--open");
     if (modalPersonalBlock) modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
-    refreshChatUserModalBlockState(id);
-    fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
+    var initialBlockPromise = refreshChatUserModalBlockState(id);
+    var profilePromise = fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalP21) modalP21.textContent = "";
         var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
         if (modalPersonal) modalPersonal.textContent = personalText || "—";
@@ -778,11 +790,12 @@ if (chatUserModalEl) {
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
         renderChatUserModalPlayerStats(data);
+        var ratingRanksPromise = Promise.resolve([]);
         if (data && data.ok) {
           if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
           var ratingNick = chatUserModalRatingNickFromData(data);
           syncChatUserModalRatingTab(ratingNick);
-          syncChatUserModalRatingRanks(ratingNick);
+          ratingRanksPromise = syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
           syncChatUserModalRatingArt(ratingNick);
           var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
           if (modalAvatar && modalAvatarPlaceholder && modalAvatar.style.display !== "none") {
@@ -808,22 +821,34 @@ if (chatUserModalEl) {
             }
           }
         }
+        return ratingRanksPromise;
       })
       .catch(function () {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalPersonal) modalPersonal.textContent = "—";
+        if (modalPlayerStats) renderChatUserModalPlayerStats(null);
         if (modalLastSeen) modalLastSeen.hidden = true;
         syncChatUserModalRatingRanks("");
         syncChatUserModalRatingArt("");
       });
-    fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
+    var respectPromise = fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalRespectVal) modalRespectVal.textContent = (data && data.score !== undefined && data.score !== null) ? String(data.score) : "—";
         if (data && data.ok && typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(data.myVote || null);
       })
       .catch(function () {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(null);
       });
+    Promise.all([
+      profilePromise.catch(function () {}),
+      respectPromise.catch(function () {}),
+      Promise.resolve(initialBlockPromise).catch(function () {}),
+    ]).then(function () {
+      revealChatUserModal(openSeq);
+    });
   }
   window.openChatUserModalById = openChatUserModalById;
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeChatUserModal);

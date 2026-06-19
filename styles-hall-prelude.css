@@ -4,25 +4,25 @@
 /* Hall of fame, footer visitor counters and adjacent showcase blocks.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
-  color: var(--text-muted);
-  text-align: center;
-  font-weight: 750;
-}
 .chat-user-modal__respect-btn-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 6px;
   align-items: stretch;
   width: 100%;
 }
 .chat-user-modal__respect-btn {
+  flex: 1 1 0;
   width: 100%;
   min-width: 0;
-  min-height: 36px;
-  padding: 6px 5px;
-  font-size: clamp(9.5px, 2.25vw, 11px);
-  line-height: 1.05;
+  min-height: 34px;
+  padding: 6px 4px;
+  overflow: hidden;
+  font-size: clamp(8.5px, 2.05vw, 10.5px);
+  line-height: 1;
   font-weight: 850;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: rgba(248, 250, 252, 0.94);
   background:
@@ -33,6 +33,17 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 7px 16px rgba(2, 6, 23, 0.14);
   cursor: pointer;
   box-sizing: border-box;
+}
+@media (max-width: 380px) {
+  .chat-user-modal__respect-btn-row {
+    gap: 4px;
+  }
+  .chat-user-modal__respect-btn {
+    min-height: 32px;
+    padding-right: 3px;
+    padding-left: 3px;
+    font-size: 8px;
+  }
 }
 .chat-user-modal__respect-btn:hover:not(:disabled) {
   border-color: rgba(125, 211, 252, 0.42);
