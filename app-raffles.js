@@ -50,6 +50,10 @@ function initRaffles() {
   var rafflesHeroPrizeSum = document.getElementById("rafflesHeroPrizeSum");
   var rafflesHeroUniqueParticipants = document.getElementById("rafflesHeroUniqueParticipants");
   var rafflesHeroWinnersCount = document.getElementById("rafflesHeroWinnersCount");
+  var rafflesHelpBtn = document.getElementById("rafflesHelpBtn");
+  var rafflesHelpModal = document.getElementById("rafflesHelpModal");
+  var rafflesHelpModalBackdrop = document.getElementById("rafflesHelpModalBackdrop");
+  var rafflesHelpModalClose = document.getElementById("rafflesHelpModalClose");
   var rafflesCompleted = document.getElementById("rafflesCompleted");
   var raffleCard = document.getElementById("raffleCard");
   var raffleCardHeading = document.getElementById("raffleCardHeading");
@@ -132,6 +136,7 @@ function initRaffles() {
   var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
   var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
   var raffleActiveInfoModalLastFocus = null;
+  var rafflesHelpModalLastFocus = null;
   var RAFFLES_REFERRAL_PROMO_ID = "__referrals_ticket_10000";
   var RAFFLES_REFERRAL_PROMO_PRIZE_RUB = 10000;
 
@@ -454,6 +459,43 @@ function initRaffles() {
       } catch (eRestoreFocus) {}
       raffleActiveInfoModalLastFocus = null;
     }
+  }
+
+  function setRafflesHelpModalOpen(open) {
+    if (!rafflesHelpModal) return;
+    var shouldOpen = !!open;
+    rafflesHelpModal.classList.toggle("raffle-active-info-modal--hidden", !shouldOpen);
+    rafflesHelpModal.hidden = !shouldOpen;
+    rafflesHelpModal.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    if (rafflesHelpBtn) rafflesHelpBtn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+    try {
+      if (document && document.body) {
+        document.body.classList.toggle("raffles-help-modal-open", shouldOpen);
+      }
+    } catch (eHelpBodyClass) {}
+    if (shouldOpen) {
+      try {
+        rafflesHelpModalLastFocus = document.activeElement || null;
+      } catch (eHelpFocusRead) {
+        rafflesHelpModalLastFocus = null;
+      }
+      setTimeout(function () {
+        try {
+          if (rafflesHelpModalClose && typeof rafflesHelpModalClose.focus === "function") {
+            rafflesHelpModalClose.focus();
+          }
+        } catch (eHelpFocusClose) {}
+      }, 0);
+    } else if (rafflesHelpModalLastFocus && typeof rafflesHelpModalLastFocus.focus === "function") {
+      try {
+        rafflesHelpModalLastFocus.focus();
+      } catch (eHelpRestoreFocus) {}
+      rafflesHelpModalLastFocus = null;
+    }
+  }
+
+  function closeRafflesHelpModal() {
+    setRafflesHelpModalOpen(false);
   }
 
   function syncRafflesActiveInfoDetailsMount() {
@@ -2802,6 +2844,44 @@ function initRaffles() {
       if (key !== "Escape" && key !== "Esc") return;
       e.preventDefault();
       closeRafflesActiveInfoModal();
+    });
+  }
+  if (rafflesHelpBtn && !rafflesHelpBtn.getAttribute("aria-expanded")) {
+    rafflesHelpBtn.setAttribute("aria-expanded", "false");
+  }
+  if (rafflesHelpBtn && rafflesHelpBtn.dataset.bound !== "1") {
+    rafflesHelpBtn.dataset.bound = "1";
+    rafflesHelpBtn.addEventListener("click", function () {
+      setRafflesHelpModalOpen(true);
+    });
+  }
+  if (rafflesHelpModal && rafflesHelpModal.dataset.bound !== "1") {
+    rafflesHelpModal.dataset.bound = "1";
+    if (rafflesHelpModalClose) {
+      rafflesHelpModalClose.addEventListener("click", function () {
+        closeRafflesHelpModal();
+      });
+    }
+    if (rafflesHelpModalBackdrop) {
+      rafflesHelpModalBackdrop.addEventListener("click", function () {
+        closeRafflesHelpModal();
+      });
+    }
+    rafflesHelpModal.addEventListener("keydown", function (e) {
+      var key = e && (e.key || e.code);
+      if (key !== "Escape" && key !== "Esc") return;
+      e.preventDefault();
+      closeRafflesHelpModal();
+    });
+  }
+  if (rafflesRoot && rafflesRoot.dataset.helpEscapeBound !== "1") {
+    rafflesRoot.dataset.helpEscapeBound = "1";
+    document.addEventListener("keydown", function (e) {
+      var key = e && (e.key || e.code);
+      if (key !== "Escape" && key !== "Esc") return;
+      if (!rafflesHelpModal || rafflesHelpModal.classList.contains("raffle-active-info-modal--hidden")) return;
+      e.preventDefault();
+      closeRafflesHelpModal();
     });
   }
 

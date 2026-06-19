@@ -2,7 +2,10 @@
             <header class="raffles-hero">
               <button type="button" class="bonus-game-back raffles-hero__back" data-view-target="home" aria-label="На главную">←</button>
               <div class="raffles-hero__copy">
-                <h1 class="raffles-hero__title">Ежедневные розыгрыши</h1>
+                <div class="raffles-hero__title-row">
+                  <h1 class="raffles-hero__title">Ежедневные розыгрыши</h1>
+                  <button type="button" class="raffles-hero__help-btn" id="rafflesHelpBtn" aria-label="Что такое ежедневные розыгрыши?" aria-haspopup="dialog" aria-controls="rafflesHelpModal">?</button>
+                </div>
                 <p class="raffles-hero__subtitle">от 12 000р до 25 000р каждый день</p>
               </div>
               <div class="raffles-hero__share-row" aria-label="Поделиться розыгрышами">
@@ -175,6 +178,22 @@
 
             </div>
 
+            <div class="raffle-active-info-modal raffle-active-info-modal--hidden raffles-help-modal" id="rafflesHelpModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rafflesHelpModalTitle">
+              <div class="raffle-active-info-modal__backdrop raffles-help-modal__backdrop" id="rafflesHelpModalBackdrop" tabindex="-1"></div>
+              <div class="raffle-active-info-modal__box raffles-help-modal__box">
+                <button type="button" class="raffle-active-info-modal__close raffles-help-modal__close" id="rafflesHelpModalClose" aria-label="Закрыть">×</button>
+                <h2 class="raffle-active-info-modal__title raffles-help-modal__title" id="rafflesHelpModalTitle">Как работают ежедневные розыгрыши</h2>
+                <div class="raffles-help-modal__content">
+                  <p>Здесь разыгрываются беккинг-байины и беккинг-билеты. Беккинг означает, что клуб за свой счет садит вас играть в кеш или турнир. Если вы что-то выигрываете, байин возвращается клубу, а чистый выигрыш делится пополам с клубом.</p>
+                  <ul>
+                    <li>У вас будет 15 минут, чтобы забрать выигрыш и нажать «Готов». Если вы не успели, выбирается другой победитель. Следите за временем завершения. Также вам придет оповещение в Telegram-бот, если вы подписались.</li>
+                    <li>Если вы выиграли <strong>билет на турнир</strong> и нажали «Готов», менеджер сам зарегистрирует вас в турнир, вам останется только зайти и играть.</li>
+                    <li>Если вы выиграли <strong>байин на кеш</strong>, надо сесть на нужный кеш-стол в Poker21 сразу после выдачи. Столы 20/40 и 5/10 подписаны Bonus game. Встать можно в любое время по отыгрышу 100 раздач.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <div class="raffles-tabs" id="rafflesTabs">
               <button type="button" class="raffles-tab raffles-tab--create raffles-tab--hidden" id="rafflesTabCreate" data-raffle-tab="create" aria-selected="false">Создать</button>
               <button type="button" class="raffles-tab raffles-tab--active" id="rafflesTabActive" data-raffle-tab="active" aria-selected="true"><span class="raffles-tab__label">Активные</span><span class="raffles-tab__meta"><span id="rafflesTabActiveCount">0</span> · <span id="rafflesTabActiveSum">0</span></span></button>
@@ -191,6 +210,7 @@
                   <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon raffle-copy-inline-btn" id="raffleCopyLinkInlineBtn" aria-label="Скопировать ссылку на розыгрыш"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
                   <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary raffles-subscribe-btn raffle-subscribe-inline-btn" id="raffleSubscribeInlineBtn">Подписаться</button>
                 </div>
+                <p class="raffle-ready-window-note">У вас будет 15 минут, чтобы забрать выигрыш (нажать «Готов»), если вы не успели, то выбирается другой победитель. Следите за временем завершения, также вам придет оповещение о победе в телеграмм-бот, если вы подписались.</p>
                 <p class="raffle-action-feedback raffle-action-feedback--hidden" id="raffleActionFeedback" role="status" aria-live="polite"></p>
               </div>
               <div class="raffles-active-chooser raffles-active-chooser--hidden" id="rafflesActiveChooser" aria-label="Активные розыгрыши" hidden></div>

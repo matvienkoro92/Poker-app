@@ -441,7 +441,6 @@ if (chatUserModalEl) {
       { key: "spring", rows: results && results[1] },
       { key: "winter", rows: results && results[2] },
     ];
-    var top1 = [];
     var top10 = [];
     var topWins = [];
     var legends = chatUserModalIsLegendNick(ratingNick)
@@ -452,7 +451,6 @@ if (chatUserModalEl) {
         var place = row && row.place != null ? parseInt(row.place, 10) : 0;
         if (!place || place < 1) return;
         var item = { season: season.key, row: row };
-        if (season.key !== "summer" && place === 1) top1.push(item);
         if (place <= 10) top10.push(item);
       });
     });
@@ -464,16 +462,15 @@ if (chatUserModalEl) {
       });
     });
     var html =
-      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
-      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
-      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
-      chatUserModalAchievementCardHtml("🏆", "Кубок рейтинга", top1) +
       chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
       chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
+      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
+      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalSummerCupCardHtml();
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;

@@ -1023,8 +1023,23 @@
   font-weight: 1000;
   line-height: 1;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(240, 128, 26, 0.5);
+  text-shadow:
+    0 0 8px rgba(255, 221, 142, 0.44),
+    0 0 18px rgba(240, 128, 26, 0.62);
   white-space: nowrap;
+  z-index: 2;
+}
+.chat-user-modal__rating-ranks::after {
+  content: "";
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 7px;
+  height: 1px;
+  background:
+    linear-gradient(90deg, transparent, rgba(240, 128, 26, 0.58), transparent 30%, transparent 70%, rgba(240, 128, 26, 0.58), transparent);
+  filter: drop-shadow(0 0 6px rgba(240, 128, 26, 0.46));
+  pointer-events: none;
 }
 .chat-user-modal__rating-ranks[hidden] {
   display: none !important;
@@ -1032,30 +1047,50 @@
 .chat-user-modal__rating-rank-row {
   --season-rank-accent: #f0a23a;
   display: grid;
-  grid-template-columns: minmax(92px, 0.82fr) minmax(174px, 1.18fr);
+  grid-template-columns: minmax(96px, 0.88fr) minmax(174px, 1.12fr);
   align-items: center;
   gap: 8px;
   width: 100%;
   min-height: 106px;
   min-width: 0;
-  padding: 18px 22px 18px 136px;
+  padding: 18px 22px 18px 164px;
   border: 0;
   border-radius: 0;
   background: center / 100% 100% no-repeat;
   box-shadow: 0 0 18px color-mix(in srgb, var(--season-rank-accent) 25%, transparent);
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+.chat-user-modal__rating-rank-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 34%;
+  background: left center / 100% 100% no-repeat;
+  pointer-events: none;
+  z-index: 0;
 }
 .chat-user-modal__rating-rank-row:nth-child(1) {
   --season-rank-accent: #f59e0b;
   background-image: url("./assets/chat-profile-season-history-summer.webp");
 }
+.chat-user-modal__rating-rank-row:nth-child(1)::before {
+  background-image: url("./assets/chat-profile-season-history-summer-mark.webp");
+}
 .chat-user-modal__rating-rank-row:nth-child(2) {
   --season-rank-accent: #84cc16;
   background-image: url("./assets/chat-profile-season-history-spring.webp");
 }
+.chat-user-modal__rating-rank-row:nth-child(2)::before {
+  background-image: url("./assets/chat-profile-season-history-spring-mark.webp");
+}
 .chat-user-modal__rating-rank-row:nth-child(3) {
   --season-rank-accent: #38bdf8;
   background-image: url("./assets/chat-profile-season-history-winter.webp");
+}
+.chat-user-modal__rating-rank-row:nth-child(3)::before {
+  background-image: url("./assets/chat-profile-season-history-winter-mark.webp");
 }
 .chat-user-modal__rating-rank-label {
   min-width: 0;
@@ -1068,6 +1103,8 @@
   text-shadow:
     0 2px 3px rgba(0, 0, 0, 0.9),
     0 0 14px color-mix(in srgb, var(--season-rank-accent) 58%, transparent);
+  position: relative;
+  z-index: 1;
 }
 .chat-user-modal__rating-rank-value {
   display: grid;
@@ -1083,6 +1120,8 @@
   white-space: normal;
   text-transform: uppercase;
   text-shadow: 0 2px 2px rgba(0, 0, 0, 0.9);
+  position: relative;
+  z-index: 1;
 }
 .chat-user-modal__rating-rank-line {
   display: grid;
@@ -1444,9 +1483,13 @@
   }
 
   .chat-user-modal__rating-rank-row {
-    grid-template-columns: minmax(58px, 0.78fr) minmax(122px, 1.22fr);
+    grid-template-columns: minmax(62px, 0.82fr) minmax(122px, 1.18fr);
     min-height: 82px;
-    padding: 13px 13px 13px 86px;
+    padding: 13px 12px 13px 118px;
+  }
+
+  .chat-user-modal__rating-rank-row::before {
+    width: 35%;
   }
 
   .chat-user-modal__rating-rank-label {
@@ -1469,6 +1512,19 @@
 @media (max-width: 380px) {
   .chat-user-modal__top-actions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-user-modal__rating-rank-row {
+    grid-template-columns: minmax(54px, 0.78fr) minmax(108px, 1.22fr);
+    padding-left: 100px;
+  }
+
+  .chat-user-modal__rating-rank-label {
+    font-size: 17px;
+  }
+
+  .chat-user-modal__rating-rank-place {
+    font-size: 23px;
   }
 }
 .chat-user-modal__title-fish {
