@@ -293,7 +293,7 @@
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary">' +
         '<span>Итоги ' + escapeHtml(monthLabel(last.month || data.monthKey)) + '</span>' +
-        '<strong>Выбор клуба</strong>' +
+        '<strong>Народный герой</strong>' +
       '</div>' +
       '<div class="club-choice-vote-modal__winners">' + (winners.length ? winners.map(function (winner) {
         return '<article class="club-choice-vote-modal__winner">' +

@@ -895,3 +895,19 @@ body.profile-avatar-choice-open {
     width: min(360px, 100%);
   }
 }
+
+.view[data-view="profile"] .profile-hero-card {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.view[data-view="profile"].profile-view--tab-club .profile-hero-card,
+[data-theme="light"] .profile-hero-card {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.view[data-view="profile"].profile-view--tab-club .profile-hero-card::before {
+  display: none;
+}

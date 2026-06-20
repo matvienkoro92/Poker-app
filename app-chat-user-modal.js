@@ -592,11 +592,10 @@ if (chatUserModalEl) {
         rows.slice(0, 3).forEach(function (leader, index) {
           if (!chatUserModalRaffleRowsMatch(leader.row, targetKeys, ratingNick)) return;
           var amount = chatUserModalFormatAchievementRub(leader.totalPrize);
-          var month = chatUserModalRaffleMonthLabel(key);
+          var place = index + 1;
           items.push({
             label:
-              "Топ" + String(index + 1) +
-              (month ? " " + month : "") +
+              String(place) + " место в розыгрыше" +
               ": " + chatUserModalWinCountText(leader.count) +
               (amount ? ", " + amount : ""),
           });
@@ -640,7 +639,7 @@ if (chatUserModalEl) {
         return;
       }
       var script = document.createElement("script");
-      script.src = "./club-choice-achievements.js?v=3.593";
+      script.src = "./club-choice-achievements.js?v=3.594";
       script.async = false;
       script.onload = function () { resolve(true); };
       script.onerror = function () { resolve(false); };
@@ -669,7 +668,7 @@ if (chatUserModalEl) {
           var pb = parseInt(b && b.place, 10) || 999;
           if (pa !== pb) return pa - pb;
           return (parseInt(b && b.votes, 10) || 0) - (parseInt(a && a.votes, 10) || 0);
-        }).slice(0, 2).forEach(function (winner, index) {
+        }).slice(0, 1).forEach(function (winner, index) {
           if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
           var place = parseInt(winner && winner.place, 10) || (index + 1);
           var votes = winner && winner.votes != null ? parseInt(winner.votes, 10) : null;
@@ -686,7 +685,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
-    if (key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "ВЫБОР<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
+    if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
@@ -797,10 +796,10 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
       chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
-        placeholder: "Топ-3 месяца",
+        placeholder: "Топ3 в розыгрыше",
       }) +
-      chatUserModalAchievementCardHtml("◆", "Выбор клуба", clubChoice, {
-        placeholder: "Топ-2 месяца",
+      chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
+        placeholder: "Топ-1 месяца",
       }) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalSummerCupCardHtml();

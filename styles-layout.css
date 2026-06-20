@@ -1556,3 +1556,43 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
     overflow: visible !important;
   }
 }
+
+body[data-view="profile"] #app.app,
+html:has(body[data-view="profile"]) #app.app,
+html.app-view-profile-html-scroll #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="profile"] #app.app .card,
+html:has(body[data-view="profile"]) #app.app .card,
+html.app-view-profile-html-scroll #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="profile"] #app.app .card .card__content,
+html:has(body[data-view="profile"]) #app.app .card .card__content,
+html.app-view-profile-html-scroll #app.app .card .card__content {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
+html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
+html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}

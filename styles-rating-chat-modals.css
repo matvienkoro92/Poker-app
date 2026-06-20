@@ -1091,7 +1091,7 @@
 .chat-user-modal__rating-ranks {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  gap: 8px;
   margin: 14px 0 10px;
   padding-top: 30px;
   position: relative;
@@ -1137,20 +1137,23 @@
   align-items: center;
   gap: 16px;
   width: 100%;
+  height: clamp(98px, 22vw, 148px);
   min-height: 0;
-  aspect-ratio: 2172 / 724;
+  aspect-ratio: auto;
   min-width: 0;
   padding: 22px 42px 22px 37%;
   border: 0;
   border-radius: 0;
-  background: center / contain no-repeat;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--season-rank-accent) 25%, transparent);
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  box-shadow: none;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
 }
 .chat-user-modal__rating-rank-row + .chat-user-modal__rating-rank-row {
-  margin-top: -8px;
+  margin-top: 0;
 }
 .chat-user-modal__rating-rank-row::before {
   content: "";
