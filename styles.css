@@ -6,16 +6,16 @@
 @import url("./styles-chat.css?v=3.593");
 @import url("./styles-learning-games.css?v=3.593");
 @import url("./styles-raffles.css?v=3.597");
-@import url("./styles-daily-poker.css?v=3.594");
+@import url("./styles-daily-poker.css?v=3.595");
 @import url("./styles-home-legacy-prelude.css?v=3.593");
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
 @import url("./styles-home-rating-promo-legacy.css?v=3.593");
-@import url("./styles-rating.css?v=3.642");
-@import url("./styles-hall.css?v=3.617");
+@import url("./styles-rating.css?v=3.644");
+@import url("./styles-hall.css?v=3.618");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.607");
+@import url("./styles-profile.css?v=3.610");
 @import url("./styles-layout.css?v=3.635");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
@@ -1686,7 +1686,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   #app:has(.view--active[data-view="daily-poker"]) .daily-poker__hero-monkey,
   body[data-view="daily-poker"] #app.app .daily-poker__hero-monkey {
-    top: -4px;
+    top: -14px;
   }
 }
 
@@ -2095,16 +2095,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-daily-shortcuts .home-mini-icon-item::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 3;
-  height: 36%;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.82) 44%, rgba(0, 0, 0, 0.96));
+  display: none;
 }
 
 .home-daily-shortcuts button.home-mini-icon-item {
@@ -2131,7 +2122,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-daily-shortcuts .home-mini-icon-item + .home-mini-icon-item::before {
-  display: block;
+  display: none;
 }
 
 .home-daily-shortcuts .home-mini-icon-item--white::after {
@@ -2246,21 +2237,25 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-daily-shortcuts .home-mini-icon__label {
   position: absolute;
   z-index: 5;
-  right: 4px;
+  right: auto;
   bottom: 9px;
-  left: 4px;
-  width: auto;
+  left: 50%;
+  width: max-content;
   height: auto;
   margin: 0;
   max-width: calc(100% - 8px);
+  padding: 0 3px;
   overflow: hidden;
   clip: auto;
+  border-radius: 5px;
+  background: radial-gradient(ellipse at 50% 72%, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.26) 62%, transparent 100%);
   color: #fff4df;
   font-size: clamp(10px, 2.65vw, 16px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   text-transform: uppercase;
+  transform: translateX(-50%);
   white-space: nowrap;
   pointer-events: none;
   text-shadow:
@@ -3729,9 +3724,9 @@ body.club-choice-vote-open {
   position: absolute;
   z-index: 8;
   right: -4px;
-  top: -17px;
+  top: -27px;
   width: auto;
-  height: 153px;
+  height: 191px;
   max-width: none;
   object-fit: contain;
   filter:

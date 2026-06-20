@@ -341,9 +341,9 @@
 }
 .hall-of-fame__top2026-monkey {
   z-index: 5;
-  top: clamp(224px, calc(49vw + 40px), 248px);
+  top: clamp(214px, calc(49vw + 30px), 238px);
   left: clamp(-102px, -24vw, -74px);
-  width: clamp(212px, 57vw, 238px);
+  width: clamp(265px, 71.25vw, 298px);
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
 }
 .hall-of-fame__top2026-trophy {

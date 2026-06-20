@@ -20,11 +20,41 @@
                   <div class="chat-user-modal__title-block">
                     <div class="chat-user-modal__title-row">
                       <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
+                      <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
+                </div>
+                <div class="profile-public-showcase__tools" aria-label="Быстрые настройки профиля">
+                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
+                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
+                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+                  </span>
+                  <button type="button" class="profile-avatar-block__respect-btn profile-public-showcase__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение от игроков" title="Уважение">
+                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
+                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+                  </button>
+                </div>
+              </div>
+              <div class="profile-chat-name profile-chat-name--editor profile-public-showcase__name-editor" id="profileChatNameEditor" hidden>
+                <div class="profile-chat-name__row" id="profileChatNameRow">
+                  <div class="profile-chat-name__cell">
+                    <input
+                      type="text"
+                      id="profileChatDisplayNameInput"
+                      class="profile-chat-name__input"
+                      maxlength="80"
+                      placeholder="Как вас показывать в чате?"
+                      aria-label="Отображаемое имя в чатах"
+                      autocomplete="nickname"
+                    />
+                  </div>
+                </div>
+                <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
+                  <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
                 </div>
               </div>
               <div class="chat-user-modal__hero chat-user-modal__hero--art profile-public-showcase__hero" id="profilePublicHero">
@@ -33,16 +63,6 @@
                 </div>
                 <div class="chat-user-modal__hero-status">
                   <div class="chat-user-modal__p21" id="profilePublicP21"></div>
-                  <div class="profile-public-showcase__tools" aria-label="Быстрые настройки профиля">
-                    <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
-                      <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
-                      <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
-                    </span>
-                    <button type="button" class="profile-avatar-block__respect-btn profile-public-showcase__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение от игроков" title="Уважение">
-                      <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
-                      <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
-                    </button>
-                  </div>
                   <div class="chat-user-modal__level">
                     <p class="chat-user-modal__level-text" id="profilePublicLevelText">Уровень не обновлен</p>
                     <div class="profile-status__refresh-action profile-public-showcase__level-actions" id="profilePokerPlusRefreshAction" hidden>
@@ -79,30 +99,10 @@
             <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
               <div class="profile-hero-card__identity">
                 <h2 class="profile-hero-card__name" id="profileUserName">
-                  <button type="button" class="profile-hero-card__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
                   <span id="profileUserNameText" class="profile-hero-card__name-text">Профиль игрока</span>
                 </h2>
                 <p class="profile-guest-nudge" id="profileGuestNudge">Войдите, чтобы настроить имя, аватар, привязать Poker21, смотреть статус и управлять клубными уведомлениями.</p>
                 <p class="profile-hero-card__id" hidden>Poker21 ID <span id="profileUserId">—</span></p>
-                <div class="profile-chat-name profile-chat-name--editor" id="profileChatNameEditor" hidden>
-                  <div class="profile-chat-name__row" id="profileChatNameRow">
-                    <div class="profile-chat-name__cell">
-                      <input
-                        type="text"
-                        id="profileChatDisplayNameInput"
-                        class="profile-chat-name__input"
-                        maxlength="80"
-                        placeholder="Как вас показывать в чате?"
-                        aria-label="Отображаемое имя в чатах"
-                        autocomplete="nickname"
-                      />
-                    </div>
-                  </div>
-                  <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
-                    <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
-                    <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
-                  </div>
-                </div>
                 <div class="profile-public-card" id="profilePublicCardEntry">
                   <span class="profile-public-card__label">Моя карточка</span>
                   <button type="button" class="profile-public-card__btn" id="profileOpenPublicCardBtn">Открыть</button>

@@ -907,8 +907,8 @@
   position: absolute;
   z-index: -1;
   right: -18px;
-  top: -14px;
-  width: min(47vw, 455px);
+  top: -24px;
+  width: min(58.75vw, 569px);
   max-width: none;
   height: auto;
   opacity: 0.9;
@@ -2060,8 +2060,8 @@
 
   .daily-poker__hero-monkey {
     right: -96px;
-    top: -2px;
-    width: min(60vw, 252px);
+    top: -12px;
+    width: min(75vw, 315px);
     opacity: 0.9;
   }
 
@@ -2216,8 +2216,8 @@
 
   .daily-poker__hero-monkey {
     right: -96px;
-    top: -2px;
-    width: min(60vw, 252px);
+    top: -12px;
+    width: min(75vw, 315px);
     opacity: 0.9;
   }
 

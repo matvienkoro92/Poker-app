@@ -1005,6 +1005,11 @@
   object-position: center bottom;
   transform: translateY(-20px);
 }
+.chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+.chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"] {
+  transform: translateY(-30px) scale(1.25);
+  transform-origin: center bottom;
+}
 .chat-user-modal__hero--art .chat-user-modal__rating-art-img--avatar-fallback {
   width: clamp(92px, 28vw, 132px);
   height: clamp(92px, 28vw, 132px);
@@ -1091,7 +1096,7 @@
 .chat-user-modal__rating-ranks {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
+  gap: 0;
   margin: 14px 0 10px;
   padding-top: 30px;
   position: relative;
@@ -1137,7 +1142,7 @@
   align-items: center;
   gap: 16px;
   width: 100%;
-  height: clamp(98px, 22vw, 148px);
+  height: clamp(112px, 25vw, 170px);
   min-height: 0;
   aspect-ratio: auto;
   min-width: 0;
@@ -1153,7 +1158,7 @@
   overflow: hidden;
 }
 .chat-user-modal__rating-rank-row + .chat-user-modal__rating-rank-row {
-  margin-top: 0;
+  margin-top: -22px;
 }
 .chat-user-modal__rating-rank-row::before {
   content: "";
@@ -1514,6 +1519,12 @@
     transform: translateY(-20px);
   }
 
+  .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+  .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"] {
+    transform: translateY(-30px) scale(1.25);
+    transform-origin: center bottom;
+  }
+
   .chat-user-modal__hero--art .chat-user-modal__rating-art-img--avatar-fallback {
     width: clamp(78px, 27vw, 108px);
     height: clamp(78px, 27vw, 108px);
@@ -1595,14 +1606,19 @@
   }
 
   .chat-user-modal__rating-ranks {
-    gap: 3px;
+    gap: 0;
     padding-top: 24px;
   }
 
   .chat-user-modal__rating-rank-row {
     grid-template-columns: minmax(70px, 0.86fr) minmax(128px, 1.14fr);
     gap: 7px;
+    height: clamp(102px, 28vw, 142px);
     padding: 16px 12px 16px 35%;
+  }
+
+  .chat-user-modal__rating-rank-row + .chat-user-modal__rating-rank-row {
+    margin-top: -16px;
   }
 
   .chat-user-modal__rating-rank-row::before {
@@ -1658,7 +1674,12 @@
 
   .chat-user-modal__rating-rank-row {
     grid-template-columns: minmax(58px, 0.82fr) minmax(112px, 1.18fr);
+    height: clamp(96px, 30vw, 132px);
     padding-left: 34%;
+  }
+
+  .chat-user-modal__rating-rank-row + .chat-user-modal__rating-rank-row {
+    margin-top: -14px;
   }
 
   .chat-user-modal__rating-rank-label {
