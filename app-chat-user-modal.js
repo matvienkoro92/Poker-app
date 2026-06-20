@@ -102,7 +102,9 @@ if (chatUserModalEl) {
   var modalRespectUp = document.getElementById("chatUserModalRespectUp");
   var modalRespectDown = document.getElementById("chatUserModalRespectDown");
   var modalRespectHint = document.getElementById("chatUserModalRespectHint");
+  var modalRespectActions = chatUserModalEl.querySelector(".chat-user-modal__respect-actions");
   var modalAddFriend = document.getElementById("chatUserModalAddFriend");
+  var modalFriendRow = modalAddFriend && modalAddFriend.closest ? modalAddFriend.closest(".chat-user-modal__friend-row") : null;
   var modalEditFriendName = document.getElementById("chatUserModalEditFriendName");
   var modalRemoveFriend = document.getElementById("chatUserModalRemoveFriend");
   var modalFriendMsg = document.getElementById("chatUserModalFriendMsg");
@@ -155,6 +157,26 @@ if (chatUserModalEl) {
     chatUserModalEl.setAttribute("aria-hidden", "false");
     chatUserModalEl.classList.add("chat-user-modal--open");
   }
+  function waitChatUserModalAsset(promise, timeoutMs) {
+    if (!promise || typeof promise.then !== "function") return Promise.resolve();
+    var delay = Math.max(300, Number(timeoutMs) || 2200);
+    return new Promise(function (resolve) {
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        resolve();
+      }
+      var timer = window.setTimeout(finish, delay);
+      Promise.resolve(promise).then(function () {
+        window.clearTimeout(timer);
+        finish();
+      }).catch(function () {
+        window.clearTimeout(timer);
+        finish();
+      });
+    });
+  }
   function chatUserModalIsSelf(id) {
     try {
       var myId = typeof resolveMyChatMemberId === "function" ? resolveMyChatMemberId() : "";
@@ -169,7 +191,8 @@ if (chatUserModalEl) {
     chatUserModalBlockedByMe = !!blocked;
     chatUserModalBlockBusy = !!busy;
     if (!modalBlockBtn) return;
-    var canUse = !!(base && typeof pokerApiHasCredential === "function" && pokerApiHasCredential() && chatUserModalUserId && !chatUserModalIsSelf(chatUserModalUserId));
+    var isSelfModal = chatUserModalEl && chatUserModalEl.classList.contains("chat-user-modal--self");
+    var canUse = !!(base && typeof pokerApiHasCredential === "function" && pokerApiHasCredential() && chatUserModalUserId && !isSelfModal && !chatUserModalIsSelf(chatUserModalUserId));
     modalBlockBtn.hidden = !canUse;
     if (!canUse) return;
     modalBlockBtn.disabled = chatUserModalBlockBusy;
@@ -252,30 +275,10 @@ if (chatUserModalEl) {
       }
     }
   }
-  function chatUserModalHeroFallbackAvatarUrl() {
-    var raw = String(chatUserModalHeroAvatarUrl || "").trim();
-    if (raw) return raw;
-    try {
-      if (modalAvatar && modalAvatar.style.display !== "none") {
-        return String(modalAvatar.currentSrc || modalAvatar.src || "").trim();
-      }
-    } catch (eFallbackAvatarRead) {}
-    return "";
-  }
-  function chatUserModalHeroFallbackPlaceholderUrl() {
-    var initial = String(chatUserModalUserName || "И").trim().charAt(0) || "И";
-    var svg =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">' +
-      '<defs><radialGradient id="g" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#4b5563"/><stop offset="1" stop-color="#111827"/></radialGradient></defs>' +
-      '<rect width="160" height="160" rx="80" fill="url(#g)"/>' +
-      '<text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="#fff3d4" font-family="Arial, sans-serif" font-size="76" font-weight="900">' +
-      initial.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
-      "</text></svg>";
-    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-  }
   function hideChatUserModalRatingArtImg() {
     if (!modalRatingArtImg) return;
     modalRatingArtImg.onerror = null;
+    modalRatingArtImg.onload = null;
     modalRatingArtImg.style.display = "none";
     modalRatingArtImg.removeAttribute("src");
     modalRatingArtImg.alt = "";
@@ -283,55 +286,50 @@ if (chatUserModalEl) {
     modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
   }
   function showChatUserModalRatingAvatarFallback() {
-    if (!modalRatingArt || !modalRatingArtImg) return false;
-    var avatar = chatUserModalHeroFallbackAvatarUrl();
-    var placeholder = chatUserModalHeroFallbackPlaceholderUrl();
-    var fallbackSrc = avatar || placeholder;
-    if (!fallbackSrc) {
-      hideChatUserModalRatingArtImg();
-      modalRatingArt.hidden = false;
-      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
-      return false;
-    }
-    modalRatingArtImg.onerror = function () {
-      if (modalRatingArtImg && modalRatingArtImg.src !== placeholder) {
-        modalRatingArtImg.onerror = function () {
-          hideChatUserModalRatingArtImg();
-        };
-        modalRatingArtImg.src = placeholder;
-        return;
-      }
-      hideChatUserModalRatingArtImg();
-    };
-    modalRatingArtImg.classList.add("chat-user-modal__rating-art-img--avatar-fallback");
-    modalRatingArtImg.src = fallbackSrc;
-    modalRatingArtImg.alt = chatUserModalUserName ? "Аватар " + chatUserModalUserName : "Аватар игрока";
-    modalRatingArtImg.hidden = false;
-    modalRatingArtImg.style.display = "";
+    if (!modalRatingArt || !modalRatingArtImg) return Promise.resolve(false);
+    hideChatUserModalRatingArtImg();
     modalRatingArt.hidden = false;
     if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
-    return true;
+    return Promise.resolve(false);
   }
   function syncChatUserModalRatingArt(nick) {
     var art = null;
     if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
       art = window.pokerGetSummerRatingPlayerArt(nick);
     }
-    if (!modalRatingArt || !modalRatingArtImg) return;
+    if (!modalRatingArt || !modalRatingArtImg) return Promise.resolve(false);
     if (!art || !art.src) {
-      showChatUserModalRatingAvatarFallback();
-      return;
+      return showChatUserModalRatingAvatarFallback();
     }
-    modalRatingArtImg.onerror = function () {
-      showChatUserModalRatingAvatarFallback();
-    };
-    modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
-    modalRatingArtImg.src = art.src;
-    modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
-    modalRatingArtImg.hidden = false;
-    modalRatingArtImg.style.display = "";
-    modalRatingArt.hidden = false;
-    if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
+    return new Promise(function (resolve) {
+      var settled = false;
+      function done(ok) {
+        if (settled) return;
+        settled = true;
+        modalRatingArtImg.onload = null;
+        resolve(!!ok);
+      }
+      modalRatingArtImg.onload = function () {
+        done(true);
+      };
+      modalRatingArtImg.onerror = function () {
+        Promise.resolve(showChatUserModalRatingAvatarFallback()).then(function () {
+          done(false);
+        }).catch(function () {
+          done(false);
+        });
+      };
+      modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+      modalRatingArtImg.src = art.src;
+      modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
+      modalRatingArtImg.hidden = false;
+      modalRatingArtImg.style.display = "";
+      modalRatingArt.hidden = false;
+      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
+      window.setTimeout(function () {
+        if (modalRatingArtImg && modalRatingArtImg.complete && modalRatingArtImg.naturalWidth > 0) done(true);
+      }, 0);
+    });
   }
   function chatUserModalRatingPlaceText(place) {
     var n = place != null ? parseInt(place, 10) : 0;
@@ -620,7 +618,19 @@ if (chatUserModalEl) {
     return titleDisp;
   }
   function updateChatUserModalFriendState(isFriend, displayTitle, requestOutgoing) {
+    if (chatUserModalEl.classList.contains("chat-user-modal--self")) {
+      if (modalFriendRow) modalFriendRow.style.display = "none";
+      if (modalAddFriend) modalAddFriend.style.display = "none";
+      if (modalEditFriendName) modalEditFriendName.style.display = "none";
+      if (modalRemoveFriend) modalRemoveFriend.style.display = "none";
+      if (modalFriendMsg) {
+        modalFriendMsg.textContent = "";
+        modalFriendMsg.style.display = "none";
+      }
+      return;
+    }
     var pending = !isFriend && !!requestOutgoing;
+    if (modalFriendRow) modalFriendRow.style.display = "";
     if (modalAddFriend) {
       modalAddFriend.style.display = isFriend ? "none" : "";
       modalAddFriend.disabled = !!isFriend;
@@ -814,7 +824,7 @@ if (chatUserModalEl) {
     var openOptions = options && typeof options === "object" ? options : {};
     var fallbackStatusLevel = openOptions.level != null && openOptions.level !== "" ? String(openOptions.level).trim() : "";
     var fallbackRatingNick = openOptions.ratingNick != null ? String(openOptions.ratingNick).trim() : "";
-    var openingSelfProfile = chatUserModalIsSelf(id);
+    var openingSelfProfile = openOptions.selfProfile === true || chatUserModalIsSelf(id);
     chatUserModalUserId = id;
     chatUserModalUserName = userName;
     chatUserModalHeroAvatarUrl = String(avatarUrl || "").trim();
@@ -826,6 +836,9 @@ if (chatUserModalEl) {
       cachedBlockedByMe = !!(window.__pokerChatDmBlockStateByPeer && window.__pokerChatDmBlockStateByPeer[String(id)] === true);
     } catch (eCachedBlockState) {}
     chatUserModalBlockedByMe = cachedBlockedByMe;
+    chatUserModalEl.classList.toggle("chat-user-modal--self", openingSelfProfile);
+    if (modalWriteBtn) modalWriteBtn.style.display = openingSelfProfile ? "none" : "";
+    if (modalRespectActions) modalRespectActions.style.display = openingSelfProfile ? "none" : "";
     setChatUserModalBlockState(cachedBlockedByMe, true);
     syncChatUserModalRatingTab("");
     syncChatUserModalRatingRanks("");
@@ -886,8 +899,11 @@ if (chatUserModalEl) {
     }
     if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(false, null);
     if (modalPersonalBlock) modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
-    var initialBlockPromise = refreshChatUserModalBlockState(id);
-    var profilePromise = fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
+    var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
+    var profileUrl = openingSelfProfile
+      ? base + "/api/users" + pokerApiAuthQuery("?")
+      : base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&");
+    var profilePromise = fetch(profileUrl)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
@@ -913,8 +929,7 @@ if (chatUserModalEl) {
         ratingNick = ratingNick || fallbackRatingNick;
         syncChatUserModalRatingTab(ratingNick);
         ratingRanksPromise = syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
-        Promise.resolve(ratingRanksPromise).catch(function () {});
-        syncChatUserModalRatingArt(ratingNick);
+        var ratingArtPromise = syncChatUserModalRatingArt(ratingNick) || Promise.resolve(false);
         if (data && data.ok) {
           if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
           var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
@@ -941,7 +956,10 @@ if (chatUserModalEl) {
             }
           }
         }
-        return null;
+        return Promise.all([
+          waitChatUserModalAsset(ratingRanksPromise, 2600),
+          waitChatUserModalAsset(ratingArtPromise, 2600),
+        ]).then(function () { return null; });
       })
       .catch(function () {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
@@ -950,8 +968,12 @@ if (chatUserModalEl) {
         if (modalLastSeen) modalLastSeen.hidden = true;
         applyChatUserModalStatusLevel(fallbackStatusLevel);
         syncChatUserModalRatingTab(fallbackRatingNick);
-        syncChatUserModalRatingRanks(fallbackRatingNick);
-        syncChatUserModalRatingArt(fallbackRatingNick);
+        var fallbackRanksPromise = syncChatUserModalRatingRanks(fallbackRatingNick);
+        var fallbackArtPromise = syncChatUserModalRatingArt(fallbackRatingNick);
+        return Promise.all([
+          waitChatUserModalAsset(fallbackRanksPromise, 1800),
+          waitChatUserModalAsset(fallbackArtPromise, 1800),
+        ]).then(function () { return null; });
       });
     var respectPromise = fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })
@@ -1555,8 +1577,8 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
 
   window.pokerOpenChatUserModalSafe = function (id, name, avatarUrl, opts) {
     if (!id) return Promise.resolve(false);
-    if (ensureReady(opts)) {
-      window.openChatUserModalById(id, name || "Игрок", avatarUrl || "");
+    if (ensureReady()) {
+      window.openChatUserModalById(id, name || "Игрок", avatarUrl || "", opts);
       return Promise.resolve(true);
     }
     if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
@@ -1568,8 +1590,8 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
       }
       if (ready && typeof ready.then === "function") {
         return ready.then(function () {
-          if (!ensureReady(opts)) return false;
-          window.openChatUserModalById(id, name || "Игрок", avatarUrl || "");
+          if (!ensureReady()) return false;
+          window.openChatUserModalById(id, name || "Игрок", avatarUrl || "", opts);
           return true;
         }).catch(function () {
           return false;
@@ -1580,8 +1602,8 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
   };
 
   if (typeof window.openChatUserModalById !== "function") {
-    var fallbackOpenChatUserModalById = function (id, name, avatarUrl) {
-      return window.pokerOpenChatUserModalSafe(id, name, avatarUrl);
+    var fallbackOpenChatUserModalById = function (id, name, avatarUrl, opts) {
+      return window.pokerOpenChatUserModalSafe(id, name, avatarUrl, opts);
     };
     fallbackOpenChatUserModalById.__pokerFallback = true;
     window.openChatUserModalById = fallbackOpenChatUserModalById;

@@ -475,6 +475,12 @@
   gap: 8px;
   min-width: 0;
 }
+.chat-user-modal--self .chat-user-modal__top {
+  grid-template-columns: minmax(0, 1fr);
+}
+.chat-user-modal--self .chat-user-modal__top-actions {
+  display: none;
+}
 .chat-user-modal__hero {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(150px, 0.82fr);
@@ -1023,9 +1029,9 @@
 .chat-user-modal__rating-ranks {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 3px;
-  margin: 18px 0 14px;
-  padding-top: 32px;
+  gap: 0;
+  margin: 14px 0 10px;
+  padding-top: 30px;
   position: relative;
 }
 .chat-user-modal__rating-ranks::before {
@@ -1072,7 +1078,7 @@
   min-height: 0;
   aspect-ratio: 2172 / 724;
   min-width: 0;
-  padding: 24px 42px 24px 37%;
+  padding: 22px 42px 22px 37%;
   border: 0;
   border-radius: 0;
   background: center / contain no-repeat;
@@ -1080,6 +1086,9 @@
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
+}
+.chat-user-modal__rating-rank-row + .chat-user-modal__rating-rank-row {
+  margin-top: -8px;
 }
 .chat-user-modal__rating-rank-row::before {
   content: "";

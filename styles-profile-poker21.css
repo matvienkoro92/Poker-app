@@ -206,6 +206,17 @@
   .profile-hero-card__id {
     font-size: var(--profile-id-font-size, 16px);
   }
+  .profile-public-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+  .profile-public-card__label {
+    text-align: center;
+  }
+  .profile-public-card__btn {
+    width: 100%;
+  }
 }
 @media (max-width: 370px) {
   .profile-chat-name__row {
