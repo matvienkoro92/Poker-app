@@ -452,142 +452,58 @@
   display: none;
 }
 
-.profile-view--unified-card:not(.profile-view--guest) .profile-header-row {
-  display: none;
-}
-body[data-view="profile"] #app.app .card:has(.profile-view--unified-card) .card__content,
-html.app-view-profile-html-scroll #app.app .card:has(.profile-view--unified-card) .card__content {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-.profile-view--unified-card {
-  width: 100%;
-  max-width: none;
-}
-.profile-view--unified-card .profile-hero-card {
-  grid-template-columns: minmax(0, 1.2fr) minmax(238px, 0.8fr);
-  grid-template-areas:
-    "toolbar toolbar"
-    "avatar identity"
-    "art status"
-    "friends friends"
-    "email email"
-    "telegram telegram"
-    "push push"
-    "poker21 poker21";
-  gap: 14px;
-  width: 100%;
-  max-width: none;
-  margin: 0 0 20px;
-  padding: 12px;
-  border-color: rgba(214, 171, 83, 0.36);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(214, 171, 83, 0.1), transparent 34%),
-    linear-gradient(135deg, #02060c 0%, #070b12 52%, #03050a 100%);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.48);
-}
-.profile-view--unified-card .profile-hero-card::after {
-  content: none;
-}
-.profile-self-card-toolbar {
-  grid-area: toolbar;
+.profile-public-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
   align-items: center;
-}
-.profile-self-card-toolbar .profile-tabs {
-  margin: 0;
-}
-.profile-self-card-toolbar__actions {
-  display: flex;
-  justify-content: flex-end;
-  min-width: 0;
-}
-.profile-view--unified-card .profile-avatar-block {
-  grid-area: avatar;
-  align-self: center;
-  justify-self: center;
-}
-.profile-view--unified-card .profile-hero-card__identity {
-  grid-area: identity;
-  align-self: center;
-  justify-items: start;
-  text-align: left;
-}
-.profile-view--unified-card .profile-hero-card__name {
-  justify-content: flex-start;
-  padding-right: 62px;
-  padding-left: 0;
-  text-align: left;
-}
-.profile-view--unified-card .profile-hero-card__name-text {
-  max-width: 100%;
-  text-align: left;
-}
-.profile-view--unified-card .profile-hero-card__id {
-  text-align: left;
-}
-.profile-self-hero-art {
-  grid-area: art;
-  min-height: 204px;
-  overflow: hidden;
-  border-radius: 14px;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(2, 5, 10, 0.04) 70%, rgba(3, 5, 10, 0.9) 100%),
-    url("./assets/chat-profile-hero-bg-21.png") 46% 54% / cover no-repeat,
-    linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.profile-self-hero-art__img {
-  display: block;
-  width: min(108%, 238px);
-  max-height: 212px;
-  object-fit: contain;
-  object-position: center bottom;
-  transform: translateY(-18px);
-  filter:
-    brightness(1.08)
-    contrast(1.04)
-    saturate(1.08)
-    drop-shadow(0 12px 16px rgba(0, 0, 0, 0.55))
-    drop-shadow(0 0 24px rgba(255, 166, 36, 0.36));
-}
-.profile-view--unified-card .profile-status {
-  grid-area: status;
-}
-.profile-view--unified-card .profile-friends {
-  grid-area: friends;
-}
-.profile-view--unified-card #profileEmailAuthSection {
-  grid-area: email;
-}
-.profile-view--unified-card #profileTelegramLinkSection {
-  grid-area: telegram;
-}
-.profile-view--unified-card #profileChatPushRow {
-  grid-area: push;
-}
-.profile-view--unified-card #profilePokerPlusSection {
-  grid-area: poker21;
-}
-.profile-view--unified-card .profile-self-card__embedded {
-  width: 100%;
-  max-width: none;
-  margin: 0;
+  gap: 10px;
+  width: min(100%, 34rem);
+  margin: 8px auto 0;
+  padding: 10px 12px;
   box-sizing: border-box;
+  border: 1px solid rgba(197, 139, 47, 0.5);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(251, 191, 36, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(8, 17, 29, 0.94), rgba(4, 9, 17, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 229, 156, 0.09), 0 10px 22px rgba(0, 0, 0, 0.22);
 }
-.profile-view--unified-card #profileEmailAuthTitle,
-.profile-view--unified-card #profileEmailAuthText,
-.profile-view--unified-card #profileEmailAuthLinkedRow,
-.profile-view--unified-card #profileTelegramLinkedRow,
-.profile-view--unified-card #profileTelegramVisibilityRow,
-.profile-view--unified-card #profileEmailAuthForm,
-.profile-view--unified-card #profileTelegramLinkSection {
-  display: none !important;
+.profile-public-card__label {
+  min-width: 0;
+  overflow: hidden;
+  color: #ffd782;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: left;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.profile-public-card__btn {
+  min-width: 112px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 230, 163, 0.78);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff4b6 0%, #ffcb58 52%, #ff9b09 100%);
+  color: #201200;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 18px rgba(0, 0, 0, 0.28);
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-public-card__btn:hover:not(:disabled),
+.profile-public-card__btn:focus-visible:not(:disabled) {
+  filter: brightness(1.06);
+  outline: none;
+}
+.profile-public-card__btn:disabled {
+  opacity: 0.68;
+  cursor: wait;
 }
 
 [data-theme="light"] .profile-hero-card {
@@ -621,13 +537,15 @@ html.app-view-profile-html-scroll #app.app .card:has(.profile-view--unified-card
   color: #475569;
 }
 
-[data-theme="light"] .profile-view--unified-card .profile-hero-card {
-  border-color: rgba(249, 115, 22, 0.26);
+[data-theme="light"] .profile-public-card {
+  border-color: rgba(249, 115, 22, 0.28);
   background:
-    radial-gradient(circle at 96% 4%, rgba(251, 146, 60, 0.1), transparent 28%),
-    radial-gradient(circle at 8% 0%, rgba(255, 237, 213, 0.76), transparent 32%),
-    linear-gradient(145deg, rgba(255, 250, 243, 0.98), rgba(255, 237, 213, 0.92));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84), 0 14px 32px rgba(234, 88, 12, 0.08);
+    radial-gradient(circle at 12% 10%, rgba(251, 146, 60, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(255, 250, 243, 0.95), rgba(255, 237, 213, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 10px 22px rgba(234, 88, 12, 0.08);
+}
+[data-theme="light"] .profile-public-card__label {
+  color: #9a3412;
 }
 
 .profile-user-id {

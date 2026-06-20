@@ -315,7 +315,6 @@ function updateProfileDtId() {
       }
       if (data && data.ok) {
         pokerApplyProfileUserInfo(data);
-        if (typeof syncProfileSelfCardFromProfile === "function") syncProfileSelfCardFromProfile(data);
         if (data.p21Id) updateProfileHeroPokerPlusId(data.p21Id);
         if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
