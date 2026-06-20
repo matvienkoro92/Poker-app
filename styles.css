@@ -16,7 +16,7 @@
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
 @import url("./styles-profile.css?v=3.605");
-@import url("./styles-layout.css?v=3.633");
+@import url("./styles-layout.css?v=3.635");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
 @import url("./styles-layout-touch-targets.css?v=3.593");
@@ -6417,4 +6417,38 @@ body.club-choice-vote-open {
   .club-choice-vote-modal__ghost {
     width: 100%;
   }
+}
+
+#app.app .card .card__content {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  overflow-x: hidden !important;
+}
+
+#app.app .card {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  box-sizing: border-box !important;
+}
+
+#app.app .card .card__content > .view--active {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  padding-left: max(var(--app-content-edge-inset, 5px), env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(var(--app-content-edge-inset, 5px), env(safe-area-inset-right, 0px)) !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+#app.app .card .card__content > .view--active > :where(div, section, article, header, footer, nav, main, aside, form, ul, ol, a) {
+  width: var(--app-content-width, 100%) !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#app.app .card .card__content > .view--active :where(img, video, canvas, svg, table, iframe) {
+  max-width: 100%;
+  box-sizing: border-box;
 }

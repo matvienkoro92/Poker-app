@@ -1,6 +1,11 @@
 /* Bottom navigation, boot overlay and final scroll/layout fallbacks.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
+:root {
+  --app-content-edge-inset: 5px;
+  --app-content-width: 100%;
+}
+
 .bottom-nav.bottom-nav--no-transition {
   transition: none !important;
 }
@@ -1594,8 +1599,8 @@ body[data-view="profile"] #app.app .card .card__content > .view--active[data-vie
 html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
 html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
   width: 100% !important;
-  padding-left: 3px !important;
-  padding-right: 3px !important;
+  padding-left: var(--app-content-edge-inset, 5px) !important;
+  padding-right: var(--app-content-edge-inset, 5px) !important;
   box-sizing: border-box !important;
 }
 
@@ -1644,8 +1649,8 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
 html:has(body[data-view="home"]) #app.app .card .card__content > .view--active[data-view="home"],
 html.app-view-home-html-scroll #app.app .card .card__content > .view--active[data-view="home"] {
   width: 100% !important;
-  padding-left: 5px !important;
-  padding-right: 5px !important;
+  padding-left: var(--app-content-edge-inset, 5px) !important;
+  padding-right: var(--app-content-edge-inset, 5px) !important;
   box-sizing: border-box !important;
 }
 
@@ -1751,4 +1756,38 @@ body[data-view="cashout"] .cashout-manager-block {
   margin-right: 0 !important;
   border-color: transparent !important;
   box-shadow: none !important;
+}
+
+#app.app .card .card__content {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  overflow-x: hidden !important;
+}
+
+#app.app .card {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  box-sizing: border-box !important;
+}
+
+#app.app .card .card__content > .view--active {
+  width: var(--app-content-width, 100%) !important;
+  max-width: var(--app-content-width, 100%) !important;
+  padding-left: max(var(--app-content-edge-inset, 5px), env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(var(--app-content-edge-inset, 5px), env(safe-area-inset-right, 0px)) !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+#app.app .card .card__content > .view--active > :where(div, section, article, header, footer, nav, main, aside, form, ul, ol, a) {
+  width: var(--app-content-width, 100%) !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#app.app .card .card__content > .view--active :where(img, video, canvas, svg, table, iframe) {
+  max-width: 100%;
+  box-sizing: border-box;
 }
