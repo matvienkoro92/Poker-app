@@ -10,6 +10,18 @@
               <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
             </div>
+            <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-club-panel aria-label="Достижения и история сезонов">
+              <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal"></div>
+              <section class="chat-user-modal__achievements profile-achievements-showcase__achievements" id="profileAchievementsBlock">
+                <h4 class="chat-user-modal__achievements-title">Достижения</h4>
+                <div class="chat-user-modal__achievements-list" id="profileAchievementsList">
+                  <div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">Идет загрузка достижений...</div>
+                </div>
+              </section>
+              <div class="chat-user-modal__rating-ranks profile-achievements-showcase__ranks" id="profileSeasonRanks">
+                <div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">Идет загрузка истории сезонов...</div>
+              </div>
+            </section>
             <p class="profile-loading-note profile-loading-note--hidden" id="profileLoadingNote" aria-live="polite">Загружаем профиль...</p>
             <section class="profile-hero-card" aria-labelledby="profileUserName" data-profile-club-panel>
               <div class="profile-hero-card__identity">

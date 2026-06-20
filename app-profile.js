@@ -73,6 +73,7 @@ function initProfileTabs() {
   }
   initProfilePoker21Tabs();
   initProfilePublicCardButton();
+  initProfileAchievementsShowcase();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
     setTimeout(function () {
@@ -206,6 +207,132 @@ function initProfilePublicCardButton() {
   btn.addEventListener("click", openProfilePublicCard);
 }
 
+var profileAchievementsShowcaseSeq = 0;
+
+function profileAchievementRatingNickFromData(data) {
+  var raw = data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
+  return String(raw || "").trim();
+}
+
+function profileAchievementUserIdFromData(data) {
+  var raw =
+    (data && (data.userId || data.memberId || data.accountId || data.dtId)) ||
+    profilePublicCardMemberIdFromAuth() ||
+    profilePublicCardFallbackDtId();
+  return String(raw || "").trim();
+}
+
+function renderProfileAchievementsShowcaseLoading() {
+  var showcase = document.getElementById("profileAchievementsShowcase");
+  var total = document.getElementById("profileRatingTotal");
+  var achievements = document.getElementById("profileAchievementsList");
+  var ranks = document.getElementById("profileSeasonRanks");
+  if (showcase) showcase.hidden = false;
+  if (total) total.innerHTML = "";
+  if (achievements) {
+    achievements.innerHTML =
+      '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
+        "Идет загрузка достижений..." +
+      "</div>";
+  }
+  if (ranks) {
+    ranks.innerHTML =
+      '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
+        "Идет загрузка истории сезонов..." +
+      "</div>";
+  }
+}
+
+function ensureProfileAchievementsBuilder() {
+  if (typeof window.pokerBuildProfileAchievements === "function") return Promise.resolve(true);
+  try {
+    if (typeof window.pokerEnsureChatUserModalReady === "function" && window.pokerEnsureChatUserModalReady()) {
+      return Promise.resolve(typeof window.pokerBuildProfileAchievements === "function");
+    }
+  } catch (eEnsureChatBuilder) {}
+  if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+    try {
+      return Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+        .then(function () {
+          try {
+            if (typeof window.pokerEnsureChatUserModalReady === "function") window.pokerEnsureChatUserModalReady();
+          } catch (eEnsureAfterGlobal) {}
+          return typeof window.pokerBuildProfileAchievements === "function";
+        })
+        .catch(function () { return false; });
+    } catch (eGlobalBuilder) {}
+  }
+  return Promise.resolve(false);
+}
+
+function refreshProfileAchievementsShowcase(profileData) {
+  var showcase = document.getElementById("profileAchievementsShowcase");
+  var total = document.getElementById("profileRatingTotal");
+  var achievements = document.getElementById("profileAchievementsList");
+  var ranks = document.getElementById("profileSeasonRanks");
+  if (!showcase || !achievements || !ranks) return Promise.resolve(false);
+  var seq = ++profileAchievementsShowcaseSeq;
+  renderProfileAchievementsShowcaseLoading();
+  var dataReady = profileData && profileData.ok
+    ? Promise.resolve(profileData)
+    : (typeof loadCurrentProfileUserInfo === "function" ? loadCurrentProfileUserInfo() : Promise.resolve(null));
+  return Promise.resolve(dataReady)
+    .then(function (data) {
+      if (seq !== profileAchievementsShowcaseSeq) return false;
+      return ensureProfileAchievementsBuilder().then(function (ready) {
+        if (!ready || typeof window.pokerBuildProfileAchievements !== "function") throw new Error("achievement-builder-unavailable");
+        return window.pokerBuildProfileAchievements({
+          ratingNick: profileAchievementRatingNickFromData(data),
+          profileData: data || {},
+          userId: profileAchievementUserIdFromData(data),
+        });
+      });
+    })
+    .then(function (result) {
+      if (seq !== profileAchievementsShowcaseSeq || !result) return false;
+      if (total) total.innerHTML = result.totalRewardHtml || "";
+      achievements.innerHTML = result.achievementsHtml || "";
+      ranks.innerHTML = result.ranksHtml || "";
+      showcase.hidden = false;
+      return true;
+    })
+    .catch(function () {
+      if (seq !== profileAchievementsShowcaseSeq) return false;
+      achievements.innerHTML =
+        '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
+          "Идет загрузка достижений..." +
+        "</div>";
+      ranks.innerHTML =
+        '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
+          "Идет загрузка истории сезонов..." +
+        "</div>";
+      return false;
+    });
+}
+
+function initProfileAchievementsShowcase() {
+  var showcase = document.getElementById("profileAchievementsShowcase");
+  if (!showcase) return;
+  if (showcase.dataset.bound !== "1") {
+    showcase.dataset.bound = "1";
+    showcase.addEventListener("click", function (event) {
+      var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
+      if (totalBtn) {
+        if (typeof openWinterRatingPlayerModalReady === "function") {
+          openWinterRatingPlayerModalReady(profileAchievementRatingNickFromData(pokerProfileUserInfoCache));
+        }
+        return;
+      }
+      var card = event && event.target ? event.target.closest("[data-chat-achievement-action]") : null;
+      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
+      if (typeof openWinterRatingPlayerModalReady === "function") {
+        openWinterRatingPlayerModalReady(profileAchievementRatingNickFromData(pokerProfileUserInfoCache), { season: "summer" });
+      }
+    });
+  }
+  refreshProfileAchievementsShowcase();
+}
+
 function syncProfileStatusVisibility(isVerified) {
   var statusSection = document.getElementById("profileStatusSection");
   if (!statusSection) return;
@@ -222,10 +349,12 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   var saveWrap = document.getElementById("profileChatNameSaveWrap");
   var chatNameWrap = document.querySelector("#profileView .profile-chat-name");
   var friendsWrap = document.querySelector("#profileView .profile-friends");
+  var achievementsWrap = document.getElementById("profileAchievementsShowcase");
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
   if (profileTabs) profileTabs.hidden = !isVerified;
   if (heroCard) heroCard.hidden = !isVerified;
+  if (achievementsWrap) achievementsWrap.hidden = !isVerified;
   if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
   if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);

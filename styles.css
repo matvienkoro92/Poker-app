@@ -15,8 +15,8 @@
 @import url("./styles-hall.css?v=3.617");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.603");
-@import url("./styles-layout.css?v=3.628");
+@import url("./styles-profile.css?v=3.604");
+@import url("./styles-layout.css?v=3.631");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
 @import url("./styles-layout-touch-targets.css?v=3.593");
@@ -2293,13 +2293,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border: 1px solid rgba(255, 131, 22, 0.88);
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 50% 118%, rgba(255, 105, 0, 0.54), rgba(255, 105, 0, 0.16) 36%, transparent 68%),
-    linear-gradient(180deg, rgba(52, 44, 42, 0.98) 0%, rgba(13, 14, 18, 0.99) 28%, rgba(0, 0, 0, 0.99) 100%);
+    radial-gradient(ellipse at 50% -34%, rgba(255, 184, 72, 0.72), rgba(255, 117, 0, 0.26) 38%, transparent 70%),
+    radial-gradient(ellipse at 50% 118%, rgba(255, 105, 0, 0.64), rgba(255, 105, 0, 0.2) 36%, transparent 68%),
+    linear-gradient(180deg, rgba(82, 50, 27, 0.98) 0%, rgba(18, 17, 19, 0.99) 31%, rgba(0, 0, 0, 0.99) 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 230, 178, 0.22),
-    inset 0 7px 16px rgba(255, 255, 255, 0.08),
-    inset 0 -9px 18px rgba(255, 92, 0, 0.16),
-    0 0 13px rgba(255, 104, 0, 0.28);
+    inset 0 0 0 1px rgba(255, 226, 166, 0.22),
+    inset 0 7px 16px rgba(255, 255, 255, 0.1),
+    inset 0 0 18px rgba(255, 118, 0, 0.26),
+    inset 0 -9px 18px rgba(255, 92, 0, 0.2),
+    0 -12px 30px rgba(255, 145, 35, 0.24),
+    0 0 18px rgba(255, 104, 0, 0.38);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   text-shadow:

@@ -1596,3 +1596,155 @@ html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[
   width: 100% !important;
   box-sizing: border-box !important;
 }
+
+body[data-view="home"] #app.app,
+html:has(body[data-view="home"]) #app.app,
+html.app-view-home-html-scroll #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="home"] #app.app .card,
+html:has(body[data-view="home"]) #app.app .card,
+html.app-view-home-html-scroll #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body[data-view="home"] #app.app .card .card__header,
+html:has(body[data-view="home"]) #app.app .card .card__header,
+html.app-view-home-html-scroll #app.app .card .card__header {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body[data-view="home"] #app.app .card .card__content,
+html:has(body[data-view="home"]) #app.app .card .card__content,
+html.app-view-home-html-scroll #app.app .card .card__content {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="home"] #app.app .card .card__content > .view--active[data-view="home"],
+html:has(body[data-view="home"]) #app.app .card .card__content > .view--active[data-view="home"],
+html.app-view-home-html-scroll #app.app .card .card__content > .view--active[data-view="home"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body[data-view="download"] #app.app,
+html:has(body[data-view="download"]) #app.app,
+html.app-view-download-html-scroll #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="download"] #app.app .card,
+html:has(body[data-view="download"]) #app.app .card,
+html.app-view-download-html-scroll #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="download"] #app.app .card .card__content,
+html:has(body[data-view="download"]) #app.app .card .card__content,
+html.app-view-download-html-scroll #app.app .card .card__content {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
+html:has(body[data-view="download"]) #app.app .card .card__content > .view--active[data-view="download"],
+html.app-view-download-html-scroll #app.app .card .card__content > .view--active[data-view="download"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="light"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="cashout"] #app.app,
+html:has(body[data-view="cashout"]) #app.app,
+html.app-view-cashout-html-scroll #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="cashout"] #app.app .card,
+html:has(body[data-view="cashout"]) #app.app .card,
+html.app-view-cashout-html-scroll #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="cashout"] #app.app .card .card__content,
+html:has(body[data-view="cashout"]) #app.app .card .card__content,
+html.app-view-cashout-html-scroll #app.app .card .card__content {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
+html:has(body[data-view="cashout"]) #app.app .card .card__content > .view--active[data-view="cashout"],
+html.app-view-cashout-html-scroll #app.app .card .card__content > .view--active[data-view="cashout"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block,
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-block,
+[data-theme="light"] body[data-view="cashout"] .cashout-manager-block,
+body[data-view="cashout"] .cashout-manager-block {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}

@@ -396,20 +396,32 @@ if (chatUserModalEl) {
   function syncChatUserModalRatingTotalReward(nick) {
     if (!modalRatingTabSum) return;
     var ratingNick = String(nick || "").trim();
-    var getTotalReward = typeof window.pokerGetRatingPlayerTotalReward === "function"
-      ? window.pokerGetRatingPlayerTotalReward
-      : (typeof window.pokerGetWinterRatingPlayerTotalReward === "function" ? window.pokerGetWinterRatingPlayerTotalReward : null);
-    if (!ratingNick || !getTotalReward) {
-      modalRatingTabSum.textContent = "";
-      modalRatingTabSum.hidden = true;
-      return;
-    }
-    var text = chatUserModalFormatAchievementRub(getTotalReward(ratingNick));
+    var text = chatUserModalRatingTotalRewardText(ratingNick);
     modalRatingTabSum.textContent = text;
     modalRatingTabSum.hidden = !text;
     if (modalRatingTab && text) {
       modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах " + text + ". Подробнее");
     }
+  }
+  function chatUserModalRatingTotalRewardText(nick) {
+    var ratingNick = String(nick || "").trim();
+    var getTotalReward = typeof window.pokerGetRatingPlayerTotalReward === "function"
+      ? window.pokerGetRatingPlayerTotalReward
+      : (typeof window.pokerGetWinterRatingPlayerTotalReward === "function" ? window.pokerGetWinterRatingPlayerTotalReward : null);
+    if (!ratingNick || !getTotalReward) return "";
+    return chatUserModalFormatAchievementRub(getTotalReward(ratingNick));
+  }
+  function chatUserModalRatingTotalHtml(ratingNick) {
+    var text = chatUserModalRatingTotalRewardText(ratingNick);
+    if (!text) return "";
+    return (
+      '<div class="chat-user-modal__rating-tabs">' +
+        '<button type="button" class="chat-user-modal__rating-tab" data-profile-rating-total="1" aria-label="Общий выигрыш в турнирах ' + escapeHtml(text) + '. Подробнее">' +
+          '<span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum">' + escapeHtml(text) + "</span></span>" +
+          '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
+        "</button>" +
+      "</div>"
+    );
   }
   function chatUserModalSameRatingNick(a, b) {
     if (typeof winterRatingSamePlayer === "function") return winterRatingSamePlayer(a, b);
@@ -510,9 +522,9 @@ if (chatUserModalEl) {
     chatUserModalRaffleAddKey(keys, "name", row && row.name);
     return keys;
   }
-  function chatUserModalRaffleTargetKeys(ratingNick, profileData) {
+  function chatUserModalRaffleTargetKeys(ratingNick, profileData, userId) {
     var keys = [];
-    chatUserModalRaffleAddKey(keys, "user", chatUserModalUserId);
+    chatUserModalRaffleAddKey(keys, "user", userId || chatUserModalUserId);
     chatUserModalRaffleAddKey(keys, "account", profileData && (profileData.accountId || profileData.dtId || profileData.memberId));
     chatUserModalRaffleAddKey(keys, "p21", profileData && (profileData.p21Id || profileData.poker21Id || profileData.pokerPlusId || profileData.pokerPlusUserId));
     chatUserModalRaffleAddKey(keys, "tg", profileData && (profileData.telegramUsername || profileData.userName || profileData.username));
@@ -559,8 +571,8 @@ if (chatUserModalEl) {
       })
       .catch(function () { return []; });
   }
-  function getChatUserModalRaffleLuckReady(ratingNick, profileData) {
-    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData);
+  function getChatUserModalRaffleLuckReady(ratingNick, profileData, userId) {
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
     if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
     return getChatUserModalRafflesReady().then(function (raffles) {
       var now = Date.now();
@@ -655,8 +667,8 @@ if (chatUserModalEl) {
   function chatUserModalClubChoiceMonthKey(row) {
     return String(row && (row.month || row.monthKey || row.period || row.key) || "").trim();
   }
-  function getChatUserModalClubChoiceReady(ratingNick, profileData) {
-    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData);
+  function getChatUserModalClubChoiceReady(ratingNick, profileData, userId) {
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
     if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
     return chatUserModalEnsureClubChoiceRowsReady().then(function () {
       var rows = chatUserModalClubChoiceRows();
@@ -752,14 +764,11 @@ if (chatUserModalEl) {
       "</div>";
     modalAchievements.hidden = false;
   }
-  function renderChatUserModalAchievements(results, ratingNick) {
-    if (!modalAchievements || !modalAchievementsList) return;
+  function chatUserModalAchievementsHtml(results, ratingNick) {
     var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
     var clubChoice = Array.isArray(results && results[5]) ? results[5] : [];
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length) {
-      modalAchievementsList.innerHTML = chatUserModalSummerCupCardHtml();
-      modalAchievements.hidden = false;
-      return;
+      return chatUserModalSummerCupCardHtml();
     }
     var seasons = [
       { key: "summer", rows: results && results[0] },
@@ -803,9 +812,80 @@ if (chatUserModalEl) {
       }) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalSummerCupCardHtml();
+    return html;
+  }
+  function renderChatUserModalAchievements(results, ratingNick) {
+    if (!modalAchievements || !modalAchievementsList) return;
+    var html = chatUserModalAchievementsHtml(results, ratingNick);
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;
   }
+  function chatUserModalRatingRanksHtml(results, ratingNick) {
+    var hasNick = !!String(ratingNick || "").trim();
+    var summerHtml = hasNick ? chatUserModalRatingPlacesHtml(results && results[0]) : "—";
+    var springHtml = hasNick ? chatUserModalRatingPlacesHtml(results && results[1]) : "—";
+    var winterHtml = hasNick ? chatUserModalRatingPlacesHtml(results && results[2]) : "—";
+    return (
+      '<div class="chat-user-modal__rating-rank-row">' +
+        '<span class="chat-user-modal__rating-rank-label">Лето</span>' +
+        '<span class="chat-user-modal__rating-rank-value">' + summerHtml + "</span>" +
+      "</div>" +
+      '<div class="chat-user-modal__rating-rank-row">' +
+        '<span class="chat-user-modal__rating-rank-label">Весна</span>' +
+        '<span class="chat-user-modal__rating-rank-value">' + springHtml + "</span>" +
+      "</div>" +
+      '<div class="chat-user-modal__rating-rank-row">' +
+        '<span class="chat-user-modal__rating-rank-label">Зима</span>' +
+        '<span class="chat-user-modal__rating-rank-value">' + winterHtml + "</span>" +
+      "</div>"
+    );
+  }
+  function chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, season) {
+    if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
+      return Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
+        .then(function () { return getPlaces(ratingNick, season); })
+        .catch(function () { return getPlaces(ratingNick, season); });
+    }
+    return getPlaces(ratingNick, season);
+  }
+  window.pokerBuildProfileAchievements = function (options) {
+    options = options && typeof options === "object" ? options : {};
+    var ratingNick = String(options.ratingNick || "").trim();
+    var profileData = options.profileData || null;
+    var userId = options.userId || "";
+    var getPlaces = typeof window.pokerGetTournamentRatingPlacesReady === "function"
+      ? window.pokerGetTournamentRatingPlacesReady
+      : null;
+    var placesReady = getPlaces && ratingNick
+      ? Promise.all([
+          chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "summer"),
+          chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "spring"),
+          chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "winter"),
+        ])
+      : Promise.resolve([null, null, null]);
+    return Promise.all([
+      placesReady,
+      ratingNick ? getChatUserModalSingleTopWinsReady() : Promise.resolve([]),
+      getChatUserModalRaffleLuckReady(ratingNick, profileData, userId),
+      getChatUserModalClubChoiceReady(ratingNick, profileData, userId),
+    ]).then(function (parts) {
+      var places = parts && parts[0] ? parts[0] : [];
+      var results = [
+        places[0],
+        places[1],
+        places[2],
+        parts && parts[1],
+        parts && parts[2],
+        parts && parts[3],
+      ];
+      return {
+        totalRewardHtml: chatUserModalRatingTotalHtml(ratingNick),
+        achievementsHtml: chatUserModalAchievementsHtml(results, ratingNick),
+        ranksHtml: chatUserModalRatingRanksHtml(results, ratingNick),
+        results: results,
+      };
+    });
+  };
   function syncChatUserModalRatingRanks(nick) {
     chatUserModalRanksSeq += 1;
     var seq = chatUserModalRanksSeq;
@@ -850,18 +930,10 @@ if (chatUserModalEl) {
         return [];
       });
     }
-    function getSeasonPlacesReady(season) {
-      if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
-        return Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
-          .then(function () { return getPlaces(ratingNick, season); })
-          .catch(function () { return getPlaces(ratingNick, season); });
-      }
-      return getPlaces(ratingNick, season);
-    }
     return Promise.all([
-      getSeasonPlacesReady("summer"),
-      getSeasonPlacesReady("spring"),
-      getSeasonPlacesReady("winter"),
+      chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "summer"),
+      chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "spring"),
+      chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, "winter"),
       getChatUserModalSingleTopWinsReady(),
       getChatUserModalRaffleLuckReady(ratingNick, chatUserModalAchievementIdentity),
       getChatUserModalClubChoiceReady(ratingNick, chatUserModalAchievementIdentity),
