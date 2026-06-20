@@ -619,12 +619,11 @@ function initRafflesCompletedRuntime(opts) {
       });
   }
 
-  function raffleWinnerLeadersMonthHtml(group, index) {
+  function raffleWinnerLeadersMonthHtml(group) {
     var totalText = raffleWinnerLeaderTotalText(group.totalPrize) || "0 ₽";
     var topRows = group.rows.slice(0, RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT);
-    var openAttr = index === 0 ? " open" : "";
     return (
-      '<details class="raffle-winner-leaders-month"' + openAttr + '>' +
+      '<details class="raffle-winner-leaders-month">' +
         '<summary class="raffle-winner-leaders-month__summary">' +
           '<span class="raffle-winner-leaders-month__name">' + escapeHtml(group.label) + '</span>' +
           '<span class="raffle-winner-leaders-month__meta">' +

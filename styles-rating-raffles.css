@@ -5723,7 +5723,7 @@ button.raffle-feedback-action {
 .raffle-winner-leaders__months {
   display: grid;
   gap: 8px;
-  margin: 0 0 10px;
+  margin: 10px 0 0;
 }
 .raffle-winner-leaders-month {
   overflow: hidden;
