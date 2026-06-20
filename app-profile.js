@@ -73,6 +73,7 @@ function initProfileTabs() {
   }
   initProfilePoker21Tabs();
   initProfilePublicCardButton();
+  initProfilePublicShowcase();
   initProfileAchievementsShowcase();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
@@ -205,6 +206,209 @@ function initProfilePublicCardButton() {
   if (!btn || btn.dataset.bound === "1") return;
   btn.dataset.bound = "1";
   btn.addEventListener("click", openProfilePublicCard);
+}
+
+var profilePublicShowcaseData = null;
+var profilePublicShowcaseStatus = null;
+
+function profilePublicShowcaseFormatXp(value) {
+  if (typeof pokerProfileFormatRake === "function") return pokerProfileFormatRake(value);
+  var n = Math.max(0, Math.floor(Number(value) || 0));
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function profilePublicShowcaseDisplayName(data) {
+  var d = data && typeof data === "object" ? data : {};
+  var raw =
+    (d.chatDisplayName != null && String(d.chatDisplayName).trim()) ||
+    (d.contactName != null && String(d.contactName).trim()) ||
+    (d.userName != null && String(d.userName).trim()) ||
+    profilePublicCardDisplayName();
+  return String(raw || "Игрок").trim();
+}
+
+function profilePublicShowcaseStatusFromData(data) {
+  var d = data && typeof data === "object" ? data : {};
+  if (d.statusPoints != null && d.statusPoints !== "" && typeof pokerProfileStatusFromRake === "function") {
+    return pokerProfileStatusFromRake(d.statusPoints);
+  }
+  if (d.level != null && d.level !== "") {
+    var level = Math.max(0, Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, parseInt(d.level, 10) || 0));
+    return {
+      points: null,
+      level: level,
+      nextLevel: Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, level + 1),
+      levelStart: 0,
+      nextStart: 0,
+      valuePercent: Math.max(0, Math.min(100, parseInt(d.statusValue, 10) || 0)),
+    };
+  }
+  return profilePublicShowcaseStatus;
+}
+
+function profilePublicShowcaseApplyAvatar(title) {
+  var img = document.getElementById("profilePublicAvatar");
+  var placeholder = document.getElementById("profilePublicAvatarPlaceholder");
+  if (!img || !placeholder) return;
+  var src = profilePublicCardAvatarUrl();
+  if (src) {
+    img.src = src;
+    img.alt = title || "Игрок";
+    img.style.display = "";
+    placeholder.style.display = "none";
+  } else {
+    img.removeAttribute("src");
+    img.alt = "";
+    img.style.display = "none";
+    placeholder.textContent = (title || "И")[0];
+    placeholder.style.display = "";
+  }
+}
+
+function profilePublicShowcaseSyncArt(nick) {
+  var artWrap = document.getElementById("profilePublicRatingArt");
+  var artImg = document.getElementById("profilePublicRatingArtImg");
+  if (!artWrap || !artImg) return;
+  var art = null;
+  if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+    try {
+      art = window.pokerGetSummerRatingPlayerArt(nick);
+    } catch (eProfilePublicArt) {}
+  }
+  artWrap.hidden = false;
+  if (art && art.src) {
+    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    artImg.src = art.src;
+    artImg.alt = "Образ рейтинга " + (art.nick || nick);
+    artImg.hidden = false;
+    artImg.style.display = "";
+  } else {
+    artImg.onerror = null;
+    artImg.onload = null;
+    artImg.removeAttribute("src");
+    artImg.alt = "";
+    artImg.hidden = true;
+    artImg.style.display = "none";
+    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+  }
+}
+
+function profilePublicShowcaseApplyStatus(status) {
+  profilePublicShowcaseStatus = status || null;
+  var section = document.getElementById("profilePublicStatusSection");
+  var scale = document.getElementById("profilePublicStatusScale");
+  var xp = document.getElementById("profilePublicStatusXp");
+  var levelText = document.getElementById("profilePublicLevelText");
+  var currentCard = document.getElementById("profilePublicStatusCardCurrent");
+  var nextCard = document.getElementById("profilePublicStatusCardNext");
+  if (!scale || !levelText) return;
+  if (!status || status.level == null) {
+    if (section) section.hidden = true;
+    if (xp) {
+      xp.textContent = "";
+      xp.hidden = true;
+    }
+    scale.style.setProperty("--status-value", "0");
+    levelText.textContent = "Уровень не обновлен";
+    levelText.hidden = false;
+    return;
+  }
+  if (section) section.hidden = false;
+  var level = Math.max(0, Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, parseInt(status.level, 10) || 0));
+  var nextLevel = status.nextLevel != null ? status.nextLevel : Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, level + 1);
+  scale.style.setProperty("--status-value", String(Math.max(0, Math.min(100, parseInt(status.valuePercent, 10) || 0))));
+  if (currentCard) currentCard.textContent = pokerProfileStatusCardLabel(level);
+  if (nextCard) nextCard.textContent = pokerProfileStatusCardLabel(nextLevel);
+  levelText.innerHTML =
+    '<span class="chat-user-modal__level-num">' +
+    escapeHtml(String(level)) +
+    '</span><span class="chat-user-modal__level-rest">из 100</span>';
+  levelText.hidden = false;
+  if (xp) {
+    var points = Number(status.points);
+    var levelStart = Number(status.levelStart) || 0;
+    var nextStart = Number(status.nextStart) || 0;
+    if (isFinite(points) && nextStart > levelStart && level < (POKER_PROFILE_MAX_STATUS_LEVEL || 100)) {
+      var currentXp = Math.max(0, Math.floor(points - levelStart));
+      var neededXp = Math.max(0, Math.floor(nextStart - levelStart));
+      xp.textContent = profilePublicShowcaseFormatXp(currentXp) + " / " + profilePublicShowcaseFormatXp(neededXp) + " XP";
+      xp.hidden = false;
+    } else if (isFinite(points) && level >= (POKER_PROFILE_MAX_STATUS_LEVEL || 100)) {
+      xp.textContent = profilePublicShowcaseFormatXp(points) + " XP · максимум";
+      xp.hidden = false;
+    } else {
+      xp.textContent = "";
+      xp.hidden = true;
+    }
+  }
+}
+
+function refreshProfilePublicShowcase(profileData) {
+  var root = document.getElementById("profilePublicShowcase");
+  if (!root) return;
+  if (profileData && typeof profileData === "object") profilePublicShowcaseData = profileData;
+  var data = profilePublicShowcaseData || {};
+  var title = profilePublicShowcaseDisplayName(data);
+  var titleEl = document.getElementById("profilePublicTitle");
+  var verified = document.getElementById("profilePublicVerifiedBadge");
+  var loginSub = document.getElementById("profilePublicLoginSub");
+  var lastSeen = document.getElementById("profilePublicLastSeen");
+  var respect = document.getElementById("profilePublicRespectVal");
+  if (titleEl) titleEl.textContent = title;
+  profilePublicShowcaseApplyAvatar(title);
+  if (verified) verified.classList.toggle("chat-user-modal__verified--hidden", data && data.pokerPlusVerified !== true);
+  if (loginSub) {
+    var login = data && data.userName != null ? String(data.userName).trim() : "";
+    loginSub.textContent = login && login !== title ? login : "";
+    loginSub.hidden = !loginSub.textContent;
+  }
+  if (lastSeen) {
+    if (data && data.chatOnline) {
+      lastSeen.textContent = "В сети";
+      lastSeen.hidden = false;
+    } else {
+      lastSeen.textContent = "";
+      lastSeen.hidden = true;
+    }
+  }
+  if (respect) {
+    var rv = document.getElementById("profileRespectValue");
+    var raw = rv ? String(rv.textContent || "").trim() : "";
+    respect.textContent = raw || "\u2014";
+  }
+  profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(data));
+  profilePublicShowcaseApplyStatus(profilePublicShowcaseStatusFromData(data));
+}
+
+function initProfilePublicShowcase() {
+  refreshProfilePublicShowcase();
+  var avatar = document.getElementById("profileAvatar");
+  if (avatar && avatar.dataset.profilePublicShowcaseBound !== "1") {
+    avatar.dataset.profilePublicShowcaseBound = "1";
+    avatar.addEventListener("load", function () {
+      refreshProfilePublicShowcase();
+    });
+  }
+  if (!window.__pokerProfilePublicShowcaseStatusBound) {
+    window.__pokerProfilePublicShowcaseStatusBound = true;
+    window.addEventListener("poker-pokerplus-status-change", function (event) {
+      var detail = event && event.detail ? event.detail : {};
+      if (detail.level != null) {
+        profilePublicShowcaseApplyStatus({
+          points: null,
+          level: detail.level,
+          nextLevel: Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, (parseInt(detail.level, 10) || 0) + 1),
+          levelStart: 0,
+          nextStart: 0,
+          valuePercent: 0,
+        });
+      }
+      if (detail.pokerPlusNickname && profilePublicShowcaseData) {
+        profilePublicShowcaseData.pokerPlusNickname = detail.pokerPlusNickname;
+        profilePublicShowcaseSyncArt(detail.pokerPlusNickname);
+      }
+    });
+  }
 }
 
 var profileAchievementsShowcaseSeq = 0;
@@ -349,11 +553,13 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   var saveWrap = document.getElementById("profileChatNameSaveWrap");
   var chatNameWrap = document.querySelector("#profileView .profile-chat-name");
   var friendsWrap = document.querySelector("#profileView .profile-friends");
+  var publicShowcase = document.getElementById("profilePublicShowcase");
   var achievementsWrap = document.getElementById("profileAchievementsShowcase");
   if (verifiedContent) verifiedContent.hidden = !isVerified;
   if (avatarBlock) avatarBlock.hidden = !isVerified;
   if (profileTabs) profileTabs.hidden = !isVerified;
   if (heroCard) heroCard.hidden = !isVerified;
+  if (publicShowcase) publicShowcase.hidden = !isVerified;
   if (achievementsWrap) achievementsWrap.hidden = !isVerified;
   if (chatRow) chatRow.classList.toggle("profile-guest-hidden", !isVerified);
   if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", !isVerified);
@@ -1035,6 +1241,7 @@ function setProfileStatusUnlinked() {
     fish.removeAttribute("title");
     fish.removeAttribute("data-status-tip");
   }
+  profilePublicShowcaseApplyStatus(null);
 }
 
 function setProfileStatusFromRake(value) {
@@ -1080,6 +1287,7 @@ function setProfileStatusFromRake(value) {
     fish.removeAttribute("title");
     fish.removeAttribute("data-status-tip");
   }
+  profilePublicShowcaseApplyStatus(status);
 }
 
 function setProfileStatusFromProfile(profile, linked) {
@@ -1113,12 +1321,15 @@ function loadProfileRespect() {
         var scoreText = String(data.score);
         el.textContent = scoreText;
         pokerWriteProfileStorage(POKER_PROFILE_RESPECT_CACHE_KEY, scoreText);
+        refreshProfilePublicShowcase();
       } else {
         if (cachedScore === "") el.textContent = "\u2014";
+        refreshProfilePublicShowcase();
       }
     })
     .catch(function () {
       if (cachedScore === "") el.textContent = "\u2014";
+      refreshProfilePublicShowcase();
     });
 }
 

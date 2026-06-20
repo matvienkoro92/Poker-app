@@ -49,6 +49,7 @@ function updateProfileUserName() {
   textEl.textContent = isEmptyName ? "Добавьте имя" : name;
   el.classList.toggle("profile-hero-card__name--empty", isEmptyName);
   updateProfileUserMeta();
+  if (typeof refreshProfilePublicShowcase === "function") refreshProfilePublicShowcase();
   pokerScheduleProfileHeroTextFit();
 }
 

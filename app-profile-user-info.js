@@ -318,6 +318,7 @@ function updateProfileDtId() {
         if (data.p21Id) updateProfileHeroPokerPlusId(data.p21Id);
         if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi();
         if (typeof updateProfileUserMeta === "function") updateProfileUserMeta();
+        if (typeof refreshProfilePublicShowcase === "function") refreshProfilePublicShowcase(data);
         if (typeof refreshProfileAchievementsShowcase === "function") refreshProfileAchievementsShowcase(data);
       }
       if (data && data.ok && data.personalInfo != null) {

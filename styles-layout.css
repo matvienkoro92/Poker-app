@@ -1644,6 +1644,8 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
 html:has(body[data-view="home"]) #app.app .card .card__content > .view--active[data-view="home"],
 html.app-view-home-html-scroll #app.app .card .card__content > .view--active[data-view="home"] {
   width: 100% !important;
+  padding-left: 5px !important;
+  padding-right: 5px !important;
   box-sizing: border-box !important;
 }
 

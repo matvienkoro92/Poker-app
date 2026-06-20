@@ -10,6 +10,45 @@
               <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
             </div>
+            <section class="profile-public-showcase" id="profilePublicShowcase" data-profile-club-panel aria-label="Публичная карточка игрока">
+              <div class="chat-user-modal__top profile-public-showcase__top">
+                <div class="chat-user-modal__header profile-public-showcase__header">
+                  <div class="chat-user-modal__avatar-wrap">
+                    <img id="profilePublicAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
+                    <span id="profilePublicAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true">И</span>
+                  </div>
+                  <div class="chat-user-modal__title-block">
+                    <div class="chat-user-modal__title-row">
+                      <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
+                      <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+                    </div>
+                    <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
+                    <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-user-modal__hero chat-user-modal__hero--art profile-public-showcase__hero" id="profilePublicHero">
+                <div class="chat-user-modal__rating-art" id="profilePublicRatingArt">
+                  <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" alt="" loading="lazy" decoding="async" hidden />
+                </div>
+                <div class="chat-user-modal__hero-status">
+                  <div class="chat-user-modal__p21" id="profilePublicP21"></div>
+                  <div class="chat-user-modal__level">
+                    <p class="chat-user-modal__level-text" id="profilePublicLevelText">Уровень не обновлен</p>
+                    <p class="chat-user-modal__respect">Уважение от игроков <span id="profilePublicRespectVal" class="chat-user-modal__respect-val">—</span></p>
+                  </div>
+                  <section class="chat-user-modal__status" aria-labelledby="profilePublicStatusTitle" id="profilePublicStatusSection">
+                    <h4 class="chat-user-modal__status-title" id="profilePublicStatusTitle">Текущий уровень</h4>
+                    <p class="chat-user-modal__status-xp" id="profilePublicStatusXp" hidden></p>
+                    <div class="chat-user-modal__status-scale" id="profilePublicStatusScale" style="--status-value: 0;">
+                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardCurrent">1</span>
+                      <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div></div>
+                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardNext">2</span>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </section>
             <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-club-panel aria-label="Достижения и история сезонов">
               <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal"></div>
               <section class="chat-user-modal__achievements profile-achievements-showcase__achievements" id="profileAchievementsBlock">
