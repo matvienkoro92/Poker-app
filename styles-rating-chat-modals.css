@@ -1409,6 +1409,8 @@
   min-width: 0;
 }
 .chat-user-modal__title {
+  flex: 1 1 auto;
+  max-width: 100%;
   margin: 0;
   font-size: 24px;
   font-weight: 950;
@@ -1427,10 +1429,10 @@
   }
 
   .chat-user-modal__top {
-    grid-template-columns: minmax(0, 1fr) minmax(132px, 148px);
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(104px, 118px);
+    gap: 8px;
     justify-content: stretch;
-    padding-right: 44px;
+    padding-right: 42px;
   }
 
   .chat-user-modal__top-actions {
@@ -1445,22 +1447,34 @@
   .chat-user-modal__top-actions .chat-user-modal__write-btn,
   .chat-user-modal__top-actions .chat-user-modal__friend-btn {
     min-height: 35px;
-    padding: 8px 10px;
-    font-size: 11px;
+    padding: 8px 8px;
+    font-size: 10.5px;
   }
 
   .chat-user-modal__header {
-    gap: 10px;
+    gap: 8px;
   }
 
   .chat-user-modal__avatar-wrap .chat-user-modal__avatar,
   .chat-user-modal__avatar-wrap .chat-user-modal__avatar--placeholder {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
   }
 
   .chat-user-modal__title {
-    font-size: 22px;
+    font-size: 18px;
+    line-height: 1.15;
+  }
+
+  .chat-user-modal__verified {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+
+  .chat-user-modal__last-seen,
+  .chat-user-modal__login-sub {
+    font-size: 11px;
   }
 
   .chat-user-modal__hero {
@@ -1614,6 +1628,29 @@
 @media (max-width: 380px) {
   .chat-user-modal__top-actions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-user-modal__top {
+    grid-template-columns: minmax(0, 1fr) minmax(96px, 108px);
+    gap: 7px;
+    padding-right: 40px;
+  }
+
+  .chat-user-modal__avatar-wrap .chat-user-modal__avatar,
+  .chat-user-modal__avatar-wrap .chat-user-modal__avatar--placeholder {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-user-modal__title {
+    font-size: 16px;
+  }
+
+  .chat-user-modal__top-actions .chat-user-modal__write-btn,
+  .chat-user-modal__top-actions .chat-user-modal__friend-btn {
+    min-height: 33px;
+    padding: 7px 6px;
+    font-size: 10px;
   }
 
   .chat-user-modal__rating-rank-row {

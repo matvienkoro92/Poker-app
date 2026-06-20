@@ -613,6 +613,28 @@ if (chatUserModalEl) {
     if (window.POKER_CLUB_CHOICE_ACHIEVEMENTS || window.pokerClubChoiceAchievements) return Promise.resolve(true);
     if (chatUserModalClubChoiceScriptReady) return chatUserModalClubChoiceScriptReady;
     chatUserModalClubChoiceScriptReady = new Promise(function (resolve) {
+      var apiBase = base || (typeof getApiBase === "function" ? getApiBase() : "");
+      if (apiBase && typeof fetch === "function") {
+        fetch(apiBase.replace(/\/$/, "") + "/api/club-choice-vote?mode=achievements&_t=" + Date.now(), { cache: "no-store" })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.ok && Array.isArray(data.rows)) {
+              window.POKER_CLUB_CHOICE_ACHIEVEMENTS = data.rows;
+              resolve(true);
+              return;
+            }
+            loadClubChoiceStaticRows(resolve);
+          })
+          .catch(function () {
+            loadClubChoiceStaticRows(resolve);
+          });
+        return;
+      }
+      loadClubChoiceStaticRows(resolve);
+    });
+    return chatUserModalClubChoiceScriptReady;
+  }
+  function loadClubChoiceStaticRows(resolve) {
       if (typeof document === "undefined") {
         resolve(false);
         return;
@@ -623,8 +645,6 @@ if (chatUserModalEl) {
       script.onload = function () { resolve(true); };
       script.onerror = function () { resolve(false); };
       (document.head || document.documentElement).appendChild(script);
-    });
-    return chatUserModalClubChoiceScriptReady;
   }
   function chatUserModalClubChoiceWinners(row) {
     if (!row || typeof row !== "object") return [];

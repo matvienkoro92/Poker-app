@@ -11,7 +11,7 @@
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
 @import url("./styles-home-rating-promo-legacy.css?v=3.593");
-@import url("./styles-rating.css?v=3.640");
+@import url("./styles-rating.css?v=3.641");
 @import url("./styles-hall.css?v=3.617");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
@@ -2032,11 +2032,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) 28px;
   align-items: stretch;
   justify-items: stretch;
   gap: 6px;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
-  height: clamp(82px, 22vw, 118px);
+  height: clamp(114px, 26vw, 154px);
   margin: 8px calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
   padding: 6px;
   box-sizing: border-box;
@@ -2266,6 +2267,472 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 2px 0 rgba(56, 24, 0, 0.88),
     0 0 9px rgba(255, 126, 0, 0.95),
     0 0 18px rgba(255, 80, 0, 0.62);
+}
+
+.home-club-choice-plaque {
+  position: relative;
+  z-index: 7;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 14px;
+  overflow: hidden;
+  color: #fff2cf;
+  font: inherit;
+  font-size: clamp(12px, 2.55vw, 15px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 181, 65, 0.64);
+  border-radius: 11px;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(255, 128, 0, 0.28), transparent 58%),
+    linear-gradient(180deg, rgba(30, 18, 8, 0.98), rgba(4, 5, 8, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 205, 0.12),
+    inset 0 0 13px rgba(255, 128, 0, 0.16),
+    0 0 12px rgba(255, 106, 0, 0.26);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-shadow:
+    0 1px 0 rgba(52, 22, 0, 0.98),
+    0 0 12px rgba(255, 132, 24, 0.76);
+}
+
+.home-club-choice-plaque::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 235, 190, 0.18) 48%, transparent 58%);
+  pointer-events: none;
+}
+
+.home-club-choice-plaque:hover,
+.home-club-choice-plaque:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  border-color: rgba(255, 216, 132, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 205, 0.2),
+    inset 0 0 15px rgba(255, 148, 20, 0.24),
+    0 0 18px rgba(255, 116, 0, 0.4);
+}
+
+.club-choice-vote-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.club-choice-vote-modal--open {
+  display: flex;
+}
+
+.club-choice-vote-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(7px);
+}
+
+.club-choice-vote-modal__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(920px, 100%);
+  max-height: min(86vh, 760px);
+  overflow: hidden;
+  color: #f8e7bd;
+  border: 1px solid rgba(255, 169, 47, 0.7);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(255, 128, 0, 0.18), transparent 44%),
+    linear-gradient(180deg, rgba(12, 15, 22, 0.98), rgba(2, 4, 8, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 241, 199, 0.12),
+    0 18px 54px rgba(0, 0, 0, 0.62),
+    0 0 28px rgba(255, 105, 0, 0.22);
+}
+
+.club-choice-vote-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid rgba(255, 196, 103, 0.2);
+}
+
+.club-choice-vote-modal__eyebrow {
+  margin: 0 0 4px;
+  color: rgba(248, 231, 189, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__title {
+  margin: 0;
+  color: #ffe4a2;
+  font-size: clamp(24px, 5vw, 38px);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  color: #ffe5ad;
+  font: inherit;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  border: 1px solid rgba(255, 184, 70, 0.55);
+  border-radius: 50%;
+  background: rgba(8, 9, 14, 0.92);
+  cursor: pointer;
+}
+
+.club-choice-vote-modal__status {
+  min-height: 22px;
+  padding: 9px 18px 0;
+  color: rgba(255, 239, 201, 0.72);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.club-choice-vote-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 18px 18px;
+}
+
+.club-choice-vote-modal__loading,
+.club-choice-vote-modal__empty,
+.club-choice-vote-modal__notice {
+  padding: 14px;
+  color: rgba(255, 239, 201, 0.82);
+  font-weight: 800;
+  text-align: center;
+  border: 1px solid rgba(255, 184, 70, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.club-choice-vote-modal__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 184, 70, 0.34);
+  border-radius: 12px;
+  background: rgba(255, 128, 0, 0.08);
+}
+
+.club-choice-vote-modal__summary span {
+  color: rgba(255, 239, 201, 0.7);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.club-choice-vote-modal__summary strong {
+  color: #ffd56f;
+  font-size: clamp(16px, 4vw, 24px);
+  line-height: 1;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__admin {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.club-choice-vote-modal__form,
+.club-choice-vote-modal__start {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(255, 184, 70, 0.25);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.club-choice-vote-modal label {
+  display: grid;
+  gap: 5px;
+  color: rgba(255, 239, 201, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal input,
+.club-choice-vote-modal textarea,
+.club-choice-vote-modal select {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  color: #fff3d2;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  border: 1px solid rgba(255, 190, 86, 0.34);
+  border-radius: 10px;
+  background: rgba(2, 6, 12, 0.82);
+}
+
+.club-choice-vote-modal input,
+.club-choice-vote-modal select {
+  min-height: 38px;
+  padding: 0 11px;
+}
+
+.club-choice-vote-modal textarea {
+  min-height: 66px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.club-choice-vote-modal__check {
+  display: flex !important;
+  grid-auto-flow: column;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  text-transform: none !important;
+}
+
+.club-choice-vote-modal__check input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.club-choice-vote-modal__primary,
+.club-choice-vote-modal__ghost {
+  min-height: 40px;
+  padding: 0 14px;
+  color: #1b1004;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  border: 1px solid rgba(255, 230, 170, 0.42);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffe28d, #d78617);
+  cursor: pointer;
+}
+
+.club-choice-vote-modal__primary:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.65) brightness(0.74);
+}
+
+.club-choice-vote-modal__primary--wide {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.club-choice-vote-modal__ghost {
+  min-height: 34px;
+  color: #ffe7b1;
+  background: rgba(8, 9, 14, 0.9);
+}
+
+.club-choice-vote-modal__section-title,
+.club-choice-vote-modal__side h3 {
+  margin: 0 0 10px;
+  color: #ffe4a4;
+  font-size: 16px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__candidates,
+.club-choice-vote-modal__winners {
+  display: grid;
+  gap: 9px;
+}
+
+.club-choice-vote-modal__candidate,
+.club-choice-vote-modal__winner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 184, 70, 0.26);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.club-choice-vote-modal__candidate-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__candidate strong,
+.club-choice-vote-modal__winner strong {
+  color: #fff0c8;
+  font-size: 16px;
+}
+
+.club-choice-vote-modal__candidate span,
+.club-choice-vote-modal__winner span,
+.club-choice-vote-modal__winner em {
+  color: rgba(255, 239, 201, 0.7);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.club-choice-vote-modal__bracket {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.club-choice-vote-modal__bracket--final {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.club-choice-vote-modal__side {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 184, 70, 0.24);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.club-choice-vote-modal__side--final {
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.club-choice-vote-modal__match {
+  display: grid;
+  gap: 7px;
+}
+
+.club-choice-vote-modal__match + .club-choice-vote-modal__match {
+  margin-top: 12px;
+}
+
+.club-choice-vote-modal__player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+  min-height: 58px;
+  padding: 8px 10px;
+  color: #fff1ce;
+  text-align: left;
+  border: 1px solid rgba(255, 184, 70, 0.24);
+  border-radius: 11px;
+  background: rgba(10, 13, 20, 0.92);
+  cursor: pointer;
+}
+
+.club-choice-vote-modal__player:disabled {
+  cursor: default;
+}
+
+.club-choice-vote-modal__player--active {
+  border-color: rgba(255, 216, 125, 0.88);
+  background: rgba(92, 54, 10, 0.72);
+}
+
+.club-choice-vote-modal__player--winner {
+  border-color: rgba(82, 216, 117, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(82, 216, 117, 0.18);
+}
+
+.club-choice-vote-modal__player span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__player strong,
+.club-choice-vote-modal__player small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__player strong {
+  font-size: 15px;
+}
+
+.club-choice-vote-modal__player small {
+  color: rgba(255, 239, 201, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.club-choice-vote-modal__player em {
+  flex: 0 0 auto;
+  min-width: 30px;
+  color: #ffd56f;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 950;
+  text-align: right;
+}
+
+.club-choice-vote-modal__versus {
+  color: rgba(255, 239, 201, 0.48);
+  font-size: 11px;
+  font-weight: 950;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__voters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.club-choice-vote-modal__voters span {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px 7px;
+  color: rgba(255, 239, 201, 0.7);
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 184, 70, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.club-choice-vote-open {
+  overflow: hidden;
 }
 
 .app.app--view-home .home-freerolls-strip {
@@ -5687,7 +6154,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   }
 
   .home-daily-shortcuts.home-mini-icons {
-    height: clamp(82px, 22vw, 108px);
+    grid-template-rows: minmax(0, 1fr) 26px;
+    height: clamp(110px, 27vw, 138px);
   }
 }
 
@@ -5749,11 +6217,18 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   }
 
   .home-daily-shortcuts.home-mini-icons {
-    height: 82px;
+    grid-template-rows: minmax(0, 1fr) 24px;
+    height: 112px;
     margin-bottom: 12px;
     padding: 5px;
     border-radius: 20px;
     gap: 5px;
+  }
+
+  .home-club-choice-plaque {
+    padding: 0 10px;
+    border-radius: 10px;
+    font-size: clamp(10px, 3.1vw, 12px);
   }
 
   .home-daily-shortcuts .home-mini-icon-item {
@@ -5845,8 +6320,74 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   }
 
   .home-daily-shortcuts.home-mini-icons {
-    height: 76px;
+    grid-template-rows: minmax(0, 1fr) 23px;
+    height: 104px;
     gap: 4px;
     padding: 4px;
+  }
+}
+
+@media (max-width: 720px) {
+  .club-choice-vote-modal {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  .club-choice-vote-modal__panel {
+    max-height: calc(100vh - 16px);
+    border-radius: 15px;
+  }
+
+  .club-choice-vote-modal__head {
+    padding: 14px 14px 10px;
+  }
+
+  .club-choice-vote-modal__close {
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+  }
+
+  .club-choice-vote-modal__status {
+    padding: 8px 14px 0;
+  }
+
+  .club-choice-vote-modal__body {
+    padding: 10px 14px 14px;
+  }
+
+  .club-choice-vote-modal__admin,
+  .club-choice-vote-modal__bracket {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .club-choice-vote-modal__summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .club-choice-vote-modal__summary strong {
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .club-choice-vote-modal {
+    padding: 0;
+  }
+
+  .club-choice-vote-modal__panel {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .club-choice-vote-modal__candidate,
+  .club-choice-vote-modal__winner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .club-choice-vote-modal__ghost {
+    width: 100%;
   }
 }
