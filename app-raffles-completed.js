@@ -5,7 +5,7 @@ function initRafflesCompletedRuntime(opts) {
     var rafflesCompletedEmpty = document.getElementById("rafflesCompletedEmpty");
     var raffleWinnerLeaders = document.getElementById("raffleWinnerLeaders");
     var raffleWinnerLeadersList = document.getElementById("raffleWinnerLeadersList");
-    var raffleWinnerLeadersSummary = document.getElementById("raffleWinnerLeadersSummary");
+    var raffleWinnerLeadersMonths = document.getElementById("raffleWinnerLeadersMonths");
     var raffleWinnerLeadersExpandBtn = document.getElementById("raffleWinnerLeadersExpandBtn");
     var raffleWinnerLeadersModal = document.getElementById("raffleWinnerLeadersModal");
     var raffleWinnerLeadersModalBackdrop = document.getElementById("raffleWinnerLeadersModalBackdrop");
@@ -523,32 +523,6 @@ function initRafflesCompletedRuntime(opts) {
     return uid;
   }
 
-  function buildRaffleWinnerLeaderSummary(completed) {
-    var participants = {};
-    var winners = {};
-    (completed || []).forEach(function (raffle) {
-      if (!raffle || raffle.status === "cancelled") return;
-      var participantRows = Array.isArray(raffle.participants) ? raffle.participants : [];
-      var winnerRows = Array.isArray(raffle.winners) ? raffle.winners : [];
-      if (!participantRows.length && !winnerRows.length) return;
-      participantRows.forEach(function (p) {
-        var id = raffleWinnerLeaderId(p);
-        if (id) participants[id] = true;
-      });
-      winnerRows.forEach(function (w) {
-        if (raffleWinnerReadyExpired(w)) return;
-        var id = raffleWinnerLeaderId(w);
-        if (!id) return;
-        winners[id] = true;
-        participants[id] = true;
-      });
-    });
-    return {
-      participants: Object.keys(participants).length,
-      winners: Object.keys(winners).length
-    };
-  }
-
   function raffleWinnerLeaderMetaText(row) {
     if (!row) return "";
     var parts = [];
@@ -605,6 +579,72 @@ function initRafflesCompletedRuntime(opts) {
       });
   }
 
+  function raffleWinnerLeaderMonthlyGroups(completed) {
+    var byMonth = {};
+    var order = [];
+    (completed || []).forEach(function (raffle) {
+      if (!raffle || raffle.status === "cancelled") return;
+      var key = raffleCompletedMonthKey(raffle);
+      if (!byMonth[key]) {
+        byMonth[key] = {
+          key: key,
+          label: raffleCompletedMonthLabel(key, raffle),
+          raffles: []
+        };
+        order.push(key);
+      }
+      byMonth[key].raffles.push(raffle);
+    });
+    return order
+      .sort(function (a, b) {
+        if (a === "unknown") return 1;
+        if (b === "unknown") return -1;
+        return String(b).localeCompare(String(a));
+      })
+      .map(function (key) {
+        var group = byMonth[key];
+        var rows = buildRaffleWinnerLeaderRows(group.raffles);
+        var totalWins = rows.reduce(function (sum, row) { return sum + (parseInt(row.count, 10) || 0); }, 0);
+        var totalPrize = rows.reduce(function (sum, row) { return sum + (parseFloat(row.totalPrize) || 0); }, 0);
+        return {
+          key: key,
+          label: group.label,
+          rows: rows,
+          totalWins: totalWins,
+          totalPrize: totalPrize
+        };
+      })
+      .filter(function (group) {
+        return group.rows.length > 0;
+      });
+  }
+
+  function raffleWinnerLeadersMonthHtml(group, index) {
+    var totalText = raffleWinnerLeaderTotalText(group.totalPrize) || "0 ₽";
+    var topRows = group.rows.slice(0, RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT);
+    var openAttr = index === 0 ? " open" : "";
+    return (
+      '<details class="raffle-winner-leaders-month"' + openAttr + '>' +
+        '<summary class="raffle-winner-leaders-month__summary">' +
+          '<span class="raffle-winner-leaders-month__name">' + escapeHtml(group.label) + '</span>' +
+          '<span class="raffle-winner-leaders-month__meta">' +
+            '<span>' + escapeHtml(raffleWinCountText(group.totalWins)) + '</span>' +
+            '<strong>Сумма ' + escapeHtml(totalText) + '</strong>' +
+          '</span>' +
+        '</summary>' +
+        '<ol class="raffle-winner-leaders__list raffle-winner-leaders__list--month">' +
+          raffleWinnerLeaderRowsHtml(topRows) +
+        '</ol>' +
+      '</details>'
+    );
+  }
+
+  function renderRaffleWinnerLeaderMonths(completed) {
+    if (!raffleWinnerLeadersMonths) return;
+    var groups = raffleWinnerLeaderMonthlyGroups(completed);
+    raffleWinnerLeadersMonths.innerHTML = groups.map(raffleWinnerLeadersMonthHtml).join("");
+  }
+
   function raffleWinnerLeaderRowsHtml(rows) {
     return (rows || []).map(function (row) {
       var pokerNick = raffleWinnerLeaderPokerNick(row);
@@ -626,20 +666,15 @@ function initRafflesCompletedRuntime(opts) {
 
   function renderRaffleWinnerLeaders(completed) {
     raffleWinnerLeaderRows = buildRaffleWinnerLeaderRows(completed);
-    var summary = buildRaffleWinnerLeaderSummary(completed);
     var hasRows = raffleWinnerLeaderRows.length > 0;
     if (raffleWinnerLeaders) {
       raffleWinnerLeaders.hidden = !hasRows;
       raffleWinnerLeaders.classList.toggle("raffle-winner-leaders--hidden", !hasRows);
     }
-    if (raffleWinnerLeadersSummary) {
-      raffleWinnerLeadersSummary.textContent = hasRows
-        ? "Уникальных участников: " + summary.participants + " · победителей: " + summary.winners
-        : "";
-    }
     if (raffleWinnerLeadersList) {
       raffleWinnerLeadersList.innerHTML = hasRows ? raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows.slice(0, RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT)) : "";
     }
+    renderRaffleWinnerLeaderMonths(completed);
     if (raffleWinnerLeadersExpandBtn) {
       raffleWinnerLeadersExpandBtn.hidden = raffleWinnerLeaderRows.length <= RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT;
       raffleWinnerLeadersExpandBtn.textContent = raffleWinnerLeaderRows.length > RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT ? "Развернуть" : "Все показаны";

@@ -5720,12 +5720,62 @@ button.raffle-feedback-action {
   color: #fff7ed;
   background: rgba(251, 146, 60, 0.22);
 }
-.raffle-winner-leaders__summary {
+.raffle-winner-leaders__months {
+  display: grid;
+  gap: 8px;
   margin: 0 0 10px;
+}
+.raffle-winner-leaders-month {
+  overflow: hidden;
+  border: 1px solid rgba(251, 146, 60, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.34);
+}
+.raffle-winner-leaders-month__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 9px 10px;
+  color: #fff7ed;
+  cursor: pointer;
+  list-style: none;
+}
+.raffle-winner-leaders-month__summary::-webkit-details-marker {
+  display: none;
+}
+.raffle-winner-leaders-month__summary::after {
+  content: "›";
+  flex: 0 0 auto;
+  color: #fdba74;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.18s ease;
+}
+.raffle-winner-leaders-month[open] .raffle-winner-leaders-month__summary::after {
+  transform: rotate(-90deg);
+}
+.raffle-winner-leaders-month__name {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 900;
+}
+.raffle-winner-leaders-month__meta {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
   color: rgba(254, 215, 170, 0.82);
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.raffle-winner-leaders-month__meta strong {
+  color: #fdba74;
   font-size: 12px;
-  font-weight: 800;
-  line-height: 1.35;
 }
 .raffle-winner-leaders__list,
 .raffle-winner-leaders-modal__list {
@@ -5735,6 +5785,9 @@ button.raffle-feedback-action {
   padding: 0;
   list-style: none;
   counter-reset: raffle-winner-leader;
+}
+.raffle-winner-leaders__list--month {
+  padding: 0 10px 10px;
 }
 .raffle-winner-leaders__item {
   display: flex;

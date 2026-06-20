@@ -170,7 +170,6 @@
         '<div class="club-referrals-modal__tabs" role="tablist" aria-label="Пригласительные ссылки">' +
           '<button type="button" class="club-referrals-modal__tab club-referrals-modal__tab--active" data-referrals-tab="links" role="tab" aria-selected="true">' + referralIcon("link") + '<span>Ссылки</span></button>' +
           '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="invited" role="tab" aria-selected="false">' + referralIcon("users") + '<span>Ваши приглашенные</span></button>' +
-          '<button type="button" class="club-referrals-modal__tab" data-referrals-tab="ranking" role="tab" aria-selected="false">' + referralIcon("trophy") + '<span>Рейтинг пригласивших</span></button>' +
         '</div>' +
         '<div class="club-referrals-modal__panel-tab" data-referrals-panel="links">' +
           '<details class="club-referrals-modal__rules">' +
@@ -252,7 +251,7 @@
   function switchTab(name) {
     var modal = document.getElementById("clubReferralsModal");
     if (!modal) return;
-    var active = name === "invited" || name === "ranking" ? name : "links";
+    var active = name === "ranking" ? "invited" : (name === "invited" ? name : "links");
     Array.prototype.slice.call(modal.querySelectorAll("[data-referrals-tab]")).forEach(function (btn) {
       var on = (btn.getAttribute("data-referrals-tab") || "") === active;
       btn.classList.toggle("club-referrals-modal__tab--active", on);

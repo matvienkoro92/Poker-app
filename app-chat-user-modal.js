@@ -116,6 +116,8 @@ if (chatUserModalEl) {
   var chatUserModalPeerLogin = "";
   var chatUserModalContactName = "";
   var chatUserModalRatingNick = "";
+  var chatUserModalAchievementIdentity = null;
+  var chatUserModalClubChoiceScriptReady = null;
   var chatUserModalRanksSeq = 0;
   var chatUserModalOpenSeq = 0;
   var chatUserModalBlockedByMe = false;
@@ -373,6 +375,24 @@ if (chatUserModalEl) {
     if (!isFinite(n) || !n) return "";
     return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
   }
+  function chatUserModalWinCountText(n) {
+    var raw = parseInt(n, 10) || 0;
+    var v = Math.abs(raw) % 100;
+    var d = v % 10;
+    if (v >= 11 && v <= 19) return raw + " раз";
+    if (d === 1) return raw + " раз";
+    if (d >= 2 && d <= 4) return raw + " раза";
+    return raw + " раз";
+  }
+  function chatUserModalVoteCountText(n) {
+    var raw = parseInt(n, 10) || 0;
+    var v = Math.abs(raw) % 100;
+    var d = v % 10;
+    if (v >= 11 && v <= 19) return raw + " голосов";
+    if (d === 1) return raw + " голос";
+    if (d >= 2 && d <= 4) return raw + " голоса";
+    return raw + " голосов";
+  }
   function syncChatUserModalRatingTotalReward(nick) {
     if (!modalRatingTabSum) return;
     var ratingNick = String(nick || "").trim();
@@ -430,8 +450,224 @@ if (chatUserModalEl) {
     }
     return Promise.resolve([]);
   }
+  function chatUserModalRaffleDate(raffle) {
+    var raw = raffle && (raffle.drawnAt || raffle.completedAt || raffle.completed_at || raffle.endDate || raffle.createdAt);
+    if (!raw) return null;
+    var d = new Date(raw);
+    return isFinite(d.getTime()) ? d : null;
+  }
+  function chatUserModalRaffleMonthKey(raffle) {
+    var d = chatUserModalRaffleDate(raffle);
+    if (!d) return "";
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+  }
+  function chatUserModalRaffleMonthLabel(key) {
+    var parts = String(key || "").split("-");
+    if (parts.length !== 2) return "";
+    var d = new Date(parseInt(parts[0], 10), (parseInt(parts[1], 10) || 1) - 1, 1);
+    if (!isFinite(d.getTime())) return "";
+    try {
+      return d.toLocaleDateString("ru-RU", { month: "long" });
+    } catch (eRaffleMonthLabel) {
+      return String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear();
+    }
+  }
+  function chatUserModalRafflePrizeAmount(prize) {
+    var text = prize != null ? String(prize).replace(/\u00a0|\u202f/g, " ") : "";
+    if (!text) return 0;
+    var currencyMatch = text.match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(?:₽|р\.?|руб\.?)/i);
+    if (!currencyMatch) return 0;
+    var value = parseFloat(currencyMatch[1].replace(/\s+/g, "").replace(",", "."));
+    return isFinite(value) && value > 0 ? value : 0;
+  }
+  function chatUserModalRaffleWinnerPrizeText(raffle, winner) {
+    if (winner && winner.prize) return winner.prize;
+    var groupIndex = winner && winner.groupIndex != null ? parseInt(winner.groupIndex, 10) : -1;
+    var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+    if (groupIndex >= 0 && groups[groupIndex] && groups[groupIndex].prize) return groups[groupIndex].prize;
+    return "";
+  }
+  function chatUserModalRaffleWinnerExpired(winner) {
+    if (!winner) return false;
+    var state = String(winner.winnerReadyState || "").toLowerCase();
+    return winner.winnerReadyExpired === true || winner.winnerBurned === true || state === "missed" || state === "burned";
+  }
+  function chatUserModalRaffleAddKey(keys, type, value) {
+    var raw = String(value == null ? "" : value).trim();
+    if (!raw) return;
+    if (type === "tg") raw = raw.replace(/^@+/, "");
+    var key = type + ":" + raw.toLowerCase();
+    if (keys.indexOf(key) === -1) keys.push(key);
+  }
+  function chatUserModalRaffleWinnerKeys(row) {
+    var keys = [];
+    chatUserModalRaffleAddKey(keys, "account", row && (row.accountId || row.dtId));
+    chatUserModalRaffleAddKey(keys, "account", row && row.memberId);
+    chatUserModalRaffleAddKey(keys, "user", row && row.userId);
+    chatUserModalRaffleAddKey(keys, "p21", row && (row.p21Id || row.poker21Id || row.pokerPlusId || row.pokerPlusUserId));
+    chatUserModalRaffleAddKey(keys, "tg", row && (row.telegramUsername || row.telegram || row.telegramLogin));
+    chatUserModalRaffleAddKey(keys, "nick", row && (row.pokerPlusNickname || row.poker21Nickname || row.ratingNick || row.nickname || row.nick));
+    chatUserModalRaffleAddKey(keys, "name", row && row.name);
+    return keys;
+  }
+  function chatUserModalRaffleTargetKeys(ratingNick, profileData) {
+    var keys = [];
+    chatUserModalRaffleAddKey(keys, "user", chatUserModalUserId);
+    chatUserModalRaffleAddKey(keys, "account", profileData && (profileData.accountId || profileData.dtId || profileData.memberId));
+    chatUserModalRaffleAddKey(keys, "p21", profileData && (profileData.p21Id || profileData.poker21Id || profileData.pokerPlusId || profileData.pokerPlusUserId));
+    chatUserModalRaffleAddKey(keys, "tg", profileData && (profileData.telegramUsername || profileData.userName || profileData.username));
+    chatUserModalRaffleAddKey(keys, "nick", ratingNick);
+    chatUserModalRaffleAddKey(keys, "nick", profileData && (profileData.pokerPlusNickname || profileData.poker21Nickname || profileData.ratingNick || profileData.nickname || profileData.nick));
+    chatUserModalRaffleAddKey(keys, "name", profileData && (profileData.chatDisplayName || profileData.contactName || profileData.displayName || profileData.name));
+    return keys;
+  }
+  function chatUserModalRaffleRowsMatch(row, targetKeys, ratingNick) {
+    var keys = chatUserModalRaffleWinnerKeys(row);
+    for (var i = 0; i < keys.length; i++) {
+      if (targetKeys.indexOf(keys[i]) !== -1) return true;
+    }
+    var nick = String(ratingNick || "").trim();
+    return !!(
+      nick &&
+      (
+        chatUserModalSameRatingNick(row && row.pokerPlusNickname, nick) ||
+        chatUserModalSameRatingNick(row && row.name, nick)
+      )
+    );
+  }
+  function chatUserModalRaffleLeaderId(row) {
+    var keys = chatUserModalRaffleWinnerKeys(row);
+    return keys.find(function (key) {
+      return key.indexOf("p21:") === 0 || key.indexOf("account:") === 0 || key.indexOf("user:") === 0;
+    }) || keys[0] || "";
+  }
+  function getChatUserModalRafflesReady() {
+    try {
+      var cached = window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.ok ? window._rafflesCache.data : null;
+      if (cached) return Promise.resolve(Array.isArray(cached.raffles) ? cached.raffles : []);
+    } catch (eCachedRaffles) {}
+    if (!base || typeof fetch !== "function") return Promise.resolve([]);
+    var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    return fetch(base + "/api/raffles" + query + "&_t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.ok) {
+          try { window._rafflesCache = { data: data, time: Date.now() }; } catch (eSetRafflesCache) {}
+          return Array.isArray(data.raffles) ? data.raffles : [];
+        }
+        return [];
+      })
+      .catch(function () { return []; });
+  }
+  function getChatUserModalRaffleLuckReady(ratingNick, profileData) {
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData);
+    if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
+    return getChatUserModalRafflesReady().then(function (raffles) {
+      var now = Date.now();
+      var byMonth = {};
+      (Array.isArray(raffles) ? raffles : []).forEach(function (raffle) {
+        if (!raffle || raffle.status === "cancelled") return;
+        var d = chatUserModalRaffleDate(raffle);
+        if (!d || d.getTime() > now) return;
+        var key = chatUserModalRaffleMonthKey(raffle);
+        if (!key) return;
+        if (!byMonth[key]) byMonth[key] = {};
+        (Array.isArray(raffle.winners) ? raffle.winners : []).forEach(function (winner) {
+          if (chatUserModalRaffleWinnerExpired(winner)) return;
+          var id = chatUserModalRaffleLeaderId(winner);
+          if (!id) return;
+          if (!byMonth[key][id]) byMonth[key][id] = { row: winner, count: 0, totalPrize: 0 };
+          byMonth[key][id].count += 1;
+          byMonth[key][id].totalPrize += chatUserModalRafflePrizeAmount(chatUserModalRaffleWinnerPrizeText(raffle, winner));
+        });
+      });
+      return Object.keys(byMonth).sort().reverse().reduce(function (items, key) {
+        var rows = Object.keys(byMonth[key]).map(function (id) {
+          return byMonth[key][id];
+        }).sort(function (a, b) {
+          if (b.count !== a.count) return b.count - a.count;
+          if ((b.totalPrize || 0) !== (a.totalPrize || 0)) return (b.totalPrize || 0) - (a.totalPrize || 0);
+          return String(chatUserModalRaffleLeaderId(a.row)).localeCompare(String(chatUserModalRaffleLeaderId(b.row)), "ru");
+        });
+        rows.slice(0, 3).forEach(function (leader, index) {
+          if (!chatUserModalRaffleRowsMatch(leader.row, targetKeys, ratingNick)) return;
+          var amount = chatUserModalFormatAchievementRub(leader.totalPrize);
+          var month = chatUserModalRaffleMonthLabel(key);
+          items.push({
+            label:
+              "Топ" + String(index + 1) +
+              (month ? " " + month : "") +
+              ": " + chatUserModalWinCountText(leader.count) +
+              (amount ? ", " + amount : ""),
+          });
+        });
+        return items;
+      }, []);
+    });
+  }
+  function chatUserModalClubChoiceRows() {
+    var source = window.POKER_CLUB_CHOICE_ACHIEVEMENTS || window.pokerClubChoiceAchievements || [];
+    return Array.isArray(source) ? source : [];
+  }
+  function chatUserModalEnsureClubChoiceRowsReady() {
+    if (window.POKER_CLUB_CHOICE_ACHIEVEMENTS || window.pokerClubChoiceAchievements) return Promise.resolve(true);
+    if (chatUserModalClubChoiceScriptReady) return chatUserModalClubChoiceScriptReady;
+    chatUserModalClubChoiceScriptReady = new Promise(function (resolve) {
+      if (typeof document === "undefined") {
+        resolve(false);
+        return;
+      }
+      var script = document.createElement("script");
+      script.src = "./club-choice-achievements.js?v=3.593";
+      script.async = false;
+      script.onload = function () { resolve(true); };
+      script.onerror = function () { resolve(false); };
+      (document.head || document.documentElement).appendChild(script);
+    });
+    return chatUserModalClubChoiceScriptReady;
+  }
+  function chatUserModalClubChoiceWinners(row) {
+    if (!row || typeof row !== "object") return [];
+    if (Array.isArray(row.winners)) return row.winners;
+    if (Array.isArray(row.top)) return row.top;
+    if (Array.isArray(row.players)) return row.players;
+    return [];
+  }
+  function chatUserModalClubChoiceMonthKey(row) {
+    return String(row && (row.month || row.monthKey || row.period || row.key) || "").trim();
+  }
+  function getChatUserModalClubChoiceReady(ratingNick, profileData) {
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData);
+    if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
+    return chatUserModalEnsureClubChoiceRowsReady().then(function () {
+      var rows = chatUserModalClubChoiceRows();
+      return rows.reduce(function (list, monthRow) {
+        var monthKey = chatUserModalClubChoiceMonthKey(monthRow);
+        var month = chatUserModalRaffleMonthLabel(monthKey);
+        chatUserModalClubChoiceWinners(monthRow).slice().sort(function (a, b) {
+          var pa = parseInt(a && a.place, 10) || 999;
+          var pb = parseInt(b && b.place, 10) || 999;
+          if (pa !== pb) return pa - pb;
+          return (parseInt(b && b.votes, 10) || 0) - (parseInt(a && a.votes, 10) || 0);
+        }).slice(0, 2).forEach(function (winner, index) {
+          if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
+          var place = parseInt(winner && winner.place, 10) || (index + 1);
+          var votes = winner && winner.votes != null ? parseInt(winner.votes, 10) : null;
+          list.push({
+            label:
+              "Топ" + String(place) +
+              (month ? " " + month : "") +
+              (votes != null && isFinite(votes) ? ": " + chatUserModalVoteCountText(votes) : ""),
+          });
+        });
+        return list;
+      }, []);
+    });
+  }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "ВЫБОР<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
+    if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
@@ -491,7 +727,9 @@ if (chatUserModalEl) {
   }
   function renderChatUserModalAchievements(results, ratingNick) {
     if (!modalAchievements || !modalAchievementsList) return;
-    if (!String(ratingNick || "").trim()) {
+    var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
+    var clubChoice = Array.isArray(results && results[5]) ? results[5] : [];
+    if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length) {
       modalAchievementsList.innerHTML = chatUserModalSummerCupCardHtml();
       modalAchievements.hidden = false;
       return;
@@ -530,6 +768,12 @@ if (chatUserModalEl) {
       }) +
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
+        placeholder: "Топ-3 месяца",
+      }) +
+      chatUserModalAchievementCardHtml("◆", "Выбор клуба", clubChoice, {
+        placeholder: "Топ-2 месяца",
+      }) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10) +
       chatUserModalSummerCupCardHtml();
     modalAchievementsList.innerHTML = html;
@@ -545,7 +789,20 @@ if (chatUserModalEl) {
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
     renderChatUserModalAchievements(null);
-    if (!hasNick) return Promise.resolve([]);
+    if (!hasNick) {
+      return Promise.all([
+        getChatUserModalRaffleLuckReady("", chatUserModalAchievementIdentity),
+        getChatUserModalClubChoiceReady("", chatUserModalAchievementIdentity),
+      ]).then(function (extraRows) {
+        if (seq !== chatUserModalRanksSeq) return;
+        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1]];
+        renderChatUserModalAchievements(results, "");
+        return results;
+      }).catch(function () {
+        if (seq === chatUserModalRanksSeq) renderChatUserModalAchievements(null);
+        return [];
+      });
+    }
     var getPlaces = typeof window.pokerGetTournamentRatingPlacesReady === "function"
       ? window.pokerGetTournamentRatingPlacesReady
       : null;
@@ -553,8 +810,18 @@ if (chatUserModalEl) {
       if (modalSummerRank) modalSummerRank.textContent = "—";
       if (modalSpringRank) modalSpringRank.textContent = "—";
       if (modalWinterRank) modalWinterRank.textContent = "—";
-      renderChatUserModalAchievements(null);
-      return Promise.resolve([]);
+      return Promise.all([
+        getChatUserModalRaffleLuckReady(ratingNick, chatUserModalAchievementIdentity),
+        getChatUserModalClubChoiceReady(ratingNick, chatUserModalAchievementIdentity),
+      ]).then(function (extraRows) {
+        if (seq !== chatUserModalRanksSeq) return;
+        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1]];
+        renderChatUserModalAchievements(results, ratingNick);
+        return results;
+      }).catch(function () {
+        if (seq === chatUserModalRanksSeq) renderChatUserModalAchievements(null);
+        return [];
+      });
     }
     function getSeasonPlacesReady(season) {
       if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
@@ -569,6 +836,8 @@ if (chatUserModalEl) {
       getSeasonPlacesReady("spring"),
       getSeasonPlacesReady("winter"),
       getChatUserModalSingleTopWinsReady(),
+      getChatUserModalRaffleLuckReady(ratingNick, chatUserModalAchievementIdentity),
+      getChatUserModalClubChoiceReady(ratingNick, chatUserModalAchievementIdentity),
     ]).then(function (results) {
       if (seq !== chatUserModalRanksSeq) return;
       setChatUserModalRatingRankValue(modalSummerRank, results && results[0]);
@@ -831,6 +1100,7 @@ if (chatUserModalEl) {
     var openSeq = ++chatUserModalOpenSeq;
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
+    chatUserModalAchievementIdentity = null;
     var cachedBlockedByMe = false;
     try {
       cachedBlockedByMe = !!(window.__pokerChatDmBlockStateByPeer && window.__pokerChatDmBlockStateByPeer[String(id)] === true);
@@ -927,6 +1197,7 @@ if (chatUserModalEl) {
         var ratingRanksPromise = Promise.resolve([]);
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;
+        chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
         ratingRanksPromise = syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
         var ratingArtPromise = syncChatUserModalRatingArt(ratingNick) || Promise.resolve(false);

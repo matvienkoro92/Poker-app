@@ -896,6 +896,16 @@
       ]
     },
     {
+      "name": "POKER_CLUB_CHOICE_ACHIEVEMENTS",
+      "domain": "chat",
+      "exportedBy": [
+        "club-choice-achievements.js"
+      ],
+      "consumedBy": [
+        "app-chat-user-modal.js"
+      ]
+    },
+    {
       "name": "updateProfileDtId",
       "domain": "profile",
       "exportedBy": [

@@ -41,6 +41,7 @@
       "app-chat-group-add-members.js",
       "app-chat-group-create.js",
       "app-chat-group-info.js",
+      "club-choice-achievements.js",
       "app-chat-user-modal.js",
       "app-chat-club-access.js",
       "app-chat-templates.js",
