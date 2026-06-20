@@ -261,8 +261,8 @@ if (chatUserModalEl) {
     var hasNick = !!chatUserModalRatingNick;
     if (modalRatingTabs) modalRatingTabs.hidden = !hasNick;
     if (modalRatingTabSum) {
-      modalRatingTabSum.textContent = "";
-      modalRatingTabSum.hidden = true;
+      modalRatingTabSum.textContent = hasNick ? "Загрузка..." : "";
+      modalRatingTabSum.hidden = !hasNick;
     }
     if (modalRatingTab) {
       modalRatingTab.hidden = !hasNick;
@@ -725,6 +725,14 @@ if (chatUserModalEl) {
       extraClass: "chat-user-modal__achievement--season-cup chat-user-modal__achievement--season-cup-current",
     });
   }
+  function renderChatUserModalAchievementsLoading() {
+    if (!modalAchievements || !modalAchievementsList) return;
+    modalAchievementsList.innerHTML =
+      '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
+        "Идет загрузка достижений..." +
+      "</div>";
+    modalAchievements.hidden = false;
+  }
   function renderChatUserModalAchievements(results, ratingNick) {
     if (!modalAchievements || !modalAchievementsList) return;
     var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
@@ -788,7 +796,7 @@ if (chatUserModalEl) {
     if (modalSummerRank) modalSummerRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
-    renderChatUserModalAchievements(null);
+    renderChatUserModalAchievementsLoading();
     if (!hasNick) {
       return Promise.all([
         getChatUserModalRaffleLuckReady("", chatUserModalAchievementIdentity),
@@ -1111,7 +1119,12 @@ if (chatUserModalEl) {
     if (modalRespectActions) modalRespectActions.style.display = openingSelfProfile ? "none" : "";
     setChatUserModalBlockState(cachedBlockedByMe, true);
     syncChatUserModalRatingTab("");
-    syncChatUserModalRatingRanks("");
+    chatUserModalRanksSeq += 1;
+    if (modalRatingRanks) modalRatingRanks.hidden = true;
+    if (modalSummerRank) modalSummerRank.textContent = "—";
+    if (modalSpringRank) modalSpringRank.textContent = "—";
+    if (modalWinterRank) modalWinterRank.textContent = "—";
+    renderChatUserModalAchievementsLoading();
     syncChatUserModalRatingArt("");
     if (modalLoginSub) {
       modalLoginSub.textContent = "";
