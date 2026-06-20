@@ -16,7 +16,7 @@
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
 @import url("./styles-profile.css?v=3.604");
-@import url("./styles-layout.css?v=3.631");
+@import url("./styles-layout.css?v=3.632");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
 @import url("./styles-layout-touch-targets.css?v=3.593");
@@ -2036,9 +2036,9 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-items: stretch;
   justify-items: stretch;
   gap: 8px;
-  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
+  width: calc(100% - 10px);
   height: clamp(130px, 28vw, 170px);
-  margin: 8px calc(-1 * var(--card-padding-x, 16px) + 3px) 14px;
+  margin: 8px 5px 14px;
   padding: 6px;
   box-sizing: border-box;
   overflow: hidden;

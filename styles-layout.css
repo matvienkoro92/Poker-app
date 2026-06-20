@@ -1594,6 +1594,8 @@ body[data-view="profile"] #app.app .card .card__content > .view--active[data-vie
 html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
 html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
   width: 100% !important;
+  padding-left: 3px !important;
+  padding-right: 3px !important;
   box-sizing: border-box !important;
 }
 
