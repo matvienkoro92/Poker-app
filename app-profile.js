@@ -522,8 +522,11 @@ function initProfileAchievementsShowcase() {
     showcase.addEventListener("click", function (event) {
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
       if (totalBtn) {
-        if (typeof openWinterRatingPlayerModalReady === "function") {
-          openWinterRatingPlayerModalReady(profileAchievementRatingNickFromData(pokerProfileUserInfoCache));
+        var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache);
+        if (typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function") {
+          window.pokerOpenLatestTournamentRatingPlayerModal(nick);
+        } else if (typeof openWinterRatingPlayerModalReady === "function") {
+          openWinterRatingPlayerModalReady(nick, { season: "summer" });
         }
         return;
       }

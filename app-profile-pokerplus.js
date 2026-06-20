@@ -1605,7 +1605,9 @@ function initProfilePokerPlus() {
     if (registerValue) registerValue.textContent = pokerPlusDate(p.registerDate) || "—";
     if (positionRow) positionRow.hidden = true;
     if (positionValue) positionValue.textContent = "—";
-    renderPokerPlusSummerRating(p);
+    if (leagueRow) leagueRow.hidden = true;
+    if (leagueLabel) leagueLabel.textContent = "Лига:";
+    if (leagueValue) leagueValue.textContent = "—";
     if (groupRow) groupRow.hidden = true;
     if (groupValue) groupValue.textContent = "—";
     setPokerPlusRow(countryRow, countryValue, p.country);

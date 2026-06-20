@@ -356,6 +356,10 @@
 .profile-public-showcase__header.chat-user-modal__header {
   flex: 1 1 auto;
   min-width: 0;
+  justify-content: center;
+}
+.profile-public-showcase__header .chat-user-modal__title-block {
+  flex: 0 1 auto;
 }
 .profile-public-showcase .chat-user-modal__title {
   max-width: min(64vw, 420px);
@@ -1105,9 +1109,9 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-hero-card {
   border: 0;
   border-radius: 0;
-  height: 0;
+  height: auto;
   min-height: 0;
-  margin: 0;
+  margin: 0 0 18px;
   padding: 0;
   overflow: visible;
   box-shadow: none;
@@ -1132,5 +1136,9 @@ body.profile-avatar-choice-open {
 }
 
 .view[data-view="profile"].profile-view--tab-club .profile-hero-card::before {
+  display: none;
+}
+
+.view[data-view="profile"] .profile-hero-card::after {
   display: none;
 }
