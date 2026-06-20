@@ -940,6 +940,171 @@ function pokerGetRatingPlayerTotalReward(nick, options) {
 
 window.pokerGetRatingPlayerTotalReward = pokerGetRatingPlayerTotalReward;
 
+function pokerRatingAchievementMonthLabel(monthKey) {
+  var labels = {
+    "01": "Январь",
+    "02": "Февраль",
+    "03": "Март",
+    "04": "Апрель",
+    "05": "Май",
+    "06": "Июнь",
+    "07": "Июль",
+    "08": "Август",
+    "09": "Сентябрь",
+    "10": "Октябрь",
+    "11": "Ноябрь",
+    "12": "Декабрь",
+  };
+  var parts = String(monthKey || "").split(".");
+  if (parts.length !== 2) return String(monthKey || "");
+  return (labels[parts[0]] || parts[0]) + " " + parts[1];
+}
+
+window.pokerRatingAchievementMonthLabel = pokerRatingAchievementMonthLabel;
+
+function pokerRatingAchievementTournamentRowsForSeason(seasonKey) {
+  var maps = [];
+  if (seasonKey === "winter") {
+    if (typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined") maps.push(WINTER_RATING_TOURNAMENTS_BY_DATE || {});
+  } else if (seasonKey === "spring") {
+    maps.push(getWinterRatingActualSpringTournamentsByDate());
+  } else if (seasonKey === "summer") {
+    maps.push(getWinterRatingActiveSeasonTournamentsByDate("summer"));
+  }
+  var rows = [];
+  maps.forEach(function (map) {
+    Object.keys(map || {}).forEach(function (dateStr) {
+      var tournaments = map && map[dateStr];
+      if (!Array.isArray(tournaments)) return;
+      tournaments.forEach(function (tournament) {
+        var players = tournament && Array.isArray(tournament.players) ? tournament.players : [];
+        players.forEach(function (player) {
+          var reward = player && player.reward != null ? Number(player.reward) : 0;
+          if (reward !== reward || !isFinite(reward)) reward = 0;
+          rows.push({
+            season: seasonKey,
+            date: dateStr,
+            time: tournament && tournament.time || "",
+            tournamentLabel: tournament && (tournament.name || tournament.time) || "",
+            nick: normalizeWinterNick(player && player.nick),
+            place: parseInt(player && player.place, 10) || 0,
+            points: winterRatingTournamentPlayerPoints(player),
+            reward: reward,
+          });
+        });
+      });
+    });
+  });
+  return rows;
+}
+
+function pokerRatingAchievementAllTournamentRows() {
+  return []
+    .concat(pokerRatingAchievementTournamentRowsForSeason("winter"))
+    .concat(pokerRatingAchievementTournamentRowsForSeason("spring"))
+    .concat(pokerRatingAchievementTournamentRowsForSeason("summer"));
+}
+
+function pokerGetTournamentAchievementStats(nick) {
+  var normalizedNick = normalizeWinterNick(nick);
+  if (!normalizedNick) {
+    return {
+      firstPlaces: 0,
+      topWin: 0,
+      totalReward: 0,
+      bigWins50: [],
+      bigWins100: [],
+      monthlyChampions: [],
+      rows: [],
+    };
+  }
+  var allRows = pokerRatingAchievementAllTournamentRows();
+  var playerRows = allRows.filter(function (row) {
+    return row && winterRatingSamePlayer(row.nick, normalizedNick) && ((Number(row.points) || 0) !== 0 || (Number(row.reward) || 0) !== 0 || Number(row.place) === 1);
+  }).sort(function (a, b) {
+    return winterRatingDateKeyToStamp(a.date) - winterRatingDateKeyToStamp(b.date);
+  });
+  var firstPlaces = 0;
+  var totalReward = 0;
+  var topWin = 0;
+  var bigWins50 = [];
+  var bigWins100 = [];
+  playerRows.forEach(function (row) {
+    var reward = Number(row.reward) || 0;
+    if (Number(row.place) === 1) firstPlaces += 1;
+    totalReward += reward;
+    if (reward > topWin) topWin = reward;
+    if (reward >= 100000) bigWins100.push(row);
+    else if (reward >= 50000) bigWins50.push(row);
+  });
+
+  var byMonth = {};
+  allRows.forEach(function (row) {
+    if (!row || !row.nick) return;
+    var parts = String(row.date || "").split(".");
+    if (parts.length !== 3) return;
+    var monthKey = parts[1] + "." + parts[2];
+    if (!byMonth[monthKey]) byMonth[monthKey] = {};
+    var nickKey = normalizeWinterNick(row.nick);
+    if (!nickKey) return;
+    if (!byMonth[monthKey][nickKey]) byMonth[monthKey][nickKey] = { nick: nickKey, wins: 0, reward: 0 };
+    if (Number(row.place) === 1) byMonth[monthKey][nickKey].wins += 1;
+    byMonth[monthKey][nickKey].reward += Number(row.reward) || 0;
+  });
+  var monthlyChampions = [];
+  Object.keys(byMonth).forEach(function (monthKey) {
+    var rows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; });
+    if (!rows.length) return;
+    var maxWins = rows.reduce(function (max, row) { return Math.max(max, Number(row.wins) || 0); }, 0);
+    var maxReward = rows.reduce(function (max, row) { return Math.max(max, Number(row.reward) || 0); }, 0);
+    rows.forEach(function (row) {
+      if (!winterRatingSamePlayer(row.nick, normalizedNick)) return;
+      var byWins = maxWins > 0 && Number(row.wins) === maxWins;
+      var byReward = maxReward > 0 && Number(row.reward) === maxReward;
+      if (!byWins && !byReward) return;
+      monthlyChampions.push({
+        monthKey: monthKey,
+        wins: row.wins,
+        reward: row.reward,
+        byWins: byWins,
+        byReward: byReward,
+      });
+    });
+  });
+  monthlyChampions.sort(function (a, b) {
+    var ap = String(a.monthKey || "").split(".");
+    var bp = String(b.monthKey || "").split(".");
+    return ((parseInt(bp[1], 10) || 0) * 12 + (parseInt(bp[0], 10) || 0)) -
+      ((parseInt(ap[1], 10) || 0) * 12 + (parseInt(ap[0], 10) || 0));
+  });
+
+  return {
+    firstPlaces: firstPlaces,
+    topWin: topWin,
+    totalReward: totalReward,
+    bigWins50: bigWins50.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
+    bigWins100: bigWins100.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
+    monthlyChampions: monthlyChampions,
+    rows: playerRows,
+  };
+}
+
+function pokerGetTournamentAchievementStatsReady(nick) {
+  var ensure = [];
+  if (typeof window.pokerEnsureScriptDomains === "function") {
+    ensure.push(Promise.resolve(window.pokerEnsureScriptDomains(["app"])).catch(function () { return false; }));
+    ensure.push(Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter"])).catch(function () { return false; }));
+  }
+  return Promise.all(ensure).then(function () {
+    return pokerGetTournamentAchievementStats(nick);
+  }).catch(function () {
+    return pokerGetTournamentAchievementStats(nick);
+  });
+}
+
+window.pokerGetTournamentAchievementStats = pokerGetTournamentAchievementStats;
+window.pokerGetTournamentAchievementStatsReady = pokerGetTournamentAchievementStatsReady;
+
 function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var fullSummary = modal._winterPlayerModalFullSummary;
   var showPoints = modal._winterPlayerModalShowPoints;

@@ -489,6 +489,7 @@ function refreshProfileAchievementsShowcase(profileData) {
           ratingNick: profileAchievementRatingNickFromData(data),
           profileData: data || {},
           userId: profileAchievementUserIdFromData(data),
+          isSelfProfile: true,
         });
       });
     })
