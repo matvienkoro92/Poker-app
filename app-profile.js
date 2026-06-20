@@ -72,7 +72,7 @@ function initProfileTabs() {
     });
   }
   initProfilePoker21Tabs();
-  initProfilePublicCardButton();
+  initProfileUnifiedCardLayout();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
     setTimeout(function () {
@@ -83,127 +83,109 @@ function initProfileTabs() {
   }
 }
 
-function profilePublicCardMemberIdFromAuth() {
-  try {
-    if (typeof window.pokerResolveMyChatMemberId === "function") {
-      var resolved = window.pokerResolveMyChatMemberId();
-      if (resolved != null && String(resolved).trim()) return String(resolved).trim();
-    }
-  } catch (eResolvedSelfCard) {}
-  try {
-    var auth = window.__pokerTelegramAuth;
-    var user = auth && auth.user ? auth.user : null;
-    if (!user || !(auth.status === "verified" || auth.status === "dev_skip")) return "";
-    if (user.memberId != null && String(user.memberId).trim()) return String(user.memberId).trim();
-    if (user.id == null || String(user.id).trim() === "") return "";
-    var raw = String(user.id).trim();
-    if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0 || raw.indexOf("ID") === 0) return raw;
-    if (user.is_vk || user.vk) return "vk_" + raw;
-    return "tg_" + raw;
-  } catch (eAuthSelfCard) {}
-  return "";
+function profileInsertAfter(parent, node, anchor) {
+  if (!parent || !node) return;
+  if (anchor && anchor.parentNode === parent) parent.insertBefore(node, anchor.nextSibling);
+  else parent.appendChild(node);
 }
 
-function profilePublicCardFallbackDtId() {
+function initProfileUnifiedCardLayout() {
+  var root = document.getElementById("profileView");
+  var card = root ? root.querySelector(".profile-hero-card") : null;
+  if (!root || !card || card.dataset.profileUnifiedCard === "1") return;
+  card.dataset.profileUnifiedCard = "1";
+  root.classList.add("profile-view--unified-card");
+
+  var toolbar = document.createElement("div");
+  toolbar.className = "profile-self-card-toolbar";
+  var tabsSlot = document.createElement("div");
+  tabsSlot.className = "profile-self-card-toolbar__tabs";
+  var actionsSlot = document.createElement("div");
+  actionsSlot.className = "profile-self-card-toolbar__actions";
+  toolbar.appendChild(tabsSlot);
+  toolbar.appendChild(actionsSlot);
+  card.insertBefore(toolbar, card.firstChild);
+
+  var tabs = document.getElementById("profileTabs");
+  if (tabs) tabsSlot.appendChild(tabs);
   try {
-    var el = document.getElementById("profileUserId");
-    var text = el ? String(el.textContent || "").trim() : "";
-    if (/^ID\d{6}$/.test(text)) return text;
-  } catch (eElDtId) {}
-  try {
-    var cached =
-      (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_dt_id")) ||
-      (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
-      "";
-    cached = String(cached || "").trim();
-    if (/^ID\d{6}$/.test(cached)) return cached;
-  } catch (eCachedDtId) {}
-  return "";
+    var authState = typeof pokerProfileAuthState === "function" ? pokerProfileAuthState() : null;
+    syncProfileUnifiedCardAuthLayout(!!(authState && authState.showProfileShell));
+  } catch (eUnifiedAuthLayout) {}
+
+  var friends = document.getElementById("profileFriendsPanel");
+  var emailSection = document.getElementById("profileEmailAuthSection");
+  var telegramSection = document.getElementById("profileTelegramLinkSection");
+  var pushRow = document.getElementById("profileChatPushRow");
+  var pokerPlusSection = document.getElementById("profilePokerPlusSection");
+
+  [emailSection, telegramSection, pushRow, pokerPlusSection].forEach(function (node) {
+    if (!node) return;
+    node.classList.add("profile-self-card__embedded");
+  });
+
+  profileInsertAfter(card, emailSection, friends);
+  profileInsertAfter(card, telegramSection, emailSection || friends);
+  profileInsertAfter(card, pushRow, telegramSection || emailSection || friends);
+  profileInsertAfter(card, pokerPlusSection, pushRow || telegramSection || emailSection || friends);
 }
 
-function profilePublicCardDisplayName() {
-  try {
-    var textEl = document.getElementById("profileUserNameText");
-    var text = textEl ? String(textEl.textContent || "").trim() : "";
-    if (text && text !== "Добавьте имя") return text;
-  } catch (eTextSelfCard) {}
-  try {
-    var name = typeof getProfileGreetingName === "function" ? getProfileGreetingName() : "";
-    if (name && name !== "NoName") return name;
-  } catch (eNameSelfCard) {}
-  try {
-    if (typeof resolveMyChatDisplayName === "function") return resolveMyChatDisplayName();
-  } catch (eResolveNameSelfCard) {}
-  return "Игрок";
-}
-
-function profilePublicCardAvatarUrl() {
-  try {
-    var avatar = document.getElementById("profileAvatar");
-    var src = avatar ? String(avatar.currentSrc || avatar.src || "").trim() : "";
-    if (src && src.indexOf("profile-pokerist.jpg") < 0) return src;
-  } catch (eAvatarSelfCard) {}
-  try {
-    var auth = window.__pokerTelegramAuth;
-    var photo = auth && auth.user && auth.user.photo_url ? String(auth.user.photo_url).trim() : "";
-    if (photo && photo.indexOf("http") === 0) return photo;
-  } catch (ePhotoSelfCard) {}
-  return "";
-}
-
-function openProfilePublicCard() {
-  var btn = document.getElementById("profileOpenPublicCardBtn");
-  var id = profilePublicCardMemberIdFromAuth() || profilePublicCardFallbackDtId();
-  if (!id) {
-    if (btn) {
-      var prevText = btn.textContent;
-      btn.textContent = "Войдите";
-      btn.disabled = true;
-      setTimeout(function () {
-        btn.textContent = prevText || "Открыть";
-        btn.disabled = false;
-      }, 1400);
-    }
+function syncProfileUnifiedCardAuthLayout(isVerified) {
+  var exitBtn = document.getElementById("profileExitBtn");
+  if (!exitBtn) return;
+  var cardActions = document.querySelector("#profileView .profile-self-card-toolbar__actions");
+  var headerControls = document.querySelector("#profileView .profile-header-controls");
+  if (isVerified && cardActions && exitBtn.parentNode !== cardActions) {
+    cardActions.appendChild(exitBtn);
     return;
   }
-  if (btn) btn.disabled = true;
-  var openPromise = null;
-  try {
-    if (typeof window.pokerOpenChatUserModalSafe === "function") {
-      openPromise = window.pokerOpenChatUserModalSafe(id, profilePublicCardDisplayName(), profilePublicCardAvatarUrl(), { selfProfile: true });
-    } else if (typeof window.openChatUserModalById === "function") {
-      window.openChatUserModalById(id, profilePublicCardDisplayName(), profilePublicCardAvatarUrl(), { selfProfile: true });
-      openPromise = Promise.resolve(true);
-    }
-  } catch (eOpenSelfCard) {
-    openPromise = Promise.resolve(false);
+  if (!isVerified && headerControls && exitBtn.parentNode !== headerControls) {
+    headerControls.appendChild(exitBtn);
   }
-  Promise.resolve(openPromise).then(function (ok) {
-    if (!ok && btn) {
-      var prevText = btn.textContent;
-      btn.textContent = "Ошибка";
-      setTimeout(function () {
-        btn.textContent = prevText || "Открыть";
-      }, 1400);
-    }
-  }).catch(function () {
-    if (btn) {
-      var prevText = btn.textContent;
-      btn.textContent = "Ошибка";
-      setTimeout(function () {
-        btn.textContent = prevText || "Открыть";
-      }, 1400);
-    }
-  }).finally(function () {
-    if (btn) btn.disabled = false;
-  });
 }
 
-function initProfilePublicCardButton() {
-  var btn = document.getElementById("profileOpenPublicCardBtn");
-  if (!btn || btn.dataset.bound === "1") return;
-  btn.dataset.bound = "1";
-  btn.addEventListener("click", openProfilePublicCard);
+function profileSelfHeroArtNickFromData(data) {
+  return String(
+    (data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick)) ||
+    ""
+  ).trim();
+}
+
+function applyProfileSelfHeroArt(nick) {
+  var wrap = document.getElementById("profileSelfHeroArt");
+  var img = document.getElementById("profileSelfHeroArtImg");
+  if (!wrap || !img) return;
+  function showArt() {
+    var art = null;
+    try {
+      art = nick && typeof window.pokerGetSummerRatingPlayerArt === "function"
+        ? window.pokerGetSummerRatingPlayerArt(nick)
+        : null;
+    } catch (eArt) {
+      art = null;
+    }
+    if (art && art.src) {
+      img.src = art.src;
+      img.alt = "";
+      img.hidden = false;
+      wrap.classList.add("profile-self-hero-art--has-art");
+      return;
+    }
+    img.removeAttribute("src");
+    img.hidden = true;
+    wrap.classList.remove("profile-self-hero-art--has-art");
+  }
+  if (nick && typeof window.pokerEnsureScriptDomains === "function" && typeof window.pokerGetSummerRatingPlayerArt !== "function") {
+    Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
+      .then(showArt)
+      .catch(showArt);
+    return;
+  }
+  showArt();
+}
+
+function syncProfileSelfCardFromProfile(data) {
+  applyProfileSelfHeroArt(profileSelfHeroArtNickFromData(data));
 }
 
 function syncProfileStatusVisibility(isVerified) {
@@ -231,6 +213,9 @@ function syncProfileVerifiedContentVisibility(isVerified) {
   if (chatNameWrap) chatNameWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (friendsWrap) friendsWrap.classList.toggle("profile-guest-hidden", !isVerified);
   if (profileView) profileView.classList.toggle("profile-view--guest", !isVerified);
+  if (profileView && profileView.classList.contains("profile-view--unified-card")) {
+    syncProfileUnifiedCardAuthLayout(isVerified);
+  }
   if (!isVerified && typeof closeProfileNameEditor === "function") closeProfileNameEditor();
 }
 

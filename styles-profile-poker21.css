@@ -206,16 +206,39 @@
   .profile-hero-card__id {
     font-size: var(--profile-id-font-size, 16px);
   }
-  .profile-public-card {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 10px;
+  .profile-view--unified-card .profile-hero-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "toolbar"
+      "avatar"
+      "identity"
+      "art"
+      "status"
+      "friends"
+      "email"
+      "telegram"
+      "push"
+      "poker21";
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
   }
-  .profile-public-card__label {
-    text-align: center;
+  .profile-self-card-toolbar {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .profile-public-card__btn {
+  .profile-self-card-toolbar__actions {
+    justify-content: stretch;
+  }
+  .profile-self-card-toolbar__actions #profileExitBtn {
     width: 100%;
+  }
+  .profile-self-hero-art {
+    min-height: 172px;
+  }
+  .profile-self-hero-art__img {
+    width: min(108%, 198px);
+    max-height: 172px;
+    transform: translateY(-16px);
   }
 }
 @media (max-width: 370px) {
