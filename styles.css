@@ -6,7 +6,7 @@
 @import url("./styles-chat.css?v=3.593");
 @import url("./styles-learning-games.css?v=3.593");
 @import url("./styles-raffles.css?v=3.602");
-@import url("./styles-daily-poker.css?v=3.599");
+@import url("./styles-daily-poker.css?v=3.600");
 @import url("./styles-home-legacy-prelude.css?v=3.593");
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
@@ -15,7 +15,7 @@
 @import url("./styles-hall.css?v=3.618");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.618");
+@import url("./styles-profile.css?v=3.621");
 @import url("./styles-layout.css?v=3.638");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
@@ -2292,15 +2292,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   letter-spacing: 0;
   text-transform: uppercase;
   white-space: nowrap;
-  border: 1px solid rgba(255, 118, 0, 0.88);
+  border: 1px solid var(--home-shortcuts-frame-color);
   border-radius: 10px 10px 19px 19px;
-  outline: 1px solid rgba(255, 168, 55, 0.42);
+  outline: 1px solid rgba(255, 226, 166, 0.14);
   outline-offset: -3px;
   background:
     linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(0, 0, 0, 0.98));
   box-shadow:
     inset 0 0 0 1px rgba(255, 199, 94, 0.12),
-    0 0 0 1px rgba(97, 36, 0, 0.84),
+    0 0 0 1px var(--home-shortcuts-frame-color),
     0 0 14px rgba(255, 104, 0, 0.34);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

@@ -459,6 +459,19 @@ function initProfilePokerPlus() {
     if (statusRefreshBtn) statusRefreshBtn.textContent = text;
   }
 
+  function setPokerPlusRefreshButtonsState(state) {
+    var buttons = [refreshBtn, statusRefreshBtn].filter(Boolean);
+    var text = "";
+    if (state === "loading") text = pokerPlusLocale() === "en" ? "Refreshing..." : "Обновляем...";
+    else if (state === "done") text = pokerPlusLocale() === "en" ? "Updated" : "Обновлено";
+    buttons.forEach(function (btn) {
+      btn.classList.toggle("profile-status__refresh-btn--loading", state === "loading");
+      btn.classList.toggle("profile-status__refresh-btn--done", state === "done");
+      btn.setAttribute("aria-busy", state === "loading" ? "true" : "false");
+      if (text) btn.textContent = text;
+    });
+  }
+
   function setPokerPlusRefreshButtonsDisabled(disabled) {
     if (refreshBtn) refreshBtn.disabled = !!disabled;
     if (statusRefreshBtn) statusRefreshBtn.disabled = !!disabled;
@@ -2002,13 +2015,23 @@ function initProfilePokerPlus() {
   }
   function refreshPokerPlusFromButton() {
     setFeedback("Обновляем данные Poker21...", false);
+    setPokerPlusRefreshButtonsState("loading");
     setPokerPlusRefreshButtonsDisabled(true);
     try {
       pokerPlusRunFinally(
         Promise.resolve(loadProfile(true)).catch(function () {}),
-        function () { setPokerPlusRefreshButtonsDisabled(false); }
+        function () {
+          setPokerPlusRefreshButtonsState("done");
+          setPokerPlusRefreshButtonsDisabled(false);
+          setTimeout(function () {
+            setPokerPlusRefreshButtonsState("");
+            setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
+          }, 1200);
+        }
       );
     } catch (eRefreshLoad) {
+      setPokerPlusRefreshButtonsState("");
+      setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
       setPokerPlusRefreshButtonsDisabled(false);
     }
   }
