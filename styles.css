@@ -11,11 +11,11 @@
 @import url("./styles-download.css?v=3.593");
 @import url("./styles-home-legacy-tail.css?v=3.593");
 @import url("./styles-home-rating-promo-legacy.css?v=3.593");
-@import url("./styles-rating.css?v=3.645");
+@import url("./styles-rating.css?v=3.648");
 @import url("./styles-hall.css?v=3.618");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.611");
+@import url("./styles-profile.css?v=3.613");
 @import url("./styles-layout.css?v=3.635");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
@@ -2030,10 +2030,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts.home-mini-icons {
   --home-mini-icons-pad: 6px;
+  --home-club-choice-row: 20px;
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr) 40px;
+  grid-template-rows: minmax(0, 1fr) var(--home-club-choice-row);
   align-items: stretch;
   justify-items: stretch;
   gap: 8px;
@@ -2276,7 +2277,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-self: end;
   min-width: 0;
   width: calc(100% + (var(--home-mini-icons-pad) * 2));
-  height: calc(100% + var(--home-mini-icons-pad));
+  height: var(--home-club-choice-row);
   margin: 0 calc(var(--home-mini-icons-pad) * -1) calc(var(--home-mini-icons-pad) * -1);
   padding: 0 18px;
   overflow: hidden;
@@ -2288,8 +2289,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   letter-spacing: 0;
   text-transform: uppercase;
   white-space: nowrap;
-  border: 2px solid rgba(255, 120, 0, 0.98);
-  border-radius: 16px 16px 19px 19px;
+  border: 1px solid rgba(255, 118, 0, 0.86);
+  border-radius: 10px 10px 19px 19px;
   background:
     radial-gradient(ellipse at 50% -30%, rgba(255, 238, 180, 0.78), rgba(255, 160, 38, 0.48) 42%, transparent 72%),
     radial-gradient(ellipse at 50% 112%, rgba(255, 104, 0, 0.92), rgba(255, 104, 0, 0.36) 42%, transparent 72%),
@@ -6244,7 +6245,7 @@ body.club-choice-vote-open {
 
   .home-daily-shortcuts.home-mini-icons {
     --home-mini-icons-pad: 5px;
-    grid-template-rows: minmax(0, 1fr) 36px;
+    --home-club-choice-row: 18px;
     height: 126px;
     margin-bottom: 12px;
     border-radius: 20px;
@@ -6253,8 +6254,8 @@ body.club-choice-vote-open {
 
   .home-club-choice-plaque {
     padding: 0 10px;
-    border-radius: 14px 14px 18px 18px;
-    font-size: clamp(11px, 3.35vw, 13px);
+    border-radius: 9px 9px 18px 18px;
+    font-size: clamp(9px, 2.8vw, 11px);
   }
 
   .home-daily-shortcuts .home-mini-icon-item {

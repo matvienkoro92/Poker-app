@@ -210,6 +210,146 @@ function initProfilePublicCardButton() {
 
 var profilePublicShowcaseData = null;
 var profilePublicShowcaseStatus = null;
+var profileHeroGenderValue = "male";
+var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
+
+function normalizeProfileHeroGender(value) {
+  var raw = String(value || "").trim().toLowerCase();
+  if (raw === "female" || raw === "f" || raw === "woman" || raw === "ж" || raw === "жен" || raw === "женский") return "female";
+  return "male";
+}
+
+function profileHeroGenderText(value) {
+  return normalizeProfileHeroGender(value) === "female" ? "Пол: Ж" : "Пол: М";
+}
+
+function profileReadStoredHeroGender() {
+  try {
+    var raw =
+      (typeof localStorage !== "undefined" && localStorage.getItem(POKER_PROFILE_GENDER_STORAGE_KEY)) ||
+      (typeof sessionStorage !== "undefined" && sessionStorage.getItem(POKER_PROFILE_GENDER_STORAGE_KEY)) ||
+      "";
+    return normalizeProfileHeroGender(raw);
+  } catch (eProfileGenderStorage) {}
+  return "male";
+}
+
+function profileWriteStoredHeroGender(value) {
+  var gender = normalizeProfileHeroGender(value);
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(POKER_PROFILE_GENDER_STORAGE_KEY, gender);
+    if (typeof sessionStorage !== "undefined") sessionStorage.setItem(POKER_PROFILE_GENDER_STORAGE_KEY, gender);
+  } catch (eProfileGenderWrite) {}
+}
+
+function profileDefaultHeroArt(value) {
+  var gender = normalizeProfileHeroGender(value);
+  return {
+    src: gender === "female" ? "./assets/chat-profile-default-hero-female.png" : "./assets/chat-profile-default-hero-male.png",
+    nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
+    defaultHero: true,
+    gender: gender,
+  };
+}
+
+function profileGenderFromData(data) {
+  var d = data && typeof data === "object" ? data : {};
+  return normalizeProfileHeroGender(d.profileGender || d.gender || d.sex || profileHeroGenderValue || profileReadStoredHeroGender());
+}
+
+function renderProfileHeroGenderControl(saving) {
+  var row = document.getElementById("profileHeroGender");
+  if (!row) return;
+  var gender = normalizeProfileHeroGender(profileHeroGenderValue);
+  Array.prototype.slice.call(row.querySelectorAll("[data-profile-gender]")).forEach(function (btn) {
+    var active = normalizeProfileHeroGender(btn.getAttribute("data-profile-gender")) === gender;
+    btn.classList.toggle("profile-hero-gender__btn--active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+    btn.disabled = !!saving;
+  });
+}
+
+function setProfileHeroGender(value, opts) {
+  opts = opts || {};
+  profileHeroGenderValue = normalizeProfileHeroGender(value);
+  profileWriteStoredHeroGender(profileHeroGenderValue);
+  if (profilePublicShowcaseData && typeof profilePublicShowcaseData === "object") {
+    profilePublicShowcaseData.profileGender = profileHeroGenderValue;
+  }
+  renderProfileHeroGenderControl(!!opts.saving);
+  var genderEl = document.getElementById("profilePublicGender");
+  if (genderEl) {
+    genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
+    genderEl.hidden = false;
+  }
+  profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(profilePublicShowcaseData || {}));
+}
+
+function saveProfileHeroGender(value) {
+  var next = normalizeProfileHeroGender(value);
+  var prev = normalizeProfileHeroGender(profileHeroGenderValue);
+  var feedback = document.getElementById("profileHeroGenderFeedback");
+  if (next === prev) return;
+  setProfileHeroGender(next, { saving: true });
+  if (feedback) feedback.textContent = "Сохраняем...";
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var canServer =
+    !!base &&
+    ((typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) ||
+      (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
+  if (!canServer) {
+    renderProfileHeroGenderControl(false);
+    if (feedback) {
+      feedback.textContent = "Сохранено локально";
+      setTimeout(function () { feedback.textContent = ""; }, 1800);
+    }
+    return;
+  }
+  fetch(base + "/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pokerGuestOrAuthedPostBody({ profileGender: next })),
+  })
+    .then(function (r) {
+      return r.json().catch(function () {
+        return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status };
+      });
+    })
+    .then(function (data) {
+      if (!data || !data.ok) {
+        setProfileHeroGender(prev);
+        if (feedback) feedback.textContent = (data && data.error) || "Ошибка";
+      } else {
+        pokerProfileUserInfoCache = null;
+        pokerProfileUserInfoCacheAt = 0;
+        if (feedback) feedback.textContent = "Сохранено";
+      }
+      renderProfileHeroGenderControl(false);
+      if (feedback) setTimeout(function () { feedback.textContent = ""; }, 1800);
+    })
+    .catch(function () {
+      setProfileHeroGender(prev);
+      renderProfileHeroGenderControl(false);
+      if (feedback) {
+        feedback.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети";
+        setTimeout(function () { feedback.textContent = ""; }, 2200);
+      }
+    });
+}
+
+function initProfileHeroGenderControl() {
+  var row = document.getElementById("profileHeroGender");
+  if (!row) return;
+  if (row.dataset.bound !== "1") {
+    row.dataset.bound = "1";
+    row.addEventListener("click", function (event) {
+      var btn = event && event.target ? event.target.closest("[data-profile-gender]") : null;
+      if (!btn || btn.disabled || !row.contains(btn)) return;
+      saveProfileHeroGender(btn.getAttribute("data-profile-gender"));
+    });
+  }
+  setProfileHeroGender(profileHeroGenderValue || profileReadStoredHeroGender());
+}
 
 function profilePublicShowcaseFormatXp(value) {
   if (typeof pokerProfileFormatRake === "function") return pokerProfileFormatRake(value);
@@ -275,9 +415,11 @@ function profilePublicShowcaseSyncArt(nick) {
       art = window.pokerGetSummerRatingPlayerArt(nick);
     } catch (eProfilePublicArt) {}
   }
+  if (!art || !art.src) art = profileDefaultHeroArt(profileHeroGenderValue);
   artWrap.hidden = false;
   if (art && art.src) {
     artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    artImg.classList.toggle("chat-user-modal__rating-art-img--default-hero", art.defaultHero === true);
     artImg.src = art.src;
     artImg.alt = "Образ рейтинга " + (art.nick || nick);
     artImg.hidden = false;
@@ -289,7 +431,7 @@ function profilePublicShowcaseSyncArt(nick) {
     artImg.alt = "";
     artImg.hidden = true;
     artImg.style.display = "none";
-    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
   }
 }
 
@@ -353,7 +495,9 @@ function refreshProfilePublicShowcase(profileData) {
   var verified = document.getElementById("profilePublicVerifiedBadge");
   var loginSub = document.getElementById("profilePublicLoginSub");
   var lastSeen = document.getElementById("profilePublicLastSeen");
+  var genderEl = document.getElementById("profilePublicGender");
   var respect = document.getElementById("profilePublicRespectVal");
+  setProfileHeroGender(profileGenderFromData(data));
   if (titleEl) titleEl.textContent = title;
   profilePublicShowcaseApplyAvatar(title);
   if (verified) verified.classList.toggle("chat-user-modal__verified--hidden", data && data.pokerPlusVerified !== true);
@@ -371,6 +515,10 @@ function refreshProfilePublicShowcase(profileData) {
       lastSeen.hidden = true;
     }
   }
+  if (genderEl) {
+    genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
+    genderEl.hidden = false;
+  }
   if (respect) {
     var rv = document.getElementById("profileRespectValue");
     var raw = rv ? String(rv.textContent || "").trim() : "";
@@ -381,6 +529,7 @@ function refreshProfilePublicShowcase(profileData) {
 }
 
 function initProfilePublicShowcase() {
+  initProfileHeroGenderControl();
   refreshProfilePublicShowcase();
   var avatar = document.getElementById("profileAvatar");
   if (avatar && avatar.dataset.profilePublicShowcaseBound !== "1") {
@@ -517,10 +666,11 @@ function refreshProfileAchievementsShowcase(profileData) {
 
 function initProfileAchievementsShowcase() {
   var showcase = document.getElementById("profileAchievementsShowcase");
-  if (!showcase) return;
+  var profileView = document.getElementById("profileView");
+  if (!showcase || !profileView) return;
   if (showcase.dataset.bound !== "1") {
     showcase.dataset.bound = "1";
-    showcase.addEventListener("click", function (event) {
+    profileView.addEventListener("click", function (event) {
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
       if (totalBtn) {
         var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache);

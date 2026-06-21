@@ -34,6 +34,7 @@
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
+                    <p class="chat-user-modal__gender" id="profilePublicGender" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
                 </div>
@@ -82,7 +83,14 @@
                   </section>
                 </div>
               </div>
+              <div class="profile-hero-gender" id="profileHeroGender" role="radiogroup" aria-label="Пол героя">
+                <span class="profile-hero-gender__label">Пол героя</span>
+                <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
+                <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
+                <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
+              </div>
             </section>
+            <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
             <section class="profile-friends" id="profileFriendsPanel" data-profile-club-panel aria-label="Друзья">
               <div class="profile-friends__head">
                 <span class="profile-friends__icon" aria-hidden="true">
@@ -126,7 +134,6 @@
               </div>
             </section>
             <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-club-panel aria-label="Достижения и история сезонов">
-              <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal"></div>
               <section class="chat-user-modal__achievements profile-achievements-showcase__achievements" id="profileAchievementsBlock">
                 <h4 class="chat-user-modal__achievements-title">Достижения</h4>
                 <div class="chat-user-modal__achievements-list" id="profileAchievementsList">

@@ -71,6 +71,8 @@ function initRaffles() {
   var raffleAddPrizeNewGroupWrap = document.getElementById("raffleAddPrizeNewGroupWrap");
   var raffleAddPrizeCount = document.getElementById("raffleAddPrizeCount");
   var raffleAddPrizeText = document.getElementById("raffleAddPrizeText");
+  var raffleAddPrizeAccess = document.getElementById("raffleAddPrizeAccess");
+  var raffleAddPrizeAccessWrap = document.getElementById("raffleAddPrizeAccessWrap");
   var raffleAddPrizesSubmit = document.getElementById("raffleAddPrizesSubmit");
   var raffleStatWinners = document.getElementById("raffleStatWinners");
   var raffleStatPrize = document.getElementById("raffleStatPrize");
@@ -810,8 +812,38 @@ function initRaffles() {
 
   function raffleAccessLevelText(raffle) {
     var level = raffleAccessLevel(raffle);
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var groupParts = [];
+    groups.forEach(function (group, index) {
+      if (!group || group.accessLevel == null || String(group.accessLevel) === "") return;
+      var groupLevel = normalizeRaffleAccessLevel(group.accessLevel);
+      var prize = String(group.prize || "").trim();
+      var label = prize ? raffleDisplayPrizeText(prize) : "Группа " + (index + 1);
+      if (label.length > 34) label = "Группа " + (index + 1);
+      groupParts.push(label + ": " + (groupLevel > 0 ? "уровень " + groupLevel + "+" : "для всех"));
+    });
+    if (groupParts.length) return groupParts.join(" · ");
     return level > 0 ? "Уровень " + level + "+" : "для всех";
   }
+
+  function raffleAccessSelectOptionsHtml(includeInherit) {
+    var html = includeInherit ? '<option value="">как общий доступ</option>' : "";
+    html += '<option value="0">для всех</option>';
+    for (var level = 1; level <= 55; level += 1) {
+      html += '<option value="' + level + '">Уровень ' + level + '+</option>';
+    }
+    return html;
+  }
+
+  function setupRaffleAccessSelect(select) {
+    if (!select || select.dataset.ready === "1") return;
+    var current = String(select.value == null ? "" : select.value);
+    select.dataset.ready = "1";
+    select.innerHTML = raffleAccessSelectOptionsHtml(true);
+    select.value = current;
+  }
+
+  setupRaffleAccessSelect(raffleAddPrizeAccess);
 
   function activeRaffleAccessLevelHtml(raffle) {
     return (
@@ -2949,7 +2981,9 @@ function initRaffles() {
     var mode = getRaffleAddPrizeMode();
     if (raffleAddPrizeExistingGroupWrap) raffleAddPrizeExistingGroupWrap.hidden = mode !== "existing";
     if (raffleAddPrizeNewGroupWrap) raffleAddPrizeNewGroupWrap.hidden = mode !== "new";
+    if (raffleAddPrizeAccessWrap) raffleAddPrizeAccessWrap.hidden = mode !== "new";
     if (raffleAddPrizeText) raffleAddPrizeText.disabled = mode !== "new";
+    if (raffleAddPrizeAccess) raffleAddPrizeAccess.disabled = mode !== "new";
     var hint = raffleAddPrizesForm ? raffleAddPrizesForm.querySelector(".raffle-add-prizes-form__hint") : null;
     if (hint) {
       hint.textContent = mode === "existing"
@@ -3042,7 +3076,10 @@ function initRaffles() {
       if (mode === "existing") {
         addPayload.targetGroupIndex = selectedGroupIndex;
       } else {
-        addPayload.groups = [{ count: count, prize: prize }];
+        var newGroup = { count: count, prize: prize };
+        var accessRaw = raffleAddPrizeAccess ? String(raffleAddPrizeAccess.value == null ? "" : raffleAddPrizeAccess.value).trim() : "";
+        if (accessRaw !== "") newGroup.accessLevel = normalizeRaffleAccessLevel(accessRaw);
+        addPayload.groups = [newGroup];
       }
       fetch(base + "/api/raffles", {
         method: "POST",

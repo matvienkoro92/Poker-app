@@ -14,6 +14,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleTicketGroupCount = document.getElementById("raffleTicketGroupCount");
     var raffleTicketWinnersWrap = document.getElementById("raffleTicketWinnersWrap");
     var raffleTicketWinnersCount = document.getElementById("raffleTicketWinnersCount");
+    var raffleTicketSingleAccess = document.getElementById("raffleTicketSingleAccess");
     var raffleTicketGroups = document.getElementById("raffleTicketGroups");
     var raffleTicketTournamentSelect = document.getElementById("raffleTicketTournamentSelect");
     var raffleCreateTotal = document.getElementById("raffleCreateTotal");
@@ -189,6 +190,41 @@ function initRafflesAdminCreateRuntime(opts) {
     return normalizeRaffleCreateAccessLevel(raffleAccessLevel ? raffleAccessLevel.value : 0);
   }
 
+  function raffleGroupAccessOptionsHtml(includeInherit) {
+    var html = includeInherit ? '<option value="">как общий доступ</option>' : "";
+    html += '<option value="0">для всех</option>';
+    for (var level = 1; level <= 55; level += 1) {
+      html += '<option value="' + level + '">Уровень ' + level + '+</option>';
+    }
+    return html;
+  }
+
+  function setupRaffleGroupAccessSelect(select) {
+    if (!select || select.dataset.ready === "1") return;
+    var current = select.value;
+    select.dataset.ready = "1";
+    select.innerHTML = raffleGroupAccessOptionsHtml(true);
+    select.value = current != null ? String(current) : "";
+  }
+
+  function setupRaffleGroupAccessSelects(root) {
+    var scope = root || document;
+    Array.prototype.forEach.call(scope.querySelectorAll(".raffle-group-access-select"), setupRaffleGroupAccessSelect);
+  }
+
+  function getRaffleGroupAccessLevel(select) {
+    if (!select) return null;
+    var raw = String(select.value == null ? "" : select.value).trim();
+    if (raw === "") return null;
+    return normalizeRaffleCreateAccessLevel(raw);
+  }
+
+  function applyRaffleGroupAccess(group, select) {
+    var level = getRaffleGroupAccessLevel(select);
+    if (level != null) group.accessLevel = level;
+    return group;
+  }
+
   function getRaffleTournamentSelectedOption(select) {
     if (!select || select.selectedIndex < 0) return null;
     return select.options[select.selectedIndex] || null;
@@ -307,6 +343,7 @@ function initRafflesAdminCreateRuntime(opts) {
   }
 
   setupRaffleAccessLevelSelect();
+  setupRaffleGroupAccessSelects(document);
 
   function syncRaffleDailyControls() {
     var enabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
@@ -377,9 +414,10 @@ function initRafflesAdminCreateRuntime(opts) {
         tournamentSelect.setAttribute("aria-label", "Турнир для группы " + (i + 1));
       }
       var selectHtml = tournamentSelect ? tournamentSelect.outerHTML : "<select class=\"randomizer-input raffle-tournament-select raffle-ticket-group-tournament\" data-group-index=\"" + i + "\" aria-label=\"Турнир для группы " + (i + 1) + "\"><option value=\"\">— Выберите турнир —</option></select>";
-      div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " (<span class=\"raffle-ticket-group-winners-num\" data-group-index=\"" + i + "\">1</span> побед.) — турнир:</span>" + selectHtml + "</label><label class=\"randomizer-label raffle-ticket-group-custom-name-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">название турнира:</span><input type=\"text\" class=\"raffle-ticket-group-custom-name randomizer-input\" maxlength=\"120\" data-group-index=\"" + i + "\" placeholder=\"Например, Sunday Million\" /></label><label class=\"randomizer-label raffle-ticket-group-custom-price-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">цена билета:</span><input type=\"number\" class=\"raffle-ticket-group-custom-price randomizer-input\" min=\"0\" step=\"0.01\" inputmode=\"decimal\" data-group-index=\"" + i + "\" placeholder=\"Например, 550\" /></label><label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span><input type=\"number\" class=\"raffle-ticket-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>";
+      div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " (<span class=\"raffle-ticket-group-winners-num\" data-group-index=\"" + i + "\">1</span> побед.) — турнир:</span>" + selectHtml + "</label><label class=\"randomizer-label raffle-ticket-group-custom-name-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">название турнира:</span><input type=\"text\" class=\"raffle-ticket-group-custom-name randomizer-input\" maxlength=\"120\" data-group-index=\"" + i + "\" placeholder=\"Например, Sunday Million\" /></label><label class=\"randomizer-label raffle-ticket-group-custom-price-wrap\" style=\"display:none;\"><span class=\"randomizer-label__text\">цена билета:</span><input type=\"number\" class=\"raffle-ticket-group-custom-price randomizer-input\" min=\"0\" step=\"0.01\" inputmode=\"decimal\" data-group-index=\"" + i + "\" placeholder=\"Например, 550\" /></label><label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span><input type=\"number\" class=\"raffle-ticket-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label><label class=\"randomizer-label\"><span class=\"randomizer-label__text\">доступ:</span><select class=\"raffle-ticket-group-access randomizer-input raffle-group-access-select\" data-group-index=\"" + i + "\">" + raffleGroupAccessOptionsHtml(true) + "</select></label>";
       raffleTicketGroups.appendChild(div);
     }
+    setupRaffleGroupAccessSelects(raffleTicketGroups);
     syncTicketGroupCustomInputs();
     updateRaffleCreateTotal();
     updateTicketGroupWinnersLabels();
@@ -458,9 +496,11 @@ function initRafflesAdminCreateRuntime(opts) {
       var div = document.createElement("div");
       div.className = "raffle-group-row";
       div.innerHTML = "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Группа " + (i + 1) + " — мест:</span><input type=\"number\" class=\"raffle-group-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" /></label>" +
-        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Приз:</span><input type=\"text\" class=\"raffle-group-prize randomizer-input\" placeholder=\"Например: Беккинг-байин 500 ₽ на кеш\" data-group-index=\"" + i + "\" /></label>";
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Приз:</span><input type=\"text\" class=\"raffle-group-prize randomizer-input\" placeholder=\"Например: Беккинг-байин 500 ₽ на кеш\" data-group-index=\"" + i + "\" /></label>" +
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Доступ:</span><select class=\"raffle-group-access randomizer-input raffle-group-access-select\" data-group-index=\"" + i + "\">" + raffleGroupAccessOptionsHtml(true) + "</select></label>";
       raffleGroupsEl.appendChild(div);
     }
+    setupRaffleGroupAccessSelects(raffleGroupsEl);
   }
 
   function buildPhysicalPrizeInputs() {
@@ -480,9 +520,11 @@ function initRafflesAdminCreateRuntime(opts) {
         "</select></label>" +
         "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">мест:</span>" +
         "<input type=\"number\" class=\"raffle-physical-count randomizer-input\" min=\"0\" max=\"100\" value=\"1\" data-group-index=\"" + i + "\" />" +
-        "</label>";
+        "</label>" +
+        "<label class=\"randomizer-label\"><span class=\"randomizer-label__text\">Доступ:</span><select class=\"raffle-physical-access randomizer-input raffle-group-access-select\" data-group-index=\"" + i + "\">" + raffleGroupAccessOptionsHtml(true) + "</select></label>";
       rafflePhysicalGroupsEl.appendChild(div);
     }
+    setupRaffleGroupAccessSelects(rafflePhysicalGroupsEl);
   }
 
   function raffleCreateEscapeHtml(value) {
@@ -519,7 +561,10 @@ function initRafflesAdminCreateRuntime(opts) {
     var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
     if (!groups.length) return "Группы: —";
     return groups.map(function (g, i) {
-      return "Группа " + (i + 1) + ": " + (parseInt(g.count, 10) || 0) + " мест — " + (g.prize || "Приз");
+      var access = g && g.accessLevel != null && String(g.accessLevel) !== ""
+        ? " · доступ: уровень " + normalizeRaffleCreateAccessLevel(g.accessLevel) + "+"
+        : "";
+      return "Группа " + (i + 1) + ": " + (parseInt(g.count, 10) || 0) + " мест — " + (g.prize || "Приз") + access;
     }).join("\n");
   }
 
@@ -803,7 +848,7 @@ function initRafflesAdminCreateRuntime(opts) {
             singleTournamentName = getRaffleTournamentName(raffleTicketTournamentSelect);
           }
           var singlePrize = buildRaffleTicketPrizeText(singleBuyin, singleTournamentName);
-          if (c > 0) groups.push({ count: c, prize: singlePrize });
+          if (c > 0) groups.push(applyRaffleGroupAccess({ count: c, prize: singlePrize }, raffleTicketSingleAccess));
         } else if (raffleTicketGroups) {
           var rows = raffleTicketGroups.querySelectorAll(".raffle-ticket-group-row");
           for (var i = 0; i < rows.length; i++) {
@@ -825,8 +870,9 @@ function initRafflesAdminCreateRuntime(opts) {
               groupTournamentName = getRaffleTournamentName(groupSelect);
             }
             var groupPrize = buildRaffleTicketPrizeText(groupBuyin, groupTournamentName);
+            var groupAccessSelect = rows[i].querySelector(".raffle-ticket-group-access");
             totalWinners += cnt;
-            if (cnt > 0) groups.push({ count: cnt, prize: groupPrize });
+            if (cnt > 0) groups.push(applyRaffleGroupAccess({ count: cnt, prize: groupPrize }, groupAccessSelect));
           }
         }
         if (groups.length === 0) {
@@ -844,8 +890,9 @@ function initRafflesAdminCreateRuntime(opts) {
           var physicalCount = physicalCountInput ? Math.max(0, parseInt(physicalCountInput.value, 10) || 0) : 0;
           var physicalPrize = physicalPrizeSelect ? String(physicalPrizeSelect.value || "").trim() : "";
           if (!physicalPrize) physicalPrize = "2 большие пиццы";
+          var physicalAccessSelect = physicalRows[pj].querySelector(".raffle-physical-access");
           totalWinners += physicalCount;
-          if (physicalCount > 0) groups.push({ count: physicalCount, prize: physicalPrize });
+          if (physicalCount > 0) groups.push(applyRaffleGroupAccess({ count: physicalCount, prize: physicalPrize }, physicalAccessSelect));
         }
         if (groups.length === 0) {
           if (tg && tg.showAlert) tg.showAlert("Укажите количество победителей");
@@ -861,8 +908,10 @@ function initRafflesAdminCreateRuntime(opts) {
           var count = Math.max(0, parseInt(groupInputs[j].value, 10) || 0);
           var prize = prizeInputs[j] ? prizeInputs[j].value.trim().slice(0, 200) : "";
           if (!prize) prize = "Беккинг-байин на кеш";
+          var cashGroupRow = groupInputs[j] && groupInputs[j].closest ? groupInputs[j].closest(".raffle-group-row") : null;
+          var cashAccessSelect = cashGroupRow ? cashGroupRow.querySelector(".raffle-group-access") : null;
           totalWinners += count;
-          groups.push({ count: count, prize: prize });
+          groups.push(applyRaffleGroupAccess({ count: count, prize: prize }, cashAccessSelect));
         }
         if (groups.length === 0) groups = [{ count: 1, prize: "Беккинг-байин на кеш" }];
         totalWinners = Math.max(1, totalWinners);

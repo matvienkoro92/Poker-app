@@ -81,6 +81,7 @@ if (chatUserModalEl) {
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
   var modalLevelText = document.getElementById("chatUserModalLevelText");
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
+  var modalGender = document.getElementById("chatUserModalGender");
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
@@ -116,6 +117,7 @@ if (chatUserModalEl) {
   var chatUserModalPeerLogin = "";
   var chatUserModalContactName = "";
   var chatUserModalRatingNick = "";
+  var chatUserModalProfileGender = "male";
   var chatUserModalAchievementIdentity = null;
   var chatUserModalClubChoiceScriptReady = null;
   var chatUserModalRanksSeq = 0;
@@ -256,6 +258,30 @@ if (chatUserModalEl) {
       data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
     return String(raw || "").trim();
   }
+  function normalizeChatUserModalProfileGender(value) {
+    var raw = String(value || "").trim().toLowerCase();
+    if (raw === "female" || raw === "f" || raw === "woman" || raw === "ж" || raw === "жен" || raw === "женский") return "female";
+    return "male";
+  }
+  function chatUserModalGenderText(value) {
+    return normalizeChatUserModalProfileGender(value) === "female" ? "Пол: Ж" : "Пол: М";
+  }
+  function chatUserModalDefaultHeroArt(value) {
+    var gender = normalizeChatUserModalProfileGender(value);
+    return {
+      src: gender === "female" ? "./assets/chat-profile-default-hero-female.png" : "./assets/chat-profile-default-hero-male.png",
+      nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
+      defaultHero: true,
+      gender: gender,
+    };
+  }
+  function syncChatUserModalGender(value) {
+    chatUserModalProfileGender = normalizeChatUserModalProfileGender(value);
+    if (modalGender) {
+      modalGender.textContent = chatUserModalGenderText(chatUserModalProfileGender);
+      modalGender.hidden = false;
+    }
+  }
   function syncChatUserModalRatingTab(nick) {
     chatUserModalRatingNick = String(nick || "").trim();
     var hasNick = !!chatUserModalRatingNick;
@@ -285,7 +311,7 @@ if (chatUserModalEl) {
     modalRatingArtImg.removeAttribute("src");
     modalRatingArtImg.alt = "";
     modalRatingArtImg.hidden = true;
-    modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
   }
   function showChatUserModalRatingAvatarFallback() {
     if (!modalRatingArt || !modalRatingArtImg) return Promise.resolve(false);
@@ -301,7 +327,7 @@ if (chatUserModalEl) {
     }
     if (!modalRatingArt || !modalRatingArtImg) return Promise.resolve(false);
     if (!art || !art.src) {
-      return showChatUserModalRatingAvatarFallback();
+      art = chatUserModalDefaultHeroArt(chatUserModalProfileGender);
     }
     return new Promise(function (resolve) {
       var settled = false;
@@ -322,6 +348,7 @@ if (chatUserModalEl) {
         });
       };
       modalRatingArtImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+      modalRatingArtImg.classList.toggle("chat-user-modal__rating-art-img--default-hero", art.defaultHero === true);
       modalRatingArtImg.src = art.src;
       modalRatingArtImg.alt = "Образ рейтинга " + (art.nick || nick);
       modalRatingArtImg.hidden = false;
@@ -772,7 +799,78 @@ if (chatUserModalEl) {
       return count;
     }).catch(function () { return 0; });
   }
+  function chatUserModalNormalizeClubAdminText(value) {
+    return String(value || "").trim().toLowerCase().replace(/ё/g, "е").replace(/^@+/, "");
+  }
+  function chatUserModalIsClubAdminId(value) {
+    var id = chatUserModalNormalizeClubAdminText(value);
+    if (!id) return false;
+    var bare = id.replace(/^tg_/, "");
+    var ids = ["tg_2144406710", "tg_1897001087"];
+    try {
+      if (typeof CHAT_ADMIN_IDS !== "undefined" && Array.isArray(CHAT_ADMIN_IDS) && CHAT_ADMIN_IDS.length) {
+        ids = CHAT_ADMIN_IDS;
+      }
+    } catch (eReadChatAdminIds) {}
+    return ids.some(function (adminId) {
+      var normalized = chatUserModalNormalizeClubAdminText(adminId);
+      return normalized === id || normalized.replace(/^tg_/, "") === bare;
+    });
+  }
+  function chatUserModalClubAdminNameValues(ratingNick, profileData) {
+    var values = [ratingNick];
+    var keys = [
+      "name",
+      "userName",
+      "username",
+      "telegramUsername",
+      "displayName",
+      "firstName",
+      "contactName",
+      "nickname",
+      "nick",
+      "pokerPlusNickname",
+      "poker21Nickname",
+      "ratingNick",
+    ];
+    keys.forEach(function (key) {
+      if (profileData && profileData[key] != null) values.push(profileData[key]);
+    });
+    return values.map(chatUserModalNormalizeClubAdminText).filter(Boolean);
+  }
+  function chatUserModalIsClubAdminUser(ratingNick, profileData, userId) {
+    if (chatUserModalIsClubAdminId(userId)) return true;
+    var idKeys = ["userId", "memberId", "accountId", "dtId", "id", "telegramId", "telegram_id", "tgId"];
+    for (var i = 0; i < idKeys.length; i++) {
+      if (profileData && chatUserModalIsClubAdminId(profileData[idKeys[i]])) return true;
+    }
+    var adminNames = {
+      "анна": true,
+      "аня": true,
+      "anna": true,
+      "anya": true,
+      "qweenpoker": true,
+      "вика": true,
+      "vika": true,
+      "vikipoker": true,
+    };
+    return chatUserModalClubAdminNameValues(ratingNick, profileData).some(function (name) {
+      return adminNames[name] === true;
+    });
+  }
   function getChatUserModalAchievementMetricsReady(ratingNick, profileData, userId, isSelfProfile) {
+    var isClubAdmin = chatUserModalIsClubAdminUser(ratingNick, profileData, userId);
+    if (isClubAdmin) {
+      return Promise.resolve({
+        tournaments: null,
+        raffleWins: 0,
+        respect: null,
+        friends: null,
+        referrals: null,
+        isClubAdmin: true,
+        isSelfProfile: !!isSelfProfile,
+      });
+    }
     return Promise.all([
       getChatUserModalTournamentAchievementsReady(ratingNick),
       getChatUserModalRaffleWinCountReady(ratingNick, profileData, userId),
@@ -786,12 +884,14 @@ if (chatUserModalEl) {
         respect: parts && parts[2] != null ? parts[2] : null,
         friends: parts && parts[3] != null ? parts[3] : null,
         referrals: parts && parts[4] != null ? parts[4] : null,
+        isClubAdmin: false,
         isSelfProfile: !!isSelfProfile,
       };
     });
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
@@ -803,6 +903,8 @@ if (chatUserModalEl) {
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
@@ -827,8 +929,11 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
     if (key.indexOf("король") >= 0) return "Считаются только первые места в клубных турнирах. У достижения есть уровни: чем больше побед, тем выше уровень карточки.";
+    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
+    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("миллион") >= 0) return "Суммируются все призовые игрока из клубной турнирной истории. У достижения есть уровни по общей сумме выигрышей.";
@@ -971,6 +1076,20 @@ if (chatUserModalEl) {
       '<span class="chat-user-modal__achievement-stars" aria-hidden="true">' + escapeHtml(stars.trim()) + "</span>" +
     "</article>";
   }
+  function chatUserModalAchievementGroupClass(title) {
+    var key = String(title || "").toLowerCase();
+    if (key.indexOf("куб") >= 0) return "cups";
+    if (key.indexOf("соц") >= 0) return "social";
+    return "wins";
+  }
+  function chatUserModalAchievementGroupHtml(title, html) {
+    html = String(html || "");
+    if (!html) return "";
+    return '<section class="chat-user-modal__achievement-group chat-user-modal__achievement-group--' + escapeHtml(chatUserModalAchievementGroupClass(title)) + '">' +
+      '<h5 class="chat-user-modal__achievement-group-title">' + escapeHtml(title) + "</h5>" +
+      '<div class="chat-user-modal__achievement-group-list">' + html + "</div>" +
+    "</section>";
+  }
   function chatUserModalSeasonCupRows(seasonKey, rows) {
     if (seasonKey === "summer") return [];
     rows = Array.isArray(rows) ? rows : [];
@@ -1033,9 +1152,14 @@ if (chatUserModalEl) {
     var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
     var clubChoice = Array.isArray(results && results[5]) ? results[5] : [];
     metrics = metrics || {};
+    if (metrics.isClubAdmin) {
+      return chatUserModalAchievementGroupHtml("Социальные", chatUserModalAchievementCardHtml("★", "Админ клуба", [{ label: "Команда клуба" }], {
+        info: "Особая клубная ачивка для администраторов клуба. Для Вики и Ани остальные достижения скрыты.",
+      }));
+    }
     var tournamentStats = metrics.tournaments || {};
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
-      return chatUserModalSummerCupCardHtml();
+      return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml());
     }
     var seasons = [
       { key: "summer", rows: results && results[0] },
@@ -1066,7 +1190,15 @@ if (chatUserModalEl) {
       ? [{ label: "Первая победа в турнире" }]
       : [];
     var monthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.monthlyChampions);
-    var html =
+    var cupsHtml =
+      chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
+        extraClass: "chat-user-modal__achievement--season-cup",
+      }) +
+      chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
+        extraClass: "chat-user-modal__achievement--season-cup",
+      }) +
+      chatUserModalSummerCupCardHtml();
+    var winsHtml =
       chatUserModalAchievementCardHtml("1", "Первый занос", firstWinRows, {
         placeholder: "Нет побед",
       }) +
@@ -1083,10 +1215,10 @@ if (chatUserModalEl) {
           lockedLabel: "До 5 побед",
         },
       }) +
-      chatUserModalAchievementCardHtml("₽", "Большой занос 50к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {
+      chatUserModalAchievementCardHtml("₽", "Занос от 50 до 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {
         placeholder: "50к-99к",
       }) +
-      chatUserModalAchievementCardHtml("₽", "Большой занос 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 3), {
+      chatUserModalAchievementCardHtml("₽", "Занос от 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 3), {
         placeholder: "100к+",
       }) +
       chatUserModalAchievementCardHtml("₽", "Миллионер клуба", [], {
@@ -1106,6 +1238,10 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("★", "Чемпион месяца", monthChampionRows, {
         placeholder: "Нет месяца",
       }) +
+      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
+      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("10", "Топ10", top10);
+    var socialHtml =
       chatUserModalAchievementCardHtml("🎟", "Золотой билет", [], {
         tier: {
           value: metrics.raffleWins || 0,
@@ -1157,23 +1293,17 @@ if (chatUserModalEl) {
           lockedLabel: metrics.referrals == null ? "Только в своем профиле" : "Нет приглашенных",
         },
       }) +
-      chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
-        extraClass: "chat-user-modal__achievement--season-cup",
-      }) +
-      chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
-        extraClass: "chat-user-modal__achievement--season-cup",
-      }) +
-      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
-      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
       chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
         placeholder: "Топ3 в розыгрыше",
       }) +
       chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
         placeholder: "Топ-1 месяца",
-      }) +
-      chatUserModalAchievementCardHtml("10", "Топ10", top10) +
-      chatUserModalSummerCupCardHtml();
-    return html;
+      });
+    return [
+      chatUserModalAchievementGroupHtml("Кубки", cupsHtml),
+      chatUserModalAchievementGroupHtml("Заносы", winsHtml),
+      chatUserModalAchievementGroupHtml("Социальные", socialHtml),
+    ].join("");
   }
   function renderChatUserModalAchievements(results, ratingNick, metrics) {
     if (!modalAchievements || !modalAchievementsList) return;
@@ -1664,6 +1794,7 @@ if (chatUserModalEl) {
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
     chatUserModalAchievementIdentity = null;
+    syncChatUserModalGender("male");
     var cachedBlockedByMe = false;
     try {
       cachedBlockedByMe = !!(window.__pokerChatDmBlockStateByPeer && window.__pokerChatDmBlockStateByPeer[String(id)] === true);
@@ -1753,6 +1884,7 @@ if (chatUserModalEl) {
           else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
         }
         var modalStatusLevel = data && data.level != null ? data.level : (fallbackStatusLevel || null);
+        if (data && data.ok) syncChatUserModalGender(data.profileGender || data.gender || data.sex || "male");
         if (!applyChatUserModalStatusLevel(modalStatusLevel) && modalLevelText) {
           modalLevelText.textContent = openingSelfProfile
             ? "Обновите свой уровень во вкладке Профиль Poker21"
@@ -1802,6 +1934,7 @@ if (chatUserModalEl) {
       })
       .catch(function () {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
+        syncChatUserModalGender("male");
         if (modalPersonal) modalPersonal.textContent = "—";
         if (modalPlayerStats) renderChatUserModalPlayerStats(null);
         if (modalLastSeen) modalLastSeen.hidden = true;
