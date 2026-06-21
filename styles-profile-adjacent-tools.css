@@ -442,14 +442,14 @@ html:has(body[data-view="equilator"]):not(.app-view-chat) #app.app,
 html.app-view-browser-local.app-view-equilator-html-scroll:not(.app-view-chat) #app.app,
 html.app-view-equilator-html-scroll #app.app {
   display: flex !important;
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   align-self: stretch !important;
   min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
   padding-bottom: 0 !important;
   overflow: hidden !important;
 }
@@ -458,7 +458,7 @@ html.app-view-browser-local.app-view-equilator-html-scroll:not(.app-view-chat) #
 html.app-view-equilator-html-scroll .card,
 body[data-view="equilator"] #app.app .card {
   display: flex !important;
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   flex-direction: column !important;
   flex-shrink: 1 !important;
   width: 100% !important;
@@ -473,7 +473,7 @@ html.app-view-browser-local.app-view-equilator-html-scroll:not(.app-view-chat) .
 html:has(body[data-view="equilator"]) .card .card__content,
 html.app-view-equilator-html-scroll .card .card__content,
 body[data-view="equilator"] #app.app .card .card__content {
-  flex: 1 1 auto !important;
+  flex: 1 1 0 !important;
   min-width: 0 !important;
   min-height: 0 !important;
   height: 100% !important;

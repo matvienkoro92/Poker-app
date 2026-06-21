@@ -696,7 +696,8 @@ body[data-view="home"] .bottom-nav__item.bottom-nav__item--active .bottom-nav__e
 }
 
 /*
- * Скачать, главная, депозит, рейтинг весны, розыгрыши, профиль, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
+ * Скачать, главная, депозит, рейтинг весны, розыгрыши, профиль, эквилятор,
+ * раздача дня, видеоуроки — финальный слой каскада: #app + data-view сильнее .card:has без #app и чуть выше одиночного html.class.
  * Дублирует ключевые свойства на случай правок выше по файлу.
  */
 html:has(body[data-view="download"]),
@@ -711,6 +712,10 @@ html:has(body[data-view="summer-rating"]),
 html.app-view-summer-rating-html-scroll,
 html:has(body[data-view="raffles"]),
 html.app-view-raffles-html-scroll,
+html:has(body[data-view="equilator"]),
+html.app-view-equilator-html-scroll,
+html:has(body[data-view="daily-poker"]),
+html.app-view-daily-poker-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
@@ -745,6 +750,14 @@ html:has(body[data-view="raffles"]) body,
 html:has(body[data-view="raffles"]) body.app-view-long-scroll,
 html.app-view-raffles-html-scroll body,
 html.app-view-raffles-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="equilator"]) body,
+html:has(body[data-view="equilator"]) body.app-view-long-scroll,
+html.app-view-equilator-html-scroll body,
+html.app-view-equilator-html-scroll body.app-view-long-scroll,
+html:has(body[data-view="daily-poker"]) body,
+html:has(body[data-view="daily-poker"]) body.app-view-long-scroll,
+html.app-view-daily-poker-html-scroll body,
+html.app-view-daily-poker-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="profile"]) body,
 html:has(body[data-view="profile"]) body.app-view-long-scroll,
 html.app-view-profile-html-scroll body,
@@ -768,6 +781,8 @@ body[data-view="cashout"] #app.app,
 body[data-view="spring-rating"] #app.app,
 body[data-view="summer-rating"] #app.app,
 body[data-view="raffles"] #app.app,
+body[data-view="equilator"] #app.app,
+body[data-view="daily-poker"] #app.app,
 body[data-view="profile"] #app.app,
 body[data-view="video-lessons"] #app.app {
   flex: 1 1 0 !important;
@@ -788,6 +803,8 @@ body[data-view="cashout"] #app.app .card,
 body[data-view="spring-rating"] #app.app .card,
 body[data-view="summer-rating"] #app.app .card,
 body[data-view="raffles"] #app.app .card,
+body[data-view="equilator"] #app.app .card,
+body[data-view="daily-poker"] #app.app .card,
 body[data-view="profile"] #app.app .card,
 body[data-view="video-lessons"] #app.app .card {
   flex: 1 1 0 !important;
@@ -826,6 +843,8 @@ body[data-view="cashout"] #app.app .card .card__content,
 body[data-view="spring-rating"] #app.app .card .card__content,
 body[data-view="summer-rating"] #app.app .card .card__content,
 body[data-view="raffles"] #app.app .card .card__content,
+body[data-view="equilator"] #app.app .card .card__content,
+body[data-view="daily-poker"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content {
   flex: 1 1 0 !important;
   min-height: 0 !important;
@@ -854,6 +873,8 @@ body[data-view="cashout"] #app.app .card .card__content > .view--active[data-vie
 body[data-view="spring-rating"] #app.app .card .card__content > .view--active[data-view="spring-rating"],
 body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"],
 body[data-view="raffles"] #app.app .card .card__content > .view--active[data-view="raffles"],
+body[data-view="equilator"] #app.app .card .card__content > .view--active[data-view="equilator"],
+body[data-view="daily-poker"] #app.app .card .card__content > .view--active[data-view="daily-poker"],
 body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
 body[data-view="video-lessons"] #app.app .card .card__content > .view--active[data-view="video-lessons"] {
   flex: 0 0 auto !important;
@@ -875,6 +896,10 @@ html:has(body[data-view="summer-rating"]),
 html.app-view-summer-rating-html-scroll,
 html:has(body[data-view="raffles"]),
 html.app-view-raffles-html-scroll,
+html:has(body[data-view="equilator"]),
+html.app-view-equilator-html-scroll,
+html:has(body[data-view="daily-poker"]),
+html.app-view-daily-poker-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
@@ -891,6 +916,10 @@ html:has(body[data-view="summer-rating"]) body,
 html.app-view-summer-rating-html-scroll body,
 html:has(body[data-view="raffles"]) body,
 html.app-view-raffles-html-scroll body,
+html:has(body[data-view="equilator"]) body,
+html.app-view-equilator-html-scroll body,
+html:has(body[data-view="daily-poker"]) body,
+html.app-view-daily-poker-html-scroll body,
 html:has(body[data-view="profile"]) body,
 html.app-view-profile-html-scroll body,
 html:has(body[data-view="video-lessons"]) body,
@@ -904,6 +933,8 @@ body[data-view="cashout"] #app.app .card .card__content,
 body[data-view="spring-rating"] #app.app .card .card__content,
 body[data-view="summer-rating"] #app.app .card .card__content,
 body[data-view="raffles"] #app.app .card .card__content,
+body[data-view="equilator"] #app.app .card .card__content,
+body[data-view="daily-poker"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content,
 body[data-view="video-lessons"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
@@ -1606,7 +1637,19 @@ html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[
 
 body[data-view="home"] #app.app,
 html:has(body[data-view="home"]) #app.app,
-html.app-view-home-html-scroll #app.app {
+html.app-view-home-html-scroll #app.app,
+body[data-view="raffles"] #app.app,
+html:has(body[data-view="raffles"]) #app.app,
+html.app-view-raffles-html-scroll #app.app,
+#app:has(.view--active[data-view="raffles"]),
+body[data-view="equilator"] #app.app,
+html:has(body[data-view="equilator"]) #app.app,
+html.app-view-equilator-html-scroll #app.app,
+#app:has(.view--active[data-view="equilator"]),
+body[data-view="daily-poker"] #app.app,
+html:has(body[data-view="daily-poker"]) #app.app,
+html.app-view-daily-poker-html-scroll #app.app,
+#app:has(.view--active[data-view="daily-poker"]) {
   align-items: stretch !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -1614,7 +1657,19 @@ html.app-view-home-html-scroll #app.app {
 
 body[data-view="home"] #app.app .card,
 html:has(body[data-view="home"]) #app.app .card,
-html.app-view-home-html-scroll #app.app .card {
+html.app-view-home-html-scroll #app.app .card,
+body[data-view="raffles"] #app.app .card,
+html:has(body[data-view="raffles"]) #app.app .card,
+html.app-view-raffles-html-scroll #app.app .card,
+#app:has(.view--active[data-view="raffles"]) > .card,
+body[data-view="equilator"] #app.app .card,
+html:has(body[data-view="equilator"]) #app.app .card,
+html.app-view-equilator-html-scroll #app.app .card,
+#app:has(.view--active[data-view="equilator"]) > .card,
+body[data-view="daily-poker"] #app.app .card,
+html:has(body[data-view="daily-poker"]) #app.app .card,
+html.app-view-daily-poker-html-scroll #app.app .card,
+#app:has(.view--active[data-view="daily-poker"]) > .card {
   width: 100% !important;
   max-width: none !important;
   margin-left: 0 !important;
@@ -1628,7 +1683,19 @@ html.app-view-home-html-scroll #app.app .card {
 
 body[data-view="home"] #app.app .card .card__header,
 html:has(body[data-view="home"]) #app.app .card .card__header,
-html.app-view-home-html-scroll #app.app .card .card__header {
+html.app-view-home-html-scroll #app.app .card .card__header,
+body[data-view="raffles"] #app.app .card .card__header,
+html:has(body[data-view="raffles"]) #app.app .card .card__header,
+html.app-view-raffles-html-scroll #app.app .card .card__header,
+#app:has(.view--active[data-view="raffles"]) > .card > .card__header,
+body[data-view="equilator"] #app.app .card .card__header,
+html:has(body[data-view="equilator"]) #app.app .card .card__header,
+html.app-view-equilator-html-scroll #app.app .card .card__header,
+#app:has(.view--active[data-view="equilator"]) > .card > .card__header,
+body[data-view="daily-poker"] #app.app .card .card__header,
+html:has(body[data-view="daily-poker"]) #app.app .card .card__header,
+html.app-view-daily-poker-html-scroll #app.app .card .card__header,
+#app:has(.view--active[data-view="daily-poker"]) > .card > .card__header {
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -1637,7 +1704,19 @@ html.app-view-home-html-scroll #app.app .card .card__header {
 
 body[data-view="home"] #app.app .card .card__content,
 html:has(body[data-view="home"]) #app.app .card .card__content,
-html.app-view-home-html-scroll #app.app .card .card__content {
+html.app-view-home-html-scroll #app.app .card .card__content,
+body[data-view="raffles"] #app.app .card .card__content,
+html:has(body[data-view="raffles"]) #app.app .card .card__content,
+html.app-view-raffles-html-scroll #app.app .card .card__content,
+#app:has(.view--active[data-view="raffles"]) > .card > .card__content,
+body[data-view="equilator"] #app.app .card .card__content,
+html:has(body[data-view="equilator"]) #app.app .card .card__content,
+html.app-view-equilator-html-scroll #app.app .card .card__content,
+#app:has(.view--active[data-view="equilator"]) > .card > .card__content,
+body[data-view="daily-poker"] #app.app .card .card__content,
+html:has(body[data-view="daily-poker"]) #app.app .card .card__content,
+html.app-view-daily-poker-html-scroll #app.app .card .card__content,
+#app:has(.view--active[data-view="daily-poker"]) > .card > .card__content {
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -1647,7 +1726,19 @@ html.app-view-home-html-scroll #app.app .card .card__content {
 
 body[data-view="home"] #app.app .card .card__content > .view--active[data-view="home"],
 html:has(body[data-view="home"]) #app.app .card .card__content > .view--active[data-view="home"],
-html.app-view-home-html-scroll #app.app .card .card__content > .view--active[data-view="home"] {
+html.app-view-home-html-scroll #app.app .card .card__content > .view--active[data-view="home"],
+body[data-view="raffles"] #app.app .card .card__content > .view--active[data-view="raffles"],
+html:has(body[data-view="raffles"]) #app.app .card .card__content > .view--active[data-view="raffles"],
+html.app-view-raffles-html-scroll #app.app .card .card__content > .view--active[data-view="raffles"],
+#app:has(.view--active[data-view="raffles"]) > .card > .card__content > .view--active[data-view="raffles"],
+body[data-view="equilator"] #app.app .card .card__content > .view--active[data-view="equilator"],
+html:has(body[data-view="equilator"]) #app.app .card .card__content > .view--active[data-view="equilator"],
+html.app-view-equilator-html-scroll #app.app .card .card__content > .view--active[data-view="equilator"],
+#app:has(.view--active[data-view="equilator"]) > .card > .card__content > .view--active[data-view="equilator"],
+body[data-view="daily-poker"] #app.app .card .card__content > .view--active[data-view="daily-poker"],
+html:has(body[data-view="daily-poker"]) #app.app .card .card__content > .view--active[data-view="daily-poker"],
+html.app-view-daily-poker-html-scroll #app.app .card .card__content > .view--active[data-view="daily-poker"],
+#app:has(.view--active[data-view="daily-poker"]) > .card > .card__content > .view--active[data-view="daily-poker"] {
   width: 100% !important;
   padding-left: var(--app-content-edge-inset, 5px) !important;
   padding-right: var(--app-content-edge-inset, 5px) !important;

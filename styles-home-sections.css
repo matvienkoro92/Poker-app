@@ -480,7 +480,9 @@ button.logo.logo--welcome:focus-visible {
 .card:has(.view--active[data-view="cashout"]) .card__content,
 .card:has(.view--active[data-view="spring-rating"]) .card__content,
 .card:has(.view--active[data-view="summer-rating"]) .card__content,
-.card:has(.view--active[data-view="raffles"]) .card__content {
+.card:has(.view--active[data-view="raffles"]) .card__content,
+.card:has(.view--active[data-view="equilator"]) .card__content,
+.card:has(.view--active[data-view="daily-poker"]) .card__content {
   min-width: 0;
 }
 /* fallback для главной без :has(); при внутреннем скролле класс app-view-home-html-scroll — не трогаем overflow */

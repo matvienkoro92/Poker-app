@@ -371,6 +371,20 @@
       consolationStatsHtml;
   }
 
+  function renderHeroStats(data) {
+    var uniqueEl = $("dailyPokerTotalUniquePlayers");
+    var spinsEl = $("dailyPokerTotalSpins");
+    var prizeEl = $("dailyPokerTotalPrize");
+    if (!uniqueEl && !spinsEl && !prizeEl) return;
+    var stats = data && data.spinStats && typeof data.spinStats === "object" ? data.spinStats : (data || {});
+    var totalUnique = Math.max(0, parseInt(stats.totalUniquePlayers || (data && data.totalUniquePlayers) || "0", 10) || 0);
+    var totalSpins = Math.max(0, parseInt(stats.totalSpins || (data && data.totalSpins) || "0", 10) || 0);
+    var totalPrize = Math.max(0, parseInt((data && data.totalPrizeRubles) || "0", 10) || 0);
+    if (uniqueEl) uniqueEl.textContent = formatCompactAmount(totalUnique);
+    if (spinsEl) spinsEl.textContent = formatCompactAmount(totalSpins);
+    if (prizeEl) prizeEl.textContent = formatRubles(totalPrize);
+  }
+
   function winnerHtml(winner, index) {
     var row = winner || {};
     var rank = Math.max(1, index + 1);
@@ -399,6 +413,7 @@
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
     var totalRubles = Math.max(0, parseInt(data && data.totalPrizeRubles || "0", 10) || 0);
     if (meta) meta.textContent = totalRubles ? "За всё время: " + formatRubles(totalRubles) : "За всё время";
+    renderHeroStats(data);
     renderSpinStats(data);
     if (!winners.length) {
       setWinnersMessage("Рублёвых выигрышей пока нет.");
@@ -411,6 +426,7 @@
     var base = apiBase();
     if (!base) {
       setWinnersMessage("Не удалось загрузить победителей.");
+      renderHeroStats(null);
       renderSpinStats(null);
       return Promise.resolve(false);
     }
@@ -423,6 +439,7 @@
       })
       .catch(function () {
         setWinnersMessage("Не удалось загрузить победителей.", true);
+        renderHeroStats(null);
         renderSpinStats(null);
         return false;
       });

@@ -446,6 +446,9 @@
     0 0 16px rgba(255, 104, 0, 0.2);
   transform: translateX(-50%);
 }
+.profile-hero-gender--has-feedback {
+  bottom: 24px;
+}
 .profile-hero-gender__btn {
   flex: 0 0 38px;
   min-width: 38px;
@@ -899,6 +902,9 @@
     inset 0 0 0 12px rgba(15, 23, 42, 0.44);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+.profile-avatar-block__img--pending {
+  color: transparent;
 }
 .profile-avatar-block__respect-btn {
   display: inline-flex;

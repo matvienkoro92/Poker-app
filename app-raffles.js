@@ -1319,6 +1319,9 @@ function initRaffles() {
         var bottom = split && split[2] ? split[2] : "";
         return (
           '<span class="raffles-active-chooser__buyin-tile">' +
+          '<span class="raffles-active-chooser__buyin-tile-group">Группа ' +
+          (index + 1) +
+          "</span>" +
           '<span class="raffles-active-chooser__buyin-tile-icon raffles-active-chooser__buyin-tile-icon--' +
           (index % 2 ? "gold" : "violet") +
           '" aria-hidden="true"></span>' +

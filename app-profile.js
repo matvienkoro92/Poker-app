@@ -210,6 +210,7 @@ function initProfilePublicCardButton() {
 
 var profilePublicShowcaseData = null;
 var profilePublicShowcaseStatus = null;
+var profilePublicShowcaseArtSeq = 0;
 var profileHeroGenderValue = "male";
 var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
 
@@ -269,6 +270,21 @@ function renderProfileHeroGenderControl(saving) {
   });
 }
 
+function setProfileHeroGenderFeedback(text, timeout) {
+  var feedback = document.getElementById("profileHeroGenderFeedback");
+  var row = document.getElementById("profileHeroGender");
+  var value = String(text || "").trim();
+  if (feedback) feedback.textContent = value;
+  if (row) row.classList.toggle("profile-hero-gender--has-feedback", !!value);
+  if (value && timeout) {
+    setTimeout(function () {
+      if (!feedback || String(feedback.textContent || "").trim() === value) {
+        setProfileHeroGenderFeedback("");
+      }
+    }, timeout);
+  }
+}
+
 function setProfileHeroGender(value, opts) {
   opts = opts || {};
   profileHeroGenderValue = normalizeProfileHeroGender(value);
@@ -282,16 +298,17 @@ function setProfileHeroGender(value, opts) {
     genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
     genderEl.hidden = false;
   }
-  profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(profilePublicShowcaseData || {}));
+  if (opts.syncArt !== false) {
+    profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(profilePublicShowcaseData || {}));
+  }
 }
 
 function saveProfileHeroGender(value) {
   var next = normalizeProfileHeroGender(value);
   var prev = normalizeProfileHeroGender(profileHeroGenderValue);
-  var feedback = document.getElementById("profileHeroGenderFeedback");
   if (next === prev) return;
   setProfileHeroGender(next, { saving: true });
-  if (feedback) feedback.textContent = "Сохраняем...";
+  setProfileHeroGenderFeedback("Сохраняем...");
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   var canServer =
     !!base &&
@@ -299,10 +316,7 @@ function saveProfileHeroGender(value) {
       (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
   if (!canServer) {
     renderProfileHeroGenderControl(false);
-    if (feedback) {
-      feedback.textContent = "Сохранено локально";
-      setTimeout(function () { feedback.textContent = ""; }, 1800);
-    }
+    setProfileHeroGenderFeedback("Сохранено локально", 1800);
     return;
   }
   fetch(base + "/api/users", {
@@ -318,22 +332,18 @@ function saveProfileHeroGender(value) {
     .then(function (data) {
       if (!data || !data.ok) {
         setProfileHeroGender(prev);
-        if (feedback) feedback.textContent = (data && data.error) || "Ошибка";
+        setProfileHeroGenderFeedback((data && data.error) || "Ошибка", 2200);
       } else {
         pokerProfileUserInfoCache = null;
         pokerProfileUserInfoCacheAt = 0;
-        if (feedback) feedback.textContent = "Сохранено";
+        setProfileHeroGenderFeedback("Сохранено", 1800);
       }
       renderProfileHeroGenderControl(false);
-      if (feedback) setTimeout(function () { feedback.textContent = ""; }, 1800);
     })
     .catch(function () {
       setProfileHeroGender(prev);
       renderProfileHeroGenderControl(false);
-      if (feedback) {
-        feedback.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети";
-        setTimeout(function () { feedback.textContent = ""; }, 2200);
-      }
+      setProfileHeroGenderFeedback(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети", 2200);
     });
 }
 
@@ -348,7 +358,7 @@ function initProfileHeroGenderControl() {
       saveProfileHeroGender(btn.getAttribute("data-profile-gender"));
     });
   }
-  setProfileHeroGender(profileHeroGenderValue || profileReadStoredHeroGender());
+  setProfileHeroGender(profileHeroGenderValue || profileReadStoredHeroGender(), { syncArt: false });
 }
 
 function profilePublicShowcaseFormatXp(value) {
@@ -405,33 +415,86 @@ function profilePublicShowcaseApplyAvatar(title) {
   }
 }
 
-function profilePublicShowcaseSyncArt(nick) {
+function profilePublicShowcaseHideArt(artImg) {
+  if (!artImg) return;
+  artImg.onerror = null;
+  artImg.onload = null;
+  artImg.removeAttribute("src");
+  artImg.alt = "";
+  artImg.hidden = true;
+  artImg.style.display = "none";
+  artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
+}
+
+function profilePublicShowcaseSyncArt(nick, opts) {
+  opts = opts || {};
   var artWrap = document.getElementById("profilePublicRatingArt");
   var artImg = document.getElementById("profilePublicRatingArtImg");
   if (!artWrap || !artImg) return;
   var art = null;
-  if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+  if (!opts.forceDefault && nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
     try {
       art = window.pokerGetSummerRatingPlayerArt(nick);
     } catch (eProfilePublicArt) {}
   }
-  if (!art || !art.src) art = profileDefaultHeroArt(profileHeroGenderValue);
+  if (!art || !art.src) {
+    if (opts.allowDefault === false) {
+      profilePublicShowcaseArtSeq += 1;
+      profilePublicShowcaseHideArt(artImg);
+      return;
+    }
+    art = profileDefaultHeroArt(profileHeroGenderValue);
+  }
   artWrap.hidden = false;
   if (art && art.src) {
-    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
-    artImg.classList.toggle("chat-user-modal__rating-art-img--default-hero", art.defaultHero === true);
-    artImg.src = art.src;
-    artImg.alt = "Образ рейтинга " + (art.nick || nick);
-    artImg.hidden = false;
-    artImg.style.display = "";
-  } else {
+    var seq = (profilePublicShowcaseArtSeq += 1);
+    var alt = "Образ рейтинга " + (art.nick || nick || "");
+    var nextSrc = art.src;
+    var currentSrc = artImg.currentSrc || artImg.src || "";
+    var resolvedSrc = nextSrc;
+    try {
+      resolvedSrc = new URL(nextSrc, document.baseURI).href;
+    } catch (eProfilePublicArtUrl) {}
     artImg.onerror = null;
     artImg.onload = null;
-    artImg.removeAttribute("src");
-    artImg.alt = "";
+    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    artImg.classList.toggle("chat-user-modal__rating-art-img--default-hero", art.defaultHero === true);
+    artImg.alt = alt;
+    if (currentSrc === resolvedSrc && artImg.complete && artImg.naturalWidth > 0) {
+      artImg.hidden = false;
+      artImg.style.display = "";
+      return;
+    }
     artImg.hidden = true;
     artImg.style.display = "none";
-    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
+    artImg.onload = function () {
+      if (seq !== profilePublicShowcaseArtSeq) return;
+      artImg.hidden = false;
+      artImg.style.display = "";
+    };
+    artImg.onerror = function () {
+      if (seq !== profilePublicShowcaseArtSeq) return;
+      if (art.defaultHero !== true && opts.allowDefault !== false) {
+        profilePublicShowcaseSyncArt("", { forceDefault: true });
+        return;
+      }
+      profilePublicShowcaseHideArt(artImg);
+    };
+    artImg.src = nextSrc;
+    if (artImg.complete && artImg.naturalWidth > 0) {
+      artImg.onload();
+    }
+  } else {
+    profilePublicShowcaseArtSeq += 1;
+    profilePublicShowcaseHideArt(artImg);
+  }
+}
+
+function profilePublicShowcaseSyncKnownArt(data) {
+  if (data && typeof data === "object") {
+    profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(data));
+  } else {
+    profilePublicShowcaseSyncArt("", { allowDefault: false });
   }
 }
 
@@ -511,7 +574,7 @@ function refreshProfilePublicShowcase(profileData) {
   var lastSeen = document.getElementById("profilePublicLastSeen");
   var genderEl = document.getElementById("profilePublicGender");
   var respect = document.getElementById("profilePublicRespectVal");
-  setProfileHeroGender(profileGenderFromData(data));
+  setProfileHeroGender(profileGenderFromData(data), { syncArt: false });
   if (titleEl) titleEl.textContent = title;
   profilePublicShowcaseApplyAvatar(title);
   if (verified) verified.classList.toggle("chat-user-modal__verified--hidden", data && data.pokerPlusVerified !== true);
@@ -538,7 +601,7 @@ function refreshProfilePublicShowcase(profileData) {
     var raw = rv ? String(rv.textContent || "").trim() : "";
     respect.textContent = raw || "\u2014";
   }
-  profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(data));
+  profilePublicShowcaseSyncKnownArt(profilePublicShowcaseData);
   profilePublicShowcaseApplyStatus(profilePublicShowcaseStatusFromData(data));
 }
 

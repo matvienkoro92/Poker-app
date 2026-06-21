@@ -287,32 +287,76 @@ function initProfileFriends() {
     return typeof getMainDocumentScrollY === "function" ? getMainDocumentScrollY() : (window.pageYOffset || 0);
   }
 
-  function restoreProfileFriendsScrollY(y) {
+  function profileFriendsHasUserScrolledSince(mark) {
+    if (!mark) return false;
+    try {
+      return (
+        typeof window.pokerGetLastMainScrollUserIntentAt === "function" &&
+        window.pokerGetLastMainScrollUserIntentAt() > mark
+      );
+    } catch (eIntent) {
+      return false;
+    }
+  }
+
+  function restoreProfileFriendsScrollY(y, mark) {
     if (y == null) return;
+    if (profileFriendsHasUserScrolledSince(mark)) return;
     if (typeof setMainDocumentScrollY === "function") setMainDocumentScrollY(y);
     else if (typeof window.scrollTo === "function") window.scrollTo(0, y);
   }
 
-  function restoreProfileFriendsScrollSoon(y) {
-    restoreProfileFriendsScrollY(y);
-    setTimeout(function () { restoreProfileFriendsScrollY(y); }, 0);
+  function restoreProfileFriendsScrollSoon(y, mark) {
+    restoreProfileFriendsScrollY(y, mark);
+    setTimeout(function () { restoreProfileFriendsScrollY(y, mark); }, 0);
     var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
-    raf(function () { restoreProfileFriendsScrollY(y); });
+    raf(function () { restoreProfileFriendsScrollY(y, mark); });
   }
 
   function initProfileFriendsScrollGuard() {
     if (!panelEl || panelEl.dataset.friendsScrollGuardBound === "1") return;
     panelEl.dataset.friendsScrollGuardBound = "1";
-    var beforeY = null;
-    var remember = function () {
-      beforeY = readProfileFriendsScrollY();
+    var start = null;
+    var readPoint = function (event) {
+      var touch = event && event.changedTouches && event.changedTouches[0]
+        ? event.changedTouches[0]
+        : event && event.touches && event.touches[0]
+          ? event.touches[0]
+          : event;
+      return {
+        x: touch && touch.clientX != null ? touch.clientX : 0,
+        y: touch && touch.clientY != null ? touch.clientY : 0,
+      };
+    };
+    var remember = function (event) {
+      var point = readPoint(event);
+      start = {
+        x: point.x,
+        y: point.y,
+        scrollY: readProfileFriendsScrollY(),
+        at: Date.now(),
+        moved: false,
+      };
+    };
+    var markMoved = function (event) {
+      if (!start) return;
+      var point = readPoint(event);
+      if (Math.abs(point.x - start.x) > 8 || Math.abs(point.y - start.y) > 8) start.moved = true;
     };
     ["pointerdown", "mousedown", "touchstart"].forEach(function (eventName) {
       panelEl.addEventListener(eventName, remember, { capture: true, passive: true });
     });
+    ["pointermove", "mousemove", "touchmove"].forEach(function (eventName) {
+      panelEl.addEventListener(eventName, markMoved, { capture: true, passive: true });
+    });
     ["click", "touchend"].forEach(function (eventName) {
-      panelEl.addEventListener(eventName, function () {
-        restoreProfileFriendsScrollSoon(beforeY);
+      panelEl.addEventListener(eventName, function (event) {
+        if (!start) return;
+        markMoved(event);
+        var currentY = readProfileFriendsScrollY();
+        var isTap = !start.moved && Math.abs(currentY - start.scrollY) <= 2 && Date.now() - start.at < 800;
+        if (isTap) restoreProfileFriendsScrollSoon(start.scrollY, start.at);
+        start = null;
       }, { capture: true, passive: true });
     });
   }
@@ -665,7 +709,8 @@ function initProfileFriends() {
       e.preventDefault();
       e.stopPropagation();
       var scrollY = readProfileFriendsScrollY();
-      var restoreScroll = function () { restoreProfileFriendsScrollSoon(scrollY); };
+      var scrollMark = Date.now();
+      var restoreScroll = function () { restoreProfileFriendsScrollSoon(scrollY, scrollMark); };
       var raw = String(searchInput.value || "").trim();
       if (!raw) {
         searchFoundProfile = null;

@@ -88,10 +88,15 @@ function pokerWriteAvatarCacheEntry(avatarDataUrlOrEmpty) {
 
 function pokerApplyProfileAvatarMirror(src) {
   var m = document.getElementById("profileAvatarMirror");
-  if (m && src) {
+  if (!m) return;
+  if (src) {
     m.src = src;
     m.alt = "Покерист";
+    return;
   }
+  try {
+    m.removeAttribute("src");
+  } catch (eMirror) {}
 }
 
 function loadHeaderAvatar() {

@@ -19,14 +19,31 @@ function initProfileAvatar() {
     }
   }
 
+  function setProfileAvatarPending() {
+    avatarEl.classList.add("profile-avatar-block__img--pending");
+    avatarEl.dataset.avatarId = "";
+    try {
+      avatarEl.removeAttribute("src");
+    } catch (ePendingSrc) {}
+    pokerApplyProfileAvatarMirror("");
+  }
+
+  function applyProfileAvatarSrc(src, avatarId) {
+    var safeSrc = String(src || "").trim();
+    if (!safeSrc) return;
+    avatarEl.classList.remove("profile-avatar-block__img--pending");
+    avatarEl.src = safeSrc;
+    avatarEl.alt = "Аватар";
+    avatarEl.dataset.avatarId = avatarId || pokerFindPresetAvatarIdBySrc(safeSrc) || "";
+    pokerApplyProfileAvatarMirror(safeSrc);
+  }
+
   function fetchProfileAvatarFromServer() {
     if (uploadInProgress || avatarPickSessionActive) return;
     base = base || getApiBase();
     if (!base) {
       revokePendingObjectUrl();
-      avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
-      avatarEl.dataset.avatarId = "";
-      pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+      applyProfileAvatarSrc(POKER_PROFILE_AVATAR_PLACEHOLDER, "");
       return;
     }
     inputEl.value = "";
@@ -35,17 +52,13 @@ function initProfileAvatar() {
       if (uploadInProgress || avatarPickSessionActive) return;
       revokePendingObjectUrl();
       if (cached.avatar) {
-        avatarEl.src = cached.avatar;
-        avatarEl.alt = "Аватар";
-        avatarEl.dataset.avatarId = pokerFindPresetAvatarIdBySrc(cached.avatar) || "";
-        pokerApplyProfileAvatarMirror(cached.avatar);
+        applyProfileAvatarSrc(cached.avatar, pokerFindPresetAvatarIdBySrc(cached.avatar) || "");
       } else {
-        avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
-        avatarEl.dataset.avatarId = "";
-        pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+        applyProfileAvatarSrc(POKER_PROFILE_AVATAR_PLACEHOLDER, "");
       }
       return;
     }
+    setProfileAvatarPending();
     var aq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     var tsSep = aq.indexOf("?") === 0 ? "&" : "?";
     fetch(base + "/api/avatar" + aq + tsSep + "_ts=" + Date.now(), { cache: "no-store" })
@@ -57,22 +70,16 @@ function initProfileAvatar() {
         }
         if (data && data.ok && data.avatar) {
           revokePendingObjectUrl();
-          avatarEl.src = data.avatar;
-          avatarEl.alt = "Аватар";
-          avatarEl.dataset.avatarId = data.avatarId || pokerFindPresetAvatarIdBySrc(data.avatar) || "";
-          pokerApplyProfileAvatarMirror(data.avatar);
+          applyProfileAvatarSrc(data.avatar, data.avatarId || "");
         } else {
           revokePendingObjectUrl();
-          avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
-          avatarEl.dataset.avatarId = "";
-          pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+          applyProfileAvatarSrc(POKER_PROFILE_AVATAR_PLACEHOLDER, "");
         }
       })
       .catch(function () {
         if (!uploadInProgress && !avatarPickSessionActive) {
           revokePendingObjectUrl();
-          avatarEl.src = POKER_PROFILE_AVATAR_PLACEHOLDER;
-          pokerApplyProfileAvatarMirror(POKER_PROFILE_AVATAR_PLACEHOLDER);
+          applyProfileAvatarSrc(POKER_PROFILE_AVATAR_PLACEHOLDER, "");
         }
       });
   }
@@ -220,11 +227,8 @@ function initProfileAvatar() {
       .then(function (data) {
         if (data && data.ok && data.avatar) {
           var newSrc = data.avatar;
-          avatarEl.src = newSrc;
-          avatarEl.alt = "Аватар";
-          avatarEl.dataset.avatarId = data.avatarId || preset.id;
+          applyProfileAvatarSrc(newSrc, data.avatarId || preset.id);
           pokerWriteAvatarCacheEntry(newSrc);
-          pokerApplyProfileAvatarMirror(newSrc);
           loadHeaderAvatar();
           renderProfileAvatarChoiceGrid();
           closeProfileAvatarChoiceModal();
@@ -324,21 +328,19 @@ function initProfileAvatar() {
           try {
             /* Дважды подряд тот же data: URL — часть движков не перерисовывает img без сброса src. */
             if (String(avatarEl.src || "") === String(newSrc)) {
-              avatarEl.src = "";
+              avatarEl.removeAttribute("src");
               var rafA = window.requestAnimationFrame || function (fn) {
                 setTimeout(fn, 16);
               };
               rafA(function () {
-                avatarEl.src = newSrc;
+                applyProfileAvatarSrc(newSrc, "");
               });
             } else {
-              avatarEl.src = newSrc;
+              applyProfileAvatarSrc(newSrc, "");
             }
           } catch (eSrcA) {
-            avatarEl.src = newSrc;
+            applyProfileAvatarSrc(newSrc, "");
           }
-          avatarEl.alt = "Аватар";
-          pokerApplyProfileAvatarMirror(newSrc);
           loadHeaderAvatar();
           showAvatarFeedback("Фотография сохранена", false);
         } else {
@@ -438,8 +440,7 @@ function initProfileAvatar() {
     revokePendingObjectUrl();
     try {
       objectUrlPending = URL.createObjectURL(file);
-      avatarEl.src = objectUrlPending;
-      avatarEl.alt = "Аватар";
+      applyProfileAvatarSrc(objectUrlPending, "");
     } catch (eOb) {}
     resizeImage(file, 512, 512, 0.88, function (dataUrl) {
       try {
@@ -448,7 +449,7 @@ function initProfileAvatar() {
           resizeImage(file, 420, 420, 0.82, function (dataUrl2) {
             try {
               revokePendingObjectUrl();
-              avatarEl.src = dataUrl2;
+              applyProfileAvatarSrc(dataUrl2, "");
               try {
                 inputEl.value = "";
               } catch (eInp1) {}
@@ -464,7 +465,7 @@ function initProfileAvatar() {
           });
         } else {
           revokePendingObjectUrl();
-          avatarEl.src = dataUrl;
+          applyProfileAvatarSrc(dataUrl, "");
           try {
             inputEl.value = "";
           } catch (eInp3) {}

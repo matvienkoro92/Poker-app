@@ -299,7 +299,7 @@
     <link rel="preload" as="image" href="./assets/home-tournament-sunday-knockout-progressive-700k.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-daily.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.682" />
+    <link rel="stylesheet" href="./styles.css?v=3.684" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.593" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -1271,6 +1271,21 @@
                 </div>
               </div>
 
+              <dl class="daily-poker__hero-stats" aria-label="Статистика раздачи дня">
+                <div class="daily-poker__hero-stat">
+                  <dt>Уникальных игроков</dt>
+                  <dd id="dailyPokerTotalUniquePlayers">—</dd>
+                </div>
+                <div class="daily-poker__hero-stat">
+                  <dt>Всего круток</dt>
+                  <dd id="dailyPokerTotalSpins">—</dd>
+                </div>
+                <div class="daily-poker__hero-stat">
+                  <dt>Выиграно</dt>
+                  <dd id="dailyPokerTotalPrize">—</dd>
+                </div>
+              </dl>
+
               <div class="daily-poker__table" aria-live="polite">
                 <div class="daily-poker__zone daily-poker__zone--hole">
                   <div class="daily-poker__zone-label">Твои карты</div>
@@ -1375,7 +1390,7 @@
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html" data-html-fragment-view="cashout"></div>
 
           <!-- Профиль грузится лениво: тяжёлый DOM живёт в html-fragments/profile.html -->
-          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=3.607" data-html-fragment-view="profile"></div>
+          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=3.608" data-html-fragment-view="profile"></div>
 
           <!-- Админка бонусных балансов -->
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html" data-html-fragment-view="admin-bonuses"></div>
@@ -1716,9 +1731,9 @@
     <script defer src="./app-profile-pokerplus.js?v=3.601"></script>
     <script defer src="./app-profile-email-auth.js?v=3.595"></script>
     <script defer src="./app-profile-friends.js?v=3.594"></script>
-    <script defer src="./app-profile-avatar-cache.js?v=3.593"></script>
-    <script defer src="./app-profile-avatar.js?v=3.593"></script>
-    <script defer src="./app-profile.js?v=3.606"></script>
+    <script defer src="./app-profile-avatar-cache.js?v=3.594"></script>
+    <script defer src="./app-profile-avatar.js?v=3.594"></script>
+    <script defer src="./app-profile.js?v=3.607"></script>
     <script defer src="./app-profile-shows.js?v=3.593"></script>
     <script defer src="./app-pwa-auth-session.js?v=3.593"></script>
     <script defer src="./app-pwa-auth-i18n.js?v=3.593"></script>
@@ -1738,7 +1753,7 @@
     <script defer src="./app-referrals-menu.js?v=3.612"></script>
     <script defer src="./app-video-lessons.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-games.js?v=3.593"></script>
-    <script defer data-poker-eager-domain="app" src="./app-daily-poker.js?v=3.594"></script>
+    <script defer data-poker-eager-domain="app" src="./app-daily-poker.js?v=3.595"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-subscribe.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-broadcast.js?v=3.593"></script>
@@ -1747,7 +1762,7 @@
     <script defer data-poker-eager-domain="app" src="./app-raffles-public.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-active-view.js?v=3.596"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-formatters.js?v=3.595"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.599"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.600"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=3.593"></script>
     <script defer src="./app-video-lessons-modals.js?v=3.593"></script>
     <script defer src="./app-equilator.js?v=3.593"></script>
