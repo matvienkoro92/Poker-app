@@ -2033,7 +2033,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   --home-club-choice-row: 25px;
   --home-shortcuts-icons-row: clamp(88px, 24vw, 134px);
   --home-shortcuts-row-gap: 5px;
-  --home-shortcuts-frame-color: rgba(255, 118, 0, 0.86);
+  --home-shortcuts-frame-color: rgba(255, 118, 0, 0.96);
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2292,16 +2292,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   letter-spacing: 0;
   text-transform: uppercase;
   white-space: nowrap;
-  border: 1px solid var(--home-shortcuts-frame-color);
+  border: 1px solid rgba(255, 118, 0, 0.96);
   border-radius: 10px 10px 19px 19px;
-  outline: 1px solid rgba(255, 226, 166, 0.14);
+  outline: 1px solid rgba(255, 118, 0, 0.72);
   outline-offset: -3px;
   background:
     linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(0, 0, 0, 0.98));
   box-shadow:
-    inset 0 0 0 1px rgba(255, 199, 94, 0.12),
-    0 0 0 1px var(--home-shortcuts-frame-color),
-    0 0 14px rgba(255, 104, 0, 0.34);
+    inset 0 0 0 1px rgba(255, 118, 0, 0.38),
+    0 0 0 1px rgba(255, 118, 0, 0.96),
+    0 0 14px rgba(255, 104, 0, 0.42);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   text-shadow:
