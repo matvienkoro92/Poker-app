@@ -887,6 +887,19 @@ function initRaffles() {
     return level > 0 ? "Уровень " + level + "+" : "для всех";
   }
 
+  function raffleAccessLevelCompactText(raffle) {
+    var level = raffleAccessLevel(raffle);
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var groupParts = [];
+    groups.forEach(function (group, index) {
+      if (!group || group.accessLevel == null || String(group.accessLevel) === "") return;
+      var groupLevel = normalizeRaffleAccessLevel(group.accessLevel);
+      groupParts.push("Г" + (index + 1) + " " + (groupLevel > 0 ? groupLevel + "+" : "всем"));
+    });
+    if (groupParts.length) return groupParts.join(" · ");
+    return level > 0 ? level + "+" : "для всех";
+  }
+
   function raffleAccessSelectOptionsHtml(includeInherit) {
     var html = includeInherit ? '<option value="">как общий доступ</option>' : "";
     html += '<option value="0">для всех</option>';
@@ -911,7 +924,7 @@ function initRaffles() {
       '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу">' +
       '<span class="raffles-active-chooser__access-label">Доступ:</span>' +
       '<span class="raffles-active-chooser__access-value">' +
-      escapeHtml(raffleAccessLevelText(raffle)) +
+      escapeHtml(raffleAccessLevelCompactText(raffle)) +
       "</span>" +
       "</span>"
     );
