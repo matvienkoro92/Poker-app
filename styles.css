@@ -15,7 +15,7 @@
 @import url("./styles-hall.css?v=3.618");
 @import url("./styles-admin.css?v=3.593");
 @import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.621");
+@import url("./styles-profile.css?v=3.622");
 @import url("./styles-layout.css?v=3.638");
 @import url("./styles-chat-overlays.css?v=3.593");
 @import url("./styles-home-overrides.css?v=3.593");
@@ -6440,4 +6440,38 @@ body.club-choice-vote-open {
 #app.app .card .card__content > .view--active :where(img, video, canvas, svg, table, iframe) {
   max-width: 100%;
   box-sizing: border-box;
+}
+
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  html.app-view-browser-local:not(.app--telegram-miniapp) {
+    --app-content-width: min(430px, calc(100vw - 32px));
+  }
+
+  html.app-view-browser-local:not(.app--telegram-miniapp) #app.app {
+    align-self: center !important;
+    width: var(--app-content-width) !important;
+    max-width: var(--app-content-width) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  html.app-view-browser-local:not(.app--telegram-miniapp) #app.app .card,
+  html.app-view-browser-local:not(.app--telegram-miniapp) #app.app .card .card__content,
+  html.app-view-browser-local:not(.app--telegram-miniapp) #app.app .card .card__content > .view--active {
+    width: var(--app-content-width) !important;
+    max-width: var(--app-content-width) !important;
+  }
+
+  html.app-view-browser-local:not(.app--telegram-miniapp) .bottom-nav {
+    right: auto;
+    left: 50%;
+    width: var(--app-content-width);
+    max-width: var(--app-content-width);
+    transform: translate3d(-50%, 0, 0);
+    border-right: 1px solid rgba(148, 163, 184, 0.22);
+    border-left: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 22px 22px 0 0;
+  }
 }

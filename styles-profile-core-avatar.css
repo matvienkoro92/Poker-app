@@ -516,9 +516,9 @@
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"] {
   width: auto;
-  max-width: min(92%, 344px);
-  height: calc(100% - 18px);
-  max-height: calc(100% - 18px);
+  max-width: min(64%, 241px);
+  height: calc(70% - 13px);
+  max-height: calc(70% - 13px);
   object-fit: contain;
   object-position: center bottom;
   transform: none;
