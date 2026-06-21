@@ -75,15 +75,19 @@ function pokerReadAvatarCacheEntry() {
 function pokerWriteAvatarCacheEntry(avatarDataUrlOrEmpty) {
   var k = pokerAvatarCacheStorageKey();
   if (!k || typeof sessionStorage === "undefined") return;
+  var avatarValue = avatarDataUrlOrEmpty ? String(avatarDataUrlOrEmpty) : "";
   try {
     sessionStorage.setItem(
       k,
       JSON.stringify({
-        a: avatarDataUrlOrEmpty ? String(avatarDataUrlOrEmpty) : "",
+        a: avatarValue,
         t: Date.now(),
       })
     );
   } catch (eW) {}
+  try {
+    window.dispatchEvent(new CustomEvent("poker-profile-avatar-change", { detail: { avatar: avatarValue } }));
+  } catch (eAvatarEvent) {}
 }
 
 function pokerApplyProfileAvatarMirror(src) {

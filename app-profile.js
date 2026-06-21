@@ -141,6 +141,13 @@ function profilePublicCardDisplayName() {
 
 function profilePublicCardAvatarUrl() {
   try {
+    if (typeof pokerReadAvatarCacheEntry === "function") {
+      var cached = pokerReadAvatarCacheEntry();
+      var cachedAvatar = cached && cached.avatar ? String(cached.avatar).trim() : "";
+      if (cachedAvatar) return cachedAvatar;
+    }
+  } catch (eCachedAvatarSelfCard) {}
+  try {
     var avatar = document.getElementById("profileAvatar");
     var src = avatar ? String(avatar.currentSrc || avatar.src || "").trim() : "";
     if (src && src.indexOf("profile-pokerist.jpg") < 0) return src;
@@ -213,6 +220,7 @@ var profilePublicShowcaseStatus = null;
 var profilePublicShowcaseArtSeq = 0;
 var profileHeroGenderValue = "male";
 var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
+var profilePublicShowcaseLatestRatingNick = "";
 
 function normalizeProfileHeroGender(value) {
   var raw = String(value || "").trim().toLowerCase();
@@ -617,6 +625,9 @@ function initProfilePublicShowcase() {
   }
   if (!window.__pokerProfilePublicShowcaseStatusBound) {
     window.__pokerProfilePublicShowcaseStatusBound = true;
+    window.addEventListener("poker-profile-avatar-change", function () {
+      refreshProfilePublicShowcase();
+    });
     window.addEventListener("poker-pokerplus-status-change", function (event) {
       var detail = event && event.detail ? event.detail : {};
       if (detail.level != null) {
@@ -629,9 +640,11 @@ function initProfilePublicShowcase() {
           valuePercent: 0,
         });
       }
-      if (detail.pokerPlusNickname && profilePublicShowcaseData) {
-        profilePublicShowcaseData.pokerPlusNickname = detail.pokerPlusNickname;
-        profilePublicShowcaseSyncArt(detail.pokerPlusNickname);
+      if (detail.pokerPlusNickname) {
+        profilePublicShowcaseLatestRatingNick = String(detail.pokerPlusNickname || "").trim();
+        if (!profilePublicShowcaseData || typeof profilePublicShowcaseData !== "object") profilePublicShowcaseData = {};
+        profilePublicShowcaseData.pokerPlusNickname = profilePublicShowcaseLatestRatingNick;
+        profilePublicShowcaseSyncArt(profilePublicShowcaseLatestRatingNick);
       }
     });
   }
@@ -641,7 +654,12 @@ var profileAchievementsShowcaseSeq = 0;
 
 function profileAchievementRatingNickFromData(data) {
   var raw = data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
-  return String(raw || "").trim();
+  var nick = String(raw || "").trim();
+  if (nick) {
+    profilePublicShowcaseLatestRatingNick = nick;
+    return nick;
+  }
+  return String(profilePublicShowcaseLatestRatingNick || "").trim();
 }
 
 function profileAchievementUserIdFromData(data) {

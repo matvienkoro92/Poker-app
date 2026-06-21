@@ -190,17 +190,16 @@
 }
 .winter-rating-player-modal__toolbar {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-top: 0;
   margin-bottom: 12px;
   min-width: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 .winter-rating-player-modal__filter {
-  flex-shrink: 0;
+  flex: 1 1 190px;
   min-width: 0;
 }
 .winter-rating-player-modal__filter select {
@@ -210,14 +209,16 @@
   border: 1px solid var(--border-subtle);
   background: var(--card-bg);
   color: var(--text);
-  min-width: 140px;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
 }
 .winter-rating-player-modal__sort {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  flex: 1 1 190px;
+  min-width: 0;
 }
 .winter-rating-player-modal__sort button {
   font-size: 13px;
@@ -228,8 +229,15 @@
   color: var(--text);
   cursor: pointer;
   white-space: nowrap;
+  min-width: 0;
+}
+.winter-rating-player-modal__sort-by {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .winter-rating-player-modal__sort-dir {
+  flex: 0 0 36px;
   min-width: 36px;
   font-size: 16px;
   line-height: 1;

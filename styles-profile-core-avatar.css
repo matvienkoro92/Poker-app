@@ -513,6 +513,13 @@
   justify-content: center;
   align-self: stretch;
 }
+.profile-public-showcase .chat-user-modal__status-title {
+  min-height: 0;
+  padding-left: 0;
+}
+.profile-public-showcase .chat-user-modal__status-title::before {
+  content: none;
+}
 .profile-header-respect-btn.profile-avatar-block__respect-btn,
 .profile-public-showcase__respect-btn.profile-avatar-block__respect-btn {
   width: auto;

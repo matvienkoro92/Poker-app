@@ -995,6 +995,35 @@ function pokerRatingAchievementTournamentRowsForSeason(seasonKey) {
       });
     });
   });
+  if (seasonKey === "winter" && typeof WINTER_RATING_BY_DATE !== "undefined") {
+    var winterTournamentMap = typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? WINTER_RATING_TOURNAMENTS_BY_DATE || {} : {};
+    Object.keys(WINTER_RATING_BY_DATE || {}).forEach(function (dateStr) {
+      var tournamentList = winterTournamentMap && winterTournamentMap[dateStr];
+      if (Array.isArray(tournamentList) && tournamentList.length) return;
+      var list = WINTER_RATING_BY_DATE && WINTER_RATING_BY_DATE[dateStr];
+      if (!Array.isArray(list) || !list.length) return;
+      var sorted = list.filter(function (row) {
+        return row && ((Number(row.points) || 0) !== 0 || (Number(row.reward) || 0) !== 0);
+      }).slice().sort(function (a, b) {
+        return ((Number(b.points) || 0) - (Number(a.points) || 0)) ||
+          ((Number(b.reward) || 0) - (Number(a.reward) || 0));
+      });
+      sorted.forEach(function (row, index) {
+        var reward = row && row.reward != null ? Number(row.reward) : 0;
+        if (reward !== reward || !isFinite(reward)) reward = 0;
+        rows.push({
+          season: seasonKey,
+          date: dateStr,
+          time: "",
+          tournamentLabel: "",
+          nick: normalizeWinterNick(row && row.nick),
+          place: index + 1,
+          points: Number(row && row.points) || 0,
+          reward: reward,
+        });
+      });
+    });
+  }
   return rows;
 }
 
@@ -1005,11 +1034,60 @@ function pokerRatingAchievementAllTournamentRows() {
     .concat(pokerRatingAchievementTournamentRowsForSeason("summer"));
 }
 
+function pokerRatingAchievementOverallRowsForSeason(seasonKey) {
+  seasonKey = normalizeWinterRatingPlayerSeasonKey(seasonKey);
+  if (seasonKey === "spring" || seasonKey === "summer") {
+    return [1, 2].reduce(function (items, leagueNum) {
+      var rows = getTournamentRatingOverallByLeagueForSeason(seasonKey, leagueNum);
+      return items.concat((Array.isArray(rows) ? rows : []).map(function (row, index) {
+        return Object.assign({}, row, {
+          season: seasonKey,
+          league: leagueNum,
+          place: index + 1,
+        });
+      }));
+    }, []);
+  }
+  if (seasonKey === "winter") {
+    var winterRows = [];
+    [1, 2].forEach(function (leagueNum) {
+      var leagueRows = buildWinterRatingOverallRowsFromTournamentsByLeague(leagueNum);
+      if (!Array.isArray(leagueRows)) return;
+      winterRows = winterRows.concat(leagueRows.map(function (row, index) {
+        return Object.assign({}, row, {
+          season: seasonKey,
+          league: leagueNum,
+          place: index + 1,
+        });
+      }));
+    });
+    if (winterRows.length) return winterRows;
+    if (typeof WINTER_RATING_BY_DATE !== "undefined") {
+      return buildWinterRatingOverallRowsFromData(WINTER_RATING_BY_DATE || {}).map(function (row, index) {
+        return Object.assign({}, row, {
+          season: seasonKey,
+          league: "",
+          place: index + 1,
+        });
+      });
+    }
+  }
+  return [];
+}
+
+function pokerRatingAchievementAllOverallRows() {
+  return []
+    .concat(pokerRatingAchievementOverallRowsForSeason("winter"))
+    .concat(pokerRatingAchievementOverallRowsForSeason("spring"))
+    .concat(pokerRatingAchievementOverallRowsForSeason("summer"));
+}
+
 function pokerGetTournamentAchievementStats(nick) {
   var normalizedNick = normalizeWinterNick(nick);
   if (!normalizedNick) {
     return {
       firstPlaces: 0,
+      overallFirstPlaces: 0,
       topWin: 0,
       totalReward: 0,
       bigWins50: [],
@@ -1024,6 +1102,9 @@ function pokerGetTournamentAchievementStats(nick) {
   }).sort(function (a, b) {
     return winterRatingDateKeyToStamp(a.date) - winterRatingDateKeyToStamp(b.date);
   });
+  var overallFirstPlaces = pokerRatingAchievementAllOverallRows().filter(function (row) {
+    return row && Number(row.place) === 1 && winterRatingSamePlayer(row.nick, normalizedNick);
+  }).length;
   var firstPlaces = 0;
   var totalReward = 0;
   var topWin = 0;
@@ -1080,6 +1161,7 @@ function pokerGetTournamentAchievementStats(nick) {
 
   return {
     firstPlaces: firstPlaces,
+    overallFirstPlaces: overallFirstPlaces,
     topWin: topWin,
     totalReward: totalReward,
     bigWins50: bigWins50.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
@@ -1286,7 +1368,7 @@ function openWinterRatingPlayerModal(nick, options) {
   var leagueSelect = document.getElementById("winterRatingPlayerModalLeague");
   if (leagueWrap) leagueWrap.style.display = (isWinterRatingPlayerSeasonalKey(seasonKey) && summary.length) ? "" : "none";
   if (leagueSelect) leagueSelect.value = "all";
-  if (sortByBtn) sortByBtn.textContent = "Сортировать: По дате";
+  if (sortByBtn) sortByBtn.textContent = "По дате";
   if (sortDirBtn) { sortDirBtn.textContent = "↓"; sortDirBtn.title = "По убыванию"; }
   var toolbar = modal.querySelector(".winter-rating-player-modal__toolbar");
   var tableLabel = document.getElementById("winterRatingPlayerModalTableLabel");
@@ -1389,9 +1471,9 @@ function initWinterRatingPlayerModal() {
   if (sortByBtn) {
     sortByBtn.addEventListener("click", function () {
       if (sortByBtn.textContent.indexOf("дате") !== -1) {
-        sortByBtn.textContent = "Сортировать: По выигрышам";
+        sortByBtn.textContent = "По выигрышам";
       } else {
-        sortByBtn.textContent = "Сортировать: По дате";
+        sortByBtn.textContent = "По дате";
       }
       if (modal._winterPlayerModalFullSummary) applyWinterRatingPlayerModalFilterAndRender(modal);
     });

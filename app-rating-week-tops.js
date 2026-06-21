@@ -169,7 +169,7 @@ function pokerInitWinterRatingWeekTops() {
     return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
   }
   /**
-   * Топ заносов за один турнир: все сезоны 2026. Индекс скрина = порядок турнира в массиве
+   * Топ заносов за один турнир: все подключенные рейтинговые сезоны. Индекс скрина = порядок турнира в массиве
    * WINTER_RATING_TOURNAMENTS_BY_DATE / SPRING (должен совпадать с порядком файлов в *_IMAGES).
    * У турнира можно задать lightboxImageIndex (число) — индекс файла в массиве скринов за день, если порядок турниров ≠ порядок PNG.
    */
@@ -177,7 +177,6 @@ function pokerInitWinterRatingWeekTops() {
     /** Каждый занос = отдельная строка (один турнир). Один игрок может быть в топе несколько раз. */
     var wins = [];
     function dateAllowed(dateStr) {
-      if (!/\.2026$/.test(dateStr)) return false;
       if (allowedDates && allowedDates.length && allowedDates.indexOf(dateStr) === -1) return false;
       return true;
     }

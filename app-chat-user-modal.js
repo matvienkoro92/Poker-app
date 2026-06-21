@@ -906,7 +906,7 @@ if (chatUserModalEl) {
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
     if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.png" };
     if (key.indexOf("зим") >= 0) return { mod: "cup-winter", label: "КУБОК<br>ЗИМЫ", img: "./assets/chat-profile-achievement-cup-winter.png" };
@@ -931,7 +931,7 @@ if (chatUserModalEl) {
     var key = String(title || "").toLowerCase();
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
-    if (key.indexOf("король") >= 0) return "Считаются первые места из общей рейтинговой статистики профиля. Уровни: 1, 15, 50, 100 и 250 побед в турнирах.";
+    if (key.indexOf("король") >= 0) return "Считаются первые места в итоговых таблицах рейтингов: зима, весна и лето по всем лигам. Уровни: 1, 15, 50, 100 и 250 побед.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
@@ -1158,6 +1158,9 @@ if (chatUserModalEl) {
       }));
     }
     var tournamentStats = metrics.tournaments || {};
+    var tournamentKingWins = tournamentStats && tournamentStats.overallFirstPlaces != null
+      ? tournamentStats.overallFirstPlaces
+      : tournamentStats.firstPlaces || 0;
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
       return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml());
     }
@@ -1198,7 +1201,7 @@ if (chatUserModalEl) {
     var winsHtml =
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {
         tier: {
-          value: tournamentStats && tournamentStats.firstPlaces || 0,
+          value: tournamentKingWins,
           tiers: [
             { value: 1, label: "1 победа" },
             { value: 15, label: "15 побед" },

@@ -36,6 +36,9 @@ function initProfileAvatar() {
     avatarEl.alt = "Аватар";
     avatarEl.dataset.avatarId = avatarId || pokerFindPresetAvatarIdBySrc(safeSrc) || "";
     pokerApplyProfileAvatarMirror(safeSrc);
+    try {
+      if (typeof refreshProfilePublicShowcase === "function") refreshProfilePublicShowcase();
+    } catch (ePublicAvatarRefresh) {}
   }
 
   function fetchProfileAvatarFromServer() {

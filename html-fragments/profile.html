@@ -24,7 +24,7 @@
               <div class="chat-user-modal__top profile-public-showcase__top">
                 <div class="chat-user-modal__header profile-public-showcase__header">
                   <div class="chat-user-modal__avatar-wrap">
-                    <img id="profilePublicAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
+                    <img id="profilePublicAvatar" class="chat-user-modal__avatar" alt="" width="96" height="96" loading="eager" decoding="async" fetchpriority="high" style="display: none;" />
                     <span id="profilePublicAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true">И</span>
                   </div>
                   <div class="chat-user-modal__title-block">
@@ -60,7 +60,7 @@
               </div>
               <div class="chat-user-modal__hero chat-user-modal__hero--art profile-public-showcase__hero" id="profilePublicHero">
                 <div class="chat-user-modal__rating-art" id="profilePublicRatingArt">
-                  <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" alt="" loading="lazy" decoding="async" hidden />
+                  <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" src="./assets/chat-profile-default-hero-male.png" alt="" loading="eager" decoding="async" fetchpriority="high" hidden />
                 </div>
                 <div class="profile-hero-gender" id="profileHeroGender" role="radiogroup" aria-label="Пол героя">
                   <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
