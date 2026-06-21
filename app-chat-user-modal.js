@@ -948,7 +948,7 @@ if (chatUserModalEl) {
     if (key.indexOf("лет") >= 0) return "Летний рейтинг сейчас идет. Когда сезон завершится, здесь появятся места и награды по итогам лета.";
     if (key.indexOf("легенд") >= 0) return "Особая клубная ачивка для игроков, которые отмечены клубом как легенды Два туза.";
     if (key.indexOf("топ занос") >= 0) return "Показывает попадание игрока в список крупнейших разовых турнирных заносов клуба.";
-    if (key.indexOf("счастлив") >= 0) return "Дается игрокам из топ-3 месяца по результатам розыгрышей. Если место известно, показывается конкретная позиция.";
+    if (key.indexOf("счастлив") >= 0) return "Дается игрокам из топ-3 месяца по количеству побед в розыгрышах.";
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return "Дается победителю голосования игроков клуба за игрока месяца.";
     if (key.indexOf("топ10") >= 0) return "Дается за попадание в топ-10 сезонного рейтинга клуба.";
     return "Клубное достижение. Открывается автоматически, когда игрок выполняет условие карточки.";
@@ -1241,24 +1241,30 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalAchievementCardHtml("₽", "Топ занос клуба 2026", topWins) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10);
+    var goldTicketHtml = chatUserModalAchievementCardHtml("🎟", "Золотой билет", [], {
+      tier: {
+        value: metrics.raffleWins || 0,
+        tiers: [
+          { value: 1, label: "1 победа" },
+          { value: 15, label: "15 побед" },
+          { value: 50, label: "50 побед" },
+          { value: 100, label: "100 побед" },
+          { value: 300, label: "300 побед" },
+        ],
+        unit: "побед",
+        lockedLabel: "Нет побед",
+      },
+    });
+    var heroHtml = chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
+      placeholder: "Топ-1 месяца",
+    });
     var socialHtml =
-      chatUserModalAchievementCardHtml("🎟", "Золотой билет", [], {
-        tier: {
-          value: metrics.raffleWins || 0,
-          tiers: [
-            { value: 1, label: "1 победа" },
-            { value: 3, label: "3 победы" },
-            { value: 5, label: "5 побед" },
-            { value: 10, label: "10 побед" },
-          ],
-          unit: "побед",
-          lockedLabel: "Нет побед",
-        },
-      }) +
+      heroHtml +
       chatUserModalAchievementCardHtml("★", "Любимец клуба", [], {
         tier: {
           value: metrics.respect != null ? metrics.respect : 0,
           tiers: [
+            { value: 1, label: "1 уважение" },
             { value: 10, label: "10 уважения" },
             { value: 25, label: "25 уважения" },
             { value: 50, label: "50 уважения" },
@@ -1272,12 +1278,14 @@ if (chatUserModalEl) {
         tier: {
           value: metrics.friends != null ? metrics.friends : 0,
           tiers: [
-            { value: 5, label: "5 друзей" },
+            { value: 1, label: "1 друг" },
             { value: 10, label: "10 друзей" },
             { value: 25, label: "25 друзей" },
+            { value: 50, label: "50 друзей" },
+            { value: 100, label: "100 друзей" },
           ],
           unit: "друзей",
-          lockedLabel: metrics.friends == null ? "Только в своем профиле" : "До 5 друзей",
+          lockedLabel: metrics.friends == null ? "Только в своем профиле" : "До 1 друга",
         },
       }) +
       chatUserModalAchievementCardHtml("↗", "Амбассадор", [], {
@@ -1288,17 +1296,16 @@ if (chatUserModalEl) {
             { value: 5, label: "5 приглашенных" },
             { value: 10, label: "10 приглашенных" },
             { value: 25, label: "25 приглашенных" },
+            { value: 50, label: "50 приглашенных" },
           ],
           unit: "приглашенных",
           lockedLabel: metrics.referrals == null ? "Только в своем профиле" : "Нет приглашенных",
         },
       }) +
       chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
-        placeholder: "Топ3 в розыгрыше",
+        placeholder: "Топ-3 по количеству побед в розыгрышах за месяц",
       }) +
-      chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
-        placeholder: "Топ-1 месяца",
-      });
+      goldTicketHtml;
     return [
       chatUserModalAchievementGroupHtml("Кубки", cupsHtml),
       chatUserModalAchievementGroupHtml("Заносы", winsHtml),
@@ -1409,6 +1416,7 @@ if (chatUserModalEl) {
     var closeBtn = modal.querySelector(".chat-achievement-info-modal__close");
     if (closeBtn && typeof closeBtn.focus === "function") closeBtn.focus();
   }
+  window.pokerOpenChatAchievementInfoModal = openChatUserAchievementInfoModal;
   function chatUserModalRatingRanksHtml(results, ratingNick) {
     var hasNick = !!String(ratingNick || "").trim();
     var summerHtml = hasNick ? chatUserModalRatingPlacesHtml(results && results[0]) : "—";

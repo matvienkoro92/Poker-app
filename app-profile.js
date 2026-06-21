@@ -765,7 +765,21 @@ function initProfileAchievementsShowcase() {
   if (!showcase || !profileView) return;
   if (showcase.dataset.bound !== "1") {
     showcase.dataset.bound = "1";
+    profileView.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      var card = event && event.target ? event.target.closest("[data-chat-achievement-info]") : null;
+      if (!card || !showcase.contains(card)) return;
+      if (typeof window.pokerOpenChatAchievementInfoModal !== "function") return;
+      event.preventDefault();
+      window.pokerOpenChatAchievementInfoModal(card);
+    });
     profileView.addEventListener("click", function (event) {
+      var card = event && event.target ? event.target.closest("[data-chat-achievement-info]") : null;
+      if (card && showcase.contains(card) && typeof window.pokerOpenChatAchievementInfoModal === "function") {
+        event.preventDefault();
+        window.pokerOpenChatAchievementInfoModal(card);
+        return;
+      }
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
       if (totalBtn) {
         var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache);
