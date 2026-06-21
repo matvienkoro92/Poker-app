@@ -3,6 +3,16 @@
             <div class="profile-header-row">
               <h1 class="title" id="profileTitle">Профиль</h1>
               <div class="profile-header-controls">
+                <div class="profile-header-tools" aria-label="Быстрые настройки профиля">
+                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
+                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
+                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
+                  </span>
+                  <button type="button" class="profile-avatar-block__respect-btn profile-header-respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение от игроков" title="Уважение">
+                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
+                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
+                  </button>
+                </div>
                 <button type="button" class="profile-exit-btn profile-exit-btn--hidden" id="profileExitBtn" hidden>Войти в аккаунт</button>
               </div>
             </div>
@@ -26,16 +36,6 @@
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
-                </div>
-                <div class="profile-public-showcase__tools" aria-label="Быстрые настройки профиля">
-                  <span class="profile-lang-switch" id="profileLangSwitch" aria-label="Выбор языка">
-                    <button type="button" class="profile-lang-switch__btn profile-lang-switch__btn--active" id="profileLangRuBtn">RU</button>
-                    <button type="button" class="profile-lang-switch__btn" id="profileLangEnBtn">EN</button>
-                  </span>
-                  <button type="button" class="profile-avatar-block__respect-btn profile-public-showcase__respect-btn" id="profileRespectOpenVotersBtn" aria-label="Кто поднял или уменьшил уважение от игроков" title="Уважение">
-                    <span class="profile-avatar-block__respect-icon" aria-hidden="true">★</span>
-                    <span id="profileRespectValue" class="profile-avatar-block__respect-val">—</span>
-                  </button>
                 </div>
               </div>
               <div class="profile-chat-name profile-chat-name--editor profile-public-showcase__name-editor" id="profileChatNameEditor" hidden>
@@ -81,6 +81,48 @@
                     </div>
                   </section>
                 </div>
+              </div>
+            </section>
+            <section class="profile-friends" id="profileFriendsPanel" data-profile-club-panel aria-label="Друзья">
+              <div class="profile-friends__head">
+                <span class="profile-friends__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </span>
+                <span class="profile-friends__copy">
+                  <span class="profile-friends__title">Друзья <span id="profileFriendsCount">(0)</span></span>
+                  <span class="profile-friends__subtitle">Ваш покерный круг</span>
+                </span>
+                <button type="button" class="profile-friends__btn" id="profileFriendsBtn">
+                  <span>Смотреть все</span>
+                  <span class="profile-friends__btn-arrow" aria-hidden="true">›</span>
+                </button>
+              </div>
+              <form class="profile-friends__search" id="profileFriendsSearchForm" role="search" aria-label="Поиск игрока">
+                <input
+                  type="search"
+                  class="profile-friends__search-input"
+                  id="profileFriendsSearchInput"
+                  placeholder="TG, ID Poker21 или ник"
+                  autocomplete="off"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
+                  aria-label="Найти игрока по логину Telegram, ID Poker21 или нику"
+                />
+                <button type="submit" class="profile-friends__search-btn" id="profileFriendsSearchBtn">Найти</button>
+              </form>
+              <div class="profile-friends__search-suggestions" id="profileFriendsSearchSuggestions" aria-live="polite" hidden></div>
+              <p class="profile-friends__search-result" id="profileFriendsSearchResult" aria-live="polite" hidden></p>
+              <div class="profile-friends__preview" id="profileFriendsPreview" aria-live="polite">
+                <button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">
+                  <span class="profile-friends__invite-plus" aria-hidden="true">+</span>
+                  <span class="profile-friends__invite-text">Пригласить<br />друга</span>
+                </button>
               </div>
             </section>
             <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-club-panel aria-label="Достижения и история сезонов">
@@ -132,48 +174,6 @@
                     </div>
                     <span class="profile-status__card">1</span>
                   </div>
-                </div>
-              </section>
-              <section class="profile-friends" id="profileFriendsPanel" aria-label="Друзья">
-                <div class="profile-friends__head">
-                  <span class="profile-friends__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                  </span>
-                  <span class="profile-friends__copy">
-                    <span class="profile-friends__title">Друзья <span id="profileFriendsCount">(0)</span></span>
-                    <span class="profile-friends__subtitle">Ваш покерный круг</span>
-                  </span>
-                  <button type="button" class="profile-friends__btn" id="profileFriendsBtn">
-                    <span>Смотреть все</span>
-                    <span class="profile-friends__btn-arrow" aria-hidden="true">›</span>
-                  </button>
-                </div>
-                <form class="profile-friends__search" id="profileFriendsSearchForm" role="search" aria-label="Поиск игрока">
-                  <input
-                    type="search"
-                    class="profile-friends__search-input"
-                    id="profileFriendsSearchInput"
-                    placeholder="TG, ID Poker21 или ник"
-                    autocomplete="off"
-                    autocapitalize="none"
-                    autocorrect="off"
-                    spellcheck="false"
-                    aria-label="Найти игрока по логину Telegram, ID Poker21 или нику"
-                  />
-                  <button type="submit" class="profile-friends__search-btn" id="profileFriendsSearchBtn">Найти</button>
-                </form>
-                <div class="profile-friends__search-suggestions" id="profileFriendsSearchSuggestions" aria-live="polite" hidden></div>
-                <p class="profile-friends__search-result" id="profileFriendsSearchResult" aria-live="polite" hidden></p>
-                <div class="profile-friends__preview" id="profileFriendsPreview" aria-live="polite">
-                  <button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">
-                    <span class="profile-friends__invite-plus" aria-hidden="true">+</span>
-                    <span class="profile-friends__invite-text">Пригласить<br />друга</span>
-                  </button>
                 </div>
               </section>
             </section>

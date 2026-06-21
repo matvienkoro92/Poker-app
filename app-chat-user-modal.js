@@ -811,6 +811,72 @@ if (chatUserModalEl) {
     if (key.indexOf("лет") >= 0) return { mod: "cup-summer", label: "КУБОК<br>ЛЕТА", img: "./assets/chat-profile-achievement-cup-summer.png" };
     return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.png" };
   }
+  function chatUserModalEncodeData(value) {
+    try {
+      return encodeURIComponent(String(value == null ? "" : value));
+    } catch (eEncodeAchievementData) {
+      return "";
+    }
+  }
+  function chatUserModalDecodeData(value) {
+    try {
+      return decodeURIComponent(String(value || ""));
+    } catch (eDecodeAchievementData) {
+      return String(value || "");
+    }
+  }
+  function chatUserModalAchievementRule(title) {
+    var key = String(title || "").toLowerCase();
+    if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
+    if (key.indexOf("король") >= 0) return "Считаются только первые места в клубных турнирах. У достижения есть уровни: чем больше побед, тем выше уровень карточки.";
+    if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
+    if (key.indexOf("больш") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
+    if (key.indexOf("миллион") >= 0) return "Суммируются все призовые игрока из клубной турнирной истории. У достижения есть уровни по общей сумме выигрышей.";
+    if (key.indexOf("чемпион месяца") >= 0) return "Дается за месяц, в котором игрок стал лучшим по числу побед или по сумме призовых среди участников.";
+    if (key.indexOf("золот") >= 0) return "Считаются победы игрока в розыгрышах клуба. У достижения есть уровни по количеству выигранных розыгрышей.";
+    if (key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
+    if (key.indexOf("команд") >= 0) return "Считаются принятые друзья в профиле игрока. У достижения есть уровни по размеру покерного круга.";
+    if (key.indexOf("амбассад") >= 0) return "Считаются приглашенные игроки по реферальной системе клуба. У достижения есть уровни по количеству приглашенных.";
+    if (key.indexOf("весн") >= 0) return "Дается за топ-3 место в весеннем рейтинге клуба. В карточке показывается место и лига.";
+    if (key.indexOf("зим") >= 0) return "Дается за топ-3 место в зимнем рейтинге клуба. В карточке показывается итоговое место за сезон.";
+    if (key.indexOf("лет") >= 0) return "Летний рейтинг сейчас идет. Когда сезон завершится, здесь появятся места и награды по итогам лета.";
+    if (key.indexOf("легенд") >= 0) return "Особая клубная ачивка для игроков, которые отмечены клубом как легенды Два туза.";
+    if (key.indexOf("топ занос") >= 0) return "Показывает попадание игрока в список крупнейших разовых турнирных заносов клуба.";
+    if (key.indexOf("счастлив") >= 0) return "Дается игрокам из топ-3 месяца по результатам розыгрышей. Если место известно, показывается конкретная позиция.";
+    if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return "Дается победителю голосования игроков клуба за игрока месяца.";
+    if (key.indexOf("топ10") >= 0) return "Дается за попадание в топ-10 сезонного рейтинга клуба.";
+    return "Клубное достижение. Открывается автоматически, когда игрок выполняет условие карточки.";
+  }
+  function chatUserModalAchievementInfoFrom(title, rows, options, tier) {
+    var progress = [];
+    var levels = [];
+    if (tier && options && options.tier) {
+      var tierOptions = options.tier;
+      var unit = tierOptions.unit || "";
+      var valueText = tierOptions.format ? tierOptions.format(tier.value) : String(Math.floor(tier.value));
+      if (tier.current) progress.push("Текущий уровень: " + (tier.current.label || valueText + (unit ? " " + unit : "")));
+      else progress.push("Текущий уровень: не открыт");
+      if (tier.next) {
+        var nextText = tierOptions.format ? tierOptions.format(tier.next.value) : String(tier.next.value);
+        progress.push("Прогресс: " + valueText + " / " + nextText + (unit ? " " + unit : ""));
+      } else if (tier.current) {
+        progress.push("Прогресс: " + valueText + (unit ? " " + unit : "") + " · максимум");
+      }
+      levels = (Array.isArray(tierOptions.tiers) ? tierOptions.tiers : []).map(function (item, index) {
+        return String(index + 1) + ". " + String(item && item.label || item && item.value || "");
+      }).filter(Boolean);
+    } else {
+      progress = rows.map(function (item) {
+        return String(item && (item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) || "");
+      }).filter(Boolean);
+      if (!progress.length) progress.push(options && options.placeholder || "Пока не открыто");
+    }
+    return {
+      rule: options.info || chatUserModalAchievementRule(title),
+      progress: progress.join("\n"),
+      levels: levels.join("\n"),
+    };
+  }
   function chatUserModalTierState(value, tiers) {
     var val = Math.max(0, Number(value) || 0);
     var list = (Array.isArray(tiers) ? tiers : []).slice().sort(function (a, b) {
@@ -861,6 +927,11 @@ if (chatUserModalEl) {
       html: detail,
       stars: chatUserModalTierStars(state),
       locked: !state.current,
+      value: state.value,
+      current: state.current,
+      next: state.next,
+      level: state.level,
+      maxLevel: state.maxLevel,
     };
   }
   function chatUserModalAchievementCardHtml(icon, title, rows, options) {
@@ -877,10 +948,17 @@ if (chatUserModalEl) {
       }).join("") || '<span class="chat-user-modal__achievement-detail">' + escapeHtml(options.placeholder || "—") + "</span>"
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
-    var attrs = "";
+    var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
+    var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
+      ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
+      ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
+      ' data-chat-achievement-rule="' + escapeHtml(chatUserModalEncodeData(info.rule)) + '"' +
+      ' data-chat-achievement-progress="' + escapeHtml(chatUserModalEncodeData(info.progress)) + '"' +
+      ' data-chat-achievement-levels="' + escapeHtml(chatUserModalEncodeData(info.levels)) + '"' +
+      ' aria-label="' + escapeHtml("Открыть описание достижения " + title) + '"';
     if (options.action) {
-      attrs += ' role="button" tabindex="0" data-chat-achievement-action="' + escapeHtml(options.action) + '"';
-      attrs += ' aria-label="' + escapeHtml(options.ariaLabel || title) + '"';
+      attrs += ' data-chat-achievement-action="' + escapeHtml(options.action) + '"';
+      attrs += ' data-chat-achievement-action-label="' + escapeHtml(chatUserModalEncodeData(options.actionLabel || options.ariaLabel || "Открыть раздел")) + '"';
     }
     return '<article class="chat-user-modal__achievement chat-user-modal__achievement--' + escapeHtml(meta.mod) +
       (options.extraClass ? " " + escapeHtml(options.extraClass) : "") +
@@ -911,6 +989,7 @@ if (chatUserModalEl) {
       locked: true,
       placeholder: "Сейчас идет",
       action: "summer-rating",
+      actionLabel: "Открыть рейтинг лета",
       ariaLabel: "Кубок лета сейчас идет. Открыть рейтинг лета",
       extraClass: "chat-user-modal__achievement--season-cup chat-user-modal__achievement--season-cup-current",
     });
@@ -1101,6 +1180,104 @@ if (chatUserModalEl) {
     var html = chatUserModalAchievementsHtml(results, ratingNick, metrics);
     modalAchievementsList.innerHTML = html;
     modalAchievements.hidden = !html;
+  }
+  function chatUserAchievementInfoLines(text) {
+    return String(text || "").split(/\n+/).map(function (line) {
+      return String(line || "").trim();
+    }).filter(Boolean);
+  }
+  function ensureChatUserAchievementInfoModal() {
+    var modal = document.getElementById("chatAchievementInfoModal");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.className = "chat-achievement-info-modal";
+    modal.id = "chatAchievementInfoModal";
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML =
+      '<div class="chat-achievement-info-modal__backdrop" data-chat-achievement-info-close="1"></div>' +
+      '<section class="chat-achievement-info-modal__panel" role="dialog" aria-modal="true" aria-labelledby="chatAchievementInfoTitle">' +
+        '<button type="button" class="chat-achievement-info-modal__close" data-chat-achievement-info-close="1" aria-label="Закрыть">×</button>' +
+        '<p class="chat-achievement-info-modal__eyebrow">Достижение</p>' +
+        '<h3 class="chat-achievement-info-modal__title" id="chatAchievementInfoTitle"></h3>' +
+        '<span class="chat-achievement-info-modal__state" id="chatAchievementInfoState"></span>' +
+        '<div class="chat-achievement-info-modal__body">' +
+          '<section class="chat-achievement-info-modal__section">' +
+            '<h4>Как получить</h4>' +
+            '<p id="chatAchievementInfoRule"></p>' +
+          '</section>' +
+          '<section class="chat-achievement-info-modal__section" id="chatAchievementInfoProgressSection">' +
+            '<h4>Прогресс</h4>' +
+            '<ul id="chatAchievementInfoProgress"></ul>' +
+          '</section>' +
+          '<section class="chat-achievement-info-modal__section" id="chatAchievementInfoLevelsSection">' +
+            '<h4>Уровни</h4>' +
+            '<ul id="chatAchievementInfoLevels"></ul>' +
+          '</section>' +
+        '</div>' +
+        '<button type="button" class="chat-achievement-info-modal__action" id="chatAchievementInfoAction" hidden></button>' +
+      '</section>';
+    document.body.appendChild(modal);
+    modal.addEventListener("click", function (event) {
+      var closeBtn = event.target && event.target.closest ? event.target.closest("[data-chat-achievement-info-close]") : null;
+      if (closeBtn) closeChatUserAchievementInfoModal();
+      var actionBtn = event.target && event.target.closest ? event.target.closest("[data-chat-achievement-info-action]") : null;
+      if (actionBtn) runChatUserAchievementInfoAction(actionBtn.getAttribute("data-chat-achievement-info-action") || "");
+    });
+    return modal;
+  }
+  function closeChatUserAchievementInfoModal() {
+    var modal = document.getElementById("chatAchievementInfoModal");
+    if (!modal) return;
+    modal.classList.remove("chat-achievement-info-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+  function renderChatUserAchievementInfoList(id, lines) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = chatUserAchievementInfoLines(lines).map(function (line) {
+      return "<li>" + escapeHtml(line) + "</li>";
+    }).join("");
+  }
+  function runChatUserAchievementInfoAction(action) {
+    closeChatUserAchievementInfoModal();
+    if (action === "summer-rating") openChatUserModalSummerRatingFromAchievement();
+  }
+  function openChatUserAchievementInfoModal(card) {
+    if (!card) return;
+    var modal = ensureChatUserAchievementInfoModal();
+    var title = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-title"));
+    var state = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-state"));
+    var rule = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-rule"));
+    var progress = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-progress"));
+    var levels = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-levels"));
+    var action = card.getAttribute("data-chat-achievement-action") || "";
+    var actionLabel = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-action-label")) || "Открыть раздел";
+    var titleEl = document.getElementById("chatAchievementInfoTitle");
+    var stateEl = document.getElementById("chatAchievementInfoState");
+    var ruleEl = document.getElementById("chatAchievementInfoRule");
+    var progressSection = document.getElementById("chatAchievementInfoProgressSection");
+    var levelsSection = document.getElementById("chatAchievementInfoLevelsSection");
+    var actionBtn = document.getElementById("chatAchievementInfoAction");
+    if (titleEl) titleEl.textContent = title || "Достижение";
+    if (stateEl) {
+      stateEl.textContent = state || "Пока не открыто";
+      stateEl.classList.toggle("chat-achievement-info-modal__state--locked", state !== "Открыто");
+    }
+    if (ruleEl) ruleEl.textContent = rule || "Описание достижения пока не заполнено.";
+    renderChatUserAchievementInfoList("chatAchievementInfoProgress", progress);
+    renderChatUserAchievementInfoList("chatAchievementInfoLevels", levels);
+    if (progressSection) progressSection.hidden = !chatUserAchievementInfoLines(progress).length;
+    if (levelsSection) levelsSection.hidden = !chatUserAchievementInfoLines(levels).length;
+    if (actionBtn) {
+      actionBtn.hidden = !action;
+      actionBtn.textContent = actionLabel;
+      if (action) actionBtn.setAttribute("data-chat-achievement-info-action", action);
+      else actionBtn.removeAttribute("data-chat-achievement-info-action");
+    }
+    modal.classList.add("chat-achievement-info-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+    var closeBtn = modal.querySelector(".chat-achievement-info-modal__close");
+    if (closeBtn && typeof closeBtn.focus === "function") closeBtn.focus();
   }
   function chatUserModalRatingRanksHtml(results, ratingNick) {
     var hasNick = !!String(ratingNick || "").trim();
@@ -1735,16 +1912,37 @@ if (chatUserModalEl) {
   }
   if (modalAchievementsList) {
     modalAchievementsList.addEventListener("click", function (e) {
-      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-action]") : null;
-      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
-      openChatUserModalSummerRatingFromAchievement();
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-info]") : null;
+      if (!card) return;
+      e.preventDefault();
+      openChatUserAchievementInfoModal(card);
     });
     modalAchievementsList.addEventListener("keydown", function (e) {
       if (e.key !== "Enter" && e.key !== " ") return;
-      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-action]") : null;
-      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-info]") : null;
+      if (!card) return;
       e.preventDefault();
-      openChatUserModalSummerRatingFromAchievement();
+      openChatUserAchievementInfoModal(card);
+    });
+  }
+  if (!window.__pokerChatAchievementInfoDelegationBound) {
+    window.__pokerChatAchievementInfoDelegationBound = true;
+    document.addEventListener("click", function (e) {
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-info]") : null;
+      if (!card || (modalAchievementsList && modalAchievementsList.contains(card))) return;
+      e.preventDefault();
+      openChatUserAchievementInfoModal(card);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeChatUserAchievementInfoModal();
+        return;
+      }
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-info]") : null;
+      if (!card || (modalAchievementsList && modalAchievementsList.contains(card))) return;
+      e.preventDefault();
+      openChatUserAchievementInfoModal(card);
     });
   }
   function chatUserModalPostRespect(action) {

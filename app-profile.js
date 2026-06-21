@@ -531,11 +531,6 @@ function initProfileAchievementsShowcase() {
         }
         return;
       }
-      var card = event && event.target ? event.target.closest("[data-chat-achievement-action]") : null;
-      if (!card || card.getAttribute("data-chat-achievement-action") !== "summer-rating") return;
-      if (typeof openWinterRatingPlayerModalReady === "function") {
-        openWinterRatingPlayerModalReady(profileAchievementRatingNickFromData(pokerProfileUserInfoCache), { season: "summer" });
-      }
     });
   }
   refreshProfileAchievementsShowcase();
