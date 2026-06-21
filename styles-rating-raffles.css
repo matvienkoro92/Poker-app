@@ -1741,7 +1741,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   white-space: nowrap;
 }
 .raffles-active-chooser__access-value {
-  flex: 0 1 auto;
+  display: grid;
+  flex: 1 1 100%;
+  justify-items: center;
+  gap: 2px;
   min-width: 0;
   max-width: 100%;
   overflow: visible;
@@ -1753,6 +1756,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   text-align: center;
   text-overflow: clip;
   white-space: normal;
+}
+.raffles-active-chooser__access-line {
+  display: block;
+  max-width: 100%;
 }
 .raffles-active-chooser__fact--participants {
   position: relative;
@@ -6358,7 +6365,10 @@ button.raffle-feedback-action {
 }
 
 .raffles-active-chooser__access-value {
-  flex: 0 1 auto !important;
+  display: grid !important;
+  flex: 1 1 100% !important;
+  justify-items: center;
+  gap: 2px;
   min-width: 0;
   max-width: 100%;
   overflow: visible !important;

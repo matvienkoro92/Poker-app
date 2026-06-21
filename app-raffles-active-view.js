@@ -245,9 +245,11 @@ function initRafflesActiveViewRuntime(opts) {
       : parts;
     if (raffleParticipantsCount) raffleParticipantsCount.textContent = "(" + displayParts.length + ")";
     var chancePct = "";
-    var totalTickets = typeof raffleParticipantsTotalTickets === "function" ? raffleParticipantsTotalTickets(displayParts) : displayParts.length;
-    var myTickets = typeof raffleViewerTicketCount === "function" ? raffleViewerTicketCount(displayParts, raffleIds) : 0;
-    var usesTicketWeights = (typeof raffleUsesTicketWeights === "function" && raffleUsesTicketWeights(raffle)) || totalTickets > displayParts.length;
+    var usesTicketWeights = !!(typeof raffleUsesTicketWeights === "function" && raffleUsesTicketWeights(raffle));
+    var totalTickets = usesTicketWeights && typeof raffleParticipantsTotalTickets === "function"
+      ? raffleParticipantsTotalTickets(displayParts)
+      : displayParts.length;
+    var myTickets = usesTicketWeights && typeof raffleViewerTicketCount === "function" ? raffleViewerTicketCount(displayParts, raffleIds) : 0;
     if (usesTicketWeights && totalTickets > 0) {
       var ticketsWord = typeof raffleTicketWord === "function" ? raffleTicketWord(totalTickets) : "билетов";
       if (myTickets > 0) {
@@ -275,7 +277,7 @@ function initRafflesActiveViewRuntime(opts) {
       displayParts.length === 0
         ? "<li class=\"raffle-participants-empty\">Пока никого</li>"
         : displayParts.map(function (p) {
-            return raffleParticipantLineHtml(p, rafflesIsAdmin);
+            return raffleParticipantLineHtml(p, rafflesIsAdmin, usesTicketWeights);
           }).join("");
     if (raffle.status === "drawn" && raffle.winners && raffle.winners.length > 0) {
       raffleWinnersWrap.classList.remove("raffle-winners-wrap--hidden");

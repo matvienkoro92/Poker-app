@@ -133,7 +133,7 @@ function pokerRafflesGroupParticipantsForDisplay(parts) {
   return groups;
 }
 
-function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
+function pokerRafflesParticipantDisplayLine(p, showTelegramLogins, showTickets) {
   var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
   var uid0 = String(p.userId != null ? p.userId : "").trim();
   var raffleIdText = p.p21Id != null && String(p.p21Id).trim()
@@ -149,7 +149,7 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins) {
     ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
     : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
   var fishLevelHtml = pokerRafflesParticipantFishLevelHtml(p);
-  var ticketsHtml = pokerRafflesParticipantTicketsHtml(p);
+  var ticketsHtml = showTickets === false ? "" : pokerRafflesParticipantTicketsHtml(p);
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
     namePart += " (@" + pokerRafflesEscapeHtml(un) + ")";
@@ -247,9 +247,9 @@ function pokerRafflesParticipantRemoveButtonHtml(p, safeName) {
   );
 }
 
-function pokerRafflesParticipantLineHtml(p, showTelegramLogins) {
+function pokerRafflesParticipantLineHtml(p, showTelegramLogins, showTickets) {
   var uid = String(p.userId != null ? p.userId : "").trim();
-  var line = pokerRafflesParticipantDisplayLine(p, !!showTelegramLogins);
+  var line = pokerRafflesParticipantDisplayLine(p, !!showTelegramLogins, showTickets);
   var safeName = pokerRafflesParticipantPublicName(p, !!showTelegramLogins);
   var removeHtml = showTelegramLogins ? pokerRafflesParticipantRemoveButtonHtml(p, safeName) : "";
   var itemClass = "raffle-participants-item" + (removeHtml ? " raffle-participants-item--with-remove" : "");

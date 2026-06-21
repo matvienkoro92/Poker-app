@@ -5,7 +5,7 @@
 @import url("./styles-home.css?v=3.593");
 @import url("./styles-chat.css?v=3.593");
 @import url("./styles-learning-games.css?v=3.593");
-@import url("./styles-raffles.css?v=3.599");
+@import url("./styles-raffles.css?v=3.600");
 @import url("./styles-daily-poker.css?v=3.595");
 @import url("./styles-home-legacy-prelude.css?v=3.593");
 @import url("./styles-download.css?v=3.593");
@@ -2031,16 +2031,18 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-daily-shortcuts.home-mini-icons {
   --home-mini-icons-pad: 6px;
   --home-club-choice-row: 25px;
+  --home-shortcuts-icons-row: clamp(88px, 24vw, 134px);
+  --home-shortcuts-row-gap: 5px;
   --home-shortcuts-frame-color: rgba(255, 118, 0, 0.86);
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr) var(--home-club-choice-row);
+  grid-template-rows: var(--home-shortcuts-icons-row) var(--home-club-choice-row);
   align-items: stretch;
   justify-items: stretch;
-  gap: 3px;
+  gap: var(--home-shortcuts-row-gap);
   width: 100%;
-  height: clamp(130px, 28vw, 170px);
+  height: auto;
   margin: 8px 0 14px;
   padding: var(--home-mini-icons-pad);
   box-sizing: border-box;
@@ -6185,8 +6187,10 @@ body.club-choice-vote-open {
   }
 
   .home-daily-shortcuts.home-mini-icons {
-    grid-template-rows: minmax(0, 1fr) 38px;
-    height: clamp(128px, 30vw, 152px);
+    --home-shortcuts-icons-row: clamp(84px, 22vw, 112px);
+    --home-club-choice-row: 38px;
+    --home-shortcuts-row-gap: 5px;
+    height: auto;
   }
 }
 
@@ -6250,10 +6254,11 @@ body.club-choice-vote-open {
   .home-daily-shortcuts.home-mini-icons {
     --home-mini-icons-pad: 5px;
     --home-club-choice-row: 23px;
-    height: 126px;
+    --home-shortcuts-icons-row: 82px;
+    --home-shortcuts-row-gap: 5px;
+    height: auto;
     margin-bottom: 12px;
     border-radius: 20px;
-    gap: 3px;
   }
 
   .home-club-choice-plaque {
@@ -6351,9 +6356,10 @@ body.club-choice-vote-open {
   }
 
   .home-daily-shortcuts.home-mini-icons {
-    grid-template-rows: minmax(0, 1fr) 34px;
-    height: 118px;
-    gap: 4px;
+    --home-shortcuts-icons-row: 74px;
+    --home-club-choice-row: 34px;
+    --home-shortcuts-row-gap: 5px;
+    height: auto;
     padding: 4px;
   }
 }

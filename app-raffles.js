@@ -871,6 +871,13 @@ function initRaffles() {
     return normalizeRaffleAccessLevel(raw);
   }
 
+  function raffleHasGroupAccessLevels(raffle) {
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    return groups.some(function (group) {
+      return !!(group && group.accessLevel != null && String(group.accessLevel) !== "");
+    });
+  }
+
   function raffleAccessLevelText(raffle) {
     var level = raffleAccessLevel(raffle);
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
@@ -887,17 +894,17 @@ function initRaffles() {
     return level > 0 ? "Уровень " + level + "+" : "для всех";
   }
 
-  function raffleAccessLevelCompactText(raffle) {
+  function raffleAccessLevelCompactLines(raffle) {
     var level = raffleAccessLevel(raffle);
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
-    var groupParts = [];
+    var lines = [];
     groups.forEach(function (group, index) {
       if (!group || group.accessLevel == null || String(group.accessLevel) === "") return;
       var groupLevel = normalizeRaffleAccessLevel(group.accessLevel);
-      groupParts.push("Г" + (index + 1) + " " + (groupLevel > 0 ? groupLevel + "+" : "всем"));
+      lines.push("Группа" + (index + 1) + " - " + (groupLevel > 0 ? "уровень " + groupLevel + "+" : "для всех"));
     });
-    if (groupParts.length) return groupParts.join(" · ");
-    return level > 0 ? level + "+" : "для всех";
+    if (lines.length) return lines;
+    return [level > 0 ? "уровень " + level + "+" : "для всех"];
   }
 
   function raffleAccessSelectOptionsHtml(includeInherit) {
@@ -920,11 +927,19 @@ function initRaffles() {
   setupRaffleAccessSelect(raffleAddPrizeAccess);
 
   function activeRaffleAccessLevelHtml(raffle) {
+    var accessLines = raffleAccessLevelCompactLines(raffle);
+    var accessHtml = accessLines.map(function (line, index) {
+      return (
+        '<span class="raffles-active-chooser__access-line">' +
+        (index === 0 ? '<span class="raffles-active-chooser__access-label">Доступ:</span> ' : "") +
+        escapeHtml(line) +
+        "</span>"
+      );
+    }).join("");
     return (
       '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу">' +
-      '<span class="raffles-active-chooser__access-label">Доступ:</span>' +
       '<span class="raffles-active-chooser__access-value">' +
-      escapeHtml(raffleAccessLevelCompactText(raffle)) +
+      accessHtml +
       "</span>" +
       "</span>"
     );
@@ -1089,6 +1104,7 @@ function initRaffles() {
     var mode = String(raffle.drawMode || raffle.draw_mode || "").trim().toLowerCase();
     if (mode === "weighted_tickets" || mode === "ticket_pool" || mode === "tickets_weighted") return true;
     if (raffle.weightedTickets === true || raffle.weighted_tickets === true) return true;
+    if (raffleHasGroupAccessLevels(raffle)) return false;
     var parts = Array.isArray(raffle.participants) ? raffle.participants : [];
     return parts.some(function (row) { return raffleParticipantTicketCount(row) > 1; });
   }
