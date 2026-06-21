@@ -1134,21 +1134,21 @@ function pokerGetTournamentAchievementStats(nick) {
   });
   var monthlyChampions = [];
   Object.keys(byMonth).forEach(function (monthKey) {
-    var rows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; });
+    var rows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; })
+      .filter(function (row) { return (Number(row.reward) || 0) > 0; })
+      .sort(function (a, b) {
+        return (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
+          String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+      });
     if (!rows.length) return;
-    var maxWins = rows.reduce(function (max, row) { return Math.max(max, Number(row.wins) || 0); }, 0);
-    var maxReward = rows.reduce(function (max, row) { return Math.max(max, Number(row.reward) || 0); }, 0);
-    rows.forEach(function (row) {
+    rows.slice(0, 3).forEach(function (row, index) {
       if (!winterRatingSamePlayer(row.nick, normalizedNick)) return;
-      var byWins = maxWins > 0 && Number(row.wins) === maxWins;
-      var byReward = maxReward > 0 && Number(row.reward) === maxReward;
-      if (!byWins && !byReward) return;
       monthlyChampions.push({
         monthKey: monthKey,
+        place: index + 1,
         wins: row.wins,
         reward: row.reward,
-        byWins: byWins,
-        byReward: byReward,
+        byReward: true,
       });
     });
   });

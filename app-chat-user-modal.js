@@ -906,6 +906,7 @@ if (chatUserModalEl) {
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
     if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.png" };
@@ -937,7 +938,7 @@ if (chatUserModalEl) {
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("миллион") >= 0) return "Суммируются все призовые игрока из клубной турнирной истории. У достижения есть уровни по общей сумме выигрышей.";
-    if (key.indexOf("чемпион месяца") >= 0) return "Дается за месяц, в котором игрок стал лучшим по числу побед или по сумме призовых среди участников.";
+    if (key.indexOf("чемпион месяца") >= 0) return "Дается за попадание в топ-3 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
     if (key.indexOf("золот") >= 0) return "Считаются победы игрока в розыгрышах клуба. У достижения есть уровни по количеству выигранных розыгрышей.";
     if (key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
     if (key.indexOf("команд") >= 0) return "Считаются принятые друзья в профиле игрока. У достижения есть уровни по размеру покерного круга.";
@@ -1045,7 +1046,8 @@ if (chatUserModalEl) {
     rows = Array.isArray(rows) ? rows : [];
     var meta = chatUserModalAchievementMeta(title);
     var tier = options.tier ? chatUserModalTierDetailsHtml(options.tier) : null;
-    var stars = tier ? tier.stars : rows.map(function () { return "★"; }).join(" ");
+    var starRows = Array.isArray(options.progressRows) ? options.progressRows : rows;
+    var stars = tier ? tier.stars : starRows.map(function () { return "★"; }).join(" ");
     var details = tier ? tier.html : (
       rows.map(function (item) {
         return '<span class="chat-user-modal__achievement-detail">' +
@@ -1143,10 +1145,8 @@ if (chatUserModalEl) {
         ? pokerRatingAchievementMonthLabel(row && row.monthKey)
         : String(row && row.monthKey || "");
       var amount = chatUserModalFormatAchievementRub(row && row.reward);
-      var reasons = [];
-      if (row && row.byWins) reasons.push("победы " + chatUserModalWinCountText(row.wins));
-      if (row && row.byReward && amount) reasons.push(amount);
-      return { label: month + (reasons.length ? ": " + reasons.join(", ") : "") };
+      var place = row && row.place ? String(row.place) + " место" : "топ-3";
+      return { label: month + ": " + place + (amount ? ", " + amount : "") };
     });
   }
   function chatUserModalAchievementsHtml(results, ratingNick, metrics) {
@@ -1225,9 +1225,10 @@ if (chatUserModalEl) {
           value: tournamentStats && tournamentStats.totalReward || 0,
           tiers: [
             { value: 1000000, label: "1 миллион" },
+            { value: 2000000, label: "2 миллиона" },
             { value: 3000000, label: "3 миллиона" },
+            { value: 4000000, label: "4 миллиона" },
             { value: 5000000, label: "5 миллионов" },
-            { value: 10000000, label: "10 миллионов" },
           ],
           unit: "₽",
           format: function (value) { return chatUserModalRubShort(value); },
@@ -1238,7 +1239,7 @@ if (chatUserModalEl) {
         placeholder: "Нет месяца",
       }) +
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +
-      chatUserModalAchievementCardHtml("₽", "Топ занос", topWins) +
+      chatUserModalAchievementCardHtml("₽", "Топ занос клуба 2026", topWins) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10);
     var socialHtml =
       chatUserModalAchievementCardHtml("🎟", "Золотой билет", [], {
