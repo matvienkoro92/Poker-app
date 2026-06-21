@@ -971,7 +971,8 @@ if (chatUserModalEl) {
         return String(index + 1) + ". " + String(item && item.label || item && item.value || "");
       }).filter(Boolean);
     } else {
-      progress = rows.map(function (item) {
+      var progressRows = Array.isArray(options && options.progressRows) ? options.progressRows : rows;
+      progress = progressRows.map(function (item) {
         return String(item && (item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) || "");
       }).filter(Boolean);
       if (!progress.length) progress.push(options && options.placeholder || "Пока не открыто");
@@ -1213,9 +1214,11 @@ if (chatUserModalEl) {
       }) +
       chatUserModalAchievementCardHtml("₽", "Занос от 50 до 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {
         placeholder: "50к-99к",
+        progressRows: chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 1000),
       }) +
       chatUserModalAchievementCardHtml("₽", "Занос от 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 3), {
         placeholder: "100к+",
+        progressRows: chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 1000),
       }) +
       chatUserModalAchievementCardHtml("₽", "Миллионер клуба", [], {
         tier: {

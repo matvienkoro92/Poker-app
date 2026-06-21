@@ -5139,6 +5139,18 @@ button.raffle-feedback-action {
     0 8px 24px rgba(250, 204, 21, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
+.raffle-winner-row--status-pending {
+  position: relative;
+  border-color: rgba(250, 204, 21, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.2),
+    0 0 18px rgba(250, 204, 21, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.raffle-winner-row--status-pending .raffle-winner-row__person,
+.raffle-winner-row--status-pending .raffle-winner-row__meta {
+  opacity: 0.72;
+}
 .raffle-winner-row--issued {
   border-color: rgba(34, 197, 94, 0.84);
   background:
@@ -5548,6 +5560,26 @@ button.raffle-feedback-action {
 .raffle-winner-btn:hover:not(:disabled) {
   background: rgba(51, 65, 85, 0.8);
   color: var(--text);
+}
+.raffle-winner-btn--pending {
+  position: relative;
+  color: transparent !important;
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(250, 204, 21, 0.18);
+  opacity: 1;
+}
+.raffle-winner-btn--pending::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid rgba(255, 236, 179, 0.34);
+  border-top-color: #fde68a;
+  border-radius: 999px;
+  animation: raffle-loading-spin 0.72s linear infinite;
 }
 .raffle-winner-btn--ok.raffle-winner-btn--active {
   background: rgba(34, 197, 94, 0.25);

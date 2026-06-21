@@ -697,16 +697,57 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleWinnerStatusSetButtonPending(btn, pending) {
     if (!btn) return;
+    var row = btn.closest ? btn.closest(".raffle-winner-row") : null;
+    var buttons = row && row.querySelectorAll ? row.querySelectorAll(".raffle-winner-btn") : [];
     if (pending) {
       if (!btn.dataset.statusIdleText) btn.dataset.statusIdleText = btn.textContent || "";
-      btn.textContent = "...";
-      btn.disabled = true;
+      if (row) {
+        row.classList.add("raffle-winner-row--status-pending");
+        row.setAttribute("aria-busy", "true");
+      }
+      buttons.forEach(function (item) {
+        item.disabled = true;
+        item.classList.toggle("raffle-winner-btn--pending", item === btn);
+        if (item === btn) item.setAttribute("aria-busy", "true");
+      });
+      btn.textContent = "";
       btn.setAttribute("aria-busy", "true");
       return;
     }
     btn.textContent = btn.dataset.statusIdleText || "";
-    btn.disabled = false;
-    btn.removeAttribute("aria-busy");
+    if (row) {
+      row.classList.remove("raffle-winner-row--status-pending");
+      row.removeAttribute("aria-busy");
+    }
+    buttons.forEach(function (item) {
+      item.disabled = false;
+      item.classList.remove("raffle-winner-btn--pending");
+      item.removeAttribute("aria-busy");
+    });
+  }
+
+  function raffleWinnerStatusApplyLocal(btn, newStatus) {
+    var row = btn && btn.closest ? btn.closest(".raffle-winner-row") : null;
+    if (!row) return;
+    var statusEl = row.querySelector(".raffle-winner-status");
+    var okBtn = row.querySelector(".raffle-winner-btn--ok");
+    var failBtn = row.querySelector(".raffle-winner-btn--fail");
+    var badge = row.querySelector(".raffle-winner-ready-badge");
+    if (statusEl) {
+      statusEl.textContent = newStatus === "ok" ? "✓" : newStatus === "fail" ? "✗" : "";
+      statusEl.classList.toggle("raffle-winner-status--ok", newStatus === "ok");
+      statusEl.classList.toggle("raffle-winner-status--fail", newStatus === "fail");
+    }
+    if (okBtn) okBtn.classList.toggle("raffle-winner-btn--active", newStatus === "ok");
+    if (failBtn) failBtn.classList.toggle("raffle-winner-btn--active", newStatus === "fail");
+    row.classList.toggle("raffle-winner-row--issued", newStatus === "ok");
+    row.classList.toggle("raffle-winner-row--declined", newStatus === "fail");
+    if (badge) {
+      if (newStatus === "ok") badge.textContent = "Выдано";
+      else if (newStatus === "fail") badge.textContent = "Отказано";
+      badge.classList.toggle("raffle-winner-ready-badge--issued", newStatus === "ok");
+      badge.classList.toggle("raffle-winner-ready-badge--declined", newStatus === "fail");
+    }
   }
 
   function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, attempt) {
@@ -728,6 +769,8 @@ function initRafflesCompletedRuntime(opts) {
       })
       .then(function (data) {
         if (data && data.ok) {
+          raffleWinnerStatusApplyLocal(btn, newStatus);
+          raffleWinnerStatusSetButtonPending(btn, false);
           loadRaffles();
         } else if (data && data.httpStatus === 409 && tryIndex < 2) {
           window.setTimeout(function () {
