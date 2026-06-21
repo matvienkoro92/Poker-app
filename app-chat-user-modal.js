@@ -931,7 +931,7 @@ if (chatUserModalEl) {
     var key = String(title || "").toLowerCase();
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
-    if (key.indexOf("король") >= 0) return "Считаются только первые места в клубных турнирах. У достижения есть уровни: чем больше побед, тем выше уровень карточки.";
+    if (key.indexOf("король") >= 0) return "Считаются первые места из общей рейтинговой статистики профиля. Уровни: 1, 15, 50, 100 и 250 побед в турнирах.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
@@ -1186,9 +1186,6 @@ if (chatUserModalEl) {
         label: String(index + 1) + " место" + (amount ? ", " + amount : ""),
       });
     });
-    var firstWinRows = tournamentStats && tournamentStats.firstPlaces > 0
-      ? [{ label: "Первая победа в турнире" }]
-      : [];
     var monthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.monthlyChampions);
     var cupsHtml =
       chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
@@ -1199,20 +1196,18 @@ if (chatUserModalEl) {
       }) +
       chatUserModalSummerCupCardHtml();
     var winsHtml =
-      chatUserModalAchievementCardHtml("1", "Первый занос", firstWinRows, {
-        placeholder: "Нет побед",
-      }) +
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {
         tier: {
           value: tournamentStats && tournamentStats.firstPlaces || 0,
           tiers: [
-            { value: 5, label: "5 побед" },
-            { value: 25, label: "25 побед" },
+            { value: 1, label: "1 победа" },
+            { value: 15, label: "15 побед" },
             { value: 50, label: "50 побед" },
             { value: 100, label: "100 побед" },
+            { value: 250, label: "250 побед" },
           ],
           unit: "побед",
-          lockedLabel: "До 5 побед",
+          lockedLabel: "Нет побед",
         },
       }) +
       chatUserModalAchievementCardHtml("₽", "Занос от 50 до 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {

@@ -441,9 +441,23 @@ function profilePublicShowcaseApplyStatus(status) {
   var scale = document.getElementById("profilePublicStatusScale");
   var xp = document.getElementById("profilePublicStatusXp");
   var levelText = document.getElementById("profilePublicLevelText");
+  var actions = document.getElementById("profilePokerPlusRefreshAction");
+  var refreshBtn = document.getElementById("profileStatusRefreshBtn");
+  var legacyRefreshBtn = document.getElementById("profilePokerPlusRefreshBtn");
+  var pointsBtn = document.getElementById("profileStatusPointsInfoBtn");
   var currentCard = document.getElementById("profilePublicStatusCardCurrent");
   var nextCard = document.getElementById("profilePublicStatusCardNext");
   if (!scale || !levelText) return;
+  if (actions) actions.hidden = false;
+  if (refreshBtn) {
+    refreshBtn.hidden = false;
+    if (!String(refreshBtn.textContent || "").trim()) refreshBtn.textContent = "Обновить";
+  }
+  if (legacyRefreshBtn && legacyRefreshBtn.parentNode === actions) legacyRefreshBtn.hidden = true;
+  if (pointsBtn) {
+    pointsBtn.hidden = false;
+    pointsBtn.textContent = "Как получить уровень";
+  }
   if (!status || status.level == null) {
     if (section) section.hidden = true;
     if (xp) {
