@@ -931,7 +931,7 @@ if (chatUserModalEl) {
     var key = String(title || "").toLowerCase();
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
-    if (key.indexOf("король") >= 0) return "Считаются первые места в итоговых таблицах рейтингов: зима, весна и лето по всем лигам. Уровни: 1, 15, 50, 100 и 250 побед.";
+    if (key.indexOf("король") >= 0) return "Считаются первые места в турнирах из общей рейтинговой истории: зима, весна и лето. Уровни: 1, 15, 50, 100 и 250 побед.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
@@ -1158,9 +1158,7 @@ if (chatUserModalEl) {
       }));
     }
     var tournamentStats = metrics.tournaments || {};
-    var tournamentKingWins = tournamentStats && tournamentStats.overallFirstPlaces != null
-      ? tournamentStats.overallFirstPlaces
-      : tournamentStats.firstPlaces || 0;
+    var tournamentKingWins = tournamentStats && tournamentStats.firstPlaces || 0;
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
       return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml());
     }
