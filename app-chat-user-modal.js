@@ -1057,6 +1057,7 @@ if (chatUserModalEl) {
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
+    var infoImage = meta.mod && meta.mod.indexOf("cup") >= 0 ? meta.img : "";
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
       ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
@@ -1064,6 +1065,10 @@ if (chatUserModalEl) {
       ' data-chat-achievement-progress="' + escapeHtml(chatUserModalEncodeData(info.progress)) + '"' +
       ' data-chat-achievement-levels="' + escapeHtml(chatUserModalEncodeData(info.levels)) + '"' +
       ' aria-label="' + escapeHtml("Открыть описание достижения " + title) + '"';
+    if (infoImage) {
+      attrs += ' data-chat-achievement-image="' + escapeHtml(chatUserModalEncodeData(infoImage)) + '"';
+      attrs += ' data-chat-achievement-image-alt="' + escapeHtml(chatUserModalEncodeData(title)) + '"';
+    }
     if (options.action) {
       attrs += ' data-chat-achievement-action="' + escapeHtml(options.action) + '"';
       attrs += ' data-chat-achievement-action-label="' + escapeHtml(chatUserModalEncodeData(options.actionLabel || options.ariaLabel || "Открыть раздел")) + '"';
@@ -1337,6 +1342,9 @@ if (chatUserModalEl) {
         '<p class="chat-achievement-info-modal__eyebrow">Достижение</p>' +
         '<h3 class="chat-achievement-info-modal__title" id="chatAchievementInfoTitle"></h3>' +
         '<span class="chat-achievement-info-modal__state" id="chatAchievementInfoState"></span>' +
+        '<figure class="chat-achievement-info-modal__figure" id="chatAchievementInfoFigure" hidden>' +
+          '<img class="chat-achievement-info-modal__image" id="chatAchievementInfoImage" alt="" loading="eager" decoding="async" />' +
+        '</figure>' +
         '<div class="chat-achievement-info-modal__body">' +
           '<section class="chat-achievement-info-modal__section">' +
             '<h4>Как получить</h4>' +
@@ -1389,9 +1397,13 @@ if (chatUserModalEl) {
     var levels = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-levels"));
     var action = card.getAttribute("data-chat-achievement-action") || "";
     var actionLabel = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-action-label")) || "Открыть раздел";
+    var imageSrc = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-image"));
+    var imageAlt = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-image-alt")) || title || "Кубок";
     var titleEl = document.getElementById("chatAchievementInfoTitle");
     var stateEl = document.getElementById("chatAchievementInfoState");
     var ruleEl = document.getElementById("chatAchievementInfoRule");
+    var figureEl = document.getElementById("chatAchievementInfoFigure");
+    var imageEl = document.getElementById("chatAchievementInfoImage");
     var progressSection = document.getElementById("chatAchievementInfoProgressSection");
     var levelsSection = document.getElementById("chatAchievementInfoLevelsSection");
     var actionBtn = document.getElementById("chatAchievementInfoAction");
@@ -1401,6 +1413,16 @@ if (chatUserModalEl) {
       stateEl.classList.toggle("chat-achievement-info-modal__state--locked", state !== "Открыто");
     }
     if (ruleEl) ruleEl.textContent = rule || "Описание достижения пока не заполнено.";
+    if (figureEl && imageEl) {
+      figureEl.hidden = !imageSrc;
+      if (imageSrc) {
+        imageEl.src = imageSrc;
+        imageEl.alt = imageAlt;
+      } else {
+        imageEl.removeAttribute("src");
+        imageEl.alt = "";
+      }
+    }
     renderChatUserAchievementInfoList("chatAchievementInfoProgress", progress);
     renderChatUserAchievementInfoList("chatAchievementInfoLevels", levels);
     if (progressSection) progressSection.hidden = !chatUserAchievementInfoLines(progress).length;

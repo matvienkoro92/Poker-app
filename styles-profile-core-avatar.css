@@ -520,18 +520,17 @@
   padding-top: 18px;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0) 74%, rgba(3, 5, 10, 0.82) 100%),
-    url("./assets/chat-profile-hero-bg-21.png") center 54% / cover no-repeat,
     linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
 }
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"] {
   width: auto;
-  max-width: min(64%, 241px);
-  height: calc(70% - 13px);
-  max-height: calc(70% - 13px);
+  max-width: min(73.6%, 277px);
+  height: calc(80.5% - 15px);
+  max-height: calc(80.5% - 15px);
   object-fit: contain;
   object-position: center bottom;
-  transform: translateY(-32px);
+  transform: translateY(-54px);
   transform-origin: center bottom;
 }
 .profile-public-showcase .chat-user-modal__p21:empty {

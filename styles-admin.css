@@ -2774,11 +2774,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 28%;
+    width: 24%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 18%;
+    width: 25%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -2790,11 +2790,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(6) {
-    width: 16%;
+    width: 14%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 24%;
+    width: 23%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {

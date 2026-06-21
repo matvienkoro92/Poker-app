@@ -1572,7 +1572,7 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
     overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-y: auto !important;
-    touch-action: auto !important;
+    touch-action: pan-y pinch-zoom !important;
     scroll-padding-bottom: max(
       calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
       calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
@@ -1590,6 +1590,15 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
+  }
+
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection {
+    touch-action: pan-y pinch-zoom !important;
   }
 }
 

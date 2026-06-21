@@ -350,7 +350,6 @@
     return parseNumber(row.rake) !== 0 ||
       parseNumber(row.roomAmount) !== 0 ||
       parseNumber(row.amount) !== 0 ||
-      row.rakeZero === true ||
       isRakebackRowReported(row);
   }
 
@@ -600,7 +599,6 @@
   function hasRakebackDomValue(row) {
     if (!row) return false;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
-    if (rakeInput && String(rakeInput.value || "").trim() && parseNumber(rakeInput.value) === 0) return true;
     var amountEl = row.querySelector("[data-rakeback-amount]");
     if (amountEl && String(amountEl.textContent || "").trim()) return true;
     return parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
@@ -2047,17 +2045,19 @@
       localRows = Array.isArray(localRows) ? localRows : [];
       if (!patch || !patch.upsertGroupIds || !patch.upsertGroupIds.length) return rows;
       var upsertSet = listToSet(patch.upsertGroupIds);
-      var presentGroups = {};
+      var presentKeys = {};
       rows.forEach(function (row) {
-        var groupId = String(row && row.groupId || "").trim();
-        if (groupId) presentGroups[groupId] = true;
+        var key = getSharedRowLocalKey(row);
+        if (key) presentKeys[key] = true;
       });
       var missingRows = [];
       localRows.forEach(function (row) {
         var groupId = String(row && row.groupId || "").trim();
-        if (!groupId || !upsertSet[groupId] || presentGroups[groupId]) return;
+        var key = getSharedRowLocalKey(row);
+        if (!groupId || !upsertSet[groupId] || !key || presentKeys[key]) return;
         if (row.saved !== true || !hasSharedDraftRowData(row) || hasNegativeSharedDraftRowValue(row)) return;
         missingRows.push(row);
+        presentKeys[key] = true;
       });
       return missingRows.length ? missingRows.concat(rows) : rows;
     }
