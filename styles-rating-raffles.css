@@ -6705,7 +6705,8 @@ button.raffle-feedback-action {
 
 .raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals .raffles-active-chooser__hero-line--kind,
 .raffles-active-chooser--count-2 .raffles-active-chooser__item--referrals .raffles-active-chooser__hero-title--referrals .raffles-active-chooser__hero-line--amount {
-  font-size: clamp(18px, 4.9vw, 25px) !important;
+  font-size: clamp(14px, 3.9vw, 20px) !important;
+  letter-spacing: 0 !important;
   line-height: 0.98 !important;
 }
 

@@ -31,25 +31,41 @@ function initRafflesActiveViewRuntime(opts) {
     return cardTheme === "knockout_ticket";
   }
 
+  function raffleActiveViewHasAccessRestrictions(raffle, accessLevel) {
+    if (accessLevel > 0) return true;
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    return groups.some(function (group) {
+      if (!group || group.accessLevel == null || String(group.accessLevel) === "") return false;
+      return typeof normalizeRaffleAccessLevel === "function"
+        ? normalizeRaffleAccessLevel(group.accessLevel) > 0
+        : parseInt(group.accessLevel, 10) > 0;
+    });
+  }
+
   function setRaffleIdNoteContent(raffle, adminTicketEntry) {
     if (!raffleIdNote) return;
     var knockoutTicketCard = raffleActiveViewIsKnockoutTicketCard(raffle);
     var accessLevel = typeof raffleAccessLevel === "function" ? raffleAccessLevel(raffle) : 0;
+    var accessRestricted = raffleActiveViewHasAccessRestrictions(raffle, accessLevel);
+    var accessText = typeof raffleAccessLevelText === "function" ? raffleAccessLevelText(raffle) : "";
     if (knockoutTicketCard) {
       raffleIdNote.innerHTML =
         "<li>Получайте по билету на розыгрыш за каждые:</li>" +
         "<li>100 раздач на 20/40 Бонус гейм</li>" +
-        '<li>250 раздач на 5/10 бонус гейм <span class="raffle-id-note__hint">(если вы не с беккинг-розыгрыша)</span></li>';
-    } else if (accessLevel > 0) {
+        '<li>250 раздач на 5/10 бонус гейм <span class="raffle-id-note__hint">(если вы не с беккинг-розыгрыша)</span></li>' +
+        (accessRestricted
+          ? "<li>Доступ: " + escapeHtml(accessText || ("уровень " + accessLevel + "+")) + ". Привязка Poker21 обязательна.</li>"
+          : "");
+    } else if (accessRestricted) {
       raffleIdNote.innerHTML =
-        "<li>Для участия нужен уровень " +
-        escapeHtml(accessLevel) +
-        '+ в профиле Poker21.</li>' +
+        "<li>Для участия нужен доступ: " +
+        escapeHtml(accessText || ("уровень " + accessLevel + "+")) +
+        ".</li>" +
+        "<li>Привязка Poker21 обязательна, уровень берется из профиля Poker21.</li>" +
         '<li>Если уровень ниже, повысьте свой уровень в игре и попробуйте снова.</li>';
     } else {
       raffleIdNote.innerHTML =
         '<li>Доступ открыт для всех, привязка Poker21 не обязательна.</li>' +
-        '<li>Если Poker21 привязан, проверьте ID в профиле <span class="raffle-id-note__hint">(так проще выдать выигранный приз)</span>.</li>' +
         '<li>У вас будет 15 минут, чтобы забрать выигрыш <span class="raffle-id-note__hint">(нажать «Готов»)</span>, если не забрали — выбирается другой участник.</li>';
     }
     raffleIdNote.hidden = !!(adminTicketEntry && !knockoutTicketCard);
@@ -178,7 +194,20 @@ function initRafflesActiveViewRuntime(opts) {
       raffleGuestGate.hidden = !showRaffleGuestGate;
     }
     if (raffleSubscribeRequirements) {
-      var showSubscribeRequirements = !!(isActive && !adminTicketEntry && !needsLoginForParticipation);
+      var subscribeRequirements =
+        typeof raffleMissingSubscriptionRequirements === "function"
+          ? raffleMissingSubscriptionRequirements()
+          : [];
+      var showSubscribeRequirements = !!(
+        isActive &&
+        !iAmIn &&
+        !adminTicketEntry &&
+        !needsLoginForParticipation &&
+        subscribeRequirements.length
+      );
+      if (showSubscribeRequirements && typeof renderRaffleSubscribeRequirements === "function") {
+        renderRaffleSubscribeRequirements(raffleSubscribeRequirements, subscribeRequirements);
+      }
       raffleSubscribeRequirements.classList.toggle("raffle-subscribe-requirements--hidden", !showSubscribeRequirements);
       raffleSubscribeRequirements.hidden = !showSubscribeRequirements;
     }

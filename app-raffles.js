@@ -135,6 +135,7 @@ function initRaffles() {
   var rafflesPendingCompletedId = "";
   var rafflesActiveBroadcastList = [];
   var rafflesActiveInfoOpenId = "";
+  var rafflesSubscriptionGate = null;
   var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
   var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
   var raffleActiveInfoModalLastFocus = null;
@@ -572,6 +573,66 @@ function initRaffles() {
   var getRaffleTotalPrize = pokerRafflesGetTotalPrize;
   var formatRaffleSum = pokerRafflesFormatSum;
   var buildActiveRaffleCardHeading = pokerRafflesBuildActiveCardHeading;
+
+  function raffleMissingSubscriptionRequirements() {
+    var gate = rafflesSubscriptionGate && typeof rafflesSubscriptionGate === "object" ? rafflesSubscriptionGate : null;
+    if (!gate || gate.ok === true) return [];
+    var rows = Array.isArray(gate.missingRequirements) ? gate.missingRequirements : [];
+    var missingRaw = Array.isArray(gate.missing) ? gate.missing.map(function (item) {
+      return String(item || "").trim();
+    }) : [];
+    var hasTelegramFallback = missingRaw.indexOf("telegram") !== -1;
+    var out = [];
+    var seen = {};
+
+    function addRequirement(source, fallback) {
+      var item = source && typeof source === "object" ? source : {};
+      var key = String(item.key || item.type || fallback || "").trim();
+      if (key !== "bot" && key !== "channel") return;
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push({
+        key: key,
+        label: item.label || (key === "bot" ? "бот клуба @Poker_dvatuza_bot" : "канал клуба @dva_tuza_club"),
+        url: item.url || (key === "bot" ? gate.botUrl : gate.channelUrl) || (key === "bot" ? "https://t.me/Poker_dvatuza_bot" : "https://t.me/dva_tuza_club"),
+        instruction: item.instruction || "",
+      });
+    }
+
+    rows.forEach(function (item) {
+      addRequirement(item, "");
+    });
+    if (!out.length || hasTelegramFallback) {
+      if (missingRaw.indexOf("bot") !== -1 || hasTelegramFallback) addRequirement(null, "bot");
+      if (missingRaw.indexOf("channel") !== -1 || hasTelegramFallback) addRequirement(null, "channel");
+    }
+    return out;
+  }
+
+  function renderRaffleSubscribeRequirements(target, requirements) {
+    if (!target) return;
+    var rows = Array.isArray(requirements) ? requirements : [];
+    var title = target.querySelector(".raffle-subscribe-requirements__title");
+    var list = target.querySelector(".raffle-subscribe-requirements__list");
+    if (title) title.textContent = "Чтобы участвовать, подпишитесь";
+    if (!list) return;
+    list.innerHTML = rows.map(function (item) {
+      var label = item && item.label ? String(item.label) : "";
+      var url = item && item.url ? String(item.url) : "";
+      var instruction = item && item.instruction ? String(item.instruction) : "";
+      if (item && item.key === "bot") {
+        instruction = "зайдите в бота и отправьте /start или нажмите «Старт» и вернитесь сюда";
+      }
+      return (
+        "<li>" +
+          "<span>на " +
+            (url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(label) + "</a>" : escapeHtml(label)) +
+          "</span>" +
+          (instruction ? '<small class="raffle-subscribe-requirements__hint">' + escapeHtml(instruction) + "</small>" : "") +
+        "</li>"
+      );
+    }).join("");
+  }
 
   function rafflePadTimerUnit(value) {
     var n = parseInt(value, 10);
@@ -2382,6 +2443,8 @@ function initRaffles() {
       raffleAccessLevel: raffleAccessLevel,
       raffleAccessLevelText: raffleAccessLevelText,
       raffleDisplayPrizeText: raffleDisplayPrizeText,
+      raffleMissingSubscriptionRequirements: raffleMissingSubscriptionRequirements,
+      renderRaffleSubscribeRequirements: renderRaffleSubscribeRequirements,
       setRaffleInfoPanelOpen: setRaffleInfoPanelOpen,
       escapeHtml: escapeHtml
     });
@@ -2559,6 +2622,7 @@ function initRaffles() {
         if (rafflesIsAdmin && window.updateRaffleSubsCount) {
           window.updateRaffleSubsCount();
         }
+        rafflesSubscriptionGate = data.subscriptionGate && typeof data.subscriptionGate === "object" ? data.subscriptionGate : null;
 
         var now = new Date();
 
