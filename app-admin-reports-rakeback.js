@@ -599,8 +599,12 @@
   function hasRakebackDomValue(row) {
     if (!row) return false;
     var rakeInput = row.querySelector("[data-rakeback-rake]");
+    var percentInput = row.querySelector("[data-rakeback-percent]");
     var amountEl = row.querySelector("[data-rakeback-amount]");
     if (amountEl && String(amountEl.textContent || "").trim()) return true;
+    if (rakeInput && String(rakeInput.value || "").trim() && parseNumber(rakeInput.value) === 0) {
+      return !!(percentInput && String(percentInput.value || "").trim());
+    }
     return parseNumber(row.getAttribute("data-rakeback-room-amount")) !== 0 ||
       parseNumber(row.getAttribute("data-rakeback-amount-value")) !== 0;
   }
