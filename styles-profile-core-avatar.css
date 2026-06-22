@@ -352,7 +352,7 @@
 .profile-public-showcase {
   width: 100%;
   min-width: 0;
-  margin: 10px 0 14px;
+  margin: 6px 0 10px;
 }
 .profile-view--guest .profile-public-showcase,
 .profile-public-showcase[hidden] {
@@ -363,7 +363,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   padding-right: 0;
 }
 .profile-public-showcase__header.chat-user-modal__header {
@@ -424,6 +424,24 @@
   min-height: 0;
   margin: 0;
   border-radius: 8px;
+}
+.profile-public-showcase .chat-user-modal__gender {
+  margin-top: 3px;
+  padding: 4px 10px;
+  border-color: rgba(197, 139, 47, 0.58);
+  color: #ffe8a3;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-public-showcase .chat-user-modal__gender:hover,
+.profile-public-showcase .chat-user-modal__gender:focus-visible {
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(16, 22, 34, 0.86);
+  outline: none;
 }
 .profile-hero-gender {
   position: absolute;
@@ -514,9 +532,9 @@
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
-  aspect-ratio: 0.86;
-  min-height: clamp(330px, 86vw, 360px);
-  max-height: min(520px, 70vh);
+  aspect-ratio: 0.8;
+  min-height: clamp(260px, 68vw, 305px);
+  max-height: min(430px, 56vh);
   padding-top: 0;
   background: transparent;
 }
@@ -525,11 +543,11 @@
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
   width: auto;
   max-width: min(55.2%, 208px);
-  height: calc(72% - 11px);
-  max-height: calc(72% - 11px);
+  height: calc(86% - 4px);
+  max-height: calc(86% - 4px);
   object-fit: contain;
   object-position: center bottom;
-  transform: translateY(-54px);
+  transform: translateY(-8px);
   transform-origin: center bottom;
 }
 .profile-public-showcase .chat-user-modal__p21:empty {
@@ -580,12 +598,12 @@
 .profile-public-showcase__level-actions.profile-status__refresh-action {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
   max-width: 210px;
   min-height: 0;
-  margin: 10px 0 0;
-  padding-top: 10px;
+  margin: 6px 0 0;
+  padding-top: 7px;
   border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 .profile-public-showcase__level-actions.profile-status__refresh-action[hidden] {
@@ -598,8 +616,8 @@
 .profile-public-showcase .profile-status__points-info-btn {
   width: 100%;
   min-width: 0;
-  min-height: 32px;
-  padding: 6px 10px;
+  min-height: 29px;
+  padding: 5px 10px;
   border: 1px solid rgba(250, 204, 21, 0.48);
   border-radius: 999px;
   color: #ffe8a3;
@@ -609,7 +627,7 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.055),
     0 8px 20px rgba(14, 165, 233, 0.1);
   font: inherit;
-  font-size: clamp(11px, 2.65vw, 13px);
+  font-size: clamp(10px, 2.45vw, 12px);
   font-weight: 950;
   line-height: 1.05;
   text-align: center;

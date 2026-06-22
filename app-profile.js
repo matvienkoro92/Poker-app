@@ -304,6 +304,8 @@ function setProfileHeroGender(value, opts) {
   var genderEl = document.getElementById("profilePublicGender");
   if (genderEl) {
     genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
+    genderEl.setAttribute("data-profile-gender", profileHeroGenderValue);
+    genderEl.setAttribute("aria-pressed", profileHeroGenderValue === "female" ? "true" : "false");
     genderEl.hidden = false;
   }
   if (opts.syncArt !== false) {
@@ -357,8 +359,16 @@ function saveProfileHeroGender(value) {
 
 function initProfileHeroGenderControl() {
   var row = document.getElementById("profileHeroGender");
-  if (!row) return;
-  if (row.dataset.bound !== "1") {
+  var topBtn = document.getElementById("profilePublicGender");
+  if (topBtn && topBtn.dataset.bound !== "1") {
+    topBtn.dataset.bound = "1";
+    topBtn.addEventListener("click", function () {
+      if (topBtn.disabled) return;
+      var next = normalizeProfileHeroGender(profileHeroGenderValue) === "female" ? "male" : "female";
+      saveProfileHeroGender(next);
+    });
+  }
+  if (row && row.dataset.bound !== "1") {
     row.dataset.bound = "1";
     row.addEventListener("click", function (event) {
       var btn = event && event.target ? event.target.closest("[data-profile-gender]") : null;
@@ -602,6 +612,8 @@ function refreshProfilePublicShowcase(profileData) {
   }
   if (genderEl) {
     genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
+    genderEl.setAttribute("data-profile-gender", profileHeroGenderValue);
+    genderEl.setAttribute("aria-pressed", profileHeroGenderValue === "female" ? "true" : "false");
     genderEl.hidden = false;
   }
   if (respect) {

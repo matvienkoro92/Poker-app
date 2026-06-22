@@ -34,7 +34,7 @@
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
-                    <p class="chat-user-modal__gender" id="profilePublicGender" hidden></p>
+                    <button type="button" class="chat-user-modal__gender" id="profilePublicGender" hidden aria-label="Переключить пол героя"></button>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
                 </div>
@@ -61,11 +61,6 @@
               <div class="chat-user-modal__hero chat-user-modal__hero--art profile-public-showcase__hero" id="profilePublicHero">
                 <div class="chat-user-modal__rating-art" id="profilePublicRatingArt">
                   <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" src="./assets/chat-profile-default-hero-male.png" alt="" loading="eager" decoding="async" fetchpriority="high" hidden />
-                </div>
-                <div class="profile-hero-gender" id="profileHeroGender" role="radiogroup" aria-label="Пол героя">
-                  <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
-                  <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
-                  <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
                 </div>
                 <div class="chat-user-modal__hero-status">
                   <div class="chat-user-modal__p21" id="profilePublicP21"></div>

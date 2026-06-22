@@ -1787,7 +1787,7 @@ function initWinterRating() {
   if (tabsUpdatedEl) {
     tabsUpdatedEl.hidden = !isSummerRatingMode;
     tabsUpdatedEl.style.display = isSummerRatingMode ? "" : "none";
-    tabsUpdatedEl.textContent = "обновлено 9 июня";
+    tabsUpdatedEl.textContent = "обновлено 21 июня";
   }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
@@ -1861,7 +1861,7 @@ function initWinterRating() {
   if (springLeaguesEl) {
     springLeaguesEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Итоговые таблицы рейтинга лета по лигам" : "Итоговые таблицы рейтинга весны по лигам");
     springLeaguesEl.querySelectorAll(".winter-rating__spring-league-updated").forEach(function (el) {
-      el.textContent = seasonConfig.updatedLabel || "обновлено 9.06";
+      el.textContent = seasonConfig.updatedLabel || "обновлено 21 июня";
     });
   }
   function filterTableByNick(tbody, searchStr, tableWrap, showAllBtn) {
@@ -2470,7 +2470,7 @@ function initWinterRating() {
     });
   }
   function renderSpringLeagueDateCaption(label) {
-    var updatedLabel = seasonConfig.updatedLabel || "обновлено 9.06";
+    var updatedLabel = seasonConfig.updatedLabel || "обновлено 21 июня";
     return "<p class=\"winter-rating__date-tournaments-caption\"><span class=\"winter-rating__date-tournaments-caption-text\">" + label + "</span><span class=\"winter-rating__date-tournaments-updated\">" + updatedLabel + "</span></p>";
   }
   function fillSpringLeagueBlocks(leaguesWrap, dateStr) {
