@@ -4917,24 +4917,44 @@ async function testFriendsFlow(redis) {
     contactName: "  Buddy\u0007  ",
   }));
   assert.strictEqual(r.statusCode, 200, "friend add succeeds");
+  assert.strictEqual(r.body.pending, true, "friend add creates outgoing request");
 
   const myAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1001");
   const peerAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1002");
   assert.ok(myAccountId && peerAccountId, "friends flow creates account ids");
-  assert.strictEqual(redis.s("poker_app:friends:" + myAccountId).has(peerAccountId), true, "friend add stores normalized account id");
+  assert.strictEqual(redis.h("poker_app:friend_requests:out:" + myAccountId).has(peerAccountId), true, "friend add stores outgoing request");
+  assert.strictEqual(redis.h("poker_app:friend_requests:in:" + peerAccountId).has(myAccountId), true, "friend add stores incoming request");
+
+  r = await call(friends, req("POST", {}, { pwaSession: s.peer, action: "accept", targetUserId: myAccountId }));
+  assert.strictEqual(r.statusCode, 200, "friend accept succeeds");
+  assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), true, "friend accept stores normalized account id");
+
+  r = await call(friends, req("POST", {}, {
+    pwaSession: s.user,
+    targetUserId: peerAccountId,
+    contactName: "  Buddy\u0007  ",
+  }));
+  assert.strictEqual(r.statusCode, 200, "friend alias update succeeds");
+  assert.strictEqual(r.body.alreadyFriend, true, "friend alias update keeps existing friendship");
   assert.strictEqual(redis.h("poker_app:friend_alias:" + myAccountId).get(peerAccountId), "Buddy", "friend alias is sanitized");
+  redis.h("poker_app:visitor_chat_display_names").set(peerAccountId, "Peer Display");
+  redis.h("poker_app:pokerplus_user_ids").set(peerAccountId, "P21-1002");
+  redis.h("poker_app:pokerplus_profiles").set(peerAccountId, JSON.stringify({ nickname: "Poker21 Buddy", totalCounter: { fee: 12000 } }));
 
   r = await call(friends, req("GET", { pwaSession: s.user }));
   assert.strictEqual(r.statusCode, 200, "friend list succeeds");
-  assert.strictEqual(r.body.friends.length, 1, "friend list returns added friend");
-  assert.strictEqual(r.body.friends[0].userId, peerAccountId, "friend list exposes account id");
-  assert.strictEqual(r.body.friends[0].chatUserId, "tg_1002", "friend list resolves chat id");
-  assert.strictEqual(r.body.friends[0].userName, "@peer", "friend list resolves username");
-  assert.strictEqual(r.body.friends[0].contactName, "Buddy", "friend list returns alias");
+  const peerFriend = (r.body.friends || []).find((row) => row && row.userId === peerAccountId);
+  assert.ok(peerFriend, "friend list returns added friend");
+  assert.strictEqual(peerFriend.userId, peerAccountId, "friend list exposes account id");
+  assert.strictEqual(peerFriend.chatUserId, "tg_1002", "friend list resolves chat id");
+  assert.strictEqual(peerFriend.userName, "без TG", "friend list masks hidden telegram username");
+  assert.strictEqual(peerFriend.contactName, "Buddy", "friend list returns alias");
+  assert.strictEqual(peerFriend.chatDisplayName, "Peer Display", "friend list exposes stored display name");
+  assert.strictEqual(peerFriend.pokerPlusNickname, "Poker21 Buddy", "friend list exposes Poker21 nickname");
 
   r = await call(friends, req("DELETE", {}, { pwaSession: s.user, targetUserId: "tg_1002" }));
   assert.strictEqual(r.statusCode, 200, "friend delete succeeds");
-  assert.strictEqual(redis.s("poker_app:friends:" + myAccountId).has(peerAccountId), false, "friend delete removes member");
+  assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), false, "friend delete removes member");
   assert.strictEqual(redis.h("poker_app:friend_alias:" + myAccountId).has(peerAccountId), false, "friend delete removes alias");
 }
 

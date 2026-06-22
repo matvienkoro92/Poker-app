@@ -268,12 +268,16 @@
   font-weight: 600;
   color: var(--text);
   line-height: 1.25;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .friends-list-modal__item-login {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-muted);
   line-height: 1.2;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .friends-list-modal__item-actions {
   display: flex;

@@ -164,6 +164,8 @@ function initProfileFriends() {
   var searchSuggestRowsPromise = null;
   var searchSuggestTimer = null;
   var focusIncomingOnOpen = false;
+  var friendsDataCache = null;
+  var friendsFetchPromise = null;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -283,6 +285,29 @@ function initProfileFriends() {
     return typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "";
   }
 
+  function rememberFriendsData(data) {
+    if (data && data.ok) friendsDataCache = data;
+    return data;
+  }
+
+  function fetchFriendsData() {
+    if (friendsFetchPromise) return friendsFetchPromise;
+    var base = getApiBase();
+    if (!base) return Promise.reject(new Error("api_base_missing"));
+    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    friendsFetchPromise = fetch(base + "/api/friends" + fq)
+      .then(function (r) { return r.json(); })
+      .then(rememberFriendsData)
+      .then(function (data) {
+        friendsFetchPromise = null;
+        return data;
+      }, function (err) {
+        friendsFetchPromise = null;
+        throw err;
+      });
+    return friendsFetchPromise;
+  }
+
   function readProfileFriendsScrollY() {
     return typeof getMainDocumentScrollY === "function" ? getMainDocumentScrollY() : (window.pageYOffset || 0);
   }
@@ -363,7 +388,7 @@ function initProfileFriends() {
 
   function profileFriendsDisplayName(data, fallback) {
     data = data || {};
-    var name = data.contactName || data.chatDisplayName || data.pokerPlusNickname || data.userName || data.dtId || data.userId || fallback || "Игрок";
+    var name = data.pokerPlusNickname || data.poker21Nickname || data.nickname || data.contactName || data.chatDisplayName || data.userName || data.dtId || data.userId || fallback || "Игрок";
     name = String(name || "").trim();
     return name.indexOf("@") === 0 ? name.slice(1) : name || "Игрок";
   }
@@ -756,8 +781,30 @@ function initProfileFriends() {
     row = row || {};
     var tgLine = row.userName || row.userId || "Игрок";
     var contact = row.contactName != null && String(row.contactName).trim() ? String(row.contactName).trim() : "";
-    var modalName = contact ? contact : tgLine.indexOf("@") === 0 ? tgLine.slice(1) : tgLine;
-    return { tgLine: tgLine, contact: contact, modalName: modalName };
+    var chatName = row.chatDisplayName != null && String(row.chatDisplayName).trim() ? String(row.chatDisplayName).trim() : "";
+    var pokerName =
+      (row.pokerPlusNickname != null && String(row.pokerPlusNickname).trim()) ||
+      (row.poker21Nickname != null && String(row.poker21Nickname).trim()) ||
+      (row.nickname != null && String(row.nickname).trim()) ||
+      "";
+    var modalName = pokerName || contact || chatName || (tgLine.indexOf("@") === 0 ? tgLine.slice(1) : tgLine);
+    var lines = [];
+    var seen = {};
+    function addLine(value, kind) {
+      var text = String(value || "").trim();
+      if (!text) return;
+      if ((kind === "tg" || lines.length > 0) && (text === "без TG" || text === "Игрок")) return;
+      var key = text.replace(/^@+/, "").toLowerCase();
+      if (seen[key]) return;
+      seen[key] = true;
+      lines.push({ text: text, kind: kind || "name" });
+    }
+    addLine(pokerName, "nick");
+    addLine(contact, "name");
+    addLine(chatName, "name");
+    addLine(tgLine, "tg");
+    if (!lines.length) addLine(modalName, "name");
+    return { tgLine: tgLine, contact: contact || chatName, pokerName: pokerName, modalName: modalName, lines: lines };
   }
 
   function previewLevel(row) {
@@ -925,14 +972,15 @@ function initProfileFriends() {
 
   function renderRow(row, section, actionsHtml, noteHtml) {
     var meta = displayData(row);
-    var htmlLabels = meta.contact
-      ? '<span class="friends-list-modal__item-labels">' +
-        '<span class="friends-list-modal__item-name">' + esc(meta.contact) + "</span>" +
-        '<span class="friends-list-modal__item-login">' + esc(meta.tgLine) + "</span></span>"
-      : '<span class="friends-list-modal__item-labels friends-list-modal__item-labels--single">' +
-        '<span class="friends-list-modal__item-name">' + esc(meta.tgLine) + "</span>" +
-        (noteHtml || "") +
-        "</span>";
+    var lines = Array.isArray(meta.lines) && meta.lines.length ? meta.lines : [{ text: meta.modalName, kind: "name" }];
+    var htmlLabels =
+      '<span class="friends-list-modal__item-labels' + (lines.length === 1 ? " friends-list-modal__item-labels--single" : "") + '">' +
+      lines.map(function (line, idx) {
+        var cls = idx === 0 ? "friends-list-modal__item-name" : "friends-list-modal__item-login";
+        return '<span class="' + cls + '">' + esc(line && line.text) + "</span>";
+      }).join("") +
+      (noteHtml || "") +
+      "</span>";
     return (
       '<div class="friends-list-modal__item" data-section="' + esc(section) +
       '" data-user-id="' + esc(row.userId || "") +
@@ -1150,16 +1198,22 @@ function initProfileFriends() {
     }
   }
 
-  function loadFriends() {
+  function loadFriends(options) {
+    options = options || {};
     var base = getApiBase();
     if (!base) return;
-    listEl.innerHTML = '<p class="friends-list-modal__loading">Загрузка...</p>';
-    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    fetch(base + "/api/friends" + fq)
-      .then(function (r) { return r.json(); })
+    var hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    var displayedCachedData = !!(options.preferCache && hasCachedData);
+    if (displayedCachedData) {
+      renderFriendsData(friendsDataCache);
+      try { pokerMarkFriendsSeen(friendsDataCache); } catch (eSeenCachedFriends) {}
+    } else {
+      listEl.innerHTML = '<p class="friends-list-modal__loading">Загрузка...</p>';
+    }
+    fetchFriendsData()
       .then(function (data) {
         if (!data || !data.ok) {
-          listEl.innerHTML = '<p class="friends-list-modal__empty">Ошибка загрузки</p>';
+          if (!displayedCachedData) listEl.innerHTML = '<p class="friends-list-modal__empty">Ошибка загрузки</p>';
           try {
             if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
           } catch (eRe) {}
@@ -1169,7 +1223,7 @@ function initProfileFriends() {
         try { pokerMarkFriendsSeen(data); } catch (eSeenFriends) {}
       })
       .catch(function () {
-        listEl.innerHTML = '<p class="friends-list-modal__empty">' + esc(POKER_NET_ERR) + "</p>";
+        if (!displayedCachedData) listEl.innerHTML = '<p class="friends-list-modal__empty">' + esc(POKER_NET_ERR) + "</p>";
       });
   }
 
@@ -1183,14 +1237,23 @@ function initProfileFriends() {
       renderFriendsPreview([]);
       return;
     }
-    renderPreviewLoading();
-    var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    fetch(base + "/api/friends" + fq)
-      .then(function (r) { return r.json(); })
+    var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    if (previewHadCachedData) {
+      renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
+      renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
+      try {
+        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
+      } catch (eCachedPreviewCount) {}
+    } else {
+      renderPreviewLoading();
+    }
+    fetchFriendsData()
       .then(function (data) {
         if (!data || !data.ok) {
-          renderIncomingNotice(0);
-          renderFriendsPreview([]);
+          if (!previewHadCachedData) {
+            renderIncomingNotice(0);
+            renderFriendsPreview([]);
+          }
           return;
         }
         try { pokerUpdateFriendsUnreadFromData(data); } catch (ePreviewUnread) {}
@@ -1201,8 +1264,10 @@ function initProfileFriends() {
         } catch (ePreviewCount) {}
       })
       .catch(function () {
-        renderIncomingNotice(0);
-        renderFriendsPreview([]);
+        if (!previewHadCachedData) {
+          renderIncomingNotice(0);
+          renderFriendsPreview([]);
+        }
       });
   }
 
@@ -1219,7 +1284,7 @@ function initProfileFriends() {
     }
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("friends-list-modal--open");
-    loadFriends();
+    loadFriends({ preferCache: true });
   });
 
   window.pokerRefreshProfileFriendsPreview = loadFriendsPreview;

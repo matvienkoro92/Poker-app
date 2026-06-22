@@ -502,7 +502,7 @@ function profilePublicShowcaseSyncKnownArt(data) {
   if (data && typeof data === "object") {
     profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(data));
   } else {
-    profilePublicShowcaseSyncArt("", { allowDefault: false });
+    profilePublicShowcaseSyncArt("", { forceDefault: true });
   }
 }
 

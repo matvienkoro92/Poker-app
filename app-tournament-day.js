@@ -542,7 +542,7 @@ function postHomeTournamentNotify(payload) {
 
 function loadHomeTournamentNotifyStatus(force) {
   if (!force && HOME_TOURNAMENT_NOTIFY_STATE.loaded) return;
-  if (!document.getElementById("homeTournamentNotifyBtn")) return;
+  if (!document.getElementById("homeTournamentPickBtn")) return;
   if (!homeTournamentNotifyApiBase() || !homeTournamentNotifyHasCredential()) {
     renderHomeTournamentNotifyState();
     return;
