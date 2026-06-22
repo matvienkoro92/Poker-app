@@ -87,15 +87,54 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-09-06-2026-league1-hok-19h.jpg",
     "rating-compressed-preview/rating-09-06-2026-league1-rebuy-evening-20h.jpg"
   ],
-  "10.06.2026": [],
-  "11.06.2026": [],
-  "12.06.2026": [],
-  "13.06.2026": [],
-  "14.06.2026": [],
-  "15.06.2026": [],
-  "16.06.2026": [],
-  "17.06.2026": [],
-  "18.06.2026": [],
+  "10.06.2026": [
+    "rating-compressed-preview/rating-10-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-10-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-10-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "11.06.2026": [
+    "rating-compressed-preview/rating-11-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-11-06-2026-league1-tournir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-11-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-11-06-2026-league1-classic-tournament-21h.jpg"
+  ],
+  "12.06.2026": [
+    "rating-compressed-preview/rating-12-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-12-06-2026-league1-friday-progressive-18h.jpg",
+    "rating-compressed-preview/rating-12-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "13.06.2026": [
+    "rating-compressed-preview/rating-13-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-13-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-13-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "14.06.2026": [
+    "rating-compressed-preview/rating-14-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-14-06-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-14-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "15.06.2026": [
+    "rating-compressed-preview/rating-15-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-15-06-2026-league1-tournir-ponedelnika-18h.jpg",
+    "rating-compressed-preview/rating-15-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-15-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "16.06.2026": [
+    "rating-compressed-preview/rating-16-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-16-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-16-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "17.06.2026": [
+    "rating-compressed-preview/rating-17-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-17-06-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-17-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "18.06.2026": [
+    "rating-compressed-preview/rating-18-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-18-06-2026-league1-tournir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-18-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-18-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
   "19.06.2026": [],
   "20.06.2026": [],
   "21.06.2026": [],
