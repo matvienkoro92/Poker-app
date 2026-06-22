@@ -1810,10 +1810,6 @@ function initRaffles() {
       return;
     }
     var selectedId = String(activeId || "");
-    var viewerIds = collectRaffleIdentityIds();
-    var needsLogin = typeof rafflesViewerNeedsLoginForParticipation === "function"
-      ? rafflesViewerNeedsLoginForParticipation()
-      : rafflesViewerIsGuestOnly();
     rafflesActiveChooser.hidden = false;
     rafflesActiveChooser.classList.remove("raffles-active-chooser--hidden");
     rafflesActiveChooser.classList.remove(
@@ -1834,15 +1830,10 @@ function initRaffles() {
         var endDate = raffle && raffle.endDate ? new Date(raffle.endDate) : null;
         var endMs = endDate && !isNaN(endDate.getTime()) ? endDate.getTime() : 0;
         var totalPrize = getRaffleTotalPrize(raffle);
-        var isIn = activeRaffleParticipantIn(raffle, viewerIds);
-        var adminTicketEntry = raffleUsesAdminTicketEntry(raffle);
         var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
         var knockoutCard = activeRaffleIsKnockoutTicketCard(raffle);
         var participantCount = activeRaffleParticipantsCount(raffle);
         var participantWord = activeRaffleParticipantWord(participantCount);
-        var buttonLabel = adminTicketEntry ? "Участников добавляет админ" : needsLogin ? "Войти" : isIn ? "Отменить участие" : "Участвовать";
-        var buttonAction = adminTicketEntry ? "locked" : needsLogin ? "login" : isIn ? "leave" : "join";
-        var buttonPressed = !adminTicketEntry && !needsLogin ? ' aria-pressed="' + (isIn ? "true" : "false") + '"' : "";
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
         var headHtml =
           '<span class="raffles-active-chooser__head">' +
@@ -1891,19 +1882,6 @@ function initRaffles() {
           factsHtml +
           "</span>" +
           accessHtml +
-          '<button type="button" class="raffles-active-chooser__cta' +
-          (isIn ? " raffles-active-chooser__cta--joined" : "") +
-          (adminTicketEntry ? " raffles-active-chooser__cta--locked" : "") +
-          '" data-raffle-active-id="' +
-          escapeHtml(id) +
-          '" data-raffle-active-action="' +
-          escapeHtml(buttonAction) +
-          '"' +
-          buttonPressed +
-          (adminTicketEntry ? " disabled aria-disabled=\"true\"" : "") +
-          ">" +
-          escapeHtml(buttonLabel) +
-          "</button>" +
           '<button type="button" class="raffles-active-chooser__info-toggle' +
           (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
           '" data-raffle-active-info-id="' +

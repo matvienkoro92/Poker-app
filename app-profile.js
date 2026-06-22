@@ -218,6 +218,7 @@ function initProfilePublicCardButton() {
 var profilePublicShowcaseData = null;
 var profilePublicShowcaseStatus = null;
 var profilePublicShowcaseArtSeq = 0;
+var profilePublicShowcaseLoading = false;
 var profileHeroGenderValue = "male";
 var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
 var profilePublicShowcaseLatestRatingNick = "";
@@ -301,13 +302,6 @@ function setProfileHeroGender(value, opts) {
     profilePublicShowcaseData.profileGender = profileHeroGenderValue;
   }
   renderProfileHeroGenderControl(!!opts.saving);
-  var genderEl = document.getElementById("profilePublicGender");
-  if (genderEl) {
-    genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
-    genderEl.setAttribute("data-profile-gender", profileHeroGenderValue);
-    genderEl.setAttribute("aria-pressed", profileHeroGenderValue === "female" ? "true" : "false");
-    genderEl.hidden = false;
-  }
   if (opts.syncArt !== false) {
     profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(profilePublicShowcaseData || {}));
   }
@@ -359,15 +353,6 @@ function saveProfileHeroGender(value) {
 
 function initProfileHeroGenderControl() {
   var row = document.getElementById("profileHeroGender");
-  var topBtn = document.getElementById("profilePublicGender");
-  if (topBtn && topBtn.dataset.bound !== "1") {
-    topBtn.dataset.bound = "1";
-    topBtn.addEventListener("click", function () {
-      if (topBtn.disabled) return;
-      var next = normalizeProfileHeroGender(profileHeroGenderValue) === "female" ? "male" : "female";
-      saveProfileHeroGender(next);
-    });
-  }
   if (row && row.dataset.bound !== "1") {
     row.dataset.bound = "1";
     row.addEventListener("click", function (event) {
@@ -444,6 +429,19 @@ function profilePublicShowcaseHideArt(artImg) {
   artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
 }
 
+function setProfilePublicShowcaseLoading(isLoading) {
+  var wasLoading = profilePublicShowcaseLoading;
+  profilePublicShowcaseLoading = !!isLoading;
+  var root = document.getElementById("profilePublicShowcase");
+  if (root) root.classList.toggle("profile-public-showcase--loading", profilePublicShowcaseLoading);
+  if (profilePublicShowcaseLoading && !wasLoading) {
+    profilePublicShowcaseArtSeq += 1;
+    profilePublicShowcaseHideArt(document.getElementById("profilePublicRatingArtImg"));
+  } else if (wasLoading && !profilePublicShowcaseLoading) {
+    profilePublicShowcaseSyncKnownArt(profilePublicShowcaseData);
+  }
+}
+
 function profilePublicShowcaseSyncArt(nick, opts) {
   opts = opts || {};
   var artWrap = document.getElementById("profilePublicRatingArt");
@@ -509,10 +507,16 @@ function profilePublicShowcaseSyncArt(nick, opts) {
 }
 
 function profilePublicShowcaseSyncKnownArt(data) {
-  if (data && typeof data === "object") {
-    profilePublicShowcaseSyncArt(profileAchievementRatingNickFromData(data));
-  } else {
+  var hasData = data && typeof data === "object";
+  var nick = hasData ? profileAchievementRatingNickFromData(data) : "";
+  if (profilePublicShowcaseLoading) {
+    profilePublicShowcaseSyncArt(nick, { allowDefault: false });
+  } else if (nick) {
+    profilePublicShowcaseSyncArt(nick);
+  } else if (hasData) {
     profilePublicShowcaseSyncArt("", { forceDefault: true });
+  } else {
+    profilePublicShowcaseSyncArt("", { allowDefault: false });
   }
 }
 
@@ -590,7 +594,6 @@ function refreshProfilePublicShowcase(profileData) {
   var verified = document.getElementById("profilePublicVerifiedBadge");
   var loginSub = document.getElementById("profilePublicLoginSub");
   var lastSeen = document.getElementById("profilePublicLastSeen");
-  var genderEl = document.getElementById("profilePublicGender");
   var respect = document.getElementById("profilePublicRespectVal");
   setProfileHeroGender(profileGenderFromData(data), { syncArt: false });
   if (titleEl) titleEl.textContent = title;
@@ -609,12 +612,6 @@ function refreshProfilePublicShowcase(profileData) {
       lastSeen.textContent = "";
       lastSeen.hidden = true;
     }
-  }
-  if (genderEl) {
-    genderEl.textContent = profileHeroGenderText(profileHeroGenderValue);
-    genderEl.setAttribute("data-profile-gender", profileHeroGenderValue);
-    genderEl.setAttribute("aria-pressed", profileHeroGenderValue === "female" ? "true" : "false");
-    genderEl.hidden = false;
   }
   if (respect) {
     var rv = document.getElementById("profileRespectValue");
@@ -842,6 +839,7 @@ function syncProfileVerifiedContentVisibility(isVerified) {
 function syncProfileLoadingVisibility(isLoading) {
   var note = document.getElementById("profileLoadingNote");
   var profileView = document.getElementById("profileView");
+  setProfilePublicShowcaseLoading(!!isLoading);
   if (note) {
     note.hidden = !isLoading;
     note.classList.toggle("profile-loading-note--hidden", !isLoading);

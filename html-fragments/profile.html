@@ -34,7 +34,11 @@
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
-                    <button type="button" class="chat-user-modal__gender" id="profilePublicGender" hidden aria-label="Переключить пол героя"></button>
+                    <div class="profile-hero-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
+                      <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
+                      <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
+                      <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
+                    </div>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
                 </div>

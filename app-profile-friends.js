@@ -973,6 +973,14 @@ function initProfileFriends() {
   function renderRow(row, section, actionsHtml, noteHtml) {
     var meta = displayData(row);
     var lines = Array.isArray(meta.lines) && meta.lines.length ? meta.lines : [{ text: meta.modalName, kind: "name" }];
+    var avatar = row && row.avatar ? String(row.avatar || "").trim() : "";
+    var initial = String(meta.modalName || meta.lines && meta.lines[0] && meta.lines[0].text || "?").trim().charAt(0) || "?";
+    var avatarHtml =
+      '<span class="friends-list-modal__avatar" aria-hidden="true">' +
+      (avatar
+        ? '<img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
+        : '<span>' + esc(initial.toUpperCase()) + "</span>") +
+      "</span>";
     var htmlLabels =
       '<span class="friends-list-modal__item-labels' + (lines.length === 1 ? " friends-list-modal__item-labels--single" : "") + '">' +
       lines.map(function (line, idx) {
@@ -986,6 +994,7 @@ function initProfileFriends() {
       '" data-user-id="' + esc(row.userId || "") +
       '" data-chat-user-id="' + esc(row.chatUserId || "") +
       '" data-user-name="' + esc(meta.modalName) + '">' +
+      avatarHtml +
       htmlLabels +
       '<div class="friends-list-modal__item-actions">' + actionsHtml + "</div></div>"
     );

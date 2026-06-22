@@ -164,34 +164,43 @@
 .friends-list-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background:
+    radial-gradient(circle at 50% 12%, rgba(245, 158, 11, 0.12), transparent 34%),
+    rgba(0, 0, 0, 0.76);
+  backdrop-filter: blur(5px);
   cursor: pointer;
 }
 .friends-list-modal__inner {
   position: relative;
   width: 100%;
-  max-width: 380px;
-  max-height: 70vh;
+  max-width: 430px;
+  max-height: 74vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--block-bg);
-  border-radius: 12px;
-  padding: 20px 16px 16px;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background:
+    linear-gradient(180deg, rgba(16, 20, 30, 0.98), rgba(4, 7, 14, 0.99)),
+    var(--block-bg);
+  border-radius: 18px;
+  padding: 22px 18px 18px;
+  border: 1px solid rgba(197, 139, 47, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 166, 0.1),
+    0 18px 54px rgba(0, 0, 0, 0.62),
+    0 0 32px rgba(245, 158, 11, 0.12);
 }
 .friends-list-modal__close {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 36px;
-  height: 36px;
-  border: none;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 232, 166, 0.18);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  font-size: 22px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #ffe8a3;
+  font-size: 28px;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -200,32 +209,34 @@
   padding: 0;
 }
 .friends-list-modal__close:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(35, 43, 58, 0.92);
+  border-color: rgba(255, 232, 166, 0.34);
 }
 .friends-list-modal__title {
-  margin: 0 0 16px;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
+  margin: 0 54px 18px 0;
+  font-size: 28px;
+  font-weight: 1000;
+  color: #ffe8a3;
+  text-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
 }
 .friends-list-modal__list {
   overflow: auto;
   flex: 1;
   min-height: 0;
+  padding-right: 2px;
 }
 .friends-list-modal__section {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
 }
 .friends-list-modal__section:last-child {
   margin-bottom: 0;
 }
 .friends-list-modal__section-title {
-  margin: 0 0 8px;
-  font-size: 13px;
+  margin: 0 0 10px;
+  font-size: 17px;
   line-height: 1.2;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--accent-2);
+  font-weight: 1000;
+  color: #ffe8a3;
   text-transform: uppercase;
 }
 .friends-list-modal__loading,
@@ -236,21 +247,52 @@
   color: var(--text-muted);
 }
 .friends-list-modal__item {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 13px;
   font-size: 14px;
   color: var(--text);
   text-decoration: none;
-  border-radius: 8px;
-  margin-bottom: 6px;
-  border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(197, 139, 47, 0.5);
+  background:
+    linear-gradient(135deg, rgba(255, 232, 166, 0.075), rgba(8, 13, 23, 0.88)),
+    rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.22);
 }
 .friends-list-modal__item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(250, 204, 21, 0.68);
+  background:
+    linear-gradient(135deg, rgba(255, 232, 166, 0.12), rgba(10, 16, 28, 0.92)),
+    rgba(255, 255, 255, 0.05);
+}
+.friends-list-modal__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 232, 166, 0.48);
+  background:
+    radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.28), transparent 32%),
+    linear-gradient(180deg, rgba(30, 41, 59, 0.94), rgba(8, 13, 23, 0.98));
+  color: #ffe8a3;
+  font-size: 18px;
+  font-weight: 1000;
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.18);
+}
+.friends-list-modal__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .friends-list-modal__item-labels {
   display: flex;
@@ -261,20 +303,20 @@
   flex: 1;
 }
 .friends-list-modal__item-labels--single .friends-list-modal__item-name {
-  font-weight: 600;
+  font-weight: 950;
 }
 .friends-list-modal__item-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 16px;
+  font-weight: 1000;
+  color: #fff4cf;
   line-height: 1.25;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
 .friends-list-modal__item-login {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255, 232, 166, 0.68);
   line-height: 1.2;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -283,16 +325,16 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
   min-width: 0;
 }
 .friends-list-modal__btn {
   margin: 0;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 950;
   font-family: inherit;
   cursor: pointer;
   border: 1px solid transparent;
@@ -304,12 +346,14 @@
   cursor: not-allowed;
 }
 .friends-list-modal__btn--profile {
-  color: #0f172a;
-  background: linear-gradient(180deg, #fdba74 0%, #f97316 100%);
-  border-color: rgba(251, 146, 60, 0.5);
+  color: #ffe8a3;
+  background: linear-gradient(180deg, rgba(20, 27, 39, 0.96), rgba(8, 13, 23, 0.98));
+  border-color: rgba(197, 139, 47, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .friends-list-modal__btn--profile:hover {
-  filter: brightness(1.05);
+  border-color: rgba(250, 204, 21, 0.8);
+  color: #fff4cf;
 }
 .friends-list-modal__btn--accept {
   color: #052e16;
@@ -323,13 +367,13 @@
 }
 .friends-list-modal__btn--cancel {
   color: #fee2e2;
-  background: rgba(127, 29, 29, 0.32);
+  background: rgba(127, 29, 29, 0.24);
   border-color: rgba(248, 113, 113, 0.4);
 }
 .friends-list-modal__btn--remove {
-  color: var(--text-muted);
-  background: transparent;
-  border-color: var(--border-subtle);
+  color: #ffe8a3;
+  background: rgba(7, 11, 19, 0.78);
+  border-color: rgba(197, 139, 47, 0.58);
 }
 .friends-list-modal__btn--remove:hover {
   color: #f87171;
@@ -348,6 +392,39 @@
   color: var(--text-muted);
   border: 1px solid var(--border-subtle);
   white-space: nowrap;
+}
+@media (max-width: 430px) {
+  .friends-list-modal {
+    padding: 10px;
+  }
+  .friends-list-modal__inner {
+    max-height: 82vh;
+    padding: 20px 12px 14px;
+    border-radius: 16px;
+  }
+  .friends-list-modal__title {
+    font-size: 24px;
+  }
+  .friends-list-modal__item {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+  .friends-list-modal__avatar {
+    width: 38px;
+    height: 38px;
+  }
+  .friends-list-modal__item-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+  }
+  .friends-list-modal__btn,
+  .friends-list-modal__status {
+    min-height: 38px;
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 .profile-personal {

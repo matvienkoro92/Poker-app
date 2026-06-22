@@ -98,7 +98,10 @@ function parsePlayerLine(line, warnings, lineNo) {
   const nick = parts[1] || "";
   if (!nick) warnings.push(`line ${lineNo}: empty nick`);
   if (!Number.isInteger(place) || place < 0) warnings.push(`line ${lineNo}: suspicious place "${parts[0]}"`);
-  if (reward < 0) warnings.push(`line ${lineNo}: negative reward "${parts[2]}"`);
+  if (reward < 0) {
+    warnings.push(`line ${lineNo}: negative reward skipped "${parts[2]}"`);
+    return null;
+  }
   return { nick, place, reward };
 }
 
@@ -171,8 +174,9 @@ function parseSnippetInput(text) {
       }
       if (key === "multiplier" || key === "множитель") {
         const multiplier = parseNumber(value, "multiplier", warnings, lineNo);
-        defaults.multiplier = multiplier || 1;
+        defaults.multiplier = multiplier === 1000 ? 100 : (multiplier || 1);
         if (current && !current.players.length) current.multiplier = defaults.multiplier;
+        if (multiplier === 1000) warnings.push(`line ${lineNo}: multiplier 1000 normalized to 100`);
         if (![1, 100].includes(defaults.multiplier)) warnings.push(`line ${lineNo}: unusual multiplier "${value}"`);
         return;
       }
