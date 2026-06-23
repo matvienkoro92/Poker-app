@@ -1467,3 +1467,446 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-hero-card::after {
   display: none;
 }
+
+/* Reference-style club profile layout */
+.view[data-view="profile"] .profile-header-row {
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0 2px;
+}
+.view[data-view="profile"] .profile-header-row .title {
+  color: #ffd77a;
+  font-size: clamp(34px, 8.4vw, 58px);
+  font-weight: 1000;
+  line-height: 0.98;
+  text-shadow: 0 2px 16px rgba(255, 181, 49, 0.18);
+}
+.view[data-view="profile"] .profile-header-controls {
+  gap: 14px;
+}
+.view[data-view="profile"] .profile-header-tools {
+  gap: 12px;
+}
+.view[data-view="profile"] .profile-lang-switch {
+  min-height: 50px;
+  padding: 0 15px;
+  border-color: rgba(148, 163, 184, 0.32);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.92), rgba(7, 11, 19, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 28px rgba(0, 0, 0, 0.24);
+}
+.view[data-view="profile"] .profile-lang-switch::after {
+  content: "/";
+  color: rgba(255, 232, 163, 0.76);
+  font-size: 17px;
+  font-weight: 950;
+  order: 2;
+}
+.view[data-view="profile"] .profile-lang-switch__btn {
+  min-width: 0;
+  height: 48px;
+  padding: 0 4px;
+  color: #fff2c8;
+  font-size: 16px;
+  font-weight: 950;
+  order: 1;
+}
+.view[data-view="profile"] .profile-lang-switch__btn:last-child {
+  order: 3;
+}
+.view[data-view="profile"] .profile-lang-switch__btn--active {
+  background: transparent;
+  color: #fff2c8;
+  box-shadow: none;
+}
+.view[data-view="profile"] .profile-header-respect-btn.profile-avatar-block__respect-btn {
+  min-width: 94px;
+  height: 50px;
+  padding: 0 18px;
+  border-color: rgba(197, 139, 47, 0.56);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(7, 11, 19, 0.98));
+  color: #fff4cf;
+  font-size: 19px;
+}
+.view[data-view="profile"] .profile-avatar-block__respect-icon {
+  color: #ffb531;
+  font-size: 25px;
+}
+.view[data-view="profile"] .profile-exit-btn {
+  min-height: 50px;
+  padding: 0 22px;
+  border: 1px solid rgba(197, 139, 47, 0.56);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(7, 11, 19, 0.98));
+  color: #fff4cf;
+  font-size: 17px;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 28px rgba(0, 0, 0, 0.22);
+}
+.view[data-view="profile"] .profile-exit-btn::before {
+  content: "↩";
+  margin-right: 9px;
+  color: #ffb531;
+  font-size: 22px;
+  line-height: 0;
+}
+.view[data-view="profile"] .profile-tabs {
+  gap: 0;
+  margin: 0 0 18px;
+  padding: 8px;
+  border-color: rgba(148, 163, 184, 0.28);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(13, 20, 32, 0.92), rgba(5, 8, 15, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.24);
+}
+.view[data-view="profile"] .profile-tabs__btn {
+  min-height: 76px;
+  border-color: rgba(197, 139, 47, 0.28);
+  border-radius: 17px;
+  color: rgba(255, 244, 207, 0.62);
+  font-size: clamp(18px, 4.2vw, 27px);
+  font-weight: 950;
+}
+.view[data-view="profile"] .profile-tabs__btn--active,
+.view[data-view="profile"] .profile-tabs__btn[aria-selected="true"] {
+  color: #fff6dc;
+  border-color: rgba(255, 224, 138, 0.96);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.34), transparent 36%),
+    linear-gradient(180deg, #ffbd39 0%, #d77a08 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(255, 118, 0, 0.82),
+    0 0 24px rgba(255, 145, 32, 0.42);
+}
+.view[data-view="profile"] .profile-tabs__btn::after {
+  display: none;
+}
+.view[data-view="profile"] .profile-public-showcase {
+  margin: 0 0 16px;
+}
+.view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+  margin: 0 0 20px;
+  padding: 20px 30px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(14, 165, 233, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(8, 13, 23, 0.94), rgba(4, 8, 15, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 14px 34px rgba(0, 0, 0, 0.22);
+}
+.view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+  justify-content: flex-start;
+  gap: 28px;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
+  width: clamp(96px, 17vw, 132px);
+  height: clamp(96px, 17vw, 132px);
+  filter: drop-shadow(0 0 18px rgba(255, 181, 49, 0.32));
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(255, 200, 74, 0.95);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(255, 118, 0, 0.66),
+    0 0 22px rgba(255, 181, 49, 0.42);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+  gap: 22px;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+  max-width: min(52vw, 460px);
+  color: #ffd77a;
+  font-size: clamp(34px, 7.4vw, 56px);
+  font-weight: 1000;
+  line-height: 1;
+}
+.view[data-view="profile"] .profile-public-showcase__edit-name.profile-hero-card__edit-name {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border-color: rgba(197, 139, 47, 0.78);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.98));
+  color: #ffe8a3;
+  font-size: 28px;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__verified {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 0 18px rgba(34, 197, 94, 0.42);
+}
+.view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+  grid-template-columns: minmax(0, 1.08fr) minmax(240px, 0.92fr);
+  gap: clamp(14px, 4vw, 34px);
+  align-items: center;
+  margin: 0;
+  padding: clamp(18px, 4vw, 36px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 145, 32, 0.82);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 22% 56%, rgba(255, 181, 49, 0.22), transparent 34%),
+    radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.08), transparent 32%),
+    linear-gradient(120deg, rgba(8, 13, 23, 0.98), rgba(2, 6, 13, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 166, 0.08),
+    0 0 24px rgba(255, 118, 0, 0.12);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+  height: clamp(430px, 55vw, 650px);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
+  max-width: min(78%, 390px);
+  height: 98%;
+  max-height: 98%;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
+  max-width: min(64%, 320px);
+  height: 88%;
+  max-height: 88%;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+  align-self: center;
+  gap: 20px;
+  padding: 0;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
+  order: 1;
+  display: grid;
+  gap: 12px;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__level {
+  order: 2;
+  display: grid;
+  gap: 18px;
+  margin: 0;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
+  color: rgba(226, 232, 240, 0.78);
+  font-size: clamp(22px, 4.2vw, 31px);
+  font-weight: 1000;
+  text-align: left;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-xp {
+  color: #ffd77a;
+  font-size: clamp(18px, 3.6vw, 29px);
+  font-weight: 1000;
+  text-align: left;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-scale {
+  display: block;
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
+  width: 100%;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-fill {
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, #ffe27a, #f59e0b);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
+  color: #ffd77a;
+  font-size: clamp(68px, 15vw, 112px);
+  font-weight: 1000;
+  line-height: 0.9;
+  text-align: left;
+  text-shadow: 0 4px 20px rgba(255, 181, 49, 0.2);
+}
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
+  margin-left: 10px;
+  color: rgba(226, 232, 240, 0.78);
+  font-size: clamp(26px, 5.5vw, 42px);
+}
+.view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
+  gap: 14px;
+  width: min(100%, 430px);
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+.view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+.view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+  min-height: 74px;
+  padding: 14px 20px;
+  border-radius: 18px;
+  font-size: clamp(19px, 4vw, 27px);
+  font-weight: 1000;
+}
+.view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn {
+  border-color: rgba(255, 232, 166, 0.95);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.42), transparent 36%),
+    linear-gradient(180deg, #ffc345 0%, #f08a09 100%);
+  color: #120b02;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.16),
+    0 0 22px rgba(255, 145, 32, 0.34);
+}
+.view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+  border-color: rgba(255, 181, 49, 0.88);
+  background:
+    linear-gradient(180deg, rgba(9, 16, 28, 0.98), rgba(3, 7, 16, 0.99));
+  color: #ffe8a3;
+}
+.view[data-view="profile"] .profile-public-showcase__level-actions .profile-hero-gender {
+  margin-top: 14px;
+  padding: 5px;
+  border-color: rgba(197, 139, 47, 0.68);
+  border-radius: 999px;
+}
+.view[data-view="profile"] .profile-hero-gender__btn {
+  flex-basis: 70px;
+  min-width: 70px;
+  height: 52px;
+  font-size: 24px;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total {
+  margin: 24px 0 22px;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
+  grid-template-columns: minmax(140px, 0.34fr) minmax(0, 1fr);
+  min-height: 230px;
+  gap: clamp(18px, 4vw, 40px);
+  padding: clamp(22px, 4vw, 34px);
+  border-color: rgba(255, 181, 49, 0.88);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 232, 166, 0.06) 0 25%, transparent 25% 50%, rgba(255, 232, 166, 0.04) 50% 75%, transparent 75%) 0 0 / 28px 28px,
+    radial-gradient(circle at 92% 50%, rgba(255, 232, 166, 0.1), transparent 24%),
+    linear-gradient(140deg, rgba(9, 16, 28, 0.98), rgba(3, 8, 16, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 166, 0.08),
+    0 0 22px rgba(255, 118, 0, 0.18);
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab::after {
+  content: "🏆";
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: center;
+  font-size: clamp(64px, 13vw, 104px);
+  filter:
+    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 18px rgba(255, 181, 49, 0.24));
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-main {
+  grid-column: 2;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: clamp(22px, 4.6vw, 34px);
+  font-weight: 950;
+  text-align: left;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-sum {
+  display: block;
+  margin-top: 12px;
+  color: #ffd77a;
+  font-size: clamp(52px, 11vw, 82px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-more {
+  grid-column: 2;
+  justify-self: start;
+  min-height: auto;
+  padding: 0 0 5px;
+  border: 0;
+  border-bottom: 2px solid rgba(255, 181, 49, 0.78);
+  border-radius: 0;
+  background: transparent;
+  color: #ffbd39;
+  font-size: clamp(20px, 4.2vw, 30px);
+}
+
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-header-row {
+    align-items: flex-start;
+  }
+  .view[data-view="profile"] .profile-header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .view[data-view="profile"] .profile-header-tools {
+    flex-wrap: wrap;
+  }
+  .view[data-view="profile"] .profile-exit-btn {
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .view[data-view="profile"] .profile-tabs__btn {
+    min-height: 58px;
+    font-size: 18px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    gap: 14px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__edit-name.profile-hero-card__edit-name {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__verified {
+    width: 36px;
+    height: 36px;
+    font-size: 21px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.86fr);
+    gap: 10px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+    height: clamp(300px, 76vw, 430px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
+    height: 15px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+  .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    min-height: 52px;
+    border-radius: 14px;
+  }
+  .view[data-view="profile"] .profile-hero-gender__btn {
+    flex-basis: 48px;
+    min-width: 48px;
+    height: 38px;
+    font-size: 18px;
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
+    grid-template-columns: 82px minmax(0, 1fr);
+    min-height: 150px;
+    border-radius: 18px;
+  }
+}

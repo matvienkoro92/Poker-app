@@ -621,14 +621,62 @@ function pokerGetTournamentRatingPlacesReady(nick, seasonKey) {
 window.pokerGetTournamentRatingPlaces = getTournamentRatingPlaceRows;
 window.pokerGetTournamentRatingPlacesReady = pokerGetTournamentRatingPlacesReady;
 
+var pokerTournamentProfileOpenLoadingNick = "";
+var pokerTournamentProfileOpenLoadingTimer = null;
+
+function pokerTournamentProfileOpenLoadingKey(nick) {
+  return String(nick || "").trim().replace(/^@+/, "").replace(/\s+/g, " ").toLowerCase();
+}
+
+function setPokerTournamentProfileOpenLoading(nick, active) {
+  var key = pokerTournamentProfileOpenLoadingKey(nick);
+  if (pokerTournamentProfileOpenLoadingTimer) {
+    clearTimeout(pokerTournamentProfileOpenLoadingTimer);
+    pokerTournamentProfileOpenLoadingTimer = null;
+  }
+  if (!active) {
+    pokerTournamentProfileOpenLoadingNick = "";
+  } else {
+    pokerTournamentProfileOpenLoadingNick = key;
+  }
+  var buttons = document.querySelectorAll("[data-nick]");
+  Array.prototype.forEach.call(buttons, function (btn) {
+    var btnKey = pokerTournamentProfileOpenLoadingKey(btn && btn.dataset ? btn.dataset.nick : "");
+    var isLoading = !!active && !!key && btnKey === key;
+    btn.classList.toggle("winter-rating__nick-btn--loading-profile", isLoading);
+    if (isLoading) {
+      btn.setAttribute("aria-busy", "true");
+      btn.setAttribute("aria-disabled", "true");
+    } else {
+      btn.removeAttribute("aria-busy");
+      btn.removeAttribute("aria-disabled");
+    }
+  });
+  var toast = document.getElementById("ratingProfileOpenLoadingToast");
+  if (active) {
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "ratingProfileOpenLoadingToast";
+      toast.className = "rating-profile-open-loading";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = '<span class="rating-profile-open-loading__spinner" aria-hidden="true"></span><span>Открываем профиль...</span>';
+    toast.hidden = false;
+  } else if (toast) {
+    toast.hidden = true;
+  }
+}
+
 function pokerOpenUnifiedPlayerProfileByRatingNick(nick, options) {
   nick = String(nick || "").trim();
   if (!nick) return Promise.resolve(false);
   var fallbackOptions = copyWinterRatingPlayerOptions(options || {});
   function openRatingFallback() {
-    if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(nick, fallbackOptions);
-    else if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, fallbackOptions);
-    return false;
+    if (typeof openWinterRatingPlayerModalReady === "function") return Promise.resolve(openWinterRatingPlayerModalReady(nick, fallbackOptions)).then(function () { return false; });
+    if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, fallbackOptions);
+    return Promise.resolve(false);
   }
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   if (!base || typeof fetch !== "function") return Promise.resolve(openRatingFallback());
@@ -670,12 +718,33 @@ function pokerOpenUnifiedPlayerProfileByRatingNick(nick, options) {
 }
 
 function pokerOpenTournamentRatingPlayer(nick, options) {
+  nick = String(nick || "").trim();
+  if (!nick) return Promise.resolve(false);
+  var key = pokerTournamentProfileOpenLoadingKey(nick);
+  if (pokerTournamentProfileOpenLoadingNick && pokerTournamentProfileOpenLoadingNick === key) return Promise.resolve(false);
+  setPokerTournamentProfileOpenLoading(nick, true);
+  var openedAt = Date.now();
+  var openPromise;
   if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
-    return window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, options);
+    openPromise = window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, options);
+  } else if (typeof openWinterRatingPlayerModalReady === "function") {
+    openPromise = openWinterRatingPlayerModalReady(nick, options);
+  } else {
+    if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, options);
+    openPromise = Promise.resolve(false);
   }
-  if (typeof openWinterRatingPlayerModalReady === "function") openWinterRatingPlayerModalReady(nick, options);
-  else if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(nick, options);
-  return Promise.resolve(false);
+  return Promise.resolve(openPromise)
+    .catch(function (err) {
+      if (typeof console !== "undefined" && console.warn) console.warn("open tournament profile", err);
+      return false;
+    })
+    .then(function (result) {
+      var left = Math.max(0, 650 - (Date.now() - openedAt));
+      pokerTournamentProfileOpenLoadingTimer = setTimeout(function () {
+        setPokerTournamentProfileOpenLoading(nick, false);
+      }, left);
+      return result;
+    });
 }
 
 window.pokerOpenUnifiedPlayerProfileByRatingNick = pokerOpenUnifiedPlayerProfileByRatingNick;
@@ -1395,29 +1464,28 @@ function openWinterRatingPlayerModal(nick, options) {
 }
 
 function openWinterRatingPlayerModalReady(nick, options) {
-  if (!nick) return;
+  if (!nick) return Promise.resolve(false);
   options = options || {};
   function openReadyModal() {
     var nextOptions = copyWinterRatingPlayerOptions(options);
     if (shouldLoadWinterRatingPlayerHistory(options)) nextOptions.__winterHistoryEnsured = true;
     openWinterRatingPlayerModal(nick, nextOptions);
+    return true;
   }
   function ensureHistoryAndOpen() {
-    ensureWinterRatingPlayerHistoryData(options).then(openReadyModal).catch(openReadyModal);
+    return ensureWinterRatingPlayerHistoryData(options).then(openReadyModal).catch(openReadyModal);
   }
   if (document.getElementById("winterRatingPlayerModal")) {
-    ensureHistoryAndOpen();
-    return;
+    return ensureHistoryAndOpen();
   }
   if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
-    Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
-      ensureHistoryAndOpen();
+    return Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
+      return ensureHistoryAndOpen();
     }).catch(function () {
-      ensureHistoryAndOpen();
+      return ensureHistoryAndOpen();
     });
-    return;
   }
-  ensureHistoryAndOpen();
+  return ensureHistoryAndOpen();
 }
 
 function getLatestTournamentRatingSeasonKey() {
