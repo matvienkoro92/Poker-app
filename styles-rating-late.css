@@ -4423,10 +4423,56 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
-  top: 82px;
+  top: 67px;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  top: 72px;
+  top: 57px;
+}
+
+/* Summer stage players are bound to the current rating rows. If a nick has no personal art, that slot stays empty. */
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+  background: url("./assets/summer-rating-podium-base.webp") center 70% / 116% auto no-repeat !important;
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__podium::before,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__podium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  background:
+    var(--summer-top3-art-center, none) 50% calc(26% - 25px) / 31% auto no-repeat,
+    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% - 25px) / 37% auto no-repeat,
+    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% - 18px) / 24% auto no-repeat;
+  pointer-events: none;
+}
+
+.winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap::before,
+.winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap::before {
+  background: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating .summer-rating-pedestal-labels::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 170px;
+  background:
+    var(--summer-lower-art-4, none) 0.5% calc(78% + 3px) / 14.9% auto no-repeat,
+    var(--summer-lower-art-5, none) 16.8% calc(78% + 3px) / 14.6% auto no-repeat,
+    var(--summer-lower-art-6, none) calc(33.7% + 4px) calc(78% + 7px) / 14.3% auto no-repeat,
+    var(--summer-lower-art-7, none) 50.7% calc(77% + 4px) / 14.8% auto no-repeat,
+    var(--summer-lower-art-8, none) 67.5% calc(76% + 4px) / 15.1% auto no-repeat,
+    var(--summer-lower-art-9, none) 84% calc(79% + 3px) / 14.1% auto no-repeat,
+    var(--summer-lower-art-10, none) 100% calc(77% + 4px) / 14.4% auto no-repeat;
+  transform: translateY(var(--summer-rating-mobile-lower-podium-players-y, -48px));
+  pointer-events: none;
 }

@@ -379,6 +379,12 @@ function pokerGetSummerRatingPlayerArt(nick) {
 
 window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
 
+function summerRatingPlayerArtCssUrl(nick) {
+  var art = pokerGetSummerRatingPlayerArt(nick);
+  if (!art || !art.src) return "none";
+  return 'url("' + String(art.src).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '")';
+}
+
 function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {
   if (!modal) return;
   var artWrap = document.getElementById("winterRatingPlayerModalArt") || modal.querySelector(".winter-rating-player-modal__art");
@@ -2150,14 +2156,17 @@ function initWinterRating() {
       labels.removeAttribute("aria-hidden");
       labels.className = "summer-rating-pedestal-labels summer-rating-pedestal-labels--league-" + leagueNum;
       var html = "";
+      var labelsStyle = "";
       for (var place = 4; place <= 10; place++) {
         var labelRow = leagueRows[place - 1];
         var labelNick = labelRow && labelRow.nick != null ? String(labelRow.nick) : "";
         var labelNickAttr = labelNick.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         var labelNickEsc = escapeHtmlRating(labelNick);
+        labelsStyle += "--summer-lower-art-" + place + ":" + summerRatingPlayerArtCssUrl(labelNick) + ";";
         html += "<button type=\"button\" class=\"summer-rating-pedestal-hitbox summer-rating-pedestal-hitbox--place-" + place + "\" data-nick=\"" + labelNickAttr + "\" aria-label=\"Подробнее: " + labelNickEsc + "\"></button>";
         html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + labelNickEsc + "</span>";
       }
+      labels.setAttribute("style", labelsStyle);
       labels.innerHTML = html;
       if (pedestalWrap._summerPedestalClick) pedestalWrap.removeEventListener("click", pedestalWrap._summerPedestalClick);
       pedestalWrap._summerPedestalClick = function (e) {
@@ -2233,7 +2242,11 @@ function initWinterRating() {
     var top3 = [rowsForPodium[1], rowsForPodium[0], rowsForPodium[2]];
     var places = [2, 1, 3];
     var podiumHtml = titleText ? "<div class=\"spring-rating-top3__title\">" + escapeHtmlRating(titleText) + "</div>" : "";
-    podiumHtml += "<div class=\"spring-rating-top3__podium\">";
+    var podiumStyle =
+      "--summer-top3-art-left:" + summerRatingPlayerArtCssUrl(top3[0] && top3[0].nick) + ";" +
+      "--summer-top3-art-center:" + summerRatingPlayerArtCssUrl(top3[1] && top3[1].nick) + ";" +
+      "--summer-top3-art-right:" + summerRatingPlayerArtCssUrl(top3[2] && top3[2].nick) + ";";
+    podiumHtml += "<div class=\"spring-rating-top3__podium\" style=\"" + podiumStyle.replace(/"/g, "&quot;") + "\">";
     for (var pj = 0; pj < 3; pj++) {
       var r = top3[pj];
       var place = places[pj];
