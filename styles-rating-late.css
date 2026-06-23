@@ -4443,9 +4443,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   z-index: 0;
   display: block;
   background:
-    var(--summer-top3-art-center, none) 50% 26% / 31% auto no-repeat,
-    var(--summer-top3-art-left, none) calc(11% - 3px) 44% / 37% auto no-repeat,
-    var(--summer-top3-art-right, none) calc(89% - 9px) 50% / 24% auto no-repeat;
+    var(--summer-top3-art-center, none) 50% calc(26% - 25px) / 31% auto no-repeat,
+    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% - 25px) / 37% auto no-repeat,
+    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% - 18px) / 24% auto no-repeat;
   pointer-events: none;
 }
 
