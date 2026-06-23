@@ -1727,7 +1727,8 @@ body.profile-avatar-choice-open {
     0 0 24px rgba(255, 118, 0, 0.12);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
-  height: clamp(380px, 48vw, 560px);
+  align-items: flex-start;
+  height: clamp(360px, 45vw, 520px);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
@@ -1735,6 +1736,7 @@ body.profile-avatar-choice-open {
   max-width: min(78%, 390px);
   height: 98%;
   max-height: 98%;
+  transform: translateY(-12px);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
   max-width: min(64%, 320px);
@@ -1969,7 +1971,7 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
     align-self: start;
-    height: clamp(300px, 42vw, 420px);
+    height: clamp(280px, 38vw, 380px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
@@ -1977,6 +1979,7 @@ body.profile-avatar-choice-open {
     max-width: min(82%, 330px);
     height: 100%;
     max-height: 100%;
+    transform: translateY(-10px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
     align-self: start;
@@ -2075,7 +2078,7 @@ body.profile-avatar-choice-open {
     border-radius: 18px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
-    height: clamp(260px, 66vw, 360px);
+    height: clamp(240px, 60vw, 320px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
     height: 15px;

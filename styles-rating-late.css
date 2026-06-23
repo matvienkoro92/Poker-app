@@ -3398,7 +3398,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   position: absolute;
   left: 4px;
   right: 4px;
-  top: 88px;
+  top: 76px;
   width: auto;
   max-width: none;
   transform: none !important;
@@ -3406,7 +3406,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  top: 78px;
+  top: 66px;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
@@ -4443,9 +4443,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   z-index: 0;
   display: block;
   background:
-    var(--summer-top3-art-center, none) 50% calc(26% - 25px) / 31% auto no-repeat,
-    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% - 25px) / 37% auto no-repeat,
-    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% - 18px) / 24% auto no-repeat;
+    var(--summer-top3-art-center, none) 50% 26% / 31% auto no-repeat,
+    var(--summer-top3-art-left, none) calc(11% - 3px) 44% / 37% auto no-repeat,
+    var(--summer-top3-art-right, none) calc(89% - 9px) 50% / 24% auto no-repeat;
   pointer-events: none;
 }
 
