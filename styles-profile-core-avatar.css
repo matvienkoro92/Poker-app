@@ -1728,7 +1728,7 @@ body.profile-avatar-choice-open {
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
   align-items: flex-start;
-  height: clamp(360px, 45vw, 520px);
+  height: clamp(330px, 41vw, 480px);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
@@ -1804,9 +1804,9 @@ body.profile-avatar-choice-open {
 }
 .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
   gap: 14px;
-  width: min(100%, 430px);
+  width: min(calc(100% - 3px), 430px);
   max-width: none;
-  margin: 0;
+  margin: 0 0 0 3px;
   padding: 0;
   border-top: 0;
 }
@@ -1970,8 +1970,8 @@ body.profile-avatar-choice-open {
     border-radius: 20px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
-    align-self: start;
-    height: clamp(280px, 38vw, 380px);
+    align-self: center;
+    height: clamp(260px, 34vw, 340px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
@@ -1982,7 +1982,7 @@ body.profile-avatar-choice-open {
     transform: translateY(-10px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
-    align-self: start;
+    align-self: center;
     gap: 8px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
@@ -2009,7 +2009,7 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
     gap: 9px;
-    width: 100%;
+    width: calc(100% - 3px);
   }
   .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
   .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
@@ -2095,8 +2095,33 @@ body.profile-avatar-choice-open {
     font-size: 18px;
   }
   .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
-    grid-template-columns: 82px minmax(0, 1fr);
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 10px;
     min-height: 150px;
+    padding: 16px 14px;
     border-radius: 18px;
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab::after {
+    font-size: clamp(46px, 12vw, 64px);
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-main {
+    font-size: clamp(18px, 5vw, 25px);
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-sum {
+    max-width: 100%;
+    font-size: clamp(36px, 9.4vw, 48px);
+    white-space: nowrap;
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-more {
+    font-size: clamp(18px, 4.6vw, 24px);
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__achievements .chat-user-modal__achievement-icon {
+    overflow: visible;
+    isolation: isolate;
+  }
+  .view[data-view="profile"] .profile-achievements-showcase__achievements .chat-user-modal__achievement-icon img {
+    mix-blend-mode: screen;
+    -webkit-mask-image: radial-gradient(ellipse 74% 76% at 50% 52%, #000 0 64%, rgba(0, 0, 0, 0.82) 76%, transparent 100%);
+    mask-image: radial-gradient(ellipse 74% 76% at 50% 52%, #000 0 64%, rgba(0, 0, 0, 0.82) 76%, transparent 100%);
   }
 }
