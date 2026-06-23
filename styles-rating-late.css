@@ -2266,8 +2266,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   background:
     url("./assets/summer-rating-monkey-place-1.webp") 50% calc(2% - 10px) / 42.5% auto no-repeat,
     url("./assets/summer-rating-monkey-place-2.webp") 15% calc(8% - 10px) / 33.125% auto no-repeat,
-    url("./assets/summer-rating-monkey-place-3.webp") 84% calc(42% - 10px) / 33.125% auto no-repeat,
-    url("./assets/summer-rating-podium-base.webp") center 101% / 116% auto no-repeat;
+    url("./assets/summer-rating-monkey-place-3.webp") 84% calc(42% - 10px) / 33.125% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
@@ -2276,8 +2275,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% 18% / 31% auto no-repeat,
     url("./assets/summer-rating-player-pokermanki.webp?v=3.546") 18% calc(22% - 10px) / 40% auto no-repeat,
-    url("./assets/summer-rating-player-cooler.webp") 82% 22% / 31% auto no-repeat,
-    url("./assets/summer-rating-podium-base.webp") center 70% / 116% auto no-repeat;
+    url("./assets/summer-rating-player-cooler.webp") 82% 22% / 31% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3--league::before {
@@ -4423,18 +4421,18 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
-  top: 67px;
+  top: 82px;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  top: 57px;
+  top: 72px;
 }
 
 /* Summer stage players are bound to the current rating rows. If a nick has no personal art, that slot stays empty. */
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
-  background: url("./assets/summer-rating-podium-base.webp") center 70% / 116% auto no-repeat !important;
+  background: none !important;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__podium::before,
@@ -4445,9 +4443,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   z-index: 0;
   display: block;
   background:
-    var(--summer-top3-art-center, none) 50% calc(26% - 25px) / 31% auto no-repeat,
-    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% - 25px) / 37% auto no-repeat,
-    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% - 18px) / 24% auto no-repeat;
+    var(--summer-top3-art-center, none) 50% 26% / 31% auto no-repeat,
+    var(--summer-top3-art-left, none) calc(11% - 3px) 44% / 37% auto no-repeat,
+    var(--summer-top3-art-right, none) calc(89% - 9px) 50% / 24% auto no-repeat;
   pointer-events: none;
 }
 

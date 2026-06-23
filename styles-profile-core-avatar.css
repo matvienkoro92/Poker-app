@@ -730,6 +730,24 @@
 .profile-achievements-showcase__achievements {
   margin-top: 0;
 }
+.profile-achievements-showcase .chat-user-modal__achievement-icon {
+  overflow: hidden;
+}
+.profile-achievements-showcase .chat-user-modal__achievement-icon img {
+  -webkit-mask-image:
+    radial-gradient(ellipse 74% 72% at 50% 50%, #000 58%, rgba(0, 0, 0, 0.78) 72%, transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 74% 72% at 50% 50%, #000 58%, rgba(0, 0, 0, 0.78) 72%, transparent 100%);
+}
+.profile-achievements-showcase .chat-user-modal__achievement--season-cup .chat-user-modal__achievement-icon img,
+.profile-achievements-showcase .chat-user-modal__achievement--top-win .chat-user-modal__achievement-icon img,
+.profile-achievements-showcase .chat-user-modal__achievement--club-choice .chat-user-modal__achievement-icon img,
+.profile-achievements-showcase .chat-user-modal__achievement--club-admin .chat-user-modal__achievement-icon img {
+  -webkit-mask-image:
+    radial-gradient(ellipse 78% 76% at 50% 50%, #000 56%, rgba(0, 0, 0, 0.7) 72%, transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 78% 76% at 50% 50%, #000 56%, rgba(0, 0, 0, 0.7) 72%, transparent 100%);
+}
 .profile-achievements-showcase__ranks {
   margin-bottom: 0;
 }
@@ -1668,6 +1686,22 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
   gap: 22px;
 }
+.view[data-view="profile"] .profile-public-showcase__identity-gender.profile-hero-gender {
+  margin: 10px 0 0;
+  padding: 4px;
+  border-color: rgba(197, 139, 47, 0.72);
+  background:
+    linear-gradient(180deg, rgba(14, 20, 32, 0.94), rgba(4, 8, 16, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 166, 0.1),
+    0 0 16px rgba(255, 145, 32, 0.18);
+}
+.view[data-view="profile"] .profile-public-showcase__identity-gender .profile-hero-gender__btn {
+  flex-basis: 48px;
+  min-width: 48px;
+  height: 34px;
+  font-size: 18px;
+}
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
   max-width: min(52vw, 460px);
   color: #ffd77a;
@@ -1891,62 +1925,113 @@ body.profile-avatar-choice-open {
   color: #ffbd39;
   font-size: clamp(20px, 4.2vw, 30px);
 }
+.view[data-view="profile"] .profile-public-showcase--loading .profile-public-showcase__hero.chat-user-modal__hero {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+  padding: clamp(16px, 3vw, 24px);
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__rating-art {
+  display: none;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__hero-status {
+  justify-self: center;
+  width: min(100%, 420px);
+  gap: 10px;
+  padding: 0;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__status {
+  gap: 8px;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__status-title {
+  font-size: clamp(18px, 4.5vw, 26px);
+  text-align: center;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__status-xp {
+  min-height: 0;
+  font-size: clamp(15px, 3.8vw, 21px);
+  text-align: center;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__status-track {
+  height: 14px;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__level {
+  gap: 10px;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__level-text {
+  font-size: clamp(42px, 12vw, 62px);
+  text-align: center;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .chat-user-modal__level-rest {
+  margin-left: 6px;
+  font-size: clamp(19px, 5vw, 27px);
+}
+.view[data-view="profile"] .profile-public-showcase--loading .profile-public-showcase__level-actions.profile-status__refresh-action {
+  width: 100%;
+  gap: 8px;
+}
+.view[data-view="profile"] .profile-public-showcase--loading .profile-status__refresh-btn,
+.view[data-view="profile"] .profile-public-showcase--loading .profile-status__points-info-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 9px 12px;
+  font-size: clamp(15px, 4vw, 20px);
+}
 
 @media (max-width: 1100px) {
   .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-    gap: clamp(10px, 2.4vw, 22px);
-    padding: clamp(14px, 2.8vw, 24px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
+    gap: clamp(10px, 2vw, 18px);
+    align-items: start;
+    padding: clamp(14px, 2.4vw, 22px);
     border-radius: 20px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
-    height: clamp(310px, 46vw, 460px);
+    align-self: start;
+    height: clamp(350px, 50vw, 500px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
-    max-width: min(72%, 280px);
-    height: 92%;
-    max-height: 92%;
+    max-width: min(82%, 330px);
+    height: 100%;
+    max-height: 100%;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
-    gap: 12px;
+    align-self: start;
+    gap: 10px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
-    gap: 8px;
+    gap: 7px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level {
-    gap: 12px;
+    gap: 10px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
-    font-size: clamp(18px, 3.1vw, 26px);
+    font-size: clamp(17px, 2.75vw, 24px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-xp {
-    font-size: clamp(16px, 2.8vw, 23px);
+    font-size: clamp(15px, 2.55vw, 22px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
-    height: 18px;
+    height: 16px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
-    font-size: clamp(46px, 8.4vw, 72px);
+    font-size: clamp(45px, 8.2vw, 68px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
     margin-left: 7px;
-    font-size: clamp(22px, 4.2vw, 32px);
+    font-size: clamp(20px, 4vw, 30px);
   }
   .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
-    gap: 10px;
+    gap: 9px;
     width: 100%;
   }
   .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
   .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
-    min-height: 54px;
-    padding: 10px 14px;
+    min-height: 50px;
+    padding: 9px 12px;
     border-radius: 14px;
-    font-size: clamp(15px, 2.75vw, 22px);
-  }
-  .view[data-view="profile"] .profile-public-showcase__level-actions .profile-hero-gender {
-    margin-top: 8px;
+    font-size: clamp(14px, 2.45vw, 20px);
   }
   .view[data-view="profile"] .profile-hero-gender__btn {
     flex-basis: 52px;
@@ -1991,6 +2076,15 @@ body.profile-avatar-choice-open {
     width: 36px;
     height: 36px;
     font-size: 21px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__identity-gender.profile-hero-gender {
+    margin-top: 8px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__identity-gender .profile-hero-gender__btn {
+    flex-basis: 42px;
+    min-width: 42px;
+    height: 32px;
+    font-size: 16px;
   }
   .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
     grid-template-columns: minmax(0, 1fr) minmax(150px, 0.86fr);
