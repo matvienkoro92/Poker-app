@@ -4421,12 +4421,12 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
-  top: 82px;
+  top: 20px;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  top: 72px;
+  top: 12px;
 }
 
 /* Summer stage players are bound to the current rating rows. If a nick has no personal art, that slot stays empty. */
@@ -4443,9 +4443,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   z-index: 0;
   display: block;
   background:
-    var(--summer-top3-art-center, none) 50% 26% / 31% auto no-repeat,
-    var(--summer-top3-art-left, none) calc(11% - 3px) 44% / 37% auto no-repeat,
-    var(--summer-top3-art-right, none) calc(89% - 9px) 50% / 24% auto no-repeat;
+    var(--summer-top3-art-center, none) 50% calc(26% + 16px) / 31% auto no-repeat,
+    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% + 16px) / 37% auto no-repeat,
+    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% + 16px) / 24% auto no-repeat;
   pointer-events: none;
 }
 
