@@ -1404,6 +1404,43 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleJoinCtaHtml(raffle, id, endDate) {
+    if (!raffle || raffle.status !== "active") return "";
+    var raffleIds = collectRaffleIdentityIds();
+    var iAmIn = activeRaffleParticipantIn(raffle, raffleIds);
+    var needsLogin =
+      typeof rafflesViewerNeedsLoginForParticipation === "function"
+        ? rafflesViewerNeedsLoginForParticipation()
+        : rafflesViewerIsGuestOnly();
+    var adminTicketEntry = typeof raffleUsesAdminTicketEntry === "function" && raffleUsesAdminTicketEntry(raffle);
+    var pastEnd = !!(endDate && endDate <= new Date());
+    var action = iAmIn ? "leave" : needsLogin ? "login" : "join";
+    var label = iAmIn ? "Отменить участие" : needsLogin ? "Войти" : "Участвовать";
+    var classes = "raffles-active-chooser__cta";
+    if (iAmIn) classes += " raffles-active-chooser__cta--joined";
+    if (adminTicketEntry || pastEnd) classes += " raffles-active-chooser__cta--locked";
+    if (adminTicketEntry) {
+      action = "locked";
+      label = "Участников добавляет админ";
+    } else if (pastEnd) {
+      action = "locked";
+      label = "Розыгрыш завершен";
+    }
+    return (
+      '<button type="button" class="' +
+      classes +
+      '" data-raffle-active-action="' +
+      escapeHtml(action) +
+      '" data-raffle-active-id="' +
+      escapeHtml(id) +
+      '"' +
+      (adminTicketEntry || pastEnd ? " disabled" : "") +
+      ">" +
+      escapeHtml(label) +
+      "</button>"
+    );
+  }
+
   function activeRaffleCashTitleHtml(raffle, totalPrize) {
     var title = activeRaffleShortTitle(raffle).replace(/\s+/g, " ").trim();
     var amountText = formatRaffleSum(totalPrize || getRaffleTotalPrize(raffle));
@@ -1862,6 +1899,7 @@ function initRaffles() {
         var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
         var factsHtml = participantsHtml + timerHtml;
         var accessHtml = activeRaffleAccessLevelHtml(raffle);
+        var actionHtml = activeRaffleJoinCtaHtml(raffle, id, endDate);
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
@@ -1882,6 +1920,7 @@ function initRaffles() {
           factsHtml +
           "</span>" +
           accessHtml +
+          actionHtml +
           '<button type="button" class="raffles-active-chooser__info-toggle' +
           (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
           '" data-raffle-active-info-id="' +
