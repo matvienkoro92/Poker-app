@@ -1,5 +1,7 @@
 // Rating view adapter: shared spring/winter DOM, tables, lightbox, and player modal.
 
+var winterRatingLightboxDirectItems = null;
+
 function syncWinterRatingLightboxSingleClass(box) {
   if (!box) return;
   var single = !!(box.dataset.lightboxOverrideFile || box.dataset.lightboxSingleOnly === "1");
@@ -40,6 +42,28 @@ function openWinterRatingLightbox(dateStr, index, leagueNum, opts) {
     return;
   }
   delete box.dataset.lightboxOverrideFile;
+  if (opts.directItems && opts.directItems.length) {
+    var directItems = opts.directItems.filter(function (item) { return item && item.src; });
+    if (!directItems.length) return;
+    if (index < 0) index = 0;
+    if (index >= directItems.length) index = directItems.length - 1;
+    winterRatingLightboxDirectItems = directItems;
+    delete box.dataset.lightboxSingleOnly;
+    box.dataset.lightboxDirect = "1";
+    box.dataset.lightboxDate = dateStr || "";
+    box.dataset.lightboxIndex = String(index);
+    box.dataset.lightboxLeague = leagueNum != null ? String(leagueNum) : "";
+    box.dataset.lightboxWinterImages = "";
+    img.src = directItems[index].src;
+    img.alt = directItems[index].alt || ("Скрин рейтинга " + (dateStr || "") + " (" + (index + 1) + ")");
+    box.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    syncWinterRatingLightboxSingleClass(box);
+    updateWinterRatingLightboxArrows();
+    return;
+  }
+  delete box.dataset.lightboxDirect;
+  winterRatingLightboxDirectItems = null;
   var files;
   if (opts.winterImages === true && typeof WINTER_RATING_IMAGES !== "undefined") {
     files = (WINTER_RATING_IMAGES[dateStr] || []);
@@ -71,6 +95,9 @@ function getWinterRatingLightboxFiles(box) {
   if (!box) return null;
   if (box.dataset.lightboxOverrideFile) {
     return [box.dataset.lightboxOverrideFile];
+  }
+  if (box.dataset.lightboxDirect === "1") {
+    return winterRatingLightboxDirectItems || [];
   }
   if (!box.dataset.lightboxDate) return null;
   var dateStr = box.dataset.lightboxDate;
@@ -118,6 +145,8 @@ function closeWinterRatingLightbox() {
   if (box) {
     box.setAttribute("aria-hidden", "true");
     delete box.dataset.lightboxSingleOnly;
+    delete box.dataset.lightboxDirect;
+    winterRatingLightboxDirectItems = null;
     box.classList.remove("winter-rating-lightbox--single");
     document.body.style.overflow = "";
   }
@@ -152,7 +181,9 @@ function initWinterRatingLightbox() {
     var index = parseInt(box.dataset.lightboxIndex, 10) || 0;
     var leagueStr = box.dataset.lightboxLeague;
     var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : undefined;
-    var lbOpts = { winterImages: box.dataset.lightboxWinterImages === "1" };
+    var lbOpts = box.dataset.lightboxDirect === "1"
+      ? { directItems: winterRatingLightboxDirectItems || [] }
+      : { winterImages: box.dataset.lightboxWinterImages === "1" };
     if (index > 0) openWinterRatingLightbox(dateStr, index - 1, leagueNum, lbOpts);
   });
   if (nextBtn) nextBtn.addEventListener("click", function (e) {
@@ -163,7 +194,9 @@ function initWinterRatingLightbox() {
     var leagueStr = box.dataset.lightboxLeague;
     var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : undefined;
     var files = getWinterRatingLightboxFiles(box);
-    var lbOpts = { winterImages: box.dataset.lightboxWinterImages === "1" };
+    var lbOpts = box.dataset.lightboxDirect === "1"
+      ? { directItems: winterRatingLightboxDirectItems || [] }
+      : { winterImages: box.dataset.lightboxWinterImages === "1" };
     if (files && index < files.length - 1) openWinterRatingLightbox(dateStr, index + 1, leagueNum, lbOpts);
   });
   box.addEventListener("click", function (e) {
@@ -181,7 +214,9 @@ function initWinterRatingLightbox() {
       var idx = parseInt(box.dataset.lightboxIndex, 10) || 0;
       var leagueStr = box.dataset.lightboxLeague;
       var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : undefined;
-      var kbOpts = { winterImages: box.dataset.lightboxWinterImages === "1" };
+      var kbOpts = box.dataset.lightboxDirect === "1"
+        ? { directItems: winterRatingLightboxDirectItems || [] }
+        : { winterImages: box.dataset.lightboxWinterImages === "1" };
       if (idx > 0) openWinterRatingLightbox(dateStr, idx - 1, leagueNum, kbOpts);
     } else if (e.key === "ArrowRight") {
       if (box.dataset.lightboxSingleOnly === "1") return;
@@ -190,7 +225,9 @@ function initWinterRatingLightbox() {
       var leagueStr = box.dataset.lightboxLeague;
       var leagueNum = leagueStr === "1" || leagueStr === "2" ? parseInt(leagueStr, 10) : undefined;
       var files = getWinterRatingLightboxFiles(box);
-      var kbOptsR = { winterImages: box.dataset.lightboxWinterImages === "1" };
+      var kbOptsR = box.dataset.lightboxDirect === "1"
+        ? { directItems: winterRatingLightboxDirectItems || [] }
+        : { winterImages: box.dataset.lightboxWinterImages === "1" };
       if (files && idx < files.length - 1) openWinterRatingLightbox(dateStr, idx + 1, leagueNum, kbOptsR);
     }
   });
@@ -2470,7 +2507,15 @@ function initWinterRating() {
       var idx = Array.prototype.indexOf.call(siblings, cell);
       if (idx < 0) return;
       e.preventDefault();
-      if (typeof openWinterRatingLightbox === "function") openWinterRatingLightbox(dateStr, idx, leagueNum);
+      if (typeof openWinterRatingLightbox === "function") openWinterRatingLightbox(dateStr, idx, leagueNum, {
+        directItems: Array.prototype.map.call(siblings, function (item) {
+          var img = item.querySelector("img");
+          return {
+            src: img ? (img.currentSrc || img.src || "") : "",
+            alt: img ? (img.alt || "") : "",
+          };
+        }),
+      });
     });
   }
   var dateItems = datesContainer.querySelectorAll(".winter-rating__date-item");
@@ -2537,12 +2582,21 @@ function initWinterRating() {
     if (!files || !files.length) return;
     var cacheV = "v=18";
     container.innerHTML = files.map(function (f, i) {
-      return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
+      return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
     }).join("");
     container.querySelectorAll(".winter-rating__screenshot").forEach(function (cell, idx) {
       var openLightbox = function (e) {
         if (e) e.preventDefault();
-        openWinterRatingLightbox(dStr, idx, leagueNum);
+        var siblings = container.querySelectorAll(".winter-rating__screenshot");
+        openWinterRatingLightbox(dStr, idx, leagueNum, {
+          directItems: Array.prototype.map.call(siblings, function (item) {
+            var img = item.querySelector("img");
+            return {
+              src: img ? (img.currentSrc || img.src || "") : "",
+              alt: img ? (img.alt || "") : "",
+            };
+          }),
+        });
       };
       cell.addEventListener("click", openLightbox);
       cell.addEventListener("keydown", function (e) {
@@ -2778,7 +2832,15 @@ function initWinterRating() {
         if (idx < 0 || typeof openWinterRatingLightbox !== "function") return;
         var handler = function (e) {
           if (e) e.preventDefault();
-          openWinterRatingLightbox(dStr, idx, leagueNum);
+          openWinterRatingLightbox(dStr, idx, leagueNum, {
+            directItems: Array.prototype.map.call(siblings, function (item) {
+              var img = item.querySelector("img");
+              return {
+                src: img ? (img.currentSrc || img.src || "") : "",
+                alt: img ? (img.alt || "") : "",
+              };
+            }),
+          });
         };
         cell.addEventListener("click", handler);
         cell.addEventListener("keydown", function (e) {

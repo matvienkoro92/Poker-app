@@ -183,12 +183,23 @@
     if (!rows.length) return '<div class="club-choice-vote-modal__empty">Кандидаты пока не добавлены.</div>';
     return '<div class="club-choice-vote-modal__candidates">' + rows.map(function (candidate) {
       return '<article class="club-choice-vote-modal__candidate">' +
-        '<div class="club-choice-vote-modal__candidate-main">' +
+        '<div class="club-choice-vote-modal__candidate-main" data-club-choice-candidate-view>' +
           '<strong>' + escapeHtml(candidate.nick) + '</strong>' +
           '<span>' + escapeHtml(candidate.description || "Без описания") + '</span>' +
         '</div>' +
         (data.isAdmin && data.status === "draft"
-          ? '<button type="button" class="club-choice-vote-modal__ghost" data-club-choice-remove="' + escapeHtml(candidate.id) + '">Убрать</button>'
+          ? '<div class="club-choice-vote-modal__candidate-actions" data-club-choice-candidate-view>' +
+              '<button type="button" class="club-choice-vote-modal__ghost" data-club-choice-edit="' + escapeHtml(candidate.id) + '">Редактировать</button>' +
+              '<button type="button" class="club-choice-vote-modal__ghost" data-club-choice-remove="' + escapeHtml(candidate.id) + '">Убрать</button>' +
+            '</div>' +
+            '<form class="club-choice-vote-modal__candidate-edit" data-club-choice-form="candidate-edit" data-club-choice-candidate-form="' + escapeHtml(candidate.id) + '" hidden>' +
+              '<label>Никнейм<input name="nick" maxlength="48" autocomplete="off" value="' + escapeHtml(candidate.nick || "") + '" required></label>' +
+              '<label>Описание<textarea name="description" maxlength="180" rows="2">' + escapeHtml(candidate.description || "") + '</textarea></label>' +
+              '<div class="club-choice-vote-modal__candidate-actions">' +
+                '<button type="submit" class="club-choice-vote-modal__primary">Сохранить</button>' +
+                '<button type="button" class="club-choice-vote-modal__ghost" data-club-choice-cancel-edit="' + escapeHtml(candidate.id) + '">Отмена</button>' +
+              '</div>' +
+            '</form>'
           : '') +
       '</article>';
     }).join("") + "</div>";
@@ -358,6 +369,15 @@
       });
       return;
     }
+    if (form.getAttribute("data-club-choice-form") === "candidate-edit") {
+      postAction({
+        action: "updateCandidate",
+        candidateId: form.getAttribute("data-club-choice-candidate-form") || "",
+        nick: form.elements.nick.value,
+        description: form.elements.description.value,
+      });
+      return;
+    }
     if (form.getAttribute("data-club-choice-form") === "start") {
       postAction({
         action: "start",
@@ -371,6 +391,30 @@
     var close = event.target && event.target.closest ? event.target.closest("[data-club-choice-close]") : null;
     if (close) {
       closeModal();
+      return;
+    }
+    var edit = event.target && event.target.closest ? event.target.closest("[data-club-choice-edit]") : null;
+    if (edit) {
+      var editArticle = edit.closest(".club-choice-vote-modal__candidate");
+      var editForm = editArticle ? editArticle.querySelector("[data-club-choice-candidate-form]") : null;
+      Array.prototype.slice.call(editArticle ? editArticle.querySelectorAll("[data-club-choice-candidate-view]") : []).forEach(function (el) {
+        el.hidden = true;
+      });
+      if (editForm) {
+        editForm.hidden = false;
+        var firstInput = editForm.querySelector("input, textarea");
+        if (firstInput && typeof firstInput.focus === "function") firstInput.focus();
+      }
+      return;
+    }
+    var cancelEdit = event.target && event.target.closest ? event.target.closest("[data-club-choice-cancel-edit]") : null;
+    if (cancelEdit) {
+      var cancelArticle = cancelEdit.closest(".club-choice-vote-modal__candidate");
+      var cancelForm = cancelArticle ? cancelArticle.querySelector("[data-club-choice-candidate-form]") : null;
+      if (cancelForm) cancelForm.hidden = true;
+      Array.prototype.slice.call(cancelArticle ? cancelArticle.querySelectorAll("[data-club-choice-candidate-view]") : []).forEach(function (el) {
+        el.hidden = false;
+      });
       return;
     }
     var remove = event.target && event.target.closest ? event.target.closest("[data-club-choice-remove]") : null;

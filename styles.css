@@ -2609,6 +2609,31 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.club-choice-vote-modal__candidate-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.club-choice-vote-modal__candidate-edit {
+  display: grid;
+  flex: 1 1 100%;
+  grid-template-columns: minmax(150px, 0.45fr) minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__candidate-edit[hidden] {
+  display: none !important;
+}
+
+.club-choice-vote-modal__candidate-edit textarea {
+  min-height: 48px;
+}
+
 .club-choice-vote-modal__candidate-main {
   display: grid;
   gap: 4px;
@@ -6407,8 +6432,18 @@ body.club-choice-vote-open {
     flex-direction: column;
   }
 
+  .club-choice-vote-modal__candidate-actions,
+  .club-choice-vote-modal__candidate-actions .club-choice-vote-modal__primary,
   .club-choice-vote-modal__ghost {
     width: 100%;
+  }
+
+  .club-choice-vote-modal__candidate-actions {
+    flex-direction: column;
+  }
+
+  .club-choice-vote-modal__candidate-edit {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
