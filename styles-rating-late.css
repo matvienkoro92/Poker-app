@@ -4429,9 +4429,28 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   top: 16px;
 }
 
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+  left: 6px;
+  right: 2px;
+  font-size: clamp(5.9px, 1.65vw, 7.3px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
+  left: 0;
+  right: 22px;
+}
+
 /* Summer stage players are bound to the current rating rows. If a nick has no personal art, that slot stays empty. */
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+  --summer-top3-art-center-x: 50%;
+  --summer-top3-art-center-y: calc(26% + 21px);
+  --summer-top3-art-left-x: calc(11% - 3px);
+  --summer-top3-art-left-y: calc(44% + 21px);
+  --summer-top3-art-right-x: calc(89% - 9px);
+  --summer-top3-art-right-y: calc(50% + 21px);
   --summer-top3-art-center-size: 31%;
   --summer-top3-art-left-size: 37%;
   --summer-top3-art-right-size: 24%;
@@ -4439,7 +4458,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
-  --summer-top3-art-center-size: 23.25%;
+  --summer-top3-art-center-size: 20%;
   --summer-top3-art-left-size: 27.75%;
   --summer-top3-art-right-size: 18%;
 }
@@ -4452,9 +4471,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   z-index: 0;
   display: block;
   background:
-    var(--summer-top3-art-center, none) 50% calc(26% + 21px) / var(--summer-top3-art-center-size) auto no-repeat,
-    var(--summer-top3-art-left, none) calc(11% - 3px) calc(44% + 21px) / var(--summer-top3-art-left-size) auto no-repeat,
-    var(--summer-top3-art-right, none) calc(89% - 9px) calc(50% + 21px) / var(--summer-top3-art-right-size) auto no-repeat;
+    var(--summer-top3-art-center, none) var(--summer-top3-art-center-x) var(--summer-top3-art-center-y) / var(--summer-top3-art-center-size) auto no-repeat,
+    var(--summer-top3-art-left, none) var(--summer-top3-art-left-x) var(--summer-top3-art-left-y) / var(--summer-top3-art-left-size) auto no-repeat,
+    var(--summer-top3-art-right, none) var(--summer-top3-art-right-x) var(--summer-top3-art-right-y) / var(--summer-top3-art-right-size) auto no-repeat;
   pointer-events: none;
 }
 
