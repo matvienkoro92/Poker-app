@@ -1595,7 +1595,9 @@ body.profile-avatar-choice-open {
   display: none;
 }
 .view[data-view="profile"] .profile-public-showcase {
+  box-sizing: border-box;
   margin: 0 0 16px;
+  overflow-x: clip;
 }
 .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
   margin: 0 0 20px;
@@ -1690,6 +1692,7 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
   align-self: center;
   gap: 20px;
+  min-width: 0;
   padding: 0;
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
@@ -1701,6 +1704,7 @@ body.profile-avatar-choice-open {
   order: 2;
   display: grid;
   gap: 18px;
+  min-width: 0;
   margin: 0;
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
@@ -1731,6 +1735,8 @@ body.profile-avatar-choice-open {
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
   color: #ffd77a;
+  max-width: 100%;
+  overflow: hidden;
   font-size: clamp(68px, 15vw, 112px);
   font-weight: 1000;
   line-height: 0.9;
@@ -1752,11 +1758,16 @@ body.profile-avatar-choice-open {
 }
 .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
 .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+  box-sizing: border-box;
   min-height: 74px;
+  max-width: 100%;
   padding: 14px 20px;
+  overflow: hidden;
   border-radius: 18px;
   font-size: clamp(19px, 4vw, 27px);
   font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn {
   border-color: rgba(255, 232, 166, 0.95);
@@ -1843,6 +1854,70 @@ body.profile-avatar-choice-open {
   background: transparent;
   color: #ffbd39;
   font-size: clamp(20px, 4.2vw, 30px);
+}
+
+@media (max-width: 1100px) {
+  .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: clamp(10px, 2.4vw, 22px);
+    padding: clamp(14px, 2.8vw, 24px);
+    border-radius: 20px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+    height: clamp(310px, 46vw, 460px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
+    max-width: min(72%, 280px);
+    height: 92%;
+    max-height: 92%;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+    gap: 12px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
+    gap: 8px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level {
+    gap: 12px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
+    font-size: clamp(18px, 3.1vw, 26px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-xp {
+    font-size: clamp(16px, 2.8vw, 23px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
+    height: 18px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
+    font-size: clamp(46px, 8.4vw, 72px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
+    margin-left: 7px;
+    font-size: clamp(22px, 4.2vw, 32px);
+  }
+  .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
+    gap: 10px;
+    width: 100%;
+  }
+  .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+  .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    min-height: 54px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: clamp(15px, 2.75vw, 22px);
+  }
+  .view[data-view="profile"] .profile-public-showcase__level-actions .profile-hero-gender {
+    margin-top: 8px;
+  }
+  .view[data-view="profile"] .profile-hero-gender__btn {
+    flex-basis: 52px;
+    min-width: 52px;
+    height: 40px;
+    font-size: 19px;
+  }
 }
 
 @media (max-width: 620px) {

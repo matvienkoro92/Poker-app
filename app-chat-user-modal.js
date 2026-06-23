@@ -295,11 +295,11 @@ if (chatUserModalEl) {
       modalRatingTab.disabled = !hasNick;
       modalRatingTab.setAttribute("aria-disabled", hasNick ? "false" : "true");
       if (hasNick) {
-        modalRatingTab.setAttribute("title", "Общий выигрыш в турнирах " + chatUserModalRatingNick);
-        modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах " + chatUserModalRatingNick + ". Подробнее");
+        modalRatingTab.setAttribute("title", "Призовые в турнирах " + chatUserModalRatingNick);
+        modalRatingTab.setAttribute("aria-label", "Призовые в турнирах " + chatUserModalRatingNick + ". Подробнее");
       } else {
         modalRatingTab.removeAttribute("title");
-        modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах. Подробнее");
+        modalRatingTab.setAttribute("aria-label", "Призовые в турнирах. Подробнее");
       }
     }
   }
@@ -427,7 +427,7 @@ if (chatUserModalEl) {
     modalRatingTabSum.textContent = text;
     modalRatingTabSum.hidden = !text;
     if (modalRatingTab && text) {
-      modalRatingTab.setAttribute("aria-label", "Общий выигрыш в турнирах " + text + ". Подробнее");
+      modalRatingTab.setAttribute("aria-label", "Призовые в турнирах " + text + ". Подробнее");
     }
   }
   function chatUserModalRatingTotalRewardText(nick) {
@@ -443,8 +443,8 @@ if (chatUserModalEl) {
     if (!text) return "";
     return (
       '<div class="chat-user-modal__rating-tabs">' +
-        '<button type="button" class="chat-user-modal__rating-tab" data-profile-rating-total="1" aria-label="Общий выигрыш в турнирах ' + escapeHtml(text) + '. Подробнее">' +
-          '<span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum">' + escapeHtml(text) + "</span></span>" +
+        '<button type="button" class="chat-user-modal__rating-tab" data-profile-rating-total="1" aria-label="Призовые в турнирах ' + escapeHtml(text) + '. Подробнее">' +
+          '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' + escapeHtml(text) + "</span></span>" +
           '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
         "</button>" +
       "</div>"

@@ -5700,6 +5700,10 @@ body.club-choice-vote-open {
   margin-top: 4px;
 }
 
+.app.app--view-home .home-live-tournament__notify-actions:not(:has(button)) {
+  display: none;
+}
+
 .app.app--view-home .home-live-tournament__notify-btn,
 .app.app--view-home .home-live-tournament__pick-btn,
 .app.app--view-home .home-tournament-notify-modal__save,
