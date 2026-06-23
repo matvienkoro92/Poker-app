@@ -493,7 +493,7 @@ if (!window.__pokerProfileAvatarDelegatedOpenBound) {
   document.addEventListener(
     "click",
     function (e) {
-      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar") : null;
+      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar, #profilePublicAvatar, #profilePublicAvatarPlaceholder") : null;
       if (!target) return;
       e.preventDefault();
       e.stopPropagation();
@@ -509,7 +509,7 @@ if (!window.__pokerProfileAvatarDelegatedOpenBound) {
   document.addEventListener(
     "keydown",
     function (e) {
-      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar") : null;
+      var target = e.target && e.target.closest ? e.target.closest("#profileAvatar, #profilePublicAvatar, #profilePublicAvatarPlaceholder") : null;
       if (!target || (e.key !== "Enter" && e.key !== " ")) return;
       e.preventDefault();
       try {
