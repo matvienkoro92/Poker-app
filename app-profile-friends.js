@@ -973,13 +973,17 @@ function initProfileFriends() {
   function renderRow(row, section, actionsHtml, noteHtml) {
     var meta = displayData(row);
     var lines = Array.isArray(meta.lines) && meta.lines.length ? meta.lines : [{ text: meta.modalName, kind: "name" }];
-    var avatar = row && row.avatar ? String(row.avatar || "").trim() : "";
+    var avatar = previewAvatar(row);
+    var level = previewLevel(row);
     var initial = String(meta.modalName || meta.lines && meta.lines[0] && meta.lines[0].text || "?").trim().charAt(0) || "?";
     var avatarHtml =
-      '<span class="friends-list-modal__avatar" aria-hidden="true">' +
+      '<span class="friends-list-modal__avatar-wrap" aria-hidden="true">' +
+        '<span class="friends-list-modal__avatar">' +
       (avatar
         ? '<img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
         : '<span>' + esc(initial.toUpperCase()) + "</span>") +
+        "</span>" +
+        '<span class="friends-list-modal__level-badge">ур. ' + esc(level) + "</span>" +
       "</span>";
     var htmlLabels =
       '<span class="friends-list-modal__item-labels' + (lines.length === 1 ? " friends-list-modal__item-labels--single" : "") + '">' +
@@ -993,7 +997,8 @@ function initProfileFriends() {
       '<div class="friends-list-modal__item" data-section="' + esc(section) +
       '" data-user-id="' + esc(row.userId || "") +
       '" data-chat-user-id="' + esc(row.chatUserId || "") +
-      '" data-user-name="' + esc(meta.modalName) + '">' +
+      '" data-user-name="' + esc(meta.modalName) +
+      '" data-avatar-url="' + esc(avatar) + '">' +
       avatarHtml +
       htmlLabels +
       '<div class="friends-list-modal__item-actions">' + actionsHtml + "</div></div>"
@@ -1021,12 +1026,13 @@ function initProfileFriends() {
         var id = item.dataset.userId;
         var chatId = item.dataset.chatUserId || "";
         var name = item.dataset.userName;
+        var avatar = item.dataset.avatarUrl || "";
         if ((id || chatId) && typeof window.pokerOpenChatUserModalSafe === "function") {
           closeFriendsModal();
-          window.pokerOpenChatUserModalSafe(id || chatId, name);
+          window.pokerOpenChatUserModalSafe(id || chatId, name, avatar);
         } else if ((id || chatId) && typeof window.openChatUserModalById === "function") {
           closeFriendsModal();
-          window.openChatUserModalById(id || chatId, name);
+          window.openChatUserModalById(id || chatId, name, avatar);
         }
       });
     });

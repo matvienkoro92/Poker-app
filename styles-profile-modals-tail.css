@@ -272,6 +272,14 @@
     linear-gradient(135deg, rgba(255, 232, 166, 0.12), rgba(10, 16, 28, 0.92)),
     rgba(255, 255, 255, 0.05);
 }
+.friends-list-modal__avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 50px;
+}
 .friends-list-modal__avatar {
   display: inline-flex;
   align-items: center;
@@ -293,6 +301,31 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.friends-list-modal__level-badge {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 16px;
+  padding: 1px 5px 2px;
+  border: 1px solid rgba(255, 181, 49, 0.88);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.38), transparent 42%),
+    linear-gradient(180deg, #ffe8a3 0%, #f7b733 52%, #d97706 100%);
+  color: #160c02;
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 3px 9px rgba(0, 0, 0, 0.45);
+  transform: translateX(-50%);
 }
 .friends-list-modal__item-labels {
   display: flex;
@@ -413,6 +446,14 @@
   .friends-list-modal__avatar {
     width: 38px;
     height: 38px;
+  }
+  .friends-list-modal__avatar-wrap {
+    width: 38px;
+    height: 46px;
+  }
+  .friends-list-modal__level-badge {
+    min-width: 30px;
+    font-size: 8.5px;
   }
   .friends-list-modal__item-actions {
     grid-column: 1 / -1;

@@ -661,6 +661,21 @@ function initProfilePublicShowcase() {
 
 var profileAchievementsShowcaseSeq = 0;
 
+function renderProfileRatingTotalState(state) {
+  var label = state === "empty"
+    ? "Турнирный рейтинг пока не найден"
+    : (state === "error" ? "Турнирный рейтинг не загрузился" : "Загружаем турнирный рейтинг...");
+  return (
+    '<div class="chat-user-modal__rating-tabs chat-user-modal__rating-tabs--profile-state">' +
+      '<button type="button" class="chat-user-modal__rating-tab chat-user-modal__rating-tab--state chat-user-modal__rating-tab--' +
+        state +
+        '" disabled aria-disabled="true">' +
+        '<span class="chat-user-modal__rating-tab-main">' + label + "</span>" +
+      "</button>" +
+    "</div>"
+  );
+}
+
 function profileAchievementRatingNickFromData(data) {
   var raw = data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
   var nick = String(raw || "").trim();
@@ -685,7 +700,7 @@ function renderProfileAchievementsShowcaseLoading() {
   var achievements = document.getElementById("profileAchievementsList");
   var ranks = document.getElementById("profileSeasonRanks");
   if (showcase) showcase.hidden = false;
-  if (total) total.innerHTML = "";
+  if (total) total.innerHTML = renderProfileRatingTotalState("loading");
   if (achievements) {
     achievements.innerHTML =
       '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
@@ -748,7 +763,7 @@ function refreshProfileAchievementsShowcase(profileData) {
     })
     .then(function (result) {
       if (seq !== profileAchievementsShowcaseSeq || !result) return false;
-      if (total) total.innerHTML = result.totalRewardHtml || "";
+      if (total) total.innerHTML = result.totalRewardHtml || renderProfileRatingTotalState("empty");
       achievements.innerHTML = result.achievementsHtml || "";
       ranks.innerHTML = result.ranksHtml || "";
       showcase.hidden = false;
@@ -756,6 +771,7 @@ function refreshProfileAchievementsShowcase(profileData) {
     })
     .catch(function () {
       if (seq !== profileAchievementsShowcaseSeq) return false;
+      if (total) total.innerHTML = renderProfileRatingTotalState("error");
       achievements.innerHTML =
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
           "Идет загрузка достижений..." +
@@ -791,6 +807,7 @@ function initProfileAchievementsShowcase() {
       }
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
       if (totalBtn) {
+        if (totalBtn.disabled || totalBtn.getAttribute("aria-disabled") === "true") return;
         var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache);
         if (typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function") {
           window.pokerOpenLatestTournamentRatingPlayerModal(nick);
