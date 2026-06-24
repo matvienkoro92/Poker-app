@@ -636,9 +636,28 @@ function refreshProfilePublicShowcase(profileData) {
   profilePublicShowcaseApplyStatus(profilePublicShowcaseStatusFromData(data));
 }
 
+function loadProfilePublicShowcaseInitial() {
+  if (typeof loadCurrentProfileUserInfo !== "function") {
+    refreshProfilePublicShowcase();
+    setProfilePublicShowcaseLoading(false);
+    return;
+  }
+  setProfilePublicShowcaseLoading(true);
+  loadCurrentProfileUserInfo()
+    .then(function (data) {
+      refreshProfilePublicShowcase(data && data.ok ? data : null);
+    })
+    .catch(function () {
+      refreshProfilePublicShowcase();
+    })
+    .finally(function () {
+      setProfilePublicShowcaseLoading(false);
+    });
+}
+
 function initProfilePublicShowcase() {
   initProfileHeroGenderControl();
-  refreshProfilePublicShowcase();
+  loadProfilePublicShowcaseInitial();
   var avatar = document.getElementById("profileAvatar");
   if (avatar && avatar.dataset.profilePublicShowcaseBound !== "1") {
     avatar.dataset.profilePublicShowcaseBound = "1";

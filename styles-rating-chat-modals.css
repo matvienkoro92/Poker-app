@@ -476,6 +476,14 @@
   width: min(236px, 100%);
   min-width: 0;
   justify-self: center;
+  transform: translateX(-10px);
+}
+.chat-user-modal__top-actions .chat-user-modal__write-btn,
+.chat-user-modal__top-actions .chat-user-modal__friend-btn {
+  min-height: 48px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-sizing: border-box;
 }
 .chat-user-modal--self .chat-user-modal__top {
   grid-template-columns: minmax(0, 1fr);
@@ -1733,6 +1741,7 @@
   .chat-user-modal__top-actions .chat-user-modal__write-btn,
   .chat-user-modal__top-actions .chat-user-modal__friend-btn {
     min-height: 35px;
+    height: 35px;
     padding: 8px 8px;
     font-size: 10.5px;
   }
@@ -1974,6 +1983,7 @@
   .chat-user-modal__top-actions .chat-user-modal__write-btn,
   .chat-user-modal__top-actions .chat-user-modal__friend-btn {
     min-height: 33px;
+    height: 33px;
     padding: 7px 6px;
     font-size: 10px;
   }

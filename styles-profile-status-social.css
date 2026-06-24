@@ -143,6 +143,11 @@
 .profile-status--loading .profile-status__loading {
   display: grid;
 }
+.profile-status--loading .profile-status__title,
+.profile-status--loading .profile-status__progress-text,
+.profile-status--loading .profile-status__hint {
+  display: none;
+}
 .profile-status--loading .profile-status__labels--cards {
   display: none;
 }

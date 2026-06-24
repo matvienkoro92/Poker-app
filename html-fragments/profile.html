@@ -20,7 +20,7 @@
               <button type="button" class="profile-tabs__btn profile-tabs__btn--active" id="profileClubTabBtn" data-profile-tab="club" role="tab" aria-selected="true">Профиль в клубе</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
             </div>
-            <section class="profile-public-showcase" id="profilePublicShowcase" data-profile-club-panel aria-label="Публичная карточка игрока">
+            <section class="profile-public-showcase profile-public-showcase--loading" id="profilePublicShowcase" data-profile-club-panel aria-label="Публичная карточка игрока">
               <div class="chat-user-modal__top profile-public-showcase__top">
                 <div class="chat-user-modal__header profile-public-showcase__header">
                   <div class="chat-user-modal__avatar-wrap">
@@ -177,12 +177,12 @@
                 <input type="file" id="profileAvatarInput" class="profile-avatar-block__file" accept="image/jpeg,image/png,image/webp" aria-hidden="true" tabindex="-1" />
                 <p class="profile-avatar-block__feedback" id="profileAvatarFeedback" aria-live="polite"></p>
               </div>
-              <section class="profile-status profile-status--unlinked" id="profileStatusSection">
+              <section class="profile-status profile-status--loading profile-status--unlinked" id="profileStatusSection">
                 <h2 class="profile-status__title" id="profileStatusTitle">Привяжите ваш аккаунт</h2>
                 <p class="profile-status__progress-text" id="profileStatusProgressText" hidden></p>
                 <p class="profile-status__hint" id="profileStatusLinkHint" hidden></p>
                 <div class="profile-status__scale-wrap">
-                  <p class="profile-status__loading" id="profileStatusLoading" hidden>Идет загрузка статуса...</p>
+                  <p class="profile-status__loading" id="profileStatusLoading">Идет загрузка статуса...</p>
                   <div class="profile-status__labels profile-status__labels--cards">
                     <span class="profile-status__card">0</span>
                     <div class="profile-status__scale-visual" id="profileStatusVisual" style="--status-value: 0;">

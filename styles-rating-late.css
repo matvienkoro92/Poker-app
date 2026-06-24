@@ -4446,11 +4446,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
   --summer-top3-art-center-x: 50%;
-  --summer-top3-art-center-y: calc(26% + 21px);
+  --summer-top3-art-center-y: calc(26% + 25px);
   --summer-top3-art-left-x: calc(11% - 3px);
   --summer-top3-art-left-y: calc(44% + 27px);
   --summer-top3-art-right-x: calc(89% - 9px);
-  --summer-top3-art-right-y: calc(50% + 21px);
+  --summer-top3-art-right-y: calc(50% + 25px);
   --summer-top3-art-center-size: 31%;
   --summer-top3-art-left-size: 37%;
   --summer-top3-art-right-size: 24%;
