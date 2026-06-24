@@ -1091,7 +1091,9 @@
 }
 .profile-friends__search-suggestion-specialty,
 .profile-friends__specialty-tag,
-.friends-list-modal__specialty-tag {
+.profile-friends__birthday-tag,
+.friends-list-modal__specialty-tag,
+.friends-list-modal__birthday-tag {
   display: inline-flex;
   align-items: center;
   width: max-content;
@@ -1117,12 +1119,57 @@
 .profile-friends__specialty-tag {
   margin-top: 4px;
 }
+.profile-friends__birthday-tag {
+  justify-self: center;
+  max-width: 94px;
+  margin-top: -1px;
+  padding: 3px 6px;
+  color: #fff0bd;
+  border-color: rgba(250, 204, 21, 0.5);
+  background: rgba(250, 204, 21, 0.14);
+  font-size: 8px;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: none;
+  white-space: normal;
+}
+.profile-friends__birthday-tag--today {
+  color: #120b02;
+  border-color: #ffd45f;
+  background: linear-gradient(180deg, #fff0bd 0%, #facc15 100%);
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.28);
+}
 .friends-list-modal__specialty-tag {
   margin-top: 2px;
 }
+.friends-list-modal__item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-height: 16px;
+  margin-top: 2px;
+}
+.friends-list-modal__item-meta:empty {
+  display: none;
+}
+.friends-list-modal__birthday-tag {
+  color: #fff0bd;
+  border-color: rgba(250, 204, 21, 0.5);
+  background: rgba(250, 204, 21, 0.14);
+  text-transform: none;
+}
+.friends-list-modal__birthday-tag--today {
+  color: #120b02;
+  border-color: #ffd45f;
+  background: linear-gradient(180deg, #fff0bd 0%, #facc15 100%);
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.28);
+}
 [data-theme="light"] .profile-friends__search-suggestion-specialty,
 [data-theme="light"] .profile-friends__specialty-tag,
-[data-theme="light"] .friends-list-modal__specialty-tag {
+[data-theme="light"] .profile-friends__birthday-tag,
+[data-theme="light"] .friends-list-modal__specialty-tag,
+[data-theme="light"] .friends-list-modal__birthday-tag {
   color: #9a3412;
   background: rgba(249, 115, 22, 0.1);
 }
@@ -1454,6 +1501,16 @@
   justify-self: center;
   align-self: start;
   gap: 4px;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+.profile-hero-card .profile-friends__avatar-btn::before,
+.profile-hero-card .profile-friends__avatar-btn::after,
+.profile-hero-card .profile-friends__avatar-stack::before,
+.profile-hero-card .profile-friends__avatar-stack::after {
+  display: none !important;
+  content: none !important;
 }
 .profile-hero-card .profile-friends__invite {
   width: 58px;
@@ -1468,10 +1525,24 @@
 .profile-hero-card .profile-friends__avatar-skeleton {
   width: 56px;
 }
+.profile-hero-card .profile-friends__avatar-stack,
+.profile-hero-card .profile-friends__avatar-ring,
+.profile-hero-card .profile-friends__avatar-ring img {
+  background-color: transparent !important;
+  background-clip: padding-box;
+}
+.profile-hero-card .profile-friends__avatar-ring {
+  overflow: hidden;
+}
 .profile-hero-card .profile-friends__friend-name {
   width: 70px;
   max-width: 70px;
   font-size: 9.5px;
+}
+.profile-hero-card .profile-friends__birthday-tag {
+  max-width: 72px;
+  padding: 2px 5px;
+  font-size: 7px;
 }
 .profile-hero-card .profile-friends__level-badge {
   right: -3px;

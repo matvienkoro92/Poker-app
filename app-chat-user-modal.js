@@ -111,6 +111,7 @@ if (chatUserModalEl) {
   var modalRemoveFriend = document.getElementById("chatUserModalRemoveFriend");
   var modalFriendMsg = document.getElementById("chatUserModalFriendMsg");
   var modalLoginSub = document.getElementById("chatUserModalLoginSub");
+  var modalSpecialtyBadge = document.getElementById("chatUserModalSpecialtyBadge");
   var modalLastSeen = document.getElementById("chatUserModalLastSeen");
   var modalVerifiedBadge = document.getElementById("chatUserModalVerifiedBadge");
   var modalBackdrop = chatUserModalEl.querySelector(".chat-user-modal__backdrop");
@@ -142,6 +143,13 @@ if (chatUserModalEl) {
     if (raw === "mtt" || raw === "мтт") return "МТТ";
     if (raw === "cash" || raw === "кеш" || raw === "кэш") return "Кеш";
     return "";
+  }
+  function updateChatUserModalSpecialtyBadge(value) {
+    if (!modalSpecialtyBadge) return;
+    var label = chatUserModalSpecialtyLabel(value);
+    modalSpecialtyBadge.textContent = label ? label + "-игрок" : "";
+    modalSpecialtyBadge.hidden = !label;
+    modalSpecialtyBadge.classList.toggle("chat-user-modal__specialty-badge--cash", label === "Кеш");
   }
   function syncChatUserModalStatusXp(pointsValue) {
     if (!modalStatusXp) return;
@@ -1932,6 +1940,7 @@ if (chatUserModalEl) {
     if (modalStatusCards[1]) modalStatusCards[1].textContent = "2";
     pokerProfileApplyStatusFish(modalStatusFish, 1);
     if (modalTitleFish) modalTitleFish.hidden = true;
+    updateChatUserModalSpecialtyBadge("");
     if (fallbackStatusLevel) applyChatUserModalStatusLevel(fallbackStatusLevel);
     if (typeof updateChatUserModalRespectButtons === "function") {
       if (modalRespectUp) modalRespectUp.disabled = true;
@@ -1955,6 +1964,7 @@ if (chatUserModalEl) {
         var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
         var birthText = chatUserModalFormatBirthDate(data && (data.profileBirthDate || data.birthDate));
         var specialtyText = chatUserModalSpecialtyLabel(data && (data.profileSpecialty || data.specialty));
+        updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
         var personalParts = [];
         if (birthText) personalParts.push("Дата рождения: " + birthText);
         if (specialtyText) personalParts.push("Специализация: " + specialtyText);

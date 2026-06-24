@@ -193,6 +193,46 @@ function initProfileFriends() {
     return '<span class="' + esc(baseClass) + " " + esc(baseClass + "--" + value) + '">' + esc(label) + "</span>";
   }
 
+  function profileFriendsBirthdayStatus(row) {
+    var raw = String(row && (row.profileBirthDate || row.birthDate || row.birthday) || "").trim();
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return "";
+    var today = new Date();
+    var currentYear = today.getFullYear();
+    var month = Number(m[2]) - 1;
+    var day = Number(m[3]);
+    var next = new Date(currentYear, month, day);
+    today.setHours(0, 0, 0, 0);
+    next.setHours(0, 0, 0, 0);
+    if (next < today) next = new Date(currentYear + 1, month, day);
+    var days = Math.round((next - today) / 86400000);
+    if (days === 0) return "today";
+    if (days > 0 && days <= 7) return "soon";
+    return "";
+  }
+
+  function profileFriendsBirthdayTagHtml(row, className) {
+    var status = profileFriendsBirthdayStatus(row);
+    if (!status) return "";
+    var baseClass = className || "profile-friends__birthday-tag";
+    var label = status === "today" ? "День рождения" : "Скоро день рождения";
+    return '<span class="' + esc(baseClass) + " " + esc(baseClass + "--" + status) + '">' + esc(label) + "</span>";
+  }
+
+  function profileFriendsBirthdayPreviewTagHtml(row) {
+    var status = profileFriendsBirthdayStatus(row);
+    if (!status) return "";
+    var label = status === "today" ? "День рождения сегодня" : "Скоро день рождения";
+    return '<span class="profile-friends__birthday-tag profile-friends__birthday-tag--' + esc(status) + '">' + esc(label) + "</span>";
+  }
+
+  function profileFriendsBirthdayPriority(row) {
+    var status = profileFriendsBirthdayStatus(row);
+    if (status === "today") return 2;
+    if (status === "soon") return 1;
+    return 0;
+  }
+
   function alertText(text) {
     if (tg && tg.showAlert) tg.showAlert(text);
     else if (typeof alert === "function") alert(text);
@@ -924,12 +964,21 @@ function initProfileFriends() {
 
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
-    var rows = Array.isArray(friends) ? friends.slice(0, 3) : [];
+    var rows = (Array.isArray(friends) ? friends.slice() : [])
+      .map(function (row, index) {
+        return { row: row, index: index, priority: profileFriendsBirthdayPriority(row) };
+      })
+      .sort(function (a, b) {
+        return b.priority - a.priority || a.index - b.index;
+      })
+      .slice(0, 3)
+      .map(function (item) { return item.row; });
     var html = rows.map(function (row) {
       var meta = displayData(row);
       var avatar = previewAvatar(row);
       var level = previewLevel(row);
       var specialtyTag = profileFriendsSpecialtyTagHtml(row);
+      var birthdayTag = profileFriendsBirthdayPreviewTagHtml(row);
       return (
         '<button type="button" class="profile-friends__avatar-btn" data-user-id="' + esc(row && row.userId || "") +
         '" data-chat-user-id="' + esc(row && row.chatUserId || "") +
@@ -942,6 +991,7 @@ function initProfileFriends() {
         "</span>" +
         '<span class="profile-friends__friend-name">' + esc(meta.modalName) + "</span>" +
         specialtyTag +
+        birthdayTag +
         "</button>"
       );
     }).join("");
@@ -998,6 +1048,7 @@ function initProfileFriends() {
     var avatar = previewAvatar(row);
     var level = previewLevel(row);
     var specialtyTag = profileFriendsSpecialtyTagHtml(row, "friends-list-modal__specialty-tag");
+    var birthdayTag = profileFriendsBirthdayTagHtml(row, "friends-list-modal__birthday-tag");
     var initial = String(meta.modalName || meta.lines && meta.lines[0] && meta.lines[0].text || "?").trim().charAt(0) || "?";
     var avatarHtml =
       '<span class="friends-list-modal__avatar-wrap" aria-hidden="true">' +
@@ -1014,7 +1065,7 @@ function initProfileFriends() {
         var cls = idx === 0 ? "friends-list-modal__item-name" : "friends-list-modal__item-login";
         return '<span class="' + cls + '">' + esc(line && line.text) + "</span>";
       }).join("") +
-      specialtyTag +
+      '<span class="friends-list-modal__item-meta">' + specialtyTag + birthdayTag + "</span>" +
       (noteHtml || "") +
       "</span>";
     return (

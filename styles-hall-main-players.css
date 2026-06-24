@@ -421,6 +421,9 @@
   letter-spacing: 0;
   line-height: 1.15;
 }
+.hall-fish-modal__my-rank[hidden] {
+  display: none;
+}
 .hall-fish-modal__close {
   width: 42px;
   height: 42px;
@@ -432,6 +435,34 @@
   font-weight: 900;
   cursor: pointer;
 }
+.hall-fish-modal__tabs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+.hall-fish-modal__tab {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(248, 217, 138, 0.28);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.42);
+  color: rgba(255, 237, 213, 0.78);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+.hall-fish-modal__tab--active {
+  border-color: rgba(251, 191, 36, 0.76);
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.22), rgba(146, 64, 14, 0.28));
+  color: #fff7d6;
+  box-shadow: inset 0 1px 0 rgba(255, 251, 235, 0.18), 0 0 18px rgba(251, 191, 36, 0.14);
+}
 .hall-fish-modal__body {
   min-height: 180px;
   overflow: auto;
@@ -442,6 +473,11 @@
   padding: 14px;
   color: #ffedd5;
   font-weight: 800;
+}
+.hall-fish-modal__notice--compact {
+  padding: 10px 2px 2px;
+  color: rgba(255, 237, 213, 0.66);
+  font-size: 12px;
 }
 .hall-fish-level-list {
   display: grid;
@@ -471,6 +507,14 @@
   border-color: rgba(248, 217, 138, 0.34);
   background: rgba(30, 41, 59, 0.62);
   outline: none;
+}
+.hall-fish-level-row:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.hall-fish-level-row:disabled:hover {
+  border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.5);
 }
 .hall-fish-level-row--loading {
   cursor: wait;
@@ -540,6 +584,29 @@
     rgba(2, 6, 23, 0.42);
   object-fit: contain;
 }
+.hall-fish-achievements {
+  display: grid;
+  gap: 14px;
+}
+.hall-fish-achievement-section {
+  padding: 10px;
+  border: 1px solid rgba(248, 217, 138, 0.18);
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.22);
+}
+.hall-fish-achievement-section__title {
+  margin: 0 0 9px;
+  color: #fde68a;
+  font-size: 15px;
+  font-weight: 1000;
+  letter-spacing: 0;
+}
+.hall-fish-achievement-list .hall-fish-level-row {
+  grid-template-columns: 36px minmax(0, 1fr) minmax(72px, auto);
+}
+.hall-fish-achievement-list .hall-fish-level-row__level {
+  font-size: 15px;
+}
 
 @media (max-width: 520px) {
   .hall-of-fame__rating-card-row {
@@ -563,9 +630,20 @@
   .hall-fish-modal__my-rank {
     font-size: 11px;
   }
+  .hall-fish-modal__tab {
+    min-height: 36px;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
   .hall-fish-level-row__fish {
     width: 38px;
     height: 38px;
+  }
+  .hall-fish-achievement-list .hall-fish-level-row {
+    grid-template-columns: 30px minmax(0, 1fr) 76px;
+  }
+  .hall-fish-achievement-list .hall-fish-level-row__level {
+    font-size: 13px;
   }
 }
 

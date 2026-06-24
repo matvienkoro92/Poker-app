@@ -378,12 +378,18 @@
   max-width: min(64vw, 420px);
   color: #f6d98f;
 }
+.profile-public-showcase__details-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  margin-top: 4px;
+}
 .profile-public-showcase__specialty-badge {
   display: inline-flex;
   align-items: center;
   width: max-content;
   max-width: 100%;
-  margin-top: 4px;
   padding: 4px 9px;
   color: #fff0bd;
   border: 1px solid rgba(255, 199, 89, 0.42);
@@ -406,6 +412,24 @@
   color: #ffe0a3;
   border-color: rgba(251, 146, 60, 0.45);
   background: rgba(249, 115, 22, 0.12);
+}
+.profile-public-showcase__age-badge {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  color: rgba(255, 232, 189, 0.9);
+  border: 1px solid rgba(255, 232, 189, 0.2);
+  border-radius: 999px;
+  background: rgba(5, 9, 18, 0.32);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+.profile-public-showcase__age-badge[hidden] {
+  display: none;
 }
 .profile-public-showcase__edit-name.profile-hero-card__edit-name {
   position: static;
@@ -680,7 +704,7 @@
   padding-right: 9px;
 }
 .profile-hero-birth--saved .profile-hero-birth__input {
-  width: 94px;
+  width: 112px;
 }
 .profile-hero-birth__feedback {
   position: absolute;
@@ -2313,7 +2337,7 @@ body.profile-avatar-choice-open {
     font-size: 11px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth--saved .profile-hero-birth__input {
-    width: 88px;
+    width: 104px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth__save {
     width: 26px;

@@ -444,9 +444,12 @@ window.pokerInitHallOfFamePanelShareButtons = initHallOfFamePanelShareButtons;
 initHallOfFamePanelShareButtons();
 
 var hallFishRatingRowsCache = null;
+var hallFishAchievementRowsCache = null;
+var hallFishAchievementRowsPromise = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
 var hallFishProfileLoadingObserver = null;
+var hallFishActiveTab = "levels";
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 
 function hallFishEsc(s) {
@@ -477,8 +480,12 @@ function hallFishEnsureModal() {
     '<div class="hall-fish-modal__backdrop" data-hall-fish-close></div>' +
     '<section class="hall-fish-modal__panel" role="dialog" aria-modal="true" aria-labelledby="hallFishRatingTitle">' +
       '<div class="hall-fish-modal__head">' +
-        '<div><h3 class="hall-fish-modal__title" id="hallFishRatingTitle">Игроки по уровню</h3><span class="hall-fish-modal__subtitle" id="hallFishRatingSubtitle">—</span><span class="hall-fish-modal__my-rank" id="hallFishRatingMyRank">Ваш рейтинг —/—</span></div>' +
+        '<div><h3 class="hall-fish-modal__title" id="hallFishRatingTitle">Рейтинги игроков</h3><span class="hall-fish-modal__subtitle" id="hallFishRatingSubtitle">—</span><span class="hall-fish-modal__my-rank" id="hallFishRatingMyRank">Ваш рейтинг —/—</span></div>' +
         '<button type="button" class="hall-fish-modal__close" data-hall-fish-close aria-label="Закрыть">×</button>' +
+      '</div>' +
+      '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
+        '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -675,6 +682,210 @@ function hallFishRenderRows(rows) {
   }).join("") + '</div>';
 }
 
+function hallFishNormalizeNick(nick) {
+  if (typeof normalizeWinterNick === "function") return normalizeWinterNick(nick);
+  return String(nick || "").trim().replace(/^@+/, "").replace(/\s+/g, " ").toLowerCase();
+}
+
+function hallFishFormatNumber(value) {
+  var n = Number(value) || 0;
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function hallFishFormatRub(value) {
+  if (typeof formatRewardRound === "function") return formatRewardRound(value) + " ₽";
+  return hallFishFormatNumber(value) + " ₽";
+}
+
+function hallFishLevelRowsByNick(rows) {
+  var map = {};
+  (Array.isArray(rows) ? rows : []).forEach(function (row) {
+    var names = [row && row.name, row && row.pokerPlusNickname, row && row.telegram];
+    names.forEach(function (name) {
+      var key = hallFishNormalizeNick(String(name || "").replace(/^@+/, ""));
+      if (key && !map[key]) map[key] = row;
+    });
+  });
+  return map;
+}
+
+function hallFishPlayerMetaByNick(nick, map) {
+  var key = hallFishNormalizeNick(nick);
+  var row = key && map ? map[key] : null;
+  if (!row) return { nick: nick || "Игрок", accountId: "", telegram: "" };
+  return {
+    nick: row.name || row.pokerPlusNickname || nick || "Игрок",
+    accountId: String(row.accountId || "").trim(),
+    telegram: String(row.telegram || "").trim(),
+  };
+}
+
+function hallFishRowsWithRank(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .filter(function (row) { return row && (Number(row.value) || 0) > 0; })
+    .sort(function (a, b) {
+      return (Number(b.value) || 0) - (Number(a.value) || 0) ||
+        (Number(b.tie) || 0) - (Number(a.tie) || 0) ||
+        String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+    })
+    .slice(0, 10)
+    .map(function (row, index) {
+      return Object.assign({ rank: index + 1 }, row);
+    });
+}
+
+function hallFishAggregateTournamentAchievements(levelRows) {
+  var allRows = typeof pokerRatingAchievementAllTournamentRows === "function" ? pokerRatingAchievementAllTournamentRows() : [];
+  var byNick = {};
+  var byMonth = {};
+  var metaByNick = hallFishLevelRowsByNick(levelRows);
+  function entry(nick) {
+    var key = hallFishNormalizeNick(nick);
+    if (!key) return null;
+    if (!byNick[key]) {
+      var meta = hallFishPlayerMetaByNick(nick, metaByNick);
+      byNick[key] = {
+        key: key,
+        nick: meta.nick || nick || "Игрок",
+        accountId: meta.accountId,
+        telegram: meta.telegram,
+        big50: 0,
+        big50Best: 0,
+        big100: 0,
+        big100Best: 0,
+        firstPlaces: 0,
+        monthChampion: 0,
+        monthChampionBest: 0,
+      };
+    }
+    return byNick[key];
+  }
+  (Array.isArray(allRows) ? allRows : []).forEach(function (row) {
+    var nick = row && row.nick;
+    var item = entry(nick);
+    if (!item) return;
+    var reward = Number(row && row.reward) || 0;
+    if (reward >= 100000) {
+      item.big100 += 1;
+      if (reward > item.big100Best) item.big100Best = reward;
+    } else if (reward >= 50000) {
+      item.big50 += 1;
+      if (reward > item.big50Best) item.big50Best = reward;
+    }
+    if (Number(row && row.place) === 1) item.firstPlaces += 1;
+    var parts = String((row && row.date) || "").split(".");
+    if (parts.length === 3) {
+      var monthKey = parts[1] + "." + parts[2];
+      if (!byMonth[monthKey]) byMonth[monthKey] = {};
+      if (!byMonth[monthKey][item.key]) byMonth[monthKey][item.key] = { key: item.key, reward: 0 };
+      byMonth[monthKey][item.key].reward += reward;
+    }
+  });
+  Object.keys(byMonth).forEach(function (monthKey) {
+    var monthRows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; })
+      .filter(function (row) { return (Number(row.reward) || 0) > 0; })
+      .sort(function (a, b) {
+        return (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
+          String(a.key || "").localeCompare(String(b.key || ""), "ru");
+      });
+    if (!monthRows.length) return;
+    monthRows.slice(0, 3).forEach(function (row) {
+      var item = byNick[row.key];
+      if (!item) return;
+      item.monthChampion += 1;
+      if ((Number(row.reward) || 0) > item.monthChampionBest) item.monthChampionBest = Number(row.reward) || 0;
+    });
+  });
+  var list = Object.keys(byNick).map(function (key) { return byNick[key]; });
+  return {
+    big50: hallFishRowsWithRank(list.map(function (row) {
+      return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший " + hallFishFormatRub(row.big50Best) : "" });
+    })),
+    big100: hallFishRowsWithRank(list.map(function (row) {
+      return Object.assign({}, row, { value: row.big100, tie: row.big100Best, valueText: row.big100 + " зан.", extraText: row.big100Best ? "лучший " + hallFishFormatRub(row.big100Best) : "" });
+    })),
+    king: hallFishRowsWithRank(list.map(function (row) {
+      return Object.assign({}, row, { value: row.firstPlaces, tie: row.big100Best || row.big50Best, valueText: row.firstPlaces + " побед", extraText: "1 место в турнирах" });
+    })),
+    monthChampion: hallFishRowsWithRank(list.map(function (row) {
+      return Object.assign({}, row, { value: row.monthChampion, tie: row.monthChampionBest, valueText: row.monthChampion + " раз", extraText: "топ месяца по заносам" });
+    })),
+  };
+}
+
+function hallFishAggregateClubChoiceRows(rows, levelRows) {
+  var map = {};
+  var metaByNick = hallFishLevelRowsByNick(levelRows);
+  (Array.isArray(rows) ? rows : []).forEach(function (month) {
+    (Array.isArray(month && month.winners) ? month.winners : []).forEach(function (winner) {
+      var nick = String((winner && winner.nick) || "").trim();
+      var key = hallFishNormalizeNick(nick);
+      if (!key) return;
+      if (!map[key]) {
+        var meta = hallFishPlayerMetaByNick(nick, metaByNick);
+        map[key] = { nick: meta.nick || nick, accountId: String((winner && winner.accountId) || meta.accountId || "").trim(), telegram: meta.telegram, value: 0, tie: 0 };
+      }
+      map[key].value += 1;
+      map[key].tie += Number(winner && winner.votes) || 0;
+    });
+  });
+  return hallFishRowsWithRank(Object.keys(map).map(function (key) {
+    var row = map[key];
+    return Object.assign({}, row, { valueText: row.value + " раз", extraText: row.tie ? row.tie + " голосов" : "Народный герой" });
+  }));
+}
+
+function hallFishReferralsRows(data) {
+  return hallFishRowsWithRank((Array.isArray(data && data.ranking) ? data.ranking : []).map(function (row) {
+    var nick = String((row && (row.name || row.telegramLogin || row.accountId)) || "Игрок").trim();
+    var login = String((row && row.telegramLogin) || "").trim();
+    return {
+      nick: nick,
+      accountId: String((row && row.accountId) || "").trim(),
+      telegram: login ? "@" + login.replace(/^@+/, "") : "",
+      value: Number(row && row.invitedCount) || 0,
+      tie: Number(row && row.totalPoker21Level) || 0,
+      valueText: (Number(row && row.invitedCount) || 0) + " чел.",
+      extraText: row && row.poker21LinkedInvited ? "Покер21: " + row.poker21LinkedInvited : "",
+    };
+  }));
+}
+
+function hallFishAchievementSectionHtml(title, rows) {
+  var list = Array.isArray(rows) ? rows : [];
+  return '<section class="hall-fish-achievement-section">' +
+    '<h4 class="hall-fish-achievement-section__title">' + hallFishEsc(title) + '</h4>' +
+    (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
+      var userId = String(row.accountId || "").trim();
+      var name = row.nick || "Игрок";
+      var sub = row.telegram || row.extraText || "";
+      var attrs = userId
+        ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
+        : ' disabled aria-disabled="true"';
+      return '<button type="button" class="hall-fish-level-row hall-fish-achievement-row"' + attrs + ' aria-label="' + hallFishEsc(name) + '">' +
+        '<span class="hall-fish-level-row__rank">' + hallFishEsc(row.rank) + '</span>' +
+        '<span><span class="hall-fish-level-row__name">' + hallFishEsc(name) + '</span>' +
+        '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
+        '<span class="hall-fish-level-row__level">' + hallFishEsc(row.valueText || row.value) + '</span>' +
+      '</button>';
+    }).join("") + '</div>' : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">Пока нет данных.</div>') +
+  '</section>';
+}
+
+function hallFishRenderAchievementRows(data) {
+  var sections = [
+    ["Заносы от 50 до 100к", data && data.big50],
+    ["Заносы от 100к", data && data.big100],
+    ["Король турниров", data && data.king],
+    ["Чемпион месяца", data && data.monthChampion],
+    ["Народный герой", data && data.clubChoice],
+    ["Приглашенные", data && data.referrals],
+  ];
+  return '<div class="hall-fish-achievements">' + sections.map(function (section) {
+    return hallFishAchievementSectionHtml(section[0], section[1]);
+  }).join("") + '</div>';
+}
+
 function hallFishClearProfileLoadingRows() {
   if (hallFishProfileLoadingObserver) {
     try {
@@ -761,10 +972,37 @@ function hallFishSetModalState(message, rows, currentIds) {
   var myRank = document.getElementById("hallFishRatingMyRank");
   var body = document.getElementById("hallFishRatingBody");
   hallFishSetSubtitle(subtitle);
-  if (myRank) myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
+  hallFishUpdateTabs("levels");
+  if (myRank) {
+    myRank.hidden = false;
+    myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
+  }
   if (body) body.innerHTML = rows ? hallFishRenderRows(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+}
+
+function hallFishSetAchievementState(message, data) {
+  var modal = hallFishEnsureModal();
+  var subtitle = document.getElementById("hallFishRatingSubtitle");
+  var myRank = document.getElementById("hallFishRatingMyRank");
+  var body = document.getElementById("hallFishRatingBody");
+  hallFishSetSubtitle(subtitle);
+  hallFishUpdateTabs("achievements");
+  if (myRank) myRank.hidden = true;
+  if (body) body.innerHTML = data ? hallFishRenderAchievementRows(data) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  modal.hidden = false;
+  if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+}
+
+function hallFishUpdateTabs(activeTab) {
+  hallFishActiveTab = activeTab === "achievements" ? "achievements" : "levels";
+  hallFishEnsureModal();
+  document.querySelectorAll("[data-hall-fish-tab]").forEach(function (tab) {
+    var isActive = tab.getAttribute("data-hall-fish-tab") === hallFishActiveTab;
+    tab.classList.toggle("hall-fish-modal__tab--active", isActive);
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
 }
 
 function hallFishCloseModal() {
@@ -788,6 +1026,69 @@ function hallFishLoadRows() {
     });
 }
 
+function hallFishLoadClubChoiceAchievementRows() {
+  var base = hallFishGetApiBase();
+  if (!base) return Promise.resolve([]);
+  return fetch(base + "/api/club-choice-vote?mode=achievements&_t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      return data && data.ok && Array.isArray(data.rows) ? data.rows : [];
+    })
+    .catch(function () {
+      return Array.isArray(window.POKER_CLUB_CHOICE_ACHIEVEMENTS) ? window.POKER_CLUB_CHOICE_ACHIEVEMENTS : [];
+    });
+}
+
+function hallFishLoadReferralRows() {
+  var base = hallFishGetApiBase();
+  var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+  if (!base || !hasCred || typeof pokerApiAuthQuery !== "function") return Promise.resolve([]);
+  return fetch(base + "/api/referrals" + pokerApiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      return data && data.ok ? hallFishReferralsRows(data) : [];
+    })
+    .catch(function () { return []; });
+}
+
+function hallFishLoadAchievementRows() {
+  if (hallFishAchievementRowsCache) return Promise.resolve(hallFishAchievementRowsCache);
+  if (hallFishAchievementRowsPromise) return hallFishAchievementRowsPromise;
+  hallFishAchievementRowsPromise = hallFishLoadRows()
+    .then(function (levelRows) {
+      var tournamentData = hallFishAggregateTournamentAchievements(levelRows);
+      return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows()])
+        .then(function (parts) {
+          hallFishAchievementRowsCache = Object.assign({}, tournamentData, {
+            clubChoice: hallFishAggregateClubChoiceRows(parts[0], levelRows),
+            referrals: parts[1],
+          });
+          return hallFishAchievementRowsCache;
+        });
+    })
+    .finally(function () {
+      hallFishAchievementRowsPromise = null;
+    });
+  return hallFishAchievementRowsPromise;
+}
+
+function openHallFishAchievementTab() {
+  hallFishSetAchievementState("Загрузка…");
+  hallFishLoadAchievementRows()
+    .then(function (data) {
+      hallFishSetAchievementState("", data);
+    })
+    .catch(function () {
+      var body = document.getElementById("hallFishRatingBody");
+      var subtitle = document.getElementById("hallFishRatingSubtitle");
+      var myRank = document.getElementById("hallFishRatingMyRank");
+      hallFishSetSubtitle(subtitle);
+      hallFishUpdateTabs("achievements");
+      if (myRank) myRank.hidden = true;
+      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить топы по ачивкам. Попробуйте ещё раз позже.</div>';
+    });
+}
+
 function openHallFishRatingModal() {
   hallFishSetModalState("Загрузка…");
   Promise.all([hallFishLoadRows(), hallFishLoadCurrentIds()])
@@ -799,7 +1100,11 @@ function openHallFishRatingModal() {
       var subtitle = document.getElementById("hallFishRatingSubtitle");
       var myRank = document.getElementById("hallFishRatingMyRank");
       hallFishSetSubtitle(subtitle);
-      if (myRank) myRank.textContent = "Ваш рейтинг —/—";
+      hallFishUpdateTabs("levels");
+      if (myRank) {
+        myRank.hidden = false;
+        myRank.textContent = "Ваш рейтинг —/—";
+      }
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
     });
 }
@@ -818,6 +1123,13 @@ function initHallFishRatingModal() {
   });
   document.addEventListener("click", function (e) {
     if (e.target && e.target.closest && e.target.closest("[data-hall-fish-close]")) hallFishCloseModal();
+  });
+  document.addEventListener("click", function (e) {
+    var tab = e.target && e.target.closest ? e.target.closest("[data-hall-fish-tab]") : null;
+    if (!tab) return;
+    e.preventDefault();
+    if (tab.getAttribute("data-hall-fish-tab") === "achievements") openHallFishAchievementTab();
+    else openHallFishRatingModal();
   });
   document.addEventListener("click", function (e) {
     var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id]") : null;

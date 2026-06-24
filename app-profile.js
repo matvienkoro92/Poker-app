@@ -596,6 +596,7 @@ function refreshProfilePublicShowcase(profileData) {
   var lastSeen = document.getElementById("profilePublicLastSeen");
   var respect = document.getElementById("profilePublicRespectVal");
   var specialtyBadge = document.getElementById("profilePublicSpecialtyBadge");
+  var ageBadge = document.getElementById("profilePublicAgeBadge");
   setProfileHeroGender(profileGenderFromData(data), { syncArt: false });
   if (titleEl) titleEl.textContent = title;
   profilePublicShowcaseApplyAvatar(title);
@@ -606,6 +607,11 @@ function refreshProfilePublicShowcase(profileData) {
     specialtyBadge.hidden = !specialtyText;
     specialtyBadge.classList.toggle("profile-public-showcase__specialty-badge--cash", specialtyText === "Кеш-игрок");
     specialtyBadge.classList.toggle("profile-public-showcase__specialty-badge--mtt", specialtyText === "МТТ-игрок");
+  }
+  if (ageBadge) {
+    var ageText = pokerProfileAgeBadgeText(data && (data.profileBirthDate || data.birthDate));
+    ageBadge.textContent = ageText;
+    ageBadge.hidden = !ageText;
   }
   if (loginSub) {
     var login = data && data.userName != null ? String(data.userName).trim() : "";
@@ -1139,6 +1145,39 @@ function pokerProfileFormatBirthDateRu(value) {
   return m[3] + "." + m[2] + "." + m[1];
 }
 
+function pokerProfilePluralYears(age) {
+  var n = Math.abs(Number(age) || 0);
+  var mod100 = n % 100;
+  var mod10 = n % 10;
+  if (mod100 >= 11 && mod100 <= 14) return "лет";
+  if (mod10 === 1) return "год";
+  if (mod10 >= 2 && mod10 <= 4) return "года";
+  return "лет";
+}
+
+function pokerProfileAgeFromBirthDate(value) {
+  var raw = String(value || "").trim();
+  var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  var year = Number(m[1]);
+  var month = Number(m[2]);
+  var day = Number(m[3]);
+  if (!year || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  var now = new Date();
+  var age = now.getFullYear() - year;
+  var currentMonth = now.getMonth() + 1;
+  var currentDay = now.getDate();
+  if (currentMonth < month || (currentMonth === month && currentDay < day)) age -= 1;
+  if (!isFinite(age) || age < 0 || age > 130) return null;
+  return age;
+}
+
+function pokerProfileAgeBadgeText(value) {
+  var age = pokerProfileAgeFromBirthDate(value);
+  if (age == null) return "";
+  return age + " " + pokerProfilePluralYears(age);
+}
+
 function pokerProfileSpecialtyLabel(value) {
   var raw = String(value || "").trim().toLowerCase();
   if (raw === "mtt" || raw === "мтт") return "МТТ";
@@ -1205,6 +1244,12 @@ function initProfilePlayerDetails() {
     if (birthSave) {
       birthSave.hidden = !!saved;
       birthSave.disabled = !!saved;
+    }
+    var ageBadge = document.getElementById("profilePublicAgeBadge");
+    if (ageBadge) {
+      var ageText = pokerProfileAgeBadgeText(saved);
+      ageBadge.textContent = ageText;
+      ageBadge.hidden = !ageText;
     }
   }
   function setSpecialtyState(value) {
