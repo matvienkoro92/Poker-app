@@ -149,9 +149,18 @@
         '<label>Дата<input name="date" type="date" required></label>' +
         '<label>Время<input name="time" type="time" required></label>' +
       '</div>' +
+      '<label>Вид игры<select name="gameType" required>' +
+        '<option value="">Выберите вид игры</option>' +
+        '<option value="Холдем">Холдем</option>' +
+        '<option value="Холдем 3-1 флоп">Холдем 3-1 флоп</option>' +
+        '<option value="Холдем 3-1 терн">Холдем 3-1 терн</option>' +
+        '<option value="Омаха5">Омаха5</option>' +
+        '<option value="Омаха6">Омаха6</option>' +
+      '</select></label>' +
       '<label>Ставки<input name="stakes" maxlength="80" placeholder="Например: 50/100 ₽" required></label>' +
+      '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
-      '<label>Актуальные комбинации<textarea name="combinations" maxlength="500" rows="3" placeholder="Что сейчас важно по игре"></textarea></label>' +
+      '<label>Актуальные бонусы<textarea name="combinations" maxlength="500" rows="3" placeholder="Какие бонусы сейчас доступны"></textarea></label>' +
       '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись и отправить пуш</button>' +
     '</form>';
   }
@@ -196,8 +205,10 @@
       '<div class="private-cash-modal__meta">' +
         '<span>Ставки</span><strong>' + escapeHtml(event.stakes) + '</strong>' +
       '</div>' +
+      (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
+      (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
-      (event.combinations ? '<div class="private-cash-modal__combo"><span>Актуальные комбинации</span><p>' + escapeHtml(event.combinations) + '</p></div>' : '') +
+      (event.combinations ? '<div class="private-cash-modal__combo"><span>Актуальные бонусы</span><p>' + escapeHtml(event.combinations) + '</p></div>' : '') +
       renderParticipant(event, my) +
       renderParticipants(event) +
     '</article>';
@@ -226,7 +237,9 @@
         action: "create",
         date: form.elements.date.value,
         time: form.elements.time.value,
+        gameType: form.elements.gameType.value,
         stakes: form.elements.stakes.value,
+        buyIn: form.elements.buyIn.value,
         description: form.elements.description.value,
         combinations: form.elements.combinations.value,
       }).then(function () {

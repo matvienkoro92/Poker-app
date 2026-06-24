@@ -6774,6 +6774,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal input,
+.private-cash-modal select,
 .private-cash-modal textarea {
   width: 100%;
   min-width: 0;
@@ -6787,6 +6788,15 @@ body.club-choice-vote-open {
   outline: none;
   padding: 12px;
   box-sizing: border-box;
+}
+
+.private-cash-modal select {
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, #ffd46a 50%) calc(100% - 20px) 50% / 7px 7px no-repeat,
+    linear-gradient(135deg, #ffd46a 50%, transparent 50%) calc(100% - 15px) 50% / 7px 7px no-repeat,
+    rgba(2, 7, 16, 0.86);
+  padding-right: 38px;
 }
 
 .private-cash-modal textarea {
@@ -6845,6 +6855,10 @@ body.club-choice-vote-open {
   border-radius: 14px;
   background: rgba(255, 179, 43, 0.08);
   padding: 11px 12px;
+}
+
+.private-cash-modal__meta--game {
+  margin-top: 9px;
 }
 
 .private-cash-modal__text,
@@ -7016,5 +7030,89 @@ body.club-choice-vote-open {
 
   .private-cash-modal__ghost {
     min-width: 120px;
+  }
+}
+
+.view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+  display: grid;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block,
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+  min-width: 0;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+    overflow: hidden;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    display: grid;
+    grid-template-columns: clamp(92px, 26vw, 112px) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
+    width: clamp(92px, 26vw, 112px);
+    height: clamp(92px, 26vw, 112px);
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px 36px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+    max-width: 100%;
+    font-size: clamp(31px, 9.4vw, 40px);
+    white-space: nowrap;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__identity-controls {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 112px);
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(146px, 0.86fr);
+    align-items: center;
+    min-height: 0;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+    align-self: center;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
+    white-space: nowrap;
   }
 }
