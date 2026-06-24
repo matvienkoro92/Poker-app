@@ -1913,6 +1913,7 @@ body.profile-avatar-choice-open {
   font-size: 18px;
 }
 .view[data-view="profile"] .profile-public-showcase__identity-controls {
+  display: flex;
   flex-wrap: nowrap;
   margin-top: 10px;
 }
@@ -1958,6 +1959,7 @@ body.profile-avatar-choice-open {
     0 0 18px rgba(34, 197, 94, 0.42);
 }
 .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+  display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(240px, 0.92fr);
   gap: clamp(12px, 3vw, 28px);
   align-items: center;
@@ -1975,6 +1977,8 @@ body.profile-avatar-choice-open {
     0 0 24px rgba(255, 118, 0, 0.12);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+  grid-column: 1;
+  grid-row: 1;
   align-items: flex-start;
   height: clamp(330px, 41vw, 480px);
 }
@@ -1996,6 +2000,8 @@ body.profile-avatar-choice-open {
   max-height: 88%;
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+  grid-column: 2;
+  grid-row: 1;
   align-self: center;
   gap: 16px;
   min-width: 0;
@@ -2315,7 +2321,20 @@ body.profile-avatar-choice-open {
     border-radius: 18px;
   }
   .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    display: grid;
+    grid-template-columns: clamp(94px, 25vw, 112px) minmax(0, 1fr);
+    align-items: center;
     gap: 14px;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block,
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+    min-width: 0;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .view[data-view="profile"] .profile-public-showcase__edit-name.profile-hero-card__edit-name {
     width: 44px;
@@ -2337,6 +2356,8 @@ body.profile-avatar-choice-open {
     font-size: 16px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 4px;
     margin-top: 8px;
   }
@@ -2377,8 +2398,10 @@ body.profile-avatar-choice-open {
     font-size: 13px;
   }
   .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(150px, 0.86fr);
     gap: 8px;
+    align-items: center;
     padding: 12px;
     border-radius: 18px;
   }
