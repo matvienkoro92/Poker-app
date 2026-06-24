@@ -255,7 +255,7 @@ function profileWriteStoredHeroGender(value) {
 function profileDefaultHeroArt(value) {
   var gender = normalizeProfileHeroGender(value);
   return {
-    src: gender === "female" ? "./assets/chat-profile-default-hero-female.png" : "./assets/chat-profile-default-hero-male.png",
+    src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp" : "./assets/chat-profile-default-hero-male.webp",
     nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
     defaultHero: true,
     gender: gender,

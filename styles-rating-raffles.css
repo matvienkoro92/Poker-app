@@ -1103,7 +1103,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-radius: 14px;
   background:
     linear-gradient(90deg, rgba(2, 6, 23, 0.98) 0%, rgba(7, 11, 22, 0.82) 48%, rgba(8, 12, 20, 0.18) 100%),
-    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-ticket-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, rgba(18, 24, 36, 0.96), rgba(4, 7, 14, 0.97));
   color: var(--text);
   text-align: left;
@@ -1139,7 +1139,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-color: rgba(217, 70, 239, 0.56);
   background:
     linear-gradient(90deg, rgba(9, 5, 24, 0.98) 0%, rgba(18, 7, 37, 0.82) 48%, rgba(30, 11, 54, 0.16) 100%),
-    url("./assets/raffles-active-cash-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-cash-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, rgba(24, 16, 42, 0.97), rgba(4, 7, 14, 0.98));
 }
 .raffles-active-chooser__item--cash::before {
@@ -1155,7 +1155,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   border-color: rgba(255, 209, 103, 0.72);
   background:
     linear-gradient(90deg, rgba(2, 5, 14, 0.98) 0%, rgba(4, 7, 16, 0.78) 44%, rgba(16, 10, 4, 0.12) 100%),
-    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-ticket-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, rgba(18, 24, 36, 0.96), rgba(4, 7, 14, 0.97));
 }
 .raffles-active-chooser__item--knockout::before {
@@ -2766,7 +2766,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background:
     radial-gradient(circle at 74% 45%, rgba(255, 213, 127, 0.22), transparent 31%),
     linear-gradient(180deg, rgba(4, 6, 14, 0.2), rgba(4, 6, 14, 0.84) 78%),
-    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-ticket-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, #101827, #03060d);
 }
 .raffles-active-chooser__item:only-child,
@@ -2790,7 +2790,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background:
     radial-gradient(circle at 75% 46%, rgba(217, 70, 239, 0.28), transparent 34%),
     linear-gradient(180deg, rgba(9, 5, 24, 0.18), rgba(9, 5, 24, 0.88) 78%),
-    url("./assets/raffles-active-cash-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-cash-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, #17062a, #05040f);
   box-shadow:
     inset 0 0 0 1px rgba(245, 208, 254, 0.18),
@@ -2809,7 +2809,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background:
     radial-gradient(circle at 75% 45%, rgba(255, 197, 79, 0.32), transparent 33%),
     linear-gradient(180deg, rgba(5, 8, 15, 0.12), rgba(4, 6, 12, 0.9) 78%),
-    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-ticket-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, #121827, #05070d);
 }
 .raffles-active-chooser__item--referrals {
@@ -2819,7 +2819,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background:
     radial-gradient(circle at 72% 38%, rgba(250, 204, 21, 0.32), transparent 35%),
     linear-gradient(180deg, rgba(8, 10, 18, 0.18), rgba(5, 7, 13, 0.9) 80%),
-    url("./assets/raffles-active-ticket-bg.png") center center / cover no-repeat,
+    url("./assets/raffles-active-ticket-bg.webp") center center / cover no-repeat,
     linear-gradient(135deg, #17110a, #05070d);
   box-shadow:
     inset 0 0 0 1px rgba(255, 244, 190, 0.18),

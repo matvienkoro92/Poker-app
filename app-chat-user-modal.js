@@ -317,7 +317,7 @@ if (chatUserModalEl) {
   function chatUserModalDefaultHeroArt(value) {
     var gender = normalizeChatUserModalProfileGender(value);
     return {
-      src: gender === "female" ? "./assets/chat-profile-default-hero-female.png" : "./assets/chat-profile-default-hero-male.png",
+      src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp" : "./assets/chat-profile-default-hero-male.webp",
       nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
       defaultHero: true,
       gender: gender,
@@ -956,25 +956,25 @@ if (chatUserModalEl) {
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
-    if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.png" };
-    if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.png" };
+    if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
+    if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
-    if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
-    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.png" };
-    if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.png" };
-    if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.png" };
-    if (key.indexOf("зим") >= 0) return { mod: "cup-winter", label: "КУБОК<br>ЗИМЫ", img: "./assets/chat-profile-achievement-cup-winter.png" };
-    if (key.indexOf("лет") >= 0) return { mod: "cup-summer", label: "КУБОК<br>ЛЕТА", img: "./assets/chat-profile-achievement-cup-summer.png" };
-    return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.png" };
+    if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.webp" };
+    if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.webp" };
+    if (key.indexOf("зим") >= 0) return { mod: "cup-winter", label: "КУБОК<br>ЗИМЫ", img: "./assets/chat-profile-achievement-cup-winter.webp" };
+    if (key.indexOf("лет") >= 0) return { mod: "cup-summer", label: "КУБОК<br>ЛЕТА", img: "./assets/chat-profile-achievement-cup-summer.webp" };
+    return { mod: "cup", label: "КУБОК<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-cup.webp" };
   }
   function chatUserModalEncodeData(value) {
     try {

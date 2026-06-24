@@ -616,7 +616,7 @@ function initProfileFriends() {
     if (searchSuggestRowsCache) return Promise.resolve(searchSuggestRowsCache);
     if (searchSuggestRowsPromise) return searchSuggestRowsPromise;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1", { cache: "no-store" })
+    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1", { cache: "default" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "suggestions_failed");

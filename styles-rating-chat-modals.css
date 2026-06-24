@@ -502,7 +502,7 @@
   border: 0;
   border-radius: 12px;
   background:
-    url("./assets/chat-profile-hero-bg-21.png") center 54% / cover no-repeat,
+    url("./assets/chat-profile-hero-bg-21.webp") center 54% / cover no-repeat,
     linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
   box-shadow: none;
 }
@@ -1265,7 +1265,7 @@
   padding: 8px 0 0;
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(2, 5, 10, 0.04) 70%, rgba(3, 5, 10, 0.9) 100%),
-    url("./assets/chat-profile-hero-bg-21.png") 46% 54% / cover no-repeat,
+    url("./assets/chat-profile-hero-bg-21.webp") 46% 54% / cover no-repeat,
     linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
 }
 .chat-user-modal__rating-art[hidden] {
@@ -1461,18 +1461,18 @@
 }
 .chat-user-modal__rating-rank-row:nth-child(1) {
   --season-rank-accent: #f59e0b;
-  --season-rank-icon: url("./assets/chat-profile-season-icon-summer.png");
-  background-image: url("./assets/chat-profile-season-history-summer-full.png");
+  --season-rank-icon: url("./assets/chat-profile-season-icon-summer.webp");
+  background-image: url("./assets/chat-profile-season-history-summer-full.webp");
 }
 .chat-user-modal__rating-rank-row:nth-child(2) {
   --season-rank-accent: #84cc16;
-  --season-rank-icon: url("./assets/chat-profile-season-icon-spring.png");
-  background-image: url("./assets/chat-profile-season-history-spring-full.png");
+  --season-rank-icon: url("./assets/chat-profile-season-icon-spring.webp");
+  background-image: url("./assets/chat-profile-season-history-spring-full.webp");
 }
 .chat-user-modal__rating-rank-row:nth-child(3) {
   --season-rank-accent: #38bdf8;
-  --season-rank-icon: url("./assets/chat-profile-season-icon-winter.png");
-  background-image: url("./assets/chat-profile-season-history-winter-full.png");
+  --season-rank-icon: url("./assets/chat-profile-season-icon-winter.webp");
+  background-image: url("./assets/chat-profile-season-history-winter-full.webp");
 }
 .chat-user-modal__rating-rank-label {
   min-width: 0;
@@ -1790,7 +1790,7 @@
     padding-top: 6px;
     background:
       linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(2, 5, 10, 0.04) 68%, rgba(3, 5, 10, 0.88) 100%),
-      url("./assets/chat-profile-hero-bg-21.png") 46% 54% / cover no-repeat,
+      url("./assets/chat-profile-hero-bg-21.webp") 46% 54% / cover no-repeat,
       linear-gradient(115deg, rgba(6, 10, 18, 0.96), rgba(13, 18, 30, 0.96));
   }
 

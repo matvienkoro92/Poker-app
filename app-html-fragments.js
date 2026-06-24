@@ -341,15 +341,15 @@
 
   (function pokerIdleWarmCommonImages() {
     var assets = [
-      "./assets/chat-profile-achievement-top-win.png",
-      "./assets/chat-profile-achievement-cup.png",
-      "./assets/chat-profile-achievement-top10.png",
-      "./assets/chat-profile-achievement-legend.png",
-      "./assets/chat-profile-achievement-cup-winter.png",
-      "./assets/chat-profile-achievement-cup-spring.png",
-      "./assets/chat-profile-achievement-cup-summer.png",
-      "./assets/chat-profile-default-hero-male.png",
-      "./assets/chat-profile-default-hero-female.png"
+      "./assets/chat-profile-achievement-top-win.webp",
+      "./assets/chat-profile-achievement-cup.webp",
+      "./assets/chat-profile-achievement-top10.webp",
+      "./assets/chat-profile-achievement-legend.webp",
+      "./assets/chat-profile-achievement-cup-winter.webp",
+      "./assets/chat-profile-achievement-cup-spring.webp",
+      "./assets/chat-profile-achievement-cup-summer.webp",
+      "./assets/chat-profile-default-hero-male.webp",
+      "./assets/chat-profile-default-hero-female.webp"
     ];
     function warm() {
       assets.forEach(function (src) {

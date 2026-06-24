@@ -1,8 +1,12 @@
-/* PWA: installability + push; GET /api/chat uses stale-while-revalidate unless caller explicitly asks for a fresh fetch. */
-var POKER_CHAT_API_CACHE = "poker-chat-api-v3";
-var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1"];
-var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v3";
-var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2"];
+/* PWA: installability + push; safe GET requests use stale-while-revalidate unless caller explicitly asks for a fresh fetch. */
+var POKER_CHAT_API_CACHE = "poker-chat-api-v4";
+var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v3"];
+var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v4";
+var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2", "poker-push-assets-v3"];
+var POKER_STATIC_CACHE = "poker-static-v1";
+var POKER_STATIC_OLD_CACHES = [];
+var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
+var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
 
 self.addEventListener("install", function (e) {
@@ -21,6 +25,10 @@ self.addEventListener("activate", function (e) {
       POKER_CHAT_API_OLD_CACHES.map(function (name) {
         return caches.delete(name).catch(function () {});
       }).concat(POKER_PUSH_ASSETS_OLD_CACHES.map(function (name) {
+        return caches.delete(name).catch(function () {});
+      })).concat(POKER_STATIC_OLD_CACHES.map(function (name) {
+        return caches.delete(name).catch(function () {});
+      })).concat(POKER_PUBLIC_API_OLD_CACHES.map(function (name) {
         return caches.delete(name).catch(function () {});
       }))
     ).then(function () {
@@ -55,12 +63,58 @@ function pokerSwChatApiStaleWhileRevalidate(request) {
   });
 }
 
+function pokerSwStaleWhileRevalidate(cacheName, request) {
+  return caches.open(cacheName).then(function (cache) {
+    return cache.match(request).then(function (cached) {
+      var networkFetch = fetch(request)
+        .then(function (response) {
+          try {
+            if (response && response.status === 200 && (response.type === "basic" || response.type === "cors")) {
+              cache.put(request, response.clone());
+            }
+          } catch (ePut) {}
+          return response;
+        })
+        .catch(function () {
+          return null;
+        });
+      if (cached) {
+        networkFetch.catch(function () {});
+        return cached;
+      }
+      return networkFetch.then(function (res) {
+        return res || Response.error();
+      });
+    });
+  });
+}
+
+function pokerSwIsStaticRequest(url) {
+  var path = url && url.pathname ? url.pathname : "";
+  if (path.indexOf("/html-fragments/") === 0) return true;
+  if (path.indexOf("/assets/") === 0) return /\.(?:png|jpg|jpeg|webp|gif|svg|mp3|wav|json)$/i.test(path);
+  return /\.(?:css|js|mjs|html|webmanifest)$/i.test(path);
+}
+
+function pokerSwIsPublicApiRequest(url) {
+  if (!url || !url.pathname) return false;
+  if (url.pathname.indexOf("/api/player-crm") === 0) {
+    return url.searchParams.get("publicLevels") === "1" ||
+      url.searchParams.get("levels") === "1" ||
+      url.searchParams.get("publicBirthdays") === "1" ||
+      url.searchParams.get("birthdays") === "1";
+  }
+  if (url.pathname.indexOf("/api/club-choice-vote") === 0) {
+    return url.searchParams.get("mode") === "achievements";
+  }
+  return false;
+}
+
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") return;
   try {
     var u = new URL(event.request.url);
     if (u.origin !== self.location.origin) return;
-    if (u.pathname.indexOf("/api/chat") !== 0) return;
     /* Бинарные ответы прокси картинок: stale-while-revalidate как у JSON чата даёт залипание битого кэша в PWA. */
     if (u.pathname.indexOf("/api/chat-image") === 0) return;
     /* fetch(..., { cache: "no-store" }) — не отдаём устаревший Cache Storage: иначе после тапа по пушу
@@ -73,6 +127,15 @@ self.addEventListener("fetch", function (event) {
       event.respondWith(fetch(event.request));
       return;
     }
+    if (pokerSwIsStaticRequest(u)) {
+      event.respondWith(pokerSwStaleWhileRevalidate(POKER_STATIC_CACHE, event.request));
+      return;
+    }
+    if (pokerSwIsPublicApiRequest(u)) {
+      event.respondWith(pokerSwStaleWhileRevalidate(POKER_PUBLIC_API_CACHE, event.request));
+      return;
+    }
+    if (u.pathname.indexOf("/api/chat") !== 0) return;
     event.respondWith(pokerSwChatApiStaleWhileRevalidate(event.request));
   } catch (eFetch) {}
 });
