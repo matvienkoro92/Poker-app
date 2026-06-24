@@ -595,10 +595,18 @@ function refreshProfilePublicShowcase(profileData) {
   var loginSub = document.getElementById("profilePublicLoginSub");
   var lastSeen = document.getElementById("profilePublicLastSeen");
   var respect = document.getElementById("profilePublicRespectVal");
+  var specialtyBadge = document.getElementById("profilePublicSpecialtyBadge");
   setProfileHeroGender(profileGenderFromData(data), { syncArt: false });
   if (titleEl) titleEl.textContent = title;
   profilePublicShowcaseApplyAvatar(title);
   if (verified) verified.classList.toggle("chat-user-modal__verified--hidden", data && data.pokerPlusVerified !== true);
+  if (specialtyBadge) {
+    var specialtyText = pokerProfileSpecialtyBadgeText(data && (data.profileSpecialty || data.specialty));
+    specialtyBadge.textContent = specialtyText;
+    specialtyBadge.hidden = !specialtyText;
+    specialtyBadge.classList.toggle("profile-public-showcase__specialty-badge--cash", specialtyText === "Кеш-игрок");
+    specialtyBadge.classList.toggle("profile-public-showcase__specialty-badge--mtt", specialtyText === "МТТ-игрок");
+  }
   if (loginSub) {
     var login = data && data.userName != null ? String(data.userName).trim() : "";
     loginSub.textContent = login && login !== title ? login : "";
@@ -1122,6 +1130,170 @@ function initProfilePersonal() {
       });
   }
   saveBtn.addEventListener("click", savePersonal);
+}
+
+function pokerProfileFormatBirthDateRu(value) {
+  var raw = String(value || "").trim();
+  var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return "";
+  return m[3] + "." + m[2] + "." + m[1];
+}
+
+function pokerProfileSpecialtyLabel(value) {
+  var raw = String(value || "").trim().toLowerCase();
+  if (raw === "mtt" || raw === "мтт") return "МТТ";
+  if (raw === "cash" || raw === "кеш" || raw === "кэш") return "Кеш";
+  return "";
+}
+
+function pokerProfileSpecialtyBadgeText(value) {
+  var label = pokerProfileSpecialtyLabel(value);
+  if (label === "МТТ") return "МТТ-игрок";
+  if (label === "Кеш") return "Кеш-игрок";
+  return "";
+}
+
+function initProfilePlayerDetails() {
+  var section = document.getElementById("profilePlayerDetailsSection");
+  var birthInput = document.getElementById("profileBirthDateInput");
+  var birthSave = document.getElementById("profileBirthDateSaveBtn");
+  var specialtyBtns = section ? section.querySelectorAll("[data-profile-specialty]") : [];
+  var feedback = document.getElementById("profilePlayerDetailsFeedback");
+  if (!section || section.dataset.playerDetailsBound === "1") return;
+  section.dataset.playerDetailsBound = "1";
+  var base = getApiBase();
+  var canServer =
+    !!base &&
+    ((typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) ||
+      (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
+  if (birthInput) {
+    var today = new Date();
+    var yyyy = String(today.getFullYear());
+    var mm = String(today.getMonth() + 1).padStart(2, "0");
+    var dd = String(today.getDate()).padStart(2, "0");
+    birthInput.max = yyyy + "-" + mm + "-" + dd;
+  }
+  function showDetailsFeedback(text, ms) {
+    if (!feedback) return;
+    feedback.textContent = text || "";
+    if (ms !== 0) {
+      setTimeout(function () {
+        if (feedback.textContent === text) feedback.textContent = "";
+      }, ms || 2500);
+    }
+  }
+  function setBirthDateState(value) {
+    var saved = String(value || "").trim();
+    if (birthInput) {
+      birthInput.value = saved;
+      birthInput.disabled = !!saved;
+    }
+    if (birthSave) {
+      birthSave.hidden = !!saved;
+      birthSave.disabled = !!saved;
+    }
+  }
+  function setSpecialtyState(value) {
+    var selected = String(value || "").trim().toLowerCase();
+    specialtyBtns.forEach(function (btn) {
+      var active = btn.getAttribute("data-profile-specialty") === selected;
+      btn.classList.toggle("profile-player-details__toggle-btn--active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+  function mergeProfileUserInfo(updates) {
+    try {
+      if (typeof pokerProfileUserInfoCache === "object" && pokerProfileUserInfoCache) {
+        Object.keys(updates).forEach(function (key) {
+          pokerProfileUserInfoCache[key] = updates[key];
+        });
+        pokerProfileUserInfoCacheAt = Date.now();
+      }
+    } catch (eMergeProfileDetails) {}
+    if (typeof refreshProfilePublicShowcase === "function") {
+      refreshProfilePublicShowcase(pokerProfileUserInfoCache || updates);
+    }
+  }
+  function loadPlayerDetails() {
+    if (!canServer) return;
+    var profileInfoPromise = typeof pokerApiHasCredential === "function" && pokerApiHasCredential()
+      ? loadCurrentProfileUserInfo()
+      : fetch(base + "/api/users" + pokerRafflesApiQueryLeading()).then(function (r) { return r.json(); });
+    profileInfoPromise
+      .then(function (data) {
+        if (!data || !data.ok) return;
+        setBirthDateState(data.profileBirthDate || data.birthDate || "");
+        setSpecialtyState(data.profileSpecialty || data.specialty || "");
+      })
+      .catch(function () {});
+  }
+  function postPlayerDetails(body, opts) {
+    opts = opts || {};
+    if (!base || !canServer) {
+      showDetailsFeedback("Войдите в аккаунт или откройте в Telegram, чтобы сохранить.", 3500);
+      return Promise.resolve(null);
+    }
+    if (opts.buttons) {
+      opts.buttons.forEach(function (btn) {
+        if (btn) btn.disabled = true;
+      });
+    }
+    return fetch(base + "/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerGuestOrAuthedPostBody(body)),
+    })
+      .then(function (r) {
+        return r.json().catch(function () {
+          return { ok: false, error: r.status === 401 ? "Откройте в Telegram" : "Ошибка " + r.status };
+        });
+      })
+      .then(function (data) {
+        if (data && data.ok) {
+          showDetailsFeedback("Сохранено");
+          return data;
+        }
+        showDetailsFeedback((data && data.error) || "Ошибка", 3500);
+        return data || null;
+      })
+      .catch(function () {
+        showDetailsFeedback(POKER_NET_ERR, 3500);
+        return null;
+      })
+      .finally(function () {
+        if (opts.buttons) {
+          opts.buttons.forEach(function (btn) {
+            if (btn) btn.disabled = false;
+          });
+        }
+      });
+  }
+  if (birthSave) {
+    birthSave.addEventListener("click", function () {
+      var val = birthInput ? String(birthInput.value || "").trim() : "";
+      if (!val) {
+        showDetailsFeedback("Укажите дату рождения.", 2500);
+        return;
+      }
+      postPlayerDetails({ birthDate: val }, { buttons: [birthSave] }).then(function (data) {
+        if (data && data.ok) {
+          setBirthDateState(val);
+          mergeProfileUserInfo({ profileBirthDate: val });
+        }
+      });
+    });
+  }
+  specialtyBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var next = btn.getAttribute("data-profile-specialty") || "";
+      setSpecialtyState(next);
+      postPlayerDetails({ specialty: next }, { buttons: Array.prototype.slice.call(specialtyBtns) }).then(function (data) {
+        if (data && data.ok) mergeProfileUserInfo({ profileSpecialty: next });
+        else loadPlayerDetails();
+      });
+    });
+  });
+  loadPlayerDetails();
 }
 
 function syncProfileStatusVisual() {

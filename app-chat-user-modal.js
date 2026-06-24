@@ -131,6 +131,18 @@ if (chatUserModalEl) {
     var n = Math.max(0, Math.floor(Number(value) || 0));
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   }
+  function chatUserModalFormatBirthDate(value) {
+    var raw = String(value || "").trim();
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return "";
+    return m[3] + "." + m[2] + "." + m[1];
+  }
+  function chatUserModalSpecialtyLabel(value) {
+    var raw = String(value || "").trim().toLowerCase();
+    if (raw === "mtt" || raw === "мтт") return "МТТ";
+    if (raw === "cash" || raw === "кеш" || raw === "кэш") return "Кеш";
+    return "";
+  }
   function syncChatUserModalStatusXp(pointsValue) {
     if (!modalStatusXp) return;
     if (pointsValue == null || pointsValue === "" || typeof pokerProfileStatusFromRake !== "function") {
@@ -1770,6 +1782,12 @@ if (chatUserModalEl) {
     var visible = data && data.pokerPlusStatsVisible === true;
     return { cash: visible, mtt: visible, sng: visible };
   }
+  function chatUserModalSpecialtyValue(data) {
+    var raw = String(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty) || "").trim().toLowerCase();
+    if (raw === "mtt" || raw === "мтт") return "mtt";
+    if (raw === "cash" || raw === "кеш" || raw === "кэш") return "cash";
+    return "";
+  }
   function renderChatUserModalPlayerStats(data) {
     if (!modalPlayerStats) return;
     var visibility = chatUserModalStatsVisibility(data);
@@ -1779,9 +1797,10 @@ if (chatUserModalEl) {
       return;
     }
     var st = data.pokerPlusStats && typeof data.pokerPlusStats === "object" ? data.pokerPlusStats : {};
-    var html = "";
+    var specialty = chatUserModalSpecialtyValue(data);
+    var blocks = {};
     if (visibility.cash) {
-      html +=
+      blocks.cash =
         chatUserModalStatHtml("Рейк", st.fee, "") +
         chatUserModalStatHtml("Раздачи", st.hands, "") +
         chatUserModalOptionalStatHtml("BB", st.bb, "") +
@@ -1789,7 +1808,7 @@ if (chatUserModalEl) {
         chatUserModalOptionalNonNegativeStatHtml("OFC", st.ofcWinnings, "");
     }
     if (visibility.mtt) {
-      html +=
+      blocks.mtt =
         chatUserModalNonNegativeStatHtml("MTT", st.mttWinnings, "") +
         chatUserModalOptionalStatHtml("MTT р.", st.mttRound, "") +
         chatUserModalOptionalStatHtml("MTT игр", st.mttCount, "") +
@@ -1797,13 +1816,15 @@ if (chatUserModalEl) {
         chatUserModalOptionalStatHtml("MTT 1-е", st.mttFirstCount, "");
     }
     if (visibility.sng) {
-      html +=
+      blocks.sng =
         chatUserModalNonNegativeStatHtml("SNG", st.sngWinnings, "") +
         chatUserModalOptionalStatHtml("SNG р.", st.sngRound, "") +
         chatUserModalOptionalStatHtml("SNG игр", st.sngCount, "") +
         chatUserModalOptionalStatHtml("SNG ITM", st.sngItmCount, "") +
         chatUserModalOptionalStatHtml("SNG 1-е", st.sngFirstCount, "");
     }
+    var order = specialty === "mtt" ? ["mtt", "cash", "sng"] : specialty === "cash" ? ["cash", "mtt", "sng"] : ["cash", "mtt", "sng"];
+    var html = order.map(function (key) { return blocks[key] || ""; }).join("");
     modalPlayerStats.innerHTML =
       html || '<p class="chat-user-modal__player-stats-private">Статистика данного игрока является приватной и доступна только секретным службам</p>';
   }
@@ -1932,9 +1953,15 @@ if (chatUserModalEl) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalP21) modalP21.textContent = "";
         var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
-        if (modalPersonal) modalPersonal.textContent = personalText || "—";
+        var birthText = chatUserModalFormatBirthDate(data && (data.profileBirthDate || data.birthDate));
+        var specialtyText = chatUserModalSpecialtyLabel(data && (data.profileSpecialty || data.specialty));
+        var personalParts = [];
+        if (birthText) personalParts.push("Дата рождения: " + birthText);
+        if (specialtyText) personalParts.push("Специализация: " + specialtyText);
+        if (personalText) personalParts.push(personalText);
+        if (modalPersonal) modalPersonal.textContent = personalParts.join("\n") || "—";
         if (modalPersonalBlock) {
-          if (personalText) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
+          if (personalParts.length) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
           else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
         }
         var modalStatusLevel = data && data.level != null ? data.level : (fallbackStatusLevel || null);

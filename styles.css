@@ -2471,6 +2471,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 14px;
   padding: 12px 14px;
@@ -2491,6 +2492,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   line-height: 1;
   text-align: right;
   text-transform: uppercase;
+}
+
+.club-choice-vote-modal__summary-desc {
+  flex: 0 0 100%;
+  margin: -2px 0 0;
+  color: rgba(255, 239, 201, 0.74);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .club-choice-vote-modal__admin {

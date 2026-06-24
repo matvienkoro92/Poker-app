@@ -77,6 +77,20 @@ function pokerRafflesParticipantCanOpenProfile(p) {
   return !!(uid && (uid.indexOf("tg_") === 0 || uid.indexOf("vk_") === 0));
 }
 
+function pokerRafflesParticipantSpecialtyValue(p) {
+  var raw = String(p && (p.profileSpecialty || p.specialty || p.pokerSpecialty) || "").trim().toLowerCase();
+  if (raw === "mtt" || raw === "мтт") return "mtt";
+  if (raw === "cash" || raw === "кеш" || raw === "кэш") return "cash";
+  return "";
+}
+
+function pokerRafflesParticipantSpecialtyTagHtml(p) {
+  var value = pokerRafflesParticipantSpecialtyValue(p);
+  if (!value) return "";
+  var label = value === "cash" ? "Кеш" : "МТТ";
+  return '<span class="raffle-participant-line__specialty raffle-participant-line__specialty--' + value + '">' + pokerRafflesEscapeHtml(label) + "</span>";
+}
+
 function pokerRafflesMergeParticipantForDisplay(base, row) {
   var merged = Object.assign({}, base || {});
   var ticketCount =
@@ -149,6 +163,7 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins, showTickets) 
     ? pokerRafflesEscapeHtml(safeName) + (pokerNick ? " (" + pokerRafflesEscapeHtml(pokerNick) + ")" : "")
     : (pokerNick ? pokerRafflesEscapeHtml(pokerNick) : "");
   var fishLevelHtml = pokerRafflesParticipantFishLevelHtml(p);
+  var specialtyHtml = pokerRafflesParticipantSpecialtyTagHtml(p);
   var ticketsHtml = showTickets === false ? "" : pokerRafflesParticipantTicketsHtml(p);
   var un = pokerRafflesNormalizeTelegramLogin(p.telegramUsername);
   if (showTelegramLogins && un && uid0.indexOf("tg_") === 0) {
@@ -164,6 +179,7 @@ function pokerRafflesParticipantDisplayLine(p, showTelegramLogins, showTickets) 
     mainLine +
     "</span>" +
     (fishLevelHtml ? '<span class="raffle-participant-line__level">' + fishLevelHtml + "</span>" : "") +
+    specialtyHtml +
     (ticketsHtml ? '<span class="raffle-participant-line__tickets">' + ticketsHtml + "</span>" : "") +
     "</span>"
   );

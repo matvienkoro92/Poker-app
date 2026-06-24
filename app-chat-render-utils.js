@@ -113,6 +113,7 @@ function chatBuildFriendContactsFromFriendsApi(friendRows, contacts) {
     row.admin = !!row.admin;
     row.online = !!row.online;
     row.unreadCount = Math.max(0, Number(row.unreadCount) || 0);
+    row.profileSpecialty = f.profileSpecialty || f.specialty || row.profileSpecialty || "";
     row.__friendAccountId = friendUserId;
     return row;
   }).filter(Boolean);

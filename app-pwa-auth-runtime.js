@@ -1043,10 +1043,12 @@
     var chatRow = document.getElementById("profileChatNameRow");
     var saveWrap = document.getElementById("profileChatNameSaveWrap");
     var personalSection = document.getElementById("profilePersonalSection");
+    var playerDetailsSection = document.getElementById("profilePlayerDetailsSection");
     var guestMode = isWebsiteGuestProfileMode();
     if (chatRow) chatRow.classList.toggle("profile-guest-hidden", guestMode);
     if (saveWrap) saveWrap.classList.toggle("profile-guest-hidden", guestMode);
     if (personalSection) personalSection.classList.toggle("profile-guest-hidden", guestMode);
+    if (playerDetailsSection) playerDetailsSection.classList.toggle("profile-guest-hidden", guestMode);
     syncProfileStatusVisibility(!guestMode);
     syncProfileVerifiedContentVisibility(!guestMode);
   }

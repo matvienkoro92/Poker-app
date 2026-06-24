@@ -178,6 +178,21 @@ function initProfileFriends() {
       .replace(/"/g, "&quot;");
   }
 
+  function profileFriendsSpecialtyValue(row) {
+    var raw = String(row && (row.profileSpecialty || row.specialty || row.pokerSpecialty) || "").trim().toLowerCase();
+    if (raw === "mtt" || raw === "мтт") return "mtt";
+    if (raw === "cash" || raw === "кеш" || raw === "кэш") return "cash";
+    return "";
+  }
+
+  function profileFriendsSpecialtyTagHtml(row, className) {
+    var value = profileFriendsSpecialtyValue(row);
+    if (!value) return "";
+    var label = value === "cash" ? "Кеш" : "МТТ";
+    var baseClass = className || "profile-friends__specialty-tag";
+    return '<span class="' + esc(baseClass) + " " + esc(baseClass + "--" + value) + '">' + esc(label) + "</span>";
+  }
+
   function alertText(text) {
     if (tg && tg.showAlert) tg.showAlert(text);
     else if (typeof alert === "function") alert(text);
@@ -225,8 +240,10 @@ function initProfileFriends() {
         if (row && row.p21Id) subParts.push("Poker21 " + String(row.p21Id));
         if (row && row.telegram) subParts.push(String(row.telegram));
         if (row && row.level) subParts.push("ур. " + String(row.level));
+        var specialtyTag = profileFriendsSpecialtyTagHtml(row, "profile-friends__search-suggestion-specialty");
         return '<button type="button" class="profile-friends__search-suggestion" data-profile-search-suggestion="' + esc(String(idx)) + '">' +
           '<span class="profile-friends__search-suggestion-name">' + esc(name) + '</span>' +
+          specialtyTag +
           '<span class="profile-friends__search-suggestion-meta">' + esc(subParts.join(" · ") || "Открыть профиль") + '</span>' +
         '</button>';
       }).join("");
@@ -246,6 +263,7 @@ function initProfileFriends() {
           pokerPlusNickname: row.name || "",
           userName: row.telegram || "",
           name: row.name || row.telegram || row.accountId || "Игрок",
+          profileSpecialty: row.profileSpecialty || row.specialty || "",
         }, raw, true);
       });
     });
@@ -255,6 +273,7 @@ function initProfileFriends() {
     searchFoundProfile = data ? {
       id: String((data.userId || data.chatUserId || data.dtId) || "").trim(),
       name: profileFriendsDisplayName(data, raw),
+      profileSpecialty: data.profileSpecialty || data.specialty || "",
     } : null;
     if (!searchResult) return;
     if (!searchFoundProfile || !searchFoundProfile.id) {
@@ -265,6 +284,7 @@ function initProfileFriends() {
     searchResult.innerHTML =
       '<button type="button" class="profile-friends__search-open" id="profileFriendsSearchOpenBtn">' +
       '<span>Игрок найден: ' + esc(searchFoundProfile.name) + '</span>' +
+      profileFriendsSpecialtyTagHtml(searchFoundProfile, "profile-friends__search-suggestion-specialty") +
       '<strong>Открыть профиль</strong>' +
       "</button>";
     searchResult.hidden = false;
@@ -909,6 +929,7 @@ function initProfileFriends() {
       var meta = displayData(row);
       var avatar = previewAvatar(row);
       var level = previewLevel(row);
+      var specialtyTag = profileFriendsSpecialtyTagHtml(row);
       return (
         '<button type="button" class="profile-friends__avatar-btn" data-user-id="' + esc(row && row.userId || "") +
         '" data-chat-user-id="' + esc(row && row.chatUserId || "") +
@@ -920,6 +941,7 @@ function initProfileFriends() {
           '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
         "</span>" +
         '<span class="profile-friends__friend-name">' + esc(meta.modalName) + "</span>" +
+        specialtyTag +
         "</button>"
       );
     }).join("");
@@ -975,6 +997,7 @@ function initProfileFriends() {
     var lines = Array.isArray(meta.lines) && meta.lines.length ? meta.lines : [{ text: meta.modalName, kind: "name" }];
     var avatar = previewAvatar(row);
     var level = previewLevel(row);
+    var specialtyTag = profileFriendsSpecialtyTagHtml(row, "friends-list-modal__specialty-tag");
     var initial = String(meta.modalName || meta.lines && meta.lines[0] && meta.lines[0].text || "?").trim().charAt(0) || "?";
     var avatarHtml =
       '<span class="friends-list-modal__avatar-wrap" aria-hidden="true">' +
@@ -991,6 +1014,7 @@ function initProfileFriends() {
         var cls = idx === 0 ? "friends-list-modal__item-name" : "friends-list-modal__item-login";
         return '<span class="' + cls + '">' + esc(line && line.text) + "</span>";
       }).join("") +
+      specialtyTag +
       (noteHtml || "") +
       "</span>";
     return (

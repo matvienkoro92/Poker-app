@@ -326,6 +326,25 @@ function updateProfileDtId() {
         if (personalInput) personalInput.value = data.personalInfo;
       }
       if (data && data.ok) {
+        var birthInput = document.getElementById("profileBirthDateInput");
+        var birthSave = document.getElementById("profileBirthDateSaveBtn");
+        var birthDate = data.profileBirthDate || data.birthDate || "";
+        if (birthInput && birthDate) {
+          birthInput.value = birthDate;
+          birthInput.disabled = true;
+        }
+        if (birthSave && birthDate) {
+          birthSave.hidden = true;
+          birthSave.disabled = true;
+        }
+        var specialty = String(data.profileSpecialty || data.specialty || "").trim().toLowerCase();
+        document.querySelectorAll("[data-profile-specialty]").forEach(function (btn) {
+          var active = specialty && btn.getAttribute("data-profile-specialty") === specialty;
+          btn.classList.toggle("profile-player-details__toggle-btn--active", !!active);
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
+      if (data && data.ok) {
         try {
           var cdn = data.chatDisplayName != null && String(data.chatDisplayName).trim() ? String(data.chatDisplayName).trim() : "";
           window.__pokerChatDisplayName = cdn;

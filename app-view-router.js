@@ -1089,6 +1089,7 @@ function setView(viewName, navOpts) {
     initProfilePokerPlus();
     initProfileEmailAuth();
     initProfilePersonal();
+    if (typeof initProfilePlayerDetails === "function") initProfilePlayerDetails();
     initProfileAvatar();
     syncProfileStatusVisual();
     initProfileFishCollectionModal();

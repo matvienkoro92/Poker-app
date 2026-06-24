@@ -752,6 +752,34 @@ body[data-view="chat"] .chat-conv-view:not(.chat-conv-view--hidden) .chat-contai
 [data-theme="light"] .chat-contact__status-level {
   color: #64748b;
 }
+.chat-contact__specialty-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  color: #ffe3aa;
+  border: 1px solid rgba(251, 146, 60, 0.42);
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.12);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.chat-contact__specialty-tag--cash {
+  color: #bbf7d0;
+  border-color: rgba(74, 222, 128, 0.42);
+  background: rgba(34, 197, 94, 0.12);
+}
+[data-theme="light"] .chat-contact__specialty-tag {
+  color: #9a3412;
+  background: rgba(249, 115, 22, 0.1);
+}
+[data-theme="light"] .chat-contact__specialty-tag--cash {
+  color: #166534;
+  background: rgba(34, 197, 94, 0.1);
+}
 .chat-contact__name-stack {
   display: flex;
   flex-direction: column;

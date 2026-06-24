@@ -79,6 +79,20 @@ function chatContactStatusLevelHtml(level) {
   return '<span class="chat-contact__status-level">Уровень: ' + chatContactsRenderEscapeHtml(String(statusLevel)) + "</span>";
 }
 
+function chatContactsSpecialtyValue(row) {
+  var raw = String(row && (row.profileSpecialty || row.specialty || row.pokerSpecialty) || "").trim().toLowerCase();
+  if (raw === "mtt" || raw === "мтт") return "mtt";
+  if (raw === "cash" || raw === "кеш" || raw === "кэш") return "cash";
+  return "";
+}
+
+function chatContactsSpecialtyTagHtml(row) {
+  var value = chatContactsSpecialtyValue(row);
+  if (!value) return "";
+  var label = value === "cash" ? "Кеш" : "МТТ";
+  return '<span class="chat-contact__specialty-tag chat-contact__specialty-tag--' + value + '">' + chatContactsRenderEscapeHtml(label) + "</span>";
+}
+
 function chatContactsRenderSetTextContentIfChanged(el, txt) {
   if (!el) return;
   var next = txt != null ? String(txt) : "";
@@ -192,6 +206,8 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
     var isFriendContact = chatContactsMatchesFriendSet(c, friendSet);
     var isPendingFriendRequest = chatContactsHasOutgoingFriendRequest(c);
     if (btn.getAttribute("data-chat-friend-pending") !== (isPendingFriendRequest ? "1" : "0")) return false;
+    var nextSpecialty = isGroupRow ? "" : chatContactsSpecialtyValue(c);
+    if ((btn.getAttribute("data-chat-specialty") || "") !== nextSpecialty) return false;
     var displayTitle = chatContactsRowDisplayTitle(c, friendSet);
     var effectiveAlias = chatContactsRowAlias(c, friendSet);
     var hasAlias = effectiveAlias !== "";
@@ -206,6 +222,7 @@ function patchExistingContactsList(block, contactsForList, friendSet, pinOrderRe
     btn.setAttribute("data-chat-friend", isFriendContact ? "1" : "0");
     btn.setAttribute("data-chat-friend-pending", isPendingFriendRequest ? "1" : "0");
     btn.setAttribute("data-chat-group", isGroupRow ? "1" : "0");
+    btn.setAttribute("data-chat-specialty", nextSpecialty);
     btn.dataset.chatOnline = c.online ? "1" : "0";
     syncChatContactAvatar(btn, c);
     if (c.pokerPlusVerified) btn.dataset.chatVerified = "1";
@@ -326,6 +343,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     : "";
   var statusLevelContactHtml = !isGroupRow ? chatContactStatusLevelHtml(c.statusLevel) : "";
   var fishContactHtml = !isGroupRow ? chatContactsStatusFishIconHtml(c.statusLevel, "chat-contact__status-fish") : "";
+  var specialtyContactHtml = !isGroupRow ? chatContactsSpecialtyTagHtml(c) : "";
   var nameBlockInner;
   if (isGroupRow) {
     nameBlockInner = '<span class="chat-contact__label">' + chatContactsRenderEscapeHtml(displayTitle || c.name || c.id || "") + "</span>";
@@ -341,6 +359,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
         verifiedBadgeHtml +
         statusLevelContactHtml +
         fishContactHtml +
+        specialtyContactHtml +
         "</span>" +
         '<span class="chat-contact__friend-nick">' +
         chatContactsRenderEscapeHtml(chatContactsNormalizeLegacyLabel(c.name || c.id || "")) +
@@ -353,6 +372,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
         verifiedBadgeHtml +
         statusLevelContactHtml +
         fishContactHtml +
+        specialtyContactHtml +
         "</span>";
     }
   } else if (hasAlias) {
@@ -365,6 +385,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
       verifiedBadgeHtml +
       statusLevelContactHtml +
       fishContactHtml +
+      specialtyContactHtml +
       "</span>" +
       '<span class="chat-contact__login-sub">' +
       chatContactsRenderEscapeHtml(chatContactsNormalizeLegacyLabel(c.name || c.id || "")) +
@@ -377,6 +398,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
       verifiedBadgeHtml +
       statusLevelContactHtml +
       fishContactHtml +
+      specialtyContactHtml +
       "</span>";
   }
   var avatarEl = isGroupRow
@@ -411,6 +433,7 @@ function buildChatContactRowHtml(c, friendSet, pinOrderRender, icons) {
     '"' +
     (c.pokerPlusVerified ? ' data-chat-verified="1"' : "") +
     (c.statusLevel != null && c.statusLevel !== "" ? ' data-chat-status-level="' + chatContactsRenderEscapeHtml(String(chatContactsStatusFishLevel(c.statusLevel))) + '"' : "") +
+    (!isGroupRow ? ' data-chat-specialty="' + chatContactsRenderEscapeHtml(chatContactsSpecialtyValue(c)) + '"' : "") +
     ">" +
     avatarEl +
     '<span class="chat-contact__label-wrap"><span class="chat-contact__label-block">' +
@@ -500,6 +523,8 @@ function chatContactsSameList(existing, contactsForList, friendSet, pinOrderRend
     if ((btn.getAttribute("data-chat-group") || "") !== (c.isGroupChat ? "1" : "0")) return false;
     var wantStatusLevel = !c.isGroupChat && c.statusLevel != null && c.statusLevel !== "" ? String(chatContactsStatusFishLevel(c.statusLevel)) : "";
     if ((btn.getAttribute("data-chat-status-level") || "") !== wantStatusLevel) return false;
+    var wantSpecialty = !c.isGroupChat ? chatContactsSpecialtyValue(c) : "";
+    if ((btn.getAttribute("data-chat-specialty") || "") !== wantSpecialty) return false;
     if ((btn.getAttribute("data-chat-verified") || "") !== (c.pokerPlusVerified ? "1" : "")) return false;
     if (c.isGroupChat) {
       var imgG = btn.querySelector("img.chat-contact__avatar");

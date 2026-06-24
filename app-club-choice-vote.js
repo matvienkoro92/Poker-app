@@ -234,6 +234,7 @@
       '<div class="club-choice-vote-modal__summary">' +
         '<span>Достижение месяца</span>' +
         '<strong>' + escapeHtml(monthLabel(data.monthKey)) + '</strong>' +
+        '<p class="club-choice-vote-modal__summary-desc">Здесь клуб выбирает главное достижение месяца. В кандидаты попадают игроки, которые за месяц отметились крупным заносом, победой, сильным рывком в рейтинге или вкладом в жизнь клуба.</p>' +
       '</div>' +
       renderAdminDraft(data) +
       '<h3 class="club-choice-vote-modal__section-title">Кандидаты</h3>' +
@@ -305,6 +306,7 @@
       '<div class="club-choice-vote-modal__summary">' +
         '<span>Итоги ' + escapeHtml(monthLabel(last.month || data.monthKey)) + '</span>' +
         '<strong>Народный герой</strong>' +
+        '<p class="club-choice-vote-modal__summary-desc">Победитель этого блока выбран игроками клуба среди кандидатов с самыми заметными результатами и поступками месяца.</p>' +
       '</div>' +
       '<div class="club-choice-vote-modal__winners">' + (winners.length ? winners.map(function (winner) {
         return '<article class="club-choice-vote-modal__winner">' +

@@ -33,6 +33,7 @@
                       <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
+                    <span class="profile-public-showcase__specialty-badge" id="profilePublicSpecialtyBadge" hidden></span>
                     <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
                       <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
                       <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
@@ -85,6 +86,30 @@
                       <span class="chat-user-modal__status-card" id="profilePublicStatusCardNext">2</span>
                     </div>
                   </section>
+                </div>
+              </div>
+            </section>
+            <section class="profile-player-details" id="profilePlayerDetailsSection" data-profile-club-panel aria-labelledby="profilePlayerDetailsTitle">
+              <div class="profile-player-details__head">
+                <h2 class="profile-player-details__title" id="profilePlayerDetailsTitle">Данные игрока</h2>
+                <span class="profile-player-details__feedback" id="profilePlayerDetailsFeedback" aria-live="polite"></span>
+              </div>
+              <div class="profile-player-details__grid">
+                <label class="profile-player-details__field">
+                  <span class="profile-player-details__label">Дата рождения</span>
+                  <span class="profile-player-details__birth-row">
+                    <input type="date" class="profile-player-details__input" id="profileBirthDateInput" aria-describedby="profileBirthDateHint" />
+                    <button type="button" class="profile-player-details__save" id="profileBirthDateSaveBtn">Сохранить</button>
+                  </span>
+                  <span class="profile-player-details__hint" id="profileBirthDateHint">Можно указать только один раз.</span>
+                </label>
+                <div class="profile-player-details__field">
+                  <span class="profile-player-details__label">Специализация</span>
+                  <span class="profile-player-details__toggle" role="group" aria-label="Специализация игрока">
+                    <button type="button" class="profile-player-details__toggle-btn" id="profileSpecialtyMttBtn" data-profile-specialty="mtt">МТТ</button>
+                    <button type="button" class="profile-player-details__toggle-btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash">Кеш</button>
+                  </span>
+                  <span class="profile-player-details__hint">Можно менять в любой момент.</span>
                 </div>
               </div>
             </section>

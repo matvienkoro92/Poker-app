@@ -3263,6 +3263,8 @@ async function testProfileUserLookup(redis) {
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
   redis.h("poker_app:visitor_personal").set("ID100002", "public bio");
+  redis.h("poker_app:profile_birth_dates").set("ID100002", "1992-04-05");
+  redis.h("poker_app:profile_specialties").set("ID100002", "cash");
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:pokerplus_user_ids").set("ID100002", "P21-1002");
   redis.h("poker_app:pokerplus_stats_visible").set("ID100002", "1");
@@ -3298,6 +3300,8 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.userName, "@peer", "lookup returns username");
   assert.strictEqual(r.body.p21Id, "P21-1002", "lookup returns PokerPlus id");
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
+  assert.strictEqual(r.body.profileBirthDate, "1992-04-05", "lookup returns immutable birth date");
+  assert.strictEqual(r.body.profileSpecialty, "cash", "lookup returns poker specialty");
   assert.strictEqual(r.body.pokerPlusStatsVisible, true, "lookup returns visible PokerPlus stats flag");
   assert.deepStrictEqual(
     r.body.pokerPlusStats,
@@ -3320,6 +3324,19 @@ async function testProfileUserLookup(redis) {
     },
     "lookup exposes extended public PokerPlus stats",
   );
+
+  r = await call(users, req("POST", {}, { pwaSession: s.user, birthDate: "1990-01-02", specialty: "mtt" }));
+  assert.strictEqual(r.statusCode, 200, "profile details save succeeds");
+  assert.strictEqual(redis.h("poker_app:profile_birth_dates").get("ID100001"), "1990-01-02", "profile birth date is stored");
+  assert.strictEqual(redis.h("poker_app:profile_specialties").get("ID100001"), "mtt", "profile specialty is stored");
+
+  r = await call(users, req("POST", {}, { pwaSession: s.user, birthDate: "1991-01-02" }));
+  assert.strictEqual(r.statusCode, 409, "profile birth date cannot be changed");
+  assert.strictEqual(redis.h("poker_app:profile_birth_dates").get("ID100001"), "1990-01-02", "profile birth date remains unchanged");
+
+  r = await call(users, req("POST", {}, { pwaSession: s.user, specialty: "cash" }));
+  assert.strictEqual(r.statusCode, 200, "profile specialty can be changed");
+  assert.strictEqual(redis.h("poker_app:profile_specialties").get("ID100001"), "cash", "profile specialty updates");
 }
 
 async function testDailyPokerWinners(redis) {
