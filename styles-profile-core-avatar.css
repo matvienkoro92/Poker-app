@@ -2054,9 +2054,9 @@ body.profile-avatar-choice-open {
 }
 .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
   gap: 14px;
-  width: min(calc(100% - 3px), 430px);
+  width: min(calc(100% - 6px), 430px);
   max-width: none;
-  margin: 0 0 0 3px;
+  margin: 0 3px 0 3px;
   padding: 0;
   border-top: 0;
 }
@@ -2269,7 +2269,7 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
     gap: 9px;
-    width: calc(100% - 3px);
+    width: calc(100% - 6px);
   }
   .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
   .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
@@ -2332,29 +2332,35 @@ body.profile-avatar-choice-open {
     font-size: 16px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls {
-    gap: 6px;
+    gap: 5px;
     margin-top: 8px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-specialty__btn {
-    min-width: 38px;
+    min-width: 35px;
     height: 28px;
-    padding: 0 7px;
-    font-size: 12px;
-  }
-  .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth {
-    flex-basis: 136px;
-    min-height: 34px;
-    gap: 3px;
-    padding-left: 7px;
-  }
-  .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth__input {
-    width: 86px;
-    height: 26px;
-    padding: 0 3px;
+    padding: 0 6px;
     font-size: 11px;
   }
+  .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth {
+    flex-basis: 132px;
+    min-height: 34px;
+    gap: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth__label {
+    font-size: 9px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth__input {
+    width: 91px;
+    height: 26px;
+    padding: 0 2px;
+    font-size: 10px;
+    line-height: 1;
+    white-space: nowrap;
+  }
   .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth--saved .profile-hero-birth__input {
-    width: 86px;
+    width: 91px;
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls .profile-hero-birth__save {
     width: 26px;
@@ -2401,6 +2407,12 @@ body.profile-avatar-choice-open {
     min-width: 48px;
     height: 38px;
     font-size: 18px;
+  }
+  .view[data-view="profile"] .profile-public-showcase__identity-gender .profile-hero-gender__btn {
+    flex-basis: 34px;
+    min-width: 34px;
+    height: 30px;
+    font-size: 15px;
   }
   .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
     grid-template-columns: 70px minmax(0, 1fr);

@@ -1312,12 +1312,23 @@
   justify-items: center;
   gap: 5px;
   min-height: 98px;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+.profile-friends__avatar-btn::before,
+.profile-friends__avatar-btn::after,
+.profile-friends__avatar-stack::before,
+.profile-friends__avatar-stack::after {
+  display: none !important;
+  content: none !important;
 }
 .profile-friends__avatar-btn:hover,
 .profile-friends__avatar-btn:focus,
 .profile-friends__avatar-btn:active {
-  background: transparent;
-  box-shadow: none;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 .profile-friends__avatar-stack {
   position: relative;
