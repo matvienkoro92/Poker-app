@@ -177,8 +177,8 @@
       headerStatus.classList.remove("header-status--hidden");
       headerStatus.setAttribute("aria-hidden", "false");
       headerStatus.setAttribute("tabindex", "0");
-      headerStatus.setAttribute("title", "Игроки по уровню");
-      headerStatus.setAttribute("aria-label", "Открыть игроков по уровню");
+      headerStatus.setAttribute("title", "Игроки клуба");
+      headerStatus.setAttribute("aria-label", "Открыть игроков клуба");
     }
     if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ 0";
     if (headerStatusFish) {
@@ -305,8 +305,8 @@
       headerStatus.setAttribute("aria-hidden", showStatus ? "false" : "true");
       headerStatus.setAttribute("tabindex", showStatus ? "0" : "-1");
       if (showStatus) {
-        headerStatus.setAttribute("title", "Игроки по уровню");
-        headerStatus.setAttribute("aria-label", "Открыть игроков по уровню");
+        headerStatus.setAttribute("title", "Игроки клуба");
+        headerStatus.setAttribute("aria-label", "Открыть игроков клуба");
       } else {
         headerStatus.removeAttribute("title");
         headerStatus.removeAttribute("aria-label");

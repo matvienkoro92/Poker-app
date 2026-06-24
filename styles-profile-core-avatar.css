@@ -954,7 +954,9 @@
   isolation: isolate;
 }
 .view[data-view="profile"] .profile-achievements-showcase__achievements .chat-user-modal__achievement-icon img {
-  mix-blend-mode: screen;
+  background: transparent;
+  mix-blend-mode: normal;
+  transform: translateZ(0);
 }
 .profile-achievements-showcase__ranks {
   margin-bottom: 0;

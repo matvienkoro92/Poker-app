@@ -555,8 +555,8 @@
       el.setAttribute("title", "Войти в аккаунт");
       el.setAttribute("aria-label", "Войти в аккаунт");
     } else if (statusActive) {
-      el.setAttribute("title", "Игроки по уровню");
-      el.setAttribute("aria-label", "Открыть игроков по уровню");
+      el.setAttribute("title", "Игроки клуба");
+      el.setAttribute("aria-label", "Открыть игроков клуба");
     } else {
       el.removeAttribute("title");
       el.removeAttribute("aria-label");
