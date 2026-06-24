@@ -450,6 +450,7 @@ var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
 var hallFishProfileLoadingObserver = null;
 var hallFishActiveTab = "levels";
+var hallFishActiveAchievementTab = "big50";
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 
 function hallFishEsc(s) {
@@ -486,6 +487,7 @@ function hallFishEnsureModal() {
       '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Дни рождения</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -519,6 +521,7 @@ function hallFishRowsFromCrmData(data) {
           name: String(poker21Nick || (row && row.name) || "").trim(),
           pokerPlusNickname: poker21Nick,
           telegram: String((row && row.telegram) || "").trim(),
+          profileBirthDate: String((row && row.profileBirthDate) || "").trim(),
           level: Number(row && row.level) || 0,
           fee: Number(row && row.fee) || 0,
         };
@@ -540,6 +543,7 @@ function hallFishRowsFromCrmData(data) {
         name: String(poker21Nick || (reg && reg.name) || accountId || "").trim(),
         pokerPlusNickname: poker21Nick,
         telegram: hallFishTelegramLabel(reg),
+        profileBirthDate: String((row && row.profileBirthDate) || "").trim(),
         level: level,
         fee: Number(row && row.fee) || 0,
       };
@@ -851,6 +855,17 @@ function hallFishReferralsRows(data) {
   }));
 }
 
+function hallFishAchievementSpecs(data) {
+  return [
+    { key: "big50", title: "Заносы от 50 до 100к", rows: data && data.big50 },
+    { key: "big100", title: "Заносы от 100к", rows: data && data.big100 },
+    { key: "king", title: "Король турниров", rows: data && data.king },
+    { key: "monthChampion", title: "Чемпион месяца", rows: data && data.monthChampion },
+    { key: "clubChoice", title: "Народный герой", rows: data && data.clubChoice },
+    { key: "referrals", title: "Приглашенные", rows: data && data.referrals },
+  ];
+}
+
 function hallFishAchievementSectionHtml(title, rows) {
   var list = Array.isArray(rows) ? rows : [];
   return '<section class="hall-fish-achievement-section">' +
@@ -873,17 +888,129 @@ function hallFishAchievementSectionHtml(title, rows) {
 }
 
 function hallFishRenderAchievementRows(data) {
-  var sections = [
-    ["Заносы от 50 до 100к", data && data.big50],
-    ["Заносы от 100к", data && data.big100],
-    ["Король турниров", data && data.king],
-    ["Чемпион месяца", data && data.monthChampion],
-    ["Народный герой", data && data.clubChoice],
-    ["Приглашенные", data && data.referrals],
-  ];
-  return '<div class="hall-fish-achievements">' + sections.map(function (section) {
-    return hallFishAchievementSectionHtml(section[0], section[1]);
-  }).join("") + '</div>';
+  var specs = hallFishAchievementSpecs(data);
+  var active = specs.some(function (spec) { return spec.key === hallFishActiveAchievementTab; })
+    ? hallFishActiveAchievementTab
+    : "big50";
+  hallFishActiveAchievementTab = active;
+  var activeSpec = specs.filter(function (spec) { return spec.key === active; })[0] || specs[0];
+  return '<div class="hall-fish-achievements">' +
+    '<div class="hall-fish-achievement-tabs" role="tablist" aria-label="Топы по ачивкам">' +
+      specs.map(function (spec) {
+        var isActive = spec.key === active;
+        return '<button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" role="tab" aria-selected="' + (isActive ? "true" : "false") + '">' + hallFishEsc(spec.title) + '</button>';
+      }).join("") +
+    '</div>' +
+    hallFishAchievementSectionHtml(activeSpec.title, activeSpec.rows) +
+  '</div>';
+}
+
+function hallFishBirthDateParts(value) {
+  var m = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  var month = parseInt(m[2], 10);
+  var day = parseInt(m[3], 10);
+  if (!month || month < 1 || month > 12 || !day || day < 1 || day > 31) return null;
+  return { month: month, day: day };
+}
+
+function hallFishBirthdayRows(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .map(function (row) {
+      var parts = hallFishBirthDateParts(row && (row.profileBirthDate || row.birthDate || row.birthday));
+      if (!parts) return null;
+      return {
+        accountId: String((row && row.accountId) || "").trim(),
+        nick: String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "Игрок").trim(),
+        telegram: String((row && row.telegram) || "").trim(),
+        month: parts.month,
+        day: parts.day,
+      };
+    })
+    .filter(Boolean);
+}
+
+function hallFishBirthdayDateForYear(row, year) {
+  var date = new Date(year, Number(row && row.month) - 1, Number(row && row.day));
+  if (date.getMonth() !== Number(row && row.month) - 1) return null;
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function hallFishFormatBirthdayDate(row, year) {
+  var date = hallFishBirthdayDateForYear(row, year || (new Date()).getFullYear());
+  if (!date) return "";
+  return date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
+function hallFishUpcomingBirthdays(rows) {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return hallFishBirthdayRows(rows).map(function (row) {
+    var next = hallFishBirthdayDateForYear(row, today.getFullYear());
+    if (!next) return null;
+    if (next < today) next = hallFishBirthdayDateForYear(row, today.getFullYear() + 1);
+    if (!next) return null;
+    return Object.assign({}, row, {
+      nextDate: next,
+      daysLeft: Math.round((next - today) / 86400000),
+    });
+  }).filter(Boolean).sort(function (a, b) {
+    return a.daysLeft - b.daysLeft || String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+  });
+}
+
+function hallFishRenderBirthdays(rows) {
+  var birthdays = hallFishBirthdayRows(rows);
+  if (!birthdays.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с указанной датой рождения.</div>';
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var monthRowsByDay = {};
+  birthdays.forEach(function (row) {
+    if (Number(row.month) !== month + 1) return;
+    if (!monthRowsByDay[row.day]) monthRowsByDay[row.day] = [];
+    monthRowsByDay[row.day].push(row);
+  });
+  Object.keys(monthRowsByDay).forEach(function (day) {
+    monthRowsByDay[day].sort(function (a, b) { return String(a.nick || "").localeCompare(String(b.nick || ""), "ru"); });
+  });
+  var first = new Date(year, month, 1);
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var offset = (first.getDay() + 6) % 7;
+  var cells = [];
+  for (var empty = 0; empty < offset; empty += 1) cells.push('<span class="hall-fish-birthday-calendar__cell hall-fish-birthday-calendar__cell--empty"></span>');
+  for (var day = 1; day <= daysInMonth; day += 1) {
+    var marked = monthRowsByDay[day] || [];
+    var isToday = day === now.getDate();
+    cells.push(
+      '<span class="hall-fish-birthday-calendar__cell' + (marked.length ? " hall-fish-birthday-calendar__cell--marked" : "") + (isToday ? " hall-fish-birthday-calendar__cell--today" : "") + '">' +
+        '<span class="hall-fish-birthday-calendar__day">' + hallFishEsc(day) + '</span>' +
+        (marked.length ? '<span class="hall-fish-birthday-calendar__names">' + marked.slice(0, 3).map(function (row) { return hallFishEsc(row.nick); }).join("<br>") + (marked.length > 3 ? "<br>+" + hallFishEsc(marked.length - 3) : "") + '</span>' : "") +
+      '</span>'
+    );
+  }
+  var upcoming = hallFishUpcomingBirthdays(rows).slice(0, 2);
+  var upcomingHtml = upcoming.length
+    ? upcoming.map(function (row) {
+        var label = row.daysLeft === 0 ? "сегодня" : (row.daysLeft === 1 ? "завтра" : "через " + row.daysLeft + " дн.");
+        return '<div class="hall-fish-birthday-next__row">' +
+          '<strong>' + hallFishEsc(row.nick) + '</strong>' +
+          '<span>' + hallFishEsc(hallFishFormatBirthdayDate(row, row.nextDate.getFullYear())) + ' · ' + hallFishEsc(label) + '</span>' +
+        '</div>';
+      }).join("")
+    : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">Ближайших дней рождения нет.</div>';
+  return '<div class="hall-fish-birthdays">' +
+    '<div class="hall-fish-birthday-calendar">' +
+      '<div class="hall-fish-birthday-calendar__title">' + hallFishEsc(now.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })) + '</div>' +
+      '<div class="hall-fish-birthday-calendar__weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>' +
+      '<div class="hall-fish-birthday-calendar__grid">' + cells.join("") + '</div>' +
+    '</div>' +
+    '<section class="hall-fish-birthday-next">' +
+      '<h4 class="hall-fish-achievement-section__title">Ближайшие дни рождения</h4>' +
+      upcomingHtml +
+    '</section>' +
+  '</div>';
 }
 
 function hallFishClearProfileLoadingRows() {
@@ -995,8 +1122,21 @@ function hallFishSetAchievementState(message, data) {
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
 
+function hallFishSetBirthdaysState(message, rows) {
+  var modal = hallFishEnsureModal();
+  var subtitle = document.getElementById("hallFishRatingSubtitle");
+  var myRank = document.getElementById("hallFishRatingMyRank");
+  var body = document.getElementById("hallFishRatingBody");
+  hallFishSetSubtitle(subtitle);
+  hallFishUpdateTabs("birthdays");
+  if (myRank) myRank.hidden = true;
+  if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  modal.hidden = false;
+  if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+}
+
 function hallFishUpdateTabs(activeTab) {
-  hallFishActiveTab = activeTab === "achievements" ? "achievements" : "levels";
+  hallFishActiveTab = activeTab === "achievements" || activeTab === "birthdays" ? activeTab : "levels";
   hallFishEnsureModal();
   document.querySelectorAll("[data-hall-fish-tab]").forEach(function (tab) {
     var isActive = tab.getAttribute("data-hall-fish-tab") === hallFishActiveTab;
@@ -1089,6 +1229,23 @@ function openHallFishAchievementTab() {
     });
 }
 
+function openHallFishBirthdaysTab() {
+  hallFishSetBirthdaysState("Загрузка…");
+  hallFishLoadRows()
+    .then(function (rows) {
+      hallFishSetBirthdaysState("", rows);
+    })
+    .catch(function () {
+      var body = document.getElementById("hallFishRatingBody");
+      var subtitle = document.getElementById("hallFishRatingSubtitle");
+      var myRank = document.getElementById("hallFishRatingMyRank");
+      hallFishSetSubtitle(subtitle);
+      hallFishUpdateTabs("birthdays");
+      if (myRank) myRank.hidden = true;
+      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить дни рождения. Попробуйте ещё раз позже.</div>';
+    });
+}
+
 function openHallFishRatingModal() {
   hallFishSetModalState("Загрузка…");
   Promise.all([hallFishLoadRows(), hallFishLoadCurrentIds()])
@@ -1128,8 +1285,19 @@ function initHallFishRatingModal() {
     var tab = e.target && e.target.closest ? e.target.closest("[data-hall-fish-tab]") : null;
     if (!tab) return;
     e.preventDefault();
-    if (tab.getAttribute("data-hall-fish-tab") === "achievements") openHallFishAchievementTab();
+    var tabKey = tab.getAttribute("data-hall-fish-tab");
+    if (tabKey === "achievements") openHallFishAchievementTab();
+    else if (tabKey === "birthdays") openHallFishBirthdaysTab();
     else openHallFishRatingModal();
+  });
+  document.addEventListener("click", function (e) {
+    var tab = e.target && e.target.closest ? e.target.closest("[data-hall-fish-achievement-tab]") : null;
+    if (!tab) return;
+    e.preventDefault();
+    e.stopPropagation();
+    hallFishActiveAchievementTab = String(tab.getAttribute("data-hall-fish-achievement-tab") || "big50").trim() || "big50";
+    if (hallFishAchievementRowsCache) hallFishSetAchievementState("", hallFishAchievementRowsCache);
+    else openHallFishAchievementTab();
   });
   document.addEventListener("click", function (e) {
     var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id]") : null;
