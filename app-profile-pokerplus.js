@@ -651,8 +651,11 @@ function initProfilePokerPlus() {
             setPokerPlusStatsVisibilityMap(prevMap);
             setFeedback((data && data.error) || "Не удалось сохранить видимость статистики.", true);
           } else {
-            pokerProfileUserInfoCache = null;
-            pokerProfileUserInfoCacheAt = 0;
+            if (typeof pokerClearProfileUserInfoCache === "function") pokerClearProfileUserInfoCache();
+            else {
+              pokerProfileUserInfoCache = null;
+              pokerProfileUserInfoCacheAt = 0;
+            }
             setFeedback("", false);
           }
         })

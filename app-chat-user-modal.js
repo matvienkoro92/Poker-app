@@ -59,6 +59,8 @@ var chatUserModalUserId = null;
 var chatUserModalUserName = null;
 var chatUserModalHeroAvatarUrl = "";
 if (chatUserModalEl) {
+  var CHAT_USER_PROFILE_CACHE_PREFIX = "poker_chat_user_profile_v2:";
+  var CHAT_USER_PROFILE_CACHE_MS = 60000;
   var modalTitle = document.getElementById("chatUserModalTitle");
   var modalTitleFish = null;
   if (modalTitle && modalTitle.parentNode) {
@@ -78,6 +80,31 @@ if (chatUserModalEl) {
   var modalHero = modalRatingArt && modalRatingArt.closest ? modalRatingArt.closest(".chat-user-modal__hero") : null;
   var modalP21 = document.getElementById("chatUserModalP21");
   var modalPersonal = document.getElementById("chatUserModalPersonal");
+
+  function chatUserModalProfileCacheKey(id) {
+    return CHAT_USER_PROFILE_CACHE_PREFIX + encodeURIComponent(String(id || "").trim());
+  }
+
+  function chatUserModalReadProfileCache(id) {
+    try {
+      if (typeof sessionStorage === "undefined") return null;
+      var raw = sessionStorage.getItem(chatUserModalProfileCacheKey(id));
+      if (!raw) return null;
+      var entry = JSON.parse(raw);
+      if (!entry || !entry.data || !entry.data.ok) return null;
+      if (Date.now() - Number(entry.ts || 0) > CHAT_USER_PROFILE_CACHE_MS) return null;
+      return entry.data;
+    } catch (eChatUserProfileCacheRead) {
+      return null;
+    }
+  }
+
+  function chatUserModalWriteProfileCache(id, data) {
+    try {
+      if (typeof sessionStorage === "undefined" || !data || !data.ok) return;
+      sessionStorage.setItem(chatUserModalProfileCacheKey(id), JSON.stringify({ ts: Date.now(), data: data }));
+    } catch (eChatUserProfileCacheWrite) {}
+  }
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
   var modalLevelText = document.getElementById("chatUserModalLevelText");
   var modalRespectOpenVoters = document.getElementById("chatUserModalRespectOpenVoters");
@@ -687,7 +714,7 @@ if (chatUserModalEl) {
     chatUserModalClubChoiceScriptReady = new Promise(function (resolve) {
       var apiBase = base || (typeof getApiBase === "function" ? getApiBase() : "");
       if (apiBase && typeof fetch === "function") {
-        fetch(apiBase.replace(/\/$/, "") + "/api/club-choice-vote?mode=achievements&_t=" + Date.now(), { cache: "no-store" })
+        fetch(apiBase.replace(/\/$/, "") + "/api/club-choice-vote?mode=achievements", { cache: "default" })
           .then(function (res) { return res.json(); })
           .then(function (data) {
             if (data && data.ok && Array.isArray(data.rows)) {
@@ -1956,8 +1983,24 @@ if (chatUserModalEl) {
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
       : base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&");
-    var profilePromise = fetch(profileUrl)
-      .then(function (r) { return r.json(); })
+    var cachedProfileData = chatUserModalReadProfileCache(id);
+    var profileDataPromise = cachedProfileData
+      ? Promise.resolve(cachedProfileData)
+      : fetch(profileUrl)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          chatUserModalWriteProfileCache(id, data);
+          return data;
+        });
+    if (cachedProfileData) {
+      fetch(profileUrl)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          chatUserModalWriteProfileCache(id, data);
+        })
+        .catch(function () {});
+    }
+    var profilePromise = profileDataPromise
       .then(function (data) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalP21) modalP21.textContent = "";
@@ -2049,11 +2092,8 @@ if (chatUserModalEl) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(null);
       });
-    Promise.all([
-      profilePromise.catch(function () {}),
-      respectPromise.catch(function () {}),
-      Promise.resolve(initialBlockPromise).catch(function () {}),
-    ]).then(function () {
+    Promise.resolve(initialBlockPromise).catch(function () {});
+    profilePromise.catch(function () {}).then(function () {
       revealChatUserModal(openSeq);
     });
   }

@@ -619,6 +619,63 @@
   border-color: rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.5);
 }
+.hall-fish-level-row--skeleton {
+  pointer-events: none;
+}
+.hall-fish-skeleton-line,
+.hall-fish-skeleton-pill,
+.hall-fish-birthday-calendar__cell--skeleton {
+  display: block;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 237, 213, 0.08), rgba(255, 214, 112, 0.24), rgba(255, 237, 213, 0.08));
+  background-size: 220% 100%;
+  animation: hall-fish-skeleton-shimmer 1.1s ease-in-out infinite;
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.04);
+}
+.hall-fish-skeleton-line--name {
+  width: min(210px, 42vw);
+  height: 18px;
+}
+.hall-fish-skeleton-line--sub {
+  width: min(150px, 34vw);
+  height: 12px;
+  margin-top: 7px;
+  opacity: 0.72;
+}
+.hall-fish-skeleton-line--value {
+  width: 62px;
+  height: 20px;
+  justify-self: end;
+}
+.hall-fish-skeleton-pill {
+  width: 160px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+.hall-fish-achievement-subtabs--skeleton {
+  pointer-events: none;
+}
+.hall-fish-skeleton-line--calendar-title {
+  width: min(240px, 58vw);
+  height: 28px;
+  margin: 0 0 16px;
+  border-radius: 12px;
+}
+.hall-fish-birthday-calendar__cell--skeleton {
+  min-height: 78px;
+  border-radius: 10px;
+  background-color: rgba(15, 23, 42, 0.5);
+}
+@keyframes hall-fish-skeleton-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
 .hall-fish-level-row--loading {
   cursor: wait;
   opacity: 0.84;

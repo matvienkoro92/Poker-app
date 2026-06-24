@@ -6,6 +6,8 @@
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
   var adminReportRakebackShellModule = null;
+  var FRAGMENT_CACHE_PREFIX = "poker_html_fragment_v2:";
+  var FRAGMENT_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
   var INLINE_GLOBAL_MODAL_IDS = [
     "partnershipModal"
   ];
@@ -26,6 +28,41 @@
     var view = String(viewName || "").trim();
     if (!view) return null;
     return document.querySelector('[data-view="' + view.replace(/"/g, '\\"') + '"][data-html-fragment]');
+  }
+
+  function readCachedFragmentText(src) {
+    try {
+      if (typeof sessionStorage === "undefined") return "";
+      var raw = sessionStorage.getItem(FRAGMENT_CACHE_PREFIX + src);
+      if (!raw) return "";
+      var entry = JSON.parse(raw);
+      if (!entry || typeof entry.html !== "string") return "";
+      if (Date.now() - Number(entry.ts || 0) > FRAGMENT_CACHE_TTL_MS) return "";
+      return entry.html;
+    } catch (eFragmentCacheRead) {
+      return "";
+    }
+  }
+
+  function writeCachedFragmentText(src, html) {
+    try {
+      if (typeof sessionStorage === "undefined" || typeof html !== "string" || !html) return;
+      sessionStorage.setItem(FRAGMENT_CACHE_PREFIX + src, JSON.stringify({ ts: Date.now(), html: html }));
+    } catch (eFragmentCacheWrite) {}
+  }
+
+  function fetchFragmentText(src, label) {
+    var cached = readCachedFragmentText(src);
+    if (cached) return Promise.resolve(cached);
+    return fetch(src, { cache: "force-cache" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to load " + label + " " + src + ": " + res.status);
+        return res.text();
+      })
+      .then(function (html) {
+        writeCachedFragmentText(src, html);
+        return html;
+      });
   }
 
   function runFragmentHooks(viewName) {
@@ -63,6 +100,7 @@
     if (viewName === "hall-of-fame") {
       safeCall(window.pokerInitHallOfFamePanelShareButtons);
       safeCall(window.pokerInitHallFishRatingModal);
+      safeCall(window.pokerPrefetchHallFishRatingData);
       safeCall(window.pokerInitWinterRatingWeekTops);
     }
     if (viewName === "player-crm") safeCall(window.pokerInitPlayerCrm);
@@ -101,11 +139,7 @@
 
   function fetchNestedFragment(src) {
     if (!nestedFragmentLoading[src]) {
-      nestedFragmentLoading[src] = fetch(src, { cache: "no-store" })
-        .then(function (res) {
-          if (!res.ok) throw new Error("Failed to load nested HTML fragment " + src + ": " + res.status);
-          return res.text();
-        });
+      nestedFragmentLoading[src] = fetchFragmentText(src, "nested HTML fragment");
     }
     return nestedFragmentLoading[src];
   }
@@ -172,11 +206,7 @@
     var src = String(host.getAttribute("data-html-fragment") || "").trim();
     if (!src) return false;
     if (loading[src]) return loading[src];
-    loading[src] = fetch(src, { cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Failed to load HTML fragment " + src + ": " + res.status);
-        return res.text();
-      })
+    loading[src] = fetchFragmentText(src, "HTML fragment")
       .then(function (html) {
         var currentHost = findFragmentHost(viewName);
         if (!currentHost) return true;
@@ -195,11 +225,7 @@
     var src = String(host.getAttribute("data-html-fragment") || "").trim();
     if (!src) return Promise.resolve(false);
     if (loading[src]) return loading[src];
-    loading[src] = fetch(src, { cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Failed to load HTML fragment " + src + ": " + res.status);
-        return res.text();
-      })
+    loading[src] = fetchFragmentText(src, "HTML fragment")
       .then(function (html) {
         var currentHost = document.getElementById("globalModalsFragmentHost");
         if (!currentHost) return true;
@@ -230,11 +256,7 @@
     if (!host) return window.pokerEnsureGlobalModalsHtml();
     var src = "./html-fragments/global-modals-admin.html";
     if (!loading[src]) {
-      loading[src] = fetch(src, { cache: "no-store" })
-        .then(function (res) {
-          if (!res.ok) throw new Error("Failed to load admin modal HTML fragment " + src + ": " + res.status);
-          return res.text();
-        })
+      loading[src] = fetchFragmentText(src, "admin modal HTML fragment")
         .then(function (html) {
           if (document.getElementById("adminReportModal")) return true;
           var currentHost = document.getElementById("globalModalsFragmentHost");
@@ -314,6 +336,43 @@
       document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {
       start();
+    }
+  })();
+
+  (function pokerIdleWarmCommonImages() {
+    var assets = [
+      "./assets/chat-profile-achievement-top-win.png",
+      "./assets/chat-profile-achievement-cup.png",
+      "./assets/chat-profile-achievement-top10.png",
+      "./assets/chat-profile-achievement-legend.png",
+      "./assets/chat-profile-achievement-cup-winter.png",
+      "./assets/chat-profile-achievement-cup-spring.png",
+      "./assets/chat-profile-achievement-cup-summer.png",
+      "./assets/chat-profile-default-hero-male.png",
+      "./assets/chat-profile-default-hero-female.png"
+    ];
+    function warm() {
+      assets.forEach(function (src) {
+        try {
+          var img = new Image();
+          img.decoding = "async";
+          img.loading = "eager";
+          img.src = src;
+          if (img.decode) img.decode().catch(function () {});
+        } catch (eWarmImage) {}
+      });
+    }
+    function schedule() {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(warm, { timeout: 3200 });
+      } else {
+        setTimeout(warm, 1800);
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", schedule, { once: true });
+    } else {
+      schedule();
     }
   })();
 

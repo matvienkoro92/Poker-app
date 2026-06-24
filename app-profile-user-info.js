@@ -39,6 +39,8 @@ var pokerProfileUserInfoCache = null;
 var pokerProfileUserInfoPromise = null;
 var pokerProfileUserInfoCacheAt = 0;
 var POKER_PROFILE_USER_INFO_CACHE_MS = 15000;
+var POKER_PROFILE_USER_INFO_SESSION_CACHE_MS = 60000;
+var POKER_PROFILE_USER_INFO_SESSION_CACHE_KEY = "poker_profile_user_info_v2";
 var POKER_PROFILE_AUTH_LOADING_FALLBACK_MS = 12000;
 var pokerProfileAuthLoadingSince = 0;
 var POKER_PROFILE_LINKED_EMAIL_CACHE_KEY = "poker_profile_linked_email";
@@ -102,8 +104,7 @@ function pokerSaveProfileTelegramVisible(value) {
       if (!data || !data.ok) {
         pokerProfileTelegramVisible = prev;
       } else {
-        pokerProfileUserInfoCache = null;
-        pokerProfileUserInfoCacheAt = 0;
+        pokerClearProfileUserInfoCache();
       }
       pokerRenderProfileTelegramVisibility(false);
     })
@@ -184,6 +185,38 @@ function pokerWriteProfileStorage(key, value) {
     }
   } catch (eLocal) {}
 }
+
+function pokerReadProfileUserInfoSessionCache() {
+  try {
+    if (typeof sessionStorage === "undefined") return null;
+    var raw = sessionStorage.getItem(POKER_PROFILE_USER_INFO_SESSION_CACHE_KEY);
+    if (!raw) return null;
+    var entry = JSON.parse(raw);
+    if (!entry || !entry.data || !entry.data.ok) return null;
+    if (Date.now() - Number(entry.ts || 0) > POKER_PROFILE_USER_INFO_SESSION_CACHE_MS) return null;
+    return entry.data;
+  } catch (eProfileInfoSessionRead) {
+    return null;
+  }
+}
+
+function pokerWriteProfileUserInfoSessionCache(data) {
+  try {
+    if (typeof sessionStorage === "undefined" || !data || !data.ok) return;
+    sessionStorage.setItem(POKER_PROFILE_USER_INFO_SESSION_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: data }));
+  } catch (eProfileInfoSessionWrite) {}
+}
+window.pokerWriteCurrentProfileUserInfoCache = pokerWriteProfileUserInfoSessionCache;
+
+function pokerClearProfileUserInfoCache() {
+  pokerProfileUserInfoCache = null;
+  pokerProfileUserInfoCacheAt = 0;
+  try {
+    if (typeof sessionStorage !== "undefined") sessionStorage.removeItem(POKER_PROFILE_USER_INFO_SESSION_CACHE_KEY);
+  } catch (eProfileInfoSessionClear) {}
+}
+window.pokerClearCurrentProfileUserInfoCache = pokerClearProfileUserInfoCache;
+
 function pokerApplyProfileUserInfo(data) {
   if (!data || !data.ok) return;
   try {
@@ -224,14 +257,42 @@ function loadCurrentProfileUserInfo() {
   var base = getApiBase();
   var authQ = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
   if (!base || !authQ || authQ === "?initData=") return Promise.resolve(null);
-  var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
+  var cached = "";
+  try {
+    cached = (typeof sessionStorage !== "undefined" && sessionStorage.getItem("poker_dt_id")) ||
+      (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id")) ||
+      "";
+  } catch (eDtIdHint) {}
   var authQWithHint = authQ;
   if (cached && authQWithHint) authQWithHint += "&dtIdHint=" + encodeURIComponent(cached);
+  var cachedInfo = pokerReadProfileUserInfoSessionCache();
+  if (cachedInfo) {
+    pokerProfileUserInfoCache = cachedInfo;
+    pokerProfileUserInfoCacheAt = Date.now();
+    pokerApplyProfileUserInfo(cachedInfo);
+    pokerProfileUserInfoPromise = fetch(base + "/api/users" + authQWithHint)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        pokerProfileUserInfoCache = data || null;
+        pokerProfileUserInfoCacheAt = Date.now();
+        if (data && data.ok) pokerWriteProfileUserInfoSessionCache(data);
+        pokerApplyProfileUserInfo(pokerProfileUserInfoCache);
+        return pokerProfileUserInfoCache;
+      })
+      .catch(function () {
+        return cachedInfo;
+      })
+      .finally(function () {
+        pokerProfileUserInfoPromise = null;
+      });
+    return Promise.resolve(cachedInfo);
+  }
   pokerProfileUserInfoPromise = fetch(base + "/api/users" + authQWithHint)
     .then(function (r) { return r.json(); })
     .then(function (data) {
       pokerProfileUserInfoCache = data || null;
       pokerProfileUserInfoCacheAt = Date.now();
+      if (data && data.ok) pokerWriteProfileUserInfoSessionCache(data);
       pokerApplyProfileUserInfo(pokerProfileUserInfoCache);
       return pokerProfileUserInfoCache;
     })
@@ -477,8 +538,7 @@ function pokerClearSessionsAndReloadForLogin() {
   pokerWriteProfileStorage(POKER_PROFILE_LINKED_EMAIL_CACHE_KEY, "");
   pokerWriteProfileStorage(POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY, "");
   pokerWriteProfileStorage(POKER_PROFILE_RESPECT_CACHE_KEY, "");
-  pokerProfileUserInfoCache = null;
-  pokerProfileUserInfoCacheAt = 0;
+  pokerClearProfileUserInfoCache();
   try { window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null }; } catch (e7) {}
   try {
     delete window.__pokerChatDisplayName;
@@ -500,8 +560,7 @@ function pokerClearSessionsAndReloadForLogin() {
 }
 window.__pokerClearSessionsAndReloadForLogin = pokerClearSessionsAndReloadForLogin;
 window.addEventListener("poker-telegram-auth", function () {
-  pokerProfileUserInfoCache = null;
-  pokerProfileUserInfoCacheAt = 0;
+  pokerClearProfileUserInfoCache();
   try { updateProfileExitBtnVisibility(); } catch (eProfileAuthVisibility) {}
   try { if (typeof syncProfileEmailAuthUi === "function") syncProfileEmailAuthUi(); } catch (eProfileEmailSync) {}
   try {
@@ -518,8 +577,7 @@ window.addEventListener("poker-telegram-auth", function () {
 });
 window.addEventListener("poker-raffle-subscription-change", function (ev) {
   var detail = ev && ev.detail ? ev.detail : {};
-  pokerProfileUserInfoCache = null;
-  pokerProfileUserInfoCacheAt = 0;
+  pokerClearProfileUserInfoCache();
   if (detail.subscribed === true) {
     pokerSetProfileSubscriptionStatus({
       botSubscribed: true,

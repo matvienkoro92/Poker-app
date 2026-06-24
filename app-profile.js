@@ -338,8 +338,11 @@ function saveProfileHeroGender(value) {
         setProfileHeroGender(prev);
         setProfileHeroGenderFeedback((data && data.error) || "Ошибка", 2200);
       } else {
-        pokerProfileUserInfoCache = null;
-        pokerProfileUserInfoCacheAt = 0;
+        if (typeof pokerClearProfileUserInfoCache === "function") pokerClearProfileUserInfoCache();
+        else {
+          pokerProfileUserInfoCache = null;
+          pokerProfileUserInfoCacheAt = 0;
+        }
         setProfileHeroGenderFeedback("Сохранено", 1800);
       }
       renderProfileHeroGenderControl(false);
@@ -1287,6 +1290,9 @@ function initProfilePlayerDetails() {
           pokerProfileUserInfoCache[key] = updates[key];
         });
         pokerProfileUserInfoCacheAt = Date.now();
+        if (typeof window.pokerWriteCurrentProfileUserInfoCache === "function") {
+          window.pokerWriteCurrentProfileUserInfoCache(pokerProfileUserInfoCache);
+        }
       }
     } catch (eMergeProfileDetails) {}
     if (typeof refreshProfilePublicShowcase === "function") {

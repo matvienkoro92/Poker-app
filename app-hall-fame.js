@@ -444,6 +444,7 @@ window.pokerInitHallOfFamePanelShareButtons = initHallOfFamePanelShareButtons;
 initHallOfFamePanelShareButtons();
 
 var hallFishRatingRowsCache = null;
+var hallFishRatingRowsPromise = null;
 var hallFishAchievementRowsCache = null;
 var hallFishAchievementRowsPromise = null;
 var hallFishCurrentIdsCache = null;
@@ -452,6 +453,8 @@ var hallFishProfileLoadingObserver = null;
 var hallFishActiveTab = "levels";
 var hallFishActiveAchievementTab = "big50";
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
+var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v2";
+var HALL_FISH_ROWS_SESSION_CACHE_MS = 60000;
 
 function hallFishEsc(s) {
   if (s == null) return "";
@@ -468,6 +471,67 @@ function hallFishGetApiBase() {
   } catch (eBase) {
     return "";
   }
+}
+
+function hallFishReadRowsSessionCache() {
+  try {
+    if (typeof sessionStorage === "undefined") return null;
+    var raw = sessionStorage.getItem(HALL_FISH_ROWS_SESSION_CACHE_KEY);
+    if (!raw) return null;
+    var entry = JSON.parse(raw);
+    if (!entry || !Array.isArray(entry.rows)) return null;
+    if (Date.now() - Number(entry.ts || 0) > HALL_FISH_ROWS_SESSION_CACHE_MS) return null;
+    return entry.rows;
+  } catch (eHallFishRowsCacheRead) {
+    return null;
+  }
+}
+
+function hallFishWriteRowsSessionCache(rows) {
+  try {
+    if (typeof sessionStorage === "undefined" || !Array.isArray(rows)) return;
+    sessionStorage.setItem(HALL_FISH_ROWS_SESSION_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: rows }));
+  } catch (eHallFishRowsCacheWrite) {}
+}
+
+function hallFishRefreshVisibleRows(rows) {
+  try {
+    var modal = document.getElementById("hallFishRatingModal");
+    if (!modal || modal.hidden) return;
+    if (hallFishActiveTab === "birthdays") {
+      hallFishSetBirthdaysState("", rows);
+      return;
+    }
+    if (hallFishActiveTab === "achievements") {
+      hallFishAchievementRowsCache = null;
+      return;
+    }
+    hallFishLoadCurrentIds()
+      .then(function (ids) {
+        hallFishSetModalState("", rows, ids);
+      })
+      .catch(function () {});
+  } catch (eHallFishVisibleRefresh) {}
+}
+
+function hallFishFetchRows() {
+  if (hallFishRatingRowsPromise) return hallFishRatingRowsPromise;
+  var base = hallFishGetApiBase();
+  if (!base) return Promise.reject(new Error("no-api-base"));
+  var q = "?publicLevels=1";
+  hallFishRatingRowsPromise = fetch(base + "/api/player-crm" + q, { cache: "default" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
+      hallFishRatingRowsCache = hallFishRowsFromCrmData(data);
+      hallFishAchievementRowsCache = null;
+      hallFishWriteRowsSessionCache(hallFishRatingRowsCache);
+      return hallFishRatingRowsCache;
+    })
+    .finally(function () {
+      hallFishRatingRowsPromise = null;
+    });
+  return hallFishRatingRowsPromise;
 }
 
 function hallFishEnsureModal() {
@@ -706,6 +770,41 @@ function hallFishRenderRows(rows, currentIds) {
     (mine ? '<div class="hall-fish-level-sticky-mine" aria-label="Ваша строка рейтинга">' +
       hallFishLevelRowHtml(mine.row, mine.rank, "hall-fish-level-row--mine hall-fish-level-row--sticky") +
     '</div>' : '');
+}
+
+function hallFishRenderLevelSkeleton() {
+  var rows = [];
+  for (var i = 1; i <= 6; i += 1) {
+    rows.push(
+      '<div class="hall-fish-level-row hall-fish-level-row--skeleton" aria-hidden="true">' +
+        '<span class="hall-fish-level-row__rank">' + i + '</span>' +
+        '<span><span class="hall-fish-skeleton-line hall-fish-skeleton-line--name"></span>' +
+        '<span class="hall-fish-skeleton-line hall-fish-skeleton-line--sub"></span></span>' +
+        '<span class="hall-fish-skeleton-line hall-fish-skeleton-line--value"></span>' +
+      '</div>'
+    );
+  }
+  return '<div class="hall-fish-level-list hall-fish-level-list--skeleton" role="status" aria-live="polite" aria-label="Загрузка рейтинга">' + rows.join("") + '</div>';
+}
+
+function hallFishRenderAchievementSkeleton() {
+  return '<div class="hall-fish-achievement-shell hall-fish-achievement-shell--skeleton" role="status" aria-live="polite" aria-label="Загрузка топов по ачивкам">' +
+    '<div class="hall-fish-achievement-subtabs hall-fish-achievement-subtabs--skeleton">' +
+      '<span class="hall-fish-skeleton-pill"></span><span class="hall-fish-skeleton-pill"></span><span class="hall-fish-skeleton-pill"></span>' +
+    '</div>' +
+    hallFishRenderLevelSkeleton() +
+  '</div>';
+}
+
+function hallFishRenderBirthdaysSkeleton() {
+  var cells = [];
+  for (var i = 0; i < 35; i += 1) cells.push('<span class="hall-fish-birthday-calendar__cell hall-fish-birthday-calendar__cell--skeleton"></span>');
+  return '<div class="hall-fish-birthdays hall-fish-birthdays--skeleton" role="status" aria-live="polite" aria-label="Загрузка дней рождения">' +
+    '<div class="hall-fish-birthday-calendar">' +
+      '<div class="hall-fish-skeleton-line hall-fish-skeleton-line--calendar-title"></div>' +
+      '<div class="hall-fish-birthday-calendar__grid">' + cells.join("") + '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function hallFishNormalizeNick(nick) {
@@ -1140,7 +1239,7 @@ function hallFishSetModalState(message, rows, currentIds) {
     myRank.hidden = false;
     myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
   }
-  if (body) body.innerHTML = rows ? hallFishRenderRows(rows, currentIds) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  if (body) body.innerHTML = rows ? hallFishRenderRows(rows, currentIds) : hallFishRenderLevelSkeleton();
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
@@ -1153,7 +1252,7 @@ function hallFishSetAchievementState(message, data) {
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("achievements");
   if (myRank) myRank.hidden = true;
-  if (body) body.innerHTML = data ? hallFishRenderAchievementRows(data) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  if (body) body.innerHTML = data ? hallFishRenderAchievementRows(data) : hallFishRenderAchievementSkeleton();
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
@@ -1166,7 +1265,7 @@ function hallFishSetBirthdaysState(message, rows) {
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("birthdays");
   if (myRank) myRank.hidden = true;
-  if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows) : hallFishRenderBirthdaysSkeleton();
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
@@ -1196,22 +1295,23 @@ function hallFishCloseModal() {
 
 function hallFishLoadRows() {
   if (hallFishRatingRowsCache) return Promise.resolve(hallFishRatingRowsCache);
-  var base = hallFishGetApiBase();
-  if (!base) return Promise.reject(new Error("no-api-base"));
-  var q = "?publicLevels=1";
-  return fetch(base + "/api/player-crm" + q)
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
-      hallFishRatingRowsCache = hallFishRowsFromCrmData(data);
-      return hallFishRatingRowsCache;
-    });
+  var cachedRows = hallFishReadRowsSessionCache();
+  if (cachedRows) {
+    hallFishRatingRowsCache = cachedRows;
+    hallFishFetchRows()
+      .then(function (freshRows) {
+        hallFishRefreshVisibleRows(freshRows);
+      })
+      .catch(function () {});
+    return Promise.resolve(cachedRows);
+  }
+  return hallFishFetchRows();
 }
 
 function hallFishLoadClubChoiceAchievementRows() {
   var base = hallFishGetApiBase();
   if (!base) return Promise.resolve([]);
-  return fetch(base + "/api/club-choice-vote?mode=achievements&_t=" + Date.now(), { cache: "no-store" })
+  return fetch(base + "/api/club-choice-vote?mode=achievements", { cache: "default" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       return data && data.ok && Array.isArray(data.rows) ? data.rows : [];
@@ -1363,6 +1463,11 @@ function initHallFishRatingModal() {
 
 window.pokerInitHallFishRatingModal = initHallFishRatingModal;
 initHallFishRatingModal();
+
+window.pokerPrefetchHallFishRatingData = function () {
+  hallFishLoadRows().catch(function () {});
+  hallFishLoadCurrentIds().catch(function () {});
+};
 
 function syncInitialHallFameSectionFromStartParam() {
   var startParam = "";
