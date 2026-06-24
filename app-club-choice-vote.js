@@ -87,7 +87,7 @@
         '<header class="club-choice-vote-modal__head">' +
           '<div>' +
             '<p class="club-choice-vote-modal__eyebrow">Клубное голосование</p>' +
-            '<h2 class="club-choice-vote-modal__title" id="clubChoiceVoteTitle">Игрок месяца</h2>' +
+            '<h2 class="club-choice-vote-modal__title" id="clubChoiceVoteTitle">Достижение месяца</h2>' +
           '</div>' +
           '<button type="button" class="club-choice-vote-modal__close" data-club-choice-close="1" aria-label="Закрыть">×</button>' +
         '</header>' +
@@ -232,7 +232,7 @@
     setStatus("Голосование еще не запущено");
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary">' +
-        '<span>Игрок месяца</span>' +
+        '<span>Достижение месяца</span>' +
         '<strong>' + escapeHtml(monthLabel(data.monthKey)) + '</strong>' +
       '</div>' +
       renderAdminDraft(data) +

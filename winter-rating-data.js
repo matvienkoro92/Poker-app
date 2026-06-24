@@ -524,7 +524,7 @@ var WINTER_RATING_BY_DATE = {
     { nick: "Rom4ik", points: 0, reward: 0 },
     { nick: "PONOCHKA", points: 0, reward: 0 },
     { nick: "pryanik2la", points: 0, reward: 0 },
-    { nick: "PokerMonkeyX", points: 0, reward: 0 },
+    { nick: "ПокерМанки", points: 0, reward: 0 },
     { nick: "Waaarr", points: 0, reward: 0 },
     { nick: "cap888881", points: 0, reward: 0 },
     { nick: "SPARTAK", points: 0, reward: 0 },
@@ -1693,7 +1693,7 @@ var WINTER_RATING_TOURNAMENTS_BY_DATE = {
     { time: "00:00", players: [{ nick: "Coo1er91", place: 4, points: 70, reward: 5800 }, { nick: "FrankL", place: 13, points: 0, reward: 1500 }, { nick: "@Felix", place: 14, points: 0, reward: 1500 }, { nick: "SPARTAK", place: 16, points: 0, reward: 0 }, { nick: "tashovvv", place: 24, points: 0, reward: 0 }] },
     { time: "12:00", players: [{ nick: "Waaar", place: 5, points: 60, reward: 5700 }, { nick: "king00001", place: 12, points: 0, reward: 0 }, { nick: "FrankL", place: 13, points: 0, reward: 0 }, { nick: "Rom4ik", place: 15, points: 0, reward: 0 }, { nick: "PONOCHKA", place: 16, points: 0, reward: 0 }] },
     { time: "17:00", players: [{ nick: "AliPetuhov", place: 1, points: 135, reward: 25900 }, { nick: "doss93", place: 7, points: 0, reward: 0 }, { nick: "Waaar", place: 10, points: 0, reward: 0 }, { nick: "king00001", place: 13, points: 0, reward: 0 }, { nick: "COBRA", place: 14, points: 0, reward: 0 }] },
-    { time: "18:00", players: [{ nick: "Simba33", place: 2, points: 110, reward: 105700 }, { nick: "pryanik2la", place: 0, points: 0, reward: 0 }, { nick: "PokerMonkeyX", place: 0, points: 0, reward: 0 }, { nick: "Waaarr", place: 0, points: 0, reward: 0 }, { nick: "cap888881", place: 0, points: 0, reward: 0 }] },
+    { time: "18:00", players: [{ nick: "Simba33", place: 2, points: 110, reward: 105700 }, { nick: "pryanik2la", place: 0, points: 0, reward: 0 }, { nick: "ПокерМанки", place: 0, points: 0, reward: 0 }, { nick: "Waaarr", place: 0, points: 0, reward: 0 }, { nick: "cap888881", place: 0, points: 0, reward: 0 }] },
     { time: "20:00", players: [{ nick: "ПокерМанки", place: 3, points: 90, reward: 8375 }, { nick: "Waaar", place: 4, points: 70, reward: 9298 }, { nick: "Coo1er91", place: 7, points: 0, reward: 0 }, { nick: "Danger", place: 8, points: 0, reward: 1547 }, { nick: "Палач", place: 10, points: 0, reward: 338 }] },
   ],
   "31.12.2025": [

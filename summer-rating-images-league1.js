@@ -125,6 +125,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
   ],
   "14.06.2026": [
     "rating-compressed-preview/rating-14-06-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-14-06-2026-league1-crazy-main-event-10h.jpg",
     "rating-compressed-preview/rating-14-06-2026-league1-dv-turbo-500-80k-10h.jpg",
     "rating-compressed-preview/rating-14-06-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-14-06-2026-league1-new-hot-pko-2-3-15h.jpg",
@@ -133,6 +134,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-14-06-2026-league1-nlh-knockout-220k-21h.jpg"
   ],
   "15.06.2026": [
+    "rating-compressed-preview/rating-15-06-2026-league1-waaar-crazy-145-4.jpg",
     "rating-compressed-preview/rating-15-06-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-15-06-2026-league1-tournir-ponedelnika-18h.jpg",
     "rating-compressed-preview/rating-15-06-2026-league1-hok-19h.jpg",
@@ -154,6 +156,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-17-06-2026-league1-rebuy-evening-20h.jpg"
   ],
   "18.06.2026": [
+    "rating-compressed-preview/rating-18-06-2026-league1-waaar-super-saturday-303-84.jpg",
     "rating-compressed-preview/rating-18-06-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-18-06-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-compressed-preview/rating-18-06-2026-league1-tournir-chetverga-18h.jpg",

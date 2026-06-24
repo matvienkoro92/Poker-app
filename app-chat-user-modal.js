@@ -80,6 +80,7 @@ if (chatUserModalEl) {
   var modalPersonal = document.getElementById("chatUserModalPersonal");
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
   var modalLevelText = document.getElementById("chatUserModalLevelText");
+  var modalRespectOpenVoters = document.getElementById("chatUserModalRespectOpenVoters");
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
   var modalGender = document.getElementById("chatUserModalGender");
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
@@ -474,6 +475,19 @@ if (chatUserModalEl) {
     return legends.some(function (legendNick) {
       return chatUserModalSameRatingNick(legendNick, nick);
     });
+  }
+  function chatUserModalManualAchievements(ratingNick) {
+    if (!String(ratingNick || "").trim()) return [];
+    var rows = [];
+    if (chatUserModalSameRatingNick("Coo1er91", ratingNick) || chatUserModalSameRatingNick("Кулер", ratingNick)) {
+      rows.push({
+        title: "Пухомет",
+        rows: [{ label: "Особая ачивка Кулера" }],
+        info: "Особая клубная ачивка для Кулера.",
+        image: "./assets/chat-profile-achievement-puhomet.webp",
+      });
+    }
+    return rows;
   }
   function getChatUserModalSingleTopWinsReady() {
     function readWins() {
@@ -902,6 +916,7 @@ if (chatUserModalEl) {
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };
+    if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.png" };
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.png" };
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.png" };
@@ -949,7 +964,8 @@ if (chatUserModalEl) {
     if (key.indexOf("легенд") >= 0) return "Особая клубная ачивка для игроков, которые отмечены клубом как легенды Два туза.";
     if (key.indexOf("топ занос") >= 0) return "Показывает попадание игрока в список крупнейших разовых турнирных заносов клуба.";
     if (key.indexOf("счастлив") >= 0) return "Дается игрокам из топ-3 месяца по количеству побед в розыгрышах.";
-    if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return "Дается победителю голосования игроков клуба за игрока месяца.";
+    if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return "Дается победителю клубного голосования за достижение месяца.";
+    if (key.indexOf("пухом") >= 0) return "Особая клубная ачивка для Кулера.";
     if (key.indexOf("топ10") >= 0) return "Дается за попадание в топ-10 сезонного рейтинга клуба.";
     return "Клубное достижение. Открывается автоматически, когда игрок выполняет условие карточки.";
   }
@@ -1057,7 +1073,7 @@ if (chatUserModalEl) {
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
-    var infoImage = meta.mod && meta.mod.indexOf("cup") >= 0 ? meta.img : "";
+    var infoImage = options.infoImage || options.image || (meta.mod && meta.mod.indexOf("cup") >= 0 ? meta.img : "");
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
       ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
@@ -1165,6 +1181,7 @@ if (chatUserModalEl) {
     }
     var tournamentStats = metrics.tournaments || {};
     var tournamentKingWins = tournamentStats && tournamentStats.firstPlaces || 0;
+    var manualAchievements = chatUserModalManualAchievements(ratingNick);
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
       return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml());
     }
@@ -1263,7 +1280,14 @@ if (chatUserModalEl) {
     var heroHtml = chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
       placeholder: "Топ-1 месяца",
     });
+    var manualHtml = manualAchievements.map(function (item) {
+      return chatUserModalAchievementCardHtml("★", item.title, item.rows, {
+        info: item.info,
+        image: item.image,
+      });
+    }).join("");
     var socialHtml =
+      manualHtml +
       heroHtml +
       chatUserModalAchievementCardHtml("★", "Любимец клуба", [], {
         tier: {
@@ -2172,6 +2196,18 @@ if (chatUserModalEl) {
       if (modalRespectDown.disabled) return;
       var a = modalRespectDown.getAttribute("data-rv-action") || "down";
       chatUserModalPostRespect(a === "withdraw" ? "withdraw" : "down");
+    });
+  }
+  if (modalRespectOpenVoters) {
+    modalRespectOpenVoters.addEventListener("click", function () {
+      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+        else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
+        return;
+      }
+      if (chatUserModalUserId && typeof window.pokerOpenRespectVotersModal === "function") {
+        window.pokerOpenRespectVotersModal(chatUserModalUserId, { hideVoteButtons: true });
+      }
     });
   }
   if (modalAddFriend) {

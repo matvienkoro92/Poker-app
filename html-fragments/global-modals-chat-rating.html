@@ -16,7 +16,11 @@
         <div class="winter-rating-date-modal__backdrop" id="winterRatingDateModalBackdrop"></div>
         <div class="winter-rating-date-modal__inner">
           <button type="button" class="winter-rating-date-modal__close" id="winterRatingDateModalClose" aria-label="Закрыть">×</button>
-          <h3 class="winter-rating-date-modal__title" id="winterRatingDateModalTitle">Рейтинг на дату</h3>
+          <div class="winter-rating-date-modal__header">
+            <button type="button" class="winter-rating-date-modal__nav winter-rating-date-modal__nav--prev" id="winterRatingDateModalPrev" aria-label="Предыдущая дата">‹</button>
+            <h3 class="winter-rating-date-modal__title" id="winterRatingDateModalTitle">Рейтинг на дату</h3>
+            <button type="button" class="winter-rating-date-modal__nav winter-rating-date-modal__nav--next" id="winterRatingDateModalNext" aria-label="Следующая дата">›</button>
+          </div>
           <div class="winter-rating-date-modal__body" id="winterRatingDateModalBody"></div>
         </div>
       </div>
@@ -61,7 +65,9 @@
               <div class="chat-user-modal__level">
                 <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
                 <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
-                <p class="chat-user-modal__respect">Уважение от игроков <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span></p>
+                <button type="button" class="chat-user-modal__respect" id="chatUserModalRespectOpenVoters" aria-label="Кто поднял или уменьшил уважение от игроков">
+                  Уважение от игроков <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span>
+                </button>
               </div>
               <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
                 <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень</h4>

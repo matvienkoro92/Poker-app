@@ -735,7 +735,7 @@
   isolation: isolate;
 }
 .view[data-view="profile"] .profile-achievements-showcase__achievements .chat-user-modal__achievement-icon img {
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
 }
 .profile-achievements-showcase__ranks {
   margin-bottom: 0;
@@ -2154,8 +2154,8 @@ body.profile-avatar-choice-open {
     isolation: isolate;
   }
   .view[data-view="profile"] .profile-achievements-showcase__achievements .chat-user-modal__achievement-icon img {
-    mix-blend-mode: screen;
-    -webkit-mask-image: radial-gradient(ellipse 74% 76% at 50% 52%, #000 0 64%, rgba(0, 0, 0, 0.82) 76%, transparent 100%);
-    mask-image: radial-gradient(ellipse 74% 76% at 50% 52%, #000 0 64%, rgba(0, 0, 0, 0.82) 76%, transparent 100%);
+    mix-blend-mode: normal;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }

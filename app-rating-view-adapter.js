@@ -378,13 +378,20 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "em13!!": { src: "./assets/summer-rating-player-emil.webp", place: 4, league: 1 },
   "winifly": { src: "./assets/summer-rating-player-winifly.webp", place: 5, league: 1 },
   "missclick": { src: "./assets/summer-rating-player-missclick.webp", place: 6, league: 1 },
+  "рыбнадзор": { src: "./assets/summer-rating-player-rybnadzor.webp", place: 7, league: 1 },
   "nikola233": { src: "./assets/summer-rating-player-nikola233.webp", place: 7, league: 1 },
   "milkyway77": { src: "./assets/summer-rating-player-milkyway.webp", place: 8, league: 1 },
   "prushnik": { src: "./assets/summer-rating-player-prushnik.webp", place: 9, league: 1 },
+  "evgen1722": { src: "./assets/summer-rating-player-evgen1722.webp", place: 10, league: 1 },
   "хер вам)))))": { src: "./assets/summer-rating-player-khervam.webp", place: 10, league: 1 },
   "alenast": { src: "./assets/summer-rating-league2-player-alena.webp", place: 1, league: 2 },
   "shkarubo": { src: "./assets/summer-rating-league2-player-shkarubo.webp", place: 2, league: 2 },
   "sarmat1305": { src: "./assets/summer-rating-league2-player-sarmat.webp", place: 3, league: 2 },
+  "палач": { src: "./assets/summer-rating-league2-player-palach.webp", place: 5, league: 2 },
+  "nakurikota": { src: "./assets/summer-rating-league2-player-nakurikota.webp", place: 6, league: 2 },
+  "накурикота": { src: "./assets/summer-rating-league2-player-nakurikota.webp", place: 6, league: 2 },
+  "wildboar": { src: "./assets/summer-rating-league2-player-wildboar.webp", place: 7, league: 2 },
+  "бабник": { src: "./assets/summer-rating-league2-player-babnik.webp", place: 9, league: 2 },
   "виктор": { src: "./assets/summer-rating-league2-player-viktor.webp", place: 5, league: 2 },
   "мистерfox": { src: "./assets/summer-rating-league2-player-mr-fox.webp", place: 7, league: 2 },
   "babyshark": { src: "./assets/summer-rating-league2-player-babyshark.webp", place: 8, league: 2 },
@@ -1746,13 +1753,19 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-player-emil.webp",
     "./assets/summer-rating-player-winifly.webp",
     "./assets/summer-rating-player-missclick.webp",
+    "./assets/summer-rating-player-rybnadzor.webp",
     "./assets/summer-rating-player-nikola233.webp",
     "./assets/summer-rating-player-milkyway.webp",
     "./assets/summer-rating-player-prushnik.webp",
+    "./assets/summer-rating-player-evgen1722.webp",
     "./assets/summer-rating-player-khervam.webp",
     "./assets/summer-rating-league2-player-alena.webp",
     "./assets/summer-rating-league2-player-shkarubo.webp",
     "./assets/summer-rating-league2-player-sarmat.webp",
+    "./assets/summer-rating-league2-player-palach.webp",
+    "./assets/summer-rating-league2-player-nakurikota.webp",
+    "./assets/summer-rating-league2-player-wildboar.webp",
+    "./assets/summer-rating-league2-player-babnik.webp",
     "./assets/summer-rating-league2-player-viktor.webp",
     "./assets/summer-rating-league2-player-mr-fox.webp",
     "./assets/summer-rating-league2-player-babyshark.webp",
@@ -2746,6 +2759,8 @@ function initWinterRating() {
     var dateModalClose = document.getElementById("winterRatingDateModalClose");
     var dateModalTitle = document.getElementById("winterRatingDateModalTitle");
     var dateModalBody = document.getElementById("winterRatingDateModalBody");
+    var dateModalPrev = document.getElementById("winterRatingDateModalPrev");
+    var dateModalNext = document.getElementById("winterRatingDateModalNext");
     function getCalendarCellTone(dateStr) {
       var rows = [];
       try {
@@ -2801,7 +2816,45 @@ function initWinterRating() {
       if (val >= 1000) return (Math.round(val / 100) / 10).toString().replace(".", ",") + "К₽";
       return formatRewardRound(val) + "₽";
     }
-    function openDateModal(dateStr, panel) {
+    function getDateModalActiveLeague() {
+      if (!dateModalBody) return null;
+      var activeTab = dateModalBody.querySelector(".spring-rating-date-league-tab--active");
+      var league = activeTab ? activeTab.getAttribute("data-league") : null;
+      return league === "1" || league === "2" ? league : null;
+    }
+    function applyDateModalLeague(leaguesWrap, preferredLeague) {
+      if (!leaguesWrap || (preferredLeague !== "1" && preferredLeague !== "2")) return;
+      leaguesWrap.querySelectorAll(".spring-rating-date-league-tab").forEach(function (t) {
+        t.classList.toggle("spring-rating-date-league-tab--active", t.getAttribute("data-league") === preferredLeague);
+      });
+      leaguesWrap.querySelectorAll(".spring-rating-date-league").forEach(function (b) {
+        b.style.display = b.getAttribute("data-league") === preferredLeague ? "" : "none";
+      });
+    }
+    function openDateModalByDate(dateStr, preferredLeague) {
+      if (!dateStr) return;
+      var item = datesContainer.querySelector(".winter-rating__date-item[data-rating-date=\"" + dateStr + "\"]");
+      if (!item) return;
+      var panel = item.querySelector(".winter-rating__date-panel");
+      if (panel) openDateModal(dateStr, panel, preferredLeague);
+    }
+    function updateDateModalNav(dateStr) {
+      var avail = calendarWrap._availableDates || availableDates || [];
+      var index = avail.indexOf(dateStr);
+      var olderDate = index >= 0 ? avail[index + 1] : null;
+      var newerDate = index > 0 ? avail[index - 1] : null;
+      if (dateModalPrev) {
+        dateModalPrev.disabled = !olderDate;
+        dateModalPrev.setAttribute("aria-label", olderDate ? "Предыдущая дата: " + olderDate : "Предыдущая дата");
+        dateModalPrev.dataset.ratingDate = olderDate || "";
+      }
+      if (dateModalNext) {
+        dateModalNext.disabled = !newerDate;
+        dateModalNext.setAttribute("aria-label", newerDate ? "Следующая дата: " + newerDate : "Следующая дата");
+        dateModalNext.dataset.ratingDate = newerDate || "";
+      }
+    }
+    function openDateModal(dateStr, panel, preferredLeague) {
       if (!dateModal || !dateModalBody || !panel) return;
       var lwModal = panel.querySelector(".spring-rating-date-leagues");
       if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr);
@@ -2811,6 +2864,7 @@ function initWinterRating() {
       dateModalBody.appendChild(clone);
       var cloneLeaguesWrap = clone.querySelector(".spring-rating-date-leagues");
       if (cloneLeaguesWrap) {
+        applyDateModalLeague(cloneLeaguesWrap, preferredLeague);
         cloneLeaguesWrap.addEventListener("click", function (e) {
           var tab = e.target && e.target.closest ? e.target.closest(".spring-rating-date-league-tab") : null;
           if (!tab) return;
@@ -2848,6 +2902,7 @@ function initWinterRating() {
         });
       });
       if (dateModalTitle) dateModalTitle.textContent = "Рейтинг на " + dateStr;
+      updateDateModalNav(dateStr);
       dateModal.setAttribute("aria-hidden", "false");
       if (document.body) document.body.style.overflow = "hidden";
     }
@@ -2858,6 +2913,16 @@ function initWinterRating() {
     }
     if (dateModalBackdrop) dateModalBackdrop.addEventListener("click", closeDateModal);
     if (dateModalClose) dateModalClose.addEventListener("click", closeDateModal);
+    [dateModalPrev, dateModalNext].forEach(function (navBtn) {
+      if (!navBtn || navBtn.getAttribute("data-rating-date-nav-bound") === "1") return;
+      navBtn.setAttribute("data-rating-date-nav-bound", "1");
+      navBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (navBtn.disabled) return;
+        openDateModalByDate(navBtn.dataset.ratingDate || "", getDateModalActiveLeague());
+      });
+    });
     function renderCalendarMonth(monthIndex) {
       calendarWrap._calendarMonthIndex = monthIndex;
       var am = calendarWrap._availableMonths;

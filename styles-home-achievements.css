@@ -3,7 +3,7 @@
   align-items: center;
   gap: 12px;
   width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
-  margin: 23px calc(-1 * var(--card-padding-x, 16px) + 3px) 8px;
+  margin: 33px calc(-1 * var(--card-padding-x, 16px) + 3px) 8px;
   color: #e8ad54;
   font-size: clamp(8.4px, 2.38vw, 11.2px);
   font-weight: 900;
@@ -74,7 +74,7 @@
 
 @media (max-width: 360px) {
   .app.app--view-home .home-club-achievements-title {
-    margin-top: 21px;
+    margin-top: 31px;
     gap: 8px;
     font-size: 7.7px;
     letter-spacing: 0.24em;
