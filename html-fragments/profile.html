@@ -34,10 +34,17 @@
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                     </div>
                     <span class="profile-public-showcase__specialty-badge" id="profilePublicSpecialtyBadge" hidden></span>
-                    <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
-                      <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
-                      <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
-                      <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
+                    <div class="profile-public-showcase__identity-controls">
+                      <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
+                        <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
+                        <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
+                        <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
+                      </div>
+                      <div class="profile-hero-specialty" id="profileHeroSpecialty" role="group" aria-label="Специализация игрока">
+                        <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyMttBtn" data-profile-specialty="mtt" aria-pressed="false">МТТ</button>
+                        <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash" aria-pressed="false">Кеш</button>
+                        <span class="profile-hero-specialty__feedback" id="profileSpecialtyFeedback" aria-live="polite"></span>
+                      </div>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
@@ -94,7 +101,7 @@
                 <h2 class="profile-player-details__title" id="profilePlayerDetailsTitle">Данные игрока</h2>
                 <span class="profile-player-details__feedback" id="profilePlayerDetailsFeedback" aria-live="polite"></span>
               </div>
-              <div class="profile-player-details__grid">
+              <div class="profile-player-details__grid profile-player-details__grid--single">
                 <label class="profile-player-details__field">
                   <span class="profile-player-details__label">Дата рождения</span>
                   <span class="profile-player-details__birth-row">
@@ -103,14 +110,6 @@
                   </span>
                   <span class="profile-player-details__hint" id="profileBirthDateHint">Можно указать только один раз.</span>
                 </label>
-                <div class="profile-player-details__field">
-                  <span class="profile-player-details__label">Специализация</span>
-                  <span class="profile-player-details__toggle" role="group" aria-label="Специализация игрока">
-                    <button type="button" class="profile-player-details__toggle-btn" id="profileSpecialtyMttBtn" data-profile-specialty="mtt">МТТ</button>
-                    <button type="button" class="profile-player-details__toggle-btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash">Кеш</button>
-                  </span>
-                  <span class="profile-player-details__hint">Можно менять в любой момент.</span>
-                </div>
               </div>
             </section>
             <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>

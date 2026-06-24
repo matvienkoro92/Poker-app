@@ -341,6 +341,7 @@ function updateProfileDtId() {
         document.querySelectorAll("[data-profile-specialty]").forEach(function (btn) {
           var active = specialty && btn.getAttribute("data-profile-specialty") === specialty;
           btn.classList.toggle("profile-player-details__toggle-btn--active", !!active);
+          btn.classList.toggle("profile-hero-specialty__btn--active", !!active);
           btn.setAttribute("aria-pressed", active ? "true" : "false");
         });
       }

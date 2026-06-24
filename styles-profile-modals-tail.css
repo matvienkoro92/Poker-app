@@ -567,6 +567,9 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
+.profile-player-details__grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
 .profile-player-details__field {
   display: flex;
   flex-direction: column;

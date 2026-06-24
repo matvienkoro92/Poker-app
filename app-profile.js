@@ -1157,8 +1157,9 @@ function initProfilePlayerDetails() {
   var section = document.getElementById("profilePlayerDetailsSection");
   var birthInput = document.getElementById("profileBirthDateInput");
   var birthSave = document.getElementById("profileBirthDateSaveBtn");
-  var specialtyBtns = section ? section.querySelectorAll("[data-profile-specialty]") : [];
+  var specialtyBtns = document.querySelectorAll("[data-profile-specialty]");
   var feedback = document.getElementById("profilePlayerDetailsFeedback");
+  var specialtyFeedback = document.getElementById("profileSpecialtyFeedback");
   if (!section || section.dataset.playerDetailsBound === "1") return;
   section.dataset.playerDetailsBound = "1";
   var base = getApiBase();
@@ -1182,6 +1183,18 @@ function initProfilePlayerDetails() {
       }, ms || 2500);
     }
   }
+  function showSpecialtyFeedback(text, ms) {
+    if (!specialtyFeedback) {
+      showDetailsFeedback(text, ms);
+      return;
+    }
+    specialtyFeedback.textContent = text || "";
+    if (ms !== 0) {
+      setTimeout(function () {
+        if (specialtyFeedback.textContent === text) specialtyFeedback.textContent = "";
+      }, ms || 2500);
+    }
+  }
   function setBirthDateState(value) {
     var saved = String(value || "").trim();
     if (birthInput) {
@@ -1198,6 +1211,7 @@ function initProfilePlayerDetails() {
     specialtyBtns.forEach(function (btn) {
       var active = btn.getAttribute("data-profile-specialty") === selected;
       btn.classList.toggle("profile-player-details__toggle-btn--active", active);
+      btn.classList.toggle("profile-hero-specialty__btn--active", active);
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
@@ -1288,7 +1302,10 @@ function initProfilePlayerDetails() {
       var next = btn.getAttribute("data-profile-specialty") || "";
       setSpecialtyState(next);
       postPlayerDetails({ specialty: next }, { buttons: Array.prototype.slice.call(specialtyBtns) }).then(function (data) {
-        if (data && data.ok) mergeProfileUserInfo({ profileSpecialty: next });
+        if (data && data.ok) {
+          showSpecialtyFeedback("Сохранено");
+          mergeProfileUserInfo({ profileSpecialty: next });
+        }
         else loadPlayerDetails();
       });
     });
