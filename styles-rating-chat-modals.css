@@ -463,17 +463,19 @@
 }
 .chat-user-modal__top {
   display: grid;
-  grid-template-columns: max-content minmax(142px, 150px);
+  grid-template-columns: max-content minmax(180px, 1fr) 58px;
   gap: 14px;
-  justify-content: start;
+  justify-content: stretch;
   align-items: start;
-  padding-right: 42px;
+  padding-right: 0;
   margin-bottom: 14px;
 }
 .chat-user-modal__top-actions {
   display: grid;
   gap: 8px;
+  width: min(236px, 100%);
   min-width: 0;
+  justify-self: center;
 }
 .chat-user-modal--self .chat-user-modal__top {
   grid-template-columns: minmax(0, 1fr);
@@ -1949,6 +1951,8 @@
 @media (max-width: 380px) {
   .chat-user-modal__top-actions {
     grid-template-columns: minmax(0, 1fr);
+    width: auto;
+    justify-self: stretch;
   }
 
   .chat-user-modal__top {

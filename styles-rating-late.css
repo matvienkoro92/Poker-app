@@ -4459,7 +4459,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
   --summer-top3-art-center-size: 20%;
-  --summer-top3-art-left-y: calc(44% + 28px);
+  --summer-top3-art-left-y: calc(44% + 34px);
   --summer-top3-art-left-size: 27.75%;
   --summer-top3-art-right-size: 18%;
 }
