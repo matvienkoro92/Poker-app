@@ -165,6 +165,23 @@
     '</form>';
   }
 
+  function renderRules() {
+    return '<section class="private-cash-modal__rules" aria-label="Условия записи">' +
+      '<div class="private-cash-modal__rule">' +
+        '<span class="private-cash-modal__rule-icon" aria-hidden="true">₽</span>' +
+        '<p>Админ примет вашу заявку только если у вас есть 5 000 ₽ на счете на вход.</p>' +
+      '</div>' +
+      '<div class="private-cash-modal__rule">' +
+        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--card" aria-hidden="true">▰</span>' +
+        '<p>Если вы записались и не пришли, вы получаете желтую карточку.</p>' +
+      '</div>' +
+      '<div class="private-cash-modal__rule">' +
+        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--password" aria-hidden="true">•••</span>' +
+        '<p>Пароль от кеша будет отправлен всем, кто записался, в день игры.</p>' +
+      '</div>' +
+    '</section>';
+  }
+
   function renderParticipant(event, my) {
     if (state && state.isAdmin) return "";
     if (my && my.status) {
@@ -223,6 +240,7 @@
     var events = state.events || [];
     bodyEl.innerHTML =
       renderAdminForm() +
+      renderRules() +
       '<section class="private-cash-modal__events">' +
         (events.length ? events.map(renderEvent).join("") : '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>') +
       '</section>';
