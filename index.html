@@ -758,10 +758,15 @@
                 <span class="home-mini-icon__new-badge" aria-hidden="true">New</span>
                 <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки</span>
               </button>
-              <button type="button" class="home-club-choice-plaque" id="clubChoiceVoteOpen" aria-label="Открыть голосование за достижение месяца">
-                <span>Голосование за достижение месяца</span>
-                <span class="home-club-choice-plaque__new-badge" aria-hidden="true">New</span>
-              </button>
+              <div class="home-club-choice-actions" aria-label="Быстрые клубные действия">
+                <button type="button" class="home-club-choice-plaque home-club-choice-plaque--cash" id="privateCashSignupOpen" aria-label="Открыть запись на приватный кеш">
+                  <span class="home-club-choice-plaque__text">Приватный кеш (запись)</span>
+                </button>
+                <button type="button" class="home-club-choice-plaque home-club-choice-plaque--vote" id="clubChoiceVoteOpen" aria-label="Открыть голосование за достижение месяца">
+                  <span class="home-club-choice-plaque__text">Голосование за достижение месяца</span>
+                  <span class="home-club-choice-plaque__new-badge" aria-hidden="true">New</span>
+                </button>
+              </div>
             </div>
             <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
               <h2 class="home-tournament-section-title">Турниры вечера в 18 МСК</h2>
@@ -1722,6 +1727,7 @@
     <script defer src="./app-video-lessons-modals.js?v=3.593"></script>
     <script defer src="./app-equilator.js?v=3.593"></script>
     <script defer src="./app-club-choice-vote.js?v=3.645"></script>
+    <script defer src="./app-private-cash.js?v=1.001"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.593"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-summer-runtime.js?v=3.593"></script>
