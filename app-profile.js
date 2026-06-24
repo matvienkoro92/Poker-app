@@ -1154,11 +1154,11 @@ function pokerProfileSpecialtyBadgeText(value) {
 }
 
 function initProfilePlayerDetails() {
-  var section = document.getElementById("profilePlayerDetailsSection");
+  var section = document.getElementById("profileHeroBirthDate") || document.getElementById("profilePlayerDetailsSection");
   var birthInput = document.getElementById("profileBirthDateInput");
   var birthSave = document.getElementById("profileBirthDateSaveBtn");
   var specialtyBtns = document.querySelectorAll("[data-profile-specialty]");
-  var feedback = document.getElementById("profilePlayerDetailsFeedback");
+  var feedback = document.getElementById("profileBirthDateFeedback") || document.getElementById("profilePlayerDetailsFeedback");
   var specialtyFeedback = document.getElementById("profileSpecialtyFeedback");
   if (!section || section.dataset.playerDetailsBound === "1") return;
   section.dataset.playerDetailsBound = "1";
@@ -1197,6 +1197,7 @@ function initProfilePlayerDetails() {
   }
   function setBirthDateState(value) {
     var saved = String(value || "").trim();
+    section.classList.toggle("profile-hero-birth--saved", !!saved);
     if (birthInput) {
       birthInput.value = saved;
       birthInput.disabled = !!saved;
@@ -1264,14 +1265,17 @@ function initProfilePlayerDetails() {
       })
       .then(function (data) {
         if (data && data.ok) {
-          showDetailsFeedback("Сохранено");
+          if (opts.feedback === "specialty") showSpecialtyFeedback("Сохранено");
+          else showDetailsFeedback("Сохранено");
           return data;
         }
-        showDetailsFeedback((data && data.error) || "Ошибка", 3500);
+        if (opts.feedback === "specialty") showSpecialtyFeedback((data && data.error) || "Ошибка", 3500);
+        else showDetailsFeedback((data && data.error) || "Ошибка", 3500);
         return data || null;
       })
       .catch(function () {
-        showDetailsFeedback(POKER_NET_ERR, 3500);
+        if (opts.feedback === "specialty") showSpecialtyFeedback(POKER_NET_ERR, 3500);
+        else showDetailsFeedback(POKER_NET_ERR, 3500);
         return null;
       })
       .finally(function () {
@@ -1301,9 +1305,8 @@ function initProfilePlayerDetails() {
     btn.addEventListener("click", function () {
       var next = btn.getAttribute("data-profile-specialty") || "";
       setSpecialtyState(next);
-      postPlayerDetails({ specialty: next }, { buttons: Array.prototype.slice.call(specialtyBtns) }).then(function (data) {
+      postPlayerDetails({ specialty: next }, { buttons: Array.prototype.slice.call(specialtyBtns), feedback: "specialty" }).then(function (data) {
         if (data && data.ok) {
-          showSpecialtyFeedback("Сохранено");
           mergeProfileUserInfo({ profileSpecialty: next });
         }
         else loadPlayerDetails();

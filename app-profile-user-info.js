@@ -328,7 +328,9 @@ function updateProfileDtId() {
       if (data && data.ok) {
         var birthInput = document.getElementById("profileBirthDateInput");
         var birthSave = document.getElementById("profileBirthDateSaveBtn");
+        var birthWrap = document.getElementById("profileHeroBirthDate");
         var birthDate = data.profileBirthDate || data.birthDate || "";
+        if (birthWrap) birthWrap.classList.toggle("profile-hero-birth--saved", !!birthDate);
         if (birthInput && birthDate) {
           birthInput.value = birthDate;
           birthInput.disabled = true;

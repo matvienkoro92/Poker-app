@@ -45,6 +45,12 @@
                         <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash" aria-pressed="false">Кеш</button>
                         <span class="profile-hero-specialty__feedback" id="profileSpecialtyFeedback" aria-live="polite"></span>
                       </div>
+                      <label class="profile-hero-birth" id="profileHeroBirthDate" aria-label="Дата рождения">
+                        <span class="profile-hero-birth__label">ДР</span>
+                        <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" aria-label="Дата рождения" />
+                        <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
+                        <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
+                      </label>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
@@ -94,22 +100,6 @@
                     </div>
                   </section>
                 </div>
-              </div>
-            </section>
-            <section class="profile-player-details" id="profilePlayerDetailsSection" data-profile-club-panel aria-labelledby="profilePlayerDetailsTitle">
-              <div class="profile-player-details__head">
-                <h2 class="profile-player-details__title" id="profilePlayerDetailsTitle">Данные игрока</h2>
-                <span class="profile-player-details__feedback" id="profilePlayerDetailsFeedback" aria-live="polite"></span>
-              </div>
-              <div class="profile-player-details__grid profile-player-details__grid--single">
-                <label class="profile-player-details__field">
-                  <span class="profile-player-details__label">Дата рождения</span>
-                  <span class="profile-player-details__birth-row">
-                    <input type="date" class="profile-player-details__input" id="profileBirthDateInput" aria-describedby="profileBirthDateHint" />
-                    <button type="button" class="profile-player-details__save" id="profileBirthDateSaveBtn">Сохранить</button>
-                  </span>
-                  <span class="profile-player-details__hint" id="profileBirthDateHint">Можно указать только один раз.</span>
-                </label>
               </div>
             </section>
             <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
