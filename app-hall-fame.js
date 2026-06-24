@@ -479,11 +479,8 @@ function hallFishEnsureModal() {
   modal.hidden = true;
   modal.innerHTML =
     '<div class="hall-fish-modal__backdrop" data-hall-fish-close></div>' +
-    '<section class="hall-fish-modal__panel" role="dialog" aria-modal="true" aria-labelledby="hallFishRatingTitle">' +
-      '<div class="hall-fish-modal__head">' +
-        '<div><h3 class="hall-fish-modal__title" id="hallFishRatingTitle">Рейтинги игроков</h3><span class="hall-fish-modal__subtitle" id="hallFishRatingSubtitle">—</span><span class="hall-fish-modal__my-rank" id="hallFishRatingMyRank">Ваш рейтинг —/—</span></div>' +
-        '<button type="button" class="hall-fish-modal__close" data-hall-fish-close aria-label="Закрыть">×</button>' +
-      '</div>' +
+    '<section class="hall-fish-modal__panel" role="dialog" aria-modal="true" aria-label="Рейтинги игроков">' +
+      '<button type="button" class="hall-fish-modal__close" data-hall-fish-close aria-label="Закрыть">×</button>' +
       '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
@@ -663,6 +660,22 @@ function hallFishFindMyRank(rows, currentIds) {
   return 0;
 }
 
+function hallFishFindMyLevelRow(rows, currentIds) {
+  rows = Array.isArray(rows) ? rows : [];
+  var variants = {};
+  (Array.isArray(currentIds) ? currentIds : []).forEach(function (id) {
+    hallFishIdVariants(id).forEach(function (v) { variants[v] = true; });
+  });
+  if (!Object.keys(variants).length) return null;
+  for (var i = 0; i < rows.length; i += 1) {
+    var rowVariants = hallFishIdVariants(rows[i] && rows[i].accountId);
+    for (var j = 0; j < rowVariants.length; j += 1) {
+      if (variants[rowVariants[j]]) return { row: rows[i], rank: i + 1 };
+    }
+  }
+  return null;
+}
+
 function hallFishMyRankText(rows, currentIds) {
   rows = Array.isArray(rows) ? rows : [];
   var total = rows.length;
@@ -671,19 +684,28 @@ function hallFishMyRankText(rows, currentIds) {
   return "Ваш рейтинг " + (rank ? String(rank) : "—") + "/" + String(total);
 }
 
-function hallFishRenderRows(rows) {
+function hallFishLevelRowHtml(row, rank, extraClass) {
+  var userId = String(row && row.accountId || "").trim();
+  var name = row && (row.name || row.telegram) || "Игрок";
+  var sub = row && row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
+  return '<button type="button" class="hall-fish-level-row' + (extraClass ? " " + hallFishEsc(extraClass) : "") + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
+    '<span class="hall-fish-level-row__rank">' + hallFishEsc(rank) + '</span>' +
+    '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
+    '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
+    '<span class="hall-fish-level-row__level">' + hallFishEsc(row && row.level) + ' ур.</span>' +
+  '</button>';
+}
+
+function hallFishRenderRows(rows, currentIds) {
   if (!rows.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с уровнем.</div>';
+  var mine = hallFishFindMyLevelRow(rows, currentIds);
   return '<div class="hall-fish-level-list">' + rows.map(function (row, idx) {
-    var userId = String(row.accountId || "").trim();
-    var name = row.name || row.telegram || "Игрок";
-    var sub = row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
-    return '<button type="button" class="hall-fish-level-row" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
-      '<span class="hall-fish-level-row__rank">' + hallFishEsc(idx + 1) + '</span>' +
-      '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row.name || "—") + '</span>' +
-      '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
-      '<span class="hall-fish-level-row__level">' + hallFishEsc(row.level) + ' ур.</span>' +
-    '</button>';
-  }).join("") + '</div>';
+    var isMine = mine && mine.rank === idx + 1;
+    return hallFishLevelRowHtml(row, idx + 1, isMine ? "hall-fish-level-row--mine" : "");
+  }).join("") + '</div>' +
+    (mine ? '<div class="hall-fish-level-sticky-mine" aria-label="Ваша строка рейтинга">' +
+      hallFishLevelRowHtml(mine.row, mine.rank, "hall-fish-level-row--mine hall-fish-level-row--sticky") +
+    '</div>' : '');
 }
 
 function hallFishNormalizeNick(nick) {
@@ -1118,7 +1140,7 @@ function hallFishSetModalState(message, rows, currentIds) {
     myRank.hidden = false;
     myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
   }
-  if (body) body.innerHTML = rows ? hallFishRenderRows(rows) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
+  if (body) body.innerHTML = rows ? hallFishRenderRows(rows, currentIds) : '<div class="hall-fish-modal__notice">' + hallFishEsc(message || "Загрузка…") + '</div>';
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }

@@ -1390,6 +1390,8 @@
   box-sizing: border-box;
 }
 .profile-friends__invite {
+  align-self: start;
+  justify-self: center;
   border-radius: 50%;
   border: 2px dashed rgba(157, 168, 187, 0.42);
   color: rgba(240, 226, 204, 0.78);
@@ -1682,8 +1684,13 @@
     font-size: 23px;
   }
   .profile-friends__preview {
+    align-items: start;
     gap: 10px;
     grid-template-columns: repeat(4, minmax(54px, 1fr));
+  }
+  .profile-friends__invite {
+    width: 58px;
+    height: 58px;
   }
   .profile-friends__level-badge {
     right: 0;
