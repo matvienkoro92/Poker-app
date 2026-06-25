@@ -8,14 +8,11 @@
   var state = null;
   var loading = false;
   var BONUS_PRESETS = [
-    { id: "top-pair", title: "Топ-пара", text: "Бонус за выигранный банк с топ-парой" },
-    { id: "set", title: "Сет", text: "Бонус за выигранный банк с сетом" },
-    { id: "straight", title: "Стрит", text: "Бонус за выигранный банк со стритом" },
-    { id: "flush", title: "Флеш", text: "Бонус за выигранный банк с флешем" },
-    { id: "full-house", title: "Фулл-хаус", text: "Бонус за выигранный банк с фулл-хаусом" },
-    { id: "four-kind", title: "Каре", text: "Бонус за выигранный банк с каре" },
-    { id: "badbeat", title: "Бэдбит", text: "Бонус за болезненный переезд" },
-    { id: "custom", title: "Свой", text: "Свой бонус" },
+    { id: "four-kind", amount: "1000 ₽", condition: "за каре" },
+    { id: "straight-flush", amount: "2500 ₽", condition: "за стрит-флеш" },
+    { id: "royal", amount: "5000 ₽", condition: "за роял" },
+    { id: "knockout", amount: "500-1500 ₽", condition: "за нокаут топ10 Лиги1" },
+    { id: "badbeat", amount: "1200 ₽", condition: "бабблу" },
   ];
 
   function baseUrl() {
@@ -66,26 +63,81 @@
       .filter(Boolean);
   }
 
-  function bonusTitle(text) {
-    var raw = String(text || "").trim();
-    if (!raw) return "Бонус";
-    return raw.length > 18 ? raw.slice(0, 18).trim() + "..." : raw;
+  function parseBonusLine(line) {
+    var raw = String(line || "").trim();
+    var parts = raw.split("|").map(function (part) { return part.trim(); });
+    if (parts.length >= 2) return { amount: parts[0], condition: parts.slice(1).join(" | ") };
+    var dash = raw.match(/^(.+?)\s+[—-]\s+(.+)$/);
+    if (dash) return { amount: dash[1].trim(), condition: dash[2].trim() };
+    return { amount: raw, condition: "" };
+  }
+
+  function serializeBonus(amount, condition) {
+    amount = String(amount || "").trim();
+    condition = String(condition || "").trim();
+    if (!amount && !condition) return "";
+    return amount + " | " + condition;
+  }
+
+  function renderBonusCard(row, options) {
+    var bonus = parseBonusLine(row);
+    var removable = options && options.removable;
+    return '<article class="private-cash-modal__bonus-card">' +
+      '<strong>' + escapeHtml(bonus.amount || "Бонус") + '</strong>' +
+      (bonus.condition ? '<span>' + escapeHtml(bonus.condition) + '</span>' : '') +
+      (removable ? '<button type="button" class="private-cash-modal__bonus-remove" data-private-cash-bonus-remove aria-label="Убрать бонус">×</button>' : '') +
+    '</article>';
+  }
+
+  function updateBonusPreview(form) {
+    if (!form || !form.elements || !form.elements.bonusText) return;
+    var preview = form.querySelector("[data-private-cash-bonus-preview]");
+    if (!preview) return;
+    var rows = bonusLines(form.elements.bonusText.value);
+    preview.innerHTML = rows.length
+      ? rows.map(function (row, index) {
+        return '<div class="private-cash-modal__bonus-preview-item" data-private-cash-bonus-index="' + index + '">' + renderBonusCard(row, { removable: true }) + '</div>';
+      }).join("")
+      : '<p class="private-cash-modal__bonus-preview-empty">Добавьте бонусы, и они появятся здесь плитками.</p>';
+  }
+
+  function addBonusFromForm(form) {
+    if (!form || !form.elements || !form.elements.bonusText) return;
+    var amountEl = form.elements.bonusAmount;
+    var conditionEl = form.elements.bonusCondition;
+    var line = serializeBonus(amountEl && amountEl.value, conditionEl && conditionEl.value);
+    if (!line) return;
+    var rows = bonusLines(form.elements.bonusText.value);
+    rows.push(line);
+    form.elements.bonusText.value = rows.join("\n");
+    if (amountEl) amountEl.value = "";
+    if (conditionEl) conditionEl.value = "";
+    updateBonusPreview(form);
   }
 
   function renderBonusPicker() {
     return '<div class="private-cash-modal__bonus-picker">' +
       '<div class="private-cash-modal__bonus-head">' +
-        '<span class="private-cash-modal__bonus-label">Бонусы плиткой</span>' +
-        '<small>Выбери бонус и отредактируй текст ниже</small>' +
+        '<span class="private-cash-modal__bonus-label">Бонусы к кешу</span>' +
+        '<small>Введите сумму и условие, затем добавьте плитку</small>' +
       '</div>' +
       '<div class="private-cash-modal__bonus-grid" role="group" aria-label="Выберите бонус">' +
         BONUS_PRESETS.map(function (bonus) {
-          return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-text="' + escapeHtml(bonus.text) + '">' +
-            '<strong>' + escapeHtml(bonus.title) + '</strong>' +
+          return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-amount="' + escapeHtml(bonus.amount) + '" data-private-cash-bonus-condition="' + escapeHtml(bonus.condition) + '">' +
+            '<strong>' + escapeHtml(bonus.amount) + '</strong>' +
+            '<span>' + escapeHtml(bonus.condition) + '</span>' +
           '</button>';
         }).join("") +
       '</div>' +
-      '<label class="private-cash-modal__bonus-editor">Текст выбранного бонуса<textarea name="bonusText" maxlength="500" rows="3" placeholder="Выберите бонус выше и отредактируйте текст"></textarea></label>' +
+      '<div class="private-cash-modal__bonus-builder">' +
+        '<label>Сумма<input name="bonusAmount" maxlength="40" placeholder="1000 ₽"></label>' +
+        '<label>Условие<input name="bonusCondition" maxlength="120" placeholder="за каре"></label>' +
+        '<button type="button" class="private-cash-modal__ghost private-cash-modal__bonus-add" data-private-cash-bonus-add>Добавить бонус</button>' +
+      '</div>' +
+      '<textarea name="bonusText" class="private-cash-modal__bonus-storage" maxlength="900" rows="4" aria-label="Список бонусов"></textarea>' +
+      '<div class="private-cash-modal__bonus-display private-cash-modal__bonus-preview" data-private-cash-bonus-preview aria-live="polite">' +
+        '<p class="private-cash-modal__bonus-preview-empty">Добавьте бонусы, и они появятся здесь плитками.</p>' +
+      '</div>' +
     '</div>';
   }
 
@@ -94,10 +146,7 @@
     if (!rows.length) return "";
     return '<div class="private-cash-modal__bonus-display" aria-label="Актуальные бонусы">' +
       rows.map(function (row) {
-        return '<article class="private-cash-modal__bonus-card">' +
-          '<strong>' + escapeHtml(bonusTitle(row)) + '</strong>' +
-          '<span>' + escapeHtml(row) + '</span>' +
-        '</article>';
+        return renderBonusCard(row);
       }).join("") +
     '</div>';
   }
@@ -320,6 +369,7 @@
         Array.prototype.slice.call(form.querySelectorAll(".private-cash-modal__bonus-tile--active")).forEach(function (btn) {
           btn.classList.remove("private-cash-modal__bonus-tile--active");
         });
+        updateBonusPreview(form);
       });
     }
   }
@@ -333,13 +383,33 @@
     var bonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus]") : null;
     if (bonus) {
       var form = bonus.closest("[data-private-cash-form]");
-      var text = bonus.getAttribute("data-private-cash-bonus-text") || "";
+      var amount = bonus.getAttribute("data-private-cash-bonus-amount") || "";
+      var condition = bonus.getAttribute("data-private-cash-bonus-condition") || "";
       Array.prototype.slice.call(form ? form.querySelectorAll(".private-cash-modal__bonus-tile") : []).forEach(function (btn) {
         btn.classList.toggle("private-cash-modal__bonus-tile--active", btn === bonus);
       });
-      if (form && form.elements && form.elements.bonusText) {
-        form.elements.bonusText.value = text;
-        form.elements.bonusText.focus();
+      if (form && form.elements) {
+        if (form.elements.bonusAmount) form.elements.bonusAmount.value = amount;
+        if (form.elements.bonusCondition) form.elements.bonusCondition.value = condition;
+        if (form.elements.bonusCondition) form.elements.bonusCondition.focus();
+      }
+      return;
+    }
+    var addBonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus-add]") : null;
+    if (addBonus) {
+      addBonusFromForm(addBonus.closest("[data-private-cash-form]"));
+      return;
+    }
+    var removeBonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus-remove]") : null;
+    if (removeBonus) {
+      var removeForm = removeBonus.closest("[data-private-cash-form]");
+      var item = removeBonus.closest("[data-private-cash-bonus-index]");
+      var index = item ? Number(item.getAttribute("data-private-cash-bonus-index")) : -1;
+      if (removeForm && removeForm.elements && removeForm.elements.bonusText && index >= 0) {
+        var rows = bonusLines(removeForm.elements.bonusText.value);
+        rows.splice(index, 1);
+        removeForm.elements.bonusText.value = rows.join("\n");
+        updateBonusPreview(removeForm);
       }
       return;
     }
