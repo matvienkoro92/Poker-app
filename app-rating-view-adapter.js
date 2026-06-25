@@ -2762,6 +2762,37 @@ function initWinterRating() {
     var dateModalBody = document.getElementById("winterRatingDateModalBody");
     var dateModalPrev = document.getElementById("winterRatingDateModalPrev");
     var dateModalNext = document.getElementById("winterRatingDateModalNext");
+    function ensureDateModalNavControls() {
+      if (!dateModal || !dateModalTitle) return;
+      var inner = dateModal.querySelector(".winter-rating-date-modal__inner");
+      if (!inner) return;
+      var header = dateModal.querySelector(".winter-rating-date-modal__header");
+      if (!header) {
+        header = document.createElement("div");
+        header.className = "winter-rating-date-modal__header";
+        dateModalTitle.parentNode.insertBefore(header, dateModalTitle);
+        header.appendChild(dateModalTitle);
+      }
+      if (!dateModalPrev) {
+        dateModalPrev = document.createElement("button");
+        dateModalPrev.type = "button";
+        dateModalPrev.className = "winter-rating-date-modal__nav winter-rating-date-modal__nav--prev";
+        dateModalPrev.id = "winterRatingDateModalPrev";
+        dateModalPrev.setAttribute("aria-label", "Предыдущая дата");
+        dateModalPrev.textContent = "‹";
+        header.insertBefore(dateModalPrev, dateModalTitle);
+      }
+      if (!dateModalNext) {
+        dateModalNext = document.createElement("button");
+        dateModalNext.type = "button";
+        dateModalNext.className = "winter-rating-date-modal__nav winter-rating-date-modal__nav--next";
+        dateModalNext.id = "winterRatingDateModalNext";
+        dateModalNext.setAttribute("aria-label", "Следующая дата");
+        dateModalNext.textContent = "›";
+        header.appendChild(dateModalNext);
+      }
+    }
+    ensureDateModalNavControls();
     function getCalendarCellTone(dateStr) {
       var rows = [];
       try {
