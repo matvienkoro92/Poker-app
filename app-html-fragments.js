@@ -6,7 +6,7 @@
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
   var adminReportRakebackShellModule = null;
-  var FRAGMENT_CACHE_PREFIX = "poker_html_fragment_v2:";
+  var FRAGMENT_CACHE_PREFIX = "poker_html_fragment_v3:";
   var FRAGMENT_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
   var INLINE_GLOBAL_MODAL_IDS = [
     "partnershipModal"
@@ -54,7 +54,7 @@
   function fetchFragmentText(src, label) {
     var cached = readCachedFragmentText(src);
     if (cached) return Promise.resolve(cached);
-    return fetch(src, { cache: "force-cache" })
+    return fetch(src, { cache: "reload" })
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to load " + label + " " + src + ": " + res.status);
         return res.text();
