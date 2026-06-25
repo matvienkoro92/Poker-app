@@ -1946,7 +1946,7 @@ function initRaffles() {
           escapeHtml(participantCount) +
           '</span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span></span>' +
           "</span></span>";
-        var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
+        var timerHtml = batchTimersHtml ? "" : activeRaffleCountdownHtml(endDate, endMs);
         var factsHtml = participantsHtml + timerHtml;
         var accessHtml = activeRaffleAccessLevelHtml(raffle);
         var actionHtml = activeRaffleJoinCtaHtml(raffle, id, endDate);
@@ -2737,6 +2737,36 @@ function initRaffles() {
           return false;
         }
 
+        function isSmallDailyCashBackingRaffle(r) {
+          if (!r || !r.daily) return false;
+          var title = String(r.title || r.cardTitle || r.name || "").toLowerCase();
+          var groups = Array.isArray(r.groups) ? r.groups : [];
+          var text = title;
+          for (var gi = 0; gi < groups.length; gi++) {
+            text += " " + String(groups[gi] && groups[gi].prize || "").toLowerCase();
+          }
+          return (
+            text.indexOf("беккинг") !== -1 &&
+            text.indexOf("кеш") !== -1 &&
+            Math.round(getRaffleTotalPrize(r)) === 2000
+          );
+        }
+
+        function moveSmallDailyCashBackingRaffle(activeRaffles) {
+          if (!Array.isArray(activeRaffles) || activeRaffles.length < 4) return;
+          var targetIndex = -1;
+          for (var mi = 0; mi < activeRaffles.length; mi++) {
+            if (isSmallDailyCashBackingRaffle(activeRaffles[mi])) {
+              targetIndex = mi;
+              break;
+            }
+          }
+          if (targetIndex === -1) return;
+          var item = activeRaffles.splice(targetIndex, 1)[0];
+          var insertIndex = Math.max(0, activeRaffles.length - 2);
+          activeRaffles.splice(insertIndex, 0, item);
+        }
+
         function completedRaffleTime(r) {
           var raw = r && (r.drawnAt || r.completedAt || r.completed_at || r.endDate || r.createdAt);
           if (!raw) return 0;
@@ -2764,6 +2794,7 @@ function initRaffles() {
           var endB = b.endDate ? new Date(b.endDate).getTime() : 0;
           return endA - endB;
         });
+        moveSmallDailyCashBackingRaffle(activeList);
         activeList.forEach(function (raffle, index) {
           if (raffle && typeof raffle === "object") {
             raffle.shareNumber = index + 1;
