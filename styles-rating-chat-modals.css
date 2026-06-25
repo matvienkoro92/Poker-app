@@ -1051,6 +1051,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.chat-user-modal__achievement-detail--story {
+  display: -webkit-box;
+  max-width: 100%;
+  margin-top: 2px;
+  font-size: 7.8px;
+  line-height: 1.14;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
 .chat-user-modal__achievement-stars {
   color: #f1a43a;
   font-size: 18px;

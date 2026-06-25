@@ -536,6 +536,21 @@ if (chatUserModalEl) {
     }
     return rows;
   }
+  function chatUserModalOfflineTournamentWins(ratingNick) {
+    if (!String(ratingNick || "").trim()) return [];
+    var records = [
+      {
+        nick: "Em13!!",
+        label: "Май · APC42 Мейн Калининград",
+        detail: "1 место. Выигрыш 2 300 000р в мейне в Калининграде. Отобрался с сателлита за 300р в сателлит за 1200р, там выиграл путевку за 120 000р в Калининград, включающую билет на мейн, и выиграл Мейн.",
+      },
+    ];
+    return records.filter(function (row) {
+      return chatUserModalSameRatingNick(row.nick, ratingNick);
+    }).map(function (row) {
+      return { label: row.label, detail: row.detail };
+    });
+  }
   function getChatUserModalSingleTopWinsReady() {
     function readWins() {
       return typeof window.pokerGetSingleTopWinsReady === "function"
@@ -571,6 +586,14 @@ if (chatUserModalEl) {
     } catch (eRaffleMonthLabel) {
       return String(d.getMonth() + 1).padStart(2, "0") + "." + d.getFullYear();
     }
+  }
+  function chatUserModalClubChoiceDescription(nick, monthKey, description) {
+    var text = String(description || "").trim();
+    if (text) return text;
+    if (String(monthKey || "") === "2026-05" && chatUserModalSameRatingNick(nick, "Em13!!")) {
+      return "Выигрыш 2 300 000р в мейне в Калининграде за 1е место. Отобрался с сателлита за 300р в сателлит за 1200р, там выиграл путевку за 120 000р в Калининград, включающую билет на мейн, и выиграл Мейн.";
+    }
+    return "";
   }
   function chatUserModalRafflePrizeAmount(prize) {
     var text = prize != null ? String(prize).replace(/\u00a0|\u202f/g, " ") : "";
@@ -631,7 +654,8 @@ if (chatUserModalEl) {
       nick &&
       (
         chatUserModalSameRatingNick(row && row.pokerPlusNickname, nick) ||
-        chatUserModalSameRatingNick(row && row.name, nick)
+        chatUserModalSameRatingNick(row && row.name, nick) ||
+        chatUserModalSameRatingNick(row && row.nick, nick)
       )
     );
   }
@@ -739,7 +763,8 @@ if (chatUserModalEl) {
         return;
       }
       var script = document.createElement("script");
-      script.src = "./club-choice-achievements.js?v=3.594";
+      var appVersion = (document.documentElement && document.documentElement.getAttribute("data-app-version")) || "3.624";
+      script.src = "./club-choice-achievements.js?v=" + encodeURIComponent(appVersion);
       script.async = false;
       script.onload = function () { resolve(true); };
       script.onerror = function () { resolve(false); };
@@ -772,11 +797,13 @@ if (chatUserModalEl) {
           if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
           var place = parseInt(winner && winner.place, 10) || (index + 1);
           var votes = winner && winner.votes != null ? parseInt(winner.votes, 10) : null;
+          var description = chatUserModalClubChoiceDescription(winner && winner.nick, monthKey, winner && winner.description);
           list.push({
             label:
+              (month ? month.charAt(0).toUpperCase() + month.slice(1) + " · " : "") +
               "Топ" + String(place) +
-              (month ? " " + month : "") +
               (votes != null && isFinite(votes) ? ": " + chatUserModalVoteCountText(votes) : ""),
+            detail: description,
           });
         });
         return list;
@@ -955,6 +982,7 @@ if (chatUserModalEl) {
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
+    if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -993,6 +1021,7 @@ if (chatUserModalEl) {
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
+    if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
     if (key.indexOf("король") >= 0) return "Считаются первые места в турнирах из общей рейтинговой истории: зима, весна и лето. Уровни: 1, 15, 50, 100 и 250 побед.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
@@ -1037,7 +1066,9 @@ if (chatUserModalEl) {
     } else {
       var progressRows = Array.isArray(options && options.progressRows) ? options.progressRows : rows;
       progress = progressRows.map(function (item) {
-        return String(item && (item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) || "");
+        var label = String(item && (item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) || "");
+        var detail = String(item && item.detail || "").trim();
+        return label + (detail ? "\n" + detail : "");
       }).filter(Boolean);
       if (!progress.length) progress.push(options && options.placeholder || "Пока не открыто");
     }
@@ -1113,9 +1144,11 @@ if (chatUserModalEl) {
     var stars = tier ? tier.stars : starRows.map(function () { return "★"; }).join(" ");
     var details = tier ? tier.html : (
       rows.map(function (item) {
+        var detail = String(item && item.detail || "").trim();
         return '<span class="chat-user-modal__achievement-detail">' +
           escapeHtml(item.label || chatUserModalAchievementPlaceLabel(item.row, item.season)) +
-          "</span>";
+          "</span>" +
+          (detail ? '<span class="chat-user-modal__achievement-detail chat-user-modal__achievement-detail--story">' + escapeHtml(detail) + "</span>" : "");
       }).join("") || '<span class="chat-user-modal__achievement-detail">' + escapeHtml(options.placeholder || "—") + "</span>"
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
@@ -1229,8 +1262,12 @@ if (chatUserModalEl) {
     var tournamentStats = metrics.tournaments || {};
     var tournamentKingWins = tournamentStats && tournamentStats.firstPlaces || 0;
     var manualAchievements = chatUserModalManualAchievements(ratingNick);
+    var offlineWins = chatUserModalOfflineTournamentWins(ratingNick);
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
-      return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml());
+      return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml()) +
+        chatUserModalAchievementGroupHtml("Турниры", chatUserModalAchievementCardHtml("🏆", "Победа в оффлайн турнире", [], {
+          placeholder: "Нет оффлайн побед",
+        }));
     }
     var seasons = [
       { key: "summer", rows: results && results[0] },
@@ -1280,6 +1317,10 @@ if (chatUserModalEl) {
           unit: "побед",
           lockedLabel: "Нет побед",
         },
+      }) +
+      chatUserModalAchievementCardHtml("🏆", "Победа в оффлайн турнире", offlineWins, {
+        placeholder: "Нет оффлайн побед",
+        progressRows: offlineWins,
       }) +
       chatUserModalAchievementCardHtml("₽", "Занос от 50 до 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {
         placeholder: "50к-99к",

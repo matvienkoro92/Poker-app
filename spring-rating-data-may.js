@@ -1980,6 +1980,20 @@ var SPRING_RATING_TOURNAMENTS_MAY_BY_DATE = {
           "reward": 0
         }
       ]
+    },
+    {
+      "time": "23:59",
+      "name": "APC42 Мейн Калининград",
+      "buyin": 0,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 2300000,
+          "points": 135
+        }
+      ]
     }
   ],
   "12.05.2026": [
