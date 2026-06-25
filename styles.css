@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.593");
-@import url("./styles-home-rating-promo.css?v=3.593");
-@import url("./styles-auth.css?v=3.609");
-@import url("./styles-home.css?v=3.594");
-@import url("./styles-chat.css?v=3.593");
-@import url("./styles-learning-games.css?v=3.593");
-@import url("./styles-raffles.css?v=3.603");
-@import url("./styles-daily-poker.css?v=3.600");
-@import url("./styles-home-legacy-prelude.css?v=3.593");
-@import url("./styles-download.css?v=3.593");
-@import url("./styles-home-legacy-tail.css?v=3.593");
-@import url("./styles-home-rating-promo-legacy.css?v=3.593");
-@import url("./styles-rating.css?v=3.650");
-@import url("./styles-hall.css?v=3.619");
-@import url("./styles-admin.css?v=3.594");
-@import url("./styles-player-crm.css?v=3.593");
-@import url("./styles-profile.css?v=3.631");
-@import url("./styles-layout.css?v=3.639");
-@import url("./styles-chat-overlays.css?v=3.593");
-@import url("./styles-home-overrides.css?v=3.593");
-@import url("./styles-layout-touch-targets.css?v=3.593");
-@import url("./styles-home-rating-promo-late.css?v=3.593");
+@import url("./styles-base.css?v=3.616");
+@import url("./styles-home-rating-promo.css?v=3.616");
+@import url("./styles-auth.css?v=3.616");
+@import url("./styles-home.css?v=3.616");
+@import url("./styles-chat.css?v=3.616");
+@import url("./styles-learning-games.css?v=3.616");
+@import url("./styles-raffles.css?v=3.616");
+@import url("./styles-daily-poker.css?v=3.616");
+@import url("./styles-home-legacy-prelude.css?v=3.616");
+@import url("./styles-download.css?v=3.616");
+@import url("./styles-home-legacy-tail.css?v=3.616");
+@import url("./styles-home-rating-promo-legacy.css?v=3.616");
+@import url("./styles-rating.css?v=3.616");
+@import url("./styles-hall.css?v=3.616");
+@import url("./styles-admin.css?v=3.616");
+@import url("./styles-player-crm.css?v=3.616");
+@import url("./styles-profile.css?v=3.616");
+@import url("./styles-layout.css?v=3.616");
+@import url("./styles-chat-overlays.css?v=3.616");
+@import url("./styles-home-overrides.css?v=3.616");
+@import url("./styles-layout-touch-targets.css?v=3.616");
+@import url("./styles-home-rating-promo-late.css?v=3.616");
 
 .profile-status__fish,
 .profile-status-fish-inline,
@@ -7294,13 +7294,13 @@ body.club-choice-vote-open {
 
 .winter-rating-date-modal .spring-rating-date-league-tab {
   width: 100%;
-  min-height: 58px;
-  padding: 12px 10px;
+  min-height: 30px;
+  padding: 5px 10px;
   border: 1px solid rgba(255, 194, 82, 0.28);
   border-radius: 12px;
   background: rgba(8, 14, 27, 0.92);
   color: #ffe9b8;
-  font-size: clamp(18px, 4.6vw, 22px);
+  font-size: clamp(16px, 4vw, 20px);
   font-weight: 900;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 28px rgba(0, 0, 0, 0.28);
 }
