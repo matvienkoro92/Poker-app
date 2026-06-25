@@ -4508,3 +4508,22 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   transform: translateY(var(--summer-rating-mobile-lower-podium-players-y, -48px));
   pointer-events: none;
 }
+
+@media (max-width: 700px) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+    --summer-top3-art-center-y: calc(26% + 59px);
+    --summer-top3-art-left-y: calc(44% + 72px);
+    --summer-top3-art-right-y: calc(50% + 66px);
+  }
+}
+
+@media (max-width: 700px) and (hover: hover) and (pointer: fine),
+  (min-width: 701px) and (max-width: 1100px) and (min-aspect-ratio: 4 / 5) and (hover: hover) and (pointer: fine) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+    --summer-top3-art-center-y: calc(26% + 28px);
+    --summer-top3-art-left-y: calc(44% + 41px);
+    --summer-top3-art-right-y: calc(50% + 35px);
+  }
+}
