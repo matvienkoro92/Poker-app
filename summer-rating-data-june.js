@@ -1048,6 +1048,34 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
       ]
     },
     {
+      "time": "11:00",
+      "name": "WOW PKO",
+      "buyin": 30000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 6840,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Два туза.Доллары MTT FAST DEEP",
+      "buyin": 0,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 20122,
+          "points": 70
+        }
+      ]
+    },
+    {
       "time": "02:00",
       "name": "Deep Night 15k",
       "buyin": 10000,
@@ -4558,31 +4586,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "FishKopcheny",
           "place": 1,
-          "reward": 25690.94,
+          "reward": 256909.38,
           "points": 135
         },
         {
           "nick": "WiNifly",
           "place": 2,
-          "reward": 13760.94,
+          "reward": 137609.37,
           "points": 110
         },
         {
           "nick": "Waaar",
           "place": 3,
-          "reward": 6241.25,
+          "reward": 62412.5,
           "points": 90
         },
         {
           "nick": "Coo1er91",
           "place": 5,
-          "reward": 6556.25,
+          "reward": 65562.5,
           "points": 60
         },
         {
           "nick": "king00001",
           "place": 8,
-          "reward": 2785,
+          "reward": 27850,
           "points": 30
         }
       ]
@@ -4886,6 +4914,32 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "place": 9,
           "reward": 0,
           "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 1,
+          "reward": 8510,
+          "points": 135
+        },
+        {
+          "nick": "Палач",
+          "place": 3,
+          "reward": 3650,
+          "points": 90
+        },
+        {
+          "nick": "Iraj",
+          "place": 4,
+          "reward": 2670,
+          "points": 70
         }
       ]
     }
@@ -5452,7 +5506,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Waaar",
           "place": 3,
-          "reward": 5183.44,
+          "reward": 51834.36,
           "points": 90
         },
         {
@@ -6576,7 +6630,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Ksuha🐉",
           "place": 7,
-          "reward": 37.13,
+          "reward": 371.25,
           "points": 40
         }
       ]
