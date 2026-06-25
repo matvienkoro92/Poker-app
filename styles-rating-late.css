@@ -2826,7 +2826,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   right: max(6px, calc((100% - min(430px, 100%)) / 2 + 6px));
   z-index: 7;
   display: grid !important;
-  grid-template-columns: 0.78fr 0.78fr 0.72fr 0.64fr;
+  grid-template-columns: repeat(3, 1fr);
   width: 232px;
   height: 37px;
   min-height: 37px;
@@ -2844,12 +2844,64 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     0 0 16px rgba(0, 0, 0, 0.36);
 }
 
-.winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn {
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
+  position: absolute;
+  top: 58px;
+  right: max(6px, calc((100% - min(430px, 100%)) / 2 + 6px));
+  z-index: 7;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 232px;
+  height: 31px;
+  min-height: 31px;
+  margin: 0;
+  padding: 2px;
+  gap: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(191, 121, 27, 0.66);
+  border-radius: 17px;
+  background:
+    linear-gradient(180deg, rgba(255, 229, 146, 0.16), rgba(147, 78, 15, 0.07)),
+    rgba(4, 10, 18, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 238, 184, 0.22),
+    0 0 13px rgba(0, 0, 0, 0.32);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs[hidden] {
+  display: none !important;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tab {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 14px;
   color: rgba(255, 232, 184, 0.9);
-  font-size: 8.1px;
+  font-size: 9px;
   font-weight: 950;
   line-height: 1;
+  text-align: center;
   text-shadow: 0 1px 7px rgba(0, 0, 0, 0.72);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 236, 164, 0.22), transparent 58%),
+    linear-gradient(180deg, rgba(20, 24, 26, 0.64), rgba(7, 10, 14, 0.72));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tab:hover {
+  color: #fff4d0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 236, 164, 0.28), transparent 54%),
+    linear-gradient(180deg, rgba(30, 34, 38, 0.94), rgba(10, 13, 18, 0.98));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn {
+  color: rgba(255, 232, 184, 0.9);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn:hover {
@@ -2862,7 +2914,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
   position: absolute;
-  top: 58px;
+  top: 94px;
   right: max(6px, calc((100% - min(430px, 100%)) / 2 + 6px));
   z-index: 7;
   width: 232px;
@@ -2933,13 +2985,27 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn {
-  padding: 0 3px;
-  font-size: 8.1px;
-  border-left: 1px solid rgba(245, 196, 85, 0.18);
-  border-radius: 15px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 236, 164, 0.22), transparent 58%),
-    linear-gradient(180deg, rgba(20, 24, 26, 0.64), rgba(7, 10, 14, 0.72));
+  font-size: 8.8px;
+}
+
+@media (max-width: 430px) {
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs,
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs,
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
+    right: 10px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+    top: 58px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
+    top: 99px;
+  }
+
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
+    top: 134px;
+  }
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-leagues {

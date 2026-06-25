@@ -1885,6 +1885,8 @@ function initWinterRating() {
   var ratingSectionEl = document.getElementById("winterRatingSection");
   var seasonConfig = typeof getRatingSeasonConfig === "function" ? getRatingSeasonConfig() : {};
   var isSummerRatingMode = isSpringRatingMode() && seasonConfig.key === "summer";
+  var actionTabsEl = document.getElementById("winterRatingSpringActionTabs");
+  var achievementsBtn = document.getElementById("springRatingAchievementsBtn");
   var prizesBtn = document.getElementById("springRatingPrizesBtn");
   var tabsUpdatedEl = document.getElementById("springRatingTabsUpdated");
   if (isSummerRatingMode) {
@@ -1899,11 +1901,10 @@ function initWinterRating() {
   var conditionsBtn = document.getElementById("springRatingConditionsBtn");
   if (conditionsBtn) {
     if (isSummerRatingMode) {
-      delete conditionsBtn.dataset.springMainLeague;
-      conditionsBtn.classList.remove("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
-      conditionsBtn.classList.add("winter-rating__spring-achievements-btn");
-      conditionsBtn.innerHTML = "<span>Ачивки</span>";
-      conditionsBtn.setAttribute("aria-label", "Топы по ачивкам");
+      conditionsBtn.dataset.springMainLeague = "top";
+      conditionsBtn.classList.remove("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn", "winter-rating__spring-achievements-btn");
+      conditionsBtn.innerHTML = "<span>по дням</span>";
+      conditionsBtn.setAttribute("aria-label", "Рейтинг по дням");
     } else {
       delete conditionsBtn.dataset.springMainLeague;
       conditionsBtn.classList.remove("winter-rating__spring-achievements-btn");
@@ -1911,6 +1912,14 @@ function initWinterRating() {
       conditionsBtn.innerHTML = "<span>Условия</span><span>и призы</span>";
       conditionsBtn.removeAttribute("aria-label");
     }
+  }
+  if (actionTabsEl) {
+    actionTabsEl.hidden = !isSummerRatingMode;
+    actionTabsEl.style.display = isSummerRatingMode ? "" : "none";
+  }
+  if (achievementsBtn) {
+    achievementsBtn.hidden = !isSummerRatingMode;
+    achievementsBtn.style.display = isSummerRatingMode ? "" : "none";
   }
   if (prizesBtn) {
     prizesBtn.hidden = !isSummerRatingMode;
@@ -1924,19 +1933,21 @@ function initWinterRating() {
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
     conditionsBtn.addEventListener("click", function () {
-      if (conditionsBtn.classList.contains("winter-rating__spring-achievements-btn")) {
-        var openAchievements = function () {
-          if (typeof window.openHallFishAchievementsModal === "function") window.openHallFishAchievementsModal();
-        };
-        if (typeof window.pokerEnsureScriptDomains === "function") {
-          Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(openAchievements).catch(openAchievements);
-        } else {
-          openAchievements();
-        }
-        return;
-      }
       if (conditionsBtn.dataset.springMainLeague) return;
       openSpringRatingInfoModal();
+    });
+  }
+  if (achievementsBtn && achievementsBtn.getAttribute("data-inited") !== "1") {
+    achievementsBtn.setAttribute("data-inited", "1");
+    achievementsBtn.addEventListener("click", function () {
+      var openAchievements = function () {
+        if (typeof window.openHallFishAchievementsModal === "function") window.openHallFishAchievementsModal();
+      };
+      if (typeof window.pokerEnsureScriptDomains === "function") {
+        Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(openAchievements).catch(openAchievements);
+      } else {
+        openAchievements();
+      }
     });
   }
   if (prizesBtn && prizesBtn.getAttribute("data-inited") !== "1") {
