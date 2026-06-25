@@ -1791,8 +1791,12 @@ function hallFishMoveCalendarMonth(delta) {
 
 function hallFishSetUpcomingFilter(filter) {
   var next = String(filter || "all").trim();
+  var body = document.getElementById("hallFishRatingBody");
+  var scrollTop = body ? body.scrollTop : 0;
   hallFishUpcomingFilter = next === "birthdays" || next === "club" ? next : "all";
   hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  body = document.getElementById("hallFishRatingBody");
+  if (body) body.scrollTop = scrollTop;
 }
 
 function hallFishUpdateTabs(activeTab) {

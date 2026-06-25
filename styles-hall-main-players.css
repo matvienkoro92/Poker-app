@@ -539,6 +539,7 @@
 .hall-fish-modal__body {
   min-height: 180px;
   overflow: auto;
+  overflow-x: hidden;
   padding: 10px;
   -webkit-overflow-scrolling: touch;
 }
@@ -1057,9 +1058,14 @@
 .hall-fish-birthdays {
   display: grid;
   gap: 12px;
+  max-width: 100%;
+  min-width: 0;
 }
 .hall-fish-birthday-calendar,
 .hall-fish-birthday-next {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
   padding: 10px;
   border: 1px solid rgba(248, 217, 138, 0.18);
   border-radius: 14px;
@@ -1251,6 +1257,8 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+  max-width: 100%;
+  min-width: 0;
   margin: 0 0 2px;
 }
 .hall-fish-birthday-next__tab {
@@ -1259,6 +1267,7 @@
   min-width: 0;
   min-height: 34px;
   padding: 7px 6px;
+  overflow: hidden;
   border: 1px solid rgba(251, 191, 36, 0.28);
   border-radius: 12px;
   background: rgba(2, 6, 23, 0.58);
@@ -1268,6 +1277,7 @@
   font-weight: 950;
   line-height: 1.08;
   text-align: center;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 .hall-fish-birthday-next__tab--active,
@@ -1286,6 +1296,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  box-sizing: border-box;
+  min-width: 0;
   width: 100%;
   padding: 9px 10px;
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -1323,18 +1335,23 @@
 }
 .hall-fish-birthday-next__row strong {
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: #fffbeb;
   font-size: 14px;
   font-weight: 1000;
   text-overflow: ellipsis;
+  overflow-wrap: anywhere;
   white-space: nowrap;
 }
 .hall-fish-birthday-next__row span {
   flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
   color: rgba(255, 237, 213, 0.72);
   font-size: 12px;
   font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 520px) {
@@ -1711,4 +1728,33 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.hall-fish-birthday-calendar__cell.hall-fish-birthday-calendar__cell--marked {
+  border-color: rgba(255, 232, 166, 0.98) !important;
+  background-color: #d8900f !important;
+  background-image:
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.24), transparent 34%),
+    linear-gradient(180deg, #ffd76d, #b7790d) !important;
+  color: #171005 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 251, 235, 0.38),
+    0 0 18px rgba(251, 191, 36, 0.3) !important;
+}
+.hall-fish-birthday-calendar__cell.hall-fish-birthday-calendar__cell--event {
+  border-color: rgba(134, 239, 172, 0.94) !important;
+  background-color: #16a34a !important;
+  background-image:
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, #22c55e, #0f766e) !important;
+  color: #ecfdf5 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(220, 252, 231, 0.28),
+    0 0 18px rgba(34, 197, 94, 0.28) !important;
+}
+.hall-fish-birthday-calendar__cell.hall-fish-birthday-calendar__cell--marked.hall-fish-birthday-calendar__cell--event {
+  border-color: rgba(255, 232, 166, 0.98) !important;
+  background-color: #16a34a !important;
+  background-image: linear-gradient(135deg, #ffd76d 0%, #d8900f 46%, #16a34a 47%, #0f766e 100%) !important;
+  color: #fff7ed !important;
 }
