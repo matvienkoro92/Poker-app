@@ -7,6 +7,16 @@
   var statusEl = null;
   var state = null;
   var loading = false;
+  var BONUS_PRESETS = [
+    { id: "top-pair", title: "Топ-пара", text: "Бонус за выигранный банк с топ-парой" },
+    { id: "set", title: "Сет", text: "Бонус за выигранный банк с сетом" },
+    { id: "straight", title: "Стрит", text: "Бонус за выигранный банк со стритом" },
+    { id: "flush", title: "Флеш", text: "Бонус за выигранный банк с флешем" },
+    { id: "full-house", title: "Фулл-хаус", text: "Бонус за выигранный банк с фулл-хаусом" },
+    { id: "four-kind", title: "Каре", text: "Бонус за выигранный банк с каре" },
+    { id: "badbeat", title: "Бэдбит", text: "Бонус за болезненный переезд" },
+    { id: "custom", title: "Свой", text: "Свой бонус" },
+  ];
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -47,6 +57,46 @@
     var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!m) return s;
     return m[3] + "." + m[2] + "." + m[1];
+  }
+
+  function bonusLines(raw) {
+    return String(raw || "")
+      .split(/\r?\n/)
+      .map(function (line) { return line.trim(); })
+      .filter(Boolean);
+  }
+
+  function bonusTitle(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return "Бонус";
+    return raw.length > 18 ? raw.slice(0, 18).trim() + "..." : raw;
+  }
+
+  function renderBonusPicker() {
+    return '<div class="private-cash-modal__bonus-picker">' +
+      '<span class="private-cash-modal__bonus-label">Актуальные бонусы</span>' +
+      '<div class="private-cash-modal__bonus-grid" role="group" aria-label="Выберите бонус">' +
+        BONUS_PRESETS.map(function (bonus) {
+          return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-text="' + escapeHtml(bonus.text) + '">' +
+            '<strong>' + escapeHtml(bonus.title) + '</strong>' +
+          '</button>';
+        }).join("") +
+      '</div>' +
+      '<label class="private-cash-modal__bonus-editor">Текст выбранного бонуса<textarea name="bonusText" maxlength="500" rows="3" placeholder="Выберите бонус выше и отредактируйте текст"></textarea></label>' +
+    '</div>';
+  }
+
+  function renderEventBonuses(raw) {
+    var rows = bonusLines(raw);
+    if (!rows.length) return "";
+    return '<div class="private-cash-modal__bonus-display" aria-label="Актуальные бонусы">' +
+      rows.map(function (row) {
+        return '<article class="private-cash-modal__bonus-card">' +
+          '<strong>' + escapeHtml(bonusTitle(row)) + '</strong>' +
+          '<span>' + escapeHtml(row) + '</span>' +
+        '</article>';
+      }).join("") +
+    '</div>';
   }
 
   function ensureModal() {
@@ -160,8 +210,9 @@
       '<label>Ставки<input name="stakes" maxlength="80" placeholder="Например: 50/100 ₽" required></label>' +
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
-      '<label>Актуальные бонусы<textarea name="combinations" maxlength="500" rows="3" placeholder="Какие бонусы сейчас доступны"></textarea></label>' +
-      '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись и отправить пуш</button>' +
+      renderBonusPicker() +
+      '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"> Отправить пуш всем об открытии записи</label>' +
+      '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись</button>' +
     '</form>';
   }
 
@@ -177,7 +228,7 @@
       '</div>' +
       '<div class="private-cash-modal__rule">' +
         '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--password" aria-hidden="true">•••</span>' +
-        '<p>Пароль от кеша будет отправлен всем, кто записался, в день игры.</p>' +
+        '<p>Пароль от кеша будет отправлен в день игры всем, кто записался.</p>' +
       '</div>' +
     '</section>';
   }
@@ -225,7 +276,7 @@
       (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
       (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
-      (event.combinations ? '<div class="private-cash-modal__combo"><span>Актуальные бонусы</span><p>' + escapeHtml(event.combinations) + '</p></div>' : '') +
+      renderEventBonuses(event.combinations) +
       renderParticipant(event, my) +
       renderParticipants(event) +
     '</article>';
@@ -259,9 +310,13 @@
         stakes: form.elements.stakes.value,
         buyIn: form.elements.buyIn.value,
         description: form.elements.description.value,
-        combinations: form.elements.combinations.value,
+        combinations: form.elements.bonusText.value,
+        sendPush: !!form.elements.sendPush.checked,
       }).then(function () {
         form.reset();
+        Array.prototype.slice.call(form.querySelectorAll(".private-cash-modal__bonus-tile--active")).forEach(function (btn) {
+          btn.classList.remove("private-cash-modal__bonus-tile--active");
+        });
       });
     }
   }
@@ -270,6 +325,19 @@
     var close = event.target && event.target.closest ? event.target.closest("[data-private-cash-close]") : null;
     if (close) {
       closeModal();
+      return;
+    }
+    var bonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus]") : null;
+    if (bonus) {
+      var form = bonus.closest("[data-private-cash-form]");
+      var text = bonus.getAttribute("data-private-cash-bonus-text") || "";
+      Array.prototype.slice.call(form ? form.querySelectorAll(".private-cash-modal__bonus-tile") : []).forEach(function (btn) {
+        btn.classList.toggle("private-cash-modal__bonus-tile--active", btn === bonus);
+      });
+      if (form && form.elements && form.elements.bonusText) {
+        form.elements.bonusText.value = text;
+        form.elements.bonusText.focus();
+      }
       return;
     }
     var join = event.target && event.target.closest ? event.target.closest("[data-private-cash-join]") : null;
