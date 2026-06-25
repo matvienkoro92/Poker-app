@@ -489,20 +489,24 @@
   filter: brightness(1.06);
   outline: none;
 }
-.hall-fish-modal__tab--active {
+.hall-fish-modal__tab--active,
+.hall-fish-modal__tab[aria-selected="true"] {
   border-color: rgba(255, 209, 92, 0.92);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 248, 215, 0.34), transparent 38%),
-    linear-gradient(180deg, rgba(255, 196, 57, 0.94), rgba(204, 112, 16, 0.95));
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.56), transparent 36%),
+    linear-gradient(180deg, #ffe28a 0%, #ffc22e 48%, #d97706 100%);
   color: #1b1204;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.36);
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.45),
-    inset 0 -10px 18px rgba(120, 53, 15, 0.2),
-    0 0 0 1px rgba(255, 145, 32, 0.42),
-    0 12px 26px rgba(251, 146, 60, 0.18);
+    inset 0 1px 0 rgba(255, 251, 235, 0.72),
+    inset 0 -12px 20px rgba(120, 53, 15, 0.22),
+    0 0 0 2px rgba(255, 232, 166, 0.36),
+    0 0 24px rgba(251, 191, 36, 0.42),
+    0 14px 28px rgba(251, 146, 60, 0.28);
 }
-.hall-fish-modal__tab--active::before {
+.hall-fish-modal__tab--active::before,
+.hall-fish-modal__tab[aria-selected="true"]::before {
   opacity: 1;
 }
 .hall-fish-modal__panel--achievements .hall-fish-modal__tabs {
@@ -576,11 +580,11 @@
 .hall-fish-level-row--mine {
   border-color: rgba(255, 209, 92, 0.74);
   background:
-    radial-gradient(circle at 9% 50%, rgba(255, 196, 57, 0.14), transparent 28%),
-    linear-gradient(180deg, rgba(20, 27, 42, 0.82), rgba(5, 10, 20, 0.94));
+    radial-gradient(circle at 9% 50%, rgba(74, 222, 128, 0.28), transparent 34%),
+    linear-gradient(180deg, rgba(18, 75, 57, 0.95), rgba(9, 34, 38, 0.98));
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.08),
-    0 0 18px rgba(251, 191, 36, 0.12);
+    inset 0 1px 0 rgba(220, 252, 231, 0.14),
+    0 0 18px rgba(34, 197, 94, 0.2);
 }
 .hall-fish-level-sticky-mine {
   position: sticky;
@@ -595,12 +599,12 @@
   cursor: pointer;
   border-color: rgba(255, 209, 92, 0.9);
   background:
-    radial-gradient(circle at 10% 50%, rgba(255, 213, 112, 0.18), transparent 34%),
-    linear-gradient(180deg, rgba(31, 41, 55, 0.96), rgba(5, 10, 20, 0.98));
+    radial-gradient(circle at 10% 50%, rgba(74, 222, 128, 0.32), transparent 36%),
+    linear-gradient(180deg, rgba(22, 101, 72, 0.98), rgba(8, 39, 42, 0.99));
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.16),
+    inset 0 1px 0 rgba(220, 252, 231, 0.18),
     0 -10px 26px rgba(0, 0, 0, 0.42),
-    0 0 22px rgba(251, 191, 36, 0.2);
+    0 0 24px rgba(34, 197, 94, 0.24);
 }
 .hall-fish-level-row--sticky::before {
   content: "Вы";
@@ -858,19 +862,20 @@
   color: #fff7d6;
   outline: none;
 }
-.hall-fish-achievement-tab--active {
+.hall-fish-achievement-tab--active,
+.hall-fish-achievement-tab[aria-selected="true"] {
   border-color: rgba(255, 232, 166, 0.98);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 251, 235, 0.68), transparent 38%),
-    linear-gradient(180deg, #ffd76a, #f59e0b 56%, #b45309);
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.7), transparent 36%),
+    linear-gradient(180deg, #fff0a8 0%, #ffc22e 52%, #d97706 100%);
   color: #1c1203;
   transform: translateY(-1px);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.46);
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.62),
+    inset 0 1px 0 rgba(255, 251, 235, 0.78),
     inset 0 -8px 14px rgba(120, 53, 15, 0.2),
-    0 0 0 1px rgba(255, 145, 32, 0.5),
-    0 0 22px rgba(251, 191, 36, 0.42),
+    0 0 0 2px rgba(255, 232, 166, 0.38),
+    0 0 26px rgba(251, 191, 36, 0.52),
     0 10px 18px rgba(0, 0, 0, 0.24);
 }
 .hall-fish-achievement-section {
@@ -950,11 +955,18 @@
   text-align: center;
 }
 .hall-fish-birthday-calendar__cell {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
   min-height: 58px;
+  width: 100%;
   padding: 5px;
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.38);
+  color: inherit;
+  font: inherit;
+  text-align: left;
   overflow: hidden;
 }
 .hall-fish-birthday-calendar__cell--empty {
@@ -966,6 +978,22 @@
   background: linear-gradient(180deg, rgba(251, 191, 36, 0.18), rgba(146, 64, 14, 0.22));
   box-shadow: inset 0 1px 0 rgba(255, 251, 235, 0.12);
 }
+.hall-fish-birthday-calendar__cell--event {
+  border-color: rgba(74, 222, 128, 0.54);
+  background:
+    linear-gradient(180deg, rgba(34, 197, 94, 0.16), rgba(15, 118, 110, 0.2)),
+    rgba(15, 23, 42, 0.42);
+  box-shadow: inset 0 1px 0 rgba(220, 252, 231, 0.12);
+}
+.hall-fish-birthday-calendar__cell--editable {
+  cursor: pointer;
+}
+.hall-fish-birthday-calendar__cell--editable:hover,
+.hall-fish-birthday-calendar__cell--editable:focus-visible {
+  border-color: rgba(255, 232, 166, 0.76);
+  filter: brightness(1.08);
+  outline: none;
+}
 .hall-fish-birthday-calendar__cell--today {
   outline: 2px solid rgba(110, 231, 183, 0.34);
   outline-offset: -2px;
@@ -975,6 +1003,20 @@
   color: #fffbeb;
   font-size: 12px;
   font-weight: 1000;
+}
+.hall-fish-birthday-calendar__today-label {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 2px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.18);
+  color: #bbf7d0;
+  font-size: 7.5px;
+  font-weight: 1000;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 .hall-fish-birthday-calendar__names {
   display: -webkit-box;
@@ -990,6 +1032,21 @@
   text-overflow: ellipsis;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+.hall-fish-birthday-calendar__events {
+  display: -webkit-box;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #bbf7d0;
+  font-size: 8.5px;
+  font-weight: 950;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .hall-fish-birthday-next {
   display: grid;
@@ -1017,6 +1074,18 @@
   border-color: rgba(248, 217, 138, 0.34);
   background: rgba(30, 41, 59, 0.62);
   outline: none;
+}
+.hall-fish-birthday-next__row--event {
+  border-color: rgba(74, 222, 128, 0.28);
+  background:
+    linear-gradient(90deg, rgba(34, 197, 94, 0.13), transparent 68%),
+    rgba(15, 23, 42, 0.5);
+  cursor: default;
+}
+.hall-fish-birthday-next__row--event strong::before {
+  content: "Событие · ";
+  color: #86efac;
+  font-size: 0.82em;
 }
 .hall-fish-birthday-next__row:disabled {
   cursor: default;

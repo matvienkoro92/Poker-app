@@ -449,6 +449,8 @@ var hallFishAchievementRowsCache = null;
 var hallFishAchievementRowsPromise = null;
 var hallFishBirthdayRowsCache = null;
 var hallFishBirthdayRowsPromise = null;
+var hallFishCalendarEventsCache = null;
+var hallFishCalendarEventsPromise = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
 var hallFishProfileLoadingObserver = null;
@@ -459,6 +461,7 @@ var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уров�
 var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v2";
 var HALL_FISH_ROWS_SESSION_CACHE_MS = 60000;
 var HALL_FISH_BIRTHDAYS_SESSION_CACHE_KEY = "poker_hall_fish_birthdays_v1";
+var HALL_FISH_CALENDAR_EVENTS_LOCAL_KEY = "poker_hall_fish_calendar_events_v1";
 
 function hallFishEsc(s) {
   if (s == null) return "";
@@ -475,6 +478,13 @@ function hallFishGetApiBase() {
   } catch (eBase) {
     return "";
   }
+}
+
+function hallFishFetch(url, init, timeoutMs) {
+  if (typeof pokerFetchWithTimeout === "function") {
+    return pokerFetchWithTimeout(url, init, timeoutMs || 9000);
+  }
+  return fetch(url, init);
 }
 
 function hallFishReadRowsSessionCache() {
@@ -519,6 +529,24 @@ function hallFishWriteBirthdaysSessionCache(rows) {
   } catch (eHallFishBirthdaysCacheWrite) {}
 }
 
+function hallFishReadCalendarEventsLocal() {
+  try {
+    if (typeof localStorage === "undefined") return [];
+    var raw = localStorage.getItem(HALL_FISH_CALENDAR_EVENTS_LOCAL_KEY);
+    var arr = raw ? JSON.parse(raw) : [];
+    return hallFishSanitizeCalendarEvents(arr);
+  } catch (eHallFishCalendarLocalRead) {
+    return [];
+  }
+}
+
+function hallFishWriteCalendarEventsLocal(events) {
+  try {
+    if (typeof localStorage === "undefined" || !Array.isArray(events)) return;
+    localStorage.setItem(HALL_FISH_CALENDAR_EVENTS_LOCAL_KEY, JSON.stringify(hallFishSanitizeCalendarEvents(events)));
+  } catch (eHallFishCalendarLocalWrite) {}
+}
+
 function hallFishRefreshVisibleRows(rows) {
   try {
     var modal = document.getElementById("hallFishRatingModal");
@@ -544,7 +572,7 @@ function hallFishFetchRows() {
   var base = hallFishGetApiBase();
   if (!base) return Promise.reject(new Error("no-api-base"));
   var q = "?publicLevels=1";
-  hallFishRatingRowsPromise = fetch(base + "/api/player-crm" + q, { cache: "default" })
+  hallFishRatingRowsPromise = hallFishFetch(base + "/api/player-crm" + q, { cache: "default" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
@@ -574,7 +602,7 @@ function hallFishEnsureModal() {
       '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
-        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Дни рождения</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -705,7 +733,7 @@ function hallFishLoadCurrentIds() {
     var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
     if (cached) q += "&dtIdHint=" + encodeURIComponent(cached);
   } catch (eHint) {}
-  hallFishCurrentIdsPromise = fetch(base + "/api/users" + q, { cache: "no-store" })
+  hallFishCurrentIdsPromise = hallFishFetch(base + "/api/users" + q, { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var ids = localIds.slice();
@@ -1096,6 +1124,79 @@ function hallFishFormatBirthdayDate(row, year) {
   return date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 }
 
+function hallFishCalendarDateKey(year, monthIndex, day) {
+  var mm = String(Number(monthIndex) + 1).padStart(2, "0");
+  var dd = String(Number(day) || 0).padStart(2, "0");
+  return String(year) + "-" + mm + "-" + dd;
+}
+
+function hallFishCalendarDateParts(dateKey) {
+  var m = String(dateKey || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  var year = parseInt(m[1], 10);
+  var month = parseInt(m[2], 10);
+  var day = parseInt(m[3], 10);
+  var d = new Date(year, month - 1, day);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  return { year: year, month: month, day: day };
+}
+
+function hallFishSanitizeCalendarEvents(input) {
+  var seen = {};
+  return (Array.isArray(input) ? input : []).map(function (event) {
+    var parts = hallFishCalendarDateParts(event && event.date);
+    var title = String((event && event.title) || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    if (!parts || !title) return null;
+    var id = String((event && event.id) || "").trim().slice(0, 80) || (event.date + ":" + title.toLowerCase());
+    if (seen[id]) return null;
+    seen[id] = true;
+    var row = {
+      id: id,
+      date: String(event.date),
+      title: title,
+      createdAt: Number(event && event.createdAt) || Date.now(),
+    };
+    var note = String((event && event.note) || "").replace(/\s+/g, " ").trim().slice(0, 180);
+    if (note) row.note = note;
+    return row;
+  }).filter(Boolean).sort(function (a, b) {
+    return String(a.date).localeCompare(String(b.date)) || String(a.title).localeCompare(String(b.title), "ru");
+  });
+}
+
+function hallFishCanManageCalendarEvents() {
+  try {
+    var auth = window.__pokerTelegramAuth;
+    if (auth && auth.adminAccess === true) return true;
+    var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+    if (rec && rec.adminAccess === true) return true;
+  } catch (eHallFishAdminFlag) {}
+  return false;
+}
+
+function hallFishCalendarEventDate(event) {
+  var parts = hallFishCalendarDateParts(event && event.date);
+  if (!parts) return null;
+  var d = new Date(parts.year, parts.month - 1, parts.day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function hallFishUpcomingCalendarEvents(events) {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return hallFishSanitizeCalendarEvents(events).map(function (event) {
+    var date = hallFishCalendarEventDate(event);
+    if (!date || date < today) return null;
+    return Object.assign({}, event, {
+      nextDate: date,
+      daysLeft: Math.round((date - today) / 86400000),
+    });
+  }).filter(Boolean).sort(function (a, b) {
+    return a.daysLeft - b.daysLeft || String(a.title || "").localeCompare(String(b.title || ""), "ru");
+  });
+}
+
 function hallFishUpcomingBirthdays(rows) {
   var today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -1113,20 +1214,32 @@ function hallFishUpcomingBirthdays(rows) {
   });
 }
 
-function hallFishRenderBirthdays(rows) {
+function hallFishRenderBirthdays(rows, calendarEvents) {
   var birthdays = hallFishBirthdayRows(rows);
-  if (!birthdays.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с указанной датой рождения.</div>';
+  var events = hallFishSanitizeCalendarEvents(calendarEvents);
+  if (!birthdays.length && !events.length) return '<div class="hall-fish-modal__notice">Пока нет событий в клубном календаре.</div>';
+  var canManage = hallFishCanManageCalendarEvents();
   var now = new Date();
   var year = now.getFullYear();
   var month = now.getMonth();
   var monthRowsByDay = {};
+  var monthEventsByDay = {};
   birthdays.forEach(function (row) {
     if (Number(row.month) !== month + 1) return;
     if (!monthRowsByDay[row.day]) monthRowsByDay[row.day] = [];
     monthRowsByDay[row.day].push(row);
   });
+  events.forEach(function (event) {
+    var parts = hallFishCalendarDateParts(event.date);
+    if (!parts || parts.year !== year || parts.month !== month + 1) return;
+    if (!monthEventsByDay[parts.day]) monthEventsByDay[parts.day] = [];
+    monthEventsByDay[parts.day].push(event);
+  });
   Object.keys(monthRowsByDay).forEach(function (day) {
     monthRowsByDay[day].sort(function (a, b) { return String(a.nick || "").localeCompare(String(b.nick || ""), "ru"); });
+  });
+  Object.keys(monthEventsByDay).forEach(function (day) {
+    monthEventsByDay[day].sort(function (a, b) { return String(a.title || "").localeCompare(String(b.title || ""), "ru"); });
   });
   var first = new Date(year, month, 1);
   var daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1135,18 +1248,37 @@ function hallFishRenderBirthdays(rows) {
   for (var empty = 0; empty < offset; empty += 1) cells.push('<span class="hall-fish-birthday-calendar__cell hall-fish-birthday-calendar__cell--empty"></span>');
   for (var day = 1; day <= daysInMonth; day += 1) {
     var marked = monthRowsByDay[day] || [];
+    var dayEvents = monthEventsByDay[day] || [];
     var isToday = day === now.getDate();
+    var tag = canManage ? "button" : "span";
+    var attrs = canManage
+      ? ' type="button" data-hall-fish-calendar-date="' + hallFishEsc(hallFishCalendarDateKey(year, month, day)) + '" aria-label="' + hallFishEsc("Добавить событие на " + day + " число") + '"'
+      : "";
     cells.push(
-      '<span class="hall-fish-birthday-calendar__cell' + (marked.length ? " hall-fish-birthday-calendar__cell--marked" : "") + (isToday ? " hall-fish-birthday-calendar__cell--today" : "") + '">' +
+      '<' + tag + attrs + ' class="hall-fish-birthday-calendar__cell' + (marked.length ? " hall-fish-birthday-calendar__cell--marked" : "") + (dayEvents.length ? " hall-fish-birthday-calendar__cell--event" : "") + (isToday ? " hall-fish-birthday-calendar__cell--today" : "") + (canManage ? " hall-fish-birthday-calendar__cell--editable" : "") + '">' +
         '<span class="hall-fish-birthday-calendar__day">' + hallFishEsc(day) + '</span>' +
+        (isToday ? '<span class="hall-fish-birthday-calendar__today-label">Сегодня</span>' : "") +
         (marked.length ? '<span class="hall-fish-birthday-calendar__names">' + marked.slice(0, 3).map(function (row) { return hallFishEsc(row.nick); }).join("<br>") + (marked.length > 3 ? "<br>+" + hallFishEsc(marked.length - 3) : "") + '</span>' : "") +
-      '</span>'
+        (dayEvents.length ? '<span class="hall-fish-birthday-calendar__events">' + dayEvents.slice(0, 2).map(function (event) { return hallFishEsc(event.title); }).join("<br>") + (dayEvents.length > 2 ? "<br>+" + hallFishEsc(dayEvents.length - 2) : "") + '</span>' : "") +
+      '</' + tag + '>'
     );
   }
-  var upcoming = hallFishUpcomingBirthdays(rows).slice(0, 2);
+  var upcoming = hallFishUpcomingBirthdays(rows).map(function (row) {
+    return Object.assign({ kind: "birthday", title: row.nick || "Игрок" }, row);
+  }).concat(hallFishUpcomingCalendarEvents(events).map(function (event) {
+    return Object.assign({ kind: "event" }, event);
+  })).sort(function (a, b) {
+    return a.daysLeft - b.daysLeft || String(a.title || a.nick || "").localeCompare(String(b.title || b.nick || ""), "ru");
+  }).slice(0, 10);
   var upcomingHtml = upcoming.length
     ? upcoming.map(function (row) {
         var label = row.daysLeft === 0 ? "сегодня" : (row.daysLeft === 1 ? "завтра" : "через " + row.daysLeft + " дн.");
+        if (row.kind === "event") {
+          return '<div class="hall-fish-birthday-next__row hall-fish-birthday-next__row--event" role="listitem">' +
+            '<strong>' + hallFishEsc(row.title) + '</strong>' +
+            '<span>' + hallFishEsc(row.nextDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })) + ' · ' + hallFishEsc(label) + '</span>' +
+          '</div>';
+        }
         var userId = String(row.accountId || "").trim();
         var name = row.nick || "Игрок";
         var attrs = userId
@@ -1165,7 +1297,7 @@ function hallFishRenderBirthdays(rows) {
       '<div class="hall-fish-birthday-calendar__grid">' + cells.join("") + '</div>' +
     '</div>' +
     '<section class="hall-fish-birthday-next">' +
-      '<h4 class="hall-fish-achievement-section__title">Ближайшие дни рождения</h4>' +
+      '<h4 class="hall-fish-achievement-section__title">Ближайшие события</h4>' +
       upcomingHtml +
     '</section>' +
   '</div>';
@@ -1260,7 +1392,7 @@ function hallFishPrefetchProfile(userId) {
   if (!base || typeof fetch !== "function") return;
   if (typeof pokerApiAuthQuery !== "function") return;
   hallFishPrefetchedProfiles[id] = true;
-  fetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"), { cache: "default" })
+  hallFishFetch(base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"), { cache: "default" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       try {
@@ -1311,7 +1443,7 @@ function hallFishSetAchievementState(message, data) {
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
 
-function hallFishSetBirthdaysState(message, rows) {
+function hallFishSetBirthdaysState(message, rows, events) {
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var myRank = document.getElementById("hallFishRatingMyRank");
@@ -1319,7 +1451,7 @@ function hallFishSetBirthdaysState(message, rows) {
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("birthdays");
   if (myRank) myRank.hidden = true;
-  if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows) : hallFishRenderBirthdaysSkeleton();
+  if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows, events || hallFishCalendarEventsCache || []) : hallFishRenderBirthdaysSkeleton();
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
@@ -1372,7 +1504,7 @@ function hallFishLoadBirthdayRows() {
   }
   var base = hallFishGetApiBase();
   if (!base) return hallFishLoadRows();
-  hallFishBirthdayRowsPromise = fetch(base + "/api/player-crm?publicBirthdays=1", { cache: "default" })
+  hallFishBirthdayRowsPromise = hallFishFetch(base + "/api/player-crm?publicBirthdays=1", { cache: "default" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.birthdayRows)) throw new Error((data && data.error) || "bad-response");
@@ -1389,10 +1521,56 @@ function hallFishLoadBirthdayRows() {
   return hallFishBirthdayRowsPromise;
 }
 
+function hallFishLoadCalendarEvents() {
+  if (hallFishCalendarEventsCache) return Promise.resolve(hallFishCalendarEventsCache);
+  if (hallFishCalendarEventsPromise) return hallFishCalendarEventsPromise;
+  var base = hallFishGetApiBase();
+  if (!base) {
+    hallFishCalendarEventsCache = hallFishReadCalendarEventsLocal();
+    return Promise.resolve(hallFishCalendarEventsCache);
+  }
+  hallFishCalendarEventsPromise = hallFishFetch(base + "/api/club-calendar-events?_t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok || !Array.isArray(data.events)) throw new Error((data && data.error) || "bad-response");
+      hallFishCalendarEventsCache = hallFishSanitizeCalendarEvents(data.events);
+      hallFishWriteCalendarEventsLocal(hallFishCalendarEventsCache);
+      return hallFishCalendarEventsCache;
+    })
+    .catch(function () {
+      hallFishCalendarEventsCache = hallFishReadCalendarEventsLocal();
+      return hallFishCalendarEventsCache;
+    })
+    .finally(function () {
+      hallFishCalendarEventsPromise = null;
+    });
+  return hallFishCalendarEventsPromise;
+}
+
+function hallFishSaveCalendarEvents(events) {
+  var sanitized = hallFishSanitizeCalendarEvents(events);
+  var base = hallFishGetApiBase();
+  hallFishCalendarEventsCache = sanitized;
+  hallFishWriteCalendarEventsLocal(sanitized);
+  if (!base || typeof pokerApiAuthJsonBody !== "function") return Promise.resolve(sanitized);
+  return hallFishFetch(base + "/api/club-calendar-events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pokerApiAuthJsonBody({ events: sanitized })),
+  }, 9000)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok || !Array.isArray(data.events)) throw new Error((data && data.error) || "bad-response");
+      hallFishCalendarEventsCache = hallFishSanitizeCalendarEvents(data.events);
+      hallFishWriteCalendarEventsLocal(hallFishCalendarEventsCache);
+      return hallFishCalendarEventsCache;
+    });
+}
+
 function hallFishLoadClubChoiceAchievementRows() {
   var base = hallFishGetApiBase();
   if (!base) return Promise.resolve([]);
-  return fetch(base + "/api/club-choice-vote?mode=achievements", { cache: "default" })
+  return hallFishFetch(base + "/api/club-choice-vote?mode=achievements", { cache: "default" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       return data && data.ok && Array.isArray(data.rows) ? data.rows : [];
@@ -1406,7 +1584,7 @@ function hallFishLoadReferralRows() {
   var base = hallFishGetApiBase();
   var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
   if (!base || !hasCred || typeof pokerApiAuthQuery !== "function") return Promise.resolve([]);
-  return fetch(base + "/api/referrals" + pokerApiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
+  return hallFishFetch(base + "/api/referrals" + pokerApiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       return data && data.ok ? hallFishReferralsRows(data) : [];
@@ -1418,6 +1596,9 @@ function hallFishLoadAchievementRows() {
   if (hallFishAchievementRowsCache) return Promise.resolve(hallFishAchievementRowsCache);
   if (hallFishAchievementRowsPromise) return hallFishAchievementRowsPromise;
   hallFishAchievementRowsPromise = hallFishLoadRows()
+    .catch(function () {
+      return hallFishRatingRowsCache || hallFishReadRowsSessionCache() || [];
+    })
     .then(function (levelRows) {
       var tournamentData = hallFishAggregateTournamentAchievements(levelRows);
       return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows()])
@@ -1454,9 +1635,9 @@ function openHallFishAchievementTab() {
 
 function openHallFishBirthdaysTab() {
   hallFishSetBirthdaysState("Загрузка…");
-  hallFishLoadBirthdayRows()
-    .then(function (rows) {
-      hallFishSetBirthdaysState("", rows);
+  Promise.all([hallFishLoadBirthdayRows(), hallFishLoadCalendarEvents()])
+    .then(function (parts) {
+      hallFishSetBirthdaysState("", parts[0], parts[1]);
     })
     .catch(function () {
       var body = document.getElementById("hallFishRatingBody");
@@ -1466,6 +1647,40 @@ function openHallFishBirthdaysTab() {
       hallFishUpdateTabs("birthdays");
       if (myRank) myRank.hidden = true;
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить дни рождения. Попробуйте ещё раз позже.</div>';
+    });
+}
+
+function hallFishAddCalendarEvent(dateKey) {
+  if (!hallFishCanManageCalendarEvents()) return;
+  var parts = hallFishCalendarDateParts(dateKey);
+  if (!parts) return;
+  var label = (new Date(parts.year, parts.month - 1, parts.day)).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  var title = "";
+  try {
+    title = window.prompt("Событие на " + label, "");
+  } catch (ePrompt) {
+    title = "";
+  }
+  title = String(title || "").replace(/\s+/g, " ").trim();
+  if (!title) return;
+  var events = hallFishSanitizeCalendarEvents(hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  events.push({
+    id: dateKey + ":" + Date.now(),
+    date: dateKey,
+    title: title,
+    createdAt: Date.now(),
+  });
+  hallFishCalendarEventsCache = hallFishSanitizeCalendarEvents(events);
+  hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache);
+  hallFishSaveCalendarEvents(hallFishCalendarEventsCache)
+    .then(function (savedEvents) {
+      hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], savedEvents);
+    })
+    .catch(function () {
+      hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache);
+      try {
+        window.alert("Не удалось сохранить событие на сервере. Оно временно осталось на этом устройстве.");
+      } catch (eAlert) {}
     });
 }
 
@@ -1533,6 +1748,13 @@ function initHallFishRatingModal() {
     else openHallFishAchievementTab();
   });
   document.addEventListener("click", function (e) {
+    var day = e.target && e.target.closest ? e.target.closest("[data-hall-fish-calendar-date]") : null;
+    if (!day) return;
+    e.preventDefault();
+    e.stopPropagation();
+    hallFishAddCalendarEvent(day.getAttribute("data-hall-fish-calendar-date"));
+  });
+  document.addEventListener("click", function (e) {
     var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id],.hall-fish-birthday-next__row[data-user-id]") : null;
     if (!row) return;
     var userId = String(row.getAttribute("data-user-id") || "").trim();
@@ -1558,6 +1780,7 @@ initHallFishRatingModal();
 window.pokerPrefetchHallFishRatingData = function () {
   hallFishLoadRows().catch(function () {});
   hallFishLoadBirthdayRows().catch(function () {});
+  hallFishLoadCalendarEvents().catch(function () {});
   hallFishLoadCurrentIds().catch(function () {});
 };
 
