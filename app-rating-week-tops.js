@@ -316,7 +316,7 @@ function pokerInitWinterRatingWeekTops() {
     var hasMainSingleTop = singleTopSummary && singleTopList;
     var hasHallSingleTop = hallFameSingleTopSummary && hallFameSingleTopList;
     if (hasMainSingleTop || hasHallSingleTop) {
-      var singleTopTitleText = "Топ выигрышей за один турнир (2026)";
+      var singleTopTitleText = "Топ призовых за один турнир (2026)";
       var isLoadingWinterSingleTop = ensureSingleTopWinterTournamentData();
       var listHtml = isLoadingWinterSingleTop
         ? buildSingleTopLoadingHtml(15)
@@ -345,11 +345,11 @@ function pokerInitWinterRatingWeekTops() {
         marchWrap.removeAttribute("hidden");
         marchWrap.style.display = "";
         if (marchData.max) {
-          marchSummary.textContent = "Самый большой выигрыш " + maxWinLabel + ": " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
+          marchSummary.textContent = "Самые большие призовые " + maxWinLabel + ": " + escapePreview(marchData.max.nick) + " — " + formatRewardRound(marchData.max.reward) + " ₽";
         } else {
-          marchSummary.textContent = "Самый большой выигрыш " + maxWinLabel + ": —";
+          marchSummary.textContent = "Самые большие призовые " + maxWinLabel + ": —";
         }
-        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 выигрыша " + top3WinsLabel + ":" : "";
+        if (marchTop3Caption) marchTop3Caption.textContent = marchData.top3 && marchData.top3.length ? "Топ-3 призовых " + top3WinsLabel + ":" : "";
         if (marchData.top3 && marchData.top3.length) {
           marchList.innerHTML = marchData.top3.map(function (r, i) {
             var sum = formatRewardRound(r.reward);
@@ -552,7 +552,7 @@ function pokerInitWinterRatingWeekTops() {
     }
     if (isCurrentWeek) {
       listEl.classList.add("winter-rating-week-top-modal__list--with-prize");
-      listEl.innerHTML = "<div class=\"winter-rating__week-top-header\"><span class=\"winter-rating__week-top-num\">№</span><span class=\"winter-rating__week-top-header-nick\">Ник</span><span class=\"winter-rating__week-top-header-reward\">Выигрыш</span><span class=\"winter-rating__week-top-header-prize\">Приз</span></div>" + top.map(function (r, i) {
+      listEl.innerHTML = "<div class=\"winter-rating__week-top-header\"><span class=\"winter-rating__week-top-num\">№</span><span class=\"winter-rating__week-top-header-nick\">Ник</span><span class=\"winter-rating__week-top-header-reward\">Призовые</span><span class=\"winter-rating__week-top-header-prize\">Приз</span></div>" + top.map(function (r, i) {
         var nickEsc = String(r.nick).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         var nickAttr = String(r.nick).replace(/"/g, "&quot;");
         var sum = formatRewardRound(r.totalReward);

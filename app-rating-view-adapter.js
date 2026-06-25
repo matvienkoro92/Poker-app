@@ -301,7 +301,7 @@ function renderWinterRatingTable(rows) {
   var place = 0;
   var totalReward = sorted.reduce(function (sum, r) { return sum + (Number(r.reward) || 0); }, 0);
   var tfoot = "<tfoot><tr class=\"winter-rating__table-total-row\"><td colspan=\"3\">Сумма призовых за день</td><td>" + (totalReward ? formatRewardRound(totalReward) : "0") + "</td></tr></tfoot>";
-  return "<table class=\"winter-rating__table\"><thead><tr><th>Место</th><th>Ник</th><th>Баллы</th><th>Выигрыш в<br>турнирах</th></tr></thead><tbody>" +
+  return "<table class=\"winter-rating__table\"><thead><tr><th>Место</th><th>Ник</th><th>Баллы</th><th>Призовые</th></tr></thead><tbody>" +
     sorted.map(function (r) {
       place++;
       var trClass = winterRatingRowClass(place);
@@ -1319,7 +1319,8 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
   if (!fullSummary || !tableWrap) return;
   var leagueSelect = document.getElementById("winterRatingPlayerModalLeague");
   var leagueVal = leagueSelect && leagueSelect.value ? leagueSelect.value : "all";
-  var sortBy = (sortByBtn && sortByBtn.textContent.indexOf("выигрыш") !== -1) ? "reward" : "date";
+  var sortByText = sortByBtn ? String(sortByBtn.textContent || "").toLowerCase() : "";
+  var sortBy = sortByText.indexOf("призов") !== -1 ? "reward" : "date";
   var sortDesc = (sortDirBtn && sortDirBtn.textContent.indexOf("↑") === -1);
   var modalSeasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
   var list = monthVal === "all" ? fullSummary.slice() : fullSummary.filter(function (s) {
@@ -1353,8 +1354,8 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     var totalRewardFilteredStr = totalRewardFiltered ? formatRewardRound(totalRewardFiltered) : "0";
     var headers = "<th class=\"winter-rating-player-modal__th-date\">Дата</th><th class=\"winter-rating-player-modal__th-tournament\">Турнир</th><th class=\"winter-rating-player-modal__th-place\">Место</th>";
     if (showPoints) headers += "<th class=\"winter-rating-player-modal__th-points\">Баллы</th>";
-    headers += "<th class=\"winter-rating-player-modal__th-reward\">Выигрыш</th>";
-    var footerCells = "<td colspan=\"3\" class=\"winter-rating-player-modal__total-label\">Итого</td>";
+    headers += "<th class=\"winter-rating-player-modal__th-reward\">Призовые</th>";
+    var footerCells = "<td colspan=\"3\" class=\"winter-rating-player-modal__total-label\">Итого призовые</td>";
     if (showPoints) footerCells += "<td class=\"winter-rating-player-modal__total-value\">" + totalPointsFiltered + "</td>";
     footerCells += "<td class=\"winter-rating-player-modal__total-value\">" + totalRewardFilteredStr + "</td>";
     var tableHtml = "<table class=\"winter-rating__table winter-rating-player-modal__table\"><thead><tr>" + headers + "</tr></thead><tbody>" +
@@ -1428,11 +1429,11 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     if (summaryBlock) {
       summaryBlock.innerHTML = "<table class=\"winter-rating-player-modal__summary-table\"><tbody>" +
         "<tr class=\"winter-rating-player-modal__summary-total-row\"><td class=\"winter-rating-player-modal__summary-label\">Общие призовые</td><td class=\"winter-rating-player-modal__summary-value\">" + totalStr + "</td></tr>" +
-        "<tr><td class=\"winter-rating-player-modal__summary-label\">Топ выигрыш</td><td class=\"winter-rating-player-modal__summary-value\">" + topRewardStr + "</td></tr>" +
+        "<tr><td class=\"winter-rating-player-modal__summary-label\">Топ призовых</td><td class=\"winter-rating-player-modal__summary-value\">" + topRewardStr + "</td></tr>" +
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Первых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + firsts + " (призовые — " + firstsRewardStr + ")</td></tr>" +
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Вторых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + seconds + " (призовые — " + secondsRewardStr + ")</td></tr>" +
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Третьих мест</td><td class=\"winter-rating-player-modal__summary-value\">" + thirds + " (призовые — " + thirdsRewardStr + ")</td></tr>" +
-        (monthRows ? "<tr class=\"winter-rating-player-modal__summary-months-sep\"><td colspan=\"2\">Выигрыши по месяцам</td></tr>" + monthRows : "") +
+        (monthRows ? "<tr class=\"winter-rating-player-modal__summary-months-sep\"><td colspan=\"2\">Призовые по месяцам</td></tr>" + monthRows : "") +
         "</tbody></table>";
       summaryBlock.style.display = "";
     }
@@ -1589,7 +1590,7 @@ function initWinterRatingPlayerModal() {
   if (sortByBtn) {
     sortByBtn.addEventListener("click", function () {
       if (sortByBtn.textContent.indexOf("дате") !== -1) {
-        sortByBtn.textContent = "По выигрышам";
+        sortByBtn.textContent = "По призовым";
       } else {
         sortByBtn.textContent = "По дате";
       }
@@ -2962,8 +2963,8 @@ function initWinterRating() {
           var rewardText = cell.topReward > 0 ? formatRewardRound(cell.topReward) + " ₽" : "";
           var rewardShortText = cell.topReward > 0 ? formatCalendarCellRewardShort(cell.topReward) : "";
           var rewardAttr = rewardText ? rewardText.replace(/"/g, "&quot;") : "";
-          var rewardHtml = rewardText ? "<span class=\"winter-rating__calendar-cell-reward\" title=\"Максимальный выигрыш: " + rewardAttr + "\">" + rewardShortText + "</span>" : "";
-          var ariaReward = rewardText ? ", максимальный выигрыш " + rewardText : "";
+          var rewardHtml = rewardText ? "<span class=\"winter-rating__calendar-cell-reward\" title=\"Максимальные призовые: " + rewardAttr + "\">" + rewardShortText + "</span>" : "";
+          var ariaReward = rewardText ? ", максимальные призовые " + rewardText : "";
           rowHtml += "<button type=\"button\" class=\"winter-rating__calendar-cell winter-rating__calendar-cell--day" + toneClass + "\" data-rating-date=\"" + cell.dateStr.replace(/"/g, "&quot;") + "\" aria-label=\"Рейтинг на " + cell.dateStr + ariaReward + "\"><span class=\"winter-rating__calendar-cell-daynum\">" + cell.day + "</span>" + rewardHtml + "</button>";
         } else {
           rowHtml += "<span class=\"winter-rating__calendar-cell winter-rating__calendar-cell--no-data\" aria-hidden=\"true\">" + cell.day + "</span>";

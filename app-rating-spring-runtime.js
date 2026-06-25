@@ -153,7 +153,7 @@ function updateSpringRatingHomePromoStats() {
     var marText = marchAll > 0 ? fmt(marchAll) + " ₽" : "—";
     if (marTot) marTot.textContent = marText;
     function line(period, sum) {
-      return period + " · общий выигрыш " + (sum > 0 ? fmt(sum) + " ₽" : "—");
+      return period + " · общие призовые " + (sum > 0 ? fmt(sum) + " ₽" : "—");
     }
     if (w1) w1.textContent = line("1—8 марта", s1);
     if (w2) w2.textContent = line("9—15 марта", s2);
@@ -230,15 +230,15 @@ function renderSpringRatingViewTotalsWeeks() {
     var sumList = listHtml(sumRows);
     var winList = listHtml(winRows);
     var openAttr = openWeeks ? " open" : "";
-    var sumTitle = monthTotals ? "Итого суммарный выигрыш за месяц" : "Топ суммарный выигрыш за неделю";
+    var sumTitle = monthTotals ? "Итого суммарные призовые за месяц" : "Топ суммарные призовые за неделю";
     var winTitle = monthTotals ? "Итого топ за 1 турнир за месяц" : "Топ занос за 1 турнир";
-    var totalLabel = monthTotals ? "Всего выиграно игроками: " : "Всего выиграно игроками за неделю: ";
+    var totalLabel = monthTotals ? "Всего призов у игроков: " : "Всего призов у игроков за неделю: ";
     var detailClass = "spring-rating-view-week" + (monthTotals ? " spring-rating-view-week--march-month spring-rating-view-week--month-total" : "");
     return (
       "<details class=\"" + detailClass + "\"" + openAttr + ">" +
       "<summary class=\"spring-rating-view-week__summary\">" +
       "<span class=\"spring-rating-view-week__label\">" + block.label + "</span>" +
-      "<span class=\"spring-rating-view-week__meta\">Общий выигрыш: " + totalText + "</span>" +
+      "<span class=\"spring-rating-view-week__meta\">Общие призовые: " + totalText + "</span>" +
       "</summary>" +
       "<div class=\"spring-rating-view-week__inner\">" +
       "<div class=\"winter-rating__past-week-row\">" +
@@ -298,13 +298,13 @@ function renderSpringRatingViewTotalsWeeks() {
   var aprAllDates = collectMonthDates(aprBlocks);
   var marchAllDates = collectMonthDates(marBlocks);
   var mayMonthHtml = mayAllDates.length
-    ? weekDetailsHtml({ label: "Итого", dates: mayAllDates }, false, true)
+    ? weekDetailsHtml({ label: "Итого призовые", dates: mayAllDates }, false, true)
     : "";
   var aprMonthHtml = aprAllDates.length
-    ? weekDetailsHtml({ label: "Итого", dates: aprAllDates }, false, true)
+    ? weekDetailsHtml({ label: "Итого призовые", dates: aprAllDates }, false, true)
     : "";
   var marchMonthHtml = marchAllDates.length
-    ? weekDetailsHtml({ label: "Итого", dates: marchAllDates }, false, true)
+    ? weekDetailsHtml({ label: "Итого призовые", dates: marchAllDates }, false, true)
     : "";
   mayHost.innerHTML =
     mayMonthHtml +

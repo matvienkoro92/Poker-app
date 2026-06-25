@@ -3174,7 +3174,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Ksuha🐉",
           "place": 4,
-          "reward": 152,
+          "reward": 1520,
           "points": 70
         },
         {
@@ -3226,31 +3226,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Neo777",
           "place": 2,
-          "reward": 1121,
+          "reward": 11210,
           "points": 110
         },
         {
           "nick": "Porquinho",
           "place": 3,
-          "reward": 638,
+          "reward": 6380,
           "points": 90
         },
         {
           "nick": "PONOCHKA",
           "place": 8,
-          "reward": 190,
+          "reward": 1900,
           "points": 30
         },
         {
           "nick": "kriak",
           "place": 9,
-          "reward": 126,
+          "reward": 1260,
           "points": 0
         },
         {
           "nick": "AlenaSt",
           "place": 10,
-          "reward": 101,
+          "reward": 1010,
           "points": 0
         }
       ]
@@ -3264,7 +3264,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Виктор",
           "place": 4,
-          "reward": 3050,
+          "reward": 30500,
           "points": 70
         }
       ]
@@ -3354,25 +3354,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Бабник",
           "place": 1,
-          "reward": 624,
+          "reward": 6240,
           "points": 135
         },
         {
           "nick": "Shkarubo",
           "place": 3,
-          "reward": 267,
+          "reward": 2670,
           "points": 90
         },
         {
           "nick": "Yoptych",
           "place": 5,
-          "reward": 160,
+          "reward": 1600,
           "points": 60
         },
         {
           "nick": "Salamander",
           "place": 6,
-          "reward": 142,
+          "reward": 1420,
           "points": 50
         },
         {
@@ -3480,19 +3480,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Бабник",
           "place": 1,
-          "reward": 473,
+          "reward": 4730,
           "points": 135
         },
         {
           "nick": "мистерFox",
           "place": 2,
-          "reward": 283,
+          "reward": 2830,
           "points": 110
         },
         {
           "nick": "Shkarubo",
           "place": 3,
-          "reward": 189,
+          "reward": 1890,
           "points": 90
         },
         {
@@ -3518,25 +3518,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "WiNifly",
           "place": 1,
-          "reward": 1263.16,
+          "reward": 12631.58,
           "points": 135
         },
         {
           "nick": "NaKuRiKoTa",
           "place": 4,
-          "reward": 341.5,
+          "reward": 3415,
           "points": 70
         },
         {
           "nick": "Prushnik",
           "place": 5,
-          "reward": 241.5,
+          "reward": 2415,
           "points": 60
         },
         {
           "nick": "Spartak",
           "place": 8,
-          "reward": 186.47,
+          "reward": 1864.69,
           "points": 30
         },
         {
@@ -3670,31 +3670,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "COBRA",
           "place": 1,
-          "reward": 613,
+          "reward": 6130,
           "points": 135
         },
         {
           "nick": "Ouninpohja",
           "place": 2,
-          "reward": 415,
+          "reward": 4150,
           "points": 110
         },
         {
           "nick": "DemonDen",
           "place": 3,
-          "reward": 248,
+          "reward": 2480,
           "points": 90
         },
         {
           "nick": "NaKuRiKoTa",
           "place": 4,
-          "reward": 198,
+          "reward": 1980,
           "points": 70
         },
         {
           "nick": "AlenaSt",
           "place": 5,
-          "reward": 182,
+          "reward": 1820,
           "points": 60
         }
       ]
@@ -3804,19 +3804,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Odna.pluha",
           "place": 2,
-          "reward": 190,
+          "reward": 1900,
           "points": 110
         },
         {
           "nick": "NaKuRiKoTa",
           "place": 3,
-          "reward": 113,
+          "reward": 1130,
           "points": 90
         },
         {
           "nick": "Prushnik",
           "place": 4,
-          "reward": 90,
+          "reward": 900,
           "points": 70
         },
         {
@@ -3976,7 +3976,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "mr.Freeman",
           "place": 3,
-          "reward": 244,
+          "reward": 2440,
           "points": 90
         },
         {
@@ -4116,13 +4116,13 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Палач",
           "place": 1,
-          "reward": 442,
+          "reward": 4420,
           "points": 135
         },
         {
           "nick": "RUS22RUS",
           "place": 2,
-          "reward": 264,
+          "reward": 2640,
           "points": 110
         },
         {
@@ -4180,25 +4180,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "аБыРвалГ",
           "place": 1,
-          "reward": 945,
+          "reward": 9450,
           "points": 135
         },
         {
           "nick": "Evgen.",
           "place": 2,
-          "reward": 985.5,
+          "reward": 9855,
           "points": 110
         },
         {
           "nick": "zagrebnagreb",
           "place": 3,
-          "reward": 199,
+          "reward": 1990,
           "points": 90
         },
         {
           "nick": "BabyShark",
           "place": 5,
-          "reward": 119,
+          "reward": 1190,
           "points": 60
         },
         {
@@ -4334,31 +4334,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Палач",
           "place": 1,
-          "reward": 744,
+          "reward": 7440,
           "points": 135
         },
         {
           "nick": "MilkyWay77",
           "place": 3,
-          "reward": 319,
+          "reward": 3190,
           "points": 90
         },
         {
           "nick": "Ron9",
           "place": 4,
-          "reward": 233,
+          "reward": 2330,
           "points": 70
         },
         {
           "nick": "LuckyBoom",
           "place": 5,
-          "reward": 191,
+          "reward": 1910,
           "points": 60
         },
         {
           "nick": "GhooSt",
           "place": 6,
-          "reward": 169,
+          "reward": 1690,
           "points": 50
         }
       ]
@@ -4520,31 +4520,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Аспирин",
           "place": 3,
-          "reward": 394.06,
+          "reward": 3940.62,
           "points": 90
         },
         {
           "nick": "🦈Shark-Eyed🦈",
           "place": 4,
-          "reward": 231.72,
+          "reward": 2317.19,
           "points": 70
         },
         {
           "nick": "DemonDen",
           "place": 5,
-          "reward": 190.88,
+          "reward": 1908.75,
           "points": 60
         },
         {
           "nick": "мистерFox",
           "place": 7,
-          "reward": 20.25,
+          "reward": 202.5,
           "points": 40
         },
         {
           "nick": "аБыРвалГ",
           "place": 9,
-          "reward": 20.25,
+          "reward": 202.5,
           "points": 0
         }
       ]
@@ -4634,7 +4634,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "MORPEH",
           "place": 1,
-          "reward": 932,
+          "reward": 9320,
           "points": 135
         },
         {
@@ -4746,19 +4746,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Палач",
           "place": 1,
-          "reward": 483,
+          "reward": 4830,
           "points": 135
         },
         {
           "nick": "@Felix",
           "place": 3,
-          "reward": 196,
+          "reward": 1960,
           "points": 90
         },
         {
           "nick": "AlenaSt",
           "place": 4,
-          "reward": 156,
+          "reward": 1560,
           "points": 70
         },
         {
@@ -4938,25 +4938,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "NaKuRiKoTa",
           "place": 1,
-          "reward": 347,
+          "reward": 3470,
           "points": 135
         },
         {
           "nick": "WildBoar",
           "place": 2,
-          "reward": 235,
+          "reward": 2350,
           "points": 110
         },
         {
           "nick": "AlenaSt",
           "place": 3,
-          "reward": 140,
+          "reward": 1400,
           "points": 90
         },
         {
           "nick": "Shkarubo",
           "place": 4,
-          "reward": 112,
+          "reward": 1120,
           "points": 70
         },
         {
@@ -4990,13 +4990,13 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Ksuha🐉",
           "place": 2,
-          "reward": 495,
+          "reward": 4950,
           "points": 110
         },
         {
           "nick": "руська",
           "place": 4,
-          "reward": 180,
+          "reward": 1800,
           "points": 70
         },
         {
@@ -5028,31 +5028,31 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Twisted-fate_08",
           "place": 2,
-          "reward": 2050,
+          "reward": 20500,
           "points": 110
         },
         {
           "nick": "XaOc_AA",
           "place": 9,
-          "reward": 320,
+          "reward": 3200,
           "points": 0
         },
         {
           "nick": "MilkyWay77",
           "place": 10,
-          "reward": 210,
+          "reward": 2100,
           "points": 0
         },
         {
           "nick": "doss93",
           "place": 11,
-          "reward": 190,
+          "reward": 1900,
           "points": 0
         },
         {
           "nick": "Штукатур",
           "place": 13,
-          "reward": 190,
+          "reward": 1900,
           "points": 0
         }
       ]
@@ -5170,7 +5170,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "zagrebnagreb",
           "place": 2,
-          "reward": 388,
+          "reward": 3880,
           "points": 110
         },
         {
@@ -5362,25 +5362,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "NaKuRiKoTa",
           "place": 1,
-          "reward": 320,
+          "reward": 3200,
           "points": 135
         },
         {
           "nick": "🔥INFERNO🔥",
           "place": 2,
-          "reward": 217,
+          "reward": 2170,
           "points": 110
         },
         {
           "nick": "WildBoar",
           "place": 3,
-          "reward": 129,
+          "reward": 1290,
           "points": 90
         },
         {
           "nick": "mr.Freeman",
           "place": 4,
-          "reward": 103,
+          "reward": 1030,
           "points": 70
         },
         {
@@ -5414,13 +5414,13 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Ksuha🐉",
           "place": 1,
-          "reward": 1905.5,
+          "reward": 19055,
           "points": 135
         },
         {
           "nick": "Irakli",
           "place": 5,
-          "reward": 152,
+          "reward": 1520,
           "points": 60
         },
         {
@@ -5528,13 +5528,13 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "COBRA",
           "place": 2,
-          "reward": 415,
+          "reward": 4150,
           "points": 110
         },
         {
           "nick": "WildBoar",
           "place": 3,
-          "reward": 248,
+          "reward": 2480,
           "points": 90
         },
         {
@@ -5640,19 +5640,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "SantaClauS",
           "place": 2,
-          "reward": 248,
+          "reward": 2480,
           "points": 110
         },
         {
           "nick": "WildBoar",
           "place": 4,
-          "reward": 118,
+          "reward": 1180,
           "points": 70
         },
         {
           "nick": "AlenaSt",
           "place": 5,
-          "reward": 108,
+          "reward": 1080,
           "points": 60
         },
         {
@@ -5678,25 +5678,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Палач",
           "place": 1,
-          "reward": 1665.5,
+          "reward": 16655,
           "points": 135
         },
         {
           "nick": "Ksuha🐉",
           "place": 2,
-          "reward": 332,
+          "reward": 3320,
           "points": 110
         },
         {
           "nick": "AlenaSt",
           "place": 4,
-          "reward": 159,
+          "reward": 1590,
           "points": 70
         },
         {
           "nick": "мистерFox",
           "place": 5,
-          "reward": 145,
+          "reward": 1450,
           "points": 60
         },
         {
@@ -5938,19 +5938,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "NaKuRiKoTa",
           "place": 2,
-          "reward": 196,
+          "reward": 1960,
           "points": 110
         },
         {
           "nick": "Shkarubo",
           "place": 3,
-          "reward": 118,
+          "reward": 1180,
           "points": 90
         },
         {
           "nick": "WildBoar",
           "place": 5,
-          "reward": 86,
+          "reward": 860,
           "points": 60
         },
         {
@@ -6042,7 +6042,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "ПСИХ",
           "place": 3,
-          "reward": 198,
+          "reward": 1980,
           "points": 90
         },
         {
@@ -6212,19 +6212,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "DIVGO",
           "place": 1,
-          "reward": 374,
+          "reward": 3740,
           "points": 135
         },
         {
           "nick": "Анубис",
           "place": 2,
-          "reward": 224,
+          "reward": 2240,
           "points": 110
         },
         {
           "nick": "WildBoar",
           "place": 3,
-          "reward": 149,
+          "reward": 1490,
           "points": 90
         },
         {
@@ -6354,13 +6354,13 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "ДжекПотный",
           "place": 2,
-          "reward": 120,
+          "reward": 1200,
           "points": 110
         },
         {
           "nick": "⚡72⚡",
           "place": 3,
-          "reward": 95,
+          "reward": 950,
           "points": 90
         },
         {
@@ -6500,25 +6500,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "time2bass",
           "place": 1,
-          "reward": 427,
+          "reward": 4270,
           "points": 135
         },
         {
           "nick": "tatarin_1",
           "place": 2,
-          "reward": 289,
+          "reward": 2890,
           "points": 110
         },
         {
           "nick": "Tanechka",
           "place": 3,
-          "reward": 172,
+          "reward": 1720,
           "points": 90
         },
         {
           "nick": "Porquinho",
           "place": 5,
-          "reward": 126,
+          "reward": 1260,
           "points": 60
         },
         {
@@ -6552,25 +6552,25 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Shershen27",
           "place": 1,
-          "reward": 1361.25,
+          "reward": 13612.52,
           "points": 135
         },
         {
           "nick": "Просто",
           "place": 3,
-          "reward": 406.91,
+          "reward": 4069.06,
           "points": 90
         },
         {
           "nick": "AlenaSt",
           "place": 4,
-          "reward": 195.25,
+          "reward": 1952.5,
           "points": 70
         },
         {
           "nick": "Tanechka",
           "place": 6,
-          "reward": 157.38,
+          "reward": 1573.75,
           "points": 50
         },
         {
@@ -6628,19 +6628,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "Porquinho",
           "place": 2,
-          "reward": 88,
+          "reward": 880,
           "points": 110
         },
         {
           "nick": "⚡72⚡",
           "place": 5,
-          "reward": 36,
+          "reward": 360,
           "points": 60
         },
         {
           "nick": "zagrebnagreb",
           "place": 6,
-          "reward": 32,
+          "reward": 320,
           "points": 50
         },
         {
@@ -6744,19 +6744,19 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
         {
           "nick": "🔥INFERNO🔥",
           "place": 2,
-          "reward": 514,
+          "reward": 5140,
           "points": 110
         },
         {
           "nick": "Аспирин",
           "place": 3,
-          "reward": 307,
+          "reward": 3070,
           "points": 90
         },
         {
           "nick": "Палач",
           "place": 4,
-          "reward": 246,
+          "reward": 2460,
           "points": 70
         },
         {
