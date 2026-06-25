@@ -1934,8 +1934,7 @@ function initRaffles() {
           "</div>"
         );
       })
-      .join("") +
-      renderRafflesReferralPromoCard();
+      .join("");
     updateRafflesActiveChooserTimers();
     if (list.length) ensureRafflesActiveChooserTimer();
     else stopRafflesActiveChooserTimer();
@@ -2796,8 +2795,8 @@ function initRaffles() {
           }
         }
         if (!active) active = activeList[0] || null;
-        var activeCount = activeList.length + 1;
-        var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0) + RAFFLES_REFERRAL_PROMO_PRIZE_RUB;
+        var activeCount = activeList.length;
+        var activeSumRub = activeList.reduce(function (sum, r) { return sum + getRaffleTotalPrize(r); }, 0);
         rafflesActiveBroadcastList = activeList.slice();
         if (rafflesActiveInfoOpenId && !raffleListHasId(activeList, rafflesActiveInfoOpenId)) {
           rafflesActiveInfoOpenId = "";

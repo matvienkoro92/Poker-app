@@ -265,6 +265,15 @@ function renderSpringRatingViewTotalsWeeks() {
   var mayMonth = monthAt(0, "Май");
   var aprMonth = monthAt(1, "Апрель");
   var marMonth = monthAt(2, "Март");
+  function setMonthPanelVisible(panelClass, month) {
+    var panel = document.querySelector(panelClass);
+    if (!panel) return;
+    var blocks = month && Array.isArray(month.blocks) ? month.blocks : [];
+    panel.hidden = !blocks.length;
+  }
+  setMonthPanelVisible(".spring-rating-view-totals-panel--may", months[0]);
+  setMonthPanelVisible(".spring-rating-view-totals-panel--april", months[1]);
+  setMonthPanelVisible(".spring-rating-view-totals-panel--march", months[2]);
   var mayBlocks = Array.isArray(mayMonth.blocks) ? mayMonth.blocks : [];
   var aprBlocks = Array.isArray(aprMonth.blocks) ? aprMonth.blocks : [];
   var marBlocks = Array.isArray(marMonth.blocks) ? marMonth.blocks : [];

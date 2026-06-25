@@ -10,15 +10,19 @@ function updateCashoutManager() {
   const hour = getMskHour();
   const isAnna = hour >= 6 && hour < 18;
   const activeManager = isAnna ? "anna" : "vika";
-  const isCashoutView = document.body && document.body.getAttribute("data-view") === "cashout";
+  const viewName = document.body ? document.body.getAttribute("data-view") : "";
+  const shouldLoadActiveImage = viewName === "cashout" || viewName === "download";
 
   const blocks = document.querySelectorAll(".cashout-manager-block");
-  const subtitle = document.querySelector(".cashout-now-subtitle");
+  const subtitles = document.querySelectorAll(".cashout-now-subtitle");
+  const subtitleText = isAnna
+    ? "Сейчас на связи: Анна (06:00–18:00 мск)"
+    : "Сейчас на связи: Вика (18:00–02:00 мск)";
 
   blocks.forEach((block) => {
     if (block.dataset.manager === activeManager) {
       block.classList.remove("cashout-manager-block--hidden");
-      if (isCashoutView) {
+      if (shouldLoadActiveImage) {
         const img = block.querySelector(".cashout-image[data-src]");
         if (img && !img.getAttribute("src")) img.setAttribute("src", img.dataset.src || "");
       }
@@ -27,11 +31,9 @@ function updateCashoutManager() {
     }
   });
 
-  if (subtitle) {
-    subtitle.textContent = isAnna
-      ? "Сейчас на связи: Анна (06:00–18:00 мск)"
-      : "Сейчас на связи: Вика (18:00–02:00 мск)";
-  }
+  subtitles.forEach((subtitle) => {
+    subtitle.textContent = subtitleText;
+  });
 }
 
 updateCashoutManager();

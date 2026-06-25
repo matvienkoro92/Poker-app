@@ -7,7 +7,7 @@
     heavyLoadingScope: "",
     loadingScope: "",
     tab: "stats",
-    period: "30",
+    period: "all",
     dateFrom: "",
     dateTo: "",
     chartPeriod: "30",
@@ -903,6 +903,50 @@
       return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
     }).join("");
     sel.dataset.crmLinkTargetsReady = "1";
+  }
+
+  function renderBroadcastLinkTargetOptions() {
+    var sel = document.getElementById("playerCrmBroadcastLinkTarget");
+    if (!sel || sel.dataset.crmBroadcastLinkTargetsReady === "1") return;
+    sel.innerHTML = CRM_LINK_TARGETS.map(function (target) {
+      return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
+    }).join("");
+    sel.dataset.crmBroadcastLinkTargetsReady = "1";
+  }
+
+  function broadcastAppLinkTarget() {
+    var sel = document.getElementById("playerCrmBroadcastLinkTarget");
+    return crmLinkTargetByKey(sel ? sel.value : "home");
+  }
+
+  function broadcastAppLinkUrl() {
+    return buildCrmLinkUrl(broadcastAppLinkTarget().startapp);
+  }
+
+  function syncBroadcastAppLinkTemplate(applyToButton) {
+    renderBroadcastLinkTargetOptions();
+    var target = broadcastAppLinkTarget();
+    var url = broadcastAppLinkUrl();
+    var urlEl = document.getElementById("playerCrmBroadcastAppLink");
+    var templateEl = document.getElementById("playerCrmBroadcastLinkTemplate");
+    var buttonTextEl = document.getElementById("playerCrmBroadcastButtonText");
+    var buttonUrlEl = document.getElementById("playerCrmBroadcastButtonUrl");
+    var buttonText = buttonTextEl ? String(buttonTextEl.value || "").trim() : "";
+    var buttonUrl = buttonUrlEl ? String(buttonUrlEl.value || "").trim() : "";
+    var previousAppLink = buttonUrlEl ? String(buttonUrlEl.dataset.crmGeneratedAppLink || "") : "";
+    if (urlEl) urlEl.value = url;
+    if (buttonUrlEl && (applyToButton || !buttonUrl || (previousAppLink && buttonUrl === previousAppLink))) {
+      buttonUrlEl.value = url;
+      buttonUrlEl.dataset.crmGeneratedAppLink = url;
+      if (buttonTextEl && !buttonText) {
+        buttonTextEl.value = "Открыть";
+        buttonText = "Открыть";
+      }
+      buttonUrl = url;
+    }
+    if (templateEl) {
+      templateEl.textContent = "Шаблон: кнопка «" + (buttonText || "без названия") + "» откроет " + target.label + " · " + (buttonUrl || url || target.startapp);
+    }
   }
 
   function crmLinkFieldValue(id) {
@@ -1989,6 +2033,8 @@
     var text = textEl ? String(textEl.value || "").trim() : "";
     var image = state.broadcastImage || null;
     var button = broadcastButtonPayload();
+    var appTarget = broadcastAppLinkTarget();
+    var appLink = broadcastAppLinkUrl();
     var hasBot = channel === "bot" || channel === "bot_push";
     var hasPush = channel === "push" || channel === "bot_push";
     var pushText = text ? text.slice(0, 180) : (image ? "Фото от Два туза" : "Новое сообщение");
@@ -2018,7 +2064,8 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span></div>" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Раздел<strong>" + esc(appTarget.label) + "</strong></span></div>" +
+            "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылка в шаблоне</strong><span>" + esc((button && !button.error && button.buttonUrl) || appLink || "—") + "</span></div>" +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
         "</div>" +
@@ -3161,6 +3208,16 @@
     if (broadcastBatchNext) broadcastBatchNext.addEventListener("click", function () { stepBroadcastBatch(1); });
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
+    renderBroadcastLinkTargetOptions();
+    syncBroadcastAppLinkTemplate(false);
+    var broadcastLinkTarget = document.getElementById("playerCrmBroadcastLinkTarget");
+    if (broadcastLinkTarget) broadcastLinkTarget.addEventListener("change", function () { syncBroadcastAppLinkTemplate(true); });
+    var broadcastUseAppLink = document.getElementById("playerCrmBroadcastUseAppLinkBtn");
+    if (broadcastUseAppLink) broadcastUseAppLink.addEventListener("click", function () { syncBroadcastAppLinkTemplate(true); });
+    var broadcastButtonText = document.getElementById("playerCrmBroadcastButtonText");
+    if (broadcastButtonText) broadcastButtonText.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    var broadcastButtonUrl = document.getElementById("playerCrmBroadcastButtonUrl");
+    if (broadcastButtonUrl) broadcastButtonUrl.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
     var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");
     var broadcastImageInput = document.getElementById("playerCrmBroadcastImageInput");
     var broadcastImageRemove = document.getElementById("playerCrmBroadcastImageRemoveBtn");

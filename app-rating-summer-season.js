@@ -36,9 +36,7 @@ var SUMMER_RATING_SEASON = {
   leaguePrefix: "summer_rating_league_",
   topLinkBase: "",
   viewMonths: [
-    { title: "Август", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: [] },
-    { title: "Июль", totalId: "springRatingViewAprilTotal", weeksHostId: "springRatingViewAprilWeeks", blocks: [] },
-    { title: "Июнь", totalId: "springRatingViewMarchTotal", weeksHostId: "springRatingViewMarchWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },
+    { title: "Июнь", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },
   ],
   pastWeekDates: [],
   currentWeekDates: SUMMER_HOME_JUNE_DAYS_1_7,

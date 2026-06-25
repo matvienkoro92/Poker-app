@@ -1100,10 +1100,12 @@ function setView(viewName, navOpts) {
     initProfileExitBtn();
     initProfileChatPush();
   }
-  if (viewName === "cashout") {
+  if (viewName === "download" || viewName === "cashout") {
     try {
       if (typeof updateCashoutManager === "function") updateCashoutManager();
     } catch (eCashoutManagerView) {}
+  }
+  if (viewName === "cashout") {
     initCashoutDepositForm();
   }
   if (viewName === "streams") {

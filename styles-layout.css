@@ -1891,3 +1891,49 @@ body[data-view="cashout"] .cashout-manager-block {
   max-width: 100%;
   box-sizing: border-box;
 }
+
+body[data-view="hall-of-fame"] #app.app,
+html:has(body[data-view="hall-of-fame"]) #app.app,
+html.app-view-hall-html-scroll #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="hall-of-fame"] #app.app .card,
+html:has(body[data-view="hall-of-fame"]) #app.app .card,
+html.app-view-hall-html-scroll #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="hall-of-fame"] #app.app .card .card__content,
+html:has(body[data-view="hall-of-fame"]) #app.app .card .card__content,
+html.app-view-hall-html-scroll #app.app .card .card__content {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="hall-of-fame"] #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
+html:has(body[data-view="hall-of-fame"]) #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
+html.app-view-hall-html-scroll #app.app .card .card__content > .view--active[data-view="hall-of-fame"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}

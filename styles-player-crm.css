@@ -1533,6 +1533,47 @@ button.player-crm__stat:focus-visible,
   cursor: not-allowed;
   opacity: 0.45;
 }
+.player-crm__broadcast-link-template {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 1px solid rgba(199, 163, 106, 0.28);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.26);
+}
+.player-crm__broadcast-link-template .player-crm__form-grid {
+  margin-bottom: 0;
+}
+.player-crm__broadcast-link-row,
+.player-crm__broadcast-preview-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.player-crm__broadcast-link-row span,
+.player-crm__broadcast-preview-link span {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.player-crm__broadcast-preview-link {
+  margin: 10px 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(199, 163, 106, 0.24);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.32);
+}
+.player-crm__broadcast-preview-link strong {
+  flex: 0 0 auto;
+  color: var(--text);
+  font-size: 12px;
+}
 .player-crm__file-input {
   position: absolute;
   width: 1px;
