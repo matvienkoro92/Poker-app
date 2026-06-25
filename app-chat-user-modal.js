@@ -1231,8 +1231,18 @@ if (chatUserModalEl) {
     if (n >= 1000) return Math.round(n / 1000) + "к";
     return String(Math.round(n));
   }
+  function chatUserModalDateStamp(dateStr) {
+    var parts = String(dateStr || "").split(".");
+    if (parts.length < 3) return 0;
+    var day = parseInt(parts[0], 10) || 0;
+    var month = parseInt(parts[1], 10) || 0;
+    var year = parseInt(parts[2], 10) || 0;
+    return year * 10000 + month * 100 + day;
+  }
   function chatUserModalBestWinRows(rows, limit) {
-    return (Array.isArray(rows) ? rows : []).slice(0, limit || 3).map(function (row) {
+    return (Array.isArray(rows) ? rows : []).slice().sort(function (a, b) {
+      return chatUserModalDateStamp(b && b.date) - chatUserModalDateStamp(a && a.date);
+    }).slice(0, limit || 3).map(function (row) {
       var date = row && row.date ? String(row.date) : "";
       var amount = chatUserModalFormatAchievementRub(row && row.reward);
       return {
