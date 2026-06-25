@@ -203,9 +203,9 @@
   --hall-top2026-stage-min-height: 884px;
   --hall-top2026-floor-y: calc(100% + 110px);
   --hall-top2026-floor-width: 118%;
-  --hall-top2026-trophy-right: clamp(-24px, -6vw, -10px);
+  --hall-top2026-trophy-right: clamp(8px, 3vw, 18px);
   --hall-top2026-trophy-top: clamp(338px, 90vw, 394px);
-  --hall-top2026-trophy-width: clamp(108px, 30vw, 130px);
+  --hall-top2026-trophy-width: clamp(130px, 36vw, 156px);
   margin: 0;
   padding: 4px 0 0;
   border-radius: 18px;
@@ -341,9 +341,9 @@
 }
 .hall-of-fame__top2026-monkey {
   z-index: 5;
-  top: clamp(214px, calc(49vw + 30px), 238px);
-  left: clamp(-102px, -24vw, -74px);
-  width: clamp(265px, 71.25vw, 298px);
+  top: clamp(196px, calc(44vw + 22px), 218px);
+  left: clamp(-120px, -29vw, -92px);
+  width: clamp(225px, 60.55vw, 253px);
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
 }
 .hall-of-fame__top2026-trophy {
