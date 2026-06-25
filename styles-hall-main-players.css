@@ -645,6 +645,10 @@
   font-size: 15px;
   font-weight: 1000;
 }
+.hall-fish-achievement-detail__amount {
+  color: #34d399;
+  text-shadow: 0 0 14px rgba(52, 211, 153, 0.36);
+}
 .hall-fish-achievement-detail__text small {
   margin-top: 3px;
   color: rgba(255, 237, 213, 0.72);

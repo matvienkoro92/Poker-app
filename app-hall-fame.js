@@ -669,10 +669,11 @@ function hallFishOpenAchievementDetail(row) {
   if (titleEl) titleEl.textContent = title;
   if (listEl) {
     listEl.innerHTML = details.length ? details.map(function (item, index) {
+      var title = hallFishAchievementDetailTitleHtml(item && item.title || "Запись");
       return '<article class="hall-fish-achievement-detail__item">' +
         '<span class="hall-fish-achievement-detail__rank">' + hallFishEsc(index + 1) + '</span>' +
         '<span class="hall-fish-achievement-detail__text">' +
-          '<strong>' + hallFishEsc(item && item.title || "Запись") + '</strong>' +
+          '<strong>' + title + '</strong>' +
           (item && item.meta ? '<small>' + hallFishEsc(item.meta) + '</small>' : '') +
         '</span>' +
       '</article>';
@@ -1108,7 +1109,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         ? pokerRatingAchievementMonthLabel(row && row.monthKey)
         : String(row && row.monthKey || "");
       return {
-        title: month || "Месяц",
+        title: month ? "Месяц: " + month : "Месяц",
         meta: (row && row.place ? String(row.place) + " место" : "топ-3") + " · " + hallFishFormatRub(row && row.reward),
       };
     });
@@ -1565,6 +1566,14 @@ function hallFishClearLoadingWhenProfileOpens() {
     });
     hallFishProfileLoadingObserver.observe(modal, { attributes: true, attributeFilter: ["class", "aria-hidden"] });
   }
+}
+
+function hallFishAchievementDetailTitleHtml(title) {
+  var text = String(title || "").trim();
+  var match = text.match(/^([\d\s]+₽)(\s*·\s*.+)?$/);
+  if (!match) return hallFishEsc(text || "Запись");
+  return '<span class="hall-fish-achievement-detail__amount">' + hallFishEsc(match[1]) + '</span>' +
+    (match[2] ? hallFishEsc(match[2]) : "");
 }
 
 function hallFishStatusFishLevel(level) {

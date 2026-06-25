@@ -1259,7 +1259,7 @@ if (chatUserModalEl) {
         : String(row && row.monthKey || "");
       var amount = chatUserModalFormatAchievementRub(row && row.reward);
       var place = row && row.place ? String(row.place) + " место" : "топ-3";
-      return { label: month + ": " + place + (amount ? ", " + amount : "") };
+      return { label: "Месяц: " + (month || "—") + " · " + place + (amount ? " · " + amount : "") };
     });
   }
   function chatUserModalAchievementsHtml(results, ratingNick, metrics) {
