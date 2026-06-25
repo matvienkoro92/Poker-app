@@ -2762,7 +2762,27 @@ function initWinterRating() {
     var dateModalBody = document.getElementById("winterRatingDateModalBody");
     var dateModalPrev = document.getElementById("winterRatingDateModalPrev");
     var dateModalNext = document.getElementById("winterRatingDateModalNext");
+    function refreshDateModalRefs() {
+      dateModal = document.getElementById("winterRatingDateModal");
+      dateModalBackdrop = document.getElementById("winterRatingDateModalBackdrop");
+      dateModalClose = document.getElementById("winterRatingDateModalClose");
+      dateModalTitle = document.getElementById("winterRatingDateModalTitle");
+      dateModalBody = document.getElementById("winterRatingDateModalBody");
+      dateModalPrev = document.getElementById("winterRatingDateModalPrev");
+      dateModalNext = document.getElementById("winterRatingDateModalNext");
+    }
+    function bindDateModalNavButton(navBtn) {
+      if (!navBtn || navBtn.getAttribute("data-rating-date-nav-bound") === "1") return;
+      navBtn.setAttribute("data-rating-date-nav-bound", "1");
+      navBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (navBtn.disabled) return;
+        openDateModalByDate(navBtn.dataset.ratingDate || "", getDateModalActiveLeague());
+      });
+    }
     function ensureDateModalNavControls() {
+      refreshDateModalRefs();
       if (!dateModal || !dateModalTitle) return;
       var inner = dateModal.querySelector(".winter-rating-date-modal__inner");
       if (!inner) return;
@@ -2791,6 +2811,8 @@ function initWinterRating() {
         dateModalNext.textContent = "›";
         header.appendChild(dateModalNext);
       }
+      bindDateModalNavButton(dateModalPrev);
+      bindDateModalNavButton(dateModalNext);
     }
     ensureDateModalNavControls();
     function getCalendarCellTone(dateStr) {
@@ -2887,6 +2909,7 @@ function initWinterRating() {
       }
     }
     function openDateModal(dateStr, panel, preferredLeague) {
+      ensureDateModalNavControls();
       if (!dateModal || !dateModalBody || !panel) return;
       var lwModal = panel.querySelector(".spring-rating-date-leagues");
       if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr);
@@ -2946,14 +2969,7 @@ function initWinterRating() {
     if (dateModalBackdrop) dateModalBackdrop.addEventListener("click", closeDateModal);
     if (dateModalClose) dateModalClose.addEventListener("click", closeDateModal);
     [dateModalPrev, dateModalNext].forEach(function (navBtn) {
-      if (!navBtn || navBtn.getAttribute("data-rating-date-nav-bound") === "1") return;
-      navBtn.setAttribute("data-rating-date-nav-bound", "1");
-      navBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (navBtn.disabled) return;
-        openDateModalByDate(navBtn.dataset.ratingDate || "", getDateModalActiveLeague());
-      });
+      bindDateModalNavButton(navBtn);
     });
     function renderCalendarMonth(monthIndex) {
       calendarWrap._calendarMonthIndex = monthIndex;

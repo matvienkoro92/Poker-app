@@ -1772,6 +1772,33 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
   background: rgba(192, 132, 252, 0.35);
   color: #fff;
 }
+.winter-rating-date-modal__body .spring-rating-date-league-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 14px;
+}
+.winter-rating-date-modal__body .spring-rating-date-league-tab {
+  width: 100%;
+  min-height: 58px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 194, 82, 0.24);
+  border-radius: 12px;
+  background: rgba(8, 14, 27, 0.92);
+  color: #ffe9b8;
+  font-size: clamp(18px, 4.6vw, 22px);
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+.winter-rating-date-modal__body .spring-rating-date-league-tab--active {
+  border-color: rgba(255, 190, 58, 0.92);
+  background:
+    linear-gradient(180deg, #ffe08a 0%, #ffb42b 52%, #a96708 100%);
+  color: #1f1300;
+  text-shadow: 0 1px 0 rgba(255, 244, 196, 0.62);
+  box-shadow: 0 0 0 1px rgba(255, 218, 106, 0.38), 0 0 22px rgba(255, 179, 42, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
 .spring-rating-date-league {
   margin-bottom: 12px;
 }
