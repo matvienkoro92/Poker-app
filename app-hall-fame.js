@@ -1004,12 +1004,11 @@ function hallFishReferralsRows(data) {
 
 function hallFishAchievementSpecs(data) {
   return [
-    { key: "big50", title: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
-    { key: "big100", title: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
-    { key: "king", title: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
-    { key: "monthChampion", title: "Чемпион месяца", description: "Начисляется игрокам, которые вошли в топ-3 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
-    { key: "clubChoice", title: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
-    { key: "referrals", title: "Приглашенные", description: "Считаются приглашённые игроки по личной ссылке. Дополнительно показывается, сколько из них привязали Poker21.", rows: data && data.referrals },
+    { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
+    { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
+    { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
+    { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игрокам, которые вошли в топ-3 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
+    { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
   ];
 }
 
@@ -1055,7 +1054,7 @@ function hallFishRenderAchievementRows(data) {
       }).join("") +
     '</div>' +
     '</div>' +
-    hallFishAchievementSectionHtml(activeSpec.title, activeSpec.rows, activeSpec.description) +
+    hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description) +
   '</div>';
 }
 

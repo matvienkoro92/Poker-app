@@ -505,20 +505,32 @@
 .hall-fish-modal__tab--active::before {
   opacity: 1;
 }
+.hall-fish-modal__panel--achievements .hall-fish-modal__tabs {
+  border-bottom-color: rgba(255, 202, 74, 0.58);
+  background:
+    radial-gradient(circle at 45% 100%, rgba(251, 191, 36, 0.2), transparent 28%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.16));
+}
 .hall-fish-modal__panel--achievements .hall-fish-modal__tab[data-hall-fish-tab="achievements"]::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -22px;
-  width: 20px;
-  height: 20px;
+  bottom: -25px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
   border-right: 1px solid rgba(255, 209, 92, 0.72);
   border-bottom: 1px solid rgba(255, 209, 92, 0.72);
   background:
-    linear-gradient(135deg, rgba(12, 18, 34, 0) 0 49%, rgba(255, 196, 57, 0.28) 50% 100%);
-  box-shadow: 8px 8px 18px rgba(251, 146, 60, 0.16);
+    linear-gradient(135deg, rgba(12, 18, 34, 0) 0 49%, rgba(255, 196, 57, 0.46) 50% 100%);
+  box-shadow: 9px 9px 24px rgba(251, 146, 60, 0.28);
   transform: translateX(-50%) rotate(45deg);
   pointer-events: none;
+}
+.hall-fish-modal__panel--achievements .hall-fish-modal__body {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.13), transparent 32%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.1), transparent 120px);
 }
 .hall-fish-modal__body {
   min-height: 180px;
@@ -754,15 +766,19 @@
   min-width: 0;
   margin: 0;
   padding: 14px 14px 12px;
-  border: 1px solid rgba(251, 191, 36, 0.36);
+  border: 1px solid rgba(251, 191, 36, 0.62);
+  border-top-color: rgba(255, 220, 118, 0.88);
   border-radius: 20px;
   background:
+    radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.28), transparent 30%),
     radial-gradient(circle at 18% 0%, rgba(251, 191, 36, 0.14), transparent 36%),
-    linear-gradient(90deg, rgba(251, 191, 36, 0.1), transparent 25%, transparent 75%, rgba(251, 191, 36, 0.1)),
-    linear-gradient(180deg, rgba(7, 12, 26, 0.72), rgba(2, 6, 23, 0.48));
+    linear-gradient(90deg, rgba(251, 191, 36, 0.14), transparent 25%, transparent 75%, rgba(251, 191, 36, 0.14)),
+    linear-gradient(180deg, rgba(11, 18, 34, 0.86), rgba(2, 6, 23, 0.58));
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.08),
-    0 14px 30px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 251, 235, 0.16),
+    inset 0 0 0 1px rgba(255, 168, 43, 0.1),
+    0 0 0 1px rgba(251, 146, 60, 0.12),
+    0 16px 34px rgba(0, 0, 0, 0.22);
 }
 .hall-fish-achievement-tabs-shell::before {
   content: "";
@@ -772,6 +788,17 @@
   top: -1px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.72), transparent);
+}
+.hall-fish-achievement-tabs-shell::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 2px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 220, 118, 0.95), rgba(251, 146, 60, 0));
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.42);
 }
 .hall-fish-achievement-tabs-shell__head {
   display: flex;
@@ -795,8 +822,8 @@
 }
 .hall-fish-achievement-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -806,8 +833,8 @@
   appearance: none;
   -webkit-appearance: none;
   min-width: 0;
-  min-height: 38px;
-  padding: 8px 9px;
+  min-height: 36px;
+  padding: 7px 5px;
   border: 1px solid rgba(248, 217, 138, 0.28);
   border-radius: 999px;
   background:
@@ -816,10 +843,10 @@
   color: rgba(255, 237, 213, 0.82);
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
+  font-size: 9.5px;
   font-weight: 950;
   letter-spacing: 0;
-  white-space: normal;
+  white-space: nowrap;
   line-height: 1.08;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
@@ -832,15 +859,19 @@
   outline: none;
 }
 .hall-fish-achievement-tab--active {
-  border-color: rgba(255, 205, 83, 0.92);
+  border-color: rgba(255, 232, 166, 0.98);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 247, 214, 0.32), transparent 42%),
-    linear-gradient(180deg, rgba(255, 202, 74, 0.94), rgba(180, 83, 9, 0.9));
+    radial-gradient(circle at 50% 0%, rgba(255, 251, 235, 0.68), transparent 38%),
+    linear-gradient(180deg, #ffd76a, #f59e0b 56%, #b45309);
   color: #1c1203;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38);
   box-shadow:
-    inset 0 1px 0 rgba(255, 251, 235, 0.38),
-    0 0 16px rgba(251, 191, 36, 0.28);
+    inset 0 1px 0 rgba(255, 251, 235, 0.62),
+    inset 0 -8px 14px rgba(120, 53, 15, 0.2),
+    0 0 0 1px rgba(255, 145, 32, 0.5),
+    0 0 22px rgba(251, 191, 36, 0.42),
+    0 10px 18px rgba(0, 0, 0, 0.24);
 }
 .hall-fish-achievement-section {
   min-width: 0;
@@ -1051,15 +1082,15 @@
   }
   .hall-fish-achievement-tab {
     min-height: 32px;
-    padding: 6px 5px;
-    font-size: 9.5px;
+    padding: 6px 2px;
+    font-size: 7.6px;
   }
   .hall-fish-achievement-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
   }
   .hall-fish-achievement-tabs-shell {
-    padding: 10px 9px 8px;
+    padding: 10px 6px 8px;
     border-radius: 15px;
   }
   .hall-fish-achievement-tabs-shell__head {

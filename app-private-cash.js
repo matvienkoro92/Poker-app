@@ -74,7 +74,10 @@
 
   function renderBonusPicker() {
     return '<div class="private-cash-modal__bonus-picker">' +
-      '<span class="private-cash-modal__bonus-label">Актуальные бонусы</span>' +
+      '<div class="private-cash-modal__bonus-head">' +
+        '<span class="private-cash-modal__bonus-label">Бонусы плиткой</span>' +
+        '<small>Выбери бонус и отредактируй текст ниже</small>' +
+      '</div>' +
       '<div class="private-cash-modal__bonus-grid" role="group" aria-label="Выберите бонус">' +
         BONUS_PRESETS.map(function (bonus) {
           return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-text="' + escapeHtml(bonus.text) + '">' +
@@ -211,7 +214,7 @@
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
       renderBonusPicker() +
-      '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"> Отправить пуш всем об открытии записи</label>' +
+      '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"><span><strong>Отправить пуш</strong><small>Если галочка включена, всем уйдет уведомление об открытии записи.</small></span></label>' +
       '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись</button>' +
     '</form>';
   }
