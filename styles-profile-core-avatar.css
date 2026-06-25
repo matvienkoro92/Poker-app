@@ -804,9 +804,9 @@
   transform-origin: center bottom;
 }
 .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
-  max-width: min(46%, 174px);
-  height: calc(88% - 6px);
-  max-height: calc(88% - 6px);
+  max-width: min(40%, 152px);
+  height: calc(76% - 6px);
+  max-height: calc(76% - 6px);
   transform: translateY(0);
 }
 .profile-public-showcase .chat-user-modal__p21:empty {
@@ -1995,9 +1995,9 @@ body.profile-avatar-choice-open {
   transform-origin: center bottom;
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
-  max-width: min(64%, 320px);
-  height: 88%;
-  max-height: 88%;
+  max-width: min(54%, 270px);
+  height: 76%;
+  max-height: 76%;
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
   grid-column: 2;
@@ -2249,6 +2249,12 @@ body.profile-avatar-choice-open {
     height: 100%;
     max-height: 100%;
     transform: translateY(-10px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
+    max-width: min(54%, 230px);
+    height: 76%;
+    max-height: 76%;
+    transform: translateY(-6px);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
     align-self: center;

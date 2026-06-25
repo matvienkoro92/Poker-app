@@ -986,6 +986,7 @@ if (chatUserModalEl) {
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
@@ -1029,7 +1030,8 @@ if (chatUserModalEl) {
     if (key.indexOf("больш") >= 0 && key.indexOf("50") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
     if (key.indexOf("больш") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 100 000 ₽ и выше в одном турнире.";
     if (key.indexOf("миллион") >= 0) return "Суммируются все призовые игрока из клубной турнирной истории. У достижения есть уровни по общей сумме выигрышей.";
-    if (key.indexOf("чемпион месяца") >= 0) return "Дается за попадание в топ-3 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
+    if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return "Дается за топ-2 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
+    if (key.indexOf("чемпион месяца") >= 0) return "Дается за топ-1 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
     if (key.indexOf("золот") >= 0) return "Считаются победы игрока в розыгрышах клуба. У достижения есть уровни по количеству выигранных розыгрышей.";
     if (key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
     if (key.indexOf("команд") >= 0) return "Считаются принятые друзья в профиле игрока. У достижения есть уровни по размеру покерного круга.";
@@ -1305,6 +1307,7 @@ if (chatUserModalEl) {
       });
     });
     var monthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.monthlyChampions);
+    var viceMonthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.viceMonthlyChampions);
     var cupsHtml =
       chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
         extraClass: "chat-user-modal__achievement--season-cup",
@@ -1356,6 +1359,9 @@ if (chatUserModalEl) {
         },
       }) +
       chatUserModalAchievementCardHtml("★", "Чемпион месяца", monthChampionRows, {
+        placeholder: "Нет месяца",
+      }) +
+      chatUserModalAchievementCardHtml("★", "Вице-чемпион месяца", viceMonthChampionRows, {
         placeholder: "Нет месяца",
       }) +
       chatUserModalAchievementCardHtml("★", "Легенда", legends) +

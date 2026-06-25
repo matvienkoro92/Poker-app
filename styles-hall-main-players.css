@@ -552,6 +552,106 @@
   color: rgba(255, 237, 213, 0.66);
   font-size: 12px;
 }
+.hall-fish-achievement-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 12120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.hall-fish-achievement-detail--open {
+  display: flex;
+}
+.hall-fish-achievement-detail__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+.hall-fish-achievement-detail__panel {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 100%);
+  max-height: min(82vh, 720px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(248, 217, 138, 0.42);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(251, 191, 36, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.58);
+}
+.hall-fish-achievement-detail__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.7);
+  color: #ffefb0;
+  font: inherit;
+  font-size: 28px;
+  font-weight: 1000;
+  line-height: 1;
+}
+.hall-fish-achievement-detail__eyebrow {
+  margin: 0 44px 4px 0;
+  color: rgba(255, 237, 213, 0.7);
+  font-size: 13px;
+  font-weight: 900;
+}
+.hall-fish-achievement-detail__title {
+  margin: 0 44px 14px 0;
+  color: #fde68a;
+  font-size: 24px;
+  font-weight: 1000;
+  line-height: 1.05;
+}
+.hall-fish-achievement-detail__list {
+  display: grid;
+  gap: 8px;
+}
+.hall-fish-achievement-detail__item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 13px;
+  background: rgba(2, 6, 23, 0.42);
+}
+.hall-fish-achievement-detail__rank {
+  color: rgba(255, 237, 213, 0.72);
+  font-weight: 1000;
+}
+.hall-fish-achievement-detail__text {
+  min-width: 0;
+}
+.hall-fish-achievement-detail__text strong,
+.hall-fish-achievement-detail__text small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.hall-fish-achievement-detail__text strong {
+  color: #fffbeb;
+  font-size: 15px;
+  font-weight: 1000;
+}
+.hall-fish-achievement-detail__text small {
+  margin-top: 3px;
+  color: rgba(255, 237, 213, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
 .hall-fish-level-list {
   display: grid;
   gap: 8px;
@@ -1230,7 +1330,7 @@
     font-size: 7.6px;
   }
   .hall-fish-achievement-tabs {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2px;
   }
   .hall-fish-achievement-tabs-shell {

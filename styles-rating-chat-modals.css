@@ -1303,8 +1303,9 @@
   transform-origin: center bottom;
 }
 .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
-  width: min(128%, 252px);
-  transform: translateY(-26px) scale(1.18);
+  width: min(106%, 238px);
+  max-height: 212px;
+  transform: translateY(-20px) scale(1);
   transform-origin: center bottom;
 }
 .chat-user-modal__hero--art .chat-user-modal__rating-art-img--avatar-fallback {
@@ -1840,8 +1841,9 @@
   }
 
   .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
-    width: min(130%, 218px);
-    transform: translateY(-24px) scale(1.18);
+    width: min(108%, 198px);
+    max-height: 172px;
+    transform: translateY(-20px) scale(1);
     transform-origin: center bottom;
   }
 

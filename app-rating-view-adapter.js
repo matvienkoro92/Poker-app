@@ -1211,6 +1211,7 @@ function pokerGetTournamentAchievementStats(nick) {
       bigWins50: [],
       bigWins100: [],
       monthlyChampions: [],
+      viceMonthlyChampions: [],
       rows: [],
     };
   }
@@ -1251,6 +1252,7 @@ function pokerGetTournamentAchievementStats(nick) {
     byMonth[monthKey][nickKey].reward += Number(row.reward) || 0;
   });
   var monthlyChampions = [];
+  var viceMonthlyChampions = [];
   Object.keys(byMonth).forEach(function (monthKey) {
     var rows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; })
       .filter(function (row) { return (Number(row.reward) || 0) > 0; })
@@ -1259,23 +1261,27 @@ function pokerGetTournamentAchievementStats(nick) {
           String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
       });
     if (!rows.length) return;
-    rows.slice(0, 3).forEach(function (row, index) {
+    rows.slice(0, 2).forEach(function (row, index) {
       if (!winterRatingSamePlayer(row.nick, normalizedNick)) return;
-      monthlyChampions.push({
+      var item = {
         monthKey: monthKey,
         place: index + 1,
         wins: row.wins,
         reward: row.reward,
         byReward: true,
-      });
+      };
+      if (index === 0) monthlyChampions.push(item);
+      else if (index === 1) viceMonthlyChampions.push(item);
     });
   });
-  monthlyChampions.sort(function (a, b) {
+  function sortMonthRows(a, b) {
     var ap = String(a.monthKey || "").split(".");
     var bp = String(b.monthKey || "").split(".");
     return ((parseInt(bp[1], 10) || 0) * 12 + (parseInt(bp[0], 10) || 0)) -
       ((parseInt(ap[1], 10) || 0) * 12 + (parseInt(ap[0], 10) || 0));
-  });
+  }
+  monthlyChampions.sort(sortMonthRows);
+  viceMonthlyChampions.sort(sortMonthRows);
 
   return {
     firstPlaces: firstPlaces,
@@ -1285,6 +1291,7 @@ function pokerGetTournamentAchievementStats(nick) {
     bigWins50: bigWins50.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
     bigWins100: bigWins100.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
     monthlyChampions: monthlyChampions,
+    viceMonthlyChampions: viceMonthlyChampions,
     rows: playerRows,
   };
 }
