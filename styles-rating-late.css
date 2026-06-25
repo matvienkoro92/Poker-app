@@ -1409,11 +1409,6 @@ html.app-view-summer-rating-html-scroll #app.app > .card > .card__content {
   padding-bottom: 0 !important;
 }
 
-body[data-view="summer-rating"] .bottom-nav,
-html.app-view-summer-rating-html-scroll .bottom-nav {
-  display: none !important;
-}
-
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {
   background:
     radial-gradient(ellipse at 9% 26%, rgba(255, 198, 91, 0.26), transparent 30%),
@@ -2831,8 +2826,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   right: max(6px, calc((100% - min(430px, 100%)) / 2 + 6px));
   z-index: 7;
   display: grid !important;
-  grid-template-columns: 0.78fr 0.78fr 0.78fr 0.36fr;
-  width: 214px;
+  grid-template-columns: 0.78fr 0.78fr 0.72fr 0.64fr;
+  width: 232px;
   height: 37px;
   min-height: 37px;
   margin: 0;
@@ -2851,7 +2846,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn {
   color: rgba(255, 232, 184, 0.9);
-  font-size: 17px;
+  font-size: 8.1px;
   font-weight: 950;
   line-height: 1;
   text-shadow: 0 1px 7px rgba(0, 0, 0, 0.72);
@@ -2870,7 +2865,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   top: 58px;
   right: max(6px, calc((100% - min(430px, 100%)) / 2 + 6px));
   z-index: 7;
-  width: 214px;
+  width: 232px;
   margin: 0;
   color: rgba(255, 232, 184, 0.72);
   font-size: 9px;
@@ -2931,14 +2926,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: block;
 }
 
-.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab[data-spring-main-league="top"] {
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab[data-spring-main-league="top"],
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-achievements-btn {
   font-size: 8.3px;
   line-height: 0.92;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-prizes-btn {
-  padding: 0;
-  font-size: 17px;
+  padding: 0 3px;
+  font-size: 8.1px;
   border-left: 1px solid rgba(245, 196, 85, 0.18);
   border-radius: 15px;
   background:

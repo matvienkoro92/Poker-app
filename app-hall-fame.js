@@ -1975,6 +1975,7 @@ function openHallFishAchievementTab() {
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить топы по ачивкам. Попробуйте ещё раз позже.</div>';
     });
 }
+window.openHallFishAchievementsModal = openHallFishAchievementTab;
 
 function openHallFishBirthdaysTab() {
   hallFishSetBirthdaysState("Загрузка…");

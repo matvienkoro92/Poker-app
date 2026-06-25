@@ -1394,6 +1394,43 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleResultBatchesHtml(raffle) {
+    var batches = Array.isArray(raffle && raffle.resultBatches) ? raffle.resultBatches : [];
+    if (!batches.length) return "";
+    return (
+      '<span class="raffles-active-chooser__batch-timers" aria-label="Таймеры итогов">' +
+      batches.map(function (batch) {
+        var endDate = batch && batch.endDate ? new Date(batch.endDate) : null;
+        var endMs = endDate && !isNaN(endDate.getTime()) ? endDate.getTime() : 0;
+        var parts = activeRaffleCountdownParts(endDate);
+        var timeText = String(batch && batch.time || "").trim();
+        var label = String(batch && batch.label || "Итоги").trim();
+        return (
+          '<span class="raffles-active-chooser__batch-timer" data-raffle-active-batch-countdown="' +
+          escapeHtml(endMs || 0) +
+          '">' +
+          '<span class="raffles-active-chooser__batch-label">' +
+          escapeHtml(label) +
+          "</span>" +
+          '<span class="raffles-active-chooser__batch-time">' +
+          escapeHtml(timeText ? timeText + " МСК" : "Итоги") +
+          "</span>" +
+          '<span class="raffles-active-chooser__batch-digits">' +
+          '<span data-raffle-batch-hours>' +
+          escapeHtml(parts.hours) +
+          "</span>:<span data-raffle-batch-minutes>" +
+          escapeHtml(parts.minutes) +
+          "</span>:<span data-raffle-batch-seconds>" +
+          escapeHtml(parts.seconds) +
+          "</span>" +
+          "</span>" +
+          "</span>"
+        );
+      }).join("") +
+      "</span>"
+    );
+  }
+
   function activeRaffleInfoSummaryHtml(raffle) {
     return (
       '<span class="raffles-active-chooser__info-copy">' +
@@ -1502,6 +1539,18 @@ function initRaffles() {
       if (minutes) minutes.textContent = parts.minutes;
       if (seconds) seconds.textContent = parts.seconds;
       node.setAttribute("aria-label", activeRaffleCountdownAria(parts));
+    });
+    var batchCountdowns = rafflesActiveChooser.querySelectorAll("[data-raffle-active-batch-countdown]");
+    batchCountdowns.forEach(function (node) {
+      var ms = parseInt(String(node.getAttribute("data-raffle-active-batch-countdown") || ""), 10);
+      var end = Number.isFinite(ms) && ms > 0 ? new Date(ms) : null;
+      var parts = activeRaffleCountdownParts(end);
+      var hours = node.querySelector("[data-raffle-batch-hours]");
+      var minutes = node.querySelector("[data-raffle-batch-minutes]");
+      var seconds = node.querySelector("[data-raffle-batch-seconds]");
+      if (hours) hours.textContent = parts.hours;
+      if (minutes) minutes.textContent = parts.minutes;
+      if (seconds) seconds.textContent = parts.seconds;
     });
   }
 
@@ -1887,6 +1936,7 @@ function initRaffles() {
           "</span>";
         var titleHtml = activeRaffleHeroTitleHtml(raffle, totalPrize);
         var detailPillsHtml = isCashPrize ? activeRaffleBuyinTilesHtml(raffle) : activeRaffleDetailPillsHtml(raffle);
+        var batchTimersHtml = activeRaffleResultBatchesHtml(raffle);
         var participantsHtml =
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--participants" aria-label="' +
           escapeHtml(participantCount + " " + participantWord) +
@@ -1919,6 +1969,7 @@ function initRaffles() {
           '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
+          batchTimersHtml +
           accessHtml +
           actionHtml +
           '<button type="button" class="raffles-active-chooser__info-toggle' +

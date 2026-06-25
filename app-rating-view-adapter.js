@@ -1899,12 +1899,14 @@ function initWinterRating() {
   var conditionsBtn = document.getElementById("springRatingConditionsBtn");
   if (conditionsBtn) {
     if (isSummerRatingMode) {
-      conditionsBtn.dataset.springMainLeague = "top";
+      delete conditionsBtn.dataset.springMainLeague;
       conditionsBtn.classList.remove("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
-      conditionsBtn.innerHTML = "<span>по дням</span>";
-      conditionsBtn.setAttribute("aria-label", "по дням");
+      conditionsBtn.classList.add("winter-rating__spring-achievements-btn");
+      conditionsBtn.innerHTML = "<span>Ачивки</span>";
+      conditionsBtn.setAttribute("aria-label", "Топы по ачивкам");
     } else {
       delete conditionsBtn.dataset.springMainLeague;
+      conditionsBtn.classList.remove("winter-rating__spring-achievements-btn");
       conditionsBtn.classList.add("winter-rating__spring-main-tab--conditions", "winter-rating__spring-conditions-btn");
       conditionsBtn.innerHTML = "<span>Условия</span><span>и призы</span>";
       conditionsBtn.removeAttribute("aria-label");
@@ -1922,6 +1924,17 @@ function initWinterRating() {
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
     conditionsBtn.addEventListener("click", function () {
+      if (conditionsBtn.classList.contains("winter-rating__spring-achievements-btn")) {
+        var openAchievements = function () {
+          if (typeof window.openHallFishAchievementsModal === "function") window.openHallFishAchievementsModal();
+        };
+        if (typeof window.pokerEnsureScriptDomains === "function") {
+          Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(openAchievements).catch(openAchievements);
+        } else {
+          openAchievements();
+        }
+        return;
+      }
       if (conditionsBtn.dataset.springMainLeague) return;
       openSpringRatingInfoModal();
     });
