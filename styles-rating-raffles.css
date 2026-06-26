@@ -8707,8 +8707,11 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__access {
+  display: grid !important;
   align-items: center !important;
   justify-content: center !important;
+  justify-items: center !important;
+  text-align: center !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__access-value,
@@ -8724,6 +8727,14 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
 
 body[data-view="raffles"] .raffles-active-chooser__access-value {
   gap: 2px !important;
+  justify-items: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__access .raffles-active-chooser__access-label {
+  font-size: clamp(12px, 1.28vw, 16px) !important;
+  font-weight: 1000 !important;
+  line-height: 1.02 !important;
+  text-align: center !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__access-line {
