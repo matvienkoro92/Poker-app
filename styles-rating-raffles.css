@@ -8911,3 +8911,30 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
     white-space: nowrap !important;
   }
 }
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 35%) !important;
+  grid-template-areas: "content prize" !important;
+  align-items: stretch !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__content {
+  grid-area: content !important;
+  display: grid !important;
+  align-content: start !important;
+  grid-template-rows: auto auto auto !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tiles {
+  grid-row: 2 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants {
+  grid-row: 3 !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel {
+  grid-area: prize !important;
+}
