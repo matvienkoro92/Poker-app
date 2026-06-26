@@ -279,7 +279,7 @@ function initRafflesActiveViewRuntime(opts) {
         : displayParts.map(function (p) {
             return raffleParticipantLineHtml(p, rafflesIsAdmin, usesTicketWeights);
           }).join("");
-    if (raffle.status === "drawn" && raffle.winners && raffle.winners.length > 0) {
+    if (raffle.winners && raffle.winners.length > 0) {
       raffleWinnersWrap.classList.remove("raffle-winners-wrap--hidden");
       var byGroup = {};
       raffle.winners.forEach(function (w) {

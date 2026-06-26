@@ -2017,7 +2017,6 @@ function initRaffles() {
           "</span>";
         var titleHtml = activeRaffleCardTitleHtml(raffle);
         var detailPillsHtml = isCashPrize ? activeRaffleBuyinTilesHtml(raffle) : activeRaffleDetailPillsHtml(raffle);
-        var batchTimersHtml = activeRaffleResultBatchesHtml(raffle);
         var resultTimeFactHtml = activeRaffleResultTimeFactHtml(raffle);
         var participantsHtml =
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--participants" aria-label="' +
@@ -2028,7 +2027,7 @@ function initRaffles() {
           escapeHtml(participantCount) +
           '</span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span></span>' +
           "</span>";
-        var timerHtml = batchTimersHtml ? "" : activeRaffleCountdownHtml(endDate, endMs);
+        var timerHtml = activeRaffleCountdownHtml(endDate, endMs);
         var accessHtml = activeRaffleAccessLevelHtml(raffle);
         var factsHtml = resultTimeFactHtml + participantsHtml + timerHtml + accessHtml;
         var prizePanelHtml = activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize);
@@ -2042,16 +2041,15 @@ function initRaffles() {
           '" aria-selected="' +
           (selected ? "true" : "false") +
           '">' +
-          headHtml +
           '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
           '<span class="raffles-active-chooser__body">' +
           '<span class="raffles-active-chooser__content">' +
+          headHtml +
           titleHtml +
           detailPillsHtml +
           '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
-          batchTimersHtml +
           "</span>" +
           prizePanelHtml +
           "</span>" +
