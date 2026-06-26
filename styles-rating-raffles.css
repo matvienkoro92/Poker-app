@@ -8496,7 +8496,8 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
 body[data-view="raffles"] .raffles-active-chooser__prize-panel {
   grid-column: 2 !important;
   grid-row: 1 !important;
-  align-content: start !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto minmax(0, 1fr) !important;
+  align-content: stretch !important;
   gap: clamp(8px, 1.1vw, 13px) !important;
   min-width: 0 !important;
   min-height: 100% !important;
@@ -8512,6 +8513,7 @@ body[data-view="raffles"] .raffles-active-chooser__prize-panel > * {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-pills {
+  grid-row: 1 !important;
   align-self: start !important;
   display: flex !important;
   flex-wrap: nowrap !important;
@@ -8565,11 +8567,13 @@ body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-c
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
+  grid-row: 3 !important;
   font-size: clamp(10px, 1.2vw, 13px) !important;
   text-align: center !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-amount {
+  grid-row: 4 !important;
   font-size: clamp(36px, 5.4vw, 58px) !important;
   line-height: 0.92 !important;
   text-align: center !important;
@@ -8578,6 +8582,7 @@ body[data-view="raffles"] .raffles-active-chooser__prize-amount {
 
 body[data-view="raffles"] .raffles-active-chooser__cta,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+  grid-row: 5 !important;
   width: min(100%, 230px) !important;
   max-width: 100% !important;
   min-height: clamp(40px, 4.8vw, 52px) !important;
