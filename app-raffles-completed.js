@@ -289,6 +289,7 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
+    var actionRaffleId = String((w && w.sourceRaffleId) || raffleId || "").trim();
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
     var isManualPlaceholderUserId = typeof pokerRafflesIsManualPlaceholderUserId === "function"
       ? pokerRafflesIsManualPlaceholderUserId(uidRaw)
@@ -323,7 +324,7 @@ function initRafflesCompletedRuntime(opts) {
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
         (winnerReady ? " raffle-winner-ready-btn--active" : "") +
         "\" data-raffle-id=\"" +
-        escapeHtml(raffleId) +
+        escapeHtml(actionRaffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
         "\" data-winner-slot-id=\"" +
@@ -437,7 +438,7 @@ function initRafflesCompletedRuntime(opts) {
         "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" +
         okActive +
         "\" data-raffle-id=\"" +
-        escapeHtml(raffleId) +
+        escapeHtml(actionRaffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
         "\" data-winner-slot-id=\"" +
@@ -446,7 +447,7 @@ function initRafflesCompletedRuntime(opts) {
         "<button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--fail" +
         failActive +
         "\" data-raffle-id=\"" +
-        escapeHtml(raffleId) +
+        escapeHtml(actionRaffleId) +
         "\" data-winner-user-id=\"" +
         uidAttr +
         "\" data-winner-slot-id=\"" +
@@ -1346,7 +1347,7 @@ function initRafflesCompletedRuntime(opts) {
         if (rid && (wid || winnerSlotId)) {
           rememberRaffleCompletedWinnerTab(winnerBtn);
           winnerBtn.disabled = true;
-          setRaffleWinnerStatus(rid, wid, winnerSlotId, winnerBtn.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) winnerBtn.disabled = false; });
+          setRaffleWinnerStatus(rid, wid, winnerSlotId, winnerBtn.classList.contains("raffle-winner-btn--ok"), currentStatus, function (ok) { if (!ok) winnerBtn.disabled = false; }, winnerBtn);
         }
         return;
       }

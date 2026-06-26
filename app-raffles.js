@@ -2883,6 +2883,8 @@ function initRaffles() {
               var batchWinners = winners.filter(function (winner) {
                 var n = parseInt(String(winner && winner.groupIndex != null ? winner.groupIndex : ""), 10);
                 return isFinite(n) && groups[n];
+              }).map(function (winner) {
+                return Object.assign({}, winner, { sourceRaffleId: raffle.id });
               });
               if (!batchWinners.length) return;
               out.push(Object.assign({}, raffle, {
