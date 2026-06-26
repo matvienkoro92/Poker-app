@@ -3262,6 +3262,7 @@ async function testProfileUserLookup(redis) {
   redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
+  redis.h("poker_app:telegram_visible").set("ID100002", "1");
   redis.h("poker_app:visitor_personal").set("ID100002", "public bio");
   redis.h("poker_app:profile_birth_dates").set("ID100002", "1992-04-05");
   redis.h("poker_app:profile_specialties").set("ID100002", "cash");
@@ -3324,6 +3325,31 @@ async function testProfileUserLookup(redis) {
     },
     "lookup exposes extended public PokerPlus stats",
   );
+
+  redis.h("poker_app:visitor_dt_ids").set("tg_661891", "ID661891");
+  redis.h("poker_app:id_to_user").set("ID661891", "tg_661891");
+  redis.h("poker_app:pokerplus_profiles").set("ID661891", JSON.stringify({
+    linked: true,
+    pokerPlusUserId: "124128",
+    nickname: "Em13",
+  }));
+  r = await call(users, req("GET", { pwaSession: s.user, ratingNick: "Em13!!" }));
+  assert.strictEqual(r.statusCode, 200, "rating nick lookup matches normalized Em13 alias");
+  assert.strictEqual(r.body.userId, "ID661891", "rating nick lookup resolves profile-only PokerPlus account");
+  assert.strictEqual(r.body.p21Id, "124128", "rating nick lookup uses PokerPlus id from cached profile");
+  assert.strictEqual(r.body.pokerPlusVerified, true, "rating nick lookup marks cached PokerPlus profile verified");
+  assert.strictEqual(r.body.pokerPlusNickname, "Em13", "rating nick lookup returns cached PokerPlus nickname");
+
+  redis.h("poker_app:visitor_dt_ids").set("tg_661892", "ID661892");
+  redis.h("poker_app:id_to_user").set("ID661892", "tg_661892");
+  redis.h("poker_app:pokerplus_profiles").set("ID661892", JSON.stringify({
+    linked: true,
+    pokerPlusUserId: "124129",
+    nickname: "Waaarr",
+  }));
+  r = await call(users, req("GET", { pwaSession: s.user, ratingNick: "Waaar" }));
+  assert.strictEqual(r.statusCode, 200, "rating nick lookup matches shared alias normalizer");
+  assert.strictEqual(r.body.userId, "ID661892", "rating nick lookup resolves another aliased PokerPlus nickname");
 
   r = await call(users, req("POST", {}, { pwaSession: s.user, birthDate: "1990-01-02", specialty: "mtt" }));
   assert.strictEqual(r.statusCode, 200, "profile details save succeeds");
