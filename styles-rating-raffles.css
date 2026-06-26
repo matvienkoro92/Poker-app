@@ -7694,6 +7694,19 @@ button.raffle-feedback-action {
   color: var(--raffles-card-gold) !important;
 }
 
+.raffles-active-chooser__main-title--cash {
+  display: grid !important;
+  gap: 0 !important;
+}
+
+.raffles-active-chooser__main-title-line,
+.raffles-active-chooser__main-title--cash .raffles-active-chooser__main-title-accent {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+}
+
 .raffles-active-chooser__subtitle {
   color: rgba(244, 238, 252, 0.72) !important;
   font-size: clamp(15px, 3vw, 21px) !important;
@@ -8340,6 +8353,11 @@ body[data-view="raffles"] .raffles-active-chooser__main-title {
   line-height: 1.02 !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__main-title--cash {
+  font-size: clamp(20px, 2.05vw, 26px) !important;
+  line-height: 1.04 !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__subtitle {
   font-size: clamp(11px, 1.22vw, 14px) !important;
   line-height: 1.08 !important;
@@ -8657,6 +8675,10 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
     font-size: clamp(21px, 6.5vw, 28px) !important;
   }
 
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash {
+    font-size: clamp(16px, 5.1vw, 22px) !important;
+  }
+
   body[data-view="raffles"] .raffles-active-chooser__prize-panel {
     padding: 8px 8px 12px !important;
   }
@@ -8729,6 +8751,10 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
 
   body[data-view="raffles"] .raffles-active-chooser__main-title {
     font-size: 28px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash {
+    font-size: clamp(16px, 5.2vw, 22px) !important;
   }
 
   body[data-view="raffles"] .raffles-active-chooser__subtitle {

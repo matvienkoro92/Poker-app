@@ -1617,17 +1617,23 @@ function initRaffles() {
     var titleText = activeRaffleMainTitleText(raffle);
     var subtitleText = activeRaffleSubtitleText(raffle);
     var titleHtml = escapeHtml(titleText);
+    var titleClass = "raffles-active-chooser__main-title";
     var cashMatch = titleText.match(/^(.+?)\s+(на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i);
     if (cashMatch && cashMatch[1] && cashMatch[2]) {
+      titleClass += " raffles-active-chooser__main-title--cash";
       titleHtml =
+        '<span class="raffles-active-chooser__main-title-line">' +
         escapeHtml(cashMatch[1]) +
-        ' <span class="raffles-active-chooser__main-title-accent">' +
+        "</span>" +
+        '<span class="raffles-active-chooser__main-title-accent">' +
         escapeHtml(cashMatch[2]) +
         "</span>";
     }
     return (
       '<span class="raffles-active-chooser__title-block">' +
-      '<span class="raffles-active-chooser__main-title">' +
+      '<span class="' +
+      titleClass +
+      '">' +
       titleHtml +
       "</span>" +
       (subtitleText
