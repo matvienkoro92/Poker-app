@@ -8279,24 +8279,28 @@ body[data-view="raffles"] .raffles-active-chooser__content {
   grid-column: 1 !important;
   display: grid !important;
   align-content: start !important;
-  gap: clamp(8px, 1.05vw, 12px) !important;
+  gap: clamp(6px, 0.8vw, 9px) !important;
   min-width: 0 !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__title-block {
+  gap: 4px !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__main-title {
-  font-size: clamp(24px, 2.65vw, 32px) !important;
+  font-size: clamp(21px, 2.25vw, 28px) !important;
   line-height: 1.02 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__subtitle {
-  font-size: clamp(13px, 1.55vw, 18px) !important;
-  line-height: 1.14 !important;
+  font-size: clamp(11px, 1.22vw, 14px) !important;
+  line-height: 1.08 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tiles,
 body[data-view="raffles"] .raffles-active-chooser__detail-pills {
   grid-template-columns: minmax(0, 1fr) !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -8310,11 +8314,21 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
   width: 100% !important;
   min-width: 0 !important;
-  min-height: clamp(42px, 4.8vw, 54px) !important;
-  padding: 8px 11px !important;
-  border-radius: 12px !important;
-  font-size: clamp(11px, 1.28vw, 15px) !important;
-  line-height: 1.08 !important;
+  min-height: clamp(34px, 3.8vw, 44px) !important;
+  padding: 6px 9px !important;
+  border-radius: 10px !important;
+  font-size: clamp(9px, 1.05vw, 12px) !important;
+  line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-icon {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
+  font-size: 0.86em !important;
+  line-height: 1.02 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-panel {
@@ -8362,7 +8376,7 @@ body[data-view="raffles"] .raffles-active-chooser__facts--with-participants {
   grid-row: auto !important;
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: clamp(6px, 0.8vw, 9px) !important;
+  gap: clamp(5px, 0.65vw, 7px) !important;
   width: 100% !important;
 }
 
@@ -8372,9 +8386,9 @@ body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
 body[data-view="raffles"] .raffles-active-chooser__access {
   grid-column: auto !important;
   grid-row: auto !important;
-  min-height: clamp(46px, 5.2vw, 58px) !important;
-  padding: 7px 6px !important;
-  border-radius: 11px !important;
+  min-height: clamp(38px, 4.2vw, 48px) !important;
+  padding: 5px 5px !important;
+  border-radius: 9px !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
@@ -8384,7 +8398,7 @@ body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
 body[data-view="raffles"] .raffles-active-chooser__fact-label,
 body[data-view="raffles"] .raffles-active-chooser__countdown-label,
 body[data-view="raffles"] .raffles-active-chooser__access-label {
-  font-size: clamp(7px, 0.75vw, 9px) !important;
+  font-size: clamp(6px, 0.65vw, 8px) !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__fact-value,
@@ -8392,8 +8406,8 @@ body[data-view="raffles"] .raffles-active-chooser__participants-count,
 body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
 body[data-view="raffles"] .raffles-active-chooser__access-value,
 body[data-view="raffles"] .raffles-active-chooser__access-line {
-  font-size: clamp(11px, 1.28vw, 16px) !important;
-  line-height: 1.05 !important;
+  font-size: clamp(9px, 1.05vw, 13px) !important;
+  line-height: 1.02 !important;
   overflow-wrap: anywhere !important;
 }
 
