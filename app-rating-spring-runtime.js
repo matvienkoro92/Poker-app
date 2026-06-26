@@ -205,11 +205,11 @@ function renderSpringRatingViewTotalsWeeks() {
     if (data && Array.isArray(data.top3)) return data.top3;
     return [];
   }
-  function listHtml(rows) {
+  function listHtml(rows, expanded) {
     if (!rows.length) return "<li class=\"winter-rating__single-top-item\">—</li>";
     return rows.slice(0, 10).map(function (r, i) {
-      var extraClass = i >= 3 ? " spring-rating-view-week__extra-item" : "";
-      var hiddenAttr = i >= 3 ? " hidden" : "";
+      var extraClass = !expanded && i >= 3 ? " spring-rating-view-week__extra-item" : "";
+      var hiddenAttr = !expanded && i >= 3 ? " hidden" : "";
       return "<li class=\"winter-rating__single-top-item" + extraClass + "\"" + hiddenAttr + ">" + (i + 1) + ". " + escNick(r.nick) + " — " + fmt(r.reward) + " ₽</li>";
     }).join("");
   }
@@ -227,9 +227,9 @@ function renderSpringRatingViewTotalsWeeks() {
     var totalText = totalWeek > 0 ? fmt(totalWeek) + " ₽" : "—";
     var sumRows = rowsFromTopData(sumData);
     var winRows = rowsFromTopData(winData);
-    var sumList = listHtml(sumRows);
-    var winList = listHtml(winRows);
-    var openAttr = openWeeks ? " open" : "";
+    var sumList = listHtml(sumRows, monthTotals);
+    var winList = listHtml(winRows, monthTotals);
+    var openAttr = openWeeks || monthTotals ? " open" : "";
     var sumTitle = monthTotals ? "Итого суммарные призовые за месяц" : "Топ суммарные призовые за неделю";
     var winTitle = monthTotals ? "Итого топ за 1 турнир за месяц" : "Топ занос за 1 турнир";
     var totalLabel = monthTotals ? "Всего призов у игроков: " : "Всего призов у игроков за неделю: ";
@@ -245,12 +245,12 @@ function renderSpringRatingViewTotalsWeeks() {
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
       "<h4 class=\"winter-rating__past-week-title\">" + sumTitle + "</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + sumList + "</ul>" +
-      moreButtonHtml(sumRows) +
+      (monthTotals ? "" : moreButtonHtml(sumRows)) +
       "</div>" +
       "<div class=\"winter-rating__past-week-wrap winter-rating__single-top-wrap--march\">" +
       "<h4 class=\"winter-rating__past-week-title\">" + winTitle + "</h4>" +
       "<ul class=\"winter-rating__single-top-list\">" + winList + "</ul>" +
-      moreButtonHtml(winRows) +
+      (monthTotals ? "" : moreButtonHtml(winRows)) +
       "</div>" +
       "</div>" +
       "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">" + totalLabel + totalText + "</p>" +
