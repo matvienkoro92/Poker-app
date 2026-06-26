@@ -8322,8 +8322,9 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-icon {
-  width: 26px !important;
-  height: 26px !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
@@ -8387,8 +8388,25 @@ body[data-view="raffles"] .raffles-active-chooser__access {
   grid-column: auto !important;
   grid-row: auto !important;
   min-height: clamp(38px, 4.2vw, 48px) !important;
-  padding: 5px 5px !important;
+  padding: 6px 7px !important;
   border-radius: 9px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact-icon,
+body[data-view="raffles"] .raffles-active-chooser__participants-icon,
+body[data-view="raffles"] .raffles-active-chooser__fact--participants::before,
+body[data-view="raffles"] .raffles-active-chooser__access::before {
+  content: none !important;
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact--result-time {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 2px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__participants-side {
+  gap: 0 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
