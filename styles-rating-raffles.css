@@ -8584,7 +8584,8 @@ body[data-view="raffles"] .raffles-active-chooser__access {
   grid-column: auto !important;
   grid-row: auto !important;
   min-height: clamp(46px, 5vw, 58px) !important;
-  padding: 9px 12px !important;
+  min-width: 0 !important;
+  padding: 8px 9px !important;
   border-radius: 9px !important;
 }
 
@@ -8636,7 +8637,9 @@ body[data-view="raffles"] .raffles-active-chooser__participants-count,
 body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
 body[data-view="raffles"] .raffles-active-chooser__access-value,
 body[data-view="raffles"] .raffles-active-chooser__access-line {
-  font-size: clamp(14px, 1.55vw, 19px) !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  font-size: clamp(12px, 1.28vw, 16px) !important;
   line-height: 1.02 !important;
   overflow-wrap: anywhere !important;
 }
