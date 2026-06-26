@@ -970,10 +970,13 @@ function initRaffles() {
 
   function activeRaffleAccessLevelHtml(raffle) {
     var accessLabel = raffleAccessLevelText(raffle);
+    var accessLines = raffleAccessLevelCompactLines(raffle);
+    var accessValue = String(accessLines[0] || "").trim();
+    var accessDisplay = !accessValue || accessValue.toUpperCase() === "ВСЕ" ? "для всех" : "Уровень " + accessValue;
     var accessHtml =
       '<span class="raffles-active-chooser__access-label">Доступ:</span>' +
       '<span class="raffles-active-chooser__access-line">' +
-      escapeHtml(accessLabel) +
+      escapeHtml(accessDisplay) +
       "</span>";
     return (
       '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу: ' +
