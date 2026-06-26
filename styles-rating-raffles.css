@@ -8379,11 +8379,11 @@ body[data-view="raffles"] .raffles-active-chooser__detail-pill,
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(170px, clamp(170px, 22vw, 230px)) !important;
+  grid-template-columns: minmax(0, 1fr) clamp(128px, 30%, 154px) !important;
   grid-template-areas: "text side" !important;
-  align-items: stretch !important;
+  align-items: center !important;
   justify-items: stretch !important;
-  column-gap: 12px !important;
+  column-gap: 10px !important;
   width: 100% !important;
   min-width: 0 !important;
   min-height: clamp(46px, 4.8vw, 58px) !important;
@@ -8401,18 +8401,29 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-icon {
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
   grid-area: text !important;
+  display: grid !important;
+  gap: 1px !important;
   justify-items: start !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
   font-size: 1em !important;
   line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text span {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  overflow-wrap: normal !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
   grid-area: side !important;
   display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) !important;
-  align-items: stretch !important;
+  grid-template-rows: auto auto !important;
+  align-content: center !important;
+  align-items: center !important;
   justify-items: stretch !important;
-  align-self: stretch !important;
   gap: 4px !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -8420,6 +8431,7 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
+  grid-row: 1 !important;
   justify-self: end !important;
   align-self: start !important;
   position: static !important;
@@ -8432,10 +8444,11 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer {
+  grid-row: 2 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: stretch !important;
-  align-self: stretch !important;
+  align-self: center !important;
   min-width: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -8457,8 +8470,8 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  min-height: 100% !important;
-  padding: 6px 10px !important;
+  min-height: 32px !important;
+  padding: 6px 8px !important;
   border: 1px solid rgba(255, 224, 138, 0.56) !important;
   border-radius: 999px !important;
   background:
@@ -8468,7 +8481,7 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 0 12px rgba(255, 209, 85, 0.16) !important;
   color: #ffdf72 !important;
-  font-size: clamp(15px, 1.72vw, 22px) !important;
+  font-size: clamp(14px, 1.48vw, 18px) !important;
   font-weight: 1000 !important;
   line-height: 1 !important;
   font-variant-numeric: tabular-nums !important;
