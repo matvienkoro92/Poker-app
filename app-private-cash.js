@@ -285,6 +285,12 @@
     '</section>';
   }
 
+  function renderPrivateCashHero() {
+    return '<figure class="private-cash-modal__table-hero">' +
+      '<img src="./assets/private-cash-table-hero.webp?v=3.658" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+    '</figure>';
+  }
+
   function renderParticipant(event, my) {
     if (state && state.isAdmin) return "";
     if (my && my.status) {
@@ -329,6 +335,7 @@
       (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderEventBonuses(event.combinations) +
+      renderPrivateCashHero() +
       renderParticipant(event, my) +
       renderParticipants(event) +
     '</article>';
@@ -345,7 +352,7 @@
       renderAdminForm() +
       renderRules() +
       '<section class="private-cash-modal__events">' +
-        (events.length ? events.map(renderEvent).join("") : '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>') +
+        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero() + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>') +
       '</section>';
   }
 

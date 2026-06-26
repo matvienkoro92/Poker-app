@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.653");
-@import url("./styles-home-rating-promo.css?v=3.653");
-@import url("./styles-auth.css?v=3.653");
-@import url("./styles-home.css?v=3.653");
-@import url("./styles-chat.css?v=3.653");
-@import url("./styles-learning-games.css?v=3.653");
-@import url("./styles-raffles.css?v=3.653");
-@import url("./styles-daily-poker.css?v=3.653");
-@import url("./styles-home-legacy-prelude.css?v=3.653");
-@import url("./styles-download.css?v=3.653");
-@import url("./styles-home-legacy-tail.css?v=3.653");
-@import url("./styles-home-rating-promo-legacy.css?v=3.653");
-@import url("./styles-rating.css?v=3.653");
-@import url("./styles-hall.css?v=3.653");
-@import url("./styles-admin.css?v=3.653");
-@import url("./styles-player-crm.css?v=3.653");
-@import url("./styles-profile.css?v=3.653");
-@import url("./styles-layout.css?v=3.653");
-@import url("./styles-chat-overlays.css?v=3.653");
-@import url("./styles-home-overrides.css?v=3.653");
-@import url("./styles-layout-touch-targets.css?v=3.653");
-@import url("./styles-home-rating-promo-late.css?v=3.653");
+@import url("./styles-base.css?v=3.658");
+@import url("./styles-home-rating-promo.css?v=3.658");
+@import url("./styles-auth.css?v=3.658");
+@import url("./styles-home.css?v=3.658");
+@import url("./styles-chat.css?v=3.658");
+@import url("./styles-learning-games.css?v=3.658");
+@import url("./styles-raffles.css?v=3.658");
+@import url("./styles-daily-poker.css?v=3.658");
+@import url("./styles-home-legacy-prelude.css?v=3.658");
+@import url("./styles-download.css?v=3.658");
+@import url("./styles-home-legacy-tail.css?v=3.658");
+@import url("./styles-home-rating-promo-legacy.css?v=3.658");
+@import url("./styles-rating.css?v=3.658");
+@import url("./styles-hall.css?v=3.658");
+@import url("./styles-admin.css?v=3.658");
+@import url("./styles-player-crm.css?v=3.658");
+@import url("./styles-profile.css?v=3.658");
+@import url("./styles-layout.css?v=3.658");
+@import url("./styles-chat-overlays.css?v=3.658");
+@import url("./styles-home-overrides.css?v=3.658");
+@import url("./styles-layout-touch-targets.css?v=3.658");
+@import url("./styles-home-rating-promo-late.css?v=3.658");
 
 .profile-status__fish,
 .profile-status-fish-inline,
@@ -34,6 +34,174 @@
 .header-status__fish,
 .home-fish-rating-btn img {
   display: none !important;
+}
+
+@media (max-width: 640px) {
+  #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-header-overlap: 104px;
+    --hall-top2026-bg-y: 42px;
+    --hall-top2026-list-offset: 122px;
+    --hall-top2026-list-width: min(66%, 248px);
+    --hall-top2026-list-max-width: 248px;
+    --hall-top2026-list-left: max(62px, calc(50% - 104px));
+    --hall-top2026-stage-min-height: 922px;
+    --hall-top2026-trophy-right: clamp(-1px, calc(3vw - 9px), 9px);
+    --hall-top2026-trophy-top: clamp(422px, calc(90vw + 84px), 478px);
+    --hall-top2026-trophy-width: clamp(130px, 36vw, 156px);
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 4px 0 0;
+    overflow: hidden;
+    color: #f5d49a;
+    background: transparent;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
+    display: none !important;
+  }
+
+  #hallOfFameView .hall-of-fame__toolbar {
+    position: relative;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    min-width: 0;
+    margin: 4px 8px;
+  }
+
+  #hallOfFameView .hall-of-fame__toolbar-back {
+    flex: 0 0 34px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    margin: 0 !important;
+    padding: 0;
+    border: 1px solid rgba(196, 125, 39, 0.72) !important;
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 211, 132, 0.22), transparent 70%),
+      linear-gradient(180deg, #22170d 0%, #0a0806 100%) !important;
+    color: #f5d49a;
+    font-size: 22px;
+    line-height: 1;
+    box-shadow: inset 0 1px 0 rgba(255, 229, 177, 0.22), 0 4px 12px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  #hallOfFameView .hall-of-fame__subtabs {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 30px;
+    min-height: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(196, 125, 39, 0.72);
+    border-radius: 11px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 204, 120, 0.16), transparent 70%),
+      linear-gradient(180deg, #20180f 0%, #070605 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 229, 177, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.46),
+      0 4px 12px rgba(0, 0, 0, 0.32);
+  }
+
+  #hallOfFameView .hall-of-fame__subtab {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 2px 3px;
+    border: 0;
+    border-right: 1px solid rgba(196, 125, 39, 0.32);
+    border-radius: 0;
+    background: transparent !important;
+    color: rgba(245, 212, 154, 0.78);
+    font: inherit;
+    font-size: clamp(8px, 2.25vw, 10px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #hallOfFameView .hall-of-fame__subtab:last-child {
+    border-right: 0;
+  }
+
+  #hallOfFameView .hall-of-fame__subtab--active,
+  #hallOfFameView .hall-of-fame__subtab[aria-selected="true"] {
+    color: #ffe5b2;
+    background: rgba(196, 125, 39, 0.18) !important;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__panels {
+    margin-top: 0;
+    min-width: 0;
+  }
+
+  #hallOfFameView .hall-of-fame__panel[hidden] {
+    display: none !important;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: var(--hall-top2026-stage-min-height);
+    margin: calc(-1 * var(--hall-top2026-header-overlap)) 0 0;
+    padding: 318px 10px 18px;
+    overflow: hidden;
+    border-radius: 0 0 18px 18px;
+    background-color: #120703;
+    background-image:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(255, 132, 24, 0.05)),
+      linear-gradient(180deg, rgba(22, 8, 3, 0), rgba(41, 15, 5, 0.82) 56%, rgba(16, 6, 2, 0.98)),
+      url("./assets/hall-top2026-floor.webp?v=3.549"),
+      url("./assets/hall-top2026-bg-dark.webp?v=3.537");
+    background-position: center top, center bottom, center bottom, center var(--hall-top2026-bg-y);
+    background-repeat: no-repeat;
+    background-size: 100% 100%, 100% 430px, 132% auto, 100% auto;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-monkey,
+  #hallOfFameView .hall-of-fame__top2026-trophy {
+    position: absolute;
+    display: block;
+    height: auto;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-monkey {
+    z-index: 5;
+    top: clamp(280px, calc(44vw + 106px), 302px);
+    left: clamp(-101px, calc(-29vw + 19px), -73px);
+    width: clamp(225px, 60.55vw, 253px);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-trophy {
+    z-index: 2;
+    top: var(--hall-top2026-trophy-top);
+    right: var(--hall-top2026-trophy-right);
+    width: var(--hall-top2026-trophy-width);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-list-card {
+    position: relative;
+    z-index: 6;
+    width: var(--hall-top2026-list-width) !important;
+    max-width: var(--hall-top2026-list-max-width) !important;
+    margin: var(--hall-top2026-list-offset) auto 0 var(--hall-top2026-list-left) !important;
+  }
 }
 
 :root {
@@ -7106,6 +7274,36 @@ body.club-choice-vote-open {
   line-height: 1.28;
 }
 
+.private-cash-modal__table-hero {
+  position: relative;
+  margin: 13px 0 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 179, 43, 0.42);
+  border-radius: 18px;
+  background: #050609;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 237, 192, 0.08);
+}
+
+.private-cash-modal__table-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 206, 112, 0.08), transparent 28%, rgba(0, 0, 0, 0.12) 100%),
+    radial-gradient(circle at 50% 0%, rgba(255, 179, 43, 0.18), transparent 42%);
+  pointer-events: none;
+}
+
+.private-cash-modal__table-hero img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 68 / 100;
+  object-fit: cover;
+  object-position: center 46%;
+}
+
 .private-cash-modal__event {
   padding: 14px;
 }
@@ -7341,6 +7539,16 @@ body.club-choice-vote-open {
   .private-cash-modal__body {
     max-height: calc(100vh - 112px);
     padding: 10px 14px 14px;
+  }
+
+  .private-cash-modal__table-hero {
+    margin-top: 12px;
+    border-radius: 15px;
+  }
+
+  .private-cash-modal__table-hero img {
+    aspect-ratio: 64 / 100;
+    object-position: center 44%;
   }
 
   .private-cash-modal__grid,
