@@ -971,8 +971,9 @@ function initRaffles() {
   function activeRaffleAccessLevelHtml(raffle) {
     var accessLabel = raffleAccessLevelText(raffle);
     var accessHtml =
+      '<span class="raffles-active-chooser__access-label">Доступ:</span>' +
       '<span class="raffles-active-chooser__access-line">' +
-      escapeHtml(raffleAccessLevelCompactText(raffle)) +
+      escapeHtml(accessLabel) +
       "</span>";
     return (
       '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу: ' +
