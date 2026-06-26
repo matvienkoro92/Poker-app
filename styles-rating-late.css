@@ -2996,15 +2996,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   }
 
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
-    top: 58px;
+    top: 17px;
   }
 
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
-    top: 99px;
+    top: 58px;
   }
 
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
-    top: 134px;
+    top: 94px;
   }
 }
 
@@ -3063,7 +3063,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 @media (max-width: 640px) {
   .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-stack {
-    margin-top: 62px;
+    margin-top: 96px;
   }
 }
 

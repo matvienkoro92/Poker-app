@@ -1689,8 +1689,12 @@
     grid-template-columns: repeat(4, minmax(54px, 1fr));
   }
   .profile-friends__invite {
-    width: 58px;
-    height: 58px;
+    width: min(78px, 100%);
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+  .profile-friends__invite-plus {
+    font-size: 42px;
   }
   .profile-friends__level-badge {
     right: 0;
@@ -1700,7 +1704,8 @@
     font-size: 15px;
   }
   .profile-friends__invite-text {
-    font-size: 9px;
+    margin-top: -10px;
+    font-size: 10px;
   }
 }
 

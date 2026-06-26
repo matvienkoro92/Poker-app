@@ -807,6 +807,7 @@
   max-width: min(40%, 152px);
   height: calc(76% - 6px);
   max-height: calc(76% - 6px);
+  object-position: center center;
   transform: translateY(0);
 }
 .profile-public-showcase .chat-user-modal__p21:empty {
@@ -1979,16 +1980,18 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
   grid-column: 1;
   grid-row: 1;
-  align-items: flex-start;
+  align-items: center;
   height: clamp(330px, 41vw, 480px);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="cooler"],
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
   max-width: min(78%, 390px);
-  height: 98%;
-  max-height: 98%;
-  transform: translateY(-12px);
+  height: 88%;
+  max-height: 88%;
+  object-position: center center;
+  transform: translateY(0);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="summer-rating-league2-player-alena"] {
   transform: translateY(-16px) scale(0.95);
@@ -1999,7 +2002,8 @@ body.profile-avatar-choice-open {
   max-width: min(54%, 270px);
   height: 76%;
   max-height: 76%;
-  transform: translateY(12%);
+  object-position: center center;
+  transform: translateY(0);
 }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
   grid-column: 2;
@@ -2243,21 +2247,25 @@ body.profile-avatar-choice-open {
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
     align-self: center;
     height: clamp(260px, 34vw, 340px);
+    align-items: center;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="monkey"],
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="cooler"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img[src*="pokermanki"],
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
     max-width: min(82%, 330px);
-    height: 100%;
-    max-height: 100%;
-    transform: translateY(-10px);
+    height: 88%;
+    max-height: 88%;
+    object-position: center center;
+    transform: translateY(0);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img--default-hero {
     align-self: center;
     max-width: min(54%, 230px);
     height: 76%;
     max-height: 76%;
-    transform: translateY(12%);
+    object-position: center center;
+    transform: translateY(0);
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
     align-self: center;
@@ -2294,15 +2302,22 @@ body.profile-avatar-choice-open {
     gap: 9px;
     justify-self: stretch;
     width: 100%;
+    max-width: 100%;
     margin: 0;
-    padding-right: 8px;
+    padding-right: 0;
+    overflow: hidden;
   }
   .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
   .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     min-height: 46px;
     padding: 8px 12px;
     border-radius: 14px;
     font-size: clamp(14px, 2.45vw, 20px);
+    text-overflow: ellipsis;
   }
   .view[data-view="profile"] .profile-hero-gender__btn {
     flex-basis: 52px;
@@ -2492,6 +2507,9 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
   .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     min-height: 46px;
     border-radius: 14px;
   }
