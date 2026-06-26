@@ -823,6 +823,40 @@ function initRaffles() {
     return totalCount + " " + ticketWord;
   }
 
+  function activeRaffleCashMainTitleText(raffle) {
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var totalCount = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
+    if (!totalCount) {
+      totalCount = groups.reduce(function (sum, group) {
+        return sum + Math.max(0, parseInt(group && group.count, 10) || 0);
+      }, 0);
+    }
+    var amountText = "";
+    var limitText = "";
+    groups.some(function (group) {
+      var prize = String(group && group.prize || "").replace(/\s+/g, " ").trim();
+      var amountMatch = prize.match(/(\d[\d\s]*)\s*(?:₽|р|руб\.?)/i);
+      var limitMatch = prize.match(/(?:кеш|cash)\s+(\d+\s*\/\s*\d+)/i) || prize.match(/\b(\d+\s*\/\s*\d+)\b/);
+      if (amountMatch && amountMatch[1]) {
+        amountText = activeRaffleBuyinAmountText(amountMatch[1].replace(/\s+/g, ""));
+      }
+      if (limitMatch && limitMatch[1]) {
+        limitText = limitMatch[1].replace(/\s+/g, "");
+      }
+      return !!(amountText && limitText);
+    });
+    if (!totalCount || !amountText || !limitText) return "";
+    return (
+      totalCount +
+      " беккинг-" +
+      activeRaffleBuyinWord(totalCount) +
+      " по " +
+      amountText +
+      " на кеш " +
+      limitText
+    );
+  }
+
   function activeRaffleMetaText(raffle) {
     var parts = [];
     if (raffle && raffle.daily) parts.push("Ежедневный");
@@ -1551,6 +1585,8 @@ function initRaffles() {
   function activeRaffleMainTitleText(raffle) {
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     if (isCashPrize) {
+      var detailedCashTitle = activeRaffleCashMainTitleText(raffle).replace(/\s+/g, " ").trim();
+      if (detailedCashTitle) return detailedCashTitle;
       var cashTitle = activeRaffleChooserPrizeTitle(raffle).replace(/\s+/g, " ").trim();
       if (cashTitle) return cashTitle;
     }
@@ -1581,7 +1617,7 @@ function initRaffles() {
     var titleText = activeRaffleMainTitleText(raffle);
     var subtitleText = activeRaffleSubtitleText(raffle);
     var titleHtml = escapeHtml(titleText);
-    var cashMatch = titleText.match(/^(.+?)\s+(на\s+кеш)$/i);
+    var cashMatch = titleText.match(/^(.+?)\s+(на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i);
     if (cashMatch && cashMatch[1] && cashMatch[2]) {
       titleHtml =
         escapeHtml(cashMatch[1]) +
