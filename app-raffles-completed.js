@@ -1086,7 +1086,9 @@ function initRafflesCompletedRuntime(opts) {
     var created = raffle.createdAt ? new Date(raffle.createdAt).toLocaleDateString("ru-RU") : "";
     var completedAt = raffleCompletedDate(raffle);
     var end = completedAt ? completedAt.toLocaleString("ru-RU") : "";
-    var meta = "Розыгрыш" + (created ? " от " + created : "") + (end ? " · Завершён " + end : "");
+    var batchLabel = String(raffle && raffle.resultBatchLabel || "").trim();
+    var batchTime = String(raffle && raffle.resultBatchTime || "").trim();
+    var meta = (batchLabel || "Розыгрыш") + (batchTime ? " · " + batchTime + " МСК" : "") + (created ? " от " + created : "") + (end ? " · Завершён " + end : "");
     var winners = raffle.winners || [];
     var originalWinners = [];
     var rerollWinners = [];
@@ -1101,7 +1103,7 @@ function initRafflesCompletedRuntime(opts) {
       ? raffleReadyTimerHtml(rerollTimerInfo, "reroll", "raffle-completed-card__timer")
       : "";
     var burnedHtml = raffleCompletedBurnedSummaryHtml(raffle);
-    var adminActionsHtml = rafflesIsAdmin
+    var adminActionsHtml = rafflesIsAdmin && !raffle.resultBatchLabel
       ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
         escapeHtml(raffle.id || "") +
         "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +

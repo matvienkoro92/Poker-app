@@ -2855,6 +2855,53 @@ function initRaffles() {
           return isFinite(t) ? t : 0;
         }
 
+        function completedBatchTime(batch) {
+          var raw = batch && (batch.drawnAt || batch.endDate);
+          if (!raw) return 0;
+          var t = new Date(raw).getTime();
+          return isFinite(t) ? t : 0;
+        }
+
+        function completedRaffleBatchResults(raffles, nowDate) {
+          var out = [];
+          var nowMs = nowDate && isFinite(nowDate.getTime()) ? nowDate.getTime() : Date.now();
+          (Array.isArray(raffles) ? raffles : []).forEach(function (raffle) {
+            var batches = Array.isArray(raffle && raffle.resultBatches) ? raffle.resultBatches : [];
+            var winners = Array.isArray(raffle && raffle.winners) ? raffle.winners : [];
+            if (!batches.length || !winners.length || raffle.status !== "active") return;
+            batches.forEach(function (batch, index) {
+              var batchMs = completedBatchTime(batch);
+              if (!batchMs || batchMs > nowMs) return;
+              var groupIndexes = Array.isArray(batch && batch.groupIndexes)
+                ? batch.groupIndexes
+                : (index >= 0 ? [index] : []);
+              var groups = {};
+              groupIndexes.forEach(function (rawIndex) {
+                var n = parseInt(String(rawIndex), 10);
+                if (isFinite(n)) groups[n] = true;
+              });
+              var batchWinners = winners.filter(function (winner) {
+                var n = parseInt(String(winner && winner.groupIndex != null ? winner.groupIndex : ""), 10);
+                return isFinite(n) && groups[n];
+              });
+              if (!batchWinners.length) return;
+              out.push(Object.assign({}, raffle, {
+                id: String(raffle.id || "raffle") + "__batch_" + index,
+                sourceRaffleId: raffle.id,
+                status: "completed",
+                completedAt: batch.drawnAt || batch.endDate || raffle.completedAt || raffle.endDate,
+                drawnAt: batch.drawnAt || batch.endDate || raffle.drawnAt || raffle.endDate,
+                endDate: batch.endDate || raffle.endDate,
+                resultBatchLabel: String(batch.label || "").trim(),
+                resultBatchTime: String(batch.time || "").trim(),
+                resultBatchIndex: index,
+                winners: batchWinners
+              }));
+            });
+          });
+          return out;
+        }
+
         var activeSeen = {};
         var activeSource = Array.isArray(data.activeRaffles) ? data.activeRaffles : allRaffles;
         var activeList = activeSource.filter(function (r) {
@@ -2887,6 +2934,7 @@ function initRaffles() {
           var end = r.endDate ? new Date(r.endDate) : null;
           return end && end <= now;
         });
+        completed = completed.concat(completedRaffleBatchResults(allRaffles, now));
         completed.sort(function (a, b) {
           var timeDiff = completedRaffleTime(b) - completedRaffleTime(a);
           if (timeDiff) return timeDiff;
