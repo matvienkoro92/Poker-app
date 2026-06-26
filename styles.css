@@ -1,26 +1,26 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.659");
-@import url("./styles-home-rating-promo.css?v=3.659");
-@import url("./styles-auth.css?v=3.659");
-@import url("./styles-home.css?v=3.659");
-@import url("./styles-chat.css?v=3.659");
-@import url("./styles-learning-games.css?v=3.659");
-@import url("./styles-raffles.css?v=3.659");
-@import url("./styles-daily-poker.css?v=3.659");
-@import url("./styles-home-legacy-prelude.css?v=3.659");
-@import url("./styles-download.css?v=3.659");
-@import url("./styles-home-legacy-tail.css?v=3.659");
-@import url("./styles-home-rating-promo-legacy.css?v=3.659");
-@import url("./styles-rating.css?v=3.659");
-@import url("./styles-hall.css?v=3.659");
-@import url("./styles-admin.css?v=3.659");
-@import url("./styles-player-crm.css?v=3.659");
-@import url("./styles-profile.css?v=3.659");
-@import url("./styles-layout.css?v=3.659");
-@import url("./styles-chat-overlays.css?v=3.659");
-@import url("./styles-home-overrides.css?v=3.659");
-@import url("./styles-layout-touch-targets.css?v=3.659");
-@import url("./styles-home-rating-promo-late.css?v=3.659");
+@import url("./styles-base.css?v=3.665");
+@import url("./styles-home-rating-promo.css?v=3.665");
+@import url("./styles-auth.css?v=3.665");
+@import url("./styles-home.css?v=3.665");
+@import url("./styles-chat.css?v=3.665");
+@import url("./styles-learning-games.css?v=3.665");
+@import url("./styles-raffles.css?v=3.665");
+@import url("./styles-daily-poker.css?v=3.665");
+@import url("./styles-home-legacy-prelude.css?v=3.665");
+@import url("./styles-download.css?v=3.665");
+@import url("./styles-home-legacy-tail.css?v=3.665");
+@import url("./styles-home-rating-promo-legacy.css?v=3.665");
+@import url("./styles-rating.css?v=3.665");
+@import url("./styles-hall.css?v=3.665");
+@import url("./styles-admin.css?v=3.665");
+@import url("./styles-player-crm.css?v=3.665");
+@import url("./styles-profile.css?v=3.665");
+@import url("./styles-layout.css?v=3.665");
+@import url("./styles-chat-overlays.css?v=3.665");
+@import url("./styles-home-overrides.css?v=3.665");
+@import url("./styles-layout-touch-targets.css?v=3.665");
+@import url("./styles-home-rating-promo-late.css?v=3.665");
 
 .profile-status__fish,
 .profile-status-fish-inline,
@@ -43,9 +43,10 @@
     --hall-top2026-list-offset: 122px;
     --hall-top2026-list-width: min(66%, 248px);
     --hall-top2026-list-max-width: 248px;
-    --hall-top2026-list-left: max(62px, calc(50% - 104px));
+    --hall-top2026-list-left: max(48px, calc(50% - 118px));
     --hall-top2026-stage-min-height: 922px;
-    --hall-top2026-trophy-right: clamp(-1px, calc(3vw - 9px), 9px);
+    --hall-top2026-floor-width: 168%;
+    --hall-top2026-trophy-right: clamp(-15px, calc(3vw - 23px), -5px);
     --hall-top2026-trophy-top: clamp(422px, calc(90vw + 84px), 478px);
     --hall-top2026-trophy-width: clamp(130px, 36vw, 156px);
     width: 100%;
@@ -163,12 +164,14 @@
     background-color: #120703;
     background-image:
       linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(255, 132, 24, 0.05)),
-      linear-gradient(180deg, rgba(22, 8, 3, 0), rgba(41, 15, 5, 0.82) 56%, rgba(16, 6, 2, 0.98)),
+      radial-gradient(ellipse at 50% 100%, rgba(126, 48, 12, 0.42), transparent 66%),
+      linear-gradient(90deg, rgba(26, 8, 2, 0.96), rgba(84, 28, 6, 0.5) 18%, rgba(84, 28, 6, 0.5) 82%, rgba(26, 8, 2, 0.96)),
+      linear-gradient(180deg, rgba(22, 8, 3, 0), rgba(41, 15, 5, 0.9) 48%, rgba(16, 6, 2, 0.98)),
       url("./assets/hall-top2026-floor.webp?v=3.549"),
       url("./assets/hall-top2026-bg-dark.webp?v=3.537");
-    background-position: center top, center bottom, center bottom, center var(--hall-top2026-bg-y);
+    background-position: center top, center bottom, center bottom, center bottom, center var(--hall-top2026-bg-y);
     background-repeat: no-repeat;
-    background-size: 100% 100%, 100% 430px, 132% auto, 100% auto;
+    background-size: 100% 100%, 100% 520px, 100% 520px, var(--hall-top2026-floor-width) auto, 100% auto;
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey,
@@ -182,14 +185,14 @@
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey {
-    z-index: 5;
+    z-index: 8;
     top: clamp(280px, calc(44vw + 106px), 302px);
     left: clamp(-101px, calc(-29vw + 19px), -73px);
     width: clamp(225px, 60.55vw, 253px);
   }
 
   #hallOfFameView .hall-of-fame__top2026-trophy {
-    z-index: 2;
+    z-index: 8;
     top: var(--hall-top2026-trophy-top);
     right: var(--hall-top2026-trophy-right);
     width: var(--hall-top2026-trophy-width);
@@ -201,6 +204,10 @@
     width: var(--hall-top2026-list-width) !important;
     max-width: var(--hall-top2026-list-max-width) !important;
     margin: var(--hall-top2026-list-offset) auto 0 var(--hall-top2026-list-left) !important;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-share {
+    display: none !important;
   }
 }
 
@@ -7302,6 +7309,15 @@ body.club-choice-vote-open {
   aspect-ratio: 68 / 100;
   object-fit: cover;
   object-position: center 46%;
+}
+
+.private-cash-modal__event > .private-cash-modal__table-hero:first-child,
+.private-cash-modal__events > .private-cash-modal__table-hero:first-child {
+  margin-top: 0;
+}
+
+.private-cash-modal__event > .private-cash-modal__rules {
+  margin-top: 13px;
 }
 
 .private-cash-modal__event {

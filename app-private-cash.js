@@ -287,7 +287,7 @@
 
   function renderPrivateCashHero() {
     return '<figure class="private-cash-modal__table-hero">' +
-      '<img src="./assets/private-cash-table-hero.webp?v=3.658" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      '<img src="./assets/private-cash-table-hero.webp?v=3.665" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
     '</figure>';
   }
 
@@ -324,6 +324,9 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     return '<article class="private-cash-modal__event">' +
+      renderPrivateCashHero() +
+      renderParticipant(event, my) +
+      renderRules() +
       '<div class="private-cash-modal__event-head">' +
         '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
         '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
@@ -335,8 +338,6 @@
       (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderEventBonuses(event.combinations) +
-      renderPrivateCashHero() +
-      renderParticipant(event, my) +
       renderParticipants(event) +
     '</article>';
   }
@@ -350,9 +351,8 @@
     var events = state.events || [];
     bodyEl.innerHTML =
       renderAdminForm() +
-      renderRules() +
       '<section class="private-cash-modal__events">' +
-        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero() + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>') +
+        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero() + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
       '</section>';
   }
 

@@ -458,6 +458,7 @@ var hallFishActiveTab = "levels";
 var hallFishActiveAchievementTab = "big50";
 var hallFishCalendarMonthOffset = 0;
 var hallFishUpcomingFilter = "all";
+var hallFishUpcomingExpanded = false;
 var hallFishPrefetchedProfiles = Object.create(null);
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
 var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v2";
@@ -1450,6 +1451,23 @@ function hallFishUpcomingCalendarEvents(events) {
   });
 }
 
+function hallFishCalendarYearEvents(events, year) {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return hallFishSanitizeCalendarEvents(events).map(function (event) {
+    var parts = hallFishCalendarDateParts(event && event.date);
+    if (!parts || parts.year !== year) return null;
+    var date = hallFishCalendarEventDate(event);
+    if (!date) return null;
+    return Object.assign({}, event, {
+      nextDate: date,
+      daysLeft: Math.round((date - today) / 86400000),
+    });
+  }).filter(Boolean).sort(function (a, b) {
+    return a.nextDate - b.nextDate || String(a.title || "").localeCompare(String(b.title || ""), "ru");
+  });
+}
+
 function hallFishCalendarRelativeLabel(daysLeft) {
   if (daysLeft === 0) return "сегодня";
   if (daysLeft === 1) return "завтра";
@@ -1565,13 +1583,19 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
   })).sort(function (a, b) {
     return a.daysLeft - b.daysLeft || String(a.title || a.nick || "").localeCompare(String(b.title || b.nick || ""), "ru");
   });
+  var yearEnd = new Date(year, 11, 31);
+  yearEnd.setHours(23, 59, 59, 999);
   var filteredUpcoming = hallFishUpcomingFilter === "club"
-    ? hallFishCalendarMonthEvents(events, year, month).map(function (event) { return Object.assign({ kind: "event" }, event); })
+    ? hallFishCalendarYearEvents(events, year).map(function (event) { return Object.assign({ kind: "event" }, event); })
     : upcomingAll.filter(function (row) {
     if (hallFishUpcomingFilter === "birthdays") return row.kind === "birthday";
     return true;
   });
-  var upcoming = filteredUpcoming.slice(0, 10);
+  var upcomingUntilYearEnd = filteredUpcoming.filter(function (row) {
+    return row.nextDate && row.nextDate <= yearEnd;
+  });
+  var canShowMore = upcomingUntilYearEnd.length > 10;
+  var upcoming = hallFishUpcomingExpanded ? upcomingUntilYearEnd : filteredUpcoming.slice(0, 10);
   var upcomingTabs = [
     { key: "all", label: "Все ближайшие события" },
     { key: "birthdays", label: "Дни рождения" },
@@ -1597,7 +1621,10 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
           '<span>' + hallFishEsc(hallFishFormatBirthdayDate(row, row.nextDate.getFullYear())) + ' · ' + hallFishEsc(label) + '</span>' +
         '</button>';
       }).join("")
-    : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">' + (hallFishUpcomingFilter === "club" ? "Праздников клуба в этом месяце нет." : "Ближайших событий нет.") + '</div>';
+    : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">' + (hallFishUpcomingFilter === "club" ? "Ближайших праздников клуба нет." : "Ближайших событий нет.") + '</div>';
+  var upcomingMoreHtml = canShowMore
+    ? '<button type="button" class="hall-fish-birthday-next__more" data-hall-fish-upcoming-more aria-expanded="' + (hallFishUpcomingExpanded ? "true" : "false") + '">' + (hallFishUpcomingExpanded ? "Свернуть" : "Еще") + '</button>'
+    : "";
   return '<div class="hall-fish-birthdays">' +
     '<div class="hall-fish-birthday-calendar">' +
       '<div class="hall-fish-birthday-calendar__head">' +
@@ -1617,6 +1644,7 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
         }).join("") +
       '</div>' +
       upcomingHtml +
+      upcomingMoreHtml +
     '</section>' +
   '</div>';
 }
@@ -1792,11 +1820,25 @@ function hallFishMoveCalendarMonth(delta) {
 function hallFishSetUpcomingFilter(filter) {
   var next = String(filter || "all").trim();
   var body = document.getElementById("hallFishRatingBody");
-  var scrollTop = body ? body.scrollTop : 0;
+  var anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
+  var anchorViewportOffset = anchor && body ? anchor.offsetTop - body.scrollTop : null;
   hallFishUpcomingFilter = next === "birthdays" || next === "club" ? next : "all";
+  hallFishUpcomingExpanded = false;
   hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
   body = document.getElementById("hallFishRatingBody");
-  if (body) body.scrollTop = scrollTop;
+  anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
+  if (body && anchor && anchorViewportOffset !== null) body.scrollTop = Math.max(0, anchor.offsetTop - anchorViewportOffset);
+}
+
+function hallFishToggleUpcomingExpanded() {
+  var body = document.getElementById("hallFishRatingBody");
+  var anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
+  var anchorViewportOffset = anchor && body ? anchor.offsetTop - body.scrollTop : null;
+  hallFishUpcomingExpanded = !hallFishUpcomingExpanded;
+  hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  body = document.getElementById("hallFishRatingBody");
+  anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
+  if (body && anchor && anchorViewportOffset !== null) body.scrollTop = Math.max(0, anchor.offsetTop - anchorViewportOffset);
 }
 
 function hallFishUpdateTabs(activeTab) {
@@ -2099,6 +2141,13 @@ function initHallFishRatingModal() {
     e.preventDefault();
     e.stopPropagation();
     hallFishSetUpcomingFilter(filterBtn.getAttribute("data-hall-fish-upcoming-filter"));
+  });
+  document.addEventListener("click", function (e) {
+    var moreBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-upcoming-more]") : null;
+    if (!moreBtn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    hallFishToggleUpcomingExpanded();
   });
   document.addEventListener("click", function (e) {
     var monthBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-calendar-month]") : null;
