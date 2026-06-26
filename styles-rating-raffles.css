@@ -8379,9 +8379,9 @@ body[data-view="raffles"] .raffles-active-chooser__detail-pill,
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(150px, clamp(150px, 18vw, 188px)) !important;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, clamp(170px, 22vw, 230px)) !important;
   grid-template-areas: "text side" !important;
-  align-items: center !important;
+  align-items: stretch !important;
   justify-items: stretch !important;
   column-gap: 12px !important;
   width: 100% !important;
@@ -8408,10 +8408,11 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
   grid-area: side !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-end !important;
-  justify-content: center !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  align-self: stretch !important;
   gap: 4px !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -8419,6 +8420,8 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
+  justify-self: end !important;
+  align-self: start !important;
   position: static !important;
   transform: none !important;
   max-width: 100% !important;
@@ -8431,8 +8434,10 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer {
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  justify-content: stretch !important;
+  align-self: stretch !important;
   min-width: 0 !important;
+  width: 100% !important;
   max-width: 100% !important;
   color: #ffe9a8 !important;
   text-align: center !important;
@@ -8449,9 +8454,11 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-width: clamp(68px, 7.8vw, 88px) !important;
+  width: 100% !important;
+  min-width: 0 !important;
   max-width: 100% !important;
-  padding: 5px 7px !important;
+  min-height: 100% !important;
+  padding: 6px 10px !important;
   border: 1px solid rgba(255, 224, 138, 0.56) !important;
   border-radius: 999px !important;
   background:
@@ -8461,7 +8468,7 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 0 12px rgba(255, 209, 85, 0.16) !important;
   color: #ffdf72 !important;
-  font-size: clamp(10px, 1.08vw, 13px) !important;
+  font-size: clamp(15px, 1.72vw, 22px) !important;
   font-weight: 1000 !important;
   line-height: 1 !important;
   font-variant-numeric: tabular-nums !important;
