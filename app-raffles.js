@@ -1547,10 +1547,12 @@ function initRaffles() {
   }
 
   function activeRaffleSubtitleText(raffle) {
+    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
+    var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
+    if (isCashPrize && hasResultBatches) return "";
     var subtitle = String(raffle && (raffle.cardSubtitle || raffle.card_subtitle) || "").replace(/\s+/g, " ").trim();
     if (subtitle) return subtitle;
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
-    var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     if (isCashPrize) {
       var labels = activeRaffleBuyinChipLabels(raffle);
       return labels.length ? labels.join(" · ") : activeRafflePrizeLabel(raffle);
@@ -1564,6 +1566,7 @@ function initRaffles() {
 
   function activeRaffleCardTitleHtml(raffle) {
     var titleText = activeRaffleMainTitleText(raffle);
+    var subtitleText = activeRaffleSubtitleText(raffle);
     var titleHtml = escapeHtml(titleText);
     var cashMatch = titleText.match(/^(.+?)\s+(на\s+кеш)$/i);
     if (cashMatch && cashMatch[1] && cashMatch[2]) {
@@ -1578,9 +1581,11 @@ function initRaffles() {
       '<span class="raffles-active-chooser__main-title">' +
       titleHtml +
       "</span>" +
-      '<span class="raffles-active-chooser__subtitle">' +
-      escapeHtml(activeRaffleSubtitleText(raffle)) +
-      "</span>" +
+      (subtitleText
+        ? '<span class="raffles-active-chooser__subtitle">' +
+          escapeHtml(subtitleText) +
+          "</span>"
+        : "") +
       "</span>"
     );
   }
