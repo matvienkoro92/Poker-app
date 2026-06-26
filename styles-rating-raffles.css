@@ -8229,6 +8229,16 @@ body[data-view="raffles"] .raffles-active-chooser {
   container-type: inline-size !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__item::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__art {
+  display: none !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__head {
   grid-column: 1 !important;
   grid-row: 1 !important;
