@@ -1716,7 +1716,8 @@ if (chatUserModalEl) {
       data && data.chatDisplayName != null && String(data.chatDisplayName).trim()
         ? String(data.chatDisplayName).trim()
         : "";
-    var titleDisp = contactNm || peerChatDisp || chatUserModalPeerLogin || (fallbackName || "Игрок");
+    var ratingNick = chatUserModalRatingNickFromData(data);
+    var titleDisp = contactNm || ratingNick || peerChatDisp || chatUserModalPeerLogin || (fallbackName || "Игрок");
     if (modalTitle) modalTitle.textContent = titleDisp;
     chatUserModalUserName = titleDisp;
     if (modalAvatar) modalAvatar.alt = titleDisp;
@@ -1725,6 +1726,9 @@ if (chatUserModalEl) {
     }
     if (modalLoginSub) {
       if (contactNm && chatUserModalPeerLogin) {
+        modalLoginSub.textContent = chatUserModalPeerLogin;
+        modalLoginSub.hidden = false;
+      } else if (ratingNick && chatUserModalPeerLogin) {
         modalLoginSub.textContent = chatUserModalPeerLogin;
         modalLoginSub.hidden = false;
       } else if (peerChatDisp && chatUserModalPeerLogin) {
