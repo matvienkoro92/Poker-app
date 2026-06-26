@@ -8671,17 +8671,17 @@ body[data-view="raffles"] .raffles-active-chooser__prize-info-btn {
   grid-row: 7 !important;
   align-self: end !important;
   justify-self: center !important;
-  width: min(100%, 142px) !important;
-  min-height: 30px !important;
-  padding: 7px 12px !important;
+  width: min(100%, 230px) !important;
+  min-height: clamp(40px, 4.8vw, 52px) !important;
+  padding: 11px 14px !important;
   border: 1px solid rgba(255, 232, 166, 0.68) !important;
-  border-radius: 999px !important;
+  border-radius: 14px !important;
   background:
     linear-gradient(180deg, rgba(255, 232, 166, 0.18), rgba(24, 14, 42, 0.92)),
     rgba(12, 8, 22, 0.88) !important;
   color: #ffe8a6 !important;
   font: inherit !important;
-  font-size: clamp(10px, 1.05vw, 13px) !important;
+  font-size: clamp(12px, 1.4vw, 16px) !important;
   font-weight: 1000 !important;
   line-height: 1 !important;
   text-align: center !important;
