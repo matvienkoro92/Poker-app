@@ -1660,6 +1660,9 @@ function initRaffles() {
       escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз") +
       "</span>" +
       activeRaffleJoinCtaHtml(raffle, id, endDate) +
+      '<button type="button" class="raffles-active-chooser__prize-info-btn" data-raffle-active-info-id="' +
+      escapeHtml(id) +
+      '" aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">ИНФО</button>' +
       "</span>"
     );
   }
