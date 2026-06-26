@@ -9138,3 +9138,513 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
       "prize" !important;
   }
 }
+
+@media (max-width: 640px) {
+  body[data-view="raffles"] .raffles-active-chooser {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item,
+  body[data-view="raffles"] .raffles-active-chooser__item:only-child,
+  body[data-view="raffles"] .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child {
+    display: grid !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 2px solid rgba(232, 88, 255, 0.94) !important;
+    border-radius: 22px !important;
+    background:
+      linear-gradient(90deg, rgba(4, 3, 12, 0.99) 0%, rgba(4, 3, 12, 0.97) 58%, rgba(89, 20, 126, 0.9) 58%, rgba(96, 24, 142, 0.86) 100%),
+      url("./assets/raffles-active-cash-bg.webp") right center / 48% 100% no-repeat,
+      #070511 !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 210, 255, 0.34),
+      0 0 18px rgba(217, 70, 239, 0.36),
+      0 14px 26px rgba(0, 0, 0, 0.36) !important;
+    transform: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item::before {
+    background:
+      linear-gradient(90deg, rgba(4, 4, 12, 0.96) 0%, rgba(4, 4, 12, 0.9) 58%, rgba(93, 24, 128, 0.12) 58%, rgba(93, 24, 128, 0.06) 100%) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--active,
+  body[data-view="raffles"] .raffles-active-chooser__item[aria-selected="true"] {
+    outline: none !important;
+    transform: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser:has(.raffles-active-chooser__item--active) .raffles-active-chooser__item:not(.raffles-active-chooser__item--active),
+  body[data-view="raffles"] .raffles-active-chooser:has(.raffles-active-chooser__item[aria-selected="true"]) .raffles-active-chooser__item:not([aria-selected="true"]) {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body {
+    display: grid !important;
+    grid-template-columns: minmax(0, 58%) minmax(0, 42%) !important;
+    grid-template-areas: "content prize" !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__content {
+    grid-area: content !important;
+    position: relative !important;
+    z-index: 2 !important;
+    display: grid !important;
+    align-content: start !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+    padding: 13px 8px 13px 13px !important;
+    border-right: 1px solid rgba(255, 213, 127, 0.58) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__head {
+    position: static !important;
+    display: contents !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__badge,
+  body[data-view="raffles"] .raffles-active-chooser__main-badge,
+  body[data-view="raffles"] .raffles-active-chooser__detail-pills,
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__results-time {
+    position: absolute !important;
+    z-index: 4 !important;
+    top: 12px !important;
+    left: calc(58% + 10px) !important;
+    right: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 20px !important;
+    padding: 0 7px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(248, 187, 255, 0.9) !important;
+    border-radius: 999px !important;
+    background:
+      radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.35), transparent 45%),
+      linear-gradient(180deg, rgba(184, 43, 230, 0.96), rgba(105, 24, 164, 0.96)) !important;
+    color: #fff9dc !important;
+    font-size: clamp(7px, 2.45vw, 10px) !important;
+    font-weight: 1000 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 0 12px rgba(217, 70, 239, 0.48) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__results-time::before {
+    content: "◴";
+    margin-right: 5px;
+    color: #ffd86a;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__title-block {
+    display: grid !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title,
+  body[data-view="raffles"] .raffles-active-chooser__title,
+  body[data-view="raffles"] .raffles-active-chooser__title--cash,
+  body[data-view="raffles"] .raffles-active-chooser__item:only-child .raffles-active-chooser__title,
+  body[data-view="raffles"] .raffles-active-chooser__item:only-child .raffles-active-chooser__title--cash {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    color: #fff8f2 !important;
+    font-size: clamp(18px, 6.4vw, 34px) !important;
+    font-weight: 1000 !important;
+    line-height: 0.94 !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.72) !important;
+    -webkit-line-clamp: initial !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash .raffles-active-chooser__main-title-line,
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash .raffles-active-chooser__main-title-accent,
+  body[data-view="raffles"] .raffles-active-chooser__title-line {
+    display: block !important;
+    overflow: visible !important;
+    text-align: left !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title-accent,
+  body[data-view="raffles"] .raffles-active-chooser__title-line--amount {
+    color: #ffdd70 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__subtitle {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    color: rgba(255, 245, 245, 0.78) !important;
+    font-size: clamp(9px, 3.1vw, 16px) !important;
+    font-weight: 900 !important;
+    line-height: 1.08 !important;
+    text-align: left !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tiles {
+    display: grid !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(88px, 0.9fr) !important;
+    align-items: center !important;
+    min-height: 48px !important;
+    padding: 6px 7px !important;
+    border: 1px solid rgba(217, 70, 239, 0.76) !important;
+    border-radius: 10px !important;
+    background: rgba(5, 4, 15, 0.8) !important;
+    box-shadow: inset 0 0 0 1px rgba(245, 208, 254, 0.08) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: stretch !important;
+    display: grid !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
+    justify-self: end !important;
+    min-width: 88px !important;
+    max-width: 100% !important;
+    padding: 2px 8px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 232, 166, 0.48) !important;
+    border-radius: 999px !important;
+    color: #ffe88d !important;
+    font-size: clamp(7px, 2.2vw, 9px) !important;
+    font-weight: 1000 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer {
+    justify-self: stretch !important;
+    min-height: 30px !important;
+    border: 1px solid rgba(255, 232, 166, 0.48) !important;
+    border-radius: 999px !important;
+    background: linear-gradient(180deg, rgba(255, 232, 166, 0.18), rgba(34, 24, 32, 0.9)) !important;
+    color: #ffe88d !important;
+    font-size: clamp(13px, 4.2vw, 22px) !important;
+    font-weight: 1000 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-icon {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    color: #fff8f2 !important;
+    font-size: clamp(9px, 3.25vw, 16px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.02 !important;
+    text-transform: uppercase !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    min-width: 0 !important;
+    min-height: 43px !important;
+    padding: 6px 5px !important;
+    border: 1px solid rgba(255, 213, 127, 0.32) !important;
+    border-radius: 8px !important;
+    background: rgba(5, 6, 12, 0.76) !important;
+    color: #fff7d7 !important;
+    font-size: clamp(8px, 2.75vw, 13px) !important;
+    font-weight: 1000 !important;
+    line-height: 1.06 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    white-space: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--result-time {
+    display: grid !important;
+    justify-items: start !important;
+    text-align: left !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--result-time .raffles-active-chooser__fact-icon {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--result-time .raffles-active-chooser__fact-label {
+    color: rgba(255, 245, 210, 0.66) !important;
+    font-size: 0.72em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 6px 5px !important;
+    border-radius: 8px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-track,
+  body[data-view="raffles"] .raffles-active-chooser__participants-icon {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-side {
+    display: block !important;
+    min-width: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count {
+    display: block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits {
+    font-size: clamp(13px, 4.1vw, 20px) !important;
+    font-weight: 1000 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits::before {
+    content: "◷";
+    margin-right: 4px;
+    color: #ffe88d;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-units {
+    grid-column: 2 !important;
+    display: block !important;
+    color: rgba(255, 245, 210, 0.62) !important;
+    font-size: clamp(7px, 2.25vw, 10px) !important;
+    line-height: 1 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-units span {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-units::before {
+    content: "до окончания";
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    display: grid !important;
+    justify-items: center !important;
+    align-content: center !important;
+    gap: 1px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-label {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-value {
+    display: block !important;
+    font-size: inherit !important;
+    line-height: 1.08 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-value::before {
+    content: "Доступ: ";
+    color: rgba(255, 245, 210, 0.66);
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel {
+    grid-area: prize !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto auto !important;
+    align-content: center !important;
+    justify-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    padding: 44px 10px 13px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(217, 70, 239, 0.22), transparent 52%),
+      linear-gradient(180deg, rgba(88, 20, 128, 0.34), rgba(88, 20, 128, 0.16)) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    justify-self: center !important;
+    color: rgba(255, 245, 245, 0.78) !important;
+    font-size: clamp(9px, 2.8vw, 14px) !important;
+    font-weight: 1000 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-amount {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    justify-self: center !important;
+    color: #ffd86a !important;
+    font-size: clamp(34px, 12vw, 68px) !important;
+    font-weight: 1000 !important;
+    line-height: 0.86 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    text-shadow:
+      0 3px 0 rgba(0, 0, 0, 0.48),
+      0 0 16px rgba(255, 216, 106, 0.26) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__cta,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 8px !important;
+    border-radius: 16px !important;
+    font-size: clamp(11px, 3.35vw, 16px) !important;
+    transform: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-info-btn {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 8px !important;
+    border: 1px solid rgba(255, 232, 166, 0.78) !important;
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, rgba(45, 31, 45, 0.98), rgba(23, 12, 28, 0.98)) !important;
+    color: #fff1bf !important;
+    font-size: clamp(11px, 3.1vw, 15px) !important;
+    font-weight: 1000 !important;
+    text-transform: uppercase !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__info-toggle {
+    display: none !important;
+  }
+}
+
+@media (max-width: 370px) {
+  body[data-view="raffles"] .raffles-active-chooser__item,
+  body[data-view="raffles"] .raffles-active-chooser__item:only-child,
+  body[data-view="raffles"] .raffles-active-chooser--count-3 .raffles-active-chooser__item:last-child {
+    border-radius: 18px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 57%) minmax(0, 43%) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__content {
+    gap: 5px !important;
+    padding: 11px 6px 11px 10px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__results-time {
+    left: calc(57% + 7px) !important;
+    right: 7px !important;
+    min-height: 18px !important;
+    padding: 0 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile {
+    grid-template-columns: minmax(0, 1fr) minmax(74px, 0.88fr) !important;
+    min-height: 43px !important;
+    padding: 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
+    min-width: 74px !important;
+    padding-inline: 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer {
+    min-height: 27px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__facts {
+    gap: 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    min-height: 38px !important;
+    padding: 5px 4px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel {
+    gap: 8px !important;
+    padding: 39px 7px 11px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__cta {
+    min-height: 43px !important;
+    border-radius: 14px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-info-btn {
+    min-height: 36px !important;
+    border-radius: 14px !important;
+  }
+}

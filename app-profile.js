@@ -219,6 +219,7 @@ var profilePublicShowcaseData = null;
 var profilePublicShowcaseStatus = null;
 var profilePublicShowcaseArtSeq = 0;
 var profilePublicShowcaseLoading = false;
+var profilePublicShowcaseInitialPending = false;
 var profileHeroGenderValue = "male";
 var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
 var profilePublicShowcaseLatestRatingNick = "";
@@ -255,7 +256,7 @@ function profileWriteStoredHeroGender(value) {
 function profileDefaultHeroArt(value) {
   var gender = normalizeProfileHeroGender(value);
   return {
-    src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp" : "./assets/chat-profile-default-hero-male.webp",
+    src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp?v=3.001" : "./assets/chat-profile-default-hero-male.webp",
     nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
     defaultHero: true,
     gender: gender,
@@ -432,7 +433,9 @@ function profilePublicShowcaseHideArt(artImg) {
   artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback", "chat-user-modal__rating-art-img--default-hero");
 }
 
-function setProfilePublicShowcaseLoading(isLoading) {
+function setProfilePublicShowcaseLoading(isLoading, opts) {
+  opts = opts || {};
+  if (!isLoading && profilePublicShowcaseInitialPending && !opts.force) return;
   var wasLoading = profilePublicShowcaseLoading;
   profilePublicShowcaseLoading = !!isLoading;
   var root = document.getElementById("profilePublicShowcase");
@@ -640,9 +643,11 @@ function refreshProfilePublicShowcase(profileData) {
 }
 
 function loadProfilePublicShowcaseInitial() {
+  profilePublicShowcaseInitialPending = true;
   if (typeof loadCurrentProfileUserInfo !== "function") {
     refreshProfilePublicShowcase();
-    setProfilePublicShowcaseLoading(false);
+    profilePublicShowcaseInitialPending = false;
+    setProfilePublicShowcaseLoading(false, { force: true });
     return;
   }
   setProfilePublicShowcaseLoading(true);
@@ -654,7 +659,8 @@ function loadProfilePublicShowcaseInitial() {
       refreshProfilePublicShowcase();
     })
     .finally(function () {
-      setProfilePublicShowcaseLoading(false);
+      profilePublicShowcaseInitialPending = false;
+      setProfilePublicShowcaseLoading(false, { force: true });
     });
 }
 
@@ -1214,15 +1220,54 @@ function pokerProfileSpecialtyBadgeText(value) {
   return "";
 }
 
+var PROFILE_MTT_PREFERENCE_VALUES = ["under500", "1k5k", "5kplus", "offline"];
+var PROFILE_CASH_PREFERENCE_VALUES = ["up-to-5-10", "10-20-20-40", "25-50-50-100", "50-100-plus"];
+
+function pokerProfileNormalizePreferenceList(value, allowed, maxCount) {
+  var raw = Array.isArray(value)
+    ? value
+    : String(value || "")
+        .split(/[,\s]+/)
+        .filter(Boolean);
+  var allowedMap = {};
+  var out = [];
+  allowed.forEach(function (item) {
+    allowedMap[item] = true;
+  });
+  raw.forEach(function (item) {
+    var key = String(item || "").trim();
+    if (!allowedMap[key] || out.indexOf(key) !== -1) return;
+    if (maxCount && out.length >= maxCount) return;
+    out.push(key);
+  });
+  return out;
+}
+
+function pokerProfileMttPreferences(value) {
+  return pokerProfileNormalizePreferenceList(value, PROFILE_MTT_PREFERENCE_VALUES, 0);
+}
+
+function pokerProfileCashPreferences(value) {
+  return pokerProfileNormalizePreferenceList(value, PROFILE_CASH_PREFERENCE_VALUES, 2);
+}
+
 function initProfilePlayerDetails() {
   var section = document.getElementById("profileHeroBirthDate") || document.getElementById("profilePlayerDetailsSection");
   var birthInput = document.getElementById("profileBirthDateInput");
   var birthSave = document.getElementById("profileBirthDateSaveBtn");
   var specialtyBtns = document.querySelectorAll("[data-profile-specialty]");
+  var preferencesWrap = document.getElementById("profileHeroPreferences");
+  var preferencesMtt = document.getElementById("profileHeroPreferencesMtt");
+  var preferencesCash = document.getElementById("profileHeroPreferencesCash");
+  var preferenceBtns = document.querySelectorAll("[data-profile-preference-kind][data-profile-preference]");
+  var preferenceFeedback = document.getElementById("profileHeroPreferencesFeedback");
   var feedback = document.getElementById("profileBirthDateFeedback") || document.getElementById("profilePlayerDetailsFeedback");
   var specialtyFeedback = document.getElementById("profileSpecialtyFeedback");
   if (!section || section.dataset.playerDetailsBound === "1") return;
   section.dataset.playerDetailsBound = "1";
+  var selectedSpecialty = "";
+  var selectedMttPreferences = [];
+  var selectedCashPreferences = [];
   var base = getApiBase();
   var canServer =
     !!base &&
@@ -1256,6 +1301,18 @@ function initProfilePlayerDetails() {
       }, ms || 2500);
     }
   }
+  function showPreferenceFeedback(text, ms) {
+    if (!preferenceFeedback) {
+      showSpecialtyFeedback(text, ms);
+      return;
+    }
+    preferenceFeedback.textContent = text || "";
+    if (ms !== 0) {
+      setTimeout(function () {
+        if (preferenceFeedback.textContent === text) preferenceFeedback.textContent = "";
+      }, ms || 2500);
+    }
+  }
   function setBirthDateState(value) {
     var saved = String(value || "").trim();
     section.classList.toggle("profile-hero-birth--saved", !!saved);
@@ -1276,11 +1333,29 @@ function initProfilePlayerDetails() {
   }
   function setSpecialtyState(value) {
     var selected = String(value || "").trim().toLowerCase();
+    selectedSpecialty = selected === "mtt" || selected === "cash" ? selected : "";
     specialtyBtns.forEach(function (btn) {
-      var active = btn.getAttribute("data-profile-specialty") === selected;
+      var active = btn.getAttribute("data-profile-specialty") === selectedSpecialty;
       btn.classList.toggle("profile-player-details__toggle-btn--active", active);
       btn.classList.toggle("profile-hero-specialty__btn--active", active);
       btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    if (preferencesWrap) preferencesWrap.hidden = !selectedSpecialty;
+    if (preferencesMtt) preferencesMtt.hidden = selectedSpecialty !== "mtt";
+    if (preferencesCash) preferencesCash.hidden = selectedSpecialty !== "cash";
+    setPreferenceState(selectedSpecialty);
+  }
+  function setPreferenceState(kind, values) {
+    if (kind === "mtt" && values !== undefined) selectedMttPreferences = pokerProfileMttPreferences(values);
+    if (kind === "cash" && values !== undefined) selectedCashPreferences = pokerProfileCashPreferences(values);
+    preferenceBtns.forEach(function (btn) {
+      var btnKind = btn.getAttribute("data-profile-preference-kind") || "";
+      var val = btn.getAttribute("data-profile-preference") || "";
+      var list = btnKind === "cash" ? selectedCashPreferences : selectedMttPreferences;
+      var active = list.indexOf(val) !== -1;
+      btn.classList.toggle("profile-hero-preferences__chip--active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+      btn.disabled = !selectedSpecialty || btnKind !== selectedSpecialty;
     });
   }
   function mergeProfileUserInfo(updates) {
@@ -1308,6 +1383,8 @@ function initProfilePlayerDetails() {
       .then(function (data) {
         if (!data || !data.ok) return;
         setBirthDateState(data.profileBirthDate || data.birthDate || "");
+        setPreferenceState("mtt", data.profileMttPreferences || data.mttPreferences || []);
+        setPreferenceState("cash", data.profileCashPreferences || data.cashPreferences || []);
         setSpecialtyState(data.profileSpecialty || data.specialty || "");
       })
       .catch(function () {});
@@ -1375,9 +1452,55 @@ function initProfilePlayerDetails() {
     btn.addEventListener("click", function () {
       var next = btn.getAttribute("data-profile-specialty") || "";
       setSpecialtyState(next);
-      postPlayerDetails({ specialty: next }, { buttons: Array.prototype.slice.call(specialtyBtns), feedback: "specialty" }).then(function (data) {
+      var body = { specialty: next };
+      if (next === "mtt") body.cashPreferences = [];
+      if (next === "cash") body.mttPreferences = [];
+      postPlayerDetails(body, { buttons: Array.prototype.slice.call(specialtyBtns), feedback: "specialty" }).then(function (data) {
         if (data && data.ok) {
-          mergeProfileUserInfo({ profileSpecialty: next });
+          var updates = { profileSpecialty: next };
+          if (next === "mtt") {
+            selectedCashPreferences = [];
+            updates.profileCashPreferences = [];
+            setPreferenceState("cash", []);
+          }
+          if (next === "cash") {
+            selectedMttPreferences = [];
+            updates.profileMttPreferences = [];
+            setPreferenceState("mtt", []);
+          }
+          mergeProfileUserInfo(updates);
+        }
+        else loadPlayerDetails();
+      });
+    });
+  });
+  preferenceBtns.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var kind = btn.getAttribute("data-profile-preference-kind") || "";
+      var value = btn.getAttribute("data-profile-preference") || "";
+      if (!selectedSpecialty || kind !== selectedSpecialty || !value) return;
+      var list = kind === "cash" ? selectedCashPreferences.slice() : selectedMttPreferences.slice();
+      var idx = list.indexOf(value);
+      if (idx !== -1) {
+        list.splice(idx, 1);
+      } else {
+        if (kind === "cash" && list.length >= 2) {
+          showPreferenceFeedback("Можно выбрать максимум 2 лимита кеша", 2500);
+          return;
+        }
+        list.push(value);
+      }
+      if (kind === "cash") selectedCashPreferences = pokerProfileCashPreferences(list);
+      else selectedMttPreferences = pokerProfileMttPreferences(list);
+      setPreferenceState(kind);
+      var body = kind === "cash"
+        ? { specialty: "cash", cashPreferences: selectedCashPreferences }
+        : { specialty: "mtt", mttPreferences: selectedMttPreferences };
+      postPlayerDetails(body, { buttons: Array.prototype.slice.call(preferenceBtns), feedback: "specialty" }).then(function (data) {
+        if (data && data.ok) {
+          mergeProfileUserInfo(kind === "cash"
+            ? { profileSpecialty: "cash", profileCashPreferences: selectedCashPreferences.slice() }
+            : { profileSpecialty: "mtt", profileMttPreferences: selectedMttPreferences.slice() });
         }
         else loadPlayerDetails();
       });

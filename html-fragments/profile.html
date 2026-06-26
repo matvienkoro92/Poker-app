@@ -55,6 +55,21 @@
                         <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
                       </label>
                     </div>
+                    <div class="profile-hero-preferences" id="profileHeroPreferences" hidden>
+                      <div class="profile-hero-preferences__group" id="profileHeroPreferencesMtt" data-profile-preferences-kind="mtt" hidden role="group" aria-label="Лимиты МТТ">
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="mtt" data-profile-preference="under500" aria-pressed="false">До 500р</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="mtt" data-profile-preference="1k5k" aria-pressed="false">от 1к до 5к</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="mtt" data-profile-preference="5kplus" aria-pressed="false">5000р+</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="mtt" data-profile-preference="offline" aria-pressed="false">оффлайн</button>
+                      </div>
+                      <div class="profile-hero-preferences__group" id="profileHeroPreferencesCash" data-profile-preferences-kind="cash" hidden role="group" aria-label="Лимиты кеша">
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="up-to-5-10" aria-pressed="false">до 5/10р</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="10-20-20-40" aria-pressed="false">10/20-20/40</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="25-50-50-100" aria-pressed="false">25/50-50/100</button>
+                        <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="50-100-plus" aria-pressed="false">50/100+</button>
+                      </div>
+                      <span class="profile-hero-preferences__feedback" id="profileHeroPreferencesFeedback" aria-live="polite"></span>
+                    </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                   </div>
@@ -81,12 +96,12 @@
               </div>
               <div class="chat-user-modal__hero chat-user-modal__hero--art profile-public-showcase__hero" id="profilePublicHero">
                 <div class="chat-user-modal__rating-art" id="profilePublicRatingArt">
-                  <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" src="./assets/chat-profile-default-hero-male.webp" alt="" loading="eager" decoding="async" fetchpriority="high" hidden />
+                  <img class="chat-user-modal__rating-art-img" id="profilePublicRatingArtImg" alt="" loading="eager" decoding="async" fetchpriority="high" hidden />
                 </div>
                 <div class="chat-user-modal__hero-status">
                   <div class="chat-user-modal__p21" id="profilePublicP21"></div>
                   <div class="chat-user-modal__level">
-                    <p class="chat-user-modal__level-text" id="profilePublicLevelText">Уровень не обновлен</p>
+                    <p class="chat-user-modal__level-text" id="profilePublicLevelText"></p>
                     <div class="profile-status__refresh-action profile-public-showcase__level-actions" id="profilePokerPlusRefreshAction">
                       <button type="button" class="profile-visible-to-others__p21-save profile-status__refresh-btn" id="profileStatusRefreshBtn" hidden>Обновить</button>
                       <button type="button" class="profile-visible-to-others__p21-save profile-status__refresh-btn" id="profilePokerPlusRefreshBtn" hidden>Обновить</button>
@@ -97,9 +112,9 @@
                     <h4 class="chat-user-modal__status-title" id="profilePublicStatusTitle">Текущий уровень</h4>
                     <p class="chat-user-modal__status-xp" id="profilePublicStatusXp" hidden></p>
                     <div class="chat-user-modal__status-scale" id="profilePublicStatusScale" style="--status-value: 0;">
-                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardCurrent">1</span>
+                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardCurrent"></span>
                       <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div></div>
-                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardNext">2</span>
+                      <span class="chat-user-modal__status-card" id="profilePublicStatusCardNext"></span>
                     </div>
                   </section>
                 </div>

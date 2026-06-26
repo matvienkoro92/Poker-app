@@ -317,7 +317,7 @@ if (chatUserModalEl) {
   function chatUserModalDefaultHeroArt(value) {
     var gender = normalizeChatUserModalProfileGender(value);
     return {
-      src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp" : "./assets/chat-profile-default-hero-male.webp",
+      src: gender === "female" ? "./assets/chat-profile-default-hero-female.webp?v=3.001" : "./assets/chat-profile-default-hero-male.webp",
       nick: gender === "female" ? "Стандартный герой Ж" : "Стандартный герой М",
       defaultHero: true,
       gender: gender,

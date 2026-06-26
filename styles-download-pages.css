@@ -488,6 +488,13 @@ body[data-view="cashout"] .cashout-image {
   box-shadow: 0 0 28px rgba(214, 163, 84, 0.18), inset 0 0 0 10px rgba(7, 10, 17, 0.68);
 }
 
+body[data-view="download"] .download-image {
+  height: min(135px, 50vw);
+  border-radius: 22px;
+  object-fit: cover;
+  object-position: center center;
+}
+
 [data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
 [data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout {
   border-color: rgba(251, 146, 60, 0.24);
@@ -983,6 +990,9 @@ body[data-view="cashout"] .cashout-manager-btn:active {
   body[data-view="download"] .download-image,
   body[data-view="cashout"] .cashout-image {
     max-width: 220px;
+  }
+  body[data-view="download"] .download-image {
+    height: min(110px, 50vw);
   }
 }
 
