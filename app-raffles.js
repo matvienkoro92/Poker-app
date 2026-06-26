@@ -1590,10 +1590,15 @@ function initRaffles() {
     );
   }
 
-  function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize) {
+  function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, resultsTimeText) {
     var amount = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
     return (
       '<span class="raffles-active-chooser__prize-panel">' +
+      (resultsTimeText
+        ? '<span class="raffles-active-chooser__prize-results-time">' +
+          escapeHtml(resultsTimeText) +
+          "</span>"
+        : "") +
       '<span class="raffles-active-chooser__prize-kicker">Призовой фонд</span>' +
       '<span class="raffles-active-chooser__prize-amount">' +
       escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз") +
@@ -2046,6 +2051,8 @@ function initRaffles() {
         var participantCount = activeRaffleParticipantsCount(raffle);
         var participantWord = activeRaffleParticipantWord(participantCount);
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
+        var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
+        var moveResultsTimeToPrize = isCashPrize && hasResultBatches;
         var headHtml =
           '<span class="raffles-active-chooser__head">' +
           '<span class="raffles-active-chooser__badge' +
@@ -2053,7 +2060,7 @@ function initRaffles() {
           '">' +
           escapeHtml(knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle)) +
           "</span>" +
-          (resultsTimeText
+          (resultsTimeText && !moveResultsTimeToPrize
             ? '<span class="raffles-active-chooser__results-time">' +
               escapeHtml(resultsTimeText) +
               "</span>"
@@ -2061,7 +2068,6 @@ function initRaffles() {
           "</span>";
         var titleHtml = activeRaffleCardTitleHtml(raffle);
         var detailPillsHtml = isCashPrize ? activeRaffleBuyinTilesHtml(raffle) : activeRaffleDetailPillsHtml(raffle);
-        var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
         var resultTimeFactHtml = isCashPrize && hasResultBatches ? "" : activeRaffleResultTimeFactHtml(raffle);
         var participantsHtml =
           '<span class="raffles-active-chooser__fact raffles-active-chooser__fact--participants" aria-label="' +
@@ -2075,7 +2081,13 @@ function initRaffles() {
         var timerHtml = isCashPrize && hasResultBatches ? "" : activeRaffleCountdownHtml(endDate, endMs);
         var accessHtml = activeRaffleAccessLevelHtml(raffle);
         var factsHtml = resultTimeFactHtml + participantsHtml + timerHtml + accessHtml;
-        var prizePanelHtml = activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize);
+        var prizePanelHtml = activeRafflePrizePanelHtml(
+          raffle,
+          id,
+          endDate,
+          totalPrize,
+          moveResultsTimeToPrize ? resultsTimeText : ""
+        );
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +

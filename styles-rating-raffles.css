@@ -8398,6 +8398,16 @@ body[data-view="raffles"] .raffles-active-chooser__prize-panel > * {
   max-width: 100% !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__prize-results-time {
+  color: rgba(255, 239, 190, 0.9) !important;
+  font-size: clamp(8px, 0.98vw, 11px) !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
   font-size: clamp(10px, 1.2vw, 13px) !important;
   text-align: center !important;
