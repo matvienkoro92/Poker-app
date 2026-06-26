@@ -1498,7 +1498,7 @@ function initRaffles() {
       var cashTitle = activeRaffleChooserPrizeTitle(raffle).replace(/\s+/g, " ").trim();
       if (cashTitle) return cashTitle;
     }
-    var explicitTitle = String(raffle && (raffle.cardTitle || raffle.card_title || raffle.title || raffle.name) || "").replace(/\s+/g, " ").trim();
+    var explicitTitle = String(raffle && (raffle.cardTitle || raffle.card_title) || "").replace(/\s+/g, " ").trim();
     if (explicitTitle) return explicitTitle;
     return "Розыгрыш";
   }
