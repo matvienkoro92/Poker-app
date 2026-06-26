@@ -8418,14 +8418,44 @@ body[data-view="raffles"] .raffles-active-chooser__prize-panel > * {
   max-width: 100% !important;
 }
 
-body[data-view="raffles"] .raffles-active-chooser__prize-results-time {
-  color: rgba(255, 239, 190, 0.9) !important;
-  font-size: clamp(8px, 0.98vw, 11px) !important;
-  font-weight: 1000 !important;
+body[data-view="raffles"] .raffles-active-chooser__prize-pills {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-bottom: 2px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-chooser__badge,
+body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-chooser__badge--panel,
+body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-chooser__results-time--panel {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: clamp(20px, 2.2vw, 25px) !important;
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  font-size: clamp(7px, 0.82vw, 10px) !important;
   line-height: 1 !important;
   text-align: center !important;
-  text-transform: uppercase !important;
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-chooser__results-time--panel {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(255, 224, 138, 0.42) !important;
+  background: rgba(12, 8, 24, 0.68) !important;
+  color: rgba(255, 239, 190, 0.9) !important;
+  font-weight: 1000 !important;
+  text-transform: uppercase !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-kicker {

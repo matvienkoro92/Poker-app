@@ -1586,15 +1586,11 @@ function initRaffles() {
     );
   }
 
-  function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, resultsTimeText) {
+  function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, topPillsHtml) {
     var amount = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
     return (
       '<span class="raffles-active-chooser__prize-panel">' +
-      (resultsTimeText
-        ? '<span class="raffles-active-chooser__prize-results-time">' +
-          escapeHtml(resultsTimeText) +
-          "</span>"
-        : "") +
+      (topPillsHtml || "") +
       '<span class="raffles-active-chooser__prize-kicker">Призовой фонд</span>' +
       '<span class="raffles-active-chooser__prize-amount">' +
       escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз") +
@@ -2048,20 +2044,37 @@ function initRaffles() {
         var participantWord = activeRaffleParticipantWord(participantCount);
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
         var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
-        var moveResultsTimeToPrize = isCashPrize && hasResultBatches;
+        var moveHeadToPrize = isCashPrize;
+        var badgeText = knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle);
+        var prizeTopPillsHtml = moveHeadToPrize
+          ? '<span class="raffles-active-chooser__prize-pills">' +
+            '<span class="raffles-active-chooser__badge raffles-active-chooser__badge--panel' +
+            (knockoutCard ? " raffles-active-chooser__badge--main" : "") +
+            '">' +
+            escapeHtml(badgeText) +
+            "</span>" +
+            (resultsTimeText
+              ? '<span class="raffles-active-chooser__results-time raffles-active-chooser__results-time--panel">' +
+                escapeHtml(resultsTimeText) +
+                "</span>"
+              : "") +
+            "</span>"
+          : "";
         var headHtml =
-          '<span class="raffles-active-chooser__head">' +
-          '<span class="raffles-active-chooser__badge' +
-          (knockoutCard ? " raffles-active-chooser__badge--main" : "") +
-          '">' +
-          escapeHtml(knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle)) +
-          "</span>" +
-          (resultsTimeText && !moveResultsTimeToPrize
-            ? '<span class="raffles-active-chooser__results-time">' +
-              escapeHtml(resultsTimeText) +
-              "</span>"
-            : "") +
-          "</span>";
+          moveHeadToPrize
+            ? ""
+            : '<span class="raffles-active-chooser__head">' +
+              '<span class="raffles-active-chooser__badge' +
+              (knockoutCard ? " raffles-active-chooser__badge--main" : "") +
+              '">' +
+              escapeHtml(badgeText) +
+              "</span>" +
+              (resultsTimeText
+                ? '<span class="raffles-active-chooser__results-time">' +
+                  escapeHtml(resultsTimeText) +
+                  "</span>"
+                : "") +
+              "</span>";
         var titleHtml = activeRaffleCardTitleHtml(raffle);
         var detailPillsHtml = isCashPrize ? activeRaffleBuyinTilesHtml(raffle) : activeRaffleDetailPillsHtml(raffle);
         var resultTimeFactHtml = isCashPrize && hasResultBatches ? "" : activeRaffleResultTimeFactHtml(raffle);
@@ -2082,7 +2095,7 @@ function initRaffles() {
           id,
           endDate,
           totalPrize,
-          moveResultsTimeToPrize ? resultsTimeText : ""
+          prizeTopPillsHtml
         );
         return (
           '<div class="raffles-active-chooser__item' +
