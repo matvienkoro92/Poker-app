@@ -964,6 +964,21 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleResultsTimePanelText(raffle) {
+    if (!raffle || !raffle.endDate) return "";
+    var end = new Date(raffle.endDate);
+    if (isNaN(end.getTime())) return "";
+    return (
+      "Итоги " +
+      end.toLocaleTimeString("ru-RU", {
+        timeZone: "Europe/Moscow",
+        hour: "2-digit",
+        minute: "2-digit",
+      }) +
+      "мск"
+    );
+  }
+
   function activeRafflePrizeLabel(raffle) {
     var subtitle = String(raffle && (raffle.cardSubtitle || raffle.card_subtitle) || "").trim();
     if (subtitle) return subtitle;
@@ -2043,6 +2058,7 @@ function initRaffles() {
         var participantCount = activeRaffleParticipantsCount(raffle);
         var participantWord = activeRaffleParticipantWord(participantCount);
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
+        var resultsTimePanelText = activeRaffleResultsTimePanelText(raffle);
         var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
         var moveHeadToPrize = isCashPrize;
         var badgeText = knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle);
@@ -2053,9 +2069,9 @@ function initRaffles() {
             '">' +
             escapeHtml(badgeText) +
             "</span>" +
-            (resultsTimeText
+            (resultsTimePanelText
               ? '<span class="raffles-active-chooser__results-time raffles-active-chooser__results-time--panel">' +
-                escapeHtml(resultsTimeText) +
+                escapeHtml(resultsTimePanelText) +
                 "</span>"
               : "") +
             "</span>"
