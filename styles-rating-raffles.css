@@ -8454,9 +8454,11 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
 body[data-view="raffles"] .raffles-active-chooser__prize-panel {
   grid-column: 2 !important;
   grid-row: 1 !important;
+  align-content: start !important;
+  gap: clamp(8px, 1.1vw, 13px) !important;
   min-width: 0 !important;
   min-height: 100% !important;
-  padding: clamp(14px, 1.8vw, 20px) 12px !important;
+  padding: clamp(8px, 1.2vw, 14px) 12px clamp(14px, 1.8vw, 20px) !important;
   border-top: 0 !important;
   border-left: 1px solid rgba(255, 220, 124, 0.64) !important;
   overflow: hidden !important;
@@ -8468,6 +8470,7 @@ body[data-view="raffles"] .raffles-active-chooser__prize-panel > * {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-pills {
+  align-self: start !important;
   display: flex !important;
   flex-wrap: nowrap !important;
   align-items: center !important;
@@ -8655,7 +8658,7 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
   }
 
   body[data-view="raffles"] .raffles-active-chooser__prize-panel {
-    padding: 12px 8px !important;
+    padding: 8px 8px 12px !important;
   }
 
   body[data-view="raffles"] .raffles-active-chooser__prize-amount {
@@ -8741,7 +8744,7 @@ body[data-view="raffles"] .raffles-active-chooser__access-line {
   }
 
   body[data-view="raffles"] .raffles-active-chooser__prize-panel {
-    padding: 12px 7px !important;
+    padding: 8px 7px 12px !important;
   }
 
   body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
