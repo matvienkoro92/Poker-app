@@ -908,6 +908,13 @@ function initRaffles() {
     return [level > 0 ? level + "+" : "ВСЕ"];
   }
 
+  function raffleAccessLevelCompactText(raffle) {
+    var lines = raffleAccessLevelCompactLines(raffle);
+    var value = String(lines[0] || "").trim();
+    if (!value || value.toUpperCase() === "ВСЕ") return "Доступ: для всех";
+    return "Доступ: уровень " + value;
+  }
+
   function raffleAccessSelectOptionsHtml(includeInherit) {
     var html = includeInherit ? '<option value="">как общий доступ</option>' : "";
     html += '<option value="0">для всех</option>';
@@ -928,16 +935,11 @@ function initRaffles() {
   setupRaffleAccessSelect(raffleAddPrizeAccess);
 
   function activeRaffleAccessLevelHtml(raffle) {
-    var accessLines = raffleAccessLevelCompactLines(raffle);
     var accessLabel = raffleAccessLevelText(raffle);
-    var accessHtml = accessLines.map(function (line, index) {
-      return (
-        '<span class="raffles-active-chooser__access-line">' +
-        (index === 0 ? '<span class="raffles-active-chooser__access-label">Доступ:</span> ' : "") +
-        escapeHtml(line) +
-        "</span>"
-      );
-    }).join("");
+    var accessHtml =
+      '<span class="raffles-active-chooser__access-line">' +
+      escapeHtml(raffleAccessLevelCompactText(raffle)) +
+      "</span>";
     return (
       '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу: ' +
       escapeHtml(accessLabel) +
