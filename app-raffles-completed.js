@@ -751,6 +751,14 @@ function initRafflesCompletedRuntime(opts) {
     }
   }
 
+  function refreshRafflesAfterWinnerAction(data) {
+    if (data && data.raffle && typeof updateCompletedRaffleCache === "function") {
+      updateCompletedRaffleCache(data.raffle);
+    }
+    if (typeof clearRafflesCache === "function") clearRafflesCache();
+    loadRaffles({ skipCache: true, keepCurrentOnLoading: true });
+  }
+
   function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, attempt) {
     var newStatus = btnIsOk ? "ok" : "fail";
     if ((btnIsOk && currentStatus === "ok") || (!btnIsOk && currentStatus === "fail")) newStatus = null;
@@ -772,7 +780,7 @@ function initRafflesCompletedRuntime(opts) {
         if (data && data.ok) {
           raffleWinnerStatusApplyLocal(btn, newStatus);
           raffleWinnerStatusSetButtonPending(btn, false);
-          loadRaffles();
+          refreshRafflesAfterWinnerAction(data);
         } else if (data && data.httpStatus === 409 && tryIndex < 2) {
           window.setTimeout(function () {
             setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, tryIndex + 1);
@@ -846,7 +854,7 @@ function initRafflesCompletedRuntime(opts) {
       .then(function (data) {
         if (data && data.ok) {
           raffleWinnerReadyApplySuccess(btn);
-          loadRaffles();
+          refreshRafflesAfterWinnerAction(data);
         } else if (data && data.httpStatus === 409 && tryIndex < 2) {
           window.setTimeout(function () {
             setRaffleWinnerReady(rid, wid, winnerSlotId, btn, onDone, tryIndex + 1);
