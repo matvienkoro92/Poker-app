@@ -8443,6 +8443,7 @@ body[data-view="raffles"] .raffles-active-chooser__detail-pills {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tiles {
+  gap: clamp(10px, 1.25vw, 14px) !important;
   margin-top: clamp(10px, 1.35vw, 16px) !important;
 }
 
