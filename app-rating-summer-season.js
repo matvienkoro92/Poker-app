@@ -34,6 +34,7 @@ var SUMMER_RATING_SEASON = {
   playerPrefix: "summer_rating_player_",
   datePrefix: "summer_rating_date_",
   leaguePrefix: "summer_rating_league_",
+  openFirstMonthWeek: false,
   topLinkBase: "",
   viewMonths: [
     { title: "Июнь", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },

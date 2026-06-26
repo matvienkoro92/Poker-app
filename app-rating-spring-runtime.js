@@ -315,15 +315,17 @@ function renderSpringRatingViewTotalsWeeks() {
   var marchMonthHtml = marchAllDates.length
     ? weekDetailsHtml({ label: "Итого призовые", dates: marchAllDates }, false, true)
     : "";
+  var config = getActiveRatingSeasonConfigSafe();
+  var openFirstMonthWeek = !(config && config.openFirstMonthWeek === false);
   mayHost.innerHTML =
     mayMonthHtml +
     mayBlocks.map(function (b, i) {
-      return weekDetailsHtml(b, i === 0, false);
+      return weekDetailsHtml(b, openFirstMonthWeek && i === 0, false);
     }).join("");
   aprilHost.innerHTML =
     aprMonthHtml +
     aprBlocks.map(function (b, i) {
-      return weekDetailsHtml(b, i === 0, false);
+      return weekDetailsHtml(b, openFirstMonthWeek && i === 0, false);
     }).join("");
   marchHost.innerHTML =
     marchMonthHtml +

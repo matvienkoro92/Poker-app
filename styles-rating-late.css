@@ -3063,7 +3063,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 @media (max-width: 640px) {
   .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-stack {
-    margin-top: 34px;
+    margin-top: 62px;
   }
 }
 
