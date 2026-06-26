@@ -2101,8 +2101,8 @@ function initRaffles() {
           escapeHtml(participantCount + " " + participantWord) +
           '" style="--raffles-participants-fill: ' +
           escapeHtml(activeRaffleParticipantsScaleFill(participantCount)) +
-          '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-label">Участников</span><span class="raffles-active-chooser__participants-side"><span class="raffles-active-chooser__participants-count">' +
-          escapeHtml(participantCount) +
+          '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-side"><span class="raffles-active-chooser__participants-count">' +
+          escapeHtml("Участников: " + participantCount) +
           '</span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span></span>' +
           "</span>";
         var timerHtml = isCashPrize && hasResultBatches ? "" : activeRaffleCountdownHtml(endDate, endMs);
