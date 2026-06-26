@@ -8312,6 +8312,12 @@ body[data-view="raffles"] .raffles-active-chooser__detail-pills:has(> :nth-child
 body[data-view="raffles"] .raffles-active-chooser__detail-pill,
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-areas: "text side" !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  column-gap: 8px !important;
   width: 100% !important;
   min-width: 0 !important;
   min-height: clamp(34px, 3.8vw, 44px) !important;
@@ -8328,8 +8334,52 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-icon {
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
+  grid-area: text !important;
+  justify-items: start !important;
   font-size: 0.86em !important;
   line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-side {
+  grid-area: side !important;
+  display: grid !important;
+  justify-items: end !important;
+  align-content: center !important;
+  gap: 3px !important;
+  min-width: clamp(72px, 8.4vw, 92px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-group {
+  position: static !important;
+  transform: none !important;
+  max-width: 100% !important;
+  padding: 2px 7px !important;
+  font-size: clamp(8px, 0.95vw, 11px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer {
+  display: grid !important;
+  justify-items: end !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+  color: #ffe9a8 !important;
+  text-align: right !important;
+  text-transform: uppercase !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-label {
+  color: rgba(255, 246, 220, 0.78) !important;
+  font-size: clamp(5px, 0.58vw, 7px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-timer-digits {
+  color: #ffdf72 !important;
+  font-size: clamp(8px, 1vw, 12px) !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__prize-panel {
@@ -8379,6 +8429,10 @@ body[data-view="raffles"] .raffles-active-chooser__facts--with-participants {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: clamp(5px, 0.65vw, 7px) !important;
   width: 100% !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__facts--with-participants:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__fact,
