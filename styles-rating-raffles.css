@@ -8407,8 +8407,8 @@ body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
   justify-items: start !important;
   min-width: 0 !important;
   overflow: hidden !important;
-  font-size: 1em !important;
-  line-height: 1.02 !important;
+  font-size: clamp(10px, 1.08vw, 13px) !important;
+  line-height: 1.03 !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text span {
