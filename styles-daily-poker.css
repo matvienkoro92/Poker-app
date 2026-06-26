@@ -1835,6 +1835,80 @@
   content: none;
 }
 
+.daily-poker__invite-btn:not(:disabled),
+.daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled),
+.daily-poker__subscribe-requirements a {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #1a0f02;
+  border-color: rgba(255, 241, 184, 0.98);
+  background:
+    radial-gradient(circle at 50% -35%, rgba(255, 255, 255, 0.9), transparent 38%),
+    linear-gradient(135deg, #fff7ba 0%, #ffd84d 34%, #ff9f1a 68%, #ff6b00 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 218, 0.42),
+    0 0 24px rgba(255, 210, 77, 0.86),
+    0 10px 28px rgba(255, 126, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -3px 0 rgba(161, 73, 0, 0.28);
+  text-shadow: 0 1px 0 rgba(255, 246, 214, 0.58);
+  animation: daily-poker-action-glow 2.2s ease-in-out infinite;
+}
+
+.daily-poker__invite-btn:not(:disabled)::after,
+.daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled)::after,
+.daily-poker__subscribe-requirements a::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -48% auto -48% -70%;
+  width: 48%;
+  transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  opacity: 0;
+  pointer-events: none;
+  animation: daily-poker-action-shine 2.8s ease-in-out infinite;
+}
+
+@keyframes daily-poker-action-glow {
+  0%, 100% {
+    filter: saturate(1);
+    box-shadow:
+      0 0 0 1px rgba(255, 250, 218, 0.42),
+      0 0 22px rgba(255, 210, 77, 0.78),
+      0 10px 28px rgba(255, 126, 0, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      inset 0 -3px 0 rgba(161, 73, 0, 0.28);
+  }
+  50% {
+    filter: saturate(1.1);
+    box-shadow:
+      0 0 0 1px rgba(255, 250, 218, 0.56),
+      0 0 34px rgba(255, 225, 99, 0.98),
+      0 13px 34px rgba(255, 126, 0, 0.46),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88),
+      inset 0 -3px 0 rgba(161, 73, 0, 0.22);
+  }
+}
+
+@keyframes daily-poker-action-shine {
+  0%, 38% { left: -70%; opacity: 0; }
+  50% { opacity: 0.78; }
+  70%, 100% { left: 124%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily-poker__invite-btn:not(:disabled),
+  .daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled),
+  .daily-poker__subscribe-requirements a,
+  .daily-poker__invite-btn:not(:disabled)::after,
+  .daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled)::after,
+  .daily-poker__subscribe-requirements a::after {
+    animation: none;
+  }
+}
+
 .daily-poker__invite-btn:hover,
 .daily-poker__invite-btn:focus-visible,
 .daily-poker__notify-btn:hover,
