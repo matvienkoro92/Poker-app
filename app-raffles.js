@@ -897,14 +897,15 @@ function initRaffles() {
   function raffleAccessLevelCompactLines(raffle) {
     var level = raffleAccessLevel(raffle);
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
-    var lines = [];
+    var groupLevels = [];
     groups.forEach(function (group, index) {
       if (!group || group.accessLevel == null || String(group.accessLevel) === "") return;
       var groupLevel = normalizeRaffleAccessLevel(group.accessLevel);
-      lines.push("Группа" + (index + 1) + " - " + (groupLevel > 0 ? "уровень " + groupLevel + "+" : "для всех"));
+      var compactLevel = groupLevel > 0 ? groupLevel + "+" : "ВСЕ";
+      if (groupLevels.indexOf(compactLevel) === -1) groupLevels.push(compactLevel);
     });
-    if (lines.length) return lines;
-    return [level > 0 ? "уровень " + level + "+" : "для всех"];
+    if (groupLevels.length) return [groupLevels.slice(0, 2).join("/") + (groupLevels.length > 2 ? "+" : "")];
+    return [level > 0 ? level + "+" : "ВСЕ"];
   }
 
   function raffleAccessSelectOptionsHtml(includeInherit) {
@@ -928,6 +929,7 @@ function initRaffles() {
 
   function activeRaffleAccessLevelHtml(raffle) {
     var accessLines = raffleAccessLevelCompactLines(raffle);
+    var accessLabel = raffleAccessLevelText(raffle);
     var accessHtml = accessLines.map(function (line, index) {
       return (
         '<span class="raffles-active-chooser__access-line">' +
@@ -937,7 +939,9 @@ function initRaffles() {
       );
     }).join("");
     return (
-      '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу">' +
+      '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу: ' +
+      escapeHtml(accessLabel) +
+      '">' +
       '<span class="raffles-active-chooser__access-value">' +
       accessHtml +
       "</span>" +
@@ -2044,13 +2048,13 @@ function initRaffles() {
           '<span class="raffles-active-chooser__content">' +
           titleHtml +
           detailPillsHtml +
-          "</span>" +
-          prizePanelHtml +
-          "</span>" +
           '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
           batchTimersHtml +
+          "</span>" +
+          prizePanelHtml +
+          "</span>" +
           '<button type="button" class="raffles-active-chooser__info-toggle' +
           (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
           '" data-raffle-active-info-id="' +
