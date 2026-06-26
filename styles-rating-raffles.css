@@ -8592,7 +8592,7 @@ body[data-view="raffles"] .raffles-active-chooser__prize-pills {
   grid-row: 1 !important;
   align-self: start !important;
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   align-items: center !important;
   justify-content: stretch !important;
   gap: 4px !important;
@@ -8615,7 +8615,7 @@ body[data-view="raffles"] .raffles-active-chooser__prize-pills .raffles-active-c
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 52%),
     linear-gradient(180deg, rgba(126, 34, 206, 0.92), rgba(66, 18, 112, 0.96)) !important;
   color: #fff4ff !important;
-  font-size: clamp(7px, 0.74vw, 9px) !important;
+  font-size: clamp(8px, 0.88vw, 11px) !important;
   font-weight: 950 !important;
   line-height: 1 !important;
   text-align: center !important;

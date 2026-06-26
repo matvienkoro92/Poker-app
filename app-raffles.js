@@ -1005,18 +1005,31 @@ function initRaffles() {
   }
 
   function activeRaffleResultsTimePanelText(raffle) {
-    if (!raffle || !raffle.endDate) return "";
-    var end = new Date(raffle.endDate);
-    if (isNaN(end.getTime())) return "";
-    return (
-      "Итоги " +
-      end.toLocaleTimeString("ru-RU", {
+    if (!raffle) return "";
+    var dates = [];
+    var batches = Array.isArray(raffle.resultBatches) ? raffle.resultBatches : [];
+    batches.forEach(function (batch) {
+      if (!batch || !batch.endDate) return;
+      var batchEnd = new Date(batch.endDate);
+      if (!isNaN(batchEnd.getTime())) dates.push(batchEnd);
+    });
+    if (!dates.length && raffle.endDate) {
+      var end = new Date(raffle.endDate);
+      if (!isNaN(end.getTime())) dates.push(end);
+    }
+    var times = [];
+    dates.forEach(function (date) {
+      var time = date.toLocaleTimeString("ru-RU", {
         timeZone: "Europe/Moscow",
         hour: "2-digit",
         minute: "2-digit",
-      }) +
-      "мск"
-    );
+      });
+      if (times.indexOf(time) === -1) times.push(time);
+    });
+    if (!times.length) return "";
+    return "Итоги в " + times.map(function (time, index) {
+      return (index > 0 ? "в " : "") + time;
+    }).join(" и ") + " МСК";
   }
 
   function activeRafflePrizeLabel(raffle) {
@@ -2114,18 +2127,11 @@ function initRaffles() {
         var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
         var moveHeadToPrize = isCashPrize;
         var badgeText = knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle);
-        var prizeTopPillsHtml = moveHeadToPrize
+        var prizeTopPillsHtml = moveHeadToPrize && resultsTimePanelText
           ? '<span class="raffles-active-chooser__prize-pills">' +
-            '<span class="raffles-active-chooser__badge raffles-active-chooser__badge--panel' +
-            (knockoutCard ? " raffles-active-chooser__badge--main" : "") +
-            '">' +
-            escapeHtml(badgeText) +
+            '<span class="raffles-active-chooser__results-time raffles-active-chooser__results-time--panel">' +
+            escapeHtml(resultsTimePanelText) +
             "</span>" +
-            (resultsTimePanelText
-              ? '<span class="raffles-active-chooser__results-time raffles-active-chooser__results-time--panel">' +
-                escapeHtml(resultsTimePanelText) +
-                "</span>"
-              : "") +
             "</span>"
           : "";
         var headHtml =
