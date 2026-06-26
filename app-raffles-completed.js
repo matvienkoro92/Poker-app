@@ -971,6 +971,20 @@ function initRafflesCompletedRuntime(opts) {
     return html;
   }
 
+  function raffleCompletedGroupResultTime(raffle, groupIndex, fallbackIndex) {
+    var batches = Array.isArray(raffle && raffle.resultBatches) ? raffle.resultBatches : [];
+    if (!batches.length) {
+      return String(raffle && raffle.resultBatchTime || "").trim();
+    }
+    var targetGroupIndex = parseInt(String(groupIndex != null ? groupIndex : fallbackIndex), 10);
+    var matched = batches.find(function (batch, index) {
+      if (!batch) return false;
+      var indexes = Array.isArray(batch.groupIndexes) ? batch.groupIndexes : [index];
+      return indexes.map(function (value) { return parseInt(String(value), 10); }).indexOf(targetGroupIndex) !== -1;
+    }) || batches[fallbackIndex] || null;
+    return String(matched && matched.time || "").trim();
+  }
+
   function raffleCompletedGroupTabLabel(groupName, prize) {
     var text = prize ? raffleDisplayPrizeText(prize) : groupName;
     text = String(text || groupName || "Группа").trim();
@@ -979,6 +993,17 @@ function initRafflesCompletedRuntime(opts) {
       .replace(/\s+/g, " ")
       .trim();
     return text || groupName || "Группа";
+  }
+
+  function raffleCompletedGroupTabContentHtml(raffle, group, index) {
+    var label = raffleCompletedGroupTabLabel(group.name, group.prize);
+    var time = raffleCompletedGroupResultTime(raffle, group.groupIndex, index);
+    return '<span class="raffle-winner-groups-tabs__tab-text">' +
+      escapeHtml(label) +
+      "</span>" +
+      (time
+        ? '<span class="raffle-winner-groups-tabs__tab-time">Итоги ' + escapeHtml(time) + "</span>"
+        : "");
   }
 
   function raffleCompletedWinnerGroupRowsHtml(raffle, rows, rerollsByOriginal) {
@@ -1004,7 +1029,6 @@ function initRafflesCompletedRuntime(opts) {
       var active = index === activeIndex;
       var tabId = "raffleWinnersTab-" + raffleKey + "-" + index;
       var panelId = "raffleWinnersPanel-" + raffleKey + "-" + index;
-      var label = raffleCompletedGroupTabLabel(group.name, group.prize);
       tabsHtml += "<button type=\"button\" class=\"raffle-winner-groups-tabs__tab" +
         (active ? " raffle-winner-groups-tabs__tab--active" : "") +
         "\" id=\"" +
@@ -1016,7 +1040,7 @@ function initRafflesCompletedRuntime(opts) {
         "\" data-raffle-winner-tab=\"" +
         escapeHtml(String(index)) +
         "\">" +
-        escapeHtml(label) +
+        raffleCompletedGroupTabContentHtml(raffle, group, index) +
         "</button>";
       panelsHtml += "<div class=\"raffle-winner-groups-tabs__panel" +
         (active ? " raffle-winner-groups-tabs__panel--active" : "") +
@@ -1053,9 +1077,11 @@ function initRafflesCompletedRuntime(opts) {
     var groupKeys = Object.keys(byGroup);
     var groups = groupKeys.map(function (g) {
       var groupRows = byGroup[g] || [];
+      var firstGroupIndex = groupRows[0] && groupRows[0].groupIndex >= 0 ? parseInt(String(groupRows[0].groupIndex), 10) : -1;
       return {
         name: g,
         prize: groupRows[0] && groupRows[0].prize ? groupRows[0].prize : "",
+        groupIndex: firstGroupIndex,
         rows: groupRows
       };
     });
