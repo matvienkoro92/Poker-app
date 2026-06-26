@@ -8371,6 +8371,10 @@ body[data-view="raffles"] .raffles-active-chooser__detail-pills {
   max-width: 100% !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__buyin-tiles {
+  margin-top: clamp(10px, 1.35vw, 16px) !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__detail-pills:has(> :nth-child(2)) {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
