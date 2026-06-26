@@ -2205,7 +2205,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-daily-shortcuts.home-mini-icons {
   --home-mini-icons-pad: 6px;
-  --home-club-choice-row: 25px;
+  --home-club-choice-row: clamp(32px, 8.5vw, 46px);
   --home-shortcuts-icons-row: clamp(88px, 24vw, 134px);
   --home-shortcuts-row-gap: 5px;
   --home-shortcuts-frame-color: rgba(255, 118, 0, 0.96);
@@ -2483,10 +2483,14 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-self: end;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px;
+  gap: 0;
   width: calc(100% + (var(--home-mini-icons-pad) * 2));
   height: var(--home-club-choice-row);
   margin: 0 calc(var(--home-mini-icons-pad) * -1) calc(var(--home-mini-icons-pad) * -1);
+  overflow: hidden;
+  border-radius: 8px 8px 18px 18px;
+  background: url("./assets/home-club-choice-reference-buttons.png?v=3.702") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 12px rgba(255, 116, 0, 0.62));
 }
 
 .home-club-choice-plaque {
@@ -2495,80 +2499,54 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0;
   min-width: 0;
+  opacity: 0;
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0 12px;
+  padding: 0;
   overflow: hidden;
-  color: #fff2cf;
+  color: transparent;
   font: inherit;
-  font-size: clamp(10px, 2.28vw, 15px);
-  font-weight: 900;
+  font-size: clamp(11px, 2.42vw, 16px);
+  font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
   text-transform: uppercase;
   white-space: nowrap;
-  border: 1px solid rgba(255, 118, 0, 0.96);
-  border-radius: 10px 10px 19px 19px;
-  outline: 1px solid rgba(255, 118, 0, 0.72);
-  outline-offset: -3px;
-  background:
-    radial-gradient(ellipse at 50% 118%, rgba(255, 138, 0, 0.92) 0%, rgba(255, 96, 0, 0.34) 32%, transparent 58%),
-    radial-gradient(ellipse at 50% 18%, rgba(255, 188, 84, 0.24) 0%, rgba(255, 105, 0, 0.12) 36%, transparent 68%),
-    linear-gradient(135deg, rgba(255, 102, 0, 0.28) 0 1px, transparent 1px 44%),
-    linear-gradient(315deg, rgba(255, 126, 0, 0.2) 0 1px, transparent 1px 42%),
-    linear-gradient(180deg, rgba(37, 14, 0, 0.98), rgba(8, 7, 7, 0.98) 52%, rgba(18, 7, 0, 0.98));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 193, 93, 0.3),
-    inset 0 0 28px rgba(255, 94, 0, 0.28),
-    0 0 0 1px rgba(255, 118, 0, 0.96),
-    0 0 16px rgba(255, 104, 0, 0.58),
-    0 0 34px rgba(255, 70, 0, 0.24);
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
+  clip-path: none;
   -webkit-tap-highlight-color: transparent;
-  text-shadow:
-    0 2px 0 rgba(56, 24, 0, 0.88),
-    0 0 9px rgba(255, 126, 0, 0.95),
-    0 0 18px rgba(255, 80, 0, 0.62);
+  text-shadow: none;
 }
 
 .home-club-choice-plaque--cash {
-  font-size: clamp(8px, 1.78vw, 12px);
+  padding-right: 10px;
+  font-size: clamp(9px, 1.88vw, 13px);
 }
 
 .home-club-choice-plaque--vote {
-  padding-right: 58px;
+  padding-right: 66px;
 }
 
 .home-club-choice-plaque::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  z-index: 1;
-  border-radius: inherit;
-  background:
-    radial-gradient(ellipse at 50% 88%, rgba(255, 205, 114, 0.45), rgba(255, 116, 0, 0.17) 36%, transparent 70%),
-    linear-gradient(105deg, transparent 0%, rgba(255, 228, 188, 0.18) 45%, transparent 55%);
-  pointer-events: none;
+  display: none;
 }
 
 .home-club-choice-plaque::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  height: 46%;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 100%, rgba(255, 159, 33, 0.48), rgba(255, 105, 0, 0.14) 48%, transparent 72%);
+  display: none;
 }
 
 .home-club-choice-plaque span {
   position: relative;
   z-index: 3;
+  opacity: 0;
 }
 
 .home-club-choice-plaque__text {
@@ -2578,6 +2556,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transform: translateY(1px);
+  text-align: center;
 }
 
 .home-club-choice-plaque .home-club-choice-plaque__new-badge {
@@ -2588,39 +2568,43 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 34px;
-  min-height: 17px;
-  padding: 3px 7px;
+  min-width: 42px;
+  min-height: 20px;
+  padding: 3px 9px;
   box-sizing: border-box;
-  border: 1px solid rgba(255, 248, 203, 0.72);
+  border: 1px solid rgba(255, 250, 205, 0.9);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.72), transparent 34%),
-    linear-gradient(180deg, #fff2a8, #ffb72e 56%, #f97316);
-  color: #2b1300;
-  font-size: clamp(8px, 2vw, 11px);
+    radial-gradient(circle at 34% 14%, rgba(255, 255, 255, 0.88), transparent 34%),
+    linear-gradient(180deg, #fff7b7, #ffbd31 54%, #ff8a08 100%);
+  color: #261000;
+  font-size: clamp(9px, 1.9vw, 12px);
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.36);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52);
   transform: translateY(-50%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 12px rgba(255, 184, 43, 0.74),
-    0 4px 10px rgba(0, 0, 0, 0.38);
+    inset 0 1px 1px rgba(255, 255, 255, 0.64),
+    inset 0 -2px 2px rgba(128, 45, 0, 0.2),
+    0 0 13px rgba(255, 188, 47, 0.9),
+    0 4px 10px rgba(0, 0, 0, 0.45);
   pointer-events: none;
 }
 
 .home-club-choice-plaque:hover,
 .home-club-choice-plaque:focus-visible {
-  transform: translateY(-1px);
+  transform: none;
   outline: none;
-  border-color: rgba(255, 174, 58, 0.98);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 229, 158, 0.24),
-    0 0 0 1px rgba(255, 207, 109, 0.72),
-    0 0 18px rgba(255, 118, 0, 0.52);
+  box-shadow: none;
+}
+
+.home-club-choice-actions:has(.home-club-choice-plaque:hover),
+.home-club-choice-actions:has(.home-club-choice-plaque:focus-visible) {
+  filter:
+    brightness(1.06)
+    drop-shadow(0 0 15px rgba(255, 139, 0, 0.72));
 }
 
 .club-choice-vote-modal {
@@ -6545,7 +6529,7 @@ body.club-choice-vote-open {
 
   .home-daily-shortcuts.home-mini-icons {
     --home-mini-icons-pad: 5px;
-    --home-club-choice-row: 23px;
+    --home-club-choice-row: 35px;
     --home-shortcuts-icons-row: 82px;
     --home-shortcuts-row-gap: 5px;
     height: auto;
@@ -6555,21 +6539,32 @@ body.club-choice-vote-open {
 
   .home-club-choice-plaque {
     border-radius: 9px 9px 18px 18px;
-    padding: 0 6px;
-    font-size: clamp(8px, 2.45vw, 10px);
+    padding: 0 39px 0 35px;
+    font-size: clamp(9px, 2.38vw, 10.5px);
+    clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 34%, 100% 100%, 15px 100%, 0 66%, 0 34%);
   }
 
   .home-club-choice-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px;
+    gap: 0;
   }
 
   .home-club-choice-plaque--cash {
-    font-size: clamp(6.8px, 1.72vw, 8px);
+    padding-right: 4px;
+    font-size: clamp(7.8px, 2.06vw, 9px);
   }
 
   .home-club-choice-plaque--vote {
-    padding-right: 40px;
+    padding-right: 41px;
+    font-size: clamp(9.2px, 2.45vw, 11px);
+  }
+
+  .home-club-choice-plaque .home-club-choice-plaque__new-badge {
+    right: 7px;
+    min-width: 31px;
+    min-height: 16px;
+    padding: 2px 5px;
+    font-size: clamp(8px, 2vw, 10px);
   }
 
   .home-daily-shortcuts .home-mini-icon-item {
@@ -6662,7 +6657,7 @@ body.club-choice-vote-open {
 
   .home-daily-shortcuts.home-mini-icons {
     --home-shortcuts-icons-row: 74px;
-    --home-club-choice-row: 34px;
+    --home-club-choice-row: 35px;
     --home-shortcuts-row-gap: 5px;
     height: auto;
     padding: 4px;
