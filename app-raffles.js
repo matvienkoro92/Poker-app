@@ -1618,7 +1618,8 @@ function initRaffles() {
     var subtitleText = activeRaffleSubtitleText(raffle);
     var titleHtml = escapeHtml(titleText);
     var titleClass = "raffles-active-chooser__main-title";
-    var cashMatch = titleText.match(/^(.+?)\s+(на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i);
+    var cashMatch = titleText.match(/^(.+?)\s+(по\s+.+?\s+на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i) ||
+      titleText.match(/^(.+?)\s+(на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i);
     if (cashMatch && cashMatch[1] && cashMatch[2]) {
       titleClass += " raffles-active-chooser__main-title--cash";
       titleHtml =
