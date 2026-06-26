@@ -196,15 +196,15 @@
   --hall-top2026-header-overlap: 104px;
   --hall-top2026-bg-width: 100%;
   --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
-  --hall-top2026-list-offset: 120px;
+  --hall-top2026-list-offset: 130px;
   --hall-top2026-list-width: min(66%, 258px);
   --hall-top2026-list-max-width: 258px;
   --hall-top2026-list-left: max(62px, calc(50% - 104px));
-  --hall-top2026-stage-min-height: 958px;
+  --hall-top2026-stage-min-height: 968px;
   --hall-top2026-floor-y: calc(100% + 110px);
   --hall-top2026-floor-width: 118%;
-  --hall-top2026-trophy-right: clamp(4px, calc(3vw - 4px), 14px);
-  --hall-top2026-trophy-top: clamp(412px, calc(90vw + 74px), 468px);
+  --hall-top2026-trophy-right: clamp(-1px, calc(3vw - 9px), 9px);
+  --hall-top2026-trophy-top: clamp(422px, calc(90vw + 84px), 478px);
   --hall-top2026-trophy-width: clamp(130px, 36vw, 156px);
   margin: 0;
   padding: 4px 0 0;
@@ -341,8 +341,8 @@
 }
 .hall-of-fame__top2026-monkey {
   z-index: 5;
-  top: clamp(270px, calc(44vw + 96px), 292px);
-  left: clamp(-106px, calc(-29vw + 14px), -78px);
+  top: clamp(280px, calc(44vw + 106px), 302px);
+  left: clamp(-101px, calc(-29vw + 19px), -73px);
   width: clamp(225px, 60.55vw, 253px);
   filter: drop-shadow(0 12px 18px rgba(105, 67, 28, 0.23));
 }
@@ -872,9 +872,9 @@
     --hall-top2026-header-overlap: 102px;
     --hall-top2026-bg-width: 100%;
     --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
-    --hall-top2026-list-offset: 112px;
+    --hall-top2026-list-offset: 122px;
     --hall-top2026-list-left: max(56px, calc(50% - 102px));
-    --hall-top2026-stage-min-height: 912px;
+    --hall-top2026-stage-min-height: 922px;
   }
   #hallOfFameView .hall-of-fame__subtab {
     font-size: 9px;
@@ -1004,7 +1004,7 @@
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-bg-width: 100%;
     --hall-top2026-bg-y: calc(var(--hall-top2026-header-overlap) - 62px);
-    --hall-top2026-list-offset: 112px;
+    --hall-top2026-list-offset: 122px;
     --hall-top2026-list-width: min(66%, 248px);
     --hall-top2026-list-max-width: 248px;
     --hall-top2026-list-left: max(62px, calc(50% - 104px));
