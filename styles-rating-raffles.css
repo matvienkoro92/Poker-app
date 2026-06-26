@@ -5574,6 +5574,28 @@ button.raffle-feedback-action {
   cursor: default;
   opacity: 0.82;
 }
+.raffle-winner-ready-btn--pending {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 104px;
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+  opacity: 1;
+}
+.raffle-winner-ready-btn--pending::before {
+  content: "";
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 236, 179, 0.34);
+  border-top-color: #fde68a;
+  border-radius: 999px;
+  animation: raffle-loading-spin 0.72s linear infinite;
+}
 .raffle-winner-ready-btn--active,
 .raffle-winner-ready-btn--active:disabled,
 .raffle-winner-row--ready .raffle-winner-ready-btn {
@@ -5613,6 +5635,7 @@ button.raffle-feedback-action {
   color: transparent !important;
   border-color: rgba(250, 204, 21, 0.72);
   background: rgba(250, 204, 21, 0.18);
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.12);
   opacity: 1;
 }
 .raffle-winner-btn--pending::after {

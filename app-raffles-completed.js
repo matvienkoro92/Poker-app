@@ -804,11 +804,13 @@ function initRafflesCompletedRuntime(opts) {
     if (pending) {
       if (!btn.dataset.readyIdleText) btn.dataset.readyIdleText = btn.textContent || "Я готов";
       btn.textContent = "Отправляем...";
+      btn.classList.add("raffle-winner-ready-btn--pending");
       btn.disabled = true;
       btn.setAttribute("aria-busy", "true");
       return;
     }
     btn.textContent = btn.dataset.readyIdleText || "Я готов";
+    btn.classList.remove("raffle-winner-ready-btn--pending");
     btn.disabled = false;
     btn.removeAttribute("aria-busy");
   }
@@ -821,6 +823,7 @@ function initRafflesCompletedRuntime(opts) {
     btn.disabled = true;
     btn.setAttribute("aria-disabled", "true");
     btn.removeAttribute("aria-busy");
+    btn.classList.remove("raffle-winner-ready-btn--pending");
     btn.classList.add("raffle-winner-ready-btn--active");
     if (row) {
       row.classList.add("raffle-winner-row--ready");
