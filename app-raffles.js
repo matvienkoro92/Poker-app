@@ -1330,14 +1330,10 @@ function initRaffles() {
       var validEndDate = endDate && !isNaN(endDate.getTime()) ? endDate : null;
       var endMs = validEndDate ? validEndDate.getTime() : 0;
       var parts = activeRaffleCountdownParts(validEndDate);
-      var timeText = String(batch.time || "").trim();
       return (
         '<span class="raffles-active-chooser__buyin-tile-timer" data-raffle-active-batch-countdown="' +
         escapeHtml(endMs || 0) +
         '">' +
-        '<span class="raffles-active-chooser__buyin-tile-timer-label">' +
-        escapeHtml(timeText ? "Итоги " + timeText : "Итоги") +
-        "</span>" +
         '<span class="raffles-active-chooser__buyin-tile-timer-digits">' +
         '<span data-raffle-batch-hours>' +
         escapeHtml(parts.hours) +
