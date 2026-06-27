@@ -5,7 +5,7 @@
 @import url("./styles-home.css?v=3.666");
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.681");
+@import url("./styles-raffles.css?v=3.682");
 @import url("./styles-daily-poker.css?v=3.666");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
@@ -169,9 +169,9 @@
       linear-gradient(180deg, rgba(22, 8, 3, 0), rgba(41, 15, 5, 0.9) 48%, rgba(16, 6, 2, 0.98)),
       url("./assets/hall-top2026-floor.webp?v=3.549"),
       url("./assets/hall-top2026-bg-dark.webp?v=3.537");
-    background-position: center top, center bottom, center bottom, center bottom, center var(--hall-top2026-bg-y);
+    background-position: center top, center bottom, center bottom, center bottom, center bottom, center var(--hall-top2026-bg-y);
     background-repeat: no-repeat;
-    background-size: 100% 100%, 100% 520px, 100% 520px, var(--hall-top2026-floor-width) auto, 100% auto;
+    background-size: 100% 100%, 100% 520px, 100% 520px, 100% 520px, var(--hall-top2026-floor-width) auto, 100% auto;
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey,
