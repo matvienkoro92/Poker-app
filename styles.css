@@ -6947,7 +6947,7 @@ body.club-choice-vote-open {
 .private-cash-modal__body {
   max-height: calc(min(760px, 100vh - 28px) - 96px);
   overflow: auto;
-  padding: 12px 18px 18px;
+  padding: 12px 18px 112px;
 }
 
 .private-cash-modal__loading,
@@ -7174,6 +7174,10 @@ body.club-choice-vote-open {
   margin-top: 11px;
 }
 
+.private-cash-modal__bonus-display--event {
+  margin: -3px 0 13px;
+}
+
 .private-cash-modal__bonus-card {
   gap: 4px;
   min-height: 66px;
@@ -7376,11 +7380,11 @@ body.club-choice-vote-open {
 .private-cash-modal__table-house-seat {
   position: absolute;
   left: 50%;
-  top: 24%;
+  top: 30%;
   z-index: 4;
   display: grid;
   justify-items: center;
-  gap: 4px;
+  gap: 3px;
   width: clamp(82px, 18vw, 118px);
   padding: 0;
   border: 0;
@@ -7400,15 +7404,17 @@ body.club-choice-vote-open {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.86);
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.96),
+    0 0 9px rgba(0, 0, 0, 0.82);
 }
 
 .private-cash-modal__table-house-seat-name {
   min-width: 70px;
   padding: 3px 8px;
   border: 1px solid rgba(255, 224, 141, 0.74);
-  background: rgba(4, 6, 12, 0.76);
-  box-shadow: 0 0 12px rgba(255, 176, 38, 0.26);
+  background: transparent;
+  box-shadow: none;
   font-size: clamp(8px, 2.15vw, 12px);
   font-weight: 1000;
   line-height: 1;
@@ -7417,7 +7423,7 @@ body.club-choice-vote-open {
 .private-cash-modal__table-house-seat small {
   padding: 3px 7px;
   border: 1px solid rgba(77, 255, 139, 0.44);
-  background: rgba(4, 6, 12, 0.68);
+  background: transparent;
   color: rgba(201, 255, 221, 0.9);
   font-size: clamp(6px, 1.45vw, 8px);
   font-weight: 950;
@@ -7428,8 +7434,8 @@ body.club-choice-vote-open {
 .private-cash-modal__table-house-seat:hover .private-cash-modal__table-house-seat-name,
 .private-cash-modal__table-house-seat:focus-visible .private-cash-modal__table-house-seat-name {
   box-shadow:
-    0 0 12px rgba(255, 176, 38, 0.34),
-    0 0 22px rgba(255, 116, 0, 0.22);
+    0 0 10px rgba(255, 176, 38, 0.32),
+    0 0 18px rgba(255, 116, 0, 0.18);
 }
 
 .private-cash-modal__table-empty-seats {
@@ -7604,7 +7610,7 @@ body.club-choice-vote-open {
 .private-cash-modal__table-seat[data-seat-index="1"] {
   --seat-face-x: -1;
   --seat-rotate: -8deg;
-  --seat-scale: 0.97;
+  --seat-scale: 0.73;
   --seat-nudge-x: 2px;
   --seat-nudge-y: 14px;
 }
@@ -7714,7 +7720,8 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__seat-list button {
-  display: block;
+  display: grid;
+  gap: 3px;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -7728,13 +7735,35 @@ body.club-choice-vote-open {
   line-height: 1;
   padding: 7px 9px;
   text-align: left;
+}
+
+.private-cash-modal__seat-list button strong,
+.private-cash-modal__seat-list button span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.private-cash-modal__seat-list button strong {
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.private-cash-modal__seat-list button span {
+  color: rgba(255, 232, 170, 0.72);
+  font-size: 10px;
+  font-weight: 850;
 }
 
 .private-cash-modal__seat-list--reserve button {
   border-color: rgba(191, 219, 254, 0.28);
   color: #dbeafe;
+}
+
+.private-cash-modal__seat-list--reserve button span {
+  color: rgba(219, 234, 254, 0.72);
 }
 
 .private-cash-modal__seat-list p {
@@ -7838,7 +7867,23 @@ body.club-choice-vote-open {
 
 .private-cash-modal__primary--wide {
   width: 100%;
-  margin-top: 13px;
+}
+
+.private-cash-modal__join-dock {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  padding: 12px 18px max(14px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(255, 179, 43, 0.28);
+  background:
+    linear-gradient(180deg, rgba(3, 7, 16, 0), rgba(3, 7, 16, 0.94) 18%, rgba(3, 7, 16, 0.99));
+  pointer-events: none;
+}
+
+.private-cash-modal__join-dock .private-cash-modal__primary {
+  pointer-events: auto;
 }
 
 .private-cash-modal__ghost {
@@ -8041,7 +8086,7 @@ body.club-choice-vote-open {
 
   .private-cash-modal__body {
     max-height: calc(100vh - 112px);
-    padding: 10px 14px 14px;
+    padding: 10px 14px 106px;
   }
 
   .private-cash-modal__table-hero {
@@ -8057,7 +8102,7 @@ body.club-choice-vote-open {
   }
 
   .private-cash-modal__table-house-seat {
-    top: 23%;
+    top: 29%;
     width: 80px;
   }
 
@@ -8127,6 +8172,15 @@ body.club-choice-vote-open {
   .private-cash-modal__bonus-card strong {
     font-size: clamp(16px, 7.2vw, 24px);
     line-height: 0.88;
+  }
+
+  .private-cash-modal__bonus-display--event {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .private-cash-modal__join-dock {
+    padding: 10px 14px max(12px, env(safe-area-inset-bottom, 0px));
   }
 
   .private-cash-modal__bonus-card span {

@@ -1545,13 +1545,22 @@ function initProfilePokerPlus() {
 
   function setPokerPlusRefreshNeedsKeyMode() {
     if (!pokerPlusProfileLinked) return;
-    if (section && section.classList) section.classList.remove("profile-pokerplus-card--needs-key");
+    if (section && section.classList) section.classList.add("profile-pokerplus-card--needs-key");
     removePokerPlusRefreshKeyInlineForm();
-    input.hidden = true;
+    input.hidden = false;
+    input.value = "";
+    input.placeholder = "Ключ из Poker21 для обновления";
+    input.setAttribute("aria-label", "Ключ из Poker21 для обновления");
     if (refreshBtn) refreshBtn.hidden = false;
     if (form) form.style.removeProperty("display");
-    bindBtn.hidden = true;
+    bindBtn.hidden = false;
     bindBtn.style.removeProperty("display");
+    bindBtn.textContent = "Обновить по ключу";
+    if (input && typeof input.focus === "function") {
+      setTimeout(function () {
+        try { input.focus(); } catch (eFocusRefreshKey) {}
+      }, 0);
+    }
   }
 
   function renderProfile(profile, linked) {

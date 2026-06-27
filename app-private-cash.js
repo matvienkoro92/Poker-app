@@ -146,7 +146,7 @@
   function renderEventBonuses(raw) {
     var rows = bonusLines(raw);
     if (!rows.length) return "";
-    return '<div class="private-cash-modal__bonus-display" aria-label="Актуальные бонусы">' +
+    return '<div class="private-cash-modal__bonus-display private-cash-modal__bonus-display--event" aria-label="Актуальные бонусы">' +
       rows.map(function (row) {
         return renderBonusCard(row);
       }).join("") +
@@ -330,6 +330,32 @@
     return name.replace(/^@+/, "") || "Игрок";
   }
 
+  function seatSpecialtyLabel(row) {
+    var raw = String(row && (row.profileSpecialty || row.specialty || row.pokerSpecialty) || "").trim().toLowerCase();
+    if (raw === "cash" || raw === "кеш" || raw === "кэш") return "Кеш";
+    if (raw === "mtt" || raw === "мтт") return "МТТ";
+    return "";
+  }
+
+  function seatAgeLabel(row) {
+    var age = Math.floor(Number(row && (row.profileAge || row.age)) || 0);
+    if (age <= 0 || age > 120) return "";
+    var mod10 = age % 10;
+    var mod100 = age % 100;
+    var word = mod10 === 1 && mod100 !== 11 ? "год" : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "года" : "лет";
+    return age + " " + word;
+  }
+
+  function seatMetaText(row) {
+    var level = Math.max(0, Math.floor(Number(row && row.level) || 0));
+    var parts = ["Уровень " + level];
+    var age = seatAgeLabel(row);
+    var specialty = seatSpecialtyLabel(row);
+    if (age) parts.push(age);
+    if (specialty) parts.push(specialty);
+    return parts.join(" · ");
+  }
+
   function visibleSeatRows(event) {
     var rows = (event && (event.seatedParticipants || event.participants)) || [];
     return rows.filter(function (row) {
@@ -415,7 +441,10 @@
   }
 
   function renderCashSeatListItem(row) {
-    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' + escapeHtml(seatName(row)) + '</button></li>';
+    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+      '<strong>' + escapeHtml(seatName(row)) + '</strong>' +
+      '<span>' + escapeHtml(seatMetaText(row)) + '</span>' +
+    '</button></li>';
   }
 
   function renderCashSeatLists(event) {
@@ -477,7 +506,9 @@
       '</div>';
     }
     if (event.status !== "active") return '<div class="private-cash-modal__notice">Запись закрыта.</div>';
-    return '<button type="button" class="private-cash-modal__primary private-cash-modal__primary--wide" data-private-cash-join="' + escapeHtml(event.id) + '">' + (hasReserveOnlyJoin(event) ? "Записаться в резерв" : "Записаться") + '</button>';
+    return '<div class="private-cash-modal__join-dock">' +
+      '<button type="button" class="private-cash-modal__primary private-cash-modal__primary--wide" data-private-cash-join="' + escapeHtml(event.id) + '">' + (hasReserveOnlyJoin(event) ? "Записаться в резерв" : "Записаться") + '</button>' +
+    '</div>';
   }
 
   function renderParticipants(event) {
@@ -506,6 +537,7 @@
     var my = event.myParticipant || null;
     return '<article class="private-cash-modal__event">' +
       renderPrivateCashHero(event) +
+      renderEventBonuses(event.combinations) +
       renderCashSeatLists(event) +
       renderParticipant(event, my) +
       renderRules() +
@@ -519,7 +551,6 @@
       (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
       (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
-      renderEventBonuses(event.combinations) +
       renderParticipants(event) +
     '</article>';
   }
