@@ -46,7 +46,9 @@
   }
 
   function statusLabel(value) {
-    return value === "approved" ? "Одобрен" : "Ждет одобрения";
+    if (value === "approved") return "Подтвержден";
+    if (value === "rejected") return "Отклонен";
+    return "Подал заявку";
   }
 
   function formatDate(raw) {
@@ -285,17 +287,75 @@
     '</section>';
   }
 
-  function renderPrivateCashHero() {
+  var SEAT_POSITIONS = [
+    { x: 26, y: 33 },
+    { x: 74, y: 33 },
+    { x: 14, y: 49 },
+    { x: 12, y: 67 },
+    { x: 88, y: 69 },
+    { x: 26, y: 86 },
+    { x: 75, y: 86 },
+  ];
+
+  function seatName(row) {
+    var name = row && (row.displayName || row.telegramUsername) ? String(row.displayName || row.telegramUsername).trim() : "";
+    return name.replace(/^@+/, "") || "Игрок";
+  }
+
+  function seatInitial(row) {
+    var name = seatName(row);
+    return (name.charAt(0) || "И").toUpperCase();
+  }
+
+  function renderPrivateCashSeats(event) {
+    var rows = (event && (event.seatedParticipants || event.participants)) || [];
+    if (!rows.length) return "";
+    var seated = rows.slice(0, SEAT_POSITIONS.length);
+    var rest = rows.length - seated.length;
+    return '<div class="private-cash-modal__table-seats" aria-label="Занятые места">' +
+      seated.map(function (row, index) {
+        var pos = SEAT_POSITIONS[index];
+        var status = row.status === "approved" ? "approved" : "pending";
+        var avatar = row.avatar != null ? String(row.avatar).trim() : "";
+        return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+          '<span class="private-cash-modal__table-seat-avatar" aria-hidden="true">' +
+            (avatar ? '<img src="' + escapeHtml(avatar) + '" alt="" loading="lazy" decoding="async">' : '<b>' + escapeHtml(seatInitial(row)) + '</b>') +
+          '</span>' +
+          '<span>' + escapeHtml(seatName(row)) + '</span>' +
+          '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
+        '</button>';
+      }).join("") +
+      (rest > 0 ? '<span class="private-cash-modal__table-seat-more">+' + escapeHtml(rest) + '</span>' : '') +
+    '</div>';
+  }
+
+  function renderPrivateCashHero(event) {
     return '<figure class="private-cash-modal__table-hero">' +
       '<img src="./assets/private-cash-table-hero.webp?v=3.665" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      renderPrivateCashSeats(event) +
     '</figure>';
   }
 
   function renderParticipant(event, my) {
     if (state && state.isAdmin) return "";
+    if (event && event.bookingBlock) {
+      return '<div class="private-cash-modal__my-status private-cash-modal__my-status--blocked">' +
+        '<span>Бронь недоступна</span><strong>2 желтые карточки</strong>' +
+        '<small>Вы пропускаете эту и следующую игру.</small>' +
+      '</div>';
+    }
     if (my && my.status) {
+      var extra = "";
+      if (my.status === "pending") extra = '<small>Место занято за вами, админ еще не подтвердил бронь.</small>';
+      if (my.status === "approved") extra = '<small>Место подтверждено, вы в списке.</small>';
+      if (my.status === "rejected") {
+        extra = '<small>' + (my.warningCount >= 2
+          ? "Вторая желтая карточка: вы пропускаете эту и следующую игру."
+          : "Первая желтая карточка. После второй бронь будет заблокирована на две игры.") + '</small>';
+      }
       return '<div class="private-cash-modal__my-status private-cash-modal__my-status--' + escapeHtml(my.status) + '">' +
         '<span>Ваша заявка</span><strong>' + escapeHtml(statusLabel(my.status)) + '</strong>' +
+        extra +
       '</div>';
     }
     if (event.status !== "active") return '<div class="private-cash-modal__notice">Запись закрыта.</div>';
@@ -309,12 +369,15 @@
       '<h3>Заявки</h3>' +
       (rows.length ? rows.map(function (row) {
         var approved = row.status === "approved";
+        var rejected = row.status === "rejected";
         return '<article class="private-cash-modal__participant">' +
           '<div><strong>' + escapeHtml(row.displayName || "Игрок") + '</strong>' +
-            '<span>' + escapeHtml(row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span></div>' +
+            '<span>' + escapeHtml(row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
+            (row.warningCount ? '<small>Желтые карточки: ' + escapeHtml(row.warningCount) + '</small>' : '') + '</div>' +
           '<div class="private-cash-modal__participant-actions">' +
             '<em class="private-cash-modal__badge private-cash-modal__badge--' + escapeHtml(row.status) + '">' + escapeHtml(statusLabel(row.status)) + '</em>' +
-            (approved ? "" : '<button type="button" class="private-cash-modal__ghost" data-private-cash-approve="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Одобрить</button>') +
+            (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost" data-private-cash-approve="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Одобрить</button>') +
+            (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-reject="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Отклонить</button>') +
           '</div>' +
         '</article>';
       }).join("") : '<div class="private-cash-modal__empty private-cash-modal__empty--compact">Заявок пока нет.</div>') +
@@ -324,7 +387,7 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     return '<article class="private-cash-modal__event">' +
-      renderPrivateCashHero() +
+      renderPrivateCashHero(event) +
       renderParticipant(event, my) +
       renderRules() +
       '<div class="private-cash-modal__event-head">' +
@@ -352,7 +415,7 @@
     bodyEl.innerHTML =
       renderAdminForm() +
       '<section class="private-cash-modal__events">' +
-        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero() + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
+        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
       '</section>';
   }
 
@@ -425,12 +488,32 @@
       postAction({ action: "join", eventId: join.getAttribute("data-private-cash-join") || "" });
       return;
     }
+    var profile = event.target && event.target.closest ? event.target.closest("[data-private-cash-profile]") : null;
+    if (profile) {
+      var profileId = profile.getAttribute("data-private-cash-profile") || "";
+      var profileName = profile.getAttribute("data-private-cash-profile-name") || "Игрок";
+      if (profileId && typeof window.openChatUserModalById === "function") {
+        window.openChatUserModalById(profileId, profileName);
+      } else if (profileId && typeof window.pokerOpenChatUserModalSafe === "function") {
+        window.pokerOpenChatUserModalSafe(profileId, profileName);
+      }
+      return;
+    }
     var approve = event.target && event.target.closest ? event.target.closest("[data-private-cash-approve]") : null;
     if (approve) {
       postAction({
         action: "approve",
         eventId: approve.getAttribute("data-private-cash-event") || "",
         accountId: approve.getAttribute("data-private-cash-approve") || "",
+      });
+      return;
+    }
+    var reject = event.target && event.target.closest ? event.target.closest("[data-private-cash-reject]") : null;
+    if (reject) {
+      postAction({
+        action: "reject",
+        eventId: reject.getAttribute("data-private-cash-event") || "",
+        accountId: reject.getAttribute("data-private-cash-reject") || "",
       });
     }
   }

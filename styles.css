@@ -6993,13 +6993,14 @@ body.club-choice-vote-open {
 
 .private-cash-modal__bonus-label {
   color: #ffe59d;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 900;
+  line-height: 1.05;
 }
 
 .private-cash-modal__bonus-head small {
   color: rgba(217, 201, 169, 0.72);
-  font-size: 11px;
+  font-size: 9.5px;
   font-weight: 850;
   line-height: 1.15;
   text-align: right;
@@ -7018,9 +7019,9 @@ body.club-choice-vote-open {
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
-  min-height: 88px;
+  min-height: 76px;
   overflow: hidden;
   border: 1px solid rgba(255, 179, 43, 0.42);
   border-radius: 14px;
@@ -7056,9 +7057,9 @@ body.club-choice-vote-open {
   z-index: 1;
   max-width: calc(100% - 12px);
   color: #ffc43a;
-  font-size: clamp(20px, 5vw, 30px);
+  font-size: clamp(16px, 3.9vw, 23px);
   font-weight: 1000;
-  line-height: 0.95;
+  line-height: 0.92;
   text-align: center;
   overflow-wrap: anywhere;
   text-shadow: 0 2px 0 rgba(104, 55, 0, 0.9), 0 0 12px rgba(255, 179, 43, 0.55);
@@ -7069,7 +7070,7 @@ body.club-choice-vote-open {
   z-index: 1;
   max-width: calc(100% - 12px);
   color: #fff4d2;
-  font-size: 13px;
+  font-size: 10.5px;
   font-weight: 950;
   line-height: 1.08;
   text-align: center;
@@ -7292,6 +7293,7 @@ body.club-choice-vote-open {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
     linear-gradient(180deg, rgba(255, 206, 112, 0.08), transparent 28%, rgba(0, 0, 0, 0.12) 100%),
     radial-gradient(circle at 50% 0%, rgba(255, 179, 43, 0.18), transparent 42%);
@@ -7304,6 +7306,136 @@ body.club-choice-vote-open {
   aspect-ratio: 68 / 100;
   object-fit: cover;
   object-position: center 46%;
+}
+
+.private-cash-modal__table-seats {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.private-cash-modal__table-seat {
+  position: absolute;
+  left: var(--seat-x);
+  top: var(--seat-y);
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: clamp(58px, 15vw, 86px);
+  min-height: clamp(70px, 17vw, 98px);
+  max-width: 25%;
+  padding: 5px;
+  border: 1px solid rgba(255, 224, 141, 0.78);
+  border-radius: 999px;
+  font: inherit;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255, 238, 184, 0.24), transparent 52%),
+    linear-gradient(180deg, rgba(40, 25, 7, 0.76), rgba(5, 8, 15, 0.82));
+  color: #fff1bd;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow:
+    0 0 18px rgba(255, 176, 38, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.private-cash-modal__table-seat:hover {
+  border-color: rgba(255, 238, 184, 0.95);
+  filter: brightness(1.08);
+}
+
+.private-cash-modal__table-seat--pending {
+  border-style: dashed;
+  color: rgba(255, 241, 189, 0.86);
+}
+
+.private-cash-modal__table-seat--approved {
+  border-color: rgba(77, 255, 139, 0.76);
+  box-shadow:
+    0 0 18px rgba(34, 197, 94, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.private-cash-modal__table-seat-avatar {
+  display: grid;
+  place-items: center;
+  width: clamp(34px, 8.8vw, 50px);
+  height: clamp(34px, 8.8vw, 50px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 225, 146, 0.72);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 227, 156, 0.28), transparent 54%),
+    rgba(5, 8, 15, 0.9);
+  box-shadow: 0 0 14px rgba(255, 176, 38, 0.28);
+}
+
+.private-cash-modal__table-seat--approved .private-cash-modal__table-seat-avatar {
+  border-color: rgba(77, 255, 139, 0.78);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.28);
+}
+
+.private-cash-modal__table-seat-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.private-cash-modal__table-seat-avatar b {
+  color: #ffe7ad;
+  font-size: clamp(15px, 4vw, 22px);
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.private-cash-modal__table-seat > span:not(.private-cash-modal__table-seat-avatar) {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(8px, 2.1vw, 11px);
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.86);
+}
+
+.private-cash-modal__table-seat small {
+  display: block;
+  max-width: 100%;
+  margin-top: 0;
+  overflow: hidden;
+  color: rgba(255, 232, 170, 0.78);
+  font-size: clamp(6px, 1.45vw, 8px);
+  font-weight: 950;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.private-cash-modal__table-seat-more {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 224, 141, 0.64);
+  border-radius: 999px;
+  background: rgba(5, 8, 15, 0.84);
+  color: #ffe7ad;
+  font-size: 12px;
+  font-weight: 1000;
 }
 
 .private-cash-modal__event > .private-cash-modal__table-hero:first-child,
@@ -7404,10 +7536,15 @@ body.club-choice-vote-open {
   color: #ffe7ad;
 }
 
+.private-cash-modal__ghost--danger {
+  border-color: rgba(255, 115, 87, 0.62);
+  color: #ffd2c7;
+}
+
 .private-cash-modal__my-status {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-top: 13px;
   border: 1px solid rgba(255, 179, 43, 0.34);
@@ -7417,6 +7554,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__my-status span {
+  min-width: 0;
   color: #d5c7ad;
   font-weight: 900;
 }
@@ -7424,10 +7562,24 @@ body.club-choice-vote-open {
 .private-cash-modal__my-status strong {
   color: #ffe681;
   font-size: 18px;
+  text-align: right;
 }
 
 .private-cash-modal__my-status--approved strong {
   color: #86efac;
+}
+
+.private-cash-modal__my-status--rejected strong,
+.private-cash-modal__my-status--blocked strong {
+  color: #ffc43a;
+}
+
+.private-cash-modal__my-status small {
+  grid-column: 1 / -1;
+  color: rgba(255, 232, 170, 0.8);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.22;
 }
 
 .private-cash-modal__participants {
@@ -7456,7 +7608,8 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__participant strong,
-.private-cash-modal__participant span {
+.private-cash-modal__participant span,
+.private-cash-modal__participant small {
   display: block;
 }
 
@@ -7471,9 +7624,18 @@ body.club-choice-vote-open {
   font-weight: 800;
 }
 
+.private-cash-modal__participant small {
+  margin-top: 3px;
+  color: #ffc43a;
+  font-size: 11px;
+  font-weight: 900;
+}
+
 .private-cash-modal__participant-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -7491,6 +7653,11 @@ body.club-choice-vote-open {
 .private-cash-modal__badge--approved {
   background: rgba(22, 163, 74, 0.2);
   color: #bbf7d0;
+}
+
+.private-cash-modal__badge--rejected {
+  background: rgba(245, 158, 11, 0.18);
+  color: #ffc43a;
 }
 
 .winter-rating-date-modal .spring-rating-date-league-tabs {
