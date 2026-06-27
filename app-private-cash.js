@@ -208,6 +208,22 @@
       .then(function (res) { return res.json(); });
   }
 
+  function updateHomeButton(data) {
+    var button = document.getElementById("privateCashSignupOpen");
+    if (!button || !data || !data.ok) return;
+    var active = !!(data.activeEvent && data.activeEvent.status === "active");
+    button.classList.toggle("home-club-choice-plaque--cash-open", active);
+    button.setAttribute("aria-label", active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
+  }
+
+  function refreshHomeButtonStatus() {
+    fetchState()
+      .then(function (data) {
+        updateHomeButton(data);
+      })
+      .catch(function () {});
+  }
+
   function loadState() {
     if (loading) return;
     loading = true;
@@ -215,6 +231,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
         state = data;
+        updateHomeButton(data);
         render();
       })
       .catch(function (error) {
@@ -236,6 +253,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка");
         state = data.state && data.state.ok ? data.state : data;
+        updateHomeButton(state);
         render();
         setStatus("");
         return state;
@@ -297,41 +315,109 @@
     { x: 75, y: 86 },
   ];
 
+  var SEAT_MONKEYS = [
+    "./assets/private-cash-seat-monkey-4.webp",
+    "./assets/private-cash-seat-monkey-2.webp",
+    "./assets/private-cash-seat-monkey-3.webp",
+    "./assets/private-cash-seat-monkey-1.webp",
+    "./assets/private-cash-seat-monkey-5.webp",
+    "./assets/private-cash-seat-monkey-6.webp",
+    "./assets/private-cash-seat-monkey-7.webp",
+  ];
+
   function seatName(row) {
     var name = row && (row.displayName || row.telegramUsername) ? String(row.displayName || row.telegramUsername).trim() : "";
     return name.replace(/^@+/, "") || "Игрок";
   }
 
-  function seatInitial(row) {
-    var name = seatName(row);
-    return (name.charAt(0) || "И").toUpperCase();
+  function visibleSeatRows(event) {
+    var rows = (event && (event.seatedParticipants || event.participants)) || [];
+    return rows.filter(function (row) {
+      return row && row.status !== "rejected";
+    });
+  }
+
+  function visibleSeatIndex(event, accountId) {
+    accountId = String(accountId || "").trim();
+    if (!accountId) return -1;
+    return visibleSeatRows(event).findIndex(function (row) {
+      return String(row && row.accountId || "").trim() === accountId;
+    });
+  }
+
+  function rowSeatGroup(event, row) {
+    if (row && row.seatGroup) return row.seatGroup;
+    var index = visibleSeatIndex(event, row && row.accountId);
+    return index >= SEAT_POSITIONS.length ? "reserve" : "inGame";
+  }
+
+  function hasReserveOnlyJoin(event) {
+    return visibleSeatRows(event).length >= SEAT_POSITIONS.length;
   }
 
   function renderPrivateCashSeats(event) {
-    var rows = (event && (event.seatedParticipants || event.participants)) || [];
+    var rows = visibleSeatRows(event);
     if (!rows.length) return "";
     var seated = rows.slice(0, SEAT_POSITIONS.length);
-    var rest = rows.length - seated.length;
     return '<div class="private-cash-modal__table-seats" aria-label="Занятые места">' +
       seated.map(function (row, index) {
         var pos = SEAT_POSITIONS[index];
         var status = row.status === "approved" ? "approved" : "pending";
-        var avatar = row.avatar != null ? String(row.avatar).trim() : "";
-        return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
-          '<span class="private-cash-modal__table-seat-avatar" aria-hidden="true">' +
-            (avatar ? '<img src="' + escapeHtml(avatar) + '" alt="" loading="lazy" decoding="async">' : '<b>' + escapeHtml(seatInitial(row)) + '</b>') +
+        var monkey = SEAT_MONKEYS[index % SEAT_MONKEYS.length];
+        return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+          '<span class="private-cash-modal__table-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
+          '<span class="private-cash-modal__table-seat-monkey" aria-hidden="true">' +
+            '<img src="' + escapeHtml(monkey) + '?v=3.671" alt="" loading="lazy" decoding="async">' +
           '</span>' +
-          '<span>' + escapeHtml(seatName(row)) + '</span>' +
           '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
         '</button>';
       }).join("") +
-      (rest > 0 ? '<span class="private-cash-modal__table-seat-more">+' + escapeHtml(rest) + '</span>' : '') +
     '</div>';
+  }
+
+  function renderPrivateCashEmptySeatRings(event) {
+    var occupiedCount = Math.min(visibleSeatRows(event).length, SEAT_POSITIONS.length);
+    if (occupiedCount >= SEAT_POSITIONS.length) return "";
+    return '<div class="private-cash-modal__table-empty-seats" aria-hidden="true">' +
+      SEAT_POSITIONS.map(function (pos, index) {
+        if (index < occupiedCount) return "";
+        return '<span class="private-cash-modal__table-empty-seat" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '"></span>';
+      }).join("") +
+    '</div>';
+  }
+
+  function renderCashSeatListItem(row) {
+    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' + escapeHtml(seatName(row)) + '</button></li>';
+  }
+
+  function renderCashSeatLists(event) {
+    var approved = visibleSeatRows(event).filter(function (row) {
+      return row && row.status === "approved";
+    });
+    if (!approved.length) return "";
+    var inGame = approved.filter(function (row) {
+      return rowSeatGroup(event, row) !== "reserve";
+    });
+    var reserve = approved.filter(function (row) {
+      return rowSeatGroup(event, row) === "reserve";
+    });
+    if (!inGame.length && !reserve.length) return "";
+    return '<section class="private-cash-modal__seat-lists" aria-label="Одобренные игроки">' +
+      '<div class="private-cash-modal__seat-list private-cash-modal__seat-list--game">' +
+        '<h3>В игре:</h3>' +
+        (inGame.length ? '<ul>' + inGame.map(renderCashSeatListItem).join("") + '</ul>' : '<p>Пока нет подтвержденных.</p>') +
+      '</div>' +
+      '<div class="private-cash-modal__seat-list private-cash-modal__seat-list--reserve">' +
+        '<h3>В резерве:</h3>' +
+        (reserve.length ? '<ul>' + reserve.map(renderCashSeatListItem).join("") + '</ul>' : '<p>Пока пусто.</p>') +
+      '</div>' +
+    '</section>';
   }
 
   function renderPrivateCashHero(event) {
     return '<figure class="private-cash-modal__table-hero">' +
-      '<img src="./assets/private-cash-table-hero.webp?v=3.665" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      '<img src="./assets/private-cash-table-hero-clean.webp?v=3.714" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      renderPrivateCashEmptySeatRings(event) +
       renderPrivateCashSeats(event) +
     '</figure>';
   }
@@ -346,8 +432,9 @@
     }
     if (my && my.status) {
       var extra = "";
-      if (my.status === "pending") extra = '<small>Место занято за вами, админ еще не подтвердил бронь.</small>';
-      if (my.status === "approved") extra = '<small>Место подтверждено, вы в списке.</small>';
+      var myReserve = visibleSeatIndex(event, my.accountId) >= SEAT_POSITIONS.length;
+      if (my.status === "pending") extra = '<small>' + (myReserve ? "Вы записаны в резерв, админ еще не подтвердил бронь." : "Место занято за вами, админ еще не подтвердил бронь.") + '</small>';
+      if (my.status === "approved") extra = '<small>' + (myReserve ? "Вы подтверждены в резерве." : "Место подтверждено, вы в списке.") + '</small>';
       if (my.status === "rejected") {
         extra = '<small>' + (my.warningCount >= 2
           ? "Вторая желтая карточка: вы пропускаете эту и следующую игру."
@@ -356,10 +443,11 @@
       return '<div class="private-cash-modal__my-status private-cash-modal__my-status--' + escapeHtml(my.status) + '">' +
         '<span>Ваша заявка</span><strong>' + escapeHtml(statusLabel(my.status)) + '</strong>' +
         extra +
+        (my.status === "pending" ? '<button type="button" class="private-cash-modal__cancel-request" data-private-cash-cancel="' + escapeHtml(event.id) + '">Отменить заявку</button>' : '') +
       '</div>';
     }
     if (event.status !== "active") return '<div class="private-cash-modal__notice">Запись закрыта.</div>';
-    return '<button type="button" class="private-cash-modal__primary private-cash-modal__primary--wide" data-private-cash-join="' + escapeHtml(event.id) + '">Записаться</button>';
+    return '<button type="button" class="private-cash-modal__primary private-cash-modal__primary--wide" data-private-cash-join="' + escapeHtml(event.id) + '">' + (hasReserveOnlyJoin(event) ? "Записаться в резерв" : "Записаться") + '</button>';
   }
 
   function renderParticipants(event) {
@@ -388,6 +476,7 @@
     var my = event.myParticipant || null;
     return '<article class="private-cash-modal__event">' +
       renderPrivateCashHero(event) +
+      renderCashSeatLists(event) +
       renderParticipant(event, my) +
       renderRules() +
       '<div class="private-cash-modal__event-head">' +
@@ -488,6 +577,11 @@
       postAction({ action: "join", eventId: join.getAttribute("data-private-cash-join") || "" });
       return;
     }
+    var cancel = event.target && event.target.closest ? event.target.closest("[data-private-cash-cancel]") : null;
+    if (cancel) {
+      postAction({ action: "cancel", eventId: cancel.getAttribute("data-private-cash-cancel") || "" });
+      return;
+    }
     var profile = event.target && event.target.closest ? event.target.closest("[data-private-cash-profile]") : null;
     if (profile) {
       var profileId = profile.getAttribute("data-private-cash-profile") || "";
@@ -522,6 +616,7 @@
     var button = document.getElementById("privateCashSignupOpen");
     if (!button) return;
     button.addEventListener("click", openModal);
+    refreshHomeButtonStatus();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);

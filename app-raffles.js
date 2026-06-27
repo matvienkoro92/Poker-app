@@ -2163,7 +2163,7 @@ function initRaffles() {
           "</span>";
         var timerHtml = isCashPrize && hasResultBatches ? "" : activeRaffleCountdownHtml(endDate, endMs);
         var accessHtml = activeRaffleAccessLevelHtml(raffle);
-        var factsHtml = resultTimeFactHtml + participantsHtml + timerHtml + accessHtml;
+        var factsHtml = resultTimeFactHtml + timerHtml + participantsHtml + accessHtml;
         var prizePanelHtml = activeRafflePrizePanelHtml(
           raffle,
           id,

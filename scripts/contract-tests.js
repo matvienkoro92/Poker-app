@@ -2913,6 +2913,67 @@ async function testRaffleCronRetriesMissingWinnerNotifications(redis) {
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "missing winner 1003 is retried");
 }
 
+async function testRaffleCronRetriesMissingActiveBatchWinnerNotifications(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const now = Date.now();
+  const winners = [1001, 1002, 1003].map((id, index) => ({
+    userId: "tg_" + id,
+    accountId: "ID" + String(100000 + id),
+    name: "Player " + id,
+    prize: "Ticket " + (index + 1),
+    groupIndex: index,
+    winnerReadySlotId: "initial_" + index,
+    winnerReadyWindowStartedAt: new Date(now - 60_000).toISOString(),
+    winnerReadyDeadlineAt: new Date(now + 14 * 60_000).toISOString(),
+    winnerReadyState: "pending",
+  }));
+  const raffle = {
+    id: "contract_active_batch_notify",
+    title: "Retry active batch notification raffle",
+    totalWinners: 3,
+    groups: [
+      { prize: "Ticket 1", count: 1 },
+      { prize: "Ticket 2", count: 1 },
+      { prize: "Ticket 3", count: 1 },
+    ],
+    participants: winners,
+    winners,
+    status: "active",
+    resultBatches: [
+      {
+        label: "First batch",
+        endDate: new Date(now - 60_000).toISOString(),
+        drawnAt: new Date(now - 60_000).toISOString(),
+        groupIndexes: [0, 1],
+      },
+      {
+        label: "Future batch",
+        endDate: new Date(now + 3600_000).toISOString(),
+        groupIndexes: [2],
+      },
+    ],
+    endDate: new Date(now + 3600_000).toISOString(),
+    createdAt: new Date(now - 3600_000).toISOString(),
+    drawnAt: "",
+    winnersNotifiedAt: new Date(now - 30_000).toISOString(),
+  };
+  persistContractRaffle(redis, raffle);
+  redis.l("poker_app:raffle_ids").push(raffle.id);
+  redis.kv.set("poker_app:raffle_winner_notify_sent:" + raffle.id + ":ID101001:tg", "1");
+
+  const r = await call(raffles, req("GET", {
+    action: "tick",
+    secret: process.env.CRON_SECRET,
+  }, undefined, { "x-cron-secret": process.env.CRON_SECRET }));
+  assert.strictEqual(r.statusCode, 200, "cron tick succeeds for active batch retry");
+  assert.strictEqual(r.body.winnerNotificationRetries, 1, "cron reports active batch raffle retried");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length, 0, "already sent active batch winner is not duplicated");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1002").length, 1, "missing active batch winner is retried");
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 0, "future batch winner is not notified early");
+}
+
 async function testRaffleDrawnGetDoesNotNotifyWinners(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -5413,6 +5474,7 @@ async function main() {
     ["raffle winner notification requires stored winner", testRaffleWinnerNotificationRequiresStoredWinner],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
     ["raffle cron retries missing winner notifications", testRaffleCronRetriesMissingWinnerNotifications],
+    ["raffle cron retries missing active batch winner notifications", testRaffleCronRetriesMissingActiveBatchWinnerNotifications],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],
     ["raffle daily recurring", testRaffleDailyRecurring],
     ["raffle daily schedule dedupe", testRaffleDailyScheduleDedupe],
