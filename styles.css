@@ -2501,7 +2501,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   justify-content: center;
   gap: 0;
   min-width: 0;
-  opacity: 0;
+  opacity: 1;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -2595,15 +2595,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque__open-badge {
   position: absolute !important;
-  right: 20px;
+  right: 14px;
   top: 50%;
   z-index: 5 !important;
   display: none;
   align-items: center;
   justify-content: center;
-  min-width: 94px;
+  min-width: 88px;
   min-height: 22px;
-  padding: 4px 10px;
+  padding: 4px 9px;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 210, 0.94);
   border-radius: 999px;
@@ -6884,12 +6884,12 @@ body.club-choice-vote-open {
   width: min(560px, 100%);
   max-height: min(760px, calc(100vh - 28px));
   overflow: hidden;
-  border: 1px solid rgba(255, 179, 43, 0.48);
+  border: 0;
   border-radius: 22px;
   background:
     radial-gradient(circle at 18% 0%, rgba(255, 184, 50, 0.18), transparent 34%),
     linear-gradient(180deg, rgba(11, 20, 37, 0.98), rgba(3, 7, 16, 0.98));
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.58), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.58);
   color: #ffedc0;
 }
 
@@ -7332,14 +7332,12 @@ body.club-choice-vote-open {
 
 .private-cash-modal__table-hero {
   position: relative;
-  margin: 13px 0 14px;
+  margin: 13px -14px 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 179, 43, 0.42);
-  border-radius: 18px;
+  border: 0;
+  border-radius: 16px;
   background: #050609;
-  box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.36),
-    inset 0 0 0 1px rgba(255, 237, 192, 0.08);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.36);
 }
 
 .private-cash-modal__table-hero::after {
@@ -7371,6 +7369,7 @@ body.club-choice-vote-open {
 .private-cash-modal__table-empty-seats {
   position: absolute;
   inset: 0;
+  display: none;
   z-index: 2;
   pointer-events: none;
 }
@@ -7380,7 +7379,7 @@ body.club-choice-vote-open {
   left: var(--seat-x);
   top: var(--seat-y);
   display: block;
-  width: clamp(64px, 16vw, 102px);
+  width: clamp(72px, 18vw, 112px);
   aspect-ratio: 1;
   border: 2px solid rgba(255, 190, 97, 0.78);
   border-radius: 50%;
@@ -7421,22 +7420,26 @@ body.club-choice-vote-open {
   --seat-nudge-y: 0px;
   transform: translate(-50%, -58%);
   display: block;
-  width: clamp(96px, 23vw, 148px);
-  height: clamp(108px, 26.7vw, 180px);
+  width: clamp(106px, 25vw, 162px);
+  height: clamp(120px, 29vw, 196px);
   max-width: 35%;
   padding: 0;
+  overflow: visible;
+  appearance: none;
+  -webkit-appearance: none;
   border: 0;
   border-radius: 0;
   font: inherit;
-  background: transparent;
+  background: none !important;
   color: #fff1bd;
   cursor: pointer;
   pointer-events: auto;
-  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.62));
+  box-shadow: none !important;
+  filter: none;
 }
 
 .private-cash-modal__table-seat:hover {
-  filter: brightness(1.08);
+  filter: none;
 }
 
 .private-cash-modal__table-seat--pending {
@@ -7477,6 +7480,7 @@ body.club-choice-vote-open {
   inset: -2px -18px -8px;
   z-index: 2;
   display: block;
+  background: transparent !important;
   transform:
     translate(var(--seat-nudge-x), var(--seat-nudge-y))
     rotate(var(--seat-rotate))
@@ -7492,6 +7496,8 @@ body.club-choice-vote-open {
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
+  background: transparent !important;
+  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.62));
 }
 
 .private-cash-modal__table-seat small {
@@ -7525,54 +7531,53 @@ body.club-choice-vote-open {
 .private-cash-modal__table-seat[data-seat-index="0"] {
   --seat-rotate: -10deg;
   --seat-scale: 0.97;
-  --seat-nudge-x: -13px;
-  --seat-nudge-y: 19px;
+  --seat-nudge-x: -6px;
+  --seat-nudge-y: 14px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="1"] {
   --seat-face-x: -1;
-  --seat-rotate: 10deg;
+  --seat-rotate: -8deg;
   --seat-scale: 0.97;
-  --seat-nudge-x: 13px;
-  --seat-nudge-y: 19px;
+  --seat-nudge-x: 2px;
+  --seat-nudge-y: 14px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="2"] {
-  --seat-face-x: -1;
   --seat-rotate: -5deg;
   --seat-scale: 0.96;
-  --seat-nudge-x: 8px;
+  --seat-nudge-x: 12px;
   --seat-nudge-y: 2px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="3"] {
-  --seat-face-x: -1;
   --seat-rotate: -8deg;
   --seat-scale: 1.01;
-  --seat-nudge-x: 7px;
+  --seat-nudge-x: 18px;
   --seat-nudge-y: -1px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="4"] {
   --seat-face-x: -1;
-  --seat-rotate: 8deg;
+  --seat-rotate: -10deg;
   --seat-scale: 1.01;
-  --seat-nudge-x: -7px;
+  --seat-nudge-x: -14px;
   --seat-nudge-y: -1px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="5"] {
-  --seat-rotate: 12deg;
+  --seat-face-x: -1;
+  --seat-rotate: -10deg;
   --seat-scale: 1.03;
-  --seat-nudge-x: 6px;
+  --seat-nudge-x: 0px;
   --seat-nudge-y: 18px;
 }
 
 .private-cash-modal__table-seat[data-seat-index="6"] {
   --seat-face-x: -1;
-  --seat-rotate: -12deg;
+  --seat-rotate: 10deg;
   --seat-scale: 1.03;
-  --seat-nudge-x: -6px;
+  --seat-nudge-x: 0px;
   --seat-nudge-y: 18px;
 }
 
@@ -7684,7 +7689,10 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__event {
-  padding: 14px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 12px 14px 14px;
 }
 
 .private-cash-modal__event-head {
@@ -7972,6 +7980,8 @@ body.club-choice-vote-open {
 
   .private-cash-modal__table-hero {
     margin-top: 12px;
+    margin-right: -14px;
+    margin-left: -14px;
     border-radius: 15px;
   }
 

@@ -318,10 +318,10 @@
   var SEAT_MONKEYS = [
     "./assets/private-cash-seat-monkey-4.webp",
     "./assets/private-cash-seat-monkey-2.webp",
-    "./assets/private-cash-seat-monkey-3.webp",
-    "./assets/private-cash-seat-monkey-1.webp",
-    "./assets/private-cash-seat-monkey-5.webp",
     "./assets/private-cash-seat-monkey-6.webp",
+    "./assets/private-cash-seat-monkey-4.webp",
+    "./assets/private-cash-seat-monkey-5.webp",
+    "./assets/private-cash-seat-monkey-1.webp",
     "./assets/private-cash-seat-monkey-7.webp",
   ];
 
@@ -347,6 +347,8 @@
 
   function rowSeatGroup(event, row) {
     if (row && row.seatGroup) return row.seatGroup;
+    var seatIndex = Number.parseInt(row && row.seatIndex, 10);
+    if (Number.isFinite(seatIndex)) return seatIndex >= SEAT_POSITIONS.length ? "reserve" : "inGame";
     var index = visibleSeatIndex(event, row && row.accountId);
     return index >= SEAT_POSITIONS.length ? "reserve" : "inGame";
   }
@@ -358,16 +360,29 @@
   function renderPrivateCashSeats(event) {
     var rows = visibleSeatRows(event);
     if (!rows.length) return "";
-    var seated = rows.slice(0, SEAT_POSITIONS.length);
+    var seated = rows
+      .map(function (row, fallbackIndex) {
+        var seatIndex = Number.parseInt(row && row.seatIndex, 10);
+        if (!Number.isFinite(seatIndex)) seatIndex = fallbackIndex;
+        return { row: row, seatIndex: seatIndex };
+      })
+      .filter(function (item) {
+        return item.seatIndex >= 0 && item.seatIndex < SEAT_POSITIONS.length;
+      })
+      .sort(function (a, b) {
+        return a.seatIndex - b.seatIndex;
+      });
     return '<div class="private-cash-modal__table-seats" aria-label="Занятые места">' +
-      seated.map(function (row, index) {
+      seated.map(function (item) {
+        var row = item.row;
+        var index = item.seatIndex;
         var pos = SEAT_POSITIONS[index];
         var status = row.status === "approved" ? "approved" : "pending";
         var monkey = SEAT_MONKEYS[index % SEAT_MONKEYS.length];
         return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
           '<span class="private-cash-modal__table-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
           '<span class="private-cash-modal__table-seat-monkey" aria-hidden="true">' +
-            '<img src="' + escapeHtml(monkey) + '?v=3.671" alt="" loading="lazy" decoding="async">' +
+            '<img src="' + escapeHtml(monkey) + '?v=3.672" alt="" loading="lazy" decoding="async">' +
           '</span>' +
           '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
         '</button>';
@@ -417,7 +432,6 @@
   function renderPrivateCashHero(event) {
     return '<figure class="private-cash-modal__table-hero">' +
       '<img src="./assets/private-cash-table-hero-clean.webp?v=3.714" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
-      renderPrivateCashEmptySeatRings(event) +
       renderPrivateCashSeats(event) +
     '</figure>';
   }

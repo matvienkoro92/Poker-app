@@ -800,6 +800,65 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(contractRakebackRow && contractRakebackRow.ownerId, "tg_388008256", "Vika edit preserves original row owner");
 }
 
+async function testPrivateCashRandomSeatAssignment(redis) {
+  const handler = loadHandler("private-cash");
+  const { signPwaSession } = require(path.join(root, "lib", "poker-pwa-session"));
+  const eventId = "contract_private_cash_random_seats";
+  redis.kv.set("poker_app:private_cash_event:" + eventId, JSON.stringify({
+    id: eventId,
+    date: "2026-07-01",
+    time: "20:00",
+    gameType: "Холдем",
+    stakes: "100/200",
+    buyIn: "10000",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    createdBy: "contract",
+  }));
+  redis.l("poker_app:private_cash_events").push(eventId);
+
+  const tokens = Array.from({ length: 9 }, (_, index) => signPwaSession({
+    id: 7100 + index,
+    username: "cash_player_" + index,
+    first_name: "Cash " + index,
+  }, BOT_TOKEN));
+
+  for (let i = 0; i < 7; i += 1) {
+    const r = await call(handler, req("POST", {}, { pwaSession: tokens[i], action: "join", eventId }, {
+      "x-forwarded-for": "10.10.0." + i,
+    }));
+    assert.strictEqual(r.statusCode, 200, "private cash join " + i + " succeeds");
+  }
+
+  const participantsKey = "poker_app:private_cash_participants:" + eventId;
+  const inGameRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
+  const inGameSeats = inGameRows.map((row) => row.seatIndex).sort((a, b) => a - b);
+  assert.deepStrictEqual(inGameSeats, [0, 1, 2, 3, 4, 5, 6], "first seven joins fill each in-game seat once");
+
+  let r = await call(handler, req("POST", {}, { pwaSession: tokens[7], action: "join", eventId }, {
+    "x-forwarded-for": "10.10.0.8",
+  }));
+  assert.strictEqual(r.statusCode, 200, "eighth private cash join succeeds");
+  const afterReserveRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
+  const reserveRow = afterReserveRows.find((row) => Number(row.seatIndex) >= 7);
+  assert.ok(reserveRow, "eighth join goes to reserve when all seats are busy");
+
+  const cancelled = inGameRows[3];
+  r = await call(handler, req("POST", {}, { pwaSession: tokens[3], action: "cancel", eventId }, {
+    "x-forwarded-for": "10.10.0.3",
+  }));
+  assert.strictEqual(r.statusCode, 200, "pending player can cancel private cash seat");
+
+  r = await call(handler, req("POST", {}, { pwaSession: tokens[8], action: "join", eventId }, {
+    "x-forwarded-for": "10.10.0.9",
+  }));
+  assert.strictEqual(r.statusCode, 200, "new player can join after cancellation");
+  const finalRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
+  const replacement = finalRows.find((row) => row.memberId === "tg_7108");
+  assert.ok(replacement, "replacement row is stored");
+  assert.strictEqual(replacement.seatIndex, cancelled.seatIndex, "replacement takes the freed in-game seat");
+}
+
 async function testChatSendEditDelete(redis) {
   const chat = loadHandler("chat");
   const { convKey } = require(path.join(root, "lib", "chat-core.js"));
@@ -5447,6 +5506,7 @@ async function main() {
   const tests = [
     ["chat core invariants", testChatCoreInvariants],
     ["auth required and admin-only", testAuthAndAdmin],
+    ["private cash random seat assignment", testPrivateCashRandomSeatAssignment],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["crm app user block", testCrmAppUserBlock],
     ["raffle join/leave", testRaffleJoinLeave],
