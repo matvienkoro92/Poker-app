@@ -1796,13 +1796,24 @@ function initProfilePokerPlus() {
         .then(function (data) {
           if (!data || !data.ok) {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
-            if (!silentRefresh) renderProfile(null, false);
+            if (!refresh && !silentRefresh) renderProfile(null, false);
             setProfileStatusLoading(false);
-            if (!silentRefresh && data && data.error) setFeedback(data.error, true);
+            if (!silentRefresh && data && data.error) {
+              setFeedback(refresh ? "Не удалось обновить Poker21: " + data.error + " Старые данные оставили." : data.error, true);
+            }
             return;
           }
           if (data && data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
           if (refreshCiphertext && data && data.linked) savePokerPlusLocalCiphertext(pokerPlusAccountId, refreshCiphertext);
+          if (refresh && pokerPlusProfileLinked && (!data.linked || !data.profile)) {
+            setProfileStatusLoading(false);
+            if (!silentRefresh) {
+              setFeedback(data.linked
+                ? "Poker21 не вернул свежий профиль. Старые данные оставили."
+                : "Poker21 не подтвердил привязку при обновлении. Старые данные оставили.", "warn");
+            }
+            return;
+          }
           try {
             renderProfile(data.profile, !!data.linked);
             notifyPokerPlusStatusChange(!!data.linked, data.profile);
@@ -1850,9 +1861,10 @@ function initProfilePokerPlus() {
           } else {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
             if (!silentRefresh) {
-              renderProfile(null, false);
+              if (!refresh) renderProfile(null, false);
+              else setProfileStatusLoading(false);
               setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : "Poker21 не ответил. Проверьте сеть и попробуйте открыть профиль ещё раз.", true);
-              renderPokerPlusStatsFallbackIfVisible();
+              if (!refresh) renderPokerPlusStatsFallbackIfVisible();
             }
           }
         }),
