@@ -390,6 +390,19 @@
     '</div>';
   }
 
+  function houseSeat(event) {
+    return event && event.houseParticipant && event.status === "active" ? event.houseParticipant : null;
+  }
+
+  function renderPrivateCashHouseSeat(event) {
+    var row = houseSeat(event);
+    if (!row) return "";
+    return '<button type="button" class="private-cash-modal__table-house-seat" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '" aria-label="Открыть профиль ' + escapeHtml(seatName(row)) + '">' +
+      '<span class="private-cash-modal__table-house-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
+      '<small>Уже в игре</small>' +
+    '</button>';
+  }
+
   function renderPrivateCashEmptySeatRings(event) {
     var occupiedCount = Math.min(visibleSeatRows(event).length, SEAT_POSITIONS.length);
     if (occupiedCount >= SEAT_POSITIONS.length) return "";
@@ -409,6 +422,8 @@
     var approved = visibleSeatRows(event).filter(function (row) {
       return row && row.status === "approved";
     });
+    var house = houseSeat(event);
+    if (house) approved.unshift(house);
     if (!approved.length) return "";
     var inGame = approved.filter(function (row) {
       return rowSeatGroup(event, row) !== "reserve";
@@ -432,6 +447,7 @@
   function renderPrivateCashHero(event) {
     return '<figure class="private-cash-modal__table-hero">' +
       '<img src="./assets/private-cash-table-hero-clean.webp?v=3.714" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      renderPrivateCashHouseSeat(event) +
       renderPrivateCashSeats(event) +
     '</figure>';
   }

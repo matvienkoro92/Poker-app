@@ -2487,7 +2487,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   width: calc(100% + (var(--home-mini-icons-pad) * 2));
   height: var(--home-club-choice-row);
   margin: 0 calc(var(--home-mini-icons-pad) * -1) calc(var(--home-mini-icons-pad) * -1);
-  overflow: hidden;
+  overflow: visible;
   border-radius: 8px 8px 18px 18px;
   background: url("./assets/home-club-choice-reference-buttons.png?v=3.703") center / 100% 100% no-repeat;
   filter: drop-shadow(0 0 12px rgba(255, 116, 0, 0.62));
@@ -2506,7 +2506,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   color: transparent;
   font: inherit;
   font-size: clamp(11px, 2.42vw, 16px);
@@ -2595,15 +2595,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque__open-badge {
   position: absolute !important;
-  right: 14px;
-  top: 50%;
+  right: 12px;
+  top: -9px;
   z-index: 5 !important;
   display: none;
   align-items: center;
   justify-content: center;
-  min-width: 88px;
-  min-height: 22px;
-  padding: 4px 9px;
+  min-width: 62px;
+  min-height: 15px;
+  padding: 2px 6px;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 210, 0.94);
   border-radius: 999px;
@@ -2612,7 +2612,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     linear-gradient(180deg, #fff2a8 0%, #ffbf28 52%, #ff6f00 100%);
   color: #210d00;
   opacity: 1 !important;
-  font-size: clamp(8px, 1.55vw, 10px);
+  font-size: clamp(6px, 1.18vw, 8px);
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
@@ -6579,7 +6579,7 @@ body.club-choice-vote-open {
     border-radius: 9px 9px 18px 18px;
     padding: 0 39px 0 35px;
     font-size: clamp(9px, 2.38vw, 10.5px);
-    clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 34%, 100% 100%, 15px 100%, 0 66%, 0 34%);
+    clip-path: none;
   }
 
   .home-club-choice-actions {
@@ -6593,11 +6593,12 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque__open-badge {
-    right: 8px;
-    min-width: 66px;
-    min-height: 16px;
+    right: 6px;
+    top: -7px;
+    min-width: 54px;
+    min-height: 14px;
     padding: 2px 5px;
-    font-size: clamp(6px, 1.58vw, 7px);
+    font-size: clamp(5.5px, 1.32vw, 6.5px);
   }
 
   .home-club-choice-plaque--vote {
@@ -7366,6 +7367,65 @@ body.club-choice-vote-open {
   pointer-events: none;
 }
 
+.private-cash-modal__table-house-seat {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: clamp(82px, 18vw, 118px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff1bd;
+  font: inherit;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.private-cash-modal__table-house-seat-name,
+.private-cash-modal__table-house-seat small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.86);
+}
+
+.private-cash-modal__table-house-seat-name {
+  min-width: 70px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 224, 141, 0.74);
+  background: rgba(4, 6, 12, 0.76);
+  box-shadow: 0 0 12px rgba(255, 176, 38, 0.26);
+  font-size: clamp(8px, 2.15vw, 12px);
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.private-cash-modal__table-house-seat small {
+  padding: 3px 7px;
+  border: 1px solid rgba(77, 255, 139, 0.44);
+  background: rgba(4, 6, 12, 0.68);
+  color: rgba(201, 255, 221, 0.9);
+  font-size: clamp(6px, 1.45vw, 8px);
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__table-house-seat:hover .private-cash-modal__table-house-seat-name,
+.private-cash-modal__table-house-seat:focus-visible .private-cash-modal__table-house-seat-name {
+  box-shadow:
+    0 0 12px rgba(255, 176, 38, 0.34),
+    0 0 22px rgba(255, 116, 0, 0.22);
+}
+
 .private-cash-modal__table-empty-seats {
   position: absolute;
   inset: 0;
@@ -7988,6 +8048,22 @@ body.club-choice-vote-open {
   .private-cash-modal__table-hero img {
     aspect-ratio: 64 / 100;
     object-position: center 44%;
+  }
+
+  .private-cash-modal__table-house-seat {
+    top: 23%;
+    width: 80px;
+  }
+
+  .private-cash-modal__table-house-seat-name {
+    min-width: 62px;
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+
+  .private-cash-modal__table-house-seat small {
+    padding: 2px 6px;
+    font-size: 6px;
   }
 
   .private-cash-modal__seat-lists {

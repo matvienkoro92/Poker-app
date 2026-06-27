@@ -830,6 +830,11 @@ async function testPrivateCashRandomSeatAssignment(redis) {
     assert.strictEqual(r.statusCode, 200, "private cash join " + i + " succeeds");
   }
 
+  let stateRes = await call(handler, req("GET", { pwaSession: tokens[0] }));
+  assert.strictEqual(stateRes.statusCode, 200, "private cash state loads");
+  assert.strictEqual(stateRes.body.activeEvent.houseParticipant.accountId, "tg_388008256", "private cash active event includes Pokermanki as house player");
+  assert.strictEqual(stateRes.body.activeEvent.houseParticipant.displayName, "ПокерМанки", "private cash house player has Pokermanki name");
+
   const participantsKey = "poker_app:private_cash_participants:" + eventId;
   const inGameRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
   const inGameSeats = inGameRows.map((row) => row.seatIndex).sort((a, b) => a - b);
