@@ -2500,9 +2500,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-club-choice-plaque {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
   align-items: center;
   justify-content: center;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
   min-width: 0;
   opacity: 1;
   width: 100%;
@@ -2582,6 +2585,25 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 1px 0 rgba(31, 13, 0, 0.95),
     0 0 7px rgba(255, 235, 170, 0.42),
     0 0 13px rgba(255, 151, 34, 0.24);
+}
+
+.home-club-choice-plaque__subtext {
+  position: relative;
+  z-index: 3;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(255, 236, 178, 0.88);
+  font-size: clamp(8px, 1.45vw, 12px);
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow:
+    0 1px 0 rgba(31, 13, 0, 0.95),
+    0 0 6px rgba(255, 151, 34, 0.2);
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .home-club-choice-plaque--cash .home-club-choice-plaque__text {
@@ -7836,6 +7858,9 @@ body.club-choice-vote-open {
   --seat-scale: 1;
   --seat-monkey-boost: 1.2;
   --seat-face-x: 1;
+  --seat-label-x: 50%;
+  --seat-label-y: -2px;
+  --seat-label-transform: translate(-50%, -100%);
   --seat-nudge-x: 0px;
   --seat-nudge-y: 0px;
   transform: translate(-50%, -58%);
@@ -7935,15 +7960,15 @@ body.club-choice-vote-open {
 
 .private-cash-modal__table-seat-label {
   position: absolute;
-  left: 50%;
-  top: -2px;
+  left: var(--seat-label-x);
+  top: var(--seat-label-y);
   z-index: 3;
   display: grid;
   justify-items: center;
   gap: 4px;
   width: max-content;
   max-width: min(138%, 136px);
-  transform: translate(-50%, -100%);
+  transform: var(--seat-label-transform);
   pointer-events: none;
 }
 
@@ -8018,6 +8043,9 @@ body.club-choice-vote-open {
 .private-cash-modal__table-seat[data-seat-index="0"] {
   --seat-rotate: -10deg;
   --seat-scale: 0.97;
+  --seat-label-x: 61%;
+  --seat-label-y: 82%;
+  --seat-label-transform: translate(-50%, -50%);
   --seat-nudge-x: -6px;
   --seat-nudge-y: 14px;
 }
