@@ -197,7 +197,7 @@
       '<div class="private-cash-modal__bonus-head">' +
         '<span class="private-cash-modal__bonus-label">Бонусы к кешу</span>' +
         '<small>Введите сумму и условие, затем добавьте плитку</small>' +
-      '</section>' +
+      '</div>' +
       '<div class="private-cash-modal__bonus-grid" role="group" aria-label="Выберите бонус">' +
         BONUS_PRESETS.map(function (bonus) {
           return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-amount="' + escapeHtml(bonus.amount) + '" data-private-cash-bonus-condition="' + escapeHtml(bonus.condition) + '">' +
@@ -205,7 +205,7 @@
             '<span>' + escapeHtml(bonus.condition) + '</span>' +
           '</button>';
         }).join("") +
-      '</section>' +
+      '</div>' +
       '<div class="private-cash-modal__bonus-builder">' +
         '<label>Сумма<input name="bonusAmount" maxlength="40" placeholder="1000 ₽"></label>' +
         '<label>Условие<input name="bonusCondition" maxlength="120" placeholder="за каре"></label>' +

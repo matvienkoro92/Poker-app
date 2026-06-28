@@ -566,6 +566,51 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   box-shadow: none !important;
 }
 
+.app.app--view-home .home-daily-shortcuts.home-mini-icons {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: var(--home-shortcuts-icons-row) var(--home-club-choice-row) !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  width: min(100%, calc(100vw - 8px)) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  box-sizing: border-box !important;
+}
+
+.app.app--view-home .home-daily-shortcuts.home-mini-icons .home-mini-icon-item {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.app.app--view-home .home-club-choice-actions {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.app.app--view-home .home-club-choice-plaque {
+  height: 100% !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--cash {
+  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.733") !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--vote {
+  background-image: url("./assets/home-club-choice-vote-panel.png?v=3.733") !important;
+}
+
 [data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {
   border-color: rgba(249, 115, 22, 0.2);
   background:
