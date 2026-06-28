@@ -516,11 +516,13 @@
         var status = row.status === "approved" ? "approved" : "pending";
         var monkey = SEAT_MONKEYS[index % SEAT_MONKEYS.length];
         return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
-          '<span class="private-cash-modal__table-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
+          '<span class="private-cash-modal__table-seat-label">' +
+            '<span class="private-cash-modal__table-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
+            '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
+          '</span>' +
           '<span class="private-cash-modal__table-seat-monkey" aria-hidden="true">' +
             '<img src="' + escapeHtml(monkey) + '?v=3.672" alt="" loading="lazy" decoding="async">' +
           '</span>' +
-          '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
         '</button>';
       }).join("") +
     '</div>';

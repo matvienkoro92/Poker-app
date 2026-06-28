@@ -7933,16 +7933,25 @@ body.club-choice-vote-open {
   color: #c9ffdd;
 }
 
-.private-cash-modal__table-seat-name {
+.private-cash-modal__table-seat-label {
   position: absolute;
   left: 50%;
   top: -2px;
   z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: min(138%, 136px);
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+
+.private-cash-modal__table-seat-name {
   display: block;
-  max-width: min(130%, 128px);
+  max-width: 100%;
   min-width: 56px;
   padding: 3px 7px;
-  transform: translate(-50%, -100%);
   overflow: hidden;
   border: 1px solid rgba(255, 224, 141, 0.7);
   border-radius: 999px;
@@ -7984,15 +7993,10 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__table-seat small {
-  position: absolute;
-  left: 50%;
-  bottom: 2px;
-  z-index: 3;
   display: block;
-  max-width: min(124%, 112px);
+  max-width: 100%;
   padding: 3px 6px;
   margin-top: 0;
-  transform: translate(-50%, 100%);
   overflow: hidden;
   border: 1px solid rgba(255, 224, 141, 0.48);
   border-radius: 999px;
