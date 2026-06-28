@@ -623,11 +623,6 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     return '<article class="private-cash-modal__event">' +
-      renderPrivateCashHero(event) +
-      renderEventBonuses(event.combinations) +
-      renderCashSeatLists(event) +
-      renderParticipant(event, my) +
-      renderRules() +
       '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
           '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
@@ -642,6 +637,11 @@
         '</div>' +
       '</section>' +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
+      renderEventBonuses(event.combinations) +
+      renderPrivateCashHero(event) +
+      renderCashSeatLists(event) +
+      renderParticipant(event, my) +
+      renderRules() +
       renderParticipants(event) +
     '</article>';
   }

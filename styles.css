@@ -5,7 +5,7 @@
 @import url("./styles-home.css?v=3.666");
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.683");
+@import url("./styles-raffles.css?v=3.684");
 @import url("./styles-daily-poker.css?v=3.666");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
@@ -18,7 +18,7 @@
 @import url("./styles-profile.css?v=3.677");
 @import url("./styles-layout.css?v=3.666");
 @import url("./styles-chat-overlays.css?v=3.666");
-@import url("./styles-home-overrides.css?v=3.733");
+@import url("./styles-home-overrides.css?v=3.734");
 @import url("./styles-layout-touch-targets.css?v=3.666");
 @import url("./styles-home-rating-promo-late.css?v=3.666");
 
@@ -2543,13 +2543,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   padding-top: clamp(18px, 3.6vw, 31px);
   padding-left: clamp(61px, 11.8vw, 112px);
   font-size: clamp(14px, 2.75vw, 27px);
-  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.733");
+  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.734");
 }
 
 .home-club-choice-plaque--vote {
   padding-left: clamp(56px, 10.8vw, 102px);
   font-size: clamp(15px, 2.9vw, 29px);
-  background-image: url("./assets/home-club-choice-vote-panel.png?v=3.733");
+  background-image: url("./assets/home-club-choice-vote-panel.png?v=3.734");
 }
 
 .home-club-choice-plaque::before {
