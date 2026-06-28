@@ -359,7 +359,7 @@
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
       '<label>Уровень доступа<select name="accessLevel">' +
         '<option value="0">Все игроки</option>' +
-        '<option value="1">Уровень 1+</option>' +
+        '<option value="1" selected>Уровень 1+</option>' +
         '<option value="2">Уровень 2+</option>' +
         '<option value="3">Уровень 3+</option>' +
         '<option value="4">Уровень 4+</option>' +
@@ -421,8 +421,22 @@
     "./assets/private-cash-seat-monkey-7.webp",
   ];
 
+  function seatPoker21Nickname(row) {
+    var p = row && typeof row === "object" ? row : {};
+    return String(
+      p.pokerPlusNickname ||
+      p.poker21Nickname ||
+      p.poker21Nick ||
+      p.pokerNickname ||
+      p.nickname ||
+      p.nick ||
+      ""
+    ).trim();
+  }
+
   function seatName(row) {
-    var name = row && (row.pokerPlusNickname || row.displayName || row.telegramUsername) ? String(row.pokerPlusNickname || row.displayName || row.telegramUsername).trim() : "";
+    var poker21Name = seatPoker21Nickname(row);
+    var name = row && (poker21Name || row.displayName || row.telegramUsername) ? String(poker21Name || row.displayName || row.telegramUsername).trim() : "";
     return name.replace(/^@+/, "") || "Игрок";
   }
 

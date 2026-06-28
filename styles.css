@@ -2500,16 +2500,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-club-choice-plaque {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+  display: block;
   min-width: 0;
   opacity: 1;
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: clamp(9px, 1.6vw, 14px) clamp(15px, 2.5vw, 26px) clamp(10px, 1.6vw, 15px) clamp(58px, 11.5vw, 106px);
+  padding: 0;
   overflow: visible;
   color: #fff1c5;
   font: inherit;
@@ -2540,14 +2537,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--cash {
-  padding-top: clamp(18px, 3.6vw, 31px);
-  padding-left: clamp(61px, 11.8vw, 112px);
   font-size: clamp(14px, 2.75vw, 27px);
   background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.742");
 }
 
 .home-club-choice-plaque--vote {
-  padding-left: clamp(56px, 10.8vw, 102px);
   font-size: clamp(15px, 2.9vw, 29px);
   background-image: url("./assets/home-club-choice-vote-panel.png?v=3.742");
 }
@@ -2567,9 +2561,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque__text {
-  display: block;
+  position: absolute !important;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
-  max-width: 100%;
+  max-width: none;
   overflow: hidden;
   opacity: 1 !important;
   color: #ffe79c;
@@ -2582,6 +2580,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 0 7px rgba(255, 235, 170, 0.72),
     0 0 15px rgba(255, 151, 34, 0.5),
     0 0 24px rgba(255, 92, 0, 0.3);
+}
+
+.home-club-choice-plaque--cash .home-club-choice-plaque__text {
+  inset: 40% 4.5% 17% 24.5%;
+  font-size: clamp(9px, 1.55vw, 16px);
+}
+
+.home-club-choice-plaque--vote .home-club-choice-plaque__text {
+  inset: 18% 5% 15% 25.5%;
+  font-size: clamp(9.5px, 1.65vw, 17px);
 }
 
 .home-club-choice-plaque .home-club-choice-plaque__new-badge {
@@ -2619,15 +2627,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque__open-badge {
   position: absolute !important;
-  left: 25%;
-  right: 18%;
-  top: 5%;
+  left: 24%;
+  right: 16.5%;
+  top: 6.5%;
   z-index: 5 !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: clamp(12px, 2.6vw, 21px);
+  height: 22.5%;
+  min-height: 12px;
   padding: 0 clamp(5px, 1.2vw, 10px);
   box-sizing: border-box;
   border: 0;
@@ -2635,7 +2644,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   background: transparent;
   color: #1c0d00;
   opacity: 1 !important;
-  font-size: clamp(7px, 1.32vw, 13px);
+  font-size: clamp(5.5px, 0.72vw, 7px);
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
@@ -6691,7 +6700,7 @@ body.club-choice-vote-open {
   .home-club-choice-plaque {
     height: 100%;
     border-radius: 0;
-    padding: 10px 12px 11px 48px;
+    padding: 0;
     font-size: clamp(12px, 3.5vw, 15px);
     clip-path: none;
   }
@@ -6702,25 +6711,20 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque--cash {
-    padding-top: 17px;
-    padding-left: 51px;
-    padding-right: 10px;
     font-size: clamp(10px, 2.85vw, 12px);
   }
 
   .home-club-choice-plaque__open-badge {
-    left: 24%;
-    right: 13%;
-    top: 5%;
+    left: 23.5%;
+    right: 14%;
+    top: 6%;
     min-width: 0;
-    min-height: 13px;
+    min-height: 11px;
     padding: 0 3px;
     font-size: clamp(5.8px, 1.72vw, 7px);
   }
 
   .home-club-choice-plaque--vote {
-    padding-left: 47px;
-    padding-right: 10px;
     font-size: clamp(10.5px, 3vw, 12.5px);
   }
 
@@ -6825,17 +6829,14 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque {
-    padding-left: 42px;
+    padding-left: 0;
   }
 
   .home-club-choice-plaque--cash {
-    padding-top: 15px;
-    padding-left: 45px;
     font-size: 9px;
   }
 
   .home-club-choice-plaque--vote {
-    padding-left: 42px;
     font-size: 9.5px;
   }
 
