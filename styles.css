@@ -7035,6 +7035,7 @@ body.club-choice-vote-open {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
   margin: 0 0 14px;
 }
 
@@ -7042,35 +7043,44 @@ body.club-choice-vote-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   min-width: 0;
   min-height: 42px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 183, 51, 0.36);
-  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 203, 83, 0.52);
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 216, 140, 0.16), transparent 48%),
-    linear-gradient(180deg, rgba(20, 30, 49, 0.98), rgba(5, 11, 23, 0.98));
-  color: #ffe7ad;
+    linear-gradient(180deg, rgba(255, 209, 103, 0.11), rgba(9, 11, 17, 0.76)),
+    rgba(5, 6, 8, 0.76);
+  color: #ffe8a6;
   font: inherit;
   font-size: 12px;
-  font-weight: 950;
-  line-height: 1;
+  font-weight: 900;
+  line-height: 1.05;
   text-align: center;
   text-transform: uppercase;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 7px 16px rgba(0, 0, 0, 0.22);
+    0 0 16px rgba(255, 164, 28, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
   cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .private-cash-modal__share-btn--subscribe {
-  border-color: rgba(255, 181, 49, 0.72);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255, 241, 184, 0.98);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 249, 208, 0.42), transparent 36%),
-    linear-gradient(180deg, #ffd56e, #f59e0b 58%, #c45a00);
-  color: #221100;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
+    radial-gradient(circle at 50% -35%, rgba(255, 255, 255, 0.92), transparent 38%),
+    linear-gradient(135deg, #fff7ba 0%, #ffd84d 34%, #ff9f1a 68%, #ff6b00 100%);
+  color: #1a0f02;
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 218, 0.42),
+    0 0 24px rgba(255, 171, 28, 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .private-cash-modal__share-btn--active {
@@ -7086,7 +7096,10 @@ body.club-choice-vote-open {
 .private-cash-modal__share-btn:focus-visible {
   outline: none;
   transform: translateY(-1px);
-  filter: brightness(1.08);
+  border-color: rgba(255, 216, 126, 0.78);
+  box-shadow:
+    0 6px 22px rgba(255, 164, 28, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .private-cash-modal__grid {
@@ -7445,31 +7458,20 @@ body.club-choice-vote-open {
 
 .private-cash-modal__rule {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
 .private-cash-modal__rule-icon {
   position: relative;
   display: block;
-  width: 40px;
-  height: 40px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 212, 106, 0.74);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 22%, rgba(255, 255, 230, 0.78), transparent 24%),
-    radial-gradient(circle at 50% 82%, rgba(172, 75, 0, 0.36), transparent 42%),
-    linear-gradient(180deg, #ffd873 0%, #f7a913 58%, #d96a00 100%);
-  color: #130b02;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    inset 0 -4px 8px rgba(112, 42, 0, 0.28),
-    0 0 0 1px rgba(255, 149, 22, 0.16),
-    0 8px 16px rgba(0, 0, 0, 0.3),
-    0 0 18px rgba(245, 158, 11, 0.28);
+  width: 34px;
+  height: 34px;
+  overflow: visible;
+  color: #f8c54c;
+  filter: drop-shadow(0 0 8px rgba(248, 178, 45, 0.2));
 }
 
 .private-cash-modal__rule-icon::before,
@@ -7480,10 +7482,10 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__rule-icon--money::before {
-  inset: 7px;
-  border: 2px solid rgba(42, 21, 0, 0.92);
+  inset: 4px;
+  border: 2px solid currentColor;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(255, 243, 185, 0.32);
+  opacity: 0.88;
 }
 
 .private-cash-modal__rule-icon--money::after {
@@ -7491,70 +7493,64 @@ body.club-choice-vote-open {
   inset: 0;
   display: grid;
   place-items: center;
-  color: #180c00;
-  font-size: 23px;
+  color: #ffe4a1;
+  font-size: 22px;
   font-weight: 1000;
   line-height: 1;
-  text-shadow:
-    0 1px 0 rgba(255, 238, 165, 0.48),
-    0 0 8px rgba(255, 246, 187, 0.32);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
 }
 
 .private-cash-modal__rule-icon--card {
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 28% 18%, rgba(255, 255, 216, 0.62), transparent 26%),
-    linear-gradient(145deg, #ffe27a 0%, #f5aa18 52%, #d46800 100%);
-  transform: rotate(-4deg);
+  transform: none;
 }
 
 .private-cash-modal__rule-icon--card::before {
-  inset: 6px;
-  border: 2px solid rgba(75, 31, 0, 0.72);
-  border-radius: 8px;
+  left: 7px;
+  top: 5px;
+  width: 20px;
+  height: 24px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  box-shadow:
+    -4px 4px 0 -2px rgba(255, 228, 161, 0.55),
+    4px -4px 0 -2px rgba(248, 197, 76, 0.36);
+  transform: rotate(4deg);
 }
 
 .private-cash-modal__rule-icon--card::after {
-  left: 50%;
-  top: 50%;
-  width: 16px;
-  height: 22px;
-  border-radius: 4px;
-  background:
-    linear-gradient(180deg, rgba(255, 247, 198, 0.95), rgba(255, 192, 58, 0.9));
-  box-shadow:
-    -5px 2px 0 rgba(59, 25, 0, 0.86),
-    5px -2px 0 rgba(255, 245, 191, 0.42),
-    0 0 0 2px rgba(59, 25, 0, 0.86);
-  transform: translate(-50%, -50%) rotate(9deg);
+  left: 13px;
+  top: 13px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #ffe4a1;
+  opacity: 0.9;
+  transform: rotate(4deg);
 }
 
 .private-cash-modal__rule-icon--password {
-  background:
-    radial-gradient(circle at 35% 20%, rgba(255, 255, 228, 0.7), transparent 24%),
-    linear-gradient(180deg, #ffd873 0%, #f6a51a 56%, #c95a00 100%);
+  color: #f8c54c;
 }
 
 .private-cash-modal__rule-icon--password::before {
-  left: 10px;
+  left: 4px;
   top: 11px;
-  width: 13px;
-  height: 13px;
-  border: 3px solid rgba(31, 16, 0, 0.92);
+  width: 12px;
+  height: 12px;
+  border: 3px solid currentColor;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(255, 242, 173, 0.28);
 }
 
 .private-cash-modal__rule-icon--password::after {
-  left: 22px;
-  top: 19px;
-  width: 12px;
-  height: 4px;
+  left: 17px;
+  top: 18px;
+  width: 15px;
+  height: 3px;
   border-radius: 999px;
-  background: rgba(31, 16, 0, 0.94);
+  background: currentColor;
   box-shadow:
-    6px 0 0 rgba(31, 16, 0, 0.94),
-    10px -4px 0 -1px rgba(31, 16, 0, 0.94);
+    8px 0 0 -1px currentColor,
+    12px -5px 0 -1px currentColor;
 }
 
 .private-cash-modal__rule p {
@@ -7626,20 +7622,23 @@ body.club-choice-vote-open {
   max-width: 100%;
   overflow: hidden;
   border-radius: 999px;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
   text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.96),
-    0 0 9px rgba(0, 0, 0, 0.82);
+    0 1px 2px rgba(0, 0, 0, 0.72),
+    0 0 5px rgba(0, 0, 0, 0.42);
 }
 
 .private-cash-modal__table-house-seat-name {
   min-width: 70px;
   padding: 3px 8px;
   border: 1px solid rgba(255, 224, 141, 0.74);
-  background: transparent;
-  box-shadow: none;
+  background: transparent !important;
+  box-shadow: none !important;
   font-size: clamp(8px, 2.15vw, 12px);
   font-weight: 1000;
   line-height: 1;
@@ -7648,7 +7647,7 @@ body.club-choice-vote-open {
 .private-cash-modal__table-house-seat small {
   padding: 3px 7px;
   border: 1px solid rgba(77, 255, 139, 0.44);
-  background: transparent;
+  background: transparent !important;
   color: rgba(201, 255, 221, 0.9);
   font-size: clamp(6px, 1.45vw, 8px);
   font-weight: 950;
@@ -7658,9 +7657,7 @@ body.club-choice-vote-open {
 
 .private-cash-modal__table-house-seat:hover .private-cash-modal__table-house-seat-name,
 .private-cash-modal__table-house-seat:focus-visible .private-cash-modal__table-house-seat-name {
-  box-shadow:
-    0 0 10px rgba(255, 176, 38, 0.32),
-    0 0 18px rgba(255, 116, 0, 0.18);
+  box-shadow: none !important;
 }
 
 .private-cash-modal__table-empty-seats {

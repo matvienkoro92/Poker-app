@@ -1347,22 +1347,55 @@ function initAdminReportModal() {
       callbacks: {
         canView: canViewSentReports,
         editReport: function (id, report) {
-          editingReportId = id;
-          editingReport = report;
-          fillReportForm(report);
-          if (submitBtn) submitBtn.textContent = "Сохранить";
-          setActiveTab("form");
-          if (dateEl) {
-            var effEd = reportEffectiveTimestampMs(report);
-            var metaEd = formatRuWeekdayDateFromTs(effEd);
-            var editDateLabel = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
-            dateEl.textContent = formatAdminReportDateLabel(editDateLabel);
-          }
+          openSentReportEditor(id, report);
         },
         syncAccess: syncSentReportsAccess,
       },
     });
     return sentReportsModule;
+  }
+
+  function showAdminReportEditorError(message) {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && tg.showAlert) tg.showAlert(message);
+  }
+
+  function applySentReportEditor(id, report) {
+    if (!id || !report) return false;
+    editingReportId = id;
+    editingReport = report;
+    fillReportForm(report);
+    if (submitBtn) submitBtn.textContent = "Сохранить";
+    if (dateEl) {
+      var effEd = reportEffectiveTimestampMs(report);
+      var metaEd = formatRuWeekdayDateFromTs(effEd);
+      var editDateLabel = metaEd.weekday && metaEd.date ? metaEd.weekday + ", " + metaEd.date : (report.weekday || "") + ", " + (report.date || "");
+      dateEl.textContent = formatAdminReportDateLabel(editDateLabel);
+    }
+    setActiveTab("form");
+    return true;
+  }
+
+  function openSentReportEditor(id, report) {
+    if (!id || !report) return;
+    var run = function () {
+      try {
+        applySentReportEditor(id, report);
+      } catch (err) {
+        editingReportId = null;
+        editingReport = null;
+        showAdminReportEditorError("Не удалось открыть отчёт для редактирования. Обновите страницу и попробуйте ещё раз.");
+      }
+    };
+    if (typeof areAdminReportModulesReady === "function" && areAdminReportModulesReady()) {
+      run();
+      return;
+    }
+    ensureAdminReportModulesLoaded()
+      .then(run)
+      .catch(function () {
+        showAdminReportEditorError("Не удалось загрузить редактор отчёта. Проверьте интернет и попробуйте ещё раз.");
+      });
   }
 
   sentReportsModule = ensureSentReportsModule();

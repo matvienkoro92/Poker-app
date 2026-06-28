@@ -367,7 +367,7 @@
   function renderShareActions() {
     var subscribed = !!(state && state.privateCashSubscribed);
     return '<section class="private-cash-modal__share-actions" aria-label="Ссылка и уведомления">' +
-      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-share>Поделиться</button>' +
+      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-share>Позвать друга</button>' +
       '<button type="button" class="private-cash-modal__share-btn" data-private-cash-copy>Скопировать</button>' +
       '<button type="button" class="private-cash-modal__share-btn private-cash-modal__share-btn--subscribe' + (subscribed ? ' private-cash-modal__share-btn--active' : '') + '" data-private-cash-subscribe>' +
         (subscribed ? "Подписан" : "Подписаться") +
@@ -637,8 +637,8 @@
         '</div>' +
       '</section>' +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
-      renderEventBonuses(event.combinations) +
       renderPrivateCashHero(event) +
+      renderEventBonuses(event.combinations) +
       renderCashSeatLists(event) +
       renderParticipant(event, my) +
       renderRules() +
