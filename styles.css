@@ -2568,6 +2568,33 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   opacity: 1;
 }
 
+.home-club-choice-plaque__count {
+  position: absolute !important;
+  top: clamp(5px, 1.15vw, 8px);
+  right: clamp(6px, 1.45vw, 10px);
+  z-index: 4 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(17px, 3.8vw, 24px);
+  height: clamp(17px, 3.8vw, 24px);
+  border: 1px solid rgba(255, 250, 214, 0.92);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, 0.96), transparent 34%),
+    linear-gradient(180deg, #fff4a8 0%, #ffc23a 52%, #ff850d 100%);
+  color: #251000;
+  font-size: clamp(10px, 2.35vw, 14px);
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.62),
+    0 0 10px rgba(255, 184, 43, 0.7),
+    0 3px 8px rgba(0, 0, 0, 0.46);
+  pointer-events: none;
+}
+
 .home-club-choice-plaque__text {
   position: relative;
   z-index: 3;
@@ -2590,18 +2617,30 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-club-choice-plaque__subtext {
   position: relative;
   z-index: 3;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   max-width: 100%;
+  min-height: clamp(15px, 3vw, 20px);
+  padding: 2px clamp(7px, 1.7vw, 12px);
   overflow: hidden;
-  color: rgba(255, 236, 178, 0.88);
+  border: 1px solid rgba(255, 247, 204, 0.72);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.38), transparent 42%),
+    linear-gradient(180deg, rgba(255, 230, 92, 0.98), rgba(255, 151, 21, 0.98));
+  color: #281100;
   font-size: clamp(8px, 1.45vw, 12px);
-  font-weight: 900;
+  font-weight: 1000;
   line-height: 1;
   text-align: center;
   text-overflow: ellipsis;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 0 12px rgba(255, 164, 31, 0.36);
   text-shadow:
-    0 1px 0 rgba(31, 13, 0, 0.95),
-    0 0 6px rgba(255, 151, 34, 0.2);
+    0 1px 0 rgba(255, 245, 189, 0.46),
+    0 0 5px rgba(255, 205, 74, 0.22);
   text-transform: none;
   white-space: nowrap;
 }
