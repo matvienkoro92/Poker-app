@@ -7032,74 +7032,105 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__share-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
   width: 100%;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
 .private-cash-modal__share-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  flex: 1 1 42%;
+  width: auto;
   min-width: 0;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 203, 83, 0.52);
+  min-height: 54px;
+  padding: 12px 10px;
+  border: 1px solid rgba(214, 163, 84, 0.86);
   border-radius: 14px;
   background:
-    linear-gradient(180deg, rgba(255, 209, 103, 0.11), rgba(9, 11, 17, 0.76)),
-    rgba(5, 6, 8, 0.76);
-  color: #ffe8a6;
+    linear-gradient(180deg, rgba(255, 214, 127, 0.14), rgba(214, 163, 84, 0.06)),
+    rgba(8, 12, 20, 0.94);
+  color: #fff1c2;
   font: inherit;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 900;
   line-height: 1.05;
   text-align: center;
-  text-transform: uppercase;
+  white-space: nowrap;
   box-shadow:
-    0 0 16px rgba(255, 164, 28, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 0 0 1px rgba(255, 214, 127, 0.1),
+    0 0 20px rgba(214, 163, 84, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
+.private-cash-modal__share-btn--invite {
+  flex-basis: 42%;
+}
+
+.private-cash-modal__share-btn--copy {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  font-size: 0;
+  color: #fff1c2;
+}
+
+.private-cash-modal__share-btn--copy::before,
+.private-cash-modal__share-btn--copy::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 3px solid currentColor;
+  border-radius: 4px;
+}
+
+.private-cash-modal__share-btn--copy::before {
+  left: 16px;
+  top: 15px;
+}
+
+.private-cash-modal__share-btn--copy::after {
+  left: 22px;
+  top: 21px;
+  background: rgba(8, 12, 20, 0.94);
+}
+
 .private-cash-modal__share-btn--subscribe {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-color: rgba(255, 241, 184, 0.98);
-  background:
-    radial-gradient(circle at 50% -35%, rgba(255, 255, 255, 0.92), transparent 38%),
-    linear-gradient(135deg, #fff7ba 0%, #ffd84d 34%, #ff9f1a 68%, #ff6b00 100%);
-  color: #1a0f02;
-  box-shadow:
-    0 0 0 1px rgba(255, 250, 218, 0.42),
-    0 0 24px rgba(255, 171, 28, 0.44),
-    inset 0 1px 0 rgba(255, 255, 255, 0.44);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  flex: 0.9 1 32%;
+  font-size: 14px;
 }
 
 .private-cash-modal__share-btn--active {
-  border-color: rgba(104, 255, 182, 0.62);
+  border-color: rgba(214, 163, 84, 0.72);
   background:
-    radial-gradient(circle at 50% 0%, rgba(219, 255, 236, 0.35), transparent 40%),
-    linear-gradient(180deg, rgba(23, 152, 93, 0.96), rgba(9, 89, 58, 0.98));
-  color: #eafff3;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.36);
+    linear-gradient(180deg, rgba(255, 214, 127, 0.1), rgba(214, 163, 84, 0.04)),
+    rgba(8, 12, 20, 0.78);
+  color: rgba(255, 241, 194, 0.66);
 }
 
 .private-cash-modal__share-btn:hover,
 .private-cash-modal__share-btn:focus-visible {
   outline: none;
   transform: translateY(-1px);
-  border-color: rgba(255, 216, 126, 0.78);
+  color: #fff7dc;
+  border-color: rgba(255, 218, 130, 0.96);
+  background:
+    linear-gradient(180deg, rgba(255, 226, 150, 0.2), rgba(214, 163, 84, 0.1)),
+    rgba(10, 15, 24, 0.97);
   box-shadow:
-    0 6px 22px rgba(255, 164, 28, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 0 0 1px rgba(255, 225, 150, 0.12),
+    0 0 24px rgba(214, 163, 84, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .private-cash-modal__grid {
@@ -7307,7 +7338,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__bonus-display--event {
-  margin: -3px 0 13px;
+  margin: -3px -14px 13px;
 }
 
 .private-cash-modal__bonus-display--single {
@@ -7533,24 +7564,28 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__rule-icon--password::before {
-  left: 4px;
-  top: 11px;
-  width: 12px;
-  height: 12px;
+  left: 9px;
+  top: 4px;
+  width: 16px;
+  height: 15px;
   border: 3px solid currentColor;
-  border-radius: 50%;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
 }
 
 .private-cash-modal__rule-icon--password::after {
-  left: 17px;
-  top: 18px;
-  width: 15px;
-  height: 3px;
-  border-radius: 999px;
-  background: currentColor;
+  left: 6px;
+  top: 17px;
+  width: 22px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 50% 45%, #ffe4a1 0 2px, transparent 2.5px),
+    linear-gradient(#ffe4a1, #ffe4a1) 50% 68% / 2px 5px no-repeat;
   box-shadow:
-    8px 0 0 -1px currentColor,
-    12px -5px 0 -1px currentColor;
+    inset 0 0 0 1px rgba(255, 228, 161, 0.22),
+    0 0 0 1px rgba(248, 197, 76, 0.1);
 }
 
 .private-cash-modal__rule p {
@@ -8116,7 +8151,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__summary {
-  margin: 0 0 12px;
+  margin: 0 -14px 12px;
   border: 1px solid rgba(255, 179, 43, 0.24);
   border-radius: 16px;
   background:
@@ -8169,7 +8204,7 @@ body.club-choice-vote-open {
 
 .private-cash-modal__summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -8196,9 +8231,13 @@ body.club-choice-vote-open {
   white-space: nowrap;
 }
 
+.private-cash-modal__summary .private-cash-modal__meta--access strong {
+  font-size: clamp(15px, 4vw, 22px);
+}
+
 .private-cash-modal__text,
 .private-cash-modal__combo p {
-  margin: 11px 0 0;
+  margin: 11px -14px 0;
   color: #d5c7ad;
   font-size: 15px;
   font-weight: 800;
@@ -8536,8 +8575,8 @@ body.club-choice-vote-open {
   }
 
   .private-cash-modal__bonus-display--event {
-    margin-right: 0;
-    margin-left: 0;
+    margin-right: -14px;
+    margin-left: -14px;
   }
 
   .private-cash-modal__join-dock {
@@ -8547,6 +8586,10 @@ body.club-choice-vote-open {
   .private-cash-modal__bonus-card span {
     font-size: clamp(9px, 3.1vw, 11px);
     line-height: 0.98;
+  }
+
+  .private-cash-modal__summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .private-cash-modal__ghost {

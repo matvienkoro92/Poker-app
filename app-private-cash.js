@@ -357,6 +357,15 @@
       '</select></label>' +
       '<label>Ставки<input name="stakes" maxlength="80" placeholder="Например: 50/100 ₽" required></label>' +
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
+      '<label>Уровень доступа<select name="accessLevel">' +
+        '<option value="0">Все игроки</option>' +
+        '<option value="1">Уровень 1+</option>' +
+        '<option value="2">Уровень 2+</option>' +
+        '<option value="3">Уровень 3+</option>' +
+        '<option value="4">Уровень 4+</option>' +
+        '<option value="5">Уровень 5+</option>' +
+        '<option value="6">Уровень 6+</option>' +
+      '</select></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
       renderBonusPicker() +
       '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"><span><strong>Отправить пуш</strong><small>Если галочка включена, всем уйдет уведомление об открытии записи.</small></span></label>' +
@@ -367,10 +376,10 @@
   function renderShareActions() {
     var subscribed = !!(state && state.privateCashSubscribed);
     return '<section class="private-cash-modal__share-actions" aria-label="Ссылка и уведомления">' +
-      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-share>Позвать друга</button>' +
-      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-copy>Скопировать</button>' +
+      '<button type="button" class="private-cash-modal__share-btn private-cash-modal__share-btn--invite" data-private-cash-share>Позвать друга</button>' +
+      '<button type="button" class="private-cash-modal__share-btn private-cash-modal__share-btn--copy" data-private-cash-copy aria-label="Скопировать ссылку">Скопировать</button>' +
       '<button type="button" class="private-cash-modal__share-btn private-cash-modal__share-btn--subscribe' + (subscribed ? ' private-cash-modal__share-btn--active' : '') + '" data-private-cash-subscribe>' +
-        (subscribed ? "Подписан" : "Подписаться") +
+        (subscribed ? "Отписаться" : "Подписаться") +
       '</button>' +
     '</section>';
   }
@@ -622,6 +631,7 @@
 
   function renderEvent(event) {
     var my = event.myParticipant || null;
+    var accessLevel = Math.max(0, Math.floor(Number(event && event.accessLevel) || 0));
     return '<article class="private-cash-modal__event">' +
       '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
@@ -634,6 +644,7 @@
           '</div>' +
           (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
           (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
+          '<div class="private-cash-modal__meta private-cash-modal__meta--access"><span>Доступ</span><strong>' + escapeHtml(accessLevel > 0 ? "Ур. " + accessLevel + "+" : "Все") + '</strong></div>' +
         '</div>' +
       '</section>' +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
@@ -673,6 +684,7 @@
         gameType: form.elements.gameType.value,
         stakes: form.elements.stakes.value,
         buyIn: form.elements.buyIn.value,
+        accessLevel: form.elements.accessLevel ? form.elements.accessLevel.value : "0",
         description: form.elements.description.value,
         combinations: form.elements.bonusText.value,
         sendPush: !!form.elements.sendPush.checked,
