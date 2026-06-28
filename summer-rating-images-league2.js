@@ -136,11 +136,19 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-21-06-2026-league2-tournament-plo6-20h.jpg",
     "rating-compressed-preview/rating-21-06-2026-league2-energetik-22h.jpg"
   ],
-  "22.06.2026": [],
-  "23.06.2026": [],
-  "24.06.2026": [],
+  "22.06.2026": [
+    "rating-compressed-preview/rating-22-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "23.06.2026": [
+    "rating-compressed-preview/rating-23-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "24.06.2026": [
+    "rating-compressed-preview/rating-24-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
   "25.06.2026": [],
-  "26.06.2026": [],
+  "26.06.2026": [
+    "rating-compressed-preview/rating-26-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
   "27.06.2026": [],
   "28.06.2026": [],
   "29.06.2026": [],

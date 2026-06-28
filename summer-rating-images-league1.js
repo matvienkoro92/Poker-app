@@ -187,12 +187,45 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-21-06-2026-league1-magic-500-120k-2159h.jpg",
     "rating-compressed-preview/rating-21-06-2026-league1-hr-5000-250k-2159h.jpg"
   ],
-  "22.06.2026": [],
-  "23.06.2026": [],
-  "24.06.2026": [],
-  "25.06.2026": [],
-  "26.06.2026": [],
-  "27.06.2026": [],
+  "22.06.2026": [
+    "rating-compressed-preview/rating-22-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-22-06-2026-league1-ok-17h.jpg",
+    "rating-compressed-preview/rating-22-06-2026-league1-tournir-ponedelnika-18h.jpg",
+    "rating-compressed-preview/rating-22-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "23.06.2026": [
+    "rating-compressed-preview/rating-23-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-23-06-2026-league1-mok-17h.jpg",
+    "rating-compressed-preview/rating-23-06-2026-league1-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-23-06-2026-league1-hok-19h.jpg",
+    "rating-compressed-preview/rating-23-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "24.06.2026": [
+    "rating-compressed-preview/rating-24-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-24-06-2026-league1-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-24-06-2026-league1-mok-17h.jpg",
+    "rating-compressed-preview/rating-24-06-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-24-06-2026-league1-rebuy-evening-20h.jpg"
+  ],
+  "25.06.2026": [
+    "rating-compressed-preview/rating-25-06-2026-league1-mok-17h.jpg",
+    "rating-compressed-preview/rating-25-06-2026-league1-turnir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-25-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-25-06-2026-league1-classic-tournament-21h.jpg",
+    "rating-compressed-preview/rating-25-06-2026-league1-energetik-22h.jpg"
+  ],
+  "26.06.2026": [
+    "rating-compressed-preview/rating-26-06-2026-league1-mok-17h.jpg",
+    "rating-compressed-preview/rating-26-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-26-06-2026-league1-energetik-22h.jpg"
+  ],
+  "27.06.2026": [
+    "rating-compressed-preview/rating-27-06-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-27-06-2026-league1-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-27-06-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-27-06-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-27-06-2026-league1-energetik-22h.jpg"
+  ],
   "28.06.2026": [],
   "29.06.2026": [],
   "30.06.2026": []

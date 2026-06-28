@@ -2,6 +2,7 @@
   "use strict";
 
   var API_PATH = "/api/private-cash";
+  var PRIVATE_CASH_START_PARAM = "private_cash";
   var modal = null;
   var bodyEl = null;
   var statusEl = null;
@@ -14,6 +15,7 @@
     { id: "knockout", amount: "500-1500 ₽", condition: "за нокаут топ10 Лиги1" },
     { id: "badbeat", amount: "1200 ₽", condition: "бабблу" },
   ];
+  var DEFAULT_CASH_BONUS_TEXT = "+10% на любой стек от 5к до 20к, первым 7ми записавшимся";
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -41,8 +43,81 @@
     else window.alert(String(text || "Ошибка"));
   }
 
+  function privateCashLink() {
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(PRIVATE_CASH_START_PARAM);
+    if (typeof pokerBuildWebsiteStartLink === "function") {
+      var webLink = pokerBuildWebsiteStartLink(PRIVATE_CASH_START_PARAM);
+      if (webLink) return webLink;
+    }
+    var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+    if (!base && window.location) base = String(window.location.origin || "") + "/";
+    base = String(base || "").trim().replace(/\/+$/, "");
+    return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(PRIVATE_CASH_START_PARAM) : "";
+  }
+
+  function sharePrivateCash() {
+    var link = privateCashLink();
+    var text = "Запись на приватный кеш клуба «Два туза»:";
+    if (!link) {
+      showAlert("Не удалось сформировать ссылку.");
+      return;
+    }
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: "Приватный кеш", text: text + "\n" + link, url: link }).then(function (ok) {
+        if (ok) return;
+        openTelegramShare(link, text);
+      });
+      return;
+    }
+    openTelegramShare(link, text);
+  }
+
+  function openTelegramShare(link, text) {
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+      ? pokerBuildTelegramShareUrlDialog(link, text)
+      : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text || "");
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+    else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+    else window.open(shareUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function copyPrivateCashLink() {
+    var link = privateCashLink();
+    if (!link) {
+      showAlert("Не удалось сформировать ссылку.");
+      return;
+    }
+    var copy = typeof pokerCopyTextToClipboard === "function"
+      ? pokerCopyTextToClipboard(link)
+      : Promise.resolve(false);
+    copy.then(function (ok) {
+      showAlert(ok ? "Ссылка на приватный кеш скопирована." : "Скопируйте ссылку вручную: " + link);
+    });
+  }
+
   function setStatus(text) {
     if (statusEl) statusEl.textContent = String(text || "");
+  }
+
+  function setProfileLoading(profile, active, name) {
+    if (!profile) return;
+    profile.classList.toggle("private-cash-modal__profile-loading", !!active);
+    if (active) {
+      profile.setAttribute("aria-busy", "true");
+      profile.setAttribute("data-private-cash-loading-label", "Открываю");
+      setStatus("Открываю профиль " + (name || "игрока") + "...");
+    } else {
+      profile.removeAttribute("aria-busy");
+      profile.removeAttribute("data-private-cash-loading-label");
+      setStatus("");
+    }
+  }
+
+  function clearProfileLoadingLater(profile, name, delay) {
+    window.setTimeout(function () {
+      setProfileLoading(profile, false, name);
+    }, delay || 1400);
   }
 
   function statusLabel(value) {
@@ -122,7 +197,7 @@
       '<div class="private-cash-modal__bonus-head">' +
         '<span class="private-cash-modal__bonus-label">Бонусы к кешу</span>' +
         '<small>Введите сумму и условие, затем добавьте плитку</small>' +
-      '</div>' +
+      '</section>' +
       '<div class="private-cash-modal__bonus-grid" role="group" aria-label="Выберите бонус">' +
         BONUS_PRESETS.map(function (bonus) {
           return '<button type="button" class="private-cash-modal__bonus-tile" data-private-cash-bonus="' + escapeHtml(bonus.id) + '" data-private-cash-bonus-amount="' + escapeHtml(bonus.amount) + '" data-private-cash-bonus-condition="' + escapeHtml(bonus.condition) + '">' +
@@ -130,7 +205,7 @@
             '<span>' + escapeHtml(bonus.condition) + '</span>' +
           '</button>';
         }).join("") +
-      '</div>' +
+      '</section>' +
       '<div class="private-cash-modal__bonus-builder">' +
         '<label>Сумма<input name="bonusAmount" maxlength="40" placeholder="1000 ₽"></label>' +
         '<label>Условие<input name="bonusCondition" maxlength="120" placeholder="за каре"></label>' +
@@ -145,8 +220,9 @@
 
   function renderEventBonuses(raw) {
     var rows = bonusLines(raw);
-    if (!rows.length) return "";
-    return '<div class="private-cash-modal__bonus-display private-cash-modal__bonus-display--event" aria-label="Актуальные бонусы">' +
+    var fallback = !rows.length;
+    if (fallback) rows = [DEFAULT_CASH_BONUS_TEXT];
+    return '<div class="private-cash-modal__bonus-display private-cash-modal__bonus-display--event' + (fallback ? ' private-cash-modal__bonus-display--single' : '') + '" aria-label="Актуальные бонусы">' +
       rows.map(function (row) {
         return renderBonusCard(row);
       }).join("") +
@@ -288,18 +364,29 @@
     '</form>';
   }
 
+  function renderShareActions() {
+    var subscribed = !!(state && state.privateCashSubscribed);
+    return '<section class="private-cash-modal__share-actions" aria-label="Ссылка и уведомления">' +
+      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-share>Поделиться</button>' +
+      '<button type="button" class="private-cash-modal__share-btn" data-private-cash-copy>Скопировать</button>' +
+      '<button type="button" class="private-cash-modal__share-btn private-cash-modal__share-btn--subscribe' + (subscribed ? ' private-cash-modal__share-btn--active' : '') + '" data-private-cash-subscribe>' +
+        (subscribed ? "Подписан" : "Подписаться") +
+      '</button>' +
+    '</section>';
+  }
+
   function renderRules() {
     return '<section class="private-cash-modal__rules" aria-label="Условия записи">' +
       '<div class="private-cash-modal__rule">' +
-        '<span class="private-cash-modal__rule-icon" aria-hidden="true">₽</span>' +
+        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--money" aria-hidden="true"></span>' +
         '<p>Админ примет вашу заявку только если у вас есть 5 000 ₽ на счете на вход.</p>' +
       '</div>' +
       '<div class="private-cash-modal__rule">' +
-        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--card" aria-hidden="true">▰</span>' +
+        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--card" aria-hidden="true"></span>' +
         '<p>Если вы записались и не пришли, вы получаете желтую карточку.</p>' +
       '</div>' +
       '<div class="private-cash-modal__rule">' +
-        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--password" aria-hidden="true">•••</span>' +
+        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--password" aria-hidden="true"></span>' +
         '<p>Пароль от кеша будет отправлен в день игры всем, кто записался.</p>' +
       '</div>' +
     '</section>';
@@ -541,15 +628,19 @@
       renderCashSeatLists(event) +
       renderParticipant(event, my) +
       renderRules() +
-      '<div class="private-cash-modal__event-head">' +
-        '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
-        '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
-      '</div>' +
-      '<div class="private-cash-modal__meta">' +
-        '<span>Ставки</span><strong>' + escapeHtml(event.stakes) + '</strong>' +
-      '</div>' +
-      (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
-      (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
+      '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
+        '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
+          '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
+          '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
+        '</div>' +
+        '<div class="private-cash-modal__summary-grid">' +
+          '<div class="private-cash-modal__meta">' +
+            '<span>Ставки</span><strong>' + escapeHtml(event.stakes) + '</strong>' +
+          '</div>' +
+          (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
+          (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
+        '</div>' +
+      '</section>' +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderParticipants(event) +
     '</article>';
@@ -564,6 +655,7 @@
     var events = state.events || [];
     bodyEl.innerHTML =
       renderAdminForm() +
+      renderShareActions() +
       '<section class="private-cash-modal__events">' +
         (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
       '</section>';
@@ -638,6 +730,24 @@
       postAction({ action: "join", eventId: join.getAttribute("data-private-cash-join") || "" });
       return;
     }
+    var share = event.target && event.target.closest ? event.target.closest("[data-private-cash-share]") : null;
+    if (share) {
+      sharePrivateCash();
+      return;
+    }
+    var copy = event.target && event.target.closest ? event.target.closest("[data-private-cash-copy]") : null;
+    if (copy) {
+      copyPrivateCashLink();
+      return;
+    }
+    var subscribe = event.target && event.target.closest ? event.target.closest("[data-private-cash-subscribe]") : null;
+    if (subscribe) {
+      var next = !(state && state.privateCashSubscribed);
+      postAction({ action: "subscribe", subscribe: next }).then(function (nextState) {
+        if (nextState) showAlert(next ? "Подписка на приватный кеш включена." : "Подписка отключена.");
+      });
+      return;
+    }
     var cancel = event.target && event.target.closest ? event.target.closest("[data-private-cash-cancel]") : null;
     if (cancel) {
       postAction({ action: "cancel", eventId: cancel.getAttribute("data-private-cash-cancel") || "" });
@@ -647,10 +757,26 @@
     if (profile) {
       var profileId = profile.getAttribute("data-private-cash-profile") || "";
       var profileName = profile.getAttribute("data-private-cash-profile-name") || "Игрок";
-      if (profileId && typeof window.openChatUserModalById === "function") {
+      if (!profileId) return;
+      setProfileLoading(profile, true, profileName);
+      if (typeof window.pokerOpenChatUserModalSafe === "function") {
+        window.pokerOpenChatUserModalSafe(profileId, profileName).then(function (ok) {
+          setProfileLoading(profile, false, profileName);
+          if (!ok && typeof window.openChatUserModalById === "function") {
+            setProfileLoading(profile, true, profileName);
+            window.openChatUserModalById(profileId, profileName);
+            clearProfileLoadingLater(profile, profileName);
+          }
+        }).catch(function () {
+          setProfileLoading(profile, false, profileName);
+          showAlert("Не удалось открыть профиль.");
+        });
+      } else if (typeof window.openChatUserModalById === "function") {
         window.openChatUserModalById(profileId, profileName);
-      } else if (profileId && typeof window.pokerOpenChatUserModalSafe === "function") {
-        window.pokerOpenChatUserModalSafe(profileId, profileName);
+        clearProfileLoadingLater(profile, profileName);
+      } else {
+        setProfileLoading(profile, false, profileName);
+        showAlert("Профиль пока загружается. Попробуйте еще раз.");
       }
       return;
     }
@@ -679,6 +805,8 @@
     button.addEventListener("click", openModal);
     refreshHomeButtonStatus();
   }
+
+  window.openPrivateCashModal = openModal;
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();

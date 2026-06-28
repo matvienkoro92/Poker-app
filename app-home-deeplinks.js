@@ -255,6 +255,22 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    if (startParam === "private_cash") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("home");
+        var attempts = 0;
+        var openPrivateCash = function () {
+          attempts += 1;
+          if (typeof window.openPrivateCashModal === "function") {
+            window.openPrivateCashModal();
+            return;
+          }
+          if (attempts < 8) setTimeout(openPrivateCash, 250);
+        };
+        setTimeout(openPrivateCash, 250);
+      }, 0);
+      return;
+    }
     if (startParam === "vpn_proxy" || startParam === "vpn_proxy_vpn") {
       setTimeout(function () {
         if (typeof window.openVpnProxyModal === "function") window.openVpnProxyModal({ tab: "vpn" });
