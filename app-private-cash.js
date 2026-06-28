@@ -422,7 +422,7 @@
   ];
 
   function seatName(row) {
-    var name = row && (row.displayName || row.telegramUsername) ? String(row.displayName || row.telegramUsername).trim() : "";
+    var name = row && (row.pokerPlusNickname || row.displayName || row.telegramUsername) ? String(row.pokerPlusNickname || row.displayName || row.telegramUsername).trim() : "";
     return name.replace(/^@+/, "") || "Игрок";
   }
 
@@ -616,7 +616,7 @@
         var approved = row.status === "approved";
         var rejected = row.status === "rejected";
         return '<article class="private-cash-modal__participant">' +
-          '<div><strong>' + escapeHtml(row.displayName || "Игрок") + '</strong>' +
+          '<div><strong>' + escapeHtml(seatName(row)) + '</strong>' +
             '<span>' + escapeHtml(row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
             (row.warningCount ? '<small>Желтые карточки: ' + escapeHtml(row.warningCount) + '</small>' : '') + '</div>' +
           '<div class="private-cash-modal__participant-actions">' +

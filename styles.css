@@ -2543,13 +2543,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   padding-top: clamp(18px, 3.6vw, 31px);
   padding-left: clamp(61px, 11.8vw, 112px);
   font-size: clamp(14px, 2.75vw, 27px);
-  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.734");
+  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.742");
 }
 
 .home-club-choice-plaque--vote {
   padding-left: clamp(56px, 10.8vw, 102px);
   font-size: clamp(15px, 2.9vw, 29px);
-  background-image: url("./assets/home-club-choice-vote-panel.png?v=3.734");
+  background-image: url("./assets/home-club-choice-vote-panel.png?v=3.742");
 }
 
 .home-club-choice-plaque::before {
@@ -4801,6 +4801,90 @@ body.club-choice-vote-open {
 }
 
 @media (max-width: 430px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+    text-align: left;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-list {
+    gap: 5px;
+    padding: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row {
+    flex: 0 0 auto;
+    grid-template-columns: 34px minmax(0, 1fr);
+    min-height: 38px;
+    padding: 6px 24px 6px 8px;
+    border: 1px solid rgba(255, 118, 0, 0.2);
+    border-radius: 10px;
+    background: rgba(6, 7, 10, 0.42);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__day {
+    font-size: 14px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__name {
+    font-size: 11px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__meta {
+    font-size: 9px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
+    width: 100%;
+    margin: 0;
+    padding: 12px 10px 10px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid--has-bubble {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
+    min-height: 62px;
+    padding: 8px 6px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
+    font-size: 17px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
+    font-size: 11px;
+    line-height: 1.08;
+    overflow-wrap: normal;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {
+    font-size: 10px;
+  }
+
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-raffle-bonus {
     grid-template-columns: minmax(0, 1fr);
     gap: 5px;
