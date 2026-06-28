@@ -7075,6 +7075,22 @@ body.club-choice-vote-open {
   flex-basis: 42%;
 }
 
+.private-cash-modal__share-btn--invite,
+.private-cash-modal__share-btn--subscribe:not(.private-cash-modal__share-btn--active) {
+  border-color: rgba(255, 242, 186, 0.94);
+  background:
+    radial-gradient(circle at 50% -36%, rgba(255, 255, 255, 0.92), transparent 38%),
+    linear-gradient(135deg, #fff4a8 0%, #ffd24d 30%, #ff9f1a 66%, #ff6a00 100%);
+  color: #1a0f03;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.52);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 18px rgba(255, 120, 0, 0.36),
+    0 0 26px rgba(255, 173, 38, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -4px 10px rgba(150, 55, 0, 0.38);
+}
+
 .private-cash-modal__share-btn--copy {
   flex: 0 0 54px;
   width: 54px;
@@ -7131,6 +7147,23 @@ body.club-choice-vote-open {
     0 0 0 1px rgba(255, 225, 150, 0.12),
     0 0 24px rgba(214, 163, 84, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.private-cash-modal__share-btn--invite:hover,
+.private-cash-modal__share-btn--invite:focus-visible,
+.private-cash-modal__share-btn--subscribe:not(.private-cash-modal__share-btn--active):hover,
+.private-cash-modal__share-btn--subscribe:not(.private-cash-modal__share-btn--active):focus-visible {
+  color: #170c02;
+  border-color: #fff6c9;
+  background:
+    radial-gradient(circle at 50% -38%, rgba(255, 255, 255, 0.96), transparent 39%),
+    linear-gradient(135deg, #fff7b8 0%, #ffdd61 28%, #ffac24 66%, #ff7608 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 10px 22px rgba(255, 120, 0, 0.42),
+    0 0 32px rgba(255, 180, 42, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -4px 10px rgba(150, 55, 0, 0.42);
 }
 
 .private-cash-modal__grid {
@@ -8204,8 +8237,8 @@ body.club-choice-vote-open {
 
 .private-cash-modal__summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: 1.05fr 1.16fr 1fr 0.88fr;
+  gap: 6px;
 }
 
 .private-cash-modal__meta,
@@ -8215,7 +8248,7 @@ body.club-choice-vote-open {
   border-radius: 12px;
   background:
     linear-gradient(180deg, rgba(255, 179, 43, 0.1), rgba(255, 179, 43, 0.035));
-  padding: 9px 10px;
+  padding: 8px 8px;
 }
 
 .private-cash-modal__meta--game {
@@ -8225,14 +8258,14 @@ body.club-choice-vote-open {
 .private-cash-modal__summary .private-cash-modal__meta strong {
   display: block;
   max-width: 100%;
-  overflow: hidden;
-  font-size: clamp(17px, 4.7vw, 24px);
-  text-overflow: ellipsis;
+  overflow: visible;
+  font-size: clamp(17px, 4.2vw, 22px);
+  text-overflow: clip;
   white-space: nowrap;
 }
 
 .private-cash-modal__summary .private-cash-modal__meta--access strong {
-  font-size: clamp(15px, 4vw, 22px);
+  font-size: clamp(15px, 3.8vw, 20px);
 }
 
 .private-cash-modal__text,
@@ -8589,7 +8622,32 @@ body.club-choice-vote-open {
   }
 
   .private-cash-modal__summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1.05fr 1.16fr 1fr 0.88fr;
+    gap: 5px;
+  }
+
+  .private-cash-modal__summary {
+    padding: 10px;
+  }
+
+  .private-cash-modal__meta,
+  .private-cash-modal__combo {
+    padding: 7px 6px;
+  }
+
+  .private-cash-modal__event-head span,
+  .private-cash-modal__meta span,
+  .private-cash-modal__combo span {
+    font-size: 8px;
+  }
+
+  .private-cash-modal__summary .private-cash-modal__meta strong {
+    font-size: clamp(15px, 4vw, 20px);
+  }
+
+  .private-cash-modal__summary .private-cash-modal__meta--game strong,
+  .private-cash-modal__summary .private-cash-modal__meta--access strong {
+    font-size: clamp(14px, 3.6vw, 18px);
   }
 
   .private-cash-modal__ghost {
