@@ -429,6 +429,7 @@ function pokerGetSummerRatingPlayerArt(nick) {
     src: art.src,
     place: art.place,
     league: art.league,
+    key: key,
   };
 }
 
@@ -461,8 +462,10 @@ function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {
   }
   var nickEsc = escapeHtml(art.nick || nick || "");
   var srcEsc = escapeHtml(art.src);
+  var artKeyName = art.key === "мистерfox" ? "misterfox" : String(art.key || "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  var artKeyClass = artKeyName ? " winter-rating-player-modal__art--key-" + artKeyName : "";
   artWrap.hidden = false;
-  artWrap.className = "winter-rating-player-modal__art winter-rating-player-modal__art--league-" + art.league + " winter-rating-player-modal__art--place-" + art.place;
+  artWrap.className = "winter-rating-player-modal__art winter-rating-player-modal__art--league-" + art.league + " winter-rating-player-modal__art--place-" + art.place + artKeyClass;
   artWrap.innerHTML = "<img class=\"winter-rating-player-modal__art-img\" src=\"" + srcEsc + "\" alt=\"" + nickEsc + "\" loading=\"eager\" decoding=\"async\" />";
 }
 

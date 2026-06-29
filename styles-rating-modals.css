@@ -249,6 +249,10 @@
   object-fit: contain;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
 }
+.winter-rating-player-modal__art--key-misterfox .winter-rating-player-modal__art-img {
+  max-width: min(54%, 166px);
+  max-height: 118px;
+}
 .winter-rating-player-modal__toolbar {
   display: flex;
   flex-wrap: wrap;

@@ -9280,6 +9280,37 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
   align-content: center !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(9px, 1vw, 12px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+  min-height: clamp(70px, 7.2vw, 92px) !important;
+  padding: clamp(10px, 1.1vw, 13px) clamp(11px, 1.25vw, 15px) !important;
+  border-radius: 12px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+  font-size: clamp(10px, 1.1vw, 13px) !important;
+  line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+  font-size: clamp(18px, 2.05vw, 25px) !important;
+  line-height: 1.04 !important;
+}
+
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills {
   grid-template-columns: minmax(0, 1fr) !important;
   max-width: 100% !important;
@@ -9317,5 +9348,32 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
     min-height: 40px !important;
     padding: 6px 8px !important;
     font-size: clamp(8px, 2.4vw, 10px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+    gap: 4px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+    min-height: 42px !important;
+    padding: 4px 3px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+    font-size: 5.5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+    font-size: 8px !important;
   }
 }
