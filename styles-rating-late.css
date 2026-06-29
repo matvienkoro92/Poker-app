@@ -3043,6 +3043,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   display: flex !important;
 }
 
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-stack {
+  margin-top: 56px;
+}
+
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-panel {
   background:
     radial-gradient(ellipse at 50% 0%, #172238 0%, #111b2d 46%, #0c1525 100%),
@@ -3777,10 +3781,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     url("./assets/summer-rating-player-prushnik.webp") 0.5% calc(78% - 11px) / 14.1% auto no-repeat,
     url("./assets/summer-rating-league2-player-viktor.webp") 16.8% calc(78% - 11px) / 14.5% auto no-repeat,
     url("./assets/summer-rating-player-winifly.webp") calc(33.7% + 4px) calc(78% - 7px) / 14.6% auto no-repeat,
-    url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% - 11px) / 13.8% auto no-repeat,
+    url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% - 11px) / 9.7% auto no-repeat,
     url("./assets/summer-rating-league2-player-babyshark.webp") 67.5% calc(78% - 11px) / 15.4% auto no-repeat,
     url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% - 11px) / 14.6% auto no-repeat,
-    url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% - 11px) / 13.8% auto no-repeat;
+    url("./assets/summer-rating-league2-player-ksyukha.webp") calc(100% + 2px) calc(78% - 13px) / 11% auto no-repeat;
   pointer-events: none;
   transform: translateY(-48px);
 }
@@ -4213,10 +4217,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
       url("./assets/summer-rating-player-prushnik.webp") 0.5% calc(78% + 3px) / 14.1% auto no-repeat,
       url("./assets/summer-rating-league2-player-viktor.webp") 16.8% calc(78% + 3px) / 14.5% auto no-repeat,
       url("./assets/summer-rating-player-winifly.webp") calc(33.7% + 4px) calc(78% + 7px) / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% + 3px) / 13.8% auto no-repeat,
+      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% + 3px) / 9.7% auto no-repeat,
       url("./assets/summer-rating-league2-player-babyshark.webp") 67.5% calc(78% + 3px) / 15.4% auto no-repeat,
       url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% + 3px) / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% + 3px) / 13.8% auto no-repeat;
+      url("./assets/summer-rating-league2-player-ksyukha.webp") calc(100% + 2px) calc(78% + 1px) / 11% auto no-repeat;
     transform: translateY(var(--summer-rating-mobile-lower-podium-players-y));
   }
 
@@ -4327,10 +4331,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
       url("./assets/summer-rating-player-prushnik.webp") 0.5% 98px / 14.1% auto no-repeat,
       url("./assets/summer-rating-league2-player-viktor.webp") 16.8% 98px / 14.5% auto no-repeat,
       url("./assets/summer-rating-player-winifly.webp") calc(33.7% + 4px) 102px / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% 98px / 13.8% auto no-repeat,
+      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% 98px / 9.7% auto no-repeat,
       url("./assets/summer-rating-league2-player-babyshark.webp") 67.5% 98px / 15.4% auto no-repeat,
       url("./assets/summer-rating-league2-player-aspirin.webp") 84% 98px / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-ksyukha.webp") 100% 98px / 13.8% auto no-repeat;
+      url("./assets/summer-rating-league2-player-ksyukha.webp") calc(100% + 2px) 96px / 11% auto no-repeat;
   }
 }
 
@@ -4420,10 +4424,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
       url("./assets/summer-rating-player-prushnik.webp") 0.5% calc(78% + 3px) / 14.1% auto no-repeat,
       url("./assets/summer-rating-league2-player-viktor.webp") 16.8% calc(78% + 3px) / 14.5% auto no-repeat,
       url("./assets/summer-rating-player-winifly.webp") calc(33.7% + 4px) calc(78% + 7px) / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% + 3px) / 13.8% auto no-repeat,
+      url("./assets/summer-rating-league2-player-mr-fox.webp") 50.7% calc(78% + 3px) / 9.7% auto no-repeat,
       url("./assets/summer-rating-league2-player-babyshark.webp") 67.5% calc(78% + 3px) / 15.4% auto no-repeat,
       url("./assets/summer-rating-league2-player-aspirin.webp") 84% calc(78% + 3px) / 14.6% auto no-repeat,
-      url("./assets/summer-rating-league2-player-ksyukha.webp") 100% calc(78% + 3px) / 13.8% auto no-repeat;
+      url("./assets/summer-rating-league2-player-ksyukha.webp") calc(100% + 2px) calc(78% + 1px) / 11% auto no-repeat;
     transform: translateY(var(--summer-rating-mobile-lower-podium-players-y));
   }
 

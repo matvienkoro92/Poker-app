@@ -244,6 +244,15 @@ function formatRewardRound(val) {
   return Math.round(Number(val) || 0).toLocaleString("ru-RU");
 }
 
+function winterRatingDisplayRewardValue(reward) {
+  var value = Number(reward) || 0;
+  return value > 0 ? value : 0;
+}
+
+function winterRatingDisplayReward(reward) {
+  return formatRewardRound(winterRatingDisplayRewardValue(reward));
+}
+
 function winterRatingPrizeByPlace(place) {
   var prizes = { 1: 110000, 2: 60000, 3: 30000, 4: 20000, 5: 10000, 6: 10000, 7: 10000 };
   var amount = prizes[place];
@@ -296,20 +305,20 @@ function mergeWinterRatingRowsByNick(rows) {
 function renderWinterRatingTable(rows) {
   if (!rows || !rows.length) return "";
   rows = mergeWinterRatingRowsByNick(rows);
-  var filtered = rows.filter(function (r) { return r.points !== 0 || r.reward !== 0; });
+  var filtered = rows.filter(function (r) { return r.points !== 0 || winterRatingDisplayRewardValue(r.reward) !== 0; });
   var sorted = filtered.slice().sort(function (a, b) { return (b.points - a.points) || (b.reward - a.reward); });
   var place = 0;
-  var totalReward = sorted.reduce(function (sum, r) { return sum + (Number(r.reward) || 0); }, 0);
+  var totalReward = sorted.reduce(function (sum, r) { return sum + winterRatingDisplayRewardValue(r.reward); }, 0);
   var tfoot = "<tfoot><tr class=\"winter-rating__table-total-row\"><td colspan=\"3\">Сумма призовых за день</td><td>" + (totalReward ? formatRewardRound(totalReward) : "0") + "</td></tr></tfoot>";
   return "<table class=\"winter-rating__table\"><thead><tr><th>Место</th><th>Ник</th><th>Баллы</th><th>Призовые</th></tr></thead><tbody>" +
     sorted.map(function (r) {
       place++;
       var trClass = winterRatingRowClass(place);
-      var rewardTone = winterRatingRewardTone(r.reward);
+      var rewardTone = winterRatingRewardTone(winterRatingDisplayRewardValue(r.reward));
       if (rewardTone === "high") trClass = (trClass ? trClass + " " : "") + "winter-rating__tr--reward-high";
       else if (rewardTone === "mid") trClass = (trClass ? trClass + " " : "") + "winter-rating__tr--reward-mid";
       var placeCell = winterRatingPlaceCell(place);
-      return "<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td>" + String(r.nick).replace(/</g, "&lt;") + "</td><td>" + r.points + "</td><td>" + (r.reward ? formatRewardRound(r.reward) : "0") + "</td></tr>";
+      return "<tr" + (trClass ? " class=\"" + trClass + "\"" : "") + "><td>" + placeCell + "</td><td>" + String(r.nick).replace(/</g, "&lt;") + "</td><td>" + r.points + "</td><td>" + winterRatingDisplayReward(r.reward) + "</td></tr>";
     }).join("") + "</tbody>" + tfoot + "</table>";
 }
 
@@ -381,6 +390,8 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "рыбнадзор": { src: "./assets/summer-rating-player-rybnadzor.webp", place: 7, league: 1 },
   "nikola233": { src: "./assets/summer-rating-player-nikola233.webp", place: 7, league: 1 },
   "milkyway77": { src: "./assets/summer-rating-player-milkyway.webp", place: 8, league: 1 },
+  "пряник": { src: "./assets/summer-rating-player-pryanik.webp", place: 9, league: 1 },
+  "pryanik2la": { src: "./assets/summer-rating-player-pryanik.webp", place: 9, league: 1 },
   "prushnik": { src: "./assets/summer-rating-player-prushnik.webp", place: 9, league: 1 },
   "evgen1722": { src: "./assets/summer-rating-player-evgen1722.webp", place: 10, league: 1 },
   "хер вам)))))": { src: "./assets/summer-rating-player-khervam.webp", place: 10, league: 1 },
@@ -1355,7 +1366,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     var totalPointsFiltered = 0;
     for (var pi = 0; pi < list.length; pi++) { totalPointsFiltered += Number(list[pi].points) || 0; }
     var totalRewardFiltered = 0;
-    for (var ri = 0; ri < list.length; ri++) { totalRewardFiltered += Number(list[ri].reward) || 0; }
+    for (var ri = 0; ri < list.length; ri++) { totalRewardFiltered += winterRatingDisplayRewardValue(list[ri].reward); }
     if (monthVal === "all" && modal._winterPlayerModalNick === "Waaar" && !isWinterRatingPlayerSeasonalKey(modalSeasonKey)) totalRewardFiltered += 588225;
     var totalRewardFilteredStr = totalRewardFiltered ? formatRewardRound(totalRewardFiltered) : "0";
     var headers = "<th class=\"winter-rating-player-modal__th-date\">Дата</th><th class=\"winter-rating-player-modal__th-tournament\">Турнир</th><th class=\"winter-rating-player-modal__th-place\">Место</th>";
@@ -1367,7 +1378,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
     var tableHtml = "<table class=\"winter-rating__table winter-rating-player-modal__table\"><thead><tr>" + headers + "</tr></thead><tbody>" +
       displayList.map(function (s, i) {
         var placeStr = winterRatingPlaceCell(s.place);
-        var rewardStr = s.reward ? formatRewardRound(s.reward) : "0";
+        var rewardStr = winterRatingDisplayReward(s.reward);
         var showDate = (i === 0 || displayList[i - 1].date !== s.date);
         var dateCell = showDate ? escapeHtmlRating(s.date) : "";
         var tourCell = escapeHtmlRating(s.tournamentLabel || s.time || "—");
@@ -1377,7 +1388,7 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
         var prevParts = i > 0 ? String(displayList[i - 1].date || "").split(".") : [];
         var prevMonthKey = prevParts.length >= 3 ? prevParts[1] + "." + prevParts[2] : "";
         var isNewMonth = i > 0 && monthKey && monthKey !== prevMonthKey;
-        var rewardTone = winterRatingRewardTone(s.reward);
+        var rewardTone = winterRatingRewardTone(winterRatingDisplayRewardValue(s.reward));
         var rewardClass = rewardTone === "high" ? " winter-rating-player-modal__tr--reward-high" : (rewardTone === "mid" ? " winter-rating-player-modal__tr--reward-mid" : "");
         var trClass = (isNewMonth ? " winter-rating-player-modal__tr--month-start" : "") + rewardClass;
         return "<tr class=\"" + trClass.replace(/^ /, "") + "\"><td class=\"winter-rating-player-modal__td-date\">" + dateCell + "</td><td class=\"winter-rating-player-modal__td-tournament\">" + tourCell + "</td><td class=\"winter-rating-player-modal__td-place\">" + placeStr + "</td>" + ptsCell + "<td class=\"winter-rating-player-modal__td-reward\">" + rewardStr + "</td></tr>";
@@ -1762,6 +1773,7 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-player-rybnadzor.webp",
     "./assets/summer-rating-player-nikola233.webp",
     "./assets/summer-rating-player-milkyway.webp",
+    "./assets/summer-rating-player-pryanik.webp",
     "./assets/summer-rating-player-prushnik.webp",
     "./assets/summer-rating-player-evgen1722.webp",
     "./assets/summer-rating-player-khervam.webp",
@@ -1928,7 +1940,7 @@ function initWinterRating() {
   if (tabsUpdatedEl) {
     tabsUpdatedEl.hidden = !isSummerRatingMode;
     tabsUpdatedEl.style.display = isSummerRatingMode ? "" : "none";
-    tabsUpdatedEl.textContent = "обновлено 21 июня";
+    tabsUpdatedEl.textContent = "обновлено 28 июня";
   }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
@@ -2015,7 +2027,7 @@ function initWinterRating() {
   if (springLeaguesEl) {
     springLeaguesEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Итоговые таблицы рейтинга лета по лигам" : "Итоговые таблицы рейтинга весны по лигам");
     springLeaguesEl.querySelectorAll(".winter-rating__spring-league-updated").forEach(function (el) {
-      el.textContent = seasonConfig.updatedLabel || "обновлено 21 июня";
+      el.textContent = seasonConfig.updatedLabel || "обновлено 28 июня";
     });
   }
   function filterTableByNick(tbody, searchStr, tableWrap, showAllBtn) {
@@ -2196,10 +2208,11 @@ function initWinterRating() {
       var r = allRows[ri];
       var rewardVal = r && r.reward != null ? Number(r.reward) : 0;
       if (rewardVal !== rewardVal || !isFinite(rewardVal)) rewardVal = 0;
-      var rewardStr = formatRewardRound(rewardVal);
+      var rewardDisplayVal = winterRatingDisplayRewardValue(rewardVal);
+      var rewardStr = formatRewardRound(rewardDisplayVal);
       var pointsVal = r && r.points != null ? Number(r.points) : 0;
       if (pointsVal !== pointsVal || !isFinite(pointsVal)) pointsVal = 0;
-      if (pointsVal === 0 && rewardVal === 0) continue;
+      if (pointsVal === 0 && rewardDisplayVal === 0) continue;
       rows.push({
         place: rows.length + 1,
         nick: r && r.nick != null ? String(r.nick) : "",
@@ -2225,10 +2238,11 @@ function initWinterRating() {
         var r = raw[ri];
         var rewardVal = r && r.reward != null ? Number(r.reward) : 0;
         if (rewardVal !== rewardVal || !isFinite(rewardVal)) rewardVal = 0;
-        var rewardStr = formatRewardRound(rewardVal);
+        var rewardDisplayVal = winterRatingDisplayRewardValue(rewardVal);
+        var rewardStr = formatRewardRound(rewardDisplayVal);
         var pointsVal = r && r.points != null ? Number(r.points) : 0;
         if (pointsVal !== pointsVal || !isFinite(pointsVal)) pointsVal = 0;
-        if (pointsVal === 0 && rewardVal === 0) continue;
+        if (pointsVal === 0 && rewardDisplayVal === 0) continue;
         leagueRows.push({ place: leagueRows.length + 1, nick: r && r.nick != null ? String(r.nick) : "", points: pointsVal, reward: rewardStr });
       }
       var hasPrizeColumn = leagueNum === 1 || leagueNum === 2;
@@ -2403,7 +2417,7 @@ function initWinterRating() {
       var nickAttr = nickStr.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       var initial = nickStr.length ? nickStr.charAt(0).toUpperCase() : "?";
       var pointsStr = r && r.points != null ? String(r.points) : "0";
-      var rewardStr = r && r.reward != null ? String(r.reward) : "0";
+      var rewardStr = r && r.reward != null ? winterRatingDisplayReward(String(r.reward).replace(/\s/g, "")) : "0";
       var rewardFormatted = rewardStr + " ₽";
       var placeClass = place === 1 ? "spring-rating-top3__card--first" : "";
       podiumHtml += "<div class=\"spring-rating-top3__card " + placeClass + "\"><span class=\"spring-rating-top3__rank\">#" + place + "</span><div class=\"spring-rating-top3__avatar\" aria-hidden=\"true\">" + initial + "</div><span class=\"spring-rating-top3__nick\">" + nickEsc + "</span><div class=\"spring-rating-top3__stats\"><span class=\"spring-rating-top3__points\"><span class=\"spring-rating-top3__points-value\">" + pointsStr + "</span> <span class=\"spring-rating-top3__points-label\">баллов</span></span><span class=\"spring-rating-top3__reward\">" + rewardFormatted + "</span></div><button type=\"button\" class=\"spring-rating-top3__nick-btn\" data-nick=\"" + nickAttr + "\" aria-label=\"Подробнее: " + nickEsc + "\"></button></div>";
@@ -2433,7 +2447,7 @@ function initWinterRating() {
         for (var pi = 0; pi < raw.length && pi < 3; pi++) {
           var r = raw[pi];
           var rewardVal = r && r.reward != null ? Number(r.reward) : 0;
-          list.push({ place: pi + 1, nick: r && r.nick != null ? String(r.nick) : "", points: r && r.points != null ? r.points : 0, reward: formatRewardRound(rewardVal) });
+          list.push({ place: pi + 1, nick: r && r.nick != null ? String(r.nick) : "", points: r && r.points != null ? r.points : 0, reward: winterRatingDisplayReward(rewardVal) });
         }
         return list;
       };
@@ -2648,7 +2662,7 @@ function initWinterRating() {
     });
   }
   function renderSpringLeagueDateCaption(label) {
-    var updatedLabel = seasonConfig.updatedLabel || "обновлено 21 июня";
+    var updatedLabel = seasonConfig.updatedLabel || "обновлено 28 июня";
     return "<p class=\"winter-rating__date-tournaments-caption\"><span class=\"winter-rating__date-tournaments-caption-text\">" + label + "</span><span class=\"winter-rating__date-tournaments-updated\">" + updatedLabel + "</span></p>";
   }
   function fillSpringLeagueBlocks(leaguesWrap, dateStr) {

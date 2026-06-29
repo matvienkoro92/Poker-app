@@ -1414,29 +1414,45 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
     border-radius: 11px;
   }
   .app.app--view-home .home-freeroll-schedule__row {
-    grid-template-columns: 21px minmax(0, 1fr) 8px;
-    gap: 3px;
-    min-height: 29px;
-    padding: 4px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 54px;
+    padding: 8px 10px;
     border-radius: 8px;
   }
   .app.app--view-home .home-freeroll-schedule__main {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
   .app.app--view-home .home-freeroll-schedule__day {
-    font-size: 12px;
+    align-self: center;
+    font-size: 18px;
+    line-height: 1;
   }
-  .app.app--view-home .home-freeroll-schedule__title,
+  .app.app--view-home .home-freeroll-schedule__title {
+    display: block;
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.08;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .app.app--view-home .home-freeroll-schedule__meta {
-    font-size: 9px;
-    line-height: 1.05;
-    white-space: nowrap;
+    display: block;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.12;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .app.app--view-home .home-freeroll-schedule__row--next::after {
-    font-size: 20px;
+    display: none;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat {
     grid-template-columns: 22px minmax(0, 0.72fr) minmax(0, 1.28fr);
@@ -1530,31 +1546,45 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
     border-radius: 11px;
   }
   .app.app--view-home .home-freeroll-schedule__row {
-    grid-template-columns: 21px minmax(0, 1fr) 8px;
-    gap: 3px;
-    min-height: 29px;
-    padding: 4px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 54px;
+    padding: 8px 10px;
     border-radius: 8px;
   }
   .app.app--view-home .home-freeroll-schedule__main {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
   .app.app--view-home .home-freeroll-schedule__day {
-    font-size: 12px;
+    align-self: center;
+    font-size: 18px;
+    line-height: 1;
   }
-  .app.app--view-home .home-freeroll-schedule__title,
+  .app.app--view-home .home-freeroll-schedule__title {
+    display: block;
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.08;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .app.app--view-home .home-freeroll-schedule__meta {
     display: block;
-    font-size: 8.5px;
-    line-height: 1.05;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.12;
     white-space: normal;
     overflow-wrap: anywhere;
   }
   .app.app--view-home .home-freeroll-schedule__row--next::after {
-    font-size: 20px;
+    display: none;
   }
   .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat {
     grid-template-columns: 22px minmax(0, 0.72fr) minmax(0, 1.28fr);
