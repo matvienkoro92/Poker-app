@@ -9446,3 +9446,351 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-
     min-height: 42px !important;
   }
 }
+
+/* Ticket cards: make inner blocks visually match cash raffle blocks. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pill {
+  min-height: clamp(56px, 6vw, 72px) !important;
+  padding: clamp(10px, 1.1vw, 14px) clamp(14px, 1.45vw, 18px) !important;
+  border: 1px solid rgba(66, 245, 157, 0.76) !important;
+  border-radius: 12px !important;
+  background:
+    linear-gradient(180deg, rgba(16, 60, 39, 0.82), rgba(5, 20, 17, 0.9)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(188, 255, 219, 0.12),
+    0 0 18px rgba(34, 197, 94, 0.18) !important;
+  color: #fff8dc !important;
+  font-size: clamp(16px, 1.55vw, 22px) !important;
+  line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants {
+  gap: clamp(9px, 1vw, 12px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+  min-height: clamp(78px, 7.2vw, 96px) !important;
+  padding: clamp(10px, 1vw, 13px) clamp(12px, 1.2vw, 15px) !important;
+  border: 1px solid rgba(209, 178, 83, 0.46) !important;
+  border-radius: 12px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 234, 166, 0.1), transparent 58%),
+    linear-gradient(180deg, rgba(7, 9, 17, 0.96), rgba(7, 8, 15, 0.9)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 204, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.18) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 221, 105, 0.28), transparent 54%),
+    linear-gradient(180deg, rgba(255, 191, 43, 0.2), rgba(30, 17, 5, 0.84)),
+    rgba(10, 9, 16, 0.92) !important;
+  border-color: rgba(255, 210, 78, 0.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 229, 143, 0.16),
+    0 0 18px rgba(255, 178, 30, 0.28),
+    inset 0 1px 0 rgba(255, 244, 204, 0.18) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-label {
+  font-size: clamp(10px, 0.92vw, 12px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  max-width: 100% !important;
+  font-size: clamp(18px, 1.55vw, 24px) !important;
+  line-height: 1.02 !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count {
+  font-size: clamp(16px, 1.35vw, 21px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  font-size: clamp(15px, 1.35vw, 20px) !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pill {
+    min-height: 40px !important;
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    font-size: clamp(8px, 2.4vw, 10px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+    min-height: 42px !important;
+    padding: 4px 3px !important;
+    border-radius: 9px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-label {
+    font-size: 5.5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+    font-size: 8px !important;
+  }
+}
+
+/* Ticket facts: keep text inside the 2x2 blocks. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+  display: grid !important;
+  align-content: center !important;
+  justify-content: stretch !important;
+  justify-items: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits {
+  font-size: clamp(18px, 1.32vw, 21px) !important;
+  line-height: 0.98 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count {
+  font-size: clamp(14px, 1.18vw, 18px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  font-size: clamp(13px, 1.08vw, 17px) !important;
+  line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown {
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  grid-template-areas:
+    "icon value"
+    "icon label" !important;
+  column-gap: 6px !important;
+  justify-items: start !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown::before {
+  grid-area: icon !important;
+  display: block !important;
+  content: "" !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-digits {
+  grid-area: value !important;
+  text-align: left !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
+  grid-area: label !important;
+  text-align: left !important;
+  font-size: clamp(10px, 0.88vw, 12px) !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+    gap: 1px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown {
+    grid-template-columns: 14px minmax(0, 1fr) !important;
+    column-gap: 2px !important;
+  }
+}
+
+/* Ticket prize panel: narrower actions and contained divider. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 31%) !important;
+  gap: clamp(12px, 1.55vw, 16px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+  position: relative !important;
+  padding-inline: clamp(14px, 2vw, 22px) !important;
+  border-left: 0 !important;
+  overflow: hidden !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: clamp(22px, 4vw, 40px) !important;
+  bottom: clamp(22px, 4vw, 40px) !important;
+  width: 1px !important;
+  background: linear-gradient(180deg, transparent, rgba(255, 220, 124, 0.72) 14%, rgba(255, 220, 124, 0.72) 86%, transparent) !important;
+  pointer-events: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__cta,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__info {
+  width: min(86%, 280px) !important;
+  max-width: 280px !important;
+  justify-self: center !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 64%) minmax(94px, 36%) !important;
+    gap: 6px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+    padding-inline: 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel::before {
+    top: 12px !important;
+    bottom: 12px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__cta,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__info {
+    width: min(92%, 118px) !important;
+    max-width: 118px !important;
+  }
+}
+
+/* Ticket top pills belong to the right half. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket {
+  position: relative !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+  position: absolute !important;
+  left: calc(69% + clamp(6px, 0.8vw, 8px)) !important;
+  right: clamp(18px, 2.2vw, 28px) !important;
+  top: clamp(20px, 2.2vw, 28px) !important;
+  z-index: 8 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: clamp(8px, 1vw, 12px) !important;
+  min-width: 0 !important;
+  pointer-events: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__badge {
+  justify-self: start !important;
+  max-width: 100% !important;
+  min-height: clamp(28px, 3vw, 38px) !important;
+  padding-inline: clamp(12px, 1.4vw, 16px) !important;
+  font-size: clamp(10px, 1.15vw, 14px) !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__results-time {
+  justify-self: end !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  font-size: clamp(9px, 1.05vw, 13px) !important;
+  line-height: 1.05 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__content {
+  padding-top: clamp(20px, 2.5vw, 30px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+  padding-top: clamp(56px, 6vw, 72px) !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+    left: calc(64% + 3px) !important;
+    right: 7px !important;
+    top: 12px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 3px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__badge,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__results-time {
+    justify-self: center !important;
+    text-align: center !important;
+    font-size: 6px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__badge {
+    min-height: 18px !important;
+    padding-inline: 6px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__content {
+    padding-top: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+    padding-top: 34px !important;
+  }
+}
+
+/* Ticket buy-in pill stays green like the cash buy-in block. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pill:only-child {
+  border-color: rgba(66, 245, 157, 0.8) !important;
+  background:
+    linear-gradient(180deg, rgba(16, 60, 39, 0.86), rgba(5, 20, 17, 0.92)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(188, 255, 219, 0.12),
+    0 0 18px rgba(34, 197, 94, 0.2) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pill::before {
+  opacity: 1 !important;
+  filter: none !important;
+}

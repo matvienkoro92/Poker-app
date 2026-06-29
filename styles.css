@@ -5,14 +5,14 @@
 @import url("./styles-home.css?v=3.666");
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.687");
+@import url("./styles-raffles.css?v=3.692");
 @import url("./styles-daily-poker.css?v=3.666");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
-@import url("./styles-rating.css?v=3.674");
-@import url("./styles-hall.css?v=3.666");
+@import url("./styles-rating.css?v=3.675");
+@import url("./styles-hall.css?v=3.667");
 @import url("./styles-admin.css?v=3.666");
 @import url("./styles-player-crm.css?v=3.666");
 @import url("./styles-profile.css?v=3.677");
@@ -2545,6 +2545,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque--cash {
   background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748");
+  filter:
+    brightness(1.12)
+    saturate(1.18)
+    drop-shadow(0 0 8px rgba(255, 214, 83, 0.52))
+    drop-shadow(0 0 18px rgba(255, 112, 0, 0.38));
+  box-shadow:
+    0 0 0 1px rgba(255, 198, 63, 0.42),
+    0 0 18px rgba(255, 155, 24, 0.58),
+    0 0 34px rgba(255, 96, 0, 0.28);
 }
 
 .home-club-choice-plaque--vote {
@@ -2557,6 +2566,24 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque::after {
   display: none;
+}
+
+.home-club-choice-plaque--cash::before {
+  content: "";
+  position: absolute;
+  inset: 6px 7px;
+  z-index: 2;
+  display: block;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 190, 48, 0.38), transparent 32%),
+    linear-gradient(90deg, rgba(255, 115, 0, 0.2), rgba(255, 223, 89, 0.16) 54%, rgba(255, 119, 0, 0.12));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 221, 115, 0.62),
+    inset 0 0 18px rgba(255, 150, 18, 0.34),
+    0 0 18px rgba(255, 161, 35, 0.48);
+  opacity: 0.96;
+  pointer-events: none;
 }
 
 .home-club-choice-plaque span {
@@ -2643,7 +2670,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--cash .home-club-choice-plaque__text {
+  color: #fff8b8;
   font-size: inherit;
+  text-shadow:
+    0 2px 0 rgba(35, 12, 0, 0.98),
+    0 0 9px rgba(255, 251, 196, 0.7),
+    0 0 18px rgba(255, 156, 25, 0.5);
+}
+
+.home-club-choice-plaque--cash .home-club-choice-plaque__subtext {
+  border-color: rgba(255, 255, 217, 0.94);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.58), transparent 42%),
+    linear-gradient(180deg, #fff7a8 0%, #ffd847 48%, #ff9d11 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 0 10px rgba(255, 238, 129, 0.58),
+    0 0 20px rgba(255, 144, 17, 0.42);
+}
+
+.home-club-choice-plaque--cash .home-club-choice-plaque__count {
+  border-color: rgba(255, 255, 231, 0.98);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.78),
+    0 0 12px rgba(255, 246, 166, 0.86),
+    0 0 22px rgba(255, 151, 24, 0.68),
+    0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .home-club-choice-plaque--vote .home-club-choice-plaque__text {

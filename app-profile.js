@@ -681,7 +681,18 @@ function initProfilePublicShowcase() {
     });
     window.addEventListener("poker-pokerplus-status-change", function (event) {
       var detail = event && event.detail ? event.detail : {};
-      if (detail.level != null) {
+      if (detail.linked === false) {
+        profilePublicShowcaseApplyStatus(null);
+      } else if (detail.level != null && detail.points != null) {
+        profilePublicShowcaseApplyStatus({
+          points: detail.points,
+          level: detail.level,
+          nextLevel: detail.nextLevel != null ? detail.nextLevel : Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, (parseInt(detail.level, 10) || 0) + 1),
+          levelStart: detail.levelStart != null ? detail.levelStart : 0,
+          nextStart: detail.nextStart != null ? detail.nextStart : 0,
+          valuePercent: detail.valuePercent != null ? detail.valuePercent : 0,
+        });
+      } else if (detail.level != null && !profilePublicShowcaseStatus) {
         profilePublicShowcaseApplyStatus({
           points: null,
           level: detail.level,

@@ -443,9 +443,9 @@ function summerRatingPlayerArtCssUrl(nick) {
 
 function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art || art.place !== place) return "";
-  if (art.key === "пряник" || art.key === "pryanik2la") {
-    return "--summer-lower-art-" + place + "-size:6.2%;";
+  if (!art) return "";
+  if (place === 10 && (art.key === "пряник" || art.key === "pryanik2la")) {
+    return "--summer-lower-art-10-size:6.2%;";
   }
   return "";
 }

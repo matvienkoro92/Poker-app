@@ -186,7 +186,14 @@ function initProfilePokerPlus() {
     if (linked && p && (typeof pokerProfileStatusFromProfile === "function" || typeof pokerProfileStatusFromRake === "function")) {
       var total = p.totalCounter && typeof p.totalCounter === "object" ? p.totalCounter : (p.total_counter && typeof p.total_counter === "object" ? p.total_counter : null);
       var status = typeof pokerProfileStatusFromProfile === "function" ? pokerProfileStatusFromProfile(p, true) : pokerProfileStatusFromRake(total && total.fee != null ? total.fee : null);
-      if (status && status.level != null) detail.level = status.level;
+      if (status && status.level != null) {
+        detail.points = status.points;
+        detail.level = status.level;
+        detail.nextLevel = status.nextLevel;
+        detail.levelStart = status.levelStart;
+        detail.nextStart = status.nextStart;
+        detail.valuePercent = status.valuePercent;
+      }
     }
     try {
       window.dispatchEvent(new CustomEvent("poker-pokerplus-status-change", { detail: detail }));
