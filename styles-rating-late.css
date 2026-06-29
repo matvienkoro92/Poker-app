@@ -3044,7 +3044,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] #springRatingViewTotals.spring-rating-view-totals-stack {
-  margin-top: 92px;
+  margin-top: 18px;
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .spring-rating-view-totals-panel {
@@ -3067,7 +3067,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 @media (max-width: 640px) {
   .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] #springRatingViewTotals.spring-rating-view-totals-stack {
-    margin-top: 136px;
+    margin-top: 42px;
   }
 }
 
@@ -4579,7 +4579,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     var(--summer-lower-art-6, none) calc(33.7% + 4px) calc(78% + 7px) / 14.3% auto no-repeat,
     var(--summer-lower-art-7, none) 50.7% calc(77% + 4px) / 10.2% auto no-repeat,
     var(--summer-lower-art-8, none) 67.5% calc(76% + 4px) / 15.1% auto no-repeat,
-    var(--summer-lower-art-9, none) 84% calc(79% + 3px) / var(--summer-lower-art-9-size, 10.6%) auto no-repeat,
+    var(--summer-lower-art-9, none) 84% calc(79% + 3px) / var(--summer-lower-art-9-size, 6.2%) auto no-repeat,
     var(--summer-lower-art-10, none) 100% calc(77% + 4px) / 14.4% auto no-repeat;
   transform: translateY(var(--summer-rating-mobile-lower-podium-players-y, -48px));
   pointer-events: none;

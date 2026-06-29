@@ -445,7 +445,16 @@ function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art || art.place !== place) return "";
   if (art.key === "пряник" || art.key === "pryanik2la") {
-    return "--summer-lower-art-" + place + "-size:7.4%;";
+    return "--summer-lower-art-" + place + "-size:6.2%;";
+  }
+  return "";
+}
+
+function summerRatingTop3ArtSizeStyle(slotName, nick) {
+  var art = pokerGetSummerRatingPlayerArt(nick);
+  if (!art) return "";
+  if (art.key === "мистерfox") {
+    return "--summer-top3-art-" + slotName + "-size:18%;";
   }
   return "";
 }
@@ -2422,8 +2431,11 @@ function initWinterRating() {
     var podiumHtml = titleText ? "<div class=\"spring-rating-top3__title\">" + escapeHtmlRating(titleText) + "</div>" : "";
     var podiumStyle =
       "--summer-top3-art-left:" + summerRatingPlayerArtCssUrl(top3[0] && top3[0].nick) + ";" +
+      summerRatingTop3ArtSizeStyle("left", top3[0] && top3[0].nick) +
       "--summer-top3-art-center:" + summerRatingPlayerArtCssUrl(top3[1] && top3[1].nick) + ";" +
-      "--summer-top3-art-right:" + summerRatingPlayerArtCssUrl(top3[2] && top3[2].nick) + ";";
+      summerRatingTop3ArtSizeStyle("center", top3[1] && top3[1].nick) +
+      "--summer-top3-art-right:" + summerRatingPlayerArtCssUrl(top3[2] && top3[2].nick) + ";" +
+      summerRatingTop3ArtSizeStyle("right", top3[2] && top3[2].nick);
     podiumHtml += "<div class=\"spring-rating-top3__podium\" style=\"" + podiumStyle.replace(/"/g, "&quot;") + "\">";
     for (var pj = 0; pj < 3; pj++) {
       var r = top3[pj];
