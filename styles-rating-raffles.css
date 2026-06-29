@@ -9794,3 +9794,66 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-
   opacity: 1 !important;
   filter: none !important;
 }
+
+/* Ticket prize side should mirror the cash raffle prize panel. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+  padding-top: clamp(4px, 0.7vw, 8px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-pills {
+  width: min(100%, 340px) !important;
+  justify-self: center !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+    padding-top: 8px !important;
+  }
+}
+
+/* Ticket fact blocks: keep labels readable in one or two lines. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits {
+  font-size: clamp(14px, 1.05vw, 17px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count {
+  font-size: clamp(12px, 0.95vw, 15px) !important;
+  line-height: 1.02 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+  font-size: clamp(10px, 0.9vw, 13px) !important;
+  line-height: 1.04 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
+  font-size: clamp(8px, 0.72vw, 10px) !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access-line {
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+}

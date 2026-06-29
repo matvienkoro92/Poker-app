@@ -426,14 +426,12 @@ function pokerHomeFormatCompactRaffleSum(rub) {
   return sign + String(abs).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
 }
 
-var POKER_HOME_REFERRAL_PROMO_RAFFLE_PRIZE_RUB = 10000;
-
 function updateRaffleBadge(activeCount, activeTotalRub) {
   var count = 0;
   var totalRub = 0;
   if (Array.isArray(activeCount)) {
-    count = activeCount.length + 1;
-    totalRub = pokerHomeRafflesTotalPrize(activeCount) + POKER_HOME_REFERRAL_PROMO_RAFFLE_PRIZE_RUB;
+    count = activeCount.length;
+    totalRub = pokerHomeRafflesTotalPrize(activeCount);
   } else if (typeof activeCount === "number") {
     count = Math.max(0, Math.floor(activeCount));
     totalRub = Math.max(0, Number(activeTotalRub) || 0);

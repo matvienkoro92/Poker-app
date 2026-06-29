@@ -7950,8 +7950,8 @@ body.club-choice-vote-open {
   --seat-monkey-boost: 1.2;
   --seat-face-x: 1;
   --seat-label-x: 50%;
-  --seat-label-y: -2px;
-  --seat-label-transform: translate(-50%, -100%);
+  --seat-label-bottom: 0px;
+  --seat-label-transform: translate(-50%, 0);
   --seat-nudge-x: 0px;
   --seat-nudge-y: 0px;
   transform: translate(-50%, -58%);
@@ -8052,7 +8052,7 @@ body.club-choice-vote-open {
 .private-cash-modal__table-seat-label {
   position: absolute;
   left: var(--seat-label-x);
-  top: var(--seat-label-y);
+  bottom: var(--seat-label-bottom);
   z-index: 3;
   display: grid;
   justify-items: center;
@@ -8135,8 +8135,6 @@ body.club-choice-vote-open {
   --seat-rotate: -10deg;
   --seat-scale: 0.97;
   --seat-label-x: 61%;
-  --seat-label-y: 82%;
-  --seat-label-transform: translate(-50%, -50%);
   --seat-nudge-x: -6px;
   --seat-nudge-y: 14px;
 }

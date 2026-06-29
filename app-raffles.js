@@ -2125,12 +2125,13 @@ function initRaffles() {
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
         var resultsTimePanelText = activeRaffleResultsTimePanelText(raffle);
         var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
-        var moveHeadToPrize = isCashPrize;
+        var moveHeadToPrize = isCashPrize || !knockoutCard;
         var badgeText = knockoutCard ? "Главный розыгрыш" : activeRaffleBadgeText(raffle);
-        var prizeTopPillsHtml = moveHeadToPrize && resultsTimePanelText
+        var prizePanelPillText = resultsTimePanelText || badgeText;
+        var prizeTopPillsHtml = moveHeadToPrize && prizePanelPillText
           ? '<span class="raffles-active-chooser__prize-pills">' +
             '<span class="raffles-active-chooser__results-time raffles-active-chooser__results-time--panel">' +
-            escapeHtml(resultsTimePanelText) +
+            escapeHtml(prizePanelPillText) +
             "</span>" +
             "</span>"
           : "";

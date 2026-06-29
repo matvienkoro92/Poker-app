@@ -892,6 +892,67 @@ if (chatUserModalEl) {
       return count;
     }).catch(function () { return 0; });
   }
+  function chatUserModalPickNumberFromObject(source, keys) {
+    if (!source || typeof source !== "object") return 0;
+    for (var i = 0; i < keys.length; i++) {
+      var value = source[keys[i]];
+      if (value == null || value === "") continue;
+      var n = parseInt(String(value).replace(/[^\d-]/g, ""), 10);
+      if (n === n && n > 0) return n;
+    }
+    return 0;
+  }
+  function chatUserModalPrivateCash2040PlayedCount(ratingNick, profileData, userId) {
+    var keys = [
+      "privateCash2040Played",
+      "privateCash2040PlayedCount",
+      "privateCash20_40Played",
+      "privateCash20_40PlayedCount",
+      "privateCashPlayed2040",
+      "privateCashPlayed20_40",
+      "clubPrivateCash2040Played",
+      "clubPrivateCash2040PlayedCount",
+      "private_cash_2040_played",
+      "private_cash_2040_played_count",
+      "private_cash_2040_count",
+      "private_cash_played_2040",
+      "cash2040Played",
+      "cash2040PlayedCount",
+      "cash20_40Played",
+      "cash20_40PlayedCount"
+    ];
+    var sources = [
+      profileData,
+      profileData && profileData.totalCounter,
+      profileData && profileData.total_counter,
+      profileData && profileData.achievements,
+      profileData && profileData.privateCash,
+      profileData && profileData.private_cash,
+      profileData && profileData.cashGames,
+      profileData && profileData.cash_games
+    ];
+    for (var i = 0; i < sources.length; i++) {
+      var count = chatUserModalPickNumberFromObject(sources[i], keys);
+      if (count > 0) return count;
+    }
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
+    var rows = typeof window !== "undefined" && Array.isArray(window.POKER_PRIVATE_CASH_RESULTS)
+      ? window.POKER_PRIVATE_CASH_RESULTS
+      : [];
+    if (!rows.length || (!targetKeys.length && !String(ratingNick || "").trim())) return 0;
+    return rows.reduce(function (sum, row) {
+      if (!row || row.cancelled || row.status === "cancelled") return sum;
+      var stakes = String(row.stakes || row.blinds || row.limit || row.game || "").replace(/\s+/g, "").toLowerCase();
+      if (stakes && stakes.indexOf("20/40") === -1 && stakes.indexOf("20-40") === -1 && stakes.indexOf("2040") === -1) return sum;
+      var players = Array.isArray(row.players) ? row.players : Array.isArray(row.participants) ? row.participants : [];
+      if (players.length) {
+        return sum + (players.some(function (player) {
+          return chatUserModalRaffleRowsMatch(player, targetKeys, ratingNick);
+        }) ? 1 : 0);
+      }
+      return sum + (chatUserModalRaffleRowsMatch(row, targetKeys, ratingNick) ? 1 : 0);
+    }, 0);
+  }
   function chatUserModalNormalizeClubAdminText(value) {
     return String(value || "").trim().toLowerCase().replace(/ё/g, "е").replace(/^@+/, "");
   }
@@ -953,6 +1014,7 @@ if (chatUserModalEl) {
   }
   function getChatUserModalAchievementMetricsReady(ratingNick, profileData, userId, isSelfProfile) {
     var isClubAdmin = chatUserModalIsClubAdminUser(ratingNick, profileData, userId);
+    var privateCash2040Played = chatUserModalPrivateCash2040PlayedCount(ratingNick, profileData, userId);
     if (isClubAdmin) {
       return Promise.resolve({
         tournaments: null,
@@ -960,6 +1022,7 @@ if (chatUserModalEl) {
         respect: null,
         friends: null,
         referrals: null,
+        privateCash2040Played: privateCash2040Played,
         isClubAdmin: true,
         isSelfProfile: !!isSelfProfile,
       });
@@ -977,6 +1040,7 @@ if (chatUserModalEl) {
         respect: parts && parts[2] != null ? parts[2] : null,
         friends: parts && parts[3] != null ? parts[3] : null,
         referrals: parts && parts[4] != null ? parts[4] : null,
+        privateCash2040Played: privateCash2040Played,
         isClubAdmin: false,
         isSelfProfile: !!isSelfProfile,
       };
@@ -994,6 +1058,7 @@ if (chatUserModalEl) {
     if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
+    if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.png" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };
@@ -1038,6 +1103,7 @@ if (chatUserModalEl) {
     if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return "Дается за топ-2 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
     if (key.indexOf("чемпион месяца") >= 0) return "Дается за топ-1 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
     if (key.indexOf("золот") >= 0) return "Считаются победы игрока в розыгрышах клуба. У достижения есть уровни по количеству выигранных розыгрышей.";
+    if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return "Считаются сыгранные сессии приватного клубного кеша 20/40. Результаты будут попадать из блока результатов в разделе «Приватный кеш». Уровни: 1, 5, 15, 30, 50 и 100 сессий.";
     if (key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
     if (key.indexOf("команд") >= 0) return "Считаются принятые друзья в профиле игрока. У достижения есть уровни по размеру покерного круга.";
     if (key.indexOf("амбассад") >= 0) return "Считаются приглашенные игроки по реферальной системе клуба. У достижения есть уровни по количеству приглашенных.";
@@ -1438,6 +1504,21 @@ if (chatUserModalEl) {
           ],
           unit: "приглашенных",
           lockedLabel: metrics.referrals == null ? "Только в своем профиле" : "Нет приглашенных",
+        },
+      }) +
+      chatUserModalAchievementCardHtml("♣", "Сыграл приватный клубный кеш 20/40", [], {
+        tier: {
+          value: metrics.privateCash2040Played || 0,
+          tiers: [
+            { value: 1, label: "1 сессия" },
+            { value: 5, label: "5 сессий" },
+            { value: 15, label: "15 сессий" },
+            { value: 30, label: "30 сессий" },
+            { value: 50, label: "50 сессий" },
+            { value: 100, label: "100 сессий" },
+          ],
+          unit: "сессий",
+          lockedLabel: "Нет сессий",
         },
       }) +
       chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
