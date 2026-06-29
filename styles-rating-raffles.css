@@ -9857,3 +9857,81 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-
     line-height: 1 !important;
   }
 }
+
+/* Final compact pass for ticket raffles: match cash-card density. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+  min-height: clamp(440px, 44vw, 500px) !important;
+  padding: clamp(18px, 2vw, 26px) clamp(20px, 2.4vw, 30px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body {
+  grid-template-columns: minmax(0, 57%) minmax(210px, 43%) !important;
+  gap: clamp(10px, 1.2vw, 14px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__content {
+  gap: clamp(7px, 0.8vw, 10px) !important;
+  padding-top: 0 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+  font-size: clamp(30px, 3.4vw, 42px) !important;
+  line-height: 0.92 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+  font-size: clamp(15px, 1.45vw, 20px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+  min-height: clamp(48px, 4.7vw, 58px) !important;
+  padding: clamp(7px, 0.8vw, 10px) clamp(11px, 1.1vw, 14px) !important;
+  font-size: clamp(18px, 1.85vw, 25px) !important;
+  line-height: 0.96 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+  gap: clamp(6px, 0.65vw, 8px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+  min-height: clamp(54px, 5.2vw, 66px) !important;
+  padding: clamp(6px, 0.7vw, 8px) clamp(7px, 0.85vw, 10px) !important;
+  gap: 2px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+  font-size: clamp(8px, 0.72vw, 10px) !important;
+  line-height: 0.98 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits {
+  font-size: clamp(17px, 1.55vw, 22px) !important;
+  line-height: 0.98 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count {
+  font-size: clamp(14px, 1.25vw, 18px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+  font-size: clamp(12px, 1.05vw, 15px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-panel {
+  padding-top: clamp(4px, 0.7vw, 8px) !important;
+  padding-bottom: clamp(12px, 1.4vw, 18px) !important;
+}
