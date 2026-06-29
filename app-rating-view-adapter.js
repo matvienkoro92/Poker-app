@@ -441,6 +441,15 @@ function summerRatingPlayerArtCssUrl(nick) {
   return 'url("' + String(art.src).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '")';
 }
 
+function summerRatingLowerArtSizeStyle(place, nick) {
+  var art = pokerGetSummerRatingPlayerArt(nick);
+  if (!art || art.place !== place) return "";
+  if (art.key === "пряник" || art.key === "pryanik2la") {
+    return "--summer-lower-art-" + place + "-size:7.4%;";
+  }
+  return "";
+}
+
 function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {
   if (!modal) return;
   var artWrap = document.getElementById("winterRatingPlayerModalArt") || modal.querySelector(".winter-rating-player-modal__art");
@@ -462,7 +471,10 @@ function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {
   }
   var nickEsc = escapeHtml(art.nick || nick || "");
   var srcEsc = escapeHtml(art.src);
-  var artKeyName = art.key === "мистерfox" ? "misterfox" : String(art.key || "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  var artKeyName =
+    art.key === "мистерfox" ? "misterfox" :
+    art.key === "пряник" || art.key === "pryanik2la" ? "pryanik" :
+    String(art.key || "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   var artKeyClass = artKeyName ? " winter-rating-player-modal__art--key-" + artKeyName : "";
   artWrap.hidden = false;
   artWrap.className = "winter-rating-player-modal__art winter-rating-player-modal__art--league-" + art.league + " winter-rating-player-modal__art--place-" + art.place + artKeyClass;
@@ -2328,6 +2340,7 @@ function initWinterRating() {
         var labelNickAttr = labelNick.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         var labelNickEsc = escapeHtmlRating(labelNick);
         labelsStyle += "--summer-lower-art-" + place + ":" + summerRatingPlayerArtCssUrl(labelNick) + ";";
+        labelsStyle += summerRatingLowerArtSizeStyle(place, labelNick);
         html += "<button type=\"button\" class=\"summer-rating-pedestal-hitbox summer-rating-pedestal-hitbox--place-" + place + "\" data-nick=\"" + labelNickAttr + "\" aria-label=\"Подробнее: " + labelNickEsc + "\"></button>";
         html += "<span class=\"summer-rating-pedestal-label summer-rating-pedestal-label--place-" + place + "\">" + labelNickEsc + "</span>";
       }

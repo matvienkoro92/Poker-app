@@ -253,6 +253,10 @@
   max-width: min(54%, 166px);
   max-height: 118px;
 }
+.winter-rating-player-modal__art--key-pryanik .winter-rating-player-modal__art-img {
+  max-width: min(46%, 142px);
+  max-height: 104px;
+}
 .winter-rating-player-modal__toolbar {
   display: flex;
   flex-wrap: wrap;

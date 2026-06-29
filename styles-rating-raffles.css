@@ -9377,3 +9377,72 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
     font-size: 8px !important;
   }
 }
+
+/* Ticket raffles must use the same readable facts layout as the other active cards. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 36%) !important;
+  grid-template-areas: "content prize" !important;
+  align-items: stretch !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__content {
+  grid-area: content !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto auto !important;
+  align-content: start !important;
+  gap: clamp(10px, 1.15vw, 14px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__detail-pills {
+  grid-row: 3 !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  max-width: 100% !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants {
+  grid-row: 4 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(9px, 1vw, 12px) !important;
+  min-width: 0 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+  min-width: 0 !important;
+  min-height: clamp(70px, 7.2vw, 92px) !important;
+  overflow: hidden !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__prize-panel {
+  grid-area: prize !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 60%) minmax(108px, 40%) !important;
+    grid-template-areas: "content prize" !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__content {
+    gap: 5px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants {
+    gap: 4px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__access {
+    min-height: 42px !important;
+  }
+}
