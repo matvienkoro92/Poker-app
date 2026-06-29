@@ -594,15 +594,17 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 .app.app--view-home .home-club-choice-plaque {
   height: 100% !important;
   min-width: 0 !important;
-  background-image: none !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 100% 100% !important;
 }
 
-.app.app--view-home .home-club-choice-plaque.home-club-choice-plaque--cash,
+.app.app--view-home .home-club-choice-plaque.home-club-choice-plaque--cash {
+  background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748") !important;
+}
+
 .app.app--view-home .home-club-choice-plaque.home-club-choice-plaque--vote {
-  background-image: none !important;
+  background-image: url("./assets/home-club-choice-vote-glow.png?v=3.748") !important;
 }
 
 [data-theme="light"] .app.app--view-home .card:has(.view--active[data-view="home"]) .card__header {

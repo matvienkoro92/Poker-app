@@ -24,7 +24,7 @@ var SUMMER_RATING_SEASON = {
   topLabel: "Топы лета",
   maxWinLabel: "за лето",
   top3WinsLabel: "за лето",
-  updatedLabel: "обновлено 21 июня",
+  updatedLabel: "обновлено 28 июня",
   finalAt: new Date(2026, 7, 31, 23, 59, 59, 999),
   finalText: "Итоги 31-го августа",
   loadingDataText: "Рейтинг загружается",
