@@ -9356,6 +9356,27 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   text-overflow: clip !important;
 }
 
+@media (min-width: 431px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
+    align-content: center !important;
+    min-height: 78px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text {
+    flex-wrap: wrap !important;
+    row-gap: 0 !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text span,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text span:last-child {
+    max-width: 100% !important;
+    white-space: nowrap !important;
+  }
+}
+
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
   --raffles-card-border: rgba(208, 88, 255, 0.94);
   background:
@@ -10168,6 +10189,35 @@ body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-a
 body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
   font-size: clamp(13px, 1.22vw, 17px) !important;
   line-height: 1 !important;
+}
+
+@media (min-width: 431px) {
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-side {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
+    display: inline !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 22px) !important;
+    overflow: visible !important;
+    font-size: 16px !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-icon {
+    flex: 0 0 auto !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+  }
 }
 
 body[data-view="raffles"] .raffles-active-chooser__access {
