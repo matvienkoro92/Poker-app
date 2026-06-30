@@ -1078,6 +1078,45 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffles-active-chooser--hidden ~ .raffles-notifications-setup {
   display: none !important;
 }
+.raffles-active-chooser--hidden ~ .raffles-private-cash-ad {
+  display: none !important;
+}
+.raffles-private-cash-ad {
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  height: auto;
+  margin: -2px 0 12px;
+  overflow: visible;
+}
+.raffles-private-cash-ad__button {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 7% 0 38% !important;
+  border-radius: 18px !important;
+  background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748") !important;
+  background-origin: border-box !important;
+  background-clip: border-box !important;
+  background-position: left center !important;
+  background-size: 100% 100% !important;
+}
+.raffles-private-cash-ad__button::before {
+  display: none !important;
+}
+.raffles-private-cash-ad__button .home-club-choice-plaque__text {
+  justify-self: center !important;
+  font-size: clamp(15px, 3.5vw, 21px) !important;
+}
+.raffles-private-cash-ad__button .home-club-choice-plaque__subtext {
+  font-size: clamp(10px, 2.1vw, 13px) !important;
+}
+.raffles-private-cash-ad__button .home-club-choice-plaque__count {
+  top: clamp(10px, 2.4vw, 15px) !important;
+  right: clamp(11px, 2.7vw, 18px) !important;
+  width: clamp(23px, 5vw, 30px) !important;
+  height: clamp(23px, 5vw, 30px) !important;
+  font-size: clamp(13px, 2.8vw, 18px) !important;
+}
 .raffles-notifications-setup {
   margin: -8px 0 20px;
   padding: 14px 16px;
@@ -9280,6 +9319,8 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
 
 /* Active raffle polish: cash groups and ticket cards share the same readable block system. */
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
+  --raffles-cash-tile-timer-width: clamp(112px, 28%, 156px);
+  --raffles-cash-tile-timer-gap: clamp(10px, 2vw, 18px);
   grid-template-columns: minmax(0, 1fr) !important;
   overflow: visible !important;
   border-color: rgba(66, 245, 157, 0.76) !important;
@@ -9297,24 +9338,28 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   align-items: center !important;
   justify-content: flex-start !important;
   gap: 0.35em !important;
-  width: 100% !important;
+  width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
   min-width: 0 !important;
-  padding-right: clamp(50px, 13vw, 112px) !important;
-  font-size: clamp(18px, 3.25vw, 28px) !important;
+  max-width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
+  padding-right: 0 !important;
+  font-size: clamp(17px, 2.65vw, 26px) !important;
   line-height: 1 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-wrap: balance !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text span,
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text span:last-child {
-  display: inline !important;
+  display: inline-block !important;
   width: auto !important;
-  max-width: none !important;
+  max-width: 100% !important;
   flex: 0 1 auto !important;
   font-size: inherit !important;
   line-height: inherit !important;
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-side {
@@ -9332,7 +9377,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   position: absolute !important;
   right: 14px !important;
   top: 50% !important;
-  width: clamp(108px, 23%, 132px) !important;
+  width: var(--raffles-cash-tile-timer-width) !important;
   height: calc(100% - 16px) !important;
   transform: translateY(-50%) !important;
 }
@@ -10329,7 +10374,7 @@ body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-a
   overflow: visible !important;
   white-space: nowrap !important;
   text-align: center !important;
-  font-size: clamp(12px, 4.3vw, 22px) !important;
+  font-size: clamp(10px, 3.25vw, 16px) !important;
   line-height: 1 !important;
   letter-spacing: 0 !important;
 }
@@ -10340,6 +10385,154 @@ body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-a
 
 @media (min-width: 431px) {
   body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
-    font-size: clamp(14px, 1.25vw, 22px) !important;
+    font-size: clamp(12px, 1.05vw, 18px) !important;
   }
+}
+
+/* Mobile ticket raffle repair: keep title, result chip and fact blocks readable. */
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+    padding: 18px 18px 16px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 52%) minmax(128px, 48%) !important;
+    gap: 9px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+    left: 56% !important;
+    right: 12px !important;
+    top: 13px !important;
+    z-index: 5 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__results-time {
+    max-width: 100% !important;
+    padding: 5px 7px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+    max-width: 100% !important;
+    font-size: clamp(25px, 7.4vw, 31px) !important;
+    line-height: 0.92 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+    font-size: clamp(13px, 3.8vw, 16px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+    min-height: 56px !important;
+    padding: 8px 9px !important;
+    font-size: clamp(15px, 4.5vw, 19px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants {
+    gap: 6px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+    min-height: 62px !important;
+    padding: 6px 5px !important;
+    gap: 3px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count {
+    font-size: clamp(9px, 2.85vw, 12px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+    font-size: clamp(8px, 2.5vw, 11px) !important;
+    white-space: normal !important;
+  }
+}
+
+/* The miniapp can be rendered in a narrow app shell inside a wide browser viewport. */
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+  padding: 18px 18px 16px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
+  grid-template-columns: minmax(0, 52%) minmax(128px, 48%) !important;
+  gap: 9px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+  left: 56% !important;
+  right: 12px !important;
+  top: 13px !important;
+  z-index: 5 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__results-time {
+  max-width: 100% !important;
+  padding: 5px 7px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+  max-width: 100% !important;
+  font-size: clamp(24px, 6.8vw, 29px) !important;
+  line-height: 0.92 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+  font-size: clamp(13px, 3.8vw, 16px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+  min-height: 56px !important;
+  padding: 8px 7px !important;
+  font-size: clamp(12px, 3.45vw, 15px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants {
+  gap: 6px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+  min-height: 62px !important;
+  padding: 6px 5px !important;
+  gap: 3px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count {
+  font-size: clamp(7px, 2.05vw, 8.5px) !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits {
+  font-size: clamp(10px, 2.8vw, 12px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+  font-size: clamp(7.5px, 2.25vw, 10px) !important;
+  white-space: normal !important;
 }

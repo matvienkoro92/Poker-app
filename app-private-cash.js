@@ -7,6 +7,7 @@
   var bodyEl = null;
   var statusEl = null;
   var state = null;
+  var buttonState = null;
   var loading = false;
   var activeTab = "signup";
   var editingEventId = "";
@@ -140,6 +141,17 @@
     if (value === "active") return "Открыта запись";
     if (value === "finished") return "Игра завершена";
     return "Запись закрыта";
+  }
+
+  function displayBuyIn(value) {
+    return String(value || "").trim().replace(/^вход\s*/i, "").trim();
+  }
+
+  function formatPrivateCashDescription(value) {
+    return String(value || "")
+      .trim()
+      .replace(/\s*-\s*(?=[A-Za-zА-Яа-яЁё0-9])/g, "\n-")
+      .replace(/^\n+/, "");
   }
 
   function formatDate(raw) {
@@ -366,8 +378,17 @@
       .then(function (res) { return res.json(); });
   }
 
-  function updateHomeButton(data) {
-    var button = document.getElementById("privateCashSignupOpen");
+  function privateCashOpenButtons() {
+    var buttons = [];
+    var homeButton = document.getElementById("privateCashSignupOpen");
+    if (homeButton) buttons.push(homeButton);
+    Array.prototype.slice.call(document.querySelectorAll("[data-private-cash-open]")).forEach(function (button) {
+      if (buttons.indexOf(button) === -1) buttons.push(button);
+    });
+    return buttons;
+  }
+
+  function updatePrivateCashButton(button, data) {
     if (!button || !data || !data.ok) return;
     var activeEvent = data.activeEvent && data.activeEvent.status === "active" ? data.activeEvent : null;
     var active = !!activeEvent;
@@ -386,6 +407,14 @@
     }
     if (count) count.textContent = active ? "1" : "";
     button.setAttribute("aria-label", started ? "Стол приватного кеша играет сейчас" : active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
+  }
+
+  function updateHomeButton(data) {
+    if (!data || !data.ok) return;
+    buttonState = data;
+    privateCashOpenButtons().forEach(function (button) {
+      updatePrivateCashButton(button, data);
+    });
   }
 
   function resetHomeButtonBeforeLoad(button) {
@@ -596,10 +625,6 @@
 
   function renderRules() {
     return '<section class="private-cash-modal__rules" aria-label="Условия записи">' +
-      '<div class="private-cash-modal__rule">' +
-        '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--money" aria-hidden="true"></span>' +
-        '<p>Админ примет вашу заявку только если у вас есть 5 000 ₽ на счете на вход.</p>' +
-      '</div>' +
       '<div class="private-cash-modal__rule">' +
         '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--card" aria-hidden="true"></span>' +
         '<p>Если вы записались и не пришли, вы получаете желтую карточку.</p>' +
@@ -912,13 +937,13 @@
             '<span>Ставки</span><strong>' + escapeHtml(event.stakes) + '</strong>' +
           '</div>' +
           (event.gameType ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вид игры</span><strong>' + escapeHtml(event.gameType) + '</strong></div>' : '') +
-          (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(event.buyIn) + '</strong></div>' : '') +
+          (event.buyIn ? '<div class="private-cash-modal__meta private-cash-modal__meta--game"><span>Вход</span><strong>' + escapeHtml(displayBuyIn(event.buyIn)) + '</strong></div>' : '') +
           '<div class="private-cash-modal__meta private-cash-modal__meta--access"><span>Доступ</span><strong>' + escapeHtml(accessLevel > 0 ? "Ур. " + accessLevel + "+" : "Все") + '</strong></div>' +
         '</div>' +
       '</section>' +
       renderAdminEditForm(event) +
       renderAdminStatusActions(event) +
-      (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
+      (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(formatPrivateCashDescription(event.description)) + '</p>' : '') +
       renderPrivateCashHero(event) +
       renderSeatsLeft(event) +
       renderEventBonuses(event.combinations) +
@@ -1261,10 +1286,32 @@
   }
 
   function bind() {
-    var button = document.getElementById("privateCashSignupOpen");
-    if (!button) return;
-    button.addEventListener("click", openModal);
-    resetHomeButtonBeforeLoad(button);
+    privateCashOpenButtons().forEach(function (button) {
+      resetHomeButtonBeforeLoad(button);
+    });
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("#privateCashSignupOpen, [data-private-cash-open]") : null;
+      if (!button) return;
+      event.preventDefault();
+      openModal();
+    });
+    if (window.MutationObserver) {
+      new MutationObserver(function (mutations) {
+        var shouldSync = mutations.some(function (mutation) {
+          return Array.prototype.slice.call(mutation.addedNodes || []).some(function (node) {
+            return node && node.nodeType === 1 && (
+              (node.matches && node.matches("[data-private-cash-open]")) ||
+              (node.querySelector && node.querySelector("[data-private-cash-open]"))
+            );
+          });
+        });
+        if (!shouldSync) return;
+        privateCashOpenButtons().forEach(function (button) {
+          if (buttonState) updatePrivateCashButton(button, buttonState);
+          else resetHomeButtonBeforeLoad(button);
+        });
+      }).observe(document.body, { childList: true, subtree: true });
+    }
     refreshHomeButtonStatus();
   }
 

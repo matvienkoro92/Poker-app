@@ -2159,7 +2159,7 @@ function initRaffles() {
           '" style="--raffles-participants-fill: ' +
           escapeHtml(activeRaffleParticipantsScaleFill(participantCount)) +
           '%"><span class="raffles-active-chooser__participants-track" aria-hidden="true"><span></span></span><span class="raffles-active-chooser__participants-side"><span class="raffles-active-chooser__participants-count">' +
-          escapeHtml("Участников: " + participantCount) +
+          escapeHtml(participantCount + " " + participantWord) +
           '</span><span class="raffles-active-chooser__participants-icon" aria-hidden="true">👥</span></span>' +
           "</span>";
         var timerHtml = isCashPrize && hasResultBatches ? "" : activeRaffleCountdownHtml(endDate, endMs);

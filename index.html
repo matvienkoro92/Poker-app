@@ -301,7 +301,7 @@
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/chat-profile-default-hero-male.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/chat-profile-default-hero-female.webp?v=3.001" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.770" />
+    <link rel="stylesheet" href="./styles.css?v=3.783" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -1284,6 +1284,13 @@
                     </span>
                   </button>
                 </div>
+                <div class="daily-poker__private-cash" aria-label="Приватный кеш">
+                  <button type="button" class="home-club-choice-plaque home-club-choice-plaque--cash daily-poker__private-cash-btn" data-private-cash-open aria-label="Открыть приватный кеш">
+                    <span class="home-club-choice-plaque__count" aria-label="Открытых столов"></span>
+                    <span class="home-club-choice-plaque__text">Приватный кеш</span>
+                    <small class="home-club-choice-plaque__subtext">Открыть запись</small>
+                  </button>
+                </div>
                 <div class="daily-poker__subscribe-requirements" aria-label="Условия участия" hidden>
                   <p class="daily-poker__subscribe-title">Чтобы участвовать, подпишитесь</p>
                   <ul class="daily-poker__subscribe-list">
@@ -1316,7 +1323,7 @@
           <div class="view" data-view="plasterer-game" data-html-fragment="./html-fragments/plasterer-game.html" data-html-fragment-view="plasterer-game"></div>
 
           <!-- Розыгрыши -->
-          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=3.594" data-html-fragment-view="raffles"></div>
+          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=3.595" data-html-fragment-view="raffles"></div>
 
           <!-- Научиться играть — хаб: видео-уроки -->
           <div class="view" data-view="learn-play-hub">
@@ -1723,12 +1730,12 @@
     <script defer data-poker-eager-domain="app" src="./app-raffles-public.js?v=3.666"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-active-view.js?v=3.678"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-formatters.js?v=3.666"></script>
-    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.679"></script>
+    <script defer data-poker-eager-domain="app" src="./app-raffles.js?v=3.680"></script>
     <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=3.666"></script>
     <script defer src="./app-video-lessons-modals.js?v=3.666"></script>
     <script defer src="./app-equilator.js?v=3.666"></script>
     <script defer src="./app-club-choice-vote.js?v=3.666"></script>
-    <script defer src="./app-private-cash.js?v=3.692"></script>
+    <script defer src="./app-private-cash.js?v=3.694"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.666"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.666"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-summer-runtime.js?v=3.666"></script>
