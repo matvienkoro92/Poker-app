@@ -3229,8 +3229,9 @@
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
     renderBroadcastLinkTargetOptions();
-    syncBroadcastButtonMode();
     var broadcastButtonEnabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
+    if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;
+    syncBroadcastButtonMode();
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.addEventListener("change", syncBroadcastButtonMode);
     var broadcastLinkTarget = document.getElementById("playerCrmBroadcastLinkTarget");
     if (broadcastLinkTarget) broadcastLinkTarget.addEventListener("change", function () { syncBroadcastAppLinkTemplate(true); });
