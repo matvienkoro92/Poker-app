@@ -136,6 +136,40 @@
     return m[3] + "." + m[2] + "." + m[1];
   }
 
+  function privateCashEventDateMs(event) {
+    var date = String(event && event.date || "").trim();
+    var time = String(event && event.time || "").trim();
+    if (!date || !time) return 0;
+    var d = new Date(date + "T" + time + ":00");
+    var ms = d.getTime();
+    return Number.isFinite(ms) ? ms : 0;
+  }
+
+  function formatPrivateCashCountdown(msLeft) {
+    if (!Number.isFinite(msLeft) || msLeft <= 0) return "Игра уже началась";
+    var totalMinutes = Math.ceil(msLeft / 60000);
+    var days = Math.floor(totalMinutes / 1440);
+    var hours = Math.floor((totalMinutes % 1440) / 60);
+    var minutes = totalMinutes % 60;
+    if (days > 0) return "Осталось " + days + "д " + hours + "ч";
+    if (hours > 0) return "Осталось " + hours + "ч " + minutes + "м";
+    return "Осталось " + minutes + "м";
+  }
+
+  function updatePrivateCashCountdowns() {
+    if (!modal || !modal.classList.contains("private-cash-modal--open")) return;
+    Array.prototype.slice.call(modal.querySelectorAll("[data-private-cash-countdown]")).forEach(function (el) {
+      var endMs = Number(el.getAttribute("data-private-cash-countdown")) || 0;
+      el.textContent = formatPrivateCashCountdown(endMs - Date.now());
+    });
+  }
+
+  window.setInterval(updatePrivateCashCountdowns, 1000);
+
+  function eventTablePassword(event) {
+    return String(event && (event.tablePassword || event.table_password || event.password) || "7788").trim() || "7788";
+  }
+
   function bonusLines(raw) {
     return String(raw || "")
       .split(/\r?\n/)
@@ -436,6 +470,7 @@
       '</select></label>' +
       '<label>Ставки<input name="stakes" maxlength="80" placeholder="Например: 50/100 ₽" required></label>' +
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
+      '<label>Пароль стола<input name="tablePassword" maxlength="40" value="7788" placeholder="Например: 7788"></label>' +
       '<label>Уровень доступа<select name="accessLevel">' +
         renderAccessLevelOptions(1) +
       '</select></label>' +
@@ -471,6 +506,7 @@
         '<label>Ставки<input name="stakes" maxlength="80" value="' + escapeHtml(event.stakes) + '" required></label>' +
         '<label>Вход<input name="buyIn" maxlength="80" value="' + escapeHtml(event.buyIn) + '" required></label>' +
       '</div>' +
+      '<label>Пароль стола<input name="tablePassword" maxlength="40" value="' + escapeHtml(eventTablePassword(event)) + '" placeholder="Например: 7788"></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="2" placeholder="Формат, место, условия">' + escapeHtml(event.description || "") + '</textarea></label>' +
       '<label>Бонусы<textarea name="combinations" maxlength="900" rows="3" placeholder="5000 ₽ | за роял">' + escapeHtml(event.combinations || "") + '</textarea></label>' +
       '<div class="private-cash-modal__form-actions">' +
@@ -673,30 +709,33 @@
   }
 
   function renderCashSeatListItem(row) {
-    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.manual ? "" : row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+    var status = row && row.status === "approved" ? "approved" : "pending";
+    var label = status === "approved" ? "Подтвержден" : "Ожидает подтверждения";
+    return '<li><button type="button" class="private-cash-modal__seat-list-btn private-cash-modal__seat-list-btn--' + escapeHtml(status) + '" data-private-cash-profile="' + escapeHtml(row.manual ? "" : row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
       '<strong>' + escapeHtml(seatName(row)) + '</strong>' +
       '<span>' + escapeHtml(seatMetaText(row)) + '</span>' +
+      '<em>' + escapeHtml(label) + '</em>' +
     '</button></li>';
   }
 
   function renderCashSeatLists(event) {
-    var approved = visibleSeatRows(event).filter(function (row) {
-      return row && row.status === "approved";
+    var rows = visibleSeatRows(event).filter(function (row) {
+      return row && row.status !== "rejected";
     });
     var house = houseSeat(event);
-    if (house) approved.unshift(house);
-    if (!approved.length) return "";
-    var inGame = approved.filter(function (row) {
+    if (house) rows.unshift(house);
+    if (!rows.length) return "";
+    var inGame = rows.filter(function (row) {
       return rowSeatGroup(event, row) !== "reserve";
     });
-    var reserve = approved.filter(function (row) {
+    var reserve = rows.filter(function (row) {
       return rowSeatGroup(event, row) === "reserve";
     });
     if (!inGame.length && !reserve.length) return "";
-    return '<section class="private-cash-modal__seat-lists" aria-label="Одобренные игроки">' +
+    return '<section class="private-cash-modal__seat-lists" aria-label="Игроки в приватном кеше">' +
       '<div class="private-cash-modal__seat-list private-cash-modal__seat-list--game">' +
         '<h3>В игре:</h3>' +
-        (inGame.length ? '<ul>' + inGame.map(renderCashSeatListItem).join("") + '</ul>' : '<p>Пока нет подтвержденных.</p>') +
+        (inGame.length ? '<ul>' + inGame.map(renderCashSeatListItem).join("") + '</ul>' : '<p>Пока нет игроков.</p>') +
       '</div>' +
       '<div class="private-cash-modal__seat-list private-cash-modal__seat-list--reserve">' +
         '<h3>В резерве:</h3>' +
@@ -786,6 +825,8 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     var accessLevel = Math.max(0, Math.floor(Number(event && event.accessLevel) || 0));
+    var countdownMs = privateCashEventDateMs(event);
+    var tablePassword = eventTablePassword(event);
     var adminEditButton = state && state.isAdmin
       ? '<button type="button" class="private-cash-modal__summary-edit" data-private-cash-edit="' + escapeHtml(event.id) + '" aria-expanded="' + (String(editingEventId || "") === String(event.id || "") ? "true" : "false") + '">Редактировать</button>'
       : "";
@@ -794,7 +835,11 @@
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
           '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
           '<div class="private-cash-modal__summary-actions">' +
-            '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
+            '<span class="private-cash-modal__summary-status-stack">' +
+              '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
+              (countdownMs ? '<span class="private-cash-modal__summary-countdown" data-private-cash-countdown="' + escapeHtml(countdownMs) + '">' + escapeHtml(formatPrivateCashCountdown(countdownMs - Date.now())) + '</span>' : '') +
+              '<span class="private-cash-modal__summary-password"><span>Пароль стола</span><strong>' + escapeHtml(tablePassword) + '</strong></span>' +
+            '</span>' +
             adminEditButton +
           '</div>' +
         '</div>' +
@@ -876,6 +921,7 @@
         gameType: form.elements.gameType.value,
         stakes: form.elements.stakes.value,
         buyIn: form.elements.buyIn.value,
+        tablePassword: form.elements.tablePassword ? form.elements.tablePassword.value : "7788",
         accessLevel: form.elements.accessLevel ? form.elements.accessLevel.value : "0",
         description: form.elements.description.value,
         combinations: form.elements.bonusText.value,
@@ -900,6 +946,7 @@
         gameType: form.elements.gameType.value,
         stakes: form.elements.stakes.value,
         buyIn: form.elements.buyIn.value,
+        tablePassword: form.elements.tablePassword ? form.elements.tablePassword.value : "7788",
         accessLevel: form.elements.accessLevel ? form.elements.accessLevel.value : "0",
         description: form.elements.description ? form.elements.description.value : "",
         combinations: form.elements.combinations ? form.elements.combinations.value : "",

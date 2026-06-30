@@ -8366,6 +8366,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__table-seat[data-seat-index="3"] {
+  --seat-face-x: -1;
   --seat-rotate: -8deg;
   --seat-scale: 1.01;
   --seat-nudge-x: 18px;
@@ -8381,7 +8382,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__table-seat[data-seat-index="5"] {
-  --seat-face-x: 1;
+  --seat-face-x: -1;
   --seat-rotate: -10deg;
   --seat-scale: 1.03;
   --seat-nudge-x: 0px;
@@ -8513,7 +8514,8 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__seat-list button strong,
-.private-cash-modal__seat-list button span {
+.private-cash-modal__seat-list button span,
+.private-cash-modal__seat-list button em {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -8530,6 +8532,28 @@ body.club-choice-vote-open {
   color: rgba(255, 232, 170, 0.72);
   font-size: 10px;
   font-weight: 850;
+}
+
+.private-cash-modal__seat-list button em {
+  justify-self: start;
+  max-width: 100%;
+  margin-top: 1px;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 216, 105, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 179, 43, 0.12);
+  color: #ffe58a;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__seat-list-btn--approved em {
+  border-color: rgba(77, 255, 139, 0.5);
+  background: rgba(22, 163, 74, 0.16);
+  color: #bbf7d0;
 }
 
 .private-cash-modal__seat-list--reserve button {
@@ -8628,8 +8652,62 @@ body.club-choice-vote-open {
 .private-cash-modal__summary-actions {
   display: flex;
   flex: 0 0 auto;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.private-cash-modal__summary-status-stack {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  min-width: 142px;
+}
+
+.private-cash-modal__summary-countdown {
+  display: block;
+  color: #ffe7ad;
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
+  white-space: nowrap;
+}
+
+.private-cash-modal__summary-password {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 217, 111, 0.86);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(180deg, rgba(146, 91, 10, 0.96), rgba(63, 36, 4, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(255, 181, 43, 0.3),
+    inset 0 1px 0 rgba(255, 245, 201, 0.28);
+  color: #fff3c9;
+  white-space: nowrap;
+}
+
+.private-cash-modal__summary-password span {
+  margin: 0;
+  color: rgba(255, 239, 196, 0.78);
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__summary-password strong {
+  color: #fff7cf;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .private-cash-modal__summary-edit {
