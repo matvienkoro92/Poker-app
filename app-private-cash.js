@@ -135,6 +135,12 @@
     return "Подал заявку";
   }
 
+  function eventStatusLabel(value) {
+    if (value === "active") return "Открыта запись";
+    if (value === "finished") return "Игра завершена";
+    return "Запись закрыта";
+  }
+
   function formatDate(raw) {
     var s = String(raw || "").trim();
     var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -531,6 +537,7 @@
         '<label>Статус<select name="status">' +
           '<option value="active"' + (event.status === "active" ? " selected" : "") + '>Открыта запись</option>' +
           '<option value="closed"' + (event.status === "closed" ? " selected" : "") + '>Закрыто</option>' +
+          '<option value="finished"' + (event.status === "finished" ? " selected" : "") + '>Игра завершена</option>' +
         '</select></label>' +
         '<label>Доступ<select name="accessLevel">' + renderAccessLevelOptions(event.accessLevel) + '</select></label>' +
       '</div>' +
@@ -547,6 +554,22 @@
         '<button type="button" class="private-cash-modal__ghost" data-private-cash-edit-cancel>Отмена</button>' +
       '</div>' +
     '</form>';
+  }
+
+  function renderAdminStatusActions(event) {
+    if (!state || !state.isAdmin || !event || !event.id) return "";
+    var actions = [];
+    if (event.status === "active") {
+      actions.push('<button type="button" class="private-cash-modal__status-action" data-private-cash-set-status="closed" data-private-cash-event="' + escapeHtml(event.id) + '">Закрыть запись</button>');
+    } else if (event.status === "closed") {
+      actions.push('<button type="button" class="private-cash-modal__status-action" data-private-cash-set-status="active" data-private-cash-event="' + escapeHtml(event.id) + '">Открыть запись</button>');
+    }
+    if (event.status !== "finished") {
+      actions.push('<button type="button" class="private-cash-modal__status-action private-cash-modal__status-action--finish" data-private-cash-set-status="finished" data-private-cash-event="' + escapeHtml(event.id) + '">Завершить игру</button>');
+    } else {
+      actions.push('<button type="button" class="private-cash-modal__status-action" data-private-cash-set-status="closed" data-private-cash-event="' + escapeHtml(event.id) + '">Вернуть в закрытую</button>');
+    }
+    return '<div class="private-cash-modal__admin-status-actions" aria-label="Управление записью">' + actions.join("") + '</div>';
   }
 
   function renderShareActions() {
@@ -817,7 +840,7 @@
         (my.status === "pending" ? '<button type="button" class="private-cash-modal__cancel-request" data-private-cash-cancel="' + escapeHtml(event.id) + '">Отменить заявку</button>' : '') +
       '</div>';
     }
-    if (event.status !== "active") return '<div class="private-cash-modal__notice">Запись закрыта.</div>';
+    if (event.status !== "active") return '<div class="private-cash-modal__notice">' + escapeHtml(event.status === "finished" ? "Игра завершена." : "Запись закрыта.") + '</div>';
     return '<div class="private-cash-modal__join-dock">' +
       '<button type="button" class="private-cash-modal__primary private-cash-modal__primary--wide" data-private-cash-join="' + escapeHtml(event.id) + '">' + (hasReserveOnlyJoin(event) ? "Записаться в резерв" : "Записаться") + '</button>' +
     '</div>';
@@ -843,9 +866,9 @@
         return '<article class="private-cash-modal__participant">' +
           '<div><strong>' + escapeHtml(adminParticipantName(row)) + '</strong>' +
             '<span>' + escapeHtml(row.manual ? "без профиля" : row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
+            '<em class="private-cash-modal__badge private-cash-modal__badge--' + escapeHtml(row.status) + '">' + escapeHtml(statusLabel(row.status)) + '</em>' +
             (row.warningCount ? '<small>Желтые карточки: ' + escapeHtml(row.warningCount) + '</small>' : '') + '</div>' +
           '<div class="private-cash-modal__participant-actions">' +
-            '<em class="private-cash-modal__badge private-cash-modal__badge--' + escapeHtml(row.status) + '">' + escapeHtml(statusLabel(row.status)) + '</em>' +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost" data-private-cash-approve="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Одобрить</button>') +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-reject="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Отклонить</button>') +
             (approved && !row.warningIssuedAt ? '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--warning" data-private-cash-warn="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Желтая</button>' : '') +
@@ -863,18 +886,18 @@
     var countdownMs = privateCashEventDateMs(event);
     var tablePassword = eventTablePassword(event);
     var adminEditButton = state && state.isAdmin
-      ? '<button type="button" class="private-cash-modal__summary-edit" data-private-cash-edit="' + escapeHtml(event.id) + '" aria-expanded="' + (String(editingEventId || "") === String(event.id || "") ? "true" : "false") + '">Редактировать</button>'
+      ? '<button type="button" class="private-cash-modal__summary-edit" data-private-cash-edit="' + escapeHtml(event.id) + '" aria-label="Редактировать запись" title="Редактировать" aria-expanded="' + (String(editingEventId || "") === String(event.id || "") ? "true" : "false") + '">✎</button>'
       : "";
     return '<article class="private-cash-modal__event">' +
       '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
+        '<div class="private-cash-modal__summary-status-stack">' +
+          '<em class="private-cash-modal__event-status private-cash-modal__event-status--' + escapeHtml(event.status || "closed") + '">' + escapeHtml(eventStatusLabel(event.status)) + '</em>' +
+          (countdownMs ? '<span class="private-cash-modal__summary-countdown" data-private-cash-countdown="' + escapeHtml(countdownMs) + '">' + escapeHtml(formatPrivateCashCountdown(countdownMs - Date.now())) + '</span>' : '') +
+        '</div>' +
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
           '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
           '<div class="private-cash-modal__summary-actions">' +
-            '<span class="private-cash-modal__summary-status-stack">' +
-              '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
-              (countdownMs ? '<span class="private-cash-modal__summary-countdown" data-private-cash-countdown="' + escapeHtml(countdownMs) + '">' + escapeHtml(formatPrivateCashCountdown(countdownMs - Date.now())) + '</span>' : '') +
-              '<span class="private-cash-modal__summary-password"><span>Пароль стола</span><strong>' + escapeHtml(tablePassword) + '</strong></span>' +
-            '</span>' +
+            '<span class="private-cash-modal__summary-password"><span>Пароль стола</span><strong>' + escapeHtml(tablePassword) + '</strong></span>' +
             adminEditButton +
           '</div>' +
         '</div>' +
@@ -888,6 +911,7 @@
         '</div>' +
       '</section>' +
       renderAdminEditForm(event) +
+      renderAdminStatusActions(event) +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderPrivateCashHero(event) +
       renderSeatsLeft(event) +
@@ -909,14 +933,40 @@
       createTabHtml +
       '<button type="button" class="private-cash-modal__tab' + (activeTab === "signup" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="signup" role="tab" aria-selected="' + (activeTab === "signup" ? "true" : "false") + '">Запись</button>' +
       '<button type="button" class="private-cash-modal__tab' + (activeTab === "results" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="results" role="tab" aria-selected="' + (activeTab === "results" ? "true" : "false") + '">Кеш-рейтинг</button>' +
+      '<button type="button" class="private-cash-modal__tab private-cash-modal__tab--icon' + (activeTab === "archive" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="archive" role="tab" aria-selected="' + (activeTab === "archive" ? "true" : "false") + '" aria-label="Архив" title="Архив">▤</button>' +
     '</div>';
   }
 
   function renderSignupTab(events) {
+    var activeEvents = (events || []).filter(function (event) {
+      return event && event.status === "active";
+    });
     return '<section class="private-cash-modal__events">' +
         renderPrivateCashPenaltyStatus() +
-        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
+        (activeEvents.length ? activeEvents.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
       '</section>';
+  }
+
+  function renderArchiveEvent(event) {
+    if (!event || !event.id) return "";
+    return '<details class="private-cash-modal__archive-item">' +
+      '<summary class="private-cash-modal__archive-summary">' +
+        '<span class="private-cash-modal__archive-date">' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time || "") + '</span>' +
+        '<span class="private-cash-modal__archive-meta">' + escapeHtml(eventStatusLabel(event.status)) + (event.gameType ? " · " + escapeHtml(event.gameType) : "") + '</span>' +
+      '</summary>' +
+      '<div class="private-cash-modal__archive-body">' +
+        renderEvent(event) +
+      '</div>' +
+    '</details>';
+  }
+
+  function renderArchiveTab(events) {
+    var archiveEvents = (events || []).filter(function (event) {
+      return event && event.status !== "active";
+    });
+    return '<section class="private-cash-modal__archive">' +
+      (archiveEvents.length ? archiveEvents.map(renderArchiveEvent).join("") : '<div class="private-cash-modal__empty private-cash-modal__empty--compact">Архив пока пуст.</div>') +
+    '</section>';
   }
 
   function renderPrivateCashPenaltyStatus() {
@@ -951,7 +1001,7 @@
     }
     if (activeTab === "create" && !state.isAdmin) activeTab = "signup";
     var events = state.events || [];
-    var content = activeTab === "create" ? renderAdminForm() : activeTab === "results" ? renderResultsTab() : renderSignupTab(events);
+    var content = activeTab === "create" ? renderAdminForm() : activeTab === "results" ? renderResultsTab() : activeTab === "archive" ? renderArchiveTab(events) : renderSignupTab(events);
     bodyEl.innerHTML =
       renderTabs() +
       renderTabPanel(content);
@@ -1029,7 +1079,7 @@
     var tab = event.target && event.target.closest ? event.target.closest("[data-private-cash-tab]") : null;
     if (tab) {
       var nextTab = tab.getAttribute("data-private-cash-tab");
-      activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : "signup";
+      activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : nextTab === "archive" ? "archive" : "signup";
       editingEventId = "";
       render();
       return;
@@ -1045,6 +1095,19 @@
     if (editCancel) {
       editingEventId = "";
       render();
+      return;
+    }
+    var setEventStatus = event.target && event.target.closest ? event.target.closest("[data-private-cash-set-status]") : null;
+    if (setEventStatus) {
+      var nextStatus = setEventStatus.getAttribute("data-private-cash-set-status") || "";
+      var statusEventId = setEventStatus.getAttribute("data-private-cash-event") || "";
+      if (nextStatus === "finished" && !window.confirm("Завершить приватную игру? Запись станет недоступна для игроков.")) return;
+      editingEventId = "";
+      postAction({
+        action: "setStatus",
+        eventId: statusEventId,
+        status: nextStatus,
+      });
       return;
     }
     var manualPick = event.target && event.target.closest ? event.target.closest("[data-private-cash-manual-pick]") : null;

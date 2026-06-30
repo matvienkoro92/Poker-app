@@ -7277,11 +7277,11 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__tabs--user {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 46px;
 }
 
 .private-cash-modal__tabs--admin {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 46px;
 }
 
 .private-cash-modal__tab {
@@ -7318,6 +7318,12 @@ body.club-choice-vote-open {
     0 0 18px rgba(255, 179, 42, 0.28);
 }
 
+.private-cash-modal__tab--icon {
+  font-size: 18px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .private-cash-modal__tab-panel {
   width: 100%;
   border: 1px solid rgba(255, 179, 43, 0.34);
@@ -7334,7 +7340,8 @@ body.club-choice-vote-open {
 
 .private-cash-modal__tab-panel > .private-cash-modal__form,
 .private-cash-modal__tab-panel > .private-cash-modal__events,
-.private-cash-modal__tab-panel > .private-cash-modal__results {
+.private-cash-modal__tab-panel > .private-cash-modal__results,
+.private-cash-modal__tab-panel > .private-cash-modal__archive {
   margin: 0;
 }
 
@@ -8691,6 +8698,83 @@ body.club-choice-vote-open {
   padding: 12px 14px 14px;
 }
 
+.private-cash-modal__archive {
+  display: grid;
+  gap: 8px;
+}
+
+.private-cash-modal__archive-item {
+  border: 1px solid rgba(255, 179, 43, 0.24);
+  border-radius: 14px;
+  background: rgba(6, 12, 23, 0.78);
+  overflow: hidden;
+}
+
+.private-cash-modal__archive-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 10px 12px;
+  color: #fff1bd;
+  cursor: pointer;
+  list-style: none;
+}
+
+.private-cash-modal__archive-summary::-webkit-details-marker {
+  display: none;
+}
+
+.private-cash-modal__archive-summary::after {
+  content: "›";
+  grid-column: 2;
+  grid-row: 1;
+  color: rgba(255, 232, 170, 0.74);
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.16s ease;
+}
+
+.private-cash-modal__archive-item[open] .private-cash-modal__archive-summary::after {
+  transform: rotate(-90deg);
+}
+
+.private-cash-modal__archive-date,
+.private-cash-modal__archive-meta {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.private-cash-modal__archive-date {
+  color: #fff3c9;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.private-cash-modal__archive-meta {
+  grid-column: 1 / -1;
+  color: rgba(255, 232, 170, 0.72);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__archive-body {
+  border-top: 1px solid rgba(255, 179, 43, 0.16);
+  padding: 0 10px 10px;
+}
+
+.private-cash-modal__archive-body .private-cash-modal__event {
+  padding-bottom: 0;
+}
+
 .private-cash-modal__event-head {
   display: flex;
   align-items: flex-start;
@@ -8700,6 +8784,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__summary {
+  position: relative;
   margin: 0 -14px 12px;
   border: 1px solid rgba(255, 179, 43, 0.24);
   border-radius: 16px;
@@ -8741,7 +8826,7 @@ body.club-choice-vote-open {
   line-height: 1;
 }
 
-.private-cash-modal__event-head em {
+.private-cash-modal__summary-status-stack em {
   flex: 0 0 auto;
   border: 1px solid rgba(45, 212, 112, 0.42);
   border-radius: 999px;
@@ -8754,21 +8839,38 @@ body.club-choice-vote-open {
   white-space: nowrap;
 }
 
+.private-cash-modal__summary-status-stack .private-cash-modal__event-status--closed {
+  border-color: rgba(251, 191, 36, 0.42);
+  background: rgba(245, 158, 11, 0.16);
+  color: #fde68a;
+}
+
+.private-cash-modal__summary-status-stack .private-cash-modal__event-status--finished {
+  border-color: rgba(148, 163, 184, 0.44);
+  background: rgba(71, 85, 105, 0.2);
+  color: #e2e8f0;
+}
+
 .private-cash-modal__summary-actions {
   display: grid;
-  grid-template-columns: minmax(0, auto) auto;
+  grid-template-columns: minmax(0, auto);
   flex: 0 0 auto;
   align-items: start;
-  gap: 8px 10px;
+  justify-items: end;
+  gap: 7px;
   min-width: 0;
+  padding-right: 36px;
 }
 
 .private-cash-modal__summary-status-stack {
   display: grid;
-  justify-items: end;
-  gap: 6px;
+  justify-items: center;
+  gap: 3px;
   min-width: 0;
-  max-width: 190px;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 0 38px 8px;
+  border-bottom: 1px solid rgba(255, 179, 43, 0.14);
 }
 
 .private-cash-modal__summary-countdown {
@@ -8776,10 +8878,10 @@ body.club-choice-vote-open {
   max-width: 100%;
   padding: 0 2px;
   color: #ffe7ad;
-  font-size: 9px;
+  font-size: clamp(10px, 2.3vw, 13px);
   font-weight: 1000;
-  line-height: 1.08;
-  text-align: right;
+  line-height: 1;
+  text-align: center;
   text-transform: uppercase;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
   white-space: normal;
@@ -8821,16 +8923,26 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__summary-edit {
-  align-self: start;
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
   border: 1px solid rgba(255, 190, 64, 0.62);
-  border-radius: 999px;
+  border-radius: 50%;
   background: rgba(255, 179, 43, 0.09);
   color: #ffe7ad;
   font: inherit;
-  font-size: 11px;
+  font-size: 17px;
   font-weight: 1000;
   line-height: 1;
-  padding: 7px 10px;
+  padding: 0;
   white-space: nowrap;
 }
 
@@ -8838,6 +8950,33 @@ body.club-choice-vote-open {
   border-color: rgba(45, 212, 112, 0.5);
   background: rgba(22, 163, 74, 0.16);
   color: #bbf7d0;
+}
+
+.private-cash-modal__admin-status-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: -2px -14px 12px;
+}
+
+.private-cash-modal__status-action {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid rgba(255, 190, 64, 0.48);
+  border-radius: 13px;
+  background: rgba(8, 14, 25, 0.88);
+  color: #ffe7ad;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1.08;
+  padding: 9px 10px;
+}
+
+.private-cash-modal__status-action--finish {
+  border-color: rgba(148, 163, 184, 0.52);
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
 }
 
 .private-cash-modal__summary-grid {
@@ -9117,7 +9256,8 @@ body.club-choice-vote-open {
 
 .private-cash-modal__participant strong,
 .private-cash-modal__participant span,
-.private-cash-modal__participant small {
+.private-cash-modal__participant small,
+.private-cash-modal__participant .private-cash-modal__badge {
   display: block;
 }
 
@@ -9170,9 +9310,9 @@ body.club-choice-vote-open {
 
 .private-cash-modal__participants .private-cash-modal__participant {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(132px, auto);
+  grid-template-columns: minmax(0, 1fr) minmax(118px, 150px);
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .private-cash-modal__participants .private-cash-modal__participant > div:first-child {
@@ -9187,20 +9327,25 @@ body.club-choice-vote-open {
 
 .private-cash-modal__participants .private-cash-modal__participant-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, auto));
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  justify-content: end;
-  gap: 7px;
+  justify-content: stretch;
+  gap: 8px;
 }
 
 .private-cash-modal__participants .private-cash-modal__badge {
-  justify-self: end;
-  min-height: 34px;
-  padding: 8px 13px;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  margin-top: 7px;
+  padding: 6px 10px;
+  font-size: 11px;
   line-height: 1;
 }
 
 .private-cash-modal__participants .private-cash-modal__participant-actions .private-cash-modal__ghost {
+  width: 100%;
   min-width: 0;
   min-height: 38px;
   padding: 8px 13px;
