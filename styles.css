@@ -12,7 +12,7 @@
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
 @import url("./styles-rating.css?v=3.675");
-@import url("./styles-hall.css?v=3.667");
+@import url("./styles-hall.css?v=3.670");
 @import url("./styles-admin.css?v=3.666");
 @import url("./styles-player-crm.css?v=3.666");
 @import url("./styles-profile.css?v=3.677");
@@ -40,16 +40,16 @@
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-header-overlap: 104px;
     --hall-top2026-bg-y: 42px;
-    --hall-top2026-list-offset: 34px;
-    --hall-top2026-list-width: min(66%, 248px);
+    --hall-top2026-list-offset: 75px;
+    --hall-top2026-list-width: 248px;
     --hall-top2026-list-max-width: 248px;
-    --hall-top2026-list-left: max(48px, calc(50% - 118px));
-    --hall-top2026-stage-min-height: clamp(744px, calc(101vw + 374px), 1078px);
-    --hall-top2026-lower-bg-y: clamp(360px, 96vw, 430px);
+    --hall-top2026-list-left: 76px;
+    --hall-top2026-stage-min-height: 838px;
+    --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 142%;
-    --hall-top2026-trophy-right: clamp(-22px, calc(3vw - 30.3px), -4px);
-    --hall-top2026-trophy-top: clamp(370px, calc(90vw + 32px), 426px);
-    --hall-top2026-trophy-width: clamp(110.5px, 30.6vw, 132.6px);
+    --hall-top2026-trophy-right: -19px;
+    --hall-top2026-trophy-top: 396px;
+    --hall-top2026-trophy-width: 119px;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -144,6 +144,8 @@
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__panels {
     margin-top: 0;
     min-width: 0;
+    overflow: hidden;
+    background: #120703;
   }
 
   #hallOfFameView .hall-of-fame__panel[hidden] {
@@ -156,7 +158,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
+    flex: 0 0 390px;
+    width: 390px;
+    max-width: none;
     min-height: var(--hall-top2026-stage-min-height);
     margin: calc(-1 * var(--hall-top2026-header-overlap)) 0 0;
     padding: 318px 10px 18px;
@@ -172,7 +176,7 @@
       url("./assets/hall-top2026-bg-dark.webp?v=3.537");
     background-position: center top, center bottom, center bottom, center bottom, center var(--hall-top2026-lower-bg-y), center var(--hall-top2026-bg-y);
     background-repeat: no-repeat;
-    background-size: 100% 100%, 100% 520px, 100% 520px, 100% 520px, var(--hall-top2026-lower-bg-width) auto, 100% auto;
+    background-size: 100% 100%, 100% 520px, 100% 520px, 100% 520px, var(--hall-top2026-lower-bg-width) auto, 390px auto;
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey,
@@ -187,9 +191,22 @@
 
   #hallOfFameView .hall-of-fame__top2026-monkey {
     z-index: 8;
-    top: clamp(251px, calc(44vw + 77px), 273px);
-    left: clamp(-101px, calc(-29vw + 19px), -73px);
-    width: clamp(225px, 60.55vw, 253px);
+    top: 249px;
+    left: -99px;
+    width: 236px;
+    clip-path: inset(0 0 0 4px);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage::after {
+    left: -24px;
+    right: -24px;
+    bottom: 0;
+    z-index: 0;
+    height: 470px;
+    background:
+      radial-gradient(ellipse at 74% 42%, rgba(156, 86, 28, 0.16), transparent 32%),
+      radial-gradient(ellipse at 18% 48%, rgba(92, 43, 15, 0.24), transparent 36%),
+      linear-gradient(180deg, rgba(23, 8, 3, 0) 0%, rgba(38, 15, 6, 0.52) 42%, rgba(18, 7, 3, 0.92) 100%);
   }
 
   #hallOfFameView .hall-of-fame__top2026-trophy {
@@ -200,11 +217,55 @@
   }
 
   #hallOfFameView .hall-of-fame__top2026-list-card {
-    position: relative;
+    position: absolute;
     z-index: 6;
     width: var(--hall-top2026-list-width) !important;
     max-width: var(--hall-top2026-list-max-width) !important;
-    margin: var(--hall-top2026-list-offset) auto 0 var(--hall-top2026-list-left) !important;
+    top: 370px;
+    left: var(--hall-top2026-list-left);
+    margin: 0 !important;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque {
+    width: 102px;
+    min-height: 48px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--sarmat {
+    top: 100px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--whiskey {
+    top: 170px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--waaar {
+    top: 238px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place5 {
+    top: 100px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place6 {
+    top: 170px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place7 {
+    top: 238px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-quotes {
+    top: 258px;
+    width: 117px;
+    min-height: 34px;
+    font-size: 12px;
   }
 
   #hallOfFameView .hall-of-fame__top2026-share {
@@ -5035,6 +5096,11 @@ body.club-choice-vote-open {
     padding: 8px 6px;
   }
 
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
+    grid-column: 1 / -1;
+    min-height: 58px;
+  }
+
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
@@ -5820,6 +5886,52 @@ body.club-choice-vote-open {
   white-space: nowrap;
 }
 
+@media (max-width: 560px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 5px;
+    padding: 7px 18px 7px 7px;
+    border: 1px solid rgba(255, 118, 0, 0.24);
+    border-radius: 12px;
+    background: rgba(6, 7, 10, 0.46);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row + .home-tournament-week-row {
+    border-top: 1px solid rgba(255, 118, 0, 0.24);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__day {
+    font-size: 13px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__main {
+    padding-right: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__name {
+    font-size: 11px;
+    line-height: 1.05;
+    white-space: normal;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__meta {
+    font-size: 9px;
+    line-height: 1.08;
+    white-space: normal;
+  }
+}
+
 .app.app--view-home .home-tournament-detail {
   display: flex;
   flex-direction: column;
@@ -5853,6 +5965,107 @@ body.club-choice-vote-open {
   object-fit: contain;
   object-position: center top;
   background: #000;
+}
+
+@media (max-width: 560px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 10px;
+    padding: 12px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-raffle-bonus {
+    grid-column: 1 / -1;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+    text-align: center;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--week {
+    grid-column: 1;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap--tournament-day {
+    grid-column: 2;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    height: 100%;
+    min-height: 0;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row {
+    grid-template-columns: 27px minmax(0, 1fr);
+    min-height: 48px;
+    padding: 6px 16px 6px 6px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row + .home-tournament-week-row {
+    border-top: 1px solid rgba(255, 118, 0, 0.18);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row--active {
+    border: 1px solid rgba(255, 181, 49, 0.82);
+    background:
+      radial-gradient(circle at 0% 50%, rgba(255, 181, 49, 0.22), transparent 42%),
+      linear-gradient(90deg, rgba(255, 118, 0, 0.2), rgba(255, 181, 49, 0.07));
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__day {
+    font-size: 12px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__main {
+    padding-right: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__name {
+    font-size: 10px;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__meta {
+    font-size: 8.2px;
+    line-height: 1.05;
+    white-space: normal;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__media {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__media {
+    aspect-ratio: auto;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .app.app--view-home .home-tournament-detail--no-banner {

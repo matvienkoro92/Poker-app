@@ -151,6 +151,13 @@
     return String(value || "")
       .trim()
       .replace(/\s*-\s*(?=[A-Za-zА-Яа-яЁё0-9])/g, "\n-")
+      .split(/\r?\n/)
+      .map(function (line) { return line.trim(); })
+      .filter(function (line) {
+        var normalized = line.replace(/\s+/g, " ").trim().toLowerCase();
+        return normalized !== "-крутка 2" && normalized !== "-3 раза, при выставлении.";
+      })
+      .join("\n")
       .replace(/^\n+/, "");
   }
 
