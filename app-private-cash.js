@@ -145,6 +145,14 @@
     return Number.isFinite(ms) ? ms : 0;
   }
 
+  function privateCashWeekdayText(raw) {
+    var s = String(raw || "").trim();
+    var d = s ? new Date(s + "T12:00:00") : null;
+    if (!d || !Number.isFinite(d.getTime())) return "";
+    var days = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
+    return days[d.getDay()] || "";
+  }
+
   function formatPrivateCashCountdown(msLeft) {
     if (!Number.isFinite(msLeft) || msLeft <= 0) return "Игра уже началась";
     var totalMinutes = Math.ceil(msLeft / 60000);
@@ -343,9 +351,23 @@
   function updateHomeButton(data) {
     var button = document.getElementById("privateCashSignupOpen");
     if (!button || !data || !data.ok) return;
-    var active = !!(data.activeEvent && data.activeEvent.status === "active");
+    var activeEvent = data.activeEvent && data.activeEvent.status === "active" ? data.activeEvent : null;
+    var active = !!activeEvent;
+    var started = !!(activeEvent && privateCashEventDateMs(activeEvent) && privateCashEventDateMs(activeEvent) <= Date.now());
+    var subtext = button.querySelector(".home-club-choice-plaque__subtext");
+    var count = button.querySelector(".home-club-choice-plaque__count");
     button.classList.toggle("home-club-choice-plaque--cash-open", active);
-    button.setAttribute("aria-label", active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
+    button.classList.toggle("home-club-choice-plaque--cash-playing", started);
+    if (subtext) {
+      var weekday = activeEvent ? privateCashWeekdayText(activeEvent.date) : "";
+      subtext.textContent = started
+        ? "Стол играет сейчас"
+        : active
+          ? "Идет запись" + (weekday ? " на " + weekday : "")
+          : "Открыть запись";
+    }
+    if (count) count.textContent = active ? "1" : "";
+    button.setAttribute("aria-label", started ? "Стол приватного кеша играет сейчас" : active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
   }
 
   function refreshHomeButtonStatus() {

@@ -10306,3 +10306,40 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
 body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access .raffles-active-chooser__access-value {
   grid-area: value !important;
 }
+
+body[data-view="raffles"] .raffles-active-chooser__fact--participants {
+  box-sizing: border-box !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-side {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  font-size: clamp(12px, 4.3vw, 22px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-icon {
+  display: none !important;
+}
+
+@media (min-width: 431px) {
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
+    font-size: clamp(14px, 1.25vw, 22px) !important;
+  }
+}
