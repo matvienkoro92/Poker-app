@@ -20,6 +20,12 @@
   ];
   var DEFAULT_CASH_BONUS_TEXT = "+10% на любой стек от 5к до 20к, первым 6 записавшимся";
 
+  function defaultBonusPresetText() {
+    return BONUS_PRESETS.map(function (bonus) {
+      return serializeBonus(bonus.amount, bonus.condition);
+    }).join("\n");
+  }
+
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
   }
@@ -237,7 +243,8 @@
     updateBonusPreview(form);
   }
 
-  function renderBonusPicker() {
+  function renderBonusPicker(initialText) {
+    var initialRows = bonusLines(initialText);
     return '<div class="private-cash-modal__bonus-picker">' +
       '<div class="private-cash-modal__bonus-head">' +
         '<span class="private-cash-modal__bonus-label">Бонусы к кешу</span>' +
@@ -256,9 +263,13 @@
         '<label>Условие<input name="bonusCondition" maxlength="120" placeholder="за каре"></label>' +
         '<button type="button" class="private-cash-modal__ghost private-cash-modal__bonus-add" data-private-cash-bonus-add>Добавить бонус</button>' +
       '</div>' +
-      '<textarea name="bonusText" class="private-cash-modal__bonus-storage" maxlength="900" rows="4" aria-label="Список бонусов"></textarea>' +
+      '<textarea name="bonusText" class="private-cash-modal__bonus-storage" maxlength="900" rows="4" aria-label="Список бонусов">' + escapeHtml(initialRows.join("\n")) + '</textarea>' +
       '<div class="private-cash-modal__bonus-display private-cash-modal__bonus-preview" data-private-cash-bonus-preview aria-live="polite">' +
-        '<p class="private-cash-modal__bonus-preview-empty">Добавьте бонусы, и они появятся здесь плитками.</p>' +
+        (initialRows.length
+          ? initialRows.map(function (row, index) {
+            return '<div class="private-cash-modal__bonus-preview-item" data-private-cash-bonus-index="' + index + '">' + renderBonusCard(row, { removable: true }) + '</div>';
+          }).join("")
+          : '<p class="private-cash-modal__bonus-preview-empty">Добавьте бонусы, и они появятся здесь плитками.</p>') +
       '</div>' +
     '</div>';
   }
@@ -497,7 +508,7 @@
         renderAccessLevelOptions(1) +
       '</select></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
-      renderBonusPicker() +
+      renderBonusPicker(defaultBonusPresetText()) +
       '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"><span><strong>Отправить пуш</strong><small>Если галочка включена, всем уйдет уведомление об открытии записи.</small></span></label>' +
       '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись</button>' +
     '</form>';
@@ -951,6 +962,7 @@
         sendPush: !!form.elements.sendPush.checked,
       }).then(function () {
         form.reset();
+        if (form.elements.bonusText) form.elements.bonusText.value = defaultBonusPresetText();
         Array.prototype.slice.call(form.querySelectorAll(".private-cash-modal__bonus-tile--active")).forEach(function (btn) {
           btn.classList.remove("private-cash-modal__bonus-tile--active");
         });
