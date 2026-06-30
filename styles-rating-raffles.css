@@ -1092,13 +1092,13 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 0 7% 0 38% !important;
+  padding: 0 6% 0 34% !important;
   border-radius: 18px !important;
   background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748") !important;
   background-origin: border-box !important;
   background-clip: border-box !important;
-  background-position: left center !important;
-  background-size: 100% 100% !important;
+  background-position: center !important;
+  background-size: 112% 112% !important;
 }
 .raffles-private-cash-ad__button::before {
   display: none !important;
@@ -7763,7 +7763,7 @@ button.raffle-feedback-action {
 .raffles-active-chooser__item--knockout {
   --raffles-card-border: rgba(208, 88, 255, 0.94);
   background:
-    linear-gradient(90deg, rgba(3, 5, 14, 0.98) 0%, rgba(7, 8, 17, 0.96) 54%, rgba(94, 24, 132, 0.74) 54.4%, rgba(35, 10, 58, 0.94) 100%),
+    linear-gradient(90deg, rgba(3, 5, 14, 0.98) 0%, rgba(7, 8, 17, 0.96) 58%, rgba(94, 24, 132, 0.74) 58.4%, rgba(35, 10, 58, 0.94) 100%),
     radial-gradient(circle at 78% 32%, rgba(201, 72, 255, 0.62), transparent 34%),
     url("./assets/raffles-active-cash-bg.webp") right center / cover no-repeat !important;
 }
@@ -9401,6 +9401,50 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   text-overflow: clip !important;
 }
 
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--no-timer {
+  padding: 10px clamp(16px, 3vw, 28px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--no-timer .raffles-active-chooser__buyin-tile-side {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--no-timer .raffles-active-chooser__buyin-tile-text {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+  font-size: clamp(20px, 3.25vw, 31px) !important;
+  line-height: 0.98 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--no-timer .raffles-active-chooser__buyin-tile-text span,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--no-timer .raffles-active-chooser__buyin-tile-text span:last-child {
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text {
+  display: grid !important;
+  align-content: center !important;
+  justify-content: start !important;
+  gap: 0 !important;
+  width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
+  max-width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
+  font-size: clamp(16px, 2.05vw, 22px) !important;
+  line-height: 0.96 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span:last-child {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
 @media (min-width: 431px) {
   body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
     align-content: center !important;
@@ -9425,7 +9469,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
   --raffles-card-border: rgba(208, 88, 255, 0.94);
   background:
-    linear-gradient(90deg, rgba(3, 5, 14, 0.98) 0%, rgba(7, 8, 17, 0.96) 54%, rgba(94, 24, 132, 0.74) 54.4%, rgba(35, 10, 58, 0.94) 100%),
+    linear-gradient(90deg, rgba(3, 5, 14, 0.98) 0%, rgba(7, 8, 17, 0.96) 58%, rgba(94, 24, 132, 0.74) 58.4%, rgba(35, 10, 58, 0.94) 100%),
     radial-gradient(circle at 78% 32%, rgba(201, 72, 255, 0.62), transparent 34%),
     url("./assets/raffles-active-ticket-bg.webp") right center / cover no-repeat !important;
 }
@@ -10397,12 +10441,12 @@ body[data-view="raffles"] .raffles-active-chooser__fact--participants .raffles-a
 
   body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body,
   body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
-    grid-template-columns: minmax(0, 52%) minmax(128px, 48%) !important;
+    grid-template-columns: minmax(0, 58%) minmax(128px, 42%) !important;
     gap: 9px !important;
   }
 
   body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
-    left: 56% !important;
+    left: 60% !important;
     right: 12px !important;
     top: 13px !important;
     z-index: 5 !important;
@@ -10468,12 +10512,12 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
 
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body,
 body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body {
-  grid-template-columns: minmax(0, 52%) minmax(128px, 48%) !important;
+  grid-template-columns: minmax(0, 58%) minmax(128px, 42%) !important;
   gap: 9px !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
-  left: 56% !important;
+  left: 60% !important;
   right: 12px !important;
   top: 13px !important;
   z-index: 5 !important;
@@ -10535,4 +10579,69 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
   font-size: clamp(7.5px, 2.25vw, 10px) !important;
   white-space: normal !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+  gap: 10px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+  min-height: 76px !important;
+  padding: 10px 12px !important;
+  gap: 3px !important;
+  align-content: center !important;
+  border-radius: 12px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+  font-size: clamp(14px, 1.65vw, 18px) !important;
+  line-height: 0.95 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+  font-size: clamp(21px, 2.55vw, 28px) !important;
+  line-height: 0.98 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count {
+  font-size: clamp(18px, 2.2vw, 24px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+  font-size: clamp(18px, 2.1vw, 23px) !important;
+  white-space: normal !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown {
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  column-gap: 8px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown::before {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-digits {
+  text-align: left !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
+  text-align: left !important;
+  font-size: clamp(13px, 1.55vw, 17px) !important;
 }

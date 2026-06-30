@@ -1421,8 +1421,9 @@ function initRaffles() {
         var top = split && split[1] ? split[1] : label;
         var bottom = split && split[2] ? split[2] : "";
         var timerHtml = batchTimerHtml(index);
+        var tileClass = "raffles-active-chooser__buyin-tile " + (timerHtml ? "raffles-active-chooser__buyin-tile--with-timer" : "raffles-active-chooser__buyin-tile--no-timer");
         return (
-          '<span class="raffles-active-chooser__buyin-tile">' +
+          '<span class="' + tileClass + '">' +
           '<span class="raffles-active-chooser__buyin-tile-side">' +
           '<span class="raffles-active-chooser__buyin-tile-group">Группа ' +
           (index + 1) +

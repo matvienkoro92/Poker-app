@@ -1456,6 +1456,21 @@
   border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
+@media (max-width: 860px) {
+  .daily-poker__header {
+    margin-bottom: 0;
+  }
+
+  .daily-poker__hero-stats {
+    margin-top: clamp(-46px, -5.4vw, -20px);
+    margin-bottom: 10px;
+  }
+
+  .daily-poker__intro {
+    margin-top: clamp(-28px, -3.2vw, -12px);
+  }
+}
+
 @media (max-width: 720px) {
   .daily-poker__hero-stats {
     width: min(78%, 320px);
