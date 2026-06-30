@@ -12,11 +12,12 @@
   var editingEventId = "";
   var manualSuggestTimer = 0;
   var BONUS_PRESETS = [
-    { id: "four-kind", amount: "1000 ₽", condition: "за каре" },
-    { id: "straight-flush", amount: "2500 ₽", condition: "за стрит-флеш" },
-    { id: "royal", amount: "5000 ₽", condition: "за роял" },
-    { id: "knockout", amount: "500-1500 ₽", condition: "за нокаут топ10 Лиги1" },
-    { id: "badbeat", amount: "1200 ₽", condition: "бабблу" },
+    { id: "four-kind", amount: "4000 ₽", condition: "за каре по 2м" },
+    { id: "straight-flush", amount: "5000 ₽", condition: "за стрит-флеш" },
+    { id: "royal", amount: "30 000 ₽", condition: "за роял" },
+    { id: "biggest-loser", amount: "5000 ₽", condition: "тому, кто больше всех в минусе" },
+    { id: "first-seven-stack", amount: "+10%", condition: "на любой стек от 5к до 20к, первым 7ми записавшимся (после 100 раздач)" },
+    { id: "table-winner", amount: "100 баллов", condition: "победителю стола" },
   ];
   var DEFAULT_CASH_BONUS_TEXT = "+10% на любой стек от 5к до 20к, первым 6 записавшимся";
 
@@ -883,17 +884,12 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     var accessLevel = Math.max(0, Math.floor(Number(event && event.accessLevel) || 0));
-    var countdownMs = privateCashEventDateMs(event);
     var tablePassword = eventTablePassword(event);
     var adminEditButton = state && state.isAdmin
       ? '<button type="button" class="private-cash-modal__summary-edit" data-private-cash-edit="' + escapeHtml(event.id) + '" aria-label="Редактировать запись" title="Редактировать" aria-expanded="' + (String(editingEventId || "") === String(event.id || "") ? "true" : "false") + '">✎</button>'
       : "";
     return '<article class="private-cash-modal__event">' +
       '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
-        '<div class="private-cash-modal__summary-status-stack">' +
-          '<em class="private-cash-modal__event-status private-cash-modal__event-status--' + escapeHtml(event.status || "closed") + '">' + escapeHtml(eventStatusLabel(event.status)) + '</em>' +
-          (countdownMs ? '<span class="private-cash-modal__summary-countdown" data-private-cash-countdown="' + escapeHtml(countdownMs) + '">' + escapeHtml(formatPrivateCashCountdown(countdownMs - Date.now())) + '</span>' : '') +
-        '</div>' +
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
           '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
           '<div class="private-cash-modal__summary-actions">' +
