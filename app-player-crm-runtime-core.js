@@ -874,6 +874,7 @@
 
   var CRM_LINK_TARGETS = [
     { key: "home", label: "Главная", view: "home", startapp: "home" },
+    { key: "private-cash", label: "Приватный кеш", view: "home", startapp: "private_cash" },
     { key: "chat", label: "Чат", view: "chat", startapp: "club_chat" },
     { key: "video-lessons", label: "Видеоуроки", view: "video-lessons", startapp: "video_lessons" },
     { key: "learn-play-hub", label: "Научиться играть", view: "learn-play-hub", startapp: "learn_play_hub" },
@@ -923,6 +924,24 @@
     return buildCrmLinkUrl(broadcastAppLinkTarget().startapp);
   }
 
+  function broadcastButtonEnabled() {
+    var enabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
+    return !!(enabledEl && enabledEl.checked);
+  }
+
+  function syncBroadcastButtonMode() {
+    var enabled = broadcastButtonEnabled();
+    var fields = document.getElementById("playerCrmBroadcastButtonFields");
+    var templateBox = document.getElementById("playerCrmBroadcastLinkTemplateBox");
+    var textEl = document.getElementById("playerCrmBroadcastButtonText");
+    var urlEl = document.getElementById("playerCrmBroadcastButtonUrl");
+    if (fields) fields.hidden = !enabled;
+    if (templateBox) templateBox.hidden = !enabled;
+    if (textEl) textEl.disabled = !enabled;
+    if (urlEl) urlEl.disabled = !enabled;
+    syncBroadcastAppLinkTemplate(enabled);
+  }
+
   function syncBroadcastAppLinkTemplate(applyToButton) {
     renderBroadcastLinkTargetOptions();
     var target = broadcastAppLinkTarget();
@@ -935,7 +954,7 @@
     var buttonUrl = buttonUrlEl ? String(buttonUrlEl.value || "").trim() : "";
     var previousAppLink = buttonUrlEl ? String(buttonUrlEl.dataset.crmGeneratedAppLink || "") : "";
     if (urlEl) urlEl.value = url;
-    if (buttonUrlEl && (applyToButton || !buttonUrl || (previousAppLink && buttonUrl === previousAppLink))) {
+    if (broadcastButtonEnabled() && buttonUrlEl && (applyToButton || !buttonUrl || (previousAppLink && buttonUrl === previousAppLink))) {
       buttonUrlEl.value = url;
       buttonUrlEl.dataset.crmGeneratedAppLink = url;
       if (buttonTextEl && !buttonText) {
@@ -1670,12 +1689,12 @@
   }
 
   function broadcastButtonPayload() {
+    if (!broadcastButtonEnabled()) return {};
     var textEl = document.getElementById("playerCrmBroadcastButtonText");
     var urlEl = document.getElementById("playerCrmBroadcastButtonUrl");
     var buttonText = textEl ? String(textEl.value || "").trim().slice(0, 64) : "";
     var buttonUrl = urlEl ? String(urlEl.value || "").trim().slice(0, 512) : "";
-    if (!buttonText && !buttonUrl) return {};
-    if (!buttonText || !buttonUrl) return { error: "Заполни название и ссылку кнопки или оставь оба поля пустыми." };
+    if (!buttonText || !buttonUrl) return { error: "Если включена кнопка, заполни название и ссылку." };
     if (!/^https?:\/\//i.test(buttonUrl)) return { error: "Ссылка кнопки должна начинаться с http:// или https://." };
     return { buttonText: buttonText, buttonUrl: buttonUrl };
   }
@@ -2033,6 +2052,7 @@
     var text = textEl ? String(textEl.value || "").trim() : "";
     var image = state.broadcastImage || null;
     var button = broadcastButtonPayload();
+    var hasButton = !!(button && !button.error && button.buttonText);
     var appTarget = broadcastAppLinkTarget();
     var appLink = broadcastAppLinkUrl();
     var hasBot = channel === "bot" || channel === "bot_push";
@@ -2046,7 +2066,7 @@
           "<div class=\"player-crm__recipient-bubble\">" +
             (image && image.dataUrl ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />" : "") +
             (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
-            (button && !button.error && button.buttonText ? "<span class=\"player-crm__recipient-open-btn\">" + esc(button.buttonText) + "</span>" : "") +
+            (hasButton ? "<span class=\"player-crm__recipient-open-btn\">" + esc(button.buttonText) + "</span>" : "") +
           "</div>" +
         "</div>" +
       "</div>"
@@ -2064,8 +2084,8 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Раздел<strong>" + esc(appTarget.label) + "</strong></span></div>" +
-            "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылка в шаблоне</strong><span>" + esc((button && !button.error && button.buttonUrl) || appLink || "—") + "</span></div>" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопка<strong>" + (hasButton ? "Да" : "Нет") + "</strong></span>" + (hasButton ? "<span>Раздел<strong>" + esc(appTarget.label) + "</strong></span>" : "") + "</div>" +
+            (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылка в кнопке</strong><span>" + esc(button.buttonUrl || appLink || "—") + "</span></div>" : "") +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
         "</div>" +
@@ -3209,7 +3229,9 @@
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
     renderBroadcastLinkTargetOptions();
-    syncBroadcastAppLinkTemplate(false);
+    syncBroadcastButtonMode();
+    var broadcastButtonEnabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
+    if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.addEventListener("change", syncBroadcastButtonMode);
     var broadcastLinkTarget = document.getElementById("playerCrmBroadcastLinkTarget");
     if (broadcastLinkTarget) broadcastLinkTarget.addEventListener("change", function () { syncBroadcastAppLinkTemplate(true); });
     var broadcastUseAppLink = document.getElementById("playerCrmBroadcastUseAppLinkBtn");

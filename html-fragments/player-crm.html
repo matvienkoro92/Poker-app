@@ -238,7 +238,11 @@
               <span>Сообщение</span>
               <textarea id="playerCrmBroadcastText" rows="6" maxlength="900">Сегодня есть хорошие столы и турнирный движ. Если хочешь зайти, напиши менеджеру — подберём игру по лимиту.</textarea>
             </label>
-            <div class="player-crm__form-grid">
+            <label class="player-crm__broadcast-button-toggle">
+              <input id="playerCrmBroadcastButtonEnabled" type="checkbox" />
+              <span>Кнопка</span>
+            </label>
+            <div class="player-crm__form-grid" id="playerCrmBroadcastButtonFields" hidden>
               <label>
                 <span>Название кнопки</span>
                 <input id="playerCrmBroadcastButtonText" maxlength="64" placeholder="Открыть акцию" />
@@ -248,7 +252,7 @@
                 <input id="playerCrmBroadcastButtonUrl" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
             </div>
-            <div class="player-crm__broadcast-link-template">
+            <div class="player-crm__broadcast-link-template" id="playerCrmBroadcastLinkTemplateBox" hidden>
               <div class="player-crm__form-grid">
                 <label>
                   <span>Раздел приложения</span>

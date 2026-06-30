@@ -1485,6 +1485,26 @@ button.player-crm__stat:focus-visible,
 .player-crm__message-label {
   margin-bottom: 10px;
 }
+.player-crm__broadcast-button-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 36px;
+  margin: 0 0 10px;
+  padding: 8px 11px;
+  border: 1px solid rgba(199, 163, 106, 0.34);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.34);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+.player-crm__broadcast-button-toggle input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
 .player-crm__broadcast-filters {
   display: flex;
   flex-wrap: wrap;
