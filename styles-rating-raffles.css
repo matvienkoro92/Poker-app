@@ -5674,6 +5674,38 @@ button.raffle-feedback-action {
   background: rgba(250, 204, 21, 0.18);
   color: #fde68a;
 }
+.raffle-winner-private-cash-state {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  max-width: 100%;
+  color: #bbf7d0;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: right;
+}
+.raffle-winner-private-cash-state span {
+  overflow-wrap: anywhere;
+}
+.raffle-winner-private-cash-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(34, 197, 94, 0.58);
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+.raffle-winner-private-cash-btn:hover,
+.raffle-winner-private-cash-btn:focus-visible {
+  border-color: rgba(34, 197, 94, 0.82);
+  background: rgba(34, 197, 94, 0.24);
+  outline: none;
+}
 .raffle-completed-card,
 .raffle-completed-card__winners,
 .raffle-winner-group,
@@ -6394,6 +6426,10 @@ button.raffle-feedback-action {
   .raffle-winner-row__meta,
   .raffle-winner-row__controls {
     justify-content: flex-start;
+  }
+  .raffle-winner-private-cash-state {
+    justify-items: start;
+    text-align: left;
   }
   .raffle-winner-row__actions--admin .raffle-winner-row__meta,
   .raffle-winner-row__actions--admin .raffle-winner-row__controls {

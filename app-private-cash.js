@@ -605,7 +605,7 @@
       var extra = "";
       var myReserve = visibleSeatIndex(event, my.accountId) >= SEAT_POSITIONS.length;
       if (my.status === "pending") extra = '<small>' + (myReserve ? "Вы записаны в резерв, админ еще не подтвердил бронь." : "Место занято за вами, админ еще не подтвердил бронь.") + '</small>';
-      if (my.status === "approved") extra = '<small>' + (myReserve ? "Вы подтверждены в резерве." : "Место подтверждено, вы в списке.") + '</small>';
+      if (my.status === "approved") extra = '<small>' + (myReserve ? "Вы зарегистрированы в резерв приватного кеша." : "Вы зарегистрированы в приватный кеш.") + '</small>';
       if (my.status === "rejected") {
         extra = '<small>' + (my.warningCount >= 2
           ? "Вторая желтая карточка: вы пропускаете эту и следующую игру."

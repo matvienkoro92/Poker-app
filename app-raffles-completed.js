@@ -288,6 +288,20 @@ function initRafflesCompletedRuntime(opts) {
     }
   }
 
+  function openRafflePrivateCashSection() {
+    if (typeof setView === "function") setView("home");
+    if (typeof window.openPrivateCashModal === "function") {
+      window.openPrivateCashModal();
+      return true;
+    }
+    var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("private_cash") : "";
+    if (link) {
+      window.location.href = link;
+      return true;
+    }
+    return false;
+  }
+
   function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
     var actionRaffleId = String((w && w.sourceRaffleId) || raffleId || "").trim();
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
@@ -303,6 +317,7 @@ function initRafflesCompletedRuntime(opts) {
     var prizeIssued = status === "ok";
     var prizeDeclined = status === "fail";
     var winnerReady = raffleWinnerIsReady(w);
+    var privateCashRegistered = !!(w && w.privateCashRegistered);
     var readyExpired = !prizeIssued && !winnerReady && raffleWinnerReadyExpired(w);
     var viewerIds = [];
     try {
@@ -311,7 +326,9 @@ function initRafflesCompletedRuntime(opts) {
       viewerIds = [];
     }
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
-    var readyBadge = prizeIssued
+    var readyBadge = privateCashRegistered
+      ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Приватный кеш</span>"
+      : prizeIssued
       ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Выдано</span>"
       : prizeDeclined
       ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--declined\">Отказано</span>"
@@ -320,7 +337,10 @@ function initRafflesCompletedRuntime(opts) {
       : readyExpired
         ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
         : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
-    var readyAction = isMyWin && status !== "ok" && status !== "fail" && !readyExpired
+    var privateCashAction = isMyWin && privateCashRegistered
+      ? "<span class=\"raffle-winner-private-cash-state\"><span>Вы зарегистрированы в приватный кеш</span><button type=\"button\" class=\"raffle-winner-private-cash-btn\" data-raffle-private-cash-open=\"1\">Перейти в раздел</button></span>"
+      : "";
+    var readyAction = !privateCashAction && isMyWin && status !== "ok" && status !== "fail" && !readyExpired
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +
         (winnerReady ? " raffle-winner-ready-btn--active" : "") +
         "\" data-raffle-id=\"" +
@@ -463,9 +483,10 @@ function initRafflesCompletedRuntime(opts) {
         "</span></li>"
       );
     }
-    var userActions = profileMeta || readyAction || statusIcon
+    var userActions = profileMeta || privateCashAction || readyAction || statusIcon
       ? "<span class=\"raffle-winner-row__actions raffle-winner-row__actions--user\">" +
         profileMeta +
+        privateCashAction +
         "<span class=\"raffle-winner-row__controls\">" +
         statusHtml +
         readyAction +
@@ -1355,6 +1376,11 @@ function initRafflesCompletedRuntime(opts) {
           panel.classList.toggle("raffle-winner-groups-tabs__panel--active", activePanel);
           panel.hidden = !activePanel;
         });
+        return;
+      }
+      var privateCashBtn = e.target.closest("[data-raffle-private-cash-open]");
+      if (privateCashBtn) {
+        openRafflePrivateCashSection();
         return;
       }
       var readyBtn = e.target.closest(".raffle-winner-ready-btn");

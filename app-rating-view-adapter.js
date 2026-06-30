@@ -444,19 +444,52 @@ function summerRatingPlayerArtCssUrl(nick) {
 function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art) return "";
-  if (place === 10 && (art.key === "пряник" || art.key === "pryanik2la")) {
-    return "--summer-lower-art-10-size:6.2%;";
-  }
-  return "";
+  var size = summerRatingPlayerArtStageSize(art.key);
+  return size ? "--summer-lower-art-" + place + "-size:" + size + ";" : "";
 }
 
 function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art) return "";
-  if (art.key === "мистерfox") {
-    return "--summer-top3-art-" + slotName + "-size:18%;";
+  if (slotName === "center") return "";
+  var size = summerRatingPlayerArtStageSize(art.key);
+  return size ? "--summer-top3-art-" + slotName + "-size:" + size + ";" : "";
+}
+
+function summerRatingPlayerArtStageSize(key) {
+  switch (key) {
+    case "waaar": return "14.7%";
+    case "покерманки": return "17.9%";
+    case "coo1er91": return "14.0%";
+    case "em13!!": return "12.9%";
+    case "winifly": return "13.9%";
+    case "missclick": return "14.2%";
+    case "рыбнадзор": return "14.3%";
+    case "nikola233": return "12.5%";
+    case "milkyway77": return "11.9%";
+    case "пряник":
+    case "pryanik2la": return "8.6%";
+    case "prushnik": return "14.5%";
+    case "evgen1722": return "14.1%";
+    case "хер вам)))))": return "11.5%";
+    case "shkarubo": return "16.3%";
+    case "sarmat1305": return "13.0%";
+    case "палач": return "14.4%";
+    case "nakurikota":
+    case "накурикота": return "14.1%";
+    case "wildboar": return "14.2%";
+    case "бабник": return "14.0%";
+    case "виктор": return "10.3%";
+    case "мистерfox": return "9.5%";
+    case "babyshark": return "12.8%";
+    case "аспирин": return "10.7%";
+    case "ksuha":
+    case "ksuha🐍":
+    case "ksuha🐊":
+    case "ksuha🦖":
+    case "ksuha🐉": return "9.4%";
+    default: return "";
   }
-  return "";
 }
 
 function syncWinterRatingPlayerModalArt(modal, nick, seasonKey) {

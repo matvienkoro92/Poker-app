@@ -4574,13 +4574,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   width: 100%;
   height: 170px;
   background:
-    var(--summer-lower-art-4, none) 0.5% calc(86% + 3px) / 10.4% auto no-repeat,
-    var(--summer-lower-art-5, none) 16.8% calc(85% + 3px) / 10.4% auto no-repeat,
-    var(--summer-lower-art-6, none) calc(33.7% + 4px) calc(78% + 7px) / 14.3% auto no-repeat,
-    var(--summer-lower-art-7, none) 50.7% calc(77% + 4px) / 10.2% auto no-repeat,
-    var(--summer-lower-art-8, none) 67.5% calc(76% + 4px) / 15.1% auto no-repeat,
-    var(--summer-lower-art-9, none) 84% calc(79% + 3px) / 10.6% auto no-repeat,
-    var(--summer-lower-art-10, none) 100% calc(77% + 4px) / var(--summer-lower-art-10-size, 6.2%) auto no-repeat;
+    var(--summer-lower-art-4, none) 0.5% calc(86% + 3px) / var(--summer-lower-art-4-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-5, none) 16.8% calc(85% + 3px) / var(--summer-lower-art-5-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-6, none) calc(33.7% + 4px) calc(78% + 7px) / var(--summer-lower-art-6-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-7, none) 50.7% calc(77% + 4px) / var(--summer-lower-art-7-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-8, none) 67.5% calc(76% + 4px) / var(--summer-lower-art-8-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-9, none) 84% calc(79% + 3px) / var(--summer-lower-art-9-size, 14.3%) auto no-repeat,
+    var(--summer-lower-art-10, none) 100% calc(77% + 4px) / var(--summer-lower-art-10-size, 14.3%) auto no-repeat;
   transform: translateY(var(--summer-rating-mobile-lower-podium-players-y, -48px));
   pointer-events: none;
 }
