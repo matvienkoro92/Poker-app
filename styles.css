@@ -2673,7 +2673,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque--cash .home-club-choice-plaque__text {
   color: #fff8b8;
-  font-size: clamp(12px, 2.25vw, 20px);
+  font-size: clamp(10px, 2.25vw, 20px);
   text-shadow:
     0 2px 0 rgba(35, 12, 0, 0.98),
     0 0 9px rgba(255, 251, 196, 0.7),
@@ -6797,8 +6797,21 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque--cash {
-    padding-right: 14%;
+    padding-right: 8%;
     font-size: clamp(10px, 3vw, 13px);
+  }
+
+  .home-club-choice-plaque--cash .home-club-choice-plaque__text {
+    font-size: clamp(9.5px, 2.65vw, 12px);
+    max-width: 100%;
+  }
+
+  .home-club-choice-plaque--cash .home-club-choice-plaque__count {
+    top: 7px;
+    right: 7px;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
 
   .home-club-choice-plaque__open-badge {
@@ -6916,8 +6929,22 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque--cash {
-    padding-right: 15%;
+    padding-right: 7%;
     font-size: 9.5px;
+  }
+
+  .home-club-choice-plaque--cash .home-club-choice-plaque__text {
+    font-size: clamp(8px, 2.45vw, 9.2px);
+    justify-self: start;
+    word-spacing: 1px;
+  }
+
+  .home-club-choice-plaque--cash .home-club-choice-plaque__count {
+    top: 5px;
+    right: 3px;
+    width: 15px;
+    height: 15px;
+    font-size: 8.5px;
   }
 
   .home-club-choice-plaque--vote {
@@ -7162,6 +7189,60 @@ body.club-choice-vote-open {
   overflow: auto;
   overflow-x: hidden;
   padding: 12px 18px 112px;
+}
+
+.private-cash-modal__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 4px;
+  border: 1px solid rgba(255, 179, 43, 0.28);
+  border-radius: 16px;
+  background: rgba(5, 10, 20, 0.7);
+}
+
+.private-cash-modal__tab {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid rgba(255, 179, 43, 0.22);
+  border-radius: 12px;
+  background: rgba(8, 14, 26, 0.86);
+  color: rgba(255, 237, 192, 0.78);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+.private-cash-modal__tab--active {
+  border-color: rgba(255, 210, 104, 0.9);
+  background: linear-gradient(180deg, #ffe180, #d6951f);
+  color: #1b1204;
+  box-shadow: 0 8px 18px rgba(214, 149, 31, 0.25);
+}
+
+.private-cash-modal__results {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  border: 1px solid rgba(255, 179, 43, 0.34);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 179, 43, 0.15), transparent 42%),
+    linear-gradient(180deg, rgba(8, 14, 26, 0.96), rgba(3, 8, 18, 0.96));
+  padding: 18px;
+  text-align: center;
+}
+
+.private-cash-modal__results p {
+  margin: 0;
+  color: #ffedc0;
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1.15;
 }
 
 .private-cash-modal__loading,

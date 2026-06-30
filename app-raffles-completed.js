@@ -627,13 +627,12 @@ function initRafflesCompletedRuntime(opts) {
         var group = byMonth[key];
         var rows = buildRaffleWinnerLeaderRows(group.raffles);
         var totalWins = rows.reduce(function (sum, row) { return sum + (parseInt(row.count, 10) || 0); }, 0);
-        var totalPrize = rows.reduce(function (sum, row) { return sum + (parseFloat(row.totalPrize) || 0); }, 0);
         return {
           key: key,
           label: group.label,
           rows: rows,
           totalWins: totalWins,
-          totalPrize: totalPrize
+          totalPrize: raffleCompletedArchiveSum(group.raffles)
         };
       })
       .filter(function (group) {
@@ -1223,6 +1222,17 @@ function initRafflesCompletedRuntime(opts) {
     }, 0);
   }
 
+  function raffleCompletedMonthTotalsByKey(items) {
+    var byMonth = {};
+    (Array.isArray(items) ? items : []).forEach(function (raffle) {
+      var key = raffleCompletedMonthKey(raffle);
+      if (!byMonth[key]) byMonth[key] = { count: 0, sum: 0 };
+      byMonth[key].count += 1;
+      byMonth[key].sum += raffleCompletedPrizeSum(raffle);
+    });
+    return byMonth;
+  }
+
   function raffleCompletedPrizeSum(raffle) {
     var amount = typeof getRaffleTotalPrize === "function" ? parseFloat(getRaffleTotalPrize(raffle)) : 0;
     if (isFinite(amount) && amount > 0) return amount;
@@ -1240,19 +1250,20 @@ function initRafflesCompletedRuntime(opts) {
     }, 0);
   }
 
-  function raffleCompletedArchiveBadgeHtml(items) {
+  function raffleCompletedArchiveBadgeHtml(items, totals) {
     var list = Array.isArray(items) ? items : [];
-    var sum = raffleCompletedArchiveSum(list);
+    var count = totals && isFinite(parseFloat(totals.count)) ? Math.max(0, parseInt(totals.count, 10) || 0) : list.length;
+    var sum = totals && isFinite(parseFloat(totals.sum)) ? parseFloat(totals.sum) : raffleCompletedArchiveSum(list);
     var sumText = typeof formatRaffleSum === "function"
       ? formatRaffleSum(sum)
       : String(Math.round(sum)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") + " ₽";
     return "<span class=\"raffles-completed-spoiler__count\">" +
-      "<span class=\"raffles-completed-spoiler__count-number\">" + escapeHtml(list.length) + "</span>" +
+      "<span class=\"raffles-completed-spoiler__count-number\">" + escapeHtml(count) + "</span>" +
       "<span class=\"raffles-completed-spoiler__sum\">" + escapeHtml(sumText) + "</span>" +
       "</span>";
   }
 
-  function buildCompletedArchiveHtml(archive) {
+  function buildCompletedArchiveHtml(archive, monthTotalsByKey) {
     archive = sortCompletedRafflesNewestFirst(archive);
     if (!archive.length) return "";
     var byMonth = {};
@@ -1271,7 +1282,7 @@ function initRafflesCompletedRuntime(opts) {
       return "<details class=\"raffles-completed-archive-month\">" +
         "<summary class=\"raffles-completed-archive-month__summary\">" +
         "<span class=\"raffles-completed-archive-month__title\">" + escapeHtml(raffleCompletedMonthLabel(key, first)) + "</span>" +
-        raffleCompletedArchiveBadgeHtml(items) +
+        raffleCompletedArchiveBadgeHtml(items, monthTotalsByKey && monthTotalsByKey[key]) +
         "</summary>" +
         "<div class=\"raffles-completed-archive-month__body\">" +
         items.map(buildCompletedRaffleCardHtml).join("") +
@@ -1294,7 +1305,7 @@ function initRafflesCompletedRuntime(opts) {
     if (list.length <= 0) return "";
     var currentHtml = buildCompletedRaffleCardHtml(list[0]);
     var archive = list.slice(1);
-    return currentHtml + buildCompletedArchiveHtml(archive);
+    return currentHtml + buildCompletedArchiveHtml(archive, raffleCompletedMonthTotalsByKey(list));
   }
 
   function refreshCompletedRaffleCard(refreshBtn) {

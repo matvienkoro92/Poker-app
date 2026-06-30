@@ -8,6 +8,7 @@
   var statusEl = null;
   var state = null;
   var loading = false;
+  var activeTab = "signup";
   var BONUS_PRESETS = [
     { id: "four-kind", amount: "1000 ₽", condition: "за каре" },
     { id: "straight-flush", amount: "2500 ₽", condition: "за стрит-флеш" },
@@ -673,6 +674,27 @@
     '</article>';
   }
 
+  function renderTabs() {
+    return '<div class="private-cash-modal__tabs" role="tablist" aria-label="Разделы приватного кеша">' +
+      '<button type="button" class="private-cash-modal__tab' + (activeTab === "signup" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="signup" role="tab" aria-selected="' + (activeTab === "signup" ? "true" : "false") + '">Запись</button>' +
+      '<button type="button" class="private-cash-modal__tab' + (activeTab === "results" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="results" role="tab" aria-selected="' + (activeTab === "results" ? "true" : "false") + '">Результаты</button>' +
+    '</div>';
+  }
+
+  function renderSignupTab(events) {
+    return renderAdminForm() +
+      renderShareActions() +
+      '<section class="private-cash-modal__events">' +
+        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
+      '</section>';
+  }
+
+  function renderResultsTab() {
+    return '<section class="private-cash-modal__results" role="tabpanel">' +
+      '<p>Здесь будут результаты приватных кеш-игр</p>' +
+    '</section>';
+  }
+
   function render() {
     ensureModal();
     if (!state) {
@@ -681,11 +703,8 @@
     }
     var events = state.events || [];
     bodyEl.innerHTML =
-      renderAdminForm() +
-      renderShareActions() +
-      '<section class="private-cash-modal__events">' +
-        (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
-      '</section>';
+      renderTabs() +
+      (activeTab === "results" ? renderResultsTab() : renderSignupTab(events));
   }
 
   function onModalSubmit(event) {
@@ -718,6 +737,12 @@
     var close = event.target && event.target.closest ? event.target.closest("[data-private-cash-close]") : null;
     if (close) {
       closeModal();
+      return;
+    }
+    var tab = event.target && event.target.closest ? event.target.closest("[data-private-cash-tab]") : null;
+    if (tab) {
+      activeTab = tab.getAttribute("data-private-cash-tab") === "results" ? "results" : "signup";
+      render();
       return;
     }
     var bonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus]") : null;
