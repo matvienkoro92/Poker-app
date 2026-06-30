@@ -185,6 +185,22 @@ function pokerChatPushVerifySubscriptionAfterSave(base, attempt) {
 }
 
 var pokerChatPushSubscribeInFlight = null;
+var POKER_CHAT_PUSH_VAPID_CACHE_KEY = "poker_chat_push_vapid_public_key_v1";
+
+function pokerChatPushStoredVapidKey() {
+  try {
+    return String(localStorage.getItem(POKER_CHAT_PUSH_VAPID_CACHE_KEY) || "");
+  } catch (e) {
+    return "";
+  }
+}
+
+function pokerChatPushStoreVapidKey(publicKey) {
+  try {
+    if (publicKey) localStorage.setItem(POKER_CHAT_PUSH_VAPID_CACHE_KEY, String(publicKey));
+  } catch (e) {}
+}
+
 function pokerChatPushSubscribeToBrowser() {
   if (pokerChatPushSubscribeInFlight) return pokerChatPushSubscribeInFlight;
   var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -233,6 +249,7 @@ function pokerChatPushSubscribeToBrowser() {
                       } catch (eV) {}
                     }
                   });
+                  pokerChatPushStoreVapidKey(cfg.publicKey);
                   return { ok: true };
                 });
             });
@@ -313,6 +330,8 @@ function pokerChatPushSyncIfNeeded() {
   if (!base) return;
   pokerFetchChatPushConfig().then(function (cfg) {
     if (!cfg || !cfg.pushConfigured) return;
+    var storedVapidKey = pokerChatPushStoredVapidKey();
+    var needsVapidRefresh = !!(cfg.publicKey && (!storedVapidKey || storedVapidKey !== String(cfg.publicKey)));
     navigator.serviceWorker.ready
       .then(function (reg) {
         return Promise.all([
@@ -340,6 +359,10 @@ function pokerChatPushSyncIfNeeded() {
         if (!d || !d.ok || !d.notificationsEnabled) return;
         var serverHas = !!d.hasSubscription;
         var browserHas = !!(browserSub && browserSub.endpoint);
+        if (serverHas && browserHas && needsVapidRefresh) {
+          pokerChatPushForceRepair(storedVapidKey ? "vapid_key_changed" : "vapid_key_missing");
+          return;
+        }
         if (serverHas && browserHas) return;
         pokerChatPushForceRepair("sync_mismatch");
       })

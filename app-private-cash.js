@@ -388,6 +388,16 @@
     button.setAttribute("aria-label", started ? "Стол приватного кеша играет сейчас" : active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
   }
 
+  function resetHomeButtonBeforeLoad(button) {
+    if (!button) return;
+    var subtext = button.querySelector(".home-club-choice-plaque__subtext");
+    var count = button.querySelector(".home-club-choice-plaque__count");
+    button.classList.remove("home-club-choice-plaque--cash-open", "home-club-choice-plaque--cash-playing");
+    if (subtext) subtext.textContent = "Открыть запись";
+    if (count) count.textContent = "";
+    button.setAttribute("aria-label", "Открыть приватный кеш");
+  }
+
   function refreshHomeButtonStatus() {
     fetchState()
       .then(function (data) {
@@ -596,7 +606,7 @@
       '</div>' +
       '<div class="private-cash-modal__rule">' +
         '<span class="private-cash-modal__rule-icon private-cash-modal__rule-icon--password" aria-hidden="true"></span>' +
-        '<p>Пароль от кеша будет отправлен в день игры всем, кто записался.</p>' +
+        '<p>Стол будет открыт в день кеша, пароль 7788, за стол допускаются сначала игроки, кто записан.</p>' +
       '</div>' +
     '</section>';
   }
@@ -1254,6 +1264,7 @@
     var button = document.getElementById("privateCashSignupOpen");
     if (!button) return;
     button.addEventListener("click", openModal);
+    resetHomeButtonBeforeLoad(button);
     refreshHomeButtonStatus();
   }
 
