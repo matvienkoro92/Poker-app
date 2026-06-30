@@ -4903,7 +4903,13 @@ body.club-choice-vote-open {
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+    max-width: 100%;
+    font-size: 18px;
+    line-height: 1.08;
     text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .tournament-day-home-wrap {
@@ -4926,24 +4932,26 @@ body.club-choice-vote-open {
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row {
     flex: 0 0 auto;
-    grid-template-columns: 34px minmax(0, 1fr);
-    min-height: 38px;
-    padding: 6px 24px 6px 8px;
+    grid-template-columns: 30px minmax(0, 1fr);
+    min-height: 34px;
+    padding: 5px 22px 5px 7px;
     border: 1px solid rgba(255, 118, 0, 0.2);
     border-radius: 10px;
     background: rgba(6, 7, 10, 0.42);
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__day {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__name {
-    font-size: 11px;
+    font-size: 10.5px;
+    line-height: 1.05;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-week-row__meta {
-    font-size: 9px;
+    font-size: 8.5px;
+    line-height: 1.05;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
@@ -8373,7 +8381,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__table-seat[data-seat-index="5"] {
-  --seat-face-x: -1;
+  --seat-face-x: 1;
   --seat-rotate: -10deg;
   --seat-scale: 1.03;
   --seat-nudge-x: 0px;
@@ -8381,7 +8389,7 @@ body.club-choice-vote-open {
 }
 
 .private-cash-modal__table-seat[data-seat-index="6"] {
-  --seat-face-x: -1;
+  --seat-face-x: 1;
   --seat-rotate: 10deg;
   --seat-scale: 1.03;
   --seat-nudge-x: 0px;
