@@ -815,6 +815,7 @@
             '<em class="private-cash-modal__badge private-cash-modal__badge--' + escapeHtml(row.status) + '">' + escapeHtml(statusLabel(row.status)) + '</em>' +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost" data-private-cash-approve="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Одобрить</button>') +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-reject="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Отклонить</button>') +
+            (approved && !row.warningIssuedAt ? '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--warning" data-private-cash-warn="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Выдать желтую карточку</button>' : '') +
             (approved ? '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-remove="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Удалить</button>' : '') +
           '</div>' +
         '</article>';
@@ -1111,6 +1112,15 @@
         action: "reject",
         eventId: reject.getAttribute("data-private-cash-event") || "",
         accountId: reject.getAttribute("data-private-cash-reject") || "",
+      });
+      return;
+    }
+    var warn = event.target && event.target.closest ? event.target.closest("[data-private-cash-warn]") : null;
+    if (warn) {
+      postAction({
+        action: "warn",
+        eventId: warn.getAttribute("data-private-cash-event") || "",
+        accountId: warn.getAttribute("data-private-cash-warn") || "",
       });
       return;
     }

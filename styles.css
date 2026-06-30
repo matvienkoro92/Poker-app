@@ -8819,6 +8819,12 @@ body.club-choice-vote-open {
   color: #ffd2c7;
 }
 
+.private-cash-modal__ghost--warning {
+  border-color: rgba(255, 209, 82, 0.78);
+  background: rgba(255, 179, 43, 0.12);
+  color: #ffe58a;
+}
+
 .private-cash-modal__my-status {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
