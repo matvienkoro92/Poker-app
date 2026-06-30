@@ -28,6 +28,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleDailyEnabled = document.getElementById("raffleDailyEnabled");
     var raffleDailyStartWrap = document.getElementById("raffleDailyStartWrap");
     var raffleDailyStartTime = document.getElementById("raffleDailyStartTime");
+    var rafflePrivateCashPrize = document.getElementById("rafflePrivateCashPrize");
     var raffleAccessLevel = document.getElementById("raffleAccessLevel");
     var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
@@ -223,6 +224,15 @@ function initRafflesAdminCreateRuntime(opts) {
     var level = getRaffleGroupAccessLevel(select);
     if (level != null) group.accessLevel = level;
     return group;
+  }
+
+  function textLooksLikePrivateCash(value) {
+    var text = String(value || "").toLowerCase();
+    return text.indexOf("приватный кеш") !== -1 ||
+      text.indexOf("приватного кеш") !== -1 ||
+      text.indexOf("приватном кеш") !== -1 ||
+      text.indexOf("private cash") !== -1 ||
+      text.indexOf("private_cash") !== -1;
   }
 
   function getRaffleTournamentSelectedOption(select) {
@@ -829,6 +839,7 @@ function initRafflesAdminCreateRuntime(opts) {
       var groups;
       var title = "";
       var prizeKind = getRafflePrizeKind();
+      var prizeAction = "";
       if (isTickets) {
         totalWinners = 0;
         groups = [];
@@ -916,7 +927,14 @@ function initRafflesAdminCreateRuntime(opts) {
         if (groups.length === 0) groups = [{ count: 1, prize: "Беккинг-байин на кеш" }];
         totalWinners = Math.max(1, totalWinners);
         title = document.getElementById("raffleTitle") ? document.getElementById("raffleTitle").value.trim().slice(0, 200) : "";
-        if (!title) title = "Розыгрыш беккинг-байинов на кеш";
+        if (!title) title = rafflePrivateCashPrize && rafflePrivateCashPrize.checked ? "Розыгрыш на приватный кеш" : "Розыгрыш беккинг-байинов на кеш";
+        if (
+          (rafflePrivateCashPrize && rafflePrivateCashPrize.checked) ||
+          textLooksLikePrivateCash(title) ||
+          groups.some(function (group) { return textLooksLikePrivateCash(group && group.prize); })
+        ) {
+          prizeAction = "private_cash";
+        }
       }
       var dailyEnabled = !!(raffleDailyEnabled && raffleDailyEnabled.checked);
       if (dailyEnabled && prizeKind !== "cash") {
@@ -952,6 +970,7 @@ function initRafflesAdminCreateRuntime(opts) {
             endDate: endDate.toISOString(),
             title: title || undefined,
             prizeKind: prizeKind,
+            prizeAction: prizeAction || undefined,
             accessLevel: dailyEnabled ? Math.max(3, getRaffleCreateAccessLevel()) : getRaffleCreateAccessLevel(),
             daily: dailyEnabled,
             dailyStartTime: dailyStartTime || undefined,

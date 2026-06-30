@@ -1681,6 +1681,100 @@ async function testRaffleWinnerReady(redis) {
   }
 }
 
+async function testRaffleWinnerReadyPrivateCashReserve(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const eventId = "contract_private_cash_raffle_ready_event";
+  redis.kv.set("poker_app:private_cash_event:" + eventId, JSON.stringify({
+    id: eventId,
+    date: "2026-07-01",
+    time: "20:00",
+    gameType: "Холдем",
+    stakes: "20/40",
+    buyIn: "1000",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    createdBy: "contract",
+  }));
+  redis.l("poker_app:private_cash_events").push(eventId);
+
+  let r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "create",
+    totalWinners: 1,
+    groups: [{ prize: "Резерв на приватный кеш", count: 1 }],
+    endDate: new Date(Date.now() + 3600_000).toISOString(),
+    title: "Розыгрыш на приватный кеш",
+    prizeKind: "cash",
+    prizeAction: "private_cash",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can create private cash raffle");
+  assert.strictEqual(r.body.raffle.prizeAction, "private_cash", "private cash raffle stores prize action");
+
+  const raffle = {
+    id: "contract_raffle_private_cash_ready",
+    title: "Розыгрыш на приватный кеш",
+    prizeKind: "cash",
+    prizeAction: "private_cash",
+    totalWinners: 1,
+    groups: [{ prize: "Резерв на приватный кеш", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [{
+      userId: "tg_1001",
+      accountId: "ID100001",
+      name: "Player",
+      p21Id: "P21-1001",
+      groupIndex: 0,
+      prize: "Резерв на приватный кеш",
+    }],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:" + raffle.id, JSON.stringify(raffle));
+  redis.l("poker_app:raffle_ids").push(raffle.id);
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "setWinnerReady",
+    raffleId: raffle.id,
+    winnerUserId: "tg_1001",
+  }));
+  assert.strictEqual(r.statusCode, 200, "private cash winner can mark self ready");
+  assert.strictEqual(r.body.raffle.winners[0].winnerReady, true, "private cash winner ready flag is stored");
+  assert.strictEqual(r.body.raffle.winners[0].privateCashRegistered, true, "winner is marked registered in private cash");
+  assert.strictEqual(r.body.raffle.winners[0].privateCashEventId, eventId, "winner is linked to active private cash event");
+  assert.strictEqual(r.body.raffle.winners[0].winnerStatus, undefined, "private cash registration does not auto-issue prize");
+
+  const privateCashRowRaw = redis.h("poker_app:private_cash_participants:" + eventId).get("ID100001");
+  assert.ok(privateCashRowRaw, "private cash participant row is stored");
+  const privateCashRow = JSON.parse(privateCashRowRaw);
+  assert.strictEqual(privateCashRow.status, "pending", "private cash raffle winner is stored as a pending reserve request");
+  assert.ok(Number(privateCashRow.seatIndex) >= 7, "private cash raffle winner goes to private cash reserve");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: raffle.id,
+    winnerUserId: "tg_1001",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can issue private cash raffle prize");
+  assert.strictEqual(r.body.raffle.winners[0].winnerStatus, "ok", "admin green check issues private cash raffle prize");
+  for (let i = 0; i < 8 && !sentMessages.some((msg) => String(msg.body.text || "").includes("Приз начислен")); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  assert.ok(
+    sentMessages.some((msg) => String(msg.body.chat_id) === "1001" && String(msg.body.text || "").includes("Приз начислен")),
+    "private cash raffle winner receives normal prize issued notification after admin green check",
+  );
+}
+
 async function testRaffleWinnerReadyCannotConfirmAnotherWinner(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -5523,6 +5617,7 @@ async function main() {
     ["participation requires bot and channel", testParticipationRequiresBotAndChannel],
     ["raffle email account subscription gate", testRaffleEmailAccountSubscriptionGate],
     ["raffle winner ready", testRaffleWinnerReady],
+    ["raffle winner ready private cash reserve", testRaffleWinnerReadyPrivateCashReserve],
     ["raffle winner ready own row only", testRaffleWinnerReadyCannotConfirmAnotherWinner],
     ["raffle winner ready admin notifications", testRaffleWinnerReadyAdminNotifications],
     ["raffle winner status prize notification", testRaffleWinnerStatusPrizeNotification],

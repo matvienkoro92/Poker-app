@@ -326,9 +326,7 @@ function initRafflesCompletedRuntime(opts) {
       viewerIds = [];
     }
     var isMyWin = !!(uidRaw && viewerIds.indexOf(uidRaw) !== -1);
-    var readyBadge = privateCashRegistered
-      ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Приватный кеш</span>"
-      : prizeIssued
+    var readyBadge = prizeIssued
       ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Выдано</span>"
       : prizeDeclined
       ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--declined\">Отказано</span>"
@@ -338,7 +336,7 @@ function initRafflesCompletedRuntime(opts) {
         ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
         : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
     var privateCashAction = isMyWin && privateCashRegistered
-      ? "<span class=\"raffle-winner-private-cash-state\"><span>Вы зарегистрированы в приватный кеш</span><button type=\"button\" class=\"raffle-winner-private-cash-btn\" data-raffle-private-cash-open=\"1\">Перейти в раздел</button></span>"
+      ? "<span class=\"raffle-winner-private-cash-state\"><span>Заявка в резерв приватного кеша отправлена</span><button type=\"button\" class=\"raffle-winner-private-cash-btn\" data-raffle-private-cash-open=\"1\">Перейти в раздел</button></span>"
       : "";
     var readyAction = !privateCashAction && isMyWin && status !== "ok" && status !== "fail" && !readyExpired
       ? "<button type=\"button\" class=\"raffle-winner-ready-btn" +

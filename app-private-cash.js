@@ -874,7 +874,7 @@
     return '<div class="private-cash-modal__tabs private-cash-modal__tabs--' + (isAdmin ? "admin" : "user") + '" role="tablist" aria-label="Разделы приватного кеша">' +
       createTabHtml +
       '<button type="button" class="private-cash-modal__tab' + (activeTab === "signup" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="signup" role="tab" aria-selected="' + (activeTab === "signup" ? "true" : "false") + '">Запись</button>' +
-      '<button type="button" class="private-cash-modal__tab' + (activeTab === "results" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="results" role="tab" aria-selected="' + (activeTab === "results" ? "true" : "false") + '">Результаты</button>' +
+      '<button type="button" class="private-cash-modal__tab' + (activeTab === "results" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="results" role="tab" aria-selected="' + (activeTab === "results" ? "true" : "false") + '">Кеш-рейтинг</button>' +
     '</div>';
   }
 
