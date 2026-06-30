@@ -16,7 +16,7 @@
     { id: "knockout", amount: "500-1500 ₽", condition: "за нокаут топ10 Лиги1" },
     { id: "badbeat", amount: "1200 ₽", condition: "бабблу" },
   ];
-  var DEFAULT_CASH_BONUS_TEXT = "+10% на любой стек от 5к до 20к, первым 7ми записавшимся";
+  var DEFAULT_CASH_BONUS_TEXT = "+10% на любой стек от 5к до 20к, первым 6 записавшимся";
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -405,7 +405,6 @@
   var SEAT_POSITIONS = [
     { x: 26, y: 33 },
     { x: 74, y: 33 },
-    { x: 14, y: 49 },
     { x: 12, y: 67 },
     { x: 88, y: 69 },
     { x: 26, y: 86 },
@@ -415,7 +414,6 @@
   var SEAT_MONKEYS = [
     "./assets/private-cash-seat-monkey-4.webp",
     "./assets/private-cash-seat-monkey-2.webp",
-    "./assets/private-cash-seat-monkey-6.webp",
     "./assets/private-cash-seat-monkey-4.webp",
     "./assets/private-cash-seat-monkey-5.webp",
     "./assets/private-cash-seat-monkey-1.webp",
@@ -491,7 +489,14 @@
   }
 
   function hasReserveOnlyJoin(event) {
-    return visibleSeatRows(event).length >= SEAT_POSITIONS.length;
+    return privateCashSeatsLeft(event) <= 0;
+  }
+
+  function privateCashSeatsLeft(event) {
+    var taken = visibleSeatRows(event).filter(function (row) {
+      return rowSeatGroup(event, row) !== "reserve";
+    }).length;
+    return Math.max(0, SEAT_POSITIONS.length - taken);
   }
 
   function renderPrivateCashSeats(event) {
@@ -538,7 +543,7 @@
     if (!row) return "";
     return '<button type="button" class="private-cash-modal__table-house-seat" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '" aria-label="Открыть профиль ' + escapeHtml(seatName(row)) + '">' +
       '<span class="private-cash-modal__table-house-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
-      '<small>Уже в игре</small>' +
+      '<small>Подтвержден</small>' +
     '</button>';
   }
 
@@ -594,6 +599,14 @@
     '</figure>';
   }
 
+  function renderSeatsLeft(event) {
+    if (!event || event.status !== "active") return "";
+    var left = privateCashSeatsLeft(event);
+    return '<div class="private-cash-modal__seats-left">' +
+      '<span>Свободных мест</span><strong>' + escapeHtml(left) + '</strong>' +
+    '</div>';
+  }
+
   function renderParticipant(event, my) {
     if (state && state.isAdmin) return "";
     if (event && event.bookingBlock) {
@@ -629,6 +642,11 @@
     var rows = event.participants || [];
     return '<div class="private-cash-modal__participants">' +
       '<h3>Заявки</h3>' +
+      '<form class="private-cash-modal__manual-add" data-private-cash-form="manual-add">' +
+        '<input name="query" type="text" maxlength="120" placeholder="ID, @telegram, Poker21 ID или ник" autocomplete="off">' +
+        '<input name="eventId" type="hidden" value="' + escapeHtml(event.id) + '">' +
+        '<button type="submit" class="private-cash-modal__ghost">Добавить</button>' +
+      '</form>' +
       (rows.length ? rows.map(function (row) {
         var approved = row.status === "approved";
         var rejected = row.status === "rejected";
@@ -666,33 +684,44 @@
       '</section>' +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderPrivateCashHero(event) +
+      renderSeatsLeft(event) +
       renderEventBonuses(event.combinations) +
       renderCashSeatLists(event) +
-      renderParticipant(event, my) +
       renderRules() +
+      renderShareActions() +
+      renderParticipant(event, my) +
       renderParticipants(event) +
     '</article>';
   }
 
   function renderTabs() {
-    return '<div class="private-cash-modal__tabs" role="tablist" aria-label="Разделы приватного кеша">' +
+    var isAdmin = !!(state && state.isAdmin);
+    var createTabHtml = state && state.isAdmin
+      ? '<button type="button" class="private-cash-modal__tab' + (activeTab === "create" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="create" role="tab" aria-selected="' + (activeTab === "create" ? "true" : "false") + '">Создать</button>'
+      : "";
+    return '<div class="private-cash-modal__tabs private-cash-modal__tabs--' + (isAdmin ? "admin" : "user") + '" role="tablist" aria-label="Разделы приватного кеша">' +
+      createTabHtml +
       '<button type="button" class="private-cash-modal__tab' + (activeTab === "signup" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="signup" role="tab" aria-selected="' + (activeTab === "signup" ? "true" : "false") + '">Запись</button>' +
       '<button type="button" class="private-cash-modal__tab' + (activeTab === "results" ? " private-cash-modal__tab--active" : "") + '" data-private-cash-tab="results" role="tab" aria-selected="' + (activeTab === "results" ? "true" : "false") + '">Результаты</button>' +
     '</div>';
   }
 
   function renderSignupTab(events) {
-    return renderAdminForm() +
-      renderShareActions() +
-      '<section class="private-cash-modal__events">' +
+    return '<section class="private-cash-modal__events">' +
         (events.length ? events.map(renderEvent).join("") : renderPrivateCashHero(null) + '<div class="private-cash-modal__empty">Открытых записей пока нет.</div>' + renderRules()) +
       '</section>';
   }
 
   function renderResultsTab() {
-    return '<section class="private-cash-modal__results" role="tabpanel">' +
+    return '<section class="private-cash-modal__results">' +
       '<p>Здесь будут результаты приватных кеш-игр</p>' +
     '</section>';
+  }
+
+  function renderTabPanel(content) {
+    return '<div class="private-cash-modal__tab-panel" role="tabpanel" data-private-cash-active-tab="' + escapeHtml(activeTab) + '">' +
+      content +
+    '</div>';
   }
 
   function render() {
@@ -701,10 +730,12 @@
       renderLoading();
       return;
     }
+    if (activeTab === "create" && !state.isAdmin) activeTab = "signup";
     var events = state.events || [];
+    var content = activeTab === "create" ? renderAdminForm() : activeTab === "results" ? renderResultsTab() : renderSignupTab(events);
     bodyEl.innerHTML =
       renderTabs() +
-      (activeTab === "results" ? renderResultsTab() : renderSignupTab(events));
+      renderTabPanel(content);
   }
 
   function onModalSubmit(event) {
@@ -730,6 +761,16 @@
         });
         updateBonusPreview(form);
       });
+      return;
+    }
+    if (form.getAttribute("data-private-cash-form") === "manual-add") {
+      postAction({
+        action: "manualAdd",
+        eventId: form.elements.eventId ? form.elements.eventId.value : "",
+        query: form.elements.query ? form.elements.query.value : "",
+      }).then(function () {
+        if (form.elements.query) form.elements.query.value = "";
+      });
     }
   }
 
@@ -741,7 +782,8 @@
     }
     var tab = event.target && event.target.closest ? event.target.closest("[data-private-cash-tab]") : null;
     if (tab) {
-      activeTab = tab.getAttribute("data-private-cash-tab") === "results" ? "results" : "signup";
+      var nextTab = tab.getAttribute("data-private-cash-tab");
+      activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : "signup";
       render();
       return;
     }

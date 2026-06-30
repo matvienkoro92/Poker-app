@@ -7193,35 +7193,73 @@ body.club-choice-vote-open {
 
 .private-cash-modal__tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 14px;
-  padding: 4px;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  padding: 4px 4px 0;
   border: 1px solid rgba(255, 179, 43, 0.28);
-  border-radius: 16px;
-  background: rgba(5, 10, 20, 0.7);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 179, 43, 0.12), transparent 52%),
+    rgba(5, 10, 20, 0.82);
+}
+
+.private-cash-modal__tabs--user {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.private-cash-modal__tabs--admin {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .private-cash-modal__tab {
   min-width: 0;
-  min-height: 44px;
-  border: 1px solid rgba(255, 179, 43, 0.22);
-  border-radius: 12px;
-  background: rgba(8, 14, 26, 0.86);
+  min-height: 46px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
   color: rgba(255, 237, 192, 0.78);
   font: inherit;
-  font-size: 15px;
+  font-size: clamp(12px, 3.4vw, 15px);
   font-weight: 1000;
   line-height: 1;
   text-align: center;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
 .private-cash-modal__tab--active {
-  border-color: rgba(255, 210, 104, 0.9);
-  background: linear-gradient(180deg, #ffe180, #d6951f);
+  border-bottom-color: #ffe27c;
+  background:
+    radial-gradient(circle at 50% -34%, rgba(255, 255, 255, 0.92), transparent 44%),
+    linear-gradient(180deg, #ffe180 0%, #ffc340 52%, #c77a0c 100%);
   color: #1b1204;
-  box-shadow: 0 8px 18px rgba(214, 149, 31, 0.25);
+  text-shadow: 0 1px 0 rgba(255, 244, 196, 0.62);
+  box-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 0 22px rgba(255, 179, 42, 0.36);
+}
+
+.private-cash-modal__tab-panel {
+  width: 100%;
+  border: 1px solid rgba(255, 179, 43, 0.34);
+  border-top: 2px solid rgba(255, 226, 124, 0.92);
+  border-radius: 0 0 18px 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 179, 43, 0.08), transparent 34px),
+    rgba(5, 10, 20, 0.42);
+  padding: 14px;
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.private-cash-modal__tab-panel > .private-cash-modal__form,
+.private-cash-modal__tab-panel > .private-cash-modal__events,
+.private-cash-modal__tab-panel > .private-cash-modal__results {
+  margin: 0;
 }
 
 .private-cash-modal__results {
@@ -7905,6 +7943,39 @@ body.club-choice-vote-open {
   aspect-ratio: 68 / 100;
   object-fit: cover;
   object-position: center 46%;
+}
+
+.private-cash-modal__seats-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: -4px 0 12px;
+  border: 1px solid rgba(77, 255, 139, 0.38);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(77, 255, 139, 0.16), transparent 58%),
+    rgba(5, 21, 15, 0.78);
+  padding: 9px 12px;
+  color: #d6ffe4;
+  text-align: center;
+  box-shadow:
+    0 0 18px rgba(77, 255, 139, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.private-cash-modal__seats-left span {
+  font-size: 13px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__seats-left strong {
+  color: #fff2ad;
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.48);
 }
 
 .private-cash-modal__table-seats {
@@ -8655,6 +8726,31 @@ body.club-choice-vote-open {
   font-size: 18px;
 }
 
+.private-cash-modal__manual-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin: 0 0 10px;
+  border: 1px solid rgba(255, 179, 43, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 179, 43, 0.07);
+  padding: 9px;
+}
+
+.private-cash-modal__manual-add input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: 1px solid rgba(255, 179, 43, 0.28);
+  border-radius: 12px;
+  background: rgba(3, 7, 16, 0.92);
+  color: #fff7df;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 9px 10px;
+}
+
 .private-cash-modal__participant {
   display: flex;
   align-items: center;
@@ -8782,6 +8878,16 @@ body.club-choice-vote-open {
     padding: 10px 14px 106px;
   }
 
+  .private-cash-modal__tab {
+    min-height: 42px;
+    font-size: clamp(10px, 3.15vw, 12px);
+  }
+
+  .private-cash-modal__tab-panel {
+    padding: 9px;
+    border-radius: 0 0 16px 16px;
+  }
+
   .private-cash-modal__table-hero {
     margin-top: 12px;
     margin-right: -14px;
@@ -8837,6 +8943,23 @@ body.club-choice-vote-open {
     font-size: 10px;
   }
 
+  .private-cash-modal__seats-left {
+    margin: -2px 0 10px;
+    padding: 8px 10px;
+  }
+
+  .private-cash-modal__seats-left span {
+    font-size: 11px;
+  }
+
+  .private-cash-modal__seats-left strong {
+    font-size: 20px;
+  }
+
+  .private-cash-modal__manual-add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .private-cash-modal__grid,
   .private-cash-modal__participant {
     grid-template-columns: minmax(0, 1fr);
@@ -8878,6 +9001,24 @@ body.club-choice-vote-open {
 
   .private-cash-modal__join-dock {
     padding: 10px 14px max(12px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .private-cash-modal__share-actions {
+    margin: 4px 0 10px;
+  }
+
+  .private-cash-modal__share-btn--copy {
+    border-color: rgba(255, 242, 186, 0.94);
+    background:
+      radial-gradient(circle at 50% -36%, rgba(255, 255, 255, 0.92), transparent 38%),
+      linear-gradient(135deg, #fff4a8 0%, #ffd24d 30%, #ff9f1a 66%, #ff6a00 100%);
+    color: #1a0f03;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.18),
+      0 8px 18px rgba(255, 120, 0, 0.36),
+      0 0 26px rgba(255, 173, 38, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.62),
+      inset 0 -4px 10px rgba(150, 55, 0, 0.38);
   }
 
   .private-cash-modal__bonus-card span {

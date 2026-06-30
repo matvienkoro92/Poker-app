@@ -639,12 +639,17 @@
 .hall-fish-achievement-detail__text small {
   display: block;
   min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
   overflow-wrap: anywhere;
 }
 .hall-fish-achievement-detail__text strong {
   color: #fffbeb;
   font-size: 15px;
   font-weight: 1000;
+  line-height: 1.18;
 }
 .hall-fish-achievement-detail__amount {
   color: #34d399;
