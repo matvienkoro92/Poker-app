@@ -7317,6 +7317,37 @@ body.club-choice-vote-open {
   min-width: 0;
 }
 
+.private-cash-modal__form--edit-event {
+  margin: 0 -14px 12px;
+  border-color: rgba(45, 212, 112, 0.26);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(45, 212, 112, 0.11), transparent 34%),
+    linear-gradient(180deg, rgba(8, 14, 26, 0.94), rgba(3, 8, 18, 0.94));
+}
+
+.private-cash-modal__form-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.private-cash-modal__form-head strong {
+  color: #fff3c9;
+  font-size: 16px;
+  font-weight: 1000;
+  line-height: 1.1;
+}
+
+.private-cash-modal__form-head span {
+  color: rgba(211, 197, 168, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: right;
+}
+
 .private-cash-modal__share-actions {
   display: flex;
   flex-wrap: nowrap;
@@ -7457,6 +7488,10 @@ body.club-choice-vote-open {
   grid-template-columns: minmax(0, 1fr) minmax(132px, 0.42fr);
   gap: 10px;
   min-width: 0;
+}
+
+.private-cash-modal__grid--even {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .private-cash-modal label {
@@ -8737,6 +8772,11 @@ body.club-choice-vote-open {
   padding: 9px;
 }
 
+.private-cash-modal__manual-search {
+  position: relative;
+  min-width: 0;
+}
+
 .private-cash-modal__manual-add input {
   width: 100%;
   min-width: 0;
@@ -8749,6 +8789,74 @@ body.club-choice-vote-open {
   font-size: 13px;
   font-weight: 900;
   padding: 9px 10px;
+}
+
+.private-cash-modal__manual-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 12;
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid rgba(255, 179, 43, 0.34);
+  border-radius: 14px;
+  background: rgba(3, 7, 16, 0.98);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.48), 0 0 18px rgba(255, 179, 43, 0.14);
+}
+
+.private-cash-modal__manual-suggestions[hidden] {
+  display: none !important;
+}
+
+.private-cash-modal__manual-suggestions-title {
+  color: rgba(255, 229, 157, 0.72);
+  font-size: 11px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.private-cash-modal__manual-suggestion {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 179, 43, 0.28);
+  border-radius: 12px;
+  background: rgba(8, 13, 25, 0.94);
+  color: #fff7df;
+  font: inherit;
+  text-align: left;
+}
+
+.private-cash-modal__manual-suggestion span,
+.private-cash-modal__manual-suggestion small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.private-cash-modal__manual-suggestion span {
+  font-size: 13px;
+  font-weight: 1000;
+}
+
+.private-cash-modal__manual-suggestion small {
+  color: rgba(255, 235, 190, 0.7);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.private-cash-modal__manual-suggestion--manual {
+  border-color: rgba(59, 130, 246, 0.42);
+  background: rgba(15, 23, 42, 0.98);
 }
 
 .private-cash-modal__participant {
@@ -8963,6 +9071,15 @@ body.club-choice-vote-open {
   .private-cash-modal__grid,
   .private-cash-modal__participant {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .private-cash-modal__form-head {
+    display: grid;
+    gap: 3px;
+  }
+
+  .private-cash-modal__form-head span {
+    text-align: left;
   }
 
   .private-cash-modal__bonus-builder {

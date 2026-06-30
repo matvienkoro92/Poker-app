@@ -9,6 +9,7 @@
   var state = null;
   var loading = false;
   var activeTab = "signup";
+  var manualSuggestTimer = 0;
   var BONUS_PRESETS = [
     { id: "four-kind", amount: "1000 ₽", condition: "за каре" },
     { id: "straight-flush", amount: "2500 ₽", condition: "за стрит-флеш" },
@@ -219,6 +220,24 @@
     '</div>';
   }
 
+  function renderGameTypeOptions(selected) {
+    var current = String(selected || "");
+    var options = ["Холдем", "Холдем 3-1 флоп", "Холдем 3-1 терн", "Омаха5", "Омаха6"];
+    return '<option value="">Выберите вид игры</option>' +
+      options.map(function (value) {
+        return '<option value="' + escapeHtml(value) + '"' + (value === current ? " selected" : "") + '>' + escapeHtml(value) + '</option>';
+      }).join("");
+  }
+
+  function renderAccessLevelOptions(selected) {
+    var current = Math.max(0, Math.floor(Number(selected) || 0));
+    var html = '<option value="0"' + (current === 0 ? " selected" : "") + '>Все игроки</option>';
+    for (var i = 1; i <= 6; i += 1) {
+      html += '<option value="' + i + '"' + (current === i ? " selected" : "") + '>Уровень ' + i + '+</option>';
+    }
+    return html;
+  }
+
   function renderEventBonuses(raw) {
     var rows = bonusLines(raw);
     var fallback = !rows.length;
@@ -254,6 +273,7 @@
     statusEl = document.getElementById("privateCashStatus");
     modal.addEventListener("click", onModalClick);
     modal.addEventListener("submit", onModalSubmit);
+    modal.addEventListener("input", onModalInput);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && modal.classList.contains("private-cash-modal--open")) closeModal();
     });
@@ -341,6 +361,68 @@
       });
   }
 
+  function fetchManualSuggestions(query) {
+    return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&suggest=1&query=" + encodeURIComponent(query || "") + "&_t=" + Date.now(), { cache: "no-store" })
+      .then(function (res) { return res.json(); });
+  }
+
+  function renderManualSuggestions(form, rows, raw) {
+    var box = form && form.querySelector("[data-private-cash-manual-suggestions]");
+    if (!box) return;
+    rows = Array.isArray(rows) ? rows.slice(0, 8) : [];
+    raw = String(raw || "").trim();
+    if (!rows.length && raw.length < 2) {
+      box.hidden = true;
+      box.innerHTML = "";
+      return;
+    }
+    var manualRow = raw ? '<button type="button" class="private-cash-modal__manual-suggestion private-cash-modal__manual-suggestion--manual" data-private-cash-manual-pick="' + escapeHtml(raw) + '" data-private-cash-manual-label="' + escapeHtml(raw) + '">' +
+      '<span>Добавить: ' + escapeHtml(raw) + '</span><small>без профиля</small></button>' : "";
+    box.innerHTML =
+      (rows.length ? '<div class="private-cash-modal__manual-suggestions-title">Похожие игроки</div>' : '') +
+      rows.map(function (row) {
+        var name = row && (row.name || row.pokerPlusNickname || row.displayName || row.telegram || row.accountId) || "Игрок";
+        var meta = [];
+        if (row && row.p21Id) meta.push("Poker21 " + row.p21Id);
+        if (row && row.telegram) meta.push(row.telegram);
+        if (row && row.accountId) meta.push(row.accountId);
+        return '<button type="button" class="private-cash-modal__manual-suggestion" data-private-cash-manual-pick="' + escapeHtml(row.accountId || name) + '" data-private-cash-manual-label="' + escapeHtml(name) + '">' +
+          '<span>' + escapeHtml(name) + '</span><small>' + escapeHtml(meta.join(" · ") || "профиль найден") + '</small></button>';
+      }).join("") +
+      manualRow;
+    box.hidden = false;
+  }
+
+  function clearManualSuggestions(form) {
+    var box = form && form.querySelector("[data-private-cash-manual-suggestions]");
+    if (!box) return;
+    box.hidden = true;
+    box.innerHTML = "";
+  }
+
+  function onModalInput(event) {
+    var input = event.target && event.target.closest ? event.target.closest("[data-private-cash-manual-query]") : null;
+    if (!input) return;
+    var form = input.closest("[data-private-cash-form='manual-add']");
+    if (!form) return;
+    if (form.elements.selectedQuery) form.elements.selectedQuery.value = "";
+    var raw = String(input.value || "").trim();
+    window.clearTimeout(manualSuggestTimer);
+    if (raw.length < 2) {
+      clearManualSuggestions(form);
+      return;
+    }
+    manualSuggestTimer = window.setTimeout(function () {
+      fetchManualSuggestions(raw).then(function (data) {
+        if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка поиска");
+        if (String(input.value || "").trim() !== raw) return;
+        renderManualSuggestions(form, data.suggestions || [], raw);
+      }).catch(function () {
+        renderManualSuggestions(form, [], raw);
+      });
+    }, 180);
+  }
+
   function renderAdminForm() {
     if (!state || !state.isAdmin) return "";
     return '<form class="private-cash-modal__form" data-private-cash-form="create">' +
@@ -349,28 +431,47 @@
         '<label>Время<input name="time" type="time" required></label>' +
       '</div>' +
       '<label>Вид игры<select name="gameType" required>' +
-        '<option value="">Выберите вид игры</option>' +
-        '<option value="Холдем">Холдем</option>' +
-        '<option value="Холдем 3-1 флоп">Холдем 3-1 флоп</option>' +
-        '<option value="Холдем 3-1 терн">Холдем 3-1 терн</option>' +
-        '<option value="Омаха5">Омаха5</option>' +
-        '<option value="Омаха6">Омаха6</option>' +
+        renderGameTypeOptions("") +
       '</select></label>' +
       '<label>Ставки<input name="stakes" maxlength="80" placeholder="Например: 50/100 ₽" required></label>' +
       '<label>Вход<input name="buyIn" maxlength="80" placeholder="Например: 5 000 ₽" required></label>' +
       '<label>Уровень доступа<select name="accessLevel">' +
-        '<option value="0">Все игроки</option>' +
-        '<option value="1" selected>Уровень 1+</option>' +
-        '<option value="2">Уровень 2+</option>' +
-        '<option value="3">Уровень 3+</option>' +
-        '<option value="4">Уровень 4+</option>' +
-        '<option value="5">Уровень 5+</option>' +
-        '<option value="6">Уровень 6+</option>' +
+        renderAccessLevelOptions(1) +
       '</select></label>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="3" placeholder="Формат, место, условия"></textarea></label>' +
       renderBonusPicker() +
       '<label class="private-cash-modal__push-check"><input type="checkbox" name="sendPush"><span><strong>Отправить пуш</strong><small>Если галочка включена, всем уйдет уведомление об открытии записи.</small></span></label>' +
       '<button type="submit" class="private-cash-modal__primary private-cash-modal__primary--gold">Создать запись</button>' +
+    '</form>';
+  }
+
+  function renderAdminEditForm(event) {
+    if (!state || !state.isAdmin || !event || !event.id) return "";
+    return '<form class="private-cash-modal__form private-cash-modal__form--edit-event" data-private-cash-form="update">' +
+      '<input type="hidden" name="eventId" value="' + escapeHtml(event.id) + '">' +
+      '<div class="private-cash-modal__form-head">' +
+        '<strong>Редактировать параметры</strong>' +
+        '<span>Изменения сразу обновят карточку записи.</span>' +
+      '</div>' +
+      '<div class="private-cash-modal__grid">' +
+        '<label>Дата<input name="date" type="date" value="' + escapeHtml(event.date) + '" required></label>' +
+        '<label>Время<input name="time" type="time" value="' + escapeHtml(event.time) + '" required></label>' +
+      '</div>' +
+      '<div class="private-cash-modal__grid private-cash-modal__grid--even">' +
+        '<label>Статус<select name="status">' +
+          '<option value="active"' + (event.status === "active" ? " selected" : "") + '>Открыта запись</option>' +
+          '<option value="closed"' + (event.status === "closed" ? " selected" : "") + '>Закрыто</option>' +
+        '</select></label>' +
+        '<label>Доступ<select name="accessLevel">' + renderAccessLevelOptions(event.accessLevel) + '</select></label>' +
+      '</div>' +
+      '<label>Вид игры<select name="gameType" required>' + renderGameTypeOptions(event.gameType) + '</select></label>' +
+      '<div class="private-cash-modal__grid private-cash-modal__grid--even">' +
+        '<label>Ставки<input name="stakes" maxlength="80" value="' + escapeHtml(event.stakes) + '" required></label>' +
+        '<label>Вход<input name="buyIn" maxlength="80" value="' + escapeHtml(event.buyIn) + '" required></label>' +
+      '</div>' +
+      '<label>Описание<textarea name="description" maxlength="500" rows="2" placeholder="Формат, место, условия">' + escapeHtml(event.description || "") + '</textarea></label>' +
+      '<label>Бонусы<textarea name="combinations" maxlength="900" rows="3" placeholder="5000 ₽ | за роял">' + escapeHtml(event.combinations || "") + '</textarea></label>' +
+      '<button type="submit" class="private-cash-modal__primary">Сохранить изменения</button>' +
     '</form>';
   }
 
@@ -456,6 +557,7 @@
   }
 
   function seatMetaText(row) {
+    if (row && row.manual) return "Без профиля";
     var level = Math.max(0, Math.floor(Number(row && row.level) || 0));
     var parts = ["Уровень " + level];
     var age = seatAgeLabel(row);
@@ -521,7 +623,7 @@
         var pos = SEAT_POSITIONS[index];
         var status = row.status === "approved" ? "approved" : "pending";
         var monkey = SEAT_MONKEYS[index % SEAT_MONKEYS.length];
-        return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+        return '<button type="button" class="private-cash-modal__table-seat private-cash-modal__table-seat--' + escapeHtml(status) + '" style="--seat-x:' + pos.x + '%;--seat-y:' + pos.y + '%;" data-seat-index="' + index + '" data-private-cash-profile="' + escapeHtml(row.manual ? "" : row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
           '<span class="private-cash-modal__table-seat-label">' +
             '<span class="private-cash-modal__table-seat-name">' + escapeHtml(seatName(row)) + '</span>' +
             '<small>' + escapeHtml(statusLabel(status)) + '</small>' +
@@ -559,7 +661,7 @@
   }
 
   function renderCashSeatListItem(row) {
-    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
+    return '<li><button type="button" data-private-cash-profile="' + escapeHtml(row.manual ? "" : row.accountId || "") + '" data-private-cash-profile-name="' + escapeHtml(seatName(row)) + '">' +
       '<strong>' + escapeHtml(seatName(row)) + '</strong>' +
       '<span>' + escapeHtml(seatMetaText(row)) + '</span>' +
     '</button></li>';
@@ -643,7 +745,11 @@
     return '<div class="private-cash-modal__participants">' +
       '<h3>Заявки</h3>' +
       '<form class="private-cash-modal__manual-add" data-private-cash-form="manual-add">' +
-        '<input name="query" type="text" maxlength="120" placeholder="ID, @telegram, Poker21 ID или ник" autocomplete="off">' +
+        '<div class="private-cash-modal__manual-search">' +
+          '<input name="query" type="text" maxlength="120" placeholder="ID, @telegram, Poker21 ID или ник" autocomplete="off" data-private-cash-manual-query>' +
+          '<input name="selectedQuery" type="hidden" value="">' +
+          '<div class="private-cash-modal__manual-suggestions" data-private-cash-manual-suggestions hidden></div>' +
+        '</div>' +
         '<input name="eventId" type="hidden" value="' + escapeHtml(event.id) + '">' +
         '<button type="submit" class="private-cash-modal__ghost">Добавить</button>' +
       '</form>' +
@@ -652,12 +758,13 @@
         var rejected = row.status === "rejected";
         return '<article class="private-cash-modal__participant">' +
           '<div><strong>' + escapeHtml(seatName(row)) + '</strong>' +
-            '<span>' + escapeHtml(row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
+            '<span>' + escapeHtml(row.manual ? "без профиля" : row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
             (row.warningCount ? '<small>Желтые карточки: ' + escapeHtml(row.warningCount) + '</small>' : '') + '</div>' +
           '<div class="private-cash-modal__participant-actions">' +
             '<em class="private-cash-modal__badge private-cash-modal__badge--' + escapeHtml(row.status) + '">' + escapeHtml(statusLabel(row.status)) + '</em>' +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost" data-private-cash-approve="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Одобрить</button>') +
             (approved || rejected ? "" : '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-reject="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Отклонить</button>') +
+            (approved ? '<button type="button" class="private-cash-modal__ghost private-cash-modal__ghost--danger" data-private-cash-remove="' + escapeHtml(row.accountId) + '" data-private-cash-event="' + escapeHtml(event.id) + '">Удалить</button>' : '') +
           '</div>' +
         '</article>';
       }).join("") : '<div class="private-cash-modal__empty private-cash-modal__empty--compact">Заявок пока нет.</div>') +
@@ -682,6 +789,7 @@
           '<div class="private-cash-modal__meta private-cash-modal__meta--access"><span>Доступ</span><strong>' + escapeHtml(accessLevel > 0 ? "Ур. " + accessLevel + "+" : "Все") + '</strong></div>' +
         '</div>' +
       '</section>' +
+      renderAdminEditForm(event) +
       (event.description ? '<p class="private-cash-modal__text">' + escapeHtml(event.description) + '</p>' : '') +
       renderPrivateCashHero(event) +
       renderSeatsLeft(event) +
@@ -763,13 +871,31 @@
       });
       return;
     }
+    if (form.getAttribute("data-private-cash-form") === "update") {
+      postAction({
+        action: "update",
+        eventId: form.elements.eventId ? form.elements.eventId.value : "",
+        date: form.elements.date.value,
+        time: form.elements.time.value,
+        status: form.elements.status ? form.elements.status.value : "active",
+        gameType: form.elements.gameType.value,
+        stakes: form.elements.stakes.value,
+        buyIn: form.elements.buyIn.value,
+        accessLevel: form.elements.accessLevel ? form.elements.accessLevel.value : "0",
+        description: form.elements.description ? form.elements.description.value : "",
+        combinations: form.elements.combinations ? form.elements.combinations.value : "",
+      });
+      return;
+    }
     if (form.getAttribute("data-private-cash-form") === "manual-add") {
       postAction({
         action: "manualAdd",
         eventId: form.elements.eventId ? form.elements.eventId.value : "",
-        query: form.elements.query ? form.elements.query.value : "",
+        query: form.elements.selectedQuery && form.elements.selectedQuery.value ? form.elements.selectedQuery.value : form.elements.query ? form.elements.query.value : "",
       }).then(function () {
         if (form.elements.query) form.elements.query.value = "";
+        if (form.elements.selectedQuery) form.elements.selectedQuery.value = "";
+        clearManualSuggestions(form);
       });
     }
   }
@@ -785,6 +911,16 @@
       var nextTab = tab.getAttribute("data-private-cash-tab");
       activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : "signup";
       render();
+      return;
+    }
+    var manualPick = event.target && event.target.closest ? event.target.closest("[data-private-cash-manual-pick]") : null;
+    if (manualPick) {
+      var manualForm = manualPick.closest("[data-private-cash-form='manual-add']");
+      if (manualForm) {
+        if (manualForm.elements.query) manualForm.elements.query.value = manualPick.getAttribute("data-private-cash-manual-label") || "";
+        if (manualForm.elements.selectedQuery) manualForm.elements.selectedQuery.value = manualPick.getAttribute("data-private-cash-manual-pick") || "";
+        clearManualSuggestions(manualForm);
+      }
       return;
     }
     var bonus = event.target && event.target.closest ? event.target.closest("[data-private-cash-bonus]") : null;
@@ -890,6 +1026,15 @@
         action: "reject",
         eventId: reject.getAttribute("data-private-cash-event") || "",
         accountId: reject.getAttribute("data-private-cash-reject") || "",
+      });
+      return;
+    }
+    var remove = event.target && event.target.closest ? event.target.closest("[data-private-cash-remove]") : null;
+    if (remove) {
+      postAction({
+        action: "remove",
+        eventId: remove.getAttribute("data-private-cash-event") || "",
+        accountId: remove.getAttribute("data-private-cash-remove") || "",
       });
     }
   }
