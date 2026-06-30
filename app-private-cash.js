@@ -9,6 +9,7 @@
   var state = null;
   var loading = false;
   var activeTab = "signup";
+  var editingEventId = "";
   var manualSuggestTimer = 0;
   var BONUS_PRESETS = [
     { id: "four-kind", amount: "1000 ₽", condition: "за каре" },
@@ -447,6 +448,7 @@
 
   function renderAdminEditForm(event) {
     if (!state || !state.isAdmin || !event || !event.id) return "";
+    if (String(editingEventId || "") !== String(event.id || "")) return "";
     return '<form class="private-cash-modal__form private-cash-modal__form--edit-event" data-private-cash-form="update">' +
       '<input type="hidden" name="eventId" value="' + escapeHtml(event.id) + '">' +
       '<div class="private-cash-modal__form-head">' +
@@ -471,7 +473,10 @@
       '</div>' +
       '<label>Описание<textarea name="description" maxlength="500" rows="2" placeholder="Формат, место, условия">' + escapeHtml(event.description || "") + '</textarea></label>' +
       '<label>Бонусы<textarea name="combinations" maxlength="900" rows="3" placeholder="5000 ₽ | за роял">' + escapeHtml(event.combinations || "") + '</textarea></label>' +
-      '<button type="submit" class="private-cash-modal__primary">Сохранить изменения</button>' +
+      '<div class="private-cash-modal__form-actions">' +
+        '<button type="submit" class="private-cash-modal__primary">Сохранить изменения</button>' +
+        '<button type="button" class="private-cash-modal__ghost" data-private-cash-edit-cancel>Отмена</button>' +
+      '</div>' +
     '</form>';
   }
 
@@ -538,6 +543,13 @@
     var poker21Name = seatPoker21Nickname(row);
     var name = row && (poker21Name || row.displayName || row.telegramUsername) ? String(poker21Name || row.displayName || row.telegramUsername).trim() : "";
     return name.replace(/^@+/, "") || "Игрок";
+  }
+
+  function adminParticipantName(row) {
+    var poker21Name = seatPoker21Nickname(row);
+    var telegramName = row && row.telegramUsername ? String(row.telegramUsername).replace(/^@+/, "").trim() : "";
+    var displayName = row && row.displayName ? String(row.displayName).trim() : "";
+    return (poker21Name || telegramName || displayName).replace(/^@+/, "") || "Игрок";
   }
 
   function seatSpecialtyLabel(row) {
@@ -757,7 +769,7 @@
         var approved = row.status === "approved";
         var rejected = row.status === "rejected";
         return '<article class="private-cash-modal__participant">' +
-          '<div><strong>' + escapeHtml(seatName(row)) + '</strong>' +
+          '<div><strong>' + escapeHtml(adminParticipantName(row)) + '</strong>' +
             '<span>' + escapeHtml(row.manual ? "без профиля" : row.telegramUsername ? "@" + row.telegramUsername : row.accountId) + '</span>' +
             (row.warningCount ? '<small>Желтые карточки: ' + escapeHtml(row.warningCount) + '</small>' : '') + '</div>' +
           '<div class="private-cash-modal__participant-actions">' +
@@ -774,11 +786,17 @@
   function renderEvent(event) {
     var my = event.myParticipant || null;
     var accessLevel = Math.max(0, Math.floor(Number(event && event.accessLevel) || 0));
+    var adminEditButton = state && state.isAdmin
+      ? '<button type="button" class="private-cash-modal__summary-edit" data-private-cash-edit="' + escapeHtml(event.id) + '" aria-expanded="' + (String(editingEventId || "") === String(event.id || "") ? "true" : "false") + '">Редактировать</button>'
+      : "";
     return '<article class="private-cash-modal__event">' +
       '<section class="private-cash-modal__summary" aria-label="Детали игры">' +
         '<div class="private-cash-modal__event-head private-cash-modal__summary-head">' +
           '<div><span>Дата и время</span><strong>' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time) + '</strong></div>' +
-          '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
+          '<div class="private-cash-modal__summary-actions">' +
+            '<em>' + escapeHtml(event.status === "active" ? "Открыта запись" : "Закрыто") + '</em>' +
+            adminEditButton +
+          '</div>' +
         '</div>' +
         '<div class="private-cash-modal__summary-grid">' +
           '<div class="private-cash-modal__meta">' +
@@ -872,9 +890,10 @@
       return;
     }
     if (form.getAttribute("data-private-cash-form") === "update") {
+      var updatedEventId = form.elements.eventId ? form.elements.eventId.value : "";
       postAction({
         action: "update",
-        eventId: form.elements.eventId ? form.elements.eventId.value : "",
+        eventId: updatedEventId,
         date: form.elements.date.value,
         time: form.elements.time.value,
         status: form.elements.status ? form.elements.status.value : "active",
@@ -884,6 +903,11 @@
         accessLevel: form.elements.accessLevel ? form.elements.accessLevel.value : "0",
         description: form.elements.description ? form.elements.description.value : "",
         combinations: form.elements.combinations ? form.elements.combinations.value : "",
+      }).then(function (nextState) {
+        if (nextState) {
+          editingEventId = "";
+          render();
+        }
       });
       return;
     }
@@ -910,6 +934,20 @@
     if (tab) {
       var nextTab = tab.getAttribute("data-private-cash-tab");
       activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : "signup";
+      editingEventId = "";
+      render();
+      return;
+    }
+    var edit = event.target && event.target.closest ? event.target.closest("[data-private-cash-edit]") : null;
+    if (edit) {
+      var eventId = edit.getAttribute("data-private-cash-edit") || "";
+      editingEventId = String(editingEventId || "") === String(eventId || "") ? "" : eventId;
+      render();
+      return;
+    }
+    var editCancel = event.target && event.target.closest ? event.target.closest("[data-private-cash-edit-cancel]") : null;
+    if (editCancel) {
+      editingEventId = "";
       render();
       return;
     }

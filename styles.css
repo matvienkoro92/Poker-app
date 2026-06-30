@@ -7230,16 +7230,21 @@ body.club-choice-vote-open {
   cursor: pointer;
 }
 
-.private-cash-modal__tab--active {
-  border-bottom-color: #ffe27c;
+.private-cash-modal__tab--active,
+.private-cash-modal__tab[aria-selected="true"] {
+  border-bottom-color: #fff0a6;
   background:
-    radial-gradient(circle at 50% -34%, rgba(255, 255, 255, 0.92), transparent 44%),
-    linear-gradient(180deg, #ffe180 0%, #ffc340 52%, #c77a0c 100%);
-  color: #1b1204;
-  text-shadow: 0 1px 0 rgba(255, 244, 196, 0.62);
+    radial-gradient(circle at 50% -30%, rgba(255, 250, 204, 0.95), transparent 42%),
+    linear-gradient(180deg, rgba(22, 163, 74, 0.98) 0%, rgba(11, 107, 54, 0.98) 52%, rgba(5, 65, 36, 0.98) 100%);
+  color: #fff8d4;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.36),
+    0 0 14px rgba(255, 226, 124, 0.45);
   box-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.28) inset,
-    0 0 22px rgba(255, 179, 42, 0.36);
+    0 0 0 1px rgba(255, 240, 166, 0.5) inset,
+    0 -3px 0 rgba(255, 226, 124, 0.98) inset,
+    0 0 26px rgba(45, 212, 112, 0.42),
+    0 0 18px rgba(255, 179, 42, 0.28);
 }
 
 .private-cash-modal__tab-panel {
@@ -7346,6 +7351,13 @@ body.club-choice-vote-open {
   font-weight: 800;
   line-height: 1.25;
   text-align: right;
+}
+
+.private-cash-modal__form-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
 }
 
 .private-cash-modal__share-actions {
@@ -8605,6 +8617,32 @@ body.club-choice-vote-open {
   white-space: nowrap;
 }
 
+.private-cash-modal__summary-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.private-cash-modal__summary-edit {
+  border: 1px solid rgba(255, 190, 64, 0.62);
+  border-radius: 999px;
+  background: rgba(255, 179, 43, 0.09);
+  color: #ffe7ad;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 1000;
+  line-height: 1;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.private-cash-modal__summary-edit[aria-expanded="true"] {
+  border-color: rgba(45, 212, 112, 0.5);
+  background: rgba(22, 163, 74, 0.16);
+  color: #bbf7d0;
+}
+
 .private-cash-modal__summary-grid {
   display: grid;
   grid-template-columns: 1.05fr 1.16fr 1fr 0.88fr;
@@ -9080,6 +9118,16 @@ body.club-choice-vote-open {
 
   .private-cash-modal__form-head span {
     text-align: left;
+  }
+
+  .private-cash-modal__form-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .private-cash-modal__summary-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .private-cash-modal__bonus-builder {
