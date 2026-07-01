@@ -107,20 +107,23 @@
     try {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     } catch (eExpand) {}
-    closeModal();
     if (hasUnifiedByNick) {
       window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, { season: "summer" });
+      setTimeout(closeModal, 0);
       return;
     }
     if (hasTournamentProfile) {
       window.pokerOpenTournamentRatingPlayer(nick, { season: "summer" });
+      setTimeout(closeModal, 0);
       return;
     }
     if (hasChatProfile) {
       window.openChatUserModalById(profileId, nick || "Игрок", null);
+      setTimeout(closeModal, 0);
       return;
     }
     window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" });
+    setTimeout(closeModal, 0);
   }
 
   function monthLabel(monthKey) {
@@ -348,11 +351,14 @@
         return '<div class="club-choice-vote-modal__player' +
           (active ? " club-choice-vote-modal__player--active" : "") +
           (winner ? " club-choice-vote-modal__player--winner" : "") +
-          '" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(candidate.nick || "") + '">' +
-            renderPlayerAvatar(candidate, id) +
-            '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
+          '">' +
+            '<div class="club-choice-vote-modal__player-profile" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(candidate.nick || "") + '">' +
+              renderPlayerAvatar(candidate, id) +
+              '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
+            '</div>' +
             '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(candidate.nick || "игрока") + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
+              '<span>Голосовать</span>' +
               '<em>' + String(votes) + '</em>' +
             '</button>' +
           '</div>';

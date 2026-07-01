@@ -3435,24 +3435,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
   gap: 10px;
   min-width: 0;
   width: 100%;
-  min-height: 112px;
+  min-height: 172px;
   padding: 8px 10px;
   color: #fff1ce;
   text-align: center;
   border: 1px solid rgba(255, 184, 70, 0.24);
   border-radius: 11px;
   background: rgba(10, 13, 20, 0.92);
+}
+
+.club-choice-vote-modal__player-profile {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
   cursor: pointer;
 }
 
 .club-choice-vote-modal__player:hover,
-.club-choice-vote-modal__player:focus-visible {
+.club-choice-vote-modal__player:focus-within {
   border-color: rgba(255, 216, 125, 0.62);
   box-shadow:
     inset 0 0 0 1px rgba(255, 241, 199, 0.1),
@@ -3473,8 +3481,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__avatar {
-  grid-column: 1;
-  grid-row: 1;
   justify-self: center;
   display: inline-flex;
   align-items: center;
@@ -3497,8 +3503,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__player-copy {
-  grid-column: 1;
-  grid-row: 2;
   display: grid;
   gap: 3px;
   min-width: 0;
@@ -3523,20 +3527,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__vote-chip {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
+  align-self: end;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 30px;
-  min-height: 38px;
-  padding: 0 9px;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
   color: #ffd56f;
   border: 1px solid rgba(255, 213, 111, 0.42);
   border-radius: 10px;
-  background: rgba(3, 5, 9, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255, 191, 75, 0.22), rgba(115, 63, 10, 0.3)),
+    rgba(3, 5, 9, 0.72);
   cursor: pointer;
+}
+
+.club-choice-vote-modal__vote-chip span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .club-choice-vote-modal__vote-chip:disabled {
@@ -7596,9 +7612,13 @@ body.club-choice-vote-open {
 
   .club-choice-vote-modal__player {
     gap: 6px;
-    min-height: 126px;
+    min-height: 164px;
     padding: 8px 6px;
     border-radius: 10px;
+  }
+
+  .club-choice-vote-modal__player-profile {
+    gap: 5px;
   }
 
   .club-choice-vote-modal__avatar {
@@ -7625,10 +7645,13 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__vote-chip {
-    min-width: 24px;
-    min-height: 31px;
-    padding: 0 5px;
+    min-height: 30px;
+    padding: 0 7px;
     border-radius: 8px;
+  }
+
+  .club-choice-vote-modal__vote-chip span {
+    font-size: 8px;
   }
 
   .club-choice-vote-modal__vote-chip em {
