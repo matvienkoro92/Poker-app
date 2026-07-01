@@ -32,13 +32,12 @@
                   <dd id="rafflesHeroWinnersCount">0</dd>
                 </div>
               </dl>
+              <div class="raffle-invite-wide-row">
+                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary raffle-invite-wide-btn" id="raffleInviteFriendInlineBtn">Позвать друга</button>
+                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon raffle-copy-inline-btn" id="raffleCopyLinkInlineBtn" aria-label="Скопировать ссылку на розыгрыш"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
+                <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary raffles-subscribe-btn raffle-subscribe-inline-btn" id="raffleSubscribeInlineBtn">Подписаться</button>
+              </div>
             </header>
-
-            <div class="raffle-invite-wide-row">
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary raffle-invite-wide-btn" id="raffleInviteFriendInlineBtn">Позвать друга</button>
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon raffle-copy-inline-btn" id="raffleCopyLinkInlineBtn" aria-label="Скопировать ссылку на розыгрыш"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--inline raffles-hero__share-btn--primary raffles-subscribe-btn raffle-subscribe-inline-btn" id="raffleSubscribeInlineBtn">Подписаться</button>
-            </div>
 
             <div class="raffles-admin-wrap raffles-admin-wrap--hidden" id="rafflesAdminWrap">
               <div class="raffles-admin-actions raffles-admin-actions--top" role="tablist" aria-label="Админские действия с розыгрышами">
@@ -222,10 +221,10 @@
 
             <div class="raffles-panel raffles-panel--active" id="rafflesPanelActive" data-raffle-panel="active">
               <div class="raffle-active-actions raffle-active-actions--hidden" id="raffleActiveActions" aria-hidden="true" hidden>
-                <p class="raffle-ready-window-note">У вас будет 15 минут, чтобы забрать выигрыш (нажать «Готов»), если вы не успели, то выбирается другой победитель. Следите за временем завершения, также вам придет оповещение о победе в телеграмм-бот, если вы подписались.</p>
                 <p class="raffle-action-feedback raffle-action-feedback--hidden" id="raffleActionFeedback" role="status" aria-live="polite"></p>
               </div>
               <div class="raffles-active-chooser raffles-active-chooser--hidden" id="rafflesActiveChooser" aria-label="Активные розыгрыши" hidden></div>
+              <p class="raffle-ready-window-note">У вас будет 15 минут, чтобы забрать выигрыш (нажать «Готов»), если вы не успели, то выбирается другой победитель. Следите за временем завершения, также вам придет оповещение о победе в телеграмм-бот, если вы подписались.</p>
               <div class="raffles-private-cash-ad" aria-label="Приватный кеш">
                 <button type="button" class="home-club-choice-plaque home-club-choice-plaque--cash raffles-private-cash-ad__button" data-private-cash-open aria-label="Открыть приватный кеш">
                   <span class="home-club-choice-plaque__count" aria-label="Открытых столов"></span>

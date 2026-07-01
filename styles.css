@@ -5,7 +5,7 @@
 @import url("./styles-home.css?v=3.666");
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.732");
+@import url("./styles-raffles.css?v=3.748");
 @import url("./styles-daily-poker.css?v=3.669");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
@@ -3434,16 +3434,17 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .club-choice-vote-modal__player {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   min-width: 0;
   width: 100%;
-  min-height: 58px;
+  min-height: 112px;
   padding: 8px 10px;
   color: #fff1ce;
-  text-align: left;
+  text-align: center;
   border: 1px solid rgba(255, 184, 70, 0.24);
   border-radius: 11px;
   background: rgba(10, 13, 20, 0.92);
@@ -3471,7 +3472,33 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   box-shadow: inset 0 0 0 1px rgba(82, 216, 117, 0.18);
 }
 
-.club-choice-vote-modal__player span {
+.club-choice-vote-modal__avatar {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 92px;
+  height: 68px;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.48)) drop-shadow(0 0 8px rgba(255, 184, 70, 0.12));
+}
+
+.club-choice-vote-modal__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.club-choice-vote-modal__player-copy {
+  grid-column: 1;
+  grid-row: 2;
   display: grid;
   gap: 3px;
   min-width: 0;
@@ -3496,7 +3523,9 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__vote-chip {
-  flex: 0 0 auto;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -7493,11 +7522,11 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__body {
-    padding: 10px 14px 14px;
+    padding: 8px 14px 8px;
   }
 
   .club-choice-vote-modal__footer {
-    padding: 0 14px 14px;
+    padding: 0 14px 10px;
   }
 
   .club-choice-vote-modal__admin,
@@ -7506,19 +7535,42 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__bracket--tournament {
-    grid-template-columns: minmax(520px, 1fr) 58px minmax(520px, 1fr);
-    min-width: 1100px;
-    overflow: visible;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    gap: 6px;
+    overflow: hidden;
+    padding: 0;
   }
 
   .club-choice-vote-modal__bracket--final.club-choice-vote-modal__bracket--tournament {
-    grid-template-columns: 48px minmax(520px, 1fr) 48px;
-    min-width: 620px;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
   }
 
   .club-choice-vote-modal__body--tournament {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+  }
+
+  .club-choice-vote-modal__bracket-spine,
+  .club-choice-vote-modal__final-lane {
+    display: none;
+  }
+
+  .club-choice-vote-modal__side {
+    padding: 6px 8px;
+    border-radius: 14px;
+  }
+
+  .club-choice-vote-modal__side h3 {
+    margin-bottom: 5px;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .club-choice-vote-modal__side--left,
+  .club-choice-vote-modal__side--right,
+  .club-choice-vote-modal__side--final {
+    border-radius: 14px;
   }
 
   .club-choice-vote-modal__bracket-spine span,
@@ -7528,7 +7580,70 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__match-list {
-    gap: 22px;
+    gap: 9px;
+  }
+
+  .club-choice-vote-modal__match {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .club-choice-vote-modal__match::before,
+  .club-choice-vote-modal__side--left .club-choice-vote-modal__match::after,
+  .club-choice-vote-modal__side--right .club-choice-vote-modal__match::after {
+    display: none;
+  }
+
+  .club-choice-vote-modal__player {
+    gap: 6px;
+    min-height: 126px;
+    padding: 8px 6px;
+    border-radius: 10px;
+  }
+
+  .club-choice-vote-modal__avatar {
+    max-width: 88px;
+    height: 64px;
+  }
+
+  .club-choice-vote-modal__player-copy {
+    gap: 3px;
+  }
+
+  .club-choice-vote-modal__player strong {
+    font-size: 12px;
+    line-height: 1.08;
+  }
+
+  .club-choice-vote-modal__player small {
+    display: -webkit-box;
+    font-size: 8px;
+    line-height: 1.08;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .club-choice-vote-modal__vote-chip {
+    min-width: 24px;
+    min-height: 31px;
+    padding: 0 5px;
+    border-radius: 8px;
+  }
+
+  .club-choice-vote-modal__vote-chip em {
+    font-size: 16px;
+  }
+
+  .club-choice-vote-modal__versus {
+    min-width: 28px;
+    padding: 0 3px;
+    font-size: 9px;
+  }
+
+  .club-choice-vote-modal__share {
+    min-height: 42px;
+    padding: 9px 10px;
   }
 
   .club-choice-vote-modal__summary {

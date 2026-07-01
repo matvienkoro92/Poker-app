@@ -349,7 +349,8 @@
           (active ? " club-choice-vote-modal__player--active" : "") +
           (winner ? " club-choice-vote-modal__player--winner" : "") +
           '" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(candidate.nick || "") + '">' +
-            '<span><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
+            renderPlayerAvatar(candidate, id) +
+            '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
             '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(candidate.nick || "игрока") + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
               '<em>' + String(votes) + '</em>' +
@@ -358,6 +359,38 @@
       }).join('<span class="club-choice-vote-modal__versus">vs</span>') +
       renderVoters(match, candidates) +
     '</article>';
+  }
+
+  function renderPlayerAvatar(candidate, id) {
+    var src = candidate && candidate.avatar ? String(candidate.avatar).trim() : "";
+    var art = null;
+    try {
+      art = !src && typeof window.pokerGetSummerRatingPlayerArt === "function"
+        ? window.pokerGetSummerRatingPlayerArt(candidate && candidate.nick)
+        : null;
+    } catch (ePlayerArt) {
+      art = null;
+    }
+    if (!src && art && art.src) src = String(art.src).trim();
+    if (!src) src = fallbackPlayerAvatar(candidate, id);
+    return '<span class="club-choice-vote-modal__avatar" aria-hidden="true">' +
+      '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
+    '</span>';
+  }
+
+  function fallbackPlayerAvatar(candidate, id) {
+    var key = String((candidate && (candidate.accountId || candidate.nick)) || id || "");
+    var hash = 0;
+    var avatars = [
+      "./assets/chat-profile-default-hero-male.webp",
+      "./assets/chat-profile-default-hero-female.webp?v=3.001"
+    ];
+
+    for (var i = 0; i < key.length; i += 1) {
+      hash = ((hash * 31) + key.charCodeAt(i)) >>> 0;
+    }
+
+    return avatars[hash % avatars.length];
   }
 
   function renderVoters(match, candidates) {

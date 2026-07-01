@@ -37,12 +37,11 @@ function initRaffles() {
   var rafflesHero = rafflesRoot ? rafflesRoot.querySelector(".raffles-hero") : null;
   var raffleInviteWideRow = rafflesRoot ? rafflesRoot.querySelector(".raffle-invite-wide-row") : null;
   if (
-    rafflesRoot &&
     raffleInviteWideRow &&
     rafflesHero &&
-    raffleInviteWideRow.previousElementSibling !== rafflesHero
+    raffleInviteWideRow.parentElement !== rafflesHero
   ) {
-    rafflesRoot.insertBefore(raffleInviteWideRow, rafflesHero.nextElementSibling);
+    rafflesHero.appendChild(raffleInviteWideRow);
   }
   var rafflesTabCreate = document.getElementById("rafflesTabCreate");
   var rafflesTabActive = document.getElementById("rafflesTabActive");
