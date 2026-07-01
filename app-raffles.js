@@ -1610,6 +1610,8 @@ function initRaffles() {
     }
     var explicitTitle = String(raffle && (raffle.cardTitle || raffle.card_title) || "").replace(/\s+/g, " ").trim();
     if (explicitTitle) return explicitTitle;
+    var ticketTitle = activeRaffleChooserPrizeTitle(raffle).replace(/\s+/g, " ").trim();
+    if (ticketTitle) return ticketTitle;
     return "Розыгрыш";
   }
 
@@ -1634,6 +1636,9 @@ function initRaffles() {
   function activeRaffleCardTitleHtml(raffle) {
     var titleText = activeRaffleMainTitleText(raffle);
     var subtitleText = activeRaffleSubtitleText(raffle);
+    if (subtitleText && titleText && subtitleText.toLowerCase() === titleText.toLowerCase()) {
+      subtitleText = "";
+    }
     var titleHtml = escapeHtml(titleText);
     var titleClass = "raffles-active-chooser__main-title";
     var cashMatch = titleText.match(/^(.+?)\s+(по\s+.+?\s+на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i) ||

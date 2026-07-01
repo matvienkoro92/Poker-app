@@ -176,6 +176,16 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-28-06-2026-league2-plo5-300-20h.jpg",
     "rating-compressed-preview/rating-28-06-2026-league2-energetik-22h.jpg"
   ],
-  "29.06.2026": [],
-  "30.06.2026": []
+  "29.06.2026": [
+    "rating-compressed-preview/rating-29-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-29-06-2026-league2-blue-bounty-200-50k-gtd-14h.jpg",
+    "rating-compressed-preview/rating-29-06-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-29-06-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "30.06.2026": [
+    "rating-compressed-preview/rating-30-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-30-06-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-30-06-2026-league1-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-30-06-2026-league2-energetik-22h.jpg"
+  ]
 };

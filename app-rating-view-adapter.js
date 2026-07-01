@@ -260,10 +260,11 @@ function winterRatingPrizeByPlace(place) {
 }
 
 function winterRatingPlaceCell(place) {
-  if (place === 1) return "🥇 1";
-  if (place === 2) return "🥈 2";
-  if (place === 3) return "🥉 3";
-  return String(place);
+  if (place === 1 || place === 2 || place === 3) {
+    var medal = place === 1 ? "🥇" : (place === 2 ? "🥈" : "🥉");
+    return "<span class=\"winter-rating__place-cell winter-rating__place-cell--top\"><span class=\"winter-rating__place-medal\" aria-hidden=\"true\">" + medal + "</span><span class=\"winter-rating__place-number\">" + place + "</span></span>";
+  }
+  return "<span class=\"winter-rating__place-cell\"><span class=\"winter-rating__place-number\">" + place + "</span></span>";
 }
 
 function winterRatingPointsForPlace(place, reward) {
@@ -451,9 +452,7 @@ function summerRatingLowerArtSizeStyle(place, nick) {
 function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art) return "";
-  if (slotName === "center") return "";
-  var size = summerRatingPlayerArtStageSize(art.key);
-  return size ? "--summer-top3-art-" + slotName + "-size:" + size + ";" : "";
+  return "";
 }
 
 function summerRatingPlayerArtStageSize(key) {

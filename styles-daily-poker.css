@@ -1735,8 +1735,8 @@
 .daily-poker__actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 2px;
 }
 
 .daily-poker .daily-poker__play-btn {
@@ -1817,10 +1817,11 @@
 
 .daily-poker__share-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 58px 58px;
+  grid-template-columns: minmax(0, 1fr) 87px 87px;
   align-items: stretch;
   gap: 10px;
   min-width: 0;
+  margin-top: -4px;
 }
 
 .daily-poker__private-cash {
@@ -1866,8 +1867,8 @@
 
 .daily-poker__invite-btn {
   min-width: 0;
-  min-height: 58px;
-  padding: 0 18px;
+  min-height: 87px;
+  padding: 0 22px;
   border: 1px solid rgba(255, 231, 180, 0.72);
   border-radius: 12px;
   color: #fff;
@@ -1980,8 +1981,8 @@
 
 .daily-poker__notify-btn,
 .daily-poker__copy-btn {
-  width: 58px;
-  min-height: 58px;
+  width: 87px;
+  min-height: 87px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

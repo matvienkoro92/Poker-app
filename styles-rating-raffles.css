@@ -4361,27 +4361,34 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   align-items: center;
   gap: 8px;
   width: 100%;
-  margin: -2px 0 16px;
+  margin: -20px 0 8px;
+  padding: 0 clamp(10px, 2.5vw, 18px);
 }
 .raffle-invite-wide-row .raffles-hero__share-btn {
   min-width: 0;
-  min-height: 54px;
-  border-radius: 14px;
+  min-height: 18px;
+  border-radius: 7px;
   white-space: nowrap;
 }
 .raffle-invite-wide-row .raffle-invite-wide-btn {
   flex: 1 1 42%;
   width: auto;
-  padding: 12px 10px;
-  font-size: 15px;
+  padding: 2px 8px;
+  font-size: 10px;
+  line-height: 1;
 }
 .raffle-invite-wide-row .raffle-copy-inline-btn {
-  flex: 0 0 54px;
-  width: 54px;
-  height: 54px;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 18px;
   padding: 0;
   position: relative;
   overflow: visible;
+}
+
+.raffle-invite-wide-row .raffle-copy-inline-btn .raffles-hero__copy-icon svg {
+  width: 12px;
+  height: 12px;
 }
 .raffle-invite-wide-row .raffle-copy-inline-btn.raffles-hero__share-btn--copied::after {
   content: "Скопировано";
@@ -4406,8 +4413,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 .raffle-invite-wide-row .raffle-subscribe-inline-btn {
   flex: 0.9 1 32%;
-  padding: 12px 10px;
-  font-size: 14px;
+  padding: 2px 8px;
+  font-size: 10px;
+  line-height: 1;
 }
 .raffle-invite-wide-row .raffles-hero__share-btn--inline.raffles-hero__share-btn--primary {
   color: #fff1c2;
@@ -4435,24 +4443,29 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 }
 @media (max-width: 390px) {
   .raffle-invite-wide-row {
-    gap: 6px;
-    margin-bottom: 14px;
+    gap: 5px;
+    margin: -18px 0 8px;
+    padding: 0 10px;
   }
   .raffle-invite-wide-row .raffles-hero__share-btn {
-    min-height: 46px;
+    min-height: 17px;
   }
   .raffle-invite-wide-row .raffle-invite-wide-btn {
-    padding: 10px 8px;
-    font-size: 13px;
+    padding: 2px 6px;
+    font-size: 9px;
   }
   .raffle-invite-wide-row .raffle-copy-inline-btn {
-    flex-basis: 46px;
-    width: 46px;
-    height: 46px;
+    flex-basis: 20px;
+    width: 20px;
+    height: 17px;
+  }
+  .raffle-invite-wide-row .raffle-copy-inline-btn .raffles-hero__copy-icon svg {
+    width: 11px;
+    height: 11px;
   }
   .raffle-invite-wide-row .raffle-subscribe-inline-btn {
-    padding: 10px 5px;
-    font-size: 11px;
+    padding: 2px 5px;
+    font-size: 9px;
   }
 }
 .raffle-join-invite-row {
@@ -9106,6 +9119,75 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants {
   grid-row: 3 !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(6px, 1.25vw, 10px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access {
+  min-width: 0 !important;
+  min-height: clamp(58px, 9.5vw, 74px) !important;
+  padding: clamp(7px, 1.2vw, 10px) clamp(7px, 1.45vw, 12px) !important;
+  overflow: hidden !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__participants-count {
+  min-width: 0 !important;
+  font-size: clamp(19px, 4.1vw, 28px) !important;
+  line-height: 0.96 !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__participants-count::after {
+  margin-left: 4px !important;
+  font-size: 0.72em !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__countdown-digits {
+  min-width: 0 !important;
+  font-size: clamp(18px, 4vw, 27px) !important;
+  line-height: 0.96 !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__countdown-label {
+  min-width: 0 !important;
+  font-size: clamp(9px, 1.9vw, 12px) !important;
+  line-height: 0.96 !important;
+  white-space: nowrap !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-label {
+  min-width: 0 !important;
+  font-size: clamp(20px, 4.6vw, 32px) !important;
+  line-height: 0.92 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-line {
+  min-width: 0 !important;
+  font-size: clamp(17px, 3.6vw, 24px) !important;
+  line-height: 0.98 !important;
+}
+
+@media (max-width: 620px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__participants-count {
+    font-size: clamp(18px, 5.3vw, 26px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__countdown-digits {
+    font-size: clamp(17px, 5vw, 25px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-label {
+    font-size: clamp(20px, 6.4vw, 31px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants .raffles-active-chooser__access-line {
+    font-size: clamp(16px, 5.1vw, 24px) !important;
+  }
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel {
@@ -9430,9 +9512,9 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   align-content: center !important;
   justify-content: start !important;
   gap: 0 !important;
-  width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
-  max-width: calc(100% - var(--raffles-cash-tile-timer-width) - var(--raffles-cash-tile-timer-gap)) !important;
-  font-size: clamp(16px, 2.05vw, 22px) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: clamp(15px, 1.72vw, 20px) !important;
   line-height: 0.96 !important;
 }
 
@@ -9441,8 +9523,37 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: visible !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer {
+  grid-template-columns: minmax(0, 1fr) var(--raffles-cash-tile-timer-width) !important;
+  grid-template-areas: "text side" !important;
+  column-gap: var(--raffles-cash-tile-timer-gap) !important;
+  padding-right: 14px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-side {
+  position: relative !important;
+  inset: auto !important;
+  grid-area: side !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  align-items: stretch !important;
+  pointer-events: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-timer {
+  position: relative !important;
+  right: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
 }
 
 @media (min-width: 431px) {
@@ -9463,6 +9574,28 @@ body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-ch
   body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile-text span:last-child {
     max-width: 100% !important;
     white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 620px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile {
+    --raffles-cash-tile-timer-width: clamp(132px, 42%, 178px);
+    --raffles-cash-tile-timer-gap: 10px;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer {
+    min-height: 132px !important;
+    padding: 12px 14px 12px 28px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text {
+    font-size: clamp(18px, 5.2vw, 26px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-timer-digits {
+    padding: 8px 10px !important;
+    font-size: clamp(17px, 4.6vw, 23px) !important;
   }
 }
 
@@ -10644,4 +10777,958 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
 body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
   text-align: left !important;
   font-size: clamp(13px, 1.55vw, 17px) !important;
+}
+
+@media (max-width: 860px) {
+  body[data-view="raffles"] .raffles-active-chooser__item,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+    padding: 14px 14px 16px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 58%) minmax(120px, 42%) !important;
+    grid-template-areas: "content prize" !important;
+    gap: 10px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__content,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__content {
+    grid-area: content !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    gap: 10px !important;
+    padding-right: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-panel {
+    grid-area: prize !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    border-left: 1px solid rgba(255, 220, 124, 0.48) !important;
+    border-top: 0 !important;
+    border-radius: 0 !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 8px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__head,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    margin: 0 0 8px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+    max-width: 100% !important;
+    font-size: clamp(17px, 6.2vw, 34px) !important;
+    line-height: 0.96 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__subtitle,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+    max-width: 100% !important;
+    font-size: clamp(10px, 3.6vw, 18px) !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+    min-height: 70px !important;
+    padding: 11px 14px !important;
+    font-size: clamp(18px, 5.1vw, 28px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text span,
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__access,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+    min-width: 0 !important;
+    min-height: 72px !important;
+    padding: 8px 9px !important;
+    gap: 3px !important;
+    align-content: center !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__participants-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+    font-size: clamp(10px, 2.8vw, 15px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+    min-width: 0 !important;
+    font-size: clamp(16px, 4.5vw, 24px) !important;
+    line-height: 0.96 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    text-align: center !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
+    font-size: 0.72em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits {
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-amount,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-amount {
+    font-size: clamp(38px, 11vw, 64px) !important;
+    line-height: 0.95 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__cta,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+    min-height: 44px !important;
+    font-size: clamp(15px, 4.2vw, 22px) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  body[data-view="raffles"] .raffles-active-chooser__detail-pills,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tiles,
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants {
+    container-type: inline-size;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    container-type: inline-size;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+    font-size: clamp(11px, 5.4cqw, 18px) !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill::before {
+    flex: 0 0 auto !important;
+    margin-right: clamp(4px, 1.8cqw, 8px) !important;
+    font-size: 1.05em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__participants-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+    font-size: clamp(7px, 8cqw, 13px) !important;
+    line-height: 0.96 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+    font-size: clamp(10px, 13.2cqw, 18px) !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__fact--result-time .raffles-active-chooser__fact-value {
+    font-size: clamp(10px, 11.6cqw, 16px) !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
+    margin-left: 0.22em !important;
+    font-size: 0.68em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access::before {
+    display: none !important;
+  }
+
+body[data-view="raffles"] .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__access-line {
+  display: block !important;
+  width: 100% !important;
+}
+}
+
+body[data-view="raffles"] .raffles-active-chooser,
+body[data-view="raffles"] .raffles-active-chooser__item,
+body[data-view="raffles"] .raffles-active-chooser__content,
+body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+body[data-view="raffles"] .raffles-active-chooser__detail-pills,
+body[data-view="raffles"] .raffles-active-chooser__buyin-tiles,
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
+body[data-view="raffles"] .raffles-active-chooser__facts,
+body[data-view="raffles"] .raffles-active-chooser__facts--with-participants {
+  container-type: inline-size;
+}
+
+@container (max-width: 760px) {
+  body[data-view="raffles"] .raffles-active-chooser__item,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+    padding: clamp(10px, 3.2cqw, 16px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 58%) minmax(120px, 42%) !important;
+    grid-template-areas: "content prize" !important;
+    gap: clamp(8px, 2.8cqw, 14px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__content,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__content {
+    grid-area: content !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-right: 0 !important;
+    gap: clamp(7px, 2.4cqw, 12px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-panel {
+    grid-area: prize !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: clamp(9px, 2.8cqw, 14px) !important;
+    border-left: 1px solid rgba(255, 220, 124, 0.48) !important;
+    border-top: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__head,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__head {
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    margin: 0 0 clamp(5px, 1.8cqw, 9px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+    max-width: 100% !important;
+    font-size: clamp(17px, 6.2cqw, 34px) !important;
+    line-height: 0.96 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__subtitle,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+    max-width: 100% !important;
+    font-size: clamp(10px, 3.6cqw, 18px) !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+
+@container (min-width: 761px) and (max-width: 980px) {
+  body[data-view="raffles"] .raffles-active-chooser__item,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) {
+    padding: clamp(16px, 2.15cqw, 22px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__body,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__body {
+    grid-template-columns: minmax(0, 58%) minmax(0, 42%) !important;
+    grid-template-areas: "content prize" !important;
+    gap: clamp(10px, 1.45cqw, 16px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__content,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__content {
+    min-width: 0 !important;
+    gap: clamp(10px, 1.45cqw, 14px) !important;
+    padding-right: 0 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tiles,
+  body[data-view="raffles"] .raffles-active-chooser__detail-pills,
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants {
+    gap: clamp(9px, 1.35cqw, 13px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+    max-width: 100% !important;
+    font-size: clamp(28px, 4.45cqw, 44px) !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: normal !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__subtitle,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+    max-width: 100% !important;
+    font-size: clamp(16px, 2.35cqw, 23px) !important;
+    line-height: 1.04 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill {
+    min-height: clamp(76px, 10cqw, 112px) !important;
+    padding: clamp(12px, 1.7cqw, 18px) !important;
+    font-size: clamp(22px, 4.15cqw, 40px) !important;
+    line-height: 0.95 !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer {
+    --raffles-cash-tile-timer-width: clamp(118px, 32%, 154px);
+    --raffles-cash-tile-timer-gap: clamp(7px, 1.1cqw, 11px);
+    grid-template-columns: minmax(0, 1fr) var(--raffles-cash-tile-timer-width) !important;
+    min-height: clamp(108px, 13cqw, 132px) !important;
+    padding: clamp(12px, 1.65cqw, 17px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: clamp(20px, 2.85cqw, 28px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span:last-child {
+    width: auto !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    min-width: 0 !important;
+    min-height: clamp(74px, 8.5cqw, 96px) !important;
+    padding: clamp(8px, 1.2cqw, 12px) !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__fact-value {
+    font-size: clamp(20px, 3.05cqw, 30px) !important;
+    line-height: 0.96 !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-label {
+    font-size: clamp(24px, 4cqw, 38px) !important;
+    line-height: 0.9 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line {
+    font-size: clamp(18px, 2.85cqw, 27px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-panel,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-panel {
+    min-width: 0 !important;
+    padding: clamp(18px, 2.2cqw, 24px) clamp(16px, 2cqw, 22px) !important;
+    overflow: hidden !important;
+  }
+}
+
+@container (max-width: 760px) {
+  body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
+    font-size: clamp(8px, 3cqw, 13px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-amount,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-amount {
+    font-size: clamp(28px, 13cqw, 56px) !important;
+    line-height: 0.94 !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__cta,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+    min-height: clamp(34px, 10cqw, 46px) !important;
+    padding: 7px 9px !important;
+    font-size: clamp(12px, 4cqw, 18px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-info-btn {
+    min-height: clamp(30px, 8cqw, 42px) !important;
+    padding: 6px 8px !important;
+    font-size: clamp(10px, 3.4cqw, 15px) !important;
+  }
+}
+
+@container (max-width: 520px) {
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pill,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__detail-pills .raffles-active-chooser__detail-pill {
+    min-height: clamp(48px, 18cqw, 70px) !important;
+    padding: clamp(7px, 2.8cqw, 11px) clamp(8px, 3.2cqw, 14px) !important;
+    font-size: clamp(10px, 5.3cqw, 18px) !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__detail-pill::before {
+    margin-right: clamp(4px, 1.8cqw, 8px) !important;
+    font-size: 0.98em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(5px, 2cqw, 8px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__access,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact--countdown,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access {
+    min-width: 0 !important;
+    min-height: clamp(54px, 28cqw, 72px) !important;
+    padding: clamp(5px, 2.4cqw, 8px) !important;
+    gap: 2px !important;
+    overflow: hidden !important;
+    align-content: center !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__participants-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-label,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-label {
+    font-size: clamp(6px, 7.4cqw, 10px) !important;
+    line-height: 0.95 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__fact-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__participants-count,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__access-line {
+    font-size: clamp(8px, 12.2cqw, 16px) !important;
+    line-height: 0.98 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    overflow: hidden !important;
+    text-align: center !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__countdown-digits,
+  body[data-view="raffles"] .raffles-active-chooser__fact--result-time .raffles-active-chooser__fact-value {
+    font-size: clamp(8px, 10.4cqw, 14px) !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
+    margin-left: 0.18em !important;
+    font-size: 0.62em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access::before {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@container (max-width: 460px) {
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer {
+    --raffles-cash-tile-timer-width: clamp(94px, 34cqw, 132px);
+    --raffles-cash-tile-timer-gap: clamp(5px, 2cqw, 9px);
+    grid-template-columns: minmax(0, 1fr) var(--raffles-cash-tile-timer-width) !important;
+    min-height: clamp(82px, 30cqw, 112px) !important;
+    padding: clamp(9px, 3.2cqw, 13px) clamp(9px, 3.4cqw, 14px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text {
+    font-size: clamp(12px, 6.5cqw, 21px) !important;
+    line-height: 0.96 !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-text span:last-child {
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__buyin-tile--with-timer .raffles-active-chooser__buyin-tile-timer-digits {
+    padding: 6px 7px !important;
+    font-size: clamp(13px, 11cqw, 20px) !important;
+    white-space: nowrap !important;
+  }
+}
+
+@container (max-width: 360px) {
+  body[data-view="raffles"] .raffles-active-chooser__prize-kicker {
+    font-size: clamp(9px, 7.2cqw, 18px) !important;
+    white-space: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-amount,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__prize-amount,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__prize-amount {
+    font-size: clamp(30px, 19cqw, 64px) !important;
+    line-height: 0.92 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__cta,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__cta {
+    width: 100% !important;
+    min-height: clamp(36px, 12cqw, 52px) !important;
+    padding: 7px 10px !important;
+    font-size: clamp(12px, 6cqw, 20px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__prize-info-btn {
+    width: 100% !important;
+    min-height: clamp(32px, 10cqw, 46px) !important;
+    font-size: clamp(11px, 5.2cqw, 18px) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  body[data-view="raffles"] .raffles-active-chooser__facts,
+  body[data-view="raffles"] .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--cash .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket .raffles-active-chooser__facts--with-participants,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__facts--with-participants {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(7px, 1.4vw, 10px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__fact,
+  body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    min-width: 0 !important;
+    min-height: clamp(70px, 10vw, 92px) !important;
+    padding: clamp(8px, 1.45vw, 12px) !important;
+    overflow: hidden !important;
+    align-content: center !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count {
+    max-width: 100% !important;
+    font-size: clamp(18px, 2.55vw, 24px) !important;
+    line-height: 0.95 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__participants-count::after {
+    margin-left: 0.2em !important;
+    font-size: 0.62em !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access::before {
+    display: none !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-label {
+    max-width: 100% !important;
+    font-size: clamp(18px, 3.2vw, 26px) !important;
+    line-height: 0.86 !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line {
+    max-width: 100% !important;
+    font-size: clamp(14px, 2.3vw, 19px) !important;
+    line-height: 0.94 !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body[data-view="raffles"] .raffles-active-chooser__participants-count {
+    font-size: clamp(15px, 4.6vw, 20px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-label {
+    font-size: clamp(16px, 5.5vw, 22px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__access-value,
+  body[data-view="raffles"] .raffles-active-chooser__access-line {
+    font-size: clamp(12px, 4.25vw, 17px) !important;
+  }
+}
+
+body[data-view="raffles"] .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__access {
+  container-type: inline-size;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--participants,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  align-content: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown {
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: center !important;
+  align-items: center !important;
+  align-content: center !important;
+  gap: 1px !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown::before,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown .raffles-active-chooser__fact-icon {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-digits {
+  display: block !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(12px, 7.3cqw, 17px) !important;
+  line-height: 0.92 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  text-align: center !important;
+  justify-self: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown .raffles-active-chooser__countdown-label {
+  display: block !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(6px, 3.4cqw, 8px) !important;
+  line-height: 0.9 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  text-align: center !important;
+  justify-self: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(10px, 5.2cqw, 13px) !important;
+  line-height: 0.95 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--participants .raffles-active-chooser__participants-count::after {
+  margin-left: 0.08em !important;
+  font-size: 0.52em !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 1px !important;
+  justify-items: center !important;
+  align-items: center !important;
+  align-content: center !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access::before {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access .raffles-active-chooser__access-label {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(11px, 7.2cqw, 17px) !important;
+  line-height: 0.86 !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access .raffles-active-chooser__access-line {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(10px, 6.4cqw, 15px) !important;
+  line-height: 0.9 !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__title-block {
+  container-type: inline-size;
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile {
+  container-type: inline-size;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: center !important;
+  align-items: center !important;
+  align-content: center !important;
+  min-width: 0 !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  overflow: hidden !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__detail-pill,
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(13px, 6.2cqw, 22px) !important;
+  line-height: 0.92 !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text span,
+body[data-view="raffles"] .raffles-active-chooser__buyin-tile-text span:last-child {
+  display: inline !important;
+  width: auto !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__detail-pill::before {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__detail-pill {
+  white-space: nowrap !important;
+  font-size: clamp(11px, 5.2cqw, 18px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__main-title,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: clamp(20px, 7.2cqw, 42px) !important;
+  line-height: 0.96 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-overflow: clip !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__main-title--cash,
+body[data-view="raffles"] .raffles-active-chooser__main-title-line,
+body[data-view="raffles"] .raffles-active-chooser__main-title-accent {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: clamp(16px, 6.4cqw, 36px) !important;
+  line-height: 0.92 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__subtitle,
+body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__subtitle {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: clamp(11px, 3.4cqw, 20px) !important;
+  line-height: 1.02 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+@container (max-width: 360px) {
+  body[data-view="raffles"] .raffles-active-chooser__main-title,
+  body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {
+    font-size: clamp(15px, 7cqw, 24px) !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash,
+  body[data-view="raffles"] .raffles-active-chooser__main-title-line,
+  body[data-view="raffles"] .raffles-active-chooser__main-title-accent {
+    font-size: clamp(13px, 6.1cqw, 22px) !important;
+  }
 }

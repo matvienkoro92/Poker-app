@@ -5,13 +5,13 @@
 @import url("./styles-home.css?v=3.666");
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.708");
-@import url("./styles-daily-poker.css?v=3.668");
+@import url("./styles-raffles.css?v=3.728");
+@import url("./styles-daily-poker.css?v=3.669");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
-@import url("./styles-rating.css?v=3.675");
+@import url("./styles-rating.css?v=3.678");
 @import url("./styles-hall.css?v=3.670");
 @import url("./styles-admin.css?v=3.666");
 @import url("./styles-player-crm.css?v=3.666");
@@ -5086,30 +5086,33 @@ body.club-choice-vote-open {
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid--has-bubble {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
-    min-height: 62px;
-    padding: 8px 6px;
+    min-height: 46px;
+    padding: 5px 3px;
+    border-radius: 7px;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
-    grid-column: 1 / -1;
-    min-height: 58px;
+    grid-column: auto;
+    min-height: 46px;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
-    font-size: 17px;
+    font-size: clamp(8px, 2.5vw, 12px);
+    line-height: 0.95;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
-    font-size: 11px;
-    line-height: 1.08;
+    margin-top: 2px;
+    font-size: clamp(6px, 1.9vw, 9px);
+    line-height: 0.98;
     overflow-wrap: normal;
   }
 
@@ -7711,6 +7714,31 @@ body.club-choice-vote-open {
     inset 0 -4px 10px rgba(150, 55, 0, 0.38);
 }
 
+.private-cash-modal__share-btn--invite:not(:disabled),
+.profile-friends__invite:not(:disabled),
+.chat-general-invite-friend-btn:not(:disabled) {
+  animation: poker-invite-friend-pulse 1.7s ease-in-out infinite;
+}
+
+@keyframes poker-invite-friend-pulse {
+  0%, 100% {
+    filter: saturate(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: saturate(1.14) brightness(1.04);
+    transform: scale(1.025);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .private-cash-modal__share-btn--invite:not(:disabled),
+  .profile-friends__invite:not(:disabled),
+  .chat-general-invite-friend-btn:not(:disabled) {
+    animation: none;
+  }
+}
+
 .private-cash-modal__share-btn--copy {
   flex: 0 0 54px;
   width: 54px;
@@ -9722,6 +9750,38 @@ body.club-choice-vote-open {
 
   .private-cash-modal__share-actions {
     margin: 4px 0 10px;
+  }
+
+  .private-cash-modal__share-btn {
+    min-height: 41px;
+    padding: 8px 8px;
+    border-radius: 11px;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .private-cash-modal__share-btn--copy {
+    flex-basis: 41px;
+    width: 41px;
+    height: 41px;
+  }
+
+  .private-cash-modal__share-btn--copy::before,
+  .private-cash-modal__share-btn--copy::after {
+    width: 13px;
+    height: 13px;
+    border-width: 2px;
+    border-radius: 3px;
+  }
+
+  .private-cash-modal__share-btn--copy::before {
+    left: 12px;
+    top: 11px;
+  }
+
+  .private-cash-modal__share-btn--copy::after {
+    left: 17px;
+    top: 16px;
   }
 
   .private-cash-modal__share-btn--copy {

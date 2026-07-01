@@ -2568,6 +2568,30 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   text-align: center;
 }
 
+.winter-rating.spring-rating.summer-rating .winter-rating__place-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+  white-space: nowrap;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__place-medal {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 0.8em;
+  line-height: 1;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__place-number {
+  display: inline-block;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
   width: 34%;
@@ -2631,6 +2655,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 .winter-rating.spring-rating.summer-rating .summer-rating-table-player {
   width: 100%;
   gap: 5px;
+  min-width: 0;
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-avatar {
@@ -3913,13 +3938,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-place,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(1) {
-  width: 13%;
+  width: 12%;
   text-align: center;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes .winter-rating__th-nick,
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes td:nth-child(2) {
-  width: 32%;
+  width: 33%;
   text-align: left;
 }
 
@@ -3982,6 +4007,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   white-space: nowrap;
 }
 
+.winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody td:nth-child(1) {
+  overflow: visible;
+  white-space: nowrap;
+}
+
 .winter-rating.spring-rating.summer-rating .winter-rating__table--league1-prizes tbody td {
   height: 27px;
   padding: 3px 3px;
@@ -4008,7 +4038,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-player {
-  gap: 5px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-avatar {
@@ -4017,6 +4048,20 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   background-color: #050911;
   background-repeat: no-repeat;
   background-size: 165% auto;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__nick-btn--verified {
+  gap: 3px;
+  min-width: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__verified-badge {
+  width: 11px;
+  height: 11px;
+  font-size: 7px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.36),
+    0 0 5px rgba(34, 197, 94, 0.34);
 }
 
 .winter-rating.spring-rating.summer-rating .summer-rating-table-avatar--place-4 {
@@ -4524,16 +4569,16 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   --summer-top3-art-right-x: calc(89% - 9px);
   --summer-top3-art-right-y: calc(50% + 25px);
   --summer-top3-art-center-size: 31%;
-  --summer-top3-art-left-size: 37%;
-  --summer-top3-art-right-size: 24%;
+  --summer-top3-art-left-size: 31%;
+  --summer-top3-art-right-size: 31%;
   background: none !important;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
   --summer-top3-art-center-size: 20%;
   --summer-top3-art-left-y: calc(44% + 40px);
-  --summer-top3-art-left-size: 27.75%;
-  --summer-top3-art-right-size: 23.4%;
+  --summer-top3-art-left-size: 20%;
+  --summer-top3-art-right-size: 20%;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick,
