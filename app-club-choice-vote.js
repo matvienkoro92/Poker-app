@@ -2,6 +2,7 @@
   "use strict";
 
   var API_PATH = "/api/club-choice-vote";
+  var CLUB_CHOICE_START_PARAM = "club_choice_vote";
   var timer = null;
   var state = null;
   var loading = false;
@@ -33,6 +34,93 @@
     var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (tg && typeof tg.showAlert === "function") tg.showAlert(String(text || "Ошибка"));
     else window.alert(String(text || "Ошибка"));
+  }
+
+  function voteLink() {
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(CLUB_CHOICE_START_PARAM);
+    if (typeof pokerBuildWebsiteStartLink === "function") {
+      var webLink = pokerBuildWebsiteStartLink(CLUB_CHOICE_START_PARAM);
+      if (webLink) return webLink;
+    }
+    var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+    if (!base && window.location) base = String(window.location.origin || "") + "/";
+    base = String(base || "").trim().replace(/\/+$/, "");
+    return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(CLUB_CHOICE_START_PARAM) : "";
+  }
+
+  function openTelegramShare(link, text) {
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+      ? pokerBuildTelegramShareUrlDialog(link, text)
+      : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text || "");
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+    else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+    else window.open(shareUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function shareVote() {
+    var link = voteLink();
+    var text = "Клубное голосование «Два туза»: выбери достижение месяца.";
+    if (!link) {
+      showAlert("Не удалось сформировать ссылку.");
+      return;
+    }
+    if (typeof recordShareButtonClick === "function") {
+      try { recordShareButtonClick("club_choice_vote"); } catch (eShareTrack) {}
+    }
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: "Достижение месяца", text: text + "\n" + link, url: link }).then(function (ok) {
+        if (ok) return;
+        openTelegramShare(link, text);
+      });
+      return;
+    }
+    openTelegramShare(link, text);
+  }
+
+  function copyVoteLink() {
+    var link = voteLink();
+    if (!link) {
+      showAlert("Не удалось сформировать ссылку.");
+      return;
+    }
+    var copy = typeof pokerCopyTextToClipboard === "function"
+      ? pokerCopyTextToClipboard(link)
+      : Promise.resolve(false);
+    copy.then(function (ok) {
+      showAlert(ok ? "Ссылка на голосование скопирована." : "Скопируйте ссылку вручную: " + link);
+    });
+  }
+
+  function openCandidateProfile(profileEl) {
+    if (!profileEl) return;
+    var nick = String(profileEl.getAttribute("data-club-choice-profile-nick") || "").trim();
+    var profileId = String(profileEl.getAttribute("data-club-choice-profile-id") || "").trim();
+    var hasUnifiedByNick = nick && typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function";
+    var hasTournamentProfile = nick && typeof window.pokerOpenTournamentRatingPlayer === "function";
+    var hasLatestRatingProfile = nick && typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function";
+    var hasChatProfile = profileId && typeof window.openChatUserModalById === "function";
+    if (!hasUnifiedByNick && !hasTournamentProfile && !hasLatestRatingProfile && !hasChatProfile) {
+      showAlert("Профиль игрока пока недоступен.");
+      return;
+    }
+    try {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    } catch (eExpand) {}
+    closeModal();
+    if (hasUnifiedByNick) {
+      window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, { season: "summer" });
+      return;
+    }
+    if (hasTournamentProfile) {
+      window.pokerOpenTournamentRatingPlayer(nick, { season: "summer" });
+      return;
+    }
+    if (hasChatProfile) {
+      window.openChatUserModalById(profileId, nick || "Игрок", null);
+      return;
+    }
+    window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" });
   }
 
   function monthLabel(monthKey) {
@@ -95,11 +183,16 @@
         '<div class="club-choice-vote-modal__body" id="clubChoiceVoteBody">' +
           '<div class="club-choice-vote-modal__loading">Идет загрузка...</div>' +
         '</div>' +
+        '<footer class="club-choice-vote-modal__footer" aria-label="Поделиться голосованием">' +
+          '<button type="button" class="club-choice-vote-modal__share club-choice-vote-modal__share--primary" data-club-choice-share="1">Поделиться</button>' +
+          '<button type="button" class="club-choice-vote-modal__share club-choice-vote-modal__share--copy" data-club-choice-copy="1">Скопировать</button>' +
+        '</footer>' +
       '</section>';
     document.body.appendChild(modal);
     bodyEl = document.getElementById("clubChoiceVoteBody");
     statusEl = document.getElementById("clubChoiceVoteStatus");
     modal.addEventListener("click", onModalClick);
+    modal.addEventListener("keydown", onModalKeydown);
     modal.addEventListener("submit", onModalSubmit);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && modal.classList.contains("club-choice-vote-modal--open")) closeModal();
@@ -124,6 +217,7 @@
 
   function renderLoading() {
     ensureModal();
+    if (bodyEl) bodyEl.classList.remove("club-choice-vote-modal__body--tournament");
     if (bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Идет загрузка...</div>';
     setStatus("");
   }
@@ -251,14 +345,16 @@
         var votes = Number(match.votes && match.votes[id]) || 0;
         var active = match.myVote === id;
         var winner = match.winnerId === id;
-        return '<button type="button" class="club-choice-vote-modal__player' +
+        return '<div class="club-choice-vote-modal__player' +
           (active ? " club-choice-vote-modal__player--active" : "") +
           (winner ? " club-choice-vote-modal__player--winner" : "") +
-          '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '"' +
-          (canVote ? "" : " disabled") + '>' +
+          '" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(candidate.nick || "") + '">' +
             '<span><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
-            '<em>' + String(votes) + '</em>' +
-          '</button>';
+            '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(candidate.nick || "игрока") + '" title="Голосовать"' +
+              (canVote ? "" : " disabled") + '>' +
+              '<em>' + String(votes) + '</em>' +
+            '</button>' +
+          '</div>';
       }).join('<span class="club-choice-vote-modal__versus">vs</span>') +
       renderVoters(match, candidates) +
     '</article>';
@@ -282,22 +378,37 @@
     var right = matches.filter(function (match) { return match.side === "right"; });
     var final = matches.filter(function (match) { return match.side === "final"; });
     var access = data.settings && data.settings.accessLevel;
-    setStatus("Раунд идет. Голосование: " + accessLabel(access));
+    var paused = data.paused === true;
+    setStatus(paused ? "Голосование стоит на паузе" : "Раунд идет. Голосование: " + accessLabel(access));
+    var bracketHtml = final.length
+      ? '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--final club-choice-vote-modal__bracket--tournament">' +
+          '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final club-choice-vote-modal__side--cup"><h3>Финал</h3><div class="club-choice-vote-modal__match-list">' + final.map(function (match) { return renderMatch(match, data, candidates); }).join("") + '</div></div>' +
+          '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
+        '</div>'
+      : '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--tournament">' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Левая сетка</h3><div class="club-choice-vote-modal__match-list">' + (left.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+          '<div class="club-choice-vote-modal__bracket-spine" aria-hidden="true"><span>Финал</span></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Правая сетка</h3><div class="club-choice-vote-modal__match-list">' + (right.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+        '</div>';
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--timer">' +
         '<span>' + escapeHtml(round ? round.name : "Раунд") + '</span>' +
-        '<strong data-club-choice-countdown="' + escapeHtml(round && round.endsAt || "") + '">Идет загрузка...</strong>' +
+        (paused
+          ? '<strong class="club-choice-vote-modal__paused-label">Голосование на паузе</strong>'
+          : '<strong data-club-choice-countdown="' + escapeHtml(round && round.endsAt || "") + '">Идет загрузка...</strong>') +
+        (data.isAdmin
+          ? '<button type="button" class="club-choice-vote-modal__pause-btn" data-club-choice-pause="' + (paused ? "resume" : "pause") + '">' + (paused ? "Продолжить" : "Пауза") + '</button>'
+          : '') +
       '</div>' +
-      (!data.canVote
+      (paused
+        ? '<div class="club-choice-vote-modal__notice club-choice-vote-modal__notice--paused">Голосование стоит на паузе. Таймер остановлен, новые голоса сейчас не принимаются.</div>'
+        : '') +
+      (!data.canVote && !paused
         ? '<div class="club-choice-vote-modal__notice">Вашему аккаунту сейчас недоступно голосование по выбранному уровню доступа.</div>'
         : '') +
-      '<div class="club-choice-vote-modal__bracket' + (final.length ? " club-choice-vote-modal__bracket--final" : "") + '">' +
-        (final.length
-          ? '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final"><h3>Финал</h3>' + final.map(function (match) { return renderMatch(match, data, candidates); }).join("") + '</div>'
-          : '<div class="club-choice-vote-modal__side"><h3>Левая сетка</h3>' + (left.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div>' +
-            '<div class="club-choice-vote-modal__side"><h3>Правая сетка</h3>' + (right.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div>') +
-      '</div>';
-    startTimer();
+      bracketHtml;
+    if (!paused) startTimer();
   }
 
   function renderCompleted(data) {
@@ -329,6 +440,7 @@
       renderLoading();
       return;
     }
+    if (bodyEl) bodyEl.classList.toggle("club-choice-vote-modal__body--tournament", state.status === "active");
     if (state.status === "active") renderActive(state);
     else if (state.status === "completed") renderCompleted(state);
     else renderDraft(state);
@@ -432,14 +544,47 @@
       postAction({ action: "newDraft" });
       return;
     }
+    var pause = event.target && event.target.closest ? event.target.closest("[data-club-choice-pause]") : null;
+    if (pause) {
+      postAction({ action: pause.getAttribute("data-club-choice-pause") === "resume" ? "resume" : "pause" });
+      return;
+    }
+    var share = event.target && event.target.closest ? event.target.closest("[data-club-choice-share]") : null;
+    if (share) {
+      shareVote();
+      return;
+    }
+    var copy = event.target && event.target.closest ? event.target.closest("[data-club-choice-copy]") : null;
+    if (copy) {
+      copyVoteLink();
+      return;
+    }
     var vote = event.target && event.target.closest ? event.target.closest("[data-club-choice-vote]") : null;
     if (vote) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (vote.disabled) return;
       postAction({
         action: "vote",
         matchId: vote.getAttribute("data-club-choice-vote") || "",
         candidateId: vote.getAttribute("data-club-choice-candidate") || "",
       });
+      return;
     }
+    var profile = event.target && event.target.closest ? event.target.closest("[data-club-choice-profile]") : null;
+    if (profile) {
+      openCandidateProfile(profile);
+      return;
+    }
+  }
+
+  function onModalKeydown(event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.target && event.target.closest && event.target.closest("[data-club-choice-vote]")) return;
+    var profile = event.target && event.target.closest ? event.target.closest("[data-club-choice-profile]") : null;
+    if (!profile) return;
+    event.preventDefault();
+    openCandidateProfile(profile);
   }
 
   function bind() {
@@ -449,6 +594,8 @@
       openModal();
     });
   }
+
+  window.openClubChoiceVoteModal = openModal;
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();

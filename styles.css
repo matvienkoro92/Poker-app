@@ -2991,6 +2991,42 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   padding: 12px 18px 18px;
 }
 
+.club-choice-vote-modal__footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 18px 18px;
+}
+
+.club-choice-vote-modal__share {
+  min-height: 48px;
+  padding: 0 18px;
+  color: #ffe9b8;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.1;
+  border: 1px solid rgba(255, 184, 70, 0.52);
+  border-radius: 12px;
+  background: rgba(10, 13, 20, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 199, 0.1);
+  cursor: pointer;
+}
+
+.club-choice-vote-modal__share--primary {
+  flex: 1 1 auto;
+  color: #241100;
+  border-color: rgba(255, 230, 162, 0.88);
+  background: linear-gradient(180deg, #fff1a9 0%, #ffb22d 42%, #ff7800 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.72),
+    0 0 18px rgba(255, 132, 0, 0.28);
+}
+
+.club-choice-vote-modal__share--copy {
+  flex: 0 0 auto;
+  min-width: 154px;
+}
+
 .club-choice-vote-modal__loading,
 .club-choice-vote-modal__empty,
 .club-choice-vote-modal__notice {
@@ -3028,6 +3064,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   line-height: 1;
   text-align: right;
   text-transform: uppercase;
+}
+
+.club-choice-vote-modal__paused-label {
+  color: #ffefbd !important;
+}
+
+.club-choice-vote-modal__pause-btn {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 14px;
+  color: #241100;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  border: 1px solid rgba(255, 230, 162, 0.78);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.club-choice-vote-modal__notice--paused {
+  color: #fff1c8;
+  border-color: rgba(255, 213, 111, 0.5);
+  background: rgba(255, 184, 70, 0.1);
 }
 
 .club-choice-vote-modal__summary-desc {
@@ -3215,16 +3277,48 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   gap: 12px;
 }
 
+.club-choice-vote-modal__bracket--tournament {
+  grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  overflow: hidden;
+  padding: 2px;
+  border: 1px solid rgba(255, 184, 70, 0.2);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 210, 112, 0.08), transparent 58%),
+    rgba(0, 0, 0, 0.14);
+}
+
 .club-choice-vote-modal__bracket--final {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(42px, 1fr) minmax(260px, 520px) minmax(42px, 1fr);
 }
 
 .club-choice-vote-modal__side {
+  position: relative;
   min-width: 0;
   padding: 12px;
-  border: 1px solid rgba(255, 184, 70, 0.24);
+  border: 1px solid rgba(255, 184, 70, 0.18);
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.16);
+  background:
+    linear-gradient(180deg, rgba(12, 15, 23, 0.84), rgba(3, 5, 9, 0.92)),
+    rgba(0, 0, 0, 0.16);
+}
+
+.club-choice-vote-modal__bracket--tournament .club-choice-vote-modal__side {
+  border-radius: 16px;
+}
+
+.club-choice-vote-modal__side--left {
+  border-right-color: rgba(255, 184, 70, 0.1);
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.club-choice-vote-modal__side--right {
+  border-left-color: rgba(255, 184, 70, 0.1);
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 .club-choice-vote-modal__side--final {
@@ -3233,16 +3327,113 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   margin: 0 auto;
 }
 
-.club-choice-vote-modal__match {
+.club-choice-vote-modal__side--cup {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 216, 125, 0.1),
+    0 0 28px rgba(255, 184, 70, 0.1);
+}
+
+.club-choice-vote-modal__match-list {
   display: grid;
-  gap: 7px;
+  gap: 24px;
+}
+
+.club-choice-vote-modal__bracket-spine,
+.club-choice-vote-modal__final-lane {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__bracket-spine::before,
+.club-choice-vote-modal__final-lane::before {
+  content: "";
+  position: absolute;
+  top: 52px;
+  bottom: 52px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(255, 213, 127, 0.78), transparent);
+  box-shadow: 0 0 18px rgba(255, 184, 70, 0.32);
+}
+
+.club-choice-vote-modal__bracket-spine span,
+.club-choice-vote-modal__final-lane span {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid rgba(255, 216, 125, 0.62);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 245, 190, 0.24), transparent 58%),
+    rgba(12, 8, 4, 0.94);
+  color: #ffe3a3;
+  box-shadow: 0 0 20px rgba(255, 184, 70, 0.2);
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.club-choice-vote-modal__match {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
 }
 
 .club-choice-vote-modal__match + .club-choice-vote-modal__match {
-  margin-top: 12px;
+  margin-top: 0;
+}
+
+.club-choice-vote-modal__match::before {
+  content: "";
+  position: absolute;
+  top: 29px;
+  right: 22px;
+  left: 22px;
+  z-index: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 184, 70, 0.2), rgba(255, 216, 125, 0.56), rgba(255, 184, 70, 0.2));
+}
+
+.club-choice-vote-modal__side--left .club-choice-vote-modal__match::after,
+.club-choice-vote-modal__side--right .club-choice-vote-modal__match::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  z-index: 0;
+  width: 34px;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255, 216, 125, 0.42);
+  box-shadow: 0 0 12px rgba(255, 184, 70, 0.22);
+}
+
+.club-choice-vote-modal__side--left .club-choice-vote-modal__match::after {
+  right: -34px;
+}
+
+.club-choice-vote-modal__side--right .club-choice-vote-modal__match::after {
+  left: -34px;
 }
 
 .club-choice-vote-modal__player {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3259,13 +3450,20 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   cursor: pointer;
 }
 
-.club-choice-vote-modal__player:disabled {
-  cursor: default;
+.club-choice-vote-modal__player:hover,
+.club-choice-vote-modal__player:focus-visible {
+  border-color: rgba(255, 216, 125, 0.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 241, 199, 0.1),
+    0 0 14px rgba(255, 184, 70, 0.18);
+  outline: none;
 }
 
 .club-choice-vote-modal__player--active {
   border-color: rgba(255, 216, 125, 0.88);
-  background: rgba(92, 54, 10, 0.72);
+  background:
+    linear-gradient(180deg, rgba(160, 99, 22, 0.52), rgba(92, 54, 10, 0.72)),
+    rgba(92, 54, 10, 0.72);
 }
 
 .club-choice-vote-modal__player--winner {
@@ -3297,10 +3495,26 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   font-weight: 800;
 }
 
-.club-choice-vote-modal__player em {
+.club-choice-vote-modal__vote-chip {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 30px;
+  min-height: 38px;
+  padding: 0 9px;
   color: #ffd56f;
+  border: 1px solid rgba(255, 213, 111, 0.42);
+  border-radius: 10px;
+  background: rgba(3, 5, 9, 0.72);
+  cursor: pointer;
+}
+
+.club-choice-vote-modal__vote-chip:disabled {
+  cursor: default;
+}
+
+.club-choice-vote-modal__vote-chip em {
   font-size: 18px;
   font-style: normal;
   font-weight: 950;
@@ -3308,14 +3522,23 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__versus {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  justify-self: center;
+  min-width: 38px;
+  padding: 0 7px;
   color: rgba(255, 239, 201, 0.48);
   font-size: 11px;
   font-weight: 950;
   text-align: center;
   text-transform: uppercase;
+  border-radius: 999px;
+  background: rgba(3, 5, 9, 0.92);
 }
 
 .club-choice-vote-modal__voters {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
@@ -7273,9 +7496,39 @@ body.club-choice-vote-open {
     padding: 10px 14px 14px;
   }
 
+  .club-choice-vote-modal__footer {
+    padding: 0 14px 14px;
+  }
+
   .club-choice-vote-modal__admin,
   .club-choice-vote-modal__bracket {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .club-choice-vote-modal__bracket--tournament {
+    grid-template-columns: minmax(520px, 1fr) 58px minmax(520px, 1fr);
+    min-width: 1100px;
+    overflow: visible;
+  }
+
+  .club-choice-vote-modal__bracket--final.club-choice-vote-modal__bracket--tournament {
+    grid-template-columns: 48px minmax(520px, 1fr) 48px;
+    min-width: 620px;
+  }
+
+  .club-choice-vote-modal__body--tournament {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .club-choice-vote-modal__bracket-spine span,
+  .club-choice-vote-modal__final-lane span {
+    min-width: 44px;
+    font-size: 9px;
+  }
+
+  .club-choice-vote-modal__match-list {
+    gap: 22px;
   }
 
   .club-choice-vote-modal__summary {
@@ -7316,6 +7569,20 @@ body.club-choice-vote-open {
 
   .club-choice-vote-modal__candidate-edit {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .club-choice-vote-modal__footer {
+    gap: 8px;
+  }
+
+  .club-choice-vote-modal__share {
+    min-height: 46px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .club-choice-vote-modal__share--copy {
+    min-width: 128px;
   }
 }
 
