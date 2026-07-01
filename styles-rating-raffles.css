@@ -11735,12 +11735,14 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
 
 /* Raffles layout breathing room: tabs, share actions, and result cards. */
 body[data-view="raffles"] .raffles-tabs {
-  margin: 14px 0 14px;
+  margin: 0 0 16px;
 }
 
 body[data-view="raffles"] .raffle-invite-wide-row {
-  margin: 0 0 18px;
-  padding: 0 clamp(16px, 3.2vw, 24px);
+  width: auto;
+  margin: -2px clamp(10px, 3vw, 24px) 14px;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 body[data-view="raffles"] .raffles-panel {
@@ -11781,12 +11783,13 @@ body[data-view="raffles"] .raffle-completed-card__winners-title {
 
 @media (max-width: 430px) {
   body[data-view="raffles"] .raffles-tabs {
-    margin: 12px 0 13px;
+    margin: 0 0 14px;
   }
 
   body[data-view="raffles"] .raffle-invite-wide-row {
-    margin-bottom: 16px;
-    padding: 0 14px;
+    margin: -2px 8px 13px;
+    padding-right: 0;
+    padding-left: 0;
   }
 
   body[data-view="raffles"] .raffles-panel {

@@ -34,6 +34,16 @@ function initRaffles() {
   var raffleCurrent = document.getElementById("raffleCurrent");
   var raffleEmpty = document.getElementById("raffleEmpty");
   var rafflesTabs = document.getElementById("rafflesTabs");
+  var rafflesHero = rafflesRoot ? rafflesRoot.querySelector(".raffles-hero") : null;
+  var raffleInviteWideRow = rafflesRoot ? rafflesRoot.querySelector(".raffle-invite-wide-row") : null;
+  if (
+    rafflesRoot &&
+    raffleInviteWideRow &&
+    rafflesHero &&
+    raffleInviteWideRow.previousElementSibling !== rafflesHero
+  ) {
+    rafflesRoot.insertBefore(raffleInviteWideRow, rafflesHero.nextElementSibling);
+  }
   var rafflesTabCreate = document.getElementById("rafflesTabCreate");
   var rafflesTabActive = document.getElementById("rafflesTabActive");
   var rafflesTabCompleted = document.getElementById("rafflesTabCompleted");
