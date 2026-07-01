@@ -11732,3 +11732,69 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
     font-size: clamp(13px, 6.1cqw, 22px) !important;
   }
 }
+
+/* Raffles layout breathing room: tabs, share actions, and result cards. */
+body[data-view="raffles"] .raffles-tabs {
+  margin: 14px 0 14px;
+}
+
+body[data-view="raffles"] .raffle-invite-wide-row {
+  margin: 0 0 18px;
+  padding: 0 clamp(16px, 3.2vw, 24px);
+}
+
+body[data-view="raffles"] .raffles-panel {
+  margin-top: 16px;
+}
+
+body[data-view="raffles"] .raffles-panel--active {
+  padding-top: 2px;
+}
+
+body[data-view="raffles"] .raffles-active-chooser:not(.raffles-active-chooser--hidden),
+body[data-view="raffles"] .raffle-current:not(.raffle-current--hidden),
+body[data-view="raffles"] .raffles-completed-list:not(:empty) {
+  margin-top: 10px;
+}
+
+body[data-view="raffles"] .raffles-completed-list {
+  gap: 18px;
+}
+
+body[data-view="raffles"] .raffle-card,
+body[data-view="raffles"] .raffle-completed-card {
+  padding: clamp(18px, 3.8vw, 28px) clamp(18px, 4vw, 30px);
+}
+
+body[data-view="raffles"] .raffle-completed-card__meta {
+  margin-bottom: 14px;
+  line-height: 1.18;
+}
+
+body[data-view="raffles"] .raffle-completed-card__timer {
+  margin: 4px 0 18px;
+}
+
+body[data-view="raffles"] .raffle-completed-card__winners-title {
+  margin: 18px 0 8px;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-tabs {
+    margin: 12px 0 13px;
+  }
+
+  body[data-view="raffles"] .raffle-invite-wide-row {
+    margin-bottom: 16px;
+    padding: 0 14px;
+  }
+
+  body[data-view="raffles"] .raffles-panel {
+    margin-top: 14px;
+  }
+
+  body[data-view="raffles"] .raffle-card,
+  body[data-view="raffles"] .raffle-completed-card {
+    padding: 18px 16px;
+  }
+}
