@@ -473,7 +473,7 @@ function summerRatingPlayerArtStageSize(key) {
     case "хер вам)))))": return "11.5%";
     case "shkarubo": return "16.3%";
     case "sarmat1305": return "13.0%";
-    case "палач": return "14.4%";
+    case "палач": return "15.84%";
     case "nakurikota":
     case "накурикота": return "14.1%";
     case "wildboar": return "14.2%";

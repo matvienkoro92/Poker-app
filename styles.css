@@ -43,8 +43,8 @@
     --hall-top2026-list-offset: 75px;
     --hall-top2026-list-width: 248px;
     --hall-top2026-list-max-width: 248px;
-    --hall-top2026-list-left: 76px;
-    --hall-top2026-stage-min-height: 838px;
+    --hall-top2026-list-left: clamp(76px, 19.5vw, 92px);
+    --hall-top2026-stage-min-height: clamp(760px, calc(100vw + 408px), 824px);
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 142%;
     --hall-top2026-trophy-right: -19px;
@@ -158,9 +158,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 390px;
-    width: 390px;
-    max-width: none;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
     min-height: var(--hall-top2026-stage-min-height);
     margin: calc(-1 * var(--hall-top2026-header-overlap)) 0 0;
     padding: 318px 10px 18px;
@@ -176,7 +176,7 @@
       url("./assets/hall-top2026-bg-dark.webp?v=3.537");
     background-position: center top, center bottom, center bottom, center bottom, center var(--hall-top2026-lower-bg-y), center var(--hall-top2026-bg-y);
     background-repeat: no-repeat;
-    background-size: 100% 100%, 100% 520px, 100% 520px, 100% 520px, var(--hall-top2026-lower-bg-width) auto, 390px auto;
+    background-size: 100% 100%, 100% 520px, 100% 520px, 100% 520px, var(--hall-top2026-lower-bg-width) auto, max(100%, 390px) auto;
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey,

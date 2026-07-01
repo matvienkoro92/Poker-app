@@ -207,6 +207,7 @@
 
   function renderAdminDraft(data) {
     if (!data.isAdmin) return "";
+    var monthKey = String(data.monthKey || "").match(/^\d{4}-\d{2}$/) ? data.monthKey : "";
     return '<section class="club-choice-vote-modal__admin">' +
       '<form class="club-choice-vote-modal__form" data-club-choice-form="candidate">' +
         '<label>Никнейм<input name="nick" maxlength="48" autocomplete="off" placeholder="Ник игрока" required></label>' +
@@ -214,6 +215,7 @@
         '<button type="submit" class="club-choice-vote-modal__primary">Добавить кандидата</button>' +
       '</form>' +
       '<form class="club-choice-vote-modal__start" data-club-choice-form="start">' +
+        '<label>Месяц опроса<input name="monthKey" type="month" value="' + escapeHtml(monthKey) + '" required></label>' +
         '<label>Кто голосует<select name="accessLevel">' +
           '<option value="all">Все авторизованные</option>' +
           '<option value="level1">Уровень 1+</option>' +
@@ -383,6 +385,7 @@
     if (form.getAttribute("data-club-choice-form") === "start") {
       postAction({
         action: "start",
+        monthKey: form.elements.monthKey ? form.elements.monthKey.value : "",
         accessLevel: form.elements.accessLevel.value,
         anonymous: !!form.elements.anonymous.checked,
       });
