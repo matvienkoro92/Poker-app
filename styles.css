@@ -319,8 +319,8 @@
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 554px;
     --hall-top2026-trophy-right: calc(50% - 214px);
-    --hall-top2026-trophy-top: 396px;
-    --hall-top2026-trophy-width: 119px;
+    --hall-top2026-trophy-top: 408px;
+    --hall-top2026-trophy-width: 126px;
     max-width: 430px;
     margin-inline: auto;
   }
@@ -350,6 +350,7 @@
 
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-list-card {
     position: absolute;
+    z-index: 9;
     top: 370px;
     left: var(--hall-top2026-list-left);
     width: var(--hall-top2026-list-width) !important;
@@ -2696,16 +2697,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque--cash {
   padding-right: 13%;
-  background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748");
+  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.748");
   filter:
-    brightness(1.12)
-    saturate(1.18)
-    drop-shadow(0 0 8px rgba(255, 214, 83, 0.52))
-    drop-shadow(0 0 18px rgba(255, 112, 0, 0.38));
+    brightness(1.02)
+    saturate(1.04);
   box-shadow:
-    0 0 0 1px rgba(255, 198, 63, 0.42),
-    0 0 18px rgba(255, 155, 24, 0.58),
-    0 0 34px rgba(255, 96, 0, 0.28);
+    0 0 0 1px rgba(255, 198, 63, 0.24),
+    0 8px 16px rgba(0, 0, 0, 0.34);
 }
 
 .home-club-choice-plaque--cash-playing {

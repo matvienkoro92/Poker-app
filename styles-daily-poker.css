@@ -1735,8 +1735,10 @@
 .daily-poker__actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  margin-top: 2px;
+  justify-items: center;
+  gap: 12px;
+  margin: 10px auto 0;
+  width: min(100%, 860px);
 }
 
 .daily-poker .daily-poker__play-btn {
@@ -1748,31 +1750,36 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 92px;
+  min-height: 124px;
   box-sizing: border-box;
-  border: 2px solid rgba(255, 204, 91, 0.94);
-  border-radius: 24px;
-  padding: 0 clamp(22px, 5vw, 54px);
-  color: #ffd066;
+  border: 2px solid rgba(255, 241, 184, 0.98);
+  border-radius: 28px;
+  padding: 0 clamp(24px, 6vw, 72px);
+  color: #ffe681;
   background:
-    linear-gradient(180deg, rgba(255, 239, 162, 0.3) 0%, rgba(255, 184, 55, 0.12) 26%, rgba(84, 37, 3, 0) 27%),
-    radial-gradient(ellipse at 50% -28%, rgba(255, 229, 128, 0.44), rgba(196, 111, 14, 0.18) 44%, transparent 70%),
-    linear-gradient(180deg, #9a5b02 0%, #7b3f00 42%, #4a2100 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 217, 103, 0.18) 24%, rgba(74, 29, 0, 0) 25%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 230, 133, 0.76), rgba(255, 140, 15, 0.22) 42%, transparent 72%),
+    linear-gradient(180deg, #b15a08 0%, #6c3000 56%, #281000 100%);
   box-shadow:
-    0 0 0 1px rgba(255, 244, 194, 0.52),
-    0 12px 18px rgba(0, 0, 0, 0.54),
-    inset 0 1px 0 rgba(255, 239, 164, 0.72),
-    inset 0 -13px 18px rgba(30, 11, 0, 0.44),
-    inset 0 0 0 1px rgba(255, 226, 128, 0.3);
+    0 0 0 5px rgba(255, 145, 23, 0.24),
+    0 0 0 8px rgba(255, 223, 116, 0.11),
+    0 0 28px rgba(255, 161, 24, 0.78),
+    0 18px 28px rgba(0, 0, 0, 0.58),
+    inset 0 2px 0 rgba(255, 250, 214, 0.9),
+    inset 0 -18px 24px rgba(58, 19, 0, 0.58),
+    inset 0 0 0 2px rgba(104, 40, 0, 0.52);
   font-family: inherit;
-  font-size: 44px;
+  font-size: clamp(39px, 7vw, 68px);
   font-weight: 1000;
   letter-spacing: 0;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 2px 0 rgba(78, 31, 0, 0.62);
+  text-shadow:
+    0 2px 0 rgba(85, 30, 0, 0.9),
+    0 5px 8px rgba(0, 0, 0, 0.72),
+    0 0 12px rgba(255, 244, 185, 0.48);
   cursor: pointer;
   overflow: hidden;
 }
@@ -1780,11 +1787,14 @@
 .daily-poker .daily-poker__play-btn::after {
   content: "";
   position: absolute;
-  inset: 5px;
+  inset: 8px;
   z-index: -1;
-  border-radius: 19px;
-  border: 1px solid rgba(255, 224, 139, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255, 241, 179, 0.38);
+  border-radius: 20px;
+  border: 2px solid rgba(255, 224, 125, 0.82);
+  box-shadow:
+    inset 0 0 0 2px rgba(91, 31, 0, 0.74),
+    inset 0 1px 0 rgba(255, 248, 206, 0.62),
+    0 0 12px rgba(255, 233, 151, 0.74);
   pointer-events: none;
 }
 
@@ -1793,35 +1803,62 @@
 }
 
 .daily-poker__streak-note {
-  width: 100%;
-  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: auto;
+  max-width: min(100%, 650px);
   box-sizing: border-box;
-  margin: -2px 0 0;
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 204, 91, 0.32);
-  border-radius: 14px;
-  color: rgba(255, 237, 194, 0.92);
+  margin: 12px 0 0;
+  padding: 10px 28px 10px 16px;
+  border: 1px solid rgba(209, 124, 17, 0.76);
+  border-radius: 22px;
+  color: rgba(255, 224, 165, 0.96);
   background:
-    linear-gradient(180deg, rgba(255, 204, 91, 0.08), rgba(255, 204, 91, 0.02)),
-    rgba(3, 5, 8, 0.58);
+    linear-gradient(180deg, rgba(255, 185, 58, 0.08), rgba(0, 0, 0, 0.02)),
+    rgba(6, 7, 7, 0.84);
   box-shadow:
-    inset 0 1px 0 rgba(255, 244, 194, 0.1),
-    0 8px 14px rgba(0, 0, 0, 0.22);
-  font-size: clamp(12px, 2.9vw, 15px);
-  font-weight: 850;
-  line-height: 1.22;
+    0 0 16px rgba(255, 132, 14, 0.28),
+    inset 0 1px 0 rgba(255, 244, 194, 0.16);
+  font-size: clamp(15px, 3vw, 22px);
+  font-weight: 900;
+  line-height: 1.1;
   text-align: center;
-  text-wrap: balance;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.72);
+}
+
+.daily-poker__streak-note strong {
+  color: #ffc44a;
+  font-weight: 1000;
+}
+
+.daily-poker__streak-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  color: #ffae21;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 128, 9, 0.74))
+    drop-shadow(0 1px 0 rgba(255, 247, 205, 0.38));
+}
+
+.daily-poker__streak-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .daily-poker__share-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 87px 87px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(86px, 0.52fr) minmax(86px, 0.52fr);
   align-items: stretch;
-  gap: 10px;
+  gap: 16px;
+  width: min(100%, 860px);
   min-width: 0;
-  margin-top: -4px;
+  margin-top: 12px;
 }
 
 .daily-poker__private-cash {
@@ -1837,7 +1874,7 @@
   min-height: 0;
   padding: 0 7% 0 38% !important;
   border-radius: 18px !important;
-  background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748") !important;
+  background-image: url("./assets/home-club-choice-private-cash-panel.png?v=3.748") !important;
   background-origin: border-box !important;
   background-clip: border-box !important;
   background-position: left center !important;
@@ -1866,34 +1903,60 @@
 }
 
 .daily-poker__invite-btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   min-width: 0;
-  min-height: 87px;
-  padding: 0 22px;
-  border: 1px solid rgba(255, 231, 180, 0.72);
-  border-radius: 12px;
-  color: #fff;
+  min-height: 104px;
+  padding: 0 24px;
+  border: 2px solid rgba(204, 135, 38, 0.86);
+  border-radius: 20px;
+  color: #f5bd4e;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 30%, transparent 31%),
-    linear-gradient(180deg, #171717 0%, #050505 100%);
+    radial-gradient(ellipse at 50% -30%, rgba(255, 208, 105, 0.18), transparent 56%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
+    linear-gradient(180deg, #211b14 0%, #090909 100%);
   box-shadow:
-    0 0 12px rgba(255, 118, 0, 0.18),
-    inset 0 1px 0 rgba(255, 250, 232, 0.18),
-    inset 0 -8px 14px rgba(0, 0, 0, 0.38);
-  font-size: clamp(18px, 4.2vw, 30px);
+    0 0 0 2px rgba(255, 165, 37, 0.1),
+    0 0 18px rgba(255, 126, 15, 0.22),
+    inset 0 1px 0 rgba(255, 238, 185, 0.22),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.5);
+  font-size: clamp(22px, 4.3vw, 34px);
   font-weight: 1000;
   letter-spacing: 0;
   text-transform: uppercase;
   text-shadow:
-    0 1px 0 rgba(255, 232, 149, 0.18),
-    0 2px 4px rgba(0, 0, 0, 0.52);
+    0 0 10px rgba(255, 173, 45, 0.4),
+    0 2px 3px rgba(0, 0, 0, 0.78);
 }
 
-.daily-poker__invite-btn::before {
-  content: none;
+.daily-poker__invite-btn::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border: 1px solid rgba(255, 209, 108, 0.3);
+  border-radius: 15px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 230, 0.16);
+  pointer-events: none;
 }
 
-.daily-poker__invite-btn:not(:disabled),
-.daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled),
+.daily-poker__invite-icon {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  filter: drop-shadow(0 0 10px rgba(255, 174, 48, 0.48));
+}
+
+.daily-poker__invite-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 .daily-poker__subscribe-requirements a {
   position: relative;
   isolation: isolate;
@@ -1913,8 +1976,6 @@
   animation: daily-poker-action-glow 2.2s ease-in-out infinite;
 }
 
-.daily-poker__invite-btn:not(:disabled)::after,
-.daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled)::after,
 .daily-poker__subscribe-requirements a::after {
   content: "";
   position: absolute;
@@ -1957,10 +2018,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .daily-poker__invite-btn:not(:disabled),
-  .daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled),
   .daily-poker__subscribe-requirements a,
-  .daily-poker__invite-btn:not(:disabled)::after,
-  .daily-poker__notify-btn:not([data-subscribed="1"]):not(:disabled)::after,
   .daily-poker__subscribe-requirements a::after {
     animation: none;
   }
@@ -1981,22 +2039,25 @@
 
 .daily-poker__notify-btn,
 .daily-poker__copy-btn {
-  width: 87px;
-  min-height: 87px;
+  width: 100%;
+  min-width: 86px;
+  min-height: 104px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid rgba(255, 231, 180, 0.72);
-  border-radius: 12px;
-  color: #fff;
+  border: 2px solid rgba(204, 135, 38, 0.86);
+  border-radius: 20px;
+  color: #ffd96b;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 30%, transparent 31%),
-    linear-gradient(180deg, #171717 0%, #050505 100%);
+    radial-gradient(ellipse at 50% -20%, rgba(255, 213, 105, 0.18), transparent 54%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
+    linear-gradient(180deg, #19130b 0%, #050505 100%);
   box-shadow:
-    0 0 12px rgba(255, 118, 0, 0.18),
-    inset 0 1px 0 rgba(255, 250, 232, 0.18),
-    inset 0 -8px 14px rgba(0, 0, 0, 0.38);
+    0 0 0 3px rgba(255, 139, 18, 0.12),
+    0 0 16px rgba(255, 128, 15, 0.32),
+    inset 0 1px 0 rgba(255, 238, 185, 0.24),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.48);
   transition: transform 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -2009,11 +2070,11 @@
   color: #fef3c7;
   border-color: rgba(255, 184, 42, 0.98);
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 211, 112, 0.34), transparent 48%),
-    linear-gradient(180deg, rgba(255, 152, 24, 0.22), rgba(0, 0, 0, 0) 42%),
-    linear-gradient(180deg, #21130a 0%, #070707 52%, #150c06 100%);
+    radial-gradient(ellipse at 50% -20%, rgba(255, 213, 105, 0.24), transparent 54%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
+    linear-gradient(180deg, #24190f 0%, #070707 100%);
   box-shadow:
-    0 0 16px rgba(255, 146, 24, 0.54),
+    0 0 18px rgba(255, 146, 24, 0.42),
     inset 0 0 0 1px rgba(255, 224, 137, 0.42),
     inset 0 -8px 14px rgba(0, 0, 0, 0.56);
 }
@@ -2026,8 +2087,8 @@
 .daily-poker__notify-icon,
 .daily-poker__copy-icon {
   display: inline-flex;
-  width: 22px;
-  height: 22px;
+  width: 42px;
+  height: 42px;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
 }
 
@@ -2600,7 +2661,7 @@
   .daily-poker .daily-poker__play-btn {
     min-height: 70px;
     border-radius: 18px;
-    padding-inline: 10px;
+    padding-inline: 12px;
     font-size: clamp(24px, 8.1vw, 30px);
   }
 }
@@ -2609,7 +2670,7 @@
   .daily-poker .daily-poker__play-btn {
     min-height: 70px;
     border-radius: 18px;
-    padding-inline: 10px;
+    padding-inline: 12px;
     font-size: clamp(24px, 8.1vw, 30px);
   }
 }
@@ -2623,6 +2684,42 @@
   .daily-poker__prize {
     border-radius: 9px;
   }
+
+  .daily-poker__share-actions {
+    grid-template-columns: minmax(0, 1.55fr) minmax(74px, 0.58fr) minmax(74px, 0.58fr);
+    gap: 10px;
+  }
+
+  .daily-poker__invite-btn,
+  .daily-poker__notify-btn,
+  .daily-poker__copy-btn {
+    min-height: 78px;
+    border-radius: 18px;
+  }
+
+  .daily-poker__invite-btn {
+    gap: 8px;
+    padding-inline: 10px;
+    font-size: clamp(13px, 3.8vw, 16px);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .daily-poker__invite-btn::after {
+    border-radius: 13px;
+  }
+
+  .daily-poker__invite-icon {
+    width: 33px;
+    height: 33px;
+    flex-basis: 33px;
+  }
+
+  .daily-poker__notify-icon,
+  .daily-poker__copy-icon {
+    width: 34px;
+    height: 34px;
+  }
 }
 
 @media (max-width: 520px) {
@@ -2633,6 +2730,42 @@
 
   .daily-poker__prize {
     border-radius: 9px;
+  }
+
+  .daily-poker__share-actions {
+    grid-template-columns: minmax(0, 1.55fr) minmax(74px, 0.58fr) minmax(74px, 0.58fr);
+    gap: 10px;
+  }
+
+  .daily-poker__invite-btn,
+  .daily-poker__notify-btn,
+  .daily-poker__copy-btn {
+    min-height: 78px;
+    border-radius: 18px;
+  }
+
+  .daily-poker__invite-btn {
+    gap: 8px;
+    padding-inline: 10px;
+    font-size: clamp(13px, 3.8vw, 16px);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .daily-poker__invite-btn::after {
+    border-radius: 13px;
+  }
+
+  .daily-poker__invite-icon {
+    width: 33px;
+    height: 33px;
+    flex-basis: 33px;
+  }
+
+  .daily-poker__notify-icon,
+  .daily-poker__copy-icon {
+    width: 34px;
+    height: 34px;
   }
 }
 
