@@ -9,6 +9,7 @@
   var modal = null;
   var bodyEl = null;
   var statusEl = null;
+  var activeRoundTab = "votes";
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -107,23 +108,33 @@
     try {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     } catch (eExpand) {}
+
+    function closeAfterProfile(openResult) {
+      if (openResult && typeof openResult.then === "function") {
+        openResult.then(function () {
+          closeModal();
+        }).catch(function () {
+          showAlert("Не удалось открыть профиль игрока.");
+        });
+        return;
+      }
+      closeModal();
+    }
+
     if (hasUnifiedByNick) {
-      window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, { season: "summer" });
-      setTimeout(closeModal, 0);
+      closeAfterProfile(window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, { season: "summer" }));
       return;
     }
     if (hasTournamentProfile) {
-      window.pokerOpenTournamentRatingPlayer(nick, { season: "summer" });
-      setTimeout(closeModal, 0);
+      closeAfterProfile(window.pokerOpenTournamentRatingPlayer(nick, { season: "summer" }));
       return;
     }
     if (hasChatProfile) {
       window.openChatUserModalById(profileId, nick || "Игрок", null);
-      setTimeout(closeModal, 0);
+      closeModal();
       return;
     }
-    window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" });
-    setTimeout(closeModal, 0);
+    closeAfterProfile(window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" }));
   }
 
   function monthLabel(monthKey) {
@@ -141,6 +152,13 @@
       if (candidate && candidate.id) map[candidate.id] = candidate;
     });
     return map;
+  }
+
+  function clubChoiceCanonicalNick(nick) {
+    var raw = String(nick || "").trim();
+    var key = raw.toLowerCase().replace(/\s+/g, " ");
+    if (key === "em13" || key === "em13!!" || (key.indexOf("эмиль") >= 0 && key.indexOf("em13") >= 0)) return "Em13!!";
+    return raw;
   }
 
   function formatLeft(ms) {
@@ -340,23 +358,41 @@
       renderCandidateList(data);
   }
 
-  function renderMatch(match, data, candidates) {
+  function matchVoteCount(match, id) {
+    return Number(match && match.votes && match.votes[id]) || 0;
+  }
+
+  function candidateLostMatch(match, id) {
+    return !!(match && match.winnerId && id && match.winnerId !== id);
+  }
+
+  function renderEliminatedStamp() {
+    return '<b class="club-choice-vote-modal__eliminated-stamp" aria-label="Выбыл">Выбыл</b>';
+  }
+
+  function renderMatch(match, data, candidates, pairLabel) {
     var canVote = data.canVote && !match.winnerId;
     return '<article class="club-choice-vote-modal__match">' +
+      '<h4 class="club-choice-vote-modal__pair-title">' + escapeHtml(pairLabel || "Пара") + '</h4>' +
       (match.candidateIds || []).map(function (id) {
         var candidate = candidates[id] || {};
-        var votes = Number(match.votes && match.votes[id]) || 0;
+        var displayNick = clubChoiceCanonicalNick(candidate.nick || "Игрок") || "Игрок";
+        var votes = matchVoteCount(match, id);
         var active = match.myVote === id;
         var winner = match.winnerId === id;
+        var eliminated = candidateLostMatch(match, id);
         return '<div class="club-choice-vote-modal__player' +
           (active ? " club-choice-vote-modal__player--active" : "") +
           (winner ? " club-choice-vote-modal__player--winner" : "") +
+          (eliminated ? " club-choice-vote-modal__player--eliminated" : "") +
           '">' +
-            '<div class="club-choice-vote-modal__player-profile" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(candidate.nick || "") + '">' +
+            '<div class="club-choice-vote-modal__player-profile" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '">' +
+              (eliminated ? renderEliminatedStamp() : "") +
+              '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(displayNick) + '</strong></span>' +
               renderPlayerAvatar(candidate, id) +
-              '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(candidate.nick || "Игрок") + '</strong><small>' + escapeHtml(candidate.description || "") + '</small></span>' +
+              '<small class="club-choice-vote-modal__player-desc">' + escapeHtml(candidate.description || "") + '</small>' +
             '</div>' +
-            '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(candidate.nick || "игрока") + '" title="Голосовать"' +
+            '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(displayNick) + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
               '<span>Голосовать</span>' +
               '<em>' + String(votes) + '</em>' +
@@ -367,12 +403,72 @@
     '</article>';
   }
 
+  function renderBracketNode(match, candidates, id) {
+    var candidate = candidates[id] || {};
+    var displayNick = clubChoiceCanonicalNick(candidate.nick || "Игрок") || "Игрок";
+    var votes = matchVoteCount(match, id);
+    var winner = match && match.winnerId === id;
+    var eliminated = candidateLostMatch(match, id);
+    return '<span class="club-choice-vote-modal__scheme-player' +
+      (winner ? " club-choice-vote-modal__scheme-player--winner" : "") +
+      (eliminated ? " club-choice-vote-modal__scheme-player--eliminated" : "") +
+      '">' +
+        '<strong>' + escapeHtml(displayNick) + '</strong>' +
+        '<em>' + String(votes) + '</em>' +
+        (winner ? '<i>прошёл</i>' : '') +
+        (eliminated ? renderEliminatedStamp() : '') +
+      '</span>';
+  }
+
+  function renderBracketScheme(data, candidates) {
+    var round = currentRound(data);
+    var matches = Array.isArray(round && round.matches) ? round.matches : [];
+    if (!matches.length) return "";
+    var left = matches.filter(function (match) { return match.side === "left"; });
+    var right = matches.filter(function (match) { return match.side === "right"; });
+    var final = matches.filter(function (match) { return match.side === "final"; });
+    function renderSchemeMatch(match, index) {
+      var ids = match.candidateIds || [];
+      return '<div class="club-choice-vote-modal__scheme-match">' +
+        '<b>Пара ' + String(index + 1) + '</b>' +
+        '<div class="club-choice-vote-modal__scheme-pair">' + ids.map(function (id, playerIndex) {
+          return renderBracketNode(match, candidates, id);
+        }).join('<span class="club-choice-vote-modal__scheme-vs">vs</span>') + '</div>' +
+      '</div>';
+    }
+    if (final.length) {
+      return '<section class="club-choice-vote-modal__scheme" aria-label="Схема турнира">' +
+        '<h3>Сетка</h3>' +
+        '<div class="club-choice-vote-modal__scheme-layout club-choice-vote-modal__scheme-layout--final">' +
+          '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--final">' +
+            '<span class="club-choice-vote-modal__scheme-round-title">Финал</span>' +
+            final.map(renderSchemeMatch).join("") +
+          '</div>' +
+        '</div>' +
+      '</section>';
+    }
+    return '<section class="club-choice-vote-modal__scheme" aria-label="Схема турнира">' +
+      '<h3>Сетка</h3>' +
+      '<div class="club-choice-vote-modal__scheme-layout">' +
+        '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--left">' +
+          '<span class="club-choice-vote-modal__scheme-round-title">Левая сетка</span>' +
+          left.map(renderSchemeMatch).join("") +
+        '</div>' +
+        '<div class="club-choice-vote-modal__scheme-final" aria-hidden="true"><span>Финал</span></div>' +
+        '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--right">' +
+          '<span class="club-choice-vote-modal__scheme-round-title">Правая сетка</span>' +
+          right.map(function (match, index) { return renderSchemeMatch(match, left.length + index); }).join("") +
+        '</div>' +
+      '</div>' +
+    '</section>';
+  }
+
   function renderPlayerAvatar(candidate, id) {
     var src = candidate && candidate.avatar ? String(candidate.avatar).trim() : "";
     var art = null;
     try {
       art = !src && typeof window.pokerGetSummerRatingPlayerArt === "function"
-        ? window.pokerGetSummerRatingPlayerArt(candidate && candidate.nick)
+        ? window.pokerGetSummerRatingPlayerArt(clubChoiceCanonicalNick(candidate && candidate.nick))
         : null;
     } catch (ePlayerArt) {
       art = null;
@@ -386,11 +482,18 @@
 
   function fallbackPlayerAvatar(candidate, id) {
     var key = String((candidate && (candidate.accountId || candidate.nick)) || id || "");
+    var nickKey = String((candidate && candidate.nick) || "").trim().toLowerCase();
+    var forcedMaleByNick = {
+      "бардюр": true,
+      "ворон": true
+    };
     var hash = 0;
     var avatars = [
       "./assets/chat-profile-default-hero-male.webp",
       "./assets/chat-profile-default-hero-female.webp?v=3.001"
     ];
+
+    if (forcedMaleByNick[nickKey]) return avatars[0];
 
     for (var i = 0; i < key.length; i += 1) {
       hash = ((hash * 31) + key.charCodeAt(i)) >>> 0;
@@ -409,6 +512,31 @@
     }).join("") + '</div>';
   }
 
+  function renderRoundTabs(votesHtml, schemeHtml) {
+    var tab = activeRoundTab === "scheme" ? "scheme" : "votes";
+    return '<div class="club-choice-vote-modal__tabs" role="tablist" aria-label="Разделы голосования">' +
+        '<button type="button" class="club-choice-vote-modal__tab' + (tab === "votes" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "votes" ? "true" : "false") + '" data-club-choice-tab="votes">Голоса</button>' +
+        '<button type="button" class="club-choice-vote-modal__tab' + (tab === "scheme" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "scheme" ? "true" : "false") + '" data-club-choice-tab="scheme">Сетка</button>' +
+      '</div>' +
+      '<div class="club-choice-vote-modal__tab-panels">' +
+        '<div class="club-choice-vote-modal__tab-panel" data-club-choice-tab-panel="votes"' + (tab === "votes" ? "" : " hidden") + '>' + votesHtml + '</div>' +
+        '<div class="club-choice-vote-modal__tab-panel" data-club-choice-tab-panel="scheme"' + (tab === "scheme" ? "" : " hidden") + '>' + (schemeHtml || '<div class="club-choice-vote-modal__empty">Сетка пока не сформирована.</div>') + '</div>' +
+      '</div>';
+  }
+
+  function setRoundTab(tabName) {
+    activeRoundTab = tabName === "scheme" ? "scheme" : "votes";
+    if (!modal) return;
+    Array.prototype.slice.call(modal.querySelectorAll("[data-club-choice-tab]")).forEach(function (button) {
+      var active = button.getAttribute("data-club-choice-tab") === activeRoundTab;
+      button.classList.toggle("club-choice-vote-modal__tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    Array.prototype.slice.call(modal.querySelectorAll("[data-club-choice-tab-panel]")).forEach(function (panel) {
+      panel.hidden = panel.getAttribute("data-club-choice-tab-panel") !== activeRoundTab;
+    });
+  }
+
   function renderActive(data) {
     var round = currentRound(data);
     var candidates = candidateMap(data);
@@ -418,19 +546,24 @@
     var final = matches.filter(function (match) { return match.side === "final"; });
     var access = data.settings && data.settings.accessLevel;
     var paused = data.paused === true;
-    setStatus(paused ? "Голосование стоит на паузе" : "Раунд идет. Голосование: " + accessLabel(access));
+    setStatus("");
+    var pairNumber = 0;
+    function renderMatchWithPair(match) {
+      pairNumber += 1;
+      return renderMatch(match, data, candidates, "Пара " + String(pairNumber));
+    }
     var bracketHtml = final.length
       ? '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--final club-choice-vote-modal__bracket--tournament">' +
           '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final club-choice-vote-modal__side--cup"><h3>Финал</h3><div class="club-choice-vote-modal__match-list">' + final.map(function (match) { return renderMatch(match, data, candidates); }).join("") + '</div></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final club-choice-vote-modal__side--cup"><h3>Финал</h3><div class="club-choice-vote-modal__match-list">' + final.map(renderMatchWithPair).join("") + '</div></div>' +
           '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
         '</div>'
       : '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--tournament">' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Левая сетка</h3><div class="club-choice-vote-modal__match-list">' + (left.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Левая сетка</h3><div class="club-choice-vote-modal__match-list">' + (left.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
           '<div class="club-choice-vote-modal__bracket-spine" aria-hidden="true"><span>Финал</span></div>' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Правая сетка</h3><div class="club-choice-vote-modal__match-list">' + (right.map(function (match) { return renderMatch(match, data, candidates); }).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Правая сетка</h3><div class="club-choice-vote-modal__match-list">' + (right.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
         '</div>';
-    bodyEl.innerHTML =
+    var votesHtml =
       '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--timer">' +
         '<span>' + escapeHtml(round ? round.name : "Раунд") + '</span>' +
         (paused
@@ -447,6 +580,7 @@
         ? '<div class="club-choice-vote-modal__notice">Вашему аккаунту сейчас недоступно голосование по выбранному уровню доступа.</div>'
         : '') +
       bracketHtml;
+    bodyEl.innerHTML = renderRoundTabs(votesHtml, renderBracketScheme(data, candidates));
     if (!paused) startTimer();
   }
 
@@ -586,6 +720,11 @@
     var pause = event.target && event.target.closest ? event.target.closest("[data-club-choice-pause]") : null;
     if (pause) {
       postAction({ action: pause.getAttribute("data-club-choice-pause") === "resume" ? "resume" : "pause" });
+      return;
+    }
+    var tab = event.target && event.target.closest ? event.target.closest("[data-club-choice-tab]") : null;
+    if (tab) {
+      setRoundTab(tab.getAttribute("data-club-choice-tab") || "votes");
       return;
     }
     var share = event.target && event.target.closest ? event.target.closest("[data-club-choice-share]") : null;
