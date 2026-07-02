@@ -4274,14 +4274,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .club-choice-vote-modal__player small.club-choice-vote-modal__achievement-card,
 .club-choice-vote-modal__duel-desc.club-choice-vote-modal__achievement-card {
   position: relative;
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  align-items: start;
-  justify-items: center;
-  gap: 5px;
-  min-height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 126px;
   overflow: hidden;
-  padding: 11px 10px 12px;
+  padding: 14px 12px;
   border: 1px solid rgba(255, 164, 39, 0.92);
   border-radius: 16px;
   color: #f5dfbd;
@@ -4290,63 +4288,26 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     inset 0 0 0 1px rgba(255, 235, 165, 0.1),
     0 0 10px rgba(255, 92, 0, 0.34),
     0 0 22px rgba(255, 174, 38, 0.16);
-  font-size: 11.6px;
-  font-weight: 650;
-  line-height: 1.18;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.16;
   text-align: center;
   white-space: normal;
   text-wrap: balance;
 }
 
-.club-choice-vote-modal__achievement-card-title {
-  color: #d6c39c;
-  font-size: 11px;
-  font-weight: 850;
-  line-height: 1;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.92),
-    0 0 9px rgba(255, 178, 57, 0.36);
-}
-
-.club-choice-vote-modal__achievement-card-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 62px;
-  height: 62px;
-  min-width: 62px;
-  margin: -2px 0 -4px;
-}
-
-.club-choice-vote-modal__achievement-card-icon img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter:
-    brightness(1.08)
-    contrast(1.05)
-    saturate(1.08)
-    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.46))
-    drop-shadow(0 0 8px rgba(255, 185, 44, 0.34));
-}
-
 .club-choice-vote-modal__achievement-card-text {
   display: -webkit-box;
-  width: 88%;
+  width: 100%;
   max-width: 100%;
-  padding-top: 8px;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 174, 43, 0.24);
   color: rgba(236, 220, 192, 0.92);
-  font-weight: 650;
+  font-weight: inherit;
   text-shadow:
     0 1px 0 rgba(0, 0, 0, 0.78),
     0 0 7px rgba(255, 140, 24, 0.16);
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 5;
 }
 
 .club-choice-vote-modal__duel-question {
@@ -8690,29 +8651,17 @@ body.club-choice-vote-open {
   .club-choice-vote-modal__achievement-card,
   .club-choice-vote-modal__player small.club-choice-vote-modal__achievement-card,
   .club-choice-vote-modal__duel-desc.club-choice-vote-modal__achievement-card {
-    gap: 4px;
-    min-height: 132px;
-    padding: 10px 8px 10px;
+    min-height: 104px;
+    padding: 12px 8px;
     border-radius: 13px;
-    font-size: 9.8px;
-    font-weight: 650;
-    line-height: 1.16;
-  }
-
-  .club-choice-vote-modal__achievement-card-title {
-    font-size: 9.5px;
-  }
-
-  .club-choice-vote-modal__achievement-card-icon {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 1.14;
   }
 
   .club-choice-vote-modal__achievement-card-text {
-    width: 90%;
-    padding-top: 7px;
-    -webkit-line-clamp: 4;
+    width: 100%;
+    -webkit-line-clamp: 5;
   }
 
   .club-choice-vote-modal__duel-question {

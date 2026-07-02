@@ -414,8 +414,6 @@
   function renderAchievementCard(className, description) {
     var text = String(description || "").trim() || "Достижение игрока";
     return '<small class="' + className + ' club-choice-vote-modal__achievement-card">' +
-      '<span class="club-choice-vote-modal__achievement-card-title">ДОСТИЖЕНИЕ</span>' +
-      '<span class="club-choice-vote-modal__achievement-card-icon" aria-hidden="true"><img src="./assets/home-menu-icon-freeroll-cup.png" alt="" loading="lazy" decoding="async" /></span>' +
       '<span class="club-choice-vote-modal__achievement-card-text">' + escapeHtml(text) + '</span>' +
     '</small>';
   }
