@@ -6,16 +6,16 @@
 @import url("./styles-chat.css?v=3.666");
 @import url("./styles-learning-games.css?v=3.666");
 @import url("./styles-raffles.css?v=3.748");
-@import url("./styles-daily-poker.css?v=3.669");
+@import url("./styles-daily-poker.css?v=3.670");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
-@import url("./styles-rating.css?v=3.678");
+@import url("./styles-rating.css?v=3.679");
 @import url("./styles-hall.css?v=3.670");
 @import url("./styles-admin.css?v=3.666");
 @import url("./styles-player-crm.css?v=3.666");
-@import url("./styles-profile.css?v=3.677");
+@import url("./styles-profile.css?v=3.678");
 @import url("./styles-layout.css?v=3.666");
 @import url("./styles-chat-overlays.css?v=3.666");
 @import url("./styles-home-overrides.css?v=3.737");
@@ -2017,6 +2017,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   }
 }
 
+@media (min-width: 721px) and (max-width: 1100px) {
+  html.app-view-browser-local.app-view-daily-poker-html-scroll #app:has(.view--active[data-view="daily-poker"]) .daily-poker,
+  html.app-view-browser-local.app-view-daily-poker-html-scroll body[data-view="daily-poker"] #app.app .daily-poker {
+    padding-top: 44px;
+  }
+}
+
 .home-daily-deal-hero {
   --daily-deal-orange: #ff7600;
   --daily-deal-gold: #ffd56a;
@@ -2358,7 +2365,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-daily-shortcuts.home-mini-icons {
   --home-mini-icons-pad: 6px;
   --home-club-choice-row: clamp(66px, 13vw, 86px);
-  --home-shortcuts-icons-row: clamp(88px, 24vw, 134px);
+  --home-shortcuts-icons-row: clamp(78px, 17vw, 96px);
   --home-shortcuts-row-gap: 5px;
   --home-shortcuts-frame-color: rgba(255, 118, 0, 0.96);
   position: relative;
@@ -2602,19 +2609,19 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   position: absolute;
   z-index: 5;
   right: auto;
-  bottom: 9px;
+  bottom: 7px;
   left: 50%;
   width: max-content;
   height: auto;
   margin: 0;
-  max-width: calc(100% - 8px);
-  padding: 0 3px;
+  max-width: calc(100% - 2px);
+  padding: 0 1px;
   overflow: hidden;
   clip: auto;
   border-radius: 5px;
   background: radial-gradient(ellipse at 50% 72%, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.26) 62%, transparent 100%);
   color: #fff4df;
-  font-size: clamp(10px, 2.65vw, 16px);
+  font-size: clamp(8px, 1.35vw, 11px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
@@ -2663,11 +2670,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0 7% 0 38%;
+  padding: 0 8% 0 30%;
   overflow: hidden;
   color: #fff1c5;
   font: inherit;
-  font-size: clamp(13px, 2.5vw, 20px);
+  font-size: clamp(9px, 1.45vw, 13px);
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
@@ -2696,17 +2703,14 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--cash {
-  padding-right: 13%;
+  padding-right: 10%;
+  background-color: rgba(0, 0, 0, 0.58);
   background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748");
+  background-blend-mode: multiply;
   filter:
-    brightness(1.12)
-    saturate(1.18)
-    drop-shadow(0 0 8px rgba(255, 214, 83, 0.52))
-    drop-shadow(0 0 18px rgba(255, 112, 0, 0.38));
-  box-shadow:
-    0 0 0 1px rgba(255, 198, 63, 0.42),
-    0 0 18px rgba(255, 155, 24, 0.58),
-    0 0 34px rgba(255, 96, 0, 0.28);
+    brightness(1)
+    saturate(1);
+  box-shadow: none;
 }
 
 .home-club-choice-plaque--cash-playing {
@@ -2726,21 +2730,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--cash::before {
-  content: "";
-  position: absolute;
-  inset: 6px 7px;
-  z-index: 2;
-  display: block;
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 190, 48, 0.38), transparent 32%),
-    linear-gradient(90deg, rgba(255, 115, 0, 0.2), rgba(255, 223, 89, 0.16) 54%, rgba(255, 119, 0, 0.12));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 221, 115, 0.62),
-    inset 0 0 18px rgba(255, 150, 18, 0.34),
-    0 0 18px rgba(255, 161, 35, 0.48);
-  opacity: 0.96;
-  pointer-events: none;
+  display: none;
 }
 
 .home-club-choice-plaque span {
@@ -2828,7 +2818,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .home-club-choice-plaque--cash .home-club-choice-plaque__text {
   color: #fff8b8;
-  font-size: clamp(10px, 2.25vw, 20px);
+  font-size: clamp(8.5px, 1.35vw, 12px);
   text-shadow:
     0 2px 0 rgba(35, 12, 0, 0.98),
     0 0 9px rgba(255, 251, 196, 0.7),
@@ -2920,7 +2910,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--vote {
-  padding-left: 37%;
+  padding-left: 30%;
 }
 
 .home-club-choice-plaque .home-club-choice-plaque__new-badge {
@@ -5983,8 +5973,8 @@ body.club-choice-vote-open {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: clamp(58px, 10.8vw, 92px);
-  padding: 8px 4px;
+  min-height: clamp(46px, 7vw, 64px);
+  padding: 5px 3px;
   border: 1px solid rgba(255, 184, 36, 0.82);
   border-radius: 8px;
   background:
@@ -6047,13 +6037,13 @@ body.club-choice-vote-open {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4) {
-  min-height: clamp(58px, 10.8vw, 92px);
+  min-height: clamp(46px, 7vw, 64px);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount {
   min-width: 0;
   color: #ffc33a;
-  font-size: clamp(15px, 3.1vw, 25px);
+  font-size: clamp(10px, 1.8vw, 17px);
   font-weight: 1000;
   line-height: 0.92;
   white-space: nowrap;
@@ -6067,17 +6057,17 @@ body.club-choice-vote-open {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
   max-width: 100%;
   overflow: hidden;
-  font-size: 14px;
+  font-size: clamp(8px, 1.25vw, 12px);
   text-overflow: clip;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
   min-width: 0;
   max-width: 100%;
-  margin-top: 4px;
+  margin-top: 2px;
   overflow-wrap: anywhere;
   color: #fff0d0;
-  font-size: clamp(8px, 1.9vw, 15px);
+  font-size: clamp(6.5px, 1.05vw, 9.5px);
   font-weight: 900;
   line-height: 1.04;
   text-shadow:
@@ -6086,7 +6076,7 @@ body.club-choice-vote-open {
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin .home-tournament-bonus__amount {
-  font-size: clamp(12px, 2.4vw, 19px);
+  font-size: clamp(9px, 1.45vw, 14px);
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-raffle-bonus {
@@ -6344,20 +6334,59 @@ body.club-choice-vote-open {
   }
 }
 
+@media (max-width: 390px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
+    padding: 10px 7px 9px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__title {
+    font-size: clamp(18px, 7.1vw, 24px);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__hint {
+    font-size: clamp(8px, 3vw, 10px);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid--has-bubble {
+    gap: 3px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4),
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
+    min-height: 54px;
+    padding: 5px 2px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin .home-tournament-bonus__amount {
+    font-size: clamp(8px, 3.9vw, 12px);
+    line-height: 0.94;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league1"] .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus[data-home-tournament-bonus="league2"] .home-tournament-bonus__amount {
+    font-size: clamp(7px, 3vw, 10px);
+    letter-spacing: 0;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
+    margin-top: 2px;
+    font-size: clamp(5.8px, 2.35vw, 8px);
+    line-height: 0.98;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {
+    padding-inline: 6px;
+    font-size: clamp(8px, 3.4vw, 11px);
+  }
+}
+
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__note {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  padding: 0 10px 1px;
-  color: rgba(255, 236, 190, 0.88);
-  font-size: clamp(9px, 1.45vw, 13px);
-  font-weight: 800;
-  line-height: 1.15;
-  text-align: center;
-  text-wrap: balance;
-  text-shadow:
-    0 1px 0 rgba(29, 16, 8, 0.9),
-    0 0 7px rgba(255, 190, 73, 0.18);
+  display: none;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--inactive {
@@ -8280,8 +8309,8 @@ body.club-choice-vote-open {
   .home-club-choice-plaque {
     height: 100%;
     border-radius: 10px;
-    padding: 0 7% 0 38%;
-    font-size: clamp(10px, 3vw, 13px);
+    padding: 0 8% 0 34%;
+    font-size: clamp(9px, 2.65vw, 12px);
     clip-path: none;
   }
 
@@ -8292,11 +8321,11 @@ body.club-choice-vote-open {
 
   .home-club-choice-plaque--cash {
     padding-right: 8%;
-    font-size: clamp(10px, 3vw, 13px);
+    font-size: clamp(9px, 2.65vw, 12px);
   }
 
   .home-club-choice-plaque--cash .home-club-choice-plaque__text {
-    font-size: clamp(9.5px, 2.65vw, 12px);
+    font-size: clamp(8.5px, 2.45vw, 11px);
     max-width: 100%;
   }
 
@@ -8314,8 +8343,8 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque--vote {
-    padding-left: 37%;
-    font-size: clamp(10px, 3vw, 13px);
+    padding-left: 34%;
+    font-size: clamp(9px, 2.65vw, 12px);
   }
 
   .home-daily-shortcuts .home-mini-icon-item {
@@ -8419,13 +8448,13 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque {
-    padding: 0 7% 0 38%;
-    font-size: 9.5px;
+    padding: 0 8% 0 34%;
+    font-size: 9px;
   }
 
   .home-club-choice-plaque--cash {
     padding-right: 7%;
-    font-size: 9.5px;
+    font-size: 9px;
   }
 
   .home-club-choice-plaque--cash .home-club-choice-plaque__text {
@@ -8444,8 +8473,8 @@ body.club-choice-vote-open {
   }
 
   .home-club-choice-plaque--vote {
-    padding-left: 37%;
-    font-size: 9.5px;
+    padding-left: 34%;
+    font-size: 9px;
   }
 
   .home-club-choice-plaque__open-badge {

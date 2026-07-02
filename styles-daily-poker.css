@@ -2657,6 +2657,26 @@
   }
 }
 
+@media (min-width: 721px) and (max-width: 1100px) {
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker {
+    padding-top: 44px;
+  }
+
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__header {
+    min-height: 68px;
+    margin-bottom: 14px;
+  }
+
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__hero-stats {
+    margin-top: 16px;
+    margin-bottom: 14px;
+  }
+
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__intro {
+    margin-top: 0;
+  }
+}
+
 @container (max-width: 360px) {
   .daily-poker .daily-poker__play-btn {
     min-height: 70px;

@@ -1052,32 +1052,10 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   margin: 0;
 }
 .raffle-ready-window-note {
-  position: relative;
-  margin: 0;
-  padding: 11px 12px 11px 32px;
-  border: 1px solid rgba(255, 213, 127, 0.26);
-  border-radius: 13px;
-  background:
-    linear-gradient(180deg, rgba(255, 213, 127, 0.08), rgba(4, 7, 14, 0.26)),
-    rgba(4, 7, 14, 0.54);
-  color: #fff1c2;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 0 18px rgba(245, 158, 11, 0.09);
-  font-size: clamp(12px, 2.8vw, 14px);
-  font-weight: 850;
-  line-height: 1.25;
+  display: none;
 }
 .raffle-ready-window-note::before {
-  content: "";
-  position: absolute;
-  top: 17px;
-  left: 14px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffd45f;
-  box-shadow: 0 0 12px rgba(255, 190, 56, 0.68);
+  content: none;
 }
 body[data-view="raffles"] .raffles-panel--active > .raffle-ready-window-note {
   margin: 16px 0 0;
@@ -11778,7 +11756,7 @@ body[data-view="raffles"] .raffles-tabs {
 }
 
 body[data-view="raffles"] .raffles-hero {
-  --raffles-hero-stack-side: clamp(10px, 3vw, 24px);
+  --raffles-hero-stack-side: 0px;
   --raffles-hero-stack-bottom: 8px;
   --raffles-hero-stack-inner: 7px;
   --raffles-hero-stack-gap: 7px;
@@ -11815,6 +11793,13 @@ body[data-view="raffles"] .raffles-hero__help-btn {
     0 0 18px rgba(255, 184, 64, 0.48),
     inset 0 1px 0 rgba(255, 255, 255, 0.58);
   text-shadow: 0 1px 0 rgba(255, 238, 184, 0.56);
+}
+
+body[data-view="raffles"] .raffles-hero__copy {
+  top: auto;
+  bottom: calc(var(--raffles-hero-stack-bottom) + 95px + 14px);
+  left: clamp(14px, 4vw, 24px);
+  width: min(365px, calc(100% - 28px));
 }
 
 body[data-view="raffles"] .raffles-hero .raffles-hero__stats {
@@ -11898,7 +11883,7 @@ body[data-view="raffles"] .raffle-completed-card__winners-title {
   }
 
   body[data-view="raffles"] .raffles-hero {
-    --raffles-hero-stack-side: 8px;
+    --raffles-hero-stack-side: 0px;
     --raffles-hero-stack-bottom: 8px;
     --raffles-hero-stack-inner: 6px;
   }

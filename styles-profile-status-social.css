@@ -1284,7 +1284,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(64px, 1fr));
   gap: 16px;
-  align-items: end;
+  align-items: start;
   margin-top: 18px;
 }
 .profile-friends__avatar-btn,
