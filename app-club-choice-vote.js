@@ -299,9 +299,18 @@
       });
   }
 
-  function postAction(payload) {
+  function restoreBodyScroll(top) {
+    if (!bodyEl || top == null) return;
+    window.requestAnimationFrame(function () {
+      bodyEl.scrollTop = top;
+    });
+  }
+
+  function postAction(payload, opts) {
+    opts = opts || {};
     var base = baseUrl();
-    setStatus("Идет загрузка...");
+    var keepScrollTop = opts.preserveScroll && bodyEl ? bodyEl.scrollTop : null;
+    if (!opts.quiet) setStatus("Идет загрузка...");
     return fetch(base + API_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -312,11 +321,13 @@
         if (data && data.state && data.state.ok) {
           state = data.state;
           render();
+          restoreBodyScroll(keepScrollTop);
           return state;
         }
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка");
         state = data;
         render();
+        restoreBodyScroll(keepScrollTop);
         return data;
       })
       .catch(function (error) {
@@ -840,7 +851,7 @@
         action: "vote",
         matchId: vote.getAttribute("data-club-choice-vote") || "",
         candidateId: vote.getAttribute("data-club-choice-candidate") || "",
-      });
+      }, { quiet: true, preserveScroll: true });
       return;
     }
     var profile = event.target && event.target.closest ? event.target.closest("[data-club-choice-profile]") : null;
