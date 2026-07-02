@@ -256,6 +256,9 @@
   flex-direction: column;
   gap: 12px;
 }
+.learn-play-hub__share-row {
+  margin: 12px 0 0;
+}
 .learn-play-hub__btn {
   display: flex;
   align-items: center;

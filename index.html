@@ -301,7 +301,7 @@
     <link rel="preload" as="image" href="./assets/home-freeroll-bg-saturday.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/chat-profile-default-hero-male.webp" fetchpriority="low" />
     <link rel="preload" as="image" href="./assets/chat-profile-default-hero-female.webp?v=3.001" fetchpriority="low" />
-    <link rel="stylesheet" href="./styles.css?v=3.858" />
+    <link rel="stylesheet" href="./styles.css?v=3.873" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -755,7 +755,6 @@
               <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба">
                 <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
                 <img class="home-mini-icon__hero home-mini-icon__hero--levels" src="./assets/home-menu-icon-level-fish.png?v=3.701" alt="" width="151" height="186" loading="lazy" decoding="async" aria-hidden="true" />
-                <span class="home-mini-icon__new-badge" aria-hidden="true">New</span>
                 <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки</span>
               </button>
               <div class="home-club-choice-actions" aria-label="Быстрые клубные действия">
@@ -765,6 +764,7 @@
                   <small class="home-club-choice-plaque__subtext">Открыть запись</small>
                 </button>
                 <button type="button" class="home-club-choice-plaque home-club-choice-plaque--vote" id="clubChoiceVoteOpen" aria-label="Открыть голосование за достижение месяца">
+                  <span class="home-club-choice-plaque__count" aria-label="Активных голосований">1</span>
                   <span class="home-club-choice-plaque__text">Голосование</span>
                 </button>
               </div>
@@ -1330,10 +1330,6 @@
             <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
             <h1 class="title">Научиться играть</h1>
             <p class="learn-play-hub__desc">Бесплатные видео-уроки по темам от тренера клуба.</p>
-            <div class="raffles-hero__share-row video-lessons__share-row learn-play-hub__share-row">
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="learnPlayHubInviteFriendBtn" aria-label="Отправить другу ссылку на раздел «Научиться играть»">Поделиться</button>
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="learnPlayHubCopyLinkBtn" aria-label="Скопировать ссылку на раздел «Научиться играть»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
-            </div>
             <div class="learn-play-hub__buttons">
               <a href="#" class="feature feature--link feature--app learn-play-hub__btn learn-play-hub__btn--video-lessons" data-view-target="video-lessons">
                 <div class="feature__icon feature__icon--games"><span class="feature__icon-emoji" aria-hidden="true">🎬</span></div>
@@ -1342,6 +1338,10 @@
                   <div class="feature__desc">15 уроков + бонусы, тренер Николай FishKopcheny</div>
                 </div>
               </a>
+            </div>
+            <div class="raffles-hero__share-row video-lessons__share-row learn-play-hub__share-row">
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="learnPlayHubInviteFriendBtn" aria-label="Отправить другу ссылку на раздел «Научиться играть»">Поделиться</button>
+              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="learnPlayHubCopyLinkBtn" aria-label="Скопировать ссылку на раздел «Научиться играть»"><span class="raffles-hero__copy-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></button>
             </div>
           </div>
 
@@ -1734,7 +1734,7 @@
     <script defer data-poker-eager-domain="app" src="./app-raffles-share.js?v=3.666"></script>
     <script defer src="./app-video-lessons-modals.js?v=3.666"></script>
     <script defer src="./app-equilator.js?v=3.666"></script>
-    <script defer src="./app-club-choice-vote.js?v=3.684"></script>
+    <script defer src="./app-club-choice-vote.js?v=3.696"></script>
     <script defer src="./app-private-cash.js?v=3.695"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.666"></script>
     <script defer data-poker-eager-domain="app" src="./app-rating-spring-runtime.js?v=3.666"></script>

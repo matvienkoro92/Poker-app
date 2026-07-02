@@ -96,10 +96,12 @@
   function openCandidateProfile(profileEl) {
     if (!profileEl) return;
     var nick = String(profileEl.getAttribute("data-club-choice-profile-nick") || "").trim();
+    var ratingNick = String(profileEl.getAttribute("data-club-choice-rating-nick") || "").trim() || clubChoiceRatingNick(nick);
     var profileId = String(profileEl.getAttribute("data-club-choice-profile-id") || "").trim();
-    var hasUnifiedByNick = nick && typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function";
-    var hasTournamentProfile = nick && typeof window.pokerOpenTournamentRatingPlayer === "function";
-    var hasLatestRatingProfile = nick && typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function";
+    var profileNick = ratingNick || nick;
+    var hasUnifiedByNick = profileNick && typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function";
+    var hasTournamentProfile = profileNick && typeof window.pokerOpenTournamentRatingPlayer === "function";
+    var hasLatestRatingProfile = profileNick && typeof window.pokerOpenLatestTournamentRatingPlayerModal === "function";
     var hasChatProfile = profileId && typeof window.openChatUserModalById === "function";
     if (!hasUnifiedByNick && !hasTournamentProfile && !hasLatestRatingProfile && !hasChatProfile) {
       showAlert("Профиль игрока пока недоступен.");
@@ -109,32 +111,40 @@
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     } catch (eExpand) {}
 
-    function closeAfterProfile(openResult) {
-      if (openResult && typeof openResult.then === "function") {
-        openResult.then(function () {
-          closeModal();
-        }).catch(function () {
-          showAlert("Не удалось открыть профиль игрока.");
-        });
+    function openProfileOverlay(openProfile) {
+      var openResult = null;
+      try {
+        openResult = openProfile();
+      } catch (eOpen) {
+        showAlert("Не удалось открыть профиль игрока.");
         return;
       }
-      closeModal();
+      if (openResult && typeof openResult.then === "function") {
+        openResult.catch(function () {
+          showAlert("Не удалось открыть профиль игрока.");
+        });
+      }
     }
 
     if (hasUnifiedByNick) {
-      closeAfterProfile(window.pokerOpenUnifiedPlayerProfileByRatingNick(nick, { season: "summer" }));
+      openProfileOverlay(function () {
+        return window.pokerOpenUnifiedPlayerProfileByRatingNick(profileNick, { season: "summer" });
+      });
       return;
     }
     if (hasTournamentProfile) {
-      closeAfterProfile(window.pokerOpenTournamentRatingPlayer(nick, { season: "summer" }));
+      openProfileOverlay(function () {
+        return window.pokerOpenTournamentRatingPlayer(profileNick, { season: "summer" });
+      });
       return;
     }
     if (hasChatProfile) {
       window.openChatUserModalById(profileId, nick || "Игрок", null);
-      closeModal();
       return;
     }
-    closeAfterProfile(window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" }));
+    openProfileOverlay(function () {
+      return window.pokerOpenLatestTournamentRatingPlayerModal(nick, { season: "summer" });
+    });
   }
 
   function monthLabel(monthKey) {
@@ -159,6 +169,28 @@
     var key = raw.toLowerCase().replace(/\s+/g, " ");
     if (key === "em13" || key === "em13!!" || (key.indexOf("эмиль") >= 0 && key.indexOf("em13") >= 0)) return "Em13!!";
     return raw;
+  }
+
+  function clubChoiceRatingNick(nick) {
+    var raw = String(nick || "").trim();
+    var key = raw.toLowerCase().replace(/\s+/g, " ");
+    if (!key) return raw;
+    if (key === "odna.pluha" || key === "илья odna.pluha") return "odna.pluha";
+    if (key === "бардюр") return "Бардюр";
+    if (key === "fishkopcheny" || key === "фишкопченый" || key === "фишкапченый") return "FishKopcheny";
+    if (key === "voron" || key === "ворон" || key === "voron💰💰💰") return "VORON💰💰💰";
+    if (key === "em13" || key === "em13!!" || (key.indexOf("эмиль") >= 0 && key.indexOf("em13") >= 0)) return "Em13!!";
+    return clubChoiceCanonicalNick(raw);
+  }
+
+  function clubChoiceDisplayNick(nick) {
+    var raw = String(nick || "").trim();
+    var key = raw.toLowerCase().replace(/\s+/g, " ");
+    if (key === "odna.pluha" || key === "илья odna.pluha") return "odna.pluha";
+    if (key === "бардюр") return "Бардюр";
+    if (key === "fishkopcheny" || key === "фишкопченый" || key === "фишкапченый") return "FishKopcheny";
+    if (key === "voron" || key === "ворон" || key === "voron💰💰💰") return "VORON💰💰💰";
+    return clubChoiceCanonicalNick(raw);
   }
 
   function formatLeft(ms) {
@@ -370,13 +402,77 @@
     return '<b class="club-choice-vote-modal__eliminated-stamp" aria-label="Выбыл">Выбыл</b>';
   }
 
+  function voteWord(count) {
+    var n = Math.abs(Number(count) || 0) % 100;
+    var n1 = n % 10;
+    if (n > 10 && n < 20) return "голосов";
+    if (n1 > 1 && n1 < 5) return "голоса";
+    if (n1 === 1) return "голос";
+    return "голосов";
+  }
+
+  function renderAchievementCard(className, description) {
+    var text = String(description || "").trim() || "Достижение игрока";
+    return '<small class="' + className + ' club-choice-vote-modal__achievement-card">' +
+      '<span class="club-choice-vote-modal__achievement-card-title">ДОСТИЖЕНИЕ</span>' +
+      '<span class="club-choice-vote-modal__achievement-card-icon" aria-hidden="true"><img src="./assets/home-menu-icon-freeroll-cup.png" alt="" loading="lazy" decoding="async" /></span>' +
+      '<span class="club-choice-vote-modal__achievement-card-text">' + escapeHtml(text) + '</span>' +
+    '</small>';
+  }
+
+  function renderDuelPlayer(match, candidates, id, side) {
+    var candidate = candidates[id] || {};
+    var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
+    var ratingNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || displayNick);
+    var votes = matchVoteCount(match, id);
+    var active = match.myVote === id;
+    var winner = match.winnerId === id;
+    var eliminated = candidateLostMatch(match, id);
+    return '<div class="club-choice-vote-modal__duel-player club-choice-vote-modal__duel-player--' + escapeHtml(side) +
+      (active ? " club-choice-vote-modal__duel-player--active" : "") +
+      (winner ? " club-choice-vote-modal__duel-player--winner" : "") +
+      (eliminated ? " club-choice-vote-modal__duel-player--eliminated" : "") +
+      '">' +
+        '<button type="button" class="club-choice-vote-modal__duel-profile" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '" data-club-choice-rating-nick="' + escapeHtml(ratingNick) + '">' +
+          (eliminated ? renderEliminatedStamp() : "") +
+          '<strong>' + escapeHtml(displayNick) + '</strong>' +
+          '<span class="club-choice-vote-modal__duel-avatar">' + renderPlayerAvatar(candidate, id) + '</span>' +
+        '</button>' +
+        renderAchievementCard("club-choice-vote-modal__duel-desc", candidate.description) +
+        '<em class="club-choice-vote-modal__duel-votes">' + String(votes) + ' ' + voteWord(votes) + '</em>' +
+      '</div>';
+  }
+
   function renderMatch(match, data, candidates, pairLabel) {
     var canVote = data.canVote && !match.winnerId;
+    var ids = match.candidateIds || [];
+    if (ids.length >= 2) {
+      var leftId = ids[0];
+      var rightId = ids[1];
+      return '<article class="club-choice-vote-modal__match club-choice-vote-modal__match--duel">' +
+        '<h4 class="club-choice-vote-modal__pair-title">' + escapeHtml(pairLabel || "Пара") + '</h4>' +
+        '<div class="club-choice-vote-modal__duel-card">' +
+          '<div class="club-choice-vote-modal__duel-players">' +
+            renderDuelPlayer(match, candidates, leftId, "left") +
+            '<span class="club-choice-vote-modal__duel-vs" aria-hidden="true"><img src="./assets/club-choice-vs-black.png?v=2" alt="" /></span>' +
+            renderDuelPlayer(match, candidates, rightId, "right") +
+          '</div>' +
+          '<p class="club-choice-vote-modal__duel-question">Кого выбираешь ты?</p>' +
+          '<div class="club-choice-vote-modal__duel-actions" aria-label="Голосование в паре">' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за левого игрока"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span></button>' +
+            '<span class="club-choice-vote-modal__duel-vote-label">Голосовать</span>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за правого игрока"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span></button>' +
+          '</div>' +
+        '</div>' +
+        renderVoters(match, candidates) +
+      '</article>';
+    }
     return '<article class="club-choice-vote-modal__match">' +
       '<h4 class="club-choice-vote-modal__pair-title">' + escapeHtml(pairLabel || "Пара") + '</h4>' +
       (match.candidateIds || []).map(function (id) {
         var candidate = candidates[id] || {};
-        var displayNick = clubChoiceCanonicalNick(candidate.nick || "Игрок") || "Игрок";
+        var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
+        var ratingNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || displayNick);
         var votes = matchVoteCount(match, id);
         var active = match.myVote === id;
         var winner = match.winnerId === id;
@@ -386,11 +482,11 @@
           (winner ? " club-choice-vote-modal__player--winner" : "") +
           (eliminated ? " club-choice-vote-modal__player--eliminated" : "") +
           '">' +
-            '<div class="club-choice-vote-modal__player-profile" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '">' +
+            '<div class="club-choice-vote-modal__player-profile" role="button" tabindex="0" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '" data-club-choice-rating-nick="' + escapeHtml(ratingNick) + '">' +
               (eliminated ? renderEliminatedStamp() : "") +
               '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(displayNick) + '</strong></span>' +
               renderPlayerAvatar(candidate, id) +
-              '<small class="club-choice-vote-modal__player-desc">' + escapeHtml(candidate.description || "") + '</small>' +
+              renderAchievementCard("club-choice-vote-modal__player-desc", candidate.description) +
             '</div>' +
             '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(displayNick) + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
@@ -405,7 +501,7 @@
 
   function renderBracketNode(match, candidates, id) {
     var candidate = candidates[id] || {};
-    var displayNick = clubChoiceCanonicalNick(candidate.nick || "Игрок") || "Игрок";
+    var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
     var votes = matchVoteCount(match, id);
     var winner = match && match.winnerId === id;
     var eliminated = candidateLostMatch(match, id);
@@ -451,12 +547,12 @@
       '<h3>Сетка</h3>' +
       '<div class="club-choice-vote-modal__scheme-layout">' +
         '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--left">' +
-          '<span class="club-choice-vote-modal__scheme-round-title">Левая сетка</span>' +
+          '<span class="club-choice-vote-modal__scheme-round-title">Сетка слева</span>' +
           left.map(renderSchemeMatch).join("") +
         '</div>' +
         '<div class="club-choice-vote-modal__scheme-final" aria-hidden="true"><span>Финал</span></div>' +
         '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--right">' +
-          '<span class="club-choice-vote-modal__scheme-round-title">Правая сетка</span>' +
+          '<span class="club-choice-vote-modal__scheme-round-title">Сетка справа</span>' +
           right.map(function (match, index) { return renderSchemeMatch(match, left.length + index); }).join("") +
         '</div>' +
       '</div>' +
@@ -468,7 +564,7 @@
     var art = null;
     try {
       art = !src && typeof window.pokerGetSummerRatingPlayerArt === "function"
-        ? window.pokerGetSummerRatingPlayerArt(clubChoiceCanonicalNick(candidate && candidate.nick))
+        ? window.pokerGetSummerRatingPlayerArt(clubChoiceRatingNick(candidate && (candidate.ratingNick || candidate.rating_nick || candidate.nick)))
         : null;
     } catch (ePlayerArt) {
       art = null;
@@ -559,9 +655,9 @@
           '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
         '</div>'
       : '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--tournament">' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Левая сетка</h3><div class="club-choice-vote-modal__match-list">' + (left.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Сетка слева</h3><div class="club-choice-vote-modal__match-list">' + (left.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
           '<div class="club-choice-vote-modal__bracket-spine" aria-hidden="true"><span>Финал</span></div>' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Правая сетка</h3><div class="club-choice-vote-modal__match-list">' + (right.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Сетка справа</h3><div class="club-choice-vote-modal__match-list">' + (right.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
         '</div>';
     var votesHtml =
       '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--timer">' +
