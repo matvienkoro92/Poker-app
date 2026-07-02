@@ -11,11 +11,11 @@
 @import url("./styles-download.css?v=3.667");
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
-@import url("./styles-rating.css?v=3.679");
-@import url("./styles-hall.css?v=3.670");
+@import url("./styles-rating.css?v=3.681");
+@import url("./styles-hall.css?v=3.671");
 @import url("./styles-admin.css?v=3.666");
 @import url("./styles-player-crm.css?v=3.666");
-@import url("./styles-profile.css?v=3.678");
+@import url("./styles-profile.css?v=3.679");
 @import url("./styles-layout.css?v=3.666");
 @import url("./styles-chat-overlays.css?v=3.666");
 @import url("./styles-home-overrides.css?v=3.737");
@@ -3994,6 +3994,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__vote-chip {
+  position: relative;
   align-self: end;
   display: inline-flex;
   align-items: center;
@@ -4013,6 +4014,52 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 8px 18px rgba(255, 139, 10, 0.2),
     0 0 18px rgba(255, 184, 70, 0.2);
   cursor: pointer;
+}
+
+.club-choice-vote-modal__vote-loading {
+  cursor: progress;
+}
+
+.club-choice-vote-modal__vote-loading > * {
+  opacity: 0;
+}
+
+.club-choice-vote-modal__vote-loading::after {
+  content: attr(data-club-choice-loading-label);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  color: #130b05;
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 234, 176, 0.42);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__vote-loading::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid rgba(76, 43, 6, 0.24);
+  border-top-color: rgba(76, 43, 6, 0.82);
+  border-radius: 50%;
+  animation: club-choice-vote-spin 0.72s linear infinite;
+}
+
+@keyframes club-choice-vote-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 [data-theme="gold"] .club-choice-vote-modal__vote-chip {
@@ -4311,62 +4358,42 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .club-choice-vote-modal__duel-actions {
-  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
   align-items: stretch;
   min-height: 48px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 229, 168, 0.64);
-  border-radius: 10px;
-  background:
-    linear-gradient(90deg, #ff7908 0%, #ffc14d 49.8%, #ffc14d 50.2%, #ff7908 100%),
-    #ff9c15;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    0 8px 18px rgba(255, 139, 10, 0.18);
-}
-
-.club-choice-vote-modal__duel-actions::before {
-  content: "";
-  position: absolute;
-  top: 7px;
-  bottom: 7px;
-  left: 50%;
-  z-index: 1;
-  width: 1px;
-  transform: translateX(-50%);
-  background: rgba(82, 46, 8, 0.32);
-  box-shadow: 0 0 10px rgba(255, 246, 205, 0.16);
 }
 
 .club-choice-vote-modal__duel-vote {
   position: relative;
-  z-index: 2;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 9px;
   min-width: 0;
-  padding: 0;
+  min-height: 48px;
+  padding: 0 14px;
   color: #4c2b06;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid rgba(255, 229, 168, 0.64);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(255, 122, 6, 0.96), rgba(255, 203, 86, 0.86)),
+    #ff9c15;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 8px 18px rgba(255, 139, 10, 0.18);
   cursor: pointer;
 }
 
 .club-choice-vote-modal__duel-vote--left {
   grid-column: 1;
-  justify-content: flex-start;
-  padding-left: 24px;
   background:
     linear-gradient(90deg, rgba(255, 122, 6, 0.96), rgba(255, 203, 86, 0.86));
 }
 
 .club-choice-vote-modal__duel-vote--right {
   grid-column: 2;
-  justify-content: flex-end;
-  padding-right: 24px;
   color: #4c2b06;
   background:
     linear-gradient(270deg, rgba(255, 122, 6, 0.96), rgba(255, 203, 86, 0.86));
@@ -4385,32 +4412,29 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .club-choice-vote-modal__duel-vote span {
   font-size: 28px;
   line-height: 1;
-  opacity: 0.58;
+  flex: 0 0 auto;
+  opacity: 0.78;
   filter:
     saturate(0.82)
     drop-shadow(0 2px 1px rgba(255, 255, 255, 0.12));
 }
 
-.club-choice-vote-modal__duel-vote-label {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.club-choice-vote-modal__duel-vote strong {
+  display: block;
+  min-width: 0;
   color: #130b05;
   font-size: 15px;
   font-weight: 950;
-  line-height: 1;
-  pointer-events: none;
-  text-transform: uppercase;
+  line-height: 1.05;
+  overflow: hidden;
   text-shadow: 0 1px 0 rgba(255, 234, 176, 0.42);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="gold"] .club-choice-vote-modal__duel-vote {
   color: #4c2b06;
-  border-color: transparent;
-  box-shadow: none;
+  border-color: rgba(255, 229, 168, 0.64);
 }
 
 [data-theme="gold"] .club-choice-vote-modal__duel-vote--right {
@@ -4419,12 +4443,21 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .club-choice-vote-modal__duel-vote:hover,
 .club-choice-vote-modal__duel-vote:focus-visible {
-  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 249, 218, 0.94);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 10px 24px rgba(255, 139, 10, 0.28);
   outline: none;
 }
 
 .club-choice-vote-modal__duel-vote:disabled {
   cursor: default;
+  opacity: 1;
+}
+
+.club-choice-vote-modal__duel-vote.club-choice-vote-modal__vote-loading:disabled,
+.club-choice-vote-modal__vote-chip.club-choice-vote-modal__vote-loading:disabled {
+  cursor: progress;
   opacity: 1;
 }
 
@@ -8701,23 +8734,34 @@ body.club-choice-vote-open {
 
   .club-choice-vote-modal__duel-actions {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 7px;
     min-height: 44px;
   }
 
-  .club-choice-vote-modal__duel-vote--left {
-    padding-left: 18px;
-  }
-
-  .club-choice-vote-modal__duel-vote--right {
-    padding-right: 18px;
+  .club-choice-vote-modal__duel-vote {
+    gap: 5px;
+    min-height: 44px;
+    padding: 0 7px;
   }
 
   .club-choice-vote-modal__duel-vote span {
-    font-size: 24px;
+    font-size: 22px;
   }
 
-  .club-choice-vote-modal__duel-vote-label {
-    font-size: 13px;
+  .club-choice-vote-modal__duel-vote strong {
+    font-size: 12.5px;
+  }
+
+  .club-choice-vote-modal__vote-loading::after {
+    padding-left: 28px;
+    font-size: 11px;
+  }
+
+  .club-choice-vote-modal__vote-loading::before {
+    left: 9px;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
   }
 
   .club-choice-vote-modal__scheme {

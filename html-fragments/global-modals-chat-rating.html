@@ -66,9 +66,16 @@
               <div class="chat-user-modal__level">
                 <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
                 <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
-                <button type="button" class="chat-user-modal__respect" id="chatUserModalRespectOpenVoters" aria-label="Кто поднял или уменьшил уважение от игроков">
-                  Уважение от игроков <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span>
-                </button>
+                <div class="chat-user-modal__respect-control">
+                  <button type="button" class="chat-user-modal__respect" id="chatUserModalRespectOpenVoters" aria-label="Кто поднял или уменьшил уважение от игроков">
+                    Уважение от игроков <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span>
+                  </button>
+                  <div class="chat-user-modal__respect-btn-row" aria-label="Изменить уважение игрока">
+                    <button type="button" class="chat-user-modal__respect-btn chat-user-modal__respect-btn--up" id="chatUserModalRespectUp" data-rv-action="up" aria-label="Поднять уважение" title="Поднять уважение">+</button>
+                    <button type="button" class="chat-user-modal__respect-btn chat-user-modal__respect-btn--down" id="chatUserModalRespectDown" data-rv-action="down" aria-label="Уменьшить уважение" title="Уменьшить уважение">−</button>
+                  </div>
+                  <p class="chat-user-modal__respect-hint" id="chatUserModalRespectHint" aria-live="polite" hidden></p>
+                </div>
               </div>
               <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
                 <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень</h4>
@@ -114,13 +121,6 @@
             <div class="chat-user-modal__personal" id="chatUserModalPersonal"></div>
           </section>
           <div class="chat-user-modal__actions">
-            <div class="chat-user-modal__respect-actions">
-              <p class="chat-user-modal__respect-hint" id="chatUserModalRespectHint" aria-live="polite" hidden></p>
-              <div class="chat-user-modal__respect-btn-row">
-                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectUp" data-rv-action="up">Поднять уважение</button>
-                <button type="button" class="chat-user-modal__respect-btn" id="chatUserModalRespectDown" data-rv-action="down">Уменьшить уважение</button>
-              </div>
-            </div>
             <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блокировать</button>
           </div>
         </div>

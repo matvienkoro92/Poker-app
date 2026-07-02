@@ -131,6 +131,7 @@ if (chatUserModalEl) {
   var modalRespectUp = document.getElementById("chatUserModalRespectUp");
   var modalRespectDown = document.getElementById("chatUserModalRespectDown");
   var modalRespectHint = document.getElementById("chatUserModalRespectHint");
+  var modalRespectControl = chatUserModalEl.querySelector(".chat-user-modal__respect-control");
   var modalRespectActions = chatUserModalEl.querySelector(".chat-user-modal__respect-actions");
   var modalAddFriend = document.getElementById("chatUserModalAddFriend");
   var modalFriendRow = modalAddFriend && modalAddFriend.closest ? modalAddFriend.closest(".chat-user-modal__friend-row") : null;
@@ -1873,20 +1874,19 @@ if (chatUserModalEl) {
   function updateChatUserModalRespectButtons(myVote) {
     if (!modalRespectUp || !modalRespectDown) return;
     var v = myVote === "up" || myVote === "down" ? myVote : null;
-    function currentRespectText() {
-      var raw = modalRespectVal ? String(modalRespectVal.textContent || "").trim() : "";
-      return raw && raw !== "\u2014" ? raw : "\u2014";
+    function setRespectButton(button, text, label, action, disabled) {
+      button.disabled = !!disabled;
+      button.textContent = text;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+      button.setAttribute("data-rv-action", action);
     }
     function respectHintText(prefix) {
-      return prefix + ". Сейчас уважение: " + currentRespectText();
+      return prefix;
     }
     if (!v) {
-      modalRespectUp.disabled = false;
-      modalRespectUp.textContent = "Поднять уважение";
-      modalRespectUp.setAttribute("data-rv-action", "up");
-      modalRespectDown.disabled = false;
-      modalRespectDown.textContent = "Уменьшить уважение";
-      modalRespectDown.setAttribute("data-rv-action", "down");
+      setRespectButton(modalRespectUp, "+", "Поднять уважение", "up", false);
+      setRespectButton(modalRespectDown, "\u2212", "Уменьшить уважение", "down", false);
       if (modalRespectHint) {
         modalRespectHint.textContent = "";
         modalRespectHint.hidden = true;
@@ -1894,25 +1894,17 @@ if (chatUserModalEl) {
       return;
     }
     if (v === "up") {
-      modalRespectUp.disabled = true;
-      modalRespectUp.textContent = "Поднять уважение";
-      modalRespectUp.setAttribute("data-rv-action", "up");
-      modalRespectDown.disabled = false;
-      modalRespectDown.textContent = "Отменить уважение";
-      modalRespectDown.setAttribute("data-rv-action", "withdraw");
+      setRespectButton(modalRespectUp, "+", "Поднять уважение", "up", true);
+      setRespectButton(modalRespectDown, "\u2212", "Отменить уважение", "withdraw", false);
       if (modalRespectHint) {
-        modalRespectHint.textContent = respectHintText("Вы уже подняли уважение игрока");
+        modalRespectHint.textContent = respectHintText("Вы подняли уважение игроку");
         modalRespectHint.hidden = false;
       }
       return;
     }
     if (v === "down") {
-      modalRespectDown.disabled = true;
-      modalRespectDown.textContent = "Уменьшить уважение";
-      modalRespectDown.setAttribute("data-rv-action", "down");
-      modalRespectUp.disabled = false;
-      modalRespectUp.textContent = "Вернуть уважение";
-      modalRespectUp.setAttribute("data-rv-action", "withdraw");
+      setRespectButton(modalRespectDown, "\u2212", "Уменьшить уважение", "down", true);
+      setRespectButton(modalRespectUp, "+", "Вернуть уважение", "withdraw", false);
       if (modalRespectHint) {
         modalRespectHint.textContent = respectHintText("Вы уменьшили уважение игроку");
         modalRespectHint.hidden = false;
@@ -2059,6 +2051,7 @@ if (chatUserModalEl) {
     chatUserModalBlockedByMe = cachedBlockedByMe;
     chatUserModalEl.classList.toggle("chat-user-modal--self", openingSelfProfile);
     if (modalWriteBtn) modalWriteBtn.style.display = openingSelfProfile ? "none" : "";
+    if (modalRespectControl) modalRespectControl.classList.toggle("chat-user-modal__respect-control--self", openingSelfProfile);
     if (modalRespectActions) modalRespectActions.style.display = openingSelfProfile ? "none" : "";
     setChatUserModalBlockState(cachedBlockedByMe, true);
     syncChatUserModalRatingTab("");
@@ -2390,7 +2383,7 @@ if (chatUserModalEl) {
               }
             });
           var msg = (d && d.error) || "Ошибка";
-          if (d && d.error === "already_raised") msg = "Вы уже подняли уважение игрока";
+          if (d && d.error === "already_raised") msg = "Вы подняли уважение игроку";
           else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение игроку";
           if (tg && tg.showAlert) tg.showAlert(msg);
         }
@@ -2422,16 +2415,20 @@ if (chatUserModalEl) {
       chatUserModalPostRespect(a === "withdraw" ? "withdraw" : "down");
     });
   }
-  if (modalRespectOpenVoters) {
-    modalRespectOpenVoters.addEventListener("click", function () {
-      if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
-        if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
-        else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
-        return;
-      }
-      if (chatUserModalUserId && typeof window.pokerOpenRespectVotersModal === "function") {
-        window.pokerOpenRespectVotersModal(chatUserModalUserId, { hideVoteButtons: true });
-      }
+  function openChatUserRespectVoters() {
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
+      else if (typeof alert === "function") alert("Войдите в приложение (Telegram или PWA).");
+      return;
+    }
+    if (chatUserModalUserId && typeof window.pokerOpenRespectVotersModal === "function") {
+      window.pokerOpenRespectVotersModal(chatUserModalUserId, { hideVoteButtons: true });
+    }
+  }
+  if (modalRespectControl || modalRespectOpenVoters) {
+    (modalRespectControl || modalRespectOpenVoters).addEventListener("click", function (event) {
+      if (event.target && event.target.closest && event.target.closest(".chat-user-modal__respect-btn")) return;
+      openChatUserRespectVoters();
     });
   }
   if (modalAddFriend) {
@@ -2700,7 +2697,7 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
       rvBtnDown.textContent = "Отменить уважение";
       rvBtnDown.setAttribute("data-rv-action", "withdraw");
       if (rvVoteHintEl) {
-        rvVoteHintEl.textContent = "Вы уже подняли уважение игрока";
+        rvVoteHintEl.textContent = "Вы подняли уважение игроку";
         rvVoteHintEl.hidden = false;
       }
       return;
@@ -2750,7 +2747,7 @@ if (respectVotersModalEl && !respectVotersModalEl.dataset.bound) {
         } else {
           loadRespectVotersList(targetId);
           var msg = (d && d.error) || "Ошибка";
-          if (d && d.error === "already_raised") msg = "Вы уже подняли уважение игрока";
+          if (d && d.error === "already_raised") msg = "Вы подняли уважение игроку";
           else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение игроку";
           if (tg && tg.showAlert) tg.showAlert(msg);
         }

@@ -306,6 +306,19 @@
     });
   }
 
+  function setVoteButtonLoading(button, active) {
+    if (!button) return;
+    button.classList.toggle("club-choice-vote-modal__vote-loading", !!active);
+    button.disabled = !!active;
+    if (active) {
+      button.setAttribute("aria-busy", "true");
+      button.setAttribute("data-club-choice-loading-label", "Идет загрузка...");
+    } else {
+      button.removeAttribute("aria-busy");
+      button.removeAttribute("data-club-choice-loading-label");
+    }
+  }
+
   function postAction(payload, opts) {
     opts = opts || {};
     var base = baseUrl();
@@ -458,6 +471,10 @@
     if (ids.length >= 2) {
       var leftId = ids[0];
       var rightId = ids[1];
+      var leftCandidate = candidates[leftId] || {};
+      var rightCandidate = candidates[rightId] || {};
+      var leftNick = clubChoiceDisplayNick(leftCandidate.ratingNick || leftCandidate.rating_nick || leftCandidate.nick || "Игрок") || "Игрок";
+      var rightNick = clubChoiceDisplayNick(rightCandidate.ratingNick || rightCandidate.rating_nick || rightCandidate.nick || "Игрок") || "Игрок";
       return '<article class="club-choice-vote-modal__match club-choice-vote-modal__match--duel">' +
         '<h4 class="club-choice-vote-modal__pair-title">' + escapeHtml(pairLabel || "Пара") + '</h4>' +
         '<div class="club-choice-vote-modal__duel-card">' +
@@ -468,9 +485,8 @@
           '</div>' +
           '<p class="club-choice-vote-modal__duel-question">Кого выбираешь ты?</p>' +
           '<div class="club-choice-vote-modal__duel-actions" aria-label="Голосование в паре">' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за левого игрока"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span></button>' +
-            '<span class="club-choice-vote-modal__duel-vote-label">Голосовать</span>' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за правого игрока"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за ' + escapeHtml(leftNick) + '"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span><strong>' + escapeHtml(leftNick) + '</strong></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за ' + escapeHtml(rightNick) + '"' + (canVote ? "" : " disabled") + '><strong>' + escapeHtml(rightNick) + '</strong><span aria-hidden="true">👍</span></button>' +
           '</div>' +
         '</div>' +
         renderVoters(match, candidates) +
@@ -847,11 +863,14 @@
       event.preventDefault();
       event.stopPropagation();
       if (vote.disabled) return;
+      setVoteButtonLoading(vote, true);
       postAction({
         action: "vote",
         matchId: vote.getAttribute("data-club-choice-vote") || "",
         candidateId: vote.getAttribute("data-club-choice-candidate") || "",
-      }, { quiet: true, preserveScroll: true });
+      }, { quiet: true, preserveScroll: true }).then(function () {
+        if (vote && vote.isConnected) setVoteButtonLoading(vote, false);
+      });
       return;
     }
     var profile = event.target && event.target.closest ? event.target.closest("[data-club-choice-profile]") : null;
