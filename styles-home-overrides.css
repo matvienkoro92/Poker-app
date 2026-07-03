@@ -569,9 +569,20 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 .app.app--view-home .home-daily-shortcuts.home-mini-icons {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  grid-template-rows: var(--home-shortcuts-icons-row) var(--home-club-choice-row) !important;
+  grid-template-rows: var(--home-shortcuts-icons-row) !important;
   align-items: stretch !important;
   justify-items: stretch !important;
+  width: min(100%, calc(100vw - 8px)) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  box-sizing: border-box !important;
+}
+
+.app.app--view-home .home-club-actions-block {
+  display: grid !important;
+  grid-template-rows: var(--home-sng-champions-row) var(--home-club-choice-row) !important;
   width: min(100%, calc(100vw - 8px)) !important;
   max-width: 100% !important;
   min-width: 0 !important;

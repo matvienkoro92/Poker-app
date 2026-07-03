@@ -10,6 +10,8 @@
   var bodyEl = null;
   var statusEl = null;
   var activeRoundTab = "votes";
+  var homePlaqueTimer = null;
+  var homePlaqueLoading = false;
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -206,12 +208,27 @@
     return (data && data.rounds || []).filter(function (round) { return round && round.id === id; })[0] || null;
   }
 
+  function roundShortLabel(round) {
+    if (!round) return "Раунд";
+    var name = String(round.name || "").trim().toLowerCase();
+    if (name.indexOf("финал") >= 0 || String(round.side || "") === "final") return "Финал";
+    var index = parseInt(round.index, 10);
+    if (isFinite(index) && index > 0) return String(index) + "ый раунд";
+    return String(round.name || "Раунд");
+  }
+
   function accessLabel(value) {
     if (value === "level1") return "Уровень 1+";
     if (value === "level10") return "Уровень 10+";
     if (value === "level25") return "Уровень 25+";
     if (value === "level50") return "Уровень 50+";
     return "Все авторизованные";
+  }
+
+  function votingAccessHint(value) {
+    var label = accessLabel(value);
+    if (value === "all") return "Голосовать могут все авторизованные игроки";
+    return "Голосовать могут только игроки " + label.toLowerCase();
   }
 
   function setStatus(text) {
@@ -289,6 +306,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
         state = data;
+        updateHomePlaque();
         render();
       })
       .catch(function (error) {
@@ -296,6 +314,50 @@
       })
       .finally(function () {
         loading = false;
+      });
+  }
+
+  function homePlaqueText(data) {
+    if (!data || !data.ok) return "Открыть голосование";
+    if (data.status === "active") {
+      if (data.paused === true) return "Голосование на паузе";
+      var round = currentRound(data);
+      var end = Date.parse(round && round.endsAt || "");
+      if (end) return roundShortLabel(round) + " · " + formatLeft(end - Date.now());
+      return roundShortLabel(round);
+    }
+    if (data.status === "completed") return "Итоги готовы";
+    return "Открыть голосование";
+  }
+
+  function updateHomePlaque() {
+    var plaque = document.getElementById("clubChoiceVoteOpen");
+    if (!plaque) return;
+    var subtext = plaque.querySelector(".home-club-choice-plaque__subtext");
+    if (subtext) subtext.textContent = homePlaqueText(state);
+    var round = state && state.status === "active" ? currentRound(state) : null;
+    var end = Date.parse(round && round.endsAt || "");
+    if (end && end <= Date.now() && !homePlaqueLoading) refreshHomePlaqueState();
+  }
+
+  function startHomePlaqueTimer() {
+    if (homePlaqueTimer) return;
+    homePlaqueTimer = window.setInterval(updateHomePlaque, 1000);
+  }
+
+  function refreshHomePlaqueState() {
+    if (homePlaqueLoading) return;
+    homePlaqueLoading = true;
+    fetchState()
+      .then(function (data) {
+        if (data && data.ok) {
+          state = data;
+          updateHomePlaque();
+        }
+      })
+      .catch(function () {})
+      .finally(function () {
+        homePlaqueLoading = false;
       });
   }
 
@@ -459,6 +521,7 @@
           (eliminated ? renderEliminatedStamp() : "") +
           '<strong>' + escapeHtml(displayNick) + '</strong>' +
           '<span class="club-choice-vote-modal__duel-avatar">' + renderPlayerAvatar(candidate, id) + '</span>' +
+          (active ? '<span class="club-choice-vote-modal__selected-badge">Вы выбрали</span>' : '') +
         '</button>' +
         renderAchievementCard("club-choice-vote-modal__duel-desc", candidate.description) +
         '<em class="club-choice-vote-modal__duel-votes">' + String(votes) + ' ' + voteWord(votes) + '</em>' +
@@ -485,8 +548,8 @@
           '</div>' +
           '<p class="club-choice-vote-modal__duel-question">Кого выбираешь ты?</p>' +
           '<div class="club-choice-vote-modal__duel-actions" aria-label="Голосование в паре">' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за ' + escapeHtml(leftNick) + '"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">👍</span><strong>' + escapeHtml(leftNick) + '</strong></button>' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за ' + escapeHtml(rightNick) + '"' + (canVote ? "" : " disabled") + '><strong>' + escapeHtml(rightNick) + '</strong><span aria-hidden="true">👍</span></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за ' + escapeHtml(leftNick) + '"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">' + (match.myVote === leftId ? "✓" : "👍") + '</span><strong>' + escapeHtml((match.myVote === leftId ? "Выбрано: " : "") + leftNick) + '</strong></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за ' + escapeHtml(rightNick) + '"' + (canVote ? "" : " disabled") + '><strong>' + escapeHtml((match.myVote === rightId ? "Выбрано: " : "") + rightNick) + '</strong><span aria-hidden="true">' + (match.myVote === rightId ? "✓" : "👍") + '</span></button>' +
           '</div>' +
         '</div>' +
         renderVoters(match, candidates) +
@@ -511,11 +574,12 @@
               (eliminated ? renderEliminatedStamp() : "") +
               '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(displayNick) + '</strong></span>' +
               renderPlayerAvatar(candidate, id) +
+              (active ? '<span class="club-choice-vote-modal__selected-badge">Вы выбрали</span>' : '') +
               renderAchievementCard("club-choice-vote-modal__player-desc", candidate.description) +
             '</div>' +
             '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(displayNick) + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
-              '<span>Голосовать</span>' +
+              '<span>' + escapeHtml(active ? "✓ Выбрано" : "Голосовать") + '</span>' +
               '<em>' + String(votes) + '</em>' +
             '</button>' +
           '</div>';
@@ -693,6 +757,7 @@
         (data.isAdmin
           ? '<button type="button" class="club-choice-vote-modal__pause-btn" data-club-choice-pause="' + (paused ? "resume" : "pause") + '">' + (paused ? "Продолжить" : "Пауза") + '</button>'
           : '') +
+        '<p class="club-choice-vote-modal__access-hint">' + escapeHtml(votingAccessHint(access)) + '</p>' +
       '</div>' +
       (paused
         ? '<div class="club-choice-vote-modal__notice club-choice-vote-modal__notice--paused">Голосование стоит на паузе. Таймер остановлен, новые голоса сейчас не принимаются.</div>'
@@ -895,6 +960,8 @@
     plaque.addEventListener("click", function () {
       openModal();
     });
+    startHomePlaqueTimer();
+    refreshHomePlaqueState();
   }
 
   window.openClubChoiceVoteModal = openModal;

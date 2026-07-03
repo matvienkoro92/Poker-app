@@ -2073,6 +2073,69 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
   }
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "prize notification resolves explicit Telegram username");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "prize notification skips mismatched account owner");
+
+  const rerollRaffle = {
+    id: "contract_raffle_prize_notify_reroll_only",
+    title: "Cash reroll prize notification raffle",
+    prizeKind: "cash",
+    totalWinners: 1,
+    groups: [{ prize: "Беккинг-байин 1 000 ₽ на кеш", count: 1 }],
+    endDate: new Date(Date.now() - 3600_000).toISOString(),
+    participants: [],
+    winners: [
+      {
+        userId: "tg_1005",
+        accountId: "ID100005",
+        name: "Missed Winner",
+        p21Id: "799757",
+        groupIndex: 0,
+        prize: "Беккинг-байин 1 000 ₽ на кеш",
+        winnerReadyExpired: true,
+        winnerReadyState: "missed",
+        winnerReadySlotId: "initial_0",
+      },
+      {
+        userId: "tg_1006",
+        accountId: "ID100006",
+        name: "Reroll Winner",
+        p21Id: "799758",
+        groupIndex: 0,
+        prize: "Беккинг-байин 1 000 ₽ на кеш",
+        winnerReroll: true,
+        winnerReady: true,
+        winnerReadyState: "ready",
+        winnerReadySlotId: "reroll_1_1",
+      },
+    ],
+    status: "drawn",
+    createdAt: new Date(Date.now() - 7200_000).toISOString(),
+    drawnAt: new Date(Date.now() - 1800_000).toISOString(),
+  };
+  redis.kv.set("poker_app:raffle:contract_raffle_prize_notify_reroll_only", JSON.stringify(rerollRaffle));
+  redis.l("poker_app:raffle_ids").push("contract_raffle_prize_notify_reroll_only");
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: "contract_raffle_prize_notify_reroll_only",
+    winnerSlotId: "initial_0",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can mark missed original winner without prize notification");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1005").length, 0, "missed original winner does not receive cash prize issued notification");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "setWinnerStatus",
+    raffleId: "contract_raffle_prize_notify_reroll_only",
+    winnerSlotId: "reroll_1_1",
+    status: "ok",
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can mark reroll winner prize issued");
+  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1006"); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1006").length, 1, "reroll winner receives cash prize issued notification");
 }
 
 async function testRaffleWinnerReadyRerollAndBurn(redis) {
