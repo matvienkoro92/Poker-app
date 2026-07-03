@@ -3819,6 +3819,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .sng-champions-modal__summary > div,
 .sng-champions-modal__buyin,
+.sng-champions-modal__description,
 .sng-champions-modal__prizes article {
   display: grid;
   gap: 4px;
@@ -3831,6 +3832,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .sng-champions-modal__summary span,
 .sng-champions-modal__buyin span,
+.sng-champions-modal__description span,
 .sng-champions-modal__prizes span,
 .sng-champions-modal__entry span {
   color: rgba(255, 239, 201, 0.68);
@@ -3849,6 +3851,18 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .sng-champions-modal__buyin {
   margin-bottom: 12px;
+}
+
+.sng-champions-modal__description {
+  margin-bottom: 12px;
+}
+
+.sng-champions-modal__description p {
+  margin: 0;
+  color: #ffe3a3;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.28;
 }
 
 .sng-champions-modal__prizes {
@@ -3879,6 +3893,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   margin-bottom: 10px;
 }
 
+.sng-champions-modal__settings-wide {
+  grid-column: 1 / -1;
+}
+
 .sng-champions-modal__settings label {
   display: grid;
   gap: 5px;
@@ -3889,12 +3907,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-transform: uppercase;
 }
 
-.sng-champions-modal__settings input {
+.sng-champions-modal__settings input,
+.sng-champions-modal__settings textarea {
   min-width: 0;
   width: 100%;
-  min-height: 38px;
   box-sizing: border-box;
-  padding: 0 10px;
   color: #fff3d2;
   font: inherit;
   font-size: 13px;
@@ -3902,6 +3919,17 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border: 1px solid rgba(255, 190, 86, 0.34);
   border-radius: 10px;
   background: rgba(2, 6, 12, 0.82);
+}
+
+.sng-champions-modal__settings input {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.sng-champions-modal__settings textarea {
+  min-height: 82px;
+  padding: 10px;
+  resize: vertical;
 }
 
 .sng-champions-modal__admin-actions {
@@ -12741,6 +12769,18 @@ body.club-choice-vote-open {
   --home-sng-champions-row: clamp(112px, 29vw, 136px);
 }
 
+.app.app--view-home .home-daily-shortcuts.home-mini-icons {
+  margin-bottom: 14px;
+}
+
+.sng-champions-modal__tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sng-champions-modal__tabs--admin {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .app.app--view-home .home-sng-champions-action {
   overflow: visible;
   border: 0;
@@ -12770,7 +12810,7 @@ body.club-choice-vote-open {
   border: 0;
   border-radius: 13px;
   background:
-    url("./assets/home-sng-champions-plaque-bg.png?v=1") center / 100% 100% no-repeat;
+    url("./assets/home-sng-champions-plaque-bg.png?v=1") center / calc(100% + clamp(28px, 7vw, 54px)) 100% no-repeat;
   box-shadow: none;
 }
 

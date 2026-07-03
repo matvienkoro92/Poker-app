@@ -236,20 +236,24 @@
     return String(player && player.displayName || "Игрок").trim() || "Игрок";
   }
 
-  function renderTabs(signupHtml, bracketHtml) {
-    var tab = activeTab === "bracket" ? "bracket" : "signup";
-    return '<div class="club-choice-vote-modal__tabs" role="tablist" aria-label="Разделы СНГ">' +
+  function renderTabs(createHtml, signupHtml, bracketHtml, data) {
+    var isAdmin = !!(data && data.isAdmin);
+    var tab = activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup";
+    return '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs' + (isAdmin ? " sng-champions-modal__tabs--admin" : "") + '" role="tablist" aria-label="Разделы СНГ">' +
+        (isAdmin ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "create" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "create" ? "true" : "false") + '" data-sng-tab="create">Создать</button>' : "") +
         '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Запись</button>' +
         '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>' +
       '</div>' +
       '<div class="club-choice-vote-modal__tab-panels">' +
+        (isAdmin ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="create"' + (tab === "create" ? "" : " hidden") + '>' + createHtml + '</div>' : "") +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="signup"' + (tab === "signup" ? "" : " hidden") + '>' + signupHtml + '</div>' +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="bracket"' + (tab === "bracket" ? "" : " hidden") + '>' + bracketHtml + '</div>' +
       '</div>';
   }
 
   function setTab(tabName) {
-    activeTab = tabName === "bracket" ? "bracket" : "signup";
+    var isAdmin = !!(state && state.isAdmin);
+    activeTab = tabName === "bracket" ? "bracket" : tabName === "create" && isAdmin ? "create" : "signup";
     if (!modal) return;
     Array.prototype.slice.call(modal.querySelectorAll("[data-sng-tab]")).forEach(function (button) {
       var active = button.getAttribute("data-sng-tab") === activeTab;
@@ -269,6 +273,12 @@
 
   function renderBuyIn(data) {
     return '<div class="sng-champions-modal__buyin"><span>Байин</span><strong>' + escapeHtml(data.buyIn || "0р") + '</strong></div>';
+  }
+
+  function renderDescription(data) {
+    var text = String(data && data.description || "").trim();
+    if (!text) return "";
+    return '<div class="sng-champions-modal__description"><span>Описание</span><p>' + escapeHtml(text) + '</p></div>';
   }
 
   function renderUserAction(data) {
@@ -296,19 +306,28 @@
     var prizes = data.prizes || [];
     var prize1 = prizes[0] && prizes[0].text || "30 000р";
     var prize2 = prizes[1] && prizes[1].text || "билет на нок за 10 000р от клуба";
+    var canOpen = data.status === "draft";
     return '<section class="sng-champions-modal__admin">' +
       '<div class="sng-champions-modal__settings">' +
+        '<label class="sng-champions-modal__settings-wide"><span>Описание</span><textarea data-sng-description maxlength="280" rows="3" placeholder="Описание турнира, условия записи или важные детали">' + escapeHtml(data.description || "") + '</textarea></label>' +
         '<label><span>Байин</span><input type="text" data-sng-buy-in value="' + escapeHtml(data.buyIn || "0р") + '" placeholder="Например: 1 000р"></label>' +
         '<label><span>1 место</span><input type="text" data-sng-prize1 value="' + escapeHtml(prize1) + '" placeholder="30 000р"></label>' +
         '<label><span>2 место</span><input type="text" data-sng-prize2 value="' + escapeHtml(prize2) + '" placeholder="билет на нок за 10 000р от клуба"></label>' +
       '</div>' +
       '<div class="sng-champions-modal__admin-actions">' +
-        '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open">Открыть турнир</button>' +
+        '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="updateSettings">Сохранить изменения</button>' +
+        '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open"' + (canOpen ? "" : " disabled") + '>Открыть турнир</button>' +
         '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs"' + (canForm ? "" : " disabled") + '>Сформировать пары</button>' +
         '<button type="button" class="sng-champions-modal__danger-action" data-sng-action="reset">Сбросить</button>' +
       '</div>' +
+      (canOpen ? "" : '<p class="sng-champions-modal__admin-hint">Турнир уже создан: меняйте описание, байин и призы через «Сохранить изменения».</p>') +
       (canForm ? "" : '<p class="sng-champions-modal__admin-hint">Для формирования пар нужно 32 подтвержденных игрока.</p>') +
     '</section>';
+  }
+
+  function renderCreate(data) {
+    if (!data.isAdmin) return "";
+    return renderAdminPanel(data);
   }
 
   function renderEntry(entry, data) {
@@ -337,9 +356,9 @@
         '<div><span>Заявок</span><strong>' + escapeHtml(entries.length) + '</strong></div>' +
         '<div><span>Ждут</span><strong>' + escapeHtml((data.counts && data.counts.pending) || 0) + '</strong></div>' +
       '</div>' +
+      renderDescription(data) +
       renderBuyIn(data) +
       renderPrizes(data) +
-      renderAdminPanel(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
         (entries.length ? entries.map(function (entry) { return renderEntry(entry, data); }).join("") : '<div class="club-choice-vote-modal__empty">Заявок пока нет.</div>') +
@@ -401,7 +420,7 @@
     ensureModal();
     var data = state || {};
     setStatus("");
-    bodyEl.innerHTML = renderTabs(renderSignup(data), renderBracket(data));
+    bodyEl.innerHTML = renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data);
   }
 
   function updateHomePlaque() {
@@ -420,12 +439,14 @@
   }
 
   function readSettingsPayload(actionName) {
-    if (actionName !== "open" || !modal) return { action: actionName };
+    if ((actionName !== "open" && actionName !== "updateSettings") || !modal) return { action: actionName };
+    var description = modal.querySelector("[data-sng-description]");
     var buyIn = modal.querySelector("[data-sng-buy-in]");
     var prize1 = modal.querySelector("[data-sng-prize1]");
     var prize2 = modal.querySelector("[data-sng-prize2]");
     return {
       action: actionName,
+      description: description ? description.value : "",
       buyIn: buyIn ? buyIn.value : "",
       prize1: prize1 ? prize1.value : "",
       prize2: prize2 ? prize2.value : "",
@@ -496,7 +517,7 @@
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
-      success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : "",
+      success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : name === "updateSettings" ? "Изменения сохранены" : "",
     });
   }
 
