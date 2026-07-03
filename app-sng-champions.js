@@ -379,7 +379,8 @@
 
   function renderInfoCard(label, value, extraClass) {
     var className = "sng-champions-modal__summary-card" + (extraClass ? " " + extraClass : "");
-    return '<div class="' + escapeHtml(className) + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || "") + '</strong></div>';
+    var valueHtml = escapeHtml(value || "").replace(/(\d)\s+(\d{3})(р|₽)/g, "$1&nbsp;$2$3");
+    return '<div class="' + escapeHtml(className) + '"><span>' + escapeHtml(label) + '</span><strong>' + valueHtml + '</strong></div>';
   }
 
   function renderSignupSummary(data, entries) {

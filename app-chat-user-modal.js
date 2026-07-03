@@ -166,11 +166,126 @@ if (chatUserModalEl) {
     if (!m) return "";
     return m[3] + "." + m[2] + "." + m[1];
   }
+  function chatUserModalBirthDateValue(value) {
+    var raw = String(value || "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
+  }
   function chatUserModalSpecialtyLabel(value) {
     var raw = String(value || "").trim().toLowerCase();
     if (raw === "mtt" || raw === "мтт") return "МТТ";
     if (raw === "cash" || raw === "кеш" || raw === "кэш") return "Кеш";
     return "";
+  }
+  function chatUserModalPersonalParts(data) {
+    var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
+    var birthText = chatUserModalFormatBirthDate(data && (data.profileBirthDate || data.birthDate));
+    var specialtyText = chatUserModalSpecialtyLabel(data && (data.profileSpecialty || data.specialty));
+    var personalParts = [];
+    if (birthText) personalParts.push("Дата рождения: " + birthText);
+    if (specialtyText) personalParts.push("Специализация: " + specialtyText);
+    if (personalText) personalParts.push(personalText);
+    return personalParts;
+  }
+  function chatUserModalApplyPersonalInfo(data, forceVisible) {
+    var personalParts = chatUserModalPersonalParts(data);
+    if (modalPersonal) modalPersonal.textContent = personalParts.join("\n") || "—";
+    if (modalPersonalBlock) {
+      if (personalParts.length || forceVisible) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
+      else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
+    }
+    return personalParts.length;
+  }
+  var modalBirthAdmin = null;
+  function chatUserModalEnsureBirthAdmin() {
+    if (!modalPersonalBlock) return null;
+    if (modalBirthAdmin) return modalBirthAdmin;
+    var wrap = document.createElement("div");
+    wrap.className = "chat-user-modal__birth-admin";
+    wrap.id = "chatUserModalBirthAdmin";
+    wrap.hidden = true;
+    wrap.innerHTML =
+      '<span class="chat-user-modal__birth-admin-label">ДР игрока</span>' +
+      '<input class="chat-user-modal__birth-admin-input" id="chatUserModalBirthAdminInput" type="date" aria-label="Дата рождения игрока" />' +
+      '<button class="chat-user-modal__birth-admin-save" id="chatUserModalBirthAdminSave" type="button">Сохранить</button>' +
+      '<span class="chat-user-modal__birth-admin-msg" id="chatUserModalBirthAdminMsg" aria-live="polite"></span>';
+    modalPersonalBlock.appendChild(wrap);
+    modalBirthAdmin = wrap;
+    var save = wrap.querySelector("#chatUserModalBirthAdminSave");
+    if (save) {
+      save.addEventListener("click", function () {
+        var targetId = String(wrap.getAttribute("data-target-user-id") || "").trim();
+        var input = wrap.querySelector("#chatUserModalBirthAdminInput");
+        var msg = wrap.querySelector("#chatUserModalBirthAdminMsg");
+        var value = input ? String(input.value || "").trim() : "";
+        if (!targetId || !base || typeof pokerApiAuthJsonBody !== "function") return;
+        if (!value) {
+          if (msg) msg.textContent = "Выберите дату";
+          return;
+        }
+        save.disabled = true;
+        if (input) input.disabled = true;
+        if (msg) msg.textContent = "Сохраняю...";
+        fetch(base + "/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, birthDate: value }))
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              if (!r.ok || !data || data.ok === false) throw new Error((data && data.error) || "Ошибка сохранения");
+              return data;
+            });
+          })
+          .then(function () {
+            var profileData = wrap._profileData && typeof wrap._profileData === "object" ? wrap._profileData : {};
+            profileData.profileBirthDate = value;
+            profileData.birthDate = value;
+            profileData.isAdmin = true;
+            profileData.ok = true;
+            wrap._profileData = profileData;
+            chatUserModalWriteProfileCache(targetId, profileData);
+            var openId = String(wrap.getAttribute("data-open-user-id") || targetId).trim();
+            if (openId && openId !== targetId) chatUserModalWriteProfileCache(openId, profileData);
+            if (String(chatUserModalUserId || "") === targetId || String(chatUserModalUserId || "") === openId) {
+              chatUserModalApplyPersonalInfo(profileData, true);
+              chatUserModalRenderBirthAdmin(profileData, openId || targetId, false);
+            }
+            if (msg) msg.textContent = "Сохранено";
+          })
+          .catch(function (err) {
+            if (msg) msg.textContent = err && err.message ? err.message : "Ошибка сохранения";
+          })
+          .finally(function () {
+            save.disabled = false;
+            if (input) input.disabled = false;
+          });
+      });
+    }
+    return wrap;
+  }
+  function chatUserModalRenderBirthAdmin(data, id, openingSelfProfile) {
+    var wrap = chatUserModalEnsureBirthAdmin();
+    if (!wrap) return false;
+    var canEdit = !!(data && data.ok && data.isAdmin === true && !openingSelfProfile && !chatUserModalIsSelf(id));
+    wrap.hidden = !canEdit;
+    if (!canEdit) {
+      wrap._profileData = null;
+      wrap.removeAttribute("data-target-user-id");
+      wrap.removeAttribute("data-open-user-id");
+      return false;
+    }
+    var targetId = String((data && (data.userId || data.dtId || data.accountId)) || id || "").trim();
+    wrap._profileData = data;
+    wrap.setAttribute("data-target-user-id", targetId);
+    wrap.setAttribute("data-open-user-id", String(id || targetId || "").trim());
+    var input = wrap.querySelector("#chatUserModalBirthAdminInput");
+    var msg = wrap.querySelector("#chatUserModalBirthAdminMsg");
+    if (input) {
+      input.value = chatUserModalBirthDateValue(data && (data.profileBirthDate || data.birthDate));
+      try { input.max = new Date().toISOString().slice(0, 10); } catch (eBirthMax) {}
+    }
+    if (msg) msg.textContent = "";
+    return true;
   }
   function updateChatUserModalSpecialtyBadge(value) {
     if (!modalSpecialtyBadge) return;
@@ -2167,6 +2282,12 @@ if (chatUserModalEl) {
     }
     if (typeof updateChatUserModalFriendState === "function") updateChatUserModalFriendState(false, null);
     if (modalPersonalBlock) modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
+    if (modalBirthAdmin) {
+      modalBirthAdmin.hidden = true;
+      modalBirthAdmin._profileData = null;
+      modalBirthAdmin.removeAttribute("data-target-user-id");
+      modalBirthAdmin.removeAttribute("data-open-user-id");
+    }
     var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
@@ -2185,6 +2306,11 @@ if (chatUserModalEl) {
         .then(function (r) { return r.json(); })
         .then(function (data) {
           chatUserModalWriteProfileCache(id, data);
+          if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
+            updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
+            var birthAdminVisible = chatUserModalRenderBirthAdmin(data, id, openingSelfProfile);
+            chatUserModalApplyPersonalInfo(data, birthAdminVisible);
+          }
         })
         .catch(function () {});
     }
@@ -2192,19 +2318,9 @@ if (chatUserModalEl) {
       .then(function (data) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         if (modalP21) modalP21.textContent = "";
-        var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
-        var birthText = chatUserModalFormatBirthDate(data && (data.profileBirthDate || data.birthDate));
-        var specialtyText = chatUserModalSpecialtyLabel(data && (data.profileSpecialty || data.specialty));
         updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
-        var personalParts = [];
-        if (birthText) personalParts.push("Дата рождения: " + birthText);
-        if (specialtyText) personalParts.push("Специализация: " + specialtyText);
-        if (personalText) personalParts.push(personalText);
-        if (modalPersonal) modalPersonal.textContent = personalParts.join("\n") || "—";
-        if (modalPersonalBlock) {
-          if (personalParts.length) modalPersonalBlock.classList.remove("chat-user-modal__personal-block--hidden");
-          else modalPersonalBlock.classList.add("chat-user-modal__personal-block--hidden");
-        }
+        var birthAdminVisible = chatUserModalRenderBirthAdmin(data, id, openingSelfProfile);
+        chatUserModalApplyPersonalInfo(data, birthAdminVisible);
         var modalStatusLevel = data && data.level != null ? data.level : (fallbackStatusLevel || null);
         if (data && data.ok) syncChatUserModalGender(data.profileGender || data.gender || data.sex || "male");
         if (!applyChatUserModalStatusLevel(modalStatusLevel) && modalLevelText) {

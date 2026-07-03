@@ -1658,6 +1658,53 @@
   word-break: break-word;
   color: var(--text);
 }
+.chat-user-modal__birth-admin {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.chat-user-modal__birth-admin[hidden] {
+  display: none;
+}
+.chat-user-modal__birth-admin-label,
+.chat-user-modal__birth-admin-msg {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.chat-user-modal__birth-admin-input {
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+}
+.chat-user-modal__birth-admin-save {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(239, 184, 86, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(239, 184, 86, 0.22), rgba(239, 184, 86, 0.08));
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.chat-user-modal__birth-admin-save:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
 .chat-user-modal__friends-row {
   margin-top: 16px;
 }
