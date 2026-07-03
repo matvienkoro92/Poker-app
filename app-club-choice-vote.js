@@ -10,6 +10,7 @@
   var bodyEl = null;
   var statusEl = null;
   var activeRoundTab = "votes";
+  var activeVotesRoundId = "";
   var homePlaqueTimer = null;
   var homePlaqueLoading = false;
 
@@ -206,6 +207,16 @@
   function currentRound(data) {
     var id = data && data.currentRoundId;
     return (data && data.rounds || []).filter(function (round) { return round && round.id === id; })[0] || null;
+  }
+
+  function voteRounds(data) {
+    var currentId = String(data && data.currentRoundId || "");
+    var rounds = (data && data.rounds || []).filter(function (round) { return round && round.id; });
+    return rounds.slice().sort(function (a, b) {
+      if (String(a.id) === currentId) return -1;
+      if (String(b.id) === currentId) return 1;
+      return (Number(b.index) || 0) - (Number(a.index) || 0);
+    });
   }
 
   function roundShortLabel(round) {
@@ -588,62 +599,97 @@
     '</article>';
   }
 
-  function renderBracketNode(match, candidates, id) {
+  function bracketProgress(data) {
+    var progress = {};
+    (data && data.rounds || []).forEach(function (round) {
+      (round.matches || []).forEach(function (match) {
+        (match.candidateIds || []).forEach(function (id) {
+          if (!id) return;
+          if (!progress[id]) progress[id] = { advanced: false, eliminated: false, finalist: false, winner: false };
+          if (match.winnerId) {
+            if (match.winnerId === id) progress[id].advanced = true;
+            else progress[id].eliminated = true;
+          }
+          if (String(match.side || "") === "final") progress[id].finalist = true;
+        });
+        if (String(match.side || "") === "final" && match.winnerId) {
+          if (!progress[match.winnerId]) progress[match.winnerId] = { advanced: false, eliminated: false, finalist: false, winner: false };
+          progress[match.winnerId].winner = true;
+        }
+      });
+    });
+    return progress;
+  }
+
+  function renderBracketNode(match, candidates, id, progress) {
     var candidate = candidates[id] || {};
     var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
     var votes = matchVoteCount(match, id);
-    var winner = match && match.winnerId === id;
+    var row = progress && progress[id] ? progress[id] : {};
+    var winner = row.winner && String(match && match.side || "") === "final" && match.winnerId === id;
+    var advanced = match && match.winnerId === id;
     var eliminated = candidateLostMatch(match, id);
     return '<span class="club-choice-vote-modal__scheme-player' +
       (winner ? " club-choice-vote-modal__scheme-player--winner" : "") +
+      (advanced && !winner ? " club-choice-vote-modal__scheme-player--advanced" : "") +
       (eliminated ? " club-choice-vote-modal__scheme-player--eliminated" : "") +
       '">' +
         '<strong>' + escapeHtml(displayNick) + '</strong>' +
         '<em>' + String(votes) + '</em>' +
-        (winner ? '<i>прошёл</i>' : '') +
+        (winner ? '<i>победитель</i>' : (advanced ? '<i>прошёл</i>' : '')) +
         (eliminated ? renderEliminatedStamp() : '') +
       '</span>';
   }
 
   function renderBracketScheme(data, candidates) {
-    var round = currentRound(data);
-    var matches = Array.isArray(round && round.matches) ? round.matches : [];
+    var rounds = (data && data.rounds || []).filter(function (round) { return round && Array.isArray(round.matches); });
+    var matches = [];
+    rounds.forEach(function (round) {
+      (round.matches || []).forEach(function (match) {
+        matches.push(match);
+      });
+    });
     if (!matches.length) return "";
+    var progress = bracketProgress(data);
     var left = matches.filter(function (match) { return match.side === "left"; });
     var right = matches.filter(function (match) { return match.side === "right"; });
     var final = matches.filter(function (match) { return match.side === "final"; });
-    function renderSchemeMatch(match, index) {
+    function renderSchemeMatch(match, index, total) {
       var ids = match.candidateIds || [];
+      var label = total > 1 ? "Пара " + String(index + 1) : "Пара";
       return '<div class="club-choice-vote-modal__scheme-match">' +
-        '<b>Пара ' + String(index + 1) + '</b>' +
+        '<b>' + escapeHtml(label) + '</b>' +
         '<div class="club-choice-vote-modal__scheme-pair">' + ids.map(function (id, playerIndex) {
-          return renderBracketNode(match, candidates, id);
+          return renderBracketNode(match, candidates, id, progress);
         }).join('<span class="club-choice-vote-modal__scheme-vs">vs</span>') + '</div>' +
       '</div>';
     }
-    if (final.length) {
-      return '<section class="club-choice-vote-modal__scheme" aria-label="Схема турнира">' +
-        '<h3>Сетка</h3>' +
-        '<div class="club-choice-vote-modal__scheme-layout club-choice-vote-modal__scheme-layout--final">' +
-          '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--final">' +
-            '<span class="club-choice-vote-modal__scheme-round-title">Финал</span>' +
-            final.map(renderSchemeMatch).join("") +
-          '</div>' +
-        '</div>' +
-      '</section>';
+    function renderSideColumn(sideMatches, sideName, className) {
+      if (!sideMatches.length) return '<div class="club-choice-vote-modal__scheme-column ' + className + '"><span class="club-choice-vote-modal__scheme-round-title">' + escapeHtml(sideName) + '</span><div class="club-choice-vote-modal__empty">Ожидает пары</div></div>';
+      var byRound = {};
+      sideMatches.forEach(function (match) {
+        var index = parseInt(String(match.id || "").replace(/^round_(\d+).*$/, "$1"), 10) || 1;
+        if (!byRound[index]) byRound[index] = [];
+        byRound[index].push(match);
+      });
+      return '<div class="club-choice-vote-modal__scheme-column ' + className + '">' +
+        '<span class="club-choice-vote-modal__scheme-round-title">' + escapeHtml(sideName) + '</span>' +
+        Object.keys(byRound).sort(function (a, b) { return Number(a) - Number(b); }).map(function (roundIndex) {
+          var group = byRound[roundIndex];
+          var title = Number(roundIndex) === 1 ? "Старт" : "Раунд " + String(roundIndex);
+          return '<div class="club-choice-vote-modal__scheme-round-group">' +
+            '<span class="club-choice-vote-modal__scheme-stage-title">' + escapeHtml(title) + '</span>' +
+            group.map(function (match, index) { return renderSchemeMatch(match, index, group.length); }).join("") +
+          '</div>';
+        }).join("") +
+      '</div>';
     }
     return '<section class="club-choice-vote-modal__scheme" aria-label="Схема турнира">' +
       '<h3>Сетка</h3>' +
       '<div class="club-choice-vote-modal__scheme-layout">' +
-        '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--left">' +
-          '<span class="club-choice-vote-modal__scheme-round-title">Сетка слева</span>' +
-          left.map(renderSchemeMatch).join("") +
-        '</div>' +
-        '<div class="club-choice-vote-modal__scheme-final" aria-hidden="true"><span>Финал</span></div>' +
-        '<div class="club-choice-vote-modal__scheme-column club-choice-vote-modal__scheme-column--right">' +
-          '<span class="club-choice-vote-modal__scheme-round-title">Сетка справа</span>' +
-          right.map(function (match, index) { return renderSchemeMatch(match, left.length + index); }).join("") +
-        '</div>' +
+        renderSideColumn(left, "Сетка слева", "club-choice-vote-modal__scheme-column--left") +
+        '<div class="club-choice-vote-modal__scheme-final"><span>Финал</span>' + (final.length ? '<div class="club-choice-vote-modal__scheme-round-group">' + final.map(function (match, index) { return renderSchemeMatch(match, index, final.length); }).join("") + '</div>' : '<em>Ожидает финалистов</em>') + '</div>' +
+        renderSideColumn(right, "Сетка справа", "club-choice-vote-modal__scheme-column--right") +
       '</div>' +
     '</section>';
   }
@@ -709,6 +755,85 @@
       '</div>';
   }
 
+  function roundVoteTabLabel(round, currentId) {
+    if (!round) return "Раунд";
+    if (String(round.id) === String(currentId || "")) return "Текущий раунд";
+    return String(round.name || "Раунд");
+  }
+
+  function renderVoteRoundTabs(data, rounds) {
+    if (!rounds || rounds.length <= 1) return "";
+    var currentId = String(data && data.currentRoundId || "");
+    return '<div class="club-choice-vote-modal__vote-round-tabs" role="tablist" aria-label="Раунды голосов">' +
+      rounds.map(function (round) {
+        var active = String(round.id) === String(activeVotesRoundId || "");
+        return '<button type="button" class="club-choice-vote-modal__vote-round-tab' + (active ? " club-choice-vote-modal__vote-round-tab--active" : "") + '" role="tab" aria-selected="' + (active ? "true" : "false") + '" data-club-choice-votes-round="' + escapeHtml(round.id) + '">' +
+          escapeHtml(roundVoteTabLabel(round, currentId)) +
+        '</button>';
+      }).join("") +
+    '</div>';
+  }
+
+  function renderRoundMatches(round, data, candidates) {
+    var matches = Array.isArray(round && round.matches) ? round.matches : [];
+    var left = matches.filter(function (match) { return match.side === "left"; });
+    var right = matches.filter(function (match) { return match.side === "right"; });
+    var final = matches.filter(function (match) { return match.side === "final"; });
+    var viewData = {};
+    Object.keys(data || {}).forEach(function (key) { viewData[key] = data[key]; });
+    viewData.canVote = data.canVote && String(round && round.id || "") === String(data.currentRoundId || "");
+    var pairNumber = 0;
+    function renderMatchWithPair(match) {
+      pairNumber += 1;
+      return renderMatch(match, viewData, candidates, "Пара " + String(pairNumber));
+    }
+    if (final.length) {
+      return '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--final club-choice-vote-modal__bracket--tournament">' +
+        '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
+        '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final club-choice-vote-modal__side--cup"><h3>Финал</h3><div class="club-choice-vote-modal__match-list">' + final.map(renderMatchWithPair).join("") + '</div></div>' +
+        '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
+      '</div>';
+    }
+    return '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--tournament">' +
+      '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Сетка слева</h3><div class="club-choice-vote-modal__match-list">' + (left.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+      '<div class="club-choice-vote-modal__bracket-spine" aria-hidden="true"><span>Финал</span></div>' +
+      '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Сетка справа</h3><div class="club-choice-vote-modal__match-list">' + (right.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
+    '</div>';
+  }
+
+  function renderRoundSummary(round, data, isCurrent) {
+    var access = data.settings && data.settings.accessLevel;
+    var paused = data.paused === true;
+    if (isCurrent) {
+      return '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--timer">' +
+        '<span>' + escapeHtml(round ? round.name : "Раунд") + '</span>' +
+        (paused
+          ? '<strong class="club-choice-vote-modal__paused-label">Голосование на паузе</strong>'
+          : '<strong data-club-choice-countdown="' + escapeHtml(round && round.endsAt || "") + '">Идет загрузка...</strong>') +
+        (data.isAdmin
+          ? '<button type="button" class="club-choice-vote-modal__pause-btn" data-club-choice-pause="' + (paused ? "resume" : "pause") + '">' + (paused ? "Продолжить" : "Пауза") + '</button>'
+          : '') +
+        '<p class="club-choice-vote-modal__access-hint">' + escapeHtml(votingAccessHint(access)) + '</p>' +
+      '</div>' +
+      (paused
+        ? '<div class="club-choice-vote-modal__notice club-choice-vote-modal__notice--paused">Голосование стоит на паузе. Таймер остановлен, новые голоса сейчас не принимаются.</div>'
+        : '') +
+      (!data.canVote && !paused
+        ? '<div class="club-choice-vote-modal__notice">Вашему аккаунту сейчас недоступно голосование по выбранному уровню доступа.</div>'
+        : '');
+    }
+    return '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--past-round">' +
+      '<span>' + escapeHtml(round ? round.name : "Раунд") + '</span>' +
+      '<strong>Результаты раунда</strong>' +
+      '<p class="club-choice-vote-modal__access-hint">Раунд завершен, голоса показаны по парам.</p>' +
+    '</div>';
+  }
+
+  function setVotesRound(roundId) {
+    activeVotesRoundId = String(roundId || "");
+    render();
+  }
+
   function setRoundTab(tabName) {
     activeRoundTab = tabName === "scheme" ? "scheme" : "votes";
     if (!modal) return;
@@ -725,47 +850,19 @@
   function renderActive(data) {
     var round = currentRound(data);
     var candidates = candidateMap(data);
-    var matches = round && round.matches ? round.matches : [];
-    var left = matches.filter(function (match) { return match.side === "left"; });
-    var right = matches.filter(function (match) { return match.side === "right"; });
-    var final = matches.filter(function (match) { return match.side === "final"; });
-    var access = data.settings && data.settings.accessLevel;
+    var rounds = voteRounds(data);
+    if (!rounds.length && round) rounds = [round];
+    if (!rounds.filter(function (item) { return String(item.id) === String(activeVotesRoundId || ""); }).length) {
+      activeVotesRoundId = String(data.currentRoundId || (rounds[0] && rounds[0].id) || "");
+    }
+    var selectedRound = rounds.filter(function (item) { return String(item.id) === String(activeVotesRoundId || ""); })[0] || round || rounds[0];
+    var isCurrentRound = selectedRound && String(selectedRound.id) === String(data.currentRoundId || "");
     var paused = data.paused === true;
     setStatus("");
-    var pairNumber = 0;
-    function renderMatchWithPair(match) {
-      pairNumber += 1;
-      return renderMatch(match, data, candidates, "Пара " + String(pairNumber));
-    }
-    var bracketHtml = final.length
-      ? '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--final club-choice-vote-modal__bracket--tournament">' +
-          '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--final club-choice-vote-modal__side--cup"><h3>Финал</h3><div class="club-choice-vote-modal__match-list">' + final.map(renderMatchWithPair).join("") + '</div></div>' +
-          '<div class="club-choice-vote-modal__final-lane" aria-hidden="true"><span></span></div>' +
-        '</div>'
-      : '<div class="club-choice-vote-modal__bracket club-choice-vote-modal__bracket--tournament">' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--left"><h3>Сетка слева</h3><div class="club-choice-vote-modal__match-list">' + (left.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
-          '<div class="club-choice-vote-modal__bracket-spine" aria-hidden="true"><span>Финал</span></div>' +
-          '<div class="club-choice-vote-modal__side club-choice-vote-modal__side--right"><h3>Сетка справа</h3><div class="club-choice-vote-modal__match-list">' + (right.map(renderMatchWithPair).join("") || '<div class="club-choice-vote-modal__empty">Ожидает пары</div>') + '</div></div>' +
-        '</div>';
     var votesHtml =
-      '<div class="club-choice-vote-modal__summary club-choice-vote-modal__summary--timer">' +
-        '<span>' + escapeHtml(round ? round.name : "Раунд") + '</span>' +
-        (paused
-          ? '<strong class="club-choice-vote-modal__paused-label">Голосование на паузе</strong>'
-          : '<strong data-club-choice-countdown="' + escapeHtml(round && round.endsAt || "") + '">Идет загрузка...</strong>') +
-        (data.isAdmin
-          ? '<button type="button" class="club-choice-vote-modal__pause-btn" data-club-choice-pause="' + (paused ? "resume" : "pause") + '">' + (paused ? "Продолжить" : "Пауза") + '</button>'
-          : '') +
-        '<p class="club-choice-vote-modal__access-hint">' + escapeHtml(votingAccessHint(access)) + '</p>' +
-      '</div>' +
-      (paused
-        ? '<div class="club-choice-vote-modal__notice club-choice-vote-modal__notice--paused">Голосование стоит на паузе. Таймер остановлен, новые голоса сейчас не принимаются.</div>'
-        : '') +
-      (!data.canVote && !paused
-        ? '<div class="club-choice-vote-modal__notice">Вашему аккаунту сейчас недоступно голосование по выбранному уровню доступа.</div>'
-        : '') +
-      bracketHtml;
+      renderVoteRoundTabs(data, rounds) +
+      renderRoundSummary(selectedRound, data, isCurrentRound) +
+      renderRoundMatches(selectedRound, data, candidates);
     bodyEl.innerHTML = renderRoundTabs(votesHtml, renderBracketScheme(data, candidates));
     if (!paused) startTimer();
   }
@@ -911,6 +1008,11 @@
     var tab = event.target && event.target.closest ? event.target.closest("[data-club-choice-tab]") : null;
     if (tab) {
       setRoundTab(tab.getAttribute("data-club-choice-tab") || "votes");
+      return;
+    }
+    var votesRound = event.target && event.target.closest ? event.target.closest("[data-club-choice-votes-round]") : null;
+    if (votesRound) {
+      setVotesRound(votesRound.getAttribute("data-club-choice-votes-round") || "");
       return;
     }
     var share = event.target && event.target.closest ? event.target.closest("[data-club-choice-share]") : null;
