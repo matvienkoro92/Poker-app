@@ -348,21 +348,38 @@
     var elRating = document.getElementById("visitorsAdminRating");
     var elRaffle = document.getElementById("visitorsAdminRaffle");
     var base = getApiBase();
-    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return Promise.resolve(null);
     var url = base + "/api/visitors-list" + (typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=");
-    fetch(url)
+    return fetch(url)
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data || !data.ok || !data.isAdmin) return;
+        if (!data || !data.ok || !data.isAdmin) return data || null;
         visitorsAdminData = data;
+        try {
+          var auth = window.__pokerTelegramAuth || {};
+          auth.adminAccess = true;
+          if (!auth.status) auth.status = "verified";
+          window.__pokerTelegramAuth = auth;
+        } catch (eAdminStatsAuth) {}
         if (elUnique) elUnique.textContent = String(data.unique != null ? data.unique : data.uniqueThisMonth != null ? data.uniqueThisMonth : "—");
         if (elTotal) elTotal.textContent = String(data.total != null ? data.total : "—");
         if (elGazette) elGazette.textContent = String(data.gazetteSubscribers != null ? data.gazetteSubscribers : "—");
         if (elRating) elRating.textContent = String(data.ratingSubscribers != null ? data.ratingSubscribers : "—");
         if (elRaffle) elRaffle.textContent = String(data.raffleSubscribers != null ? data.raffleSubscribers : "—");
+        return data;
       })
-      .catch(function () {});
+      .catch(function () {
+        return null;
+      });
   }
+
+  function ensureVisitorsAdminAccess() {
+    if (visitorsAdminData && visitorsAdminData.isAdmin === true) return Promise.resolve(true);
+    return fetchVisitorsAdminStats(null).then(function (data) {
+      return !!(data && data.ok && data.isAdmin === true);
+    });
+  }
+
   function openVisitorsModal() {
     var modal = document.getElementById("visitorsAdminModal");
     var listWrap = document.getElementById("visitorsAdminListWrap");
@@ -385,10 +402,15 @@
       var btn = document.getElementById("visitorsAdminGroup" + name);
       updateGroupBtnState(btn, false);
     });
-    modal.setAttribute("aria-hidden", "false");
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
-    fetchVisitorsAdminStats(null);
+    ensureVisitorsAdminAccess().then(function (allowed) {
+      if (!allowed) {
+        closeVisitorsModal();
+        return;
+      }
+      modal.setAttribute("aria-hidden", "false");
+    });
   }
 
   function closeVisitorsModal() {
@@ -412,6 +434,7 @@
     return out;
   }
   function openBroadcastModal() {
+    if (!visitorsAdminData || visitorsAdminData.isAdmin !== true) return;
     selectedBroadcastGroups = getSelectedBroadcastGroups();
     if (selectedBroadcastGroups.length === 0) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -480,6 +503,8 @@
   }
 
   function openAdminPushModal() {
+    ensureVisitorsAdminAccess().then(function (allowed) {
+      if (!allowed) return;
     var modal = document.getElementById("adminPushBroadcastModal");
     var titleEl = document.getElementById("adminPushTitleInput");
     var textEl = document.getElementById("adminPushBodyInput");
@@ -491,6 +516,7 @@
         "Только для админов приложения; доставка на устройства с включённым пушем о чате (установленная PWA).";
     }
     if (modal) modal.setAttribute("aria-hidden", "false");
+    });
   }
 
   function closeAdminPushModal() {
@@ -623,6 +649,8 @@
     }
   }
   function openAdminPushAllModal() {
+    ensureVisitorsAdminAccess().then(function (allowed) {
+      if (!allowed) return;
     var modal = document.getElementById("adminChatPushAllModal");
     var titleEl = document.getElementById("adminPushAllTitleInput");
     var textEl = document.getElementById("adminPushAllBodyInput");
@@ -686,6 +714,7 @@
       .catch(function () {
         if (countEl) countEl.textContent = "—";
       });
+    });
   }
   function sendAdminPushAll() {
     var titleEl = document.getElementById("adminPushAllTitleInput");
@@ -750,6 +779,7 @@
   }
 
   function sendBroadcast() {
+    if (!visitorsAdminData || visitorsAdminData.isAdmin !== true) return;
     var textEl = document.getElementById("visitorsBroadcastText");
     var fileEl = document.getElementById("visitorsBroadcastImageFile");
     var sendBtn = document.getElementById("visitorsBroadcastSendBtn");
@@ -974,6 +1004,7 @@
   }
 
   function renderVisitorsList() {
+    if (!visitorsAdminData || visitorsAdminData.isAdmin !== true) return;
     var listWrap = document.getElementById("visitorsAdminListWrap");
     var listEl = document.getElementById("visitorsAdminList");
     if (!listWrap || !listEl || !visitorsAdminData || !visitorsAdminData.visitors) return;
@@ -1158,6 +1189,7 @@
   }
 
   window.pokerInitVisitorsAdminUi = pokerInitVisitorsAdminUi;
+  window.pokerEnsureVisitorsAdminAccess = ensureVisitorsAdminAccess;
   window.pokerRenderHomeAdminIdentityStatus = renderHomeAdminIdentityStatus;
   window.addEventListener("poker-telegram-auth", checkAdminAndShowVisitorsButton);
   window.addEventListener("poker-admin-access", checkAdminAndShowVisitorsButton);

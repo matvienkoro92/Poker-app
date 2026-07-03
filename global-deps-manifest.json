@@ -63,6 +63,18 @@
       ]
     },
     {
+      "name": "pokerEnsureVisitorsAdminAccess",
+      "domain": "admin",
+      "exportedBy": [
+        "app-visitors-admin.js"
+      ],
+      "consumedBy": [
+        "app-auth-debug.js",
+        "app-share-stats.js",
+        "app-tracking-links.js"
+      ]
+    },
+    {
       "name": "resolveHallFameSectionFromStartParam",
       "domain": "hallDeepLinks",
       "exportedBy": [

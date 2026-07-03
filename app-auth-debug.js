@@ -138,7 +138,15 @@
     if (!btn) return;
     if (btn.dataset.authDebugBound === "1") return;
     btn.dataset.authDebugBound = "1";
-    btn.addEventListener("click", function () { setOpen(true); });
+    btn.addEventListener("click", function () {
+      if (typeof window.pokerEnsureVisitorsAdminAccess === "function") {
+        window.pokerEnsureVisitorsAdminAccess().then(function (allowed) {
+          if (allowed) setOpen(true);
+        });
+        return;
+      }
+      setOpen(true);
+    });
     var closeBtn = $("adminAuthDebugModalClose");
     var backdrop = $("adminAuthDebugModalBackdrop");
     var refreshBtn = $("adminAuthDebugRefreshBtn");

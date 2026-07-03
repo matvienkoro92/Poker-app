@@ -26,6 +26,15 @@ function initShareStatsAdminModal() {
     if (document.body) document.body.style.overflow = "";
   }
   function openShareStatsModal() {
+    if (typeof window.pokerEnsureVisitorsAdminAccess === "function") {
+      window.pokerEnsureVisitorsAdminAccess().then(function (allowed) {
+        if (allowed) openShareStatsModalChecked();
+      });
+      return;
+    }
+    openShareStatsModalChecked();
+  }
+  function openShareStatsModalChecked() {
     modal.setAttribute("aria-hidden", "false");
     if (document.body) document.body.style.overflow = "hidden";
     tbody.innerHTML = "<tr><td colspan=\"2\">Загрузка…</td></tr>";

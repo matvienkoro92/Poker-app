@@ -711,6 +711,7 @@
     "app-visitors-admin.js:__pokerSyncRomanTaskPlanner",
     "app-visitors-admin.js:__pokerTelegramAuth",
     "app-visitors-admin.js:pokerInitAdminSectionViewsUi",
+    "app-visitors-admin.js:pokerEnsureVisitorsAdminAccess",
     "app-visitors-admin.js:pokerInitVisitorsAdminUi",
     "app-visitors-admin.js:pokerRecheckAdminFooter",
     "app-visitors-admin.js:pokerRenderHomeAdminIdentityStatus",

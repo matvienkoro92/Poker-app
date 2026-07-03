@@ -146,6 +146,16 @@ function initTrackingLinksAdminModal() {
   }
 
   function openMainModal() {
+    if (typeof window.pokerEnsureVisitorsAdminAccess === "function") {
+      window.pokerEnsureVisitorsAdminAccess().then(function (allowed) {
+        if (allowed) openMainModalChecked();
+      });
+      return;
+    }
+    openMainModalChecked();
+  }
+
+  function openMainModalChecked() {
     modal.setAttribute("aria-hidden", "false");
     if (document.body) document.body.style.overflow = "hidden";
     if (createMsg) {
