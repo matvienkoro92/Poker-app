@@ -407,7 +407,7 @@
       '</div>';
     }
     if (data.status === "open" && mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice">Ваша заявка отклонена админом. Можно подать заявку еще раз.</div>' +
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена админом. Можно подать заявку еще раз.</div>' +
         '<div class="sng-champions-modal__join-dock">' +
           '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Подать заявку еще раз</button>' +
         '</div>';
@@ -416,8 +416,8 @@
       var notice = mine.status === "approved"
         ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>'
         : mine.status === "balance_requested"
-          ? '<div class="sng-champions-modal__notice">Админ запросил пополнить баланс.</div>'
-          : '<div class="sng-champions-modal__notice">Вы подали заявку. Админ должен подтвердить участие.</div>';
+          ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>'
+          : '<div class="sng-champions-modal__notice sng-champions-modal__notice--pending">Вы подали заявку. Админ должен подтвердить участие.</div>';
       return notice +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="cancel">Отменить заявку</button>';
     }
@@ -425,10 +425,10 @@
       return '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>';
     }
     if (mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice">Ваша заявка отклонена админом.</div>';
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена админом.</div>';
     }
-    if (data.status === "draft") return '<div class="sng-champions-modal__notice">Запись еще не открыта.</div>';
-    return '<div class="sng-champions-modal__notice">Запись закрыта, смотрите сетку турнира.</div>';
+    if (data.status === "draft") return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись еще не открыта.</div>';
+    return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись закрыта, смотрите сетку турнира.</div>';
   }
 
   function renderAdminPanel(data) {
@@ -463,13 +463,15 @@
 
   function renderEntry(entry, data) {
     var level = playerLevelText(entry);
-    var adminActions = data.isAdmin && data.status === "open"
-      ? '<div class="sng-champions-modal__entry-actions">' +
-          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "approved" ? " disabled" : "") + '><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>' +
-          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--balance" data-sng-request-balance="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "balance_requested" ? " disabled" : "") + '><span aria-hidden="true">₽</span><strong>Пополнить баланс</strong></button>' +
-          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>' +
-        '</div>'
-      : "";
+    var adminButtons = "";
+    if (data.isAdmin && data.status === "open") {
+      if (entry.status !== "approved") {
+        adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>';
+        adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--balance" data-sng-request-balance="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "balance_requested" ? " disabled" : "") + '><span aria-hidden="true">₽</span><strong>Пополнить баланс</strong></button>';
+      }
+      adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>';
+    }
+    var adminActions = adminButtons ? '<div class="sng-champions-modal__entry-actions">' + adminButtons + '</div>' : "";
     return '<article class="sng-champions-modal__entry sng-champions-modal__entry--' + escapeHtml(entry.status || "pending") + '">' +
       renderPlayerAvatar(entry) +
       '<div class="sng-champions-modal__entry-main">' +
@@ -502,8 +504,8 @@
       renderDescription(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
-        renderEntryColumn("Подтверждены", approvedEntries, data) +
         renderEntryColumn("Подали заявку", pendingEntries, data) +
+        renderEntryColumn("Подтверждены", approvedEntries, data) +
       '</div>';
   }
 
