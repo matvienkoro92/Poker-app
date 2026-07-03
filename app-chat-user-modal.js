@@ -1095,7 +1095,7 @@ if (chatUserModalEl) {
     if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
-    if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.png" };
+    if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };

@@ -467,6 +467,62 @@ function localCssImportsFromStyles() {
   return out;
 }
 
+function lazyCssEntrypointsFromHtml() {
+  const out = [];
+  const seen = new Set();
+  const re = /<link\b[^>]*type=["']application\/poker-lazy-style["'][^>]*href=["']([^"']+\.css(?:\?[^"']*)?)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || file.includes("/") || !file.endsWith(".css") || seen.has(file)) continue;
+    seen.add(file);
+    out.push(file);
+  }
+  return out;
+}
+
+function localCssEntrypointsFromHtml() {
+  const out = [];
+  const seen = new Set();
+  const re = /<link\b[^>]*href=["']([^"']+\.css(?:\?[^"']*)?)["'][^>]*>/gi;
+  let match;
+  while ((match = re.exec(files.html))) {
+    const file = stripAssetUrl(match[1]);
+    if (!file || file.includes("/") || !file.endsWith(".css") || seen.has(file)) continue;
+    seen.add(file);
+    out.push(file);
+  }
+  return out;
+}
+
+function localCssFilesReferencedByEntrypoints() {
+  const out = [];
+  const seen = new Set();
+  function walk(rel) {
+    if (!rel || seen.has(rel)) return;
+    seen.add(rel);
+    if (rel !== "styles.css") out.push(rel);
+    let css = "";
+    try {
+      css = read(rel);
+    } catch (err) {
+      return;
+    }
+    const re = /@import\s+url\(["']?([^"')]+)["']?\)/gi;
+    let match;
+    while ((match = re.exec(css))) {
+      const file = stripAssetUrl(match[1]);
+      if (!file || /^(?:https?:)?\/\//i.test(file) || file.startsWith("/")) continue;
+      if (file.includes("/") || !file.endsWith(".css")) continue;
+      walk(file);
+    }
+  }
+  walk("styles.css");
+  localCssEntrypointsFromHtml().forEach(walk);
+  lazyCssEntrypointsFromHtml().forEach(walk);
+  return out;
+}
+
 function cssManifestData() {
   try {
     return JSON.parse(files.cssManifest);
@@ -2506,7 +2562,7 @@ add("JS manifest files exist in root and build output", () => {
 
 add("Build output contains every local CSS import from styles.css", () => {
   const publicDir = path.join(root, "public");
-  return localCssImportsFromStyles().every((file) =>
+  return localCssFilesReferencedByEntrypoints().every((file) =>
     fs.existsSync(path.join(root, file)) &&
     fs.existsSync(path.join(publicDir, file))
   );
@@ -2519,13 +2575,13 @@ add("CSS manifest owns every split stylesheet", () => {
   const domainNames = Object.keys(domains);
   const manifestFiles = cssManifestDomainFiles();
   const rootCssFiles = localStyleFilesFromRoot().filter((file) => file !== "styles.css");
-  const importedFiles = localCssImportsFromStyles();
+  const referencedFiles = localCssFilesReferencedByEntrypoints();
   return parsed.entrypoint === "styles.css" &&
     domainNames.length > 0 &&
     domainNames.every((name) => ownership[name] && ownership[name].owner && ownership[name].scope) &&
     rootCssFiles.every((file) => manifestFiles.includes(file)) &&
-    rootCssFiles.every((file) => importedFiles.includes(file)) &&
-    manifestFiles.every((file) => importedFiles.includes(file)) &&
+    rootCssFiles.every((file) => referencedFiles.includes(file)) &&
+    manifestFiles.every((file) => referencedFiles.includes(file)) &&
     manifestFiles.every((file) => fs.existsSync(path.join(root, file)));
 });
 
@@ -2600,12 +2656,12 @@ add("Individual shipped assets stay under the mobile file budget", () => {
 });
 
 add("CSS domain entrypoints cover auth and tournament styles", () =>
-  localCssImportsFromStyles().includes("styles-auth.css") &&
-  localCssImportsFromStyles().includes("styles-pwa.css") &&
-  localCssImportsFromStyles().includes("styles-tournament.css") &&
-  localCssImportsFromStyles().includes("styles-hall-tournament-day.css") &&
-  localCssImportsFromStyles().includes("styles-home-overrides.css") &&
-  !localCssImportsFromStyles().includes("styles-home-tournament.css")
+  localCssFilesReferencedByEntrypoints().includes("styles-auth.css") &&
+  localCssFilesReferencedByEntrypoints().includes("styles-pwa.css") &&
+  localCssFilesReferencedByEntrypoints().includes("styles-tournament.css") &&
+  localCssFilesReferencedByEntrypoints().includes("styles-hall-tournament-day.css") &&
+  localCssFilesReferencedByEntrypoints().includes("styles-home-overrides.css") &&
+  !localCssFilesReferencedByEntrypoints().includes("styles-home-tournament.css")
 );
 
 add("CSS manifest maps split home and tournament domains", () => {
@@ -2663,18 +2719,28 @@ add("CSS manifest maps split home and tournament domains", () => {
     views["spring-rating"].includes("rating");
 });
 
-add("Rating CSS entrypoint no longer owns learning games raffles or download", () =>
+add("Heavy feature CSS is lazy-loaded outside the startup entrypoint", () =>
+  hasAll("html", [
+    'type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="learning" href="./styles-learning-games.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=',
+  ]) &&
   hasAll("styles", [
-    "styles-learning-games.css?v=",
-    "styles-raffles.css?v=",
     "styles-download.css?v=",
     "styles-home-legacy-prelude.css?v=",
     "styles-home-legacy-tail.css?v=",
     "styles-home-rating-promo-legacy.css?v=",
     "styles-layout-touch-targets.css?v=",
     "styles-home-rating-promo-late.css?v=",
-    "styles-rating.css?v=",
   ]) &&
+  !has("styles", "styles-learning-games.css?v=") &&
+  !has("styles", "styles-raffles.css?v=") &&
+  !has("styles", "styles-rating.css?v=") &&
+  !has("styles", "styles-hall.css?v=") &&
+  !has("styles", "styles-profile.css?v=") &&
   !has("stylesRating", "styles-rating-learning-games.css") &&
   !has("stylesRating", "styles-rating-raffles.css") &&
   !has("stylesRating", "styles-rating-home-download.css") &&

@@ -1,7 +1,9 @@
 (function () {
   var domainPromises = Object.create(null);
-  var loadedDomains = Object.create(null);
+  var loadedScriptDomains = Object.create(null);
+  var loadedStyleDomains = Object.create(null);
   var scriptPromises = Object.create(null);
+  var stylePromises = Object.create(null);
 
   var DOMAIN_DEPS = {
     "rating-winter": ["rating-common"],
@@ -11,10 +13,19 @@
   };
 
   var VIEW_DOMAINS = {
+    "chat": ["chat"],
     "winter-rating": ["rating-common", "rating-winter"],
     "spring-rating": ["rating-common", "rating-spring"],
     "summer-rating": ["rating-common", "rating-summer"],
+    "raffles": ["raffles"],
+    "daily-poker": ["learning"],
+    "learn-play-hub": ["learning"],
+    "bonus-game": ["learning"],
+    "cooler-game": ["learning"],
+    "plasterer-game": ["learning"],
     "poker-tasks": ["club-tasks"],
+    "hall-of-fame": ["hall"],
+    "schedule": ["tournament"],
     "profile": ["profile"],
     "streams": ["streams"],
     "cashout": ["cashout"],
@@ -55,6 +66,19 @@
     return out;
   }
 
+  function lazyStyleDomains(style) {
+    return normalizeDomains(style && style.getAttribute ? style.getAttribute("data-poker-lazy-domain") : "");
+  }
+
+  function lazyStylesForDomain(domain) {
+    var nodes = document.querySelectorAll('link[type="application/poker-lazy-style"][data-poker-lazy-domain][href]');
+    var out = [];
+    for (var i = 0; i < nodes.length; i++) {
+      if (lazyStyleDomains(nodes[i]).indexOf(domain) !== -1) out.push(nodes[i]);
+    }
+    return out;
+  }
+
   function loadLazyScript(sourceNode) {
     if (!sourceNode || !sourceNode.getAttribute) return Promise.resolve(true);
     if (sourceNode.getAttribute("data-poker-loaded") === "1") return Promise.resolve(true);
@@ -83,50 +107,96 @@
     return scriptPromises[src];
   }
 
-  function ensureDomain(domain) {
+  function loadLazyStyle(sourceNode) {
+    if (!sourceNode || !sourceNode.getAttribute) return Promise.resolve(true);
+    if (sourceNode.getAttribute("data-poker-loaded") === "1") return Promise.resolve(true);
+    var href = sourceNode.getAttribute("href");
+    if (!href) return Promise.resolve(true);
+    if (stylePromises[href]) return stylePromises[href];
+    stylePromises[href] = new Promise(function (resolve, reject) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      link.setAttribute("data-poker-lazy-loaded-from", lazyStyleDomains(sourceNode).join(" "));
+      ["crossorigin", "integrity", "referrerpolicy", "media"].forEach(function (attr) {
+        var value = sourceNode.getAttribute(attr);
+        if (value) link.setAttribute(attr, value);
+      });
+      link.onload = function () {
+        sourceNode.setAttribute("data-poker-loaded", "1");
+        resolve(true);
+      };
+      link.onerror = function () {
+        delete stylePromises[href];
+        reject(new Error("Failed to load stylesheet " + href));
+      };
+      (document.head || document.documentElement).appendChild(link);
+    });
+    return stylePromises[href];
+  }
+
+  function ensureDomain(domain, opts) {
     domain = String(domain || "").trim();
+    opts = opts || {};
+    var loadStyles = opts.styles !== false;
+    var loadScripts = opts.scripts !== false;
     if (!domain) return Promise.resolve(true);
-    if (loadedDomains[domain]) return Promise.resolve(true);
-    if (domainPromises[domain]) return domainPromises[domain];
+    if ((!loadStyles || loadedStyleDomains[domain]) && (!loadScripts || loadedScriptDomains[domain])) return Promise.resolve(true);
+    var promiseKey = domain + "|s:" + (loadStyles ? "1" : "0") + "|j:" + (loadScripts ? "1" : "0");
+    if (domainPromises[promiseKey]) return domainPromises[promiseKey];
     var deps = normalizeDomains(DOMAIN_DEPS[domain]);
-    domainPromises[domain] = ensureDomains(deps)
+    domainPromises[promiseKey] = ensureDomains(deps, opts)
       .then(function () {
-        var scripts = lazyScriptsForDomain(domain);
         var chain = Promise.resolve(true);
-        scripts.forEach(function (script) {
-          chain = chain.then(function () {
-            return loadLazyScript(script);
+        if (loadStyles && !loadedStyleDomains[domain]) {
+          lazyStylesForDomain(domain).forEach(function (style) {
+            chain = chain.then(function () {
+              return loadLazyStyle(style);
+            });
           });
-        });
+        }
+        if (loadScripts && !loadedScriptDomains[domain]) {
+          lazyScriptsForDomain(domain).forEach(function (script) {
+            chain = chain.then(function () {
+              return loadLazyScript(script);
+            });
+          });
+        }
         return chain;
       })
       .then(function () {
-        loadedDomains[domain] = true;
+        if (loadStyles) loadedStyleDomains[domain] = true;
+        if (loadScripts) loadedScriptDomains[domain] = true;
         return true;
       })
       .catch(function (err) {
-        delete domainPromises[domain];
+        delete domainPromises[promiseKey];
         throw err;
       });
-    return domainPromises[domain];
+    return domainPromises[promiseKey];
   }
 
-  function ensureDomains(domains) {
+  function ensureDomains(domains, opts) {
     var list = normalizeDomains(domains);
     if (!list.length) return Promise.resolve(true);
-    return Promise.all(list.map(ensureDomain)).then(function () {
+    return Promise.all(list.map(function (domain) {
+      return ensureDomain(domain, opts);
+    })).then(function () {
       return true;
     });
   }
 
-  function ensureDomainsMaybeAsync(domains) {
+  function ensureDomainsMaybeAsync(domains, opts) {
     var list = normalizeDomains(domains);
+    opts = opts || {};
+    var loadStyles = opts.styles !== false;
+    var loadScripts = opts.scripts !== false;
     if (!list.length) return false;
     var allLoaded = list.every(function (domain) {
-      return loadedDomains[domain];
+      return (!loadStyles || loadedStyleDomains[domain]) && (!loadScripts || loadedScriptDomains[domain]);
     });
     if (allLoaded) return true;
-    return ensureDomains(list);
+    return ensureDomains(list, opts);
   }
 
   function matchesTarget(target, selector) {
@@ -175,15 +245,15 @@
   }
 
   window.pokerEnsureScriptDomains = function (domains) {
-    return ensureDomainsMaybeAsync(domains);
+    return ensureDomainsMaybeAsync(domains, { styles: false, scripts: true });
   };
   window.pokerEnsureViewScripts = function (viewName) {
-    return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || []);
+    return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: true });
   };
   window.pokerHasGlobalModalScriptsForTarget = function (target) {
     return globalModalDomainsForTarget(target).length > 0;
   };
   window.pokerEnsureGlobalModalScriptsForTarget = function (target) {
-    return ensureDomainsMaybeAsync(globalModalDomainsForTarget(target));
+    return ensureDomainsMaybeAsync(globalModalDomainsForTarget(target), { styles: true, scripts: true });
   };
 })();

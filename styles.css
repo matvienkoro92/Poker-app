@@ -3,21 +3,11 @@
 @import url("./styles-home-rating-promo.css?v=3.666");
 @import url("./styles-auth.css?v=3.666");
 @import url("./styles-home.css?v=3.666");
-@import url("./styles-chat.css?v=3.666");
-@import url("./styles-learning-games.css?v=3.666");
-@import url("./styles-raffles.css?v=3.748");
-@import url("./styles-daily-poker.css?v=3.670");
 @import url("./styles-home-legacy-prelude.css?v=3.666");
 @import url("./styles-download.css?v=3.667");
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
-@import url("./styles-rating.css?v=3.681");
-@import url("./styles-hall.css?v=3.671");
-@import url("./styles-admin.css?v=3.666");
-@import url("./styles-player-crm.css?v=3.666");
-@import url("./styles-profile.css?v=3.679");
 @import url("./styles-layout.css?v=3.666");
-@import url("./styles-chat-overlays.css?v=3.666");
 @import url("./styles-home-overrides.css?v=3.737");
 @import url("./styles-layout-touch-targets.css?v=3.666");
 @import url("./styles-home-rating-promo-late.css?v=3.666");
@@ -2793,7 +2783,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .home-club-choice-plaque--cash {
   padding-right: 10%;
   background-color: rgba(0, 0, 0, 0.74);
-  background-image: url("./assets/home-club-choice-private-cash-glow.png?v=3.748");
+  background-image: url("./assets/home-club-choice-private-cash-glow.webp?v=3.748");
   background-blend-mode: screen;
   filter:
     brightness(0.9)
@@ -2806,7 +2796,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .home-club-choice-plaque--vote {
-  background-image: url("./assets/home-club-choice-vote-glow.png?v=3.748");
+  background-image: url("./assets/home-club-choice-vote-glow.webp?v=3.748");
   filter:
     brightness(0.9)
     saturate(1.12);

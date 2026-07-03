@@ -1559,7 +1559,7 @@ function pokerOpenChatFromTab() {
   }, 900);
   function activateChatNow() {
     try {
-      setView("chat", { htmlReady: true, scriptsReady: true });
+      setView("chat", { htmlReady: true });
     } catch (eSetChatImmediate) {
       try { setView("chat"); } catch (eSetChatFallback) {}
     }
