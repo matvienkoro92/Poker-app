@@ -38,8 +38,9 @@
         "app-lazy-loader.js"
       ],
       "consumedBy": [
-        "app-home-init.js",
-        "app-pwa-auth-runtime.js"
+        "app-chat-user-modal.js",
+        "app-rating-view-adapter.js",
+        "app-rating-week-tops.js"
       ]
     },
     {

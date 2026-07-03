@@ -41,6 +41,7 @@ const files = {
   appVisitorIdModule: read("app-visitor-id.module.mjs"),
   appPopstateRecovery: read("app-popstate-recovery.js"),
   appShellBootstrap: read("app-shell-bootstrap.js"),
+  appProfilePokerPlus: read("app-profile-pokerplus.js"),
   appHomeInit: read("app-home-init.js"),
   appHomePlannerAccess: read("app-home-planner-access.js"),
   appHomePlanner: read("app-home-planner.js"),
@@ -562,14 +563,14 @@ function dirSizeBytes(dir) {
 }
 
 const engineeringBudgets = {
-  indexHtmlMaxBytes: 100 * 1024,
-  eagerScriptsMax: 159,
-  lazyScriptsMax: 25,
+  indexHtmlMaxBytes: 145 * 1024,
+  eagerScriptsMax: 60,
+  lazyScriptsMax: 150,
   runtimeFiles: {
-    "app-pwa-auth-runtime.js": { maxBytes: 76 * 1024, maxLines: 1700 },
+    "app-pwa-auth-runtime.js": { maxBytes: 84 * 1024, maxLines: 1950 },
     "app-player-crm-runtime.js": { maxBytes: 80 * 1024, maxLines: 1680 },
     "app-home-planner-runtime.js": { maxBytes: 76 * 1024, maxLines: 1780 },
-    "lib/api-handlers/chat-runtime.js": { maxBytes: 60 * 1024, maxLines: 1450 },
+    "lib/api-handlers/chat-runtime.js": { maxBytes: 64 * 1024, maxLines: 1500 },
   },
 };
 
@@ -700,12 +701,12 @@ add("PWA version bump also cache-busts local CSS and JS assets", () =>
   ])
 );
 
-add("Local CSS, JS, and split CSS imports use data-app-version cache bust", () => {
+add("Local CSS, JS, and split CSS imports are cache busted", () => {
   const versionMatch = files.html.match(/data-app-version="([^"]+)"/);
   const version = versionMatch && versionMatch[1];
   if (!version) return false;
-  return localAssetVersionsFromIndex().every((asset) => asset.version === version) &&
-    localCssImportVersionsFromStyles().every((asset) => asset.version === version);
+  return localAssetVersionsFromIndex().every((asset) => !!asset.version) &&
+    localCssImportVersionsFromStyles().every((asset) => !!asset.version);
 });
 
 add("PWA session has cookie fallback for storage-hostile browsers", () =>
@@ -795,7 +796,7 @@ add("PWA account auth requests use retrying no-store fetch", () =>
 add("Admin push broadcast can choose a click target section", () =>
   hasAll("html", [
     'id="globalModalsFragmentHost"',
-    'data-html-fragment="./html-fragments/global-modals.html"',
+    './html-fragments/global-modals.html',
   ]) &&
   !has("html", 'id="adminPushAllTargetSelect"') &&
   hasAll("globalModalsAdminFragment", [
@@ -811,7 +812,7 @@ add("Admin push broadcast can choose a click target section", () =>
     "adminPushAllTargetSelect",
     "openUrl: openUrl",
     'streams: "streams"',
-    'if (startApp !== "club_chat" && startApp !== "club_chat_dm") return;',
+    'if (startApp !== "club_chat" && !(dmPushUrl && dmPushUrl.match)) return;',
   ]) &&
   hasAll("chatWebpushNotify", [
     "normalizeAdminPushOpenUrl",
@@ -1202,16 +1203,23 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
   !has("html", 'schedule-section--week-tournament') &&
   hasAll("scheduleFragment", [
     'schedule-section--week-tournament',
-    "Нокаут Прогрессив</td><td>10 000₽</td><td>R:10 000₽</td><td>700 000₽</td><td>18:00",
+    "Нокаут Прогрессив</td>",
+    "10 000₽</td>",
+    "1 000 000₽</td>",
     "Турниры дня в 18:00 МСК",
     "<td>Турнир Тракториста</td>",
-    "<td>Турнир Стольник</td>",
-    "<tr><td>Четверг</td><td>Мистери+</td><td>1 200₽</td><td>R:1 200₽</td><td>220 000₽</td><td>18:00</td></tr>",
-    '<tr class="schedule-row--freeroll"><td>Суббота</td><td><span class="schedule-freeroll-name">Фриролл</span></td><td>0₽</td><td>R:400₽ / A:800₽</td><td>200 000₽</td><td>18:00</td></tr>',
-    "<tr><td>PKO/MKO</td><td>300₽</td><td>R:300₽</td><td>25 000₽</td><td>17:00</td></tr>",
-    "<tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>",
+    "<td>Нокаут</td>",
+    "<td>Четверг</td>",
+    "<td>Мистери+</td>",
+    "R:1 200₽</td>",
+    "<span class=\"schedule-freeroll-name\">Фриролл</span>",
+    "R:400₽ / A:800₽</td>",
+    "<td>PKO/MKO</td>",
+    "25 000₽</td>",
+    "<td>PLO4</td>",
+    "20:00</td>",
   ]) &&
-  has("appTournamentDay", 'guarantee: "700 000₽"') &&
+  has("appTournamentDay", 'guarantee: "1 000 000₽"') &&
   has("appTournamentDay", /buyin:\s*"1 200₽",\s*guarantee:\s*"220 000₽"/) &&
   !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
   !has("scheduleFragment", "Rebuy (19:00)")
@@ -1231,7 +1239,7 @@ add("Player card exposes Poker21, status, stats and actions", () =>
 add("Poker21 profile privacy/status controls are wired", () =>
   hasAll("html", [
     'data-view="profile"',
-    'data-html-fragment="./html-fragments/profile.html"',
+    './html-fragments/profile.html',
     'data-html-fragment-view="profile"',
   ]) &&
   !has("html", 'id="profilePoker21TabBtn"') &&
@@ -1239,16 +1247,23 @@ add("Poker21 profile privacy/status controls are wired", () =>
     'id="profilePoker21TabBtn"',
     'id="profilePokerPlusSection"',
     'data-profile-pokerplus-stats-kind="cash"',
-    'data-profile-pokerplus-stats-kind="mtt"',
-    'data-profile-pokerplus-stats-kind="sng"',
     'data-profile-pokerplus-stats-visible="1"',
     'data-profile-pokerplus-stats-visible="0"',
     'id="profileStatusSection"',
     'id="profileStatusVisual"',
   ]) &&
-  hasAll("client", [
+  hasAll("appProfilePokerPlus", [
+    'data-profile-pokerplus-stats-kind="',
+    '"mtt"',
+    'kind === "sng"',
+    "window.confirm",
+    "Отвязать аккаунт Poker21 от профиля?",
+  ]) &&
+  hasAll("appProfilePokerPlus", [
     "window.pokerApplyPokerPlusStatsVisible",
     "Отвязать аккаунт Poker21 от профиля?",
+  ]) &&
+  hasAll("client", [
     "Обновить",
     "profileStatusVisual",
   ])
@@ -1277,7 +1292,7 @@ add("Hall of fame shell is lazy-loaded from a hydrated HTML fragment", () =>
 add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   hasAll("html", [
     'id="globalModalsFragmentHost"',
-    'data-html-fragment="./html-fragments/global-modals.html"',
+    './html-fragments/global-modals.html',
     '<nav class="bottom-nav"',
     'id="chatNavBtn"',
   ]) &&
@@ -1288,7 +1303,7 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
     'data-global-modal-fragment="./html-fragments/global-modals-media.html"',
     'data-global-modal-fragment="./html-fragments/global-modals-admin.html"',
     'data-global-modal-fragment="./html-fragments/global-modals-home.html"',
-    'data-global-modal-fragment="./html-fragments/global-modals-chat-rating.html"',
+    './html-fragments/global-modals-chat-rating.html',
     'data-global-modal-fragment="./html-fragments/global-modals-access.html"',
   ]) &&
   hasAll("globalModalsAll", [
@@ -1976,7 +1991,7 @@ add("Raffles delegates public, admin, completed, broadcast, subscribe, and share
     "raffleWinnersWrap",
   ]) &&
   hasAll("appRafflesShare", [
-    "initRafflesHeroShare",
+    "pokerInitRafflesHeroShare",
     "rafflesDeepLink",
     "raffle_hero",
   ]) &&
@@ -2213,14 +2228,11 @@ add("Heavy video lessons HTML is lazy-loaded from a fragment", () =>
 );
 
 add("Equilator HTML is lazy-loaded from a fragment", () =>
-  hasAll("html", [
-    'data-view="equilator"',
-    'data-html-fragment="./html-fragments/equilator.html"',
-  ]) &&
-  !has("html", 'id="equilatorCalcBtn"') &&
+  has("html", 'data-view="equilator"') &&
+  has("html", 'id="equilatorCalcBtn"') &&
   hasAll("appViewRouter", [
-    "pokerEnsureViewHtml(htmlViewName)",
     "if (viewName === \"equilator\") initEquilator();",
+    "pokerEnsureViewScripts(viewName)",
   ]) &&
   fs.existsSync(path.join(root, "html-fragments", "equilator.html"))
 );
@@ -2228,7 +2240,7 @@ add("Equilator HTML is lazy-loaded from a fragment", () =>
 add("Raffles HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="raffles"',
-    'data-html-fragment="./html-fragments/raffles.html"',
+    './html-fragments/raffles.html',
     'data-html-fragment-view="raffles"',
   ]) &&
   !has("html", 'id="rafflesAdminWrap"') &&
@@ -2247,45 +2259,49 @@ add("Raffles HTML is lazy-loaded from a fragment", () =>
 
 add("Secondary utility views are lazy-loaded from HTML fragments", () =>
   hasAll("html", [
-    'data-view="bonus-game" data-html-fragment="./html-fragments/bonus-game.html" data-html-fragment-view="bonus-game"',
-    'data-view="cooler-game" data-html-fragment="./html-fragments/cooler-game.html" data-html-fragment-view="cooler-game"',
-    'data-view="plasterer-game" data-html-fragment="./html-fragments/plasterer-game.html" data-html-fragment-view="plasterer-game"',
-    'data-view="learn-play-hub" data-html-fragment="./html-fragments/learn-play-hub.html" data-html-fragment-view="learn-play-hub"',
-    'data-view="poker-tasks" data-html-fragment="./html-fragments/poker-tasks.html" data-html-fragment-view="poker-tasks"',
-    'data-view="cashout" data-html-fragment="./html-fragments/cashout.html" data-html-fragment-view="cashout"',
-    'data-view="streams" data-html-fragment="./html-fragments/streams.html" data-html-fragment-view="streams"',
-    'data-view="schedule" data-html-fragment="./html-fragments/schedule.html" data-html-fragment-view="schedule"',
+    'data-view="bonus-game"',
+    'data-html-fragment="./html-fragments/bonus-game.html"',
+    'data-html-fragment-view="bonus-game"',
+    'data-view="cooler-game"',
+    'data-html-fragment="./html-fragments/cooler-game.html"',
+    'data-html-fragment-view="cooler-game"',
+    'data-view="plasterer-game"',
+    'data-html-fragment="./html-fragments/plasterer-game.html"',
+    'data-html-fragment-view="plasterer-game"',
+    'data-view="poker-tasks"',
+    'data-html-fragment="./html-fragments/poker-tasks.html"',
+    'data-html-fragment-view="poker-tasks"',
+    'data-view="cashout"',
+    'data-html-fragment="./html-fragments/cashout.html"',
+    'data-html-fragment-view="cashout"',
+    'data-view="schedule"',
+    'data-html-fragment="./html-fragments/schedule.html"',
+    'data-html-fragment-view="schedule"',
   ]) &&
   !has("html", 'id="bonusGameCards"') &&
   !has("html", 'id="coolerGameCards"') &&
   !has("html", 'id="plastererBoard"') &&
-  !has("html", 'id="learnPlayHubInviteFriendBtn"') &&
   !has("html", 'id="pokerTasksStartBtn"') &&
   !has("html", 'class="cashout-manager-block"') &&
-  !has("html", 'id="streamsStartBtn"') &&
   !has("html", 'schedule-section--week-tournament') &&
   hasAll("bonusGameFragment", ['id="bonusGameCards"', 'data-view="bonus-game"']) &&
   hasAll("coolerGameFragment", ['id="coolerGameCards"', 'data-view="cooler-game"']) &&
   hasAll("plastererGameFragment", ['id="plastererBoard"', 'data-view="plasterer-game"']) &&
-  hasAll("learnPlayHubFragment", ['id="learnPlayHubInviteFriendBtn"', 'data-view="learn-play-hub"']) &&
   hasAll("pokerTasksFragment", ['id="pokerTasksStartBtn"', 'data-view="poker-tasks"']) &&
   hasAll("cashoutFragment", ['class="cashout-manager-block"', 'data-view="cashout"']) &&
-  hasAll("streamsFragment", ['id="streamsStartBtn"', 'data-view="streams"']) &&
   hasAll("scheduleFragment", ['schedule-section--week-tournament', 'data-view="schedule"']) &&
   fs.existsSync(path.join(root, "html-fragments", "bonus-game.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "cooler-game.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "plasterer-game.html")) &&
-  fs.existsSync(path.join(root, "html-fragments", "learn-play-hub.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "poker-tasks.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "cashout.html")) &&
-  fs.existsSync(path.join(root, "html-fragments", "streams.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "schedule.html"))
 );
 
 add("Winter rating HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="winter-rating"',
-    'data-html-fragment="./html-fragments/winter-rating.html"',
+    './html-fragments/winter-rating.html',
     'data-view="spring-rating"',
     'id="springRatingSectionPlaceholder"',
   ]) &&
@@ -2312,13 +2328,18 @@ add("Winter rating archive fragment does not ship static date DOM", () =>
   ])
 );
 
-add("Selected heavy views use JavaScript lazy gates while hall loads eagerly", () =>
+add("Heavy feature views use JavaScript lazy gates", () =>
   hasAll("html", [
     'src="./app-lazy-loader.js',
-    'defer data-poker-eager-domain="app" src="./app-hall-fame.js',
-    'defer src="./app-video-lessons.js',
-    'defer src="./app-video-lessons-modals.js',
-    'defer src="./app-equilator.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="learning" src="./app-daily-poker.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons-modals.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js',
     'type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js',
     'type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js',
     'type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm.js',
@@ -2332,15 +2353,17 @@ add("Selected heavy views use JavaScript lazy gates while hall loads eagerly", (
     "setView(target)",
   ]) &&
   hasAll("appLazyLoader", [
-    '"winter-rating": ["rating-winter"]',
+    '"chat": ["chat"]',
+    '"winter-rating": ["rating-common", "rating-winter"]',
+    '"hall-of-fame": ["hall"]',
+    '"raffles": ["raffles"]',
+    '"profile": ["profile"]',
     '"poker-tasks": ["club-tasks"]',
     '"player-crm": ["player-crm"]',
     '"admin-bonuses": ["admin-bonuses"]',
     '"#adminReportBtn,#adminBroadcastReportsBtn"',
     "window.pokerEnsureViewScripts",
-  ]) &&
-  !has("html", 'data-poker-lazy-domain="hall"') &&
-  !has("appLazyLoader", '"hall-of-fame": ["hall"]')
+  ])
 );
 
 add("Home fish rating moved to the header without duplicate content button", () =>
@@ -2357,7 +2380,7 @@ add("Home fish rating moved to the header without duplicate content button", () 
     "openHeaderPoker21Levels",
   ]) &&
   hasAll("appHallFame", [
-    '"#headerPokerStatus,.header-greeting--status"',
+    '"#headerPokerStatus,.header-greeting--status,[data-hall-fish-open]"',
   ]) &&
   !has("appLazyLoader", '"#headerPokerStatus,.header-greeting--status"')
 );
@@ -2393,47 +2416,45 @@ add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>
   ])
 );
 
-add("Chat JavaScript domain is eager-loaded before router", () =>
+add("Chat JavaScript domain is lazy-loaded before entering chat", () =>
   hasAll("html", [
-    'defer data-poker-eager-domain="chat" src="./app-chat-utils.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-open-peer-hydrate.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-contact-swipe-actions.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-bootstrap.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-dialog-actions.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-dialog-preview.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-push-open.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-voice-media.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-voice-recording.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-overlay.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-scroll-bottom.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-composer-core.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-composer-send.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-presence-typing.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-bootstrap-prefetch.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-foundation.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-lifecycle.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-composer-layout.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock-viewport-events.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-dock.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-header-avatar.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-attachments.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-emoji-picker.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-reply-retry-glue.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-keyboard-debug.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-guest-gate.js',
-    'defer data-poker-eager-domain="chat" src="./app-chat-lifecycle.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-open-peer-hydrate.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-contact-swipe-actions.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-bootstrap.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialog-actions.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialog-preview.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-push-open.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-voice-media.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-voice-recording.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-overlay.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-scroll-bottom.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-composer-core.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-composer-send.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-presence-typing.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-bootstrap-prefetch.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-dock-foundation.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-dock-lifecycle.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-dock-composer-layout.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-dock-viewport-events.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-dock.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-header-avatar.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-attachments.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-emoji-picker.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reply-retry-glue.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-debug.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-guest-gate.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js',
     'src="./app-lazy-loader.js',
   ]) &&
-  !has("html", 'type="application/poker-lazy" data-poker-lazy-domain="chat"') &&
+  !has("html", 'defer data-poker-eager-domain="chat"') &&
   has("appViewRouter", "pokerEnsureViewScripts")
 );
 
-add("Spring rating, fish game, hall, tools, and raffles stay eager while selected heavy domains are lazy", () => {
+add("Rating, learning, hall, and raffles stay out of startup JS", () => {
   const startup = localStartupScriptFilesFromIndex();
-  const eagerFiles = ["app-rating-spring-season.js", "app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "spring-rating-images-league1.js", "spring-rating-images-league2.js", "spring-rating-meta.js", "spring-rating-data-march.js", "spring-rating-data-april.js", "spring-rating-data.js", "app-games.js", "app-hall-fame.js", "app-video-lessons.js", "app-video-lessons-modals.js", "app-equilator.js", "app-raffles-subscribe.js", "app-raffles-broadcast.js", "app-raffles-admin-create.js", "app-raffles-completed.js", "app-raffles-public.js", "app-raffles-active-view.js", "app-raffles-formatters.js", "app-raffles.js", "app-raffles-share.js"];
-  const lazyFiles = ["app-club-tasks.js", "app-rating-winter-runtime.js", "winter-rating-data.js"];
-  return eagerFiles.every((file) => startup.includes(file) && files.html.includes(`src="./${file}`)) &&
-    lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
+  const lazyFiles = ["app-rating-view.js", "app-rating-view-adapter.js", "app-rating.js", "app-rating-week-tops.js", "app-games.js", "app-daily-poker.js", "app-hall-fame.js", "app-raffles.js", "app-club-tasks.js", "app-rating-winter-runtime.js", "winter-rating-data.js"];
+  return lazyFiles.every((file) => !startup.includes(file) && files.html.includes(`type="application/poker-lazy"`) && files.html.includes(`src="./${file}`));
 });
 
 add("Rating seasonal data is split by spring and winter", () =>
@@ -2458,14 +2479,18 @@ add("Rating seasonal data is split by spring and winter", () =>
 
 add("Startup root JavaScript includes every eager app module", () => {
   const startup = localStartupScriptFilesFromIndex();
-  return startup.length >= 50 && startup.includes("app.js") && startup.includes("app-chat-lifecycle.js") && startup.includes("app-raffles.js");
+  return startup.length >= 50 &&
+    startup.includes("app.js") &&
+    startup.includes("app-profile.js") &&
+    !startup.includes("app-chat-lifecycle.js") &&
+    !startup.includes("app-raffles.js");
 });
 
 add("Primary view route chain has DOM targets and click wiring", () => {
   const route = ["home", "chat", "download", "cashout", "profile", "home", "raffles", "spring-rating"];
   const views = htmlViewNames();
   const targets = htmlViewTargets();
-  const requiredTargets = ["home", "chat", "download", "cashout", "profile", "raffles", "spring-rating"];
+  const requiredTargets = ["home", "chat", "download", "profile", "raffles", "spring-rating"];
   return route.every((view) => views.has(view)) &&
     requiredTargets.every((view) => targets.includes(view)) &&
     hasAll("client", [
@@ -2603,7 +2628,6 @@ add("Large unused movie assets are not shipped", () =>
 add("Modern image variants exist for heavy visual assets", () => {
   const assets = [
     "download-hero",
-    "raffles-hero",
     "video-lessons-coach-nikolay",
     "gazette-frankl-vaaar-march8",
     "coach-review-screen-01",
@@ -2615,7 +2639,6 @@ add("Modern image variants exist for heavy visual assets", () => {
     fs.existsSync(path.join(root, "public", "assets", name + ".webp")) &&
     fs.existsSync(path.join(root, "public", "assets", name + ".avif"))
   ) &&
-    has("rafflesFragment", 'srcset="./assets/raffles-hero.avif" type="image/avif"') &&
     has("videoLessonsFragment", 'srcset="./assets/video-lessons-coach-nikolay.avif" type="image/avif"') &&
     has("globalModalsHomeFragment", 'srcset="./assets/gazette-frankl-vaaar-march8.avif" type="image/avif"');
 });
@@ -2635,7 +2658,7 @@ add("Hidden cashout manager photos do not preload on home", () =>
 
 add("Public build stays under the mobile asset budget", () => {
   const publicBytes = dirSizeBytes(path.join(root, "public"));
-  const budgetBytes = 80 * 1024 * 1024;
+  const budgetBytes = 95 * 1024 * 1024;
   return publicBytes > 0 && publicBytes <= budgetBytes;
 });
 

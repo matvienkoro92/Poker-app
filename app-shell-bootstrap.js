@@ -9,7 +9,7 @@ function tryInitWinterRatingLightboxEarly() {
 
 function pokerRunShellReadyBootstrap() {
   runGazetteAndTasksInit();
-  updateSpringRatingPromoDateFromVar();
+  if (typeof updateSpringRatingPromoDateFromVar === "function") updateSpringRatingPromoDateFromVar();
   tryInitWinterRatingLightboxEarly();
 }
 

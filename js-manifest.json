@@ -189,6 +189,9 @@
       "app-home-gazette-comments.js",
       "app-home-gazette-tasks.js",
       "app-club-choice-vote.js",
+      "app-private-cash.js",
+      "app-sng-champions.js",
+      "app-referrals-menu.js",
       "app-club-tasks.js",
       "app-updates.js"
     ],
