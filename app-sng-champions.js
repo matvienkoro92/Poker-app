@@ -65,13 +65,13 @@
 
   function shareSng() {
     var link = sngLink();
-    var text = "СНГ Лига Чемпионов: запись на турнир клуба «Два туза».";
+    var text = "СНГ Лига Чемпионов Два Туза: запись на турнир клуба.";
     if (!link) {
       showAlert("Не удалось сформировать ссылку.");
       return;
     }
     if (typeof pokerTryPwaWebShare === "function") {
-      pokerTryPwaWebShare({ title: "СНГ Лига Чемпионов", text: text + "\n" + link, url: link }).then(function (ok) {
+      pokerTryPwaWebShare({ title: "СНГ Лига Чемпионов Два Туза", text: text + "\n" + link, url: link }).then(function (ok) {
         if (ok) return;
         openTelegramShare(link, text);
       });
@@ -104,7 +104,7 @@
         '<header class="club-choice-vote-modal__head">' +
           '<div>' +
             '<p class="club-choice-vote-modal__eyebrow">Турнир по записи</p>' +
-            '<h2 class="club-choice-vote-modal__title" id="sngChampionsTitle">СНГ Лига Чемпионов</h2>' +
+            '<h2 class="club-choice-vote-modal__title" id="sngChampionsTitle">СНГ Лига Чемпионов Два Туза</h2>' +
           '</div>' +
           '<button type="button" class="club-choice-vote-modal__close" data-sng-close="1" aria-label="Закрыть">×</button>' +
         '</header>' +
@@ -233,7 +233,14 @@
   }
 
   function playerName(player) {
-    return String(player && player.displayName || "Игрок").trim() || "Игрок";
+    return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim() || "Игрок";
+  }
+
+  function playerLevelText(player) {
+    var raw = player && player.level;
+    if (raw == null || raw === "") return "";
+    var level = Math.max(0, Math.floor(Number(raw) || 0));
+    return "Уровень " + String(level);
   }
 
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
@@ -291,7 +298,7 @@
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="cancel">Отменить заявку</button>';
     }
     if (mine && mine.status === "approved") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов.</div>';
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>';
     }
     if (mine && mine.status === "rejected") {
       return '<div class="sng-champions-modal__notice">Ваша заявка отклонена админом.</div>';
@@ -331,6 +338,7 @@
   }
 
   function renderEntry(entry, data) {
+    var level = playerLevelText(entry);
     var adminActions = data.isAdmin && data.status === "open"
       ? '<div class="sng-champions-modal__entry-actions">' +
           '<button type="button" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "approved" ? " disabled" : "") + '>Подтвердить</button>' +
@@ -341,6 +349,7 @@
       '<div>' +
         '<strong>' + escapeHtml(playerName(entry)) + '</strong>' +
         '<span>' + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
+        (level ? '<small>' + escapeHtml(level) + '</small>' : '') +
       '</div>' +
       adminActions +
     '</article>';
@@ -513,7 +522,7 @@
     var action = event.target && event.target.closest ? event.target.closest("[data-sng-action]") : null;
     if (!action) return;
     var name = action.getAttribute("data-sng-action") || "";
-    if (name === "reset" && !window.confirm("Сбросить СНГ Лигу Чемпионов?")) return;
+    if (name === "reset" && !window.confirm("Сбросить СНГ Лигу Чемпионов Два Туза?")) return;
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",

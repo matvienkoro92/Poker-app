@@ -3813,8 +3813,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 7px;
+  margin-bottom: 8px;
 }
 
 .sng-champions-modal__summary > div,
@@ -3822,9 +3822,9 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__description,
 .sng-champions-modal__prizes article {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
-  padding: 12px;
+  padding: 8px 10px;
   border: 1px solid rgba(255, 184, 70, 0.3);
   border-radius: 12px;
   background: rgba(255, 128, 0, 0.07);
@@ -3834,9 +3834,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__buyin span,
 .sng-champions-modal__description span,
 .sng-champions-modal__prizes span,
-.sng-champions-modal__entry span {
+.sng-champions-modal__entry span,
+.sng-champions-modal__entry small {
   color: rgba(255, 239, 201, 0.68);
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 850;
 }
 
@@ -3844,23 +3845,23 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__buyin strong,
 .sng-champions-modal__prizes strong {
   color: #ffd56f;
-  font-size: clamp(17px, 4vw, 26px);
+  font-size: clamp(16px, 3.4vw, 22px);
   font-weight: 1000;
   line-height: 1.02;
 }
 
 .sng-champions-modal__buyin {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .sng-champions-modal__description {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .sng-champions-modal__description p {
   margin: 0;
   color: #ffe3a3;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.28;
 }
@@ -3868,8 +3869,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__prizes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .sng-champions-modal__admin,
@@ -12133,10 +12134,35 @@ body.club-choice-vote-open {
 }
 
 @media (max-width: 720px) {
-  .sng-champions-modal__summary,
   .sng-champions-modal__settings,
   .sng-champions-modal__prizes {
     grid-template-columns: 1fr;
+  }
+
+  .sng-champions-modal__summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .sng-champions-modal__summary > div,
+  .sng-champions-modal__buyin,
+  .sng-champions-modal__description,
+  .sng-champions-modal__prizes article {
+    padding: 8px 9px;
+    border-radius: 10px;
+  }
+
+  .sng-champions-modal__summary span,
+  .sng-champions-modal__buyin span,
+  .sng-champions-modal__description span,
+  .sng-champions-modal__prizes span {
+    font-size: 10px;
+  }
+
+  .sng-champions-modal__summary strong,
+  .sng-champions-modal__buyin strong,
+  .sng-champions-modal__prizes strong {
+    font-size: clamp(15px, 4.8vw, 22px);
   }
 
   .sng-champions-modal__entry {
@@ -12829,8 +12855,8 @@ body.club-choice-vote-open {
   gap: 0;
   margin: 0;
   color: #fff0c5;
-  font-size: clamp(18px, 5.15vw, 26px);
-  line-height: 0.9;
+  font-size: clamp(15px, 4.35vw, 21px);
+  line-height: 0.86;
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 900;
   text-transform: uppercase;
