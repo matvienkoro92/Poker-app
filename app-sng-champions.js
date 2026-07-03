@@ -219,6 +219,7 @@
   function entryStatusLabel(value) {
     if (value === "approved") return "Подтвержден";
     if (value === "rejected") return "Отклонен";
+    if (value === "balance_requested") return "Админ запросил пополнить баланс";
     return "Ждет подтверждения";
   }
 
@@ -248,6 +249,27 @@
     return String(name || "И").trim().charAt(0).toUpperCase() || "И";
   }
 
+  function renderPlayerAvatar(entry) {
+    var profileId = entry && entry.accountId ? String(entry.accountId) : "";
+    var profileName = playerName(entry);
+    var avatar = entry && entry.avatar ? String(entry.avatar) : "";
+    var attrs = ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"';
+    var content = avatar
+      ? '<img src="' + escapeHtml(avatar) + '" alt="" loading="lazy" decoding="async">'
+      : '<b>' + escapeHtml(playerInitial(entry)) + '</b>';
+    return '<button type="button" class="sng-champions-modal__entry-avatar" aria-label="Открыть профиль ' + escapeHtml(profileName) + '"' + attrs + '>' +
+      content +
+      (entry.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(entry.level) || 0)))) + '</em>' : '') +
+    '</button>';
+  }
+
+  function renderPlayerNameButton(entry) {
+    var profileId = entry && entry.accountId ? String(entry.accountId) : "";
+    var profileName = playerName(entry);
+    var avatar = entry && entry.avatar ? String(entry.avatar) : "";
+    return '<button type="button" class="sng-champions-modal__entry-name" data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '">' + escapeHtml(profileName) + '</button>';
+  }
+
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var tab = activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup";
@@ -275,6 +297,13 @@
     Array.prototype.slice.call(modal.querySelectorAll("[data-sng-tab-panel]")).forEach(function (panel) {
       panel.hidden = panel.getAttribute("data-sng-tab-panel") !== activeTab;
     });
+    updateJoinDockBodyClass();
+  }
+
+  function updateJoinDockBodyClass() {
+    if (!bodyEl) return;
+    var activePanel = bodyEl.querySelector('[data-sng-tab-panel="' + activeTab + '"]');
+    bodyEl.classList.toggle("sng-champions-modal__body--with-join-dock", !!(activePanel && activePanel.querySelector(".sng-champions-modal__join-dock")));
   }
 
   function renderPrizes(data) {
@@ -318,12 +347,22 @@
   function renderUserAction(data) {
     var mine = data.myEntry;
     if (data.status === "open" && !mine) {
-      return '<button type="button" class="sng-champions-modal__main-action" data-sng-action="join">Записаться</button>';
+      return '<div class="sng-champions-modal__join-dock">' +
+        '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться</button>' +
+      '</div>';
+    }
+    if (data.status === "open" && mine && mine.status === "rejected") {
+      return '<div class="sng-champions-modal__notice">Ваша заявка отклонена админом. Можно подать заявку еще раз.</div>' +
+        '<div class="sng-champions-modal__join-dock">' +
+          '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Подать заявку еще раз</button>' +
+        '</div>';
     }
     if (data.status === "open" && mine && mine.status !== "rejected") {
       var notice = mine.status === "approved"
         ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>'
-        : '<div class="sng-champions-modal__notice">Вы подали заявку. Админ должен подтвердить участие.</div>';
+        : mine.status === "balance_requested"
+          ? '<div class="sng-champions-modal__notice">Админ запросил пополнить баланс.</div>'
+          : '<div class="sng-champions-modal__notice">Вы подали заявку. Админ должен подтвердить участие.</div>';
       return notice +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="cancel">Отменить заявку</button>';
     }
@@ -372,13 +411,14 @@
     var adminActions = data.isAdmin && data.status === "open"
       ? '<div class="sng-champions-modal__entry-actions">' +
           '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "approved" ? " disabled" : "") + '><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>' +
+          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--balance" data-sng-request-balance="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "balance_requested" ? " disabled" : "") + '><span aria-hidden="true">₽</span><strong>Пополнить баланс</strong></button>' +
           '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>' +
         '</div>'
       : "";
     return '<article class="sng-champions-modal__entry sng-champions-modal__entry--' + escapeHtml(entry.status || "pending") + '">' +
-      '<span class="sng-champions-modal__entry-avatar" aria-hidden="true"><b>' + escapeHtml(playerInitial(entry)) + '</b>' + (entry.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(entry.level) || 0)))) + '</em>' : '') + '</span>' +
+      renderPlayerAvatar(entry) +
       '<div class="sng-champions-modal__entry-main">' +
-        '<strong>' + escapeHtml(playerName(entry)) + '</strong>' +
+        renderPlayerNameButton(entry) +
         '<span class="sng-champions-modal__entry-status sng-champions-modal__entry-status--' + escapeHtml(entry.status || "pending") + '">' + (entry.status === "approved" ? '<i aria-hidden="true">✓</i>' : '') + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
         (level ? '<small>' + escapeHtml(level) + '</small>' : '') +
       '</div>' +
@@ -402,7 +442,7 @@
       return (order[a.status] || 0) - (order[b.status] || 0);
     });
     var approvedEntries = entries.filter(function (entry) { return entry.status === "approved"; });
-    var pendingEntries = entries.filter(function (entry) { return entry.status === "pending"; });
+    var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
     return renderSignupSummary(data, entries) +
       renderDescription(data) +
       renderUserAction(data) +
@@ -468,6 +508,7 @@
     var data = state || {};
     setStatus("");
     bodyEl.innerHTML = renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data);
+    updateJoinDockBodyClass();
   }
 
   function updateHomePlaque() {
@@ -525,6 +566,29 @@
     if (approve) {
       setButtonLoading(approve, true);
       postAction({ action: "approve", accountId: approve.getAttribute("data-sng-approve") || "" }, { status: "Подтверждаю заявку...", success: "Заявка подтверждена" });
+      return;
+    }
+    var profile = event.target && event.target.closest ? event.target.closest("[data-sng-profile]") : null;
+    if (profile) {
+      var profileId = profile.getAttribute("data-sng-profile") || "";
+      var profileName = profile.getAttribute("data-sng-profile-name") || "Игрок";
+      var profileAvatar = profile.getAttribute("data-sng-profile-avatar") || "";
+      if (!profileId) return;
+      if (typeof window.pokerOpenChatUserModalSafe === "function") {
+        window.pokerOpenChatUserModalSafe(profileId, profileName, profileAvatar).catch(function () {
+          showAlert("Не удалось открыть профиль.");
+        });
+      } else if (typeof window.openChatUserModalById === "function") {
+        window.openChatUserModalById(profileId, profileName, profileAvatar);
+      } else {
+        showAlert("Профиль пока загружается. Попробуйте еще раз.");
+      }
+      return;
+    }
+    var requestBalance = event.target && event.target.closest ? event.target.closest("[data-sng-request-balance]") : null;
+    if (requestBalance) {
+      setButtonLoading(requestBalance, true);
+      postAction({ action: "requestBalance", accountId: requestBalance.getAttribute("data-sng-request-balance") || "" }, { status: "Запрашиваю пополнение баланса...", success: "Запрос на пополнение отправлен" });
       return;
     }
     var reject = event.target && event.target.closest ? event.target.closest("[data-sng-reject]") : null;
