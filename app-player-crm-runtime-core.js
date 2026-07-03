@@ -933,21 +933,29 @@
   }
 
   function renderBroadcastLinkTargetOptions() {
-    var sel = document.getElementById("playerCrmBroadcastLinkTarget");
-    if (!sel || sel.dataset.crmBroadcastLinkTargetsReady === "1") return;
-    sel.innerHTML = CRM_LINK_TARGETS.map(function (target) {
-      return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
-    }).join("");
-    sel.dataset.crmBroadcastLinkTargetsReady = "1";
+    ["playerCrmBroadcastButtonTarget", "playerCrmBroadcastButtonTarget2"].forEach(function (id) {
+      var sel = document.getElementById(id);
+      if (!sel || sel.dataset.crmBroadcastLinkTargetsReady === "1") return;
+      sel.innerHTML = "<option value=\"\">Своя ссылка</option>" + CRM_LINK_TARGETS.map(function (target) {
+        return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
+      }).join("");
+      sel.dataset.crmBroadcastLinkTargetsReady = "1";
+    });
   }
 
-  function broadcastAppLinkTarget() {
-    var sel = document.getElementById("playerCrmBroadcastLinkTarget");
-    return crmLinkTargetByKey(sel ? sel.value : "home");
+  function broadcastButtonTarget(buttonNo) {
+    var sel = document.getElementById(buttonNo === 2 ? "playerCrmBroadcastButtonTarget2" : "playerCrmBroadcastButtonTarget");
+    var value = sel ? String(sel.value || "").trim() : "";
+    return value ? crmLinkTargetByKey(value) : null;
   }
 
-  function broadcastAppLinkUrl() {
-    return buildCrmLinkUrl(broadcastAppLinkTarget().startapp);
+  function syncBroadcastButtonTarget(buttonNo) {
+    var target = broadcastButtonTarget(buttonNo);
+    if (!target) return;
+    var urlEl = document.getElementById(buttonNo === 2 ? "playerCrmBroadcastButtonUrl2" : "playerCrmBroadcastButtonUrl");
+    var textEl = document.getElementById(buttonNo === 2 ? "playerCrmBroadcastButtonText2" : "playerCrmBroadcastButtonText");
+    if (urlEl) urlEl.value = buildCrmLinkUrl(target.startapp);
+    if (textEl && !String(textEl.value || "").trim()) textEl.value = "Открыть";
   }
 
   function broadcastButtonEnabled() {
@@ -977,81 +985,30 @@
     } catch (eEmojiInput) {}
   }
 
-  function closeBroadcastEmojiPanel() {
-    var panel = document.getElementById("playerCrmBroadcastEmojiPanel");
-    var btn = document.getElementById("playerCrmBroadcastEmojiBtn");
-    if (panel) panel.hidden = true;
-    if (btn) btn.setAttribute("aria-expanded", "false");
-  }
-
   function initBroadcastEmojiPicker() {
     var wrap = document.getElementById("playerCrmBroadcastEmojiWrap");
-    var btn = document.getElementById("playerCrmBroadcastEmojiBtn");
     var panel = document.getElementById("playerCrmBroadcastEmojiPanel");
-    if (!wrap || !btn || !panel || panel.dataset.crmEmojiReady === "1") return;
+    if (!wrap || !panel || panel.dataset.crmEmojiReady === "1") return;
     panel.dataset.crmEmojiReady = "1";
     panel.innerHTML = CRM_BROADCAST_EMOJIS.map(function (emoji) {
       return "<button type=\"button\" class=\"player-crm__broadcast-emoji-item\" data-crm-broadcast-emoji=\"" + esc(emoji) + "\" aria-label=\"" + esc("Вставить " + emoji) + "\">" + esc(emoji) + "</button>";
     }).join("");
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var nextOpen = !!panel.hidden;
-      panel.hidden = !nextOpen;
-      btn.setAttribute("aria-expanded", nextOpen ? "true" : "false");
-    });
     panel.addEventListener("click", function (e) {
       var emojiBtn = e.target && e.target.closest ? e.target.closest("[data-crm-broadcast-emoji]") : null;
       if (!emojiBtn) return;
       e.preventDefault();
       insertBroadcastEmoji(emojiBtn.getAttribute("data-crm-broadcast-emoji") || "");
     });
-    document.addEventListener("click", function (e) {
-      if (wrap.contains(e.target)) return;
-      closeBroadcastEmojiPanel();
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeBroadcastEmojiPanel();
-    });
   }
 
   function syncBroadcastButtonMode() {
     var enabled = broadcastButtonEnabled();
     var fields = document.getElementById("playerCrmBroadcastButtonFields");
-    var templateBox = document.getElementById("playerCrmBroadcastLinkTemplateBox");
     if (fields) fields.hidden = !enabled;
-    if (templateBox) templateBox.hidden = !enabled;
-    ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonUrl", "playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
+    ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonTarget", "playerCrmBroadcastButtonUrl", "playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonTarget2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.disabled = !enabled;
     });
-    syncBroadcastAppLinkTemplate(enabled);
-  }
-
-  function syncBroadcastAppLinkTemplate(applyToButton) {
-    renderBroadcastLinkTargetOptions();
-    var target = broadcastAppLinkTarget();
-    var url = broadcastAppLinkUrl();
-    var urlEl = document.getElementById("playerCrmBroadcastAppLink");
-    var templateEl = document.getElementById("playerCrmBroadcastLinkTemplate");
-    var buttonTextEl = document.getElementById("playerCrmBroadcastButtonText");
-    var buttonUrlEl = document.getElementById("playerCrmBroadcastButtonUrl");
-    var buttonText = buttonTextEl ? String(buttonTextEl.value || "").trim() : "";
-    var buttonUrl = buttonUrlEl ? String(buttonUrlEl.value || "").trim() : "";
-    var previousAppLink = buttonUrlEl ? String(buttonUrlEl.dataset.crmGeneratedAppLink || "") : "";
-    if (urlEl) urlEl.value = url;
-    if (broadcastButtonEnabled() && buttonUrlEl && (applyToButton || !buttonUrl || (previousAppLink && buttonUrl === previousAppLink))) {
-      buttonUrlEl.value = url;
-      buttonUrlEl.dataset.crmGeneratedAppLink = url;
-      if (buttonTextEl && !buttonText) {
-        buttonTextEl.value = "Открыть";
-        buttonText = "Открыть";
-      }
-      buttonUrl = url;
-    }
-    if (templateEl) {
-      templateEl.textContent = "Шаблон: кнопка «" + (buttonText || "без названия") + "» откроет " + target.label + " · " + (buttonUrl || url || target.startapp);
-    }
   }
 
   function crmLinkFieldValue(id) {
@@ -2156,8 +2113,6 @@
     var buttonsLinksHtml = buttons.map(function (btn, idx) {
       return "<span><em>Кнопка " + esc(String(idx + 1)) + "</em>" + esc((btn && btn.url) || "—") + "</span>";
     }).join("");
-    var appTarget = broadcastAppLinkTarget();
-    var appLink = broadcastAppLinkUrl();
     var hasBot = channel === "bot" || channel === "bot_push";
     var hasPush = channel === "push" || channel === "bot_push";
     var pushText = text ? text.slice(0, 180) : (image ? "Фото от Два туза" : "Новое сообщение");
@@ -2187,7 +2142,7 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span>" + (hasButton ? "<span>Раздел<strong>" + esc(appTarget.label) + "</strong></span>" : "") + "</div>" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span></div>" +
             (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылки в кнопках</strong>" + buttonsLinksHtml + "</div>" : "") +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
@@ -3337,18 +3292,20 @@
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;
     syncBroadcastButtonMode();
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.addEventListener("change", syncBroadcastButtonMode);
-    var broadcastLinkTarget = document.getElementById("playerCrmBroadcastLinkTarget");
-    if (broadcastLinkTarget) broadcastLinkTarget.addEventListener("change", function () { syncBroadcastAppLinkTemplate(true); });
-    var broadcastUseAppLink = document.getElementById("playerCrmBroadcastUseAppLinkBtn");
-    if (broadcastUseAppLink) broadcastUseAppLink.addEventListener("click", function () { syncBroadcastAppLinkTemplate(true); });
-    var broadcastButtonText = document.getElementById("playerCrmBroadcastButtonText");
-    if (broadcastButtonText) broadcastButtonText.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    var broadcastButtonTarget = document.getElementById("playerCrmBroadcastButtonTarget");
+    if (broadcastButtonTarget) broadcastButtonTarget.addEventListener("change", function () { syncBroadcastButtonTarget(1); });
+    var broadcastButtonTarget2 = document.getElementById("playerCrmBroadcastButtonTarget2");
+    if (broadcastButtonTarget2) broadcastButtonTarget2.addEventListener("change", function () { syncBroadcastButtonTarget(2); });
     var broadcastButtonUrl = document.getElementById("playerCrmBroadcastButtonUrl");
-    if (broadcastButtonUrl) broadcastButtonUrl.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
-    var broadcastButtonText2 = document.getElementById("playerCrmBroadcastButtonText2");
-    if (broadcastButtonText2) broadcastButtonText2.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    if (broadcastButtonUrl) broadcastButtonUrl.addEventListener("input", function () {
+      var sel = document.getElementById("playerCrmBroadcastButtonTarget");
+      if (sel) sel.value = "";
+    });
     var broadcastButtonUrl2 = document.getElementById("playerCrmBroadcastButtonUrl2");
-    if (broadcastButtonUrl2) broadcastButtonUrl2.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    if (broadcastButtonUrl2) broadcastButtonUrl2.addEventListener("input", function () {
+      var sel = document.getElementById("playerCrmBroadcastButtonTarget2");
+      if (sel) sel.value = "";
+    });
     var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");
     var broadcastImageInput = document.getElementById("playerCrmBroadcastImageInput");
     var broadcastImageRemove = document.getElementById("playerCrmBroadcastImageRemoveBtn");

@@ -239,8 +239,7 @@
               <textarea id="playerCrmBroadcastText" rows="6" maxlength="900">Сегодня есть хорошие столы и турнирный движ. Если хочешь зайти, напиши менеджеру — подберём игру по лимиту.</textarea>
             </label>
             <div class="player-crm__broadcast-emoji" id="playerCrmBroadcastEmojiWrap">
-              <button type="button" class="player-crm__ghost-btn player-crm__broadcast-emoji-toggle" id="playerCrmBroadcastEmojiBtn" aria-expanded="false" aria-controls="playerCrmBroadcastEmojiPanel">Смайлы</button>
-              <div class="player-crm__broadcast-emoji-panel" id="playerCrmBroadcastEmojiPanel" hidden></div>
+              <div class="player-crm__broadcast-emoji-panel" id="playerCrmBroadcastEmojiPanel" aria-label="Смайлы для текста рассылки"></div>
             </div>
             <label class="player-crm__broadcast-button-toggle">
               <input id="playerCrmBroadcastButtonEnabled" type="checkbox" />
@@ -252,6 +251,10 @@
                 <input id="playerCrmBroadcastButtonText" maxlength="64" placeholder="Открыть акцию" />
               </label>
               <label>
+                <span>Раздел кнопки 1</span>
+                <select id="playerCrmBroadcastButtonTarget"></select>
+              </label>
+              <label>
                 <span>Ссылка кнопки 1</span>
                 <input id="playerCrmBroadcastButtonUrl" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
@@ -260,25 +263,13 @@
                 <input id="playerCrmBroadcastButtonText2" maxlength="64" placeholder="Написать менеджеру" />
               </label>
               <label>
+                <span>Раздел кнопки 2</span>
+                <select id="playerCrmBroadcastButtonTarget2"></select>
+              </label>
+              <label>
                 <span>Ссылка кнопки 2</span>
                 <input id="playerCrmBroadcastButtonUrl2" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
-            </div>
-            <div class="player-crm__broadcast-link-template" id="playerCrmBroadcastLinkTemplateBox" hidden>
-              <div class="player-crm__form-grid">
-                <label>
-                  <span>Раздел приложения</span>
-                  <select id="playerCrmBroadcastLinkTarget"></select>
-                </label>
-                <label>
-                  <span>Ссылка на раздел</span>
-                  <input id="playerCrmBroadcastAppLink" readonly />
-                </label>
-              </div>
-              <div class="player-crm__broadcast-link-row">
-                <span id="playerCrmBroadcastLinkTemplate">Кнопка откроет: Главная</span>
-                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastUseAppLinkBtn">Подставить в кнопку</button>
-              </div>
             </div>
             <div class="player-crm__form-grid player-crm__broadcast-batch-grid">
               <label>
