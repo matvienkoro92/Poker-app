@@ -816,6 +816,41 @@ if (chatUserModalEl) {
       }, []);
     });
   }
+  function chatUserModalSngRows() {
+    var source = window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS || window.pokerSngChampionsAchievements || [];
+    return Array.isArray(source) ? source : [];
+  }
+  function getChatUserModalSngAchievementsReady(ratingNick, profileData, userId) {
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
+    if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
+    var apiBase = base || (typeof getApiBase === "function" ? getApiBase() : "");
+    if (!apiBase || typeof fetch !== "function") return Promise.resolve([]);
+    return fetch(apiBase.replace(/\/$/, "") + "/api/sng-champions?mode=achievements", { cache: "default" })
+      .then(function (res) { return res.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.ok && Array.isArray(data.rows)) window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS = data.rows;
+        return chatUserModalSngRows().reduce(function (list, seasonRow) {
+          var completedAt = String(seasonRow && seasonRow.completedAt || "").trim();
+          var season = String(seasonRow && seasonRow.season || "").trim();
+          (Array.isArray(seasonRow && seasonRow.winners) ? seasonRow.winners : []).forEach(function (winner) {
+            if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
+            var place = parseInt(winner && winner.place, 10) || 0;
+            if (!place || place > 3) return;
+            var label = String(place) + " место";
+            if (place === 1) label += " · Чемпион СНГ сезона";
+            else if (place === 2) label += " · Финалист СНГ сезона";
+            else label += " · Топ-3 СНГ сезона";
+            if (season) label += " · " + season;
+            list.push({
+              label: label,
+              detail: completedAt ? "Турнир завершен: " + completedAt.slice(0, 10) : "",
+            });
+          });
+          return list;
+        }, []);
+      })
+      .catch(function () { return []; });
+  }
   function getChatUserModalTournamentAchievementsReady(ratingNick) {
     var nick = String(ratingNick || "").trim();
     if (!nick) return Promise.resolve(null);
@@ -1049,6 +1084,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion.png" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
@@ -1092,6 +1128,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("снг") >= 0) return "Дается игрокам из топ-3 турнира СНГ Лига Чемпионов Два Туза. 1 место получает статус чемпиона СНГ сезона, 2 место — финалист, 3 место — топ-3 сезона.";
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
@@ -1337,6 +1374,7 @@ if (chatUserModalEl) {
   function chatUserModalAchievementsHtml(results, ratingNick, metrics) {
     var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
     var clubChoice = Array.isArray(results && results[5]) ? results[5] : [];
+    var sngChampions = Array.isArray(results && results[6]) ? results[6] : [];
     metrics = metrics || {};
     if (metrics.isClubAdmin) {
       return chatUserModalAchievementGroupHtml("Социальные", chatUserModalAchievementCardHtml("★", "Админ клуба", [{ label: "Команда клуба" }], {
@@ -1387,7 +1425,12 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
-      chatUserModalSummerCupCardHtml();
+      chatUserModalSummerCupCardHtml() +
+      chatUserModalAchievementCardHtml("★", "СНГ Лига Чемпионов", sngChampions, {
+        placeholder: "Топ-3 сезона",
+        image: "./assets/chat-profile-achievement-sng-champion.png",
+        infoImage: "./assets/chat-profile-achievement-sng-champion.png",
+      });
     var winsHtml =
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {
         tier: {
@@ -1702,6 +1745,7 @@ if (chatUserModalEl) {
       ratingNick ? getChatUserModalSingleTopWinsReady() : Promise.resolve([]),
       getChatUserModalRaffleLuckReady(ratingNick, profileData, userId),
       getChatUserModalClubChoiceReady(ratingNick, profileData, userId),
+      getChatUserModalSngAchievementsReady(ratingNick, profileData, userId),
       getChatUserModalAchievementMetricsReady(ratingNick, profileData, userId, options.isSelfProfile === true),
     ]).then(function (parts) {
       var places = parts && parts[0] ? parts[0] : [];
@@ -1712,13 +1756,14 @@ if (chatUserModalEl) {
         parts && parts[1],
         parts && parts[2],
         parts && parts[3],
+        parts && parts[4],
       ];
       return {
         totalRewardHtml: chatUserModalRatingTotalHtml(ratingNick),
-        achievementsHtml: chatUserModalAchievementsHtml(results, ratingNick, parts && parts[4]),
+        achievementsHtml: chatUserModalAchievementsHtml(results, ratingNick, parts && parts[5]),
         ranksHtml: chatUserModalRatingRanksHtml(results, ratingNick),
         results: results,
-        metrics: parts && parts[4],
+        metrics: parts && parts[5],
       };
     });
   };
@@ -1736,11 +1781,12 @@ if (chatUserModalEl) {
       return Promise.all([
         getChatUserModalRaffleLuckReady("", chatUserModalAchievementIdentity),
         getChatUserModalClubChoiceReady("", chatUserModalAchievementIdentity),
+        getChatUserModalSngAchievementsReady("", chatUserModalAchievementIdentity),
         getChatUserModalAchievementMetricsReady("", chatUserModalAchievementIdentity, chatUserModalUserId, chatUserModalEl.classList.contains("chat-user-modal--self")),
       ]).then(function (extraRows) {
         if (seq !== chatUserModalRanksSeq) return;
-        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1]];
-        renderChatUserModalAchievements(results, "", extraRows && extraRows[2]);
+        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1], extraRows && extraRows[2]];
+        renderChatUserModalAchievements(results, "", extraRows && extraRows[3]);
         return results;
       }).catch(function () {
         if (seq === chatUserModalRanksSeq) renderChatUserModalAchievements(null);
@@ -1757,11 +1803,12 @@ if (chatUserModalEl) {
       return Promise.all([
         getChatUserModalRaffleLuckReady(ratingNick, chatUserModalAchievementIdentity),
         getChatUserModalClubChoiceReady(ratingNick, chatUserModalAchievementIdentity),
+        getChatUserModalSngAchievementsReady(ratingNick, chatUserModalAchievementIdentity),
         getChatUserModalAchievementMetricsReady(ratingNick, chatUserModalAchievementIdentity, chatUserModalUserId, chatUserModalEl.classList.contains("chat-user-modal--self")),
       ]).then(function (extraRows) {
         if (seq !== chatUserModalRanksSeq) return;
-        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1]];
-        renderChatUserModalAchievements(results, ratingNick, extraRows && extraRows[2]);
+        var results = [null, null, null, null, extraRows && extraRows[0], extraRows && extraRows[1], extraRows && extraRows[2]];
+        renderChatUserModalAchievements(results, ratingNick, extraRows && extraRows[3]);
         return results;
       }).catch(function () {
         if (seq === chatUserModalRanksSeq) renderChatUserModalAchievements(null);
@@ -1775,6 +1822,7 @@ if (chatUserModalEl) {
       getChatUserModalSingleTopWinsReady(),
       getChatUserModalRaffleLuckReady(ratingNick, chatUserModalAchievementIdentity),
       getChatUserModalClubChoiceReady(ratingNick, chatUserModalAchievementIdentity),
+      getChatUserModalSngAchievementsReady(ratingNick, chatUserModalAchievementIdentity),
       getChatUserModalAchievementMetricsReady(ratingNick, chatUserModalAchievementIdentity, chatUserModalUserId, chatUserModalEl.classList.contains("chat-user-modal--self")),
     ]).then(function (results) {
       if (seq !== chatUserModalRanksSeq) return;
@@ -1782,7 +1830,7 @@ if (chatUserModalEl) {
       setChatUserModalRatingRankValue(modalSpringRank, results && results[1]);
       setChatUserModalRatingRankValue(modalWinterRank, results && results[2]);
       syncChatUserModalRatingTotalReward(ratingNick);
-      renderChatUserModalAchievements(results, ratingNick, results && results[6]);
+      renderChatUserModalAchievements(results, ratingNick, results && results[7]);
     }).catch(function () {
       if (seq !== chatUserModalRanksSeq) return;
       if (modalSummerRank) modalSummerRank.textContent = "—";

@@ -12907,7 +12907,7 @@ body.club-choice-vote-open {
   border: 0;
   border-radius: 13px;
   background:
-    url("./assets/home-sng-champions-plaque-bg.png?v=1") center / calc(100% + clamp(28px, 7vw, 54px)) 100% no-repeat;
+    url("./assets/home-sng-champions-plaque-bg.png?v=1") center / calc(100% + clamp(96px, 15vw, 150px)) 100% no-repeat;
   box-shadow: none;
 }
 
