@@ -1485,6 +1485,58 @@ button.player-crm__stat:focus-visible,
 .player-crm__message-label {
   margin-bottom: 10px;
 }
+.player-crm__broadcast-emoji {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: -2px 0 10px;
+}
+.player-crm__broadcast-emoji-toggle {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+.player-crm__broadcast-emoji-panel {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 6px);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 32px);
+  gap: 5px;
+  max-width: min(100%, 306px);
+  padding: 9px;
+  border: 1px solid rgba(199, 163, 106, 0.3);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.96);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+.player-crm__broadcast-emoji-panel[hidden] {
+  display: none !important;
+}
+.player-crm__broadcast-emoji-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.player-crm__broadcast-emoji-item:hover,
+.player-crm__broadcast-emoji-item:focus-visible {
+  border-color: rgba(199, 163, 106, 0.62);
+  background: rgba(199, 163, 106, 0.16);
+  outline: none;
+}
 .player-crm__broadcast-button-toggle {
   display: inline-flex;
   align-items: center;

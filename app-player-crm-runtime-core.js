@@ -955,6 +955,66 @@
     return !!(enabledEl && enabledEl.checked);
   }
 
+  var CRM_BROADCAST_EMOJIS = ["🔥", "✅", "🎉", "🏆", "💰", "🤑", "👍", "👏", "🙌", "🤝", "💪", "🙏", "❤️", "⭐", "✨", "💯", "😍", "🥳", "😎", "🤩", "😉", "😊", "😂", "🤣", "🤔", "👋", "♠️", "♥️", "♦️", "♣️", "🃏", "🎲"];
+
+  function insertBroadcastEmoji(emoji) {
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    if (!textEl || textEl.disabled) return;
+    var value = String(textEl.value || "");
+    var start = typeof textEl.selectionStart === "number" ? textEl.selectionStart : value.length;
+    var end = typeof textEl.selectionEnd === "number" ? textEl.selectionEnd : start;
+    var next = value.slice(0, start) + emoji + value.slice(end);
+    var max = Number(textEl.getAttribute("maxlength")) || 0;
+    if (max && next.length > max) return;
+    textEl.value = next;
+    var caret = start + emoji.length;
+    try {
+      textEl.focus();
+      textEl.selectionStart = textEl.selectionEnd = caret;
+    } catch (eEmojiFocus) {}
+    try {
+      textEl.dispatchEvent(new Event("input", { bubbles: true }));
+    } catch (eEmojiInput) {}
+  }
+
+  function closeBroadcastEmojiPanel() {
+    var panel = document.getElementById("playerCrmBroadcastEmojiPanel");
+    var btn = document.getElementById("playerCrmBroadcastEmojiBtn");
+    if (panel) panel.hidden = true;
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
+
+  function initBroadcastEmojiPicker() {
+    var wrap = document.getElementById("playerCrmBroadcastEmojiWrap");
+    var btn = document.getElementById("playerCrmBroadcastEmojiBtn");
+    var panel = document.getElementById("playerCrmBroadcastEmojiPanel");
+    if (!wrap || !btn || !panel || panel.dataset.crmEmojiReady === "1") return;
+    panel.dataset.crmEmojiReady = "1";
+    panel.innerHTML = CRM_BROADCAST_EMOJIS.map(function (emoji) {
+      return "<button type=\"button\" class=\"player-crm__broadcast-emoji-item\" data-crm-broadcast-emoji=\"" + esc(emoji) + "\" aria-label=\"" + esc("Вставить " + emoji) + "\">" + esc(emoji) + "</button>";
+    }).join("");
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var nextOpen = !!panel.hidden;
+      panel.hidden = !nextOpen;
+      btn.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+    });
+    panel.addEventListener("click", function (e) {
+      var emojiBtn = e.target && e.target.closest ? e.target.closest("[data-crm-broadcast-emoji]") : null;
+      if (!emojiBtn) return;
+      e.preventDefault();
+      insertBroadcastEmoji(emojiBtn.getAttribute("data-crm-broadcast-emoji") || "");
+    });
+    document.addEventListener("click", function (e) {
+      if (wrap.contains(e.target)) return;
+      closeBroadcastEmojiPanel();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeBroadcastEmojiPanel();
+    });
+  }
+
   function syncBroadcastButtonMode() {
     var enabled = broadcastButtonEnabled();
     var fields = document.getElementById("playerCrmBroadcastButtonFields");
@@ -3271,6 +3331,7 @@
     if (broadcastBatchNext) broadcastBatchNext.addEventListener("click", function () { stepBroadcastBatch(1); });
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
+    initBroadcastEmojiPicker();
     renderBroadcastLinkTargetOptions();
     var broadcastButtonEnabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;
