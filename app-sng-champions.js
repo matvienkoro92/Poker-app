@@ -384,20 +384,13 @@
   }
 
   function renderSignupSummary(data, entries) {
-    var prizes = Array.isArray(data.prizes) ? data.prizes : [];
     var edit = data.isAdmin
       ? '<button type="button" class="sng-champions-modal__edit-btn" data-sng-tab="create">Редактировать</button>'
       : "";
     return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
-      '<div class="sng-champions-modal__summary sng-champions-modal__summary--compact">' +
-        renderInfoCard(statusLabel(data.status), String((data.counts && data.counts.approved) || 0) + ' / ' + String(data.capacity || 32), "sng-champions-modal__summary-card--players") +
-        renderInfoCard("Заявок", String(entries.length), "sng-champions-modal__summary-card--requests") +
-        renderInfoCard("Ждут", String((data.counts && data.counts.pending) || 0), "sng-champions-modal__summary-card--waiting") +
-        renderInfoCard("Байин", data.buyIn || "0р", "sng-champions-modal__summary-card--buyin") +
-        prizes.map(function (prize, index) {
-          return renderInfoCard(String(prize.place || "") + " место", prize.text || "", "sng-champions-modal__summary-card--prize sng-champions-modal__summary-card--prize-" + String(index + 1));
-        }).join("") +
-      '</div>';
+      '<figure class="sng-champions-modal__hero">' +
+        '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
+      '</figure>';
   }
 
   function renderDescription(data) {
