@@ -3,11 +3,23 @@
   var loadedDomains = Object.create(null);
   var scriptPromises = Object.create(null);
 
-  var DOMAIN_DEPS = {};
+  var DOMAIN_DEPS = {
+    "rating-winter": ["rating-common"],
+    "rating-spring": ["rating-common"],
+    "rating-summer": ["rating-common"],
+    "streams": ["peer-media"]
+  };
 
   var VIEW_DOMAINS = {
-    "winter-rating": ["rating-winter"],
+    "winter-rating": ["rating-common", "rating-winter"],
+    "spring-rating": ["rating-common", "rating-spring"],
+    "summer-rating": ["rating-common", "rating-summer"],
     "poker-tasks": ["club-tasks"],
+    "profile": ["profile"],
+    "streams": ["streams"],
+    "cashout": ["cashout"],
+    "video-lessons": ["video-lessons"],
+    "equilator": ["equilator"],
     "player-crm": ["player-crm"],
     "admin-bonuses": ["admin-bonuses"]
   };

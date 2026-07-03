@@ -26,6 +26,29 @@ function pokerInitHomeDeepLinks(opts) {
     if (val === "hall_fame_shame") return "shame";
     return null;
   }
+  function openViewThen(viewName, afterReady, fallbackDelay) {
+    setTimeout(function () {
+      if (typeof setView === "function") setView(viewName);
+      var ready = false;
+      try {
+        ready = typeof window.pokerEnsureViewScripts === "function"
+          ? window.pokerEnsureViewScripts(viewName)
+          : false;
+      } catch (eEnsureViewScripts) {
+        ready = false;
+      }
+      function runAfterReady() {
+        setTimeout(function () {
+          if (typeof afterReady === "function") afterReady();
+        }, fallbackDelay == null ? 80 : fallbackDelay);
+      }
+      if (ready && typeof ready.then === "function") {
+        ready.then(runAfterReady).catch(runAfterReady);
+        return;
+      }
+      runAfterReady();
+    }, 0);
+  }
   /**
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
@@ -67,88 +90,64 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "spring_rating_league_1" || startParam === "spring_rating_league_2") {
       var leagueNum = startParam === "spring_rating_league_1" ? "1" : "2";
-      setTimeout(function () {
-        if (typeof setView === "function") setView("spring-rating");
-        setTimeout(function () {
-          if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(leagueNum);
-        }, 400);
-      }, 0);
+      openViewThen("spring-rating", function () {
+        if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(leagueNum);
+      }, 120);
       return;
     }
     if (startParam === "summer_rating_league_1" || startParam === "summer_rating_league_2") {
       var summerLeagueNum = startParam === "summer_rating_league_1" ? "1" : "2";
-      setTimeout(function () {
-        if (typeof setView === "function") setView("summer-rating");
-        setTimeout(function () {
-          if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(summerLeagueNum);
-        }, 400);
-      }, 0);
+      openViewThen("summer-rating", function () {
+        if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab(summerLeagueNum);
+      }, 120);
       return;
     }
     if (startParam.indexOf("winter_rating_player_") === 0) {
       var playerNickW = decodeURIComponent(startParam.replace("winter_rating_player_", "").replace(/\+/g, " "));
       if (playerNickW) {
-        setTimeout(function () {
-          if (typeof setView === "function") setView("winter-rating");
-          setTimeout(function () {
-            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickW);
-          }, 400);
-        }, 0);
+        openViewThen("winter-rating", function () {
+          if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickW);
+        }, 120);
       }
       return;
     }
     if (startParam.indexOf("spring_rating_player_") === 0) {
       var playerNickS = decodeURIComponent(startParam.replace("spring_rating_player_", "").replace(/\+/g, " "));
       if (playerNickS) {
-        setTimeout(function () {
-          if (typeof setView === "function") setView("spring-rating");
-          setTimeout(function () {
-            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickS);
-          }, 400);
-        }, 0);
+        openViewThen("spring-rating", function () {
+          if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickS);
+        }, 120);
       }
       return;
     }
     if (startParam.indexOf("summer_rating_player_") === 0) {
       var playerNickSummer = decodeURIComponent(startParam.replace("summer_rating_player_", "").replace(/\+/g, " "));
       if (playerNickSummer) {
-        setTimeout(function () {
-          if (typeof setView === "function") setView("summer-rating");
-          setTimeout(function () {
-            if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickSummer);
-          }, 400);
-        }, 0);
+        openViewThen("summer-rating", function () {
+          if (typeof openWinterRatingPlayerModal === "function") openWinterRatingPlayerModal(playerNickSummer);
+        }, 120);
       }
       return;
     }
     if (startParam.indexOf("rating_") === 0 && startParam.indexOf("spring_rating_date_") !== 0 && startParam.indexOf("summer_rating_date_") !== 0) {
       var dateParamR = startParam.replace("rating_", "").replace(/_/g, ".");
-      setTimeout(function () {
-        if (typeof setView === "function") setView("winter-rating");
-        setTimeout(function () {
-          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamR);
-        }, 400);
-      }, 0);
+      openViewThen("winter-rating", function () {
+        if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamR);
+      }, 120);
       return;
     }
     if (startParam.indexOf("summer_rating_date_") === 0) {
       var dateParamSummer = startParam.replace("summer_rating_date_", "").replace(/_/g, ".");
-      setTimeout(function () {
-        if (typeof setView === "function") setView("summer-rating");
-        setTimeout(function () {
-          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSummer);
-        }, 400);
-      }, 0);
+      openViewThen("summer-rating", function () {
+        if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSummer);
+      }, 120);
       return;
     }
     if (startParam.indexOf("spring_rating_date_") === 0) {
       var dateParamSp = startParam.replace("spring_rating_date_", "").replace(/_/g, ".");
-      setTimeout(function () {
-        if (typeof setView === "function") setView("spring-rating");
-        setTimeout(function () {
-          if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSp);
-        }, 400);
-      }, 0);
+      openViewThen("spring-rating", function () {
+        if (typeof window.openWinterRatingDatePanel === "function") window.openWinterRatingDatePanel(dateParamSp);
+      }, 120);
       return;
     }
     if (
@@ -160,12 +159,9 @@ function pokerInitHomeDeepLinks(opts) {
       var ratingTopKind =
         startParam === "rating_top_current" ? "current" : startParam === "rating_top_february" ? "feb" : startParam === "rating_top_mar" ? "feb" : "past";
       var viewForTop = startParam === "rating_top_mar" ? "spring-rating" : "winter-rating";
-      setTimeout(function () {
-        if (typeof setView === "function") setView(viewForTop);
-        setTimeout(function () {
-          if (typeof window.openWinterRatingWeekTopModal === "function") window.openWinterRatingWeekTopModal(ratingTopKind);
-        }, 350);
-      }, 0);
+      openViewThen(viewForTop, function () {
+        if (typeof window.openWinterRatingWeekTopModal === "function") window.openWinterRatingWeekTopModal(ratingTopKind);
+      }, 120);
       return;
     }
     if (startParam === "daily_prediction") {

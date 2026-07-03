@@ -2132,7 +2132,7 @@ function initWinterRating() {
     if (winterSearchWrap) winterSearchWrap.style.display = "none";
     if (springLeaguesEl) { springLeaguesEl.removeAttribute("hidden"); springLeaguesEl.style.display = ""; }
     if (springMainTabsEl) { springMainTabsEl.removeAttribute("hidden"); springMainTabsEl.style.display = ""; }
-    try {
+    if (typeof updateSpringRatingFinalCountdown === "function") try {
       updateSpringRatingFinalCountdown();
     } catch (eCount) {
       if (typeof console !== "undefined" && console.warn) console.warn("updateSpringRatingFinalCountdown", eCount);

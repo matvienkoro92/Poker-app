@@ -3985,15 +3985,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__summary-card--players {
-  background-image: url("./assets/sng-champions-card-players.png?v=4");
+  background-image: url("./assets/sng-champions-card-players.webp?v=1");
 }
 
 .sng-champions-modal__summary-card--requests {
-  background-image: url("./assets/sng-champions-card-requests.png?v=4");
+  background-image: url("./assets/sng-champions-card-requests.webp?v=1");
 }
 
 .sng-champions-modal__summary-card--waiting {
-  background-image: url("./assets/sng-champions-card-waiting.png?v=4");
+  background-image: url("./assets/sng-champions-card-waiting.webp?v=1");
 }
 
 .sng-champions-modal__summary--compact .sng-champions-modal__summary-card--buyin,
@@ -4010,15 +4010,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__summary-card--buyin {
-  background-image: url("./assets/sng-champions-prize-buyin.png?v=4");
+  background-image: url("./assets/sng-champions-prize-buyin.webp?v=1");
 }
 
 .sng-champions-modal__summary-card--prize-1 {
-  background-image: url("./assets/sng-champions-prize-first.png?v=4");
+  background-image: url("./assets/sng-champions-prize-first.webp?v=1");
 }
 
 .sng-champions-modal__summary-card--prize-2 {
-  background-image: url("./assets/sng-champions-prize-ticket.png?v=4");
+  background-image: url("./assets/sng-champions-prize-ticket.webp?v=1");
 }
 
 .sng-champions-modal__summary--compact .sng-champions-modal__summary-card span {
@@ -13480,7 +13480,7 @@ body.club-choice-vote-open {
   border: 0;
   border-radius: 13px;
   background:
-    url("./assets/home-sng-champions-plaque-bg.png?v=1") center / calc(100% + clamp(96px, 15vw, 150px)) 100% no-repeat;
+    url("./assets/home-sng-champions-plaque-bg.webp?v=1") center / calc(100% + clamp(96px, 15vw, 150px)) 100% no-repeat;
   box-shadow: none;
 }
 
