@@ -959,12 +959,12 @@
     var enabled = broadcastButtonEnabled();
     var fields = document.getElementById("playerCrmBroadcastButtonFields");
     var templateBox = document.getElementById("playerCrmBroadcastLinkTemplateBox");
-    var textEl = document.getElementById("playerCrmBroadcastButtonText");
-    var urlEl = document.getElementById("playerCrmBroadcastButtonUrl");
     if (fields) fields.hidden = !enabled;
     if (templateBox) templateBox.hidden = !enabled;
-    if (textEl) textEl.disabled = !enabled;
-    if (urlEl) urlEl.disabled = !enabled;
+    ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonUrl", "playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = !enabled;
+    });
     syncBroadcastAppLinkTemplate(enabled);
   }
 
@@ -1716,13 +1716,23 @@
 
   function broadcastButtonPayload() {
     if (!broadcastButtonEnabled()) return {};
-    var textEl = document.getElementById("playerCrmBroadcastButtonText");
-    var urlEl = document.getElementById("playerCrmBroadcastButtonUrl");
-    var buttonText = textEl ? String(textEl.value || "").trim().slice(0, 64) : "";
-    var buttonUrl = urlEl ? String(urlEl.value || "").trim().slice(0, 512) : "";
-    if (!buttonText || !buttonUrl) return { error: "Если включена кнопка, заполни название и ссылку." };
-    if (!/^https?:\/\//i.test(buttonUrl)) return { error: "Ссылка кнопки должна начинаться с http:// или https://." };
-    return { buttonText: buttonText, buttonUrl: buttonUrl };
+    var fields = [
+      ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonUrl", "кнопки 1"],
+      ["playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2", "кнопки 2"],
+    ];
+    var buttons = [];
+    for (var i = 0; i < fields.length; i += 1) {
+      var textEl = document.getElementById(fields[i][0]);
+      var urlEl = document.getElementById(fields[i][1]);
+      var buttonText = textEl ? String(textEl.value || "").trim().slice(0, 64) : "";
+      var buttonUrl = urlEl ? String(urlEl.value || "").trim().slice(0, 512) : "";
+      if (!buttonText && !buttonUrl) continue;
+      if (!buttonText || !buttonUrl) return { error: "Заполни название и ссылку " + fields[i][2] + " или оставь оба поля пустыми." };
+      if (!/^https?:\/\//i.test(buttonUrl)) return { error: "Ссылка " + fields[i][2] + " должна начинаться с http:// или https://." };
+      buttons.push({ text: buttonText, url: buttonUrl });
+    }
+    if (!buttons.length) return { error: "Если включены кнопки, заполни хотя бы одну кнопку со ссылкой." };
+    return { buttonText: buttons[0].text, buttonUrl: buttons[0].url, buttons: buttons };
   }
 
   function makeBroadcastProgressId() {
@@ -2079,6 +2089,13 @@
     var image = state.broadcastImage || null;
     var button = broadcastButtonPayload();
     var hasButton = !!(button && !button.error && button.buttonText);
+    var buttons = hasButton && Array.isArray(button.buttons) ? button.buttons : (hasButton ? [{ text: button.buttonText, url: button.buttonUrl }] : []);
+    var buttonsHtml = buttons.map(function (btn) {
+      return "<span class=\"player-crm__recipient-open-btn\">" + esc(btn.text || "Открыть") + "</span>";
+    }).join("");
+    var buttonsLinksHtml = buttons.map(function (btn, idx) {
+      return "<span><em>Кнопка " + esc(String(idx + 1)) + "</em>" + esc((btn && btn.url) || "—") + "</span>";
+    }).join("");
     var appTarget = broadcastAppLinkTarget();
     var appLink = broadcastAppLinkUrl();
     var hasBot = channel === "bot" || channel === "bot_push";
@@ -2092,7 +2109,7 @@
           "<div class=\"player-crm__recipient-bubble\">" +
             (image && image.dataUrl ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />" : "") +
             (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
-            (hasButton ? "<span class=\"player-crm__recipient-open-btn\">" + esc(button.buttonText) + "</span>" : "") +
+            (hasButton ? "<div class=\"player-crm__recipient-open-buttons\">" + buttonsHtml + "</div>" : "") +
           "</div>" +
         "</div>" +
       "</div>"
@@ -2110,8 +2127,8 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопка<strong>" + (hasButton ? "Да" : "Нет") + "</strong></span>" + (hasButton ? "<span>Раздел<strong>" + esc(appTarget.label) + "</strong></span>" : "") + "</div>" +
-            (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылка в кнопке</strong><span>" + esc(button.buttonUrl || appLink || "—") + "</span></div>" : "") +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span>" + (hasButton ? "<span>Раздел<strong>" + esc(appTarget.label) + "</strong></span>" : "") + "</div>" +
+            (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылки в кнопках</strong>" + buttonsLinksHtml + "</div>" : "") +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
         "</div>" +
@@ -3267,6 +3284,10 @@
     if (broadcastButtonText) broadcastButtonText.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
     var broadcastButtonUrl = document.getElementById("playerCrmBroadcastButtonUrl");
     if (broadcastButtonUrl) broadcastButtonUrl.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    var broadcastButtonText2 = document.getElementById("playerCrmBroadcastButtonText2");
+    if (broadcastButtonText2) broadcastButtonText2.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
+    var broadcastButtonUrl2 = document.getElementById("playerCrmBroadcastButtonUrl2");
+    if (broadcastButtonUrl2) broadcastButtonUrl2.addEventListener("input", function () { syncBroadcastAppLinkTemplate(false); });
     var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");
     var broadcastImageInput = document.getElementById("playerCrmBroadcastImageInput");
     var broadcastImageRemove = document.getElementById("playerCrmBroadcastImageRemoveBtn");
