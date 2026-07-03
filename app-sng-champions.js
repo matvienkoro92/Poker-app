@@ -267,6 +267,10 @@
     }).join("") + '</div>';
   }
 
+  function renderBuyIn(data) {
+    return '<div class="sng-champions-modal__buyin"><span>Байин</span><strong>' + escapeHtml(data.buyIn || "0р") + '</strong></div>';
+  }
+
   function renderUserAction(data) {
     var mine = data.myEntry;
     if (data.status === "open" && !mine) {
@@ -289,7 +293,15 @@
   function renderAdminPanel(data) {
     if (!data.isAdmin) return "";
     var canForm = data.status === "open" && data.counts && data.counts.approved >= data.capacity;
+    var prizes = data.prizes || [];
+    var prize1 = prizes[0] && prizes[0].text || "30 000р";
+    var prize2 = prizes[1] && prizes[1].text || "билет на нок за 10 000р от клуба";
     return '<section class="sng-champions-modal__admin">' +
+      '<div class="sng-champions-modal__settings">' +
+        '<label><span>Байин</span><input type="text" data-sng-buy-in value="' + escapeHtml(data.buyIn || "0р") + '" placeholder="Например: 1 000р"></label>' +
+        '<label><span>1 место</span><input type="text" data-sng-prize1 value="' + escapeHtml(prize1) + '" placeholder="30 000р"></label>' +
+        '<label><span>2 место</span><input type="text" data-sng-prize2 value="' + escapeHtml(prize2) + '" placeholder="билет на нок за 10 000р от клуба"></label>' +
+      '</div>' +
       '<div class="sng-champions-modal__admin-actions">' +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open">Открыть турнир</button>' +
         '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs"' + (canForm ? "" : " disabled") + '>Сформировать пары</button>' +
@@ -325,6 +337,7 @@
         '<div><span>Заявок</span><strong>' + escapeHtml(entries.length) + '</strong></div>' +
         '<div><span>Ждут</span><strong>' + escapeHtml((data.counts && data.counts.pending) || 0) + '</strong></div>' +
       '</div>' +
+      renderBuyIn(data) +
       renderPrizes(data) +
       renderAdminPanel(data) +
       renderUserAction(data) +
@@ -406,6 +419,19 @@
     }
   }
 
+  function readSettingsPayload(actionName) {
+    if (actionName !== "open" || !modal) return { action: actionName };
+    var buyIn = modal.querySelector("[data-sng-buy-in]");
+    var prize1 = modal.querySelector("[data-sng-prize1]");
+    var prize2 = modal.querySelector("[data-sng-prize2]");
+    return {
+      action: actionName,
+      buyIn: buyIn ? buyIn.value : "",
+      prize1: prize1 ? prize1.value : "",
+      prize2: prize2 ? prize2.value : "",
+    };
+  }
+
   function onModalClick(event) {
     var close = event.target && event.target.closest ? event.target.closest("[data-sng-close]") : null;
     if (close) {
@@ -468,7 +494,7 @@
     var name = action.getAttribute("data-sng-action") || "";
     if (name === "reset" && !window.confirm("Сбросить СНГ Лигу Чемпионов?")) return;
     setButtonLoading(action, true);
-    postAction({ action: name }, {
+    postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
       success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : "",
     });

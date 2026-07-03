@@ -2853,6 +2853,14 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: none;
 }
 
+.home-club-choice-plaque--sng::before {
+  display: block;
+}
+
+.home-club-choice-plaque--sng::after {
+  display: block;
+}
+
 .home-club-choice-plaque span {
   position: relative;
   z-index: 3;
@@ -3654,6 +3662,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__summary > div,
+.sng-champions-modal__buyin,
 .sng-champions-modal__prizes article {
   display: grid;
   gap: 4px;
@@ -3665,6 +3674,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__summary span,
+.sng-champions-modal__buyin span,
 .sng-champions-modal__prizes span,
 .sng-champions-modal__entry span {
   color: rgba(255, 239, 201, 0.68);
@@ -3673,11 +3683,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__summary strong,
+.sng-champions-modal__buyin strong,
 .sng-champions-modal__prizes strong {
   color: #ffd56f;
   font-size: clamp(17px, 4vw, 26px);
   font-weight: 1000;
   line-height: 1.02;
+}
+
+.sng-champions-modal__buyin {
+  margin-bottom: 12px;
 }
 
 .sng-champions-modal__prizes {
@@ -3699,6 +3714,38 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border: 1px solid rgba(255, 184, 70, 0.26);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.2);
+}
+
+.sng-champions-modal__settings {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(150px, 1fr) minmax(180px, 1.4fr);
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.sng-champions-modal__settings label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: rgba(255, 239, 201, 0.72);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sng-champions-modal__settings input {
+  min-width: 0;
+  width: 100%;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  color: #fff3d2;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  border: 1px solid rgba(255, 190, 86, 0.34);
+  border-radius: 10px;
+  background: rgba(2, 6, 12, 0.82);
 }
 
 .sng-champions-modal__admin-actions {
@@ -11841,6 +11888,7 @@ body.club-choice-vote-open {
 
 @media (max-width: 720px) {
   .sng-champions-modal__summary,
+  .sng-champions-modal__settings,
   .sng-champions-modal__prizes {
     grid-template-columns: 1fr;
   }
