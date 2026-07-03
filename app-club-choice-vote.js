@@ -3,6 +3,7 @@
 
   var API_PATH = "/api/club-choice-vote";
   var CLUB_CHOICE_START_PARAM = "club_choice_vote";
+  var CLUB_CHOICE_CURRENT_START_PARAM = "club_choice_vote_current";
   var timer = null;
   var state = null;
   var loading = false;
@@ -41,15 +42,15 @@
   }
 
   function voteLink() {
-    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(CLUB_CHOICE_START_PARAM);
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(CLUB_CHOICE_CURRENT_START_PARAM);
     if (typeof pokerBuildWebsiteStartLink === "function") {
-      var webLink = pokerBuildWebsiteStartLink(CLUB_CHOICE_START_PARAM);
+      var webLink = pokerBuildWebsiteStartLink(CLUB_CHOICE_CURRENT_START_PARAM);
       if (webLink) return webLink;
     }
     var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
     if (!base && window.location) base = String(window.location.origin || "") + "/";
     base = String(base || "").trim().replace(/\/+$/, "");
-    return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(CLUB_CHOICE_START_PARAM) : "";
+    return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(CLUB_CHOICE_CURRENT_START_PARAM) : "";
   }
 
   function openTelegramShare(link, text) {
@@ -283,6 +284,8 @@
 
   function openModal() {
     ensureModal();
+    activeRoundTab = "votes";
+    activeVotesRoundId = "";
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
     renderLoading();

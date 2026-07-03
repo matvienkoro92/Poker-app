@@ -271,7 +271,7 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
-    if (startParam === "club_choice_vote") {
+    if (startParam === "club_choice_vote" || startParam === "club_choice_vote_current") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
         var attempts = 0;
