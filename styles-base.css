@@ -1,7 +1,9 @@
 /* Base variables, theme tokens, root layout, scroll and card primitives.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
-body [role="dialog"][aria-hidden="true"] {
+body [role="dialog"][aria-hidden="true"],
+body [aria-hidden="true"]:has(> [role="dialog"]),
+body [aria-hidden="true"]:has(> [class$="__panel"][role="dialog"]) {
   display: none !important;
 }
 

@@ -84,7 +84,9 @@
       html[data-theme="neon"] #app.app {
         background-color: #020611;
       }
-      body [role="dialog"][aria-hidden="true"] {
+      body [role="dialog"][aria-hidden="true"],
+      body [aria-hidden="true"]:has(> [role="dialog"]),
+      body [aria-hidden="true"]:has(> [class$="__panel"][role="dialog"]) {
         display: none !important;
       }
     </style>
@@ -294,7 +296,7 @@
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/home-tournament-mystery-bounty-130k.webp" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.896" />
+    <link rel="stylesheet" href="./styles.css?v=3.897" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.666" />
