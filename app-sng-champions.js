@@ -282,6 +282,27 @@
     return '<div class="sng-champions-modal__buyin"><span>Байин</span><strong>' + escapeHtml(data.buyIn || "0р") + '</strong></div>';
   }
 
+  function renderInfoCard(label, value, extraClass) {
+    return '<div class="' + escapeHtml(extraClass || "") + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || "") + '</strong></div>';
+  }
+
+  function renderSignupSummary(data, entries) {
+    var prizes = Array.isArray(data.prizes) ? data.prizes : [];
+    var edit = data.isAdmin
+      ? '<button type="button" class="sng-champions-modal__edit-btn" data-sng-tab="create">Редактировать</button>'
+      : "";
+    return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
+      '<div class="sng-champions-modal__summary sng-champions-modal__summary--compact">' +
+        renderInfoCard(statusLabel(data.status), String((data.counts && data.counts.approved) || 0) + ' / ' + String(data.capacity || 32)) +
+        renderInfoCard("Заявок", String(entries.length)) +
+        renderInfoCard("Ждут", String((data.counts && data.counts.pending) || 0)) +
+        renderInfoCard("Байин", data.buyIn || "0р", "sng-champions-modal__summary-card--buyin") +
+        prizes.map(function (prize) {
+          return renderInfoCard(String(prize.place || "") + " место", prize.text || "", "sng-champions-modal__summary-card--prize");
+        }).join("") +
+      '</div>';
+  }
+
   function renderDescription(data) {
     var text = String(data && data.description || "").trim();
     if (!text) return "";
@@ -293,8 +314,11 @@
     if (data.status === "open" && !mine) {
       return '<button type="button" class="sng-champions-modal__main-action" data-sng-action="join">Записаться</button>';
     }
-    if (data.status === "open" && mine && mine.status === "pending") {
-      return '<div class="sng-champions-modal__notice">Вы подали заявку. Админ должен подтвердить участие.</div>' +
+    if (data.status === "open" && mine && mine.status !== "rejected") {
+      var notice = mine.status === "approved"
+        ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>'
+        : '<div class="sng-champions-modal__notice">Вы подали заявку. Админ должен подтвердить участие.</div>';
+      return notice +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="cancel">Отменить заявку</button>';
     }
     if (mine && mine.status === "approved") {
@@ -355,22 +379,28 @@
     '</article>';
   }
 
+  function renderEntryColumn(title, entries, data) {
+    return '<section class="sng-champions-modal__entries-column">' +
+      '<h3>' + escapeHtml(title) + '</h3>' +
+      (entries.length ? entries.map(function (entry) { return renderEntry(entry, data); }).join("") : '<div class="club-choice-vote-modal__empty club-choice-vote-modal__empty--compact">Пока пусто.</div>') +
+    '</section>';
+  }
+
   function renderSignup(data) {
-    var entries = (data.entries || []).slice().sort(function (a, b) {
+    var entries = (data.entries || []).filter(function (entry) {
+      return entry && entry.status !== "rejected";
+    }).sort(function (a, b) {
       var order = { pending: 0, approved: 1, rejected: 2 };
       return (order[a.status] || 0) - (order[b.status] || 0);
     });
-    return '<div class="sng-champions-modal__summary">' +
-        '<div><span>' + escapeHtml(statusLabel(data.status)) + '</span><strong>' + escapeHtml((data.counts && data.counts.approved) || 0) + ' / ' + escapeHtml(data.capacity || 32) + '</strong></div>' +
-        '<div><span>Заявок</span><strong>' + escapeHtml(entries.length) + '</strong></div>' +
-        '<div><span>Ждут</span><strong>' + escapeHtml((data.counts && data.counts.pending) || 0) + '</strong></div>' +
-      '</div>' +
+    var approvedEntries = entries.filter(function (entry) { return entry.status === "approved"; });
+    var pendingEntries = entries.filter(function (entry) { return entry.status === "pending"; });
+    return renderSignupSummary(data, entries) +
       renderDescription(data) +
-      renderBuyIn(data) +
-      renderPrizes(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
-        (entries.length ? entries.map(function (entry) { return renderEntry(entry, data); }).join("") : '<div class="club-choice-vote-modal__empty">Заявок пока нет.</div>') +
+        renderEntryColumn("Подтверждены", approvedEntries, data) +
+        renderEntryColumn("Подали заявку", pendingEntries, data) +
       '</div>';
   }
 

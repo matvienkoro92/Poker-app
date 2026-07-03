@@ -3817,6 +3817,36 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   margin-bottom: 8px;
 }
 
+.sng-champions-modal__signup-tools {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 0;
+  margin: 0 0 6px;
+}
+
+.sng-champions-modal__edit-btn {
+  min-height: 30px;
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 191, 80, 0.62);
+  border-radius: 999px;
+  background: rgba(255, 146, 25, 0.12);
+  color: #ffe8a7;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 190, 0.08), 0 0 14px rgba(255, 129, 0, 0.18);
+}
+
+.sng-champions-modal__summary--compact {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sng-champions-modal__summary--compact > div {
+  grid-column: span 2;
+}
+
 .sng-champions-modal__summary > div,
 .sng-champions-modal__buyin,
 .sng-champions-modal__description,
@@ -3824,7 +3854,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: grid;
   gap: 2px;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 7px 9px;
   border: 1px solid rgba(255, 184, 70, 0.3);
   border-radius: 12px;
   background: rgba(255, 128, 0, 0.07);
@@ -3845,9 +3875,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__buyin strong,
 .sng-champions-modal__prizes strong {
   color: #ffd56f;
-  font-size: clamp(16px, 3.4vw, 22px);
+  font-size: clamp(15px, 3vw, 21px);
   font-weight: 1000;
-  line-height: 1.02;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
 }
 
 .sng-champions-modal__buyin {
@@ -4000,7 +4031,24 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
 .sng-champions-modal__entries {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.sng-champions-modal__entries-column {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.sng-champions-modal__entries-column h3 {
+  margin: 0;
+  color: #ffe8ad;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .sng-champions-modal__entry {
@@ -12144,11 +12192,25 @@ body.club-choice-vote-open {
     gap: 6px;
   }
 
+  .sng-champions-modal__summary--compact {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .sng-champions-modal__signup-tools {
+    margin-bottom: 5px;
+  }
+
+  .sng-champions-modal__edit-btn {
+    min-height: 28px;
+    padding: 5px 11px;
+    font-size: 10px;
+  }
+
   .sng-champions-modal__summary > div,
   .sng-champions-modal__buyin,
   .sng-champions-modal__description,
   .sng-champions-modal__prizes article {
-    padding: 8px 9px;
+    padding: 7px 8px;
     border-radius: 10px;
   }
 
@@ -12162,12 +12224,21 @@ body.club-choice-vote-open {
   .sng-champions-modal__summary strong,
   .sng-champions-modal__buyin strong,
   .sng-champions-modal__prizes strong {
-    font-size: clamp(15px, 4.8vw, 22px);
+    font-size: clamp(14px, 4.2vw, 20px);
   }
 
   .sng-champions-modal__entry {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .sng-champions-modal__entries {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .sng-champions-modal__entries-column h3 {
+    font-size: 11px;
   }
 
   .sng-champions-modal__entry-actions,
