@@ -249,16 +249,77 @@
     return String(name || "И").trim().charAt(0).toUpperCase() || "И";
   }
 
+  var SNG_PLAYER_ART_BY_NICK = {
+    "waaar": "./assets/summer-rating-player-waaar.webp",
+    "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.546",
+    "coo1er91": "./assets/summer-rating-player-cooler.webp",
+    "em13!!": "./assets/summer-rating-player-emil.webp",
+    "winifly": "./assets/summer-rating-player-winifly.webp",
+    "missclick": "./assets/summer-rating-player-missclick.webp",
+    "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp",
+    "nikola233": "./assets/summer-rating-player-nikola233.webp",
+    "milkyway77": "./assets/summer-rating-player-milkyway.webp",
+    "пряник": "./assets/summer-rating-player-pryanik.webp",
+    "pryanik2la": "./assets/summer-rating-player-pryanik.webp",
+    "prushnik": "./assets/summer-rating-player-prushnik.webp",
+    "evgen1722": "./assets/summer-rating-player-evgen1722.webp",
+    "хер вам)))))": "./assets/summer-rating-player-khervam.webp",
+    "alenast": "./assets/summer-rating-league2-player-alena.webp",
+    "shkarubo": "./assets/summer-rating-league2-player-shkarubo.webp",
+    "sarmat1305": "./assets/summer-rating-league2-player-sarmat.webp",
+    "палач": "./assets/summer-rating-league2-player-palach.webp",
+    "nakurikota": "./assets/summer-rating-league2-player-nakurikota.webp",
+    "накурикота": "./assets/summer-rating-league2-player-nakurikota.webp",
+    "wildboar": "./assets/summer-rating-league2-player-wildboar.webp",
+    "бабник": "./assets/summer-rating-league2-player-babnik.webp",
+    "виктор": "./assets/summer-rating-league2-player-viktor.webp",
+    "мистерfox": "./assets/summer-rating-league2-player-mr-fox.webp",
+    "babyshark": "./assets/summer-rating-league2-player-babyshark.webp",
+    "аспирин": "./assets/summer-rating-league2-player-aspirin.webp",
+    "ksuha": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "ksuha🐍": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "ksuha🐊": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "ksuha🦖": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "ksuha🐉": "./assets/summer-rating-league2-player-ksyukha.webp",
+  };
+
+  function sngPlayerArtKey(nick) {
+    var normalized = typeof normalizeWinterNick === "function" ? normalizeWinterNick(nick) : String(nick || "").trim();
+    return String(normalized || "").trim().toLowerCase();
+  }
+
+  function sngPlayerArt(entry) {
+    var nick = entry && (entry.pokerPlusNickname || entry.displayName);
+    if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
+      var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
+      if (sharedArt && sharedArt.src) return String(sharedArt.src);
+    }
+    return SNG_PLAYER_ART_BY_NICK[sngPlayerArtKey(nick)] || "";
+  }
+
+  function playerAvatar(entry) {
+    return entry && entry.avatar ? String(entry.avatar) : "";
+  }
+
+  function renderPlayerImage(entry) {
+    var art = sngPlayerArt(entry);
+    if (art) {
+      return '<img class="sng-champions-modal__entry-avatar-img sng-champions-modal__entry-avatar-img--art" src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async">';
+    }
+    var avatar = playerAvatar(entry);
+    if (avatar) {
+      return '<img class="sng-champions-modal__entry-avatar-img" src="' + escapeHtml(avatar) + '" alt="" loading="lazy" decoding="async">';
+    }
+    return '<b>' + escapeHtml(playerInitial(entry)) + '</b>';
+  }
+
   function renderPlayerAvatar(entry) {
     var profileId = entry && entry.accountId ? String(entry.accountId) : "";
     var profileName = playerName(entry);
-    var avatar = entry && entry.avatar ? String(entry.avatar) : "";
+    var avatar = playerAvatar(entry);
     var attrs = ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"';
-    var content = avatar
-      ? '<img src="' + escapeHtml(avatar) + '" alt="" loading="lazy" decoding="async">'
-      : '<b>' + escapeHtml(playerInitial(entry)) + '</b>';
     return '<button type="button" class="sng-champions-modal__entry-avatar" aria-label="Открыть профиль ' + escapeHtml(profileName) + '"' + attrs + '>' +
-      content +
+      renderPlayerImage(entry) +
       (entry.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(entry.level) || 0)))) + '</em>' : '') +
     '</button>';
   }
@@ -266,7 +327,7 @@
   function renderPlayerNameButton(entry) {
     var profileId = entry && entry.accountId ? String(entry.accountId) : "";
     var profileName = playerName(entry);
-    var avatar = entry && entry.avatar ? String(entry.avatar) : "";
+    var avatar = playerAvatar(entry);
     return '<button type="button" class="sng-champions-modal__entry-name" data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '">' + escapeHtml(profileName) + '</button>';
   }
 
