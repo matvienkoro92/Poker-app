@@ -243,6 +243,11 @@
     return "Уровень " + String(level);
   }
 
+  function playerInitial(player) {
+    var name = playerName(player);
+    return String(name || "И").trim().charAt(0).toUpperCase() || "И";
+  }
+
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var tab = activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup";
@@ -283,7 +288,8 @@
   }
 
   function renderInfoCard(label, value, extraClass) {
-    return '<div class="' + escapeHtml(extraClass || "") + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || "") + '</strong></div>';
+    var className = "sng-champions-modal__summary-card" + (extraClass ? " " + extraClass : "");
+    return '<div class="' + escapeHtml(className) + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || "") + '</strong></div>';
   }
 
   function renderSignupSummary(data, entries) {
@@ -293,12 +299,12 @@
       : "";
     return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
       '<div class="sng-champions-modal__summary sng-champions-modal__summary--compact">' +
-        renderInfoCard(statusLabel(data.status), String((data.counts && data.counts.approved) || 0) + ' / ' + String(data.capacity || 32)) +
-        renderInfoCard("Заявок", String(entries.length)) +
-        renderInfoCard("Ждут", String((data.counts && data.counts.pending) || 0)) +
+        renderInfoCard(statusLabel(data.status), String((data.counts && data.counts.approved) || 0) + ' / ' + String(data.capacity || 32), "sng-champions-modal__summary-card--players") +
+        renderInfoCard("Заявок", String(entries.length), "sng-champions-modal__summary-card--requests") +
+        renderInfoCard("Ждут", String((data.counts && data.counts.pending) || 0), "sng-champions-modal__summary-card--waiting") +
         renderInfoCard("Байин", data.buyIn || "0р", "sng-champions-modal__summary-card--buyin") +
-        prizes.map(function (prize) {
-          return renderInfoCard(String(prize.place || "") + " место", prize.text || "", "sng-champions-modal__summary-card--prize");
+        prizes.map(function (prize, index) {
+          return renderInfoCard(String(prize.place || "") + " место", prize.text || "", "sng-champions-modal__summary-card--prize sng-champions-modal__summary-card--prize-" + String(index + 1));
         }).join("") +
       '</div>';
   }
@@ -365,14 +371,15 @@
     var level = playerLevelText(entry);
     var adminActions = data.isAdmin && data.status === "open"
       ? '<div class="sng-champions-modal__entry-actions">' +
-          '<button type="button" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "approved" ? " disabled" : "") + '>Подтвердить</button>' +
-          '<button type="button" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '>Отклонить</button>' +
+          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "approved" ? " disabled" : "") + '><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>' +
+          '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>' +
         '</div>'
       : "";
     return '<article class="sng-champions-modal__entry sng-champions-modal__entry--' + escapeHtml(entry.status || "pending") + '">' +
-      '<div>' +
+      '<span class="sng-champions-modal__entry-avatar" aria-hidden="true"><b>' + escapeHtml(playerInitial(entry)) + '</b>' + (entry.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(entry.level) || 0)))) + '</em>' : '') + '</span>' +
+      '<div class="sng-champions-modal__entry-main">' +
         '<strong>' + escapeHtml(playerName(entry)) + '</strong>' +
-        '<span>' + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
+        '<span class="sng-champions-modal__entry-status sng-champions-modal__entry-status--' + escapeHtml(entry.status || "pending") + '">' + (entry.status === "approved" ? '<i aria-hidden="true">✓</i>' : '') + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
         (level ? '<small>' + escapeHtml(level) + '</small>' : '') +
       '</div>' +
       adminActions +
@@ -380,9 +387,10 @@
   }
 
   function renderEntryColumn(title, entries, data) {
-    return '<section class="sng-champions-modal__entries-column">' +
+    var key = title.toLowerCase().indexOf("подтверж") >= 0 ? "approved" : "pending";
+    return '<section class="sng-champions-modal__entries-column sng-champions-modal__entries-column--' + key + '">' +
       '<h3>' + escapeHtml(title) + '</h3>' +
-      (entries.length ? entries.map(function (entry) { return renderEntry(entry, data); }).join("") : '<div class="club-choice-vote-modal__empty club-choice-vote-modal__empty--compact">Пока пусто.</div>') +
+      (entries.length ? entries.map(function (entry) { return renderEntry(entry, data); }).join("") : '<div class="sng-champions-modal__entries-empty">Пока пусто.</div>') +
     '</section>';
   }
 

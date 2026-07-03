@@ -3913,6 +3913,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   grid-column: span 2;
 }
 
+.sng-champions-modal__summary-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
 .sng-champions-modal__summary > div,
 .sng-champions-modal__buyin,
 .sng-champions-modal__description,
@@ -3945,6 +3951,87 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   font-weight: 1000;
   line-height: 0.98;
   overflow-wrap: anywhere;
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card {
+  align-content: center;
+  min-height: 94px;
+  padding: 14px 18px 14px 38%;
+  border-color: rgba(197, 122, 30, 0.66);
+  border-radius: 16px;
+  background-color: #050810;
+  background-position: center;
+  background-size: cover;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 225, 160, 0.06),
+    0 0 18px rgba(255, 145, 25, 0.16);
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(2, 6, 12, 0.1), rgba(2, 6, 12, 0.5) 46%, rgba(2, 6, 12, 0.1));
+  pointer-events: none;
+}
+
+.sng-champions-modal__summary-card--players {
+  background-image: url("./assets/sng-champions-card-players.png?v=1");
+}
+
+.sng-champions-modal__summary-card--requests {
+  background-image: url("./assets/sng-champions-card-requests.png?v=1");
+}
+
+.sng-champions-modal__summary-card--waiting {
+  background-image: url("./assets/sng-champions-card-waiting.png?v=1");
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card--buyin,
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card--prize {
+  align-content: start;
+  justify-items: center;
+  min-height: 250px;
+  padding: 26px 18px 18px;
+  background-position: center;
+  background-size: cover;
+  text-align: center;
+}
+
+.sng-champions-modal__summary-card--buyin {
+  background-image: url("./assets/sng-champions-prize-buyin.png?v=1");
+}
+
+.sng-champions-modal__summary-card--prize-1 {
+  background-image: url("./assets/sng-champions-prize-first.png?v=1");
+}
+
+.sng-champions-modal__summary-card--prize-2 {
+  background-image: url("./assets/sng-champions-prize-ticket.png?v=1");
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card span {
+  color: rgba(255, 239, 201, 0.68);
+  font-size: 18px;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card strong {
+  color: #fff4d6;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 0.96;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.54),
+    0 0 16px rgba(255, 178, 50, 0.28);
+}
+
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card--buyin strong,
+.sng-champions-modal__summary--compact .sng-champions-modal__summary-card--prize strong {
+  max-width: 100%;
+  color: #f5c75f;
+  font-size: clamp(32px, 6vw, 54px);
 }
 
 .sng-champions-modal__buyin {
@@ -4098,54 +4185,162 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__entries {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 14px;
 }
 
 .sng-champions-modal__entries-column {
+  position: relative;
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 10px;
   min-width: 0;
+  min-height: 214px;
+  padding: 0 0 14px;
 }
 
 .sng-champions-modal__entries-column h3 {
-  margin: 0;
-  color: #ffe8ad;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 2px;
+  color: #d8a342;
+  font-size: 16px;
   font-weight: 1000;
   line-height: 1;
   text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(255, 184, 70, 0.22);
+}
+
+.sng-champions-modal__entries-column h3::before {
+  flex: 0 0 auto;
+  color: #f4b945;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.sng-champions-modal__entries-column--approved h3::before {
+  content: "☆";
+}
+
+.sng-champions-modal__entries-column--pending h3::before {
+  content: "♟";
 }
 
 .sng-champions-modal__entry {
-  display: flex;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px 12px;
-  border: 1px solid rgba(255, 184, 70, 0.24);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 0 16px;
+  min-height: 180px;
+  padding: 14px 16px;
+  border: 1px solid rgba(205, 126, 31, 0.44);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 184, 70, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(13, 18, 25, 0.98), rgba(4, 8, 15, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 224, 153, 0.05),
+    0 0 18px rgba(255, 141, 22, 0.14);
 }
 
-.sng-champions-modal__entry > div:first-child {
+.sng-champions-modal__entry-main {
   display: grid;
-  gap: 3px;
+  align-content: center;
+  gap: 8px;
   min-width: 0;
+}
+
+.sng-champions-modal__entry-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border: 3px solid rgba(201, 145, 65, 0.72);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 211, 112, 0.28), transparent 42%),
+    radial-gradient(circle at 50% 54%, rgba(2, 6, 23, 0.72), rgba(5, 8, 14, 0.96) 70%);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(255, 184, 70, 0.18);
+}
+
+.sng-champions-modal__entry-avatar b {
+  color: #f9d98b;
+  font-size: 42px;
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 2px 0 #000, 0 0 12px rgba(255, 184, 70, 0.36);
+}
+
+.sng-champions-modal__entry-avatar em {
+  position: absolute;
+  right: 50%;
+  bottom: -11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 26px;
+  padding: 0 7px;
+  color: #ffe7a8;
+  border: 2px solid rgba(255, 214, 105, 0.7);
+  border-radius: 999px;
+  background: rgba(5, 7, 12, 0.96);
+  box-shadow: 0 0 12px rgba(255, 184, 70, 0.24);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 1000;
+  transform: translateX(50%);
 }
 
 .sng-champions-modal__entry strong {
   min-width: 0;
   overflow: hidden;
-  color: #fff0c8;
-  font-size: 15px;
+  color: #f7efe0;
+  font-size: 24px;
+  line-height: 1.05;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.sng-champions-modal__entry-status {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  color: #8bd15f;
+  border: 1px solid rgba(117, 208, 80, 0.64);
+  border-radius: 8px;
+  background: rgba(37, 91, 18, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(204, 255, 172, 0.06);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__entry-status i {
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.sng-champions-modal__entry-status--pending {
+  color: #f0c46a;
+  border-color: rgba(240, 196, 106, 0.5);
+  background: rgba(104, 70, 14, 0.22);
+}
+
+.sng-champions-modal__entry-status--rejected {
+  color: #ffb4b4;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(127, 29, 29, 0.22);
+}
+
 .sng-champions-modal__entry--approved {
-  border-color: rgba(255, 213, 111, 0.42);
-  background: rgba(255, 184, 70, 0.08);
+  border-color: rgba(205, 126, 31, 0.6);
 }
 
 .sng-champions-modal__entry--rejected {
@@ -4153,9 +4348,96 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__entry-actions {
-  display: flex;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.sng-champions-modal__entry-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.sng-champions-modal__entry-action span {
   flex: 0 0 auto;
-  gap: 7px;
+  font-size: 31px;
+  line-height: 1;
+}
+
+.sng-champions-modal__entry-action strong {
+  color: inherit;
+  font-size: 17px;
+  line-height: 1;
+  white-space: normal;
+}
+
+.sng-champions-modal__entry-action--approve {
+  color: #ffe2a1;
+  border-color: rgba(255, 153, 24, 0.72);
+  background: linear-gradient(180deg, rgba(120, 62, 5, 0.92), rgba(78, 37, 4, 0.94));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 227, 161, 0.16),
+    0 0 14px rgba(255, 136, 20, 0.22);
+}
+
+.sng-champions-modal__entry-action--reject {
+  color: #f4efe6;
+  border-color: rgba(239, 68, 68, 0.68);
+  background: linear-gradient(180deg, rgba(20, 24, 31, 0.94), rgba(8, 12, 18, 0.94));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 166, 166, 0.08),
+    0 0 14px rgba(239, 68, 68, 0.16);
+}
+
+.sng-champions-modal__entries-empty {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.58);
+  border: 1px solid rgba(205, 126, 31, 0.36);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% -3%, rgba(255, 184, 70, 0.18), transparent 30%),
+    linear-gradient(135deg, rgba(9, 13, 20, 0.96), rgba(3, 7, 14, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 153, 0.04);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__entries-empty::before {
+  content: "A♣";
+  position: absolute;
+  top: 47px;
+  left: 50%;
+  color: rgba(255, 239, 201, 0.09);
+  font-size: 54px;
+  font-weight: 1000;
+  letter-spacing: -10px;
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+.sng-champions-modal__entries-empty::after {
+  content: "";
+  position: absolute;
+  top: 67px;
+  left: 50%;
+  width: 74px;
+  height: 24px;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(255, 184, 70, 0.12), transparent 70%);
+  transform: translateX(-50%);
 }
 
 .sng-champions-modal__bracket-slider {
@@ -12311,6 +12593,19 @@ body.club-choice-vote-open {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card {
+    min-height: 76px;
+    padding: 11px 10px 11px 38%;
+    border-radius: 12px;
+  }
+
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card--buyin,
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card--prize {
+    grid-column: span 6;
+    min-height: 210px;
+    padding: 18px 12px 14px;
+  }
+
   .sng-champions-modal__signup-tools {
     margin-bottom: 5px;
   }
@@ -12329,11 +12624,25 @@ body.club-choice-vote-open {
     border-radius: 10px;
   }
 
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card {
+    padding: 11px 10px 11px 38%;
+    border-radius: 12px;
+  }
+
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card--buyin,
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card--prize {
+    padding: 18px 12px 14px;
+  }
+
   .sng-champions-modal__summary span,
   .sng-champions-modal__buyin span,
   .sng-champions-modal__description span,
   .sng-champions-modal__prizes span {
     font-size: 10px;
+  }
+
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card span {
+    font-size: 12px;
   }
 
   .sng-champions-modal__summary strong,
@@ -12342,9 +12651,15 @@ body.club-choice-vote-open {
     font-size: clamp(14px, 4.2vw, 20px);
   }
 
+  .sng-champions-modal__summary--compact .sng-champions-modal__summary-card strong {
+    font-size: clamp(21px, 7vw, 32px);
+  }
+
   .sng-champions-modal__entry {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 0 10px;
+    min-height: 0;
+    padding: 10px;
   }
 
   .sng-champions-modal__entries {
@@ -12361,6 +12676,36 @@ body.club-choice-vote-open {
     display: grid;
     grid-template-columns: 1fr;
     width: 100%;
+  }
+
+  .sng-champions-modal__entry-avatar {
+    width: 58px;
+    height: 58px;
+    border-width: 2px;
+  }
+
+  .sng-champions-modal__entry-avatar b {
+    font-size: 28px;
+  }
+
+  .sng-champions-modal__entry-avatar em {
+    min-width: 26px;
+    min-height: 20px;
+    font-size: 11px;
+  }
+
+  .sng-champions-modal__entry strong {
+    font-size: 16px;
+  }
+
+  .sng-champions-modal__entry-status {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .sng-champions-modal__entry-action {
+    min-height: 42px;
   }
 
   .sng-champions-modal__bracket {

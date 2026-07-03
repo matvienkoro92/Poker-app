@@ -2422,21 +2422,65 @@ body.profile-avatar-choice-open {
 @media (max-width: 620px) {
   .view[data-view="profile"] .profile-header-row {
     align-items: flex-start;
+    gap: 7px;
+    margin-bottom: 9px;
+  }
+  .view[data-view="profile"] .profile-header-row .title {
+    font-size: clamp(26px, 10vw, 36px);
   }
   .view[data-view="profile"] .profile-header-controls {
     width: 100%;
     justify-content: space-between;
+    gap: 6px;
   }
   .view[data-view="profile"] .profile-header-tools {
     flex-wrap: wrap;
+    gap: 5px;
+  }
+  .view[data-view="profile"] .profile-lang-switch,
+  .view[data-view="profile"] .profile-header-respect-btn.profile-avatar-block__respect-btn,
+  .view[data-view="profile"] .profile-exit-btn {
+    min-height: 24px;
+    height: 24px;
+    border-radius: 8px;
+    font-size: 9px;
+  }
+  .view[data-view="profile"] .profile-lang-switch {
+    padding: 0 7px;
+  }
+  .view[data-view="profile"] .profile-lang-switch::after {
+    font-size: 9px;
+  }
+  .view[data-view="profile"] .profile-lang-switch__btn {
+    height: 23px;
+    padding: 0 2px;
+    font-size: 9px;
+  }
+  .view[data-view="profile"] .profile-header-respect-btn.profile-avatar-block__respect-btn {
+    min-width: 46px;
+    padding: 0 8px;
+  }
+  .view[data-view="profile"] .profile-avatar-block__respect-icon {
+    font-size: 13px;
   }
   .view[data-view="profile"] .profile-exit-btn {
-    padding: 0 10px;
-    font-size: 10px;
+    padding: 0 9px;
+  }
+  .view[data-view="profile"] .profile-exit-btn::before {
+    margin-right: 4px;
+    font-size: 11px;
+  }
+  .view[data-view="profile"] .profile-tabs {
+    margin-bottom: 10px;
+    padding: 4px;
+    border-radius: 13px;
   }
   .view[data-view="profile"] .profile-tabs__btn {
-    min-height: 41px;
-    font-size: 18px;
+    min-height: 26px;
+    padding: 4px 6px;
+    border-radius: 10px;
+    font-size: clamp(12px, 4.4vw, 14px);
+    line-height: 1.05;
   }
   .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
     padding: 16px;

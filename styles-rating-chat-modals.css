@@ -1025,8 +1025,24 @@
   color: #ffe7ad;
 }
 .chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-icon {
-  width: min(128%, 132px);
-  height: 116px;
+  width: 112px;
+  height: 112px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 218, 116, 0.34);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(34, 131, 255, 0.34), transparent 62%),
+    rgba(3, 5, 10, 0.86);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 241, 199, 0.08),
+    0 0 18px rgba(255, 181, 42, 0.2);
+}
+.chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 58%;
+  transform: scale(1.68);
 }
 .chat-user-modal__achievement--season-cup-current .chat-user-modal__achievement-detail {
   color: rgba(255, 218, 146, 0.82);
