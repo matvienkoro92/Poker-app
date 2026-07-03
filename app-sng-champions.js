@@ -383,20 +383,49 @@
     return '<div class="' + escapeHtml(className) + '"><span>' + escapeHtml(label) + '</span><strong>' + valueHtml + '</strong></div>';
   }
 
+  function formatRubles(value) {
+    var amount = Math.max(0, Math.round(Number(value) || 0));
+    return String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + "р";
+  }
+
+  function prizeAmount(prize) {
+    var text = String(prize && prize.text || "");
+    var matches = text.match(/\d[\d\s]*(?=\s*(?:р|₽))/gi) || text.match(/\d[\d\s]*/g) || [];
+    return matches.reduce(function (sum, raw) {
+      return sum + (Number(String(raw || "").replace(/\s+/g, "")) || 0);
+    }, 0);
+  }
+
+  function renderHeroStat(label, value, icon) {
+    return '<div class="sng-champions-modal__hero-stat"><span aria-hidden="true">' + escapeHtml(icon) + '</span><em>' + escapeHtml(label) + '</em><strong>' + escapeHtml(value) + '</strong></div>';
+  }
+
   function renderSignupSummary(data, entries) {
     var edit = data.isAdmin
       ? '<button type="button" class="sng-champions-modal__edit-btn" data-sng-tab="create">Редактировать</button>'
       : "";
+    var approved = (data.counts && Number(data.counts.approved)) || entries.filter(function (entry) { return entry.status === "approved"; }).length;
+    var pending = (data.counts && Number(data.counts.pending)) || entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; }).length;
+    var capacity = Number(data.capacity) || 32;
+    var totalPrizes = (Array.isArray(data.prizes) ? data.prizes : []).reduce(function (sum, prize) { return sum + prizeAmount(prize); }, 0) || 60000;
     return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
       '<figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
+        '<figcaption class="sng-champions-modal__hero-stats">' +
+          renderHeroStat("Участников", String(approved) + " / " + String(capacity), "♟") +
+          renderHeroStat("Призы", formatRubles(totalPrizes), "▤") +
+          renderHeroStat("Заявок", String(pending), "◷") +
+        '</figcaption>' +
       '</figure>';
   }
 
   function renderDescription(data) {
     var text = String(data && data.description || "").trim();
     if (!text) return "";
-    return '<div class="sng-champions-modal__description"><span>Описание</span><p>' + escapeHtml(text) + '</p></div>';
+    var html = text.split(/\n{2,}/).map(function (paragraph) {
+      return '<p>' + escapeHtml(paragraph.trim()).replace(/\n/g, "<br>") + '</p>';
+    }).join("");
+    return '<div class="sng-champions-modal__description"><span>Описание</span><div class="sng-champions-modal__description-text">' + html + '</div></div>';
   }
 
   function renderUserAction(data) {
@@ -407,7 +436,7 @@
       '</div>';
     }
     if (data.status === "open" && mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена админом. Можно подать заявку еще раз.</div>' +
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена. Пополните баланс на 1000р и подайте заявку еще раз.</div>' +
         '<div class="sng-champions-modal__join-dock">' +
           '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Подать заявку еще раз</button>' +
         '</div>';
@@ -425,7 +454,7 @@
       return '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>';
     }
     if (mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена админом.</div>';
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена.</div>';
     }
     if (data.status === "draft") return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись еще не открыта.</div>';
     return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись закрыта, смотрите сетку турнира.</div>';
@@ -504,8 +533,8 @@
       renderDescription(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
-        renderEntryColumn("Подали заявку", pendingEntries, data) +
         renderEntryColumn("Подтверждены", approvedEntries, data) +
+        renderEntryColumn("Подали заявку", pendingEntries, data) +
       '</div>';
   }
 
