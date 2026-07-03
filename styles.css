@@ -13669,6 +13669,7 @@ body.club-choice-vote-open {
 .app.app--view-home .home-club-actions-block {
   --home-sng-champions-row: clamp(112px, 29vw, 136px);
   --home-shortcuts-row-gap: 0px;
+  --home-sng-frame-overlap: clamp(38px, 8.6vw, 48px);
 }
 
 .app.app--view-home .home-daily-shortcuts.home-mini-icons {
@@ -13695,6 +13696,10 @@ body.club-choice-vote-open {
 .app.app--view-home .home-sng-champions-action::after {
   display: none;
   content: none;
+}
+
+.app.app--view-home .home-club-choice-actions {
+  margin-top: calc(-1 * var(--home-sng-frame-overlap));
 }
 
 .app.app--view-home .home-club-choice-plaque--sng {
