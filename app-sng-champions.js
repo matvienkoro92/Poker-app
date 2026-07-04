@@ -256,6 +256,14 @@
     return round && round.name ? round.name : "Сетка";
   }
 
+  function roundStageClass(round) {
+    var label = roundStageLabel(round);
+    if (label === "1/4") return "quarter";
+    if (label === "1/2") return "semi";
+    if (label === "Финал") return "final";
+    return "";
+  }
+
   function playerName(player) {
     return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim() || "Игрок";
   }
@@ -581,6 +589,9 @@
     if (activeBracketStage >= rounds.length) activeBracketStage = rounds.length - 1;
     var round = rounds[activeBracketStage] || rounds[0];
     var active = data.currentRoundId && data.currentRoundId === round.id;
+    var stageLabel = roundStageLabel(round);
+    var stageClass = roundStageClass(round);
+    var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
     var prevDisabled = activeBracketStage <= 0;
     var nextDisabled = activeBracketStage >= rounds.length - 1;
     return '<div class="sng-champions-modal__bracket-slider">' +
@@ -588,12 +599,13 @@
         '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
         '<div>' +
           '<span>Этап ' + escapeHtml(activeBracketStage + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
-          '<strong>' + escapeHtml(roundStageLabel(round)) + '</strong>' +
+          '<strong>' + escapeHtml(stageLabel) + '</strong>' +
           (active ? '<em>текущий этап</em>' : '') +
         '</div>' +
         '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
       '</div>' +
-      '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + '">' +
+      '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
+        (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
           ((round.matches || []).map(function (match) { return renderBracketMatch(match, data); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
