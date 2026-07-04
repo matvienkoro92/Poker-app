@@ -45,6 +45,10 @@
       "owner": "profile",
       "scope": "profile, avatar, poker21 meta, status/social, profile modals"
     },
+    "equilator": {
+      "owner": "learning",
+      "scope": "equilator layout and card/range controls"
+    },
     "admin": {
       "owner": "admin",
       "scope": "admin-only panels and admin controls"
@@ -145,6 +149,10 @@
       "styles-profile-adjacent-tools.css",
       "styles-profile-modals-tail.css"
     ],
+    "equilator": [
+      "styles-equilator.css",
+      "styles-profile-adjacent-tools.css"
+    ],
     "admin": [
       "styles-admin.css",
       "styles-daily-poker.css"
@@ -224,6 +232,11 @@
     "poker-tasks": [
       "base",
       "learning",
+      "layout"
+    ],
+    "equilator": [
+      "base",
+      "equilator",
       "layout"
     ],
     "hall-of-fame": [

@@ -543,6 +543,25 @@ function pokerClosePlayerCrmStandalone() {
 
 window.pokerClosePlayerCrmStandalone = pokerClosePlayerCrmStandalone;
 
+function pokerSyncViewHtmlScrollClasses(viewName) {
+  var root = document.documentElement;
+  if (!root || !root.classList) return;
+  root.classList.toggle("app-view-home-html-scroll", viewName === "home");
+  root.classList.toggle("app-view-download-html-scroll", viewName === "download");
+  root.classList.toggle("app-view-cashout-html-scroll", viewName === "cashout");
+  root.classList.toggle("app-view-spring-rating-html-scroll", viewName === "spring-rating");
+  root.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
+  root.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
+  root.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  root.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
+  root.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
+  root.classList.toggle("app-view-daily-poker-html-scroll", viewName === "daily-poker");
+  root.classList.toggle("app-view-admin-bonuses-html-scroll", viewName === "admin-bonuses");
+  root.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
+  var appEl = document.getElementById("app");
+  if (appEl) appEl.classList.toggle("app--view-home", viewName === "home");
+}
+
 (function pokerInitInactiveViewsInert() {
   function apply() {
     pokerSyncInertForViewScreensOnly();
@@ -769,6 +788,7 @@ function setView(viewName, navOpts) {
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
+    pokerSyncViewHtmlScrollClasses(viewName);
     document.body.classList.remove("view--active");
     document.documentElement.classList.remove("view--active");
     try {
@@ -1835,7 +1855,8 @@ document.addEventListener("touchend", function (e) {
     e.stopPropagation();
     viewHandledInTouchend = true;
     var target = backBtn.getAttribute("data-view-target");
-    if (target) setView(target, { fromBack: true });
+    var currentView = document.body && document.body.getAttribute ? document.body.getAttribute("data-view") : "";
+    if (target) setView(target, currentView === "equilator" && target === "home" ? undefined : { fromBack: true });
     return;
   }
   if (e.target.closest("[data-download-back]")) {
@@ -1931,7 +1952,8 @@ function handleViewLinkClick(e) {
     e.preventDefault();
     e.stopPropagation();
     var target = backBtn.getAttribute("data-view-target");
-    if (target) setView(target, { fromBack: true });
+    var currentView = document.body && document.body.getAttribute ? document.body.getAttribute("data-view") : "";
+    if (target) setView(target, currentView === "equilator" && target === "home" ? undefined : { fromBack: true });
     return;
   }
   var link = e.target.closest("a[data-view-target]");

@@ -14,6 +14,10 @@
   var activeVotesRoundId = "";
   var homePlaqueTimer = null;
   var homePlaqueLoading = false;
+  var homePlaqueState = null;
+  var homeSummaryInFlight = null;
+  var homeSummaryLoadedAt = 0;
+  var HOME_SUMMARY_CACHE_MS = 45000;
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -313,6 +317,26 @@
     });
   }
 
+  function fetchHomeSummary(force) {
+    var now = Date.now();
+    if (!force && homePlaqueState && homePlaqueState.summary && homeSummaryLoadedAt && now - homeSummaryLoadedAt < HOME_SUMMARY_CACHE_MS) {
+      return Promise.resolve(homePlaqueState);
+    }
+    if (homeSummaryInFlight) return homeSummaryInFlight;
+    homeSummaryInFlight = fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1", { cache: "default" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          homeSummaryLoadedAt = Date.now();
+        }
+        return data;
+      })
+      .finally(function () {
+        homeSummaryInFlight = null;
+      });
+    return homeSummaryInFlight;
+  }
+
   function loadState() {
     if (loading) return;
     loading = true;
@@ -320,6 +344,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
         state = data;
+        homePlaqueState = data;
         updateHomePlaque();
         render();
       })
@@ -347,11 +372,12 @@
   function updateHomePlaque() {
     var plaque = document.getElementById("clubChoiceVoteOpen");
     if (!plaque) return;
+    var data = homePlaqueState || state;
     var subtext = plaque.querySelector(".home-club-choice-plaque__subtext");
-    if (subtext) subtext.textContent = homePlaqueText(state);
-    var round = state && state.status === "active" ? currentRound(state) : null;
+    if (subtext) subtext.textContent = homePlaqueText(data);
+    var round = data && data.status === "active" ? currentRound(data) : null;
     var end = Date.parse(round && round.endsAt || "");
-    if (end && end <= Date.now() && !homePlaqueLoading) refreshHomePlaqueState();
+    if (end && end <= Date.now() && !homePlaqueLoading) refreshHomePlaqueState(true);
   }
 
   function startHomePlaqueTimer() {
@@ -359,13 +385,13 @@
     homePlaqueTimer = window.setInterval(updateHomePlaque, 1000);
   }
 
-  function refreshHomePlaqueState() {
+  function refreshHomePlaqueState(force) {
     if (homePlaqueLoading) return;
     homePlaqueLoading = true;
-    fetchState()
+    fetchHomeSummary(!!force)
       .then(function (data) {
         if (data && data.ok) {
-          state = data;
+          homePlaqueState = data;
           updateHomePlaque();
         }
       })
@@ -409,12 +435,14 @@
       .then(function (data) {
         if (data && data.state && data.state.ok) {
           state = data.state;
+          homePlaqueState = state;
           render();
           restoreBodyScroll(keepScrollTop);
           return state;
         }
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка");
         state = data;
+        homePlaqueState = data;
         render();
         restoreBodyScroll(keepScrollTop);
         return data;

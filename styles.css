@@ -10633,6 +10633,18 @@ body.club-choice-vote-open {
   }
 }
 
+@media (max-width: 720px) {
+  html.app--telegram-miniapp .club-choice-vote-modal.sng-champions-modal,
+  html.poker-telegram-miniapp .club-choice-vote-modal.sng-champions-modal {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 78px) !important;
+  }
+
+  html.app--telegram-miniapp .sng-champions-modal .club-choice-vote-modal__panel,
+  html.poker-telegram-miniapp .sng-champions-modal .club-choice-vote-modal__panel {
+    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 86px) !important;
+  }
+}
+
 #app.app .card .card__content {
   width: var(--app-content-width, 100%) !important;
   max-width: var(--app-content-width, 100%) !important;
@@ -13420,6 +13432,24 @@ body.club-choice-vote-open {
 
   .private-cash-modal__ghost {
     min-width: 120px;
+  }
+}
+
+@media (max-width: 720px) {
+  html.app--telegram-miniapp .private-cash-modal,
+  html.poker-telegram-miniapp .private-cash-modal {
+    align-items: center;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 76px) !important;
+  }
+
+  html.app--telegram-miniapp .private-cash-modal__panel,
+  html.poker-telegram-miniapp .private-cash-modal__panel {
+    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 86px) !important;
+  }
+
+  html.app--telegram-miniapp .private-cash-modal__body,
+  html.poker-telegram-miniapp .private-cash-modal__body {
+    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 180px) !important;
   }
 }
 

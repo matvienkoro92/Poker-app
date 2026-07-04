@@ -9,9 +9,12 @@
   var state = null;
   var buttonState = null;
   var loading = false;
+  var homeSummaryInFlight = null;
+  var homeSummaryLoadedAt = 0;
   var activeTab = "signup";
   var editingEventId = "";
   var manualSuggestTimer = 0;
+  var HOME_SUMMARY_CACHE_MS = 60000;
   var BONUS_PRESETS = [
     { id: "four-kind", amount: "4000 ₽", condition: "за каре по 2м" },
     { id: "straight-flush", amount: "5000 ₽", condition: "за стрит-флеш" },
@@ -385,6 +388,27 @@
       .then(function (res) { return res.json(); });
   }
 
+  function fetchHomeSummary(force) {
+    var now = Date.now();
+    if (!force && buttonState && homeSummaryLoadedAt && now - homeSummaryLoadedAt < HOME_SUMMARY_CACHE_MS) {
+      return Promise.resolve(buttonState);
+    }
+    if (homeSummaryInFlight) return homeSummaryInFlight;
+    homeSummaryInFlight = fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1", { cache: "default" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          buttonState = data;
+          homeSummaryLoadedAt = Date.now();
+        }
+        return data;
+      })
+      .finally(function () {
+        homeSummaryInFlight = null;
+      });
+    return homeSummaryInFlight;
+  }
+
   function privateCashOpenButtons() {
     var buttons = [];
     var homeButton = document.getElementById("privateCashSignupOpen");
@@ -435,7 +459,7 @@
   }
 
   function refreshHomeButtonStatus() {
-    fetchState()
+    fetchHomeSummary()
       .then(function (data) {
         updateHomeButton(data);
       })

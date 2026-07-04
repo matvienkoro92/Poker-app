@@ -8,8 +8,11 @@
   var statusEl = null;
   var state = null;
   var loading = false;
+  var homeSummaryInFlight = null;
+  var homeSummaryLoadedAt = 0;
   var activeTab = "signup";
   var activeBracketStage = 0;
+  var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -151,6 +154,26 @@
     return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" }).then(function (res) {
       return res.json();
     });
+  }
+
+  function fetchHomeSummary(force) {
+    var now = Date.now();
+    if (!force && state && state.summary && homeSummaryLoadedAt && now - homeSummaryLoadedAt < HOME_SUMMARY_CACHE_MS) {
+      return Promise.resolve(state);
+    }
+    if (homeSummaryInFlight) return homeSummaryInFlight;
+    homeSummaryInFlight = fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1", { cache: "default" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          homeSummaryLoadedAt = Date.now();
+        }
+        return data;
+      })
+      .finally(function () {
+        homeSummaryInFlight = null;
+      });
+    return homeSummaryInFlight;
   }
 
   function loadState() {
@@ -717,7 +740,7 @@
         openModal();
       });
     }
-    fetchState().then(function (data) {
+    fetchHomeSummary().then(function (data) {
       if (data && data.ok) {
         state = data;
         updateHomePlaque();
