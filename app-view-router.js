@@ -888,16 +888,16 @@ function setView(viewName, navOpts) {
     initPokerShowsPlayer();
     if (typeof updateTournamentDayBlock === "function") updateTournamentDayBlock();
     try {
-      var runHomeChatBoot = function () {
-        if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
-          window.__pokerScheduleChatBootstrapFetch();
+      var runHomeChatSummary = function () {
+        if (typeof window.__pokerScheduleChatHomeSummaryFetch === "function") {
+          window.__pokerScheduleChatHomeSummaryFetch();
         }
       };
       if (typeof isTelegramWebApp === "function" && isTelegramWebApp()) {
-        setTimeout(runHomeChatBoot, 0);
+        setTimeout(runHomeChatSummary, 0);
       } else {
         var idleChatBoot = window.requestIdleCallback || function (cb) { setTimeout(cb, 80); };
-        idleChatBoot(runHomeChatBoot);
+        idleChatBoot(runHomeChatSummary);
       }
     } catch (eChatBootHome) {}
     if (!window.chatListenersAttached && typeof initChat === "function") {

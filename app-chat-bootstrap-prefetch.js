@@ -27,6 +27,64 @@ function initChatBootstrapPrefetchRuntime(opts) {
     }
   }
 
+  function chatSummaryNumber(value) {
+    var n = parseInt(String(value != null && value !== false ? value : "0"), 10);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function applyChatHomeSummaryPayload(data) {
+    if (!data || !data.ok) return;
+    var generalUnread = chatSummaryNumber(data.generalUnreadCount != null ? data.generalUnreadCount : data.generalUnread);
+    var personalUnread = chatSummaryNumber(
+      data.personalUnreadTotal != null ? data.personalUnreadTotal : data.personalUnreadCount
+    );
+    try {
+      window.chatGeneralUnreadCount = generalUnread;
+      window.chatGeneralUnread = generalUnread > 0;
+      window.chatPersonalUnreadTotalFromContacts = personalUnread;
+      window.chatPersonalUnreadCount = personalUnread;
+      if (data.clubChatPendingReviewCount != null) {
+        window.chatClubPendingReviewCount = chatSummaryNumber(data.clubChatPendingReviewCount);
+      }
+    } catch (eSumState) {}
+    try {
+      if (typeof opts.updateChatNavDot === "function") opts.updateChatNavDot();
+      else if (typeof updateChatNavDot === "function") updateChatNavDot();
+    } catch (eSumDot) {}
+    try {
+      window.dispatchEvent(new CustomEvent("poker-chat-home-summary", { detail: data }));
+    } catch (eSumEvent) {}
+  }
+
+  function scheduleChatHomeSummaryFetch() {
+    try {
+      if (typeof opts.pokerReadPwaGuestMode === "function" && opts.pokerReadPwaGuestMode()) return;
+      if (typeof opts.pokerApiHasCredential !== "function" || !opts.pokerApiHasCredential()) return;
+      if (typeof opts.pokerChatContactsAuthFingerprint === "function" && !opts.pokerChatContactsAuthFingerprint()) return;
+      var base = opts.base || "";
+      if (!base) return;
+      var nowS = Date.now();
+      if (window.__pokerChatHomeSummaryCooldownUntil && nowS < window.__pokerChatHomeSummaryCooldownUntil) return;
+      window.__pokerChatHomeSummaryCooldownUntil = nowS + 12000;
+      var genS = (window.__pokerChatHomeSummaryGen || 0) + 1;
+      window.__pokerChatHomeSummaryGen = genS;
+      var lastVS = "";
+      try {
+        var lvS = {};
+        if (opts.lastViewedGeneral != null) lvS.general = opts.lastViewedGeneral;
+        if (lvS.general != null) lastVS = "&lastViewed=" + encodeURIComponent(JSON.stringify(lvS));
+      } catch (eLvS) {}
+      var qS = typeof opts.pokerApiAuthQuery === "function" ? opts.pokerApiAuthQuery("?") : "?";
+      fetch(base + "/api/chat" + qS + "&mode=homeSummary" + lastVS, { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (genS !== window.__pokerChatHomeSummaryGen) return;
+          applyChatHomeSummaryPayload(data);
+        })
+        .catch(function () {});
+    } catch (eSum) {}
+  }
+
   function scheduleChatBootstrapFetch() {
     try {
       if (typeof opts.pokerReadPwaGuestMode === "function" && opts.pokerReadPwaGuestMode()) return;
@@ -90,10 +148,12 @@ function initChatBootstrapPrefetchRuntime(opts) {
   }
   try {
     window.__pokerScheduleChatBootstrapFetch = scheduleChatBootstrapFetch;
+    window.__pokerScheduleChatHomeSummaryFetch = scheduleChatHomeSummaryFetch;
   } catch (eExBoot) {}
 
   return {
     pokerPrefetchDiskPeersWarmup: pokerPrefetchDiskPeersWarmup,
+    scheduleChatHomeSummaryFetch: scheduleChatHomeSummaryFetch,
     scheduleChatBootstrapFetch: scheduleChatBootstrapFetch
   };
 }

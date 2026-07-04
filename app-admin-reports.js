@@ -3589,7 +3589,6 @@ function initAdminReportModal() {
     setActiveTab("form");
     fillReportForm(null, { skipRakeback: true });
     syncRakebackAccessControls();
-    prefetchSentReportsSoon();
     return true;
   }
   window.pokerOpenAdminReportModal = function () {
@@ -4815,9 +4814,6 @@ function initAdminReportModalsRuntime() {
       initAdminReportModal();
       if (typeof window.pokerInitBroadcastReportsModal === "function") {
         window.pokerInitBroadcastReportsModal();
-      }
-      if (typeof window.pokerPreloadAdminSentReports === "function") {
-        window.pokerPreloadAdminSentReports();
       }
       return true;
     })

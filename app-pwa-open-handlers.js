@@ -126,18 +126,32 @@ window.addEventListener("poker-telegram-auth", function (ev) {
         pokerHydrateChatSnapshotsFromDisk();
       }
     } catch (eChatHydAuth) {}
+    var needsFullChatRefresh = false;
     try {
-      if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
+      needsFullChatRefresh = !!(
+        (document.body && document.body.getAttribute("data-view") === "chat") ||
+        document.querySelector('[data-view="chat"].view--active') ||
+        window.__pokerPushNeedsFullChatBootstrap ||
+        window.__pendingOpenChatPersonalFromDeepLink ||
+        window.__pendingOpenClubChatGeneral
+      );
+    } catch (eChatFullAuth) {}
+    try {
+      if (needsFullChatRefresh && typeof window.__pokerScheduleChatBootstrapFetch === "function") {
         window.__pokerScheduleChatBootstrapFetch();
+      } else if (!needsFullChatRefresh && typeof window.__pokerScheduleChatHomeSummaryFetch === "function") {
+        window.__pokerScheduleChatHomeSummaryFetch();
       }
     } catch (eChatBootAuth) {}
-    try {
-      if (typeof loadContacts === "function") loadContacts();
-    } catch (eChatContactsAuth) {}
-    try {
-      if (typeof loadGeneral === "function") loadGeneral();
-    } catch (eChatGeneralAuth) {}
-    if (typeof window.chatRefresh === "function") window.chatRefresh();
+    if (needsFullChatRefresh) {
+      try {
+        if (typeof loadContacts === "function") loadContacts();
+      } catch (eChatContactsAuth) {}
+      try {
+        if (typeof loadGeneral === "function") loadGeneral();
+      } catch (eChatGeneralAuth) {}
+      if (typeof window.chatRefresh === "function") window.chatRefresh();
+    }
     if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
     if (typeof pokerMaybeAutoEnrollChatPush === "function") pokerMaybeAutoEnrollChatPush();
     if (window.__pendingOpenChatPersonalFromDeepLink && typeof window.__pokerOpenChatFromPushUrl === "function") {

@@ -181,6 +181,7 @@ function initChatPollingLoop(opts) {
   var loadGeneral = typeof opts.loadGeneral === "function" ? opts.loadGeneral : function () {};
   var loadMessages = typeof opts.loadMessages === "function" ? opts.loadMessages : function () {};
   var loadContacts = typeof opts.loadContacts === "function" ? opts.loadContacts : function () {};
+  var loadChatHomeSummary = typeof opts.loadChatHomeSummary === "function" ? opts.loadChatHomeSummary : null;
   var loadAdminsOnline = typeof opts.loadAdminsOnline === "function" ? opts.loadAdminsOnline : function () {};
   var updateChatHeaderStats = typeof opts.updateChatHeaderStats === "function" ? opts.updateChatHeaderStats : function () {};
   var pokerChatCanRunLongPoll = typeof opts.pokerChatCanRunLongPoll === "function" ? opts.pokerChatCanRunLongPoll : function () { return false; };
@@ -201,18 +202,20 @@ function initChatPollingLoop(opts) {
     var nowPoll = Date.now();
 
     if (hidden) {
-      if (credPoll && !guestPoll && typeof loadContacts === "function") {
+      if (credPoll && !guestPoll) {
         if (!chatLastPollAt.contacts || nowPoll - chatLastPollAt.contacts >= CHAT_HIDDEN_IDLE_MS) {
           chatLastPollAt.contacts = nowPoll;
-          loadContacts({ metaOnly: true });
+          if (loadChatHomeSummary) loadChatHomeSummary();
+          else loadContacts({ metaOnly: true });
         }
       }
       return;
     }
 
     if (!chatViewOn) {
-      if (credPoll && !guestPoll && typeof loadContacts === "function" && !pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) {
-        loadContacts({ metaOnly: true });
+      if (credPoll && !guestPoll && !pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) {
+        if (loadChatHomeSummary) loadChatHomeSummary();
+        else loadContacts({ metaOnly: true });
       }
       return;
     }

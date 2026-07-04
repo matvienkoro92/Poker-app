@@ -276,6 +276,88 @@
       ]
     },
     {
+      "name": "__pokerScheduleChatHomeSummaryFetch",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-chat-lifecycle.js",
+        "app-pwa-open-handlers.js"
+      ]
+    },
+    {
+      "name": "__pokerChatHomeSummaryCooldownUntil",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ]
+    },
+    {
+      "name": "__pokerChatHomeSummaryGen",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ]
+    },
+    {
+      "name": "chatGeneralUnreadCount",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-unread.js"
+      ]
+    },
+    {
+      "name": "chatGeneralUnread",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-unread.js"
+      ]
+    },
+    {
+      "name": "chatPersonalUnreadTotalFromContacts",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-unread.js"
+      ]
+    },
+    {
+      "name": "chatPersonalUnreadCount",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-unread.js"
+      ]
+    },
+    {
+      "name": "chatClubPendingReviewCount",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-bootstrap-prefetch.js"
+      ],
+      "consumedBy": [
+        "app-chat-dialogs-meta.js"
+      ]
+    },
+    {
       "name": "resolveMyChatMemberId",
       "domain": "chat",
       "exportedBy": [

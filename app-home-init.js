@@ -342,6 +342,7 @@
       var cached = sessionStorage.getItem("poker_dt_id") || (typeof localStorage !== "undefined" && localStorage.getItem("poker_dt_id"));
       if (cached) q += "&dtIdHint=" + encodeURIComponent(cached);
     } catch (eHint) {}
+    q += "&statusSummary=1";
     fetch(base + "/api/users" + q, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) { applyStatus(data); })

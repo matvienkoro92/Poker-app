@@ -782,6 +782,11 @@ function initChat() {
       return chatBootstrapPrefetchRuntime.scheduleChatBootstrapFetch();
     }
   }
+  function scheduleChatHomeSummaryFetch() {
+    if (chatBootstrapPrefetchRuntime && typeof chatBootstrapPrefetchRuntime.scheduleChatHomeSummaryFetch === "function") {
+      return chatBootstrapPrefetchRuntime.scheduleChatHomeSummaryFetch();
+    }
+  }
 
   try {
     pokerHydrateChatSnapshotsFromDisk();
@@ -2482,6 +2487,7 @@ function initChat() {
       applyContactsApiResponse: applyContactsApiResponse,
       prefetchTopPersonalDialogs: prefetchTopPersonalDialogs,
       ingestBootstrapGeneralSnapshot: ingestBootstrapGeneralSnapshot,
+      updateChatNavDot: typeof updateChatNavDot === "function" ? updateChatNavDot : null,
       isTelegramWebApp: typeof isTelegramWebApp === "function" ? isTelegramWebApp : null
     });
     chatBootstrapPrefetchRuntime = initChatBootstrapPrefetchRuntime(chatBootstrapPrefetchDeps) || {};
@@ -2515,8 +2521,8 @@ function initChat() {
     (function schedulePrefetchChatContactsCache() {
       var runBoot = function () {
         try {
-          if (typeof window.__pokerScheduleChatBootstrapFetch === "function") {
-            window.__pokerScheduleChatBootstrapFetch();
+          if (typeof window.__pokerScheduleChatHomeSummaryFetch === "function") {
+            window.__pokerScheduleChatHomeSummaryFetch();
           }
         } catch (ePf) {}
       };
@@ -2872,6 +2878,7 @@ function initChat() {
     loadGeneral: loadGeneral,
     loadMessages: loadMessages,
     loadContacts: loadContacts,
+    loadChatHomeSummary: scheduleChatHomeSummaryFetch,
     loadAdminsOnline: loadAdminsOnline,
     updateChatHeaderStats: updateChatHeaderStats,
     pokerChatCanRunLongPoll: pokerChatCanRunLongPoll,
