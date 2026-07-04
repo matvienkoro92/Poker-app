@@ -300,9 +300,9 @@
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.666" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="chat profile" href="./styles-rating-chat-modals.css?v=3.655" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="chat profile" href="./styles-rating-chat-modals.css?v=3.656" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="learning" href="./styles-learning-games.css?v=3.666" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="learning admin" href="./styles-daily-poker.css?v=3.670" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="learning admin admin-bonuses" href="./styles-daily-poker.css?v=3.670" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=3.748" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=3.682" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=3.671" />
@@ -768,10 +768,12 @@
             </div>
             <div class="home-club-actions-block" aria-label="Быстрые клубные действия">
               <div class="home-sng-champions-action" aria-label="СНГ Лига Чемпионов Два Туза">
-                <button type="button" class="home-club-choice-plaque home-club-choice-plaque--sng" id="sngChampionsOpen" aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
+                <button type="button" class="home-club-choice-plaque home-club-choice-plaque--sng" id="sngChampionsOpen" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
                   <span class="home-club-choice-plaque__count" aria-label="Подтвержденных игроков">0/32</span>
                   <span class="home-club-choice-plaque__text"><span>СНГ Лига</span><span>Чемпионов</span><span>Два Туза</span></span>
+                  <small class="home-club-choice-plaque__prize">1е место - 50 000р.</small>
                   <small class="home-club-choice-plaque__subtext">Запись закрыта</small>
+                  <small class="home-club-choice-plaque__entry">Вход 1000р</small>
                 </button>
               </div>
               <div class="home-club-choice-actions" aria-label="Быстрые клубные действия">
@@ -1319,11 +1321,13 @@
                   </span>
                   <span>После <strong>7</strong> круток без выигрыша — билет <strong>300 ₽</strong></span>
                 </p>
-                <div class="daily-poker__private-cash" aria-label="Приватный кеш">
-                  <button type="button" class="home-club-choice-plaque home-club-choice-plaque--cash daily-poker__private-cash-btn" data-private-cash-open aria-label="Открыть приватный кеш">
-                    <span class="home-club-choice-plaque__count" aria-label="Открытых столов"></span>
-                    <span class="home-club-choice-plaque__text">Приватный кеш</span>
-                    <small class="home-club-choice-plaque__subtext">Открыть запись</small>
+                <div class="daily-poker__sng-champions sng-champions-promo" aria-label="СНГ Лига Чемпионов Два Туза">
+                  <button type="button" class="home-club-choice-plaque home-club-choice-plaque--sng sng-champions-promo__button daily-poker__sng-champions-btn" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
+                    <span class="home-club-choice-plaque__count" aria-label="Подтвержденных игроков">0/32</span>
+                    <span class="home-club-choice-plaque__text"><span>СНГ Лига</span><span>Чемпионов</span><span>Два Туза</span></span>
+                    <small class="home-club-choice-plaque__prize">1е место - 50 000р.</small>
+                    <small class="home-club-choice-plaque__subtext">Запись закрыта</small>
+                    <small class="home-club-choice-plaque__entry">Вход 1000р</small>
                   </button>
                 </div>
                 <div class="daily-poker__subscribe-requirements" aria-label="Условия участия" hidden>
@@ -1679,7 +1683,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=3.666"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=3.674"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=3.675"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=3.666"></script>
@@ -1781,7 +1785,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=3.666"></script>
     <script defer src="./app-shell-layout.js?v=3.666"></script>
     <script defer src="./app-navigation-scroll.js?v=3.666"></script>
-    <script defer src="./app-html-fragments.js?v=3.668"></script>
+    <script defer src="./app-html-fragments.js?v=3.669"></script>
     <script defer src="./app-webview-keyboard.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-emoji-picker.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reply-retry-glue.js?v=3.666"></script>

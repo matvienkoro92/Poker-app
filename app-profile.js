@@ -473,12 +473,13 @@ function profilePublicShowcaseSyncArt(nick, opts) {
       profilePublicShowcaseHideArt(artImg);
       return;
     }
-    art = profileDefaultHeroArt(profileHeroGenderValue);
+    var avatarFallback = !opts.forceDefault ? profilePublicCardAvatarUrl() : "";
+    art = avatarFallback ? { src: avatarFallback, nick: nick || "Фото профиля", avatarFallback: true } : profileDefaultHeroArt(profileHeroGenderValue);
   }
   artWrap.hidden = false;
   if (art && art.src) {
     var seq = (profilePublicShowcaseArtSeq += 1);
-    var alt = "Образ рейтинга " + (art.nick || nick || "");
+    var alt = art.avatarFallback ? "Фото профиля " + (art.nick || nick || "") : "Образ рейтинга " + (art.nick || nick || "");
     var nextSrc = art.src;
     var currentSrc = artImg.currentSrc || artImg.src || "";
     var resolvedSrc = nextSrc;
@@ -487,7 +488,7 @@ function profilePublicShowcaseSyncArt(nick, opts) {
     } catch (eProfilePublicArtUrl) {}
     artImg.onerror = null;
     artImg.onload = null;
-    artImg.classList.remove("chat-user-modal__rating-art-img--avatar-fallback");
+    artImg.classList.toggle("chat-user-modal__rating-art-img--avatar-fallback", art.avatarFallback === true);
     artImg.classList.toggle("chat-user-modal__rating-art-img--default-hero", art.defaultHero === true);
     artImg.alt = alt;
     if (currentSrc === resolvedSrc && artImg.complete && artImg.naturalWidth > 0) {

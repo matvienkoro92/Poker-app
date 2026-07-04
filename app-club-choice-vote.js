@@ -13,6 +13,7 @@
   var activeRoundTab = "votes";
   var activeVotesRoundId = "";
   var homePlaqueTimer = null;
+  var copyFeedbackTimer = null;
   var homePlaqueLoading = false;
   var homePlaqueState = null;
   var homeSummaryInFlight = null;
@@ -87,6 +88,36 @@
     openTelegramShare(link, text);
   }
 
+  function setCopyFeedback(ok, text) {
+    if (copyFeedbackTimer) {
+      clearTimeout(copyFeedbackTimer);
+      copyFeedbackTimer = null;
+    }
+    if (!modal) return;
+    var button = modal.querySelector("[data-club-choice-copy]");
+    var feedback = modal.querySelector("[data-club-choice-copy-feedback]");
+    if (button) {
+      if (!button.dataset.defaultLabel) button.dataset.defaultLabel = button.textContent || "Скопировать";
+      button.classList.toggle("club-choice-vote-modal__share--copied", !!ok);
+      button.textContent = ok ? "Скопировано" : button.dataset.defaultLabel;
+    }
+    if (feedback) {
+      feedback.textContent = text || "";
+      feedback.classList.toggle("club-choice-vote-modal__copy-feedback--visible", !!text);
+    }
+    copyFeedbackTimer = setTimeout(function () {
+      if (button) {
+        button.classList.remove("club-choice-vote-modal__share--copied");
+        button.textContent = button.dataset.defaultLabel || "Скопировать";
+      }
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.classList.remove("club-choice-vote-modal__copy-feedback--visible");
+      }
+      copyFeedbackTimer = null;
+    }, 2200);
+  }
+
   function copyVoteLink() {
     var link = voteLink();
     if (!link) {
@@ -97,7 +128,15 @@
       ? pokerCopyTextToClipboard(link)
       : Promise.resolve(false);
     copy.then(function (ok) {
-      showAlert(ok ? "Ссылка на голосование скопирована." : "Скопируйте ссылку вручную: " + link);
+      if (ok) {
+        setCopyFeedback(true, "Ссылка скопирована");
+        return;
+      }
+      setCopyFeedback(false, "Не удалось скопировать");
+      showAlert("Скопируйте ссылку вручную: " + link);
+    }).catch(function () {
+      setCopyFeedback(false, "Не удалось скопировать");
+      showAlert("Скопируйте ссылку вручную: " + link);
     });
   }
 
@@ -272,6 +311,7 @@
         '<footer class="club-choice-vote-modal__footer" aria-label="Поделиться голосованием">' +
           '<button type="button" class="club-choice-vote-modal__share club-choice-vote-modal__share--primary" data-club-choice-share="1">Поделиться</button>' +
           '<button type="button" class="club-choice-vote-modal__share club-choice-vote-modal__share--copy" data-club-choice-copy="1">Скопировать</button>' +
+          '<span class="club-choice-vote-modal__copy-feedback" data-club-choice-copy-feedback role="status" aria-live="polite"></span>' +
         '</footer>' +
       '</section>';
     document.body.appendChild(modal);

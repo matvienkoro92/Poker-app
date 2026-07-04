@@ -1199,7 +1199,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
-    if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion.webp" };
+    if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-emblem.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
@@ -1543,8 +1543,8 @@ if (chatUserModalEl) {
       chatUserModalSummerCupCardHtml() +
       chatUserModalAchievementCardHtml("★", "СНГ Лига Чемпионов", sngChampions, {
         placeholder: "Топ-3 сезона",
-        image: "./assets/chat-profile-achievement-sng-champion.webp",
-        infoImage: "./assets/chat-profile-achievement-sng-champion.webp",
+        image: "./assets/chat-profile-achievement-sng-champion-emblem.webp",
+        infoImage: "./assets/chat-profile-achievement-sng-champion-emblem.webp",
       });
     var winsHtml =
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {

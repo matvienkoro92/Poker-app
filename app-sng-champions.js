@@ -633,18 +633,21 @@
   }
 
   function updateHomePlaque() {
-    var button = document.getElementById("sngChampionsOpen");
-    if (!button || !state) return;
-    var count = button.querySelector(".home-club-choice-plaque__count");
-    var sub = button.querySelector(".home-club-choice-plaque__subtext");
+    if (!state) return;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-sng-open], #sngChampionsOpen"));
+    if (!buttons.length) return;
     var approved = (state.counts && state.counts.approved) || 0;
-    if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
-    if (sub) {
-      if (state.status === "open") sub.textContent = "Запись открыта";
-      else if (state.status === "bracket") sub.textContent = "Сетка идет";
-      else if (state.status === "completed") sub.textContent = "Итоги готовы";
-      else sub.textContent = "Запись закрыта";
-    }
+    buttons.forEach(function (button) {
+      var count = button.querySelector(".home-club-choice-plaque__count");
+      var sub = button.querySelector(".home-club-choice-plaque__subtext");
+      if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
+      if (sub) {
+        if (state.status === "open") sub.textContent = "Запись открыта";
+        else if (state.status === "bracket") sub.textContent = "Сетка идет";
+        else if (state.status === "completed") sub.textContent = "Итоги готовы";
+        else sub.textContent = "Запись закрыта";
+      }
+    });
   }
 
   function readSettingsPayload(actionName) {
@@ -754,11 +757,31 @@
   }
 
   function bind() {
-    var plaque = document.getElementById("sngChampionsOpen");
-    if (plaque) {
-      plaque.addEventListener("click", function () {
+    if (!document.documentElement.dataset.sngChampionsOpenBound) {
+      document.documentElement.dataset.sngChampionsOpenBound = "1";
+      document.addEventListener("click", function (event) {
+        var trigger = event.target && event.target.closest ? event.target.closest("[data-sng-open], #sngChampionsOpen") : null;
+        if (!trigger) return;
+        updateHomePlaque();
         openModal();
       });
+    }
+    if (!document.documentElement.dataset.sngChampionsPlaqueObserverBound && window.MutationObserver) {
+      document.documentElement.dataset.sngChampionsPlaqueObserverBound = "1";
+      new MutationObserver(function (mutations) {
+        if (!state) return;
+        for (var i = 0; i < mutations.length; i++) {
+          var nodes = mutations[i].addedNodes || [];
+          for (var j = 0; j < nodes.length; j++) {
+            var node = nodes[j];
+            if (!node || node.nodeType !== 1) continue;
+            if ((node.matches && node.matches("[data-sng-open], #sngChampionsOpen")) || (node.querySelector && node.querySelector("[data-sng-open], #sngChampionsOpen"))) {
+              updateHomePlaque();
+              return;
+            }
+          }
+        }
+      }).observe(document.body, { childList: true, subtree: true });
     }
     fetchHomeSummary().then(function (data) {
       if (data && data.ok) {

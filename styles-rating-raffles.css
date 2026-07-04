@@ -11586,9 +11586,11 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
   max-width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  font-size: clamp(10px, 5.2cqw, 13px) !important;
+  font-size: clamp(8px, 4.6cqw, 12px) !important;
   line-height: 0.95 !important;
   white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
   overflow: hidden !important;
   text-overflow: clip !important;
   text-align: center !important;
