@@ -3,6 +3,9 @@
   var visitorsAdminData = null;
   var crmAccessProbeState = "idle";
   var crmAccessProbeKey = "";
+  var visitorsAdminCheckPromise = null;
+  var visitorsAdminCheckLastAt = 0;
+  var visitorsAdminCheckLastResult = false;
 
   function esc(s) {
     if (s == null) return "";
@@ -296,6 +299,7 @@
     }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
+      return;
     } else {
       if (pokerIsKnownClientReportUser()) showReportUi();
       if (pokerIsKnownClientBonusAdmin()) showBonusAdminUi();
@@ -303,18 +307,29 @@
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base + "/api/visitors-list" + q)
+    var now = Date.now();
+    if (visitorsAdminCheckPromise) return;
+    if (visitorsAdminCheckLastAt && now - visitorsAdminCheckLastAt < 15000) {
+      if (visitorsAdminCheckLastResult) showAdminUi();
+      else {
+        renderHomeAdminIdentityStatus(false);
+        syncCrmButtonAccess();
+      }
+      return;
+    }
+    visitorsAdminCheckLastAt = now;
+    visitorsAdminCheckPromise = fetch(base + "/api/visitors-list" + q + "&adminCheck=1")
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data && data.ok && data.isAdmin) showAdminUi();
+        visitorsAdminCheckLastResult = !!(data && data.ok && data.isAdmin);
+        if (visitorsAdminCheckLastResult) showAdminUi();
       })
-      .catch(function () {});
-    fetch(base + "/api/raffles" + q)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data && data.ok && data.isAdmin) showAdminUi();
+      .catch(function () {
+        visitorsAdminCheckLastResult = false;
       })
-      .catch(function () {});
+      .finally(function () {
+        visitorsAdminCheckPromise = null;
+      });
     renderHomeAdminIdentityStatus(false);
     syncCrmButtonAccess();
   }

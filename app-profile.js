@@ -1,3 +1,11 @@
+function profileEscapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
@@ -568,7 +576,7 @@ function profilePublicShowcaseApplyStatus(status) {
   if (nextCard) nextCard.textContent = pokerProfileStatusCardLabel(nextLevel);
   levelText.innerHTML =
     '<span class="chat-user-modal__level-num">' +
-    escapeHtml(String(level)) +
+    profileEscapeHtml(String(level)) +
     '</span><span class="chat-user-modal__level-rest">из 100</span>';
   levelText.hidden = false;
   if (xp) {
@@ -768,26 +776,124 @@ function renderProfileAchievementsShowcaseLoading() {
   }
 }
 
+function profileEnsureLazyScriptDomains(domains) {
+  var list = Array.isArray(domains) ? domains : String(domains || "").split(/[\s,]+/);
+  var normalized = [];
+  list.forEach(function (domain) {
+    var name = String(domain || "").trim();
+    if (name && normalized.indexOf(name) === -1) normalized.push(name);
+  });
+  if (!normalized.length) return Promise.resolve(true);
+  if (typeof window.pokerEnsureScriptDomains === "function") {
+    return Promise.resolve(window.pokerEnsureScriptDomains(normalized)).catch(function () { return true; });
+  }
+  var withDeps = [];
+  function addDomain(domain) {
+    if (!domain || withDeps.indexOf(domain) !== -1) return;
+    if (domain === "rating-winter" || domain === "rating-spring" || domain === "rating-summer") addDomain("rating-common");
+    withDeps.push(domain);
+  }
+  normalized.forEach(addDomain);
+  var chain = Promise.resolve(true);
+  withDeps.forEach(function (domain) {
+    var nodes = Array.prototype.slice.call(document.querySelectorAll('script[type="application/poker-lazy"][data-poker-lazy-domain][src]'))
+      .filter(function (script) {
+        return String(script.getAttribute("data-poker-lazy-domain") || "").split(/[\s,]+/).indexOf(domain) !== -1;
+      });
+    nodes.forEach(function (sourceNode) {
+      chain = chain.then(function () {
+        if (sourceNode.getAttribute("data-poker-loaded") === "1") return true;
+        var src = sourceNode.getAttribute("src");
+        if (!src) return true;
+        return new Promise(function (resolve) {
+          var existing = Array.prototype.slice.call(document.querySelectorAll("script[src]"))
+            .some(function (script) { return script !== sourceNode && script.getAttribute("src") === src; });
+          if (existing) {
+            sourceNode.setAttribute("data-poker-loaded", "1");
+            resolve(true);
+            return;
+          }
+          var script = document.createElement("script");
+          script.src = src;
+          script.async = false;
+          script.setAttribute("data-poker-lazy-loaded-from", domain);
+          script.onload = function () {
+            sourceNode.setAttribute("data-poker-loaded", "1");
+            resolve(true);
+          };
+          script.onerror = function () { resolve(false); };
+          (document.head || document.documentElement).appendChild(script);
+        });
+      });
+    });
+  });
+  return chain.then(function () { return true; });
+}
+
 function ensureProfileAchievementsBuilder() {
-  if (typeof window.pokerBuildProfileAchievements === "function") return Promise.resolve(true);
+  function hasBuilder() {
+    return typeof window.pokerBuildProfileAchievements === "function";
+  }
+  function waitForBuilder() {
+    if (hasBuilder()) return Promise.resolve(true);
+    return new Promise(function (resolve) {
+      var tries = 0;
+      function tick() {
+        if (hasBuilder()) {
+          resolve(true);
+          return;
+        }
+        tries += 1;
+        if (tries >= 10) {
+          resolve(false);
+          return;
+        }
+        window.setTimeout(tick, 120);
+      }
+      tick();
+    });
+  }
+  function ensureRatingData() {
+    return profileEnsureLazyScriptDomains(["rating-winter", "rating-spring", "rating-summer"]);
+  }
+  function ensureChatBuilderScript() {
+    if (hasBuilder()) return Promise.resolve(true);
+    return profileEnsureLazyScriptDomains(["chat"]).then(function () {
+      try {
+        if (typeof window.pokerEnsureChatUserModalReady === "function") window.pokerEnsureChatUserModalReady();
+      } catch (eEnsureChatAfterLoad) {}
+      return true;
+    });
+  }
+  if (hasBuilder()) {
+    return ensureRatingData().then(function () { return true; });
+  }
   try {
     if (typeof window.pokerEnsureChatUserModalReady === "function" && window.pokerEnsureChatUserModalReady()) {
-      return Promise.resolve(typeof window.pokerBuildProfileAchievements === "function");
+      return ensureRatingData().then(function () {
+        return waitForBuilder();
+      });
     }
   } catch (eEnsureChatBuilder) {}
   if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
     try {
       return Promise.resolve(window.pokerEnsureGlobalModalsHtml())
         .then(function () {
-          try {
-            if (typeof window.pokerEnsureChatUserModalReady === "function") window.pokerEnsureChatUserModalReady();
-          } catch (eEnsureAfterGlobal) {}
-          return typeof window.pokerBuildProfileAchievements === "function";
+          return ensureChatBuilderScript().then(function () {
+            return ensureRatingData().then(function () {
+              return waitForBuilder();
+            });
+          });
         })
         .catch(function () { return false; });
     } catch (eGlobalBuilder) {}
   }
-  return Promise.resolve(false);
+  return ensureChatBuilderScript()
+    .then(waitForBuilder)
+    .then(function (ready) {
+      if (!ready) return false;
+      return ensureRatingData().then(function () { return true; });
+    });
 }
 
 function refreshProfileAchievementsShowcase(profileData) {
@@ -1351,7 +1457,11 @@ function initProfilePlayerDetails() {
       btn.classList.toggle("profile-hero-specialty__btn--active", active);
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
-    if (preferencesWrap) preferencesWrap.hidden = !selectedSpecialty;
+    if (preferencesWrap) {
+      preferencesWrap.hidden = !selectedSpecialty;
+      preferencesWrap.classList.toggle("profile-hero-preferences--mtt", selectedSpecialty === "mtt");
+      preferencesWrap.classList.toggle("profile-hero-preferences--cash", selectedSpecialty === "cash");
+    }
     if (preferencesMtt) preferencesMtt.hidden = selectedSpecialty !== "mtt";
     if (preferencesCash) preferencesCash.hidden = selectedSpecialty !== "cash";
     setPreferenceState(selectedSpecialty);
@@ -1730,14 +1840,14 @@ function pokerProfileRenderFishCollection() {
       '<div class="' +
       classes +
       '" role="listitem" aria-label="Уровень ' +
-      escapeHtml(String(level)) +
+      profileEscapeHtml(String(level)) +
       (unlocked ? " открыт" : " закрыт") +
       '">' +
       '<span class="profile-fish-collection__level">' +
-      escapeHtml(String(level)) +
+      profileEscapeHtml(String(level)) +
       "</span>" +
       '<img class="profile-fish-collection__img" src="' +
-      escapeHtml(src) +
+      profileEscapeHtml(src) +
       '" alt="" aria-hidden="true" loading="lazy" decoding="async" />' +
       "</div>"
     );

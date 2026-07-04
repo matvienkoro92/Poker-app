@@ -1366,8 +1366,7 @@ function pokerGetTournamentAchievementStats(nick) {
 function pokerGetTournamentAchievementStatsReady(nick) {
   var ensure = [];
   if (typeof window.pokerEnsureScriptDomains === "function") {
-    ensure.push(Promise.resolve(window.pokerEnsureScriptDomains(["app"])).catch(function () { return false; }));
-    ensure.push(Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter"])).catch(function () { return false; }));
+    ensure.push(Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).catch(function () { return false; }));
   }
   return Promise.all(ensure).then(function () {
     return pokerGetTournamentAchievementStats(nick);

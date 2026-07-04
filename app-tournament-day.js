@@ -1098,14 +1098,19 @@ function loadHomeTournamentRaffleBonus(force) {
   var btn = document.getElementById("homeTournamentRaffleBonus");
   if (!btn) return;
   var now = Date.now();
-  if (!force && homeTournamentRaffleBonusLoadedAt && now - homeTournamentRaffleBonusLoadedAt < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS) {
+  if (homeTournamentRaffleBonusLoadedAt && now - homeTournamentRaffleBonusLoadedAt < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS) {
     renderHomeTournamentRaffleBonus();
     return;
   }
   var cached = null;
   try {
-    var raffleCache = window._rafflesCache || null;
-    cached = raffleCache && raffleCache.data && raffleCache.data.ok && raffleCache.time && now - raffleCache.time < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS ? raffleCache.data : null;
+    var cacheRoot = window._rafflesCache || null;
+    var homeBonusCache = cacheRoot && cacheRoot.homeBonus ? cacheRoot.homeBonus : null;
+    cached = homeBonusCache && homeBonusCache.data && homeBonusCache.data.ok && homeBonusCache.time && now - homeBonusCache.time < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS ? homeBonusCache.data : null;
+    if (!cached) {
+      var raffleCache = window._rafflesCache || null;
+      cached = raffleCache && raffleCache.data && raffleCache.data.ok && !raffleCache.data.homeBonus && raffleCache.time && now - raffleCache.time < HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS ? raffleCache.data : null;
+    }
   } catch (eCache) {}
   if (cached) {
     homeTournamentRaffleBonusLoadedAt = now;
@@ -1122,12 +1127,15 @@ function loadHomeTournamentRaffleBonus(force) {
     isLocal = /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(window.location.hostname || "");
   } catch (eLocal) {}
   homeTournamentRaffleBonusInFlight = true;
-  fetch(base + "/api/raffles" + q + "&homeBonus=1&_t=" + Date.now() + (isLocal ? "&demo=1" : ""), { cache: "no-store" })
+  fetch(base + "/api/raffles" + q + "&homeBonus=1" + (isLocal ? "&demo=1" : ""))
     .then(function (r) { return r.json().catch(function () { return null; }); })
     .then(function (data) {
       homeTournamentRaffleBonusLoadedAt = Date.now();
       if (data && data.ok) {
-        try { window._rafflesCache = { data: data, time: Date.now() }; } catch (eSetCache) {}
+        try {
+          window._rafflesCache = window._rafflesCache || {};
+          window._rafflesCache.homeBonus = { data: data, time: Date.now() };
+        } catch (eSetCache) {}
         setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(data.activeRaffles || data.raffles || []));
       } else {
         hideHomeTournamentRaffleBonus();

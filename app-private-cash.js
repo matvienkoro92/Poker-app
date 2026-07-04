@@ -412,7 +412,7 @@
           ? "Идет запись" + (weekday ? " на " + weekday : "")
           : "Открыть запись";
     }
-    if (count) count.textContent = active ? "1" : "";
+    if (count) count.textContent = "";
     button.setAttribute("aria-label", started ? "Стол приватного кеша играет сейчас" : active ? "Открыта запись на приватный кеш" : "Открыть приватный кеш");
   }
 

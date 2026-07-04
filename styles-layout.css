@@ -982,12 +982,14 @@ body[data-view="summer-rating"] #app.app .card .card__content > .view--active[da
 
 body[data-view="download"] #app.app .card .card__content,
 body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="summer-rating"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content {
   scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
   padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
 }
 body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
 body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
+body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"],
 body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"] {
   min-height: calc(100% + var(--app-short-panel-overscroll-extra)) !important;
   box-sizing: border-box !important;
@@ -1016,6 +1018,9 @@ body[data-view="home"] #app.app .card .card__content {
   html:has(body[data-view="cashout"]) .card .card__content,
   html.app-view-cashout-html-scroll .card .card__content,
   body[data-view="cashout"] #app.app .card .card__content,
+  html:has(body[data-view="summer-rating"]) .card .card__content,
+  html.app-view-summer-rating-html-scroll .card .card__content,
+  body[data-view="summer-rating"] #app.app .card .card__content,
   html:has(body[data-view="profile"]) .card .card__content,
   html.app-view-profile-html-scroll .card .card__content,
   body[data-view="profile"] #app.app .card .card__content {
@@ -1030,6 +1035,9 @@ body[data-view="home"] #app.app .card .card__content {
   html:has(body[data-view="cashout"]) .card .card__content,
   html.app-view-cashout-html-scroll .card .card__content,
   body[data-view="cashout"] #app.app .card .card__content,
+  html:has(body[data-view="summer-rating"]) .card .card__content,
+  html.app-view-summer-rating-html-scroll .card .card__content,
+  body[data-view="summer-rating"] #app.app .card .card__content,
   html:has(body[data-view="profile"]) .card .card__content,
   html.app-view-profile-html-scroll .card .card__content,
   body[data-view="profile"] #app.app .card .card__content {
@@ -1053,6 +1061,9 @@ html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="cashout"]) .card .card__content,
 html.poker-ios-pwa.app-view-cashout-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="cashout"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="summer-rating"]) .card .card__content,
+html.poker-ios-pwa.app-view-summer-rating-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="summer-rating"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
 html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {
@@ -1067,6 +1078,9 @@ html.poker-ios-pwa body[data-view="download"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="cashout"]) .card .card__content,
 html.poker-ios-pwa.app-view-cashout-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="cashout"] #app.app .card .card__content,
+html.poker-ios-pwa:has(body[data-view="summer-rating"]) .card .card__content,
+html.poker-ios-pwa.app-view-summer-rating-html-scroll .card .card__content,
+html.poker-ios-pwa body[data-view="summer-rating"] #app.app .card .card__content,
 html.poker-ios-pwa:has(body[data-view="profile"]) .card .card__content,
 html.poker-ios-pwa.app-view-profile-html-scroll .card .card__content,
 html.poker-ios-pwa body[data-view="profile"] #app.app .card .card__content {

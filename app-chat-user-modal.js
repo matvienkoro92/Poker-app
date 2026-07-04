@@ -1834,7 +1834,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalGetSeasonPlacesReady(getPlaces, ratingNick, season) {
     if ((season === "summer" || season === "spring") && typeof window.pokerEnsureScriptDomains === "function") {
-      return Promise.resolve(window.pokerEnsureScriptDomains(["app"]))
+      return Promise.resolve(window.pokerEnsureScriptDomains(["rating-" + season]))
         .then(function () { return getPlaces(ratingNick, season); })
         .catch(function () { return getPlaces(ratingNick, season); });
     }

@@ -341,7 +341,7 @@ function fetchRaffleBadge() {
   if (!base) return;
   var q = pokerRafflesApiQueryLeading();
   if (q === "?initData=" && !pokerCanSyncGuestProfileToServer()) return;
-  fetch(base + "/api/raffles" + q + "&_t=" + Date.now())
+  fetch(base + "/api/raffles" + q + "&homeBonus=1")
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok) {
@@ -349,7 +349,10 @@ function fetchRaffleBadge() {
           ? data.activeRaffles
           : (data.activeRaffle ? [data.activeRaffle] : []);
         updateRaffleBadge(activeList);
-        if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
+        if (typeof window !== "undefined") {
+          window._rafflesCache = window._rafflesCache || {};
+          window._rafflesCache.homeBonus = { data: data, time: Date.now() };
+        }
       }
     })
     .catch(function () {});

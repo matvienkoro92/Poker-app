@@ -2617,17 +2617,16 @@ add("Large unused movie assets are not shipped", () =>
   !fs.existsSync(path.join(root, "public", "assets", "chat-push-notify.wav")) &&
   has("client", 'var POKER_CHAT_MESSAGE_NOTIFY_SRC = "./assets/chat-message-notify.mp3?v=') &&
   !fs.existsSync(path.join(root, "public", "assets", "README.md")) &&
-  has("downloadFragment", 'src="./assets/download-hero.png"') &&
-  has("downloadFragment", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
-  has("downloadFragment", 'srcset="./assets/download-hero.webp" type="image/webp"') &&
+  !has("downloadFragment", 'src="./assets/download-hero.png"') &&
+  !has("downloadFragment", 'srcset="./assets/download-hero.avif" type="image/avif"') &&
+  !has("downloadFragment", 'srcset="./assets/download-hero.webp" type="image/webp"') &&
   !has("html", 'rel="preload" as="image" href="./assets/download-hero.png"') &&
-  has("downloadFragment", 'class="download-image"') &&
-  has("downloadFragment", 'loading="lazy"')
+  !has("downloadFragment", 'class="download-image"') &&
+  !has("downloadFragment", 'download-quote')
 );
 
 add("Modern image variants exist for heavy visual assets", () => {
   const assets = [
-    "download-hero",
     "video-lessons-coach-nikolay",
     "gazette-frankl-vaaar-march8",
     "coach-review-screen-01",

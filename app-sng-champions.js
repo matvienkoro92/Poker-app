@@ -387,9 +387,16 @@
     var edit = data.isAdmin
       ? '<button type="button" class="sng-champions-modal__edit-btn" data-sng-tab="create">Редактировать</button>'
       : "";
+    var approved = (data.counts && Number(data.counts.approved)) || entries.filter(function (entry) { return entry.status === "approved"; }).length;
+    var pending = (data.counts && Number(data.counts.pending)) || entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; }).length;
+    var activeEntries = approved + pending;
+    var capacity = Number(data.capacity) || 32;
     return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
       '<figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
+        '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--players" aria-label="Подтвержденных игроков">' + escapeHtml(String(approved) + " / " + String(capacity)) + '</span>' +
+        '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--requests" aria-label="Активных заявок">' + escapeHtml(activeEntries) + '</span>' +
+        '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--waiting" aria-label="Ждут подтверждения">' + escapeHtml(pending) + '</span>' +
       '</figure>';
   }
 

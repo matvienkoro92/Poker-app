@@ -39,8 +39,8 @@
     --hall-top2026-stage-min-height: clamp(760px, calc(100vw + 408px), 824px);
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: calc(var(--hall-top2026-scene-width) * 1.42);
-    --hall-top2026-trophy-right: -19px;
-    --hall-top2026-trophy-top: 396px;
+    --hall-top2026-trophy-right: -62px;
+    --hall-top2026-trophy-top: 372px;
     --hall-top2026-trophy-width: 119px;
     width: 100%;
     max-width: 100%;
@@ -202,7 +202,7 @@
   }
 
   #hallOfFameView .hall-of-fame__top2026-trophy {
-    z-index: 8;
+    z-index: 7;
     top: var(--hall-top2026-trophy-top);
     right: calc((100vw - var(--hall-top2026-scene-width)) / 2 + var(--hall-top2026-trophy-right));
     width: var(--hall-top2026-trophy-width);
@@ -215,7 +215,7 @@
 
   #hallOfFameView .hall-of-fame__top2026-list-card {
     position: absolute;
-    z-index: 6;
+    z-index: 9;
     width: var(--hall-top2026-list-width) !important;
     max-width: var(--hall-top2026-list-max-width) !important;
     top: 370px;
@@ -275,7 +275,7 @@
     --hall-top2026-list-width: 216px;
     --hall-top2026-list-max-width: 216px;
     --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + 58px);
-    --hall-top2026-trophy-right: -60px;
+    --hall-top2026-trophy-right: -72px;
     --hall-top2026-trophy-width: 112px;
   }
 
@@ -308,8 +308,8 @@
     --hall-top2026-stage-min-height: 824px;
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 554px;
-    --hall-top2026-trophy-right: calc(50% - 214px);
-    --hall-top2026-trophy-top: 408px;
+    --hall-top2026-trophy-right: calc(50% - 258px);
+    --hall-top2026-trophy-top: 372px;
     --hall-top2026-trophy-width: 126px;
     max-width: 430px;
     margin-inline: auto;
@@ -3194,7 +3194,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.home-club-choice-plaque--cash .home-club-choice-plaque__count:empty {
+.home-club-choice-plaque--cash .home-club-choice-plaque__count {
   display: none;
 }
 
@@ -3923,6 +3923,51 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   object-fit: cover;
 }
 
+.sng-champions-modal__hero-live {
+  position: absolute;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  height: 6.3%;
+  padding: 0 0.4%;
+  color: #f3c65b;
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(255, 199, 78, 0.12), transparent 64%),
+    linear-gradient(180deg, rgba(17, 15, 12, 0.96), rgba(9, 10, 11, 0.92));
+  box-shadow:
+    0 0 10px rgba(0, 0, 0, 0.76),
+    inset 0 0 12px rgba(255, 160, 26, 0.08);
+  font-size: clamp(14px, 3vw, 48px);
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  text-shadow:
+    0 2px 0 rgba(34, 16, 2, 0.96),
+    0 0 8px rgba(255, 221, 124, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.sng-champions-modal__hero-live--players {
+  left: 35.4%;
+  top: 87%;
+  width: 11.2%;
+}
+
+.sng-champions-modal__hero-live--requests {
+  left: 52.3%;
+  top: 87%;
+  width: 4.5%;
+}
+
+.sng-champions-modal__hero-live--waiting {
+  left: 68.6%;
+  top: 87%;
+  width: 4.5%;
+}
+
 .sng-champions-modal__summary--compact {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
@@ -4494,20 +4539,20 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
-  object-position: center;
+  object-position: center 58%;
 }
 
 .sng-champions-modal__entry-avatar-img--art {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 166%;
-  height: 166%;
+  width: 196%;
+  height: 196%;
   max-width: none;
   max-height: none;
   object-fit: contain;
-  object-position: center;
-  transform: translate(-50%, -48%);
+  object-position: center bottom;
+  transform: translate(-50%, -37%);
 }
 
 .sng-champions-modal__entry-avatar em {
@@ -10622,6 +10667,67 @@ body.club-choice-vote-open {
   box-sizing: border-box;
 }
 
+.card__footer--home {
+  padding: 8px 12px 16px;
+}
+
+.footer-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+  min-height: 28px;
+  color: rgba(255, 239, 204, 0.62);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.footer-note,
+.footer-admin-visitors,
+.footer-visitors {
+  margin: 0;
+}
+
+.footer-note {
+  flex: 1 1 100%;
+  color: rgba(255, 239, 204, 0.68);
+  text-shadow: 0 0 10px rgba(255, 184, 70, 0.1);
+}
+
+.footer-admin-visitors--hidden {
+  display: none !important;
+}
+
+.footer-admin-visitors__btn {
+  min-height: 24px;
+  padding: 3px 9px;
+  color: rgba(255, 226, 174, 0.76);
+  border: 1px solid rgba(255, 184, 70, 0.24);
+  border-radius: 8px;
+  background: rgba(7, 9, 13, 0.54);
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 172, 0.04);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.footer-admin-visitors__btn:focus-visible {
+  outline: 2px solid rgba(255, 198, 94, 0.46);
+  outline-offset: 2px;
+}
+
+.footer-visitors__version {
+  color: rgba(255, 239, 204, 0.42);
+  font-size: 10px;
+  font-weight: 750;
+}
+
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   html.app-view-browser-local:not(.app--telegram-miniapp) {
     --app-content-width: min(430px, calc(100vw - 32px));
@@ -13879,4 +13985,124 @@ body.club-choice-vote-open {
     --home-club-choice-row: 64px;
     --home-shortcuts-row-gap: 9px;
   }
+}
+
+body[data-view="equilator"] #app.app,
+html:has(body[data-view="equilator"]) #app.app,
+html.app-view-equilator-html-scroll #app.app,
+#app:has(.view--active[data-view="equilator"]) {
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body[data-view="equilator"] #app.app .card,
+html:has(body[data-view="equilator"]) #app.app .card,
+html.app-view-equilator-html-scroll #app.app .card,
+#app:has(.view--active[data-view="equilator"]) > .card {
+  width: min(100%, 430px) !important;
+  max-width: 430px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="equilator"] #app.app .card .card__content,
+html:has(body[data-view="equilator"]) #app.app .card .card__content,
+html.app-view-equilator-html-scroll #app.app .card .card__content,
+#app:has(.view--active[data-view="equilator"]) > .card > .card__content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="equilator"] #app.app .card .card__content > .view--active[data-view="equilator"],
+html:has(body[data-view="equilator"]) #app.app .card .card__content > .view--active[data-view="equilator"],
+html.app-view-equilator-html-scroll #app.app .card .card__content > .view--active[data-view="equilator"],
+#app:has(.view--active[data-view="equilator"]) > .card > .card__content > .view--active[data-view="equilator"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.learn-play-hub__share-row,
+.video-lessons__share-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin: 14px 0 0;
+}
+
+.learn-play-hub__share-row .raffles-hero__share-btn,
+.video-lessons__share-row .raffles-hero__share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 194, 90, 0.72);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% -35%, rgba(255, 255, 255, 0.42), transparent 38%),
+    linear-gradient(135deg, #fff0b8 0%, #ffc84a 38%, #f28b17 100%);
+  color: #1a0f02;
+  box-shadow:
+    0 0 0 1px rgba(255, 238, 177, 0.22),
+    0 8px 22px rgba(255, 126, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    inset 0 -2px 0 rgba(119, 55, 0, 0.2);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, 0.48);
+  cursor: pointer;
+  appearance: none;
+}
+
+.learn-play-hub__share-row .raffles-hero__share-btn--primary,
+.video-lessons__share-row .raffles-hero__share-btn--primary {
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
+.learn-play-hub__share-row .raffles-hero__share-btn--copy-icon,
+.video-lessons__share-row .raffles-hero__share-btn--copy-icon {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.learn-play-hub__share-row .raffles-hero__copy-icon,
+.video-lessons__share-row .raffles-hero__copy-icon,
+.learn-play-hub__share-row .raffles-hero__copy-icon svg,
+.video-lessons__share-row .raffles-hero__copy-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.learn-play-hub__share-row .raffles-hero__share-btn:hover,
+.learn-play-hub__share-row .raffles-hero__share-btn:focus-visible,
+.video-lessons__share-row .raffles-hero__share-btn:hover,
+.video-lessons__share-row .raffles-hero__share-btn:focus-visible {
+  border-color: rgba(255, 238, 177, 0.96);
+  background:
+    radial-gradient(circle at 50% -35%, rgba(255, 255, 255, 0.55), transparent 40%),
+    linear-gradient(135deg, #fff5c8 0%, #ffd65d 38%, #ff9a20 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 238, 177, 0.32),
+    0 10px 26px rgba(255, 126, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }

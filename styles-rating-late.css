@@ -2260,8 +2260,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   overflow: hidden;
   background:
     url("./assets/summer-rating-monkey-place-1.webp") 50% calc(2% - 10px) / 42.5% auto no-repeat,
-    url("./assets/summer-rating-monkey-place-2.webp") 15% calc(8% - 10px) / 33.125% auto no-repeat,
-    url("./assets/summer-rating-monkey-place-3.webp") 84% calc(42% - 10px) / 33.125% auto no-repeat;
+    url("./assets/summer-rating-monkey-place-2.webp") 15% calc(8% - 10px) / 23.85% auto no-repeat,
+    url("./assets/summer-rating-monkey-place-3.webp") 84% calc(42% - 10px) / 26.5% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
@@ -2269,8 +2269,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   min-height: 280px;
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% 18% / 31% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki.webp?v=3.546") 18% calc(22% - 10px) / 40% auto no-repeat,
-    url("./assets/summer-rating-player-cooler.webp") 82% 22% / 27.9% auto no-repeat;
+    url("./assets/summer-rating-player-pokermanki.webp?v=3.546") 18% calc(22% - 10px) / 32% auto no-repeat,
+    url("./assets/summer-rating-player-cooler.webp") 82% 22% / 22.32% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3--league::before {
@@ -2826,12 +2826,14 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   align-items: center;
   justify-content: center;
   gap: 0;
+  max-width: calc(100% - 190px);
   color: #ffe9bd;
   font-size: 0;
   font-weight: 1000;
   line-height: 0.9;
   letter-spacing: 0;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
+  transform: translateX(-26px);
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::before {
@@ -3066,6 +3068,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-legend,
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__dates {
   display: flex !important;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::after {
+  content: "";
+  display: block;
+  height: calc(var(--app-bottom-tabbar-pad, 105px) + 72px);
+  flex: 0 0 auto;
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] #springRatingViewTotals.spring-rating-view-totals-stack {

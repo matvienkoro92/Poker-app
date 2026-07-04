@@ -1,4 +1,13 @@
 function initProfilePokerPlus() {
+  var escapeHtml = typeof window.escapeHtml === "function"
+    ? window.escapeHtml
+    : function (value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    };
   var section = document.getElementById("profilePokerPlusSection");
   var title = document.getElementById("profilePokerPlusTitle");
   var input = document.getElementById("profilePokerPlusCiphertextInput");
