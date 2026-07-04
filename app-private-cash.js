@@ -175,14 +175,14 @@
     var date = String(event && event.date || "").trim();
     var time = String(event && event.time || "").trim();
     if (!date || !time) return 0;
-    var d = new Date(date + "T" + time + ":00");
+    var d = new Date(date + "T" + time + ":00+03:00");
     var ms = d.getTime();
     return Number.isFinite(ms) ? ms : 0;
   }
 
   function privateCashWeekdayText(raw) {
     var s = String(raw || "").trim();
-    var d = s ? new Date(s + "T12:00:00") : null;
+    var d = s ? new Date(s + "T12:00:00+03:00") : null;
     if (!d || !Number.isFinite(d.getTime())) return "";
     var days = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
     return days[d.getDay()] || "";
