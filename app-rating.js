@@ -336,12 +336,28 @@ function initSummerRating2025Modal() {
 
 
 
+var raffleBadgeHomeFetchPromise = null;
+var RAFFLE_BADGE_HOME_TTL_MS = 60 * 1000;
+
 function fetchRaffleBadge() {
+  var force = arguments.length > 0 && arguments[0] && arguments[0].force === true;
+  var cached = null;
+  try {
+    cached = window._rafflesCache && window._rafflesCache.homeBonus;
+    if (!force && cached && cached.data && cached.time && Date.now() - cached.time < RAFFLE_BADGE_HOME_TTL_MS) {
+      var cachedList = Array.isArray(cached.data.activeRaffles)
+        ? cached.data.activeRaffles
+        : (cached.data.activeRaffle ? [cached.data.activeRaffle] : []);
+      updateRaffleBadge(cachedList);
+      return;
+    }
+  } catch (eCachedBadge) {}
+  if (!force && raffleBadgeHomeFetchPromise) return raffleBadgeHomeFetchPromise;
   var base = getApiBase();
   if (!base) return;
   var q = pokerRafflesApiQueryLeading();
   if (q === "?initData=" && !pokerCanSyncGuestProfileToServer()) return;
-  fetch(base + "/api/raffles" + q + "&homeBonus=1")
+  raffleBadgeHomeFetchPromise = fetch(base + "/api/raffles" + q + "&homeBonus=1")
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data && data.ok) {
@@ -355,7 +371,11 @@ function fetchRaffleBadge() {
         }
       }
     })
-    .catch(function () {});
+    .catch(function () {})
+    .then(function () {
+      raffleBadgeHomeFetchPromise = null;
+    });
+  return raffleBadgeHomeFetchPromise;
 }
 
 /** Не показываем логин Telegram у админа Романа (@Roman1787443) в профиле и списках. */

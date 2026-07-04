@@ -191,7 +191,16 @@ function initChatPollingLoop(opts) {
   var chatLastPollAt = state.chatLastPollAt || {};
   var CHAT_POLL_TICK_MS = constants.CHAT_POLL_TICK_MS || 1000;
   var CHAT_HIDDEN_IDLE_MS = constants.CHAT_HIDDEN_IDLE_MS || 60000;
+  var CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS = constants.CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS || 60000;
+  var CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS = constants.CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS || 300000;
   var CHAT_PRESENCE_IDLE_MS = constants.CHAT_PRESENCE_IDLE_MS || 45000;
+  function shouldRunChatHomeSummaryPoll(nowMs, hidden) {
+    var interval = hidden ? CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS : CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS;
+    var last = chatLastPollAt.homeSummary || 0;
+    if (nowMs - last < interval) return false;
+    chatLastPollAt.homeSummary = nowMs;
+    return true;
+  }
 
   if (currentInterval) clearInterval(currentInterval);
   var nextInterval = setInterval(function () {
@@ -203,19 +212,23 @@ function initChatPollingLoop(opts) {
 
     if (hidden) {
       if (credPoll && !guestPoll) {
-        if (!chatLastPollAt.contacts || nowPoll - chatLastPollAt.contacts >= CHAT_HIDDEN_IDLE_MS) {
+        if (loadChatHomeSummary && shouldRunChatHomeSummaryPoll(nowPoll, true)) {
+          loadChatHomeSummary();
+        } else if (!loadChatHomeSummary && (!chatLastPollAt.contacts || nowPoll - chatLastPollAt.contacts >= CHAT_HIDDEN_IDLE_MS)) {
           chatLastPollAt.contacts = nowPoll;
-          if (loadChatHomeSummary) loadChatHomeSummary();
-          else loadContacts({ metaOnly: true });
+          loadContacts({ metaOnly: true });
         }
       }
       return;
     }
 
     if (!chatViewOn) {
-      if (credPoll && !guestPoll && !pokerChatCanRunLongPoll("contacts") && pokerChatShouldRunPoll("contacts", nowPoll)) {
-        if (loadChatHomeSummary) loadChatHomeSummary();
-        else loadContacts({ metaOnly: true });
+      if (credPoll && !guestPoll && !pokerChatCanRunLongPoll("contacts")) {
+        if (loadChatHomeSummary) {
+          if (shouldRunChatHomeSummaryPoll(nowPoll, false)) loadChatHomeSummary();
+        } else if (pokerChatShouldRunPoll("contacts", nowPoll)) {
+          loadContacts({ metaOnly: true });
+        }
       }
       return;
     }

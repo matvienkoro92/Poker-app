@@ -1,4 +1,7 @@
 // API base, tracking-link events, share stats, and visitor counters.
+var POKER_VISITOR_STATS_TTL_MS = 5 * 60 * 1000;
+var pokerVisitorStatsCache = null;
+var pokerVisitorStatsCacheAt = 0;
 
 function isLocalEnv() {
   if (typeof window === "undefined" || !window.location) return true;
@@ -323,6 +326,7 @@ function applyVisitorCounts(data, elTotal, elUnique, elReturning) {
 }
 
 function fetchVisitorStatsOnly() {
+  var force = arguments.length > 0 && arguments[0] && arguments[0].force === true;
   const elTotal = document.getElementById("visitorTotal");
   const elUnique = document.getElementById("visitorUnique");
   const elReturning = document.getElementById("visitorReturning");
@@ -342,6 +346,10 @@ function fetchVisitorStatsOnly() {
     setDash();
     return;
   }
+  if (!force && pokerVisitorStatsCache && Date.now() - pokerVisitorStatsCacheAt < POKER_VISITOR_STATS_TTL_MS) {
+    applyVisitorCounts(pokerVisitorStatsCache, elTotal, elUnique, elReturning);
+    return;
+  }
   var authLeadingSt =
     typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
   var statsUrl =
@@ -353,7 +361,11 @@ function fetchVisitorStatsOnly() {
       if (!res.ok) return Promise.reject(new Error("stats " + res.status));
       return res.json();
     })
-    .then((data) => applyVisitorCounts(data, elTotal, elUnique, elReturning))
+    .then(function (data) {
+      pokerVisitorStatsCache = data;
+      pokerVisitorStatsCacheAt = Date.now();
+      applyVisitorCounts(data, elTotal, elUnique, elReturning);
+    })
     .catch(function () {
       setDash();
     });

@@ -200,7 +200,10 @@
   var headerStatusLevel = document.getElementById("headerPokerStatusLevel");
   var headerStatusFish = document.getElementById("headerPokerStatusFish");
   if (!headerStatus) return;
+  var HOME_STATUS_REFRESH_MS = 10 * 60 * 1000;
   var loadedStatus = false;
+  var lastStatusLoadAt = 0;
+  var statusLoadInFlight = false;
   var hallFishRatingLoading = false;
   function fishSrcForLevel(level) {
     if (typeof pokerProfileStatusFishSrc === "function") return pokerProfileStatusFishSrc(level);
@@ -325,11 +328,16 @@
   }
   function loadStatus(attempt) {
     attempt = Number(attempt) || 0;
+    var force = arguments.length > 1 && arguments[1] === true;
+    var nowStatus = Date.now();
+    if (!force && attempt === 0 && loadedStatus && lastStatusLoadAt && nowStatus - lastStatusLoadAt < HOME_STATUS_REFRESH_MS) return;
+    if (!force && attempt === 0 && statusLoadInFlight) return;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     var q = authQuery();
     if (isGuestAuthMode()) {
       loadedStatus = false;
+      lastStatusLoadAt = Date.now();
       applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "", level: 0 });
       return;
     }
@@ -343,16 +351,22 @@
       if (cached) q += "&dtIdHint=" + encodeURIComponent(cached);
     } catch (eHint) {}
     q += "&statusSummary=1";
+    statusLoadInFlight = true;
     fetch(base + "/api/users" + q, { cache: "no-store" })
       .then(function (r) { return r.json(); })
-      .then(function (data) { applyStatus(data); })
+      .then(function (data) {
+        statusLoadInFlight = false;
+        if (data && data.ok) lastStatusLoadAt = Date.now();
+        applyStatus(data);
+      })
       .catch(function () {
-        if (attempt < 12) setTimeout(function () { loadStatus(attempt + 1); }, 800);
+        statusLoadInFlight = false;
+        if (attempt < 12) setTimeout(function () { loadStatus(attempt + 1, force); }, 800);
         else applyStatus(null);
       });
   }
   loadStatus(0);
-  window.addEventListener("poker-telegram-auth", function () { loadStatus(0); });
+  window.addEventListener("poker-telegram-auth", function () { loadStatus(0, true); });
   window.addEventListener("poker-pokerplus-status-change", function (ev) {
     var detail = ev && ev.detail ? ev.detail : {};
     if (detail && detail.linked === true) {
@@ -360,7 +374,7 @@
     } else if (detail && detail.linked === false) {
       applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "" });
     }
-    loadStatus(0);
+    loadStatus(0, true);
   });
   document.addEventListener("visibilitychange", function () {
     if (!document.hidden) loadStatus(0);

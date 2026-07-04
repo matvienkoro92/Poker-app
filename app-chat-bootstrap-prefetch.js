@@ -64,8 +64,10 @@ function initChatBootstrapPrefetchRuntime(opts) {
       var base = opts.base || "";
       if (!base) return;
       var nowS = Date.now();
+      var hiddenS = typeof document !== "undefined" && document.visibilityState !== "visible";
+      var cooldownMs = hiddenS ? 300000 : 60000;
       if (window.__pokerChatHomeSummaryCooldownUntil && nowS < window.__pokerChatHomeSummaryCooldownUntil) return;
-      window.__pokerChatHomeSummaryCooldownUntil = nowS + 12000;
+      window.__pokerChatHomeSummaryCooldownUntil = nowS + cooldownMs;
       var genS = (window.__pokerChatHomeSummaryGen || 0) + 1;
       window.__pokerChatHomeSummaryGen = genS;
       var lastVS = "";
