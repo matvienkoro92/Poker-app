@@ -267,6 +267,22 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    if (startParam === "sng_champions") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("home");
+        var attempts = 0;
+        var openSngChampions = function () {
+          attempts += 1;
+          if (typeof window.openSngChampionsModal === "function") {
+            window.openSngChampionsModal();
+            return;
+          }
+          if (attempts < 8) setTimeout(openSngChampions, 250);
+        };
+        setTimeout(openSngChampions, 250);
+      }, 0);
+      return;
+    }
     if (startParam === "club_choice_vote" || startParam === "club_choice_vote_current") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");

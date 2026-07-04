@@ -106,6 +106,7 @@
       { title: "Ссылка на розыгрыш", hint: "Открывает актуальный розыгрыш #1", icon: "link", link: buildRaffleLink() },
       { title: "Блок розыгрышей", hint: "Все активные розыгрыши", icon: "gift", link: buildStartLink("raffles") },
       { title: "Раздача дня", hint: "Игра дня с личной ссылкой", icon: "card", link: buildStartLink("daily_poker") },
+      { title: "СНГ Лига чемпионов", hint: "Запись на турнир", icon: "star", link: buildStartLink("sng_champions") },
       { title: "Общий чат", hint: "Чат клуба", icon: "message", link: buildStartLink("club_chat") },
       { title: "Газета клуба", hint: "Новости и задачи клуба", icon: "newspaper", link: buildStartLink("news") },
       { title: "Устав клуба", hint: "Правила клуба", icon: "star", link: buildStartLink("club_charter") },

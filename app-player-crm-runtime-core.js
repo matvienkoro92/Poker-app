@@ -877,6 +877,7 @@
     { key: "daily-poker", label: "Раздача дня", view: "daily-poker", startapp: "daily_poker" },
     { key: "daily-prediction", label: "Прогноз дня", view: "home", startapp: "daily_prediction" },
     { key: "private-cash", label: "Приватный кеш", view: "home", startapp: "private_cash" },
+    { key: "sng-champions", label: "СНГ Лига чемпионов", view: "home", startapp: "sng_champions" },
     { key: "club-charter", label: "Устав клуба", view: "home", startapp: "club_charter" },
     { key: "club-choice-vote", label: "Голосование клуба", view: "home", startapp: "club_choice_vote" },
     { key: "vpn-proxy", label: "VPN и прокси", view: "home", startapp: "vpn_proxy" },
