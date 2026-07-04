@@ -246,7 +246,15 @@
     return "Ждет подтверждения";
   }
 
-  function roundStageLabel(round) {
+  function roundStageLabel(round, index, rounds) {
+    if (Array.isArray(rounds) && rounds.length) {
+      var remaining = rounds.length - (Number(index) || 0);
+      if (remaining === 1) return "Финал";
+      if (remaining === 2) return "1/2";
+      if (remaining === 3) return "1/4";
+      if (remaining === 4) return "1/8";
+      if (remaining === 5) return "1/16";
+    }
     var matches = Array.isArray(round && round.matches) ? round.matches.length : 0;
     if (matches >= 16) return "1/16";
     if (matches === 8) return "1/8";
@@ -256,8 +264,8 @@
     return round && round.name ? round.name : "Сетка";
   }
 
-  function roundStageClass(round) {
-    var label = roundStageLabel(round);
+  function roundStageClass(round, index, rounds) {
+    var label = roundStageLabel(round, index, rounds);
     if (label === "1/4") return "quarter";
     if (label === "1/2") return "semi";
     if (label === "Финал") return "final";
@@ -589,8 +597,8 @@
     if (activeBracketStage >= rounds.length) activeBracketStage = rounds.length - 1;
     var round = rounds[activeBracketStage] || rounds[0];
     var active = data.currentRoundId && data.currentRoundId === round.id;
-    var stageLabel = roundStageLabel(round);
-    var stageClass = roundStageClass(round);
+    var stageLabel = roundStageLabel(round, activeBracketStage, rounds);
+    var stageClass = roundStageClass(round, activeBracketStage, rounds);
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
     var prevDisabled = activeBracketStage <= 0;
     var nextDisabled = activeBracketStage >= rounds.length - 1;
@@ -611,7 +619,7 @@
         '</div>' +
       '</section>' +
       '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
-        return '<button type="button" class="' + (index === activeBracketStage ? "is-active" : "") + '" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(item)) + '</button>';
+        return '<button type="button" class="' + (index === activeBracketStage ? "is-active" : "") + '" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(item, index, rounds)) + '</button>';
       }).join("") + '</div>' +
     '</div>';
   }
