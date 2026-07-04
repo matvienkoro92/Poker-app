@@ -3194,6 +3194,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
+.home-club-choice-plaque--cash .home-club-choice-plaque__count:empty {
+  display: none;
+}
+
 .home-club-choice-plaque--vote .home-club-choice-plaque__text {
   font-size: inherit;
 }
@@ -3919,77 +3923,6 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   object-fit: cover;
 }
 
-.sng-champions-modal__hero-stats {
-  position: absolute;
-  right: 21.5%;
-  bottom: 3.6%;
-  left: 21.5%;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: center;
-  min-height: 12.2%;
-  padding: clamp(5px, 1.2vw, 12px) clamp(8px, 1.8vw, 18px);
-  overflow: hidden;
-  border: 1px solid rgba(185, 112, 28, 0.72);
-  border-radius: clamp(8px, 1.6vw, 18px);
-  background:
-    radial-gradient(circle at 50% 100%, rgba(255, 166, 35, 0.2), transparent 58%),
-    linear-gradient(180deg, rgba(12, 15, 18, 0.99), rgba(3, 6, 10, 0.99));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 226, 148, 0.07),
-    0 0 20px rgba(255, 144, 24, 0.2);
-}
-
-.sng-champions-modal__hero-stat {
-  display: grid;
-  grid-template-columns: clamp(24px, 4vw, 46px) minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  align-items: center;
-  column-gap: clamp(5px, 1vw, 11px);
-  min-width: 0;
-}
-
-.sng-champions-modal__hero-stat span {
-  grid-row: 1 / span 2;
-  display: inline-grid;
-  place-items: center;
-  width: clamp(24px, 4vw, 46px);
-  height: clamp(24px, 4vw, 46px);
-  color: #ffd26d;
-  border: 1px solid rgba(255, 198, 94, 0.42);
-  border-radius: 999px;
-  background: rgba(255, 184, 70, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(255, 240, 196, 0.06), 0 0 10px rgba(255, 171, 44, 0.18);
-  font-size: clamp(13px, 2.3vw, 25px);
-  line-height: 1;
-}
-
-.sng-champions-modal__hero-stat em,
-.sng-champions-modal__hero-stat strong {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.62), 0 0 10px rgba(255, 189, 78, 0.24);
-}
-
-.sng-champions-modal__hero-stat em {
-  color: rgba(255, 239, 201, 0.76);
-  font-size: clamp(7px, 1.25vw, 13px);
-  font-style: normal;
-  font-weight: 950;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.sng-champions-modal__hero-stat strong {
-  color: #fff0c6;
-  font-size: clamp(15px, 3.2vw, 34px);
-  font-weight: 1000;
-  line-height: 1.05;
-}
-
 .sng-champions-modal__summary--compact {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
@@ -4329,6 +4262,20 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   background: rgba(8, 9, 14, 0.9);
 }
 
+.sng-champions-modal__bottom-actions {
+  display: grid;
+  margin-top: 14px;
+}
+
+.sng-champions-modal__secondary-action--cancel {
+  width: 100%;
+  min-height: 42px;
+  color: rgba(255, 225, 176, 0.78);
+  border-color: rgba(255, 184, 70, 0.24);
+  background: rgba(8, 9, 14, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(255, 230, 162, 0.04);
+}
+
 .sng-champions-modal__danger-action {
   color: #ffe3d7;
   border-color: rgba(255, 120, 72, 0.45);
@@ -4532,6 +4479,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__entry-avatar-media {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -4550,13 +4498,16 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 .sng-champions-modal__entry-avatar-img--art {
-  width: 148%;
-  height: 148%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 166%;
+  height: 166%;
   max-width: none;
   max-height: none;
   object-fit: contain;
-  object-position: center 30%;
-  transform: translateY(8%);
+  object-position: center;
+  transform: translate(-50%, -48%);
 }
 
 .sng-champions-modal__entry-avatar em {
@@ -4622,8 +4573,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
   min-height: 28px;
   padding: 0 10px;
+  overflow: hidden;
   color: #8bd15f;
   border: 1px solid rgba(117, 208, 80, 0.64);
   border-radius: 8px;
@@ -4631,6 +4586,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   box-shadow: inset 0 0 0 1px rgba(204, 255, 172, 0.06);
   font-size: 14px;
   font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sng-champions-modal__entry-status i {
@@ -13000,6 +12957,7 @@ body.club-choice-vote-open {
     gap: 0 10px;
     min-height: 0;
     padding: 10px;
+    overflow: hidden;
   }
 
   .sng-champions-modal__entries {
@@ -13044,14 +13002,29 @@ body.club-choice-vote-open {
 
   .sng-champions-modal__entry-name {
     font-size: 16px;
+    width: 100%;
+    justify-self: stretch;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
   }
 
   .sng-champions-modal__entry-status {
+    box-sizing: border-box;
+    max-width: 100%;
     min-height: 24px;
-    padding: 0 8px;
-    font-size: 11px;
+    min-width: 0;
+    padding: 0 6px;
+    gap: 4px;
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sng-champions-modal__entry-status i {
+    flex: 0 0 auto;
+    font-size: 15px;
   }
 
   .sng-champions-modal__entry-action {
@@ -13799,7 +13772,7 @@ body.club-choice-vote-open {
 }
 
 .app.app--view-home .home-club-actions-block {
-  --home-sng-champions-row: clamp(110px, 28vw, 136px);
+  --home-sng-champions-row: clamp(121px, 30.8vw, 150px);
   --home-club-choice-row: clamp(66px, 16vw, 84px);
   --home-shortcuts-row-gap: clamp(10px, 2.6vw, 14px);
   grid-template-rows: var(--home-sng-champions-row) var(--home-club-choice-row) !important;
@@ -13839,6 +13812,43 @@ body.club-choice-vote-open {
   padding-bottom: clamp(15px, 4vw, 21px);
 }
 
+.app.app--view-home .home-club-choice-plaque--sng::before {
+  content: "" !important;
+  position: absolute;
+  top: clamp(15px, 3.1vw, 20px);
+  left: 50%;
+  z-index: 6;
+  display: block !important;
+  width: clamp(42px, 9vw, 66px);
+  height: clamp(16px, 3.4vw, 23px);
+  border: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 194, 78, 0.1), transparent 62%),
+    linear-gradient(180deg, rgba(12, 9, 4, 0.92), rgba(9, 7, 5, 0.86));
+  transform: translateX(-50%);
+  filter: blur(0.2px);
+  pointer-events: none;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__count,
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__subtext {
+  border-color: rgba(255, 184, 57, 0.96);
+  background:
+    radial-gradient(circle at 22% 0%, rgba(255, 220, 119, 0.18), transparent 44%),
+    linear-gradient(180deg, rgba(12, 13, 15, 0.96), rgba(5, 6, 9, 0.94));
+  color: #ffe59a;
+  font-weight: 1000;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.94),
+    0 0 7px rgba(255, 214, 112, 0.64),
+    0 0 13px rgba(255, 139, 23, 0.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 237, 170, 0.13),
+    inset 0 0 10px rgba(255, 149, 23, 0.14),
+    0 0 8px rgba(255, 154, 27, 0.42),
+    0 0 16px rgba(255, 106, 0, 0.18);
+}
+
 .app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque {
   height: 100%;
   min-height: 0;
@@ -13853,7 +13863,7 @@ body.club-choice-vote-open {
 
 @media (max-width: 430px) {
   .app.app--view-home .home-club-actions-block {
-    --home-sng-champions-row: clamp(108px, 28vw, 122px);
+    --home-sng-champions-row: clamp(119px, 30.8vw, 134px);
     --home-club-choice-row: clamp(64px, 17vw, 74px);
     --home-shortcuts-row-gap: 10px;
   }
@@ -13865,7 +13875,7 @@ body.club-choice-vote-open {
 
 @media (max-width: 360px) {
   .app.app--view-home .home-club-actions-block {
-    --home-sng-champions-row: 112px;
+    --home-sng-champions-row: 123px;
     --home-club-choice-row: 64px;
     --home-shortcuts-row-gap: 9px;
   }
