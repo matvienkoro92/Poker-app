@@ -199,12 +199,12 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   position: absolute;
   top: -7px;
   right: -10px;
-  min-width: 18px;
+  min-width: 22px;
   height: 18px;
-  padding: 0 5px;
-  font-size: 11px;
+  padding: 0 6px;
+  font-size: 10px;
   font-weight: 700;
-  line-height: 18px;
+  line-height: 1;
   text-align: center;
   border-radius: 9px;
   background: #ef4444;
@@ -212,10 +212,17 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   border: 2px solid var(--overscroll-canvas);
   box-shadow: 0 6px 14px rgba(239, 68, 68, 0.32);
   display: none;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: visible;
   box-sizing: border-box;
 }
 .bottom-nav__badge.bottom-nav__badge--on {
-  display: inline-block;
+  display: inline-flex;
+}
+.bottom-nav__badge.bottom-nav__badge--updating {
+  visibility: hidden;
 }
 
 .bottom-nav__item:nth-child(3) .bottom-nav__icon,

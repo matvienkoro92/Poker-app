@@ -902,6 +902,114 @@
   font-size: 12.5px;
   line-height: 1;
 }
+.chat-user-modal__achievement--big-win-plus:not(.chat-user-modal__achievement--locked) {
+  border-color: rgba(255, 231, 139, 0.98);
+  background:
+    linear-gradient(135deg, rgba(255, 239, 164, 0.78), transparent 13px) top left / 22px 22px no-repeat,
+    linear-gradient(225deg, rgba(255, 239, 164, 0.78), transparent 13px) top right / 22px 22px no-repeat,
+    linear-gradient(45deg, rgba(255, 188, 54, 0.62), transparent 13px) bottom left / 22px 22px no-repeat,
+    linear-gradient(315deg, rgba(255, 188, 54, 0.62), transparent 13px) bottom right / 22px 22px no-repeat,
+    radial-gradient(circle at 50% 49%, rgba(255, 233, 150, 0.36), transparent 30%),
+    radial-gradient(circle at 50% 70%, rgba(255, 130, 23, 0.24), transparent 60%),
+    linear-gradient(180deg, rgba(24, 17, 8, 0.99), rgba(10, 9, 8, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 248, 201, 0.42),
+    inset 0 0 28px rgba(255, 196, 64, 0.22),
+    0 0 22px rgba(255, 177, 38, 0.42),
+    0 0 48px rgba(255, 222, 116, 0.24);
+}
+.chat-user-modal__achievement--big-win-plus:not(.chat-user-modal__achievement--locked)::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(255, 235, 155, 0.28);
+  border-radius: 4px;
+  box-shadow: inset 0 0 18px rgba(255, 215, 104, 0.1);
+  pointer-events: none;
+}
+.chat-user-modal__achievement--big-win-plus .chat-user-modal__achievement-title {
+  min-height: 36px;
+  color: #fff1bb;
+  font-size: 13.5px;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 9px rgba(255, 217, 103, 0.52),
+    0 0 18px rgba(255, 139, 23, 0.28);
+}
+.chat-user-modal__achievement--big-win-plus .chat-user-modal__achievement-icon {
+  width: min(126%, 132px);
+  height: 112px;
+  margin-top: -4px;
+}
+.chat-user-modal__achievement--big-win-plus:not(.chat-user-modal__achievement--locked) .chat-user-modal__achievement-icon img {
+  filter:
+    brightness(1.32)
+    contrast(1.16)
+    saturate(1.34)
+    drop-shadow(0 12px 13px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 18px rgba(255, 231, 131, 0.74))
+    drop-shadow(0 0 38px rgba(255, 145, 24, 0.42));
+}
+.chat-user-modal__achievement--big-win-plus .chat-user-modal__achievement-stars {
+  color: #ffe88f;
+  text-shadow:
+    0 1px 0 rgba(60, 25, 0, 0.95),
+    0 0 9px rgba(255, 222, 99, 0.72),
+    0 0 18px rgba(255, 143, 21, 0.36);
+}
+.chat-user-modal__achievement--month-champion:not(.chat-user-modal__achievement--locked) {
+  border-color: rgba(255, 221, 111, 0.96);
+  background:
+    linear-gradient(135deg, rgba(255, 226, 126, 0.68), transparent 12px) top left / 21px 21px no-repeat,
+    linear-gradient(225deg, rgba(255, 226, 126, 0.68), transparent 12px) top right / 21px 21px no-repeat,
+    linear-gradient(45deg, rgba(255, 140, 27, 0.5), transparent 12px) bottom left / 21px 21px no-repeat,
+    linear-gradient(315deg, rgba(255, 140, 27, 0.5), transparent 12px) bottom right / 21px 21px no-repeat,
+    radial-gradient(circle at 50% 50%, rgba(255, 229, 137, 0.32), transparent 34%),
+    radial-gradient(circle at 50% 73%, rgba(255, 128, 22, 0.2), transparent 58%),
+    linear-gradient(180deg, rgba(23, 15, 7, 0.99), rgba(11, 10, 9, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 243, 190, 0.36),
+    inset 0 0 30px rgba(255, 186, 50, 0.18),
+    0 0 22px rgba(255, 165, 31, 0.36),
+    0 0 44px rgba(255, 215, 103, 0.2);
+}
+.chat-user-modal__achievement--month-champion:not(.chat-user-modal__achievement--locked)::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(255, 229, 139, 0.25);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.chat-user-modal__achievement--month-champion .chat-user-modal__achievement-title {
+  min-height: 39px;
+  color: #fff0bd;
+  font-size: 13.5px;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 10px rgba(255, 218, 104, 0.5),
+    0 0 18px rgba(255, 130, 22, 0.24);
+}
+.chat-user-modal__achievement--month-champion .chat-user-modal__achievement-icon {
+  width: min(122%, 128px);
+  height: 110px;
+  margin-top: -3px;
+}
+.chat-user-modal__achievement--month-champion:not(.chat-user-modal__achievement--locked) .chat-user-modal__achievement-icon img {
+  filter:
+    brightness(1.2)
+    contrast(1.12)
+    saturate(1.18)
+    drop-shadow(0 12px 13px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 15px rgba(255, 218, 107, 0.62))
+    drop-shadow(0 0 32px rgba(255, 130, 22, 0.34));
+}
+.chat-user-modal__achievement--month-champion .chat-user-modal__achievement-stars {
+  color: #ffe38a;
+  text-shadow:
+    0 1px 0 rgba(60, 25, 0, 0.95),
+    0 0 9px rgba(255, 218, 96, 0.66);
+}
 .chat-user-modal__achievement--lucky-month:not(.chat-user-modal__achievement--locked) {
   border-color: rgba(255, 204, 83, 0.9);
   background:

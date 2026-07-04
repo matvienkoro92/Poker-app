@@ -1053,11 +1053,11 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   line-height: 1;
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(2)::before {
-  content: "🪙";
-}
-.app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(3)::before {
   content: "◷";
   font-size: 22px;
+}
+.app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(3)::before {
+  content: "🪙";
 }
 .app.app--view-home .tournament-day-home-wrap--tournament-day .tournament-day-block__stat:nth-child(4)::before {
   content: "♤";

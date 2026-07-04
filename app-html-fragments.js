@@ -342,13 +342,15 @@
   (function pokerIdleWarmCommonImages() {
     var assets = [
       "./assets/chat-profile-achievement-top-win.webp",
+      "./assets/chat-profile-achievement-top-win-2026.webp",
+      "./assets/chat-profile-achievement-offline-win.webp",
       "./assets/chat-profile-achievement-cup.webp",
       "./assets/chat-profile-achievement-top10.webp",
       "./assets/chat-profile-achievement-legend.webp",
       "./assets/chat-profile-achievement-cup-winter.webp",
       "./assets/chat-profile-achievement-cup-spring.webp",
       "./assets/chat-profile-achievement-cup-summer.webp",
-      "./assets/chat-profile-achievement-sng-champion-emblem.webp",
+      "./assets/chat-profile-achievement-sng-champion-card.webp",
       "./assets/chat-profile-default-hero-male.webp",
       "./assets/chat-profile-default-hero-female.webp"
     ];

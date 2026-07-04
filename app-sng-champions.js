@@ -288,6 +288,38 @@
     return String(name || "И").trim().charAt(0).toUpperCase() || "И";
   }
 
+  function buildBracketSkeletonRounds() {
+    return [16, 8, 4, 2, 1].map(function (count, roundIndex) {
+      var matches = [];
+      for (var index = 0; index < count; index += 1) {
+        matches.push({
+          id: "preview-" + String(roundIndex) + "-" + String(index),
+          index: index + 1,
+          playerIds: [
+            "preview-" + String(roundIndex) + "-" + String(index) + "-a",
+            "preview-" + String(roundIndex) + "-" + String(index) + "-b",
+          ],
+        });
+      }
+      return {
+        id: "preview-round-" + String(roundIndex),
+        matches: matches,
+      };
+    });
+  }
+
+  function buildBracketSkeletonPlayers(rounds) {
+    var players = {};
+    rounds.forEach(function (round) {
+      (round.matches || []).forEach(function (match) {
+        (match.playerIds || []).forEach(function (id) {
+          players[id] = { id: id, displayName: "Random Random" };
+        });
+      });
+    });
+    return players;
+  }
+
   var SNG_PLAYER_ART_BY_NICK = {
     "waaar": "./assets/summer-rating-player-waaar.webp",
     "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.546",
@@ -433,7 +465,7 @@
     return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
       '<figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
-        '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--players" aria-label="Подтвержденных игроков">' + escapeHtml(String(approved) + " / " + String(capacity)) + '</span>' +
+        '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--players" aria-label="Подтвержденных игроков">' + escapeHtml(String(approved) + "/" + String(capacity)) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--requests" aria-label="Активных заявок">' + escapeHtml(activeEntries) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--waiting" aria-label="Ждут подтверждения">' + escapeHtml(pending) + '</span>' +
       '</figure>';
@@ -591,8 +623,17 @@
   }
 
   function renderBracket(data) {
-    var rounds = data.rounds || [];
-    if (!rounds.length) return '<div class="club-choice-vote-modal__empty">Сетка появится после кнопки «Сформировать пары».</div>';
+    var realRounds = data.rounds || [];
+    var isPreview = !realRounds.length;
+    var rounds = isPreview ? buildBracketSkeletonRounds() : realRounds;
+    var previewData = data;
+    if (isPreview) {
+      previewData = Object.assign({}, data, {
+        currentRoundId: "",
+        isAdmin: false,
+        playersById: buildBracketSkeletonPlayers(rounds),
+      });
+    }
     if (activeBracketStage < 0) activeBracketStage = 0;
     if (activeBracketStage >= rounds.length) activeBracketStage = rounds.length - 1;
     var round = rounds[activeBracketStage] || rounds[0];
@@ -602,20 +643,20 @@
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
     var prevDisabled = activeBracketStage <= 0;
     var nextDisabled = activeBracketStage >= rounds.length - 1;
-    return '<div class="sng-champions-modal__bracket-slider">' +
+    return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
       '<div class="sng-champions-modal__stage-head">' +
         '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
         '<div>' +
           '<span>Этап ' + escapeHtml(activeBracketStage + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
           '<strong>' + escapeHtml(stageLabel) + '</strong>' +
-          (active ? '<em>текущий этап</em>' : '') +
+          (isPreview ? '<em>предпросмотр сетки</em>' : active ? '<em>текущий этап</em>' : '') +
         '</div>' +
         '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
       '</div>' +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
         (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
-          ((round.matches || []).map(function (match) { return renderBracketMatch(match, data); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
+          ((round.matches || []).map(function (match) { return renderBracketMatch(match, previewData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
       '</section>' +
       '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {

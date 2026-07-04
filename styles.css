@@ -8,7 +8,7 @@
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
 @import url("./styles-layout.css?v=3.666");
-@import url("./styles-home-overrides.css?v=3.737");
+@import url("./styles-home-overrides.css?v=3.738");
 @import url("./styles-layout-touch-targets.css?v=3.666");
 @import url("./styles-home-rating-promo-late.css?v=3.666");
 
@@ -3534,6 +3534,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-transform: uppercase;
 }
 
+#sngChampionsTitle {
+  max-width: calc(100vw - 104px);
+  overflow: hidden;
+  font-size: clamp(15px, 3.55vw, 28px);
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
 .club-choice-vote-modal__close {
   flex: 0 0 auto;
   width: 44px;
@@ -4186,6 +4195,9 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   font-weight: 1000;
   line-height: 1;
   letter-spacing: 0;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
   text-align: center;
   text-shadow:
     0 2px 0 rgba(34, 16, 2, 0.96),
@@ -4208,7 +4220,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__hero-live--players {
   left: 35.4%;
   top: 87%;
-  width: 11.2%;
+  width: 12.4%;
 }
 
 .sng-champions-modal__hero-live--requests {
@@ -5032,6 +5044,15 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .sng-champions-modal__bracket-slider {
   display: grid;
   gap: 12px;
+}
+
+.sng-champions-modal__bracket-slider--preview .sng-champions-modal__bracket-player {
+  color: rgba(255, 239, 198, 0.82);
+  border-color: rgba(255, 178, 42, 0.28);
+}
+
+.sng-champions-modal__bracket-slider--preview .sng-champions-modal__bracket-player span {
+  opacity: 0.82;
 }
 
 .sng-champions-modal__stage-head {
@@ -14714,6 +14735,86 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__entry {
   grid-area: entry !important;
   min-width: clamp(76px, 17vw, 106px) !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng,
+.sng-champions-promo__button.home-club-choice-plaque--sng {
+  grid-template-areas: "count status prize entry" !important;
+  grid-template-columns: repeat(4, max-content) !important;
+  grid-template-rows: auto !important;
+  align-content: end !important;
+  justify-content: center !important;
+  column-gap: clamp(4px, 1vw, 10px) !important;
+  padding-right: clamp(14px, 7vw, 74px) !important;
+  padding-left: clamp(14px, 7vw, 74px) !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__count,
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__subtext,
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__prize,
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__entry,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__count,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__subtext,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__prize,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__entry {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 8 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  height: clamp(22px, 5.2vw, 28px) !important;
+  min-height: clamp(22px, 5.2vw, 28px) !important;
+  margin: 0 !important;
+  padding: 0 clamp(6px, 1.4vw, 16px) !important;
+  border: 1px solid rgba(255, 178, 42, 0.7) !important;
+  border-radius: 999px !important;
+  background: rgba(4, 7, 12, 0.88) !important;
+  color: #ffd977 !important;
+  font-size: clamp(7px, 1.5vw, 13px) !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  transform: none !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 222, 147, 0.08),
+    0 0 11px rgba(255, 159, 31, 0.18) !important;
+  text-shadow:
+    0 1px 0 rgba(62, 28, 0, 0.9),
+    0 0 7px rgba(255, 184, 70, 0.42) !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__count,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__count {
+  grid-area: count !important;
+  flex-shrink: 0 !important;
+  min-width: clamp(74px, 14vw, 108px) !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__subtext,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__subtext {
+  grid-area: status !important;
+  min-width: clamp(88px, 20vw, 172px) !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__prize,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__prize {
+  grid-area: prize !important;
+  min-width: clamp(104px, 20vw, 172px) !important;
+}
+
+.app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__entry,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__entry {
+  grid-area: entry !important;
+  min-width: clamp(68px, 15vw, 122px) !important;
 }
 
 html body #app.app :is(

@@ -1199,11 +1199,11 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
-    if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-emblem.webp" };
+    if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-card.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
-    if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-cup.webp" };
+    if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-offline-win.webp" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -1217,9 +1217,9 @@ if (chatUserModalEl) {
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
-    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win-plus", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
-    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win-2026.webp" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.webp" };
     if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.webp" };
@@ -1379,7 +1379,7 @@ if (chatUserModalEl) {
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
-    var infoImage = options.infoImage || options.image || (meta.mod && meta.mod.indexOf("cup") >= 0 ? meta.img : "");
+    var infoImage = options.infoImage || options.image || (meta.mod && (meta.mod.indexOf("cup") >= 0 || meta.mod === "offline-win") ? meta.img : "");
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
       ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
@@ -1543,8 +1543,8 @@ if (chatUserModalEl) {
       chatUserModalSummerCupCardHtml() +
       chatUserModalAchievementCardHtml("★", "СНГ Лига Чемпионов", sngChampions, {
         placeholder: "Топ-3 сезона",
-        image: "./assets/chat-profile-achievement-sng-champion-emblem.webp",
-        infoImage: "./assets/chat-profile-achievement-sng-champion-emblem.webp",
+        image: "./assets/chat-profile-achievement-sng-champion-card.webp",
+        infoImage: "./assets/chat-profile-achievement-sng-champion-card.webp",
       });
     var winsHtml =
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {

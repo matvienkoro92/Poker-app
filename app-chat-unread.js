@@ -19,25 +19,41 @@ function pokerSyncPwaAppIconUnreadBadge(unreadTotal) {
   } catch (eBadge) {}
 }
 
+function pokerChatUnreadNumber(value) {
+  var n = Number(value);
+  if (!isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+function pokerChatUnreadDisplay(value) {
+  var n = pokerChatUnreadNumber(value);
+  if (n <= 0) return "0";
+  return n > 99 ? "99+" : String(n);
+}
+
 function updateChatNavDot() {
   var personalUnread =
     typeof window.chatPersonalUnreadTotalFromContacts === "number"
-      ? window.chatPersonalUnreadTotalFromContacts
-      : window.chatPersonalUnreadCount || 0;
-  var raw = (window.chatGeneralUnreadCount || 0) + personalUnread;
+      ? pokerChatUnreadNumber(window.chatPersonalUnreadTotalFromContacts)
+      : pokerChatUnreadNumber(window.chatPersonalUnreadCount);
+  var raw = pokerChatUnreadNumber(window.chatGeneralUnreadCount) + personalUnread;
   // Если какие-то непрочитанные помечены флагами, но счётчик не пришёл — показываем хотя бы 1.
   if (raw === 0 && (window.chatGeneralUnread || window.chatPersonalUnread)) raw = 1;
   // В бейдже хотим реальное количество непрочитанных (общий чат + личные), без деления пополам.
   var count = raw > 0 ? raw : 0;
   var badge = document.getElementById("chatNavBadge");
   var headerBadge = document.getElementById("headerNotificationsBadge");
-  var display = count > 99 ? "99+" : (count > 0 ? String(count) : "0");
+  var display = pokerChatUnreadDisplay(count);
   var on = count > 0;
   if (badge) {
     /* Частые перерисовки одним и тем же числом (опрос loadGeneral/loadContacts) дёргали DOM и aria-live */
     if (badge.getAttribute("data-poker-unread-display") !== display) {
+      badge.classList.add("bottom-nav__badge--updating");
       badge.setAttribute("data-poker-unread-display", display);
       badge.textContent = display;
+      requestAnimationFrame(function () {
+        badge.classList.remove("bottom-nav__badge--updating");
+      });
     }
     if (badge.classList.contains("bottom-nav__badge--on") !== on) {
       badge.classList.toggle("bottom-nav__badge--on", on);
