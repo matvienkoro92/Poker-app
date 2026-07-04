@@ -304,7 +304,7 @@
   function renderPlayerImage(entry) {
     var art = sngPlayerArt(entry);
     if (art) {
-      return '<span class="sng-champions-modal__entry-avatar-media"><img class="sng-champions-modal__entry-avatar-img" src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>';
+      return '<span class="sng-champions-modal__entry-avatar-media"><img class="sng-champions-modal__entry-avatar-img sng-champions-modal__entry-avatar-img--art" src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>';
     }
     var avatar = playerAvatar(entry);
     if (avatar) {

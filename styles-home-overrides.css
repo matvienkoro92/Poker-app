@@ -600,6 +600,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   grid-column: 1 / -1 !important;
   width: 100% !important;
   min-width: 0 !important;
+  filter: none !important;
 }
 
 .app.app--view-home .home-club-choice-plaque {
