@@ -2385,6 +2385,29 @@ add("Home fish rating moved to the header without duplicate content button", () 
   !has("appLazyLoader", '"#headerPokerStatus,.header-greeting--status"')
 );
 
+add("Shared brand header keeps greeting visible outside chat", () =>
+  hasAll("html", [
+    'class="logo logo--welcome"',
+    'id="headerGreeting"',
+    'class="header-profile-summary"',
+    'id="headerMoreMenuBtn"',
+  ]) &&
+  hasAll("styles", [
+    'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary',
+    "display: flex !important;",
+    "flex: 1 1 clamp(112px, 34vw, 172px) !important;",
+    'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting',
+    "text-overflow: ellipsis !important;",
+    'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions',
+    "flex: 0 1 clamp(156px, 43vw, 206px) !important;",
+  ]) &&
+  appearsBefore(
+    files.styles,
+    'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary,\nhtml body:not([data-view="chat"]) #app.app > .card > .card__header .header-notification-btn',
+    'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary {\n  display: flex !important;'
+  )
+);
+
 add("iOS/PWA chat keyboard dock has metric and recovery smoke coverage", () =>
   hasAll("appChatKeyboardDockFoundation", [
     "__pokerChatThreadDockBottomCssPx",
