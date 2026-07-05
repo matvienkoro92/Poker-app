@@ -5281,6 +5281,181 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
 }
 
+.sng-champions-modal__bracket-map-wrap {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 184, 70, 0.3);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 184, 70, 0.08), transparent 62%),
+    rgba(2, 5, 10, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 234, 176, 0.08);
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded {
+  position: fixed;
+  inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  z-index: 80;
+  align-content: start;
+  overflow: auto;
+  padding: 12px;
+  border-color: rgba(255, 219, 126, 0.72);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 184, 70, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(18, 12, 10, 0.98), rgba(2, 6, 12, 0.98));
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.76),
+    inset 0 1px 0 rgba(255, 242, 198, 0.16);
+}
+
+.sng-champions-modal__bracket-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sng-champions-modal__bracket-map-head strong {
+  color: #ffe7ae;
+  font-size: 14px;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.sng-champions-modal__bracket-map-head button {
+  min-height: 28px;
+  padding: 0 12px;
+  color: #1c1003;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 1000;
+  border: 1px solid rgba(255, 230, 162, 0.76);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+  cursor: pointer;
+}
+
+.sng-champions-modal__bracket-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1.52fr) minmax(0, 1.22fr) minmax(0, 0.96fr) minmax(0, 0.78fr) minmax(0, 0.82fr);
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
+  gap: 8px;
+  min-width: 760px;
+}
+
+.sng-champions-modal__map-round {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sng-champions-modal__map-round-title {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 20px;
+  padding: 0 3px;
+  color: rgba(255, 239, 201, 0.78);
+  font: inherit;
+  font-size: clamp(7px, 1.8vw, 10px);
+  font-weight: 1000;
+  line-height: 1;
+  border: 1px solid rgba(255, 184, 70, 0.3);
+  border-radius: 999px;
+  background: rgba(8, 9, 14, 0.84);
+  cursor: pointer;
+}
+
+.sng-champions-modal__map-round--active .sng-champions-modal__map-round-title {
+  color: #1c1003;
+  border-color: rgba(255, 230, 162, 0.82);
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+}
+
+.sng-champions-modal__map-round-matches {
+  display: grid;
+  align-content: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sng-champions-modal__map-match {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 2px;
+  min-width: 0;
+  min-height: 18px;
+  padding: 2px;
+  border: 1px solid rgba(255, 184, 70, 0.16);
+  border-radius: 4px;
+  background: rgba(5, 8, 14, 0.72);
+}
+
+.sng-champions-modal__map-match-index {
+  color: rgba(255, 239, 201, 0.36);
+  font-size: 6px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sng-champions-modal__map-players {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.sng-champions-modal__map-player {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.74);
+  font-size: clamp(5px, 1.15vw, 7px);
+  font-weight: 850;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sng-champions-modal__map-player--winner {
+  color: #ffd56f;
+  text-shadow: 0 0 5px rgba(255, 184, 70, 0.45);
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-title {
+  min-height: 28px;
+  font-size: 13px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-matches {
+  gap: 5px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match {
+  grid-template-columns: 18px minmax(0, 1fr);
+  min-height: 32px;
+  padding: 5px;
+  border-radius: 7px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match-index {
+  font-size: 9px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
+  font-size: 11px;
+}
+
 .club-choice-vote-modal__scheme {
   padding: 12px;
   border: 1px solid rgba(255, 184, 70, 0.32);
@@ -14740,13 +14915,13 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 .app.app--view-home .home-club-choice-plaque--sng,
 .sng-champions-promo__button.home-club-choice-plaque--sng {
   grid-template-areas: "count status prize entry" !important;
-  grid-template-columns: repeat(4, max-content) !important;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.12fr) minmax(0, 1.22fr) minmax(0, 0.9fr) !important;
   grid-template-rows: auto !important;
   align-content: end !important;
   justify-content: center !important;
-  column-gap: clamp(4px, 1vw, 10px) !important;
-  padding-right: clamp(14px, 7vw, 74px) !important;
-  padding-left: clamp(14px, 7vw, 74px) !important;
+  width: 100% !important;
+  column-gap: clamp(8px, 1.5vw, 14px) !important;
+  padding: clamp(12px, 2.2vw, 18px) clamp(8px, 3.1vw, 28px) clamp(25px, 5vw, 37px) !important;
 }
 
 .app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__count,
@@ -14765,34 +14940,38 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: auto !important;
-  height: clamp(22px, 5.2vw, 28px) !important;
-  min-height: clamp(22px, 5.2vw, 28px) !important;
+  width: 100% !important;
+  height: clamp(29px, 6vw, 36px) !important;
+  min-height: clamp(29px, 6vw, 36px) !important;
   margin: 0 !important;
-  padding: 0 clamp(6px, 1.4vw, 16px) !important;
-  border: 1px solid rgba(255, 178, 42, 0.7) !important;
+  padding: 2px clamp(7px, 1.5vw, 16px) 0 !important;
+  border: 1.5px solid rgba(255, 190, 48, 0.94) !important;
   border-radius: 999px !important;
-  background: rgba(4, 7, 12, 0.88) !important;
-  color: #ffd977 !important;
-  font-size: clamp(7px, 1.5vw, 13px) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 236, 154, 0.26), transparent 58%),
+    linear-gradient(180deg, rgba(12, 17, 27, 0.96), rgba(4, 8, 15, 0.94)) !important;
+  color: #ffe389 !important;
+  font-size: clamp(8px, 1.75vw, 14px) !important;
   font-weight: 1000 !important;
   line-height: 1 !important;
   text-transform: none !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
   transform: none !important;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 222, 147, 0.08),
-    0 0 11px rgba(255, 159, 31, 0.18) !important;
+    inset 0 1px 0 rgba(255, 247, 210, 0.22),
+    inset 0 -2px 0 rgba(125, 69, 7, 0.28),
+    0 0 17px rgba(255, 172, 35, 0.36) !important;
   text-shadow:
     0 1px 0 rgba(62, 28, 0, 0.9),
-    0 0 7px rgba(255, 184, 70, 0.42) !important;
+    0 0 10px rgba(255, 196, 79, 0.62) !important;
 }
 
 .app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__count,
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__count {
   grid-area: count !important;
   flex-shrink: 0 !important;
-  min-width: clamp(74px, 14vw, 108px) !important;
+  min-width: 0 !important;
   overflow: visible !important;
   white-space: nowrap !important;
   overflow-wrap: normal !important;
@@ -14802,19 +14981,19 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 .app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__subtext,
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__subtext {
   grid-area: status !important;
-  min-width: clamp(88px, 20vw, 172px) !important;
+  min-width: 0 !important;
 }
 
 .app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__prize,
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__prize {
   grid-area: prize !important;
-  min-width: clamp(104px, 20vw, 172px) !important;
+  min-width: 0 !important;
 }
 
 .app.app--view-home .home-club-choice-plaque--sng .home-club-choice-plaque__entry,
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__entry {
   grid-area: entry !important;
-  min-width: clamp(68px, 15vw, 122px) !important;
+  min-width: 0 !important;
 }
 
 html body #app.app :is(
@@ -14941,4 +15120,119 @@ html body #app.app :is(
 ):focus-visible {
   outline: 2px solid rgba(255, 232, 166, 0.9) !important;
   outline-offset: 3px !important;
+}
+
+/* Единая клубная шапка для всех обычных разделов приложения. */
+html body:not([data-view="chat"]) #app.app > .card > .card__header {
+  position: relative !important;
+  z-index: 60 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px) !important;
+  min-height: 66px !important;
+  margin: 0 calc(-1 * var(--card-padding-x, 16px) + 3px) 8px !important;
+  padding: 7px 12px !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(214, 163, 84, 0.3) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.06), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.035), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.94), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.1),
+    inset 0 -18px 34px rgba(0, 0, 0, 0.16),
+    0 18px 46px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="gold"] body:not([data-view="chat"]) #app.app > .card > .card__header {
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.065), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.95), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo.logo--welcome {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  gap: 6px !important;
+  padding: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__image {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__text {
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__title {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.2em !important;
+  max-width: 100% !important;
+  font-size: clamp(10px, 2.95vw, 13px) !important;
+  line-height: 1.04 !important;
+  white-space: nowrap !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__subtitle {
+  font-size: clamp(7px, 1.95vw, 9px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0.2em !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions {
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary,
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-notification-btn {
+  display: none !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row {
+  gap: 6px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row .header-icon-btn {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+}
+
+@media (max-width: 380px) {
+  html body:not([data-view="chat"]) #app.app > .card > .card__header {
+    min-height: 60px !important;
+    gap: 7px !important;
+    padding: 7px 10px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .logo.logo--welcome {
+    gap: 5px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__image {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row .header-icon-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
 }

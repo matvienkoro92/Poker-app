@@ -1631,7 +1631,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 }
 /* Рейтинг весны: скрываем верхнее и нижнее меню */
 .card:has(.view--active[data-view="spring-rating"]) .card__header {
-  display: none !important;
+  display: flex !important;
 }
 #app:has(.view--active[data-view="spring-rating"]) ~ .bottom-nav {
   transform: translate3d(0, 100%, 0);
@@ -1643,7 +1643,7 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 /* Зал славы и расписание: скрываем верхнее и нижнее меню (как в турнире дня и газете) */
 .card:has(.view--active[data-view="hall-of-fame"]) .card__header,
 .card:has(.view--active[data-view="schedule"]) .card__header {
-  display: none !important;
+  display: flex !important;
 }
 #app:has(.view--active[data-view="hall-of-fame"]) ~ .bottom-nav,
 #app:has(.view--active[data-view="schedule"]) ~ .bottom-nav {
@@ -1663,13 +1663,13 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .card:has(.view--active[data-view="streams"]) .card__header,
 .card:has(.view--active[data-view="equilator"]) .card__header,
 .card:has(.view--active[data-view="winter-rating"]) .card__header {
-  display: none !important;
+  display: flex !important;
 }
 /* Скачать, Депозит, Профиль: скрываем только верхнее меню */
 .card:has(.view--active[data-view="download"]) .card__header,
 .card:has(.view--active[data-view="cashout"]) .card__header,
 .card:has(.view--active[data-view="profile"]) .card__header {
-  display: none !important;
+  display: flex !important;
 }
 #app:has(.view--active[data-view="bonus-game"]) ~ .bottom-nav,
 #app:has(.view--active[data-view="plasterer-game"]) ~ .bottom-nav,

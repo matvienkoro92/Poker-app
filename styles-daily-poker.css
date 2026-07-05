@@ -932,16 +932,7 @@
 }
 
 .daily-poker__feature::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  border: 1px solid rgba(255, 238, 179, 0.54);
-  box-shadow:
-    inset 0 0 22px rgba(255, 172, 45, 0.25),
-    0 0 22px rgba(255, 172, 45, 0.44);
-  pointer-events: none;
+  content: none;
 }
 
 .daily-poker__header {

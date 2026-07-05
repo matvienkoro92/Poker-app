@@ -2272,7 +2272,7 @@ add("Secondary utility views are lazy-loaded from HTML fragments", () =>
     'data-html-fragment="./html-fragments/poker-tasks.html"',
     'data-html-fragment-view="poker-tasks"',
     'data-view="cashout"',
-    'data-html-fragment="./html-fragments/cashout.html"',
+    './html-fragments/cashout.html',
     'data-html-fragment-view="cashout"',
     'data-view="schedule"',
     'data-html-fragment="./html-fragments/schedule.html"',
@@ -2647,9 +2647,11 @@ add("Hidden cashout manager photos do not preload on home", () =>
   !has("html", 'rel="preload" as="image" href="./assets/dep-manager-vika.jpg"') &&
   !has("html", 'src="./assets/dep-manager.jpg"') &&
   !has("html", 'src="./assets/dep-manager-vika.jpg"') &&
+  !has("html", 'src="/assets/dep-manager.jpg"') &&
+  !has("html", 'src="/assets/dep-manager-vika.jpg"') &&
   hasAll("cashoutFragment", [
-    'src="./assets/dep-manager.jpg"',
-    'src="./assets/dep-manager-vika.jpg"',
+    'src="/assets/dep-manager.jpg"',
+    'src="/assets/dep-manager-vika.jpg"',
     'class="cashout-image"',
     'loading="lazy"',
   ])

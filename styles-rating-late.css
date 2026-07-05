@@ -799,7 +799,7 @@ body[data-view="summer-rating"] .summer-rating-initial-loader__spinner {
 }
 
 body[data-view="summer-rating"] #app.app > .card > .card__header {
-  display: none !important;
+  display: flex !important;
 }
 
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] .bonus-game-back {
@@ -2833,7 +2833,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   line-height: 0.9;
   letter-spacing: 0;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
-  transform: translateX(-26px);
+  transform: translateX(-42px);
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::before {

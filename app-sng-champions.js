@@ -12,6 +12,7 @@
   var homeSummaryLoadedAt = 0;
   var activeTab = "signup";
   var activeBracketStage = 0;
+  var bracketMapExpanded = false;
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -622,6 +623,42 @@
     '</article>';
   }
 
+  function renderBracketMapPlayer(id, match, data) {
+    var player = (data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" };
+    var won = match.winnerId && match.winnerId === id;
+    return '<span class="sng-champions-modal__map-player' + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+  }
+
+  function renderBracketMapMatch(match, data) {
+    var players = match.playerIds || [];
+    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + '">' +
+      '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
+      '<span class="sng-champions-modal__map-players">' +
+        players.map(function (id) { return renderBracketMapPlayer(id, match, data); }).join("") +
+      '</span>' +
+    '</article>';
+  }
+
+  function renderBracketMap(rounds, data, isPreview) {
+    var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
+    return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + '" aria-label="Миниатюрная сетка всего турнира">' +
+      '<div class="sng-champions-modal__bracket-map-head">' +
+        '<strong>Вся сетка</strong>' +
+        '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Закрыть" : "Увеличить") + '</button>' +
+      '</div>' +
+      '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
+        rounds.map(function (round, index) {
+          return '<div class="sng-champions-modal__map-round' + (index === activeBracketStage ? " sng-champions-modal__map-round--active" : "") + '">' +
+            '<button type="button" class="sng-champions-modal__map-round-title" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(round, index, rounds)) + '</button>' +
+            '<div class="sng-champions-modal__map-round-matches">' +
+              ((round.matches || []).map(function (match) { return renderBracketMapMatch(match, data); }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
+            '</div>' +
+          '</div>';
+        }).join("") +
+      '</div>' +
+    '</section>';
+  }
+
   function renderBracket(data) {
     var realRounds = data.rounds || [];
     var isPreview = !realRounds.length;
@@ -662,6 +699,7 @@
       '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
         return '<button type="button" class="' + (index === activeBracketStage ? "is-active" : "") + '" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(item, index, rounds)) + '</button>';
       }).join("") + '</div>' +
+      renderBracketMap(rounds, previewData, isPreview) +
     '</div>';
   }
 
@@ -782,6 +820,13 @@
     var stageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-stage-index]") : null;
     if (stageIndex) {
       activeBracketStage = Math.max(0, Number(stageIndex.getAttribute("data-sng-stage-index")) || 0);
+      render();
+      setTab("bracket");
+      return;
+    }
+    var bracketMap = event.target && event.target.closest ? event.target.closest("[data-sng-bracket-map]") : null;
+    if (bracketMap) {
+      bracketMapExpanded = bracketMap.getAttribute("data-sng-bracket-map") === "open";
       render();
       setTab("bracket");
       return;
