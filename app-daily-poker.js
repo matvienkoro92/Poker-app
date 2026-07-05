@@ -15,6 +15,10 @@
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
+  var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
+  var dailyPokerWinnersCache = null;
+  var dailyPokerWinnersCacheAt = 0;
+  var dailyPokerWinnersPromise = null;
   var DAILY_POKER_HAND_ORDER = [
     "royal_flush",
     "straight_flush",
@@ -422,7 +426,14 @@
     list.innerHTML = winners.map(winnerHtml).join("");
   }
 
-  function loadWinners() {
+  function loadWinners(options) {
+    options = options || {};
+    var force = options.force === true;
+    if (!force && dailyPokerWinnersCache && Date.now() - dailyPokerWinnersCacheAt < DAILY_POKER_WINNERS_CACHE_MS) {
+      renderWinners(dailyPokerWinnersCache);
+      return Promise.resolve(true);
+    }
+    if (!force && dailyPokerWinnersPromise) return dailyPokerWinnersPromise;
     var base = apiBase();
     if (!base) {
       setWinnersMessage("Не удалось загрузить победителей.");
@@ -430,10 +441,12 @@
       renderSpinStats(null);
       return Promise.resolve(false);
     }
-    return fetch(withQuery(authUrl("winners"), "limit=50"), { cache: "no-store" })
+    dailyPokerWinnersPromise = fetch(withQuery(authUrl("winners"), "limit=50"), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "winners failed");
+        dailyPokerWinnersCache = data;
+        dailyPokerWinnersCacheAt = Date.now();
         renderWinners(data);
         return true;
       })
@@ -442,7 +455,12 @@
         renderHeroStats(null);
         renderSpinStats(null);
         return false;
+      })
+      .then(function (ok) {
+        dailyPokerWinnersPromise = null;
+        return ok;
       });
+    return dailyPokerWinnersPromise;
   }
 
   function formatDuration(seconds) {
@@ -623,7 +641,7 @@
     setResultText(formatResultLine(result), false);
     resetManualDeal();
     syncStatus(result);
-    loadWinners();
+    loadWinners({ force: true });
   }
 
   function advanceManualDeal() {
