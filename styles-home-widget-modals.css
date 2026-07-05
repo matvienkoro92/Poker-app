@@ -481,6 +481,20 @@
   text-wrap: auto;
 }
 
+.club-choice-vote-modal__winner-achievement-label {
+  display: inline-flex;
+  width: max-content;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 194, 80, 0.3);
+  border-radius: 999px;
+  color: #ffd574;
+  background: rgba(255, 181, 49, 0.12);
+  font-size: 9px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .club-choice-vote-modal__bracket {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2136,6 +2150,66 @@
 
 .club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-final > .club-choice-vote-modal__scheme-round-group {
   width: 100%;
+}
+
+.club-choice-vote-modal__scheme--completed-fallback {
+  width: 100%;
+}
+
+.club-choice-vote-modal__completed-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.club-choice-vote-modal__completed-grid-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 184, 70, 0.3);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 198, 83, 0.14), transparent 42%),
+    rgba(8, 10, 15, 0.72);
+  color: #f5dfbd;
+}
+
+.club-choice-vote-modal__completed-grid-card span,
+.club-choice-vote-modal__completed-grid-card em,
+.club-choice-vote-modal__completed-grid-card i {
+  color: rgba(229, 215, 184, 0.86);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__completed-grid-card strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #fff1c7;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__completed-grid-card i {
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 181, 49, 0.14);
+  color: #ffd574;
+  font-size: 9px;
+  text-transform: uppercase;
 }
 
 .club-choice-vote-modal__scheme h3 {
