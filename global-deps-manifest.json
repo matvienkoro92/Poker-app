@@ -1934,6 +1934,26 @@
       "consumedBy": [
         "app-lazy-loader.js"
       ]
+    },
+    {
+      "name": "__pokerTransfersBodyObserverBound",
+      "domain": "transfers",
+      "exportedBy": [
+        "app-transfers.js"
+      ],
+      "consumedBy": [
+        "app-transfers.js"
+      ]
+    },
+    {
+      "name": "pokerInitTransfers",
+      "domain": "transfers",
+      "exportedBy": [
+        "app-transfers.js"
+      ],
+      "consumedBy": [
+        "app-transfers.js"
+      ]
     }
   ]
 }

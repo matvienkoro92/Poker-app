@@ -229,6 +229,9 @@
       "app-player-crm-runtime-core.js",
       "app-player-crm.js"
     ],
+    "transfers": [
+      "app-transfers.js"
+    ],
     "shell": [
       "app-shell-layout.js",
       "app-navigation-scroll.js",

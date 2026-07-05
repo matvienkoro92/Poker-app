@@ -57,6 +57,10 @@
       "owner": "admin",
       "scope": "player CRM admin view"
     },
+    "transfers": {
+      "owner": "home",
+      "scope": "player-to-player transfer view and transfer request controls"
+    },
     "layout": {
       "owner": "shell",
       "scope": "global layout, app chrome, tabbar, responsive shell"
@@ -160,6 +164,9 @@
     ],
     "playerCrm": [
       "styles-player-crm.css"
+    ],
+    "transfers": [
+      "styles-transfers.css"
     ],
     "layout": [
       "styles-layout.css",

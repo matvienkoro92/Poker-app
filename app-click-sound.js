@@ -96,6 +96,7 @@
     if (!clickSoundTarget(event)) return;
     var now = Date.now();
     if (source === "touch") {
+      if (now - lastPointerSoundAt < 360) return;
       lastTouchSoundAt = now;
       lastPointerSoundAt = now;
     } else if (source === "pointer") {
