@@ -414,7 +414,13 @@
     if (!plaque) return;
     var data = homePlaqueState || state;
     var subtext = plaque.querySelector(".home-club-choice-plaque__subtext");
+    var count = plaque.querySelector(".home-club-choice-plaque__count");
+    var completed = !!(data && data.status === "completed");
     if (subtext) subtext.textContent = homePlaqueText(data);
+    if (count) {
+      count.hidden = completed;
+      count.setAttribute("aria-hidden", completed ? "true" : "false");
+    }
     var round = data && data.status === "active" ? currentRound(data) : null;
     var end = Date.parse(round && round.endsAt || "");
     if (end && end <= Date.now() && !homePlaqueLoading) refreshHomePlaqueState(true);
