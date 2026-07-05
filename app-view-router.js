@@ -1809,6 +1809,16 @@ function pokerOpenPlayerCrmFromHome() {
 })();
 
 (function bindGlobalClickSound() {
+  var lastPointerSoundAt = 0;
+
+  function clickSoundTarget(e) {
+    if (!e || !e.target || !e.target.closest) return null;
+    var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"], [role=\"menuitem\"], [data-menu-item]");
+    if (!interactive || e.target.closest("audio") || interactive.getAttribute("aria-hidden") === "true") return null;
+    if (interactive.disabled || interactive.getAttribute("disabled") != null) return null;
+    return interactive;
+  }
+
   function playBundledClickSound() {
     if (typeof playClickSound === "function") {
       playClickSound();
@@ -1818,23 +1828,28 @@ function pokerOpenPlayerCrmFromHome() {
     if (!audio) {
       audio = document.__pokerClickAudio = new Audio("./assets/gta-sa-menu.mp3?v=20260706");
       audio.preload = "auto";
-      audio.volume = 0.42;
+      audio.volume = 0.78;
     }
     audio.pause();
     audio.currentTime = 0;
     var p = audio.play();
     if (p && typeof p.catch === "function") p.catch(function () {});
   }
+
+  document.addEventListener("pointerdown", function (e) {
+    if (!clickSoundTarget(e)) return;
+    lastPointerSoundAt = Date.now();
+    try {
+      playBundledClickSound();
+    } catch (ePointerSound) {}
+  }, true);
+
   document.addEventListener("click", function (e) {
-    var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
-    if (!interactive || e.target.closest("audio") || interactive.getAttribute("aria-hidden") === "true") return;
-    var defer = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
-    defer(function () {
-      try {
-        playBundledClickSound();
-      } catch (eClickSound) {}
-    });
-  }, false);
+    if (!clickSoundTarget(e) || Date.now() - lastPointerSoundAt < 420) return;
+    try {
+      playBundledClickSound();
+    } catch (eClickSound) {}
+  }, true);
 })();
 
 (function scrollVsTap() {

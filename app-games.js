@@ -158,50 +158,22 @@ function stopDailyPredictionTimer() {
 }
 
 function playClickSound() {
-  function fallbackTone() {
-    try {
-      var Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      var ctx = window.__clickAudioCtx;
-      if (!ctx) ctx = window.__clickAudioCtx = new Ctx();
-      if (ctx.state === "suspended") ctx.resume();
-      var now = ctx.currentTime;
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(180, now);
-      osc.frequency.exponentialRampToValueAtTime(80, now + 0.03);
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    } catch (errTone) {}
-  }
   var audio = null;
   try {
     audio = playClickSound.__audio;
     if (!audio) {
       audio = playClickSound.__audio = new Audio("./assets/gta-sa-menu.mp3?v=20260706");
       audio.preload = "auto";
-      audio.volume = 0.42;
+      audio.volume = 0.78;
     }
   } catch (errAudio) {}
-  if (!audio) {
-    fallbackTone();
-    return;
-  }
+  if (!audio) return;
   try {
     audio.pause();
     audio.currentTime = 0;
     var p = audio.play();
-    if (p && typeof p.catch === "function") p.catch(function () {
-      fallbackTone();
-    });
-  } catch (err) {
-    fallbackTone();
-  }
+    if (p && typeof p.catch === "function") p.catch(function () {});
+  } catch (err) {}
 }
 
 function tryChillRadioPlay() {

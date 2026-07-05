@@ -533,7 +533,7 @@ html.app-view-home:not(.app-view-home-html-scroll) .card .card__content {
 }
 
 .view--active[data-view="home"] {
-  padding-bottom: 28px;
+  padding-bottom: clamp(220px, 56vh, 380px);
 }
 /* Низкий ландшафт: фиксированный таббар перекрывает последний ряд сетки на главной */
 @media (orientation: landscape) and (max-height: 520px) {
