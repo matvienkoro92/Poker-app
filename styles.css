@@ -9200,3 +9200,154 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__text {
   top: clamp(18px, 3.3vw, 30px) !important;
 }
+
+.hall-fish-modal--bootstrap-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+}
+
+.hall-fish-modal--bootstrap-loading[hidden] {
+  display: none;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(720px, calc(100vw - 20px));
+  max-height: min(760px, calc(100dvh - 72px));
+  margin: max(54px, calc(env(safe-area-inset-top, 0px) + 18px)) auto 18px;
+  overflow: hidden;
+  border: 1px solid rgba(248, 217, 138, 0.42);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(248, 217, 138, 0.44);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.46);
+  color: #ffedd5;
+  font-size: 28px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 58px 14px 12px;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.36), rgba(2, 6, 23, 0.12));
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__tab {
+  min-height: 42px;
+  padding: 9px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(248, 217, 138, 0.24);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 0.96));
+  color: rgba(255, 237, 213, 0.84);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__tab--active {
+  border-color: rgba(255, 209, 92, 0.92);
+  background: linear-gradient(180deg, #ffe28a 0%, #ffc22e 48%, #d97706 100%);
+  color: #1b1204;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-modal__body {
+  min-height: 180px;
+  overflow: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-level-list {
+  display: grid;
+  gap: 8px;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-level-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-level-row__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(255, 237, 213, 0.09);
+  color: rgba(255, 237, 213, 0.68);
+  font-weight: 950;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-skeleton-line {
+  display: block;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 237, 213, 0.08), rgba(255, 214, 112, 0.24), rgba(255, 237, 213, 0.08));
+  background-size: 220% 100%;
+  animation: hall-fish-bootstrap-shimmer 1.1s ease-in-out infinite;
+  box-shadow: inset 0 0 0 1px rgba(255, 237, 213, 0.04);
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-skeleton-line--name {
+  width: min(210px, 42vw);
+  height: 18px;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-skeleton-line--sub {
+  width: min(150px, 34vw);
+  height: 12px;
+  margin-top: 7px;
+  opacity: 0.72;
+}
+
+.hall-fish-modal--bootstrap-loading .hall-fish-skeleton-line--value {
+  width: 62px;
+  height: 20px;
+}
+
+@keyframes hall-fish-bootstrap-shimmer {
+  0% {
+    background-position: 120% 50%;
+  }
+  100% {
+    background-position: -120% 50%;
+  }
+}

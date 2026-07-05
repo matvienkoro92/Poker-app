@@ -617,7 +617,10 @@ function hallFishFetchRows() {
 
 function hallFishEnsureModal() {
   var modal = document.getElementById("hallFishRatingModal");
-  if (modal) return modal;
+  if (modal) {
+    modal.classList.remove("hall-fish-modal--bootstrap-loading");
+    return modal;
+  }
   modal = document.createElement("div");
   modal.className = "hall-fish-modal";
   modal.id = "hallFishRatingModal";
