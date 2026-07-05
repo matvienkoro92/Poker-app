@@ -7,6 +7,7 @@
     kind: "cashout",
     items: [],
     viewer: null,
+    access: { allowed: false, level: 0, requiredLevel: 10, message: "" },
     maxAmount: 2500,
   };
   var tickTimer = null;
@@ -207,14 +208,30 @@
     var list = byId("transfersList");
     var empty = byId("transfersEmpty");
     var viewer = byId("transfersViewerId");
+    var form = byId("transfersCreateForm");
+    var tabs = document.querySelector(".transfers-tabs");
+    var locked = byId("transfersAccessLocked");
+    var access = state.access || {};
+    var allowed = access.allowed !== false;
     if (viewer && state.viewer && state.viewer.accountId) {
       viewer.hidden = false;
-      viewer.textContent = "Ваш ID: " + state.viewer.accountId;
+      viewer.textContent = "Ваш ID: " + state.viewer.accountId + (state.viewer.level ? " · уровень " + state.viewer.level : "");
+    }
+    if (form) form.hidden = !allowed;
+    if (tabs) tabs.hidden = !allowed;
+    if (locked) {
+      locked.hidden = allowed;
+      locked.textContent = allowed ? "" : (access.message || "Переводы доступны только игрокам с уровнем 10+.");
     }
     renderMode();
     renderTabs();
     if (!list) return;
     list.textContent = "";
+    list.hidden = !allowed;
+    if (!allowed) {
+      if (empty) empty.hidden = true;
+      return;
+    }
     var items = visibleItems();
     items.forEach(function (item) {
       list.appendChild(renderCard(item));
@@ -231,8 +248,6 @@
     state.loading = !!value;
     var r = root();
     if (r) r.classList.toggle("transfers-page--loading", state.loading);
-    var refresh = byId("transfersRefreshBtn");
-    if (refresh) refresh.disabled = state.loading;
   }
 
   function loadTransfers(force) {
@@ -254,6 +269,12 @@
         if (!data || !data.ok) throw new Error((data && data.error) || "Не удалось загрузить заявки");
         state.items = Array.isArray(data.items) ? data.items : [];
         state.viewer = data.viewer || null;
+        state.access = data.access || {
+          allowed: !(data.viewer && data.viewer.transfersAccess === false),
+          level: data.viewer && data.viewer.level ? Number(data.viewer.level) || 0 : 0,
+          requiredLevel: data.viewer && data.viewer.requiredLevel ? Number(data.viewer.requiredLevel) || 10 : 10,
+          message: "",
+        };
         state.maxAmount = Number(data.maxAmount || 2500) || 2500;
         state.loadedAt = Date.now();
         render();
@@ -379,21 +400,10 @@
         render();
         return;
       }
-      var preset = event.target && event.target.closest ? event.target.closest("[data-transfers-amount]") : null;
-      if (preset) {
-        var amountEl = byId("transfersAmountInput");
-        if (amountEl) amountEl.value = preset.getAttribute("data-transfers-amount") || "";
-        return;
-      }
       var filter = event.target && event.target.closest ? event.target.closest("[data-transfers-filter]") : null;
       if (filter) {
         state.filter = filter.getAttribute("data-transfers-filter") || "active";
         render();
-        return;
-      }
-      var refresh = event.target && event.target.closest ? event.target.closest("#transfersRefreshBtn") : null;
-      if (refresh) {
-        loadTransfers(true);
         return;
       }
       handleAction(event);

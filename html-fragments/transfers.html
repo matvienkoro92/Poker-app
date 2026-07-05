@@ -7,13 +7,17 @@
                   <h1 class="title transfers-page__title" id="transfersTitle">Переводы</h1>
                   <p class="transfers-page__viewer" id="transfersViewerId" hidden></p>
                 </div>
-                <button type="button" class="transfers-page__refresh" id="transfersRefreshBtn" aria-label="Обновить">↻</button>
               </header>
 
-              <form class="transfers-create" id="transfersCreateForm" autocomplete="off">
+              <p class="transfers-page__access-note" id="transfersAccessNote">
+                Размещать и видеть заявки могут только игроки с уровнем 10+.
+              </p>
+              <p class="transfers-page__access-locked" id="transfersAccessLocked" hidden></p>
+
+              <form class="transfers-create" id="transfersCreateForm" autocomplete="off" hidden>
                 <div class="transfers-create__mode" role="tablist" aria-label="Тип заявки">
-                  <button type="button" class="transfers-create__mode-btn transfers-create__mode-btn--active" data-transfers-kind="cashout" aria-pressed="true">Кешаут</button>
-                  <button type="button" class="transfers-create__mode-btn" data-transfers-kind="deposit" aria-pressed="false">Депозит</button>
+                  <button type="button" class="transfers-create__mode-btn transfers-create__mode-btn--active" data-transfers-kind="cashout" aria-pressed="true">Хочу вывести</button>
+                  <button type="button" class="transfers-create__mode-btn" data-transfers-kind="deposit" aria-pressed="false">Нужны реквизиты</button>
                 </div>
                 <div class="transfers-create__grid">
                   <label class="transfers-field transfers-field--amount">
@@ -25,13 +29,6 @@
                     <input class="transfers-field__input" id="transfersCommentInput" type="text" maxlength="240" placeholder="необязательно" />
                   </label>
                 </div>
-                <div class="transfers-presets" aria-label="Быстрый выбор суммы">
-                  <button type="button" data-transfers-amount="500">500</button>
-                  <button type="button" data-transfers-amount="1000">1000</button>
-                  <button type="button" data-transfers-amount="1500">1500</button>
-                  <button type="button" data-transfers-amount="2000">2000</button>
-                  <button type="button" data-transfers-amount="2500">2500</button>
-                </div>
                 <label class="transfers-field transfers-field--details" id="transfersDetailsField">
                   <span class="transfers-field__label" id="transfersDetailsLabel">Реквизиты</span>
                   <textarea class="transfers-field__textarea" id="transfersDetailsInput" rows="3" maxlength="700" placeholder="карта, банк, телефон"></textarea>
@@ -42,13 +39,13 @@
                 </div>
               </form>
 
-              <div class="transfers-tabs" role="tablist" aria-label="Список заявок">
+              <div class="transfers-tabs" role="tablist" aria-label="Список заявок" hidden>
                 <button type="button" class="transfers-tabs__btn transfers-tabs__btn--active" data-transfers-filter="active" aria-pressed="true">Активные</button>
                 <button type="button" class="transfers-tabs__btn" data-transfers-filter="mine" aria-pressed="false">Мои</button>
                 <button type="button" class="transfers-tabs__btn" data-transfers-filter="completed" aria-pressed="false">Закрытые</button>
               </div>
 
-              <div class="transfers-list" id="transfersList" aria-live="polite"></div>
+              <div class="transfers-list" id="transfersList" aria-live="polite" hidden></div>
               <p class="transfers-empty" id="transfersEmpty" hidden>Заявок пока нет.</p>
             </section>
           </div>
