@@ -869,12 +869,14 @@
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
-    fetchHomeSummary().then(function (data) {
-      if (data && data.ok) {
-        state = data;
-        updateHomePlaque();
-      }
-    }).catch(function () {});
+    if (window.__pokerHomeWidgetOpening !== "sngChampions") {
+      fetchHomeSummary().then(function (data) {
+        if (data && data.ok) {
+          state = data;
+          updateHomePlaque();
+        }
+      }).catch(function () {});
+    }
   }
 
   window.openSngChampionsModal = openModal;

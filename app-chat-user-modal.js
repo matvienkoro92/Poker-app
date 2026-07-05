@@ -150,6 +150,7 @@ if (chatUserModalEl) {
   var chatUserModalProfileGender = "male";
   var chatUserModalAchievementIdentity = null;
   var chatUserModalClubChoiceScriptReady = null;
+  var chatUserModalSngAchievementsReady = null;
   var chatUserModalRanksSeq = 0;
   var chatUserModalOpenSeq = 0;
   var chatUserModalBlockedByMe = false;
@@ -789,7 +790,7 @@ if (chatUserModalEl) {
   function getChatUserModalRafflesReady() {
     try {
       var cached = window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.ok ? window._rafflesCache.data : null;
-      if (cached) return Promise.resolve(Array.isArray(cached.raffles) ? cached.raffles : []);
+      if (cached && !cached.activeOnly && !cached.archiveDeferred) return Promise.resolve(Array.isArray(cached.raffles) ? cached.raffles : []);
     } catch (eCachedRaffles) {}
     try {
       var compactCached = window._raffleAchievementsCache && window._raffleAchievementsCache.data && window._raffleAchievementsCache.data.ok ? window._raffleAchievementsCache.data : null;
@@ -941,36 +942,45 @@ if (chatUserModalEl) {
     var source = window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS || window.pokerSngChampionsAchievements || [];
     return Array.isArray(source) ? source : [];
   }
+  function chatUserModalSngAchievementsForRows(targetKeys, ratingNick) {
+    return chatUserModalSngRows().reduce(function (list, seasonRow) {
+      var completedAt = String(seasonRow && seasonRow.completedAt || "").trim();
+      var season = String(seasonRow && seasonRow.season || "").trim();
+      (Array.isArray(seasonRow && seasonRow.winners) ? seasonRow.winners : []).forEach(function (winner) {
+        if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
+        var place = parseInt(winner && winner.place, 10) || 0;
+        if (!place || place > 3) return;
+        var label = String(place) + " место";
+        if (place === 1) label += " · Чемпион СНГ сезона";
+        else if (place === 2) label += " · Финалист СНГ сезона";
+        else label += " · Топ-3 СНГ сезона";
+        if (season) label += " · " + season;
+        list.push({
+          label: label,
+          detail: completedAt ? "Турнир завершен: " + completedAt.slice(0, 10) : "",
+        });
+      });
+      return list;
+    }, []);
+  }
   function getChatUserModalSngAchievementsReady(ratingNick, profileData, userId) {
     var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
     if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve([]);
+    if (chatUserModalSngRows().length) return Promise.resolve(chatUserModalSngAchievementsForRows(targetKeys, ratingNick));
     var apiBase = base || (typeof getApiBase === "function" ? getApiBase() : "");
     if (!apiBase || typeof fetch !== "function") return Promise.resolve([]);
-    return fetch(apiBase.replace(/\/$/, "") + "/api/sng-champions?mode=achievements", { cache: "default" })
-      .then(function (res) { return res.json().catch(function () { return {}; }); })
-      .then(function (data) {
-        if (data && data.ok && Array.isArray(data.rows)) window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS = data.rows;
-        return chatUserModalSngRows().reduce(function (list, seasonRow) {
-          var completedAt = String(seasonRow && seasonRow.completedAt || "").trim();
-          var season = String(seasonRow && seasonRow.season || "").trim();
-          (Array.isArray(seasonRow && seasonRow.winners) ? seasonRow.winners : []).forEach(function (winner) {
-            if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
-            var place = parseInt(winner && winner.place, 10) || 0;
-            if (!place || place > 3) return;
-            var label = String(place) + " место";
-            if (place === 1) label += " · Чемпион СНГ сезона";
-            else if (place === 2) label += " · Финалист СНГ сезона";
-            else label += " · Топ-3 СНГ сезона";
-            if (season) label += " · " + season;
-            list.push({
-              label: label,
-              detail: completedAt ? "Турнир завершен: " + completedAt.slice(0, 10) : "",
-            });
-          });
-          return list;
-        }, []);
-      })
-      .catch(function () { return []; });
+    if (!chatUserModalSngAchievementsReady) {
+      chatUserModalSngAchievementsReady = fetch(apiBase.replace(/\/$/, "") + "/api/sng-champions?mode=achievements", { cache: "default" })
+        .then(function (res) { return res.json().catch(function () { return {}; }); })
+        .then(function (data) {
+          if (data && data.ok && Array.isArray(data.rows)) window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS = data.rows;
+          return chatUserModalSngRows();
+        })
+        .catch(function () { return []; });
+    }
+    return chatUserModalSngAchievementsReady.then(function () {
+      return chatUserModalSngAchievementsForRows(targetKeys, ratingNick);
+    });
   }
   function getChatUserModalTournamentAchievementsReady(ratingNick) {
     var nick = String(ratingNick || "").trim();

@@ -205,13 +205,15 @@
         reportBtn.removeAttribute("aria-hidden");
         reportBtn.disabled = false;
       }
-      var prewarmAdminReportModal = window.pokerPrewarmAdminReportModal;
-      if (typeof prewarmAdminReportModal === "function") {
-        setTimeout(function () {
-          try {
-            prewarmAdminReportModal();
-          } catch (ePrewarmReport) {}
-        }, 0);
+      if (window.__pokerAllowEagerAdminReportPrewarm === true) {
+        var prewarmAdminReportModal = window.pokerPrewarmAdminReportModal;
+        if (typeof prewarmAdminReportModal === "function") {
+          setTimeout(function () {
+            try {
+              prewarmAdminReportModal();
+            } catch (ePrewarmReport) {}
+          }, 0);
+        }
       }
     }
     function showBonusAdminUi() {

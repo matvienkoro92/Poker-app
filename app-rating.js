@@ -337,7 +337,7 @@ function initSummerRating2025Modal() {
 
 
 var raffleBadgeHomeFetchPromise = null;
-var RAFFLE_BADGE_HOME_TTL_MS = 60 * 1000;
+var RAFFLE_BADGE_HOME_TTL_MS = 30 * 60 * 1000;
 
 function fetchRaffleBadge() {
   var force = arguments.length > 0 && arguments[0] && arguments[0].force === true;

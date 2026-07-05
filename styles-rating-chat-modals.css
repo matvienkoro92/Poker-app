@@ -2423,6 +2423,9 @@
   padding: 12px 10px 10px;
   border: 1px solid rgba(255, 199, 78, 0.86);
   border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(4, 5, 8, 0.4) 0%, rgba(4, 5, 8, 0.03) 36%, rgba(4, 5, 8, 0.66) 100%),
+    linear-gradient(180deg, rgba(20, 14, 5, 0.94), rgba(4, 7, 14, 0.96));
 }
 
 .chat-user-modal__achievement--sng-champion:not(.chat-user-modal__achievement--locked) {
@@ -2437,11 +2440,32 @@
 .chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-main,
 .chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-stars {
   display: block;
+  position: relative;
+  z-index: 2;
+}
+
+.chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-title {
+  min-height: 48px;
+  color: #ffe8ad;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(255, 179, 58, 0.36);
+}
+
+.chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-main {
+  align-self: end;
+  width: 100%;
+  padding: 5px 4px 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, transparent, rgba(3, 5, 10, 0.54));
 }
 
 .chat-user-modal__achievement--sng-champion .chat-user-modal__achievement-icon {
-  width: min(122%, 128px);
-  height: 112px;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
   border: 0;
   border-radius: 0;
@@ -2453,13 +2477,21 @@
 .chat-user-modal__achievement--sng-champion:not(.chat-user-modal__achievement--locked) .chat-user-modal__achievement-icon img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
+  object-fit: cover;
+  object-position: center center;
   transform: none;
   filter:
-    drop-shadow(0 10px 12px rgba(0, 0, 0, 0.54))
-    drop-shadow(0 0 16px rgba(255, 188, 65, 0.32))
-    drop-shadow(0 0 18px rgba(35, 135, 255, 0.26));
+    brightness(0.94)
+    contrast(1.06)
+    saturate(1.08);
+}
+
+.chat-user-modal__achievement--sng-champion.chat-user-modal__achievement--locked .chat-user-modal__achievement-icon img {
+  filter:
+    grayscale(0.1)
+    brightness(0.56)
+    contrast(1.08)
+    saturate(0.92);
 }
 
 .chat-user-modal__achievement--sng-champion:focus-visible {

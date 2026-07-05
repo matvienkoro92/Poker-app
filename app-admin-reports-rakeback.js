@@ -515,13 +515,13 @@
     return tr;
   }
 
-  function createArchiveEmptyRow() {
+  function createArchiveEmptyRow(message) {
     var tr = document.createElement("tr");
     var td = document.createElement("td");
     tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--templates";
     tr.setAttribute("data-rakeback-generated", "1");
     td.colSpan = 7;
-    td.textContent = "Архив пока пуст";
+    td.textContent = message || "Архив пока пуст";
     tr.appendChild(td);
     return tr;
   }
@@ -978,6 +978,9 @@
     var sharedUpdatedAt = "";
     var sharedAutoLoadStarted = false;
     var sharedAutoLoadRetryCount = 0;
+    var sharedArchiveLoaded = false;
+    var sharedArchiveLoading = false;
+    var sharedArchiveAvailable = false;
     var saving = false;
     var loading = false;
     var locallyDeletedRowKeys = {};
@@ -2044,6 +2047,30 @@
       return merged;
     }
 
+    function mergeLoadedRowsIntoExisting(loadedRows, existingRows) {
+      loadedRows = Array.isArray(loadedRows) ? loadedRows : [];
+      existingRows = Array.isArray(existingRows) ? existingRows : [];
+      var loadedByKey = {};
+      loadedRows.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (key) loadedByKey[key] = row;
+      });
+      var seen = {};
+      var merged = existingRows.map(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (!key || !loadedByKey[key]) return row;
+        seen[key] = true;
+        return mergeServerRowWithLocalVisualState(loadedByKey[key], row);
+      });
+      loadedRows.forEach(function (row) {
+        var key = getSharedRowLocalKey(row);
+        if (key && seen[key]) return;
+        merged.push(row);
+        if (key) seen[key] = true;
+      });
+      return merged;
+    }
+
     function mergeRowsWithPatchedLocalUpserts(rows, localRows, patch) {
       rows = Array.isArray(rows) ? rows : [];
       localRows = Array.isArray(localRows) ? localRows : [];
@@ -2168,6 +2195,7 @@
       var payload = {
         action: "rakeback_draft_save",
         date: "shared",
+        rakebackDraftScope: archiveMode ? "archive" : "currentWeek",
         rakebackRows: getRowsForSave(localRows, patchMode ? patch : null),
       };
       if (patchMode) {
@@ -2184,7 +2212,13 @@
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
           var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows));
-          sharedRows = mergeRowsWithPatchedLocalUpserts(mergeRowsWithLocalUnsaved(serverRows, localRows), localRows, patchMode ? patch : null);
+          if (archiveMode) {
+            sharedRows = mergeLoadedRowsIntoExisting(serverRows, localRows);
+            sharedArchiveLoaded = true;
+          } else {
+            sharedRows = mergeRowsWithPatchedLocalUpserts(mergeRowsWithLocalUnsaved(serverRows, localRows), localRows, patchMode ? patch : null);
+            sharedArchiveAvailable = data.rakebackDraft.hasArchive === true || sharedArchiveAvailable;
+          }
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
           if (!skipRender) {
             var scrollSnapshot = preserveScroll ? captureRakebackScroll(body) : null;
@@ -2214,32 +2248,45 @@
         if (options.showStatus) setStatus("Нет подключения для обновления");
         return Promise.resolve(false);
       }
+      var includeArchive = options.includeArchive === true || options.scope === "archive";
       var markBusy = options.background !== true;
       var q = getAuthQuery();
-      q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared";
-      if (sharedUpdatedAt && !options.force) q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
+      q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared&scope=" + encodeURIComponent(includeArchive ? "archive" : "currentWeek");
+      if (sharedUpdatedAt && !options.force && !includeArchive) q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
       if (markBusy) loading = true;
-      if (options.showStatus) setStatus("Обновляю…", true);
-      if (markBusy) syncControls();
+      if (includeArchive) sharedArchiveLoading = true;
+      if (options.showStatus) setStatus(includeArchive ? "Загружаю архив…" : "Обновляю…", true);
+      if (includeArchive && archiveMode) render();
+      else if (markBusy) syncControls();
       return requestJson(base + "/api/admin-report-shifts" + q).then(function (data) {
         var draft = data && data.ok ? data.rakebackDraft : null;
         if (draft && draft.notModified === true) {
           if (options.showStatus) setStatus("Уже актуально");
           return true;
         }
-        sharedRows = mergeRowsWithLocalUnsaved(filterLocallyDeletedSharedRows(normalizeDraftRows(draft && draft.rows)), mergeSharedRowsFromDom({ includeEmptyUnsaved: true }));
+        var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(draft && draft.rows));
+        var localRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+        if (includeArchive) {
+          sharedRows = mergeLoadedRowsIntoExisting(serverRows, localRows);
+          sharedArchiveLoaded = true;
+        } else {
+          sharedRows = mergeRowsWithLocalUnsaved(serverRows, localRows);
+          sharedArchiveAvailable = draft && draft.hasArchive === true;
+        }
         sharedUpdatedAt = draft && draft.updatedAt ? draft.updatedAt : sharedUpdatedAt;
         render();
-        if (options.showStatus) setStatus("Обновлено");
+        if (options.showStatus) setStatus(includeArchive ? "Архив загружен" : "Обновлено");
         return true;
       }).catch(function () {
-        if (options.showStatus) setStatus("Не удалось обновить");
+        if (options.showStatus) setStatus(includeArchive ? "Не удалось загрузить архив" : "Не удалось обновить");
         return false;
       }).then(function (result) {
+        if (includeArchive) sharedArchiveLoading = false;
         if (markBusy) {
           loading = false;
-          syncControls();
         }
+        if (includeArchive && archiveMode) render();
+        else if (markBusy) syncControls();
         return result;
       });
     }
@@ -2349,8 +2396,8 @@
       if (statusEl) {
         if (archiveMode) {
           var archiveRows = getArchiveRows();
-          statusEl.hidden = archiveRows.length > 0;
-          statusEl.textContent = archiveRows.length ? "" : "Архив пока пуст";
+          statusEl.hidden = sharedArchiveLoading || archiveRows.length > 0;
+          statusEl.textContent = sharedArchiveLoading || archiveRows.length ? "" : "Архив пока пуст";
         } else if (!statusEl.textContent) {
           statusEl.hidden = true;
         }
@@ -2385,7 +2432,9 @@
         var archiveFragment = document.createDocumentFragment();
         var archiveRows = getArchiveRows();
         var archiveWeeks = getArchiveWeeks(archiveRows);
-        if (archiveWeeks.length) {
+        if (sharedArchiveLoading && !sharedArchiveLoaded) {
+          archiveFragment.appendChild(createArchiveEmptyRow("Загружаю архив…"));
+        } else if (archiveWeeks.length) {
           archiveWeeks.forEach(function (week) {
             appendArchiveTableWeek(archiveFragment, week);
           });
@@ -2779,7 +2828,7 @@
       if (sortSelect) sortSelect.addEventListener("change", render);
       if (refreshBtn) {
         refreshBtn.onclick = function () {
-          loadSharedDraft({ force: true, showStatus: true });
+          loadSharedDraft({ force: true, showStatus: true, includeArchive: archiveMode });
         };
       }
       if (addBtn) {
@@ -3035,7 +3084,13 @@
 
     function setArchiveMode(active) {
       archiveMode = !!active;
-      return render();
+      var count = render();
+      if (archiveMode && !sharedArchiveLoaded && !sharedArchiveLoading) {
+        loadSharedDraft({ includeArchive: true, force: true, showStatus: true });
+      } else if (!archiveMode) {
+        scheduleSharedDraftAutoload();
+      }
+      return count;
     }
 
     return {

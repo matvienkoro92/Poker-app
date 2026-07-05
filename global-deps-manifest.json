@@ -1001,6 +1001,26 @@
       ]
     },
     {
+      "name": "_raffleAchievementsCache",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-user-modal.js"
+      ],
+      "consumedBy": [
+        "app-chat-user-modal.js"
+      ]
+    },
+    {
+      "name": "__rafflesBypassServerListCacheUntil",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-raffles.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js"
+      ]
+    },
+    {
       "name": "updateProfileDtId",
       "domain": "profile",
       "exportedBy": [

@@ -273,6 +273,7 @@
   };
 
   (function pokerEagerHydrateGlobalModals() {
+    if (window.__pokerAllowEagerGlobalModals !== true) return;
     function run() {
       try {
         if (document.getElementById("globalModalsFragmentHost")) {
@@ -298,11 +299,8 @@
 
   (function pokerEagerHydratePrimaryViews() {
     var queue = [
-      "chat",
-      "hall-of-fame",
-      "download",
-      "profile",
-      "raffles"
+      "raffles",
+      "profile"
     ];
     var index = 0;
     function runNext(deadline) {
@@ -340,6 +338,7 @@
   })();
 
   (function pokerIdleWarmCommonImages() {
+    if (window.__pokerAllowIdleWarmCommonImages !== true) return;
     var assets = [
       "./assets/chat-profile-achievement-top-win.webp",
       "./assets/chat-profile-achievement-top-win-2026.webp",
@@ -957,6 +956,7 @@
   });
 
   (function prewarmDesktopAdminReport() {
+    if (window.__pokerAllowEagerAdminReportPrewarm !== true) return;
     function run() {
       var btn = document.getElementById("adminReportBtn");
       if (!btn) return;

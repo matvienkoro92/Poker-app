@@ -6,6 +6,9 @@
   var stylePromises = Object.create(null);
 
   var DOMAIN_DEPS = {
+    "home-widget-club-choice": ["home-widget-modals"],
+    "home-widget-private-cash": ["home-widget-modals"],
+    "home-widget-sng": ["home-widget-modals"],
     "rating-winter": ["rating-common"],
     "rating-spring": ["rating-common"],
     "rating-summer": ["rating-common"],
@@ -229,6 +232,49 @@
     return null;
   }
 
+  function shouldSkipIntentPrewarm() {
+    try {
+      var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!connection) return false;
+      if (connection.saveData) return true;
+      return /(^|-)2g$/i.test(String(connection.effectiveType || ""));
+    } catch (eConnection) {
+      return false;
+    }
+  }
+
+  function viewIntentTarget(target) {
+    if (!target || !target.closest) return "";
+    var el = target.closest("[data-view-target]");
+    if (!el) return "";
+    return String(el.getAttribute("data-view-target") || "").trim();
+  }
+
+  function prewarmViewFromIntent(event) {
+    if (shouldSkipIntentPrewarm()) return;
+    var viewName = viewIntentTarget(event && event.target);
+    if (!viewName || viewName === "home") return;
+    var domains = VIEW_DOMAINS[viewName];
+    if (!domains || !domains.length) return;
+    var key = "view:" + viewName;
+    if (window.__pokerViewIntentPrewarmed && window.__pokerViewIntentPrewarmed[key]) return;
+    window.__pokerViewIntentPrewarmed = window.__pokerViewIntentPrewarmed || Object.create(null);
+    window.__pokerViewIntentPrewarmed[key] = true;
+    var ready = ensureDomainsMaybeAsync(domains, { styles: true, scripts: true });
+    if (ready && typeof ready.catch === "function") ready.catch(function () {});
+    try {
+      if (typeof window.pokerEnsureViewHtml === "function") {
+        var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;
+        var htmlReady = window.pokerEnsureViewHtml(htmlViewName);
+        if (htmlReady && typeof htmlReady.catch === "function") htmlReady.catch(function () {});
+      }
+    } catch (eHtmlPrewarm) {}
+  }
+
+  document.addEventListener("pointerover", prewarmViewFromIntent, true);
+  document.addEventListener("focusin", prewarmViewFromIntent, true);
+  document.addEventListener("touchstart", prewarmViewFromIntent, { capture: true, passive: true });
+
   if (typeof window.resolveHallFameSectionFromStartParam !== "function") {
     window.resolveHallFameSectionFromStartParam = resolveHallStartParam;
   }
@@ -247,8 +293,26 @@
   window.pokerEnsureScriptDomains = function (domains) {
     return ensureDomainsMaybeAsync(domains, { styles: false, scripts: true });
   };
+  window.pokerEnsureStyleDomains = function (domains) {
+    return ensureDomainsMaybeAsync(domains, { styles: true, scripts: false });
+  };
+  window.pokerEnsureLazyDomains = function (domains, opts) {
+    return ensureDomainsMaybeAsync(domains, opts || { styles: true, scripts: true });
+  };
   window.pokerEnsureViewScripts = function (viewName) {
     return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: true });
+  };
+  window.pokerPrewarmLikelyViewAssets = function () {
+    if (window.__pokerLikelyViewAssetsPrewarmed) return;
+    window.__pokerLikelyViewAssetsPrewarmed = true;
+    var idle = window.requestIdleCallback || function (cb) {
+      return setTimeout(cb, 900);
+    };
+    idle(function () {
+      if (document.hidden) return;
+      var ready = ensureDomainsMaybeAsync(["raffles", "learning", "profile", "rating-common"], { styles: true, scripts: false });
+      if (ready && typeof ready.catch === "function") ready.catch(function () {});
+    }, { timeout: 2500 });
   };
   window.pokerHasGlobalModalScriptsForTarget = function (target) {
     return globalModalDomainsForTarget(target).length > 0;

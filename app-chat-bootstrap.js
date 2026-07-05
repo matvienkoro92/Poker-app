@@ -30,6 +30,18 @@ function initChatBootstrap(opts) {
   var showDialogs = typeof opts.showDialogs === "function" ? opts.showDialogs : function () {};
   var pokerPushOpenSetCaller = typeof opts.pokerPushOpenSetCaller === "function" ? opts.pokerPushOpenSetCaller : function () {};
   var pokerPushOpenDebug = typeof opts.pokerPushOpenDebug === "function" ? opts.pokerPushOpenDebug : function () {};
+  var pokerGuardDefaultDialogsOpen = typeof opts.pokerGuardDefaultDialogsOpen === "function" ? opts.pokerGuardDefaultDialogsOpen : null;
+
+  function chatBootstrapIsChatViewActive() {
+    try {
+      return !!(
+        (typeof document !== "undefined" && document.body && document.body.getAttribute("data-view") === "chat") ||
+        (typeof document !== "undefined" && document.querySelector('[data-view="chat"].view--active'))
+      );
+    } catch (eChatViewActive) {
+      return false;
+    }
+  }
 
   if (window.__pendingOpenClubChatGeneral) {
     window.__pendingOpenClubChatGeneral = false;
@@ -58,8 +70,10 @@ function initChatBootstrap(opts) {
     openConvFromDialogs(pcm.userId, pcm.userName || "Менеджер");
   } else if (typeof pokerGuardDefaultDialogsOpen === "function" && pokerGuardDefaultDialogsOpen()) {
   } else {
-    pokerPushOpenSetCaller("initChat-default");
-    showDialogs();
+    if (chatBootstrapIsChatViewActive()) {
+      pokerPushOpenSetCaller("initChat-default");
+      showDialogs();
+    }
   }
 
   if (dialogsView) {
@@ -191,8 +205,8 @@ function initChatPollingLoop(opts) {
   var chatLastPollAt = state.chatLastPollAt || {};
   var CHAT_POLL_TICK_MS = constants.CHAT_POLL_TICK_MS || 1000;
   var CHAT_HIDDEN_IDLE_MS = constants.CHAT_HIDDEN_IDLE_MS || 60000;
-  var CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS = constants.CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS || 60000;
-  var CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS = constants.CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS || 300000;
+  var CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS = constants.CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS || 300000;
+  var CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS = constants.CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS || 1800000;
   var CHAT_PRESENCE_IDLE_MS = constants.CHAT_PRESENCE_IDLE_MS || 45000;
   function shouldRunChatHomeSummaryPoll(nowMs, hidden) {
     var interval = hidden ? CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS : CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS;
@@ -279,6 +293,17 @@ function initChatPollingLoop(opts) {
       return;
     }
     try {
+      var chatViewVisible = !!(
+        (document.body && document.body.getAttribute("data-view") === "chat") ||
+        document.querySelector('[data-view="chat"].view--active')
+      );
+      var guestV = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
+      var credV = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+      if (!chatViewVisible) {
+        if (credV && !guestV && loadChatHomeSummary) loadChatHomeSummary();
+        pokerChatRefreshLongPollTargets();
+        return;
+      }
       var activeTab = getChatActiveTab();
       var generalView = getGeneralView();
       if (
@@ -289,8 +314,6 @@ function initChatPollingLoop(opts) {
       ) {
         loadGeneral();
       }
-      var guestV = typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode();
-      var credV = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
       if (credV && !guestV && typeof loadContacts === "function") loadContacts({ metaOnly: true });
       if (getChatWithUserId() && typeof loadMessages === "function") loadMessages();
     } catch (eVisPoll) {}

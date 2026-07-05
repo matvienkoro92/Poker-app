@@ -59,6 +59,17 @@ function initChatTabDialogShell(opts) {
   var pokerFlushBottomNavAndViewportAfterChatChrome = typeof opts.pokerFlushBottomNavAndViewportAfterChatChrome === "function" ? opts.pokerFlushBottomNavAndViewportAfterChatChrome : null;
   var closeSwitcherDropdown = typeof opts.closeSwitcherDropdown === "function" ? opts.closeSwitcherDropdown : function () {};
 
+function chatShellIsChatViewActive() {
+  try {
+    return !!(
+      (document.body && document.body.getAttribute("data-view") === "chat") ||
+      document.querySelector('[data-view="chat"].view--active')
+    );
+  } catch (eChatShellView) {
+    return false;
+  }
+}
+
 function setChatThreadChromeOpen(on) {
   try {
     if (typeof window.pokerSetChatConversationOpenClass === "function") {
@@ -377,18 +388,23 @@ function showDialogs() {
   try {
     pokerHydrateChatSnapshotsFromDisk({ generalOnly: true });
   } catch (eHydDlg) {}
-  setTimeout(function () {
-    try {
-      pokerPrefetchDiskPeersWarmup();
-    } catch (eWarmDlg) {}
-  }, 350);
+  var chatViewActiveForDialogs = chatShellIsChatViewActive();
+  if (chatViewActiveForDialogs) {
+    setTimeout(function () {
+      try {
+        if (chatShellIsChatViewActive()) pokerPrefetchDiskPeersWarmup();
+      } catch (eWarmDlg) {}
+    }, 350);
+  }
   if (window._chatGeneralCache && window._chatGeneralCache.messages && typeof updateClubChatPreview === "function") updateClubChatPreview(window._chatGeneralCache.messages);
-  loadContacts();
-  setTimeout(function () {
-    try {
-      loadGeneral();
-    } catch (eLoadGenDlg) {}
-  }, 0);
+  if (chatViewActiveForDialogs) {
+    loadContacts();
+    setTimeout(function () {
+      try {
+        if (chatShellIsChatViewActive()) loadGeneral();
+      } catch (eLoadGenDlg) {}
+    }, 0);
+  }
   // На некоторых переходах между экранами (в т.ч. download) браузер может
   // сохранить inline-трансформы/позиции для абсолютных элементов.
   // Принудительно возвращаем верхнюю панель общего чата в корректное место.

@@ -2,6 +2,9 @@
   function init(scope) {
     scope = scope || {};
     with (scope) {
+      var calculationArchiveRequestBase = "";
+      var calculationArchiveRequestQuery = "";
+
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
           clearTimeout(calculationCashUpdateTimer);
@@ -357,6 +360,43 @@
         }).join("");
       }
 
+      function renderCalculationArchiveDeferred(hasArchive) {
+        if (!calculationsArchiveEl) return;
+        calculationsArchiveEl.hidden = !hasArchive;
+        if (!hasArchive) {
+          calculationsArchiveEl.innerHTML = "";
+          return;
+        }
+        calculationsArchiveEl.innerHTML =
+          '<details class="admin-report-calculations__archive-details" data-admin-report-calculation-archive-deferred="1">' +
+            '<summary class="admin-report-calculations__archive-summary">Архив</summary>' +
+            '<div class="admin-report-calculations__archive-inner">' +
+              '<p class="admin-report-calculations__archive-empty">Откройте архив, чтобы загрузить прошлые недели.</p>' +
+            "</div>" +
+          "</details>";
+      }
+
+      function requestCalculationArchiveLoad() {
+        if (!calculationArchiveRequestBase || !calculationArchiveRequestQuery) return;
+        loadCalculationArchiveReports(calculationArchiveRequestBase, calculationArchiveRequestQuery);
+      }
+
+      function bindCalculationArchiveDeferredLoader() {
+        if (!calculationsArchiveEl || calculationsArchiveEl.dataset.adminReportCalculationArchiveLazyBound === "1") return;
+        calculationsArchiveEl.dataset.adminReportCalculationArchiveLazyBound = "1";
+        calculationsArchiveEl.addEventListener("toggle", function (event) {
+          var target = event.target;
+          if (!target || !target.matches || !target.matches("[data-admin-report-calculation-archive-deferred]")) return;
+          if (!target.open) return;
+          requestCalculationArchiveLoad();
+        }, true);
+        calculationsArchiveEl.addEventListener("click", function (event) {
+          var summary = event.target && event.target.closest ? event.target.closest("[data-admin-report-calculation-archive-deferred] > summary") : null;
+          if (!summary) return;
+          requestCalculationArchiveLoad();
+        });
+      }
+
       function appendCalculationQueryParam(url, name, value) {
         var sep = String(url || "").indexOf("?") === -1 ? "?" : "&";
         return String(url || "") + sep + encodeURIComponent(name) + "=" + encodeURIComponent(value);
@@ -376,6 +416,14 @@
       function loadCalculationArchiveReports(base, q) {
         if (!calculationsArchiveEl || calculationArchiveLoading || calculationArchiveLoaded) return;
         calculationArchiveLoading = true;
+        calculationsArchiveEl.hidden = false;
+        calculationsArchiveEl.innerHTML =
+          '<details class="admin-report-calculations__archive-details" open>' +
+            '<summary class="admin-report-calculations__archive-summary">Архив</summary>' +
+            '<div class="admin-report-calculations__archive-inner">' +
+              '<p class="admin-report-calculations__archive-empty">Загружаю архив…</p>' +
+            "</div>" +
+          "</details>";
         fetchCalculationReports(base, q, "archive")
           .then(function (data) {
             calculationArchiveLoading = false;
@@ -386,6 +434,7 @@
           })
           .catch(function () {
             calculationArchiveLoading = false;
+            renderCalculationArchiveDeferred(true);
           });
       }
 
@@ -399,12 +448,22 @@
         var base = typeof getApiBase === "function" ? getApiBase() : "";
         if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
         var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+        calculationArchiveRequestBase = base;
+        calculationArchiveRequestQuery = q;
+        bindCalculationArchiveDeferredLoader();
         fetchCalculationReports(base, q, "currentWeek")
           .then(function (data) {
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
             calculationReportsCache = Array.isArray(items) ? items : [];
             setCalculationTotalsText(sumCalculationReports(calculationReportsCache, week));
-            if (data && data.hasArchive) loadCalculationArchiveReports(base, q);
+            if (data && data.hasArchive) {
+              if (calculationArchiveLoaded && Array.isArray(calculationArchiveReportsCache) && calculationArchiveReportsCache.length) {
+                renderCalculationArchive(calculationArchiveReportsCache);
+              } else {
+                calculationArchiveLoaded = false;
+                renderCalculationArchiveDeferred(true);
+              }
+            }
             else {
               calculationArchiveLoaded = true;
               calculationArchiveReportsCache = [];

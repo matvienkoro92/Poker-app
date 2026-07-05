@@ -1343,7 +1343,7 @@
         });
       }).observe(document.body, { childList: true, subtree: true });
     }
-    refreshHomeButtonStatus();
+    if (window.__pokerHomeWidgetOpening !== "privateCash") refreshHomeButtonStatus();
   }
 
   window.openPrivateCashModal = openModal;

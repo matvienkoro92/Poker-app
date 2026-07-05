@@ -1134,7 +1134,7 @@
       openModal();
     });
     startHomePlaqueTimer();
-    refreshHomePlaqueState();
+    if (window.__pokerHomeWidgetOpening !== "clubChoiceVote") refreshHomePlaqueState();
   }
 
   window.openClubChoiceVoteModal = openModal;

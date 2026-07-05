@@ -2792,6 +2792,7 @@ function initChat() {
     tg: tg,
     openConvFromDialogs: openConvFromDialogs,
     showDialogs: showDialogs,
+    pokerGuardDefaultDialogsOpen: typeof pokerGuardDefaultDialogsOpen === "function" ? pokerGuardDefaultDialogsOpen : null,
     pokerPushOpenSetCaller: pokerPushOpenSetCaller,
     pokerPushOpenDebug: pokerPushOpenDebug,
   });

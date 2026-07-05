@@ -11,6 +11,7 @@ function pokerRunShellReadyBootstrap() {
   runGazetteAndTasksInit();
   if (typeof updateSpringRatingPromoDateFromVar === "function") updateSpringRatingPromoDateFromVar();
   tryInitWinterRatingLightboxEarly();
+  if (typeof window.pokerPrewarmLikelyViewAssets === "function") window.pokerPrewarmLikelyViewAssets();
 }
 
 if (document.readyState === "loading") {

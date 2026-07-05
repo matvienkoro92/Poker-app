@@ -1301,8 +1301,8 @@ function initRafflesCompletedRuntime(opts) {
   function buildCompletedRafflesListHtml(completed) {
     var list = sortCompletedRafflesNewestFirst(completed);
     if (list.length <= 0) return "";
-    var currentHtml = buildCompletedRaffleCardHtml(list[0]);
-    var archive = list.slice(1);
+    var currentHtml = list.slice(0, 2).map(buildCompletedRaffleCardHtml).join("");
+    var archive = list.slice(2);
     return currentHtml + buildCompletedArchiveHtml(archive, raffleCompletedMonthTotalsByKey(list));
   }
 

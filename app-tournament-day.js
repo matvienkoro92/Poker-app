@@ -950,7 +950,7 @@ function initHomeTournamentBubbleButtons() {
   });
 }
 
-var HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS = 60000;
+var HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS = 30 * 60 * 1000;
 var homeTournamentRaffleBonusLoadedAt = 0;
 var homeTournamentRaffleBonusInFlight = false;
 var homeTournamentRaffleBonusData = null;

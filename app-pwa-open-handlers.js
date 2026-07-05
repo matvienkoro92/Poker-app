@@ -144,13 +144,24 @@ window.addEventListener("poker-telegram-auth", function (ev) {
       }
     } catch (eChatBootAuth) {}
     if (needsFullChatRefresh) {
+      var chatViewActiveAfterAuth = false;
       try {
-        if (typeof loadContacts === "function") loadContacts();
+        chatViewActiveAfterAuth = !!(
+          (document.body && document.body.getAttribute("data-view") === "chat") ||
+          document.querySelector('[data-view="chat"].view--active')
+        );
+      } catch (eChatViewAfterAuth) {}
+      var pendingPersonalAfterAuth = !!window.__pendingOpenChatPersonalFromDeepLink;
+      var pendingClubAfterAuth = !!window.__pendingOpenClubChatGeneral;
+      try {
+        if (typeof loadContacts === "function" && (chatViewActiveAfterAuth || pendingPersonalAfterAuth || pendingClubAfterAuth)) {
+          loadContacts(chatViewActiveAfterAuth ? undefined : { metaOnly: true });
+        }
       } catch (eChatContactsAuth) {}
       try {
-        if (typeof loadGeneral === "function") loadGeneral();
+        if (typeof loadGeneral === "function" && (chatViewActiveAfterAuth || pendingClubAfterAuth)) loadGeneral();
       } catch (eChatGeneralAuth) {}
-      if (typeof window.chatRefresh === "function") window.chatRefresh();
+      if (chatViewActiveAfterAuth && typeof window.chatRefresh === "function") window.chatRefresh();
     }
     if (typeof window.pokerRecheckAdminFooter === "function") window.pokerRecheckAdminFooter();
     if (typeof pokerMaybeAutoEnrollChatPush === "function") pokerMaybeAutoEnrollChatPush();
