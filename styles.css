@@ -9092,3 +9092,19 @@ html.app-view-home #app.app.app--view-home > .card > .card__header .header-actio
 #app.app.app--view-home > .card > .card__header .header-actions {
   flex: 0 1 clamp(156px, 43vw, 206px) !important;
 }
+
+.app.app--view-home .home-club-actions-block {
+  --home-sng-champions-row: clamp(164px, 31vw, 190px);
+}
+
+.app.app--view-home .home-club-choice-plaque--sng,
+.sng-champions-promo__button.home-club-choice-plaque--sng {
+  align-content: end !important;
+  padding-top: clamp(20px, 3.4vw, 30px) !important;
+  padding-bottom: clamp(36px, 6vw, 46px) !important;
+}
+
+.app.app--view-home .home-club-actions-block .home-club-choice-plaque--sng .home-club-choice-plaque__text,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__text {
+  top: clamp(18px, 3.3vw, 30px) !important;
+}
