@@ -8,6 +8,7 @@ const root = path.join(__dirname, "..");
 const roots = ["api", "lib", "scripts"];
 const skipDirs = new Set(["node_modules", "public", ".git"]);
 const files = [];
+const redisGuardSkipFiles = new Set(["lib/redis-bandwidth-guard.js"]);
 
 function stripAssetUrl(raw) {
   return String(raw || "")
@@ -60,6 +61,7 @@ for (const rel of roots) walk(rel);
 const uniqueFiles = [...new Set(files)].sort();
 
 let failed = false;
+const redisBandwidthIssues = [];
 for (const rel of uniqueFiles) {
   const result = spawnSync(process.execPath, ["--check", path.join(root, rel)], {
     cwd: root,
@@ -71,7 +73,54 @@ for (const rel of uniqueFiles) {
     if (result.stdout) process.stdout.write(result.stdout);
     if (result.stderr) process.stderr.write(result.stderr);
   }
+  redisBandwidthIssues.push(...findRedisBandwidthGuardIssues(rel));
+}
+
+if (redisBandwidthIssues.length) {
+  failed = true;
+  console.error("\nRedis bandwidth guard check failed:");
+  redisBandwidthIssues.slice(0, 40).forEach((issue) => {
+    console.error(`${issue.file}:${issue.line}: ${issue.message}`);
+  });
+  if (redisBandwidthIssues.length > 40) {
+    console.error(`...and ${redisBandwidthIssues.length - 40} more Redis bandwidth issues.`);
+  }
 }
 
 if (failed) process.exit(1);
 console.log(`Checked ${uniqueFiles.length} JavaScript files.`);
+
+function findRedisBandwidthGuardIssues(rel) {
+  if (!rel || redisGuardSkipFiles.has(rel)) return [];
+  const abs = path.join(root, rel);
+  if (!fs.existsSync(abs)) return [];
+  const lines = fs.readFileSync(abs, "utf8").split(/\r?\n/);
+  const issues = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const windowText = lines.slice(i, Math.min(lines.length, i + 24)).join("\n");
+    if (/\[\s*["']KEYS["']/.test(line) && !/allowDangerousRedisRead\s*:\s*true/.test(windowText)) {
+      issues.push({
+        file: rel,
+        line: i + 1,
+        message: "KEYS needs allowDangerousRedisRead: true and a context.",
+      });
+    }
+    if (/\[\s*["']LRANGE["']/.test(line) && redisLrangeCanReadWholeList(line) && !/allowLargeRedisRead\s*:/.test(windowText)) {
+      issues.push({
+        file: rel,
+        line: i + 1,
+        message: "Full-list LRANGE needs allowLargeRedisRead and a context.",
+      });
+    }
+  }
+  return issues;
+}
+
+function redisLrangeCanReadWholeList(line) {
+  const text = String(line || "");
+  if (!/["']0["']/.test(text)) return false;
+  if (/["']-1["']/.test(text)) return true;
+  if (/\bneedsFull[A-Za-z0-9_]*\b/.test(text)) return true;
+  return false;
+}
