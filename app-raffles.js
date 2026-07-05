@@ -144,6 +144,8 @@ function initRaffles() {
   var rafflesPendingCompletedId = "";
   var rafflesArchiveLoaded = false;
   var rafflesArchiveLoading = false;
+  var rafflesWinnerReadyOverrides = {};
+  var rafflesWinnerStatusOverrides = {};
   var rafflesActiveBroadcastList = [];
   var rafflesActiveInfoOpenId = "";
   var rafflesSubscriptionGate = null;
@@ -1896,10 +1898,17 @@ function initRaffles() {
     });
     var summaryParticipants = parseInt(summaryData.uniqueParticipantsCount, 10);
     var summaryWinners = parseInt(summaryData.uniqueWinnersCount, 10);
-    if (rafflesHeroDoneCount) rafflesHeroDoneCount.textContent = formatRaffleHeroCount(completedList.length);
-    if (rafflesHeroPrizeSum) rafflesHeroPrizeSum.textContent = formatRaffleSum(completedSumRub || 0);
+    var summaryCompletedCount = parseInt(summaryData.completedCount, 10);
+    var summaryCompletedSum = parseFloat(summaryData.completedPrizeSumRub);
+    if (rafflesHeroDoneCount) rafflesHeroDoneCount.textContent = formatRaffleHeroCount(isFinite(summaryCompletedCount) ? summaryCompletedCount : completedList.length);
+    if (rafflesHeroPrizeSum) rafflesHeroPrizeSum.textContent = formatRaffleSum(isFinite(summaryCompletedSum) ? summaryCompletedSum : (completedSumRub || 0));
     if (rafflesHeroUniqueParticipants) rafflesHeroUniqueParticipants.textContent = formatRaffleHeroCount(isFinite(summaryParticipants) ? summaryParticipants : Object.keys(participants).length);
     if (rafflesHeroWinnersCount) rafflesHeroWinnersCount.textContent = formatRaffleHeroCount(isFinite(summaryWinners) ? summaryWinners : Object.keys(winners).length);
+  }
+
+  function rafflesSummaryNumber(summary, key) {
+    var n = summary && typeof summary === "object" ? parseFloat(summary[key]) : NaN;
+    return isFinite(n) ? n : null;
   }
 
   function parseRaffleActionResponse(r) {
@@ -2676,10 +2685,8 @@ function initRaffles() {
     }
   }
 
-  function renderDeferredCompletedArchivePanel() {
-    if (!rafflesCompleted || rafflesArchiveLoaded) return;
-    if (rafflesCompleted.querySelector && rafflesCompleted.querySelector("[data-raffles-archive-deferred='1']")) return;
-    rafflesCompleted.innerHTML =
+  function deferredCompletedArchiveHtml() {
+    return (
       "<details class=\"raffles-completed-spoiler raffles-completed-archive raffles-completed-archive--deferred\" data-raffles-archive-deferred=\"1\">" +
         "<summary class=\"raffles-completed-spoiler__summary\">" +
           "<span class=\"raffles-completed-spoiler__title\">Архив</span>" +
@@ -2691,7 +2698,23 @@ function initRaffles() {
         "<div class=\"raffles-completed-spoiler__body raffles-completed-archive__body\">" +
           "<span class=\"raffle-loading__spinner\" aria-hidden=\"true\"></span><span class=\"raffle-loading__text\">Загружаем архив</span>" +
         "</div>" +
-      "</details>";
+      "</details>"
+    );
+  }
+
+  function renderDeferredCompletedArchivePanel(recentCompleted) {
+    if (!rafflesCompleted || rafflesArchiveLoaded) return;
+    var recent = Array.isArray(recentCompleted) ? recentCompleted.slice(0, 2) : [];
+    if (recent.length) {
+      renderCompletedRafflesPanel(recent);
+      if (rafflesCompleted.insertAdjacentHTML) {
+        rafflesCompleted.insertAdjacentHTML("beforeend", deferredCompletedArchiveHtml());
+      }
+      return;
+    }
+    if (rafflesCompleted.querySelector && rafflesCompleted.querySelector("[data-raffles-archive-deferred='1']")) return;
+    if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");
+    rafflesCompleted.innerHTML = deferredCompletedArchiveHtml();
   }
 
   function requestCompletedArchiveLoad() {
@@ -2705,8 +2728,137 @@ function initRaffles() {
     schedulePendingCompletedRaffleFocus();
   }
 
+  function raffleWinnerIsReadyLocally(winner) {
+    return !!(winner && (winner.winnerReady === true || String(winner.winnerReady || "").toLowerCase() === "true"));
+  }
+
+  function raffleWinnerReadyOverrideKey(raffleId, winner) {
+    var keys = raffleWinnerReadyOverrideKeys(raffleId, winner);
+    return keys[0] || "";
+  }
+
+  function raffleWinnerReadyOverrideKeys(raffleId, winner) {
+    var rid = String(raffleId || "").trim();
+    if (!rid || !winner) return [];
+    var keys = [];
+    var slot = String((winner.winnerReadySlotId || winner.winnerSlotId) || "").trim();
+    if (slot) keys.push(rid + "|slot:" + slot);
+    var userId = String(winner.userId != null ? winner.userId : "").trim();
+    if (userId) keys.push(rid + "|user:" + userId);
+    var accountId = String((winner.accountId || winner.dtId) || "").trim();
+    if (accountId) keys.push(rid + "|account:" + accountId);
+    var p21Id = String(winner.p21Id != null ? winner.p21Id : "").trim();
+    if (p21Id) keys.push(rid + "|p21:" + p21Id);
+    return keys;
+  }
+
+  function rememberRaffleWinnerReadyOverrides(raffle) {
+    if (!raffle || !Array.isArray(raffle.winners)) return;
+    var rid = String(raffle.id || "").trim();
+    if (!rid) return;
+    var until = Date.now() + 10 * 60 * 1000;
+    raffle.winners.forEach(function (winner) {
+      if (!raffleWinnerIsReadyLocally(winner)) return;
+      raffleWinnerReadyOverrideKeys(rid, winner).forEach(function (key) {
+        if (key) rafflesWinnerReadyOverrides[key] = until;
+      });
+    });
+  }
+
+  function applyRaffleWinnerReadyOverrides(raffle) {
+    if (!raffle || !Array.isArray(raffle.winners)) return raffle;
+    var rid = String(raffle.id || "").trim();
+    if (!rid) return raffle;
+    var nowMs = Date.now();
+    raffle.winners.forEach(function (winner) {
+      var keys = raffleWinnerReadyOverrideKeys(rid, winner);
+      var key = "";
+      var until = 0;
+      keys.some(function (candidateKey) {
+        var candidateUntil = candidateKey ? parseInt(rafflesWinnerReadyOverrides[candidateKey], 10) || 0 : 0;
+        if (!candidateUntil) return false;
+        key = candidateKey;
+        until = candidateUntil;
+        return true;
+      });
+      if (!until) return;
+      if (until <= nowMs) {
+        delete rafflesWinnerReadyOverrides[key];
+        return;
+      }
+      var state = String(winner && winner.winnerReadyState || "").toLowerCase();
+      var status = String(winner && winner.winnerStatus || "").toLowerCase();
+      if (winner.winnerReadyExpired === true || winner.winnerBurned === true || state === "missed" || state === "burned" || status === "ok" || status === "fail") return;
+      winner.winnerReady = true;
+      winner.winnerReadyState = "ready";
+    });
+    return raffle;
+  }
+
+  function applyRaffleWinnerReadyOverridesToList(list) {
+    if (!Array.isArray(list)) return list;
+    list.forEach(applyRaffleWinnerReadyOverrides);
+    return list;
+  }
+
+  function winnerStatusOverrideValue(winner) {
+    if (!winner || !Object.prototype.hasOwnProperty.call(winner, "winnerStatus")) return null;
+    var status = String(winner.winnerStatus || "").toLowerCase();
+    return status === "ok" || status === "fail" ? status : "";
+  }
+
+  function rememberRaffleWinnerStatusOverrides(raffle) {
+    if (!raffle || !Array.isArray(raffle.winners)) return;
+    var rid = String(raffle.id || "").trim();
+    if (!rid) return;
+    var until = Date.now() + 10 * 60 * 1000;
+    raffle.winners.forEach(function (winner) {
+      var status = winnerStatusOverrideValue(winner);
+      if (status == null) return;
+      raffleWinnerReadyOverrideKeys(rid, winner).forEach(function (key) {
+        if (key) rafflesWinnerStatusOverrides[key] = { status: status, until: until };
+      });
+    });
+  }
+
+  function applyRaffleWinnerStatusOverrides(raffle) {
+    if (!raffle || !Array.isArray(raffle.winners)) return raffle;
+    var rid = String(raffle.id || "").trim();
+    if (!rid) return raffle;
+    var nowMs = Date.now();
+    raffle.winners.forEach(function (winner) {
+      var keys = raffleWinnerReadyOverrideKeys(rid, winner);
+      var matchKey = "";
+      var override = null;
+      keys.some(function (candidateKey) {
+        var candidate = candidateKey ? rafflesWinnerStatusOverrides[candidateKey] : null;
+        if (!candidate || !candidate.until) return false;
+        matchKey = candidateKey;
+        override = candidate;
+        return true;
+      });
+      if (!override) return;
+      if (override.until <= nowMs) {
+        delete rafflesWinnerStatusOverrides[matchKey];
+        return;
+      }
+      winner.winnerStatus = override.status || null;
+    });
+    return raffle;
+  }
+
+  function applyRaffleWinnerStatusOverridesToList(list) {
+    if (!Array.isArray(list)) return list;
+    list.forEach(applyRaffleWinnerStatusOverrides);
+    return list;
+  }
+
   function updateCompletedRaffleCache(raffle) {
     if (!raffle || !raffle.id) return;
+    rememberRaffleWinnerReadyOverrides(raffle);
+    rememberRaffleWinnerStatusOverrides(raffle);
+    applyRaffleWinnerReadyOverrides(raffle);
+    applyRaffleWinnerStatusOverrides(raffle);
     var targetId = String(raffle.id);
     function replaceInList(list) {
       if (!Array.isArray(list)) return false;
@@ -2742,6 +2894,9 @@ function initRaffles() {
       clearRafflesCache: clearRafflesCache,
       pokerRafflesApiQueryLeading: pokerRafflesApiQueryLeading,
       updateCompletedRaffleCache: updateCompletedRaffleCache,
+      shouldReloadCompletedArchiveAfterWinnerAction: function () {
+        return !!rafflesArchiveLoaded;
+      },
       focusRaffleAfterMutation: focusRaffleAfterMutation,
       confirmRaffleAdminAction: confirmRaffleAdminAction,
       collectRaffleIdentityIds: collectRaffleIdentityIds,
@@ -3000,6 +3155,12 @@ function initRaffles() {
           seen[id] = true;
           return true;
         });
+        applyRaffleWinnerReadyOverridesToList(allRaffles);
+        applyRaffleWinnerStatusOverridesToList(allRaffles);
+        if (Array.isArray(data.activeRaffles)) applyRaffleWinnerReadyOverridesToList(data.activeRaffles);
+        if (Array.isArray(data.activeRaffles)) applyRaffleWinnerStatusOverridesToList(data.activeRaffles);
+        if (Array.isArray(data.recentCompletedRaffles)) applyRaffleWinnerReadyOverridesToList(data.recentCompletedRaffles);
+        if (Array.isArray(data.recentCompletedRaffles)) applyRaffleWinnerStatusOverridesToList(data.recentCompletedRaffles);
         rafflesIsAdmin = !!data.isAdmin;
         if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
           window.pokerMarkAdminAccess("raffles");
@@ -3294,12 +3455,21 @@ function initRaffles() {
         var completedCount = completed.length;
         var completedSumRub = completed.reduce(function (s, r) { return s + getRaffleTotalPrize(r); }, 0);
         if (archiveUnavailable) {
-          if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = "—";
-          if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = "Архив";
-          if (rafflesHeroDoneCount) rafflesHeroDoneCount.textContent = "—";
-          if (rafflesHeroPrizeSum) rafflesHeroPrizeSum.textContent = "—";
-          if (rafflesHeroUniqueParticipants) rafflesHeroUniqueParticipants.textContent = "—";
-          if (rafflesHeroWinnersCount) rafflesHeroWinnersCount.textContent = "—";
+          rafflesLastCompleted = completed.slice(0, 2);
+          var summaryCompletedCount = rafflesSummaryNumber(data.rafflesSummary, "completedCount");
+          var summaryCompletedSum = rafflesSummaryNumber(data.rafflesSummary, "completedPrizeSumRub");
+          if (summaryCompletedCount != null || summaryCompletedSum != null || data.rafflesSummary) {
+            if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = summaryCompletedCount != null ? formatRaffleHeroCount(summaryCompletedCount) : "—";
+            if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = summaryCompletedSum != null ? formatRaffleSum(summaryCompletedSum) : "Архив";
+            updateRafflesHeroStats(allRaffles, completed, completedSumRub, data.rafflesSummary);
+          } else {
+            if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = "—";
+            if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = "Архив";
+            if (rafflesHeroDoneCount) rafflesHeroDoneCount.textContent = "—";
+            if (rafflesHeroPrizeSum) rafflesHeroPrizeSum.textContent = "—";
+            if (rafflesHeroUniqueParticipants) rafflesHeroUniqueParticipants.textContent = "—";
+            if (rafflesHeroWinnersCount) rafflesHeroWinnersCount.textContent = "—";
+          }
         } else {
           if (rafflesTabCompletedCount) rafflesTabCompletedCount.textContent = String(completedCount);
           if (rafflesTabCompletedSum) rafflesTabCompletedSum.textContent = formatRaffleSum(completedSumRub);
@@ -3313,7 +3483,7 @@ function initRaffles() {
             (rafflesPanelLeaders && !rafflesPanelLeaders.classList.contains("raffles-panel--hidden"))
           );
         if (archiveUnavailable && completedPanelVisible && rafflesCurrentTab === "completed") {
-          renderDeferredCompletedArchivePanel();
+          renderDeferredCompletedArchivePanel(completed);
         }
         if (!archiveUnavailable) {
           rafflesLastCompleted = completed;
@@ -3413,7 +3583,7 @@ function initRaffles() {
     if (!isActive) closeRafflesActiveInfoModal();
     rafflesCurrentTab = tab;
     if ((isCompleted || isLeaders) && !rafflesArchiveLoaded) {
-      if (isCompleted) renderDeferredCompletedArchivePanel();
+      if (isCompleted) renderDeferredCompletedArchivePanel(rafflesLastCompleted || []);
       if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
       return;
     }

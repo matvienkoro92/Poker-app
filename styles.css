@@ -8789,7 +8789,7 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__entry {
   height: clamp(28px, 5.3vw, 34px) !important;
   min-height: clamp(28px, 5.3vw, 34px) !important;
-  padding: 1px clamp(2px, 0.65vw, 7px) 0 !important;
+  padding: 6px clamp(2px, 0.65vw, 7px) 2px !important;
   border-color: rgba(255, 139, 21, 1) !important;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 207, 105, 0.46), transparent 58%),
@@ -9101,7 +9101,7 @@ html.app-view-home #app.app.app--view-home > .card > .card__header .header-actio
 .sng-champions-promo__button.home-club-choice-plaque--sng {
   align-content: end !important;
   padding-top: clamp(20px, 3.4vw, 30px) !important;
-  padding-bottom: clamp(36px, 6vw, 46px) !important;
+  padding-bottom: 2px !important;
 }
 
 .app.app--view-home .home-club-actions-block .home-club-choice-plaque--sng .home-club-choice-plaque__text,

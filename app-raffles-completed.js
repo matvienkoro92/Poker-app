@@ -309,7 +309,11 @@ function initRafflesCompletedRuntime(opts) {
       ? pokerRafflesIsManualPlaceholderUserId(uidRaw)
       : /^manual_raffle_[a-f0-9]+$/i.test(uidRaw);
     var uidAttr = escapeHtml(uidRaw);
+    var fallbackWinnerNumber = parseInt(winnerNumber, 10);
     var winnerSlotId = String((w && (w.winnerReadySlotId || w.winnerSlotId)) || "").trim();
+    if (!winnerSlotId && isFinite(fallbackWinnerNumber) && fallbackWinnerNumber > 0 && !raffleWinnerIsReroll(w)) {
+      winnerSlotId = "initial_" + String(fallbackWinnerNumber - 1);
+    }
     var winnerSlotAttr = escapeHtml(winnerSlotId);
     var status = w.winnerStatus;
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
@@ -774,7 +778,11 @@ function initRafflesCompletedRuntime(opts) {
       updateCompletedRaffleCache(data.raffle);
     }
     if (typeof clearRafflesCache === "function") clearRafflesCache();
-    loadRaffles({ skipCache: true, keepCurrentOnLoading: true });
+    loadRaffles({
+      includeArchive: typeof shouldReloadCompletedArchiveAfterWinnerAction === "function" && shouldReloadCompletedArchiveAfterWinnerAction(),
+      skipCache: true,
+      keepCurrentOnLoading: true
+    });
   }
 
   function setRaffleWinnerStatus(rid, wid, winnerSlotId, btnIsOk, currentStatus, onDone, btn, attempt) {
