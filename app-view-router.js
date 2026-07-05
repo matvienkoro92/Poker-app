@@ -1808,16 +1808,34 @@ function pokerOpenPlayerCrmFromHome() {
   });
 })();
 
-document.addEventListener("click", function (e) {
-  var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
-  if (!interactive || e.target.closest("audio, [aria-hidden=\"true\"]") || typeof playClickSound !== "function") return;
-  var defer = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
-  defer(function () {
-    try {
+(function bindGlobalClickSound() {
+  function playBundledClickSound() {
+    if (typeof playClickSound === "function") {
       playClickSound();
-    } catch (eClickSound) {}
-  });
-}, false);
+      return;
+    }
+    var audio = document.__pokerClickAudio;
+    if (!audio) {
+      audio = document.__pokerClickAudio = new Audio("./assets/gta-sa-menu.mp3?v=20260706");
+      audio.preload = "auto";
+      audio.volume = 0.42;
+    }
+    audio.pause();
+    audio.currentTime = 0;
+    var p = audio.play();
+    if (p && typeof p.catch === "function") p.catch(function () {});
+  }
+  document.addEventListener("click", function (e) {
+    var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"]");
+    if (!interactive || e.target.closest("audio") || interactive.getAttribute("aria-hidden") === "true") return;
+    var defer = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
+    defer(function () {
+      try {
+        playBundledClickSound();
+      } catch (eClickSound) {}
+    });
+  }, false);
+})();
 
 (function scrollVsTap() {
   var touchStartX = 0;

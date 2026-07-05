@@ -8316,6 +8316,25 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   }
 }
 
+.app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque--cash {
+  container-type: inline-size;
+}
+
+.app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque--cash .home-club-choice-plaque__text {
+  max-width: 100%;
+  overflow: visible;
+  font-size: clamp(8px, 6.2cqw, 11px);
+  line-height: 0.95;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+@supports not (font-size: 1cqw) {
+  .app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque--cash .home-club-choice-plaque__text {
+    font-size: clamp(8px, 2.65vw, 11px);
+  }
+}
+
 body[data-view="equilator"] #app.app,
 html:has(body[data-view="equilator"]) #app.app,
 html.app-view-equilator-html-scroll #app.app,

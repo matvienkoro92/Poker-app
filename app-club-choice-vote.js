@@ -428,6 +428,14 @@
 
   function startHomePlaqueTimer() {
     if (homePlaqueTimer) return;
+    var plaque = document.getElementById("clubChoiceVoteOpen");
+    if (
+      plaque &&
+      !plaque.querySelector(".home-club-choice-plaque__subtext") &&
+      !plaque.querySelector(".home-club-choice-plaque__count")
+    ) {
+      return;
+    }
     homePlaqueTimer = window.setInterval(updateHomePlaque, 1000);
   }
 
