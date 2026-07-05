@@ -8141,7 +8141,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border: 0;
   border-radius: 13px;
   background:
-    url("./assets/home-sng-champions-stadium-bg.webp?v=1") center / 100% 100% no-repeat;
+    url("./assets/home-sng-champions-stadium-bg.webp?v=2") center / 100% 100% no-repeat;
   box-shadow: none;
 }
 
@@ -8564,7 +8564,7 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
   overflow: hidden !important;
   border: 0 !important;
   border-radius: 18px !important;
-  background: url("./assets/home-sng-champions-stadium-bg.webp?v=1") center / 100% 100% no-repeat !important;
+  background: url("./assets/home-sng-champions-stadium-bg.webp?v=2") center / 100% 100% no-repeat !important;
   box-shadow: none !important;
 }
 
