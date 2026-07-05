@@ -4,7 +4,8 @@
   if (window.__pokerClickSoundGlobalBound) return;
   window.__pokerClickSoundGlobalBound = true;
 
-  var CLICK_SOUND_SRC = "./assets/gta-sa-menu.mp3?v=20260706";
+  var CLICK_SOUND_SRC = "./assets/gta-sa-menu.mp3?v=2026070602";
+  var SUBSCRIBE_SOUND_SRC = "./assets/subscribe-bell-sfx.mp3?v=20260706";
   var INTERACTIVE_SELECTOR = [
     "button",
     "a[href]",
@@ -39,9 +40,16 @@
     "select",
     "[contenteditable=\"true\"]",
     "[data-click-sound=\"off\"]",
+    ".raffles-subscribe-btn",
+    ".gazette-modal__subscribe-in-article-btn",
+    ".rating-subscribe-btn",
+    "[data-private-cash-subscribe]",
+    "#dailyPokerNotifyBtn",
+    "#homeTournamentNotifyBtn",
   ].join(",");
   var audioPool = [];
   var audioIndex = 0;
+  var subscribeAudio = null;
   var lastPointerSoundAt = 0;
   var lastTouchSoundAt = 0;
 
@@ -88,6 +96,23 @@
     }
   }
 
+  function playPokerSubscribeSound() {
+    try {
+      if (!subscribeAudio) {
+        subscribeAudio = new Audio(SUBSCRIBE_SOUND_SRC);
+        subscribeAudio.preload = "auto";
+        subscribeAudio.volume = 1;
+      }
+      subscribeAudio.pause();
+      subscribeAudio.currentTime = 0;
+      var p = subscribeAudio.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
   function preloadPokerClickSound() {
     getAudio();
   }
@@ -109,6 +134,7 @@
   }
 
   window.playPokerClickSound = playPokerClickSound;
+  window.playPokerSubscribeSound = playPokerSubscribeSound;
   if (typeof window.playClickSound !== "function") window.playClickSound = playPokerClickSound;
 
   document.addEventListener("pointerdown", function (event) {

@@ -162,7 +162,7 @@ function playClickSound() {
   try {
     audio = playClickSound.__audio;
     if (!audio) {
-      audio = playClickSound.__audio = new Audio("./assets/gta-sa-menu.mp3?v=20260706");
+      audio = playClickSound.__audio = new Audio("./assets/gta-sa-menu.mp3?v=2026070602");
       audio.preload = "auto";
       audio.volume = 0.78;
     }

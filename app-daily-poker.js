@@ -16,6 +16,12 @@
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
+  var DAILY_POKER_DEAL_SOUND_SRC = "./assets/daily-poker-here-we-go-again.mp3?v=20260706";
+  var DAILY_POKER_WIN_SOUND_SRC = "./assets/daily-poker-win-miscom.mp3?v=20260706";
+  var DAILY_POKER_LOSE_SOUND_SRC = "./assets/daily-poker-lose-keep-up.mp3?v=20260706";
+  var dailyPokerDealAudio = null;
+  var dailyPokerWinAudio = null;
+  var dailyPokerLoseAudio = null;
   var dailyPokerWinnersCache = null;
   var dailyPokerWinnersCacheAt = 0;
   var dailyPokerWinnersPromise = null;
@@ -146,6 +152,45 @@
     resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer");
     resultEl.dataset.dailyPokerPrompt = "";
     setLiveText($("dailyPokerReward"), "");
+  }
+
+  function playDailyPokerAudio(audio, src) {
+    try {
+      if (!audio) {
+        audio = new Audio(src);
+        audio.preload = "auto";
+        audio.volume = 1;
+      }
+      audio.pause();
+      audio.currentTime = 0;
+      var p = audio.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+    } catch (errAudio) {}
+    return audio || null;
+  }
+
+  function playDailyPokerDealSound() {
+    dailyPokerDealAudio = playDailyPokerAudio(dailyPokerDealAudio, DAILY_POKER_DEAL_SOUND_SRC);
+  }
+
+  function playDailyPokerWinSound() {
+    dailyPokerWinAudio = playDailyPokerAudio(dailyPokerWinAudio, DAILY_POKER_WIN_SOUND_SRC);
+  }
+
+  function playDailyPokerLoseSound() {
+    dailyPokerLoseAudio = playDailyPokerAudio(dailyPokerLoseAudio, DAILY_POKER_LOSE_SOUND_SRC);
+  }
+
+  function hasDailyPokerWin(result) {
+    var reward = result && result.reward ? result.reward : {};
+    var streak = result && result.ticketlessStreakAward ? result.ticketlessStreakAward : null;
+    return !!(
+      Number(reward.amount || 0) > 0 ||
+      Number(reward.ticketAmount || 0) > 0 ||
+      Number(reward.bonusAmount || 0) > 0 ||
+      reward.grantsExtraAttempt === true ||
+      (streak && Number(streak.amount || 0) > 0)
+    );
   }
 
   function setResultPrompt(primary, detail, isTimer) {
@@ -639,6 +684,8 @@
     if (board) board.innerHTML = boardHtml(result.boardCards || [], 5, [4]);
     dailyPokerState.revealing = false;
     setResultText(formatResultLine(result), false);
+    if (hasDailyPokerWin(result)) playDailyPokerWinSound();
+    else playDailyPokerLoseSound();
     resetManualDeal();
     syncStatus(result);
     loadWinners({ force: true });
@@ -901,6 +948,7 @@
       })
       .then(function (data) {
         setReminderButtonState(!!data.subscribed, false);
+        if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
         var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tgw && tgw.HapticFeedback && typeof tgw.HapticFeedback.notificationOccurred === "function") {
           tgw.HapticFeedback.notificationOccurred(data.subscribed ? "success" : "warning");
@@ -944,6 +992,7 @@
       showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть.");
       return;
     }
+    playDailyPokerDealSound();
     dailyPokerState.revealing = true;
     spendAttemptImmediately();
     setBusy(true);

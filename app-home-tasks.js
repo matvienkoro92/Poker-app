@@ -504,6 +504,7 @@ function pokerInitHomeTasks() {
                   localStorage.setItem(RATING_SUBSCRIBED_KEY, data.subscribed ? "1" : "0");
                 } catch (e) {}
                 setRatingSubscribeButtonState(!!data.subscribed);
+                if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
                 var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
                 if (tg && tg.showAlert) {
                   tg.showAlert(data.subscribed ? "Подписка оформлена. Уведомления об обновлении рейтинга будут приходить в Telegram." : "Вы отписаны от уведомлений рейтинга.");

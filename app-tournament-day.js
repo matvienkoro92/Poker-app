@@ -612,6 +612,7 @@ function saveHomeTournamentNotifySelection(unsubscribe, ids) {
   })
     .then(function (data) {
       syncHomeTournamentNotifyFromResponse(data);
+      if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
       homeTournamentNotifyMessage(
         data.subscribed ? "Уведомления о турнирах включены." : "Уведомления о турнирах отключены.",
         false

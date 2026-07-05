@@ -410,6 +410,7 @@ function runGazetteAndTasksInit() {
               localStorage.setItem(GAZETTE_SUBSCRIBED_KEY, data.subscribed ? "1" : "0");
             } catch (e) {}
             setSubscribeButtonState(!!data.subscribed);
+            if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
             var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             if (tg && tg.showAlert) {
               tg.showAlert(data.subscribed ? "Подписка оформлена. Пуши о новых новостях будут приходить в Telegram." : "Вы отписаны от уведомлений газеты.");

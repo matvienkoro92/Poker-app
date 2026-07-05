@@ -114,6 +114,7 @@ function initRafflesSubscribeRuntime(opts) {
               window.dispatchEvent(new CustomEvent("poker-raffle-subscription-change", { detail: data }));
             } catch (eSubEvent) {}
             setRaffleSubscribeState(!!data.subscribed);
+            if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
             var tgNow = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
             if (tgNow && tgNow.showAlert) {
               tgNow.showAlert(

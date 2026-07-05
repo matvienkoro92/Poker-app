@@ -1234,7 +1234,10 @@
     if (subscribe) {
       var next = !(state && state.privateCashSubscribed);
       postAction({ action: "subscribe", subscribe: next }).then(function (nextState) {
-        if (nextState) showAlert(next ? "Подписка на приватный кеш включена." : "Подписка отключена.");
+        if (nextState) {
+          if (next && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
+          showAlert(next ? "Подписка на приватный кеш включена." : "Подписка отключена.");
+        }
       });
       return;
     }

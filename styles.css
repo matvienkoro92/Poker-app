@@ -7151,6 +7151,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   pointer-events: none;
 }
 
+.app.app--view-home .home-transfer-cta::before {
+  background:
+    linear-gradient(90deg, rgba(3, 4, 9, 0.96) 0%, rgba(10, 7, 4, 0.86) 52%, rgba(61, 25, 0, 0.32) 100%),
+    linear-gradient(180deg, rgba(255, 220, 148, 0.08), rgba(0, 0, 0, 0.36));
+}
+
 .app.app--view-home .home-vpn-cta::after {
   content: "";
   position: absolute;
