@@ -9093,6 +9093,42 @@ html.app-view-home #app.app.app--view-home > .card > .card__header .header-actio
   flex: 0 1 clamp(156px, 43vw, 206px) !important;
 }
 
+html body:not([data-view="chat"]) #app.app > .card > .card__header {
+  width: calc(100% - 16px) !important;
+  margin: 0 8px 8px !important;
+  padding: 8px 12px !important;
+  gap: 9px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary {
+  display: flex !important;
+  flex: 1 1 clamp(112px, 34vw, 172px) !important;
+  max-width: clamp(112px, 34vw, 172px) !important;
+  min-width: 0 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting-wrap {
+  display: flex !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting {
+  display: block !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions {
+  flex: 0 1 clamp(156px, 43vw, 206px) !important;
+}
+
 .app.app--view-home .home-club-actions-block {
   --home-sng-champions-row: clamp(164px, 31vw, 190px);
 }
