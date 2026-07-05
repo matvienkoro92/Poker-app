@@ -791,13 +791,19 @@ if (chatUserModalEl) {
       var cached = window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.ok ? window._rafflesCache.data : null;
       if (cached) return Promise.resolve(Array.isArray(cached.raffles) ? cached.raffles : []);
     } catch (eCachedRaffles) {}
+    try {
+      var compactCached = window._raffleAchievementsCache && window._raffleAchievementsCache.data && window._raffleAchievementsCache.data.ok ? window._raffleAchievementsCache.data : null;
+      if (compactCached && Date.now() - (window._raffleAchievementsCache.time || 0) < 10 * 60 * 1000) {
+        return Promise.resolve(Array.isArray(compactCached.raffles) ? compactCached.raffles : []);
+      }
+    } catch (eCachedRaffleAchievements) {}
     if (!base || typeof fetch !== "function") return Promise.resolve([]);
     var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    return fetch(base + "/api/raffles" + query + "&_t=" + Date.now(), { cache: "no-store" })
+    return fetch(base + "/api/raffles" + query + "&mode=achievements", { cache: "default" })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (data && data.ok) {
-          try { window._rafflesCache = { data: data, time: Date.now() }; } catch (eSetRafflesCache) {}
+          try { window._raffleAchievementsCache = { data: data, time: Date.now() }; } catch (eSetRafflesCache) {}
           return Array.isArray(data.raffles) ? data.raffles : [];
         }
         return [];
@@ -1017,7 +1023,7 @@ if (chatUserModalEl) {
   function getChatUserModalReferralsCountReady(isSelfProfile) {
     if (!isSelfProfile || !base || typeof fetch !== "function") return Promise.resolve(null);
     var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    return fetch(base + "/api/referrals" + query + "&_t=" + Date.now(), { cache: "no-store" })
+    return fetch(base + "/api/referrals" + query + "&summary=1", { cache: "default" })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok) return null;
