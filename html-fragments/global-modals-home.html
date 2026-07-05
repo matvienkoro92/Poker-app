@@ -150,89 +150,11 @@
           </div>
         </div>
       </div>
-      <div class="club-charter-modal vpn-proxy-modal" id="vpnProxyModal" role="dialog" aria-modal="true" aria-labelledby="vpnProxyModalTitle" aria-hidden="true">
+      <div class="club-charter-modal vpn-proxy-modal" id="vpnProxyModal" role="dialog" aria-modal="true" aria-label="ВПН от клуба" aria-hidden="true">
         <div class="club-charter-modal__backdrop" id="vpnProxyModalBackdrop"></div>
         <div class="club-charter-modal__sheet">
           <button type="button" class="club-charter-modal__close" id="vpnProxyModalClose" aria-label="Закрыть">×</button>
-          <div class="club-charter-modal__paper" id="vpn-proxy">
-            <p class="club-charter-modal__kicker">От игроков</p>
-            <h2 class="club-charter-modal__title" id="vpnProxyModalTitle">ВПН и прокси</h2>
-            <p class="vpn-proxy-modal__intro">
-              Делитесь рабочими ссылками и комментариями. Клуб сервисы не проверяет — ориентируйтесь на опыт в чате.
-            </p>
-            <div class="vpn-proxy-modal__actions raffles-hero__share-row" role="group" aria-label="Поделиться подборкой ВПН и прокси">
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--primary" id="vpnProxyShareBtn">Поделиться</button>
-              <button type="button" class="raffles-hero__share-btn raffles-hero__share-btn--copy-icon" id="vpnProxyCopyLinkBtn" aria-label="Скопировать ссылку на подборку">
-                <span class="raffles-hero__copy-icon" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                </span>
-              </button>
-            </div>
-            <div class="club-charter-modal__rule" aria-hidden="true"></div>
-            <nav class="club-charter-modal__menu vpn-proxy-modal__tabs" role="tablist" aria-label="Раздел подборки">
-              <button type="button" class="club-charter-modal__menu-item club-charter-modal__menu-item--active" role="tab" id="vpnProxyTabVpn" aria-selected="true" aria-controls="vpnProxyPanelVpn">ВПН</button>
-              <button type="button" class="club-charter-modal__menu-item" role="tab" id="vpnProxyTabProxy" aria-selected="false" aria-controls="vpnProxyPanelProxy">ПРОКСИ</button>
-            </nav>
-            <div class="vpn-proxy-modal__panels">
-              <div id="vpnProxyPanelVpn" class="vpn-proxy-modal__panel" role="tabpanel" aria-labelledby="vpnProxyTabVpn">
-                <section class="gazette-article-comments gazette-article-comments--panel vpn-proxy-modal__comments" aria-label="ВПН: сообщения игроков">
-                  <p class="gazette-article-comments__hint gazette-article-comments__hint--login vpn-proxy-modal__hint" id="vpnProxyHintVpn" hidden>
-                    Чтобы писать здесь, войдите через Telegram или ВКонтакте (PWA) либо откройте приложение в Telegram.
-                  </p>
-                  <div
-                    class="gazette-article-comments__feed"
-                    id="vpnProxyFeedVpn"
-                    data-gazette-article-comments-article-id="98"
-                    data-vpn-proxy-linkify="1"
-                  ></div>
-                  <div class="gazette-article-comments__composer-card vpn-proxy-modal__composer" id="vpnProxyComposerVpn" hidden>
-                    <form class="gazette-article-comments__form" novalidate aria-label="Новое сообщение ВПН">
-                      <textarea
-                        id="vpnProxyTextareaVpn"
-                        class="gazette-article-comments__textarea"
-                        maxlength="2000"
-                        rows="3"
-                        placeholder="Текст или ссылка — появится в ленте после отправки."
-                        aria-label="Сообщение про ВПН"
-                      ></textarea>
-                      <button type="submit" class="gazette-article-comments__submit">Отправить</button>
-                      <p class="gazette-article-comments__form-status" aria-live="polite"></p>
-                    </form>
-                  </div>
-                </section>
-              </div>
-              <div id="vpnProxyPanelProxy" class="vpn-proxy-modal__panel" role="tabpanel" aria-labelledby="vpnProxyTabProxy" hidden>
-                <section class="gazette-article-comments gazette-article-comments--panel vpn-proxy-modal__comments" aria-label="Прокси: сообщения игроков">
-                  <p class="gazette-article-comments__hint gazette-article-comments__hint--login vpn-proxy-modal__hint" id="vpnProxyHintProxy" hidden>
-                    Чтобы писать здесь, войдите через Telegram или ВКонтакте (PWA) либо откройте приложение в Telegram.
-                  </p>
-                  <div
-                    class="gazette-article-comments__feed"
-                    id="vpnProxyFeedProxy"
-                    data-gazette-article-comments-article-id="99"
-                    data-vpn-proxy-linkify="1"
-                  ></div>
-                  <div class="gazette-article-comments__composer-card vpn-proxy-modal__composer" id="vpnProxyComposerProxy" hidden>
-                    <form class="gazette-article-comments__form" novalidate aria-label="Новое сообщение прокси">
-                      <textarea
-                        id="vpnProxyTextareaProxy"
-                        class="gazette-article-comments__textarea"
-                        maxlength="2000"
-                        rows="3"
-                        placeholder="Текст или ссылка — появится в ленте после отправки."
-                        aria-label="Сообщение про прокси"
-                      ></textarea>
-                      <button type="submit" class="gazette-article-comments__submit">Отправить</button>
-                      <p class="gazette-article-comments__form-status" aria-live="polite"></p>
-                    </form>
-                  </div>
-                </section>
-              </div>
-            </div>
-          </div>
+          <div class="club-charter-modal__paper" id="vpn-proxy"></div>
         </div>
       </div>
       <div class="club-charter-modal site-home-instruction-modal" id="siteHomeInstructionModal" role="dialog" aria-modal="true" aria-labelledby="siteHomeInstructionModalTitle" aria-hidden="true">
