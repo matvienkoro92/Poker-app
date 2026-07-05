@@ -413,6 +413,12 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.club-choice-vote-modal__winner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
 .club-choice-vote-modal__candidate-actions {
   display: flex;
   flex: 0 0 auto;
@@ -457,6 +463,22 @@
   font-size: 13px;
   font-style: normal;
   font-weight: 800;
+}
+
+.club-choice-vote-modal__winner-desc {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 7px 9px;
+  border-color: rgba(255, 184, 70, 0.24);
+  border-radius: 9px;
+  background: rgba(8, 10, 14, 0.42);
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 1.18;
+  text-align: left;
+  text-wrap: auto;
 }
 
 .club-choice-vote-modal__bracket {
@@ -2004,6 +2026,118 @@
   box-shadow: inset 0 0 0 1px rgba(255, 241, 199, 0.04);
 }
 
+.club-choice-vote-modal__completed-scheme {
+  min-width: 0;
+}
+
+.club-choice-vote-modal__scheme--compact {
+  padding: 8px;
+  overflow: hidden;
+}
+
+.club-choice-vote-modal__scheme--compact h3 {
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 7px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-column {
+  gap: 5px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-column::after {
+  display: none;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-round-title {
+  font-size: 8px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-round-group {
+  gap: 4px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-stage-title,
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-match b {
+  font-size: 7px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-match {
+  gap: 3px;
+  padding: 4px;
+  border-radius: 7px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-match::after {
+  display: none;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-pair {
+  grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr);
+  gap: 2px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-player {
+  min-height: 30px;
+  gap: 3px;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-player strong {
+  font-size: 8px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-player em,
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-player i,
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-vs {
+  font-size: 7px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-vs {
+  width: 14px;
+  min-height: 14px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-final {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  gap: 5px;
+  width: min(72%, 210px);
+  margin: 0 auto;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-column--right {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-final::before {
+  top: 11px;
+  right: 10%;
+  bottom: auto;
+  left: 10%;
+  width: auto;
+  height: 2px;
+  transform: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 216, 125, 0.72), transparent);
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-final span {
+  min-width: 30px;
+  min-height: 20px;
+  font-size: 7px;
+}
+
+.club-choice-vote-modal__scheme--compact .club-choice-vote-modal__scheme-final > .club-choice-vote-modal__scheme-round-group {
+  width: 100%;
+}
+
 .club-choice-vote-modal__scheme h3 {
   margin: 0 0 9px;
   color: #ffe7a8;
@@ -2939,6 +3073,20 @@
     0 0 7px rgba(255, 140, 24, 0.16);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
+}
+
+.club-choice-vote-modal__winner-desc.club-choice-vote-modal__achievement-card {
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 7px 9px;
+  border-color: rgba(255, 184, 70, 0.24);
+  border-radius: 9px;
+  background: rgba(8, 10, 14, 0.42);
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 1.18;
+  text-align: left;
+  text-wrap: auto;
 }
 
 .club-choice-vote-modal__duel-question {

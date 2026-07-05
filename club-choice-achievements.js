@@ -14,6 +14,17 @@
    */
   window.POKER_CLUB_CHOICE_ACHIEVEMENTS = window.POKER_CLUB_CHOICE_ACHIEVEMENTS || [
     {
+      month: "2026-06",
+      winners: [
+        {
+          place: 1,
+          nick: "Waaar",
+          votes: 108,
+          description: "Победитель клубного голосования за достижение месяца.",
+        },
+      ],
+    },
+    {
       month: "2026-05",
       winners: [
         {

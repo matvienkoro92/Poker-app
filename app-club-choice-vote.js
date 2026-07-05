@@ -712,7 +712,7 @@
       '</span>';
   }
 
-  function renderBracketScheme(data, candidates) {
+  function renderBracketScheme(data, candidates, extraClass) {
     var rounds = (data && data.rounds || []).filter(function (round) { return round && Array.isArray(round.matches); });
     var matches = [];
     rounds.forEach(function (round) {
@@ -755,7 +755,7 @@
         }).join("") +
       '</div>';
     }
-    return '<section class="club-choice-vote-modal__scheme" aria-label="Схема турнира">' +
+    return '<section class="club-choice-vote-modal__scheme' + (extraClass ? " " + escapeHtml(extraClass) : "") + '" aria-label="Схема турнира">' +
       '<h3>Сетка</h3>' +
       '<div class="club-choice-vote-modal__scheme-layout">' +
         renderSideColumn(left, "Сетка слева", "club-choice-vote-modal__scheme-column--left") +
@@ -941,6 +941,8 @@
   function renderCompleted(data) {
     var last = (data.history || [])[0] || {};
     var winners = last.winners || [];
+    var candidates = candidateMap(data);
+    var schemeHtml = renderBracketScheme(data, candidates, "club-choice-vote-modal__scheme--compact");
     setStatus("Голосование завершено");
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary">' +
@@ -953,8 +955,10 @@
           '<span>Топ ' + escapeHtml(winner.place || "") + '</span>' +
           '<strong>' + escapeHtml(winner.nick || "Игрок") + '</strong>' +
           '<em>' + escapeHtml(winner.votes || 0) + ' голосов</em>' +
+          renderAchievementCard("club-choice-vote-modal__winner-desc", winner.description) +
         '</article>';
       }).join("") : '<div class="club-choice-vote-modal__empty">Итоги пока не сформированы.</div>') + '</div>' +
+      (schemeHtml ? '<div class="club-choice-vote-modal__completed-scheme">' + schemeHtml + '</div>' : '') +
       (data.isAdmin
         ? '<button type="button" class="club-choice-vote-modal__primary club-choice-vote-modal__primary--wide" data-club-choice-new-draft="1">Новое голосование</button>'
         : '');

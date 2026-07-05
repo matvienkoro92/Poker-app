@@ -197,11 +197,17 @@
 
   function postAction(payload, options) {
     options = options || {};
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timeoutMs = Math.max(5000, Number(options.timeoutMs) || 18000);
+    var timeoutId = controller ? window.setTimeout(function () {
+      controller.abort();
+    }, timeoutMs) : null;
     setStatus(options.status || "Идет загрузка...");
     return fetch(baseUrl() + API_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(apiBody(payload || {})),
+      signal: controller ? controller.signal : undefined,
     })
       .then(function (res) {
         return res.json().then(function (data) {
@@ -215,7 +221,10 @@
       })
       .catch(function (error) {
         setStatus("");
-        showAlert(error.message || "Ошибка");
+        showAlert(error && error.name === "AbortError" ? "Заявка не отправилась: сервер не ответил. Попробуйте еще раз." : (error.message || "Ошибка"));
+      })
+      .finally(function () {
+        if (timeoutId) window.clearTimeout(timeoutId);
       });
   }
 
@@ -768,7 +777,8 @@
     var approve = event.target && event.target.closest ? event.target.closest("[data-sng-approve]") : null;
     if (approve) {
       setButtonLoading(approve, true);
-      postAction({ action: "approve", accountId: approve.getAttribute("data-sng-approve") || "" }, { status: "Подтверждаю заявку...", success: "Заявка подтверждена" });
+      postAction({ action: "approve", accountId: approve.getAttribute("data-sng-approve") || "" }, { status: "Подтверждаю заявку...", success: "Заявка подтверждена" })
+        .finally(function () { setButtonLoading(approve, false); });
       return;
     }
     var profile = event.target && event.target.closest ? event.target.closest("[data-sng-profile]") : null;
@@ -791,13 +801,15 @@
     var requestBalance = event.target && event.target.closest ? event.target.closest("[data-sng-request-balance]") : null;
     if (requestBalance) {
       setButtonLoading(requestBalance, true);
-      postAction({ action: "requestBalance", accountId: requestBalance.getAttribute("data-sng-request-balance") || "" }, { status: "Запрашиваю пополнение баланса...", success: "Запрос на пополнение отправлен" });
+      postAction({ action: "requestBalance", accountId: requestBalance.getAttribute("data-sng-request-balance") || "" }, { status: "Запрашиваю пополнение баланса...", success: "Запрос на пополнение отправлен" })
+        .finally(function () { setButtonLoading(requestBalance, false); });
       return;
     }
     var reject = event.target && event.target.closest ? event.target.closest("[data-sng-reject]") : null;
     if (reject) {
       setButtonLoading(reject, true);
-      postAction({ action: "reject", accountId: reject.getAttribute("data-sng-reject") || "" }, { status: "Отклоняю заявку...", success: "Заявка отклонена" });
+      postAction({ action: "reject", accountId: reject.getAttribute("data-sng-reject") || "" }, { status: "Отклоняю заявку...", success: "Заявка отклонена" })
+        .finally(function () { setButtonLoading(reject, false); });
       return;
     }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
@@ -807,7 +819,8 @@
         action: "setWinner",
         matchId: winner.getAttribute("data-sng-winner") || "",
         playerId: winner.getAttribute("data-sng-player") || "",
-      }, { status: "Обновляю сетку...", success: "Победитель пары сохранен" });
+      }, { status: "Обновляю сетку...", success: "Победитель пары сохранен" })
+        .finally(function () { setButtonLoading(winner, false); });
       return;
     }
     var stage = event.target && event.target.closest ? event.target.closest("[data-sng-stage]") : null;
@@ -839,6 +852,8 @@
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
       success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : name === "updateSettings" ? "Изменения сохранены" : "",
+    }).finally(function () {
+      setButtonLoading(action, false);
     });
   }
 
