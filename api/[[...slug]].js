@@ -43,6 +43,7 @@ const handlers = {
   "chat-push-admin-broadcast": () => require(path.join(handlersDir, "chat-push-admin-broadcast.js")),
   "club-choice-vote": () => require(path.join(handlersDir, "club-choice-vote.js")),
   "sng-champions": () => require(path.join(handlersDir, "sng-champions.js")),
+  transfers: () => require(path.join(handlersDir, "transfers.js")),
   "club-calendar-events": () => require(path.join(handlersDir, "club-calendar-events.js")),
   "private-cash": () => require(path.join(handlersDir, "private-cash.js")),
   visit: () => require(path.join(handlersDir, "visit.js")),

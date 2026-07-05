@@ -1,0 +1,54 @@
+          <!-- Переводы -->
+          <div class="view" data-view="transfers" id="transfersView">
+            <section class="transfers-page" aria-labelledby="transfersTitle">
+              <header class="transfers-page__header">
+                <button type="button" class="bonus-game-back transfers-page__back" data-view-target="home" aria-label="На главную">←</button>
+                <div class="transfers-page__heading">
+                  <h1 class="title transfers-page__title" id="transfersTitle">Переводы</h1>
+                  <p class="transfers-page__viewer" id="transfersViewerId" hidden></p>
+                </div>
+                <button type="button" class="transfers-page__refresh" id="transfersRefreshBtn" aria-label="Обновить">↻</button>
+              </header>
+
+              <form class="transfers-create" id="transfersCreateForm" autocomplete="off">
+                <div class="transfers-create__mode" role="tablist" aria-label="Тип заявки">
+                  <button type="button" class="transfers-create__mode-btn transfers-create__mode-btn--active" data-transfers-kind="cashout" aria-pressed="true">Кешаут</button>
+                  <button type="button" class="transfers-create__mode-btn" data-transfers-kind="deposit" aria-pressed="false">Депозит</button>
+                </div>
+                <div class="transfers-create__grid">
+                  <label class="transfers-field transfers-field--amount">
+                    <span class="transfers-field__label">Сумма</span>
+                    <input class="transfers-field__input" id="transfersAmountInput" type="number" min="1" max="2500" step="1" inputmode="numeric" placeholder="до 2500 ₽" required />
+                  </label>
+                  <label class="transfers-field transfers-field--comment">
+                    <span class="transfers-field__label">Комментарий</span>
+                    <input class="transfers-field__input" id="transfersCommentInput" type="text" maxlength="240" placeholder="необязательно" />
+                  </label>
+                </div>
+                <div class="transfers-presets" aria-label="Быстрый выбор суммы">
+                  <button type="button" data-transfers-amount="500">500</button>
+                  <button type="button" data-transfers-amount="1000">1000</button>
+                  <button type="button" data-transfers-amount="1500">1500</button>
+                  <button type="button" data-transfers-amount="2000">2000</button>
+                  <button type="button" data-transfers-amount="2500">2500</button>
+                </div>
+                <label class="transfers-field transfers-field--details" id="transfersDetailsField">
+                  <span class="transfers-field__label" id="transfersDetailsLabel">Реквизиты</span>
+                  <textarea class="transfers-field__textarea" id="transfersDetailsInput" rows="3" maxlength="700" placeholder="карта, банк, телефон"></textarea>
+                </label>
+                <div class="transfers-create__actions">
+                  <button type="submit" class="transfers-create__submit" id="transfersCreateSubmit">Разместить заявку</button>
+                  <span class="transfers-feedback" id="transfersCreateFeedback" aria-live="polite"></span>
+                </div>
+              </form>
+
+              <div class="transfers-tabs" role="tablist" aria-label="Список заявок">
+                <button type="button" class="transfers-tabs__btn transfers-tabs__btn--active" data-transfers-filter="active" aria-pressed="true">Активные</button>
+                <button type="button" class="transfers-tabs__btn" data-transfers-filter="mine" aria-pressed="false">Мои</button>
+                <button type="button" class="transfers-tabs__btn" data-transfers-filter="completed" aria-pressed="false">Закрытые</button>
+              </div>
+
+              <div class="transfers-list" id="transfersList" aria-live="polite"></div>
+              <p class="transfers-empty" id="transfersEmpty" hidden>Заявок пока нет.</p>
+            </section>
+          </div>

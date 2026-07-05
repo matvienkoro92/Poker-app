@@ -1827,6 +1827,113 @@
       "consumedBy": [
         "app-tournament-day.js"
       ]
+    },
+    {
+      "name": "__pokerClickSoundGlobalBound",
+      "domain": "shell",
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "playPokerClickSound",
+      "domain": "shell",
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js"
+      ]
+    },
+    {
+      "name": "playClickSound",
+      "domain": "shell",
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "__pokerHomeWidgetOpening",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-widgets-bootstrap.js"
+      ],
+      "consumedBy": [
+        "app-home-widgets-bootstrap.js",
+        "app-club-choice-vote.js",
+        "app-private-cash.js",
+        "app-sng-champions.js"
+      ]
+    },
+    {
+      "name": "pokerOpenHomeWidgetModal",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-widgets-bootstrap.js"
+      ],
+      "consumedBy": [
+        "app-home-widgets-bootstrap.js"
+      ]
+    },
+    {
+      "name": "__pokerViewIntentPrewarmed",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js"
+      ]
+    },
+    {
+      "name": "pokerEnsureStyleDomains",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js"
+      ]
+    },
+    {
+      "name": "pokerEnsureLazyDomains",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js",
+        "app-home-widgets-bootstrap.js"
+      ]
+    },
+    {
+      "name": "pokerPrewarmLikelyViewAssets",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js",
+        "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "__pokerLikelyViewAssetsPrewarmed",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js"
+      ]
     }
   ]
 }

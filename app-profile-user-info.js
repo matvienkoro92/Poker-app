@@ -57,6 +57,15 @@ function pokerApplyProfileTelegramVisible(value) {
   pokerRenderProfileTelegramVisibility();
 }
 
+function pokerApplyProfileDealsCount(value) {
+  var badge = document.getElementById("profileDealsBadge");
+  var countEl = document.getElementById("profileDealsCount");
+  if (!badge || !countEl) return;
+  var count = Math.max(0, parseInt(String(value == null ? 0 : value), 10) || 0);
+  countEl.textContent = "+" + count;
+  badge.setAttribute("aria-label", "Закрытые сделки: " + count);
+}
+
 function pokerRenderProfileTelegramVisibility(saving) {
   var row = document.getElementById("profileTelegramVisibilityRow");
   var stateEl = document.getElementById("profileTelegramVisibilityState");
@@ -237,6 +246,9 @@ function pokerApplyProfileUserInfo(data) {
   try {
     pokerApplyProfileTelegramVisible(data.telegramVisible === true || data.telegramVisible === 1 || data.telegramVisible === "1");
   } catch (eTgVisible) {}
+  try {
+    pokerApplyProfileDealsCount(data.transferDealsCount);
+  } catch (eDealsCount) {}
   try {
     if (data.pokerPlusStatsVisibility != null && typeof window.pokerApplyPokerPlusStatsVisibility === "function") {
       window.pokerApplyPokerPlusStatsVisibility(data.pokerPlusStatsVisibility);

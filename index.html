@@ -296,7 +296,7 @@
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/home-tournament-mystery-bounty-130k.webp" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.955" />
+    <link rel="stylesheet" href="./styles.css?v=3.957" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.666" />
@@ -307,9 +307,10 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=3.684" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=3.672" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-tournament.css?v=3.665" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=3.679" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=3.680" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=3.003" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=3.001" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=3.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="admin admin-reports auth-debug share-stats tracking admin-bonuses" href="./styles-admin.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="player-crm" href="./styles-player-crm.css?v=3.666" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
@@ -1136,9 +1137,14 @@
                   <span class="games-apps-card__text" id="homePartnerTitle">Партнёрство</span>
                 </button>
               </div>
-              <button type="button" class="home-vpn-cta" id="vpnProxyOpenBtn" aria-label="ВПН от клуба за 100 рублей в месяц">
-                ВПН от клуба за 100р/мес
-              </button>
+              <div class="home-transfer-vpn-row">
+                <button type="button" class="home-vpn-cta home-transfer-cta" data-view-target="transfers" aria-label="Переводы между игроками">
+                  Переводы
+                </button>
+                <button type="button" class="home-vpn-cta" id="vpnProxyOpenBtn" aria-label="ВПН от клуба за 100 рублей в месяц">
+                  ВПН от клуба за 100р/мес
+                </button>
+              </div>
               </div>
 
             <footer class="card__footer card__footer--home" id="homeFooter">
@@ -1397,8 +1403,11 @@
           <!-- Депозит / кэшаут -->
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html?v=3.001" data-html-fragment-view="cashout"></div>
 
+          <!-- Переводы между игроками -->
+          <div class="view" data-view="transfers" data-html-fragment="./html-fragments/transfers.html?v=3.001" data-html-fragment-view="transfers"></div>
+
           <!-- Профиль грузится лениво: тяжёлый DOM живёт в html-fragments/profile.html -->
-          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=3.613" data-html-fragment-view="profile"></div>
+          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=3.614" data-html-fragment-view="profile"></div>
 
           <!-- Админка бонусных балансов -->
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html" data-html-fragment-view="admin-bonuses"></div>
@@ -1654,9 +1663,10 @@
     <script defer src="./app-auth.js?v=3.666"></script>
     <script defer src="./app-network.js?v=3.666"></script>
     <script defer src="./app-shared-helpers.js?v=3.666"></script>
+    <script defer src="./app-click-sound.js?v=3.001"></script>
     <script defer src="./app-home-init.js?v=3.729"></script>
     <script defer src="./app-home-media.js?v=3.666"></script>
-    <script defer src="./app-lazy-loader.js?v=3.669"></script>
+    <script defer src="./app-lazy-loader.js?v=3.670"></script>
     <script defer src="./app-home-planner-access.js?v=3.666"></script>
     <script defer src="./app-home-planner-runtime.js?v=3.666"></script>
     <script defer src="./app-home-planner.js?v=3.666"></script>
@@ -1736,7 +1746,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-header-avatar.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-attachments.js?v=3.666"></script>
     <script defer src="./app-profile-hero.js?v=3.666"></script>
-    <script defer src="./app-profile-user-info.js?v=3.666"></script>
+    <script defer src="./app-profile-user-info.js?v=3.667"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js?v=3.670"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-email-auth.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=3.666"></script>
@@ -1787,7 +1797,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=3.667"></script>
     <script defer src="./app-shell-layout.js?v=3.666"></script>
     <script defer src="./app-navigation-scroll.js?v=3.666"></script>
-    <script defer src="./app-html-fragments.js?v=3.673"></script>
+    <script defer src="./app-html-fragments.js?v=3.674"></script>
     <script defer src="./app-webview-keyboard.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-emoji-picker.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reply-retry-glue.js?v=3.666"></script>
@@ -1795,7 +1805,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-debug.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-overscroll-debug.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js?v=3.668"></script>
-    <script defer src="./app-view-router.js?v=3.668"></script>
+    <script defer src="./app-view-router.js?v=3.669"></script>
     <script defer src="./app-popstate-recovery.js?v=3.666"></script>
     <script defer src="./app-visitor-id.js?v=3.666"></script>
     <script defer src="./app-api-tracking.js?v=3.729"></script>
@@ -1818,6 +1828,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="share-stats" src="./app-share-stats.js?v=3.667"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="tracking" src="./app-tracking-links.js?v=3.667"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="cashout" src="./app-cashout.js?v=3.667"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="transfers" src="./app-transfers.js?v=3.001"></script>
     <script defer src="./app-updates.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./spring-rating-images-league1.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./spring-rating-images-league2.js?v=3.666"></script>

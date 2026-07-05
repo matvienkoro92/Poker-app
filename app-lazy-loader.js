@@ -32,6 +32,7 @@
     "profile": ["profile"],
     "streams": ["streams"],
     "cashout": ["cashout"],
+    "transfers": ["transfers"],
     "video-lessons": ["video-lessons"],
     "equilator": ["equilator"],
     "player-crm": ["player-crm"],

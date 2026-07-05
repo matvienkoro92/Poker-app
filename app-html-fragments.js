@@ -97,6 +97,7 @@
     if (viewName === "schedule") safeCall(window.updateTournamentDayBlock);
     if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);
     if (viewName === "raffles") safeCall(window.pokerInitRafflesHeroShare);
+    if (viewName === "transfers") safeCall(window.pokerInitTransfers);
     if (viewName === "hall-of-fame") {
       safeCall(window.pokerInitHallOfFamePanelShareButtons);
       safeCall(window.pokerInitHallFishRatingModal);

@@ -1809,6 +1809,7 @@ function pokerOpenPlayerCrmFromHome() {
 })();
 
 (function bindGlobalClickSound() {
+  if (window.__pokerClickSoundGlobalBound) return;
   var lastPointerSoundAt = 0;
 
   function clickSoundTarget(e) {
