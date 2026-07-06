@@ -1944,10 +1944,13 @@
 .sng-champions-modal__bracket-map-wrap--expanded {
   position: fixed;
   inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
-  z-index: 80;
+  z-index: 1300;
   align-content: start;
   overflow: auto;
-  padding: 12px;
+  padding: 12px 12px 28px;
+  scroll-padding-bottom: 28px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border-color: rgba(255, 219, 126, 0.72);
   border-radius: 18px;
   background:
