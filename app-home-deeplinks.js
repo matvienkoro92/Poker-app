@@ -364,6 +364,7 @@ function pokerInitHomeDeepLinks(opts) {
       download: "download",
       equilator: "equilator",
       cashout: "cashout",
+      transfers: "transfers",
       profile: "profile",
       streams: "streams",
       daily_poker: "daily-poker",
