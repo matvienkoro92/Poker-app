@@ -1847,6 +1847,25 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.sng-champions-modal__bracket-player--ready {
+  border: 1px solid rgba(134, 239, 172, 0.62);
+  background:
+    linear-gradient(135deg, rgba(34, 197, 94, 0.34), rgba(21, 128, 61, 0.22)),
+    rgba(5, 8, 14, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(187, 247, 208, 0.18),
+    0 8px 22px rgba(22, 163, 74, 0.16);
+}
+
+.sng-champions-modal__bracket-player--ready span {
+  color: #dcfce7;
+}
+
+.sng-champions-modal__bracket-player--ready .sng-champions-modal__ready-badge--ready {
+  color: #052e16;
+  background: #bbf7d0;
+}
+
 .sng-champions-modal__bracket-player--winner {
   outline: 1px solid rgba(255, 213, 111, 0.54);
   background: rgba(255, 184, 70, 0.14);

@@ -639,7 +639,10 @@
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
-    return '<div class="sng-champions-modal__bracket-player' + (won ? " sng-champions-modal__bracket-player--winner" : "") + '">' +
+    var playerClass = "sng-champions-modal__bracket-player" +
+      (ready && !won ? " sng-champions-modal__bracket-player--ready" : "") +
+      (won ? " sng-champions-modal__bracket-player--winner" : "");
+    return '<div class="' + playerClass + '">' +
       '<span>' + escapeHtml(playerName(player)) + '</span>' +
       readyBadge +
       (won ? '<strong>Победитель</strong>' : adminButton) +
