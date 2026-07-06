@@ -634,13 +634,15 @@
     var won = match.winnerId && match.winnerId === player.id;
     var matchPlayers = (match.playerIds || []).filter(Boolean);
     var ready = match.readyById && match.readyById[player.id] === true;
+    var advanced = playerAdvancedToOpenMatch(player.id, match, data);
     var allReady = matchPlayers.length >= 2 && matchPlayers.every(function (id) { return match.readyById && match.readyById[id] === true; });
     var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && allReady && !match.winnerId
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
     var playerClass = "sng-champions-modal__bracket-player" +
-      (ready && !won ? " sng-champions-modal__bracket-player--ready" : "") +
+      (advanced ? " sng-champions-modal__bracket-player--advanced" : "") +
+      (ready && !won && !match.winnerId ? " sng-champions-modal__bracket-player--ready" : "") +
       (won ? " sng-champions-modal__bracket-player--winner" : "");
     return '<div class="' + playerClass + '">' +
       '<span>' + escapeHtml(playerName(player)) + '</span>' +
@@ -695,10 +697,23 @@
     '</article>';
   }
 
+  function playerAdvancedToOpenMatch(id, match, data) {
+    if (!id || !match || match.winnerId) return false;
+    var rounds = data && Array.isArray(data.rounds) ? data.rounds : [];
+    for (var i = 0; i < rounds.length; i += 1) {
+      var matches = rounds[i] && Array.isArray(rounds[i].matches) ? rounds[i].matches : [];
+      for (var j = 0; j < matches.length; j += 1) {
+        if (matches[j] && matches[j].winnerId === id && matches[j].id !== match.id) return true;
+      }
+    }
+    return false;
+  }
+
   function renderBracketMapPlayer(id, match, data) {
     var player = (data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" };
     var won = match.winnerId && match.winnerId === id;
-    return '<span class="sng-champions-modal__map-player' + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    var advanced = playerAdvancedToOpenMatch(id, match, data);
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
   function renderBracketMapMatch(match, data) {
