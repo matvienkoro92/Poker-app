@@ -137,11 +137,79 @@
     return btn;
   }
 
+  function transfersDeepLink() {
+    if (typeof pokerBuildWebsiteStartLink === "function") {
+      var webLink = pokerBuildWebsiteStartLink("transfers");
+      if (webLink) return webLink;
+    }
+    if (typeof pokerBuildPersonalInviteLink === "function") {
+      var inviteLink = pokerBuildPersonalInviteLink("transfers");
+      if (inviteLink) return inviteLink;
+    }
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink("transfers");
+    var base = typeof getAppBaseUrlForLinks === "function" ? String(getAppBaseUrlForLinks() || "").replace(/\/+$/, "") : "";
+    return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=transfers" : "";
+  }
+
+  function buildTransferShareText(item, link) {
+    item = item || {};
+    var lines = [
+      kindText(item.kind) + " " + formatAmount(item.amount),
+    ];
+    if (item.comment) lines.push(String(item.comment));
+    if (item.requisites) {
+      lines.push("");
+      lines.push("Реквизиты:");
+      lines.push(String(item.requisites));
+    }
+    if (link) {
+      lines.push("");
+      lines.push("Открыть переводы: " + link);
+    }
+    return lines.join("\n");
+  }
+
+  function shareTransfer(item) {
+    if (!item || !item.requisites) return;
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    var link = transfersDeepLink();
+    var text = buildTransferShareText(item, link);
+    var caption = buildTransferShareText(item, "");
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+      ? pokerBuildTelegramShareUrlDialog(link, caption)
+      : "";
+    var tryWebShare = typeof pokerTryPwaWebShare === "function"
+      ? pokerTryPwaWebShare
+      : function () { return Promise.resolve(false); };
+    tryWebShare({ title: "Переводы", text: text, url: link }).then(function (pwaOk) {
+      if (pwaOk) {
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("transfers_requisites_share");
+        return;
+      }
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (shareUrl && tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (shareUrl && tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else if (shareUrl) window.open(shareUrl, "_blank", "noopener,noreferrer");
+      else if (typeof pokerCopyTextToClipboard === "function") {
+        pokerCopyTextToClipboard(text).then(function () {
+          if (tg && tg.showToast) tg.showToast("Текст скопирован");
+        });
+      }
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("transfers_requisites_share");
+    });
+  }
+
   function renderRequisites(card, item) {
     if (!item.canSeeRequisites || !item.requisites) return;
     var box = textNode("div", "transfers-card__details");
     box.appendChild(textNode("span", "transfers-card__details-label", "Реквизиты"));
     box.appendChild(textNode("pre", "transfers-card__details-text", item.requisites));
+    if (item.isOwner) {
+      var share = textNode("button", "transfers-card__share", "Отправить в чат");
+      share.type = "button";
+      share.setAttribute("data-transfers-share", item.id);
+      box.appendChild(share);
+    }
     card.appendChild(box);
   }
 
@@ -398,6 +466,15 @@
     postAction(payload, btn);
   }
 
+  function handleShare(event) {
+    var btn = event.target && event.target.closest ? event.target.closest("[data-transfers-share]") : null;
+    if (!btn || btn.disabled) return false;
+    var id = btn.getAttribute("data-transfers-share");
+    var item = state.items.filter(function (row) { return row.id === id; })[0];
+    shareTransfer(item);
+    return true;
+  }
+
   function bind() {
     var r = root();
     if (!r || state.bound) return;
@@ -416,6 +493,7 @@
         render();
         return;
       }
+      if (handleShare(event)) return;
       handleAction(event);
     });
     var form = byId("transfersCreateForm");
