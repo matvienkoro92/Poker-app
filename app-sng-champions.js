@@ -652,6 +652,13 @@
     '</div>';
   }
 
+  function renderBracketPendingPlayer() {
+    return '<div class="sng-champions-modal__bracket-player sng-champions-modal__bracket-player--pending">' +
+      '<span>???</span>' +
+      '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--waiting">Ждет</small>' +
+    '</div>';
+  }
+
   function formatReadyCountdown(match, data) {
     if (!match || !match.readyDeadlineAt || match.winnerId) return "";
     if (match.playingAt) return "Играют";
@@ -685,14 +692,15 @@
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
+    var playerRows = players.length ? players.map(function (id) {
+      return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
+    }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
     var matchClass = "sng-champions-modal__bracket-match" +
       (match.playingAt && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "");
     return '<article class="' + matchClass + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
-      (players.length ? players.map(function (id) {
-        return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
-      }).join("") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>') +
+      playerRows +
       renderPlayingAction(match, players, data) +
       renderReadyAction(match, players, data) +
     '</article>';

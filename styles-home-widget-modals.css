@@ -1848,6 +1848,18 @@
   text-transform: uppercase;
 }
 
+.sng-champions-modal__bracket-player--pending {
+  border: 1px dashed rgba(255, 213, 111, 0.36);
+  background:
+    linear-gradient(135deg, rgba(255, 213, 111, 0.1), rgba(255, 255, 255, 0.03)),
+    rgba(5, 8, 14, 0.58);
+}
+
+.sng-champions-modal__bracket-player--pending span {
+  color: rgba(255, 239, 201, 0.66);
+  letter-spacing: 0;
+}
+
 .sng-champions-modal__ready-badge {
   flex: 0 0 auto;
   padding: 3px 6px;
