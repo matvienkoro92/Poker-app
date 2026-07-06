@@ -1,5 +1,5 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.668");
+@import url("./styles-base.css?v=3.669");
 @import url("./styles-home-rating-promo.css?v=3.666");
 @import url("./styles-auth.css?v=3.666");
 @import url("./styles-home.css?v=3.666");
@@ -2969,9 +2969,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   z-index: 2;
   display: block;
   background:
-    radial-gradient(ellipse at 50% 112%, rgba(255, 105, 0, 0.2), transparent 39%),
-    linear-gradient(135deg, transparent 0 47%, rgba(255, 137, 19, 0.16) 48% 49%, transparent 50%),
-    linear-gradient(45deg, transparent 0 47%, rgba(255, 137, 19, 0.1) 48% 49%, transparent 50%);
+    radial-gradient(ellipse at 50% 112%, rgba(255, 105, 0, 0.2), transparent 39%);
   pointer-events: none;
 }
 

@@ -311,7 +311,7 @@
     };
     idle(function () {
       if (document.hidden) return;
-      var ready = ensureDomainsMaybeAsync(["raffles", "learning", "profile", "rating-common"], { styles: true, scripts: false });
+      var ready = ensureDomainsMaybeAsync(["learning", "profile", "rating-common"], { styles: true, scripts: false });
       if (ready && typeof ready.catch === "function") ready.catch(function () {});
     }, { timeout: 2500 });
   };

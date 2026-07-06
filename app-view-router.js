@@ -630,10 +630,43 @@ function pokerChatDomainScriptsReady() {
     typeof initChatPersonalLoader === "function";
 }
 
+function pokerHasHydratedRafflesView() {
+  return !!(
+    document.querySelector('.view[data-view="raffles"]:not([data-html-fragment]) .raffles-hero') ||
+    document.getElementById("rafflesActiveChooser") ||
+    document.getElementById("rafflesTabs")
+  );
+}
+
+function pokerEnsureRafflesAfterShell() {
+  if (pokerEnsureRafflesAfterShell.pending) return;
+  pokerEnsureRafflesAfterShell.pending = true;
+  var htmlReady = typeof window.pokerEnsureViewHtml === "function"
+    ? window.pokerEnsureViewHtml("raffles")
+    : true;
+  var scriptsReady = typeof window.pokerEnsureViewScripts === "function"
+    ? window.pokerEnsureViewScripts("raffles")
+    : true;
+  Promise.all([Promise.resolve(htmlReady), Promise.resolve(scriptsReady)])
+    .then(function () {
+      pokerEnsureRafflesAfterShell.pending = false;
+      if (!document.body || document.body.getAttribute("data-view") !== "raffles") return;
+      setView("raffles", { htmlReady: true, scriptsReady: true });
+    })
+    .catch(function (err) {
+      pokerEnsureRafflesAfterShell.pending = false;
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert("Не удалось загрузить розыгрыши. Попробуйте ещё раз.");
+      }
+      if (typeof console !== "undefined" && console.warn) console.warn("raffles shell hydration", err);
+    });
+}
+
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
+  var useInstantRafflesShell = viewName === "raffles" && !navOpts.htmlReady && !navOpts.scriptsReady;
   try {
-    if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
+    if (!useInstantRafflesShell && !navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
       var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;
       var htmlReady = window.pokerEnsureViewHtml(htmlViewName);
       if (htmlReady && typeof htmlReady.then === "function") {
@@ -655,7 +688,7 @@ function setView(viewName, navOpts) {
     }
   } catch (eHtmlView) {}
   try {
-    if (!navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
+    if (!useInstantRafflesShell && !navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
       var scriptsReady = window.pokerEnsureViewScripts(viewName);
       if (scriptsReady && typeof scriptsReady.then === "function") {
         scriptsReady.then(function () {
@@ -1155,7 +1188,11 @@ function setView(viewName, navOpts) {
   if (viewName === "plasterer-game") initPlastererGame();
   if (viewName === "raffles") {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-    initRaffles();
+    if (pokerHasHydratedRafflesView() && typeof initRaffles === "function") {
+      initRaffles();
+    } else {
+      pokerEnsureRafflesAfterShell();
+    }
   }
   if (viewName === "equilator") initEquilator();
   if (viewName === "video-lessons") {

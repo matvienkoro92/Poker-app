@@ -78,6 +78,194 @@ body::-webkit-scrollbar,
   height: 0;
 }
 
+.raffles-shell-skeleton {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  padding: max(14px, env(safe-area-inset-top)) var(--screen-gutter-x) calc(var(--app-bottom-tabbar-pad) + 16px);
+  color: #fff3d0;
+  overflow: hidden;
+}
+
+.raffles-shell-skeleton::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 199, 85, 0.14), transparent 30%),
+    radial-gradient(circle at 86% 70%, rgba(255, 111, 31, 0.1), transparent 34%),
+    linear-gradient(145deg, #070807 0%, #11100c 44%, #040505 100%);
+}
+
+.raffles-shell-skeleton__hero,
+.raffles-shell-skeleton__tabs,
+.raffles-shell-skeleton__card {
+  position: relative;
+  border: 1px solid rgba(205, 145, 42, 0.58);
+  background:
+    linear-gradient(115deg, rgba(255, 238, 183, 0.09), transparent 24% 70%, rgba(255, 168, 46, 0.08)),
+    linear-gradient(145deg, rgba(29, 25, 16, 0.88), rgba(7, 8, 8, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 218, 0.1),
+    0 16px 34px rgba(0, 0, 0, 0.38),
+    0 0 22px rgba(255, 161, 34, 0.12);
+  overflow: hidden;
+}
+
+.raffles-shell-skeleton__hero::after,
+.raffles-shell-skeleton__tabs::after,
+.raffles-shell-skeleton__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 0 32%, rgba(255, 241, 200, 0.16) 45%, transparent 58% 100%);
+  transform: translateX(-100%);
+  animation: raffles-shell-skeleton-shimmer 1.25s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.raffles-shell-skeleton__hero {
+  min-height: 230px;
+  padding: 22px 18px 18px;
+  border-radius: 28px;
+}
+
+.raffles-shell-skeleton__back {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 221, 144, 0.5);
+  background: rgba(10, 12, 12, 0.64);
+}
+
+.raffles-shell-skeleton__title,
+.raffles-shell-skeleton__subtitle,
+.raffles-shell-skeleton__stats span,
+.raffles-shell-skeleton__tabs span,
+.raffles-shell-skeleton__line,
+.raffles-shell-skeleton__prize,
+.raffles-shell-skeleton__cta {
+  display: block;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 235, 170, 0.16), rgba(255, 207, 97, 0.3), rgba(255, 235, 170, 0.14));
+}
+
+.raffles-shell-skeleton__title {
+  width: min(82%, 360px);
+  height: 34px;
+  margin-top: 32px;
+}
+
+.raffles-shell-skeleton__subtitle {
+  width: min(62%, 260px);
+  height: 18px;
+  margin-top: 14px;
+  opacity: 0.82;
+}
+
+.raffles-shell-skeleton__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 34px;
+}
+
+.raffles-shell-skeleton__stats span {
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(6, 8, 9, 0.56);
+}
+
+.raffles-shell-skeleton__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 6px;
+  border-radius: 20px;
+}
+
+.raffles-shell-skeleton__tabs span {
+  height: 48px;
+  border-radius: 16px;
+}
+
+.raffles-shell-skeleton__card {
+  min-height: 260px;
+  padding: 20px;
+  border-radius: 28px;
+}
+
+.raffles-shell-skeleton__line {
+  height: 22px;
+  width: 58%;
+}
+
+.raffles-shell-skeleton__line--wide {
+  width: 76%;
+  height: 30px;
+}
+
+.raffles-shell-skeleton__line + .raffles-shell-skeleton__line {
+  margin-top: 14px;
+}
+
+.raffles-shell-skeleton__prize {
+  width: 72%;
+  height: 68px;
+  margin-top: 34px;
+  border-radius: 20px;
+}
+
+.raffles-shell-skeleton__cta {
+  width: 54%;
+  height: 54px;
+  margin-top: 38px;
+  margin-left: auto;
+  border-radius: 18px;
+}
+
+@keyframes raffles-shell-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 430px) {
+  .raffles-shell-skeleton {
+    gap: 10px;
+  }
+
+  .raffles-shell-skeleton__hero {
+    min-height: 212px;
+    padding: 18px 14px 14px;
+    border-radius: 24px;
+  }
+
+  .raffles-shell-skeleton__title {
+    height: 30px;
+    margin-top: 26px;
+  }
+
+  .raffles-shell-skeleton__stats {
+    margin-top: 28px;
+  }
+
+  .raffles-shell-skeleton__stats span {
+    height: 46px;
+  }
+
+  .raffles-shell-skeleton__card {
+    min-height: 230px;
+    padding: 16px;
+    border-radius: 24px;
+  }
+}
+
 [data-theme="light"] html,
 [data-theme="light"] body,
 [data-theme="light"] .app {

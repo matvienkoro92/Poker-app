@@ -296,7 +296,7 @@
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/home-tournament-mystery-bounty-130k.webp?v=2026070602" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=3.961" />
+    <link rel="stylesheet" href="./styles.css?v=3.963" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.666" />
@@ -310,7 +310,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=3.680" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=3.004" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=3.001" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=3.010" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=3.011" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="admin admin-reports auth-debug share-stats tracking admin-bonuses" href="./styles-admin.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="player-crm" href="./styles-player-crm.css?v=3.666" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
@@ -1369,7 +1369,30 @@
           <div class="view" data-view="plasterer-game" data-html-fragment="./html-fragments/plasterer-game.html" data-html-fragment-view="plasterer-game"></div>
 
           <!-- Розыгрыши -->
-          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=3.602" data-html-fragment-view="raffles"></div>
+          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=3.602" data-html-fragment-view="raffles">
+            <section class="raffles-shell-skeleton" aria-label="Розыгрыши загружаются" aria-busy="true">
+              <div class="raffles-shell-skeleton__hero">
+                <div class="raffles-shell-skeleton__back" aria-hidden="true"></div>
+                <div class="raffles-shell-skeleton__title"></div>
+                <div class="raffles-shell-skeleton__subtitle"></div>
+                <div class="raffles-shell-skeleton__stats">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <div class="raffles-shell-skeleton__tabs">
+                <span></span>
+                <span></span>
+              </div>
+              <div class="raffles-shell-skeleton__card">
+                <div class="raffles-shell-skeleton__line raffles-shell-skeleton__line--wide"></div>
+                <div class="raffles-shell-skeleton__line"></div>
+                <div class="raffles-shell-skeleton__prize"></div>
+                <div class="raffles-shell-skeleton__cta"></div>
+              </div>
+            </section>
+          </div>
 
           <!-- Научиться играть — хаб: видео-уроки -->
           <div class="view" data-view="learn-play-hub">
@@ -1666,7 +1689,7 @@
     <script defer src="./app-click-sound.js?v=3.006"></script>
     <script defer src="./app-home-init.js?v=3.729"></script>
     <script defer src="./app-home-media.js?v=3.666"></script>
-    <script defer src="./app-lazy-loader.js?v=3.670"></script>
+    <script defer src="./app-lazy-loader.js?v=3.671"></script>
     <script defer src="./app-home-planner-access.js?v=3.666"></script>
     <script defer src="./app-home-planner-runtime.js?v=3.666"></script>
     <script defer src="./app-home-planner.js?v=3.666"></script>
@@ -1797,7 +1820,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=3.667"></script>
     <script defer src="./app-shell-layout.js?v=3.666"></script>
     <script defer src="./app-navigation-scroll.js?v=3.668"></script>
-    <script defer src="./app-html-fragments.js?v=3.674"></script>
+    <script defer src="./app-html-fragments.js?v=3.675"></script>
     <script defer src="./app-webview-keyboard.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-emoji-picker.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-reply-retry-glue.js?v=3.666"></script>
@@ -1805,7 +1828,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard-debug.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-overscroll-debug.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js?v=3.668"></script>
-    <script defer src="./app-view-router.js?v=3.671"></script>
+    <script defer src="./app-view-router.js?v=3.672"></script>
     <script defer src="./app-popstate-recovery.js?v=3.666"></script>
     <script defer src="./app-visitor-id.js?v=3.666"></script>
     <script defer src="./app-api-tracking.js?v=3.729"></script>

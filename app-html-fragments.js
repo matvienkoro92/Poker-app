@@ -300,7 +300,6 @@
 
   (function pokerEagerHydratePrimaryViews() {
     var queue = [
-      "raffles",
       "profile"
     ];
     var index = 0;
