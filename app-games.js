@@ -158,6 +158,10 @@ function stopDailyPredictionTimer() {
 }
 
 function playClickSound() {
+  if (typeof window.playPokerClickSound === "function" && window.playPokerClickSound !== playClickSound) {
+    window.playPokerClickSound();
+    return;
+  }
   var audio = null;
   try {
     audio = playClickSound.__audio;
@@ -165,6 +169,9 @@ function playClickSound() {
       audio = playClickSound.__audio = new Audio("./assets/gta-sa-menu.mp3?v=2026070602");
       audio.preload = "auto";
       audio.volume = 0.78;
+      try {
+        audio.load();
+      } catch (errLoad) {}
     }
   } catch (errAudio) {}
   if (!audio) return;

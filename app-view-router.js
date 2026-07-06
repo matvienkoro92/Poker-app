@@ -1450,7 +1450,7 @@ function setView(viewName, navOpts) {
         restoreMainScrollIfStillIdle();
       }, 120);
     } else {
-      scrollMainDocumentToTop();
+      scrollMainDocumentToTop({ force: true });
       /* Чат: только синхронный сброс — повторный rAF доводил окно и давал «вверх—вниз» в первые сотни мс вместе с лентой. */
       if (viewName !== "chat" && viewName !== "home" && viewName !== "profile") {
         rafScroll(function () {
@@ -1827,9 +1827,12 @@ function pokerOpenPlayerCrmFromHome() {
     }
     var audio = document.__pokerClickAudio;
     if (!audio) {
-      audio = document.__pokerClickAudio = new Audio("./assets/gta-sa-menu.mp3?v=20260706");
+      audio = document.__pokerClickAudio = new Audio("./assets/gta-sa-menu.mp3?v=2026070602");
       audio.preload = "auto";
       audio.volume = 0.78;
+      try {
+        audio.load();
+      } catch (errLoad) {}
     }
     audio.pause();
     audio.currentTime = 0;

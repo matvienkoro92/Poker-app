@@ -19,18 +19,18 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
     name: "Magic MKO",
     buyin: "500₽",
-    guarantee: "130 000₽",
+    guarantee: "170 000₽",
     banner: HOME_TOURNAMENT_MONDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Magic MKO понедельника — Мистери Баунти 130 000 ₽",
+    bannerAlt: "Poker21 Magic MKO понедельника — Мистери Баунти 170 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
   {
     name: "Турнир Тракториста",
     buyin: "300₽",
-    guarantee: "120 000₽",
+    guarantee: "150 000₽",
     banner: HOME_TOURNAMENT_TUESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Турнир Тракториста вторника — призовые 120 000 ₽",
+    bannerAlt: "Poker21 Турнир Тракториста вторника — призовые 150 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
@@ -55,18 +55,18 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
     name: "Нокаут Прогрессив",
     buyin: "500₽",
-    guarantee: "130 000₽",
+    guarantee: "170 000₽",
     banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут Прогрессив пятницы — вход 500 ₽, призовые 130 000 ₽",
+    bannerAlt: "Poker21 Нокаут Прогрессив пятницы — вход 500 ₽, призовые 170 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
   {
     name: "Фриролл",
     buyin: "0₽ · R:400₽ / A:800₽",
-    guarantee: "200 000₽",
+    guarantee: "10 билетов по 10 000₽",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Фриролл субботы — ребай 400 ₽, аддон 800 ₽, призовые 200 000 ₽",
+    bannerAlt: "Poker21 Фриролл субботы — ребай 400 ₽, аддон 800 ₽, 10 билетов по 10 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   }
@@ -87,7 +87,7 @@ var HOME_FREEROLL_SCHEDULE = [
     guarantee: "9 000₽",
     desc: "Ежедневный фриролл-сателлит в Poker21. Старт в 16:00 МСК, вход 0₽, гарантия 9 000₽: 3 билета по 3 000₽."
   },
-  { day: "Сб", dow: 6, title: "Приз 200 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:400₽ / A:800₽, гарантия 200 000₽." }
+  { day: "Сб", dow: 6, title: "10 билетов по 10 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", guarantee: "10 билетов по 10 000₽", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:400₽ / A:800₽, приз: 10 билетов по 10 000₽." }
 ];
 
 var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [];
@@ -100,13 +100,13 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "daily", category: "Сателлит", name: "Бесплатный сателлит к турниру месяца", buyin: "0₽", rebuy: "—", guarantee: "9 000₽ — 3 билета за 3 000₽", hour: 16, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Ежедневный", name: "Magic Chest", buyin: "50₽", rebuy: "R:50₽", guarantee: "3 000₽", hour: 16, minute: 0, durationMinutes: 180, priority: 50 },
   { repeat: "daily", category: "Ежедневный", name: "PKO/MKO", buyin: "300₽", rebuy: "R:300₽", guarantee: "25 000₽", hour: 17, minute: 0, durationMinutes: 180, priority: 55 },
-  { repeat: "weekly", dow: 1, category: "Турнир дня", name: "Magic MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "120 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 1, category: "Турнир дня", name: "Magic MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "150 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут", buyin: "5 000₽", rebuy: "R:5 000₽", guarantee: "250 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "50 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 89, levels: "12/10/8" },
   { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери+", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "130 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "200 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "10 билетов по 10 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Мистери", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту на 1 000 000₽", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 36 },
@@ -169,12 +169,14 @@ var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
+var HOME_TOURNAMENT_BANNER_VERSION = "2026070602";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
 function getHomeTournamentBannerUrl(file) {
   if (!file) return "";
-  return typeof getAssetUrl === "function" ? getAssetUrl(file) : "./assets/" + file;
+  var base = typeof getAssetUrl === "function" ? getAssetUrl(file) : "./assets/" + file;
+  return base + (base.indexOf("?") === -1 ? "?v=" : "&v=") + HOME_TOURNAMENT_BANNER_VERSION;
 }
 
 function setHomeTournamentImagePriority(img, priority) {
@@ -1813,7 +1815,7 @@ function updateTournamentDayBlock() {
   function getFreerollTournamentInfo(item) {
     if (!item) return TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
     var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "0₽ · R:400₽ / A:800₽" : "0₽";
-    var fallbackGuarantee = item.daily ? "9 000₽" : "200 000₽";
+    var fallbackGuarantee = item.daily ? "9 000₽" : "10 билетов по 10 000₽";
     return {
       name: item.room === "X-poker" ? "Фриролл X-poker" : "Фриролл",
       buyin: item.buyin || fallbackBuyin,

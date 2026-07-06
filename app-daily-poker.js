@@ -154,13 +154,17 @@
     setLiveText($("dailyPokerReward"), "");
   }
 
-  function playDailyPokerAudio(audio, src) {
+  function playDailyPokerAudio(audio, src, preloadOnly) {
     try {
       if (!audio) {
         audio = new Audio(src);
         audio.preload = "auto";
         audio.volume = 1;
+        try {
+          audio.load();
+        } catch (errLoad) {}
       }
+      if (preloadOnly) return audio;
       audio.pause();
       audio.currentTime = 0;
       var p = audio.play();
@@ -179,6 +183,12 @@
 
   function playDailyPokerLoseSound() {
     dailyPokerLoseAudio = playDailyPokerAudio(dailyPokerLoseAudio, DAILY_POKER_LOSE_SOUND_SRC);
+  }
+
+  function preloadDailyPokerSounds() {
+    dailyPokerDealAudio = playDailyPokerAudio(dailyPokerDealAudio, DAILY_POKER_DEAL_SOUND_SRC, true);
+    dailyPokerWinAudio = playDailyPokerAudio(dailyPokerWinAudio, DAILY_POKER_WIN_SOUND_SRC, true);
+    dailyPokerLoseAudio = playDailyPokerAudio(dailyPokerLoseAudio, DAILY_POKER_LOSE_SOUND_SRC, true);
   }
 
   function hasDailyPokerWin(result) {
@@ -1044,10 +1054,14 @@
     var copyBtn = $("dailyPokerCopyLinkBtn");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
+      playBtn.addEventListener("pointerover", preloadDailyPokerSounds, { passive: true });
+      playBtn.addEventListener("touchstart", preloadDailyPokerSounds, { passive: true });
       playBtn.addEventListener("click", play);
     }
     if (extraBtn && extraBtn.dataset.dailyPokerBound !== "1") {
       extraBtn.dataset.dailyPokerBound = "1";
+      extraBtn.addEventListener("pointerover", preloadDailyPokerSounds, { passive: true });
+      extraBtn.addEventListener("touchstart", preloadDailyPokerSounds, { passive: true });
       extraBtn.addEventListener("click", play);
     }
     if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {

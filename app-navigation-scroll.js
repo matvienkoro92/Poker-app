@@ -66,8 +66,15 @@ function pokerGetDownloadCardContentScrollEl() {
 }
 
 /** Сброс прокрутки окна (html/body) — при смене экрана иначе остаётся Y с предыдущей страницы. */
-function scrollMainDocumentToTop() {
+function scrollMainDocumentToTop(opts) {
   try {
+    opts = opts || {};
+    var force = opts === true || opts.force === true;
+    var activeView = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    if (!force && activeView === "home") {
+      if (getMainDocumentScrollY() > 2) return;
+      if (typeof pokerHasRecentMainScrollUserIntent === "function" && pokerHasRecentMainScrollUserIntent(2500)) return;
+    }
     if (
       typeof pokerIsActiveIosPwaChatComposerKeyboard === "function" &&
       pokerIsActiveIosPwaChatComposerKeyboard()
@@ -208,7 +215,7 @@ function scrollHomeToTop(force) {
       if (typeof pokerHasRecentMainScrollUserIntent === "function" && pokerHasRecentMainScrollUserIntent(2500)) return;
     } catch (eHomeScrollIntent) {}
   }
-  scrollMainDocumentToTop();
+  scrollMainDocumentToTop({ force: !!force });
 }
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
