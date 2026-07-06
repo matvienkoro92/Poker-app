@@ -323,19 +323,40 @@ html.vpn-proxy-modal-open {
   margin: 0 0 14px;
   gap: 8px;
 }
+.vpn-proxy-modal__trial-btn,
 .vpn-proxy-modal__trial-btn.raffles-hero__share-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: min(100%, 680px);
   min-height: 58px;
   padding: 12px 28px;
+  color: #1c1003;
+  font: inherit;
+  font-size: clamp(18px, 3.8vw, 28px);
+  font-weight: 1000;
   text-align: center;
   text-decoration: none;
   line-height: 1.15;
+  border: 2px solid rgba(255, 239, 191, 0.92);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #fff4b8 0%, #ffc43d 48%, #ff8a00 100%);
+  box-shadow:
+    0 0 0 2px rgba(89, 54, 6, 0.5),
+    0 12px 30px rgba(255, 184, 70, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  cursor: pointer;
 }
+.vpn-proxy-modal__trial-btn:hover,
+.vpn-proxy-modal__trial-btn:focus-visible,
 .vpn-proxy-modal__trial-btn.raffles-hero__share-btn:hover,
 .vpn-proxy-modal__trial-btn.raffles-hero__share-btn:focus-visible {
+  color: #1c1003;
   text-decoration: none;
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 .vpn-proxy-modal .gazette-article-comments--panel {
   margin-top: 4px;
