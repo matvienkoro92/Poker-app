@@ -643,6 +643,7 @@
     var playerClass = "sng-champions-modal__bracket-player" +
       (advanced ? " sng-champions-modal__bracket-player--advanced" : "") +
       (ready && !won && !match.winnerId ? " sng-champions-modal__bracket-player--ready" : "") +
+      (match.winnerId && !won ? " sng-champions-modal__bracket-player--lost" : "") +
       (won ? " sng-champions-modal__bracket-player--winner" : "");
     return '<div class="' + playerClass + '">' +
       '<span>' + escapeHtml(playerName(player)) + '</span>' +
@@ -713,7 +714,8 @@
     var player = (data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" };
     var won = match.winnerId && match.winnerId === id;
     var advanced = playerAdvancedToOpenMatch(id, match, data);
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    var lost = match.winnerId && !won;
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
   function renderBracketMapMatch(match, data) {
