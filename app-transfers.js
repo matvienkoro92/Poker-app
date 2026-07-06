@@ -2,6 +2,7 @@
   var state = {
     bound: false,
     loading: false,
+    fetching: false,
     loadedAt: 0,
     filter: "active",
     kind: "cashout",
@@ -11,6 +12,7 @@
     maxAmount: 2500,
   };
   var tickTimer = null;
+  var pollTimer = null;
 
   function root() {
     return document.getElementById("transfersView");
@@ -255,7 +257,8 @@
     if (r) r.classList.toggle("transfers-page--loading", state.loading);
   }
 
-  function loadTransfers(force) {
+  function loadTransfers(force, options) {
+    options = options || {};
     var base = apiBase();
     var q = authQuery();
     if (!base || !q || q === "?initData=") {
@@ -263,12 +266,13 @@
       render();
       return Promise.resolve(null);
     }
-    if (state.loading) return Promise.resolve(null);
+    if (state.fetching) return Promise.resolve(null);
     if (!force && state.loadedAt && Date.now() - state.loadedAt < 15000) {
       render();
       return Promise.resolve(state.items);
     }
-    setLoading(true);
+    state.fetching = true;
+    if (!options.silent) setLoading(true);
     return fetchJson(base + "/api/transfers" + q, { method: "GET" })
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Не удалось загрузить заявки");
@@ -286,12 +290,13 @@
         return state.items;
       })
       .catch(function (err) {
-        setFeedback(err && err.message ? err.message : "Не удалось загрузить заявки", "error");
+        if (!options.silent) setFeedback(err && err.message ? err.message : "Не удалось загрузить заявки", "error");
         render();
         return null;
       })
       .finally(function () {
-        setLoading(false);
+        state.fetching = false;
+        if (!options.silent) setLoading(false);
       });
   }
 
@@ -434,7 +439,7 @@
       if (document.body) observer.observe(document.body, { attributes: true, attributeFilter: ["data-view"] });
     } catch (eObserver) {}
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden && activeView() && Date.now() - Number(state.loadedAt || 0) > 60000) loadTransfers(true);
+      if (!document.hidden && activeView() && Date.now() - Number(state.loadedAt || 0) > 5000) loadTransfers(true, { silent: true });
     });
   }
 
@@ -451,11 +456,20 @@
     }, 1000);
   }
 
+  function startPolling() {
+    if (pollTimer) return;
+    pollTimer = setInterval(function () {
+      if (!activeView() || document.hidden) return;
+      loadTransfers(true, { silent: true });
+    }, 20000);
+  }
+
   function initTransfers() {
     bindBodyObserver();
     bind();
     render();
     startTicker();
+    startPolling();
     if (activeView()) loadTransfers(false);
   }
 
