@@ -273,6 +273,10 @@ function pokerInitHomeDeepLinks(opts) {
         var attempts = 0;
         var openSngChampions = function () {
           attempts += 1;
+          if (typeof window.pokerOpenHomeWidgetModal === "function") {
+            window.pokerOpenHomeWidgetModal("sng-champions");
+            return;
+          }
           if (typeof window.openSngChampionsModal === "function") {
             window.openSngChampionsModal();
             return;
