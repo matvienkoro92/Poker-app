@@ -122,6 +122,11 @@
     row.appendChild(item);
   }
 
+  function transferDisplayId(item, role) {
+    item = item || {};
+    return item[role + "DisplayId"] || item[role + "Poker21Id"] || item[role + "AccountId"] || "";
+  }
+
   function actionButton(action, label, item) {
     var btn = textNode("button", "transfers-card__action", label);
     btn.type = "button";
@@ -185,9 +190,9 @@
     card.appendChild(top);
 
     var meta = textNode("div", "transfers-card__meta");
-    addMeta(meta, "Автор", item.ownerAccountId);
-    addMeta(meta, "Покупатель", item.buyerAccountId);
-    addMeta(meta, "Продавец", item.sellerAccountId);
+    addMeta(meta, "Автор", transferDisplayId(item, "owner"));
+    addMeta(meta, "Покупатель", transferDisplayId(item, "buyer"));
+    addMeta(meta, "Продавец", transferDisplayId(item, "seller"));
     card.appendChild(meta);
 
     if (item.comment) card.appendChild(textNode("p", "transfers-card__comment", item.comment));

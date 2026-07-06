@@ -5018,3 +5018,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
     border-left: 1px solid rgba(226, 232, 240, 0.2);
   }
 }
+
+body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonus-game-back {
+  left: 0 !important;
+}

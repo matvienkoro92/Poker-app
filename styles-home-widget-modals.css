@@ -2212,6 +2212,173 @@
   text-transform: uppercase;
 }
 
+.club-choice-vote-modal__round-history {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__round-history-head,
+.club-choice-vote-modal__round-history-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.club-choice-vote-modal__round-history-head h3 {
+  margin: 0;
+  color: #ffe7a8;
+  font-size: 16px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__round-history-head span,
+.club-choice-vote-modal__round-history-title em {
+  flex: 0 0 auto;
+  color: rgba(255, 239, 201, 0.66);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.club-choice-vote-modal__round-history-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 184, 70, 0.28);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 184, 70, 0.12), transparent 42%),
+    rgba(7, 9, 15, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 199, 0.04);
+}
+
+.club-choice-vote-modal__round-history-title strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #fff1c7;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__round-history-matches {
+  display: grid;
+  gap: 6px;
+}
+
+.club-choice-vote-modal__round-history-match {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__round-history-match > b {
+  color: rgba(255, 213, 116, 0.92);
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__round-history-players {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.club-choice-vote-modal__round-history-players small {
+  align-self: center;
+  color: rgba(255, 239, 201, 0.42);
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.club-choice-vote-modal__round-history-player {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 7px;
+  border: 1px solid rgba(255, 184, 70, 0.18);
+  border-radius: 8px;
+  background: rgba(10, 13, 20, 0.82);
+}
+
+.club-choice-vote-modal__round-history-player strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #f7e6c4;
+  font-size: 11px;
+  font-weight: 1000;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__round-history-player em {
+  color: #ffd574;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.club-choice-vote-modal__round-history-player i {
+  grid-column: 1 / -1;
+  width: max-content;
+  max-width: 100%;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.74);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.club-choice-vote-modal__round-history-player--winner {
+  border-color: rgba(80, 255, 150, 0.45);
+  background:
+    linear-gradient(180deg, rgba(27, 96, 49, 0.84), rgba(8, 45, 25, 0.9)),
+    rgba(10, 13, 20, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(194, 255, 213, 0.08);
+}
+
+.club-choice-vote-modal__round-history-player--winner strong,
+.club-choice-vote-modal__round-history-player--winner i {
+  color: #b8ffce;
+}
+
+.club-choice-vote-modal__round-history-player--eliminated {
+  border-color: rgba(255, 90, 90, 0.34);
+  color: rgba(255, 239, 201, 0.58);
+  opacity: 0.84;
+}
+
+.club-choice-vote-modal__round-history-player--eliminated strong {
+  color: rgba(255, 220, 205, 0.68);
+  text-decoration: line-through;
+}
+
 .club-choice-vote-modal__scheme h3 {
   margin: 0 0 9px;
   color: #ffe7a8;

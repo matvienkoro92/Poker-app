@@ -35,12 +35,12 @@
     --hall-top2026-list-offset: 75px;
     --hall-top2026-list-width: 248px;
     --hall-top2026-list-max-width: 248px;
-    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + clamp(64px, 18.5vw, 74px));
+    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + clamp(54px, 16vw, 66px));
     --hall-top2026-stage-min-height: clamp(760px, calc(100vw + 408px), 824px);
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: calc(var(--hall-top2026-scene-width) * 1.42);
-    --hall-top2026-trophy-right: -62px;
-    --hall-top2026-trophy-top: 372px;
+    --hall-top2026-trophy-right: -78px;
+    --hall-top2026-trophy-top: 342px;
     --hall-top2026-trophy-width: 119px;
     width: 100%;
     max-width: 100%;
@@ -182,7 +182,7 @@
   }
 
   #hallOfFameView .hall-of-fame__top2026-monkey {
-    z-index: 8;
+    z-index: 12;
     top: 249px;
     left: calc(var(--hall-top2026-scene-left) - 99px);
     width: 236px;
@@ -274,13 +274,14 @@
   #hallOfFameView.hall-of-fame--top2026 {
     --hall-top2026-list-width: 216px;
     --hall-top2026-list-max-width: 216px;
-    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + 58px);
-    --hall-top2026-trophy-right: -72px;
+    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + 50px);
+    --hall-top2026-trophy-right: -88px;
+    --hall-top2026-trophy-top: 338px;
     --hall-top2026-trophy-width: 112px;
   }
 
   #hallOfFameView .hall-of-fame__top2026-trophy {
-    z-index: 5;
+    z-index: 7;
   }
 
   #hallOfFameView .hall-of-fame__top2026-stage .winter-rating__single-top-link,
@@ -304,12 +305,12 @@
     --hall-top2026-list-offset: 75px;
     --hall-top2026-list-width: 248px;
     --hall-top2026-list-max-width: 248px;
-    --hall-top2026-list-left: calc(50% - 136px);
+    --hall-top2026-list-left: calc(50% - 146px);
     --hall-top2026-stage-min-height: 824px;
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 554px;
-    --hall-top2026-trophy-right: calc(50% - 258px);
-    --hall-top2026-trophy-top: 372px;
+    --hall-top2026-trophy-right: calc(50% - 274px);
+    --hall-top2026-trophy-top: 342px;
     --hall-top2026-trophy-width: 126px;
     max-width: 430px;
     margin-inline: auto;
@@ -6965,6 +6966,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  overflow-anchor: none;
 }
 
 [data-theme="light"] .app.app--view-home .games-apps-block {
@@ -7063,6 +7065,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   grid-template-columns: minmax(0, 0.74fr) minmax(0, 1.26fr);
   gap: clamp(6px, 1.7vw, 10px);
   margin: clamp(10px, 2.5vw, 16px) 0 0;
+  overflow-anchor: none;
 }
 
 .app.app--view-home .home-vpn-cta {
@@ -7721,6 +7724,11 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   padding-right: max(var(--app-content-edge-inset, 5px), env(safe-area-inset-right, 0px)) !important;
   box-sizing: border-box !important;
   overflow-x: hidden !important;
+}
+
+body[data-view="home"] #app.app .card .card__content,
+body[data-view="home"] #app.app .card .card__content > .view--active[data-view="home"] {
+  overflow-anchor: none;
 }
 
 #app.app .card .card__content > .view--active > :where(div, section, article, header, footer, nav, main, aside, form, ul, ol, a) {

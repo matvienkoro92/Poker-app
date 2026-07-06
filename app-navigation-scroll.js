@@ -128,9 +128,57 @@ function setMainDocumentScrollY(y) {
 }
 
 var pokerLastMainScrollUserIntentAt = 0;
+var pokerLastMainScrollDirection = "";
+var pokerLastMainTouchY = null;
+var pokerLastMainScrollTopObserved = 0;
+var pokerRestoringHomeScrollJump = false;
 (function pokerBindMainScrollUserIntent() {
   function mark() {
     pokerLastMainScrollUserIntentAt = Date.now();
+  }
+  function markWheel(e) {
+    mark();
+    var dy = e && Number(e.deltaY);
+    if (dy > 0) pokerLastMainScrollDirection = "down";
+    else if (dy < 0) pokerLastMainScrollDirection = "up";
+  }
+  function markTouchStart(e) {
+    mark();
+    var t = e && e.touches && e.touches.length ? e.touches[0] : null;
+    pokerLastMainTouchY = t ? Number(t.clientY) : null;
+  }
+  function markTouchMove(e) {
+    mark();
+    var t = e && e.touches && e.touches.length ? e.touches[0] : null;
+    if (!t || pokerLastMainTouchY == null) return;
+    var y = Number(t.clientY);
+    var dy = y - pokerLastMainTouchY;
+    if (dy < -3) pokerLastMainScrollDirection = "down";
+    else if (dy > 3) pokerLastMainScrollDirection = "up";
+    pokerLastMainTouchY = y;
+  }
+  function guardHomeScrollJump() {
+    mark();
+    if (pokerRestoringHomeScrollJump) return;
+    var y = getMainDocumentScrollY();
+    var prev = pokerLastMainScrollTopObserved || 0;
+    var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    if (
+      view === "home" &&
+      prev > 300 &&
+      y < prev - 180 &&
+      pokerLastMainScrollDirection !== "up"
+    ) {
+      pokerRestoringHomeScrollJump = true;
+      setMainDocumentScrollY(prev);
+      requestAnimationFrame(function () {
+        setMainDocumentScrollY(prev);
+        pokerRestoringHomeScrollJump = false;
+        pokerLastMainScrollTopObserved = getMainDocumentScrollY();
+      });
+      return;
+    }
+    pokerLastMainScrollTopObserved = y;
   }
   function bindPanelScrollIntent() {
     try {
@@ -138,18 +186,23 @@ var pokerLastMainScrollUserIntentAt = 0;
       var panel = card ? card.querySelector(".card__content") : null;
       if (!panel || panel.dataset.pokerScrollIntentBound === "1") return;
       panel.dataset.pokerScrollIntentBound = "1";
-      panel.addEventListener("scroll", mark, { passive: true });
-      panel.addEventListener("touchmove", mark, { passive: true });
-      panel.addEventListener("wheel", mark, { passive: true });
+      pokerLastMainScrollTopObserved = getMainDocumentScrollY();
+      panel.addEventListener("scroll", guardHomeScrollJump, { passive: true });
+      panel.addEventListener("touchstart", markTouchStart, { passive: true });
+      panel.addEventListener("touchmove", markTouchMove, { passive: true });
+      panel.addEventListener("wheel", markWheel, { passive: true });
       panel.addEventListener("pointerdown", mark, { passive: true });
     } catch (ePanelScrollIntent) {}
   }
   try {
-    window.addEventListener("touchstart", mark, { passive: true, capture: true });
-    window.addEventListener("touchmove", mark, { passive: true, capture: true });
-    window.addEventListener("wheel", mark, { passive: true, capture: true });
+    window.addEventListener("touchstart", markTouchStart, { passive: true, capture: true });
+    window.addEventListener("touchmove", markTouchMove, { passive: true, capture: true });
+    window.addEventListener("touchend", function () {
+      pokerLastMainTouchY = null;
+    }, { passive: true, capture: true });
+    window.addEventListener("wheel", markWheel, { passive: true, capture: true });
     window.addEventListener("pointerdown", mark, { passive: true, capture: true });
-    document.addEventListener("scroll", mark, { passive: true, capture: true });
+    document.addEventListener("scroll", guardHomeScrollJump, { passive: true, capture: true });
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindPanelScrollIntent);
     else bindPanelScrollIntent();
   } catch (eBindMainScrollIntent) {}

@@ -798,6 +798,65 @@
     '</section>';
   }
 
+  function completedRounds(data) {
+    return (data && data.rounds || []).filter(function (round) {
+      return round && round.id && Array.isArray(round.matches) && round.matches.length;
+    }).slice().sort(function (a, b) {
+      var aIndex = Number(a.index) || 0;
+      var bIndex = Number(b.index) || 0;
+      if (aIndex !== bIndex) return aIndex - bIndex;
+      if (String(a.side || "") === "final") return 1;
+      if (String(b.side || "") === "final") return -1;
+      return String(a.id || "").localeCompare(String(b.id || ""));
+    });
+  }
+
+  function renderCompletedRoundHistory(data, candidates) {
+    var rounds = completedRounds(data);
+    if (!rounds.length) return "";
+    return '<section class="club-choice-vote-modal__round-history" aria-label="Прошедшие раунды">' +
+      '<div class="club-choice-vote-modal__round-history-head">' +
+        '<h3>Прошедшие раунды</h3>' +
+        '<span>' + String(rounds.length) + '</span>' +
+      '</div>' +
+      rounds.map(function (round) {
+        var matches = Array.isArray(round.matches) ? round.matches : [];
+        return '<article class="club-choice-vote-modal__round-history-card">' +
+          '<header class="club-choice-vote-modal__round-history-title">' +
+            '<strong>' + escapeHtml(round.name || roundShortLabel(round)) + '</strong>' +
+            '<em>' + String(matches.length) + ' ' + (matches.length === 1 ? "пара" : "пар") + '</em>' +
+          '</header>' +
+          '<div class="club-choice-vote-modal__round-history-matches">' +
+            matches.map(function (match, index) {
+              var ids = (match.candidateIds || []).filter(Boolean);
+              return '<div class="club-choice-vote-modal__round-history-match">' +
+                '<b>Пара ' + String(index + 1) + '</b>' +
+                '<div class="club-choice-vote-modal__round-history-players">' +
+                  ids.map(function (id) {
+                    var candidate = candidates[id] || {};
+                    var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
+                    var votes = matchVoteCount(match, id);
+                    var winner = match.winnerId === id;
+                    var eliminated = candidateLostMatch(match, id);
+                    return '<span class="club-choice-vote-modal__round-history-player' +
+                      (winner ? " club-choice-vote-modal__round-history-player--winner" : "") +
+                      (eliminated ? " club-choice-vote-modal__round-history-player--eliminated" : "") +
+                      '">' +
+                        '<strong>' + escapeHtml(displayNick) + '</strong>' +
+                        '<em>' + String(votes) + '</em>' +
+                        (winner ? '<i>прошел</i>' : '') +
+                        (eliminated ? '<i>выбыл</i>' : '') +
+                      '</span>';
+                  }).join('<small>vs</small>') +
+                '</div>' +
+              '</div>';
+            }).join("") +
+          '</div>' +
+        '</article>';
+      }).join("") +
+    '</section>';
+  }
+
   function completedWinnerDescription(winner, entry) {
     var description = String(winner && winner.description || "").trim();
     var month = String(entry && entry.month || "").trim();
@@ -986,6 +1045,7 @@
     var winners = last.winners || [];
     var candidates = candidateMap(data);
     var schemeHtml = renderBracketScheme(data, candidates, "club-choice-vote-modal__scheme--compact") || renderCompletedFallbackScheme(last);
+    var roundHistoryHtml = renderCompletedRoundHistory(data, candidates);
     setStatus("Голосование завершено");
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary">' +
@@ -1002,6 +1062,7 @@
           renderAchievementCard("club-choice-vote-modal__winner-desc", completedWinnerDescription(winner, last)) +
         '</article>';
       }).join("") : '<div class="club-choice-vote-modal__empty">Итоги пока не сформированы.</div>') + '</div>' +
+      roundHistoryHtml +
       (schemeHtml ? '<div class="club-choice-vote-modal__completed-scheme">' + schemeHtml + '</div>' : '') +
       (data.isAdmin
         ? '<button type="button" class="club-choice-vote-modal__primary club-choice-vote-modal__primary--wide" data-club-choice-new-draft="1">Новое голосование</button>'

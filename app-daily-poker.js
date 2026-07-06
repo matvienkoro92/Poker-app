@@ -16,6 +16,7 @@
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
+  var DAILY_POKER_WINNERS_PREVIEW_LIMIT = 3;
   var DAILY_POKER_DEAL_SOUND_SRC = "./assets/daily-poker-here-we-go-again.mp3?v=20260706";
   var DAILY_POKER_WIN_SOUND_SRC = "./assets/daily-poker-win-miscom.mp3?v=20260706";
   var DAILY_POKER_LOSE_SOUND_SRC = "./assets/daily-poker-lose-keep-up.mp3?v=20260706";
@@ -25,6 +26,7 @@
   var dailyPokerWinnersCache = null;
   var dailyPokerWinnersCacheAt = 0;
   var dailyPokerWinnersPromise = null;
+  var dailyPokerWinnersExpanded = false;
   var DAILY_POKER_HAND_ORDER = [
     "royal_flush",
     "straight_flush",
@@ -289,6 +291,10 @@
     return formatCompactAmount(value) + " ₽";
   }
 
+  function nonNegativeInt(value) {
+    return Math.max(0, parseInt(value || "0", 10) || 0);
+  }
+
   function dailyPokerHandStatsHtml(stats) {
     var counts = stats && stats.handCounts && typeof stats.handCounts === "object" ? stats.handCounts : {};
     var parts = DAILY_POKER_HAND_ORDER.map(function (rank) {
@@ -320,8 +326,8 @@
   }
 
   function winnerSubline(row) {
-    var wins = Math.max(0, parseInt(row && row.winsCount || "0", 10) || 0);
-    var spins = Math.max(0, parseInt(row && row.spinCount || "0", 10) || 0);
+    var wins = nonNegativeInt(row && row.winsCount);
+    var spins = nonNegativeInt(row && row.spinCount);
     var parts = [];
     if (spins > 0) parts.push(spins + " " + pluralRu(spins, "крутка", "крутки", "круток"));
     if (wins > 0) parts.push(wins + " " + pluralRu(wins, "выигрыш", "выигрыша", "выигрышей"));
@@ -369,6 +375,25 @@
     if (name && !sameWinnerNamePart(name, login) && !sameWinnerNamePart(name, "@" + login)) parts.push(name);
     if (!parts.length) return "";
     return '<small class="daily-poker-winner__telegram">Telegram: ' + esc(parts.join(" · ")) + '</small>';
+  }
+
+  function winnerPrizeText(row) {
+    row = row || {};
+    var hasTicketTotal = Object.prototype.hasOwnProperty.call(row, "ticketTotal");
+    var hasBonusTotal = Object.prototype.hasOwnProperty.call(row, "bonusTotal");
+    var ticketTotal = hasTicketTotal ? nonNegativeInt(row.ticketTotal) : 0;
+    var bonusTotal = hasBonusTotal ? nonNegativeInt(row.bonusTotal) : 0;
+    var totalAmount = nonNegativeInt(row.totalPrizeAmount);
+    var extraAttempts = nonNegativeInt(row.extraAttempts);
+    var parts = [];
+    if (!hasTicketTotal && totalAmount > 0) ticketTotal = Math.max(0, totalAmount - bonusTotal);
+    if (ticketTotal > 0) parts.push(formatRubles(ticketTotal));
+    if (bonusTotal > 0) parts.push(formatCompactAmount(bonusTotal) + " бонусов");
+    if (!parts.length && extraAttempts > 0) {
+      parts.push(formatCompactAmount(extraAttempts) + " " + pluralRu(extraAttempts, "доп. попытка", "доп. попытки", "доп. попыток"));
+    }
+    if (parts.length) return "Всего: " + parts.join(" + ");
+    return row.prize || "Суммарный приз";
   }
 
   function setWinnersMessage(text, isError) {
@@ -458,11 +483,23 @@
           '<span class="daily-poker-winner__rank">#' + rank + '</span>' +
         '</div>' +
         fishLevel +
-        '<p>' + esc(row.prize || "Суммарный приз") + '</p>' +
+        '<p>' + esc(winnerPrizeText(row)) + '</p>' +
         (subline ? '<small>' + esc(subline) + '</small>' : "") +
         telegram +
       '</div>' +
     '</article>';
+  }
+
+  function winnersToggleHtml(winners, visibleCount) {
+    var hiddenCount = Math.max(0, winners.length - visibleCount);
+    if (winners.length <= DAILY_POKER_WINNERS_PREVIEW_LIMIT) return "";
+    var label = dailyPokerWinnersExpanded ? "Скрыть" : "Еще";
+    var detail = dailyPokerWinnersExpanded ? "" : " +" + hiddenCount;
+    return '<div class="daily-poker__winners-more">' +
+      '<button type="button" class="daily-poker__winners-more-btn" data-daily-poker-winners-toggle="1" aria-expanded="' +
+      (dailyPokerWinnersExpanded ? "true" : "false") +
+      '">' + esc(label + detail) + '</button>' +
+    '</div>';
   }
 
   function renderWinners(data) {
@@ -478,7 +515,17 @@
       setWinnersMessage("Рублёвых выигрышей пока нет.");
       return;
     }
-    list.innerHTML = winners.map(winnerHtml).join("");
+    var visibleCount = dailyPokerWinnersExpanded ? winners.length : Math.min(DAILY_POKER_WINNERS_PREVIEW_LIMIT, winners.length);
+    var visibleWinners = winners.slice(0, visibleCount);
+    list.innerHTML = visibleWinners.map(winnerHtml).join("") + winnersToggleHtml(winners, visibleCount);
+  }
+
+  function toggleWinnersExpanded(evt) {
+    var target = evt && evt.target && evt.target.closest ? evt.target.closest("[data-daily-poker-winners-toggle]") : null;
+    if (!target) return;
+    if (evt && typeof evt.preventDefault === "function") evt.preventDefault();
+    dailyPokerWinnersExpanded = !dailyPokerWinnersExpanded;
+    if (dailyPokerWinnersCache) renderWinners(dailyPokerWinnersCache);
   }
 
   function loadWinners(options) {
@@ -1052,6 +1099,7 @@
     var inviteBtn = $("dailyPokerInviteBtn");
     var notifyBtn = $("dailyPokerNotifyBtn");
     var copyBtn = $("dailyPokerCopyLinkBtn");
+    var winnersList = $("dailyPokerWinnersList");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
       playBtn.addEventListener("pointerover", preloadDailyPokerSounds, { passive: true });
@@ -1076,11 +1124,16 @@
       copyBtn.dataset.dailyPokerBound = "1";
       copyBtn.addEventListener("click", copyDailyPokerLink);
     }
+    if (winnersList && winnersList.dataset.dailyPokerBound !== "1") {
+      winnersList.dataset.dailyPokerBound = "1";
+      winnersList.addEventListener("click", toggleWinnersExpanded);
+    }
   }
 
   window.initDailyPoker = function () {
     resetManualDeal();
     bind();
+    dailyPokerWinnersExpanded = false;
     renderEmptyCards();
     setResultPrompt(DAILY_POKER_START_PROMPT, [], false);
     setWinnersMessage("Загружаем победителей…");

@@ -1273,6 +1273,39 @@
   gap: 10px;
 }
 
+.daily-poker__winners-more {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.daily-poker__winners-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  min-height: 42px;
+  padding: 9px 24px;
+  border: 1px solid rgba(255, 193, 78, 0.58);
+  border-radius: 8px;
+  color: #fff0c8;
+  background:
+    linear-gradient(180deg, rgba(255, 193, 78, 0.2), rgba(90, 46, 8, 0.48)),
+    #090d12;
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 199, 0.08), 0 0 18px rgba(255, 174, 39, 0.18);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 950;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.daily-poker__winners-more-btn:active {
+  transform: translateY(1px);
+}
+
 .daily-poker__spin-stats {
   display: flex;
   align-items: flex-start;
