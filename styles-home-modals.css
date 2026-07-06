@@ -308,10 +308,13 @@ html.vpn-proxy-modal-open {
   display: block;
 }
 .vpn-proxy-modal__intro {
-  margin: 0 0 12px;
-  font-size: 13px;
+  margin: 0 auto 18px;
+  max-width: 680px;
+  font-size: 18px;
   line-height: 1.45;
-  color: rgba(28, 20, 16, 0.85);
+  color: rgba(255, 244, 214, 0.94);
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
 }
 .vpn-proxy-modal__actions.raffles-hero__share-row {
   flex-wrap: wrap;
@@ -319,6 +322,20 @@ html.vpn-proxy-modal-open {
   align-items: center;
   margin: 0 0 14px;
   gap: 8px;
+}
+.vpn-proxy-modal__trial-btn.raffles-hero__share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 12px 28px;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.15;
+}
+.vpn-proxy-modal__trial-btn.raffles-hero__share-btn:hover,
+.vpn-proxy-modal__trial-btn.raffles-hero__share-btn:focus-visible {
+  text-decoration: none;
 }
 .vpn-proxy-modal .gazette-article-comments--panel {
   margin-top: 4px;
