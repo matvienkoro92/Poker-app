@@ -1782,6 +1782,16 @@
   background: rgba(255, 255, 255, 0.035);
 }
 
+.sng-champions-modal__bracket-match--playing {
+  border-color: rgba(255, 213, 111, 0.76);
+  background:
+    linear-gradient(135deg, rgba(255, 213, 111, 0.22), rgba(255, 138, 0, 0.1)),
+    rgba(8, 9, 14, 0.88);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 239, 184, 0.2),
+    0 10px 26px rgba(255, 184, 70, 0.16);
+}
+
 .sng-champions-modal__bracket-match header {
   display: flex;
   align-items: center;
@@ -1876,6 +1886,25 @@
   min-height: 28px;
   padding: 0 9px;
   font-size: 11px;
+}
+
+.sng-champions-modal__playing-btn {
+  width: 100%;
+  min-height: 32px;
+  color: #1c1003;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 1000;
+  border: 1px solid rgba(255, 230, 162, 0.78);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+  cursor: pointer;
+}
+
+.sng-champions-modal__playing-btn--active {
+  color: #271604;
+  background: linear-gradient(180deg, #fff7cc, #ffd56f 55%, #f59e0b);
+  box-shadow: 0 0 18px rgba(255, 213, 111, 0.28);
 }
 
 .sng-champions-modal__ready-btn,

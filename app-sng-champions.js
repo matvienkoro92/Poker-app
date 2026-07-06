@@ -651,6 +651,7 @@
 
   function formatReadyCountdown(match, data) {
     if (!match || !match.readyDeadlineAt || match.winnerId) return "";
+    if (match.playingAt) return "Играют";
     var end = Date.parse(match.readyDeadlineAt);
     var base = Date.now();
     if (!isFinite(end)) return "";
@@ -672,14 +673,24 @@
     return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';
   }
 
+  function renderPlayingAction(match, players, data) {
+    if (!data || !data.isAdmin || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
+    var active = !!match.playingAt;
+    return '<button type="button" class="sng-champions-modal__playing-btn' + (active ? " sng-champions-modal__playing-btn--active" : "") + '" data-sng-playing="' + escapeHtml(match.id || "") + '">' + (active ? "Играют" : "Играют") + '</button>';
+  }
+
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
-    return '<article class="sng-champions-modal__bracket-match' + (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") + '">' +
+    var matchClass = "sng-champions-modal__bracket-match" +
+      (match.playingAt && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
+      (match.winnerId ? " sng-champions-modal__bracket-match--done" : "");
+    return '<article class="' + matchClass + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       (players.length ? players.map(function (id) {
         return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
       }).join("") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>') +
+      renderPlayingAction(match, players, data) +
       renderReadyAction(match, players, data) +
     '</article>';
   }
@@ -872,6 +883,16 @@
         matchId: ready.getAttribute("data-sng-ready") || "",
       }, { status: "Отмечаю готовность...", success: "Готовность сохранена" })
         .finally(function () { setButtonLoading(ready, false); });
+      return;
+    }
+    var playing = event.target && event.target.closest ? event.target.closest("[data-sng-playing]") : null;
+    if (playing) {
+      setButtonLoading(playing, true);
+      postAction({
+        action: "setPlaying",
+        matchId: playing.getAttribute("data-sng-playing") || "",
+      }, { status: "Отмечаю матч...", success: "Матч отмечен как играющий" })
+        .finally(function () { setButtonLoading(playing, false); });
       return;
     }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
