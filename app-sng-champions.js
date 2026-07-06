@@ -13,6 +13,7 @@
   var activeTab = "signup";
   var activeBracketStage = 0;
   var bracketMapExpanded = false;
+  var bracketTimerInterval = null;
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -135,6 +136,7 @@
     ensureModal();
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
+    startBracketTimerRefresh();
     renderLoading();
     loadState();
   }
@@ -143,6 +145,21 @@
     if (!modal) return;
     modal.classList.remove("club-choice-vote-modal--open");
     document.body.classList.remove("club-choice-vote-open");
+    stopBracketTimerRefresh();
+  }
+
+  function startBracketTimerRefresh() {
+    if (bracketTimerInterval) return;
+    bracketTimerInterval = window.setInterval(function () {
+      if (!modal || !modal.classList.contains("club-choice-vote-modal--open")) return;
+      if (state && state.status === "bracket") loadState();
+    }, 60000);
+  }
+
+  function stopBracketTimerRefresh() {
+    if (!bracketTimerInterval) return;
+    window.clearInterval(bracketTimerInterval);
+    bracketTimerInterval = null;
   }
 
   function renderLoading() {
@@ -614,22 +631,51 @@
   function renderBracketPlayer(player, match, data) {
     var won = match.winnerId && match.winnerId === player.id;
     var matchPlayers = (match.playerIds || []).filter(Boolean);
-    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && !match.winnerId
+    var ready = match.readyById && match.readyById[player.id] === true;
+    var allReady = matchPlayers.length >= 2 && matchPlayers.every(function (id) { return match.readyById && match.readyById[id] === true; });
+    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && allReady && !match.winnerId
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
+    var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
     return '<div class="sng-champions-modal__bracket-player' + (won ? " sng-champions-modal__bracket-player--winner" : "") + '">' +
       '<span>' + escapeHtml(playerName(player)) + '</span>' +
+      readyBadge +
       (won ? '<strong>Победитель</strong>' : adminButton) +
     '</div>';
   }
 
+  function formatReadyCountdown(match, data) {
+    if (!match || !match.readyDeadlineAt || match.winnerId) return "";
+    var end = Date.parse(match.readyDeadlineAt);
+    var base = Date.now();
+    if (!isFinite(end)) return "";
+    var diff = Math.max(0, end - (isFinite(base) ? base : Date.now()));
+    var hours = Math.floor(diff / 3600000);
+    var mins = Math.floor((diff % 3600000) / 60000);
+    if (diff <= 0) return "Таймер истек";
+    if (hours >= 1) return "До готовности: " + String(hours) + "ч " + String(mins).padStart(2, "0") + "м";
+    return "До готовности: " + String(mins || 1) + "м";
+  }
+
+  function renderReadyAction(match, players, data) {
+    if (!data || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
+    var myId = data.myEntryId || (data.myEntry && data.myEntry.id) || "";
+    if (!myId || players.indexOf(myId) < 0) return "";
+    if (match.readyById && match.readyById[myId] === true) {
+      return '<div class="sng-champions-modal__ready-action sng-champions-modal__ready-action--done">Вы нажали «Готов»</div>';
+    }
+    return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';
+  }
+
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
+    var countdown = formatReadyCountdown(match, data);
     return '<article class="sng-champions-modal__bracket-match' + (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") + '">' +
-      '<header>Пара ' + escapeHtml(match.index || "") + '</header>' +
+      '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       (players.length ? players.map(function (id) {
         return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
       }).join("") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>') +
+      renderReadyAction(match, players, data) +
     '</article>';
   }
 
@@ -811,6 +857,16 @@
       setButtonLoading(reject, true);
       postAction({ action: "reject", accountId: reject.getAttribute("data-sng-reject") || "" }, { status: "Отклоняю заявку...", success: "Заявка отклонена" })
         .finally(function () { setButtonLoading(reject, false); });
+      return;
+    }
+    var ready = event.target && event.target.closest ? event.target.closest("[data-sng-ready]") : null;
+    if (ready) {
+      setButtonLoading(ready, true);
+      postAction({
+        action: "setReady",
+        matchId: ready.getAttribute("data-sng-ready") || "",
+      }, { status: "Отмечаю готовность...", success: "Готовность сохранена" })
+        .finally(function () { setButtonLoading(ready, false); });
       return;
     }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
