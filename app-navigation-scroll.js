@@ -48,7 +48,7 @@ function pokerIsDownloadViewActive() {
 function pokerGetPanelScrollCardContentEl() {
   try {
     var v = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "spring-rating" && v !== "summer-rating" && v !== "raffles" && v !== "profile" && v !== "video-lessons" && v !== "equilator" && v !== "admin-bonuses" && v !== "player-crm") return null;
+    if (v !== "download" && v !== "hall-of-fame" && v !== "home" && v !== "cashout" && v !== "transfers" && v !== "spring-rating" && v !== "summer-rating" && v !== "raffles" && v !== "profile" && v !== "video-lessons" && v !== "equilator" && v !== "admin-bonuses" && v !== "player-crm") return null;
     var card = document.querySelector("main.card");
     return card ? card.querySelector(".card__content") : null;
   } catch (ePan) {

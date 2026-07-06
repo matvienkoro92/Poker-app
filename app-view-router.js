@@ -555,6 +555,7 @@ function pokerSyncViewHtmlScrollClasses(viewName) {
   root.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   root.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   root.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
+  root.classList.toggle("app-view-transfers-html-scroll", viewName === "transfers");
   root.classList.toggle("app-view-daily-poker-html-scroll", viewName === "daily-poker");
   root.classList.toggle("app-view-admin-bonuses-html-scroll", viewName === "admin-bonuses");
   root.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
@@ -586,6 +587,7 @@ function pokerSyncViewHtmlScrollClasses(viewName) {
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
+  document.documentElement.classList.toggle("app-view-transfers-html-scroll", viewName === "transfers");
   document.documentElement.classList.toggle("app-view-admin-bonuses-html-scroll", viewName === "admin-bonuses");
   document.documentElement.classList.toggle("app-view-player-crm-html-scroll", viewName === "player-crm");
   document.documentElement.classList.remove("app-view-vl-html-scroll");

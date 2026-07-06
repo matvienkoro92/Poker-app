@@ -13,6 +13,8 @@
   };
   var tickTimer = null;
   var pollTimer = null;
+  var keyboardRestoreTimers = [];
+  var keyboardRestoreInProgress = false;
 
   function root() {
     return document.getElementById("transfersView");
@@ -506,6 +508,113 @@
     return document.body && document.body.getAttribute("data-view") === "transfers";
   }
 
+  function isTransfersKeyboardField(node) {
+    if (!node || !node.matches) return false;
+    return !!node.matches(
+      "#transfersAmountInput, #transfersCommentInput, #transfersDetailsInput, [data-transfers-take-details]"
+    );
+  }
+
+  function setTransfersKeyboardClass(active) {
+    try {
+      if (document.documentElement) document.documentElement.classList.toggle("transfers-keyboard-open", !!active);
+      if (document.body) document.body.classList.toggle("transfers-keyboard-open", !!active);
+    } catch (eTransfersKbClass) {}
+  }
+
+  function runTransfersKeyboardRestore() {
+    if (!activeView()) return;
+    if (isTransfersKeyboardField(document.activeElement)) return;
+    keyboardRestoreInProgress = true;
+    setTransfersKeyboardClass(false);
+    try {
+      if (typeof setTelegramIosKeyboardRootLock === "function") setTelegramIosKeyboardRootLock(false);
+    } catch (eTransfersTgKbUnlock) {}
+    try {
+      if (typeof pokerClearBodyDocumentScrollLockInline === "function") pokerClearBodyDocumentScrollLockInline();
+    } catch (eTransfersBodyUnlock) {}
+    try {
+      if (typeof pokerEnsureUnlockedDocumentScrollForNonChat === "function") pokerEnsureUnlockedDocumentScrollForNonChat();
+    } catch (eTransfersDocUnlock) {}
+    try {
+      if (typeof pokerSyncViewHtmlScrollClasses === "function") pokerSyncViewHtmlScrollClasses("transfers");
+    } catch (eTransfersScrollClass) {}
+    try {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+    } catch (eTransfersTopPad) {}
+    try {
+      if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
+    } catch (eTransfersTopClearance) {}
+    try {
+      if (typeof pokerApplyBottomTabbarPad === "function") {
+        pokerApplyBottomTabbarPad._lastPad = null;
+        pokerApplyBottomTabbarPad();
+      }
+    } catch (eTransfersTabbarPad) {}
+    try {
+      if (typeof pokerNukeIosKeyboardViewportArtifacts === "function") {
+        pokerNukeIosKeyboardViewportArtifacts({ resetMainScroll: true });
+      }
+    } catch (eTransfersVvNuke) {}
+    try {
+      if (typeof pokerFlushBottomNavAndViewportAfterChatChrome === "function") {
+        pokerFlushBottomNavAndViewportAfterChatChrome();
+      }
+    } catch (eTransfersNavFlush) {}
+    try {
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      else if (typeof window.tryTelegramWebAppExpand === "function") window.tryTelegramWebAppExpand();
+    } catch (eTransfersExpand) {}
+    try {
+      if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("resize"));
+    } catch (eTransfersResize) {}
+    setTimeout(function () {
+      keyboardRestoreInProgress = false;
+    }, 120);
+  }
+
+  function scheduleTransfersKeyboardRestore() {
+    keyboardRestoreTimers.forEach(function (timer) {
+      clearTimeout(timer);
+    });
+    keyboardRestoreTimers = [];
+    [40, 140, 320, 680].forEach(function (delay) {
+      keyboardRestoreTimers.push(setTimeout(runTransfersKeyboardRestore, delay));
+    });
+  }
+
+  function bindKeyboardRestore() {
+    var r = root();
+    if (!r || r.__pokerTransfersKeyboardRestoreBound) return;
+    r.__pokerTransfersKeyboardRestoreBound = true;
+    r.addEventListener("focusin", function (event) {
+      if (!isTransfersKeyboardField(event.target)) return;
+      setTransfersKeyboardClass(true);
+      try {
+        if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      } catch (eTransfersFocusExpand) {}
+    });
+    r.addEventListener("focusout", function (event) {
+      if (!isTransfersKeyboardField(event.target)) return;
+      scheduleTransfersKeyboardRestore();
+    });
+    if (!window.__pokerTransfersVisualViewportRestoreBound) {
+      window.__pokerTransfersVisualViewportRestoreBound = true;
+      var onViewportRest = function () {
+        if (keyboardRestoreInProgress) return;
+        if (!activeView() || isTransfersKeyboardField(document.activeElement)) return;
+        scheduleTransfersKeyboardRestore();
+      };
+      try {
+        if (window.visualViewport && window.visualViewport.addEventListener) {
+          window.visualViewport.addEventListener("resize", onViewportRest);
+          window.visualViewport.addEventListener("scroll", onViewportRest);
+        }
+      } catch (eTransfersVvListen) {}
+      window.addEventListener("resize", onViewportRest);
+    }
+  }
+
   function bindBodyObserver() {
     if (window.__pokerTransfersBodyObserverBound) return;
     window.__pokerTransfersBodyObserverBound = true;
@@ -547,6 +656,7 @@
   function initTransfers() {
     bindBodyObserver();
     bind();
+    bindKeyboardRestore();
     render();
     startTicker();
     startPolling();
