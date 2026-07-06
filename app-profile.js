@@ -564,12 +564,19 @@ function profilePublicShowcaseApplyStatus(status) {
       xp.textContent = "";
       xp.hidden = true;
     }
+    if (refreshBtn) refreshBtn.hidden = true;
+    if (legacyRefreshBtn) legacyRefreshBtn.hidden = true;
+    if (pointsBtn) pointsBtn.textContent = "Как привязать профиль";
     scale.style.setProperty("--status-value", "0");
-    levelText.textContent = "Уровень не обновлен";
+    levelText.classList.add("chat-user-modal__level-text--unlinked");
+    levelText.textContent = "Привяжите профиль Покер21";
+    levelText.setAttribute("aria-label", "Привяжите профиль Покер21, чтобы уровень начал обновляться.");
     levelText.hidden = false;
     return;
   }
   if (section) section.hidden = false;
+  levelText.classList.remove("chat-user-modal__level-text--unlinked");
+  levelText.removeAttribute("aria-label");
   var level = Math.max(0, Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, parseInt(status.level, 10) || 0));
   var nextLevel = status.nextLevel != null ? status.nextLevel : Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, level + 1);
   scale.style.setProperty("--status-value", String(Math.max(0, Math.min(100, parseInt(status.valuePercent, 10) || 0))));
@@ -2023,13 +2030,13 @@ function setProfileStatusUnlinked() {
   }
   if (progressText) {
     progressText.hidden = false;
-    progressText.textContent = "Привяжите Poker21, чтобы уровень начал обновляться.";
+    progressText.textContent = "Привяжите профиль Покер21, чтобы уровень начал обновляться.";
   }
   if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(0);
   if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(1);
   if (fish) {
     pokerProfileApplyStatusFish(fish, 0);
-    fish.setAttribute("aria-label", "Уровень 0. Привяжите Poker21, чтобы уровень начал обновляться.");
+    fish.setAttribute("aria-label", "Уровень 0. Привяжите профиль Покер21, чтобы уровень начал обновляться.");
     fish.removeAttribute("title");
     fish.removeAttribute("data-status-tip");
   }

@@ -274,7 +274,14 @@ function pokerInitHomeDeepLinks(opts) {
         var openSngChampions = function () {
           attempts += 1;
           if (typeof window.pokerOpenHomeWidgetModal === "function") {
-            window.pokerOpenHomeWidgetModal("sng-champions");
+            Promise.resolve(window.pokerOpenHomeWidgetModal("sng-champions")).then(function (opened) {
+              if (opened) return;
+              if (typeof window.openSngChampionsModal === "function") window.openSngChampionsModal();
+              else if (attempts < 8) setTimeout(openSngChampions, 250);
+            }).catch(function () {
+              if (typeof window.openSngChampionsModal === "function") window.openSngChampionsModal();
+              else if (attempts < 8) setTimeout(openSngChampions, 250);
+            });
             return;
           }
           if (typeof window.openSngChampionsModal === "function") {

@@ -314,7 +314,7 @@ html.vpn-proxy-modal-open {
   color: rgba(28, 20, 16, 0.85);
 }
 .vpn-proxy-modal__actions.raffles-hero__share-row {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   margin: 0 0 14px;

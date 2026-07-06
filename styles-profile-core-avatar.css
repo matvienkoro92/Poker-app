@@ -2185,6 +2185,15 @@ body.profile-avatar-choice-open {
   text-align: left;
   text-shadow: 0 4px 20px rgba(255, 181, 49, 0.2);
 }
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text--unlinked {
+  max-width: 430px;
+  overflow: visible;
+  font-size: clamp(24px, 4.8vw, 40px);
+  line-height: 1.06;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
   margin-left: 10px;
   color: rgba(226, 232, 240, 0.78);
@@ -2416,6 +2425,11 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
     font-size: clamp(45px, 8.2vw, 68px);
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text--unlinked {
+    max-width: 100%;
+    font-size: clamp(20px, 4.4vw, 28px);
+    line-height: 1.08;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
     margin-left: 7px;

@@ -613,7 +613,8 @@
 
   function renderBracketPlayer(player, match, data) {
     var won = match.winnerId && match.winnerId === player.id;
-    var adminButton = data.isAdmin && data.status === "bracket" && data.currentRoundId && !match.winnerId
+    var matchPlayers = (match.playerIds || []).filter(Boolean);
+    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && !match.winnerId
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     return '<div class="sng-champions-modal__bracket-player' + (won ? " sng-champions-modal__bracket-player--winner" : "") + '">' +
@@ -623,12 +624,12 @@
   }
 
   function renderBracketMatch(match, data) {
-    var players = match.playerIds || [];
+    var players = (match.playerIds || []).filter(Boolean);
     return '<article class="sng-champions-modal__bracket-match' + (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + '</header>' +
-      players.map(function (id) {
+      (players.length ? players.map(function (id) {
         return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
-      }).join("") +
+      }).join("") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>') +
     '</article>';
   }
 
@@ -639,11 +640,11 @@
   }
 
   function renderBracketMapMatch(match, data) {
-    var players = match.playerIds || [];
+    var players = (match.playerIds || []).filter(Boolean);
     return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        players.map(function (id) { return renderBracketMapPlayer(id, match, data); }).join("") +
+        (players.length ? players.map(function (id) { return renderBracketMapPlayer(id, match, data); }).join("") : '<span class="sng-champions-modal__map-player">ждет</span>') +
       '</span>' +
     '</article>';
   }
