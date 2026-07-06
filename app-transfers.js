@@ -137,6 +137,13 @@
     return btn;
   }
 
+  function shareButton(item) {
+    var share = textNode("button", "transfers-card__share", "Отправить в чат");
+    share.type = "button";
+    share.setAttribute("data-transfers-share", item.id);
+    return share;
+  }
+
   function transfersDeepLink() {
     if (typeof pokerBuildWebsiteStartLink === "function") {
       var webLink = pokerBuildWebsiteStartLink("transfers");
@@ -204,12 +211,6 @@
     var box = textNode("div", "transfers-card__details");
     box.appendChild(textNode("span", "transfers-card__details-label", "Реквизиты"));
     box.appendChild(textNode("pre", "transfers-card__details-text", item.requisites));
-    if (item.isOwner) {
-      var share = textNode("button", "transfers-card__share", "Отправить в чат");
-      share.type = "button";
-      share.setAttribute("data-transfers-share", item.id);
-      box.appendChild(share);
-    }
     card.appendChild(box);
   }
 
@@ -233,6 +234,7 @@
       actions.appendChild(actionButton("take", "Взял", item));
     }
     if (item.status === "open" && item.isOwner) {
+      if (item.requisites) actions.appendChild(shareButton(item));
       actions.appendChild(actionButton("cancel", "Отменить", item));
     }
     if (item.status === "reserved" && item.isBuyer) {
