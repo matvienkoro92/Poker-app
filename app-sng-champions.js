@@ -551,6 +551,7 @@
   function renderAdminPanel(data) {
     if (!data.isAdmin) return "";
     var canForm = data.status === "open" && data.counts && data.counts.approved >= data.capacity;
+    var canBroadcastRoundOne = data.status === "bracket" && data.rounds && data.rounds[0] && data.rounds[0].matches && data.rounds[0].matches.length;
     var prizes = data.prizes || [];
     var prize1 = prizes[0] && prizes[0].text || "30 000р";
     var prize2 = prizes[1] && prizes[1].text || "билет на нок за 10 000р от клуба";
@@ -566,6 +567,7 @@
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="updateSettings">Сохранить изменения</button>' +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open"' + (canOpen ? "" : " disabled") + '>Открыть турнир</button>' +
         '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs"' + (canForm ? "" : " disabled") + '>Сформировать пары</button>' +
+        '<button type="button" class="sng-champions-modal__main-action" data-sng-action="broadcastRoundOnePairs"' + (canBroadcastRoundOne ? "" : " disabled") + '>Разослать пары 1/16</button>' +
         '<button type="button" class="sng-champions-modal__danger-action" data-sng-action="reset">Сбросить</button>' +
       '</div>' +
       (canOpen ? "" : '<p class="sng-champions-modal__admin-hint">Турнир уже создан: меняйте описание, байин и призы через «Сохранить изменения».</p>') +
@@ -908,7 +910,7 @@
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
-      success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : name === "updateSettings" ? "Изменения сохранены" : "",
+      success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары 1/16 разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
     }).finally(function () {
       setButtonLoading(action, false);
     });
