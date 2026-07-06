@@ -1829,7 +1829,10 @@ body[data-view="download"] .download-page--active[data-download-page="main"] .do
 
 body[data-view="cashout"] #app.app,
 html:has(body[data-view="cashout"]) #app.app,
-html.app-view-cashout-html-scroll #app.app {
+html.app-view-cashout-html-scroll #app.app,
+body[data-view="transfers"] #app.app,
+html:has(body[data-view="transfers"]) #app.app,
+html.app-view-transfers-html-scroll #app.app {
   align-items: stretch !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -1837,7 +1840,10 @@ html.app-view-cashout-html-scroll #app.app {
 
 body[data-view="cashout"] #app.app .card,
 html:has(body[data-view="cashout"]) #app.app .card,
-html.app-view-cashout-html-scroll #app.app .card {
+html.app-view-cashout-html-scroll #app.app .card,
+body[data-view="transfers"] #app.app .card,
+html:has(body[data-view="transfers"]) #app.app .card,
+html.app-view-transfers-html-scroll #app.app .card {
   width: 100% !important;
   max-width: none !important;
   margin-left: 0 !important;
@@ -1852,7 +1858,10 @@ html.app-view-cashout-html-scroll #app.app .card {
 
 body[data-view="cashout"] #app.app .card .card__content,
 html:has(body[data-view="cashout"]) #app.app .card .card__content,
-html.app-view-cashout-html-scroll #app.app .card .card__content {
+html.app-view-cashout-html-scroll #app.app .card .card__content,
+body[data-view="transfers"] #app.app .card .card__content,
+html:has(body[data-view="transfers"]) #app.app .card .card__content,
+html.app-view-transfers-html-scroll #app.app .card .card__content {
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -1862,7 +1871,10 @@ html.app-view-cashout-html-scroll #app.app .card .card__content {
 
 body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
 html:has(body[data-view="cashout"]) #app.app .card .card__content > .view--active[data-view="cashout"],
-html.app-view-cashout-html-scroll #app.app .card .card__content > .view--active[data-view="cashout"] {
+html.app-view-cashout-html-scroll #app.app .card .card__content > .view--active[data-view="cashout"],
+body[data-view="transfers"] #app.app .card .card__content > .view--active[data-view="transfers"],
+html:has(body[data-view="transfers"]) #app.app .card .card__content > .view--active[data-view="transfers"],
+html.app-view-transfers-html-scroll #app.app .card .card__content > .view--active[data-view="transfers"] {
   width: 100% !important;
   box-sizing: border-box !important;
 }
