@@ -13,6 +13,8 @@
   var activeTab = "signup";
   var activeBracketStage = 0;
   var activeLoserBracketStage = 0;
+  var activeBracketStageManual = false;
+  var activeLoserBracketStageManual = false;
   var activeBracketView = "winners";
   var bracketMapExpanded = false;
   var bracketTimerInterval = null;
@@ -970,9 +972,10 @@
       });
     }
     var stageIndex = isLosers ? activeLoserBracketStage : activeBracketStage;
+    var stageManual = isLosers ? activeLoserBracketStageManual : activeBracketStageManual;
     if (stageIndex < 0) stageIndex = 0;
     if (stageIndex >= rounds.length) stageIndex = rounds.length - 1;
-    if (!isPreview) stageIndex = preferredBracketStageIndex(rounds, stageIndex);
+    if (!isPreview && !stageManual) stageIndex = preferredBracketStageIndex(rounds, stageIndex);
     if (isLosers) activeLoserBracketStage = stageIndex;
     else activeBracketStage = stageIndex;
     var round = rounds[stageIndex] || rounds[0];
@@ -1202,6 +1205,7 @@
     }
     var stage = event.target && event.target.closest ? event.target.closest("[data-sng-stage]") : null;
     if (stage) {
+      activeBracketStageManual = true;
       activeBracketStage += stage.getAttribute("data-sng-stage") === "next" ? 1 : -1;
       render();
       setTab("bracket");
@@ -1209,6 +1213,7 @@
     }
     var loserStage = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage]") : null;
     if (loserStage) {
+      activeLoserBracketStageManual = true;
       activeLoserBracketStage += loserStage.getAttribute("data-sng-loser-stage") === "next" ? 1 : -1;
       activeBracketView = "losers";
       render();
@@ -1217,6 +1222,7 @@
     }
     var stageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-stage-index]") : null;
     if (stageIndex) {
+      activeBracketStageManual = true;
       activeBracketStage = Math.max(0, Number(stageIndex.getAttribute("data-sng-stage-index")) || 0);
       activeBracketView = "winners";
       render();
@@ -1225,6 +1231,7 @@
     }
     var loserStageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage-index]") : null;
     if (loserStageIndex) {
+      activeLoserBracketStageManual = true;
       activeLoserBracketStage = Math.max(0, Number(loserStageIndex.getAttribute("data-sng-loser-stage-index")) || 0);
       activeBracketView = "losers";
       render();
