@@ -16,6 +16,8 @@
   var activeBracketView = "winners";
   var bracketMapExpanded = false;
   var bracketTimerInterval = null;
+  var versionChecking = false;
+  var stateRevision = "";
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -154,7 +156,7 @@
     if (bracketTimerInterval) return;
     bracketTimerInterval = window.setInterval(function () {
       if (!modal || !modal.classList.contains("club-choice-vote-modal--open")) return;
-      if (state && state.status === "bracket") loadState();
+      checkStateVersion();
     }, 60000);
   }
 
@@ -172,6 +174,19 @@
 
   function fetchState() {
     return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" }).then(function (res) {
+      return res.json();
+    });
+  }
+
+  function rememberStateRevision(data) {
+    stateRevision = String(data && (data.revision || data.updatedAt) || "").trim();
+  }
+
+  function fetchStateVersion() {
+    return fetch(
+      baseUrl() + API_PATH + apiAuthQuery("?") + "&mode=version&revision=" + encodeURIComponent(stateRevision || ""),
+      { cache: "no-store" }
+    ).then(function (res) {
       return res.json();
     });
   }
@@ -203,6 +218,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
         state = data;
+        rememberStateRevision(data);
         updateHomePlaque();
         render();
       })
@@ -232,6 +248,7 @@
         return res.json().then(function (data) {
           if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || "Ошибка");
           state = data;
+          rememberStateRevision(data);
           render();
           updateHomePlaque();
           setStatus(options.success || "");
@@ -244,6 +261,25 @@
       })
       .finally(function () {
         if (timeoutId) window.clearTimeout(timeoutId);
+      });
+  }
+
+  function checkStateVersion() {
+    if (versionChecking || loading) return;
+    if (!state || state.status !== "bracket") return;
+    if (document.hidden) return;
+    versionChecking = true;
+    fetchStateVersion()
+      .then(function (data) {
+        if (!data || !data.ok) return;
+        var nextRevision = String(data.revision || data.updatedAt || "").trim();
+        if (nextRevision && nextRevision !== stateRevision) {
+          loadState();
+        }
+      })
+      .catch(function () {})
+      .finally(function () {
+        versionChecking = false;
       });
   }
 
@@ -440,7 +476,9 @@
   }
 
   function playerAvatar(entry) {
-    return entry && entry.avatar ? String(entry.avatar) : "";
+    return entry && (entry.avatar || entry.avatarUrl || entry.profileAvatar || entry.photoUrl || entry.photo_url)
+      ? String(entry.avatar || entry.avatarUrl || entry.profileAvatar || entry.photoUrl || entry.photo_url)
+      : "";
   }
 
   function renderPlayerImage(entry) {
@@ -1171,6 +1209,7 @@
       fetchHomeSummary().then(function (data) {
         if (data && data.ok) {
           state = data;
+          rememberStateRevision(data);
           updateHomePlaque();
         }
       }).catch(function () {});
