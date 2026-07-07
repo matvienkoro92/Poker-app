@@ -911,6 +911,19 @@
     '</section>';
   }
 
+  function bracketRoundStatus(round) {
+    var matches = Array.isArray(round && round.matches) ? round.matches : [];
+    var playableMatches = matches.filter(function (match) {
+      var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+      return ids.length >= 2;
+    });
+    if (!playableMatches.length) return null;
+    var allDone = playableMatches.every(function (match) { return !!match.winnerId; });
+    return allDone
+      ? { kind: "done", text: "Все пары сыграли" }
+      : { kind: "live", text: "Идет" };
+  }
+
   function renderBracketView(data, options) {
     options = options || {};
     var isLosers = options.kind === "losers";
@@ -936,6 +949,7 @@
     var classFn = isLosers ? loserRoundStageClass : roundStageClass;
     var stageLabel = labelFn(round, stageIndex, rounds);
     var stageClass = classFn(round, stageIndex, rounds);
+    var stageStatus = isPreview ? null : bracketRoundStatus(round);
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
     var prevDisabled = stageIndex <= 0;
     var nextDisabled = stageIndex >= rounds.length - 1;
@@ -950,6 +964,7 @@
         '<div>' +
           '<span>Этап ' + escapeHtml(stageIndex + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
           '<strong>' + escapeHtml(stageLabel) + '</strong>' +
+          (stageStatus ? '<em class="sng-champions-modal__stage-status sng-champions-modal__stage-status--' + escapeHtml(stageStatus.kind) + '">' + escapeHtml(stageStatus.text) + '</em>' : '') +
           (isPreview ? '<em>предпросмотр сетки</em>' : active ? '<em>текущий этап</em>' : '') +
         '</div>' +
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
