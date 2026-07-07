@@ -779,12 +779,17 @@
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
+  function renderBracketMapPendingPlayer() {
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">???</span>';
+  }
+
   function renderBracketMapMatch(match, data) {
-    var players = (match.playerIds || []).filter(Boolean);
+    var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
+    while (playerIds.length < 2) playerIds.push("");
     return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        (players.length ? players.map(function (id) { return renderBracketMapPlayer(id, match, data); }).join("") : '<span class="sng-champions-modal__map-player">ждет</span>') +
+        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
     '</article>';
   }

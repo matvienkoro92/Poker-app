@@ -2335,6 +2335,12 @@
   text-shadow: 0 0 5px rgba(127, 29, 29, 0.48);
 }
 
+.sng-champions-modal__map-player--pending {
+  color: rgba(255, 239, 201, 0.42);
+  font-weight: 1000;
+  letter-spacing: 0;
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-title {
   min-height: 28px;
   font-size: 13px;
