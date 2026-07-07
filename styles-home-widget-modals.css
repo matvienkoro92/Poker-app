@@ -2517,6 +2517,13 @@
   text-shadow: 0 0 7px rgba(255, 213, 111, 0.5);
 }
 
+.sng-champions-modal__map-player--waiting {
+  color: rgba(255, 239, 201, 0.5);
+  opacity: 0.58;
+  text-shadow: none;
+  filter: saturate(0.7);
+}
+
 .sng-champions-modal__map-player--lost {
   color: rgba(252, 165, 165, 0.64);
   text-decoration: line-through;
@@ -2526,15 +2533,24 @@
 }
 
 .sng-champions-modal__map-player--pending {
-  min-width: 30px;
-  padding: 2px 5px;
-  color: rgba(255, 239, 201, 0.72);
+  min-width: 46px;
+  max-width: 58px;
+  padding: 2px 4px;
+  overflow: visible;
+  color: #fff7ed;
+  font-size: 4.5px;
   font-weight: 1000;
+  line-height: 0.95;
   letter-spacing: 0;
-  border: 1px dashed rgba(255, 239, 201, 0.28);
+  text-overflow: clip;
+  white-space: normal;
+  border: 1px solid rgba(254, 202, 202, 0.82);
   border-radius: 999px;
-  background: rgba(255, 239, 201, 0.08);
-  text-transform: uppercase;
+  background: linear-gradient(180deg, #ef4444, #b91c1c);
+  box-shadow:
+    0 0 0 1px rgba(127, 29, 29, 0.55),
+    0 0 10px rgba(248, 113, 113, 0.42);
+  text-transform: none;
   text-shadow: none;
 }
 
@@ -2583,8 +2599,11 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--pending {
-  min-width: 48px;
-  padding: 4px 8px;
+  min-width: 82px;
+  max-width: 96px;
+  padding: 5px 8px;
+  font-size: 9px;
+  line-height: 1;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-next {

@@ -838,16 +838,16 @@
     return false;
   }
 
-  function renderBracketMapPlayer(id, match, data) {
+  function renderBracketMapPlayer(id, match, data, waitingForOpponent) {
     var player = (data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" };
     var won = match.winnerId && match.winnerId === id;
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
   function renderBracketMapPendingPlayer() {
-    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">ждем</span>';
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">Еще не играли</span>';
   }
 
   function nextMapMatchIndex(round, match, roundIndex, rounds) {
@@ -870,10 +870,13 @@
     var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
     var nextIndex = nextMapMatchIndex(round, match, roundIndex, rounds);
     while (playerIds.length < 2) playerIds.push("");
+    var hasKnownPlayer = playerIds.some(function (id) { return !!id; });
+    var hasPendingPlayer = playerIds.some(function (id) { return !id; });
+    var waitingForOpponent = !match.winnerId && hasKnownPlayer && hasPendingPlayer;
     return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data) : renderBracketMapPendingPlayer(); }).join("") +
+        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
