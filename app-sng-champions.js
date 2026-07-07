@@ -838,16 +838,16 @@
     return false;
   }
 
-  function renderBracketMapPlayer(id, match, data, waitingForOpponent) {
+  function renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) {
     var player = (data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" };
     var won = match.winnerId && match.winnerId === id;
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
   function renderBracketMapPendingPlayer() {
-    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">Еще не играли</span>';
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">???</span>';
   }
 
   function nextMapMatchIndex(round, match, roundIndex, rounds) {
@@ -870,13 +870,16 @@
     var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
     var nextIndex = nextMapMatchIndex(round, match, roundIndex, rounds);
     while (playerIds.length < 2) playerIds.push("");
-    var hasKnownPlayer = playerIds.some(function (id) { return !!id; });
+    var knownCount = playerIds.filter(function (id) { return !!id; }).length;
+    var hasKnownPlayer = knownCount > 0;
     var hasPendingPlayer = playerIds.some(function (id) { return !id; });
     var waitingForOpponent = !match.winnerId && hasKnownPlayer && hasPendingPlayer;
-    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '">' +
+    var unplayed = !match.winnerId && knownCount >= 2;
+    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent) : renderBracketMapPendingPlayer(); }).join("") +
+        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
+        (unplayed ? '<span class="sng-champions-modal__map-status">Еще не сыграли</span>' : '') +
       '</span>' +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
