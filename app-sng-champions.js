@@ -993,6 +993,7 @@
       extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "",
     });
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
+      bracketMapHtml +
       '<div class="sng-champions-modal__stage-head">' +
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
         '<div>' +
@@ -1004,7 +1005,6 @@
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
       '</div>' +
       stageDotsHtml +
-      bracketMapHtml +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
         (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
