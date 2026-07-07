@@ -569,8 +569,8 @@ function profilePublicShowcaseApplyStatus(status) {
     if (pointsBtn) pointsBtn.textContent = "Как привязать профиль";
     scale.style.setProperty("--status-value", "0");
     levelText.classList.add("chat-user-modal__level-text--unlinked");
-    levelText.textContent = "Привяжите профиль Покер21";
-    levelText.setAttribute("aria-label", "Привяжите профиль Покер21, чтобы уровень начал обновляться.");
+    levelText.textContent = "Привяжите аккаунт";
+    levelText.setAttribute("aria-label", "Привяжите аккаунт Poker21, чтобы уровень начал обновляться.");
     levelText.hidden = false;
     return;
   }
@@ -578,6 +578,21 @@ function profilePublicShowcaseApplyStatus(status) {
   levelText.classList.remove("chat-user-modal__level-text--unlinked");
   levelText.removeAttribute("aria-label");
   var level = Math.max(0, Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, parseInt(status.level, 10) || 0));
+  if (level <= 0) {
+    if (section) section.hidden = false;
+    if (xp) {
+      xp.textContent = "";
+      xp.hidden = true;
+    }
+    if (currentCard) currentCard.textContent = "Привяжите";
+    if (nextCard) nextCard.textContent = "аккаунт";
+    scale.style.setProperty("--status-value", "0");
+    levelText.classList.add("chat-user-modal__level-text--unlinked");
+    levelText.textContent = "Привяжите аккаунт";
+    levelText.setAttribute("aria-label", "Привяжите аккаунт Poker21, чтобы уровень начал обновляться.");
+    levelText.hidden = false;
+    return;
+  }
   var nextLevel = status.nextLevel != null ? status.nextLevel : Math.min(POKER_PROFILE_MAX_STATUS_LEVEL || 100, level + 1);
   scale.style.setProperty("--status-value", String(Math.max(0, Math.min(100, parseInt(status.valuePercent, 10) || 0))));
   if (currentCard) currentCard.textContent = pokerProfileStatusCardLabel(level);
@@ -2026,17 +2041,17 @@ function setProfileStatusUnlinked() {
   visual.style.setProperty("--status-value", "0");
   if (title) {
     title.hidden = false;
-    title.textContent = "Привяжите ваш аккаунт";
+    title.textContent = "Привяжите аккаунт";
   }
   if (progressText) {
     progressText.hidden = false;
-    progressText.textContent = "Привяжите профиль Покер21, чтобы уровень начал обновляться.";
+    progressText.textContent = "Привяжите аккаунт Poker21, чтобы уровень начал обновляться.";
   }
-  if (cards[0]) cards[0].textContent = pokerProfileStatusCardLabel(0);
-  if (cards[1]) cards[1].textContent = pokerProfileStatusCardLabel(1);
+  if (cards[0]) cards[0].textContent = "Привяжите";
+  if (cards[1]) cards[1].textContent = "аккаунт";
   if (fish) {
     pokerProfileApplyStatusFish(fish, 0);
-    fish.setAttribute("aria-label", "Уровень 0. Привяжите профиль Покер21, чтобы уровень начал обновляться.");
+    fish.setAttribute("aria-label", "Привяжите аккаунт Poker21, чтобы уровень начал обновляться.");
     fish.removeAttribute("title");
     fish.removeAttribute("data-status-tip");
   }

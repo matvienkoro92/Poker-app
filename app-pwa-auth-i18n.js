@@ -160,7 +160,7 @@ var POKER_PWA_AUTH_I18N = {
         pokerPlusLastIp: "IP последнего входа:",
         pokerPlusStats: "Статистика:",
         friends: "Друзья",
-        level: "Привяжите ваш аккаунт",
+        level: "Привяжите аккаунт",
         tournaments: "Турниры",
         cash: "Кеш",
         notes: "Нотс про себя",

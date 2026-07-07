@@ -352,9 +352,10 @@
     if (typeof pokerProfileStatusFishIconHtml === "function") {
       fishHtml = pokerProfileStatusFishIconHtml(level, "daily-poker-winner__fish");
     }
+    var label = level > 0 ? "Уровень " + String(level) : "Привяжите аккаунт";
     return '<span class="daily-poker-winner__fish-level">' +
       fishHtml +
-      '<span>Уровень ' + esc(level) + '</span>' +
+      '<span>' + esc(label) + '</span>' +
     '</span>';
   }
 

@@ -76,7 +76,8 @@ function chatContactsRowDisplayTitle(c, friendSet) {
 function chatContactStatusLevelHtml(level) {
   if (level == null || level === "") return "";
   var statusLevel = chatContactsStatusFishLevel(level);
-  return '<span class="chat-contact__status-level">Уровень: ' + chatContactsRenderEscapeHtml(String(statusLevel)) + "</span>";
+  var label = statusLevel > 0 ? "Уровень: " + String(statusLevel) : "Привяжите аккаунт";
+  return '<span class="chat-contact__status-level">' + chatContactsRenderEscapeHtml(label) + "</span>";
 }
 
 function chatContactsSpecialtyValue(row) {
@@ -122,7 +123,7 @@ function syncChatContactStatusMeta(btn, level, isVerified) {
       levelEl = document.createElement("span");
       levelEl.className = "chat-contact__status-level";
     }
-    levelEl.textContent = "Уровень: " + String(statusLevel);
+    levelEl.textContent = statusLevel > 0 ? "Уровень: " + String(statusLevel) : "Привяжите аккаунт";
     var levelAfter = verifiedEl || labelEl;
     if (levelAfter) nameLineEl.insertBefore(levelEl, levelAfter.nextSibling);
     else nameLineEl.appendChild(levelEl);

@@ -2963,6 +2963,54 @@ function initWinterRating() {
       }
       return maxReward;
     }
+    function hasCalendarCellRatingRows(dateStr) {
+      try {
+        if (isSpringRatingMode() && typeof getSpringRatingRowsForDateLeague === "function") {
+          return !!((getSpringRatingRowsForDateLeague(dateStr, 1) || []).length || (getSpringRatingRowsForDateLeague(dateStr, 2) || []).length);
+        }
+        var byDate = getRatingByDate();
+        return !!(byDate && byDate[dateStr] && byDate[dateStr].length);
+      } catch (eHasRows) {
+        return false;
+      }
+    }
+    function countCalendarMonthRewardTones(yearNum, monthNum) {
+      var counts = { high: 0, mid: 0 };
+      function countPlayerReward(reward) {
+        var tone = winterRatingRewardTone(reward);
+        if (tone === "high") counts.high += 1;
+        else if (tone === "mid") counts.mid += 1;
+      }
+      try {
+        var tournamentsByDate = isSpringRatingMode() && typeof getSpringRatingTournamentsByDate === "function"
+          ? getSpringRatingTournamentsByDate()
+          : getRatingTournamentsByDate();
+        var keys = tournamentsByDate && typeof tournamentsByDate === "object" ? Object.keys(tournamentsByDate) : [];
+        for (var ki = 0; ki < keys.length; ki++) {
+          var dateStr = keys[ki];
+          var parts = String(dateStr || "").split(".");
+          if (Number(parts[1]) !== monthNum || Number(parts[2]) !== yearNum) continue;
+          var tournaments = Array.isArray(tournamentsByDate[dateStr]) ? tournamentsByDate[dateStr] : [];
+          for (var ti = 0; ti < tournaments.length; ti++) {
+            var players = tournaments[ti] && Array.isArray(tournaments[ti].players) ? tournaments[ti].players : [];
+            for (var pi = 0; pi < players.length; pi++) countPlayerReward(players[pi] && players[pi].reward);
+          }
+        }
+        return counts;
+      } catch (eTournamentCounts) {}
+      try {
+        var byDate = getRatingByDate();
+        var rowKeys = byDate && typeof byDate === "object" ? Object.keys(byDate) : [];
+        for (var ri = 0; ri < rowKeys.length; ri++) {
+          var rowDate = rowKeys[ri];
+          var rowParts = String(rowDate || "").split(".");
+          if (Number(rowParts[1]) !== monthNum || Number(rowParts[2]) !== yearNum) continue;
+          var rows = Array.isArray(byDate[rowDate]) ? byDate[rowDate] : [];
+          for (var rpi = 0; rpi < rows.length; rpi++) countPlayerReward(rows[rpi] && rows[rpi].reward);
+        }
+      } catch (eRowCounts) {}
+      return counts;
+    }
     function formatCalendarCellRewardShort(reward) {
       var val = Number(reward) || 0;
       if (val >= 1000000) {
@@ -3092,7 +3140,7 @@ function initWinterRating() {
         var d = i < 10 ? "0" + i : "" + i;
         var m = monthNum < 10 ? "0" + monthNum : "" + monthNum;
         var dateStr = d + "." + m + "." + yearNum;
-        var hasData = avail.indexOf(dateStr) !== -1;
+        var hasData = avail.indexOf(dateStr) !== -1 && hasCalendarCellRatingRows(dateStr);
         cells.push({ empty: false, day: i, dateStr: dateStr, hasData: hasData, tone: hasData ? getCalendarCellTone(dateStr) : "", topReward: hasData ? getCalendarCellTopReward(dateStr) : 0 });
       }
       var weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
@@ -3128,7 +3176,13 @@ function initWinterRating() {
       var prevBtn = "<button type=\"button\" class=\"winter-rating__calendar-nav winter-rating__calendar-nav--prev\" aria-label=\"Предыдущий месяц\"" + (canPrev ? "" : " disabled") + ">←</button>";
       var nextBtn = "<button type=\"button\" class=\"winter-rating__calendar-nav winter-rating__calendar-nav--next\" aria-label=\"Следующий месяц\"" + (canNext ? "" : " disabled") + ">→</button>";
       var titleRow = "<div class=\"winter-rating__calendar-title-row\">" + prevBtn + "<span class=\"winter-rating__calendar-title\">" + monthLabel + "</span>" + nextBtn + "</div>";
-      calendarWrap.innerHTML = "<div class=\"winter-rating__calendar\">" + titleRow + headerRow + "<div class=\"winter-rating__calendar-grid\">" + rowsHtml + "</div></div>";
+      var toneCounts = countCalendarMonthRewardTones(yearNum, monthNum);
+      var countsHtml =
+        "<div class=\"winter-rating__calendar-counts\" aria-label=\"Заносы месяца\">" +
+          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--green\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>100к+:</span> <strong>" + toneCounts.high + "</strong></span>" +
+          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--brown\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>50-100к:</span> <strong>" + toneCounts.mid + "</strong></span>" +
+        "</div>";
+      calendarWrap.innerHTML = "<div class=\"winter-rating__calendar\">" + titleRow + headerRow + "<div class=\"winter-rating__calendar-grid\">" + rowsHtml + "</div>" + countsHtml + "</div>";
       calendarWrap.querySelectorAll(".winter-rating__calendar-cell--day").forEach(function (btn) {
         btn.addEventListener("click", function (e) {
           e.preventDefault();

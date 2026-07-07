@@ -180,7 +180,7 @@
       headerStatus.setAttribute("title", "Игроки клуба");
       headerStatus.setAttribute("aria-label", "Открыть игроков клуба");
     }
-    if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ 0";
+    if (headerStatusLevel) headerStatusLevel.textContent = "ПРИВЯЖИТЕ АККАУНТ";
     if (headerStatusFish) {
       headerStatusFish.src = "./assets/profile-status-fish-level-01.png";
       headerStatusFish.setAttribute("data-status-fish-level", "0");
@@ -315,7 +315,7 @@
         headerStatus.removeAttribute("aria-label");
       }
     }
-    if (headerStatusLevel) headerStatusLevel.textContent = "УРОВЕНЬ " + safeLevel;
+    if (headerStatusLevel) headerStatusLevel.textContent = safeLevel > 0 ? "УРОВЕНЬ " + safeLevel : "ПРИВЯЖИТЕ АККАУНТ";
     if (headerStatusFish) {
       headerStatusFish.src = fishSrcForLevel(safeLevel);
       headerStatusFish.setAttribute("data-status-fish-level", String(safeLevel));

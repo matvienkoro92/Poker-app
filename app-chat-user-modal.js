@@ -2184,15 +2184,21 @@ if (chatUserModalEl) {
   function applyChatUserModalStatusLevel(level) {
     var rawLevel = level != null ? String(level).trim() : "";
     if (!rawLevel) return false;
+    var modalLevel = Math.min(100, Math.max(0, parseInt(rawLevel, 10) || 0));
     if (modalLevelText) {
-      modalLevelText.innerHTML = '<span class="chat-user-modal__level-num">' +
-        escapeHtml(rawLevel) +
-        '</span><span class="chat-user-modal__level-rest">из 100</span>';
+      if (modalLevel > 0) {
+        modalLevelText.classList.remove("chat-user-modal__level-text--unlinked");
+        modalLevelText.innerHTML = '<span class="chat-user-modal__level-num">' +
+          escapeHtml(rawLevel) +
+          '</span><span class="chat-user-modal__level-rest">из 100</span>';
+      } else {
+        modalLevelText.classList.add("chat-user-modal__level-text--unlinked");
+        modalLevelText.textContent = "Привяжите аккаунт";
+      }
       modalLevelText.hidden = false;
     }
-    var modalLevel = Math.min(100, Math.max(0, parseInt(rawLevel, 10) || 0));
-    if (modalStatusCards[0]) modalStatusCards[0].textContent = pokerProfileStatusCardLabel(modalLevel);
-    if (modalStatusCards[1]) modalStatusCards[1].textContent = pokerProfileStatusCardLabel(Math.min(100, modalLevel + 1));
+    if (modalStatusCards[0]) modalStatusCards[0].textContent = modalLevel > 0 ? pokerProfileStatusCardLabel(modalLevel) : "Привяжите";
+    if (modalStatusCards[1]) modalStatusCards[1].textContent = modalLevel > 0 ? pokerProfileStatusCardLabel(Math.min(100, modalLevel + 1)) : "аккаунт";
     if (modalStatusSection) modalStatusSection.hidden = false;
     pokerProfileApplyStatusFish(modalLevelFish, rawLevel);
     if (modalLevelFish) modalLevelFish.hidden = false;

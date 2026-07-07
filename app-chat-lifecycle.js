@@ -1310,12 +1310,14 @@ function initChat() {
   function chatProfileStatusLevelHtml(level) {
     if (level == null || level === "") return "";
     var statusLevel = pokerProfileStatusFishLevel(level);
-    return '<span class="chat-msg__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
+    var label = statusLevel > 0 ? "Уровень: " + String(statusLevel) : "Привяжите аккаунт";
+    return '<span class="chat-msg__status-level">' + escapeHtml(label) + "</span>";
   }
   function chatContactStatusLevelHtml(level) {
     if (level == null || level === "") return "";
     var statusLevel = pokerProfileStatusFishLevel(level);
-    return '<span class="chat-contact__status-level">Уровень: ' + escapeHtml(String(statusLevel)) + "</span>";
+    var label = statusLevel > 0 ? "Уровень: " + String(statusLevel) : "Привяжите аккаунт";
+    return '<span class="chat-contact__status-level">' + escapeHtml(label) + "</span>";
   }
   var chatMessageBodyBuilders = initChatMessageBodyBuilders({
     escapeHtml: escapeHtml,

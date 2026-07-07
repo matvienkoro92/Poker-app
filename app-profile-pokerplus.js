@@ -518,7 +518,7 @@ function initProfilePokerPlus() {
     var canRenderUnlinkedStatus = !pokerPlusProfileLinked && !pokerPlusProfileLoading && typeof setProfileStatusUnlinked === "function";
     if (canRenderUnlinkedStatus) setProfileStatusUnlinked();
     if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
-    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Привяжите ваш аккаунт";
+    if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Привяжите аккаунт";
     if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || (!pokerPlusProfileLinked && !canRenderUnlinkedStatus);
     if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusProgressText) profileStatusProgressText.textContent = "";
     if (statusLinkHint) {

@@ -7729,6 +7729,10 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   overflow-anchor: none;
 }
 
+body[data-view="home"] #app.app .card .card__content > .view--active[data-view="home"] {
+  padding-bottom: max(18px, calc(var(--app-tabbar-content-gap, 5px) + env(safe-area-inset-bottom, 0px))) !important;
+}
+
 #app.app .card .card__content > .view--active > :where(div, section, article, header, footer, nav, main, aside, form, ul, ol, a) {
   width: var(--app-content-width, 100%) !important;
   max-width: 100% !important;
@@ -9186,8 +9190,8 @@ html body[data-view="home"] #app.app > .card > .card__header .header-profile-sum
 html.app-view-home #app.app.app--view-home > .card > .card__header .header-profile-summary,
 #app.app.app--view-home > .card > .card__header .header-profile-summary {
   display: flex !important;
-  flex: 1 1 clamp(112px, 34vw, 172px) !important;
-  max-width: clamp(112px, 34vw, 172px) !important;
+  flex: 1 1 clamp(118px, 38vw, 260px) !important;
+  max-width: clamp(118px, 38vw, 260px) !important;
   min-width: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
@@ -9205,18 +9209,28 @@ html.app-view-home #app.app.app--view-home > .card > .card__header .header-greet
 html body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 html.app-view-home #app.app.app--view-home > .card > .card__header .header-greeting,
 #app.app.app--view-home > .card > .card__header .header-greeting {
-  display: block !important;
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  column-gap: 0.22em !important;
+  row-gap: 0 !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: right !important;
+  font-size: clamp(10px, 2.85vw, 13px) !important;
+  line-height: 1.08 !important;
 }
 
 html body[data-view="home"] #app.app > .card > .card__header .header-actions,
 html.app-view-home #app.app.app--view-home > .card > .card__header .header-actions,
 #app.app.app--view-home > .card > .card__header .header-actions {
-  flex: 0 1 clamp(156px, 43vw, 206px) !important;
+  flex: 1 1 clamp(164px, 50vw, 336px) !important;
 }
 
 html body:not([data-view="chat"]) #app.app > .card > .card__header {
@@ -9228,8 +9242,8 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header {
 
 html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary {
   display: flex !important;
-  flex: 1 1 clamp(112px, 34vw, 172px) !important;
-  max-width: clamp(112px, 34vw, 172px) !important;
+  flex: 1 1 clamp(118px, 38vw, 260px) !important;
+  max-width: clamp(118px, 38vw, 260px) !important;
   min-width: 0 !important;
   align-items: flex-end !important;
   justify-content: center !important;
@@ -9243,16 +9257,36 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greet
 }
 
 html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting {
-  display: block !important;
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  column-gap: 0.22em !important;
+  row-gap: 0 !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: right !important;
+  font-size: clamp(10px, 2.85vw, 13px) !important;
+  line-height: 1.08 !important;
 }
 
 html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions {
-  flex: 0 1 clamp(156px, 43vw, 206px) !important;
+  flex: 1 1 clamp(164px, 50vw, 336px) !important;
+}
+
+#app.app > .card > .card__header .header-greeting__hello,
+#app.app > .card > .card__header .header-greeting__name,
+#app.app > .card > .card__header .header-greeting__bang {
+  min-width: 0;
+}
+
+#app.app > .card > .card__header .header-greeting__name {
+  overflow-wrap: anywhere;
 }
 
 .app.app--view-home .home-club-actions-block {

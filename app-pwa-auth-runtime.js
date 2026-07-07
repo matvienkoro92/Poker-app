@@ -606,6 +606,28 @@
     return displayName ? "Привет, " + displayName + "!" : "Привет!";
   }
 
+  function escapeHeaderGreetingHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function setHeaderGreetingText(el, name) {
+    if (!el) return;
+    var displayName = name != null ? String(name).trim() : "";
+    var text = formatHeaderGreeting(displayName);
+    el.setAttribute("title", text);
+    el.setAttribute("aria-label", text);
+    if (!displayName) {
+      el.textContent = "Привет!";
+      return;
+    }
+    el.innerHTML =
+      '<span class="header-greeting__hello">Привет,</span> ' +
+      '<span class="header-greeting__name">' + escapeHeaderGreetingHtml(displayName) + '</span>' +
+      '<span class="header-greeting__bang">!</span>';
+  }
+
   function isHeaderGuestLoginMode() {
     try {
       var auth = window.__pokerTelegramAuth;
@@ -627,22 +649,26 @@
     if (isSiteHomeInstructionMode()) {
       setHeaderGreetingLoginActive(true);
       el.textContent = "Войти";
+      el.setAttribute("title", "Войти в аккаунт");
+      el.setAttribute("aria-label", "Войти в аккаунт");
       return;
     }
     if (isHeaderGuestLoginMode()) {
       setHeaderGreetingLoginActive(true);
       el.textContent = "Войти";
+      el.setAttribute("title", "Войти в аккаунт");
+      el.setAttribute("aria-label", "Войти в аккаунт");
       return;
     }
     setHeaderGreetingLoginActive(false);
     var poker21Name = pokerHeaderPoker21Nickname();
     if (poker21Name) {
-      el.textContent = formatHeaderGreeting(poker21Name);
+      setHeaderGreetingText(el, poker21Name);
       return;
     }
     var profileName = pokerPreferredProfileDisplayName();
     if (profileName) {
-      el.textContent = formatHeaderGreeting(profileName);
+      setHeaderGreetingText(el, profileName);
       return;
     }
     var u = null;
@@ -658,7 +684,7 @@
       }
     }
     var dn = telegramUserDisplayName(u);
-    el.textContent = formatHeaderGreeting(dn);
+    setHeaderGreetingText(el, dn);
   }
   window.__pokerUpdateHeaderGreeting = updateHeaderGreeting;
 
