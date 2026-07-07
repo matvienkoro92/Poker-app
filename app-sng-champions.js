@@ -956,7 +956,12 @@
     var stageAttr = isLosers ? "data-sng-loser-stage-index" : "data-sng-stage-index";
     var stageMoveAttr = isLosers ? "data-sng-loser-stage" : "data-sng-stage";
     var stageDotsHtml = '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
-      return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(item, index, rounds)) + '</button>';
+      var dotStatus = isPreview ? null : bracketRoundStatus(item);
+      var complete = dotStatus && dotStatus.kind === "done";
+      return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + (complete ? " is-complete" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' +
+        '<span>' + escapeHtml(labelFn(item, index, rounds)) + '</span>' +
+        (complete ? '<small>все сыграли</small>' : '') +
+      '</button>';
     }).join("") + '</div>';
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
       '<div class="sng-champions-modal__stage-head">' +

@@ -2290,6 +2290,9 @@
 }
 
 .sng-champions-modal__stage-dots button {
+  display: grid;
+  place-items: center;
+  gap: 2px;
   min-height: 30px;
   padding: 0 10px;
   color: rgba(255, 239, 201, 0.72);
@@ -2302,10 +2305,37 @@
   cursor: pointer;
 }
 
+.sng-champions-modal__stage-dots button span,
+.sng-champions-modal__stage-dots button small {
+  display: block;
+  line-height: 1;
+}
+
+.sng-champions-modal__stage-dots button small {
+  color: rgba(5, 46, 22, 0.86);
+  font-size: 7px;
+  font-weight: 1000;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .sng-champions-modal__stage-dots button.is-active {
   color: #1c1003;
   border-color: rgba(255, 230, 162, 0.82);
   background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+}
+
+.sng-champions-modal__stage-dots button.is-complete {
+  color: #052e16;
+  border-color: rgba(187, 247, 208, 0.82);
+  background: linear-gradient(180deg, #bbf7d0 0%, #4ade80 54%, #16a34a 100%);
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.38);
+}
+
+.sng-champions-modal__stage-dots button.is-complete.is-active {
+  color: #052e16;
+  border-color: rgba(220, 252, 231, 0.9);
+  background: linear-gradient(180deg, #dcfce7 0%, #5af08b 52%, #16a34a 100%);
 }
 
 .sng-champions-modal__bracket-map-wrap {
