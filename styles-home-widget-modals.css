@@ -2483,12 +2483,17 @@
 
 .sng-champions-modal__map-players {
   display: grid;
+  align-content: center;
+  justify-items: center;
   gap: 1px;
   min-width: 0;
+  text-align: center;
 }
 
 .sng-champions-modal__map-player {
+  display: inline-block;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: rgba(255, 239, 201, 0.74);
   font-size: clamp(5px, 1.15vw, 7px);
@@ -2521,9 +2526,16 @@
 }
 
 .sng-champions-modal__map-player--pending {
-  color: rgba(255, 239, 201, 0.42);
+  min-width: 30px;
+  padding: 2px 5px;
+  color: rgba(255, 239, 201, 0.72);
   font-weight: 1000;
   letter-spacing: 0;
+  border: 1px dashed rgba(255, 239, 201, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 239, 201, 0.08);
+  text-transform: uppercase;
+  text-shadow: none;
 }
 
 .sng-champions-modal__map-next {
@@ -2568,6 +2580,11 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
   font-size: 11px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--pending {
+  min-width: 48px;
+  padding: 4px 8px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-next {

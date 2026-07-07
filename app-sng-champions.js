@@ -847,7 +847,7 @@
   }
 
   function renderBracketMapPendingPlayer() {
-    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">???</span>';
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">ждем</span>';
   }
 
   function nextMapMatchIndex(round, match, roundIndex, rounds) {
