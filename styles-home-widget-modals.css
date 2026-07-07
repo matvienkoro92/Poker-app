@@ -2260,13 +2260,21 @@
 }
 
 .sng-champions-modal__ready-btn,
-.sng-champions-modal__ready-action {
+.sng-champions-modal__ready-action,
+.sng-champions-modal__remind-btn {
   width: 100%;
   min-height: 32px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 1000;
   text-align: center;
+}
+
+.sng-champions-modal__remind-btn {
+  color: #1c1003;
+  border: 1px solid rgba(255, 230, 162, 0.72);
+  background: linear-gradient(180deg, #fff1a9, #facc15 54%, #f59e0b);
+  cursor: pointer;
 }
 
 .sng-champions-modal__ready-btn {

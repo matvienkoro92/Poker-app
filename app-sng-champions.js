@@ -804,6 +804,13 @@
     '</div>';
   }
 
+  function renderRemindAction(match, players, data) {
+    if (!data || !data.isAdmin || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
+    var allReady = players.every(function (id) { return match.readyById && match.readyById[id] === true; });
+    if (allReady) return "";
+    return '<button type="button" class="sng-champions-modal__remind-btn" data-sng-remind="' + escapeHtml(match.id || "") + '">Напомнить</button>';
+  }
+
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
@@ -822,6 +829,7 @@
       playerRows +
       tablePasswordHtml +
       renderPlayingAction(match, players, data) +
+      renderRemindAction(match, players, data) +
       renderReadyAction(match, players, data) +
     '</article>';
   }
@@ -1135,6 +1143,16 @@
         tablePassword: tablePassword,
       }, { status: "Отмечаю матч...", success: "Матч отмечен как играющий" })
         .finally(function () { setButtonLoading(playing, false); });
+      return;
+    }
+    var remind = event.target && event.target.closest ? event.target.closest("[data-sng-remind]") : null;
+    if (remind) {
+      setButtonLoading(remind, true);
+      postAction({
+        action: "remindMatchReady",
+        matchId: remind.getAttribute("data-sng-remind") || "",
+      }, { status: "Отправляю напоминание...", success: "Напоминание отправлено" })
+        .finally(function () { setButtonLoading(remind, false); });
       return;
     }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
