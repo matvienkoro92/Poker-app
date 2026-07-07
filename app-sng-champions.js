@@ -926,10 +926,12 @@
       return ids.length >= 2;
     });
     if (!playableMatches.length) return null;
-    var allDone = playableMatches.every(function (match) { return !!match.winnerId; });
+    var doneCount = playableMatches.filter(function (match) { return !!match.winnerId; }).length;
+    var totalCount = playableMatches.length;
+    var allDone = doneCount === totalCount;
     return allDone
-      ? { kind: "done", text: "Все пары сыграли" }
-      : { kind: "live", text: "Идет" };
+      ? { kind: "done", text: "Все пары сыграли", done: doneCount, total: totalCount }
+      : { kind: "live", text: "Идет", done: doneCount, total: totalCount };
   }
 
   function renderBracketView(data, options) {
@@ -966,9 +968,11 @@
     var stageDotsHtml = '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
       var dotStatus = isPreview ? null : bracketRoundStatus(item);
       var complete = dotStatus && dotStatus.kind === "done";
-      return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + (complete ? " is-complete" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' +
+      var live = dotStatus && dotStatus.kind === "live";
+      return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + (complete ? " is-complete" : "") + (live ? " is-live" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' +
         '<span>' + escapeHtml(labelFn(item, index, rounds)) + '</span>' +
         (complete ? '<small>все сыграли</small>' : '') +
+        (live ? '<small>Сыграли ' + escapeHtml(dotStatus.done) + ' пар из ' + escapeHtml(dotStatus.total) + '</small>' : '') +
       '</button>';
     }).join("") + '</div>';
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
