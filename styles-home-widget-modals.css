@@ -2271,23 +2271,39 @@
 }
 
 .sng-champions-modal__map-match {
+  --sng-map-lane: rgba(255, 184, 70, 0.34);
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr);
+  position: relative;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
   gap: 2px;
   min-width: 0;
   min-height: 18px;
-  padding: 2px;
+  padding: 2px 3px 2px 4px;
   border: 1px solid rgba(255, 184, 70, 0.16);
+  border-left: 3px solid var(--sng-map-lane);
   border-radius: 4px;
-  background: rgba(5, 8, 14, 0.72);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sng-map-lane) 24%, transparent), transparent 38%),
+    rgba(5, 8, 14, 0.72);
 }
 
 .sng-champions-modal__map-match--done {
   border-color: rgba(134, 239, 172, 0.5);
+  border-left-color: var(--sng-map-lane);
   background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sng-map-lane) 26%, transparent), transparent 42%),
     linear-gradient(135deg, rgba(21, 128, 61, 0.18), rgba(7, 89, 46, 0.08)),
     rgba(4, 10, 8, 0.82);
 }
+
+.sng-champions-modal__map-match--lane-1 { --sng-map-lane: #86efac; }
+.sng-champions-modal__map-match--lane-2 { --sng-map-lane: #60a5fa; }
+.sng-champions-modal__map-match--lane-3 { --sng-map-lane: #facc15; }
+.sng-champions-modal__map-match--lane-4 { --sng-map-lane: #fb7185; }
+.sng-champions-modal__map-match--lane-5 { --sng-map-lane: #a78bfa; }
+.sng-champions-modal__map-match--lane-6 { --sng-map-lane: #2dd4bf; }
+.sng-champions-modal__map-match--lane-7 { --sng-map-lane: #fb923c; }
+.sng-champions-modal__map-match--lane-8 { --sng-map-lane: #f472b6; }
 
 .sng-champions-modal__map-match-index {
   color: rgba(255, 239, 201, 0.36);
@@ -2341,6 +2357,16 @@
   letter-spacing: 0;
 }
 
+.sng-champions-modal__map-next {
+  align-self: center;
+  color: var(--sng-map-lane);
+  font-size: 6px;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0 7px color-mix(in srgb, var(--sng-map-lane) 62%, transparent);
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-title {
   min-height: 28px;
   font-size: 13px;
@@ -2351,7 +2377,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match {
-  grid-template-columns: 18px minmax(0, 1fr);
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   min-height: 32px;
   padding: 5px;
   border-radius: 7px;
@@ -2363,6 +2389,10 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
   font-size: 11px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-next {
+  font-size: 10px;
 }
 
 .club-choice-vote-modal__scheme {

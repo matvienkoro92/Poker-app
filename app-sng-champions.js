@@ -783,14 +783,32 @@
     return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">???</span>';
   }
 
-  function renderBracketMapMatch(match, data) {
+  function nextMapMatchIndex(round, match, roundIndex, rounds) {
+    if (!round || !match || !Array.isArray(rounds) || roundIndex >= rounds.length - 1) return 0;
+    var matchIndex = Math.max(1, Number(match.index) || 1);
+    if (round.loserBracket) {
+      var lowerRoundIndex = Number(round.index) || (roundIndex + 1);
+      if (lowerRoundIndex === 1 || lowerRoundIndex === 3 || lowerRoundIndex === 5) return matchIndex;
+      if (lowerRoundIndex === 7 || lowerRoundIndex === 8) return 1;
+    }
+    return Math.ceil(matchIndex / 2);
+  }
+
+  function mapLaneClass(nextIndex) {
+    if (!nextIndex) return "";
+    return " sng-champions-modal__map-match--lane-" + String(((Math.max(1, nextIndex) - 1) % 8) + 1);
+  }
+
+  function renderBracketMapMatch(match, data, round, roundIndex, rounds) {
     var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
+    var nextIndex = nextMapMatchIndex(round, match, roundIndex, rounds);
     while (playerIds.length < 2) playerIds.push("");
-    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + '">' +
+    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + mapLaneClass(nextIndex) + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
+      (nextIndex ? '<span class="sng-champions-modal__map-next">→ ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
   }
 
@@ -812,7 +830,7 @@
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
-              ((round.matches || []).map(function (match) { return renderBracketMapMatch(match, data); }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
+              ((round.matches || []).map(function (match) { return renderBracketMapMatch(match, data, round, index, rounds); }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +
           '</div>';
         }).join("") +
