@@ -1203,6 +1203,24 @@ function getHomeTournamentLeagueUpdatedLabel() {
   return "актуально сейчас";
 }
 
+function getHomeTournamentSummerTournamentsByDateFallback() {
+  if (typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" && SUMMER_RATING_TOURNAMENTS_BY_DATE) {
+    return SUMMER_RATING_TOURNAMENTS_BY_DATE;
+  }
+  var merged = {};
+  [
+    typeof SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE : null,
+    typeof SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE : null,
+    typeof SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE : null
+  ].forEach(function (monthData) {
+    if (!monthData) return;
+    Object.keys(monthData).forEach(function (dateStr) {
+      merged[dateStr] = monthData[dateStr];
+    });
+  });
+  return merged;
+}
+
 function sortHomeTournamentLeagueTopRows(rows) {
   rows.sort(function (a, b) {
     var ap = Number(a && a.points);
@@ -1228,7 +1246,7 @@ function getHomeTournamentLeagueTopRows(leagueNum) {
   }
   var tournamentsByDate = {};
   if (typeof pokerRatingGetSummerTournamentsByDate === "function") tournamentsByDate = pokerRatingGetSummerTournamentsByDate() || {};
-  else if (typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined") tournamentsByDate = SUMMER_RATING_TOURNAMENTS_BY_DATE || {};
+  else tournamentsByDate = getHomeTournamentSummerTournamentsByDateFallback() || {};
   var byNick = {};
   var monthRegex = /\.(06|07|08)\.2026$/;
   Object.keys(tournamentsByDate || {}).forEach(function (dateStr) {
@@ -1261,6 +1279,24 @@ function getHomeTournamentLeagueTopRows(leagueNum) {
   }).filter(function (row) {
     return Number(row.points || 0) !== 0 || Number(row.reward || 0) !== 0;
   })).slice(0, 10);
+}
+
+function ensureHomeTournamentLeagueTopData(leagueNum) {
+  var rows = getHomeTournamentLeagueTopRows(leagueNum);
+  if (rows.length) return Promise.resolve(rows);
+  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(rows);
+  var ready = null;
+  try {
+    ready = window.pokerEnsureScriptDomains(["rating-summer"]);
+  } catch (eEnsureLeagueTop) {
+    return Promise.resolve(rows);
+  }
+  if (!ready || typeof ready.then !== "function") return Promise.resolve(getHomeTournamentLeagueTopRows(leagueNum));
+  return ready.then(function () {
+    return getHomeTournamentLeagueTopRows(leagueNum);
+  }).catch(function () {
+    return rows;
+  });
 }
 
 function formatHomeTournamentLeagueTopNumber(value) {
@@ -1331,6 +1367,11 @@ function openHomeTournamentLeagueTopModal(leagueNum) {
     if (!modal) return;
     initHomeTournamentLeagueTopModal();
     renderHomeTournamentLeagueTopList(leagueNum);
+    ensureHomeTournamentLeagueTopData(leagueNum).then(function (rows) {
+      var activeModal = document.getElementById("homeTournamentLeagueTopModal");
+      if (!rows.length || !activeModal || activeModal.getAttribute("aria-hidden") === "true") return;
+      renderHomeTournamentLeagueTopList(leagueNum);
+    });
     modal.classList.remove("home-league-top-modal--hidden");
     modal.setAttribute("aria-hidden", "false");
     var closeBtn = modal.querySelector("[data-home-league-top-close]");
