@@ -2564,12 +2564,13 @@
   position: absolute;
   left: 50%;
   display: block;
-  max-width: 100%;
+  width: max-content;
+  max-width: none;
   overflow: visible;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   text-overflow: clip;
   transform: translateX(-50%);
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed:nth-child(1) {
@@ -2789,9 +2790,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
-  max-width: 100%;
-  font-size: 10px;
-  line-height: 0.95;
+  font-size: clamp(7px, 1.22vw, 10px);
+  line-height: 1;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match-index {
