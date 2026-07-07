@@ -1989,8 +1989,82 @@
   font-size: 11px;
 }
 
+.sng-champions-modal__match-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 213, 111, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 184, 70, 0.08);
+}
+
+.sng-champions-modal__match-meta span {
+  min-width: 0;
+  color: rgba(255, 239, 201, 0.68);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__match-meta strong {
+  color: #ffd56f;
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 0;
+}
+
+.sng-champions-modal__playing-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: end;
+}
+
+.sng-champions-modal__table-password {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sng-champions-modal__table-password span {
+  color: rgba(255, 239, 201, 0.66);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.sng-champions-modal__table-password input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 9px;
+  color: #fff0c8;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 1000;
+  letter-spacing: 0;
+  border: 1px solid rgba(255, 184, 70, 0.32);
+  border-radius: 8px;
+  background: rgba(5, 8, 14, 0.86);
+  outline: none;
+}
+
+.sng-champions-modal__table-password input:focus {
+  border-color: rgba(255, 230, 162, 0.82);
+  box-shadow: 0 0 0 2px rgba(255, 184, 70, 0.18);
+}
+
+.sng-champions-modal__table-password input:disabled {
+  color: #ffd56f;
+  -webkit-text-fill-color: #ffd56f;
+  opacity: 1;
+}
+
 .sng-champions-modal__playing-btn {
   width: 100%;
+  min-width: 92px;
   min-height: 32px;
   color: #1c1003;
   font: inherit;

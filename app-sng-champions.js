@@ -730,12 +730,20 @@
   function renderPlayingAction(match, players, data) {
     if (!data || !data.isAdmin || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
     var active = !!match.playingAt;
-    return '<button type="button" class="sng-champions-modal__playing-btn' + (active ? " sng-champions-modal__playing-btn--active" : "") + '" data-sng-playing="' + escapeHtml(match.id || "") + '">' + (active ? "Играют" : "Играют") + '</button>';
+    var password = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
+    return '<div class="sng-champions-modal__playing-tools">' +
+      '<label class="sng-champions-modal__table-password"><span>Пароль стола</span><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-sng-table-password="' + escapeHtml(match.id || "") + '" value="' + escapeHtml(password) + '"' + (active ? " disabled" : "") + '></label>' +
+      '<button type="button" class="sng-champions-modal__playing-btn' + (active ? " sng-champions-modal__playing-btn--active" : "") + '" data-sng-playing="' + escapeHtml(match.id || "") + '">' + (active ? "Играют" : "Играют") + '</button>' +
+    '</div>';
   }
 
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
+    var tablePassword = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
+    var tablePasswordHtml = tablePassword
+      ? '<div class="sng-champions-modal__match-meta"><span>Пароль стола</span><strong>' + escapeHtml(tablePassword) + '</strong></div>'
+      : "";
     var playerRows = players.length ? players.map(function (id) {
       return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
     }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
@@ -745,6 +753,7 @@
     return '<article class="' + matchClass + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       playerRows +
+      tablePasswordHtml +
       renderPlayingAction(match, players, data) +
       renderReadyAction(match, players, data) +
     '</article>';
@@ -989,10 +998,20 @@
     }
     var playing = event.target && event.target.closest ? event.target.closest("[data-sng-playing]") : null;
     if (playing) {
+      var matchId = playing.getAttribute("data-sng-playing") || "";
+      var matchCard = playing.closest ? playing.closest(".sng-champions-modal__bracket-match") : null;
+      var passwordInput = matchCard && matchCard.querySelector ? matchCard.querySelector('[data-sng-table-password="' + matchId.replace(/"/g, '\\"') + '"]') : null;
+      var tablePassword = passwordInput ? String(passwordInput.value || "").replace(/\D/g, "").slice(0, 4) : "";
+      if (!/^\d{4}$/.test(tablePassword)) {
+        showAlert("Введите пароль стола из 4 цифр.");
+        if (passwordInput && passwordInput.focus) passwordInput.focus();
+        return;
+      }
       setButtonLoading(playing, true);
       postAction({
         action: "setPlaying",
-        matchId: playing.getAttribute("data-sng-playing") || "",
+        matchId: matchId,
+        tablePassword: tablePassword,
       }, { status: "Отмечаю матч...", success: "Матч отмечен как играющий" })
         .finally(function () { setButtonLoading(playing, false); });
       return;
