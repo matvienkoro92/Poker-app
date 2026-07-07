@@ -303,13 +303,13 @@
 
   function loserRoundStageLabel(round, index) {
     var step = Number(index) || 0;
-    if (step === 0) return "L 1/16";
-    if (step === 1) return "L 1/8 вход";
-    if (step === 2) return "L 1/8";
-    if (step === 3) return "L 1/4 вход";
-    if (step === 4) return "L 1/4";
-    if (step === 5) return "L 1/2 вход";
-    if (step === 6) return "L 1/2";
+    if (step === 0) return "L 1/8";
+    if (step === 1) return "L 1/8";
+    if (step === 2) return "L 1/4";
+    if (step === 3) return "L 1/4";
+    if (step === 4) return "L 1/2";
+    if (step === 5) return "L 1/2";
+    if (step === 6) return "L финал";
     if (step === 7) return "Финал лузеров";
     if (step === 8) return "Гранд-финал";
     return round && round.name ? round.name : "Сетка проигравших";
