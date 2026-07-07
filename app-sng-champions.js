@@ -934,6 +934,17 @@
       : { kind: "live", text: "Идет", done: doneCount, total: totalCount };
   }
 
+  function preferredBracketStageIndex(rounds, currentIndex) {
+    var safeIndex = Math.max(0, Math.min(rounds.length - 1, Number(currentIndex) || 0));
+    var currentStatus = bracketRoundStatus(rounds[safeIndex]);
+    if (currentStatus && currentStatus.kind === "live") return safeIndex;
+    var liveIndex = rounds.findIndex(function (round) {
+      var status = bracketRoundStatus(round);
+      return status && status.kind === "live";
+    });
+    return liveIndex >= 0 ? liveIndex : safeIndex;
+  }
+
   function pairWord(count) {
     var value = Math.abs(Number(count) || 0);
     var lastTwo = value % 100;
@@ -961,6 +972,7 @@
     var stageIndex = isLosers ? activeLoserBracketStage : activeBracketStage;
     if (stageIndex < 0) stageIndex = 0;
     if (stageIndex >= rounds.length) stageIndex = rounds.length - 1;
+    if (!isPreview) stageIndex = preferredBracketStageIndex(rounds, stageIndex);
     if (isLosers) activeLoserBracketStage = stageIndex;
     else activeBracketStage = stageIndex;
     var round = rounds[stageIndex] || rounds[0];
