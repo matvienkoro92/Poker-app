@@ -473,6 +473,33 @@
     return '<button type="button" class="sng-champions-modal__entry-name" data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '">' + escapeHtml(profileName) + '</button>';
   }
 
+  function renderBracketPlayerAvatar(player) {
+    var profileId = player && player.accountId ? String(player.accountId) : "";
+    var profileName = playerName(player);
+    var avatar = playerAvatar(player);
+    var attrs = profileId
+      ? ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"'
+      : "";
+    return '<button type="button" class="sng-champions-modal__bracket-avatar" aria-label="Открыть профиль ' + escapeHtml(profileName) + '"' + attrs + '>' +
+      renderPlayerImage(player) +
+      (player.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(player.level) || 0)))) + '</em>' : '') +
+    '</button>';
+  }
+
+  function renderBracketPlayerName(player) {
+    var profileId = player && player.accountId ? String(player.accountId) : "";
+    var profileName = playerName(player);
+    var avatar = playerAvatar(player);
+    var level = playerLevelText(player);
+    var attrs = profileId
+      ? ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"'
+      : "";
+    return '<span class="sng-champions-modal__bracket-player-main">' +
+      '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
+      (level ? '<small class="sng-champions-modal__bracket-player-level">' + escapeHtml(level) + '</small>' : '') +
+    '</span>';
+  }
+
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var tab = activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup";
@@ -690,7 +717,8 @@
       (match.winnerId && !won ? " sng-champions-modal__bracket-player--lost" : "") +
       (won ? " sng-champions-modal__bracket-player--winner" : "");
     return '<div class="' + playerClass + '">' +
-      '<span>' + escapeHtml(playerName(player)) + '</span>' +
+      renderBracketPlayerAvatar(player) +
+      renderBracketPlayerName(player) +
       readyBadge +
       (won ? '<strong>Победитель</strong>' : adminButton) +
     '</div>';
@@ -698,7 +726,8 @@
 
   function renderBracketPendingPlayer() {
     return '<div class="sng-champions-modal__bracket-player sng-champions-modal__bracket-player--pending">' +
-      '<span>???</span>' +
+      '<span class="sng-champions-modal__bracket-avatar sng-champions-modal__bracket-avatar--pending"><b>?</b></span>' +
+      '<span class="sng-champions-modal__bracket-player-main"><span class="sng-champions-modal__bracket-player-name">???</span></span>' +
       '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--waiting">Ждет</small>' +
     '</div>';
   }

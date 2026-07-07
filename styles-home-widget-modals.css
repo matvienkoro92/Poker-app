@@ -1882,22 +1882,111 @@
 }
 
 .sng-champions-modal__bracket-player {
-  display: flex;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  min-height: 38px;
+  min-height: 52px;
   padding: 7px 8px;
   border-radius: 8px;
   background: rgba(5, 8, 14, 0.78);
 }
 
-.sng-champions-modal__bracket-player span {
+.sng-champions-modal__bracket-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  overflow: visible;
+  color: #f9d98b;
+  border: 2px solid rgba(201, 145, 65, 0.72);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 211, 112, 0.28), transparent 42%),
+    radial-gradient(circle at 50% 54%, rgba(2, 6, 23, 0.72), rgba(5, 8, 14, 0.96) 70%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.42),
+    0 0 12px rgba(255, 184, 70, 0.16);
+  cursor: pointer;
+}
+
+.sng-champions-modal__bracket-avatar b {
+  color: #f9d98b;
+  font-size: 18px;
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 1px 0 #000, 0 0 8px rgba(255, 184, 70, 0.34);
+}
+
+.sng-champions-modal__bracket-avatar .sng-champions-modal__entry-avatar-media {
+  border-radius: inherit;
+}
+
+.sng-champions-modal__bracket-avatar .sng-champions-modal__entry-avatar-img--art {
+  width: 196%;
+  height: 196%;
+}
+
+.sng-champions-modal__bracket-avatar em {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  min-height: 15px;
+  padding: 0 4px;
+  color: #1c1003;
+  border: 1px solid rgba(255, 242, 190, 0.76);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 58%, #f08700);
+  box-shadow: 0 0 8px rgba(255, 184, 70, 0.24);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.sng-champions-modal__bracket-avatar--pending {
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.sng-champions-modal__bracket-player-main {
+  display: grid;
+  gap: 2px;
   min-width: 0;
+}
+
+.sng-champions-modal__bracket-player-name {
+  display: inline-block;
+  min-width: 0;
+  padding: 0;
   overflow: hidden;
   color: #fff0c8;
+  font: inherit;
   font-size: 13px;
   font-weight: 900;
+  line-height: 1.05;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sng-champions-modal__bracket-player-level {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.62);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1917,7 +2006,7 @@
     rgba(5, 8, 14, 0.58);
 }
 
-.sng-champions-modal__bracket-player--pending span {
+.sng-champions-modal__bracket-player--pending .sng-champions-modal__bracket-player-name {
   color: rgba(255, 239, 201, 0.66);
   letter-spacing: 0;
 }
@@ -1951,7 +2040,7 @@
     0 8px 22px rgba(22, 163, 74, 0.16);
 }
 
-.sng-champions-modal__bracket-player--ready span {
+.sng-champions-modal__bracket-player--ready .sng-champions-modal__bracket-player-name {
   color: #dcfce7;
 }
 
@@ -1968,7 +2057,7 @@
   box-shadow: inset 0 0 0 1px rgba(255, 242, 198, 0.14);
 }
 
-.sng-champions-modal__bracket-player--advanced span {
+.sng-champions-modal__bracket-player--advanced .sng-champions-modal__bracket-player-name {
   color: #fff7d6;
   text-shadow: 0 0 8px rgba(255, 213, 111, 0.34);
 }
@@ -1980,7 +2069,7 @@
     rgba(8, 8, 12, 0.86);
 }
 
-.sng-champions-modal__bracket-player--lost span {
+.sng-champions-modal__bracket-player--lost .sng-champions-modal__bracket-player-name {
   color: rgba(254, 202, 202, 0.72);
   text-decoration: line-through;
   text-decoration-thickness: 2px;
@@ -2002,7 +2091,7 @@
     0 0 18px rgba(74, 222, 128, 0.16);
 }
 
-.sng-champions-modal__bracket-player--winner span,
+.sng-champions-modal__bracket-player--winner .sng-champions-modal__bracket-player-name,
 .sng-champions-modal__bracket-player--winner strong {
   color: #f0fdf4;
   text-shadow: 0 0 10px rgba(187, 247, 208, 0.48);
