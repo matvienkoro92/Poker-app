@@ -935,6 +935,9 @@
     var nextDisabled = stageIndex >= rounds.length - 1;
     var stageAttr = isLosers ? "data-sng-loser-stage-index" : "data-sng-stage-index";
     var stageMoveAttr = isLosers ? "data-sng-loser-stage" : "data-sng-stage";
+    var stageDotsHtml = '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
+      return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(item, index, rounds)) + '</button>';
+    }).join("") + '</div>';
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
       '<div class="sng-champions-modal__stage-head">' +
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
@@ -945,15 +948,14 @@
         '</div>' +
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
       '</div>' +
+      stageDotsHtml +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
         (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
           ((round.matches || []).map(function (match) { return renderBracketMatch(match, previewData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
       '</section>' +
-      '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
-        return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(item, index, rounds)) + '</button>';
-      }).join("") + '</div>' +
+      stageDotsHtml +
       renderBracketMap(rounds, previewData, isPreview, {
         labelFn: labelFn,
         stageIndex: stageIndex,
