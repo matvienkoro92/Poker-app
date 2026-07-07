@@ -2205,6 +2205,8 @@
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
   gap: 8px;
   min-width: 760px;
+  overflow: visible;
+  padding-bottom: 34px;
 }
 
 .sng-champions-modal__bracket-map-wrap--losers {
@@ -2228,6 +2230,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
   min-width: 1040px;
+  padding-bottom: 54px;
 }
 
 .sng-champions-modal__map-round {
