@@ -926,12 +926,22 @@
       return ids.length >= 2;
     });
     if (!playableMatches.length) return null;
-    var doneCount = playableMatches.filter(function (match) { return !!match.winnerId; }).length;
-    var totalCount = playableMatches.length;
+    var doneCount = matches.filter(function (match) { return !!match.winnerId; }).length;
+    var totalCount = matches.length;
     var allDone = doneCount === totalCount;
     return allDone
       ? { kind: "done", text: "Все пары сыграли", done: doneCount, total: totalCount }
       : { kind: "live", text: "Идет", done: doneCount, total: totalCount };
+  }
+
+  function pairWord(count) {
+    var value = Math.abs(Number(count) || 0);
+    var lastTwo = value % 100;
+    var last = value % 10;
+    if (lastTwo >= 11 && lastTwo <= 14) return "пар";
+    if (last === 1) return "пару";
+    if (last >= 2 && last <= 4) return "пары";
+    return "пар";
   }
 
   function renderBracketView(data, options) {
@@ -972,7 +982,7 @@
       return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + (complete ? " is-complete" : "") + (live ? " is-live" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' +
         '<span>' + escapeHtml(labelFn(item, index, rounds)) + '</span>' +
         (complete ? '<small>все сыграли</small>' : '') +
-        (live ? '<small>Сыграли ' + escapeHtml(dotStatus.done) + ' пар из ' + escapeHtml(dotStatus.total) + '</small>' : '') +
+        (live ? '<small>Сыграли ' + escapeHtml(dotStatus.done) + ' ' + escapeHtml(pairWord(dotStatus.done)) + ' из ' + escapeHtml(dotStatus.total) + '</small>' : '') +
       '</button>';
     }).join("") + '</div>';
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
