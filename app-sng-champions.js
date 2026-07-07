@@ -744,8 +744,7 @@
     var matchPlayers = (match.playerIds || []).filter(Boolean);
     var ready = match.readyById && match.readyById[player.id] === true;
     var advanced = playerAdvancedToOpenMatch(player.id, match, data);
-    var allReady = matchPlayers.length >= 2 && matchPlayers.every(function (id) { return match.readyById && match.readyById[id] === true; });
-    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && allReady && !match.winnerId
+    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && !match.winnerId
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
