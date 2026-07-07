@@ -1622,17 +1622,35 @@
 
 .sng-champions-modal__bracket-subnav {
   display: grid;
+  position: relative;
   gap: 7px;
-  margin-bottom: 12px;
-  padding: 7px;
-  border: 1px solid rgba(255, 184, 70, 0.42);
-  border-radius: 14px;
+  margin: -4px 0 14px;
+  padding: 10px 9px 9px;
+  border: 2px solid rgba(255, 184, 70, 0.58);
+  border-top-color: rgba(255, 202, 86, 0.82);
+  border-radius: 0 0 16px 16px;
   background:
-    linear-gradient(180deg, rgba(255, 184, 70, 0.12), rgba(255, 184, 70, 0.03)),
-    rgba(5, 8, 14, 0.78);
+    radial-gradient(ellipse at 83% -16px, rgba(255, 163, 26, 0.32), transparent 42%),
+    linear-gradient(180deg, rgba(255, 184, 70, 0.18), rgba(255, 184, 70, 0.04)),
+    rgba(5, 8, 14, 0.84);
   box-shadow:
-    inset 0 1px 0 rgba(255, 241, 199, 0.08),
-    0 0 0 1px rgba(255, 128, 0, 0.08);
+    inset 0 1px 0 rgba(255, 241, 199, 0.12),
+    0 0 0 1px rgba(255, 128, 0, 0.12),
+    0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.sng-champions-modal__bracket-subnav::before {
+  content: "";
+  position: absolute;
+  right: 4%;
+  top: -8px;
+  width: 31%;
+  height: 8px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 55%, #f08700);
+  box-shadow:
+    0 0 0 1px rgba(255, 240, 188, 0.56),
+    0 0 20px rgba(255, 145, 22, 0.38);
 }
 
 .sng-champions-modal__bracket-subnav-label {
@@ -1652,8 +1670,9 @@
 }
 
 .sng-champions-modal__bracket-subtab {
+  position: relative;
   min-width: 0;
-  min-height: 36px;
+  min-height: 42px;
   padding: 0 10px;
   color: rgba(255, 239, 201, 0.78);
   font: inherit;
@@ -1666,7 +1685,8 @@
   box-shadow: inset 0 1px 0 rgba(255, 241, 199, 0.06);
 }
 
-.sng-champions-modal__bracket-subtab--active {
+.sng-champions-modal__bracket-subtab--active,
+.sng-champions-modal__bracket-subtab[aria-selected="true"] {
   color: #1c1003;
   border-color: rgba(255, 240, 188, 0.94);
   background:
@@ -1675,7 +1695,21 @@
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.58),
     0 0 0 2px rgba(255, 230, 162, 0.22),
-    0 0 22px rgba(255, 145, 22, 0.34);
+    0 0 24px rgba(255, 145, 22, 0.42);
+  transform: translateY(-1px);
+}
+
+.sng-champions-modal__bracket-subtab--active::after,
+.sng-champions-modal__bracket-subtab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  left: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(28, 16, 3, 0.72);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.32);
 }
 
 .sng-champions-modal__bracket-subpanel[hidden] {
