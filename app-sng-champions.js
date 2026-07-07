@@ -851,7 +851,8 @@
     var won = match.winnerId && match.winnerId === id;
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    var ready = match.readyById && match.readyById[id] === true;
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
   }
 
   function renderBracketMapPendingPlayer() {
