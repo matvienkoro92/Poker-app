@@ -12,6 +12,8 @@
   var homeSummaryLoadedAt = 0;
   var activeTab = "signup";
   var activeBracketStage = 0;
+  var activeLoserBracketStage = 0;
+  var activeBracketView = "winners";
   var bracketMapExpanded = false;
   var bracketTimerInterval = null;
   var HOME_SUMMARY_CACHE_MS = 60000;
@@ -299,6 +301,28 @@
     return "";
   }
 
+  function loserRoundStageLabel(round, index) {
+    var step = Number(index) || 0;
+    if (step === 0) return "L 1/16";
+    if (step === 1) return "L 1/8 вход";
+    if (step === 2) return "L 1/8";
+    if (step === 3) return "L 1/4 вход";
+    if (step === 4) return "L 1/4";
+    if (step === 5) return "L 1/2 вход";
+    if (step === 6) return "L 1/2";
+    if (step === 7) return "Финал лузеров";
+    if (step === 8) return "Гранд-финал";
+    return round && round.name ? round.name : "Сетка проигравших";
+  }
+
+  function loserRoundStageClass(round, index) {
+    var label = loserRoundStageLabel(round, index);
+    if (label === "L 1/4" || label === "L 1/4 вход") return "quarter";
+    if (label === "L 1/2" || label === "L 1/2 вход") return "semi";
+    if (label === "Финал лузеров" || label === "Гранд-финал") return "final";
+    return "";
+  }
+
   function playerName(player) {
     return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim() || "Игрок";
   }
@@ -331,6 +355,26 @@
       return {
         id: "preview-round-" + String(roundIndex),
         matches: matches,
+      };
+    });
+  }
+
+  function buildLoserBracketSkeletonRounds() {
+    return [8, 8, 4, 4, 2, 2, 1, 1, 1].map(function (count, roundIndex) {
+      var matches = [];
+      for (var index = 0; index < count; index += 1) {
+        matches.push({
+          id: "loser-preview-" + String(roundIndex) + "-" + String(index),
+          index: index + 1,
+          playerIds: [],
+          loserBracket: true,
+        });
+      }
+      return {
+        id: "loser-preview-round-" + String(roundIndex),
+        index: roundIndex + 1,
+        matches: matches,
+        loserBracket: true,
       };
     });
   }
@@ -736,17 +780,23 @@
     '</article>';
   }
 
-  function renderBracketMap(rounds, data, isPreview) {
+  function renderBracketMap(rounds, data, isPreview, options) {
+    options = options || {};
+    var labelFn = options.labelFn || roundStageLabel;
+    var stageIndex = Number(options.stageIndex) || 0;
+    var stageAttr = options.stageAttr || "data-sng-stage-index";
+    var title = options.title || "Вся сетка";
+    var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
-    return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + '" aria-label="Миниатюрная сетка всего турнира">' +
+    return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
-        '<strong>Вся сетка</strong>' +
+        '<strong>' + escapeHtml(title) + '</strong>' +
         '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Закрыть" : "Увеличить") + '</button>' +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
-          return '<div class="sng-champions-modal__map-round' + (index === activeBracketStage ? " sng-champions-modal__map-round--active" : "") + '">' +
-            '<button type="button" class="sng-champions-modal__map-round-title" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(round, index, rounds)) + '</button>' +
+          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + '">' +
+            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match) { return renderBracketMapMatch(match, data); }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +
@@ -756,10 +806,12 @@
     '</section>';
   }
 
-  function renderBracket(data) {
-    var realRounds = data.rounds || [];
+  function renderBracketView(data, options) {
+    options = options || {};
+    var isLosers = options.kind === "losers";
+    var realRounds = options.rounds || [];
     var isPreview = !realRounds.length;
-    var rounds = isPreview ? buildBracketSkeletonRounds() : realRounds;
+    var rounds = isPreview ? (isLosers ? buildLoserBracketSkeletonRounds() : buildBracketSkeletonRounds()) : realRounds;
     var previewData = data;
     if (isPreview) {
       previewData = Object.assign({}, data, {
@@ -768,24 +820,31 @@
         playersById: buildBracketSkeletonPlayers(rounds),
       });
     }
-    if (activeBracketStage < 0) activeBracketStage = 0;
-    if (activeBracketStage >= rounds.length) activeBracketStage = rounds.length - 1;
-    var round = rounds[activeBracketStage] || rounds[0];
+    var stageIndex = isLosers ? activeLoserBracketStage : activeBracketStage;
+    if (stageIndex < 0) stageIndex = 0;
+    if (stageIndex >= rounds.length) stageIndex = rounds.length - 1;
+    if (isLosers) activeLoserBracketStage = stageIndex;
+    else activeBracketStage = stageIndex;
+    var round = rounds[stageIndex] || rounds[0];
     var active = data.currentRoundId && data.currentRoundId === round.id;
-    var stageLabel = roundStageLabel(round, activeBracketStage, rounds);
-    var stageClass = roundStageClass(round, activeBracketStage, rounds);
+    var labelFn = isLosers ? loserRoundStageLabel : roundStageLabel;
+    var classFn = isLosers ? loserRoundStageClass : roundStageClass;
+    var stageLabel = labelFn(round, stageIndex, rounds);
+    var stageClass = classFn(round, stageIndex, rounds);
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
-    var prevDisabled = activeBracketStage <= 0;
-    var nextDisabled = activeBracketStage >= rounds.length - 1;
+    var prevDisabled = stageIndex <= 0;
+    var nextDisabled = stageIndex >= rounds.length - 1;
+    var stageAttr = isLosers ? "data-sng-loser-stage-index" : "data-sng-stage-index";
+    var stageMoveAttr = isLosers ? "data-sng-loser-stage" : "data-sng-stage";
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
       '<div class="sng-champions-modal__stage-head">' +
-        '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
+        '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
         '<div>' +
-          '<span>Этап ' + escapeHtml(activeBracketStage + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
+          '<span>Этап ' + escapeHtml(stageIndex + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
           '<strong>' + escapeHtml(stageLabel) + '</strong>' +
           (isPreview ? '<em>предпросмотр сетки</em>' : active ? '<em>текущий этап</em>' : '') +
         '</div>' +
-        '<button type="button" class="sng-champions-modal__stage-arrow" data-sng-stage="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
+        '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="next"' + (nextDisabled ? " disabled" : "") + ' aria-label="Следующий этап">›</button>' +
       '</div>' +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
         (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
@@ -794,10 +853,28 @@
         '</div>' +
       '</section>' +
       '<div class="sng-champions-modal__stage-dots" aria-label="Этапы сетки">' + rounds.map(function (item, index) {
-        return '<button type="button" class="' + (index === activeBracketStage ? "is-active" : "") + '" data-sng-stage-index="' + escapeHtml(index) + '">' + escapeHtml(roundStageLabel(item, index, rounds)) + '</button>';
+        return '<button type="button" class="' + (index === stageIndex ? "is-active" : "") + '" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(item, index, rounds)) + '</button>';
       }).join("") + '</div>' +
-      renderBracketMap(rounds, previewData, isPreview) +
+      renderBracketMap(rounds, previewData, isPreview, {
+        labelFn: labelFn,
+        stageIndex: stageIndex,
+        stageAttr: stageAttr,
+        title: isLosers ? "Сетка проигравших" : "Вся сетка винеров",
+        extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "",
+      }) +
     '</div>';
+  }
+
+  function renderBracket(data) {
+    var winnersHtml = renderBracketView(data, { kind: "winners", rounds: data.rounds || [] });
+    var losersHtml = renderBracketView(data, { kind: "losers", rounds: data.loserRounds || [] });
+    activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
+    return '<div class="sng-champions-modal__bracket-subtabs" role="tablist" aria-label="Сетки турнира">' +
+        '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "winners" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="winners" aria-selected="' + (activeBracketView === "winners" ? "true" : "false") + '">Сетка Винеров</button>' +
+        '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Сетка проигравших</button>' +
+      '</div>' +
+      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "winners" ? "" : " hidden") + ' data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' +
+      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "losers" ? "" : " hidden") + ' data-sng-bracket-view-panel="losers">' + losersHtml + '</div>';
   }
 
   function render() {
@@ -931,6 +1008,13 @@
         .finally(function () { setButtonLoading(winner, false); });
       return;
     }
+    var bracketView = event.target && event.target.closest ? event.target.closest("[data-sng-bracket-view]") : null;
+    if (bracketView) {
+      activeBracketView = bracketView.getAttribute("data-sng-bracket-view") === "losers" ? "losers" : "winners";
+      render();
+      setTab("bracket");
+      return;
+    }
     var stage = event.target && event.target.closest ? event.target.closest("[data-sng-stage]") : null;
     if (stage) {
       activeBracketStage += stage.getAttribute("data-sng-stage") === "next" ? 1 : -1;
@@ -938,9 +1022,26 @@
       setTab("bracket");
       return;
     }
+    var loserStage = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage]") : null;
+    if (loserStage) {
+      activeLoserBracketStage += loserStage.getAttribute("data-sng-loser-stage") === "next" ? 1 : -1;
+      activeBracketView = "losers";
+      render();
+      setTab("bracket");
+      return;
+    }
     var stageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-stage-index]") : null;
     if (stageIndex) {
       activeBracketStage = Math.max(0, Number(stageIndex.getAttribute("data-sng-stage-index")) || 0);
+      activeBracketView = "winners";
+      render();
+      setTab("bracket");
+      return;
+    }
+    var loserStageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage-index]") : null;
+    if (loserStageIndex) {
+      activeLoserBracketStage = Math.max(0, Number(loserStageIndex.getAttribute("data-sng-loser-stage-index")) || 0);
+      activeBracketView = "losers";
       render();
       setTab("bracket");
       return;

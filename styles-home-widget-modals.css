@@ -1620,6 +1620,42 @@
   gap: 12px;
 }
 
+.sng-champions-modal__bracket-subtabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 5px;
+  border: 1px solid rgba(255, 184, 70, 0.26);
+  border-radius: 12px;
+  background: rgba(5, 8, 14, 0.66);
+}
+
+.sng-champions-modal__bracket-subtab {
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 10px;
+  color: rgba(255, 239, 201, 0.78);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 1000;
+  border: 1px solid rgba(255, 184, 70, 0.22);
+  border-radius: 8px;
+  background: rgba(8, 9, 14, 0.82);
+  cursor: pointer;
+}
+
+.sng-champions-modal__bracket-subtab--active {
+  color: #1c1003;
+  border-color: rgba(255, 230, 162, 0.82);
+  background: linear-gradient(180deg, #fff1a9, #ffb22d 52%, #f08700);
+  box-shadow: 0 0 18px rgba(255, 145, 22, 0.2);
+}
+
+.sng-champions-modal__bracket-subpanel[hidden] {
+  display: none;
+}
+
 .sng-champions-modal__bracket-slider--preview .sng-champions-modal__bracket-player {
   color: rgba(255, 239, 198, 0.82);
   border-color: rgba(255, 178, 42, 0.28);
@@ -2095,6 +2131,29 @@
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
   gap: 8px;
   min-width: 760px;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
+  grid-template-columns:
+    minmax(92px, 1.22fr)
+    minmax(92px, 1.22fr)
+    minmax(84px, 1fr)
+    minmax(84px, 1fr)
+    minmax(76px, 0.86fr)
+    minmax(76px, 0.86fr)
+    minmax(72px, 0.78fr)
+    minmax(78px, 0.82fr)
+    minmax(86px, 0.9fr);
+  min-width: 820px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
+  min-width: 1040px;
 }
 
 .sng-champions-modal__map-round {
