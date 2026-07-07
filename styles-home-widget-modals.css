@@ -2301,8 +2301,8 @@
   display: grid;
   place-items: center;
   gap: 2px;
-  min-height: 30px;
-  padding: 0 10px;
+  min-height: 34px;
+  padding: 3px 11px;
   color: rgba(255, 239, 201, 0.72);
   font: inherit;
   font-size: 12px;
@@ -2321,7 +2321,7 @@
 
 .sng-champions-modal__stage-dots button small {
   color: rgba(5, 46, 22, 0.86);
-  font-size: 7px;
+  font-size: 8px;
   font-weight: 1000;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -2356,7 +2356,7 @@
 
 .sng-champions-modal__stage-dots button.is-live small {
   color: rgba(28, 16, 3, 0.84);
-  font-size: 6px;
+  font-size: 7px;
 }
 
 .sng-champions-modal__stage-dots button.is-live.is-active {
