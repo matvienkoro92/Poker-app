@@ -2518,6 +2518,12 @@
   text-align: center;
 }
 
+.sng-champions-modal__map-match--waiting .sng-champions-modal__map-players {
+  align-content: space-evenly;
+  gap: 4px;
+  padding-right: 6px;
+}
+
 .sng-champions-modal__map-player {
   display: inline-block;
   min-width: 0;
@@ -2546,10 +2552,15 @@
 }
 
 .sng-champions-modal__map-player--waiting {
-  color: rgba(255, 239, 201, 0.5);
-  opacity: 0.58;
-  text-shadow: none;
-  filter: saturate(0.7);
+  max-width: none;
+  overflow: visible;
+  color: #fff7d6;
+  opacity: 1;
+  font-weight: 1000;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  text-shadow: 0 0 7px rgba(255, 239, 201, 0.42);
+  white-space: normal;
 }
 
 .sng-champions-modal__map-player--unplayed {
@@ -2651,6 +2662,11 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
   font-size: 11px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting {
+  font-size: 10px;
+  line-height: 1.05;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--pending {
