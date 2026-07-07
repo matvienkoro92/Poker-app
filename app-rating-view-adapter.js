@@ -3179,8 +3179,8 @@ function initWinterRating() {
       var toneCounts = countCalendarMonthRewardTones(yearNum, monthNum);
       var countsHtml =
         "<div class=\"winter-rating__calendar-counts\" aria-label=\"Заносы месяца\">" +
-          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--green\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>100к+:</span> <strong>" + toneCounts.high + "</strong></span>" +
-          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--brown\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>50-100к:</span> <strong>" + toneCounts.mid + "</strong></span>" +
+          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--green\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>100к+:</span> <strong>" + toneCounts.high + "</strong><span>заносов</span></span>" +
+          "<span class=\"winter-rating__calendar-count winter-rating__calendar-count--brown\"><span class=\"winter-rating__calendar-count-swatch\" aria-hidden=\"true\"></span><span>50-100к:</span> <strong>" + toneCounts.mid + "</strong><span>заносов</span></span>" +
         "</div>";
       calendarWrap.innerHTML = "<div class=\"winter-rating__calendar\">" + titleRow + headerRow + "<div class=\"winter-rating__calendar-grid\">" + rowsHtml + "</div>" + countsHtml + "</div>";
       calendarWrap.querySelectorAll(".winter-rating__calendar-cell--day").forEach(function (btn) {

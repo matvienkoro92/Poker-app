@@ -309,8 +309,8 @@
     --hall-top2026-stage-min-height: 824px;
     --hall-top2026-lower-bg-y: 402px;
     --hall-top2026-lower-bg-width: 554px;
-    --hall-top2026-trophy-right: calc(50% - 274px);
-    --hall-top2026-trophy-top: 342px;
+    --hall-top2026-trophy-right: calc(50% - 279px);
+    --hall-top2026-trophy-top: 332px;
     --hall-top2026-trophy-width: 126px;
     max-width: 430px;
     margin-inline: auto;

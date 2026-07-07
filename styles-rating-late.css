@@ -3168,9 +3168,11 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-counts {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 6px 12px;
+  align-items: center;
+  gap: 5px;
   margin-top: 10px;
   color: rgba(255, 247, 237, 0.82);
   font-size: clamp(11px, 2.25vw, 15px);
@@ -3184,6 +3186,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   align-items: center;
   justify-content: center;
   gap: 5px;
+  width: 100%;
   min-width: 0;
 }
 
