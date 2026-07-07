@@ -870,12 +870,12 @@
     var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
     var nextIndex = nextMapMatchIndex(round, match, roundIndex, rounds);
     while (playerIds.length < 2) playerIds.push("");
-    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + mapLaneClass(nextIndex) + '">' +
+    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '">' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
-      (nextIndex ? '<span class="sng-champions-modal__map-next">→ ' + escapeHtml(nextIndex) + '</span>' : '') +
+      (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
   }
 
