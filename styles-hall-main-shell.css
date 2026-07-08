@@ -206,8 +206,8 @@
   --hall-top2026-stage-min-height: clamp(820px, calc(101vw + 434px), 1028px);
   --hall-top2026-lower-bg-y: clamp(360px, 96vw, 430px);
   --hall-top2026-lower-bg-width: 142%;
-  --hall-top2026-trophy-right: clamp(-53px, calc(3vw - 62px), -35px);
-  --hall-top2026-trophy-top: clamp(338px, calc(84vw + 18px), 393px);
+  --hall-top2026-trophy-right: clamp(-58px, calc(3vw - 67px), -40px);
+  --hall-top2026-trophy-top: clamp(327px, calc(84vw + 7px), 382px);
   --hall-top2026-trophy-width: clamp(121.55px, 33.66vw, 145.86px);
   margin: 0;
   padding: 4px 0 0;
@@ -241,12 +241,12 @@
   background: linear-gradient(180deg, rgba(4, 4, 4, 0.99) 0%, rgba(5, 4, 3, 0.96) 100%);
 }
 #hallOfFameView .hall-of-fame__toolbar-back {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
+  width: 29px;
+  min-width: 29px;
+  height: 29px;
+  min-height: 29px;
   padding: 0;
-  font-size: 22px;
+  font-size: 19px;
   color: #f5d49a;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(255, 211, 132, 0.22), transparent 70%),
@@ -255,8 +255,8 @@
   box-shadow: inset 0 1px 0 rgba(255, 229, 177, 0.22), 0 4px 12px rgba(0, 0, 0, 0.34) !important;
 }
 #hallOfFameView .hall-of-fame__subtabs {
-  height: 46px;
-  min-height: 46px;
+  height: 39px;
+  min-height: 39px;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(255, 204, 120, 0.16), transparent 70%),
     linear-gradient(180deg, #20180f 0%, #070605 100%);
@@ -268,7 +268,7 @@
     0 4px 12px rgba(0, 0, 0, 0.32);
 }
 #hallOfFameView .hall-of-fame__subtab {
-  padding: 4px 3px;
+  padding: 3px 3px;
   color: rgba(245, 212, 154, 0.78);
   background: transparent !important;
   border-right-color: rgba(196, 125, 39, 0.32);
