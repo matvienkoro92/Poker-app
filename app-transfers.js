@@ -64,6 +64,11 @@
     return el;
   }
 
+  function participantInitial(name, id) {
+    var value = String(name || id || "И").trim();
+    return value.charAt(0).toUpperCase() || "И";
+  }
+
   function formatAmount(amount) {
     var n = Math.max(0, Number(amount) || 0);
     try {
@@ -131,6 +136,61 @@
     return item[role + "DisplayId"] || item[role + "Poker21Id"] || item[role + "AccountId"] || "";
   }
 
+  function participantName(item, role) {
+    item = item || {};
+    var profile = item[role + "Profile"] || {};
+    return profile.name || item[role + "Name"] || transferDisplayId(item, role) || "";
+  }
+
+  function participantAvatar(item, role) {
+    item = item || {};
+    var profile = item[role + "Profile"] || {};
+    return profile.avatarUrl || profile.avatar || "";
+  }
+
+  function participantLevel(item, role) {
+    item = item || {};
+    var profile = item[role + "Profile"] || {};
+    var raw = profile.level != null ? profile.level : item[role + "Level"];
+    var level = Math.max(0, Math.floor(Number(raw) || 0));
+    return level > 0 ? level : 0;
+  }
+
+  function renderParticipant(label, item, role) {
+    var id = transferDisplayId(item, role);
+    var name = participantName(item, role);
+    if (!id && !name) return null;
+    var profile = textNode("article", "transfers-card__participant transfers-card__participant--" + role);
+    var avatar = textNode("span", "transfers-card__participant-avatar");
+    var avatarUrl = participantAvatar(item, role);
+    if (avatarUrl) {
+      var img = document.createElement("img");
+      img.src = avatarUrl;
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      avatar.appendChild(img);
+    } else {
+      avatar.appendChild(textNode("b", "", participantInitial(name, id)));
+    }
+    var level = participantLevel(item, role);
+    if (level) avatar.appendChild(textNode("em", "", String(level)));
+    profile.appendChild(avatar);
+
+    var body = textNode("span", "transfers-card__participant-body");
+    body.appendChild(textNode("span", "transfers-card__participant-role", label));
+    body.appendChild(textNode("strong", "transfers-card__participant-name", name || "Игрок"));
+    if (level) body.appendChild(textNode("small", "transfers-card__participant-level", "Уровень " + level));
+    if (id) {
+      var pokerId = textNode("span", "transfers-card__participant-id");
+      pokerId.appendChild(textNode("span", "", "Poker21 ID"));
+      pokerId.appendChild(textNode("b", "", id));
+      body.appendChild(pokerId);
+    }
+    profile.appendChild(body);
+    return profile;
+  }
+
   function actionButton(action, label, item) {
     var btn = textNode("button", "transfers-card__action", label);
     btn.type = "button";
@@ -158,6 +218,32 @@
     if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink("transfers");
     var base = typeof getAppBaseUrlForLinks === "function" ? String(getAppBaseUrlForLinks() || "").replace(/\/+$/, "") : "";
     return base ? base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=transfers" : "";
+  }
+
+  function shareTransfersSection() {
+    var link = transfersDeepLink();
+    var text = "Переводы между игроками клуба Два Туза";
+    if (!link && window.location) link = String(window.location.origin || "") + "/?startapp=transfers";
+    if (!link) return;
+    var tryWebShare = typeof pokerTryPwaWebShare === "function"
+      ? pokerTryPwaWebShare
+      : function () { return Promise.resolve(false); };
+    tryWebShare({ title: "Переводы", text: text + "\n" + link, url: link }).then(function (ok) {
+      if (ok) return;
+      var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+        ? pokerBuildTelegramShareUrlDialog(link, text)
+        : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (shareUrl && tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (shareUrl && tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else if (shareUrl) window.open(shareUrl, "_blank", "noopener,noreferrer");
+      else if (typeof pokerCopyTextToClipboard === "function") {
+        pokerCopyTextToClipboard(link).then(function () {
+          if (tg && tg.showToast) tg.showToast("Ссылка скопирована");
+        });
+      }
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("transfers_section_share");
+    });
   }
 
   function buildTransferShareText(item, link) {
@@ -264,10 +350,14 @@
     card.appendChild(top);
 
     var meta = textNode("div", "transfers-card__meta");
-    addMeta(meta, "Автор", transferDisplayId(item, "owner"));
-    addMeta(meta, "Покупатель", transferDisplayId(item, "buyer"));
-    addMeta(meta, "Продавец", transferDisplayId(item, "seller"));
-    card.appendChild(meta);
+    [
+      renderParticipant("Автор", item, "owner"),
+      renderParticipant("Покупатель", item, "buyer"),
+      renderParticipant("Продавец", item, "seller"),
+    ].forEach(function (node) {
+      if (node) meta.appendChild(node);
+    });
+    if (meta.children.length) card.appendChild(meta);
 
     if (item.comment) card.appendChild(textNode("p", "transfers-card__comment", item.comment));
     renderRequisites(card, item);
@@ -484,6 +574,11 @@
     if (!r || state.bound) return;
     state.bound = true;
     r.addEventListener("click", function (event) {
+      var sectionShare = event.target && event.target.closest ? event.target.closest("[data-transfers-share-section]") : null;
+      if (sectionShare) {
+        shareTransfersSection();
+        return;
+      }
       var mode = event.target && event.target.closest ? event.target.closest("[data-transfers-kind]") : null;
       if (mode) {
         state.kind = mode.getAttribute("data-transfers-kind") || "cashout";

@@ -17,6 +17,7 @@
   var activeLoserBracketStageManual = false;
   var activeBracketView = "winners";
   var bracketMapExpanded = false;
+  var activeBracketMapSelection = null;
   var bracketTimerInterval = null;
   var versionChecking = false;
   var stateRevision = "";
@@ -132,6 +133,7 @@
     bodyEl = document.getElementById("sngChampionsBody");
     statusEl = document.getElementById("sngChampionsStatus");
     modal.addEventListener("click", onModalClick);
+    modal.addEventListener("keydown", onModalKeydown);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && modal.classList.contains("club-choice-vote-modal--open")) closeModal();
     });
@@ -314,6 +316,7 @@
   }
 
   function roundStageLabel(round, index, rounds) {
+    if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд-финал";
     if (Array.isArray(rounds) && rounds.length) {
       var remaining = rounds.length - (Number(index) || 0);
       if (remaining === 1) return "Финал";
@@ -378,7 +381,7 @@
   }
 
   function buildBracketSkeletonRounds() {
-    return [16, 8, 4, 2, 1].map(function (count, roundIndex) {
+    return [16, 8, 4, 2, 1, 1].map(function (count, roundIndex) {
       var matches = [];
       for (var index = 0; index < count; index += 1) {
         matches.push({
@@ -392,13 +395,14 @@
       }
       return {
         id: "preview-round-" + String(roundIndex),
+        name: roundIndex === 5 ? "Гранд-финал" : "",
         matches: matches,
       };
     });
   }
 
   function buildLoserBracketSkeletonRounds() {
-    return [8, 8, 4, 4, 2, 2, 1, 1, 1].map(function (count, roundIndex) {
+    return [8, 8, 4, 4, 2, 2, 1, 1].map(function (count, roundIndex) {
       var matches = [];
       for (var index = 0; index < count; index += 1) {
         matches.push({
@@ -876,7 +880,8 @@
     return " sng-champions-modal__map-match--lane-" + String(((Math.max(1, nextIndex) - 1) % 8) + 1);
   }
 
-  function renderBracketMapMatch(match, data, round, roundIndex, rounds) {
+  function renderBracketMapMatch(match, data, round, roundIndex, rounds, options) {
+    options = options || {};
     var playerIds = Array.isArray(match.playerIds) ? match.playerIds.slice(0, 2) : [];
     var nextIndex = nextMapMatchIndex(round, match, roundIndex, rounds);
     while (playerIds.length < 2) playerIds.push("");
@@ -885,7 +890,10 @@
     var hasPendingPlayer = playerIds.some(function (id) { return !id; });
     var waitingForOpponent = !match.winnerId && hasKnownPlayer && hasPendingPlayer;
     var unplayed = !match.winnerId && knownCount >= 2;
-    return '<article class="sng-champions-modal__map-match' + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '">' +
+    var selectedClass = options.selected ? " sng-champions-modal__map-match--selected" : "";
+    var focusClass = options.focus ? " sng-champions-modal__map-match--focus" : "";
+    var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
+    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + attrs + '>' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
@@ -895,25 +903,52 @@
     '</article>';
   }
 
+  function selectedBracketMapMatch(rounds, kind) {
+    if (!activeBracketMapSelection || activeBracketMapSelection.kind !== kind) return null;
+    var roundIndex = Math.max(0, Number(activeBracketMapSelection.roundIndex) || 0);
+    var round = rounds[roundIndex];
+    var matches = Array.isArray(round && round.matches) ? round.matches : [];
+    var matchId = String(activeBracketMapSelection.matchId || "");
+    var match = matches.find(function (item) {
+      return item && String(item.id || "") === matchId;
+    });
+    return match ? { round: round, roundIndex: roundIndex, match: match } : null;
+  }
+
   function renderBracketMap(rounds, data, isPreview, options) {
     options = options || {};
     var labelFn = options.labelFn || roundStageLabel;
     var stageIndex = Number(options.stageIndex) || 0;
     var stageAttr = options.stageAttr || "data-sng-stage-index";
     var title = options.title || "Вся сетка";
+    var kind = options.kind || "winners";
+    var selected = selectedBracketMapMatch(rounds, kind);
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
+    var focusHtml = bracketMapExpanded && selected
+      ? '<div class="sng-champions-modal__map-focus" aria-label="Увеличенная выбранная пара">' +
+          '<div class="sng-champions-modal__map-focus-head">' +
+            '<span>' + escapeHtml(labelFn(selected.round, selected.roundIndex, rounds)) + '</span>' +
+            '<strong>Пара ' + escapeHtml(selected.match.index || "") + '</strong>' +
+          '</div>' +
+          renderBracketMapMatch(selected.match, data, selected.round, selected.roundIndex, rounds, { focus: true, interactive: false }) +
+        '</div>'
+      : "";
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
         '<strong>' + escapeHtml(title) + '</strong>' +
         '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Закрыть" : "Увеличить") + '</button>' +
       '</div>' +
+      focusHtml +
       '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
-              ((round.matches || []).map(function (match) { return renderBracketMapMatch(match, data, round, index, rounds); }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
+              ((round.matches || []).map(function (match) {
+                var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
+                return renderBracketMapMatch(match, data, round, index, rounds, { selected: isSelected });
+              }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +
           '</div>';
         }).join("") +
@@ -955,6 +990,26 @@
     if (last === 1) return "пару";
     if (last >= 2 && last <= 4) return "пары";
     return "пар";
+  }
+
+  function grandFinalRound(data) {
+    var rounds = Array.isArray(data && data.loserRounds) ? data.loserRounds : [];
+    return rounds.filter(function (round) {
+      return round && (Number(round.index) === 9 || String(round.name || "").toLowerCase() === "гранд-финал");
+    })[0] || null;
+  }
+
+  function winnerDisplayRounds(data) {
+    var rounds = Array.isArray(data && data.rounds) ? data.rounds.slice() : [];
+    var grand = grandFinalRound(data);
+    if (grand && !rounds.some(function (round) { return round && round.id === grand.id; })) rounds.push(grand);
+    return rounds;
+  }
+
+  function loserDisplayRounds(data) {
+    return (Array.isArray(data && data.loserRounds) ? data.loserRounds : []).filter(function (round) {
+      return !(round && (Number(round.index) === 9 || String(round.name || "").toLowerCase() === "гранд-финал"));
+    });
   }
 
   function renderBracketView(data, options) {
@@ -1004,6 +1059,7 @@
       labelFn: labelFn,
       stageIndex: stageIndex,
       stageAttr: stageAttr,
+      kind: isLosers ? "losers" : "winners",
       title: isLosers ? "Сетка проигравших" : "Вся сетка винеров",
       extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "",
     });
@@ -1031,8 +1087,8 @@
   }
 
   function renderBracket(data) {
-    var winnersHtml = renderBracketView(data, { kind: "winners", rounds: data.rounds || [] });
-    var losersHtml = renderBracketView(data, { kind: "losers", rounds: data.loserRounds || [] });
+    var winnersHtml = renderBracketView(data, { kind: "winners", rounds: winnerDisplayRounds(data) });
+    var losersHtml = renderBracketView(data, { kind: "losers", rounds: loserDisplayRounds(data) });
     activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
     return '<div class="sng-champions-modal__bracket-subnav" aria-label="Раздел вкладки Сетка">' +
         '<span class="sng-champions-modal__bracket-subnav-label">Вкладка Сетка</span>' +
@@ -1229,6 +1285,28 @@
       setTab("bracket");
       return;
     }
+    var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
+    if (mapMatch) {
+      var mapRoundIndex = Math.max(0, Number(mapMatch.getAttribute("data-sng-map-round")) || 0);
+      var isLoserMap = !!(mapMatch.closest && mapMatch.closest(".sng-champions-modal__bracket-map-wrap--losers"));
+      if (isLoserMap) {
+        activeLoserBracketStageManual = true;
+        activeLoserBracketStage = mapRoundIndex;
+      } else {
+        activeBracketStageManual = true;
+        activeBracketStage = mapRoundIndex;
+      }
+      activeBracketView = isLoserMap ? "losers" : "winners";
+      activeBracketMapSelection = {
+        kind: isLoserMap ? "losers" : "winners",
+        roundIndex: mapRoundIndex,
+        matchId: mapMatch.getAttribute("data-sng-map-match") || "",
+      };
+      bracketMapExpanded = true;
+      render();
+      setTab("bracket");
+      return;
+    }
     var loserStageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage-index]") : null;
     if (loserStageIndex) {
       activeLoserBracketStageManual = true;
@@ -1256,6 +1334,14 @@
     }).finally(function () {
       setButtonLoading(action, false);
     });
+  }
+
+  function onModalKeydown(event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
+    if (!mapMatch) return;
+    event.preventDefault();
+    mapMatch.click();
   }
 
   function bind() {

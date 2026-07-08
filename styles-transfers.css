@@ -42,6 +42,34 @@
   backdrop-filter: blur(12px);
 }
 
+.transfers-page__share {
+  position: fixed;
+  top: max(28px, calc(env(safe-area-inset-top) + 24px));
+  right: 18px;
+  z-index: 4;
+  min-height: 38px;
+  padding: 0 14px;
+  color: #ffe7a2;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 1000;
+  line-height: 1;
+  border: 1px solid rgba(255, 204, 97, 0.48);
+  border-radius: 12px;
+  background: rgba(9, 10, 8, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 212, 0.16),
+    0 0 18px rgba(255, 170, 33, 0.16);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.transfers-page__share:hover,
+.transfers-page__share:focus-visible {
+  border-color: rgba(255, 230, 167, 0.84);
+  color: #fff8e6;
+}
+
 .transfers-page__heading {
   position: absolute;
   width: 1px;
@@ -239,6 +267,14 @@
   letter-spacing: 0;
   line-height: 1;
   text-transform: uppercase;
+}
+
+.transfers-field__hint {
+  margin-top: -4px;
+  color: rgba(255, 232, 184, 0.7);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .transfers-field__input,
@@ -507,7 +543,10 @@
 }
 
 .transfers-card__meta {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  flex-wrap: initial;
   margin-top: 24px;
 }
 
@@ -522,6 +561,120 @@
   color: #fff8e6;
   font-size: clamp(17px, 4.6vw, 26px);
   font-weight: 950;
+}
+
+.transfers-card__participant {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 211, 126, 0.24);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 224, 158, 0.08), rgba(255, 224, 158, 0.02)),
+    rgba(4, 6, 8, 0.32);
+}
+
+.transfers-card__participant-avatar {
+  display: grid;
+  position: relative;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  color: #fff7d6;
+  border: 1px solid rgba(255, 225, 159, 0.46);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 241, 199, 0.32), transparent 34%),
+    linear-gradient(145deg, rgba(255, 184, 70, 0.34), rgba(4, 7, 13, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 218, 0.18),
+    0 0 18px rgba(255, 184, 70, 0.16);
+}
+
+.transfers-card__participant-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.transfers-card__participant-avatar b {
+  font-size: 20px;
+  font-weight: 1000;
+}
+
+.transfers-card__participant-avatar em {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1b1104;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+  border: 1px solid rgba(255, 249, 223, 0.86);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3b8, #ffc24c 54%, #e58a00);
+  box-shadow: 0 0 10px rgba(255, 184, 70, 0.5);
+}
+
+.transfers-card__participant-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.transfers-card__participant-role {
+  color: rgba(255, 223, 166, 0.72);
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.transfers-card__participant-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #fff8e6;
+  font-size: clamp(16px, 3.9vw, 22px);
+  font-weight: 1000;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfers-card__participant-level {
+  color: rgba(255, 248, 230, 0.74);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.transfers-card__participant-id {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  color: rgba(255, 223, 166, 0.72);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.transfers-card__participant-id b {
+  color: #fff8e6;
+  font-size: 13px;
+  font-weight: 1000;
 }
 
 .transfers-card__comment {
@@ -555,12 +708,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 240px;
-  min-height: 72px;
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 48px;
   margin: 0;
-  padding: 0 28px;
+  padding: 0 18px;
   color: #ffe6a8;
-  font-size: clamp(20px, 5.8vw, 31px);
+  font-size: clamp(14px, 3.8vw, 20px);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .transfers-card__share:hover,
@@ -577,8 +733,9 @@
 }
 
 .transfers-card__actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+  gap: 10px;
   margin-top: 26px;
 }
 
@@ -590,11 +747,14 @@
 }
 
 .transfers-card__action {
-  min-width: 240px;
-  min-height: 72px;
-  padding: 0 28px;
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 18px;
   color: #ffe6a8;
-  font-size: clamp(20px, 5.8vw, 31px);
+  font-size: clamp(14px, 3.8vw, 20px);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .transfers-card__action:disabled,
@@ -621,6 +781,14 @@
   .transfers-page {
     gap: 10px;
     padding: max(12px, env(safe-area-inset-top)) 10px calc(22px + env(safe-area-inset-bottom));
+  }
+
+  .transfers-page__share {
+    right: 10px;
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
+    border-radius: 11px;
   }
 
   .transfers-create {
@@ -759,8 +927,24 @@
   }
 
   .transfers-card__meta {
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px 14px;
     margin-top: 14px;
+  }
+
+  .transfers-card__participant {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 9px;
+    padding: 8px;
+  }
+
+  .transfers-card__participant-avatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .transfers-card__participant-name {
+    font-size: 17px;
   }
 
   .transfers-card__meta-item {
@@ -788,14 +972,16 @@
   }
 
   .transfers-card__actions {
+    gap: 8px;
     margin-top: 14px;
   }
 
-  .transfers-card__action {
-    min-width: min(100%, 190px);
-    min-height: 56px;
-    border-radius: 16px;
-    font-size: 20px;
+  .transfers-card__action,
+  .transfers-card__share {
+    min-height: 40px;
+    padding: 0 12px;
+    border-radius: 13px;
+    font-size: 15px;
   }
 }
 
@@ -817,5 +1003,12 @@
 
   .transfers-card__amount {
     font-size: 32px;
+  }
+
+  .transfers-card__action,
+  .transfers-card__share {
+    min-height: 36px;
+    padding: 0 9px;
+    font-size: 13px;
   }
 }

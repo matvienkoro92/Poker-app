@@ -2428,7 +2428,7 @@
 
 .sng-champions-modal__bracket-map {
   display: grid;
-  grid-template-columns: minmax(0, 1.52fr) minmax(0, 1.22fr) minmax(0, 0.96fr) minmax(0, 0.78fr) minmax(0, 0.82fr);
+  grid-template-columns: minmax(0, 1.52fr) minmax(0, 1.22fr) minmax(0, 0.96fr) minmax(0, 0.78fr) minmax(0, 0.82fr) minmax(0, 0.92fr);
   gap: 4px;
   width: 100%;
   min-width: 0;
@@ -2437,7 +2437,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
   gap: 8px;
-  min-width: 900px;
+  min-width: 1080px;
   overflow: visible;
   padding-bottom: 34px;
 }
@@ -2456,13 +2456,12 @@
     minmax(76px, 0.86fr)
     minmax(76px, 0.86fr)
     minmax(72px, 0.78fr)
-    minmax(78px, 0.82fr)
-    minmax(86px, 0.9fr);
-  min-width: 820px;
+    minmax(78px, 0.82fr);
+  min-width: 740px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  min-width: 1280px;
+  min-width: 1160px;
   padding-bottom: 54px;
 }
 
@@ -2524,6 +2523,69 @@
     0 0 14px color-mix(in srgb, var(--sng-map-lane) 10%, transparent);
   isolation: isolate;
   overflow: visible;
+}
+
+.sng-champions-modal__map-match[role="button"] {
+  cursor: pointer;
+}
+
+.sng-champions-modal__map-match[role="button"]:focus-visible {
+  outline: 2px solid rgba(255, 241, 199, 0.92);
+  outline-offset: 2px;
+}
+
+.sng-champions-modal__map-match--selected {
+  border-color: rgba(255, 241, 199, 0.95);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 241, 199, 0.42),
+    0 0 0 2px color-mix(in srgb, var(--sng-map-lane) 52%, transparent),
+    0 0 24px color-mix(in srgb, var(--sng-map-lane) 42%, transparent);
+}
+
+.sng-champions-modal__map-focus {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 241, 199, 0.48);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255, 241, 199, 0.14), transparent 56%),
+    rgba(3, 6, 12, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 199, 0.14),
+    0 14px 30px rgba(0, 0, 0, 0.32);
+}
+
+.sng-champions-modal__map-focus-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sng-champions-modal__map-focus-head span {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.74);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sng-champions-modal__map-focus-head strong {
+  flex: 0 0 auto;
+  color: #fff1a9;
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.sng-champions-modal__map-match--focus.sng-champions-modal__map-match--has-next::after {
+  display: none;
 }
 
 .sng-champions-modal__map-match--done {
@@ -2836,6 +2898,51 @@
   right: -22px;
   width: 22px;
   height: 4px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus {
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  min-height: clamp(118px, 18vw, 164px);
+  padding: 12px 14px;
+  border-left-width: 9px;
+  border-radius: 10px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus .sng-champions-modal__map-match-index {
+  font-size: 14px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus .sng-champions-modal__map-player {
+  font-size: clamp(16px, 3.8vw, 25px);
+  line-height: 1.02;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus .sng-champions-modal__map-player--pending {
+  min-width: 72px;
+  max-width: 118px;
+  padding: 7px 12px;
+  font-size: clamp(15px, 3.3vw, 22px);
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus .sng-champions-modal__map-status {
+  min-width: 132px;
+  max-width: 168px;
+  padding: 7px 12px;
+  font-size: clamp(12px, 2.8vw, 18px);
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus .sng-champions-modal__map-next {
+  max-width: 96px;
+  padding: 7px 10px;
+  font-size: clamp(11px, 2.4vw, 16px);
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  inset: 12px 130px 12px 42px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-status {
+  left: 44%;
 }
 
 .club-choice-vote-modal__scheme {
