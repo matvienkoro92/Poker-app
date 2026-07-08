@@ -497,9 +497,9 @@
 
 .club-choice-vote-modal__hero-winner {
   display: grid;
-  grid-template-columns: clamp(150px, 24vw, 230px) minmax(0, 1fr);
+  grid-template-columns: clamp(210px, 30vw, 320px) minmax(0, 1fr);
   align-items: center;
-  gap: 20px;
+  gap: 18px;
   padding: 16px;
   border: 1px solid rgba(255, 205, 102, 0.42);
   border-radius: 16px;
@@ -515,23 +515,24 @@
   display: grid;
   place-items: center;
   min-width: 0;
-  min-height: clamp(170px, 24vw, 250px);
+  min-height: clamp(230px, 31vw, 330px);
   cursor: pointer;
 }
 
 .club-choice-vote-modal__hero-winner-avatar .club-choice-vote-modal__avatar {
-  width: clamp(132px, 20vw, 188px);
-  height: clamp(132px, 20vw, 188px);
-  border-width: 2px;
-  box-shadow:
-    0 0 0 3px rgba(255, 184, 70, 0.16),
-    0 0 28px rgba(255, 169, 40, 0.24);
+  width: clamp(190px, 28vw, 300px);
+  max-width: none;
+  height: clamp(220px, 31vw, 330px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .club-choice-vote-modal__hero-art {
   display: block;
-  width: clamp(150px, 24vw, 230px);
-  height: clamp(170px, 24vw, 250px);
+  width: clamp(220px, 31vw, 330px);
+  height: clamp(230px, 31vw, 330px);
   pointer-events: none;
 }
 
@@ -7798,316 +7799,45 @@ body.club-choice-vote-open {
   }
 }
 
-.sng-champions-modal__bracket-map {
-  --sng-tree-card-h: 17px;
-  --sng-tree-card-w: 96px;
-  --sng-tree-gap: 6px;
-  --sng-tree-line: rgba(255, 232, 188, 0.64);
-  --sng-tree-line-w: 16px;
-  --sng-tree-join-w: 12px;
-  grid-template-columns: repeat(var(--sng-tree-rounds, 6), var(--sng-tree-card-w));
-  align-items: start;
-  justify-content: start;
-  gap: calc(var(--sng-tree-line-w) + var(--sng-tree-join-w));
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 6px 3px 9px;
-  scrollbar-width: thin;
-}
-
-.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  grid-template-columns: repeat(var(--sng-tree-rounds, 8), var(--sng-tree-card-w));
-  min-width: max-content;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
-  --sng-tree-card-h: 25px;
-  --sng-tree-card-w: 142px;
-  --sng-tree-gap: 10px;
-  --sng-tree-line-w: 28px;
-  --sng-tree-join-w: 18px;
-  min-width: max-content;
-  gap: calc(var(--sng-tree-line-w) + var(--sng-tree-join-w));
-  padding: 12px 8px 30px;
-  overflow: visible;
-}
-
-.sng-champions-modal__map-round {
-  grid-template-rows: auto auto;
-  gap: 8px;
-  min-width: var(--sng-tree-card-w);
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round {
-  gap: 12px;
-}
-
-.sng-champions-modal__map-round-title {
-  min-height: 18px;
-  padding: 0 5px;
-  font-size: 9px;
-  border-radius: 5px;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-title {
-  min-height: 24px;
-  font-size: 13px;
-}
-
-.sng-champions-modal__map-round-matches {
+/* Keep the original СНГ map style, but prevent later rounds from stretching into tall empty cards. */
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-matches {
   align-content: start;
-  gap: var(--sng-tree-gap);
 }
 
-.sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-round-matches {
-  gap: var(--sng-tree-gap);
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match {
+  min-height: 44px;
 }
 
-.sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) / 2);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 2 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 1.5);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 4 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 3.5);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 8 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 7.5);
-}
-
-.sng-champions-modal__bracket-map--root-8 .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-round-matches {
-  padding-top: 0;
-  gap: var(--sng-tree-gap);
-}
-
-.sng-champions-modal__bracket-map--root-8 .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) / 2);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 2 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__bracket-map--root-8 .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 1.5);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 4 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__bracket-map--root-8 .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 3.5);
-}
-
-.sng-champions-modal__bracket-map--root-4 .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-round-matches {
-  padding-top: 0;
-  gap: var(--sng-tree-gap);
-}
-
-.sng-champions-modal__bracket-map--root-4 .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) / 2);
-  gap: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 2 - var(--sng-tree-card-h));
-}
-
-.sng-champions-modal__bracket-map--root-4 .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-round-matches {
-  padding-top: calc((var(--sng-tree-card-h) + var(--sng-tree-gap)) * 1.5);
-}
-
-.sng-champions-modal__map-match {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  width: var(--sng-tree-card-w);
-  min-height: var(--sng-tree-card-h);
-  height: var(--sng-tree-card-h);
-  padding: 1px 6px;
-  border: 1px solid color-mix(in srgb, var(--sng-map-lane) 62%, rgba(255, 239, 201, 0.36));
-  border-left-width: 1px;
-  border-radius: 2px;
-  background: rgba(4, 7, 12, 0.9);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--sng-map-lane) 10%, transparent),
-    0 0 8px color-mix(in srgb, var(--sng-map-lane) 8%, transparent);
-  overflow: visible;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--unplayed {
-  grid-template-columns: minmax(0, 1fr);
-  min-height: var(--sng-tree-card-h);
-  height: var(--sng-tree-card-h);
-  padding: 2px 8px;
-  border-left-width: 1px;
-  border-radius: 3px;
-}
-
-.sng-champions-modal__map-match--selected {
-  border-color: rgba(255, 241, 199, 0.95);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 241, 199, 0.32),
-    0 0 0 1px color-mix(in srgb, var(--sng-map-lane) 42%, transparent),
-    0 0 14px color-mix(in srgb, var(--sng-map-lane) 34%, transparent);
-}
-
-.sng-champions-modal__map-match-index,
-.sng-champions-modal__map-status,
-.sng-champions-modal__map-next {
-  display: none;
-}
-
-.sng-champions-modal__map-players,
-.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  position: static;
-  inset: auto;
-  display: grid;
-  align-content: center;
-  justify-items: stretch;
-  gap: 1px;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  pointer-events: none;
-}
-
-.sng-champions-modal__map-player,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  font-size: 6px;
-  line-height: 1;
-  text-align: left;
-  text-overflow: ellipsis;
-  transform: none;
-  white-space: nowrap;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
-  font-size: 10px;
-}
-
-.sng-champions-modal__map-player--pending,
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--pending {
-  min-width: 0;
-  max-width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed:nth-child(1),
-.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed:nth-child(2) {
-  position: static;
-  top: auto;
-  bottom: auto;
-  left: auto;
-}
-
-.sng-champions-modal__map-match--has-next::after {
-  z-index: 1;
-  top: 50%;
-  right: calc(var(--sng-tree-line-w) * -1 - 1px);
-  width: var(--sng-tree-line-w);
-  height: 2px;
-  border-radius: 0;
-  background: var(--sng-tree-line);
-  box-shadow: none;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next::after {
-  right: calc(var(--sng-tree-line-w) * -1 - 1px);
-  width: var(--sng-tree-line-w);
-  height: 2px;
-}
-
-.sng-champions-modal__map-round:not(:last-child) .sng-champions-modal__map-match:nth-child(odd)::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  right: calc((var(--sng-tree-line-w) + var(--sng-tree-join-w)) * -1);
-  top: 50%;
-  width: var(--sng-tree-join-w);
-  height: calc(var(--sng-tree-card-h) + var(--sng-tree-gap));
-  border-top: 2px solid var(--sng-tree-line);
-  border-right: 2px solid var(--sng-tree-line);
-  transform: translateY(0);
-  pointer-events: none;
-}
-
-.sng-champions-modal__map-round:not(:last-child) .sng-champions-modal__map-match:nth-child(even)::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  right: calc((var(--sng-tree-line-w) + var(--sng-tree-join-w)) * -1);
-  bottom: 50%;
-  width: var(--sng-tree-join-w);
-  height: calc(var(--sng-tree-card-h) + var(--sng-tree-gap));
-  border-bottom: 2px solid var(--sng-tree-line);
-  border-right: 2px solid var(--sng-tree-line);
-  pointer-events: none;
-}
-
-.sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match::before {
-  display: none;
-}
-
-@media (max-width: 700px) {
-  .sng-champions-modal__bracket-map {
-    --sng-tree-card-h: 16px;
-    --sng-tree-card-w: 86px;
-    --sng-tree-gap: 5px;
-    --sng-tree-line-w: 13px;
-    --sng-tree-join-w: 9px;
-  }
-
-  .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
-    --sng-tree-card-h: 22px;
-    --sng-tree-card-w: 118px;
-    --sng-tree-gap: 8px;
-    --sng-tree-line-w: 22px;
-    --sng-tree-join-w: 14px;
-  }
-
-  .sng-champions-modal__map-player,
-  .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player,
-  .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting,
-  .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
-    font-size: 8px;
-  }
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match--unplayed,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-match--unplayed,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match--unplayed,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match--unplayed {
+  min-height: 54px;
 }
 
 @media (max-width: 520px) {
   .club-choice-vote-modal__hero-winner {
-    grid-template-columns: 108px minmax(0, 1fr);
-    gap: 11px;
+    grid-template-columns: 126px minmax(0, 1fr);
+    gap: 8px;
     padding: 12px;
     border-radius: 14px;
   }
 
   .club-choice-vote-modal__hero-winner-avatar {
-    min-height: 136px;
+    min-height: 154px;
   }
 
   .club-choice-vote-modal__hero-winner-avatar .club-choice-vote-modal__avatar {
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 154px;
   }
 
   .club-choice-vote-modal__hero-art {
-    width: 112px;
-    height: 136px;
-  }
+    width: 132px;
+    height: 154px;
   }
 
   .club-choice-vote-modal__hero-winner-main {

@@ -916,13 +916,14 @@
   function renderCompletedWinnerArt(candidate, id) {
     var src = "";
     var nick = clubChoiceRatingNick(candidate && (candidate.ratingNick || candidate.rating_nick || candidate.nick));
+    var key = String(nick || "").trim().toLowerCase();
     try {
       var art = typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(nick) : null;
       if (art && art.src) src = String(art.src).trim();
     } catch (eHeroArt) {
       src = "";
     }
-    if (!src && nick === "Waaar") src = "./assets/summer-rating-player-waaar.webp";
+    if (key === "waaar") src = "./assets/summer-rating-player-waaar.webp";
     if (!src) return renderPlayerAvatar(candidate, id);
     return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +
       '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
