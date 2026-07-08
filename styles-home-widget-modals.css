@@ -497,9 +497,9 @@
 
 .club-choice-vote-modal__hero-winner {
   display: grid;
-  grid-template-columns: clamp(96px, 18vw, 142px) minmax(0, 1fr);
+  grid-template-columns: clamp(150px, 24vw, 230px) minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   padding: 16px;
   border: 1px solid rgba(255, 205, 102, 0.42);
   border-radius: 16px;
@@ -515,16 +515,34 @@
   display: grid;
   place-items: center;
   min-width: 0;
+  min-height: clamp(170px, 24vw, 250px);
   cursor: pointer;
 }
 
 .club-choice-vote-modal__hero-winner-avatar .club-choice-vote-modal__avatar {
-  width: clamp(88px, 17vw, 128px);
-  height: clamp(88px, 17vw, 128px);
+  width: clamp(132px, 20vw, 188px);
+  height: clamp(132px, 20vw, 188px);
   border-width: 2px;
   box-shadow:
     0 0 0 3px rgba(255, 184, 70, 0.16),
     0 0 28px rgba(255, 169, 40, 0.24);
+}
+
+.club-choice-vote-modal__hero-art {
+  display: block;
+  width: clamp(150px, 24vw, 230px);
+  height: clamp(170px, 24vw, 250px);
+  pointer-events: none;
+}
+
+.club-choice-vote-modal__hero-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 14px 18px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 0 20px rgba(255, 171, 42, 0.22));
 }
 
 .club-choice-vote-modal__hero-winner-main {
@@ -581,19 +599,6 @@
   font-size: clamp(14px, 2.1vw, 18px);
   font-weight: 800;
   line-height: 1.28;
-}
-
-.club-choice-vote-modal__hero-winner-main small {
-  display: inline-flex;
-  width: max-content;
-  padding: 5px 10px;
-  color: rgba(255, 239, 201, 0.8);
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1;
-  border: 1px solid rgba(255, 184, 70, 0.24);
-  border-radius: 999px;
-  background: rgba(255, 184, 70, 0.08);
 }
 
 .club-choice-vote-modal__bracket {
@@ -8084,15 +8089,25 @@ body.club-choice-vote-open {
 
 @media (max-width: 520px) {
   .club-choice-vote-modal__hero-winner {
-    grid-template-columns: 74px minmax(0, 1fr);
+    grid-template-columns: 108px minmax(0, 1fr);
     gap: 11px;
     padding: 12px;
     border-radius: 14px;
   }
 
+  .club-choice-vote-modal__hero-winner-avatar {
+    min-height: 136px;
+  }
+
   .club-choice-vote-modal__hero-winner-avatar .club-choice-vote-modal__avatar {
-    width: 70px;
-    height: 70px;
+    width: 96px;
+    height: 96px;
+  }
+
+  .club-choice-vote-modal__hero-art {
+    width: 112px;
+    height: 136px;
+  }
   }
 
   .club-choice-vote-modal__hero-winner-main {

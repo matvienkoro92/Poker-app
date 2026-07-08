@@ -870,7 +870,7 @@
     var month = String(entry && entry.month || "").trim();
     var nick = clubChoiceRatingNick(winner && winner.nick);
     if (month === "2026-06" && nick === "Waaar" && (!description || description === "Победитель клубного голосования за достижение месяца.")) {
-      return "Стабильный июньский рывок в рейтингах и турнирах клуба, за который игроки отдали 108 голосов.";
+      return "Стабильный июньский рывок в рейтингах и турнирах клуба.";
     }
     return description;
   }
@@ -898,21 +898,35 @@
     var candidate = completedWinnerCandidate(winner, candidates);
     var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || winner.nick || candidate.nick || "Игрок") || "Игрок";
     var ratingNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || winner.nick || candidate.nick || displayNick);
-    var votes = parseInt(winner && winner.votes, 10) || 0;
     var month = monthNameOnly(entry && entry.month);
     var description = completedWinnerDescription(winner, entry) || "Победитель клубного голосования за достижение месяца.";
     return '<section class="club-choice-vote-modal__hero-winner" aria-label="Победитель голосования">' +
       '<div class="club-choice-vote-modal__hero-winner-avatar" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '" data-club-choice-rating-nick="' + escapeHtml(ratingNick) + '" role="button" tabindex="0">' +
-        renderPlayerAvatar(candidate, winner && winner.id) +
+        renderCompletedWinnerArt(candidate, winner && winner.id) +
       '</div>' +
       '<div class="club-choice-vote-modal__hero-winner-main">' +
         '<span class="club-choice-vote-modal__hero-winner-badge">Победитель</span>' +
         '<strong>' + escapeHtml(displayNick) + '</strong>' +
         '<em>Народный герой ' + escapeHtml(month) + '</em>' +
         '<p>' + escapeHtml(description) + '</p>' +
-        '<small>' + escapeHtml(votes) + ' ' + escapeHtml(voteWord(votes)) + '</small>' +
       '</div>' +
     '</section>';
+  }
+
+  function renderCompletedWinnerArt(candidate, id) {
+    var src = "";
+    var nick = clubChoiceRatingNick(candidate && (candidate.ratingNick || candidate.rating_nick || candidate.nick));
+    try {
+      var art = typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(nick) : null;
+      if (art && art.src) src = String(art.src).trim();
+    } catch (eHeroArt) {
+      src = "";
+    }
+    if (!src && nick === "Waaar") src = "./assets/summer-rating-player-waaar.webp";
+    if (!src) return renderPlayerAvatar(candidate, id);
+    return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +
+      '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
+    '</span>';
   }
 
   function renderPlayerAvatar(candidate, id) {
