@@ -941,7 +941,6 @@
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
-        (unplayed ? '<span class="sng-champions-modal__map-status" data-sng-full-label="Еще не сыграли">Не сыгр.</span>' : '') +
       '</span>' +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
@@ -976,6 +975,7 @@
         '<strong>' + escapeHtml(title) + '</strong>' +
         mapToggleButton +
       '</div>' +
+      '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
       '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;

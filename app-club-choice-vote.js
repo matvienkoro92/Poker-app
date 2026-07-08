@@ -219,8 +219,14 @@
   function clubChoiceCanonicalNick(nick) {
     var raw = String(nick || "").trim();
     var key = raw.toLowerCase().replace(/\s+/g, " ");
+    if (isWaaarNick(key)) return "Waaar";
     if (key === "em13" || key === "em13!!" || (key.indexOf("эмиль") >= 0 && key.indexOf("em13") >= 0)) return "Em13!!";
     return raw;
+  }
+
+  function isWaaarNick(value) {
+    var key = String(value || "").trim().toLowerCase().replace(/\s+/g, "");
+    return key === "waaar" || key === "waaarr" || key === "вааар" || key === "вааарр";
   }
 
   function clubChoiceRatingNick(nick) {
@@ -923,7 +929,7 @@
     } catch (eHeroArt) {
       src = "";
     }
-    if (key === "waaar") src = "./assets/summer-rating-player-waaar.webp";
+    if (isWaaarNick(key)) src = "./assets/summer-rating-player-waaar.webp";
     if (!src) return renderPlayerAvatar(candidate, id);
     return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +
       '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
