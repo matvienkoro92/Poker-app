@@ -9303,6 +9303,7 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
 .app.app--view-home .home-club-actions-block .home-club-choice-plaque--sng .home-club-choice-plaque__text,
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__text {
   top: clamp(18px, 3.3vw, 30px) !important;
+  font-size: clamp(23px, 5.64vw, 34.5px) !important;
 }
 
 .hall-fish-modal--bootstrap-loading {
@@ -9465,7 +9466,7 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   --sng-plaque-glow: rgba(255, 128, 16, 0.5);
   align-content: end !important;
   column-gap: 0 !important;
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.45fr) minmax(0, 1.65fr) minmax(0, 1fr) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   padding: clamp(14px, 3vw, 24px) clamp(6px, 1.2vw, 10px)
     calc(var(--sng-plaque-bar-bottom) + clamp(5px, 1.2vw, 9px)) !important;
 }
@@ -9535,7 +9536,7 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   gap: clamp(3px, 0.7vw, 5px) !important;
   height: calc(var(--sng-plaque-bar-height) - 11px) !important;
   min-height: calc(var(--sng-plaque-bar-height) - 11px) !important;
-  padding: 0 clamp(2px, 0.75vw, 8px) 3px !important;
+  padding: 0 clamp(4px, 1vw, 10px) 3px !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -9607,7 +9608,7 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   .app.app--view-home .home-club-choice-plaque--sng,
   .sng-champions-promo__button.home-club-choice-plaque--sng {
     --sng-plaque-icon-size: clamp(10px, 3vw, 12px);
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 1.48fr) minmax(0, 0.92fr) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     padding-left: clamp(14px, 3.7vw, 18px) !important;
     padding-right: clamp(14px, 3.7vw, 18px) !important;
   }

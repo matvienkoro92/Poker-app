@@ -11,6 +11,7 @@
   var homeSummaryInFlight = null;
   var homeSummaryLoadedAt = 0;
   var activeTab = "signup";
+  var activeTabManual = false;
   var activeBracketStage = 0;
   var activeLoserBracketStage = 0;
   var activeBracketStageManual = false;
@@ -147,6 +148,7 @@
     } catch (eTrack) {}
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
+    activeTabManual = false;
     startBracketTimerRefresh();
     renderLoading();
     loadState();
@@ -154,6 +156,7 @@
 
   function closeModal() {
     if (!modal) return;
+    bracketMapExpanded = false;
     modal.classList.remove("club-choice-vote-modal--open");
     document.body.classList.remove("club-choice-vote-open");
     stopBracketTimerRefresh();
@@ -574,11 +577,16 @@
 
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
-    var tab = activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup";
+    var bracketStarted = data && data.status === "bracket";
+    var tab = activeTabManual
+      ? (activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup")
+      : (bracketStarted ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup");
+    var createTab = isAdmin ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "create" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "create" ? "true" : "false") + '" data-sng-tab="create">' + (bracketStarted ? "Редактировать" : "Создать") + '</button>' : "";
+    var signupTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Запись</button>';
+    var bracketTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>';
+    activeTab = tab;
     return '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs' + (isAdmin ? " sng-champions-modal__tabs--admin" : "") + '" role="tablist" aria-label="Разделы СНГ">' +
-        (isAdmin ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "create" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "create" ? "true" : "false") + '" data-sng-tab="create">Создать</button>' : "") +
-        '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Запись</button>' +
-        '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>' +
+        (bracketStarted ? bracketTab + signupTab + createTab : createTab + signupTab + bracketTab) +
       '</div>' +
       '<div class="club-choice-vote-modal__tab-panels">' +
         (isAdmin ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="create"' + (tab === "create" ? "" : " hidden") + '>' + createHtml + '</div>' : "") +
@@ -590,6 +598,7 @@
   function setTab(tabName) {
     var isAdmin = !!(state && state.isAdmin);
     activeTab = tabName === "bracket" ? "bracket" : tabName === "create" && isAdmin ? "create" : "signup";
+    activeTabManual = true;
     if (!modal) return;
     Array.prototype.slice.call(modal.querySelectorAll("[data-sng-tab]")).forEach(function (button) {
       var active = button.getAttribute("data-sng-tab") === activeTab;
@@ -600,6 +609,13 @@
       panel.hidden = panel.getAttribute("data-sng-tab-panel") !== activeTab;
     });
     updateJoinDockBodyClass();
+  }
+
+  function scrollSngBodyTop() {
+    if (!bodyEl) return;
+    try {
+      bodyEl.scrollTop = 0;
+    } catch (eScrollTop) {}
   }
 
   function updateJoinDockBodyClass() {
@@ -953,10 +969,12 @@
     var selected = selectedBracketMapMatch(rounds, kind);
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
+    var mapToggleButton = '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>';
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
+        (bracketMapExpanded ? '<span class="sng-champions-modal__bracket-map-head-left">' + mapToggleButton + '</span>' : '') +
         '<strong>' + escapeHtml(title) + '</strong>' +
-        '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>' +
+        mapToggleButton +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
@@ -1345,6 +1363,7 @@
       bracketMapExpanded = bracketMap.getAttribute("data-sng-bracket-map") === "open";
       render();
       setTab("bracket");
+      window.requestAnimationFrame(scrollSngBodyTop);
       return;
     }
     var action = event.target && event.target.closest ? event.target.closest("[data-sng-action]") : null;
