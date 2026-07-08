@@ -328,6 +328,9 @@
 
   function openModal() {
     ensureModal();
+    try {
+      if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-choice-vote");
+    } catch (eTrack) {}
     activeRoundTab = "votes";
     activeVotesRoundId = "";
     modal.classList.add("club-choice-vote-modal--open");

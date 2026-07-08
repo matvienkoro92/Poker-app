@@ -6,6 +6,8 @@
 
   var CLICK_SOUND_SRC = "./assets/gta-sa-menu.mp3?v=2026070602";
   var SUBSCRIBE_SOUND_SRC = "./assets/subscribe-bell-sfx.mp3?v=20260706";
+  var DAILY_POKER_DEAL_SOUND_SRC = "./assets/daily-poker-here-we-go-again.mp3?v=20260706";
+  var CLICK_SOUND_MUTED_KEY = "poker_click_sound_muted";
   var INTERACTIVE_SELECTOR = [
     "button",
     "a[href]",
@@ -50,6 +52,7 @@
   var audioPool = [];
   var audioIndex = 0;
   var subscribeAudio = null;
+  var dailyPokerDealAudio = null;
   var lastSoundAt = 0;
   var lastSoundKey = "";
   var lastSubscribeSoundAt = 0;
@@ -59,6 +62,32 @@
   var TOUCH_TAP_MOVE_LIMIT = 12;
   var touchStartInfo = null;
   var lastTouchScrollAt = 0;
+
+  function pokerIsClickSoundMuted() {
+    try {
+      if (window.__pokerClickSoundMuted === true) return true;
+      if (window.__pokerClickSoundMuted === false) return false;
+    } catch (eMemory) {}
+    try {
+      return typeof localStorage !== "undefined" && localStorage.getItem(CLICK_SOUND_MUTED_KEY) === "1";
+    } catch (eStorage) {
+      return false;
+    }
+  }
+
+  function pokerSetClickSoundMuted(muted) {
+    var next = !!muted;
+    try {
+      window.__pokerClickSoundMuted = next;
+    } catch (eMemory) {}
+    try {
+      if (typeof localStorage !== "undefined") {
+        if (next) localStorage.setItem(CLICK_SOUND_MUTED_KEY, "1");
+        else localStorage.removeItem(CLICK_SOUND_MUTED_KEY);
+      }
+    } catch (eStorage) {}
+    return next;
+  }
 
   function isDisabled(el) {
     return !!(el && (el.disabled || el.getAttribute("disabled") != null || el.getAttribute("aria-disabled") === "true"));
@@ -93,6 +122,7 @@
   }
 
   function playPokerClickSound() {
+    if (pokerIsClickSoundMuted()) return false;
     var audio = getAudio();
     if (!audio) return false;
     try {
@@ -128,6 +158,32 @@
       return false;
     }
   }
+
+  function playPokerDailyDealSound() {
+    if (typeof window.playDailyPokerDealSound === "function") {
+      window.playDailyPokerDealSound();
+      return true;
+    }
+    try {
+      if (!dailyPokerDealAudio) {
+        dailyPokerDealAudio = new Audio(DAILY_POKER_DEAL_SOUND_SRC);
+        dailyPokerDealAudio.preload = "auto";
+        dailyPokerDealAudio.volume = 1;
+        try {
+          dailyPokerDealAudio.load();
+        } catch (errLoad) {}
+      }
+      dailyPokerDealAudio.pause();
+      dailyPokerDealAudio.currentTime = 0;
+      var p = dailyPokerDealAudio.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  window.playPokerDailyDealSound = playPokerDailyDealSound;
 
   function preloadPokerClickSound() {
     getAudio();
@@ -172,6 +228,7 @@
   }
 
   function playForEvent(event, source) {
+    if (pokerIsClickSoundMuted()) return;
     var target = clickSoundTarget(event);
     if (!target || shouldSkipDuplicate(event, target, source)) return;
     playPokerClickSound();
@@ -206,6 +263,8 @@
 
   window.playPokerClickSound = playPokerClickSound;
   window.playPokerSubscribeSound = playPokerSubscribeSound;
+  window.pokerIsClickSoundMuted = pokerIsClickSoundMuted;
+  window.pokerSetClickSoundMuted = pokerSetClickSoundMuted;
   if (typeof window.playClickSound !== "function") window.playClickSound = playPokerClickSound;
 
   document.addEventListener("pointerdown", function (event) {

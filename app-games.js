@@ -209,6 +209,9 @@ function tryChillRadioPlay() {
 function openDailyPredictionModal() {
   var modal = document.getElementById("dailyPredictionModal");
   if (!modal) return;
+  try {
+    if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("daily-prediction");
+  } catch (eTrack) {}
   var textEl = document.getElementById("dailyPredictionText");
   if (textEl) {
     textEl.textContent = getPokerDailyPredictionForToday();

@@ -179,6 +179,8 @@
     dailyPokerDealAudio = playDailyPokerAudio(dailyPokerDealAudio, DAILY_POKER_DEAL_SOUND_SRC);
   }
 
+  window.playDailyPokerDealSound = playDailyPokerDealSound;
+
   function playDailyPokerWinSound() {
     dailyPokerWinAudio = playDailyPokerAudio(dailyPokerWinAudio, DAILY_POKER_WIN_SOUND_SRC);
   }

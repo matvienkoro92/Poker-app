@@ -322,6 +322,24 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    if (startParam === "gazette") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("home");
+        setTimeout(function () {
+          if (typeof window.openGazette === "function") window.openGazette();
+        }, 250);
+      }, 0);
+      return;
+    }
+    if (startParam === "club_tasks") {
+      setTimeout(function () {
+        try {
+          if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-tasks");
+        } catch (eTrack) {}
+        if (typeof setView === "function") setView("poker-tasks");
+      }, 0);
+      return;
+    }
     if (startParam === "stream") {
       setTimeout(function () {
         if (typeof setView === "function") setView("streams");

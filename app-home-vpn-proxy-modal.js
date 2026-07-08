@@ -189,6 +189,9 @@ function initHomeVpnProxyModal(opts) {
         if (typeof window.closeClubWelcomeModal === "function") window.closeClubWelcomeModal();
       } catch (eWel) {}
       var tab = opts.tab === "proxy" ? "proxy" : "vpn";
+      try {
+        if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen(tab === "proxy" ? "vpn-proxy-proxy" : "vpn-proxy");
+      } catch (eTrack) {}
       lockBehind();
       modal.setAttribute("aria-hidden", "false");
       refreshVpnProxyAuthUi();

@@ -75,6 +75,9 @@ function initHomeClubInfoModals() {
     function openCharter(opts) {
       opts = opts || {};
       try {
+        if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-charter");
+      } catch (eTrack) {}
+      try {
         if (typeof window.closeVpnProxyModal === "function") window.closeVpnProxyModal();
       } catch (eVpnClose) {}
       try {

@@ -155,6 +155,9 @@ function runGazetteAndTasksInit() {
     });
   })();
   function openGazette(goToNews, articleIndex) {
+    try {
+      if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("gazette");
+    } catch (eTrack) {}
     if (goToNews === "news") {
       if (newsEl) {
         newsEl.removeAttribute("data-reveal-draft");

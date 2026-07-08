@@ -142,6 +142,9 @@
 
   function openModal() {
     ensureModal();
+    try {
+      if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("sng-champions");
+    } catch (eTrack) {}
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
     startBracketTimerRefresh();
@@ -316,8 +319,11 @@
   }
 
   function roundStageLabel(round, index, rounds) {
-    if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд-финал";
+    if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд-Финал";
     if (Array.isArray(rounds) && rounds.length) {
+      if (rounds.length === 6) {
+        return ["1/16", "1/8", "1/4", "1/2", "Финал", "Гранд-Финал"][Number(index) || 0] || "Сетка";
+      }
       var remaining = rounds.length - (Number(index) || 0);
       if (remaining === 1) return "Финал";
       if (remaining === 2) return "1/2";
@@ -338,7 +344,7 @@
     var label = roundStageLabel(round, index, rounds);
     if (label === "1/4") return "quarter";
     if (label === "1/2") return "semi";
-    if (label === "Финал") return "final";
+    if (label === "Финал" || label === "Гранд-Финал") return "final";
     return "";
   }
 
@@ -352,7 +358,7 @@
     if (step === 5) return "L 1/2";
     if (step === 6) return "L финал";
     if (step === 7) return "Финал лузеров";
-    if (step === 8) return "Гранд-финал";
+    if (step === 8) return "Гранд-Финал";
     return round && round.name ? round.name : "Сетка проигравших";
   }
 
@@ -360,7 +366,7 @@
     var label = loserRoundStageLabel(round, index);
     if (label === "L 1/4" || label === "L 1/4 вход") return "quarter";
     if (label === "L 1/2" || label === "L 1/2 вход") return "semi";
-    if (label === "Финал лузеров" || label === "Гранд-финал") return "final";
+    if (label === "Финал лузеров" || label === "Гранд-Финал") return "final";
     return "";
   }
 
@@ -395,7 +401,7 @@
       }
       return {
         id: "preview-round-" + String(roundIndex),
-        name: roundIndex === 5 ? "Гранд-финал" : "",
+        name: roundIndex === 5 ? "Гранд-Финал" : "",
         matches: matches,
       };
     });
@@ -1203,6 +1209,10 @@
     }
     var ready = event.target && event.target.closest ? event.target.closest("[data-sng-ready]") : null;
     if (ready) {
+      try {
+        if (typeof window.playPokerDailyDealSound === "function") window.playPokerDailyDealSound();
+        else if (typeof window.playDailyPokerDealSound === "function") window.playDailyPokerDealSound();
+      } catch (eReadySound) {}
       setButtonLoading(ready, true);
       postAction({
         action: "setReady",

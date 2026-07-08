@@ -1407,6 +1407,10 @@ function initRafflesCompletedRuntime(opts) {
         var readyWid = readyBtn.getAttribute("data-winner-user-id");
         var readySlotId = readyBtn.getAttribute("data-winner-slot-id") || "";
         if (!readyRid || (!readyWid && !readySlotId)) return;
+        try {
+          if (typeof window.playPokerDailyDealSound === "function") window.playPokerDailyDealSound();
+          else if (typeof window.playDailyPokerDealSound === "function") window.playDailyPokerDealSound();
+        } catch (eReadySound) {}
         rememberRaffleCompletedWinnerTab(readyBtn);
         readyBtn.disabled = true;
         setRaffleWinnerReady(readyRid, readyWid, readySlotId, readyBtn, function (ok) { if (!ok) readyBtn.disabled = false; });

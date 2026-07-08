@@ -365,6 +365,9 @@
 
   function openModal() {
     ensureModal();
+    try {
+      if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("private-cash");
+    } catch (eTrack) {}
     modal.classList.add("private-cash-modal--open");
     document.body.classList.add("private-cash-open");
     renderLoading();

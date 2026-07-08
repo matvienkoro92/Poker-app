@@ -46,6 +46,7 @@ var pokerProfileAuthLoadingSince = 0;
 var POKER_PROFILE_LINKED_EMAIL_CACHE_KEY = "poker_profile_linked_email";
 var POKER_PROFILE_TELEGRAM_USERNAME_CACHE_KEY = "poker_profile_telegram_username";
 var POKER_PROFILE_TELEGRAM_VISIBLE_CACHE_KEY = "poker_profile_telegram_visible";
+var POKER_PROFILE_CLICK_SOUND_MUTED_KEY = "poker_click_sound_muted";
 var POKER_PROFILE_RESPECT_CACHE_KEY = "poker_profile_respect_score";
 var pokerProfileTelegramVisible = false;
 
@@ -133,6 +134,58 @@ function pokerBindProfileTelegramVisibility() {
     pokerSaveProfileTelegramVisible(btn.dataset.profileTelegramVisible === "1");
   });
   pokerRenderProfileTelegramVisibility(false);
+}
+
+function pokerProfileIsClickSoundMuted() {
+  try {
+    if (typeof window.pokerIsClickSoundMuted === "function") return !!window.pokerIsClickSoundMuted();
+  } catch (eGlobalSound) {}
+  try {
+    return typeof localStorage !== "undefined" && localStorage.getItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY) === "1";
+  } catch (eStorage) {
+    return false;
+  }
+}
+
+function pokerProfileSetClickSoundMuted(muted) {
+  var next = !!muted;
+  try {
+    if (typeof window.pokerSetClickSoundMuted === "function") {
+      window.pokerSetClickSoundMuted(next);
+      return next;
+    }
+  } catch (eGlobalSound) {}
+  try {
+    if (typeof localStorage !== "undefined") {
+      if (next) localStorage.setItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY, "1");
+      else localStorage.removeItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY);
+    }
+  } catch (eStorage) {}
+  return next;
+}
+
+function pokerRenderProfileClickSound() {
+  var row = document.getElementById("profileClickSoundRow");
+  var btn = document.getElementById("profileClickSoundToggle");
+  var stateEl = document.getElementById("profileClickSoundState");
+  if (!row || !btn) return;
+  var muted = pokerProfileIsClickSoundMuted();
+  row.classList.toggle("profile-click-sound--muted", muted);
+  btn.textContent = muted ? "Включить звук" : "Отключить звук";
+  btn.setAttribute("aria-pressed", muted ? "true" : "false");
+  if (stateEl) stateEl.textContent = muted ? "Звук кликов отключен." : "Звук кликов включен.";
+}
+
+function pokerBindProfileClickSound() {
+  var row = document.getElementById("profileClickSoundRow");
+  var btn = document.getElementById("profileClickSoundToggle");
+  if (!row || !btn || row.dataset.bound === "1") return;
+  row.dataset.bound = "1";
+  btn.addEventListener("click", function () {
+    pokerProfileSetClickSoundMuted(!pokerProfileIsClickSoundMuted());
+    pokerRenderProfileClickSound();
+  });
+  pokerRenderProfileClickSound();
 }
 
 function pokerProfileSubscriptionHandle(raw, fallback) {
@@ -359,6 +412,8 @@ function pokerProfileRehydrateStoredAuthIfNeeded() {
 }
 
 function updateProfileDtId() {
+  pokerBindProfileClickSound();
+  pokerRenderProfileClickSound();
   var el = document.getElementById("profileUserId");
   if (el) updateProfileHeroPokerPlusId(typeof window !== "undefined" ? window.__pokerPlusUserId : "");
   var base = getApiBase();
