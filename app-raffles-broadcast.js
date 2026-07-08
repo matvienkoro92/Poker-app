@@ -141,9 +141,15 @@ function initRafflesBroadcastRuntime(opts) {
     function raffleBroadcastActiveSummaryMessage(list) {
       var ordered = list
         .map(function (raffle, index) {
-          return { raffle: raffle, index: index, isThirtyK: raffleBroadcastIsThirtyKSummary(raffle) };
+          return {
+            raffle: raffle,
+            index: index,
+            totalPrize: raffleBroadcastTotalPrize(raffle),
+            isThirtyK: raffleBroadcastIsThirtyKSummary(raffle),
+          };
         })
         .sort(function (a, b) {
+          if (b.totalPrize !== a.totalPrize) return b.totalPrize - a.totalPrize;
           if (a.isThirtyK !== b.isThirtyK) return a.isThirtyK ? 1 : -1;
           return a.index - b.index;
         })
@@ -153,7 +159,7 @@ function initRafflesBroadcastRuntime(opts) {
         .filter(function (line) { return !!line; });
       if (!lines.length) return "";
       return (
-        "🎲 Сейчас идут " +
+        "🎲 Стартовали " +
         lines.length +
         " " +
         pluralizeRaffles(lines.length) +

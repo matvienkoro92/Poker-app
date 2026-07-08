@@ -2541,9 +2541,18 @@ async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
   const summaryMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
   assert.ok(summaryMessage, "subscriber receives active raffles summary message");
   const summaryText = String(summaryMessage.body.text || "");
-  assert.ok(summaryText.includes("идут 2 розыгрыша"), "summary broadcast says two raffles are active");
+  assert.ok(summaryText.includes("Стартовали 2 розыгрыша"), "summary broadcast says two raffles started");
   assert.ok(summaryText.includes("22 000 ₽"), "summary broadcast includes total active raffle prize");
-  assert.ok(summaryText.includes("startapp=raffles"), "summary broadcast includes raffle participation link");
+  assert.ok(!summaryText.includes("startapp=raffles"), "summary broadcast keeps raffle participation link out of text");
+  assert.strictEqual(
+    summaryMessage.body.reply_markup &&
+      summaryMessage.body.reply_markup.inline_keyboard &&
+      summaryMessage.body.reply_markup.inline_keyboard[0] &&
+      summaryMessage.body.reply_markup.inline_keyboard[0][0] &&
+      summaryMessage.body.reply_markup.inline_keyboard[0][0].url,
+    "https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=raffles",
+    "summary broadcast includes raffle participation inline button"
+  );
   assert.ok(!summaryText.includes("стартовал новый розыгрыш"), "summary broadcast does not append single-raffle default text");
 
   sentMessages.length = 0;

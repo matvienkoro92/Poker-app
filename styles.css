@@ -9630,3 +9630,62 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
     font-size: clamp(8px, 2.3vw, 10px) !important;
   }
 }
+
+/* Header menu: the admin report action reuses the compact header button class. */
+.header-more-menu .header-menu-action[hidden],
+.header-more-menu .header-admin-report--hidden,
+.header-more-menu .header-crm-btn--hidden,
+.header-more-menu .welcome-planner-icon--hidden,
+.app.app--view-home .header-more-menu .header-menu-action[hidden],
+.app.app--view-home .header-more-menu .header-admin-report--hidden,
+.app.app--view-home .header-more-menu .header-crm-btn--hidden,
+.app.app--view-home .header-more-menu .welcome-planner-icon--hidden,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action[hidden],
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-admin-report--hidden,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-crm-btn--hidden,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .welcome-planner-icon--hidden,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action[hidden],
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-admin-report--hidden,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-crm-btn--hidden,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .welcome-planner-icon--hidden {
+  display: none !important;
+}
+
+.header-more-menu .welcome-admin-report-btn.header-menu-action {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: initial !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  font: inherit !important;
+  line-height: normal !important;
+}
+
+.header-more-menu .welcome-admin-report-btn .welcome-admin-report-btn__icon {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.header-more-menu .welcome-admin-report-btn .header-menu-action__body {
+  min-width: 0 !important;
+  display: flex !important;
+}
+
+.header-more-menu .header-menu-action__title,
+.app.app--view-home .header-more-menu .header-menu-action__title,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu .header-menu-action__title,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action__title {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}

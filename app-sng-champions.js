@@ -360,16 +360,16 @@
     if (step === 4) return "L 1/2";
     if (step === 5) return "L 1/2";
     if (step === 6) return "L финал";
-    if (step === 7) return "Финал лузеров";
+    if (step === 7) return "Финал сетки №2";
     if (step === 8) return "Гранд-Финал";
-    return round && round.name ? round.name : "Сетка проигравших";
+    return round && round.name ? round.name : "Сетка №2";
   }
 
   function loserRoundStageClass(round, index) {
     var label = loserRoundStageLabel(round, index);
     if (label === "L 1/4" || label === "L 1/4 вход") return "quarter";
     if (label === "L 1/2" || label === "L 1/2 вход") return "semi";
-    if (label === "Финал лузеров" || label === "Гранд-Финал") return "final";
+    if (label === "Финал сетки №2" || label === "Гранд-Финал") return "final";
     return "";
   }
 
@@ -1113,7 +1113,7 @@
       stageIndex: stageIndex,
       stageAttr: stageAttr,
       kind: isLosers ? "losers" : "winners",
-      title: isLosers ? "Сетка проигравших" : "Вся сетка винеров",
+      title: isLosers ? "Сетка №2" : "Вся сетка винеров",
       extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "",
     });
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
@@ -1147,7 +1147,7 @@
         '<span class="sng-champions-modal__bracket-subnav-label">Вкладка Сетка</span>' +
         '<div class="sng-champions-modal__bracket-subtabs" role="tablist" aria-label="Сетки турнира">' +
           '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "winners" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="winners" aria-selected="' + (activeBracketView === "winners" ? "true" : "false") + '">Сетка Винеров</button>' +
-          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Сетка проигравших</button>' +
+          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Сетка №2</button>' +
         '</div>' +
       '</div>' +
       '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "winners" ? "" : " hidden") + ' data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' +
