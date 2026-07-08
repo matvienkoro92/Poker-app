@@ -203,6 +203,11 @@
     return (names[idx] || "месяц") + " " + parts[1];
   }
 
+  function monthNameOnly(monthKey) {
+    var label = monthLabel(monthKey).split(/\s+/)[0] || "месяц";
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
   function candidateMap(data) {
     var map = {};
     (data && data.candidates || []).forEach(function (candidate) {
@@ -870,6 +875,46 @@
     return description;
   }
 
+  function completedWinnerCandidate(winner, candidates) {
+    var winnerNick = clubChoiceRatingNick(winner && winner.nick);
+    var keys = Object.keys(candidates || {});
+    for (var i = 0; i < keys.length; i += 1) {
+      var candidate = candidates[keys[i]] || {};
+      var candidateNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || candidate.nick);
+      if (candidateNick && candidateNick === winnerNick) return candidate;
+    }
+    return {
+      nick: winner && winner.nick,
+      ratingNick: winnerNick,
+      description: winner && winner.description,
+      avatar: winner && winner.avatar,
+      accountId: winner && winner.accountId,
+    };
+  }
+
+  function renderCompletedHeroWinner(entry, winners, candidates) {
+    var winner = (winners || [])[0];
+    if (!winner) return '<div class="club-choice-vote-modal__empty">Итоги пока не сформированы.</div>';
+    var candidate = completedWinnerCandidate(winner, candidates);
+    var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || winner.nick || candidate.nick || "Игрок") || "Игрок";
+    var ratingNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || winner.nick || candidate.nick || displayNick);
+    var votes = parseInt(winner && winner.votes, 10) || 0;
+    var month = monthNameOnly(entry && entry.month);
+    var description = completedWinnerDescription(winner, entry) || "Победитель клубного голосования за достижение месяца.";
+    return '<section class="club-choice-vote-modal__hero-winner" aria-label="Победитель голосования">' +
+      '<div class="club-choice-vote-modal__hero-winner-avatar" data-club-choice-profile="1" data-club-choice-profile-id="' + escapeHtml(candidate.accountId || "") + '" data-club-choice-profile-nick="' + escapeHtml(displayNick) + '" data-club-choice-rating-nick="' + escapeHtml(ratingNick) + '" role="button" tabindex="0">' +
+        renderPlayerAvatar(candidate, winner && winner.id) +
+      '</div>' +
+      '<div class="club-choice-vote-modal__hero-winner-main">' +
+        '<span class="club-choice-vote-modal__hero-winner-badge">Победитель</span>' +
+        '<strong>' + escapeHtml(displayNick) + '</strong>' +
+        '<em>Народный герой ' + escapeHtml(month) + '</em>' +
+        '<p>' + escapeHtml(description) + '</p>' +
+        '<small>' + escapeHtml(votes) + ' ' + escapeHtml(voteWord(votes)) + '</small>' +
+      '</div>' +
+    '</section>';
+  }
+
   function renderPlayerAvatar(candidate, id) {
     var src = candidate && candidate.avatar ? String(candidate.avatar).trim() : "";
     var art = null;
@@ -1047,8 +1092,6 @@
     var last = (data.history || [])[0] || {};
     var winners = last.winners || [];
     var candidates = candidateMap(data);
-    var schemeHtml = renderBracketScheme(data, candidates, "club-choice-vote-modal__scheme--compact") || renderCompletedFallbackScheme(last);
-    var roundHistoryHtml = renderCompletedRoundHistory(data, candidates);
     setStatus("Голосование завершено");
     bodyEl.innerHTML =
       '<div class="club-choice-vote-modal__summary">' +
@@ -1056,17 +1099,7 @@
         '<strong>Народный герой</strong>' +
         '<p class="club-choice-vote-modal__summary-desc">Победитель этого блока выбран игроками клуба среди кандидатов с самыми заметными результатами и поступками месяца.</p>' +
       '</div>' +
-      '<div class="club-choice-vote-modal__winners">' + (winners.length ? winners.map(function (winner) {
-        return '<article class="club-choice-vote-modal__winner">' +
-          '<span>Топ ' + escapeHtml(winner.place || "") + '</span>' +
-          '<strong>' + escapeHtml(winner.nick || "Игрок") + '</strong>' +
-          '<em>' + escapeHtml(winner.votes || 0) + ' голосов</em>' +
-          '<b class="club-choice-vote-modal__winner-achievement-label">Достижение</b>' +
-          renderAchievementCard("club-choice-vote-modal__winner-desc", completedWinnerDescription(winner, last)) +
-        '</article>';
-      }).join("") : '<div class="club-choice-vote-modal__empty">Итоги пока не сформированы.</div>') + '</div>' +
-      roundHistoryHtml +
-      (schemeHtml ? '<div class="club-choice-vote-modal__completed-scheme">' + schemeHtml + '</div>' : '') +
+      renderCompletedHeroWinner(last, winners, candidates) +
       (data.isAdmin
         ? '<button type="button" class="club-choice-vote-modal__primary club-choice-vote-modal__primary--wide" data-club-choice-new-draft="1">Новое голосование</button>'
         : '');

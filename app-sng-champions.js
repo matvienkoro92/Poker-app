@@ -969,6 +969,9 @@
     var selected = selectedBracketMapMatch(rounds, kind);
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
+    var maxMatchCount = Math.max.apply(null, rounds.map(function (round) {
+      return Array.isArray(round && round.matches) ? round.matches.length : 0;
+    }).concat([1]));
     var mapToggleButton = '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>';
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
@@ -976,7 +979,7 @@
         '<strong>' + escapeHtml(title) + '</strong>' +
         mapToggleButton +
       '</div>' +
-      '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
+      '<div class="sng-champions-modal__bracket-map sng-champions-modal__bracket-map--root-' + escapeHtml(maxMatchCount) + '" style="--sng-tree-rounds: ' + escapeHtml(rounds.length || 1) + ';" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
