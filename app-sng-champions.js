@@ -1114,7 +1114,7 @@
       stageAttr: stageAttr,
       kind: isLosers ? "losers" : "winners",
       title: isLosers ? "Сетка №2" : "Вся сетка винеров",
-      extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "",
+      extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "sng-champions-modal__bracket-map-wrap--winners",
     });
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
       bracketMapHtml +

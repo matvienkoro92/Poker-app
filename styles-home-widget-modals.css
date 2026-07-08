@@ -2660,6 +2660,33 @@
   padding-bottom: 34px;
 }
 
+.sng-champions-modal__bracket-map-wrap--winners {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
+  grid-template-columns:
+    minmax(116px, 1.16fr)
+    minmax(112px, 1.12fr)
+    minmax(104px, 1fr)
+    minmax(98px, 0.94fr)
+    minmax(92px, 0.88fr)
+    minmax(92px, 0.88fr);
+  min-width: 820px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
+  grid-template-columns:
+    minmax(132px, 1.16fr)
+    minmax(128px, 1.12fr)
+    minmax(118px, 1fr)
+    minmax(110px, 0.94fr)
+    minmax(104px, 0.88fr)
+    minmax(104px, 0.88fr);
+  min-width: 900px;
+}
+
 .sng-champions-modal__bracket-map-wrap--losers {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
