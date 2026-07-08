@@ -2101,7 +2101,8 @@ body[data-view="summer-rating"] #app.app > .card > .card__content,
 html.app-view-summer-rating-html-scroll #app.app > .card > .card__content {
   width: 100% !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 0 var(--app-bottom-tabbar-pad) !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad);
 }
 
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] {

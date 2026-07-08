@@ -2544,6 +2544,17 @@
   white-space: nowrap;
 }
 
+.sng-champions-modal__bracket-map-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sng-champions-modal__bracket-map-title-row strong {
+  flex: 0 1 auto;
+}
+
 .sng-champions-modal__bracket-map-head button {
   flex: 0 0 auto;
   min-height: 28px;
@@ -2617,8 +2628,15 @@
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
   --sng-map-row-height: 52px;
   --sng-map-row-gap: 8px;
-  gap: 22px;
-  min-width: 1420px;
+  grid-template-columns:
+    minmax(185px, 1.28fr)
+    minmax(170px, 1.08fr)
+    minmax(154px, 0.96fr)
+    minmax(136px, 0.84fr)
+    minmax(136px, 0.84fr)
+    minmax(144px, 0.88fr);
+  gap: 14px;
+  min-width: 1080px;
   overflow: visible;
   padding-bottom: 34px;
 }

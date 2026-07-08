@@ -1294,38 +1294,6 @@ function hallFishAchievementSpecs(data) {
   ];
 }
 
-function hallFishClubChoiceHeroArt(row) {
-  var key = hallFishNormalizeNick(row && row.nick);
-  if (key === hallFishNormalizeNick("Waaar")) return "./assets/summer-rating-player-waaar.webp";
-  if (key === hallFishNormalizeNick("Em13!!") || key === hallFishNormalizeNick("Em13")) return "./assets/summer-rating-player-emil.webp";
-  return "";
-}
-
-function hallFishClubChoiceHeroRowHtml(row, title) {
-  var userId = String(row.accountId || "").trim();
-  var name = row.nick || "Игрок";
-  var month = row.extraText || "Народный герой";
-  var story = String(row.description || "").trim();
-  var details = Array.isArray(row.detailRows) ? row.detailRows : [];
-  var art = hallFishClubChoiceHeroArt(row);
-  var attrs = userId
-    ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
-    : ' data-user-name="' + hallFishEsc(name) + '"';
-  attrs += ' data-hall-fish-achievement-title="' + hallFishEsc(title) + '" data-hall-fish-achievement-details="' + hallFishEsc(hallFishEncodeData(details)) + '"';
-  return '<button type="button" class="hall-fish-club-choice-hero hall-fish-achievement-row"' + attrs + ' aria-label="' + hallFishEsc("Открыть ачивку " + title + " — " + name) + '">' +
-    '<span class="hall-fish-club-choice-hero__rank">' + hallFishEsc(row.rank) + '</span>' +
-    '<span class="hall-fish-club-choice-hero__art" aria-hidden="true">' +
-      (art ? '<img src="' + hallFishEsc(art) + '" alt="" loading="lazy" decoding="async" />' : '<span>' + hallFishEsc(name.charAt(0) || "?") + '</span>') +
-    '</span>' +
-    '<span class="hall-fish-club-choice-hero__body">' +
-      '<span class="hall-fish-club-choice-hero__badge">Победитель</span>' +
-      '<strong>' + hallFishEsc(name) + '</strong>' +
-      '<em>Народный герой ' + hallFishEsc(month) + '</em>' +
-      (story ? '<span class="hall-fish-club-choice-hero__story">' + hallFishEsc(story) + '</span>' : '') +
-    '</span>' +
-  '</button>';
-}
-
 function hallFishAchievementShareLabel(key, title) {
   return "Зал славы — Топы по ачивкам: " + (title || key || "ачивка");
 }
@@ -1340,12 +1308,10 @@ function hallFishAchievementShareHtml(key, title) {
 
 function hallFishAchievementSectionHtml(title, rows, description, key) {
   var list = Array.isArray(rows) ? rows : [];
-  var isClubChoice = title === "Народный герой";
   return '<section class="hall-fish-achievement-section">' +
     '<h4 class="hall-fish-achievement-section__title">' + hallFishEsc(title) + '</h4>' +
     (description ? '<p class="hall-fish-achievement-section__description">' + hallFishEsc(description) + '</p>' : '') +
-    (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list' + (isClubChoice ? " hall-fish-achievement-list--club-choice" : "") + '">' + list.map(function (row) {
-      if (isClubChoice) return hallFishClubChoiceHeroRowHtml(row, title);
+    (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
       var sub = row.telegram || row.extraText || "";
@@ -1808,6 +1774,14 @@ function hallFishEnsureProfileModal() {
     tg: window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null,
   });
   return typeof window.openChatUserModalById === "function";
+}
+
+function hallFishEnsureProfileModalReady() {
+  if (hallFishEnsureProfileModal()) return Promise.resolve(true);
+  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(false);
+  return Promise.resolve(window.pokerEnsureScriptDomains(["chat"]))
+    .then(function () { return hallFishEnsureProfileModal(); })
+    .catch(function () { return hallFishEnsureProfileModal(); });
 }
 
 function hallFishPrefetchProfile(userId) {
@@ -2318,16 +2292,22 @@ function initHallFishRatingModal() {
     if (!row) return;
     if (row.classList && row.classList.contains("hall-fish-achievement-row")) return;
     var userId = String(row.getAttribute("data-user-id") || "").trim();
-    if (!userId || !hallFishEnsureProfileModal()) return;
+    if (!userId) return;
     var rowLevel = hallFishLevelFromRow(row);
     e.preventDefault();
     e.stopPropagation();
     hallFishSetProfileRowLoading(row);
-    window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null, {
-      level: rowLevel,
-      ratingNick: row.getAttribute("data-user-name") || "",
+    hallFishEnsureProfileModalReady().then(function (ready) {
+      if (!ready || typeof window.openChatUserModalById !== "function") {
+        hallFishClearProfileLoadingRows();
+        return;
+      }
+      window.openChatUserModalById(userId, row.getAttribute("data-user-name") || "Игрок", null, {
+        level: rowLevel,
+        ratingNick: row.getAttribute("data-user-name") || "",
+      });
+      hallFishClearLoadingWhenProfileOpens();
     });
-    hallFishClearLoadingWhenProfileOpens();
   });
   document.addEventListener("keydown", function (e) {
     var detailModal = document.getElementById("hallFishAchievementDetailModal");

@@ -19,6 +19,18 @@
   var homeSummaryInFlight = null;
   var homeSummaryLoadedAt = 0;
   var HOME_SUMMARY_CACHE_MS = 45000;
+  var MANUAL_COMPLETED_HISTORY = [
+    {
+      month: "2026-05",
+      winners: [
+        {
+          place: 1,
+          nick: "Em13!!",
+          description: "Выигрыш 2 300 000р в мейне в Калининграде за 1е место. Отобрался с сателлита за 300р в сателлит за 1200р, там выиграл путевку за 120 000р в Калининград, включающую билет на мейн, и выиграл Мейн.",
+        },
+      ],
+    },
+  ];
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -940,6 +952,22 @@
     '</span>';
   }
 
+  function completedHistoryRows(data) {
+    var rows = Array.isArray(data && data.history) ? data.history.slice() : [];
+    MANUAL_COMPLETED_HISTORY.forEach(function (manualRow) {
+      var manualMonth = String(manualRow && manualRow.month || "").trim();
+      var manualWinner = manualRow && manualRow.winners && manualRow.winners[0];
+      var manualNick = clubChoiceRatingNick(manualWinner && manualWinner.nick);
+      var exists = rows.some(function (row) {
+        var winner = row && row.winners && row.winners[0];
+        return String(row && row.month || "").trim() === manualMonth &&
+          clubChoiceRatingNick(winner && winner.nick) === manualNick;
+      });
+      if (!exists) rows.push(manualRow);
+    });
+    return rows;
+  }
+
   function renderPlayerAvatar(candidate, id) {
     var src = candidate && candidate.avatar ? String(candidate.avatar).trim() : "";
     var art = null;
@@ -1114,8 +1142,8 @@
   }
 
   function renderCompleted(data) {
-    var last = (data.history || [])[0] || {};
-    var winners = last.winners || [];
+    var historyRows = completedHistoryRows(data);
+    var last = historyRows[0] || {};
     var candidates = candidateMap(data);
     setStatus("Голосование завершено");
     bodyEl.innerHTML =
@@ -1124,7 +1152,11 @@
         '<strong>Народный герой</strong>' +
         '<p class="club-choice-vote-modal__summary-desc">Победитель этого блока выбран игроками клуба среди кандидатов с самыми заметными результатами и поступками месяца.</p>' +
       '</div>' +
-      renderCompletedHeroWinner(last, winners, candidates) +
+      (historyRows.length
+        ? historyRows.map(function (row) {
+            return renderCompletedHeroWinner(row, row && row.winners || [], candidates);
+          }).join("")
+        : renderCompletedHeroWinner(last, [], candidates)) +
       (data.isAdmin
         ? '<button type="button" class="club-choice-vote-modal__primary club-choice-vote-modal__primary--wide" data-club-choice-new-draft="1">Новое голосование</button>'
         : '');

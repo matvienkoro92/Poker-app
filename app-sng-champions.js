@@ -978,8 +978,11 @@
     }).concat([1]));
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
-        (bracketMapExpanded ? '<span class="sng-champions-modal__bracket-map-head-left">' + mapToggleButton + '</span>' : '') +
-        '<strong>' + escapeHtml(title) + '</strong>' +
+        '<span class="sng-champions-modal__bracket-map-title-row">' +
+          (bracketMapExpanded ? '' : '<strong>' + escapeHtml(title) + '</strong>') +
+          '<span class="sng-champions-modal__bracket-map-head-left">' + mapToggleButton + '</span>' +
+        '</span>' +
+        (bracketMapExpanded ? '<strong>' + escapeHtml(title) + '</strong>' : '') +
         mapToggleButton +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
