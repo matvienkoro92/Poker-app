@@ -452,7 +452,16 @@ function summerRatingLowerArtSizeStyle(place, nick) {
 function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art) return "";
-  return "";
+  // Top-3 podium art is rendered through inline CSS variables; CSS background fallbacks below do not control these sizes.
+  var size = "";
+  if (art.league === 1) {
+    if (art.key === "waaar" && slotName === "left") size = "22.4%";
+    else if (art.key === "покерманки" && slotName === "center") size = "41.0%";
+    else if (art.key === "coo1er91" && slotName === "right") size = "22.4%";
+  } else if (art.league === 2 && slotName === "left") {
+    size = "19.55%";
+  }
+  return size ? "--summer-top3-art-" + slotName + "-size:" + size + ";" : "";
 }
 
 function summerRatingPlayerArtStageSize(key) {

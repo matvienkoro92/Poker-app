@@ -69,9 +69,10 @@
       if (window.__pokerClickSoundMuted === false) return false;
     } catch (eMemory) {}
     try {
-      return typeof localStorage !== "undefined" && localStorage.getItem(CLICK_SOUND_MUTED_KEY) === "1";
+      if (typeof localStorage === "undefined") return true;
+      return localStorage.getItem(CLICK_SOUND_MUTED_KEY) !== "0";
     } catch (eStorage) {
-      return false;
+      return true;
     }
   }
 
@@ -83,7 +84,7 @@
     try {
       if (typeof localStorage !== "undefined") {
         if (next) localStorage.setItem(CLICK_SOUND_MUTED_KEY, "1");
-        else localStorage.removeItem(CLICK_SOUND_MUTED_KEY);
+        else localStorage.setItem(CLICK_SOUND_MUTED_KEY, "0");
       }
     } catch (eStorage) {}
     return next;

@@ -139,7 +139,7 @@
   function participantName(item, role) {
     item = item || {};
     var profile = item[role + "Profile"] || {};
-    return profile.name || item[role + "Name"] || transferDisplayId(item, role) || "";
+    return profile.name || profile.poker21Id || item[role + "Poker21Id"] || transferDisplayId(item, role) || item[role + "Name"] || "";
   }
 
   function participantAvatar(item, role) {
@@ -157,6 +157,7 @@
   }
 
   function renderParticipant(label, item, role) {
+    if (item && item.status === "open" && role === "buyer") return null;
     var id = transferDisplayId(item, role);
     var name = participantName(item, role);
     if (!id && !name) return null;
@@ -353,7 +354,6 @@
     [
       renderParticipant("Автор", item, "owner"),
       renderParticipant("Покупатель", item, "buyer"),
-      renderParticipant("Продавец", item, "seller"),
     ].forEach(function (node) {
       if (node) meta.appendChild(node);
     });

@@ -5093,5 +5093,39 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 }
 
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonus-game-back {
-  left: 4px !important;
+  left: 8px !important;
+}
+
+body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
+  transform: translateY(-38px);
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+  top: -18px;
+}
+
+@media (max-width: 430px) {
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+    top: -18px;
+  }
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
+  top: 23px;
+}
+
+@media (max-width: 430px) {
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
+    top: 23px;
+  }
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
+  top: 59px;
+}
+
+@media (max-width: 430px) {
+  .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
+    top: 59px;
+  }
 }

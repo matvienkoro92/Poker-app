@@ -141,9 +141,10 @@ function pokerProfileIsClickSoundMuted() {
     if (typeof window.pokerIsClickSoundMuted === "function") return !!window.pokerIsClickSoundMuted();
   } catch (eGlobalSound) {}
   try {
-    return typeof localStorage !== "undefined" && localStorage.getItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY) === "1";
+    if (typeof localStorage === "undefined") return true;
+    return localStorage.getItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY) !== "0";
   } catch (eStorage) {
-    return false;
+    return true;
   }
 }
 
@@ -158,7 +159,7 @@ function pokerProfileSetClickSoundMuted(muted) {
   try {
     if (typeof localStorage !== "undefined") {
       if (next) localStorage.setItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY, "1");
-      else localStorage.removeItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY);
+      else localStorage.setItem(POKER_PROFILE_CLICK_SOUND_MUTED_KEY, "0");
     }
   } catch (eStorage) {}
   return next;
