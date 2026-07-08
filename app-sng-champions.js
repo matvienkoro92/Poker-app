@@ -936,8 +936,12 @@
     var unplayed = !match.winnerId && knownCount >= 2;
     var selectedClass = options.selected ? " sng-champions-modal__map-match--selected" : "";
     var focusClass = options.focus ? " sng-champions-modal__map-match--focus" : "";
+    var styleParts = [];
+    if (options.rowStart) styleParts.push("--sng-map-row-start:" + String(options.rowStart));
+    if (options.rowSpan) styleParts.push("--sng-map-row-span:" + String(options.rowSpan));
+    var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
-    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + attrs + '>' +
+    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
@@ -969,6 +973,9 @@
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
     var mapToggleButton = '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>';
+    var baseMatchCount = Math.max.apply(null, rounds.map(function (round) {
+      return Array.isArray(round && round.matches) ? round.matches.length : 0;
+    }).concat([1]));
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
         (bracketMapExpanded ? '<span class="sng-champions-modal__bracket-map-head-left">' + mapToggleButton + '</span>' : '') +
@@ -976,16 +983,21 @@
         mapToggleButton +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
-      '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
+      '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
-              ((round.matches || []).map(function (match) {
+              ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
-                return renderBracketMapMatch(match, data, round, index, rounds, { selected: isSelected });
+                var rowSpan = matchCount ? Math.max(1, Math.round(baseMatchCount / matchCount)) : 1;
+                return renderBracketMapMatch(match, data, round, index, rounds, {
+                  selected: isSelected,
+                  rowStart: (matchIndex * rowSpan) + 1,
+                  rowSpan: rowSpan
+                });
               }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +
           '</div>';
