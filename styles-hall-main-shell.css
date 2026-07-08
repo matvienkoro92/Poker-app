@@ -119,6 +119,9 @@
   text-align: center;
   width: 100%;
 }
+#hallOfFameView .hall-of-fame__main-title {
+  display: none !important;
+}
 /* Ссылка на вкладку: Поделиться / Скопировать (уникальный startapp на раздел) */
 /* Ряд «Поделиться / копировать»: отступы зала славы + разметка как .raffles-hero__share-row */
 .hall-of-fame__panel-share-row {
@@ -206,8 +209,8 @@
   --hall-top2026-stage-min-height: clamp(820px, calc(101vw + 434px), 1028px);
   --hall-top2026-lower-bg-y: clamp(360px, 96vw, 430px);
   --hall-top2026-lower-bg-width: 142%;
-  --hall-top2026-trophy-right: clamp(-58px, calc(3vw - 67px), -40px);
-  --hall-top2026-trophy-top: clamp(327px, calc(84vw + 7px), 382px);
+  --hall-top2026-trophy-right: clamp(-63px, calc(3vw - 72px), -45px);
+  --hall-top2026-trophy-top: clamp(319px, calc(84vw - 1px), 374px);
   --hall-top2026-trophy-width: clamp(121.55px, 33.66vw, 145.86px);
   margin: 0;
   padding: 4px 0 0;

@@ -553,6 +553,14 @@
   min-width: 0;
 }
 
+.club-choice-vote-modal__hero-winner-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .club-choice-vote-modal__hero-winner-badge {
   display: inline-flex;
   align-items: center;
@@ -569,6 +577,17 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.58),
     0 0 18px rgba(255, 184, 70, 0.25);
+}
+
+.club-choice-vote-modal__hero-winner-badge--month {
+  color: #ffe8a6;
+  border-color: rgba(255, 218, 128, 0.48);
+  background:
+    linear-gradient(180deg, rgba(255, 232, 166, 0.18), rgba(18, 22, 34, 0.82)),
+    rgba(9, 12, 20, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 14px rgba(255, 184, 70, 0.18);
 }
 
 .club-choice-vote-modal__hero-winner-main strong {
@@ -2609,25 +2628,25 @@
 }
 
 .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 34px;
-  --sng-map-row-gap: 5px;
+  --sng-map-row-height: 40px;
+  --sng-map-row-gap: 6px;
   display: grid;
   grid-template-columns:
-    minmax(230px, 1.42fr)
-    minmax(205px, 1.18fr)
-    minmax(176px, 1fr)
-    minmax(158px, 0.92fr)
-    minmax(158px, 0.92fr)
-    minmax(164px, 0.96fr);
+    minmax(250px, 1.42fr)
+    minmax(230px, 1.18fr)
+    minmax(190px, 1fr)
+    minmax(172px, 0.92fr)
+    minmax(172px, 0.92fr)
+    minmax(176px, 0.96fr);
   gap: 14px;
   width: 100%;
-  min-width: 1120px;
+  min-width: 1240px;
   overflow: visible;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 52px;
-  --sng-map-row-gap: 8px;
+  --sng-map-row-height: 42px;
+  --sng-map-row-gap: 5px;
   grid-template-columns:
     minmax(185px, 1.28fr)
     minmax(170px, 1.08fr)
@@ -2736,12 +2755,12 @@
   display: grid;
   position: relative;
   grid-row: var(--sng-map-row-start, auto) / span var(--sng-map-row-span, 1);
-  grid-template-columns: 10px minmax(0, 1fr) minmax(42px, auto);
+  grid-template-columns: 10px minmax(0, 1fr);
   align-self: center;
   gap: 2px;
   min-width: 0;
-  min-height: 34px;
-  padding: 4px 5px 4px 5px;
+  min-height: 38px;
+  padding: 4px 6px;
   border: 1px solid color-mix(in srgb, var(--sng-map-lane) 58%, rgba(255, 184, 70, 0.1));
   border-left: 5px solid var(--sng-map-lane);
   border-radius: 4px;
@@ -2833,7 +2852,7 @@
 }
 
 .sng-champions-modal__map-match--unplayed {
-  min-height: 42px;
+  min-height: 46px;
   border-color: color-mix(in srgb, var(--sng-map-lane) 82%, rgba(255, 255, 255, 0.18));
   border-left-color: color-mix(in srgb, var(--sng-map-lane) 96%, #fff);
   background:
@@ -2849,10 +2868,10 @@
   content: "";
   position: absolute;
   z-index: 4;
-  top: -7px;
-  right: -7px;
-  width: 18px;
-  height: 18px;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
   background: linear-gradient(180deg, #ff6b6b, #dc2626 62%, #991b1b);
   box-shadow:
@@ -2867,7 +2886,7 @@
 
 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
   position: absolute;
-  inset: 5px 48px 5px 15px;
+  inset: 6px 10px 6px 16px;
   z-index: 1;
   display: grid;
   align-content: space-between;
@@ -2882,13 +2901,13 @@
   display: -webkit-box;
   width: 100%;
   max-width: 100%;
-  overflow: visible;
-  overflow-wrap: anywhere;
-  text-overflow: clip;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
   transform: none;
-  white-space: normal;
+  white-space: nowrap;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed:nth-child(1) {
@@ -2968,10 +2987,10 @@
   font-weight: 850;
   line-height: 1.05;
   text-overflow: ellipsis;
-  overflow-wrap: anywhere;
-  white-space: normal;
+  overflow-wrap: normal;
+  white-space: nowrap;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .sng-champions-modal__map-player--winner {
@@ -2994,10 +3013,10 @@
   color: #fff7d6;
   opacity: 1;
   font-weight: 1000;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   text-overflow: ellipsis;
   text-shadow: 0 0 7px rgba(255, 239, 201, 0.42);
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .sng-champions-modal__map-player--unplayed {
@@ -3066,23 +3085,7 @@
 }
 
 .sng-champions-modal__map-next {
-  align-self: center;
-  justify-self: end;
-  z-index: 3;
-  max-width: 44px;
-  padding: 4px 4px;
-  color: #03100a;
-  font-size: 7px;
-  font-weight: 1000;
-  line-height: 1;
-  text-align: center;
-  white-space: normal;
-  border-radius: 999px;
-  background: var(--sng-map-lane);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--sng-map-lane) 72%, #fff),
-    0 0 12px color-mix(in srgb, var(--sng-map-lane) 62%, transparent);
-  text-shadow: none;
+  display: none !important;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-title {
@@ -3105,32 +3108,32 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match {
-  grid-template-columns: 18px minmax(0, 1fr) minmax(52px, auto);
-  min-height: 58px;
-  padding: 7px;
-  border-left-width: 7px;
-  border-radius: 7px;
+  grid-template-columns: 14px minmax(0, 1fr);
+  min-height: 44px;
+  padding: 5px;
+  border-left-width: 6px;
+  border-radius: 6px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed {
-  min-height: 70px;
+  min-height: 54px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match {
-  min-height: 58px;
-  padding: 7px;
+  min-height: 44px;
+  padding: 5px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--unplayed {
-  min-height: 70px;
+  min-height: 54px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 12px 66px 12px 28px;
+  inset: 8px 12px 8px 22px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 12px 64px 12px 26px;
+  inset: 8px 12px 8px 20px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
@@ -3140,7 +3143,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting {
   max-width: 100%;
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-status {
@@ -3148,15 +3151,15 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match-index {
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting {
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.05;
 }
 
@@ -3173,12 +3176,6 @@
   padding: 5px 6px;
   font-size: 9px;
   line-height: 1;
-}
-
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-next {
-  max-width: 54px;
-  padding: 5px 6px;
-  font-size: 8px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next::after {
@@ -7918,6 +7915,10 @@ body.club-choice-vote-open {
 
   .club-choice-vote-modal__hero-winner-main {
     gap: 5px;
+  }
+
+  .club-choice-vote-modal__hero-winner-badges {
+    gap: 4px;
   }
 
   .club-choice-vote-modal__hero-winner-badge {

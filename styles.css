@@ -51,6 +51,7 @@
     background: transparent;
   }
 
+  #hallOfFameView .hall-of-fame__main-title,
   #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
     display: none !important;
   }

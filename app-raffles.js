@@ -1691,8 +1691,93 @@ function initRaffles() {
     );
   }
 
+  function activeRaffleSpecificStartParam(id) {
+    var rawId = String(id || "").trim();
+    if (!rawId) return "raffles";
+    if (typeof window !== "undefined" && typeof window.pokerBuildRaffleActiveStartParam === "function") {
+      return window.pokerBuildRaffleActiveStartParam(rawId);
+    }
+    return "r_" + raffleActiveShortCode(rawId);
+  }
+
+  function activeRaffleSpecificShareLink(id) {
+    var startParam = activeRaffleSpecificStartParam(id);
+    if (typeof window !== "undefined" && typeof window.pokerBuildRaffleShareLink === "function") {
+      return window.pokerBuildRaffleShareLink(startParam);
+    }
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(startParam);
+    return "";
+  }
+
+  function copyRaffleActiveText(text) {
+    return new Promise(function (resolve) {
+      var value = text != null ? String(text) : "";
+      if (!value) {
+        resolve(false);
+        return;
+      }
+      function copyWithFallback() {
+        var input = null;
+        try {
+          input = document.createElement("textarea");
+          input.value = value;
+          input.setAttribute("readonly", "readonly");
+          input.style.position = "fixed";
+          input.style.left = "-9999px";
+          input.style.top = "0";
+          document.body.appendChild(input);
+          input.focus();
+          input.select();
+          input.setSelectionRange(0, input.value.length);
+          var ok = typeof document.execCommand === "function" && document.execCommand("copy");
+          if (input.parentNode) input.parentNode.removeChild(input);
+          resolve(!!ok);
+        } catch (e) {
+          if (input && input.parentNode) input.parentNode.removeChild(input);
+          resolve(false);
+        }
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(value).then(function () {
+          resolve(true);
+        }).catch(copyWithFallback);
+        return;
+      }
+      copyWithFallback();
+    });
+  }
+
+  function handleRafflesActiveChooserCopy(copyBtn) {
+    if (!copyBtn) return;
+    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+    var id = String(copyBtn.getAttribute("data-raffle-active-copy-id") || "").trim();
+    var link = String(copyBtn.getAttribute("data-raffle-active-copy-link") || "").trim() || activeRaffleSpecificShareLink(id);
+    var originalText = copyBtn.dataset.copyDefaultText || copyBtn.textContent || "Скопировать";
+    copyBtn.dataset.copyDefaultText = originalText;
+    copyRaffleActiveText(link).then(function (copied) {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (copied) {
+        copyBtn.classList.add("raffles-active-chooser__copy-btn--copied");
+        copyBtn.textContent = "Готово";
+        copyBtn.setAttribute("aria-label", "Ссылка на этот розыгрыш скопирована");
+        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_active_card_copy");
+        if (handleRafflesActiveChooserCopy.timer) clearTimeout(handleRafflesActiveChooserCopy.timer);
+        handleRafflesActiveChooserCopy.timer = setTimeout(function () {
+          copyBtn.classList.remove("raffles-active-chooser__copy-btn--copied");
+          copyBtn.textContent = copyBtn.dataset.copyDefaultText || "Скопировать";
+          copyBtn.setAttribute("aria-label", "Скопировать ссылку на этот розыгрыш");
+          handleRafflesActiveChooserCopy.timer = null;
+        }, 1800);
+        return;
+      }
+      if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+      else alert("Ссылка: " + link);
+    });
+  }
+
   function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, topPillsHtml) {
     var amount = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
+    var shareLink = activeRaffleSpecificShareLink(id);
     return (
       '<span class="raffles-active-chooser__prize-panel">' +
       (topPillsHtml || "") +
@@ -1704,6 +1789,11 @@ function initRaffles() {
       '<button type="button" class="raffles-active-chooser__prize-info-btn" data-raffle-active-info-id="' +
       escapeHtml(id) +
       '" aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">ИНФО</button>' +
+      '<button type="button" class="raffles-active-chooser__copy-btn" data-raffle-active-copy-id="' +
+      escapeHtml(id) +
+      '" data-raffle-active-copy-link="' +
+      escapeHtml(shareLink) +
+      '" aria-label="Скопировать ссылку на этот розыгрыш">Скопировать</button>' +
       "</span>"
     );
   }
@@ -2276,6 +2366,13 @@ function initRaffles() {
         handleRafflesActiveChooserAction(actionBtn);
         return;
       }
+      var copyBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-copy-id]") : null;
+      if (copyBtn && rafflesActiveChooser.contains(copyBtn)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleRafflesActiveChooserCopy(copyBtn);
+        return;
+      }
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       var id = String(btn.getAttribute("data-raffle-active-id") || "").trim();
@@ -2301,6 +2398,8 @@ function initRaffles() {
       if (infoBtn && rafflesActiveChooser.contains(infoBtn)) return;
       var actionBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-action]") : null;
       if (actionBtn && rafflesActiveChooser.contains(actionBtn)) return;
+      var copyBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-active-copy-id]") : null;
+      if (copyBtn && rafflesActiveChooser.contains(copyBtn)) return;
       var btn = e.target && e.target.closest ? e.target.closest(".raffles-active-chooser__item[data-raffle-active-id]") : null;
       if (!btn || !rafflesActiveChooser.contains(btn)) return;
       e.preventDefault();

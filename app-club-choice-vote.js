@@ -926,9 +926,12 @@
         renderCompletedWinnerArt(candidate, winner && winner.id) +
       '</div>' +
       '<div class="club-choice-vote-modal__hero-winner-main">' +
-        '<span class="club-choice-vote-modal__hero-winner-badge">Победитель</span>' +
+        '<span class="club-choice-vote-modal__hero-winner-badges">' +
+          '<span class="club-choice-vote-modal__hero-winner-badge">Победитель</span>' +
+          (month ? '<span class="club-choice-vote-modal__hero-winner-badge club-choice-vote-modal__hero-winner-badge--month">' + escapeHtml(month) + '</span>' : '') +
+        '</span>' +
         '<strong>' + escapeHtml(displayNick) + '</strong>' +
-        '<em>Народный герой ' + escapeHtml(month) + '</em>' +
+        '<em>Народный герой</em>' +
         '<p>' + escapeHtml(description) + '</p>' +
       '</div>' +
     '</section>';
