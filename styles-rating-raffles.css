@@ -11913,3 +11913,76 @@ body[data-view="raffles"] .raffle-completed-card__winners-title {
   }
 
 }
+
+body[data-view="raffles"] .raffles-hero::after {
+  display: none !important;
+  content: none !important;
+}
+
+body[data-view="raffles"] .raffles-hero .raffles-hero__stats {
+  bottom: calc(var(--raffles-hero-stack-bottom, 8px) + var(--raffles-hero-stack-inner, 7px) + var(--raffles-hero-actions-height, 27px) + var(--raffles-hero-stack-gap, 7px) + 12px) !important;
+}
+
+@media (max-width: 430px) {
+  body[data-view="raffles"] .raffles-hero .raffles-hero__stats {
+    bottom: calc(var(--raffles-hero-stack-bottom, 8px) + var(--raffles-hero-stack-inner, 6px) + var(--raffles-hero-actions-height, 27px) + var(--raffles-hero-stack-gap, 7px) + 12px) !important;
+  }
+}
+
+body[data-view="raffles"] .raffles-hero__stats :is(
+  .raffles-hero__stat--active,
+  .raffles-hero__stat--selected,
+  .raffles-hero__stat.active,
+  .raffles-hero__stat.is-active,
+  .raffles-hero__stat[aria-selected="true"],
+  .raffles-hero__stat[aria-pressed="true"],
+  .raffles-hero__chip--active,
+  .raffles-hero__chip--selected,
+  .raffles-hero__chip.active,
+  .raffles-hero__chip.is-active,
+  .raffles-hero__chip[aria-selected="true"],
+  .raffles-hero__chip[aria-pressed="true"],
+  button.active,
+  button.is-active,
+  button[aria-selected="true"],
+  button[aria-pressed="true"]
+) {
+  border-color: rgba(255, 219, 125, 0.98) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 245, 188, 0.38), transparent 58%),
+    linear-gradient(180deg, rgba(72, 37, 10, 0.98), rgba(18, 12, 8, 0.98)) !important;
+  color: #fff4c8 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 190, 0.32),
+    inset 0 -2px 0 rgba(255, 128, 18, 0.44),
+    0 0 0 1px rgba(255, 128, 18, 0.7),
+    0 0 18px rgba(255, 128, 18, 0.54) !important;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.82),
+    0 0 10px rgba(255, 219, 125, 0.68) !important;
+}
+
+body[data-view="raffles"] .raffles-hero__stats :is(
+  .raffles-hero__stat--active,
+  .raffles-hero__stat--selected,
+  .raffles-hero__stat.active,
+  .raffles-hero__stat.is-active,
+  .raffles-hero__stat[aria-selected="true"],
+  .raffles-hero__stat[aria-pressed="true"],
+  .raffles-hero__chip--active,
+  .raffles-hero__chip--selected,
+  .raffles-hero__chip.active,
+  .raffles-hero__chip.is-active,
+  .raffles-hero__chip[aria-selected="true"],
+  .raffles-hero__chip[aria-pressed="true"],
+  button.active,
+  button.is-active,
+  button[aria-selected="true"],
+  button[aria-pressed="true"]
+) :is(dt, dd, span) {
+  color: #fff4c8 !important;
+  opacity: 1 !important;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.82),
+    0 0 10px rgba(255, 219, 125, 0.68) !important;
+}

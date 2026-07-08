@@ -456,7 +456,7 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var size = "";
   if (art.league === 1) {
     if (art.key === "waaar" && slotName === "left") size = "22.4%";
-    else if (art.key === "покерманки" && slotName === "center") size = "41.0%";
+    else if (art.key === "покерманки" && slotName === "center") size = "38.1%";
     else if (art.key === "coo1er91" && slotName === "right") size = "22.4%";
   } else if (art.league === 2 && slotName === "left") {
     size = "19.55%";

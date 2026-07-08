@@ -5097,35 +5097,81 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title {
-  transform: translateY(-38px);
+  transform: translateY(0);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
-  top: -18px;
+  top: 22px;
 }
 
 @media (max-width: 430px) {
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
-    top: -18px;
+    top: 22px;
   }
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
-  top: 23px;
+  top: 63px;
 }
 
 @media (max-width: 430px) {
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
-    top: 23px;
+    top: 63px;
   }
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
-  top: 59px;
+  top: 99px;
 }
 
 @media (max-width: 430px) {
   .winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
-    top: 59px;
+    top: 99px;
+  }
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+  --summer-top3-art-center-y: calc(26% + 19px);
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  top: 10px;
+}
+
+@media (max-width: 700px) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    --summer-top3-art-center-y: calc(26% + 22px);
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+    top: 72px;
+  }
+}
+
+@media (max-width: 700px) and (hover: hover) and (pointer: fine),
+  (min-width: 701px) and (max-width: 1100px) and (min-aspect-ratio: 4 / 5) and (hover: hover) and (pointer: fine) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    --summer-top3-art-center-y: calc(26% + 22px);
+  }
+
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+    top: 33px;
+  }
+}
+
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+  --summer-top3-art-left-y: calc(44% + 30px);
+}
+
+@media (max-width: 700px) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    --summer-top3-art-left-y: calc(44% + 75px);
+  }
+}
+
+@media (max-width: 700px) and (hover: hover) and (pointer: fine),
+  (min-width: 701px) and (max-width: 1100px) and (min-aspect-ratio: 4 / 5) and (hover: hover) and (pointer: fine) {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+    --summer-top3-art-left-y: calc(44% + 44px);
   }
 }

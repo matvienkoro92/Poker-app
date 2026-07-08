@@ -381,6 +381,26 @@
     return "Уровень " + String(level);
   }
 
+  function playerTelegram(player) {
+    var raw = player && (
+      player.telegram ||
+      player.telegramUsername ||
+      player.telegram_username ||
+      player.tgUsername ||
+      player.tg_username ||
+      player.username ||
+      player.telegramLogin
+    );
+    var value = String(raw || "").trim();
+    if (!value) return null;
+    value = value.replace(/^https?:\/\/t\.me\//i, "").replace(/^tg:\/\//i, "").replace(/^@+/, "").split(/[/?#]/)[0].trim();
+    if (!/^[A-Za-z0-9_]{5,32}$/.test(value)) return null;
+    return {
+      label: "@" + value,
+      href: "https://t.me/" + value,
+    };
+  }
+
   function playerInitial(player) {
     var name = playerName(player);
     return String(name || "И").trim().charAt(0).toUpperCase() || "И";
@@ -541,12 +561,14 @@
     var profileName = playerName(player);
     var avatar = playerAvatar(player);
     var level = playerLevelText(player);
+    var telegram = playerTelegram(player);
     var attrs = profileId
       ? ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"'
       : "";
     return '<span class="sng-champions-modal__bracket-player-main">' +
       '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
       (level ? '<small class="sng-champions-modal__bracket-player-level">' + escapeHtml(level) + '</small>' : '') +
+      (telegram ? '<a class="sng-champions-modal__bracket-player-telegram" href="' + escapeHtml(telegram.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(telegram.label) + '</a>' : '') +
     '</span>';
   }
 
@@ -903,7 +925,7 @@
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
-        (unplayed ? '<span class="sng-champions-modal__map-status">Еще не сыграли</span>' : '') +
+        (unplayed ? '<span class="sng-champions-modal__map-status" data-sng-full-label="Еще не сыграли">Не сыгр.</span>' : '') +
       '</span>' +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
@@ -931,24 +953,16 @@
     var selected = selectedBracketMapMatch(rounds, kind);
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
-    var focusHtml = bracketMapExpanded && selected
-      ? '<div class="sng-champions-modal__map-focus" aria-label="Увеличенная выбранная пара">' +
-          '<div class="sng-champions-modal__map-focus-head">' +
-            '<span>' + escapeHtml(labelFn(selected.round, selected.roundIndex, rounds)) + '</span>' +
-            '<strong>Пара ' + escapeHtml(selected.match.index || "") + '</strong>' +
-          '</div>' +
-          renderBracketMapMatch(selected.match, data, selected.round, selected.roundIndex, rounds, { focus: true, interactive: false }) +
-        '</div>'
-      : "";
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
         '<strong>' + escapeHtml(title) + '</strong>' +
-        '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Закрыть" : "Увеличить") + '</button>' +
+        '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>' +
       '</div>' +
-      focusHtml +
       '<div class="sng-champions-modal__bracket-map" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
-          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + '">' +
+          var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
+          var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
+          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match) {
