@@ -180,6 +180,82 @@ function renderSpringRatingViewTotalsWeeks() {
   function escNick(s) {
     return typeof escapeHtmlRating === "function" ? escapeHtmlRating(s) : String(s == null ? "" : s).replace(/</g, "&lt;");
   }
+  function shareIconHtml() {
+    return "<span class=\"winter-rating__share-icon\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"9\" y=\"9\" width=\"13\" height=\"13\" rx=\"2\" ry=\"2\"/><path d=\"M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1\"/></svg></span>";
+  }
+  function weekStartParam(dates, monthTotals) {
+    var firstDate = Array.isArray(dates) && dates.length ? dates[0] : "";
+    if (!firstDate) return typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "summer-rating" : "spring-rating";
+    var datePrefix = typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("date") : "spring_rating_date_";
+    return datePrefix + String(firstDate).replace(/\./g, "_");
+  }
+  function weekShareHtml(block, totalText, monthTotals) {
+    var dates = Array.isArray(block && block.dates) ? block.dates : [];
+    var label = String(block && block.label || "").trim() || (monthTotals ? "Итого призовые" : "Неделя");
+    var startParam = weekStartParam(dates, monthTotals);
+    var shareLabel = monthTotals ? "Ссылка на блок итогов " + label : "Ссылка на блок " + label;
+    var shareText = (typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "Рейтинг лета 2026" : "Рейтинг весны 2026") + ": " + label + (totalText && totalText !== "—" ? " · " + totalText : "");
+    return "<div class=\"spring-rating-view-week__share-row winter-rating__spring-league-share-wrap\" data-rating-week-share-row>" +
+      "<button type=\"button\" class=\"winter-rating__share-btn spring-rating-view-week__share-btn\" data-spring-rating-week-share=\"" + escNick(startParam) + "\" data-rating-share-mode=\"share\" data-rating-share-text=\"" + escNick(shareText) + "\">Поделиться</button>" +
+      "<button type=\"button\" class=\"winter-rating__share-btn winter-rating__share-btn--copy-icon spring-rating-view-week__share-btn\" data-spring-rating-week-share=\"" + escNick(startParam) + "\" data-rating-share-mode=\"copy\" data-rating-share-text=\"" + escNick(shareText) + "\" aria-label=\"Скопировать ссылку: " + escNick(shareLabel) + "\">" + shareIconHtml() + "</button>" +
+    "</div>";
+  }
+  function showWeekShareFeedback(btn) {
+    if (!btn || !btn.closest) return;
+    var wrap = btn.closest("[data-rating-week-share-row]");
+    if (!wrap) return;
+    var feedback = wrap.querySelector(".winter-rating__spring-league-copy-feedback");
+    if (!feedback) {
+      feedback = document.createElement("span");
+      feedback.className = "winter-rating__spring-league-copy-feedback";
+      feedback.setAttribute("role", "status");
+      feedback.setAttribute("aria-live", "polite");
+      feedback.hidden = true;
+      wrap.appendChild(feedback);
+    }
+    feedback.textContent = "Скопировано";
+    feedback.hidden = false;
+    feedback.classList.add("winter-rating__spring-league-copy-feedback--visible");
+    btn.classList.add("winter-rating__share-btn--copied");
+    if (btn.__ratingWeekShareFeedbackTimer) clearTimeout(btn.__ratingWeekShareFeedbackTimer);
+    btn.__ratingWeekShareFeedbackTimer = setTimeout(function () {
+      feedback.classList.remove("winter-rating__spring-league-copy-feedback--visible");
+      feedback.hidden = true;
+      btn.classList.remove("winter-rating__share-btn--copied");
+    }, 1800);
+  }
+  function bindSpringRatingWeekShareButtons(host) {
+    if (!host || host.getAttribute("data-spring-rating-week-share-bound") === "1") return;
+    host.setAttribute("data-spring-rating-week-share-bound", "1");
+    host.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-spring-rating-week-share]") : null;
+      if (!btn || !host.contains(btn)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+      var startParam = btn.getAttribute("data-spring-rating-week-share") || "";
+      var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startParam) : "";
+      var text = btn.getAttribute("data-rating-share-text") || "Рейтинг";
+      var mode = btn.getAttribute("data-rating-share-mode") || "copy";
+      if (mode === "share") {
+        var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, text) : "";
+        var tryShare = typeof pokerTryPwaWebShare === "function" ? pokerTryPwaWebShare({ title: text, text: text + "\n" + link, url: link }) : Promise.resolve(false);
+        tryShare.then(function (ok) {
+          if (ok) return;
+          var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (shareUrl && tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+          else if (shareUrl) window.open(shareUrl, "_blank", "noopener,noreferrer");
+        });
+        return;
+      }
+      pokerCopyTextToClipboard(link).then(function (copied) {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (copied) showWeekShareFeedback(btn);
+        else if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+        else alert("Ссылка: " + link);
+      });
+    });
+  }
   function bindSpringRatingWeekMoreButtons(host) {
     if (!host || host.getAttribute("data-spring-rating-week-more-bound") === "1") return;
     host.setAttribute("data-spring-rating-week-more-bound", "1");
@@ -200,6 +276,9 @@ function renderSpringRatingViewTotalsWeeks() {
   bindSpringRatingWeekMoreButtons(mayHost);
   bindSpringRatingWeekMoreButtons(aprilHost);
   bindSpringRatingWeekMoreButtons(marchHost);
+  bindSpringRatingWeekShareButtons(mayHost);
+  bindSpringRatingWeekShareButtons(aprilHost);
+  bindSpringRatingWeekShareButtons(marchHost);
   function rowsFromTopData(data) {
     if (data && Array.isArray(data.top10) && data.top10.length) return data.top10;
     if (data && Array.isArray(data.top3)) return data.top3;
@@ -254,6 +333,7 @@ function renderSpringRatingViewTotalsWeeks() {
       "</div>" +
       "</div>" +
       "<p class=\"winter-rating__past-week-total winter-rating__past-week-total--below\">" + totalLabel + totalText + "</p>" +
+      weekShareHtml(block, totalText, monthTotals) +
       "</div>" +
       "</details>"
     );

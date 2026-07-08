@@ -2240,6 +2240,21 @@ function initWinterRating() {
         typeof buildMiniAppStartLink === "function"
           ? buildMiniAppStartLink((typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + shareBtn.dataset.springLeague)
           : "";
+      var mode = shareBtn.getAttribute("data-rating-share-mode") || "copy";
+      if (mode === "share") {
+        var leagueLabel = shareBtn.dataset.springLeague === "2" ? "Лига 2" : "Лига 1";
+        var seasonLabel = typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "Рейтинг лета 2026" : "Рейтинг весны 2026";
+        var shareText = seasonLabel + ": " + leagueLabel;
+        var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
+        var tryShare = typeof pokerTryPwaWebShare === "function" ? pokerTryPwaWebShare({ title: shareText, text: shareText + "\n" + link, url: link }) : Promise.resolve(false);
+        tryShare.then(function (ok) {
+          if (ok) return;
+          var tgShare = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+          if (shareUrl && tgShare && tgShare.openTelegramLink) tgShare.openTelegramLink(shareUrl);
+          else if (shareUrl) window.open(shareUrl, "_blank", "noopener,noreferrer");
+        });
+        return;
+      }
       pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (copied) {

@@ -1005,6 +1005,38 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+.spring-rating-view-week__share-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46px;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.spring-rating-view-week__share-row .winter-rating__share-btn:not(.winter-rating__share-btn--copy-icon) {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 12px;
+}
+
+.spring-rating-view-week__share-row .winter-rating__share-btn--copy-icon {
+  width: 46px;
+  min-height: 46px;
+  border-radius: 12px;
+}
+
+.spring-rating-view-week__share-row .winter-rating__spring-league-copy-feedback {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+@media (max-width: 520px) {
+  .spring-rating-view-week__share-row {
+    gap: 8px;
+  }
+}
+
 .winter-rating.spring-rating .winter-rating__spring-league-share-wrap .winter-rating__share-btn {
   box-shadow: 0 4px 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }

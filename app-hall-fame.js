@@ -323,6 +323,22 @@ function getHallFameSectionShareUrl(section) {
   return buildMiniAppStartLink(p);
 }
 
+function hallFishAchievementStartParam(key) {
+  var value = String(key || "").trim() || "big50";
+  return "hall_fame_achievements_" + value;
+}
+
+function hallFishAchievementShareUrl(key) {
+  if (typeof buildMiniAppStartLink !== "function") return "";
+  return buildMiniAppStartLink(hallFishAchievementStartParam(key));
+}
+
+function hallFishAchievementKeyFromStartParam(startParam) {
+  var value = String(startParam || "").trim();
+  var match = value.match(/^hall_fame_achievements(?:_([A-Za-z0-9_-]+))?$/);
+  return match ? (match[1] || "big50") : "";
+}
+
 function resolveHallFameSectionFromStartParam(startParam) {
   if (!startParam) return null;
   var p = String(startParam).trim();
@@ -332,6 +348,7 @@ function resolveHallFameSectionFromStartParam(startParam) {
   if (p === "hall_fame_cups") return "cups";
   if (p === "hall_fame_photos") return "photos";
   if (p === "hall_fame_shame") return "shame";
+  if (hallFishAchievementKeyFromStartParam(p)) return "achievements";
   return null;
 }
 
@@ -341,6 +358,10 @@ function resolveHallFameSectionFromStartParam(startParam) {
 function navigateToHallFameSection(section) {
   if (typeof setView === "function") setView("hall-of-fame");
   setTimeout(function () {
+    if (section === "achievements") {
+      openHallFishAchievementTab();
+      return;
+    }
     if (section === "top2026") {
       try {
         if (typeof window.updateWinterRatingWeekTopPreviews === "function") {
@@ -1273,12 +1294,58 @@ function hallFishAchievementSpecs(data) {
   ];
 }
 
-function hallFishAchievementSectionHtml(title, rows, description) {
+function hallFishClubChoiceHeroArt(row) {
+  var key = hallFishNormalizeNick(row && row.nick);
+  if (key === hallFishNormalizeNick("Waaar")) return "./assets/summer-rating-player-waaar.webp";
+  if (key === hallFishNormalizeNick("Em13!!") || key === hallFishNormalizeNick("Em13")) return "./assets/summer-rating-player-emil.webp";
+  return "";
+}
+
+function hallFishClubChoiceHeroRowHtml(row, title) {
+  var userId = String(row.accountId || "").trim();
+  var name = row.nick || "Игрок";
+  var month = row.extraText || "Народный герой";
+  var story = String(row.description || "").trim();
+  var details = Array.isArray(row.detailRows) ? row.detailRows : [];
+  var art = hallFishClubChoiceHeroArt(row);
+  var attrs = userId
+    ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
+    : ' data-user-name="' + hallFishEsc(name) + '"';
+  attrs += ' data-hall-fish-achievement-title="' + hallFishEsc(title) + '" data-hall-fish-achievement-details="' + hallFishEsc(hallFishEncodeData(details)) + '"';
+  return '<button type="button" class="hall-fish-club-choice-hero hall-fish-achievement-row"' + attrs + ' aria-label="' + hallFishEsc("Открыть ачивку " + title + " — " + name) + '">' +
+    '<span class="hall-fish-club-choice-hero__rank">' + hallFishEsc(row.rank) + '</span>' +
+    '<span class="hall-fish-club-choice-hero__art" aria-hidden="true">' +
+      (art ? '<img src="' + hallFishEsc(art) + '" alt="" loading="lazy" decoding="async" />' : '<span>' + hallFishEsc(name.charAt(0) || "?") + '</span>') +
+    '</span>' +
+    '<span class="hall-fish-club-choice-hero__body">' +
+      '<span class="hall-fish-club-choice-hero__badge">Победитель</span>' +
+      '<strong>' + hallFishEsc(name) + '</strong>' +
+      '<em>Народный герой ' + hallFishEsc(month) + '</em>' +
+      (story ? '<span class="hall-fish-club-choice-hero__story">' + hallFishEsc(story) + '</span>' : '') +
+    '</span>' +
+  '</button>';
+}
+
+function hallFishAchievementShareLabel(key, title) {
+  return "Зал славы — Топы по ачивкам: " + (title || key || "ачивка");
+}
+
+function hallFishAchievementShareHtml(key, title) {
+  var label = hallFishAchievementShareLabel(key, title);
+  return '<div class="hall-fish-achievement-share" data-hall-fish-achievement-share-row>' +
+    '<button type="button" class="hall-fish-achievement-share__btn" data-hall-fish-achievement-share="' + hallFishEsc(key) + '" data-hall-fish-achievement-action="share" data-hall-fish-achievement-text="' + hallFishEsc(label) + '">Поделиться</button>' +
+    '<button type="button" class="hall-fish-achievement-share__btn hall-fish-achievement-share__btn--copy" data-hall-fish-achievement-share="' + hallFishEsc(key) + '" data-hall-fish-achievement-action="copy" data-hall-fish-achievement-text="' + hallFishEsc(label) + '" aria-label="' + hallFishEsc("Скопировать ссылку: " + label) + '">Скопировать</button>' +
+  '</div>';
+}
+
+function hallFishAchievementSectionHtml(title, rows, description, key) {
   var list = Array.isArray(rows) ? rows : [];
+  var isClubChoice = title === "Народный герой";
   return '<section class="hall-fish-achievement-section">' +
     '<h4 class="hall-fish-achievement-section__title">' + hallFishEsc(title) + '</h4>' +
     (description ? '<p class="hall-fish-achievement-section__description">' + hallFishEsc(description) + '</p>' : '') +
-    (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
+    (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list' + (isClubChoice ? " hall-fish-achievement-list--club-choice" : "") + '">' + list.map(function (row) {
+      if (isClubChoice) return hallFishClubChoiceHeroRowHtml(row, title);
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
       var sub = row.telegram || row.extraText || "";
@@ -1296,6 +1363,7 @@ function hallFishAchievementSectionHtml(title, rows, description) {
         '<span class="hall-fish-level-row__level">' + hallFishEsc(row.valueText || row.value) + '</span>' +
       '</button>';
     }).join("") + '</div>' : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">Пока нет данных.</div>') +
+    hallFishAchievementShareHtml(key || hallFishActiveAchievementTab || "big50", title) +
   '</section>';
 }
 
@@ -1319,7 +1387,7 @@ function hallFishRenderAchievementRows(data) {
       }).join("") +
     '</div>' +
     '</div>' +
-    hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description) +
+    hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description, activeSpec.key) +
   '</div>';
 }
 
@@ -1980,23 +2048,42 @@ function hallFishLoadReferralRows() {
     .catch(function () { return []; });
 }
 
+function hallFishAchievementRatingDataReady() {
+  return typeof WINTER_RATING_TOURNAMENTS_BY_DATE !== "undefined" &&
+    typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" &&
+    typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined";
+}
+
+function hallFishEnsureAchievementRatingData() {
+  if (hallFishAchievementRatingDataReady()) return Promise.resolve(true);
+  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(false);
+  return Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"]))
+    .then(function () { return hallFishAchievementRatingDataReady(); })
+    .catch(function () { return hallFishAchievementRatingDataReady(); });
+}
+
 function hallFishLoadAchievementRows() {
-  if (hallFishAchievementRowsCache) return Promise.resolve(hallFishAchievementRowsCache);
+  if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return Promise.resolve(hallFishAchievementRowsCache);
+  if (hallFishAchievementRowsCache && !hallFishAchievementRatingDataReady()) hallFishAchievementRowsCache = null;
   if (hallFishAchievementRowsPromise) return hallFishAchievementRowsPromise;
-  hallFishAchievementRowsPromise = hallFishLoadRows()
-    .catch(function () {
-      return hallFishRatingRowsCache || hallFishReadRowsSessionCache() || [];
-    })
-    .then(function (levelRows) {
-      var tournamentData = hallFishAggregateTournamentAchievements(levelRows);
-      return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows()])
-        .then(function (parts) {
-          hallFishAchievementRowsCache = Object.assign({}, tournamentData, {
-            clubChoice: hallFishAggregateClubChoiceRows(parts[0], levelRows),
-            referrals: parts[1],
+  hallFishAchievementRowsPromise = hallFishEnsureAchievementRatingData()
+    .then(function () {
+      if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return hallFishAchievementRowsCache;
+      return hallFishLoadRows()
+        .catch(function () {
+          return hallFishRatingRowsCache || hallFishReadRowsSessionCache() || [];
+        })
+        .then(function (levelRows) {
+          var tournamentData = hallFishAggregateTournamentAchievements(levelRows);
+          return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows()])
+            .then(function (parts) {
+              hallFishAchievementRowsCache = Object.assign({}, tournamentData, {
+                clubChoice: hallFishAggregateClubChoiceRows(parts[0], levelRows),
+                referrals: parts[1],
+              });
+              return hallFishAchievementRowsCache;
+            });
           });
-          return hallFishAchievementRowsCache;
-        });
     })
     .finally(function () {
       hallFishAchievementRowsPromise = null;
@@ -2021,6 +2108,24 @@ function openHallFishAchievementTab() {
     });
 }
 window.openHallFishAchievementsModal = openHallFishAchievementTab;
+
+function hallFishShareAchievementTop(key, text) {
+  var url = hallFishAchievementShareUrl(key);
+  if (!url) {
+    hallFameCopyDone(false);
+    return;
+  }
+  var intro = text || hallFishAchievementShareLabel(key, "ачивка");
+  var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(url, intro) : "";
+  if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
+  pokerTryPwaWebShare({ title: intro, text: intro + "\n" + url, url: url }).then(function (pwaOk) {
+    if (pwaOk) return;
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (shareUrl && tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+    else if (shareUrl && tg && tg.openLink) tg.openLink(shareUrl);
+    else if (shareUrl) window.open(shareUrl, "_blank", "noopener,noreferrer");
+  });
+}
 
 function openHallFishBirthdaysTab() {
   hallFishSetBirthdaysState("Загрузка…");
@@ -2139,6 +2244,20 @@ function initHallFishRatingModal() {
     else openHallFishAchievementTab();
   });
   document.addEventListener("click", function (e) {
+    var shareBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-achievement-share][data-hall-fish-achievement-action]") : null;
+    if (!shareBtn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var key = String(shareBtn.getAttribute("data-hall-fish-achievement-share") || hallFishActiveAchievementTab || "big50").trim() || "big50";
+    var action = shareBtn.getAttribute("data-hall-fish-achievement-action") || "copy";
+    var text = shareBtn.getAttribute("data-hall-fish-achievement-text") || hallFishAchievementShareLabel(key, "ачивка");
+    if (action === "share") {
+      hallFishShareAchievementTop(key, text);
+      return;
+    }
+    hallFameCopyUrlToClipboard(hallFishAchievementShareUrl(key));
+  });
+  document.addEventListener("click", function (e) {
     var filterBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-upcoming-filter]") : null;
     if (!filterBtn) return;
     e.preventDefault();
@@ -2241,9 +2360,15 @@ function syncInitialHallFameSectionFromStartParam() {
     if (typeof pokerNormalizeWebAppStartParam === "function") startParam = pokerNormalizeWebAppStartParam(startParam);
   } catch (eHallStartParam) {}
   var section = resolveHallFameSectionFromStartParam(startParam) || window.__pendingHallFameSection || "";
+  var achievementKey = hallFishAchievementKeyFromStartParam(startParam) || String(window.__pendingHallFishAchievementTab || "").trim();
+  if (achievementKey) hallFishActiveAchievementTab = achievementKey;
   if (!section) return;
   var view = document.getElementById("hallOfFameView");
   if (!view || !view.classList.contains("view--active")) return;
+  if (section === "achievements") {
+    openHallFishAchievementTab();
+    return;
+  }
   var activePanel = view.querySelector(".hall-of-fame__panel--active[data-hall-panel]");
   if (activePanel && activePanel.getAttribute("data-hall-panel") === section) return;
   showHallOfFamePanel(section);

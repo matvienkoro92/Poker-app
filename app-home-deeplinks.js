@@ -24,6 +24,7 @@ function pokerInitHomeDeepLinks(opts) {
     if (val === "hall_fame_cups") return "cups";
     if (val === "hall_fame_photos") return "photos";
     if (val === "hall_fame_shame") return "shame";
+    if (/^hall_fame_achievements(?:_[A-Za-z0-9_-]+)?$/.test(val)) return "achievements";
     return null;
   }
   function openViewThen(viewName, afterReady, fallbackDelay) {
@@ -178,6 +179,10 @@ function pokerInitHomeDeepLinks(opts) {
       : resolveHallFameStartParamLocal(startParam);
     if (hallSecStart) {
       window.__pendingHallFameSection = hallSecStart;
+      if (hallSecStart === "achievements") {
+        var hallAchievementMatch = String(startParam || "").trim().match(/^hall_fame_achievements(?:_([A-Za-z0-9_-]+))?$/);
+        window.__pendingHallFishAchievementTab = hallAchievementMatch ? (hallAchievementMatch[1] || "big50") : "big50";
+      }
       setTimeout(function () {
         if (typeof navigateToHallFameSection === "function") navigateToHallFameSection(hallSecStart);
         else if (typeof setView === "function") setView("hall-of-fame");

@@ -230,6 +230,7 @@
     if (val === "hall_fame_cups") return "cups";
     if (val === "hall_fame_photos") return "photos";
     if (val === "hall_fame_shame") return "shame";
+    if (/^hall_fame_achievements(?:_[A-Za-z0-9_-]+)?$/.test(val)) return "achievements";
     return null;
   }
 
@@ -282,6 +283,14 @@
   if (typeof window.navigateToHallFameSection !== "function") {
     window.navigateToHallFameSection = function (section) {
       window.__pendingHallFameSection = section || "top2026";
+      if (section === "achievements") {
+        try {
+          var qs = new URLSearchParams(typeof location !== "undefined" && location.search ? location.search : "");
+          var startParam = typeof pokerStartAppQueryFromUrlSearchParams === "function" ? pokerStartAppQueryFromUrlSearchParams(qs) : qs.get("startapp") || "";
+          var match = String(startParam || "").trim().match(/^hall_fame_achievements(?:_([A-Za-z0-9_-]+))?$/);
+          window.__pendingHallFishAchievementTab = match ? (match[1] || "big50") : "big50";
+        } catch (eHallAchievementPending) {}
+      }
       if (typeof setView === "function") setView("hall-of-fame");
     };
   }

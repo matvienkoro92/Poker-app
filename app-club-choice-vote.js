@@ -878,6 +878,9 @@
     if (month === "2026-06" && nick === "Waaar" && (!description || description === "Победитель клубного голосования за достижение месяца.")) {
       return "Стабильный июньский рывок в рейтингах и турнирах клуба.";
     }
+    if (month === "2026-05" && nick === "Em13!!" && (!description || description === "Победитель клубного голосования за достижение месяца.")) {
+      return "Выигрыш 2 300 000р в мейне в Калининграде за 1е место. Отобрался с сателлита за 300р в сателлит за 1200р, там выиграл путевку за 120 000р в Калининград, включающую билет на мейн, и выиграл Мейн.";
+    }
     return description;
   }
 
@@ -930,6 +933,7 @@
       src = "";
     }
     if (isWaaarNick(key)) src = "./assets/summer-rating-player-waaar.webp";
+    if (key === "em13!!" || key === "em13") src = "./assets/summer-rating-player-emil.webp";
     if (!src) return renderPlayerAvatar(candidate, id);
     return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +
       '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
