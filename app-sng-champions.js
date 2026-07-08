@@ -575,6 +575,64 @@
     '</span>';
   }
 
+  function matchScoreText(match) {
+    var score = match && match.score && typeof match.score === "object" ? match.score : null;
+    if (!score) return "";
+    var winner = Number(score.winner);
+    var loser = Number(score.loser);
+    if (!Number.isFinite(winner) || !Number.isFinite(loser)) return "";
+    return String(winner) + "-" + String(loser);
+  }
+
+  function matchRequiresScore(match, data) {
+    if (!match || !data) return false;
+    var ids = (match.playerIds || []).filter(Boolean);
+    if (ids.length < 2) return false;
+    var winnersRounds = Array.isArray(data.rounds) ? data.rounds : [];
+    for (var i = 0; i < winnersRounds.length; i += 1) {
+      var round = winnersRounds[i];
+      if (!round || !Array.isArray(round.matches)) continue;
+      if (round.matches.indexOf(match) >= 0) return round.matches.length <= 2;
+    }
+    var loserRounds = Array.isArray(data.loserRounds) ? data.loserRounds : [];
+    for (var j = 0; j < loserRounds.length; j += 1) {
+      var loserRound = loserRounds[j];
+      if (!loserRound || !Array.isArray(loserRound.matches)) continue;
+      if (loserRound.matches.indexOf(match) >= 0) return loserRound.matches.length === 1;
+    }
+    return false;
+  }
+
+  function findMatchById(data, matchId) {
+    var rounds = []
+      .concat(Array.isArray(data && data.rounds) ? data.rounds : [])
+      .concat(Array.isArray(data && data.loserRounds) ? data.loserRounds : []);
+    for (var i = 0; i < rounds.length; i += 1) {
+      var matches = Array.isArray(rounds[i] && rounds[i].matches) ? rounds[i].matches : [];
+      for (var j = 0; j < matches.length; j += 1) {
+        if (String(matches[j] && matches[j].id || "") === String(matchId || "")) return matches[j];
+      }
+    }
+    return null;
+  }
+
+  function readBestOfFiveScore(winnerName) {
+    var text = window.prompt("Введите счёт для " + String(winnerName || "победителя") + " до 3 побед. Например: 3-1", "3-0");
+    if (text == null) return null;
+    var match = String(text || "").trim().match(/^([0-3])\s*[-:]\s*([0-3])$/);
+    if (!match) {
+      showAlert("Введите счёт в формате 3-0, 3-1 или 3-2.");
+      return false;
+    }
+    var winner = Number(match[1]);
+    var loser = Number(match[2]);
+    if (winner !== 3 || loser < 0 || loser > 2) {
+      showAlert("Для матча до 3 побед у победителя должно быть 3, у второго игрока 0-2.");
+      return false;
+    }
+    return { winner: winner, loser: loser, text: String(winner) + "-" + String(loser) };
+  }
+
   function renderTabs(createHtml, signupHtml, bracketHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var bracketStarted = data && data.status === "bracket";
@@ -798,6 +856,7 @@
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
+    var scoreBadge = won && matchScoreText(match) ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--score">Счёт ' + escapeHtml(matchScoreText(match)) + '</small>' : "";
     var playerClass = "sng-champions-modal__bracket-player" +
       (advanced ? " sng-champions-modal__bracket-player--advanced" : "") +
       (ready && !won && !match.winnerId ? " sng-champions-modal__bracket-player--ready" : "") +
@@ -807,8 +866,9 @@
       renderBracketPlayerAvatar(player) +
       renderBracketPlayerName(player) +
       readyBadge +
+      scoreBadge +
       (won ? '<strong>Победитель</strong>' : adminButton) +
-    '</div>';
+      '</div>';
   }
 
   function renderBracketPendingPlayer() {
@@ -1300,11 +1360,23 @@
     }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
     if (winner) {
+      var winnerMatchId = winner.getAttribute("data-sng-winner") || "";
+      var winnerPlayerId = winner.getAttribute("data-sng-player") || "";
+      var currentMatch = findMatchById(state || {}, winnerMatchId);
+      var score = null;
+      if (matchRequiresScore(currentMatch, state || {})) {
+        var player = state && state.playersById ? state.playersById[winnerPlayerId] : null;
+        var playerLabel = playerName(player || { name: winnerPlayerId });
+        score = readBestOfFiveScore(playerLabel);
+        if (score == null) return;
+        if (score === false) return;
+      }
       setButtonLoading(winner, true);
       postAction({
         action: "setWinner",
-        matchId: winner.getAttribute("data-sng-winner") || "",
-        playerId: winner.getAttribute("data-sng-player") || "",
+        matchId: winnerMatchId,
+        playerId: winnerPlayerId,
+        score: score,
       }, { status: "Обновляю сетку...", success: "Победитель пары сохранен" })
         .finally(function () { setButtonLoading(winner, false); });
       return;

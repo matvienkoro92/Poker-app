@@ -2224,6 +2224,11 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.sng-champions-modal__ready-badge--score {
+  color: #07111f;
+  background: linear-gradient(180deg, #e0f2fe, #7dd3fc);
+}
+
 .sng-champions-modal__bracket-player--ready {
   border: 1px solid rgba(134, 239, 172, 0.62);
   background:
@@ -2666,25 +2671,28 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
+  --sng-map-row-height: 42px;
   grid-template-columns:
-    minmax(116px, 1.16fr)
-    minmax(112px, 1.12fr)
-    minmax(104px, 1fr)
-    minmax(98px, 0.94fr)
-    minmax(92px, 0.88fr)
-    minmax(92px, 0.88fr);
-  min-width: 820px;
+    156px
+    156px
+    148px
+    140px
+    132px
+    132px;
+  width: max-content;
+  min-width: 0;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
   grid-template-columns:
-    minmax(132px, 1.16fr)
-    minmax(128px, 1.12fr)
-    minmax(118px, 1fr)
-    minmax(110px, 0.94fr)
-    minmax(104px, 0.88fr)
-    minmax(104px, 0.88fr);
-  min-width: 900px;
+    188px
+    184px
+    172px
+    164px
+    156px
+    156px;
+  width: max-content;
+  min-width: 0;
 }
 
 .sng-champions-modal__bracket-map-wrap--losers {
@@ -2693,16 +2701,24 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
+  --sng-map-row-height: 42px;
   grid-template-columns:
-    minmax(92px, 1.22fr)
-    minmax(92px, 1.22fr)
-    minmax(84px, 1fr)
-    minmax(84px, 1fr)
-    minmax(76px, 0.86fr)
-    minmax(76px, 0.86fr)
-    minmax(72px, 0.78fr)
-    minmax(78px, 0.82fr);
-  min-width: 740px;
+    138px
+    138px
+    128px
+    128px
+    120px
+    120px
+    112px
+    116px;
+  width: max-content;
+  min-width: 0;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-match {
+  min-height: 40px;
+  padding: 4px 5px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
@@ -3018,6 +3034,12 @@
   white-space: nowrap;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-player,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-player {
+  font-size: clamp(9px, 1.05vw, 11px);
+  line-height: 1.02;
 }
 
 .sng-champions-modal__map-player--winner {
