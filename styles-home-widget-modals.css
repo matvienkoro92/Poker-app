@@ -2437,7 +2437,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__bracket-map {
   gap: 8px;
-  min-width: 760px;
+  min-width: 900px;
   overflow: visible;
   padding-bottom: 34px;
 }
@@ -2462,7 +2462,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  min-width: 1040px;
+  min-width: 1280px;
   padding-bottom: 54px;
 }
 
@@ -2779,19 +2779,23 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match {
   grid-template-columns: 18px minmax(0, 1fr) auto;
-  min-height: 40px;
-  padding: 5px;
+  min-height: 60px;
+  padding: 6px;
   border-left-width: 7px;
   border-radius: 7px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 6px 68px 6px 26px;
+  inset: 8px 82px 8px 28px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
-  font-size: clamp(7px, 1.22vw, 10px);
+  font-size: clamp(8px, 1.08vw, 11px);
   line-height: 1;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-status {
+  left: 41%;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match-index {
