@@ -521,13 +521,13 @@
 .hall-of-fame__top2026-quotes {
   position: absolute;
   z-index: 30;
-  top: clamp(274px, calc(68vw + 12px), 296px);
+  top: clamp(266px, calc(68vw + 4px), 288px);
   left: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: clamp(170px, 46vw, 222px);
-  min-height: 58px;
+  min-height: 112px;
   padding: 0;
   box-sizing: border-box;
   appearance: none;
@@ -959,9 +959,9 @@
     right: clamp(16px, 5vw, 22px);
   }
   .hall-of-fame__top2026-quotes {
-    top: clamp(274px, calc(67vw + 14px), 296px);
+    top: clamp(266px, calc(67vw + 6px), 288px);
     width: clamp(166px, 46vw, 216px);
-    min-height: 56px;
+    min-height: 110px;
     font-size: clamp(9px, 2.35vw, 12px);
   }
   .hall-of-fame__top2026-quote-text {

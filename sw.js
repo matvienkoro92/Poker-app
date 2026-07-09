@@ -3,8 +3,8 @@ var POKER_CHAT_API_CACHE = "poker-chat-api-v4";
 var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v3"];
 var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v4";
 var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2", "poker-push-assets-v3"];
-var POKER_STATIC_CACHE = "poker-static-v11";
-var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10"];
+var POKER_STATIC_CACHE = "poker-static-v12";
+var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11"];
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
@@ -105,6 +105,25 @@ function pokerSwCacheFirst(cacheName, request) {
   });
 }
 
+function pokerSwNetworkFirst(cacheName, request) {
+  return caches.open(cacheName).then(function (cache) {
+    return fetch(request)
+      .then(function (response) {
+        try {
+          if (response && response.status === 200 && (response.type === "basic" || response.type === "cors")) {
+            cache.put(request, response.clone());
+          }
+        } catch (ePut) {}
+        return response;
+      })
+      .catch(function () {
+        return cache.match(request).then(function (cached) {
+          return cached || Response.error();
+        });
+      });
+  });
+}
+
 function pokerSwIsStaticRequest(url) {
   var path = url && url.pathname ? url.pathname : "";
   if (path.indexOf("/html-fragments/") === 0) return true;
@@ -151,7 +170,7 @@ self.addEventListener("fetch", function (event) {
       return;
     }
     if (pokerSwIsStableStaticRequest(u)) {
-      event.respondWith(pokerSwCacheFirst(POKER_STATIC_CACHE, event.request));
+      event.respondWith(pokerSwNetworkFirst(POKER_STATIC_CACHE, event.request));
       return;
     }
     if (pokerSwIsStaticRequest(u)) {
