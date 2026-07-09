@@ -40,6 +40,7 @@
                     <div class="profile-public-showcase__details-row" id="profilePublicDetailsRow">
                       <span class="profile-public-showcase__specialty-badge" id="profilePublicSpecialtyBadge" hidden></span>
                       <span class="profile-public-showcase__age-badge" id="profilePublicAgeBadge" hidden></span>
+                      <span class="profile-public-showcase__city-badge" id="profilePublicCityBadge" hidden></span>
                     </div>
                     <div class="profile-public-showcase__identity-controls">
                       <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
@@ -57,6 +58,12 @@
                         <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" aria-label="Дата рождения" />
                         <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
                         <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
+                      </label>
+                      <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
+                        <span class="profile-hero-city__label">Город</span>
+                        <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
+                        <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
+                        <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
                       </label>
                     </div>
                     <div class="profile-hero-preferences" id="profileHeroPreferences" hidden>

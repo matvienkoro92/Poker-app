@@ -634,6 +634,7 @@ function refreshProfilePublicShowcase(profileData) {
   var respect = document.getElementById("profilePublicRespectVal");
   var specialtyBadge = document.getElementById("profilePublicSpecialtyBadge");
   var ageBadge = document.getElementById("profilePublicAgeBadge");
+  var cityBadge = document.getElementById("profilePublicCityBadge");
   setProfileHeroGender(profileGenderFromData(data), { syncArt: false });
   if (titleEl) titleEl.textContent = title;
   profilePublicShowcaseApplyAvatar(title);
@@ -649,6 +650,11 @@ function refreshProfilePublicShowcase(profileData) {
     var ageText = pokerProfileAgeBadgeText(data && (data.profileBirthDate || data.birthDate));
     ageBadge.textContent = ageText;
     ageBadge.hidden = !ageText;
+  }
+  if (cityBadge) {
+    var cityText = data && (data.profileCity || data.city) != null ? String(data.profileCity || data.city).trim() : "";
+    cityBadge.textContent = cityText;
+    cityBadge.hidden = !cityText;
   }
   if (loginSub) {
     var login = data && data.userName != null ? String(data.userName).trim() : "";
@@ -1360,6 +1366,14 @@ function pokerProfileSpecialtyBadgeText(value) {
   return "";
 }
 
+function pokerProfileNormalizeCity(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/\s+/g, " ")
+    .slice(0, 80);
+}
+
 var PROFILE_MTT_PREFERENCE_VALUES = ["under500", "1k5k", "5kplus", "offline"];
 var PROFILE_CASH_PREFERENCE_VALUES = ["up-to-5-10", "10-20-20-40", "25-50-50-100", "50-100-plus"];
 
@@ -1395,6 +1409,9 @@ function initProfilePlayerDetails() {
   var section = document.getElementById("profileHeroBirthDate") || document.getElementById("profilePlayerDetailsSection");
   var birthInput = document.getElementById("profileBirthDateInput");
   var birthSave = document.getElementById("profileBirthDateSaveBtn");
+  var cityInput = document.getElementById("profileCityInput");
+  var citySave = document.getElementById("profileCitySaveBtn");
+  var cityFeedback = document.getElementById("profileCityFeedback");
   var specialtyBtns = document.querySelectorAll("[data-profile-specialty]");
   var preferencesWrap = document.getElementById("profileHeroPreferences");
   var preferencesMtt = document.getElementById("profileHeroPreferencesMtt");
@@ -1441,6 +1458,18 @@ function initProfilePlayerDetails() {
       }, ms || 2500);
     }
   }
+  function showCityFeedback(text, ms) {
+    if (!cityFeedback) {
+      showDetailsFeedback(text, ms);
+      return;
+    }
+    cityFeedback.textContent = text || "";
+    if (ms !== 0) {
+      setTimeout(function () {
+        if (cityFeedback.textContent === text) cityFeedback.textContent = "";
+      }, ms || 2500);
+    }
+  }
   function showPreferenceFeedback(text, ms) {
     if (!preferenceFeedback) {
       showSpecialtyFeedback(text, ms);
@@ -1469,6 +1498,15 @@ function initProfilePlayerDetails() {
       var ageText = pokerProfileAgeBadgeText(saved);
       ageBadge.textContent = ageText;
       ageBadge.hidden = !ageText;
+    }
+  }
+  function setCityState(value) {
+    var city = pokerProfileNormalizeCity(value);
+    if (cityInput) cityInput.value = city;
+    var cityBadge = document.getElementById("profilePublicCityBadge");
+    if (cityBadge) {
+      cityBadge.textContent = city;
+      cityBadge.hidden = !city;
     }
   }
   function setSpecialtyState(value) {
@@ -1530,6 +1568,7 @@ function initProfilePlayerDetails() {
         setPreferenceState("mtt", data.profileMttPreferences || data.mttPreferences || []);
         setPreferenceState("cash", data.profileCashPreferences || data.cashPreferences || []);
         setSpecialtyState(data.profileSpecialty || data.specialty || "");
+        setCityState(data.profileCity || data.city || "");
       })
       .catch(function () {});
   }
@@ -1557,15 +1596,18 @@ function initProfilePlayerDetails() {
       .then(function (data) {
         if (data && data.ok) {
           if (opts.feedback === "specialty") showSpecialtyFeedback("Сохранено");
+          else if (opts.feedback === "city") showCityFeedback("Сохранено");
           else showDetailsFeedback("Сохранено");
           return data;
         }
         if (opts.feedback === "specialty") showSpecialtyFeedback((data && data.error) || "Ошибка", 3500);
+        else if (opts.feedback === "city") showCityFeedback((data && data.error) || "Ошибка", 3500);
         else showDetailsFeedback((data && data.error) || "Ошибка", 3500);
         return data || null;
       })
       .catch(function () {
         if (opts.feedback === "specialty") showSpecialtyFeedback(POKER_NET_ERR, 3500);
+        else if (opts.feedback === "city") showCityFeedback(POKER_NET_ERR, 3500);
         else showDetailsFeedback(POKER_NET_ERR, 3500);
         return null;
       })
@@ -1588,6 +1630,17 @@ function initProfilePlayerDetails() {
         if (data && data.ok) {
           setBirthDateState(val);
           mergeProfileUserInfo({ profileBirthDate: val });
+        }
+      });
+    });
+  }
+  if (citySave) {
+    citySave.addEventListener("click", function () {
+      var val = pokerProfileNormalizeCity(cityInput ? cityInput.value : "");
+      postPlayerDetails({ profileCity: val }, { buttons: [citySave], feedback: "city" }).then(function (data) {
+        if (data && data.ok) {
+          setCityState(val);
+          mergeProfileUserInfo({ profileCity: val });
         }
       });
     });

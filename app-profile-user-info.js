@@ -468,6 +468,8 @@ function updateProfileDtId() {
           birthSave.hidden = true;
           birthSave.disabled = true;
         }
+        var cityInput = document.getElementById("profileCityInput");
+        if (cityInput) cityInput.value = data.profileCity || data.city || "";
         var specialty = String(data.profileSpecialty || data.specialty || "").trim().toLowerCase();
         document.querySelectorAll("[data-profile-specialty]").forEach(function (btn) {
           var active = specialty && btn.getAttribute("data-profile-specialty") === specialty;
