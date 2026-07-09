@@ -460,6 +460,14 @@ function initProfileKeyboardViewportCleanup() {
       if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
       if (t.id === "profileAvatarInput") return;
       if (t.id === "profileFriendsSearchInput") return;
+      if (t.id === "profileCityInput") {
+        if (typeof ensureProfileFieldVisible === "function") {
+          requestAnimationFrame(function () {
+            ensureProfileFieldVisible(t, "smooth");
+          });
+        }
+        return;
+      }
       if (
         typeof window.__pokerIsChatPhysicalKeyboardContext === "function" &&
         window.__pokerIsChatPhysicalKeyboardContext()
@@ -504,6 +512,10 @@ function initProfileKeyboardViewportCleanup() {
       if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
       if (t.id === "profileAvatarInput") return;
       if (t.id === "profileFriendsSearchInput") return;
+      if (t.id === "profileCityInput") {
+        scheduleFlush();
+        return;
+      }
       scheduleFlush();
     },
     true

@@ -697,14 +697,7 @@ html.app--tg-content-inset
 html:not(.app--telegram-miniapp):not(.poker-telegram-miniapp) body.chat-keyboard-open:has(.view--active[data-view="chat"]) .app {
   padding-bottom: 0;
 }
-/* Профиль: таббар как в чате — не перекрывает поля при клавиатуре */
-body.chat-keyboard-open:has(.view--active[data-view="profile"]) .bottom-nav {
-  transform: translate3d(0, 100%, 0);
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  transition: none !important;
-}
+/* Профиль: навигация должна оставаться доступной даже после фокуса полей. */
 body.chat-keyboard-open:has(.view--active[data-view="profile"]) .app {
   padding-bottom: 0;
 }
