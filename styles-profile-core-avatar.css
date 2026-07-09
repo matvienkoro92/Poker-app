@@ -3331,3 +3331,38 @@ body.profile-avatar-choice-open {
     width: 28px;
   }
 }
+
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    justify-self: stretch !important;
+    align-self: start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 4px 0 0 !important;
+    grid-template-columns: minmax(0, 1fr) 30px !important;
+    box-sizing: border-box !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {
+    min-width: 0 !important;
+    height: 28px !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
+    width: 30px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
+    grid-template-columns: minmax(0, 1fr) 28px !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
+    width: 28px !important;
+  }
+}

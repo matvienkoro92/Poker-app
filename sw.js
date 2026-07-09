@@ -3,12 +3,12 @@ var POKER_CHAT_API_CACHE = "poker-chat-api-v4";
 var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v3"];
 var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v4";
 var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2", "poker-push-assets-v3"];
-var POKER_STATIC_CACHE = "poker-static-v14";
-var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11", "poker-static-v12", "poker-static-v13"];
+var POKER_STATIC_CACHE = "poker-static-v15";
+var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11", "poker-static-v12", "poker-static-v13", "poker-static-v14"];
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
-var POKER_SW_BUILD = "3.711";
+var POKER_SW_BUILD = "3.712";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
