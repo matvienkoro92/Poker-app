@@ -66,6 +66,18 @@
   grid-row: 1;
   justify-self: start;
   margin: 0;
+  width: 54px;
+  min-width: 54px;
+  max-width: 54px;
+  height: 54px;
+  min-height: 54px;
+  max-height: 54px;
+  padding: 0;
+  align-self: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
 }
 
 .admin-bonuses__heading {

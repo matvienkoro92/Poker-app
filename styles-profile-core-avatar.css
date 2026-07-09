@@ -3136,3 +3136,107 @@ body.profile-avatar-choice-open {
   transform: translateY(5px) !important;
   transform-origin: center bottom !important;
 }
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
+  margin-top: -28px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__group {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px !important;
+  width: auto !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__chip {
+  flex: 0 0 auto;
+  min-width: 0 !important;
+  width: auto !important;
+  min-height: 26px !important;
+  padding: 0 14px !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__chip--active,
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__chip[aria-pressed="true"] {
+  color: #fff3bf !important;
+  border-color: rgba(255, 181, 49, 0.98) !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 214, 111, 0.26), transparent 58%),
+    linear-gradient(180deg, rgba(69, 26, 7, 0.99), rgba(13, 9, 9, 0.98)) !important;
+  text-shadow:
+    0 1px 0 rgba(42, 12, 0, 0.98),
+    0 0 10px rgba(255, 190, 74, 0.72) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 235, 171, 0.18),
+    inset 0 -8px 16px rgba(255, 127, 21, 0.14),
+    0 0 0 1px rgba(255, 127, 21, 0.34),
+    0 0 16px rgba(255, 166, 36, 0.36) !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 360px);
+  max-width: min(100%, 360px);
+  min-height: 36px;
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid rgba(197, 139, 47, 0.76);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(12, 18, 30, 0.98), rgba(4, 8, 16, 0.99));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 163, 0.08),
+    0 0 14px rgba(255, 145, 32, 0.14);
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {
+  width: 100%;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(197, 139, 47, 0.45);
+  border-radius: 8px;
+  background: rgba(3, 7, 15, 0.72);
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
+  width: 32px;
+  height: 28px;
+}
+
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences::before,
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences::after {
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
+    margin-top: -18px !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__group {
+    gap: 5px !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__chip {
+    min-height: 23px !important;
+    padding: 0 10px !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
+    grid-template-columns: minmax(0, 1fr) 28px;
+    width: min(100%, 300px);
+    max-width: min(100%, 300px);
+  }
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
+    width: 28px;
+  }
+}

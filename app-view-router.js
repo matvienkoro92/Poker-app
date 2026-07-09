@@ -1922,11 +1922,34 @@ function pokerOpenPlayerCrmFromHome() {
 
 var viewHandledInTouchend = false;
 
+function pokerEventPointInsideElement(e, el) {
+  if (!e || !el || !el.getBoundingClientRect) return true;
+  var touch = null;
+  try {
+    if (e.changedTouches && e.changedTouches.length) touch = e.changedTouches[0];
+    else if (e.touches && e.touches.length) touch = e.touches[0];
+  } catch (eTouchPoint) {}
+  if (!touch || touch.clientX == null || touch.clientY == null) return true;
+  try {
+    var rect = el.getBoundingClientRect();
+    var pad = 6;
+    return (
+      touch.clientX >= rect.left - pad &&
+      touch.clientX <= rect.right + pad &&
+      touch.clientY >= rect.top - pad &&
+      touch.clientY <= rect.bottom + pad
+    );
+  } catch (eRect) {
+    return true;
+  }
+}
+
 document.addEventListener("touchend", function (e) {
   if (!e.target || !e.target.closest) return;
   if (window.__touchWasScroll && window.__touchWasScroll()) return;
   var backBtn = e.target.closest(".bonus-game-back[data-view-target]");
   if (backBtn) {
+    if (!pokerEventPointInsideElement(e, backBtn)) return;
     e.preventDefault();
     e.stopPropagation();
     viewHandledInTouchend = true;
