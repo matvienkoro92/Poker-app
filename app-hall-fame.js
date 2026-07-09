@@ -1017,7 +1017,7 @@ function hallFishMyRankText(rows, currentIds) {
 }
 
 function hallFishLevelPlayerImage(row) {
-  var nick = String((row && (row.pokerPlusNickname || row.name)) || "").trim();
+  var nick = String((row && (row.pokerPlusNickname || row.name || row.nick)) || "").trim();
   if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
     try {
       var art = window.pokerGetSummerRatingPlayerArt(nick);
@@ -1136,11 +1136,15 @@ function hallFishLevelRowsByNick(rows) {
 function hallFishPlayerMetaByNick(nick, map) {
   var key = hallFishNormalizeNick(nick);
   var row = key && map ? map[key] : null;
-  if (!row) return { nick: nick || "Игрок", accountId: "", telegram: "" };
+  if (!row) return { nick: nick || "Игрок", accountId: "", telegram: "", profileBirthDate: "", profileCity: "", avatarUrl: "", level: 0 };
   return {
     nick: row.name || row.pokerPlusNickname || nick || "Игрок",
     accountId: String(row.accountId || "").trim(),
     telegram: String(row.telegram || "").trim(),
+    profileBirthDate: String((row && row.profileBirthDate) || "").trim(),
+    profileCity: String((row && (row.profileCity || row.city)) || "").trim(),
+    avatarUrl: String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim(),
+    level: Number(row && row.level) || 0,
   };
 }
 
@@ -1173,6 +1177,10 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         nick: meta.nick || nick || "Игрок",
         accountId: meta.accountId,
         telegram: meta.telegram,
+        profileBirthDate: meta.profileBirthDate,
+        profileCity: meta.profileCity,
+        avatarUrl: meta.avatarUrl,
+        level: meta.level,
         big50: 0,
         big50Best: 0,
         big100: 0,
@@ -1310,7 +1318,20 @@ function hallFishAggregateClubChoiceRows(rows, levelRows) {
       if (!key) return;
       if (!map[key]) {
         var meta = hallFishPlayerMetaByNick(nick, metaByNick);
-        map[key] = { nick: meta.nick || nick, accountId: String((winner && winner.accountId) || meta.accountId || "").trim(), telegram: meta.telegram, value: 0, tie: 0, months: [], descriptions: [], detailRows: [] };
+        map[key] = {
+          nick: meta.nick || nick,
+          accountId: String((winner && winner.accountId) || meta.accountId || "").trim(),
+          telegram: meta.telegram,
+          profileBirthDate: meta.profileBirthDate,
+          profileCity: meta.profileCity,
+          avatarUrl: meta.avatarUrl,
+          level: meta.level,
+          value: 0,
+          tie: 0,
+          months: [],
+          descriptions: [],
+          detailRows: [],
+        };
       }
       map[key].value += 1;
       map[key].tie += Number(winner && winner.votes) || 0;
@@ -1387,16 +1408,22 @@ function hallFishAchievementSectionHtml(title, rows, description, key) {
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
       var sub = row.telegram || row.extraText || "";
+      var image = hallFishLevelPlayerImage(row);
+      var age = hallFishLevelAgeText(row && row.profileBirthDate);
+      var city = String((row && (row.profileCity || row.city)) || "").trim();
+      var meta = [age, city].filter(Boolean).join(" · ");
       var story = String(row.description || "").trim();
       var details = Array.isArray(row.detailRows) ? row.detailRows : [];
       var attrs = userId
-        ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
+        ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level || "") + '"'
         : ' data-user-name="' + hallFishEsc(name) + '"';
       attrs += ' data-hall-fish-achievement-title="' + hallFishEsc(title) + '" data-hall-fish-achievement-details="' + hallFishEsc(hallFishEncodeData(details)) + '"';
-      return '<button type="button" class="hall-fish-level-row hall-fish-achievement-row"' + attrs + ' aria-label="' + hallFishEsc("Открыть ачивку " + title + " — " + name) + '">' +
+      return '<button type="button" class="hall-fish-level-row hall-fish-level-row--player hall-fish-achievement-row"' + attrs + ' aria-label="' + hallFishEsc("Открыть ачивку " + title + " — " + name) + '">' +
         '<span class="hall-fish-level-row__rank">' + hallFishEsc(row.rank) + '</span>' +
-        '<span><span class="hall-fish-level-row__name">' + hallFishEsc(name) + '</span>' +
+        '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' +
+        '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(name) + '</span>' +
         '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' +
+        (meta ? '<span class="hall-fish-level-row__meta">' + hallFishEsc(meta) + '</span>' : '') +
         (story ? '<span class="hall-fish-achievement-row__story">' + hallFishEsc(story) + '</span>' : '') + '</span>' +
         '<span class="hall-fish-level-row__level">' + hallFishEsc(row.valueText || row.value) + '</span>' +
       '</button>';

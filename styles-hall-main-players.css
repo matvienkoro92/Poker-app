@@ -1122,8 +1122,9 @@
   line-height: 1.28;
 }
 .hall-fish-achievement-list .hall-fish-level-row {
-  grid-template-columns: 36px minmax(0, 1fr) minmax(72px, auto);
+  grid-template-columns: 32px 54px minmax(0, 1fr) minmax(72px, auto);
   min-width: 0;
+  min-height: 74px;
 }
 .hall-fish-achievement-list.hall-fish-level-list {
   padding-bottom: 0;

@@ -322,14 +322,14 @@
   }
 
   function roundStageLabel(round, index, rounds) {
-    if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд-Финал";
+    if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд финал";
     if (Array.isArray(rounds) && rounds.length) {
       if (rounds.length === 6) {
-        return ["1/16", "1/8", "1/4", "1/2", "Финал", "Гранд-Финал"][Number(index) || 0] || "Сетка";
+        return ["1/16", "1/8", "1/4", "Полуфинал", "Финал", "Гранд финал"][Number(index) || 0] || "Сетка";
       }
       var remaining = rounds.length - (Number(index) || 0);
       if (remaining === 1) return "Финал";
-      if (remaining === 2) return "1/2";
+      if (remaining === 2) return "Полуфинал";
       if (remaining === 3) return "1/4";
       if (remaining === 4) return "1/8";
       if (remaining === 5) return "1/16";
@@ -338,7 +338,7 @@
     if (matches >= 16) return "1/16";
     if (matches === 8) return "1/8";
     if (matches === 4) return "1/4";
-    if (matches === 2) return "1/2";
+    if (matches === 2) return "Полуфинал";
     if (matches === 1) return "Финал";
     return round && round.name ? round.name : "Сетка";
   }
@@ -346,8 +346,8 @@
   function roundStageClass(round, index, rounds) {
     var label = roundStageLabel(round, index, rounds);
     if (label === "1/4") return "quarter";
-    if (label === "1/2") return "semi";
-    if (label === "Финал" || label === "Гранд-Финал") return "final";
+    if (label === "Полуфинал") return "semi";
+    if (label === "Финал" || label === "Гранд финал") return "final";
     return "";
   }
 
@@ -710,18 +710,18 @@
     '</span>';
   }
 
-  function readBestOfFiveScore(winnerName) {
-    var text = window.prompt("Введите счёт для " + String(winnerName || "победителя") + " до 3 побед. Например: 3-1", "3-0");
+  function readMatchScore(winnerName) {
+    var text = window.prompt("Введите счёт для " + String(winnerName || "победителя") + ". Например: 2-1", "2-0");
     if (text == null) return null;
-    var match = String(text || "").trim().match(/^([0-3])\s*[-:]\s*([0-3])$/);
+    var match = String(text || "").trim().match(/^(\d{1,2})\s*[-:]\s*(\d{1,2})$/);
     if (!match) {
-      showAlert("Введите счёт в формате 3-0, 3-1 или 3-2.");
+      showAlert("Введите счёт в формате 2-1 или 3-1.");
       return false;
     }
     var winner = Number(match[1]);
     var loser = Number(match[2]);
-    if (winner !== 3 || loser < 0 || loser > 2) {
-      showAlert("Для матча до 3 побед у победителя должно быть 3, у второго игрока 0-2.");
+    if (!Number.isFinite(winner) || !Number.isFinite(loser) || winner < 1 || loser < 0 || winner <= loser) {
+      showAlert("Счёт должен быть в пользу выбранного победителя.");
       return false;
     }
     return { winner: winner, loser: loser, text: String(winner) + "-" + String(loser) };
@@ -1140,7 +1140,9 @@
       return Array.isArray(round && round.matches) ? round.matches.length : 0;
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
-    var connectorRowStep = isTournamentMap ? (bracketMapExpanded ? 87 : 84) : (bracketMapExpanded ? 47 : 46);
+    var connectorRowStep = isTournamentMap
+      ? (kind === "losers" ? (bracketMapExpanded ? 109 : 94) : (bracketMapExpanded ? 69 : 64))
+      : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
         '<span class="sng-champions-modal__bracket-map-title-row">' +
@@ -1155,8 +1157,12 @@
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
-          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
-            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(labelFn(round, index, rounds)) + '</button>' +
+          var roundLabel = labelFn(round, index, rounds);
+          var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
+            ? " sng-champions-modal__map-round--named-stage"
+            : "";
+          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
+            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(roundLabel) + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
@@ -1473,7 +1479,7 @@
       if (matchRequiresScore(currentMatch, state || {})) {
         var player = state && state.playersById ? state.playersById[winnerPlayerId] : null;
         var playerLabel = playerName(player || { name: winnerPlayerId });
-        score = readBestOfFiveScore(playerLabel);
+        score = readMatchScore(playerLabel);
         if (score == null) return;
         if (score === false) return;
       }
