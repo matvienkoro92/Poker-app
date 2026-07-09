@@ -10,6 +10,7 @@ var POKER_PROFILE_AVATAR_PRESETS = [
   { id: "cat", src: "./assets/avatar-cat.jpg", label: "Кот" },
   { id: "robot", src: "./assets/avatar-robot.jpg", label: "Робот" },
   { id: "bulldog", src: "./assets/avatar-bulldog.jpg", label: "Бульдог" },
+  { id: "monkey", src: "./assets/daily-poker-monkey.webp", label: "Обезьяна" },
   { id: "fox", src: "./assets/avatar-fox.jpg", label: "Лис" },
   { id: "chip", src: "./assets/avatar-chip.jpg", label: "Фишка" },
   { id: "koala", src: "./assets/avatar-koala.jpg", label: "Коала" },
