@@ -166,6 +166,8 @@ function initProfileFriends() {
   var focusIncomingOnOpen = false;
   var friendsDataCache = null;
   var friendsFetchPromise = null;
+  var friendsPreviewRetryTimer = null;
+  var friendsPreviewRetryCount = 0;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -343,6 +345,25 @@ function initProfileFriends() {
 
   function profileFriendsAuthQuery() {
     return typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "";
+  }
+
+  function profileFriendsHasCredential() {
+    try {
+      if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) return true;
+    } catch (eFriendsCred) {}
+    try {
+      return typeof pokerReadEmailPwaSessionToken === "function" && !!pokerReadEmailPwaSessionToken();
+    } catch (eFriendsEmailCred) {}
+    return false;
+  }
+
+  function scheduleFriendsPreviewRetry() {
+    if (friendsPreviewRetryTimer || friendsPreviewRetryCount >= 10) return;
+    friendsPreviewRetryCount += 1;
+    friendsPreviewRetryTimer = setTimeout(function () {
+      friendsPreviewRetryTimer = null;
+      loadFriendsPreview();
+    }, friendsPreviewRetryCount <= 3 ? 450 : 1000);
   }
 
   function rememberFriendsData(data) {
@@ -1319,14 +1340,18 @@ function initProfileFriends() {
 
   function loadFriendsPreview() {
     var base = getApiBase();
-    if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
-      try {
-        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(null);
-      } catch (eNoCred) {}
-      renderIncomingNotice(0);
-      renderFriendsPreview([]);
+    if (!base) return;
+    if (!profileFriendsHasCredential()) {
+      if (friendsDataCache && friendsDataCache.ok) {
+        renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
+        renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
+      } else {
+        renderPreviewLoading();
+      }
+      scheduleFriendsPreviewRetry();
       return;
     }
+    friendsPreviewRetryCount = 0;
     var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
     if (previewHadCachedData) {
       renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
@@ -1379,6 +1404,13 @@ function initProfileFriends() {
 
   window.pokerRefreshProfileFriendsPreview = loadFriendsPreview;
   window.pokerRenderProfileFriendsPreview = renderFriendsPreview;
+  window.addEventListener("poker-telegram-auth", function () {
+    friendsFetchPromise = null;
+    loadFriendsPreview();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") loadFriendsPreview();
+  });
   loadFriendsPreview();
 }
 

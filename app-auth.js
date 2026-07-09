@@ -1383,7 +1383,11 @@ function pokerApiHasCredential() {
     if (pokerReadPwaGuestMode()) return false;
   } catch (eGuestCred) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken();
+  var hasEmailSession = false;
+  try {
+    hasEmailSession = typeof pokerReadEmailPwaSessionToken === "function" && !!pokerReadEmailPwaSessionToken();
+  } catch (eEmailCred) {}
+  return !!(tg0 && tg0.initData) || !!pokerReadPwaTgSessionToken() || !!pokerReadPwaVkSessionToken() || hasEmailSession;
 }
 
 function pokerSetHomeAuthResolved(value) {
