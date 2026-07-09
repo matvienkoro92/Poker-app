@@ -529,7 +529,7 @@ function profilePublicShowcaseSyncKnownArt(data) {
   } else if (nick) {
     profilePublicShowcaseSyncArt(nick);
   } else if (hasData) {
-    profilePublicShowcaseSyncArt("", { forceDefault: true });
+    profilePublicShowcaseSyncArt("");
   } else {
     profilePublicShowcaseSyncArt("", { allowDefault: false });
   }

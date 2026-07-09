@@ -1,6 +1,7 @@
 /** Плейсхолдер профиля: лёгкий JPEG (~18 KB), не полноразмерный PNG. */
 var POKER_PROFILE_AVATAR_PLACEHOLDER = "./assets/profile-pokerist.jpg";
-var POKER_AVATAR_CACHE_TTL_MS = 20 * 60 * 1000;
+var POKER_AVATAR_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+var POKER_AVATAR_LAST_SELF_CACHE_KEY = "poker_avatar_data_v2:last_self";
 var POKER_PROFILE_AVATAR_PRESETS = [
   { id: "tiger", src: "./assets/avatar-tiger.jpg", label: "Тигр" },
   { id: "raccoon", src: "./assets/avatar-raccoon.jpg", label: "Енот" },
@@ -38,6 +39,25 @@ function pokerAvatarCacheStorageKey() {
   }
 }
 
+function pokerAvatarCacheStorageKeys() {
+  var keys = [];
+  var userKey = pokerAvatarCacheStorageKey();
+  if (userKey) keys.push(userKey);
+  keys.push(POKER_AVATAR_LAST_SELF_CACHE_KEY);
+  return keys;
+}
+
+function pokerAvatarCacheStorages() {
+  var stores = [];
+  try {
+    if (typeof localStorage !== "undefined") stores.push(localStorage);
+  } catch (eLocalAvatarStore) {}
+  try {
+    if (typeof sessionStorage !== "undefined") stores.push(sessionStorage);
+  } catch (eSessionAvatarStore) {}
+  return stores;
+}
+
 function pokerFindPresetAvatarById(id) {
   id = id != null ? String(id).trim() : "";
   if (!id) return null;
@@ -59,33 +79,43 @@ function pokerFindPresetAvatarIdBySrc(src) {
 }
 
 function pokerReadAvatarCacheEntry() {
-  var k = pokerAvatarCacheStorageKey();
-  if (!k || typeof sessionStorage === "undefined") return null;
-  try {
-    var raw = sessionStorage.getItem(k);
-    if (!raw) return null;
-    var o = JSON.parse(raw);
-    if (!o || typeof o.t !== "number") return null;
-    if (Date.now() - o.t > POKER_AVATAR_CACHE_TTL_MS) return null;
-    return { avatar: o.a ? String(o.a) : "", t: o.t };
-  } catch (eR) {
-    return null;
+  var keys = pokerAvatarCacheStorageKeys();
+  var stores = pokerAvatarCacheStorages();
+  var emptyEntry = null;
+  for (var s = 0; s < stores.length; s++) {
+    for (var i = 0; i < keys.length; i++) {
+      try {
+        var raw = stores[s].getItem(keys[i]);
+        if (!raw) continue;
+        var o = JSON.parse(raw);
+        if (!o || typeof o.t !== "number") continue;
+        if (Date.now() - o.t > POKER_AVATAR_CACHE_TTL_MS) continue;
+        var entry = { avatar: o.a ? String(o.a) : "", t: o.t };
+        if (entry.avatar) return entry;
+        if (!emptyEntry) emptyEntry = entry;
+      } catch (eR) {}
+    }
   }
+  return emptyEntry;
 }
 
 function pokerWriteAvatarCacheEntry(avatarDataUrlOrEmpty) {
-  var k = pokerAvatarCacheStorageKey();
-  if (!k || typeof sessionStorage === "undefined") return;
+  var keys = pokerAvatarCacheStorageKeys();
+  var stores = pokerAvatarCacheStorages();
+  if (!stores.length) return;
   var avatarValue = avatarDataUrlOrEmpty ? String(avatarDataUrlOrEmpty) : "";
-  try {
-    sessionStorage.setItem(
-      k,
-      JSON.stringify({
-        a: avatarValue,
-        t: Date.now(),
-      })
-    );
-  } catch (eW) {}
+  var payload = JSON.stringify({
+    a: avatarValue,
+    t: Date.now(),
+  });
+  for (var s = 0; s < stores.length; s++) {
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i] === POKER_AVATAR_LAST_SELF_CACHE_KEY && !avatarValue) continue;
+      try {
+        stores[s].setItem(keys[i], payload);
+      } catch (eW) {}
+    }
+  }
   try {
     window.dispatchEvent(new CustomEvent("poker-profile-avatar-change", { detail: { avatar: avatarValue } }));
   } catch (eAvatarEvent) {}
