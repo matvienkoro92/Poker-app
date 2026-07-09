@@ -892,7 +892,6 @@
   }
 
   function renderEntry(entry, data) {
-    var meta = playerMetaText(entry);
     var adminButtons = "";
     if (data.isAdmin && data.status === "open") {
       if (entry.status !== "approved") {
@@ -907,7 +906,7 @@
       '<div class="sng-champions-modal__entry-main">' +
         renderPlayerNameButton(entry) +
         '<span class="sng-champions-modal__entry-status sng-champions-modal__entry-status--' + escapeHtml(entry.status || "pending") + '">' + (entry.status === "approved" ? '<i aria-hidden="true">✓</i>' : '') + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
-        (meta ? '<small>' + escapeHtml(meta) + '</small>' : '') +
+        playerMetaHtml(entry, "sng-champions-modal__entry-meta") +
       '</div>' +
       adminActions +
     '</article>';

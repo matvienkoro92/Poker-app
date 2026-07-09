@@ -1420,6 +1420,22 @@
   background-size: 220% 100%;
   animation: profileFriendsPulse 1.2s ease-in-out infinite;
 }
+.profile-friends__loading {
+  grid-column: span 3;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: rgba(255, 237, 213, 0.82);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.58);
+}
+.profile-friends__loading .profile-friends__avatar-skeleton {
+  width: min(78px, 42vw);
+}
 @keyframes profileFriendsPulse {
   0% { background-position: 120% 0; }
   100% { background-position: -120% 0; }

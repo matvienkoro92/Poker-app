@@ -3340,10 +3340,10 @@ body.profile-avatar-choice-open {
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
     grid-column: 2 !important;
     grid-row: 3 !important;
-    justify-self: stretch !important;
+    justify-self: start !important;
     align-self: start !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: min(100%, clamp(300px, 70vw, 535px)) !important;
+    max-width: min(100%, clamp(300px, 70vw, 535px)) !important;
     min-width: 0 !important;
     margin: -2px 0 0 !important;
     grid-template-columns: minmax(0, 1fr) 30px !important;

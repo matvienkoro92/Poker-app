@@ -1056,9 +1056,10 @@ function initProfileFriends() {
   function renderPreviewLoading() {
     if (!previewEl) return;
     previewEl.innerHTML =
-      '<span class="profile-friends__avatar-skeleton"></span>' +
-      '<span class="profile-friends__avatar-skeleton"></span>' +
-      '<span class="profile-friends__avatar-skeleton"></span>' +
+      '<span class="profile-friends__loading" role="status" aria-live="polite">' +
+        '<span class="profile-friends__avatar-skeleton" aria-hidden="true"></span>' +
+        '<span>Идет загрузка друзей...</span>' +
+      '</span>' +
       inviteSlotHtml();
     wirePreviewButtons();
   }

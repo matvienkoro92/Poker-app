@@ -1580,6 +1580,23 @@
   transform: translateY(1px);
 }
 
+.sng-champions-modal__entry-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: rgba(255, 239, 201, 0.68);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.sng-champions-modal__entry-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sng-champions-modal__entry-status {
   justify-self: start;
   display: inline-flex;
