@@ -26,6 +26,7 @@ window.pokerRemoveFriendFromOpenFriendsList = pokerRemoveFriendFromOpenFriendsLi
 
 var POKER_FRIENDS_UNREAD_KEY = "poker_profile_friends_unread_v1";
 var POKER_FRIENDS_SEEN_KEY = "poker_profile_friends_seen_v1";
+var POKER_FRIENDS_STABLE_CACHE_KEY = "poker_profile_friends_stable_v1";
 
 function pokerFriendsReadJson(key, fallback) {
   try {
@@ -367,8 +368,7 @@ function initProfileFriends() {
   }
 
   function rememberFriendsData(data) {
-    if (data && data.ok) friendsDataCache = data;
-    return data;
+    return stableFriendsData(data) || data;
   }
 
   function fetchFriendsData() {
@@ -983,6 +983,41 @@ function initProfileFriends() {
   initProfileFriendsScrollGuard();
   initProfileFriendsSearch();
 
+  function friendsRowsCount(data) {
+    return Array.isArray(data && data.friends) ? data.friends.length : 0;
+  }
+
+  function friendsHasAnyRows(data) {
+    return !!(data && data.ok && (
+      friendsRowsCount(data) ||
+      (Array.isArray(data.incoming) && data.incoming.length) ||
+      (Array.isArray(data.outgoing) && data.outgoing.length) ||
+      (Array.isArray(data.notices) && data.notices.length)
+    ));
+  }
+
+  function readStableFriendsData() {
+    var data = pokerFriendsReadJson(POKER_FRIENDS_STABLE_CACHE_KEY, null);
+    if (!data || data.ok !== true) return null;
+    return data;
+  }
+
+  function writeStableFriendsData(data) {
+    if (!friendsHasAnyRows(data)) return;
+    pokerFriendsWriteJson(POKER_FRIENDS_STABLE_CACHE_KEY, data);
+  }
+
+  function stableFriendsData(data) {
+    if (data && data.ok) {
+      var cached = friendsDataCache && friendsDataCache.ok ? friendsDataCache : readStableFriendsData();
+      if (friendsRowsCount(data) === 0 && friendsRowsCount(cached) > 0) return cached;
+      friendsDataCache = data;
+      writeStableFriendsData(data);
+      return data;
+    }
+    return friendsDataCache && friendsDataCache.ok ? friendsDataCache : readStableFriendsData();
+  }
+
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
     var rows = (Array.isArray(friends) ? friends.slice() : [])
@@ -1315,6 +1350,10 @@ function initProfileFriends() {
     var base = getApiBase();
     if (!base) return;
     var hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    if (!hasCachedData) {
+      friendsDataCache = readStableFriendsData();
+      hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    }
     var displayedCachedData = !!(options.preferCache && hasCachedData);
     if (displayedCachedData) {
       renderFriendsData(friendsDataCache);
@@ -1343,9 +1382,13 @@ function initProfileFriends() {
     var base = getApiBase();
     if (!base) return;
     if (!profileFriendsHasCredential()) {
+      if (!friendsDataCache) friendsDataCache = readStableFriendsData();
       if (friendsDataCache && friendsDataCache.ok) {
         renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
         renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
+        try {
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
+        } catch (eNoCredCachedPreviewCount) {}
       } else {
         renderPreviewLoading();
       }
@@ -1354,6 +1397,10 @@ function initProfileFriends() {
     }
     friendsPreviewRetryCount = 0;
     var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    if (!previewHadCachedData) {
+      friendsDataCache = readStableFriendsData();
+      previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    }
     if (previewHadCachedData) {
       renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
       renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
@@ -1372,11 +1419,12 @@ function initProfileFriends() {
           }
           return;
         }
-        try { pokerUpdateFriendsUnreadFromData(data); } catch (ePreviewUnread) {}
-        renderIncomingNotice(Array.isArray(data.incoming) ? data.incoming.length : 0);
-        renderFriendsPreview(Array.isArray(data.friends) ? data.friends : []);
+        var stableData = stableFriendsData(data) || data;
+        try { pokerUpdateFriendsUnreadFromData(stableData); } catch (ePreviewUnread) {}
+        renderIncomingNotice(Array.isArray(stableData.incoming) ? stableData.incoming.length : 0);
+        renderFriendsPreview(Array.isArray(stableData.friends) ? stableData.friends : []);
         try {
-          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(data.friends) ? data.friends.length : 0);
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(stableData.friends) ? stableData.friends.length : 0);
         } catch (ePreviewCount) {}
       })
       .catch(function () {

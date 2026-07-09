@@ -231,6 +231,7 @@ var profilePublicShowcaseInitialPending = false;
 var profileHeroGenderValue = "male";
 var POKER_PROFILE_GENDER_STORAGE_KEY = "poker_profile_gender";
 var profilePublicShowcaseLatestRatingNick = "";
+var profilePublicShowcaseArtEnsureSeq = 0;
 
 function normalizeProfileHeroGender(value) {
   var raw = String(value || "").trim().toLowerCase();
@@ -449,8 +450,7 @@ function setProfilePublicShowcaseLoading(isLoading, opts) {
   var root = document.getElementById("profilePublicShowcase");
   if (root) root.classList.toggle("profile-public-showcase--loading", profilePublicShowcaseLoading);
   if (profilePublicShowcaseLoading && !wasLoading) {
-    profilePublicShowcaseArtSeq += 1;
-    profilePublicShowcaseHideArt(document.getElementById("profilePublicRatingArtImg"));
+    profilePublicShowcaseSyncKnownArt(profilePublicShowcaseData);
   } else if (wasLoading && !profilePublicShowcaseLoading) {
     profilePublicShowcaseSyncKnownArt(profilePublicShowcaseData);
   }
@@ -468,9 +468,20 @@ function profilePublicShowcaseSyncArt(nick, opts) {
     } catch (eProfilePublicArt) {}
   }
   if (!art || !art.src) {
+    if (!opts.forceDefault && nick && typeof window.pokerGetSummerRatingPlayerArt !== "function" && typeof profileEnsureLazyScriptDomains === "function") {
+      var ensureSeq = ++profilePublicShowcaseArtEnsureSeq;
+      profileEnsureLazyScriptDomains(["rating-summer"]).then(function () {
+        if (ensureSeq !== profilePublicShowcaseArtEnsureSeq) return;
+        if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
+          profilePublicShowcaseSyncArt(nick, opts);
+        }
+      }).catch(function () {});
+    }
     if (opts.allowDefault === false) {
-      profilePublicShowcaseArtSeq += 1;
-      profilePublicShowcaseHideArt(artImg);
+      if (!artImg.src) {
+        profilePublicShowcaseArtSeq += 1;
+        profilePublicShowcaseHideArt(artImg);
+      }
       return;
     }
     var avatarFallback = !opts.forceDefault ? profilePublicCardAvatarUrl() : "";
@@ -1374,6 +1385,49 @@ function pokerProfileNormalizeCity(value) {
     .slice(0, 80);
 }
 
+var profileHeroCityWidthObserver = null;
+var profileHeroCityWidthResizeBound = false;
+
+function pokerProfileSyncHeroCityWidth() {
+  var city = document.getElementById("profileHeroCity");
+  var controls = document.querySelector(".profile-public-showcase__identity-controls");
+  if (!city || !controls) return;
+  var rect = controls.getBoundingClientRect ? controls.getBoundingClientRect() : null;
+  var width = rect && rect.width ? Math.ceil(rect.width) : Math.ceil(controls.offsetWidth || 0);
+  if (width >= 160) city.style.setProperty("--profile-hero-city-width", width + "px");
+}
+
+function pokerProfileQueueHeroCityWidthSync() {
+  pokerProfileSyncHeroCityWidth();
+  if (typeof requestAnimationFrame === "function") {
+    requestAnimationFrame(function () {
+      pokerProfileSyncHeroCityWidth();
+    });
+  }
+}
+
+function initProfileHeroCityWidthSync() {
+  var city = document.getElementById("profileHeroCity");
+  var controls = document.querySelector(".profile-public-showcase__identity-controls");
+  if (!city || !controls || city.dataset.widthSyncBound === "1") {
+    pokerProfileQueueHeroCityWidthSync();
+    return;
+  }
+  city.dataset.widthSyncBound = "1";
+  if (typeof ResizeObserver === "function") {
+    profileHeroCityWidthObserver = new ResizeObserver(function () {
+      pokerProfileQueueHeroCityWidthSync();
+    });
+    profileHeroCityWidthObserver.observe(controls);
+  }
+  if (!profileHeroCityWidthResizeBound) {
+    profileHeroCityWidthResizeBound = true;
+    window.addEventListener("resize", pokerProfileQueueHeroCityWidthSync);
+    window.addEventListener("orientationchange", pokerProfileQueueHeroCityWidthSync);
+  }
+  pokerProfileQueueHeroCityWidthSync();
+}
+
 var PROFILE_MTT_PREFERENCE_VALUES = ["under500", "1k5k", "5kplus", "offline"];
 var PROFILE_CASH_PREFERENCE_VALUES = ["up-to-5-10", "10-20-20-40", "25-50-50-100", "50-100-plus"];
 
@@ -1422,6 +1476,7 @@ function initProfilePlayerDetails() {
   var specialtyFeedback = document.getElementById("profileSpecialtyFeedback");
   if (!section || section.dataset.playerDetailsBound === "1") return;
   section.dataset.playerDetailsBound = "1";
+  initProfileHeroCityWidthSync();
   var selectedSpecialty = "";
   var selectedMttPreferences = [];
   var selectedCashPreferences = [];
@@ -1493,6 +1548,7 @@ function initProfilePlayerDetails() {
       birthSave.hidden = !!saved;
       birthSave.disabled = !!saved;
     }
+    pokerProfileQueueHeroCityWidthSync();
     var ageBadge = document.getElementById("profilePublicAgeBadge");
     if (ageBadge) {
       var ageText = pokerProfileAgeBadgeText(saved);
@@ -1526,6 +1582,7 @@ function initProfilePlayerDetails() {
     if (preferencesMtt) preferencesMtt.hidden = selectedSpecialty !== "mtt";
     if (preferencesCash) preferencesCash.hidden = selectedSpecialty !== "cash";
     setPreferenceState(selectedSpecialty);
+    pokerProfileQueueHeroCityWidthSync();
   }
   function setPreferenceState(kind, values) {
     if (kind === "mtt" && values !== undefined) selectedMttPreferences = pokerProfileMttPreferences(values);

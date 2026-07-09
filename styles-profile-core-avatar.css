@@ -2121,6 +2121,8 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-public-showcase__identity-controls {
   display: flex;
   flex-wrap: wrap;
+  width: fit-content;
+  max-width: 100%;
   margin-top: 10px;
 }
 .view[data-view="profile"] .profile-public-showcase .profile-hero-preferences {
@@ -3277,8 +3279,8 @@ body.profile-avatar-choice-open {
   grid-template-columns: minmax(0, 1fr) 32px;
   align-items: center;
   gap: 6px;
-  width: min(100%, 360px);
-  max-width: min(100%, 360px);
+  width: min(100%, var(--profile-hero-city-width, 360px)) !important;
+  max-width: min(100%, var(--profile-hero-city-width, 360px)) !important;
   min-height: 36px;
   margin-top: 8px;
   padding: 4px;
@@ -3328,8 +3330,8 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
     grid-template-columns: minmax(0, 1fr) 28px;
-    width: min(100%, 300px);
-    max-width: min(100%, 300px);
+    width: min(100%, var(--profile-hero-city-width, 300px)) !important;
+    max-width: min(100%, var(--profile-hero-city-width, 300px)) !important;
   }
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
     width: 28px;
@@ -3342,8 +3344,8 @@ body.profile-avatar-choice-open {
     grid-row: 3 !important;
     justify-self: start !important;
     align-self: start !important;
-    width: min(100%, clamp(300px, 70vw, 535px)) !important;
-    max-width: min(100%, clamp(300px, 70vw, 535px)) !important;
+    width: min(100%, var(--profile-hero-city-width, 260px)) !important;
+    max-width: min(100%, var(--profile-hero-city-width, 260px)) !important;
     min-width: 0 !important;
     margin: -2px 0 0 !important;
     grid-template-columns: minmax(0, 1fr) 30px !important;

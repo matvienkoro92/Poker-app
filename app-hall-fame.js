@@ -810,6 +810,8 @@ function hallFishRowsFromCrmData(data) {
           pokerPlusNickname: poker21Nick,
           telegram: String((row && row.telegram) || "").trim(),
           profileBirthDate: String((row && row.profileBirthDate) || "").trim(),
+          profileCity: String((row && (row.profileCity || row.city)) || "").trim(),
+          avatarUrl: String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim(),
           level: Number(row && row.level) || 0,
           fee: Number(row && row.fee) || 0,
         };
@@ -832,6 +834,8 @@ function hallFishRowsFromCrmData(data) {
         pokerPlusNickname: poker21Nick,
         telegram: hallFishTelegramLabel(reg),
         profileBirthDate: String((row && row.profileBirthDate) || "").trim(),
+        profileCity: String((row && (row.profileCity || row.city)) || "").trim(),
+        avatarUrl: String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim(),
         level: level,
         fee: Number(row && row.fee) || 0,
       };
@@ -975,14 +979,45 @@ function hallFishMyRankText(rows, currentIds) {
   return "Ваш рейтинг " + (rank ? String(rank) : "—") + "/" + String(total);
 }
 
+function hallFishLevelPlayerImage(row) {
+  var nick = String((row && (row.pokerPlusNickname || row.name)) || "").trim();
+  if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+    try {
+      var art = window.pokerGetSummerRatingPlayerArt(nick);
+      if (art && art.src) return { src: art.src, kind: "art" };
+    } catch (eHallFishArt) {}
+  }
+  var avatar = String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim();
+  if (avatar) return { src: avatar, kind: "avatar" };
+  return { src: hallFishLevelFishSrc(row && row.level), kind: "fish" };
+}
+
+function hallFishLevelAgeText(value) {
+  var parts = hallFishBirthDateParts(value);
+  if (!parts) return "";
+  var now = new Date();
+  var age = now.getFullYear() - parts.year;
+  var month = now.getMonth() + 1;
+  var day = now.getDate();
+  if (month < parts.month || (month === parts.month && day < parts.day)) age -= 1;
+  if (!isFinite(age) || age < 0 || age > 130) return "";
+  return String(age) + " " + hallFishAgeWord(age);
+}
+
 function hallFishLevelRowHtml(row, rank, extraClass) {
   var userId = String(row && row.accountId || "").trim();
   var name = row && (row.name || row.telegram) || "Игрок";
   var sub = row && row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
-  return '<button type="button" class="hall-fish-level-row' + (extraClass ? " " + hallFishEsc(extraClass) : "") + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
+  var image = hallFishLevelPlayerImage(row);
+  var age = hallFishLevelAgeText(row && row.profileBirthDate);
+  var city = String((row && (row.profileCity || row.city)) || "").trim();
+  var meta = [age, city].filter(Boolean).join(" · ");
+  return '<button type="button" class="hall-fish-level-row hall-fish-level-row--player' + (extraClass ? " " + hallFishEsc(extraClass) : "") + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
     '<span class="hall-fish-level-row__rank">' + hallFishEsc(rank) + '</span>' +
-    '<span><span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
-    '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span></span>' +
+    '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' +
+    '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
+    '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' +
+    (meta ? '<span class="hall-fish-level-row__meta">' + hallFishEsc(meta) + '</span>' : '') + '</span>' +
     '<span class="hall-fish-level-row__level">' + hallFishEsc(row && row.level) + ' ур.</span>' +
   '</button>';
 }
@@ -2070,6 +2105,14 @@ function hallFishEnsureAchievementRatingData() {
     .catch(function () { return hallFishAchievementRatingDataReady(); });
 }
 
+function hallFishEnsureLevelPlayerArtData() {
+  if (typeof window.pokerGetSummerRatingPlayerArt === "function") return Promise.resolve(true);
+  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(false);
+  return Promise.resolve(window.pokerEnsureScriptDomains(["rating-summer"]))
+    .then(function () { return typeof window.pokerGetSummerRatingPlayerArt === "function"; })
+    .catch(function () { return typeof window.pokerGetSummerRatingPlayerArt === "function"; });
+}
+
 function hallFishLoadAchievementRows() {
   if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return Promise.resolve(hallFishAchievementRowsCache);
   if (hallFishAchievementRowsCache && !hallFishAchievementRatingDataReady()) hallFishAchievementRowsCache = null;
@@ -2188,9 +2231,9 @@ function hallFishAddCalendarEvent(dateKey) {
 
 function openHallFishRatingModal() {
   hallFishSetModalState("Загрузка…");
-  Promise.all([hallFishLoadRows(), hallFishLoadCurrentIds()])
+  Promise.all([hallFishEnsureLevelPlayerArtData(), hallFishLoadRows(), hallFishLoadCurrentIds()])
     .then(function (result) {
-      hallFishSetModalState("", result[0], result[1]);
+      hallFishSetModalState("", result[1], result[2]);
     })
     .catch(function () {
       var body = document.getElementById("hallFishRatingBody");
