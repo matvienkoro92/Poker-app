@@ -3144,6 +3144,11 @@ body.profile-avatar-choice-open {
   max-width: 100% !important;
 }
 
+.view[data-view="profile"] #profileHeroPreferences[hidden],
+.view[data-view="profile"] #profileHeroPreferences .profile-hero-preferences__group[hidden] {
+  display: none !important;
+}
+
 .view[data-view="profile"] #profileHeroPreferences .profile-hero-preferences__chip {
   flex: 0 0 auto !important;
   width: auto !important;
@@ -3169,10 +3174,13 @@ body.profile-avatar-choice-open {
   grid-template-columns: minmax(0, 1fr) 34px !important;
   align-items: center !important;
   gap: 6px !important;
-  width: min(100%, 360px) !important;
-  max-width: min(100%, 360px) !important;
+  flex: 0 0 100% !important;
+  clear: both !important;
+  width: min(100%, 520px) !important;
+  max-width: min(100%, 520px) !important;
   min-height: 38px !important;
-  margin-top: 8px !important;
+  margin-top: 10px !important;
+  margin-left: 0 !important;
   padding: 4px !important;
   border-radius: 12px !important;
   background:
