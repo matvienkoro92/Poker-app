@@ -146,6 +146,36 @@ function pokerSyncChatContactsFilterTabs() {
   } catch (ePrimFilter) {}
 }
 
+var POKER_DEFAULT_FRIEND_ACCOUNT_IDS = ["ID803668", "ID403173", "ID400800"];
+
+function pokerViewerAccountIdForFriendCount() {
+  var candidates = [];
+  try {
+    var profileId = document.getElementById("profileUserId");
+    candidates.push(profileId && profileId.textContent);
+  } catch (eProfileFriendCountId) {}
+  try { candidates.push(sessionStorage.getItem("poker_dt_id")); } catch (eSessionFriendCountId) {}
+  try { candidates.push(localStorage.getItem("poker_dt_id")); } catch (eLocalFriendCountId) {}
+  for (var i = 0; i < candidates.length; i += 1) {
+    var value = String(candidates[i] || "").trim().toUpperCase();
+    if (/^ID\d{6}$/.test(value)) return value;
+  }
+  return "";
+}
+
+function pokerFriendsCountWithDefaults(friendIds) {
+  var seen = {};
+  (Array.isArray(friendIds) ? friendIds : []).forEach(function (id) {
+    var value = String(id || "").trim().toUpperCase();
+    if (value) seen[value] = true;
+  });
+  var viewer = pokerViewerAccountIdForFriendCount();
+  POKER_DEFAULT_FRIEND_ACCOUNT_IDS.forEach(function (id) {
+    if (id !== viewer) seen[id] = true;
+  });
+  return Object.keys(seen).length;
+}
+
 /** Подписи «Друзья (N)» на кнопке профиля и вкладке списка чатов. count === null — без скобок (нет авторизации). */
 function pokerUpdateFriendsCountLabels(count) {
   var hasCount = typeof count === "number" && !isNaN(count);
@@ -174,7 +204,7 @@ function pokerUpdateFriendsCountLabels(count) {
 function pokerUpdateFriendsCountLabelsFromContactsData(data) {
   if (!data || data.confirmedFriendIds !== true) return;
   if (!Array.isArray(data.friendIds)) return;
-  pokerUpdateFriendsCountLabels(data.friendIds.length);
+  pokerUpdateFriendsCountLabels(pokerFriendsCountWithDefaults(data.friendIds));
 }
 
 function pokerApplyLocalOutgoingFriendRequest(targetUserId) {

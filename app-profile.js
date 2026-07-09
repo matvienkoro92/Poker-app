@@ -1491,11 +1491,8 @@ function initProfilePlayerDetails() {
     ((typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) ||
       (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()));
   if (birthInput) {
-    var today = new Date();
-    var yyyy = String(today.getFullYear());
-    var mm = String(today.getMonth() + 1).padStart(2, "0");
-    var dd = String(today.getDate()).padStart(2, "0");
-    birthInput.max = yyyy + "-" + mm + "-" + dd;
+    birthInput.min = "1965-01-01";
+    birthInput.max = "2010-12-31";
   }
   function showDetailsFeedback(text, ms) {
     if (!feedback) return;
@@ -1544,15 +1541,19 @@ function initProfilePlayerDetails() {
   }
   function setBirthDateState(value) {
     var saved = String(value || "").trim();
-    section.classList.toggle("profile-hero-birth--saved", !!saved);
+    var savedYearMatch = saved.match(/^(\d{4})-\d{2}-\d{2}$/);
+    var savedYear = savedYearMatch ? Number(savedYearMatch[1]) : 0;
+    var savedAllowed = !!saved && savedYear >= 1965 && savedYear <= 2010;
+    section.classList.toggle("profile-hero-birth--saved", savedAllowed);
     if (birthInput) {
       birthInput.value = saved;
-      birthInput.disabled = !!saved;
+      birthInput.disabled = savedAllowed;
     }
     if (birthSave) {
-      birthSave.hidden = !!saved;
-      birthSave.disabled = !!saved;
+      birthSave.hidden = savedAllowed;
+      birthSave.disabled = savedAllowed;
     }
+    if (saved && !savedAllowed) showDetailsFeedback("Исправьте год рождения: допустимо от 1965 до 2010.", 0);
     pokerProfileQueueHeroCityWidthSync();
     var ageBadge = document.getElementById("profilePublicAgeBadge");
     if (ageBadge) {
@@ -1686,6 +1687,12 @@ function initProfilePlayerDetails() {
       var val = birthInput ? String(birthInput.value || "").trim() : "";
       if (!val) {
         showDetailsFeedback("Укажите дату рождения.", 2500);
+        return;
+      }
+      var birthYearMatch = val.match(/^(\d{4})-\d{2}-\d{2}$/);
+      var birthYear = birthYearMatch ? Number(birthYearMatch[1]) : 0;
+      if (birthYear < 1965 || birthYear > 2010) {
+        showDetailsFeedback("Год рождения должен быть от 1965 до 2010.", 3500);
         return;
       }
       postPlayerDetails({ birthDate: val }, { buttons: [birthSave] }).then(function (data) {

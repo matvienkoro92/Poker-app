@@ -167,6 +167,7 @@ function initProfileFriends() {
   var focusIncomingOnOpen = false;
   var friendsDataCache = null;
   var friendsFetchPromise = null;
+  var defaultFriendsFetchPromise = null;
   var friendsPreviewRetryTimer = null;
   var friendsPreviewRetryCount = 0;
   if (!btn || !modal || !listEl) return;
@@ -364,6 +365,54 @@ function initProfileFriends() {
     return false;
   }
 
+  function profileFriendsViewerAccountId() {
+    var candidates = [];
+    try {
+      var profileId = document.getElementById("profileUserId");
+      candidates.push(profileId && profileId.textContent);
+    } catch (eProfileFriendId) {}
+    try { candidates.push(sessionStorage.getItem("poker_dt_id")); } catch (eSessionFriendId) {}
+    try { candidates.push(localStorage.getItem("poker_dt_id")); } catch (eLocalFriendId) {}
+    for (var i = 0; i < candidates.length; i += 1) {
+      var value = String(candidates[i] || "").trim().toUpperCase();
+      if (/^ID\d{6}$/.test(value)) return value;
+    }
+    return "";
+  }
+
+  function mergeDefaultFriendsData(data, fallback) {
+    var source = data && data.ok ? data : { ok: true, friends: [], incoming: [], outgoing: [], notices: [] };
+    var rows = Array.isArray(source.friends) ? source.friends.slice() : [];
+    var seen = {};
+    rows.forEach(function (row) {
+      var id = pokerFriendsRowId(row);
+      if (id) seen[id] = true;
+    });
+    (Array.isArray(fallback && fallback.friends) ? fallback.friends : []).forEach(function (row) {
+      var id = pokerFriendsRowId(row);
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      rows.push(row);
+    });
+    return Object.assign({}, source, { ok: true, friends: rows });
+  }
+
+  function fetchDefaultFriendsData() {
+    if (defaultFriendsFetchPromise) return defaultFriendsFetchPromise;
+    var base = getApiBase();
+    if (!base) return Promise.reject(new Error("api_base_missing"));
+    var viewer = profileFriendsViewerAccountId();
+    var query = "?publicDefaults=1" + (viewer ? "&viewerAccountId=" + encodeURIComponent(viewer) : "");
+    defaultFriendsFetchPromise = fetch(base + "/api/friends" + query, { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.friends) || !data.friends.length) throw new Error("default_friends_empty");
+        return data;
+      })
+      .finally(function () { defaultFriendsFetchPromise = null; });
+    return defaultFriendsFetchPromise;
+  }
+
   function scheduleFriendsPreviewRetry() {
     if (friendsPreviewRetryTimer || friendsPreviewRetryCount >= 10) return;
     friendsPreviewRetryCount += 1;
@@ -384,6 +433,14 @@ function initProfileFriends() {
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     friendsFetchPromise = fetch(base + "/api/friends" + fq)
       .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok && Array.isArray(data.friends) && data.friends.length) return data;
+        return fetchDefaultFriendsData().then(function (fallback) {
+          return mergeDefaultFriendsData(data, fallback);
+        });
+      }, function (err) {
+        return fetchDefaultFriendsData().catch(function () { throw err; });
+      })
       .then(rememberFriendsData)
       .then(function (data) {
         friendsFetchPromise = null;
@@ -1398,6 +1455,14 @@ function initProfileFriends() {
       } else {
         renderPreviewLoading();
       }
+      fetchDefaultFriendsData()
+        .then(function (data) {
+          var stableData = rememberFriendsData(data) || data;
+          renderIncomingNotice(0);
+          renderFriendsPreview(stableData.friends || []);
+          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels((stableData.friends || []).length);
+        })
+        .catch(function () {});
       scheduleFriendsPreviewRetry();
       return;
     }
@@ -1435,8 +1500,8 @@ function initProfileFriends() {
       })
       .catch(function () {
         if (!previewHadCachedData) {
-          renderIncomingNotice(0);
-          renderFriendsPreview([]);
+          renderPreviewLoading();
+          scheduleFriendsPreviewRetry();
         }
       });
   }

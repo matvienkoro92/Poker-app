@@ -1614,7 +1614,7 @@
     height: 38px;
   }
   .hall-fish-achievement-list .hall-fish-level-row {
-    grid-template-columns: 28px minmax(0, 1fr) minmax(58px, auto);
+    grid-template-columns: 28px 46px minmax(0, 1fr) minmax(58px, auto);
   }
   .hall-fish-achievement-list .hall-fish-level-row__level {
     font-size: 12px;

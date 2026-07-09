@@ -843,6 +843,7 @@ function hallFishRowsFromCrmData(data) {
         var poker21Nick = String((row && (row.pokerPlusNickname || row.poker21Nickname || row.nickname)) || "").trim();
         return {
           accountId: String((row && row.accountId) || "").trim(),
+          p21Id: String((row && (row.p21Id || row.pokerPlusUserId || row.poker21Id)) || "").trim(),
           name: String(poker21Nick || (row && row.name) || "").trim(),
           pokerPlusNickname: poker21Nick,
           telegram: String((row && row.telegram) || "").trim(),
@@ -867,6 +868,7 @@ function hallFishRowsFromCrmData(data) {
       var poker21Nick = String((row && (row.pokerPlusNickname || row.poker21Nickname || row.nickname)) || "").trim();
       return {
         accountId: accountId,
+        p21Id: String((row && (row.p21Id || row.pokerPlusUserId || row.poker21Id)) || "").trim(),
         name: String(poker21Nick || (reg && reg.name) || accountId || "").trim(),
         pokerPlusNickname: poker21Nick,
         telegram: hallFishTelegramLabel(reg),
@@ -1043,8 +1045,10 @@ function hallFishLevelAgeText(value) {
 
 function hallFishLevelRowHtml(row, rank, extraClass) {
   var userId = String(row && row.accountId || "").trim();
+  var p21Id = String(row && (row.p21Id || row.pokerPlusUserId || row.poker21Id) || "").trim();
   var name = row && (row.name || row.telegram) || "Игрок";
-  var sub = row && row.telegram ? String(row.telegram) : ((userId ? userId + " / " : "") + "без TG");
+  var telegram = String(row && row.telegram || "").trim();
+  var sub = [p21Id ? "ID Poker21: " + p21Id : "", telegram].filter(Boolean).join(" · ");
   var image = hallFishLevelPlayerImage(row);
   var age = hallFishLevelAgeText(row && row.profileBirthDate);
   var city = String((row && (row.profileCity || row.city)) || "").trim();
@@ -1053,7 +1057,7 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
     '<span class="hall-fish-level-row__rank">' + hallFishEsc(rank) + '</span>' +
     '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' +
     '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
-    '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' +
+    (sub ? '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' : '') +
     (meta ? '<span class="hall-fish-level-row__meta">' + hallFishEsc(meta) + '</span>' : '') + '</span>' +
     '<span class="hall-fish-level-row__level">' + hallFishEsc(row && row.level) + ' ур.</span>' +
   '</button>';

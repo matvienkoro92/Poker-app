@@ -2622,11 +2622,12 @@ body.profile-avatar-choice-open {
     display: grid;
     grid-template-columns: clamp(85px, 22.5vw, 101px) minmax(0, 1fr);
     align-items: start;
-    gap: 14px;
+    column-gap: 14px;
+    row-gap: 4px;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / span 4;
   }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block {
     display: contents;
@@ -2648,7 +2649,7 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase__details-row {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 5;
     justify-content: center;
     flex-wrap: wrap;
     gap: 5px;
@@ -2693,7 +2694,7 @@ body.profile-avatar-choice-open {
   }
   .view[data-view="profile"] .profile-public-showcase__identity-controls {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
     align-self: start;
     display: flex;
     flex-wrap: wrap;
@@ -2701,14 +2702,14 @@ body.profile-avatar-choice-open {
     gap: 4px;
     width: 100%;
     min-width: 0;
-    margin-top: clamp(34px, 9.6vw, 42px);
+    margin-top: 0;
   }
   .view[data-view="profile"] .profile-public-showcase .profile-hero-preferences {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     align-self: start;
     width: 100%;
-    margin-top: -2px;
+    margin-top: 0;
   }
   .view[data-view="profile"] .profile-public-showcase .profile-hero-preferences__group {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3231,7 +3232,7 @@ body.profile-avatar-choice-open {
 }
 
 .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
-  margin-top: 8px !important;
+  margin-top: 0 !important;
   width: auto !important;
   max-width: 100% !important;
   padding: 0 !important;
@@ -3319,7 +3320,7 @@ body.profile-avatar-choice-open {
 
 @media (max-width: 520px) {
   .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
-    margin-top: 7px !important;
+    margin-top: 0 !important;
   }
   .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__group {
     gap: 5px !important;
@@ -3341,19 +3342,19 @@ body.profile-avatar-choice-open {
 @media (max-width: 620px) {
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
     grid-column: 2 !important;
-    grid-row: 3 !important;
+    grid-row: 4 !important;
     justify-self: start !important;
     align-self: start !important;
     width: min(100%, var(--profile-hero-city-width, 260px)) !important;
     max-width: min(100%, var(--profile-hero-city-width, 260px)) !important;
     min-width: 0 !important;
-    margin: -2px 0 0 !important;
+    margin: 0 !important;
     grid-template-columns: minmax(0, 1fr) 30px !important;
     box-sizing: border-box !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences:not([hidden]) + #profileHeroCity.profile-hero-city {
-    margin-top: 8px !important;
+    margin-top: 0 !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {

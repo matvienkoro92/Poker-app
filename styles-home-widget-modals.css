@@ -2751,7 +2751,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 88px;
+  --sng-map-row-height: 64px;
+  --sng-map-row-gap: 4px;
   grid-template-columns:
     152px
     152px
@@ -2823,7 +2824,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 104px;
+  --sng-map-row-height: 68px;
+  --sng-map-row-gap: 5px;
   min-width: 1160px;
   padding-bottom: 54px;
 }
@@ -2834,6 +2836,31 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed {
   min-height: 104px;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match {
+  min-height: 56px;
+  padding-block: 3px;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-player {
+  font-size: 9px;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  inset-block: 4px;
+}
+
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed {
+  min-height: 64px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match {
+  min-height: 60px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed {
+  min-height: 68px;
 }
 
 @media (max-width: 700px) {
