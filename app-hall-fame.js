@@ -1360,10 +1360,12 @@ function hallFishRenderAchievementRows(data) {
 function hallFishBirthDateParts(value) {
   var m = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return null;
+  var year = parseInt(m[1], 10);
   var month = parseInt(m[2], 10);
   var day = parseInt(m[3], 10);
+  if (!year || year < 1900 || year > 2100) return null;
   if (!month || month < 1 || month > 12 || !day || day < 1 || day > 31) return null;
-  return { month: month, day: day };
+  return { year: year, month: month, day: day };
 }
 
 function hallFishBirthdayRows(rows) {
@@ -1375,6 +1377,7 @@ function hallFishBirthdayRows(rows) {
         accountId: String((row && row.accountId) || "").trim(),
         nick: String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "Игрок").trim(),
         telegram: String((row && row.telegram) || "").trim(),
+        birthYear: parts.year,
         month: parts.month,
         day: parts.day,
       };
@@ -1393,6 +1396,30 @@ function hallFishFormatBirthdayDate(row, year) {
   var date = hallFishBirthdayDateForYear(row, year || (new Date()).getFullYear());
   if (!date) return "";
   return date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
+function hallFishAgeWord(age) {
+  var value = Math.abs(Number(age) || 0);
+  var lastTwo = value % 100;
+  var last = value % 10;
+  if (lastTwo >= 11 && lastTwo <= 14) return "лет";
+  if (last === 1) return "год";
+  if (last >= 2 && last <= 4) return "года";
+  return "лет";
+}
+
+function hallFishBirthdayAgeText(row, targetDate, today) {
+  var birthYear = Number(row && row.birthYear);
+  var date = targetDate instanceof Date ? targetDate : null;
+  var targetYear = date ? date.getFullYear() : NaN;
+  if (!birthYear || !targetYear || targetYear < birthYear) return "";
+  var age = targetYear - birthYear;
+  var base = today instanceof Date ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : new Date();
+  base.setHours(0, 0, 0, 0);
+  var compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  compareDate.setHours(0, 0, 0, 0);
+  var verb = compareDate < base ? "Исполнилось" : compareDate > base ? "Исполнится" : "Исполняется";
+  return verb + " " + String(age) + " " + hallFishAgeWord(age);
 }
 
 function hallFishCalendarDateKey(year, monthIndex, day) {
@@ -1585,11 +1612,14 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
     var dayEvents = monthEventsByDay[day] || [];
     var isToday = day === now.getDate() && month === now.getMonth() && year === now.getFullYear();
     var dateKey = hallFishCalendarDateKey(year, month, day);
+    var cellDate = new Date(year, month, day);
+    cellDate.setHours(0, 0, 0, 0);
     var detailRows = marked.map(function (row) {
+      var ageText = hallFishBirthdayAgeText(row, cellDate, now);
       return {
         kind: "birthday",
         title: row.nick || "Игрок",
-        meta: "День рождения" + (row.age ? " · " + row.age : ""),
+        meta: "День рождения" + (ageText ? " · " + ageText : ""),
       };
     }).concat(dayEvents.map(function (event) {
       return {
@@ -1650,12 +1680,16 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
         }
         var userId = String(row.accountId || "").trim();
         var name = row.nick || "Игрок";
+        var ageText = hallFishBirthdayAgeText(row, row.nextDate, now);
         var attrs = userId
           ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
           : ' disabled aria-disabled="true"';
         return '<button type="button" class="hall-fish-birthday-next__row"' + attrs + ' aria-label="' + hallFishEsc("Открыть профиль " + name) + '">' +
-          '<strong>' + hallFishEsc(row.nick) + '</strong>' +
-          '<span>' + hallFishEsc(hallFishFormatBirthdayDate(row, row.nextDate.getFullYear())) + ' · ' + hallFishEsc(label) + '</span>' +
+          '<span class="hall-fish-birthday-next__main">' +
+            '<strong>' + hallFishEsc(row.nick) + '</strong>' +
+            '<span>' + hallFishEsc(hallFishFormatBirthdayDate(row, row.nextDate.getFullYear())) + ' · ' + hallFishEsc(label) + '</span>' +
+          '</span>' +
+          (ageText ? '<span class="hall-fish-birthday-next__age">' + hallFishEsc(ageText) + '</span>' : '') +
         '</button>';
       }).join("")
     : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">' + (hallFishUpcomingFilter === "club" ? "Ближайших праздников клуба нет." : "Ближайших событий нет.") + '</div>';

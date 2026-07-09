@@ -384,6 +384,14 @@
     return "Уровень " + String(level);
   }
 
+  function playerCityText(player) {
+    return String(player && (player.profileCity || player.city) || "").trim();
+  }
+
+  function playerMetaText(player) {
+    return [playerLevelText(player), playerCityText(player)].filter(Boolean).join(" · ");
+  }
+
   function playerTelegram(player) {
     var raw = player && (
       player.telegram ||
@@ -563,14 +571,14 @@
     var profileId = player && player.accountId ? String(player.accountId) : "";
     var profileName = playerName(player);
     var avatar = playerAvatar(player);
-    var level = playerLevelText(player);
+    var meta = playerMetaText(player);
     var telegram = playerTelegram(player);
     var attrs = profileId
       ? ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"'
       : "";
     return '<span class="sng-champions-modal__bracket-player-main">' +
       '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
-      (level ? '<small class="sng-champions-modal__bracket-player-level">' + escapeHtml(level) + '</small>' : '') +
+      (meta ? '<small class="sng-champions-modal__bracket-player-level">' + escapeHtml(meta) + '</small>' : '') +
       (telegram ? '<a class="sng-champions-modal__bracket-player-telegram" href="' + escapeHtml(telegram.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(telegram.label) + '</a>' : '') +
     '</span>';
   }
@@ -614,6 +622,83 @@
       }
     }
     return null;
+  }
+
+  function bracketAllMatches(data) {
+    var out = [];
+    []
+      .concat(Array.isArray(data && data.rounds) ? data.rounds : [])
+      .concat(Array.isArray(data && data.loserRounds) ? data.loserRounds : [])
+      .forEach(function (round) {
+        (round && Array.isArray(round.matches) ? round.matches : []).forEach(function (match) {
+          out.push(match);
+        });
+      });
+    return out;
+  }
+
+  function sameBracketPair(match, firstId, secondId) {
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    if (ids.length < 2) return false;
+    return (ids[0] === firstId && ids[1] === secondId) || (ids[0] === secondId && ids[1] === firstId);
+  }
+
+  function bracketMatchCompletedTime(match) {
+    var time = Date.parse(String(match && match.completedAt || ""));
+    return Number.isFinite(time) ? time : NaN;
+  }
+
+  function bracketHeadToHeadScore(match, data) {
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    if (ids.length < 2) return null;
+    var firstId = ids[0];
+    var secondId = ids[1];
+    var matches = bracketAllMatches(data);
+    var currentIndex = matches.indexOf(match);
+    var currentTime = bracketMatchCompletedTime(match);
+    var firstWins = 0;
+    var secondWins = 0;
+    matches.forEach(function (item, index) {
+      if (!item || !item.winnerId || !sameBracketPair(item, firstId, secondId)) return;
+      var include = false;
+      if (item === match) {
+        include = !!match.winnerId;
+      } else {
+        var itemTime = bracketMatchCompletedTime(item);
+        if (Number.isFinite(currentTime) && Number.isFinite(itemTime)) include = itemTime <= currentTime;
+        else if (Number.isFinite(currentTime)) include = currentIndex < 0 || index < currentIndex;
+        else if (Number.isFinite(itemTime)) include = true;
+        else include = currentIndex < 0 || index < currentIndex;
+      }
+      if (!include) return;
+      if (item.winnerId === firstId) firstWins += 1;
+      else if (item.winnerId === secondId) secondWins += 1;
+    });
+    return {
+      first: firstWins,
+      second: secondWins,
+      text: String(firstWins) + "-" + String(secondWins),
+    };
+  }
+
+  function renderBracketHeadToHead(match, data) {
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    if (ids.length < 2) return "";
+    var score = bracketHeadToHeadScore(match, data);
+    if (!score) return "";
+    return '<div class="sng-champions-modal__match-meta sng-champions-modal__match-meta--h2h"><span>Личные встречи</span><strong>' + escapeHtml(score.text) + '</strong></div>';
+  }
+
+  function renderBracketMapHeadToHead(match, data) {
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    if (ids.length < 2) return "";
+    var score = bracketHeadToHeadScore(match, data);
+    if (!score) return "";
+    return '<span class="sng-champions-modal__map-h2h" aria-label="Личные встречи ' + escapeHtml(score.text) + '">' +
+      '<span>' + escapeHtml(score.first) + '</span>' +
+      '<span>−</span>' +
+      '<span>' + escapeHtml(score.second) + '</span>' +
+    '</span>';
   }
 
   function readBestOfFiveScore(winnerName) {
@@ -798,7 +883,7 @@
   }
 
   function renderEntry(entry, data) {
-    var level = playerLevelText(entry);
+    var meta = playerMetaText(entry);
     var adminButtons = "";
     if (data.isAdmin && data.status === "open") {
       if (entry.status !== "approved") {
@@ -813,7 +898,7 @@
       '<div class="sng-champions-modal__entry-main">' +
         renderPlayerNameButton(entry) +
         '<span class="sng-champions-modal__entry-status sng-champions-modal__entry-status--' + escapeHtml(entry.status || "pending") + '">' + (entry.status === "approved" ? '<i aria-hidden="true">✓</i>' : '') + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
-        (level ? '<small>' + escapeHtml(level) + '</small>' : '') +
+        (meta ? '<small>' + escapeHtml(meta) + '</small>' : '') +
       '</div>' +
       adminActions +
     '</article>';
@@ -935,6 +1020,7 @@
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "");
     return '<article class="' + matchClass + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
+      renderBracketHeadToHead(match, data) +
       playerRows +
       tablePasswordHtml +
       renderPlayingAction(match, players, data) +
@@ -961,7 +1047,11 @@
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
     var ready = match.readyById && match.readyById[id] === true;
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' + escapeHtml(playerName(player)) + '</span>';
+    var meta = playerMetaText(player);
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
+      '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
+      (meta ? '<small class="sng-champions-modal__map-player-meta">' + escapeHtml(meta) + '</small>' : '') +
+    '</span>';
   }
 
   function renderBracketMapPendingPlayer() {
@@ -1007,6 +1097,7 @@
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
+      renderBracketMapHeadToHead(match, data) +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
   }
