@@ -3291,6 +3291,10 @@ body.profile-avatar-choice-open {
     0 0 14px rgba(255, 145, 32, 0.14);
 }
 
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences:not([hidden]) + #profileHeroCity.profile-hero-city {
+  margin-top: -86px !important;
+}
+
 .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {
   width: 100%;
   height: 28px;
@@ -3344,6 +3348,10 @@ body.profile-avatar-choice-open {
     margin: -2px 0 0 !important;
     grid-template-columns: minmax(0, 1fr) 30px !important;
     box-sizing: border-box !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences:not([hidden]) + #profileHeroCity.profile-hero-city {
+    margin-top: -2px !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {
