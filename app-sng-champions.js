@@ -999,6 +999,7 @@
     var styleParts = [];
     if (options.rowStart) styleParts.push("--sng-map-row-start:" + String(options.rowStart));
     if (options.rowSpan) styleParts.push("--sng-map-row-span:" + String(options.rowSpan));
+    if (options.connectorHeight) styleParts.push("--sng-map-connector-height:" + String(options.connectorHeight));
     var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
     return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
@@ -1059,7 +1060,8 @@
                 return renderBracketMapMatch(match, data, round, index, rounds, {
                   selected: isSelected,
                   rowStart: (matchIndex * rowSpan) + 1,
-                  rowSpan: rowSpan
+                  rowSpan: rowSpan,
+                  connectorHeight: String(Math.max(28, (rowSpan * 46) - 6)) + "px"
                 });
               }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +

@@ -2721,6 +2721,24 @@
   padding: 4px 5px;
 }
 
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match {
+  min-height: 46px;
+  padding: 5px 6px;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-match {
+  min-height: 54px;
+  padding: 6px 7px;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match {
+  min-height: 64px;
+  padding: 7px 8px;
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
   min-width: 1160px;
   padding-bottom: 54px;
@@ -2989,6 +3007,20 @@
   transform: translateY(-50%);
 }
 
+.sng-champions-modal__map-match--has-next:nth-child(odd)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: -15px;
+  width: 3px;
+  height: var(--sng-map-connector-height, 40px);
+  border-radius: 999px;
+  background: var(--sng-map-lane);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--sng-map-lane) 68%, transparent);
+  transform: translate(50%, -1px);
+}
+
 .sng-champions-modal__map-match--lane-1 { --sng-map-lane: #22c55e; }
 .sng-champions-modal__map-match--lane-2 { --sng-map-lane: #38bdf8; }
 .sng-champions-modal__map-match--lane-3 { --sng-map-lane: #facc15; }
@@ -3040,6 +3072,21 @@
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-player {
   font-size: clamp(9px, 1.05vw, 11px);
   line-height: 1.02;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-player,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-player {
+  font-size: clamp(10px, 1.12vw, 12px);
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-player,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-player {
+  font-size: clamp(11px, 1.22vw, 13px);
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-player,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-player {
+  font-size: clamp(12px, 1.34vw, 15px);
 }
 
 .sng-champions-modal__map-player--winner {
@@ -3231,6 +3278,11 @@
   right: -22px;
   width: 22px;
   height: 4px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next:nth-child(odd)::before {
+  right: -22px;
+  width: 4px;
 }
 
 .sng-champions-modal__map-focus .sng-champions-modal__map-match--focus {

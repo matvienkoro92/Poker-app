@@ -988,13 +988,14 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleCompletedRerollRowsHtml(raffle, rows, winnerNumber) {
     if (!Array.isArray(rows) || !rows.length) return "";
+    var actionRaffleId = raffle && (raffle.sourceRaffleId || raffle.id);
     var html =
       "<li class=\"raffle-winner-reroll-nest\">" +
       "<span class=\"raffle-winner-reroll-arrow\" aria-hidden=\"true\">" +
       "<span class=\"raffle-winner-reroll-arrow__label\">Рерролл</span>" +
       "</span><ul class=\"raffle-winner-reroll-list\">";
     rows.forEach(function (w) {
-      html += buildRaffleWinnerRowHtml(w, raffle.id, rafflesIsAdmin, winnerNumber);
+      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber);
     });
     html += "</ul></li>";
     return html;
@@ -1037,9 +1038,10 @@ function initRafflesCompletedRuntime(opts) {
 
   function raffleCompletedWinnerGroupRowsHtml(raffle, rows, rerollsByOriginal) {
     var html = "";
+    var actionRaffleId = raffle && (raffle.sourceRaffleId || raffle.id);
     (Array.isArray(rows) ? rows : []).forEach(function (w, index) {
       var winnerNumber = index + 1;
-      html += buildRaffleWinnerRowHtml(w, raffle.id, rafflesIsAdmin, winnerNumber);
+      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber);
       if (!raffleWinnerIsReroll(w)) {
         var key = raffleWinnerPrimaryRenderKey(w);
         html += raffleCompletedRerollRowsHtml(raffle, key && rerollsByOriginal ? rerollsByOriginal[key] : [], winnerNumber);
@@ -1146,6 +1148,38 @@ function initRafflesCompletedRuntime(opts) {
       "</strong></div>";
   }
 
+  function completedRaffleBatchFromSource(sourceRaffle, batchIndex, fallbackBatch) {
+    var source = sourceRaffle || {};
+    var batches = Array.isArray(source.resultBatches) ? source.resultBatches : [];
+    var index = parseInt(batchIndex, 10);
+    if (!isFinite(index) || index < 0 || !batches[index]) return fallbackBatch || source;
+    var batch = batches[index];
+    var groupIndexes = Array.isArray(batch && batch.groupIndexes) ? batch.groupIndexes : [index];
+    var groups = {};
+    groupIndexes.forEach(function (rawIndex) {
+      var n = parseInt(String(rawIndex), 10);
+      if (isFinite(n)) groups[n] = true;
+    });
+    var winners = (Array.isArray(source.winners) ? source.winners : []).filter(function (winner) {
+      var n = parseInt(String(winner && winner.groupIndex != null ? winner.groupIndex : ""), 10);
+      return isFinite(n) && groups[n];
+    }).map(function (winner) {
+      return Object.assign({}, winner, { sourceRaffleId: source.id });
+    });
+    return Object.assign({}, source, {
+      id: (fallbackBatch && fallbackBatch.id) || (String(source.id || "raffle") + "__batch_" + index),
+      sourceRaffleId: source.id,
+      status: "completed",
+      completedAt: batch.drawnAt || batch.endDate || source.completedAt || source.endDate,
+      drawnAt: batch.drawnAt || batch.endDate || source.drawnAt || source.endDate,
+      endDate: batch.endDate || source.endDate,
+      resultBatchLabel: String(batch.label || "").trim(),
+      resultBatchTime: String(batch.time || "").trim(),
+      resultBatchIndex: index,
+      winners: winners
+    });
+  }
+
   function buildCompletedRaffleCardHtml(raffle) {
     var created = raffle.createdAt ? new Date(raffle.createdAt).toLocaleDateString("ru-RU") : "";
     var completedAt = raffleCompletedDate(raffle);
@@ -1167,11 +1201,18 @@ function initRafflesCompletedRuntime(opts) {
       ? raffleReadyTimerHtml(rerollTimerInfo, "reroll", "raffle-completed-card__timer")
       : "";
     var burnedHtml = raffleCompletedBurnedSummaryHtml(raffle);
-    var adminActionsHtml = rafflesIsAdmin && !raffle.resultBatchLabel
+    var refreshRaffleId = String((raffle && (raffle.sourceRaffleId || raffle.id)) || "");
+    var batchIndex = raffle && raffle.resultBatchIndex != null ? String(raffle.resultBatchIndex) : "";
+    var deleteHtml = rafflesIsAdmin && !raffle.resultBatchLabel
+      ? "<button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
+        escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button>"
+      : "";
+    var adminActionsHtml = rafflesIsAdmin
       ? "<div class=\"raffle-completed-card__actions\"><button type=\"button\" class=\"raffle-completed-card__refresh-btn\" data-raffle-id=\"" +
-        escapeHtml(raffle.id || "") +
-        "\">Обновить</button><button type=\"button\" class=\"raffle-completed-card__delete-btn\" data-raffle-id=\"" +
-        escapeHtml(raffle.id || "") + "\">Удалить розыгрыш (админ)</button></div>"
+        escapeHtml(refreshRaffleId) +
+        "\" data-raffle-batch-index=\"" +
+        escapeHtml(batchIndex) +
+        "\">Обновить</button>" + deleteHtml + "</div>"
       : "";
     return "<div class=\"raffle-completed-card\" data-raffle-id=\"" + escapeHtml(raffle.id || "") + "\" data-raffle-number=\"" + escapeHtml(raffle.completedNumber || "") + "\"><p class=\"raffle-completed-card__meta\">" + escapeHtml(meta) + "</p>" +
       rerollTimerHtml +
@@ -1321,6 +1362,7 @@ function initRafflesCompletedRuntime(opts) {
       return;
     }
     var raffleId = refreshBtn.getAttribute("data-raffle-id") || "";
+    var batchIndex = refreshBtn.getAttribute("data-raffle-batch-index") || "";
     var card = refreshBtn.closest(".raffle-completed-card");
     if (!raffleId || !card) return;
     refreshBtn.disabled = true;
@@ -1339,7 +1381,17 @@ function initRafflesCompletedRuntime(opts) {
           return;
         }
         if (typeof updateCompletedRaffleCache === "function") updateCompletedRaffleCache(data.raffle);
-        var nextHtml = buildCompletedRaffleCardHtml(data.raffle);
+        var currentBatch = null;
+        if (batchIndex !== "") {
+          currentBatch = {
+            id: card.getAttribute("data-raffle-id") || "",
+            completedNumber: card.getAttribute("data-raffle-number") || ""
+          };
+        }
+        var nextRaffle = batchIndex !== ""
+          ? completedRaffleBatchFromSource(data.raffle, batchIndex, currentBatch)
+          : data.raffle;
+        var nextHtml = buildCompletedRaffleCardHtml(nextRaffle);
         var wrap = document.createElement("div");
         wrap.innerHTML = nextHtml;
         var nextCard = wrap.firstElementChild;

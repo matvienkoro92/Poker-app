@@ -520,14 +520,14 @@
 }
 .hall-of-fame__top2026-quotes {
   position: absolute;
-  z-index: 6;
-  top: clamp(286px, calc(68vw + 20px), 306px);
+  z-index: 30;
+  top: clamp(274px, calc(68vw + 12px), 296px);
   left: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(116px, 30vw, 144px);
-  min-height: 34px;
+  width: clamp(170px, 46vw, 222px);
+  min-height: 58px;
   padding: 0;
   box-sizing: border-box;
   appearance: none;
@@ -547,6 +547,7 @@
   text-shadow: none;
   transform: translateX(-50%);
   pointer-events: auto;
+  touch-action: manipulation;
   cursor: pointer;
 }
 .hall-of-fame__top2026-quotes:hover,
@@ -958,7 +959,9 @@
     right: clamp(16px, 5vw, 22px);
   }
   .hall-of-fame__top2026-quotes {
-    top: clamp(286px, calc(67vw + 22px), 306px);
+    top: clamp(274px, calc(67vw + 14px), 296px);
+    width: clamp(166px, 46vw, 216px);
+    min-height: 56px;
     font-size: clamp(9px, 2.35vw, 12px);
   }
   .hall-of-fame__top2026-quote-text {
