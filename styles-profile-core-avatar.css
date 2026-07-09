@@ -3351,7 +3351,7 @@ body.profile-avatar-choice-open {
   }
 
   .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences:not([hidden]) + #profileHeroCity.profile-hero-city {
-    margin-top: -2px !important;
+    margin-top: -104px !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__input {

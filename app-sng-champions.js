@@ -392,6 +392,16 @@
     return [playerLevelText(player), playerCityText(player)].filter(Boolean).join(" · ");
   }
 
+  function playerMetaHtml(player, className) {
+    var level = playerLevelText(player);
+    var city = playerCityText(player);
+    if (!level && !city) return "";
+    return '<small class="' + escapeHtml(className) + '">' +
+      (level ? '<span>' + escapeHtml(level) + '</span>' : '') +
+      (city ? '<span>' + escapeHtml(city) + '</span>' : '') +
+    '</small>';
+  }
+
   function playerTelegram(player) {
     var raw = player && (
       player.telegram ||
@@ -571,14 +581,13 @@
     var profileId = player && player.accountId ? String(player.accountId) : "";
     var profileName = playerName(player);
     var avatar = playerAvatar(player);
-    var meta = playerMetaText(player);
     var telegram = playerTelegram(player);
     var attrs = profileId
       ? ' data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '"'
       : "";
     return '<span class="sng-champions-modal__bracket-player-main">' +
       '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
-      (meta ? '<small class="sng-champions-modal__bracket-player-level">' + escapeHtml(meta) + '</small>' : '') +
+      playerMetaHtml(player, "sng-champions-modal__bracket-player-level") +
       (telegram ? '<a class="sng-champions-modal__bracket-player-telegram" href="' + escapeHtml(telegram.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(telegram.label) + '</a>' : '') +
     '</span>';
   }
@@ -1047,10 +1056,9 @@
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
     var ready = match.readyById && match.readyById[id] === true;
-    var meta = playerMetaText(player);
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
-      (meta ? '<small class="sng-champions-modal__map-player-meta">' + escapeHtml(meta) + '</small>' : '') +
+      playerMetaHtml(player, "sng-champions-modal__map-player-meta") +
     '</span>';
   }
 
