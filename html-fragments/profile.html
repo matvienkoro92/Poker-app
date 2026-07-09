@@ -59,12 +59,6 @@
                         <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
                         <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
                       </label>
-                      <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
-                        <span class="profile-hero-city__label">Город</span>
-                        <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
-                        <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
-                        <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
-                      </label>
                     </div>
                     <div class="profile-hero-preferences" id="profileHeroPreferences" hidden>
                       <div class="profile-hero-preferences__group" id="profileHeroPreferencesMtt" data-profile-preferences-kind="mtt" hidden role="group" aria-label="Лимиты МТТ">
@@ -79,6 +73,11 @@
                         <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="25-50-50-100" aria-label="Кеш 25/50-50/100" aria-pressed="false">25-100</button>
                         <button type="button" class="profile-hero-preferences__chip" data-profile-preference-kind="cash" data-profile-preference="50-100-plus" aria-label="Кеш 50/100 плюс" aria-pressed="false">100+</button>
                       </div>
+                      <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
+                        <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
+                        <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
+                        <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
+                      </label>
                       <span class="profile-hero-preferences__feedback" id="profileHeroPreferencesFeedback" aria-live="polite"></span>
                     </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
