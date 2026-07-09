@@ -3045,12 +3045,20 @@
 
 .sng-champions-modal__map-match--has-next:nth-child(odd)::after {
   top: 50%;
-  height: calc(var(--sng-map-connector-height, 42px) + var(--sng-map-row-gap, 6px) + 2px);
+  height: var(--sng-map-connector-height, 42px);
   border-radius: 0;
   background:
     linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 100% 3px no-repeat,
     linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right top / 3px 100% no-repeat;
   transform: none;
+}
+
+.sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match--has-next::after {
+  top: 50%;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--sng-map-lane);
+  transform: translateY(-50%);
 }
 
 .sng-champions-modal__map-match--lane-1 { --sng-map-lane: #22c55e; }
@@ -3373,11 +3381,18 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next:nth-child(odd)::after {
-  height: calc(var(--sng-map-connector-height, 44px) + var(--sng-map-row-gap, 5px) + 2px);
+  height: var(--sng-map-connector-height, 44px);
   background:
     linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 100% 4px no-repeat,
     linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right top / 4px 100% no-repeat;
   transform: none;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match--has-next::after {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sng-map-lane);
+  transform: translateY(-50%);
 }
 
 .sng-champions-modal__map-focus .sng-champions-modal__map-match--focus {

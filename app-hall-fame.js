@@ -1412,7 +1412,7 @@ function hallFishBirthdayAgeText(row, targetDate, today) {
   var birthYear = Number(row && row.birthYear);
   var date = targetDate instanceof Date ? targetDate : null;
   var targetYear = date ? date.getFullYear() : NaN;
-  if (!birthYear || !targetYear || targetYear < birthYear) return "";
+  if (!birthYear || !targetYear || targetYear <= birthYear) return "";
   var age = targetYear - birthYear;
   var base = today instanceof Date ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : new Date();
   base.setHours(0, 0, 0, 0);

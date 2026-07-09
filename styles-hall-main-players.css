@@ -722,14 +722,18 @@
   background:
     linear-gradient(180deg, rgba(3, 7, 18, 0), rgba(3, 7, 18, 0.96) 20%, rgba(3, 7, 18, 1) 100%);
 }
-.hall-fish-level-row--sticky {
+.hall-fish-level-row--sticky,
+.hall-fish-level-row--mine.hall-fish-level-row--sticky,
+.hall-fish-level-row--mine.hall-fish-level-row--sticky:hover,
+.hall-fish-level-row--mine.hall-fish-level-row--sticky:focus-visible {
   cursor: pointer;
   border: 2px solid rgba(255, 207, 79, 0.98);
   border-color: rgba(255, 207, 79, 0.98);
   background:
-    radial-gradient(circle at 9% 45%, rgba(255, 222, 94, 0.5), transparent 34%),
-    linear-gradient(180deg, #fff7d6 0%, #ffe28a 46%, #f0b12b 100%);
+    radial-gradient(circle at 9% 45%, rgba(255, 237, 151, 0.58), transparent 34%),
+    linear-gradient(180deg, #fffbe6 0%, #ffe89f 46%, #f2bd43 100%);
   color: #241504;
+  outline: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     inset 0 -10px 24px rgba(143, 87, 8, 0.22),
@@ -779,9 +783,6 @@
 .hall-fish-level-row--sticky:hover,
 .hall-fish-level-row--sticky:focus-visible {
   border-color: rgba(255, 230, 141, 1);
-  background:
-    radial-gradient(circle at 9% 45%, rgba(255, 237, 151, 0.58), transparent 34%),
-    linear-gradient(180deg, #fffbe6 0%, #ffe89f 46%, #f2bd43 100%);
   outline: none;
 }
 .hall-fish-level-row:disabled {
