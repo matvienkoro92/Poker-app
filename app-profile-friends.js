@@ -353,6 +353,12 @@ function initProfileFriends() {
       if (typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) return true;
     } catch (eFriendsCred) {}
     try {
+      if (typeof pokerCanSyncGuestProfileToServer === "function" && pokerCanSyncGuestProfileToServer()) return true;
+    } catch (eFriendsGuestCred) {}
+    try {
+      if (typeof pokerReadPwaSessionToken === "function" && !!pokerReadPwaSessionToken()) return true;
+    } catch (eFriendsPwaCred) {}
+    try {
       return typeof pokerReadEmailPwaSessionToken === "function" && !!pokerReadEmailPwaSessionToken();
     } catch (eFriendsEmailCred) {}
     return false;

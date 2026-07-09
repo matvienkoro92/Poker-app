@@ -1091,6 +1091,10 @@
     var hasPendingPlayer = playerIds.some(function (id) { return !id; });
     var waitingForOpponent = !match.winnerId && hasKnownPlayer && hasPendingPlayer;
     var unplayed = !match.winnerId && knownCount >= 2;
+    var hasRichPlayerMeta = playerIds.some(function (id) {
+      var player = id && data.playersById ? data.playersById[id] : null;
+      return !!(player && (playerLevelText(player) || playerCityText(player)));
+    });
     var selectedClass = options.selected ? " sng-champions-modal__map-match--selected" : "";
     var focusClass = options.focus ? " sng-champions-modal__map-match--focus" : "";
     var styleParts = [];
@@ -1099,7 +1103,7 @@
     if (options.connectorHeight) styleParts.push("--sng-map-connector-height:" + String(options.connectorHeight));
     var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
-    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
+    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +

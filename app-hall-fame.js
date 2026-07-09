@@ -486,6 +486,28 @@ var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v2";
 var HALL_FISH_ROWS_SESSION_CACHE_MS = 60000;
 var HALL_FISH_BIRTHDAYS_SESSION_CACHE_KEY = "poker_hall_fish_birthdays_v1";
 var HALL_FISH_CALENDAR_EVENTS_LOCAL_KEY = "poker_hall_fish_calendar_events_v1";
+var HALL_FISH_PRESET_AVATAR_SRC = {
+  tiger: "./assets/avatar-tiger.jpg",
+  raccoon: "./assets/avatar-raccoon.jpg",
+  skull: "./assets/avatar-skull.jpg",
+  phoenix: "./assets/avatar-phoenix.jpg",
+  octopus: "./assets/avatar-octopus.jpg",
+  cat: "./assets/avatar-cat.jpg",
+  robot: "./assets/avatar-robot.jpg",
+  bulldog: "./assets/avatar-bulldog.jpg",
+  fox: "./assets/avatar-fox.jpg",
+  chip: "./assets/avatar-chip.jpg",
+  koala: "./assets/avatar-koala.jpg",
+  raven: "./assets/avatar-raven.jpg",
+  crocodile: "./assets/avatar-crocodile.jpg",
+  rabbit: "./assets/avatar-rabbit.jpg",
+  chameleon: "./assets/avatar-chameleon.jpg",
+  panda: "./assets/avatar-panda.jpg",
+  wolf: "./assets/avatar-wolf.jpg",
+  owl: "./assets/avatar-owl.jpg",
+  bat: "./assets/avatar-bat.jpg",
+  gorilla: "./assets/avatar-gorilla.jpg",
+};
 
 function hallFishEsc(s) {
   if (s == null) return "";
@@ -510,6 +532,21 @@ function hallFishDecodeData(value) {
   } catch (eDecodeHallFishData) {
     return null;
   }
+}
+
+function hallFishResolveAvatarSrc(value) {
+  var raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.indexOf("preset:") === 0) {
+    return HALL_FISH_PRESET_AVATAR_SRC[raw.slice("preset:".length)] || "";
+  }
+  return raw;
+}
+
+function hallFishLevelFishSrc(level) {
+  var n = Math.max(1, Math.min(55, Math.round(Number(level) || 1)));
+  var suffix = n < 10 ? "0" + n : String(n);
+  return "./assets/profile-status-fish-level-" + suffix + ".png";
 }
 
 function hallFishDateStamp(dateStr) {
@@ -987,7 +1024,7 @@ function hallFishLevelPlayerImage(row) {
       if (art && art.src) return { src: art.src, kind: "art" };
     } catch (eHallFishArt) {}
   }
-  var avatar = String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim();
+  var avatar = hallFishResolveAvatarSrc(row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url));
   if (avatar) return { src: avatar, kind: "avatar" };
   return { src: hallFishLevelFishSrc(row && row.level), kind: "fish" };
 }
@@ -2231,9 +2268,14 @@ function hallFishAddCalendarEvent(dateKey) {
 
 function openHallFishRatingModal() {
   hallFishSetModalState("Загрузка…");
-  Promise.all([hallFishEnsureLevelPlayerArtData(), hallFishLoadRows(), hallFishLoadCurrentIds()])
+  Promise.all([
+    hallFishEnsureLevelPlayerArtData().catch(function () { return false; }),
+    hallFishLoadRows(),
+    hallFishLoadCurrentIds().catch(function () { return hallFishReadLocalCurrentIds(); }),
+  ])
     .then(function (result) {
-      hallFishSetModalState("", result[1], result[2]);
+      var rows = Array.isArray(result[1]) ? result[1] : [];
+      hallFishSetModalState("", rows, Array.isArray(result[2]) ? result[2] : []);
     })
     .catch(function () {
       var body = document.getElementById("hallFishRatingBody");

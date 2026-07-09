@@ -1391,9 +1391,14 @@ var profileHeroCityWidthResizeBound = false;
 function pokerProfileSyncHeroCityWidth() {
   var city = document.getElementById("profileHeroCity");
   var controls = document.querySelector(".profile-public-showcase__identity-controls");
+  var birth = document.getElementById("profileHeroBirthDate");
   if (!city || !controls) return;
-  var rect = controls.getBoundingClientRect ? controls.getBoundingClientRect() : null;
-  var width = rect && rect.width ? Math.ceil(rect.width) : Math.ceil(controls.offsetWidth || 0);
+  var cityRect = city.getBoundingClientRect ? city.getBoundingClientRect() : null;
+  var birthRect = birth && birth.getBoundingClientRect ? birth.getBoundingClientRect() : null;
+  var controlsRect = controls.getBoundingClientRect ? controls.getBoundingClientRect() : null;
+  var width = cityRect && birthRect && birthRect.right > cityRect.left
+    ? Math.ceil(birthRect.right - cityRect.left)
+    : (controlsRect && controlsRect.width ? Math.ceil(controlsRect.width) : Math.ceil(controls.offsetWidth || 0));
   if (width >= 160) city.style.setProperty("--profile-hero-city-width", width + "px");
 }
 

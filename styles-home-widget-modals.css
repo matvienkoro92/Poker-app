@@ -2989,6 +2989,11 @@
     0 0 18px color-mix(in srgb, var(--sng-map-lane) 18%, transparent);
 }
 
+.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed,
+.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
+  min-height: 94px;
+}
+
 .sng-champions-modal__bracket-map .sng-champions-modal__map-match--unplayed::before {
   content: "";
   position: absolute;
@@ -3021,6 +3026,11 @@
   pointer-events: none;
 }
 
+.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  inset: 9px 27px 9px 16px;
+  gap: 6px;
+}
+
 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
   position: static;
   display: grid;
@@ -3031,6 +3041,11 @@
   text-overflow: ellipsis;
   transform: none;
   white-space: nowrap;
+}
+
+.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed {
+  gap: 0;
+  line-height: 1;
 }
 
 .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-player--unplayed:nth-child(1) {
@@ -3181,6 +3196,12 @@
   line-height: 0.96;
   text-shadow: none;
   white-space: normal;
+}
+
+.sng-champions-modal__map-match--rich .sng-champions-modal__map-player-meta {
+  gap: 0;
+  font-size: 0.66em;
+  line-height: 0.9;
 }
 
 .sng-champions-modal__map-player-meta span {
@@ -3344,6 +3365,11 @@
   min-height: 82px;
 }
 
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
+  min-height: 104px;
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match {
   min-height: 80px;
   padding: 5px;
@@ -3357,8 +3383,17 @@
   inset: 8px 30px 8px 22px;
 }
 
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  inset: 10px 32px 10px 22px;
+  gap: 8px;
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
   inset: 8px 30px 8px 20px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  inset: 10px 32px 10px 20px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-h2h {
@@ -3480,6 +3515,15 @@
 
 .sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
   inset: 12px 130px 12px 42px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
+  gap: 10px;
+}
+
+.sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--rich .sng-champions-modal__map-player-meta {
+  font-size: 0.52em;
+  line-height: 0.92;
 }
 
 .sng-champions-modal__map-focus .sng-champions-modal__map-match--focus.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-status {
