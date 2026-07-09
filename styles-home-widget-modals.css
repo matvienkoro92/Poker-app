@@ -2673,8 +2673,8 @@
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
   --sng-map-row-height: 42px;
   grid-template-columns:
-    156px
-    156px
+    128px
+    128px
     148px
     140px
     132px
@@ -2685,12 +2685,12 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
   grid-template-columns:
-    188px
-    184px
-    172px
-    164px
+    148px
+    148px
     156px
-    156px;
+    148px
+    140px
+    140px;
   width: max-content;
   min-width: 0;
 }
@@ -2728,8 +2728,8 @@
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match {
   justify-self: end;
   width: fit-content;
-  min-width: 76px;
-  max-width: 144px;
+  min-width: 68px;
+  max-width: 116px;
   padding-right: 6px;
 }
 
@@ -2739,7 +2739,7 @@
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-players,
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-players {
   width: max-content;
-  max-width: 118px;
+  max-width: 94px;
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match,
@@ -2758,6 +2758,18 @@
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match {
   min-height: 64px;
   padding: 7px 8px;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round:last-child .sng-champions-modal__map-match::after,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round:last-child .sng-champions-modal__map-match::after {
+  content: none !important;
+  display: none !important;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round:last-child .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round:last-child .sng-champions-modal__map-match {
+  align-self: center !important;
+  height: auto !important;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
