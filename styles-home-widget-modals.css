@@ -2721,6 +2721,27 @@
   padding: 4px 5px;
 }
 
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match {
+  justify-self: end;
+  width: fit-content;
+  min-width: 76px;
+  max-width: 144px;
+  padding-right: 6px;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-players,
+.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-players,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-players,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-players,
+.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-players {
+  width: max-content;
+  max-width: 118px;
+}
+
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match,
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-match {
   min-height: 46px;
@@ -3008,17 +3029,7 @@
 }
 
 .sng-champions-modal__map-match--has-next:nth-child(odd)::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 50%;
-  right: -15px;
-  width: 3px;
-  height: var(--sng-map-connector-height, 40px);
-  border-radius: 999px;
-  background: var(--sng-map-lane);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--sng-map-lane) 68%, transparent);
-  transform: translate(50%, -1px);
+  display: none;
 }
 
 .sng-champions-modal__map-match--lane-1 { --sng-map-lane: #22c55e; }
@@ -3281,8 +3292,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next:nth-child(odd)::before {
-  right: -22px;
-  width: 4px;
+  display: none;
 }
 
 .sng-champions-modal__map-focus .sng-champions-modal__map-match--focus {
