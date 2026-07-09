@@ -464,7 +464,7 @@
 
   var SNG_PLAYER_ART_BY_NICK = {
     "waaar": "./assets/summer-rating-player-waaar.webp",
-    "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.546",
+    "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
     "coo1er91": "./assets/summer-rating-player-cooler.webp",
     "em13!!": "./assets/summer-rating-player-emil.webp",
     "winifly": "./assets/summer-rating-player-winifly.webp",

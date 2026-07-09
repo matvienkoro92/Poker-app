@@ -2270,7 +2270,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   min-height: 280px;
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% 18% / 26.35% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki.webp?v=3.546") 18% calc(22% - 10px) / 36.8% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki.webp?v=3.547") 18% calc(22% - 10px) / 36.8% auto no-repeat,
     url("./assets/summer-rating-player-cooler.webp") 82% 22% / 18.97% auto no-repeat;
 }
 
@@ -2380,7 +2380,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league[data-spring-league="1"] .summer-rating-table-avatar--place-2 {
-  background-image: url("./assets/summer-rating-player-pokermanki.webp?v=3.546");
+  background-image: url("./assets/summer-rating-player-pokermanki.webp?v=3.547");
   background-position: 36% 10%;
 }
 
@@ -3298,7 +3298,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   overflow: visible;
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
     url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
 }
 
@@ -3666,7 +3666,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
   }
 
@@ -3722,7 +3722,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
   }
 
@@ -4308,7 +4308,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 18.36% auto no-repeat;
   }
 
@@ -4473,7 +4473,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% 53px / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) 45px / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) 45px / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) 49px / 18.36% auto no-repeat;
   }
 
@@ -4533,7 +4533,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 28px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 41px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% + 41px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 35px) / 18.36% auto no-repeat;
   }
 
@@ -4682,7 +4682,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
     #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki.webp?v=3.546") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki.webp?v=3.547") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 18.36% auto no-repeat;
   }
 
