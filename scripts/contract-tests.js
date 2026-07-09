@@ -5286,6 +5286,22 @@ async function testFriendsFlow(redis) {
   assert.strictEqual(peerFriend.chatDisplayName, "Peer Display", "friend list exposes stored display name");
   assert.strictEqual(peerFriend.pokerPlusNickname, "Poker21 Buddy", "friend list exposes Poker21 nickname");
 
+  redis.h("poker_app:visitor_dt_ids").set("tg_1003", "ID100003");
+  redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");
+  redis.h("poker_app:visitor_usernames").set("tg_1003", "legacy_peer");
+  redis.s("poker_app:friends:tg_1001").add("tg_1003");
+  redis.h("poker_app:friend_alias:tg_1001").set("tg_1003", "Legacy Buddy");
+
+  r = await call(friends, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "friend list with legacy friends succeeds");
+  const legacyFriend = (r.body.friends || []).find((row) => row && row.userId === "ID100003");
+  assert.ok(legacyFriend, "friend list migrates legacy friend set");
+  assert.strictEqual(legacyFriend.chatUserId, "tg_1003", "legacy friend resolves chat id");
+  assert.strictEqual(legacyFriend.contactName, "Legacy Buddy", "legacy friend alias is preserved");
+  assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has("ID100003"), true, "legacy friend migrates to current friendship set");
+  assert.strictEqual(redis.s("poker_app:friendships:ID100003").has(myAccountId), true, "legacy friend migration is reciprocal");
+  assert.strictEqual(redis.sets.has("poker_app:friends:tg_1001"), false, "legacy friend set is cleaned after migration");
+
   r = await call(friends, req("DELETE", {}, { pwaSession: s.user, targetUserId: "tg_1002" }));
   assert.strictEqual(r.statusCode, 200, "friend delete succeeds");
   assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), false, "friend delete removes member");
