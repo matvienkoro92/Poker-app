@@ -3341,7 +3341,7 @@ body.profile-avatar-choice-open {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    margin: 4px 0 0 !important;
+    margin: -2px 0 0 !important;
     grid-template-columns: minmax(0, 1fr) 30px !important;
     box-sizing: border-box !important;
   }
@@ -3365,4 +3365,11 @@ body.profile-avatar-choice-open {
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity .profile-hero-city__save {
     width: 28px !important;
   }
+}
+
+.view[data-view="profile"] #profileHeroPreferences[hidden],
+.view[data-view="profile"] #profileHeroPreferences .profile-hero-preferences__group[hidden],
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences[hidden],
+.view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__group[hidden] {
+  display: none !important;
 }
