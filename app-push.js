@@ -698,10 +698,30 @@ function initProfileChatPush() {
 }
 (function initPwaServiceWorkerGlobal() {
   if (!("serviceWorker" in navigator)) return;
+  var pokerSwReloadScheduled = false;
+  function pokerScheduleSwReload(reason) {
+    if (pokerSwReloadScheduled) return;
+    pokerSwReloadScheduled = true;
+    setTimeout(function () {
+      try {
+        var url = new URL(window.location.href);
+        url.searchParams.set("_pwa_reload", String(Date.now()));
+        window.location.replace(url.toString());
+      } catch (eUrl) {
+        try {
+          window.location.reload();
+        } catch (eReload) {}
+      }
+    }, reason === "controllerchange" ? 450 : 80);
+  }
   try {
     navigator.serviceWorker.addEventListener("message", function (ev) {
       var d = ev.data;
       if (!d) return;
+      if (d.pokerAppReloadRequired) {
+        pokerScheduleSwReload("message");
+        return;
+      }
       if (d.pokerChatPushSound) {
         if (typeof pokerPlayChatMessageNotificationSound === "function") {
           try {
@@ -739,6 +759,7 @@ function initProfileChatPush() {
   } catch (eMsg) {}
   try {
     navigator.serviceWorker.addEventListener("controllerchange", function () {
+      pokerScheduleSwReload("controllerchange");
       setTimeout(function () {
         try {
           pokerChatPushSyncIfNeeded();

@@ -3,11 +3,12 @@ var POKER_CHAT_API_CACHE = "poker-chat-api-v4";
 var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v3"];
 var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v4";
 var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2", "poker-push-assets-v3"];
-var POKER_STATIC_CACHE = "poker-static-v12";
-var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11"];
+var POKER_STATIC_CACHE = "poker-static-v13";
+var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11", "poker-static-v12"];
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
+var POKER_SW_BUILD = "3.710";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
@@ -33,9 +34,29 @@ self.addEventListener("activate", function (e) {
       }))
     ).then(function () {
       return self.clients.claim();
+    }).then(function () {
+      return pokerSwRefreshOpenClients("activate");
     })
   );
 });
+
+function pokerSwRefreshOpenClients(reason) {
+  return clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (cs) {
+    var tasks = [];
+    var i;
+    for (i = 0; i < cs.length; i++) {
+      try {
+        cs[i].postMessage({ pokerAppReloadRequired: true, version: POKER_SW_BUILD, reason: reason || "sw_update" });
+      } catch (ePost) {}
+      try {
+        if (cs[i] && typeof cs[i].navigate === "function" && cs[i].url) {
+          tasks.push(cs[i].navigate(cs[i].url).catch(function () {}));
+        }
+      } catch (eNav) {}
+    }
+    return Promise.all(tasks).catch(function () {});
+  });
+}
 
 function pokerSwChatApiStaleWhileRevalidate(request) {
   return caches.open(POKER_CHAT_API_CACHE).then(function (cache) {
