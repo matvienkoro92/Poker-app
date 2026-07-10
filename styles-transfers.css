@@ -986,6 +986,147 @@
   }
 }
 
+/* Poker21 identity cards shared visually with the SNG player treatment. */
+.transfers-card__participant {
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  overflow: hidden;
+  border-color: rgba(219, 165, 73, 0.46);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 28%, rgba(255, 205, 105, 0.11), transparent 28%),
+    linear-gradient(145deg, rgba(28, 25, 18, 0.96), rgba(5, 8, 12, 0.98) 72%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 207, 0.1),
+    0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.transfers-card__participant--owner {
+  border-left: 4px solid rgba(255, 192, 70, 0.78);
+}
+
+.transfers-card__participant--buyer {
+  border-left: 4px solid rgba(104, 214, 155, 0.76);
+}
+
+.transfers-card__participant-avatar {
+  width: 72px;
+  height: 72px;
+  border-width: 2px;
+  border-color: rgba(224, 175, 86, 0.78);
+  box-shadow:
+    inset 0 0 0 2px rgba(3, 5, 8, 0.72),
+    0 0 16px rgba(255, 184, 70, 0.2);
+}
+
+.transfers-card__participant-avatar img {
+  border-radius: inherit;
+}
+
+.transfers-card__participant-avatar em {
+  right: -2px;
+  bottom: -2px;
+  min-width: 23px;
+  height: 23px;
+  font-size: 11px;
+}
+
+.transfers-card__participant-body {
+  gap: 5px;
+}
+
+.transfers-card__participant-role {
+  color: #d8b875;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.transfers-card__participant-name {
+  overflow: visible;
+  color: #fff0c8;
+  font-size: clamp(19px, 4.4vw, 25px);
+  line-height: 1.08;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 0 #000, 0 0 10px rgba(255, 196, 76, 0.12);
+}
+
+.transfers-card__participant-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+  min-width: 0;
+}
+
+.transfers-card__participant-id,
+.transfers-card__participant-city,
+.transfers-card__participant-telegram {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.transfers-card__participant-id {
+  color: rgba(244, 224, 181, 0.62);
+}
+
+.transfers-card__participant-id b {
+  color: #f8d88f;
+  font-size: 12px;
+}
+
+.transfers-card__participant-city {
+  color: rgba(242, 231, 207, 0.72);
+}
+
+.transfers-card__participant-city::before {
+  content: "Город";
+  color: rgba(244, 224, 181, 0.48);
+}
+
+.transfers-card__participant-telegram {
+  color: #93c5fd;
+  text-decoration: none;
+  text-shadow: 0 0 7px rgba(59, 130, 246, 0.3);
+}
+
+.transfers-card__participant-telegram:hover,
+.transfers-card__participant-telegram:focus-visible {
+  color: #dbeafe;
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .transfers-card__participant {
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .transfers-card__participant-avatar {
+    width: 62px;
+    height: 62px;
+  }
+
+  .transfers-card__participant-name {
+    font-size: 19px;
+  }
+
+  .transfers-card__participant-facts {
+    display: grid;
+    justify-items: start;
+    gap: 3px;
+  }
+}
+
 @media (max-width: 374px) {
   .transfers-create__mode-btn,
   .transfers-tabs__btn {

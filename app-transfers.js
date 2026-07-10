@@ -133,7 +133,8 @@
 
   function transferDisplayId(item, role) {
     item = item || {};
-    return item[role + "DisplayId"] || item[role + "Poker21Id"] || item[role + "AccountId"] || "";
+    var profile = item[role + "Profile"] || {};
+    return profile.poker21Id || item[role + "DisplayId"] || item[role + "Poker21Id"] || item[role + "AccountId"] || "";
   }
 
   function participantName(item, role) {
@@ -154,6 +155,17 @@
     var raw = profile.level != null ? profile.level : item[role + "Level"];
     var level = Math.max(0, Math.floor(Number(raw) || 0));
     return level > 0 ? level : 0;
+  }
+
+  function participantCity(item, role) {
+    var profile = item && item[role + "Profile"] || {};
+    return String(profile.city || profile.profileCity || "").trim();
+  }
+
+  function participantTelegram(item, role) {
+    var profile = item && item[role + "Profile"] || {};
+    var username = String(profile.telegramUsername || profile.telegram || "").trim().replace(/^@+/, "");
+    return /^[A-Za-z0-9_]{5,32}$/.test(username) ? username : "";
   }
 
   function renderParticipant(label, item, role) {
@@ -181,13 +193,24 @@
     var body = textNode("span", "transfers-card__participant-body");
     body.appendChild(textNode("span", "transfers-card__participant-role", label));
     body.appendChild(textNode("strong", "transfers-card__participant-name", name || "Игрок"));
-    if (level) body.appendChild(textNode("small", "transfers-card__participant-level", "Уровень " + level));
+    var facts = textNode("span", "transfers-card__participant-facts");
     if (id) {
       var pokerId = textNode("span", "transfers-card__participant-id");
       pokerId.appendChild(textNode("span", "", "Poker21 ID"));
       pokerId.appendChild(textNode("b", "", id));
-      body.appendChild(pokerId);
+      facts.appendChild(pokerId);
     }
+    var city = participantCity(item, role);
+    if (city) facts.appendChild(textNode("span", "transfers-card__participant-city", city));
+    var telegram = participantTelegram(item, role);
+    if (telegram) {
+      var telegramLink = textNode("a", "transfers-card__participant-telegram", "@" + telegram);
+      telegramLink.href = "https://t.me/" + telegram;
+      telegramLink.target = "_blank";
+      telegramLink.rel = "noopener noreferrer";
+      facts.appendChild(telegramLink);
+    }
+    if (facts.children.length) body.appendChild(facts);
     profile.appendChild(body);
     return profile;
   }
