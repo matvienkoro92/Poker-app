@@ -295,7 +295,28 @@
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/home-link-preview.jpg?v=3.510" />
     <link rel="manifest" href="./manifest.json?v=3.176" />
     <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
-    <link rel="preload" as="image" href="./assets/home-tournament-mystery-bounty-130k.webp?v=2026070602" fetchpriority="high" />
+    <script>
+      (function preloadCurrentTournamentPoster() {
+        var posters = [
+          "home-tournament-sunday-knockout-week-300k.webp",
+          "home-tournament-mystery-bounty-130k.webp",
+          "home-tournament-tuesday-tractor-120k.webp",
+          "home-tournament-wednesday-knockout-250k.jpg",
+          "home-tournament-thursday-mystery-plus-220k.webp",
+          "home-tournament-friday-knockout-progressive-130k.webp",
+          "home-tournament-saturday-freeroll-200k.webp"
+        ];
+        var dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+        var day = new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" });
+        var file = posters[dayMap[day]] || posters[1];
+        var preload = document.createElement("link");
+        preload.rel = "preload";
+        preload.as = "image";
+        preload.href = "./assets/" + file + "?v=2026070602";
+        preload.fetchPriority = "high";
+        document.head.appendChild(preload);
+      })();
+    </script>
     <link rel="stylesheet" href="./styles.css?v=3.981" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />

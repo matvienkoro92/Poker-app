@@ -10,6 +10,7 @@
     viewer: null,
     access: { allowed: false, level: 0, requiredLevel: 10, message: "" },
     maxAmount: 2500,
+    subscribed: false,
   };
   var tickTimer = null;
   var pollTimer = null;
@@ -55,6 +56,37 @@
     el.textContent = text || "";
     el.classList.toggle("transfers-feedback--error", kind === "error");
     el.classList.toggle("transfers-feedback--ok", kind === "ok");
+  }
+
+  function renderSubscription() {
+    var btn = byId("transfersSubscribeBtn");
+    if (!btn) return;
+    btn.disabled = false;
+    btn.textContent = state.subscribed ? "Отписаться" : "Подписаться";
+    btn.setAttribute("aria-pressed", state.subscribed ? "true" : "false");
+  }
+
+  function toggleSubscription(button) {
+    if (!button) return;
+    var wasSubscribed = state.subscribed;
+    button.disabled = true;
+    button.textContent = wasSubscribed ? "Отписываем…" : "Подписываем…";
+    return fetchJson(apiBase() + "/api/transfers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(authedBody({ action: "subscribe", unsubscribe: wasSubscribed })),
+    }).then(function (data) {
+      if (!data || !data.ok) throw new Error((data && data.error) || "Не удалось изменить подписку");
+      state.subscribed = !!data.subscribed;
+      renderSubscription();
+      setFeedback(state.subscribed ? "Уведомления о новых заявках включены" : "Уведомления отключены", "ok");
+      return data;
+    }).catch(function (err) {
+      state.subscribed = wasSubscribed;
+      renderSubscription();
+      setFeedback(err && err.message ? err.message : "Не удалось изменить подписку", "error");
+      return null;
+    });
   }
 
   function textNode(tag, className, text) {
@@ -181,6 +213,13 @@
     return profile.avatarUrl || profile.avatar || "";
   }
 
+  function participantProfileAvatarFallback(item, role, currentUrl) {
+    item = item || {};
+    var profile = item[role + "Profile"] || {};
+    var candidate = profile.avatarFallbackUrl || "";
+    return candidate && candidate !== currentUrl ? candidate : "";
+  }
+
   function participantAvatarFallback(item, role, currentUrl) {
     var targetId = String(transferDisplayId(item, role) || "").trim();
     if (!targetId) return "";
@@ -213,6 +252,11 @@
     return /^[A-Za-z0-9_]{5,32}$/.test(username) ? username : "";
   }
 
+  function participantDealsCount(item, role) {
+    var profile = item && item[role + "Profile"] || {};
+    return Math.max(0, Math.floor(Number(profile.dealsCount != null ? profile.dealsCount : item && item[role + "DealsCount"]) || 0));
+  }
+
   function renderParticipant(label, item, role) {
     if (item && item.status === "open" && role === "buyer") return null;
     var id = transferDisplayId(item, role);
@@ -228,7 +272,8 @@
       img.loading = "lazy";
       img.decoding = "async";
       img.addEventListener("error", function () {
-        var fallbackUrl = participantAvatarFallback(item, role, img.src || avatarUrl);
+        var currentUrl = img.getAttribute("src") || avatarUrl;
+        var fallbackUrl = participantProfileAvatarFallback(item, role, currentUrl) || participantAvatarFallback(item, role, currentUrl);
         if (fallbackUrl && img.dataset.fallbackTried !== "1") {
           img.dataset.fallbackTried = "1";
           img.src = fallbackUrl;
@@ -266,6 +311,12 @@
       facts.appendChild(telegramLink);
     }
     if (facts.children.length) body.appendChild(facts);
+    var dealsCount = participantDealsCount(item, role);
+    var dealsBadge = textNode("span", "transfers-card__participant-deals");
+    dealsBadge.setAttribute("aria-label", "Успешные сделки: " + dealsCount);
+    dealsBadge.appendChild(textNode("span", "transfers-card__participant-deals-label", "Сделки"));
+    dealsBadge.appendChild(textNode("b", "transfers-card__participant-deals-value", "+" + dealsCount));
+    body.appendChild(dealsBadge);
     profile.appendChild(body);
     return profile;
   }
@@ -556,8 +607,10 @@
           message: "",
         };
         state.maxAmount = Number(data.maxAmount || 2500) || 2500;
+        state.subscribed = !!data.subscribed;
         state.loadedAt = Date.now();
         render();
+        renderSubscription();
         return state.items;
       })
       .catch(function (err) {
@@ -752,6 +805,11 @@
       var sectionShare = event.target && event.target.closest ? event.target.closest("[data-transfers-share-section]") : null;
       if (sectionShare) {
         shareTransfersSection();
+        return;
+      }
+      var subscribe = event.target && event.target.closest ? event.target.closest("#transfersSubscribeBtn") : null;
+      if (subscribe) {
+        toggleSubscription(subscribe);
         return;
       }
       var mode = event.target && event.target.closest ? event.target.closest("[data-transfers-kind]") : null;

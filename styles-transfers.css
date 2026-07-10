@@ -42,11 +42,17 @@
   backdrop-filter: blur(12px);
 }
 
-.transfers-page__share {
+.transfers-page__actions {
   position: fixed;
   top: max(28px, calc(env(safe-area-inset-top) + 24px));
   right: 18px;
   z-index: 4;
+  display: flex;
+  gap: 8px;
+}
+
+.transfers-page__share,
+.transfers-page__subscribe {
   min-height: 38px;
   padding: 0 14px;
   color: #ffe7a2;
@@ -65,9 +71,31 @@
 }
 
 .transfers-page__share:hover,
-.transfers-page__share:focus-visible {
+.transfers-page__share:focus-visible,
+.transfers-page__subscribe:hover,
+.transfers-page__subscribe:focus-visible,
+.transfers-page__subscribe[aria-pressed="true"] {
   border-color: rgba(255, 230, 167, 0.84);
   color: #fff8e6;
+}
+
+.transfers-page__subscribe[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(198, 132, 28, 0.9), rgba(105, 65, 10, 0.92));
+  box-shadow: 0 0 20px rgba(255, 177, 45, 0.3);
+}
+
+@media (max-width: 560px) {
+  .transfers-page__actions {
+    gap: 5px;
+    right: 10px;
+  }
+
+  .transfers-page__share,
+  .transfers-page__subscribe {
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
 }
 
 .transfers-page__heading {
@@ -1127,8 +1155,8 @@
     padding: max(12px, env(safe-area-inset-top)) 10px calc(22px + env(safe-area-inset-bottom));
   }
 
-  .transfers-page__share {
-    right: 10px;
+  .transfers-page__share,
+  .transfers-page__subscribe {
     min-height: 34px;
     padding: 0 11px;
     font-size: 12px;
@@ -1483,6 +1511,37 @@
 .transfers-card__participant-telegram:focus-visible {
   color: #dbeafe;
   text-decoration: underline;
+}
+
+.transfers-card__participant-deals {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 5px;
+  min-height: 24px;
+  margin-top: 3px;
+  padding: 0 8px;
+  border: 1px solid rgba(45, 212, 191, 0.34);
+  border-radius: 9px;
+  background: rgba(8, 47, 73, 0.35);
+  color: #d7fff3;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.16);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.transfers-card__participant-deals-label {
+  color: rgba(215, 255, 243, 0.82);
+}
+
+.transfers-card__participant-deals-value {
+  color: #86efac;
+  font-size: 11px;
+  font-weight: 1000;
 }
 
 @media (max-width: 560px) {
@@ -1871,4 +1930,135 @@
 .transfers-tabs .transfers-tabs__btn--active .transfers-tabs__icon,
 .transfers-tabs .transfers-tabs__btn[aria-pressed="true"] .transfers-tabs__icon {
   color: #3a2004;
+}
+
+/* Keep the back control optically centered with the transfers navigation. */
+@media (max-width: 1000px) {
+  .transfers-page__back {
+    transform: translateY(2px);
+  }
+}
+
+/* Persistent CTA treatment for the placement tab. */
+.transfers-tabs .transfers-tabs__btn[data-transfers-filter="create"] {
+  position: relative;
+  isolation: isolate;
+  color: #ffe7a3;
+  border-color: rgba(255, 190, 65, 0.58);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 235, 154, 0.2), transparent 48%),
+    linear-gradient(180deg, rgba(64, 40, 11, 0.86), rgba(20, 14, 7, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 191, 0.2),
+    0 0 15px rgba(255, 165, 28, 0.32),
+    0 0 30px rgba(255, 154, 17, 0.14);
+  animation: transfers-place-cta-glow 2.2s ease-in-out infinite;
+}
+
+.transfers-tabs .transfers-tabs__btn[data-transfers-filter="create"]::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 25%, rgba(255, 244, 194, 0.26) 48%, transparent 70%);
+  background-size: 220% 100%;
+  animation: transfers-place-cta-shimmer 2.8s linear infinite;
+}
+
+.transfers-tabs .transfers-tabs__btn[data-transfers-filter="create"][aria-pressed="true"] {
+  color: #2b1700;
+  border-color: rgba(255, 239, 190, 0.98);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 235, 0.82), transparent 44%),
+    linear-gradient(180deg, #ffe18a 0%, #f6aa25 54%, #d87808 100%);
+}
+
+@keyframes transfers-place-cta-glow {
+  0%, 100% {
+    box-shadow: inset 0 1px 0 rgba(255, 241, 191, 0.2), 0 0 12px rgba(255, 165, 28, 0.25), 0 0 24px rgba(255, 154, 17, 0.1);
+  }
+  50% {
+    box-shadow: inset 0 1px 0 rgba(255, 247, 211, 0.34), 0 0 22px rgba(255, 175, 40, 0.58), 0 0 42px rgba(255, 145, 10, 0.24);
+  }
+}
+
+@keyframes transfers-place-cta-shimmer {
+  from { background-position: 180% 0; }
+  to { background-position: -120% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transfers-tabs .transfers-tabs__btn[data-transfers-filter="create"],
+  .transfers-tabs .transfers-tabs__btn[data-transfers-filter="create"]::after {
+    animation: none;
+  }
+}
+
+/* Narrow phones: keep navigation readable and both participants balanced. */
+@media (max-width: 420px) {
+  .transfers-tabs {
+    width: calc(100% - 52px);
+    margin-left: 52px;
+  }
+
+  .transfers-tabs__btn,
+  .transfers-tabs__btn:last-child {
+    flex-direction: column;
+    gap: 1px;
+    min-height: 50px;
+    padding: 3px 1px;
+    font-size: 10px;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .transfers-tabs__icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .transfers-card__participant {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 6px;
+    min-height: 88px;
+    padding: 8px 7px 11px;
+  }
+
+  .transfers-card__participant-avatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .transfers-card__participant-avatar b {
+    font-size: 22px;
+  }
+
+  .transfers-card__participant-name {
+    font-size: 15px;
+    line-height: 1.08;
+  }
+
+  .transfers-card__participant-facts {
+    display: grid;
+    gap: 2px;
+  }
+
+  .transfers-card__participant-deals {
+    min-height: 20px;
+    margin-top: 1px;
+    padding: 0 6px;
+  }
+}
+
+@media (max-width: 340px) {
+  .transfers-card__meta:has(.transfers-card__participant--buyer) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.transfers-card__participant-avatar img {
+  display: block;
+  border-radius: 50%;
 }
