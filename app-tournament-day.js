@@ -169,7 +169,7 @@ var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
-var HOME_TOURNAMENT_BANNER_VERSION = "2026070602";
+var HOME_TOURNAMENT_BANNER_VERSION = "2026071001";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
@@ -187,6 +187,20 @@ function setHomeTournamentImagePriority(img, priority) {
   try {
     img.fetchPriority = priority || "low";
   } catch (e2) {}
+}
+
+function bindHomeTournamentImageRecovery(img) {
+  if (!img || img.dataset.homeTournamentRecoveryBound === "1") return;
+  img.dataset.homeTournamentRecoveryBound = "1";
+  img.addEventListener("load", function () {
+    img.removeAttribute("data-home-tournament-retry-src");
+  });
+  img.addEventListener("error", function () {
+    var expected = img.getAttribute("data-home-tournament-banner-src") || "";
+    if (!expected || img.getAttribute("data-home-tournament-retry-src") === expected) return;
+    img.setAttribute("data-home-tournament-retry-src", expected);
+    img.src = expected + (expected.indexOf("?") === -1 ? "?" : "&") + "retry=1";
+  });
 }
 
 function preloadHomeTournamentBanner(file, priority) {
@@ -2028,6 +2042,7 @@ function updateTournamentDayBlock() {
       }
     }
     if (homeTrophyImg) {
+      bindHomeTournamentImageRecovery(homeTrophyImg);
       if (hasDetailBanner) {
         var homeTrophySrc = getHomeTournamentBannerUrl(detailBannerFile);
         setHomeTournamentImagePriority(homeTrophyImg, "high");

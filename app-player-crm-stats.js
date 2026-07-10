@@ -46,13 +46,6 @@ function initPlayerCrmStatsRuntime(deps) {
     var registrationBothCount = registrationRowsByMethod("both").length;
     var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
     var visitsSummary = summary && summary.visits && typeof summary.visits === "object" ? summary.visits : null;
-    var visitRows = summary ? players : periodPlayers;
-    var visitTotal = visitsSummary ? Number(visitsSummary.total) || 0 : visitRows.reduce(function (sum, p) { return sum + (Number(p && p.totals && p.totals.visits) || 0); }, 0);
-    var visitUnique = visitsSummary ? Number(visitsSummary.unique) || 0 : visitRows.length;
-    var visitNew = visitsSummary && visitsSummary.new != null
-      ? Number(visitsSummary.new) || 0
-      : players.filter(function (p) { return dateInSelectedPeriod(p && p.firstSeenAt); }).length;
-    var visitRepeat = visitsSummary && visitsSummary.repeat != null ? Number(visitsSummary.repeat) || 0 : Math.max(0, visitTotal - visitUnique);
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statPokerPlusUnlinked = summary ? Number(summary.pokerPlusUnlinked) || 0 : 0;
@@ -81,8 +74,6 @@ function initPlayerCrmStatsRuntime(deps) {
       registrationEmailOnlyCount = Number(summaryRegistrationCounts.email) || 0;
       registrationBothCount = Number(summaryRegistrationCounts.both) || 0;
     }
-    var chat = state.chatStats || {};
-    var chatPeriodHint = periodLabel();
     var visitsIncomplete = visitsSummary && visitsSummary.incomplete;
     var visitsUnavailableBeforeStart = visitsSummary && visitsSummary.unavailableBeforeStart;
     var firstVisitDate = visitsSummary && visitsSummary.firstTrackedDate ? String(visitsSummary.firstTrackedDate) : "";
@@ -98,97 +89,30 @@ function initPlayerCrmStatsRuntime(deps) {
           : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому дашборд показывает нули только по датированным событиям этого периода.") +
         "</div>"
       : "";
-    function periodOnly(row) {
-      return intFmt(row && row.period);
-    }
-    var stats = [
-      ["Посещений", visitTotal, periodLabel(), "visits"],
-      ["Зарегано", statRegistrations, periodLabel(), "registrations"],
-      ["Poker21", intFmt(statPokerPlus), "привязали · " + periodLabel(), "pokerplus"],
-      ["Новые подписки на бот", statBotSubscribers, periodLabel(), "bot"],
-      ["Новые push-подписки", statPushSubscribers, periodLabel(), "push"],
-      ["Депозиты", money(statDeposits), periodLabel(), "deposits"],
+    var periodMetrics = [
+      ["Зарегано · всего", intFmt(statRegistrations)],
+      ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
+      ["Зарегано · только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
+      ["Зарегано · и Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
+      ["Poker21 · новые привязки", "+" + intFmt(statPokerPlus), "data-crm-pokerplus-modal", "plus"],
+      ["Poker21 · отвязали", "−" + intFmt(statPokerPlusUnlinked), "data-crm-pokerplus-modal", "minus"],
+      ["Poker21 · итого за период", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal"],
+      ["Бот · подписки", "+" + intFmt(statBotSubscribers), "data-crm-bot-modal", "plus"],
+      ["Бот · отписки", "−" + intFmt(statBotUnsubscribers), "data-crm-bot-modal", "minus"],
+      ["Бот · итого", intFmt(statBotNet), "data-crm-bot-modal"],
+      ["Push · подписки", "+" + intFmt(statPushSubscribers), "data-crm-push-modal", "plus"],
+      ["Push · отписки", "−" + intFmt(statPushUnsubscribers), "data-crm-push-modal", "minus"],
+      ["Push · итого", intFmt(statPushNet), "data-crm-push-modal"],
+      ["Депозиты · сумма", money(statDeposits)],
+      ["Депозиты · количество", intFmt(statDepositCount)],
     ];
-    if (visitsUnavailableBeforeStart) stats = stats.filter(function (it) { return it[3] !== "visits"; });
-    var chatStats = [
-      ["Сообщений в главном чате", periodOnly(chat.generalMessages), chatPeriodHint, "generalMessages"],
-      ["Личных диалогов", periodOnly(chat.personalDialogs), chatPeriodHint],
-      ["Групповых чатов", periodOnly(chat.groupChats), chatPeriodHint],
-      ["Диалогов у Ани", periodOnly(chat.managerDialogs && chat.managerDialogs.anna), chatPeriodHint, "anna"],
-      ["Диалогов у Вики", periodOnly(chat.managerDialogs && chat.managerDialogs.vika), chatPeriodHint, "vika"],
-      ["Все остальные диалоги", periodOnly(chat.managerDialogs && chat.managerDialogs.other), chatPeriodHint, "other"],
-    ];
-    function statCard(it) {
-      var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
-      var toneCls = tone ? " player-crm__stat--" + esc(tone) : "";
-      if (it[3] === "visits") {
-        return "<div class=\"player-crm__stat player-crm__stat--visits" + toneCls + "\"><span class=\"player-crm__stat-label\">Посещений</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid\">" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Посещений</small><strong>" + esc(intFmt(visitTotal)) + "</strong></span>" +
-            "<button type=\"button\" data-crm-visits-modal><small>Пользователей</small><strong>" + esc(intFmt(visitUnique)) + "</strong></button>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Из них новых</small><strong>" + esc(intFmt(visitNew)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Повторные</small><strong>" + esc(intFmt(visitRepeat)) + "</strong></span>" +
-            "<button type=\"button\" data-crm-visits-sections-modal><small>Разделы</small><strong>Открыть</strong></button>" +
-          "</span></div>";
-      }
-      if (it[3] === "registrations") {
-        return "<div class=\"player-crm__stat player-crm__stat--registration" + toneCls + "\"><span class=\"player-crm__stat-label\">Зарегано</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(intFmt(statRegistrations)) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid\">" +
-            "<button type=\"button\" data-crm-registrations-modal=\"telegram\"><small>Только Telegram</small><strong>" + esc(intFmt(registrationTelegramOnlyCount)) + "</strong></button>" +
-            "<button type=\"button\" data-crm-registrations-modal=\"email\"><small>Только email</small><strong>" + esc(intFmt(registrationEmailOnlyCount)) + "</strong></button>" +
-            "<button type=\"button\" data-crm-registrations-modal=\"both\"><small>И то и то</small><strong>" + esc(intFmt(registrationBothCount)) + "</strong></button>" +
-          "</span></div>";
-      }
-      if (it[3] === "pokerplus") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pokerPlusModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-pokerplus-modal><span class=\"player-crm__stat-label\">Poker21</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Новые привязали</small><strong>+" + esc(intFmt(statPokerPlus)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отвязали</small><strong>−" + esc(intFmt(statPokerPlusUnlinked)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Итого за период</small><strong>" + esc(intFmt(statPokerPlusNet)) + "</strong></span>" +
-          "</span></button>";
-      }
-      if (it[3] === "generalMessages") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.generalMessagesModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-general-messages-modal><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></button>";
-      }
-      if (it[3] === "bot") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.botModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-bot-modal><span class=\"player-crm__stat-label\">Новые подписки на бот</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Подписки</small><strong>+" + esc(intFmt(statBotSubscribers)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statBotUnsubscribers)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statBotNet)) + "</strong></span>" +
-          "</span></button>";
-      }
-      if (it[3] === "push") {
-        return "<button type=\"button\" class=\"player-crm__stat" + toneCls + (state.pushModalOpen ? " player-crm__stat--active" : "") + "\" data-crm-push-modal><span class=\"player-crm__stat-label\">Новые push-подписки</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--plus\"><small>Подписки</small><strong>+" + esc(intFmt(statPushSubscribers)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row player-crm__stat-mini-row--minus\"><small>Отписки</small><strong>−" + esc(intFmt(statPushUnsubscribers)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Итого</small><strong>" + esc(intFmt(statPushNet)) + "</strong></span>" +
-          "</span></button>";
-      }
-      if (it[3] === "deposits") {
-        return "<div class=\"player-crm__stat" + toneCls + "\"><span class=\"player-crm__stat-label\">Депозиты</span>" +
-          "<span class=\"player-crm__stat-hint\">" + esc(it[2] || periodLabel()) + "</span>" +
-          "<span class=\"player-crm__stat-mini-grid player-crm__stat-mini-grid--flow\">" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Сумма</small><strong>" + esc(money(statDeposits)) + "</strong></span>" +
-            "<span class=\"player-crm__stat-mini-row\"><small>Количество</small><strong>" + esc(intFmt(statDepositCount)) + "</strong></span>" +
-          "</span></div>";
-      }
-      var tag = it[3] ? "button" : "div";
-      var typeAttr = it[3] ? " type=\"button\"" : "";
-      var managerAttr = it[3] ? " data-crm-manager-dialogs=\"" + esc(it[3]) + "\"" : "";
-      var activeCls = it[3] && state.chatDialogManager === it[3] ? " player-crm__stat--active" : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__stat" + toneCls + activeCls + "\"" + managerAttr + "><span class=\"player-crm__stat-label\">" + esc(it[0]) + "</span>" +
-        (it[2] ? "<span class=\"player-crm__stat-hint\">" + esc(it[2]) + "</span>" : "") +
-        "<span class=\"player-crm__stat-value\">" + esc(it[1]) + "</span></" + tag + ">";
+    function periodMetricRow(it) {
+      var tag = it[2] ? "button" : "div";
+      var typeAttr = it[2] ? " type=\"button\"" : "";
+      var actionAttr = it[2] ? " " + it[2] : "";
+      var toneCls = it[3] ? " player-crm__period-metric--" + it[3] : "";
+      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + "\"" + actionAttr + ">" +
+        "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong></" + tag + ">";
     }
     function currentCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -206,13 +130,7 @@ function initPlayerCrmStatsRuntime(deps) {
     el.innerHTML =
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__stats-grid\">" + stats.map(statCard).join("") + "</div>" +
-      "<section class=\"player-crm__stats-section\" aria-label=\"Чатовые показатели\">" +
-        "<div class=\"player-crm__stats-section-head\"><h3>Чат</h3><span>" + esc(periodLabel()) + "</span></div>" +
-        (state.heavyLoading && !state.chatStats
-          ? "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем чатовую статистику…</div>"
-          : "<div class=\"player-crm__stats-grid player-crm__stats-grid--chat\">" + chatStats.map(statCard).join("") + "</div>") +
-      "</section>";
+      "<div class=\"player-crm__period-metrics\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>";
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
     return { active: players.length, botSubscribers: botSubscribers, pushSubscribers: pushSubscribers, deposits: deposits, messages: messages };

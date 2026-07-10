@@ -645,6 +645,11 @@ async function testAuthAndAdmin(redis) {
   const reportHandler = loadHandler("admin-report-shifts");
   const roman1ReportToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "roman1_matvienko" }, BOT_TOKEN);
   const roman178ReportToken = pwa.signPwaSession({ id: 388008256, memberId: "tg_388008256", username: "roman1787443" }, BOT_TOKEN);
+  let reportAccessRes = await call(reportHandler, req("GET", { pwaSession: roman1ReportToken, access: "1" }));
+  assert.strictEqual(reportAccessRes.statusCode, 200, "report admin access probe succeeds");
+  assert.strictEqual(reportAccessRes.body.allowed, true, "report admin access probe confirms access");
+  reportAccessRes = await call(reportHandler, req("GET", { pwaSession: nonBonusAdminToken, access: "1" }));
+  assert.strictEqual(reportAccessRes.statusCode, 403, "ordinary user report access probe is denied");
   let shiftReportRes = await call(reportHandler, req("POST", {}, {
     pwaSession: roman1ReportToken,
     date: "01.06.2026",

@@ -6,6 +6,8 @@
   var visitorsAdminCheckPromise = null;
   var visitorsAdminCheckLastAt = 0;
   var visitorsAdminCheckLastResult = false;
+  var reportAccessProbeState = "idle";
+  var reportAccessProbeKey = "";
 
   function esc(s) {
     if (s == null) return "";
@@ -180,6 +182,7 @@
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !homeAdminVersion) return;
     if (reportBtn) {
+      reportBtn.hidden = true;
       reportBtn.classList.add("header-admin-report--hidden");
       reportBtn.setAttribute("aria-hidden", "true");
       reportBtn.disabled = true;
@@ -201,6 +204,7 @@
         window.__pokerTelegramAuth = auth;
       } catch (eReportAuth) {}
       if (reportBtn) {
+        reportBtn.hidden = false;
         reportBtn.classList.remove("header-admin-report--hidden");
         reportBtn.removeAttribute("aria-hidden");
         reportBtn.disabled = false;
@@ -249,7 +253,6 @@
         bonusAdminBtn.hidden = false;
         bonusAdminBtn.removeAttribute("aria-hidden");
       }
-      showReportUi();
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
       if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();
@@ -257,6 +260,49 @@
         if (typeof updateVisitorCounter === "function") updateVisitorCounter();
       } catch (eVisAd) {}
     }
+    function verifyReportUiAccess() {
+      if (!reportBtn) return;
+      try {
+        if (window.location && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+          window.__pokerAdminReportAccessVerified = true;
+          showReportUi();
+          return;
+        }
+      } catch (eHost) {}
+      var reportBase = getApiBase();
+      if (!reportBase || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+        window.__pokerAdminReportAccessVerified = false;
+        return;
+      }
+      var reportQuery = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+      var reportUrl = reportBase + "/api/admin-report-shifts" + reportQuery + "&access=1";
+      if (reportAccessProbeState === "allowed" && reportAccessProbeKey === reportUrl) {
+        window.__pokerAdminReportAccessVerified = true;
+        showReportUi();
+        return;
+      }
+      if (reportAccessProbeState === "denied" && reportAccessProbeKey === reportUrl) return;
+      if (reportAccessProbeState === "pending" && reportAccessProbeKey === reportUrl) return;
+      reportAccessProbeState = "pending";
+      reportAccessProbeKey = reportUrl;
+      window.__pokerAdminReportAccessVerified = false;
+      fetch(reportUrl, { cache: "no-store" })
+        .then(function (response) {
+          if (!response.ok) return null;
+          return response.json();
+        })
+        .then(function (data) {
+          var allowed = !!(data && data.ok && data.allowed === true);
+          reportAccessProbeState = allowed ? "allowed" : "denied";
+          window.__pokerAdminReportAccessVerified = allowed;
+          if (allowed) showReportUi();
+        })
+        .catch(function () {
+          reportAccessProbeState = "denied";
+          window.__pokerAdminReportAccessVerified = false;
+        });
+    }
+    verifyReportUiAccess();
     function pokerIsKnownClientAdmin() {
       try {
         var authFlag = window.__pokerTelegramAuth;
@@ -303,7 +349,6 @@
       showAdminUi();
       return;
     } else {
-      if (pokerIsKnownClientReportUser()) showReportUi();
       if (pokerIsKnownClientBonusAdmin()) showBonusAdminUi();
     }
     var base = getApiBase();

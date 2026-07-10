@@ -1225,8 +1225,8 @@ if (chatUserModalEl) {
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
-    if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
-    if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/home-hall-of-fame-medal.png" };
+    if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/chat-profile-achievement-month-vice-champion.webp" };
+    if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/chat-profile-achievement-month-champion.webp" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
@@ -1397,7 +1397,6 @@ if (chatUserModalEl) {
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
-    var infoImage = options.infoImage || options.image || (meta.mod && (meta.mod.indexOf("cup") >= 0 || meta.mod === "offline-win") ? meta.img : "");
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
       ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
@@ -1405,10 +1404,6 @@ if (chatUserModalEl) {
       ' data-chat-achievement-progress="' + escapeHtml(chatUserModalEncodeData(info.progress)) + '"' +
       ' data-chat-achievement-levels="' + escapeHtml(chatUserModalEncodeData(info.levels)) + '"' +
       ' aria-label="' + escapeHtml("Открыть описание достижения " + title) + '"';
-    if (infoImage) {
-      attrs += ' data-chat-achievement-image="' + escapeHtml(chatUserModalEncodeData(infoImage)) + '"';
-      attrs += ' data-chat-achievement-image-alt="' + escapeHtml(chatUserModalEncodeData(title)) + '"';
-    }
     if (options.action) {
       attrs += ' data-chat-achievement-action="' + escapeHtml(options.action) + '"';
       attrs += ' data-chat-achievement-action-label="' + escapeHtml(chatUserModalEncodeData(options.actionLabel || options.ariaLabel || "Открыть раздел")) + '"';
@@ -1718,9 +1713,6 @@ if (chatUserModalEl) {
         '<p class="chat-achievement-info-modal__eyebrow">Достижение</p>' +
         '<h3 class="chat-achievement-info-modal__title" id="chatAchievementInfoTitle"></h3>' +
         '<span class="chat-achievement-info-modal__state" id="chatAchievementInfoState"></span>' +
-        '<figure class="chat-achievement-info-modal__figure" id="chatAchievementInfoFigure" hidden>' +
-          '<img class="chat-achievement-info-modal__image" id="chatAchievementInfoImage" alt="" loading="eager" decoding="async" />' +
-        '</figure>' +
         '<div class="chat-achievement-info-modal__body">' +
           '<section class="chat-achievement-info-modal__section">' +
             '<h4>Как получить</h4>' +
@@ -1773,13 +1765,9 @@ if (chatUserModalEl) {
     var levels = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-levels"));
     var action = card.getAttribute("data-chat-achievement-action") || "";
     var actionLabel = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-action-label")) || "Открыть раздел";
-    var imageSrc = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-image"));
-    var imageAlt = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-image-alt")) || title || "Кубок";
     var titleEl = document.getElementById("chatAchievementInfoTitle");
     var stateEl = document.getElementById("chatAchievementInfoState");
     var ruleEl = document.getElementById("chatAchievementInfoRule");
-    var figureEl = document.getElementById("chatAchievementInfoFigure");
-    var imageEl = document.getElementById("chatAchievementInfoImage");
     var progressSection = document.getElementById("chatAchievementInfoProgressSection");
     var levelsSection = document.getElementById("chatAchievementInfoLevelsSection");
     var actionBtn = document.getElementById("chatAchievementInfoAction");
@@ -1789,17 +1777,6 @@ if (chatUserModalEl) {
       stateEl.classList.toggle("chat-achievement-info-modal__state--locked", state !== "Открыто");
     }
     if (ruleEl) ruleEl.textContent = rule || "Описание достижения пока не заполнено.";
-    if (figureEl && imageEl) {
-      figureEl.hidden = !imageSrc;
-      figureEl.classList.toggle("chat-achievement-info-modal__figure--sng-card", imageSrc.indexOf("chat-profile-achievement-sng-champion-card") >= 0);
-      if (imageSrc) {
-        imageEl.src = imageSrc;
-        imageEl.alt = imageAlt;
-      } else {
-        imageEl.removeAttribute("src");
-        imageEl.alt = "";
-      }
-    }
     renderChatUserAchievementInfoList("chatAchievementInfoProgress", progress);
     renderChatUserAchievementInfoList("chatAchievementInfoLevels", levels);
     if (progressSection) progressSection.hidden = !chatUserAchievementInfoLines(progress).length;

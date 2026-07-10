@@ -312,16 +312,16 @@
         var preload = document.createElement("link");
         preload.rel = "preload";
         preload.as = "image";
-        preload.href = "./assets/" + file + "?v=2026070602";
+        preload.href = "./assets/" + file + "?v=2026071001";
         preload.fetchPriority = "high";
         document.head.appendChild(preload);
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=3.981" />
+    <link rel="stylesheet" href="./styles.css?v=3.982" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.666" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="chat profile" href="./styles-rating-chat-modals.css?v=3.660" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="chat profile" href="./styles-rating-chat-modals.css?v=3.661" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="learning" href="./styles-learning-games.css?v=3.666" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="learning admin admin-bonuses" href="./styles-daily-poker.css?v=3.672" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=3.753" />
@@ -333,7 +333,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=3.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=3.016" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="admin admin-reports auth-debug share-stats tracking admin-bonuses" href="./styles-admin.css?v=3.666" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="player-crm" href="./styles-player-crm.css?v=3.666" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="player-crm" href="./styles-player-crm.css?v=3.667" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
       .app.app--view-home {
@@ -605,7 +605,7 @@
                     <span class="header-more-menu__title">Меню клуба</span>
                     <span class="header-more-menu__hint">Быстрые настройки</span>
                   </div>
-                  <button type="button" class="header-menu-action header-menu-action--admin-report welcome-admin-report-btn header-admin-report header-admin-report--hidden" id="adminReportBtn" title="Отчёт за смену" aria-label="Отчёт за смену" aria-hidden="true" role="menuitem" data-header-menu-close disabled>
+                  <button type="button" class="header-menu-action header-menu-action--admin-report welcome-admin-report-btn header-admin-report header-admin-report--hidden" id="adminReportBtn" title="Отчёт за смену" aria-label="Отчёт за смену" aria-hidden="true" role="menuitem" data-header-menu-close disabled hidden>
                     <span class="header-menu-action__icon welcome-admin-report-btn__icon" aria-hidden="true">📋</span>
                     <span class="header-menu-action__body">
                       <span class="header-menu-action__title">Отчёт за смену</span>
@@ -1710,12 +1710,13 @@
     <script defer src="./app-click-sound.js?v=3.009"></script>
     <script defer src="./app-home-init.js?v=3.729"></script>
     <script defer src="./app-home-media.js?v=3.666"></script>
+    <script defer src="./app-admin-menu-password.js?v=3.001"></script>
     <script defer src="./app-lazy-loader.js?v=3.672"></script>
     <script defer src="./app-home-planner-access.js?v=3.666"></script>
     <script defer src="./app-home-planner-runtime.js?v=3.666"></script>
     <script defer src="./app-home-planner.js?v=3.666"></script>
     <script defer src="./app-home-tasks.js?v=3.667"></script>
-    <script defer src="./app-tournament-day.js?v=3.673"></script>
+    <script defer src="./app-tournament-day.js?v=3.674"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=3.003"></script>
     <script defer src="./app-home-deeplinks.js?v=3.673"></script>
     <script defer src="./app-home-club-info-modals.js?v=3.667"></script>
@@ -1739,7 +1740,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=3.666"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=3.734"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=3.735"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=3.666"></script>
@@ -1856,11 +1857,11 @@
     <script defer src="./app-shell-bootstrap.js?v=3.668"></script>
     <script defer src="./app.js?v=3.666"></script>
     <script defer src="./app-section-views.js?v=3.666"></script>
-    <script defer src="./app-visitors-admin.js?v=3.668"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.668"></script>
+    <script defer src="./app-visitors-admin.js?v=3.669"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.669"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=3.666"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.666"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.669"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-charts.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-reports.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-registrations.js?v=3.668"></script>

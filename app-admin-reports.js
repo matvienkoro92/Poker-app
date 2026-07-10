@@ -378,21 +378,12 @@ function initAdminReportModal() {
 
   function canOpenAdminReportModal() {
     if (isLocalAdminReportDevHost()) return true;
-    try {
-      var auth = window.__pokerTelegramAuth;
-      if (auth && (auth.adminAccess === true || auth.adminReportAccess === true)) return true;
-      var rec = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
-      if (rec && (rec.adminAccess === true || rec.adminReportAccess === true)) return true;
-    } catch (eAuth) {}
-    var users = collectAdminReportIdentityCandidates();
-    for (var i = 0; i < users.length; i++) {
-      if (isKnownAdminUserForReportButton(users[i])) return true;
-    }
-    return false;
+    return window.__pokerAdminReportAccessVerified === true;
   }
 
   function syncAdminReportButtonVisibility() {
     var allowed = canOpenAdminReportModal();
+    btn.hidden = !allowed;
     btn.classList.toggle("header-admin-report--hidden", !allowed);
     btn.toggleAttribute("aria-hidden", !allowed);
     btn.disabled = !allowed;
