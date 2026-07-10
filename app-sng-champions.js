@@ -604,7 +604,8 @@
   function seriesTargetFromLabel(label, losers) {
     var normalized = String(label || "").toLowerCase();
     if (losers) {
-      return normalized === "l финал" || normalized === "финал сетки №2" || normalized.indexOf("гранд-финал") >= 0 ? 2 : 0;
+      if (normalized.indexOf("гранд-финал") >= 0) return 3;
+      return normalized === "l финал" || normalized === "финал сетки №2" ? 2 : 0;
     }
     if (normalized === "полуфинал" || normalized.indexOf("1/2") >= 0) return 2;
     if (normalized.indexOf("финал") >= 0) return 3;
@@ -662,16 +663,16 @@
     var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
     if (!target || ids.length < 2) return "";
     var score = matchSeriesScore(match);
-    if (!data.isAdmin || match.winnerId) {
+    if (!data.isAdmin) {
       return '<div class="sng-champions-modal__series-score"><span>Счёт матча</span><strong>' + escapeHtml(score.text) + '</strong></div>';
     }
     var firstPlayer = data.playersById && data.playersById[ids[0]] ? data.playersById[ids[0]] : { id: ids[0] };
     var secondPlayer = data.playersById && data.playersById[ids[1]] ? data.playersById[ids[1]] : { id: ids[1] };
     return '<div class="sng-champions-modal__series-score sng-champions-modal__series-score--editable" data-sng-score-editor="' + escapeHtml(match.id || "") + '">' +
       '<span>Счёт матча</span>' +
-      '<label title="' + escapeHtml(playerName(firstPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.first) + '" data-sng-score-first aria-label="Победы ' + escapeHtml(playerName(firstPlayer)) + '"></label>' +
+      '<label title="' + escapeHtml(playerName(firstPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(match.winnerId ? target : target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.first) + '" data-sng-score-first aria-label="Победы ' + escapeHtml(playerName(firstPlayer)) + '"></label>' +
       '<b>:</b>' +
-      '<label title="' + escapeHtml(playerName(secondPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.second) + '" data-sng-score-second aria-label="Победы ' + escapeHtml(playerName(secondPlayer)) + '"></label>' +
+      '<label title="' + escapeHtml(playerName(secondPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(match.winnerId ? target : target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.second) + '" data-sng-score-second aria-label="Победы ' + escapeHtml(playerName(secondPlayer)) + '"></label>' +
       '<button type="button" data-sng-save-score="' + escapeHtml(match.id || "") + '" aria-label="Сохранить промежуточный счёт">✓</button>' +
     '</div>';
   }
@@ -1563,7 +1564,7 @@
         action: "setMatchScore",
         matchId: scoreSave.getAttribute("data-sng-save-score") || "",
         score: { first: firstScore, second: secondScore },
-      }, { status: "Сохраняю счёт...", success: "Промежуточный счёт сохранён" })
+      }, { status: "Сохраняю счёт...", success: "Счёт матча сохранён" })
         .finally(function () { setButtonLoading(scoreSave, false); });
       return;
     }
