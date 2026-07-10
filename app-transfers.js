@@ -375,7 +375,7 @@
 
     var meta = textNode("div", "transfers-card__meta");
     [
-      renderParticipant("Автор", item, "owner"),
+      renderParticipant("Продавец", item, "owner"),
       renderParticipant("Покупатель", item, "buyer"),
     ].forEach(function (node) {
       if (node) meta.appendChild(node);
@@ -409,7 +409,8 @@
       viewer.hidden = false;
       viewer.textContent = "Ваш ID: " + state.viewer.accountId + (state.viewer.level ? " · уровень " + state.viewer.level : "");
     }
-    if (form) form.hidden = !allowed;
+    var showCreate = allowed && state.filter === "create";
+    if (form) form.hidden = !showCreate;
     if (tabs) tabs.hidden = !allowed;
     if (locked) {
       locked.hidden = allowed;
@@ -419,8 +420,12 @@
     renderTabs();
     if (!list) return;
     list.textContent = "";
-    list.hidden = !allowed;
+    list.hidden = !allowed || showCreate;
     if (!allowed) {
+      if (empty) empty.hidden = true;
+      return;
+    }
+    if (showCreate) {
       if (empty) empty.hidden = true;
       return;
     }

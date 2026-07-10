@@ -3389,7 +3389,7 @@ body.profile-avatar-choice-open {
 @media (max-width: 620px) {
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
     grid-column: 1 !important;
-    grid-row: 1 / span 5 !important;
+    grid-row: 1 / span 4 !important;
     align-self: start !important;
   }
 
@@ -3407,13 +3407,8 @@ body.profile-avatar-choice-open {
     grid-row: 3 !important;
   }
 
-  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
-    grid-column: 2 !important;
-    grid-row: 4 !important;
-  }
-
   .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
     grid-column: 2 !important;
-    grid-row: 5 !important;
+    grid-row: 4 !important;
   }
 }
