@@ -243,6 +243,38 @@
   color: #ffe7a4;
 }
 
+.transfers-create .transfers-create__mode-btn--heading {
+  min-height: 0 !important;
+  padding: 2px 0 8px !important;
+  color: #ffe6a8 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+
+.transfers-create {
+  overflow: visible;
+}
+
+.transfers-field--comment:has(.transfers-field__emoji-picker:not([hidden])) {
+  z-index: 30;
+}
+
+.transfers-field--comment:has(.transfers-field__emoji-picker:not([hidden])) .transfers-field__emoji-picker {
+  z-index: 40;
+}
+
+.transfers-create:has(.transfers-create__mode-btn--heading) .transfers-create__mode {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 .transfers-create__grid {
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
@@ -267,6 +299,13 @@
   letter-spacing: 0;
   line-height: 1;
   text-transform: uppercase;
+}
+
+.transfers-create .transfers-field__label,
+.transfers-create .transfers-requisites__bank > span,
+.transfers-create .transfers-requisites__recipient > span,
+.transfers-create .transfers-requisites__numbers label > span {
+  display: none;
 }
 
 .transfers-field__hint {
@@ -354,6 +393,7 @@
 }
 
 .transfers-requisites__bank,
+.transfers-requisites__recipient,
 .transfers-requisites__numbers label {
   display: grid;
   gap: 7px;
@@ -435,13 +475,25 @@
   }
 
   .transfers-requisites__numbers {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 7px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 6px;
   }
 
   .transfers-requisites__or {
-    padding: 0;
+    padding: 0 0 20px;
     text-align: center;
+  }
+
+  .transfers-requisites__numbers label {
+    gap: 5px;
+    font-size: 10px;
+  }
+
+  .transfers-requisites__numbers .transfers-field__input {
+    height: 46px;
+    padding: 0 9px;
+    border-radius: 13px;
+    font-size: 13px;
   }
 
   .transfers-card__details-bank {
@@ -936,6 +988,19 @@
   cursor: default;
 }
 
+.transfers-card__action--delete {
+  color: #ffd0ca;
+  border-color: rgba(239, 68, 68, 0.62);
+  background: rgba(75, 12, 12, 0.72);
+}
+
+.transfers-card__action--delete:hover,
+.transfers-card__action--delete:focus-visible {
+  color: #fff;
+  border-color: rgba(255, 117, 117, 0.92);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.28);
+}
+
 .transfers-empty {
   margin: 0;
   padding: 22px;
@@ -1159,6 +1224,10 @@
 }
 
 @media (max-width: 560px) {
+  .transfers-page__header {
+    top: max(18px, calc(env(safe-area-inset-top) + 14px));
+  }
+
   .transfers-tabs {
     margin-top: 52px;
   }

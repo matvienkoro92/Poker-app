@@ -78,6 +78,28 @@
     }
   }
 
+  function normalizeRussianPhone(value) {
+    var digits = String(value || "").replace(/\D/g, "");
+    if (digits.length === 10 && digits.charAt(0) === "9") digits = "7" + digits;
+    if (digits.length === 11 && digits.charAt(0) === "8") digits = "7" + digits.slice(1);
+    return /^79\d{9}$/.test(digits) ? digits : "";
+  }
+
+  function formatRussianPhoneInput(value) {
+    var digits = String(value || "").replace(/\D/g, "");
+    if (digits === "7" || digits === "8") return "+7";
+    if (digits.charAt(0) === "8" || digits.charAt(0) === "7") digits = digits.slice(1);
+    digits = digits.slice(0, 10);
+    if (!digits) return "";
+    var out = "+7";
+    if (digits.length) out += " (" + digits.slice(0, 3);
+    if (digits.length >= 3) out += ")";
+    if (digits.length > 3) out += " " + digits.slice(3, 6);
+    if (digits.length > 6) out += "-" + digits.slice(6, 8);
+    if (digits.length > 8) out += "-" + digits.slice(8, 10);
+    return out;
+  }
+
   function formatLeft(until) {
     var left = Math.max(0, Number(until || 0) - Date.now());
     var total = Math.ceil(left / 1000);
@@ -103,6 +125,7 @@
   function renderMode() {
     var details = byId("transfersDetailsField");
     var bankInput = byId("transfersBankInput");
+    var recipientInput = byId("transfersRecipientInput");
     var submit = byId("transfersCreateSubmit");
     var label = byId("transfersDetailsLabel");
     Array.prototype.slice.call(document.querySelectorAll("[data-transfers-kind]")).forEach(function (btn) {
@@ -112,6 +135,7 @@
     });
     if (details) details.hidden = state.kind === "deposit";
     if (bankInput) bankInput.required = state.kind === "cashout";
+    if (recipientInput) recipientInput.required = state.kind === "cashout";
     if (submit) submit.textContent = state.kind === "deposit" ? "Хочу сделать депозит" : "Разместить кешаут";
     if (label) label.textContent = state.kind === "deposit" ? "Реквизиты" : "Реквизиты";
   }
@@ -149,6 +173,19 @@
     return profile.avatarUrl || profile.avatar || "";
   }
 
+  function participantAvatarFallback(item, role, currentUrl) {
+    var targetId = String(transferDisplayId(item, role) || "").trim();
+    if (!targetId) return "";
+    var roles = ["owner", "seller", "buyer"];
+    for (var i = 0; i < roles.length; i += 1) {
+      var candidateRole = roles[i];
+      if (candidateRole === role || String(transferDisplayId(item, candidateRole) || "").trim() !== targetId) continue;
+      var candidate = participantAvatar(item, candidateRole);
+      if (candidate && candidate !== currentUrl) return candidate;
+    }
+    return "";
+  }
+
   function participantLevel(item, role) {
     item = item || {};
     var profile = item[role + "Profile"] || {};
@@ -182,6 +219,16 @@
       img.alt = "";
       img.loading = "lazy";
       img.decoding = "async";
+      img.addEventListener("error", function () {
+        var fallbackUrl = participantAvatarFallback(item, role, img.src || avatarUrl);
+        if (fallbackUrl && img.dataset.fallbackTried !== "1") {
+          img.dataset.fallbackTried = "1";
+          img.src = fallbackUrl;
+          return;
+        }
+        var initial = textNode("b", "", participantInitial(name, id));
+        if (img.parentNode) img.parentNode.replaceChild(initial, img);
+      });
       avatar.appendChild(img);
     } else {
       avatar.appendChild(textNode("b", "", participantInitial(name, id)));
@@ -372,6 +419,11 @@
     if (item.status === "seller_transferred" && item.isBuyer) {
       actions.appendChild(actionButton("received", "Получил", item));
     }
+    if (state.viewer && state.viewer.isAdmin) {
+      var deleteBtn = actionButton("delete", "Удалить", item);
+      deleteBtn.classList.add("transfers-card__action--delete");
+      actions.appendChild(deleteBtn);
+    }
     if (actions.children.length) card.appendChild(actions);
   }
 
@@ -536,6 +588,11 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Не удалось выполнить действие");
         if (data.item) upsertItem(data.item);
+        if (payload.action === "delete" && data.deleted) {
+          state.items = state.items.filter(function (row) { return row.id !== payload.id; });
+          state.loadedAt = Date.now();
+          render();
+        }
         if (payload.action === "received") {
           try {
             if (typeof pokerClearCurrentProfileUserInfoCache === "function") pokerClearCurrentProfileUserInfoCache();
@@ -561,6 +618,7 @@
     var amountEl = byId("transfersAmountInput");
     var commentEl = byId("transfersCommentInput");
     var bankEl = byId("transfersBankInput");
+    var recipientEl = byId("transfersRecipientInput");
     var phoneEl = byId("transfersPhoneInput");
     var cardEl = byId("transfersCardInput");
     var amount = amountEl ? Number(amountEl.value) || 0 : 0;
@@ -569,18 +627,32 @@
       return;
     }
     var bank = bankEl ? bankEl.value.trim() : "";
+    var recipient = recipientEl ? recipientEl.value.trim() : "";
     var phone = phoneEl ? phoneEl.value.trim() : "";
     var cardNumber = cardEl ? cardEl.value.trim() : "";
     if (state.kind === "cashout" && !bank) {
       setFeedback("Укажите банк", "error");
       return;
     }
+    if (state.kind === "cashout" && !recipient) {
+      setFeedback("Укажите получателя (ФИО)", "error");
+      if (recipientEl) recipientEl.focus();
+      return;
+    }
     if (state.kind === "cashout" && !phone && !cardNumber) {
       setFeedback("Укажите номер телефона или номер карты", "error");
       return;
     }
+    var normalizedPhone = phone ? normalizeRussianPhone(phone) : "";
+    if (phone && !normalizedPhone) {
+      setFeedback("Введите телефон в формате +7 (999) 999-99-99", "error");
+      if (phoneEl) phoneEl.focus();
+      return;
+    }
+    if (normalizedPhone) phone = formatRussianPhoneInput(normalizedPhone.slice(1));
     var details = [
       bank ? "Банк: " + bank : "",
+      recipient ? "Получатель: " + recipient : "",
       phone ? "Номер: " + phone : "",
       cardNumber ? "Номер карты: " + cardNumber : "",
     ].filter(Boolean).join("\n");
@@ -591,10 +663,13 @@
       amount: amount,
       comment: commentEl ? commentEl.value : "",
       requisites: state.kind === "cashout" ? details : "",
+      phoneNumber: normalizedPhone,
+      recipientName: recipient,
     }, submit).then(function (data) {
       if (!data || !data.ok) return;
       if (commentEl) commentEl.value = "";
       if (bankEl) bankEl.value = "";
+      if (recipientEl) recipientEl.value = "";
       if (phoneEl) phoneEl.value = "";
       if (cardEl) cardEl.value = "";
       if (amountEl) amountEl.value = "";
@@ -608,6 +683,7 @@
     var id = btn.getAttribute("data-transfer-id");
     if (!action || !id) return;
     var payload = { action: action, id: id };
+    if (action === "delete" && typeof window.confirm === "function" && !window.confirm("Удалить эту заявку без возможности восстановления?")) return;
     if (action === "take") {
       var details = document.querySelector('[data-transfers-take-details="' + id.replace(/"/g, '\\"') + '"]');
       if (details) {
@@ -679,6 +755,14 @@
     });
     var form = byId("transfersCreateForm");
     if (form) form.addEventListener("submit", handleCreate);
+    var phoneInput = byId("transfersPhoneInput");
+    if (phoneInput) {
+      phoneInput.addEventListener("input", function () {
+        var formatted = formatRussianPhoneInput(phoneInput.value);
+        if (phoneInput.value !== formatted) phoneInput.value = formatted;
+        phoneInput.setCustomValidity(phoneInput.value && !normalizeRussianPhone(phoneInput.value) ? "Введите полный номер телефона" : "");
+      });
+    }
   }
 
   function activeView() {
@@ -688,7 +772,7 @@
   function isTransfersKeyboardField(node) {
     if (!node || !node.matches) return false;
     return !!node.matches(
-      "#transfersAmountInput, #transfersCommentInput, #transfersBankInput, #transfersPhoneInput, #transfersCardInput, [data-transfers-take-details]"
+      "#transfersAmountInput, #transfersCommentInput, #transfersBankInput, #transfersRecipientInput, #transfersPhoneInput, #transfersCardInput, [data-transfers-take-details]"
     );
   }
 
