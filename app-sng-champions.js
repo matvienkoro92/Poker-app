@@ -1088,9 +1088,9 @@
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
     var tablePassword = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
-    var tablePasswordHtml = tablePassword
-      ? '<div class="sng-champions-modal__match-meta"><span>Пароль стола</span><strong>' + escapeHtml(tablePassword) + '</strong></div>'
-      : "";
+    var tablePasswordHtml = '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
+      '<span>Пароль стола</span><strong>' + (tablePassword ? escapeHtml(tablePassword) : '&nbsp;') + '</strong>' +
+    '</div>';
     var playerRows = players.length ? players.map(function (id) {
       return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
     }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
