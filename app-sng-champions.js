@@ -601,8 +601,11 @@
     return String(winner) + "-" + String(loser);
   }
 
-  function seriesTargetFromLabel(label) {
+  function seriesTargetFromLabel(label, losers) {
     var normalized = String(label || "").toLowerCase();
+    if (losers) {
+      return normalized === "финал сетки №2" || normalized.indexOf("гранд-финал") >= 0 ? 2 : 0;
+    }
     if (normalized === "полуфинал" || normalized.indexOf("1/2") >= 0) return 2;
     if (normalized.indexOf("финал") >= 0) return 3;
     return 0;
@@ -621,7 +624,7 @@
         var label = groups[groupIndex].losers
           ? loserRoundStageLabel(rounds[roundIndex], roundIndex)
           : roundStageLabel(rounds[roundIndex], roundIndex, rounds);
-        return seriesTargetFromLabel(label);
+        return seriesTargetFromLabel(label, groups[groupIndex].losers);
       }
     }
     return 0;
@@ -646,6 +649,12 @@
 
   function seriesRuleText(target) {
     return target ? "Игра до " + String(target) + " побед" : "";
+  }
+
+  function renderBracketSeriesRule(match, data, map) {
+    var target = matchSeriesTarget(match, data);
+    if (!target) return "";
+    return '<span class="sng-champions-modal__' + (map ? 'map-' : '') + 'series-rule">' + escapeHtml(seriesRuleText(target)) + '</span>';
   }
 
   function renderBracketMatchSeriesScore(match, data) {
@@ -1089,6 +1098,7 @@
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") +
       (matchSeriesTarget(match, data) ? " sng-champions-modal__bracket-match--series" : "");
     return '<article class="' + matchClass + '">' +
+      renderBracketSeriesRule(match, data, false) +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       renderBracketHeadToHead(match, data) +
       playerRows +
@@ -1168,6 +1178,7 @@
     var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
     return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + seriesClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
+      renderBracketSeriesRule(match, data, true) +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
@@ -1223,12 +1234,11 @@
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
           var roundLabel = labelFn(round, index, rounds);
-          var roundSeriesTarget = seriesTargetFromLabel(roundLabel);
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
-            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span>' + (roundSeriesTarget ? '<small>' + escapeHtml(seriesRuleText(roundSeriesTarget)) + '</small>' : '') + '</button>' +
+            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span></button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
@@ -1330,7 +1340,7 @@
     var classFn = isLosers ? loserRoundStageClass : roundStageClass;
     var stageLabel = labelFn(round, stageIndex, rounds);
     var stageClass = classFn(round, stageIndex, rounds);
-    var stageSeriesTarget = seriesTargetFromLabel(stageLabel);
+    var stageSeriesTarget = seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi" || stageSeriesTarget > 0;
     var prevDisabled = stageIndex <= 0;
@@ -1369,7 +1379,7 @@
       '</div>' +
       stageDotsHtml +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
-        (showRoundLabel ? '<div class="sng-champions-modal__round-label' + (stageSeriesTarget ? ' sng-champions-modal__round-label--series' : '') + '"><span>' + escapeHtml(stageLabel) + '</span>' + (stageSeriesTarget ? '<small>' + escapeHtml(seriesRuleText(stageSeriesTarget)) + '</small>' : '') + '</div>' : '') +
+        (showRoundLabel ? '<div class="sng-champions-modal__round-label"><span>' + escapeHtml(stageLabel) + '</span></div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
           ((round.matches || []).map(function (match) { return renderBracketMatch(match, previewData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +

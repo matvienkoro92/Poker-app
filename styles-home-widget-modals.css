@@ -2055,12 +2055,37 @@
 }
 
 .sng-champions-modal__bracket-match {
+  position: relative;
   display: grid;
   gap: 7px;
   padding: 9px;
   border: 1px solid rgba(255, 184, 70, 0.22);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.035);
+}
+
+.sng-champions-modal__bracket-match--series {
+  margin-top: 18px;
+}
+
+.sng-champions-modal__series-rule {
+  position: absolute;
+  z-index: 4;
+  top: -17px;
+  left: 50%;
+  min-width: 126px;
+  padding: 4px 10px;
+  color: #ffe5a3;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  border: 1px solid rgba(255, 184, 70, 0.54);
+  border-radius: 999px;
+  background: rgba(5, 8, 14, 0.98);
+  box-shadow: 0 0 10px rgba(255, 184, 70, 0.14);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .sng-champions-modal__bracket-match--playing {
@@ -3381,6 +3406,29 @@
   pointer-events: none;
 }
 
+.sng-champions-modal__map-series-rule {
+  position: absolute;
+  z-index: 5;
+  top: -17px;
+  left: 50%;
+  min-width: 72px;
+  padding: 3px 6px;
+  overflow: hidden;
+  color: #ffe5a3;
+  font-size: 7px;
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 184, 70, 0.52);
+  border-radius: 999px;
+  background: rgba(5, 8, 14, 0.98);
+  box-shadow: 0 0 8px rgba(255, 184, 70, 0.14);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed,
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
   min-height: 82px;
@@ -3655,6 +3703,13 @@
   bottom: 5px;
   left: 20px;
   font-size: 8px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-series-rule {
+  top: -19px;
+  min-width: 96px;
+  padding: 4px 8px;
+  font-size: 9px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-h2h {
