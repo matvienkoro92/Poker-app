@@ -1231,13 +1231,13 @@ if (chatUserModalEl) {
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
-    if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/referrals-ticket-banner.webp" };
+    if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win-plus", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
-    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win-2026.webp" };
+    if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win-2026", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win-2026.webp" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("легенд") >= 0) return { mod: "legend", label: "ЛЕГЕНДА<br>КЛУБА", img: "./assets/chat-profile-achievement-legend.webp" };
     if (key.indexOf("весн") >= 0) return { mod: "cup-spring", label: "КУБОК<br>ВЕСНЫ", img: "./assets/chat-profile-achievement-cup-spring.webp" };
@@ -1683,21 +1683,6 @@ if (chatUserModalEl) {
           lockedLabel: metrics.referrals == null ? "Только в своем профиле" : "Нет приглашенных",
         },
       }) +
-      chatUserModalAchievementCardHtml("♣", "Сыграл приватный клубный кеш 20/40", [], {
-        tier: {
-          value: metrics.privateCash2040Played || 0,
-          tiers: [
-            { value: 1, label: "1 сессия" },
-            { value: 5, label: "5 сессий" },
-            { value: 15, label: "15 сессий" },
-            { value: 30, label: "30 сессий" },
-            { value: 50, label: "50 сессий" },
-            { value: 100, label: "100 сессий" },
-          ],
-          unit: "сессий",
-          lockedLabel: "Нет сессий",
-        },
-      }) +
       chatUserModalAchievementCardHtml("🎟", "Счастливчик месяца", luckyMonth, {
         placeholder: "Топ-3 по количеству побед в розыгрышах за месяц",
       }) +
@@ -1806,6 +1791,7 @@ if (chatUserModalEl) {
     if (ruleEl) ruleEl.textContent = rule || "Описание достижения пока не заполнено.";
     if (figureEl && imageEl) {
       figureEl.hidden = !imageSrc;
+      figureEl.classList.toggle("chat-achievement-info-modal__figure--sng-card", imageSrc.indexOf("chat-profile-achievement-sng-champion-card") >= 0);
       if (imageSrc) {
         imageEl.src = imageSrc;
         imageEl.alt = imageAlt;

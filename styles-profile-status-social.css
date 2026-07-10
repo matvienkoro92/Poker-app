@@ -1420,6 +1420,39 @@
   background-size: 220% 100%;
   animation: profileFriendsPulse 1.2s ease-in-out infinite;
 }
+.profile-friends__skeleton-card {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+}
+.profile-friends__name-skeleton {
+  width: min(70px, 80%);
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.06), rgba(255, 203, 99, 0.16), rgba(255, 255, 255, 0.06));
+  background-size: 220% 100%;
+  animation: profileFriendsPulse 1.2s ease-in-out infinite;
+}
+.profile-friends__loading-label {
+  align-self: center;
+  color: rgba(255, 237, 213, 0.6);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+.profile-friends__count-skeleton {
+  display: inline-block;
+  width: 1.35em;
+  height: 0.62em;
+  margin-left: 0.12em;
+  border-radius: 999px;
+  vertical-align: 0.08em;
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.08), rgba(255, 203, 99, 0.24), rgba(255, 255, 255, 0.08));
+  background-size: 220% 100%;
+  animation: profileFriendsPulse 1.2s ease-in-out infinite;
+}
 .profile-friends__loading {
   grid-column: span 3;
   display: grid;

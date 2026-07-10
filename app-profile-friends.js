@@ -28,7 +28,16 @@ function pokerUpdateProfileFriendsCount(count) {
   var safeCount = Math.max(0, Math.floor(Number(count) || 0));
   try {
     var profileCount = document.getElementById("profileFriendsCount");
-    if (profileCount) profileCount.textContent = "(" + safeCount + ")";
+    if (profileCount) {
+      profileCount.classList.remove("profile-friends__count-skeleton");
+      profileCount.removeAttribute("aria-label");
+      profileCount.textContent = "(" + safeCount + ")";
+    }
+    var profilePanel = document.getElementById("profileFriendsPanel");
+    if (profilePanel) {
+      profilePanel.classList.remove("profile-friends--loading");
+      profilePanel.setAttribute("aria-busy", "false");
+    }
   } catch (eProfileFriendsCount) {}
   try {
     if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(safeCount);
@@ -1106,6 +1115,7 @@ function initProfileFriends() {
 
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
+    if (panelEl) panelEl.classList.remove("profile-friends--loading");
     var rows = (Array.isArray(friends) ? friends.slice() : [])
       .map(function (row, index) {
         return { row: row, index: index, priority: profileFriendsBirthdayPriority(row) };
@@ -1176,13 +1186,15 @@ function initProfileFriends() {
 
   function renderPreviewLoading() {
     if (!previewEl) return;
+    if (panelEl) {
+      panelEl.classList.add("profile-friends--loading");
+      panelEl.setAttribute("aria-busy", "true");
+    }
     previewEl.innerHTML =
-      '<span class="profile-friends__loading" role="status" aria-live="polite">' +
-        '<span class="profile-friends__avatar-skeleton" aria-hidden="true"></span>' +
-        '<span>Идет загрузка друзей...</span>' +
-      '</span>' +
-      inviteSlotHtml();
-    wirePreviewButtons();
+      '<span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>' +
+      '<span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>' +
+      '<span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>' +
+      '<span class="profile-friends__loading-label" role="status">Загружаем друзей…</span>';
   }
 
   function renderRow(row, section, actionsHtml, noteHtml) {
@@ -1505,25 +1517,13 @@ function initProfileFriends() {
     } else {
       renderPreviewLoading();
     }
-    var primaryPreviewSettled = false;
-    if (!previewHadCachedData) {
-      fetchDefaultFriendsData()
-        .then(function (fallback) {
-          if (primaryPreviewSettled || previewLoadVersion !== friendsPreviewLoadVersion) return;
-          renderIncomingNotice(0);
-          renderFriendsPreview(Array.isArray(fallback.friends) ? fallback.friends : []);
-          pokerUpdateProfileFriendsCount(Array.isArray(fallback.friends) ? fallback.friends.length : 0);
-        })
-        .catch(function () {});
-    }
     fetchFriendsData()
       .then(function (data) {
-        primaryPreviewSettled = true;
         if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!data || !data.ok) {
           if (!previewHadCachedData) {
-            renderIncomingNotice(0);
-            renderFriendsPreview([]);
+            renderPreviewLoading();
+            scheduleFriendsPreviewRetry();
           }
           return;
         }
@@ -1536,7 +1536,6 @@ function initProfileFriends() {
         } catch (ePreviewCount) {}
       })
       .catch(function () {
-        primaryPreviewSettled = true;
         if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!previewHadCachedData) {
           renderPreviewLoading();

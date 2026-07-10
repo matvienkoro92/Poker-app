@@ -118,7 +118,7 @@
               </div>
             </section>
             <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
-            <section class="profile-friends" id="profileFriendsPanel" data-profile-club-panel aria-label="Друзья">
+            <section class="profile-friends profile-friends--loading" id="profileFriendsPanel" data-profile-club-panel aria-label="Друзья" aria-busy="true">
               <div class="profile-friends__head">
                 <span class="profile-friends__icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -129,7 +129,7 @@
                   </svg>
                 </span>
                 <span class="profile-friends__copy">
-                  <span class="profile-friends__title">Друзья <span id="profileFriendsCount">(0)</span></span>
+                  <span class="profile-friends__title">Друзья <span class="profile-friends__count-skeleton" id="profileFriendsCount" aria-label="Количество друзей загружается"></span></span>
                   <span class="profile-friends__subtitle">Ваш покерный круг</span>
                 </span>
                 <button type="button" class="profile-friends__btn" id="profileFriendsBtn">
@@ -154,10 +154,10 @@
               <div class="profile-friends__search-suggestions" id="profileFriendsSearchSuggestions" aria-live="polite" hidden></div>
               <p class="profile-friends__search-result" id="profileFriendsSearchResult" aria-live="polite" hidden></p>
               <div class="profile-friends__preview" id="profileFriendsPreview" aria-live="polite">
-                <button type="button" class="profile-friends__invite" id="profileFriendsInviteBtn" aria-label="Пригласить друга">
-                  <span class="profile-friends__invite-plus" aria-hidden="true">+</span>
-                  <span class="profile-friends__invite-text">Пригласить<br />друга</span>
-                </button>
+                <span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>
+                <span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>
+                <span class="profile-friends__skeleton-card" aria-hidden="true"><span class="profile-friends__avatar-skeleton"></span><span class="profile-friends__name-skeleton"></span></span>
+                <span class="profile-friends__loading-label" role="status">Загружаем друзей…</span>
               </div>
             </section>
             <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-achievements-panel aria-label="Достижения и история сезонов">

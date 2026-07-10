@@ -1935,7 +1935,7 @@
 /* Keep the back control optically centered with the transfers navigation. */
 @media (max-width: 1000px) {
   .transfers-page__back {
-    transform: translateY(2px);
+    transform: translateY(11px);
   }
 }
 

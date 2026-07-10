@@ -668,7 +668,7 @@ function hallFishFetchRows() {
   var base = hallFishGetApiBase();
   if (!base) return Promise.reject(new Error("no-api-base"));
   var q = "?publicLevels=1";
-  hallFishRatingRowsPromise = hallFishFetch(base + "/api/player-crm" + q, { cache: "default" })
+  hallFishRatingRowsPromise = hallFishFetch(base + "/api/player-crm" + q + "&_t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
@@ -2066,7 +2066,15 @@ function hallFishCloseModal() {
 }
 
 function hallFishLoadRows() {
-  if (hallFishRatingRowsCache) return Promise.resolve(hallFishRatingRowsCache);
+  if (hallFishRatingRowsCache) {
+    var memoryRows = hallFishRatingRowsCache;
+    hallFishFetchRows()
+      .then(function (freshRows) {
+        hallFishRefreshVisibleRows(freshRows);
+      })
+      .catch(function () {});
+    return Promise.resolve(memoryRows);
+  }
   var cachedRows = hallFishReadRowsSessionCache();
   if (cachedRows) {
     hallFishRatingRowsCache = cachedRows;
@@ -2080,17 +2088,26 @@ function hallFishLoadRows() {
   return hallFishFetchRows();
 }
 
-function hallFishLoadBirthdayRows() {
-  if (hallFishBirthdayRowsCache) return Promise.resolve(hallFishBirthdayRowsCache);
+function hallFishLoadBirthdayRows(forceRefresh) {
+  if (!forceRefresh && hallFishBirthdayRowsCache) {
+    var memoryRows = hallFishBirthdayRowsCache;
+    hallFishLoadBirthdayRows(true)
+      .then(function (freshRows) { hallFishRefreshVisibleRows(freshRows); })
+      .catch(function () {});
+    return Promise.resolve(memoryRows);
+  }
   if (hallFishBirthdayRowsPromise) return hallFishBirthdayRowsPromise;
-  var cachedRows = hallFishReadBirthdaysSessionCache();
+  var cachedRows = forceRefresh ? null : hallFishReadBirthdaysSessionCache();
   if (cachedRows) {
     hallFishBirthdayRowsCache = cachedRows;
+    hallFishLoadBirthdayRows(true)
+      .then(function (freshRows) { hallFishRefreshVisibleRows(freshRows); })
+      .catch(function () {});
     return Promise.resolve(cachedRows);
   }
   var base = hallFishGetApiBase();
   if (!base) return hallFishLoadRows();
-  hallFishBirthdayRowsPromise = hallFishFetch(base + "/api/player-crm?publicBirthdays=1", { cache: "default" })
+  hallFishBirthdayRowsPromise = hallFishFetch(base + "/api/player-crm?publicBirthdays=1&_t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.birthdayRows)) throw new Error((data && data.error) || "bad-response");
