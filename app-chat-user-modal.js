@@ -1234,8 +1234,8 @@ if (chatUserModalEl) {
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
-    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
-    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win-plus", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-top-win.webp" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-50k.webp" };
+    if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win-plus", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-100k.webp" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("топ занос клуба") >= 0) return { mod: "top-win-2026", label: "ТОП ЗАНОС<br>КЛУБА<br>2026", img: "./assets/chat-profile-achievement-top-win-2026.webp" };
     if (key.indexOf("занос") >= 0) return { mod: "top-win", label: "ТОП<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
