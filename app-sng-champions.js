@@ -1218,7 +1218,7 @@
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
     var connectorRowStep = isTournamentMap
-      ? (kind === "losers" ? (bracketMapExpanded ? 73 : 68) : (bracketMapExpanded ? 69 : 64))
+      ? (kind === "losers" ? (bracketMapExpanded ? 93 : 68) : (bracketMapExpanded ? 89 : 64))
       : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +

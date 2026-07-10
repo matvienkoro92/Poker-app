@@ -2832,15 +2832,15 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 64px;
-  --sng-map-row-gap: 5px;
+  --sng-map-row-height: 82px;
+  --sng-map-row-gap: 7px;
   grid-template-columns:
-    168px
-    168px
-    168px
-    156px
-    148px
-    148px;
+    220px
+    220px
+    210px
+    200px
+    190px
+    190px;
   width: max-content;
   min-width: 0;
 }
@@ -2863,7 +2863,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-match,
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match {
-  min-height: 60px;
+  min-height: 78px;
 }
 
 .sng-champions-modal__bracket-map-wrap--losers {
@@ -2945,9 +2945,18 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 68px;
-  --sng-map-row-gap: 5px;
-  min-width: 1160px;
+  --sng-map-row-height: 86px;
+  --sng-map-row-gap: 7px;
+  grid-template-columns:
+    220px
+    220px
+    210px
+    210px
+    200px
+    200px
+    190px
+    190px;
+  min-width: 1700px;
   padding-bottom: 54px;
 }
 
@@ -2977,7 +2986,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match {
-  min-height: 60px;
+  min-height: 78px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__map-round--matches-8 .sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed {
@@ -3738,7 +3747,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--waiting {
