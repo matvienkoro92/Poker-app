@@ -97,12 +97,12 @@
   }
 
   function kindText(kind) {
-    return kind === "deposit" ? "Депозит" : "Кешаут";
+    return kind === "deposit" ? "Депозит" : "Хочу сделать кешаут и перевести вам на счёт в Poker21";
   }
 
   function renderMode() {
     var details = byId("transfersDetailsField");
-    var detailsInput = byId("transfersDetailsInput");
+    var bankInput = byId("transfersBankInput");
     var submit = byId("transfersCreateSubmit");
     var label = byId("transfersDetailsLabel");
     Array.prototype.slice.call(document.querySelectorAll("[data-transfers-kind]")).forEach(function (btn) {
@@ -111,7 +111,7 @@
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (details) details.hidden = state.kind === "deposit";
-    if (detailsInput) detailsInput.required = state.kind === "cashout";
+    if (bankInput) bankInput.required = state.kind === "cashout";
     if (submit) submit.textContent = state.kind === "deposit" ? "Хочу сделать депозит" : "Разместить кешаут";
     if (label) label.textContent = state.kind === "deposit" ? "Реквизиты" : "Реквизиты";
   }
@@ -322,7 +322,21 @@
     if (!item.canSeeRequisites || !item.requisites) return;
     var box = textNode("div", "transfers-card__details");
     box.appendChild(textNode("span", "transfers-card__details-label", "Реквизиты"));
-    box.appendChild(textNode("pre", "transfers-card__details-text", item.requisites));
+    var lines = String(item.requisites).split(/\n+/);
+    var bank = "";
+    var rest = [];
+    lines.forEach(function (line) {
+      var match = String(line || "").match(/^Банк:\s*(.+)$/i);
+      if (match && !bank) bank = match[1].trim();
+      else if (String(line || "").trim()) rest.push(String(line).trim());
+    });
+    if (bank) {
+      var bankRow = textNode("strong", "transfers-card__details-bank");
+      bankRow.appendChild(textNode("span", "", "!"));
+      bankRow.appendChild(textNode("b", "", bank));
+      box.appendChild(bankRow);
+    }
+    if (rest.length || !bank) box.appendChild(textNode("pre", "transfers-card__details-text", (rest.length ? rest : lines).join("\n")));
     card.appendChild(box);
   }
 
@@ -367,7 +381,11 @@
 
     var top = textNode("div", "transfers-card__top");
     var titleBlock = textNode("div", "transfers-card__title-block");
-    titleBlock.appendChild(textNode("span", "transfers-card__kind", kindText(item.kind)));
+    titleBlock.appendChild(textNode(
+      "span",
+      "transfers-card__kind" + (item.kind === "cashout" ? " transfers-card__kind--cashout-request" : ""),
+      kindText(item.kind)
+    ));
     titleBlock.appendChild(textNode("strong", "transfers-card__amount", formatAmount(item.amount)));
     top.appendChild(titleBlock);
     top.appendChild(textNode("span", "transfers-card__status", statusText(item)));
@@ -542,17 +560,30 @@
     event.preventDefault();
     var amountEl = byId("transfersAmountInput");
     var commentEl = byId("transfersCommentInput");
-    var detailsEl = byId("transfersDetailsInput");
+    var bankEl = byId("transfersBankInput");
+    var phoneEl = byId("transfersPhoneInput");
+    var cardEl = byId("transfersCardInput");
     var amount = amountEl ? Number(amountEl.value) || 0 : 0;
     if (!amount || amount > state.maxAmount) {
       setFeedback("Максимум " + state.maxAmount + " ₽", "error");
       return;
     }
-    var details = detailsEl ? detailsEl.value.trim() : "";
-    if (state.kind === "cashout" && !details) {
-      setFeedback("Укажите реквизиты", "error");
+    var bank = bankEl ? bankEl.value.trim() : "";
+    var phone = phoneEl ? phoneEl.value.trim() : "";
+    var cardNumber = cardEl ? cardEl.value.trim() : "";
+    if (state.kind === "cashout" && !bank) {
+      setFeedback("Укажите банк", "error");
       return;
     }
+    if (state.kind === "cashout" && !phone && !cardNumber) {
+      setFeedback("Укажите номер телефона или номер карты", "error");
+      return;
+    }
+    var details = [
+      bank ? "Банк: " + bank : "",
+      phone ? "Номер: " + phone : "",
+      cardNumber ? "Номер карты: " + cardNumber : "",
+    ].filter(Boolean).join("\n");
     var submit = byId("transfersCreateSubmit");
     postAction({
       action: "create",
@@ -563,7 +594,9 @@
     }, submit).then(function (data) {
       if (!data || !data.ok) return;
       if (commentEl) commentEl.value = "";
-      if (detailsEl) detailsEl.value = "";
+      if (bankEl) bankEl.value = "";
+      if (phoneEl) phoneEl.value = "";
+      if (cardEl) cardEl.value = "";
       if (amountEl) amountEl.value = "";
     });
   }
@@ -602,6 +635,27 @@
     if (!r || state.bound) return;
     state.bound = true;
     r.addEventListener("click", function (event) {
+      var emojiToggle = event.target && event.target.closest ? event.target.closest("#transfersCommentEmojiToggle") : null;
+      var emojiPicker = byId("transfersCommentEmojiPicker");
+      if (emojiToggle) {
+        var willOpen = !!(emojiPicker && emojiPicker.hidden);
+        if (emojiPicker) emojiPicker.hidden = !willOpen;
+        emojiToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        return;
+      }
+      var emojiBtn = event.target && event.target.closest ? event.target.closest("[data-transfers-comment-emoji]") : null;
+      if (emojiBtn) {
+        var commentInput = byId("transfersCommentInput");
+        var emoji = emojiBtn.getAttribute("data-transfers-comment-emoji") || "";
+        if (commentInput && emoji) {
+          var start = typeof commentInput.selectionStart === "number" ? commentInput.selectionStart : commentInput.value.length;
+          var end = typeof commentInput.selectionEnd === "number" ? commentInput.selectionEnd : start;
+          commentInput.value = commentInput.value.slice(0, start) + emoji + commentInput.value.slice(end);
+          commentInput.focus();
+          commentInput.setSelectionRange(start + emoji.length, start + emoji.length);
+        }
+        return;
+      }
       var sectionShare = event.target && event.target.closest ? event.target.closest("[data-transfers-share-section]") : null;
       if (sectionShare) {
         shareTransfersSection();
@@ -634,7 +688,7 @@
   function isTransfersKeyboardField(node) {
     if (!node || !node.matches) return false;
     return !!node.matches(
-      "#transfersAmountInput, #transfersCommentInput, #transfersDetailsInput, [data-transfers-take-details]"
+      "#transfersAmountInput, #transfersCommentInput, #transfersBankInput, #transfersPhoneInput, #transfersCardInput, [data-transfers-take-details]"
     );
   }
 

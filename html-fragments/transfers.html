@@ -32,13 +32,38 @@
                   <label class="transfers-field transfers-field--comment">
                     <span class="transfers-field__label">Комментарий</span>
                     <input class="transfers-field__input" id="transfersCommentInput" type="text" maxlength="240" placeholder="необязательно" />
+                    <button type="button" class="transfers-field__emoji-toggle" id="transfersCommentEmojiToggle" aria-label="Добавить смайл" aria-expanded="false">☺</button>
+                    <span class="transfers-field__emoji-picker" id="transfersCommentEmojiPicker" aria-label="Смайлы" hidden>
+                      <button type="button" data-transfers-comment-emoji="👍">👍</button>
+                      <button type="button" data-transfers-comment-emoji="🤝">🤝</button>
+                      <button type="button" data-transfers-comment-emoji="😊">😊</button>
+                      <button type="button" data-transfers-comment-emoji="🔥">🔥</button>
+                      <button type="button" data-transfers-comment-emoji="💰">💰</button>
+                      <button type="button" data-transfers-comment-emoji="✅">✅</button>
+                      <button type="button" data-transfers-comment-emoji="🙏">🙏</button>
+                      <button type="button" data-transfers-comment-emoji="🎉">🎉</button>
+                    </span>
                   </label>
                 </div>
-                <label class="transfers-field transfers-field--details" id="transfersDetailsField">
+                <div class="transfers-field transfers-field--details" id="transfersDetailsField">
                   <span class="transfers-field__label" id="transfersDetailsLabel">Реквизиты</span>
                   <span class="transfers-field__hint">Эти данные увидят только игроки 10+ уровня.</span>
-                  <textarea class="transfers-field__textarea" id="transfersDetailsInput" rows="3" maxlength="700" placeholder="карта, банк, телефон"></textarea>
-                </label>
+                  <label class="transfers-requisites__bank">
+                    <span>Банк</span>
+                    <input class="transfers-field__input" id="transfersBankInput" type="text" maxlength="80" placeholder="Название банка" autocomplete="organization" />
+                  </label>
+                  <div class="transfers-requisites__numbers">
+                    <label>
+                      <span>Номер</span>
+                      <input class="transfers-field__input" id="transfersPhoneInput" type="tel" maxlength="40" placeholder="Номер телефона" autocomplete="tel" inputmode="tel" />
+                    </label>
+                    <span class="transfers-requisites__or">или</span>
+                    <label>
+                      <span>Номер карты</span>
+                      <input class="transfers-field__input" id="transfersCardInput" type="text" maxlength="40" placeholder="Номер карты" autocomplete="cc-number" inputmode="numeric" />
+                    </label>
+                  </div>
+                </div>
                 <div class="transfers-create__actions">
                   <button type="submit" class="transfers-create__submit" id="transfersCreateSubmit">Разместить заявку</button>
                   <span class="transfers-feedback" id="transfersCreateFeedback" aria-live="polite"></span>
