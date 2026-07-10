@@ -8204,21 +8204,67 @@ body.club-choice-vote-open {
   }
 }
 
-/* Desktop PWA uses a narrow CSS viewport despite the large Retina window.
-   Keep both semifinal matches on one row in the regular stage view only. */
+/* A consistent two-column stage layout for the narrow desktop PWA.
+   This applies only to regular round cards, never to the overview map. */
 @media (min-width: 431px) and (max-width: 700px) {
-  .sng-champions-modal__round--semi {
+  .sng-champions-modal__round--slider {
     padding: 18px 8px 8px;
   }
 
-  .sng-champions-modal__round--semi .sng-champions-modal__round-matches--slider {
+  .sng-champions-modal__round--slider .sng-champions-modal__round-matches--slider {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
     gap: 8px;
   }
 
-  .sng-champions-modal__round--semi .sng-champions-modal__bracket-match {
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-match {
+    height: 100%;
+    min-width: 0;
     gap: 5px;
     padding: 7px;
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player {
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 4px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 6px;
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-name,
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-level,
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-level span,
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-telegram {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-name {
+    font-size: clamp(8px, 2.05vw, 10px);
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-level,
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player-telegram {
+    font-size: clamp(7px, 1.7vw, 8px);
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__ready-badge {
+    padding: 3px 4px;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-player > strong {
+    font-size: clamp(8px, 1.8vw, 9px);
+    white-space: nowrap;
   }
 }
 
