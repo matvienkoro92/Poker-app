@@ -17,12 +17,23 @@ function pokerRemoveFriendFromOpenFriendsList(userId, chatUserId) {
   if (!removed) return false;
   var remaining = listEl.querySelectorAll('.friends-list-modal__item[data-section="friends"]').length;
   try {
-    if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(remaining);
+    pokerUpdateProfileFriendsCount(remaining);
     if (typeof window.pokerRefreshProfileFriendsPreview === "function") window.pokerRefreshProfileFriendsPreview();
   } catch (eFriendCount) {}
   return true;
 }
 window.pokerRemoveFriendFromOpenFriendsList = pokerRemoveFriendFromOpenFriendsList;
+
+function pokerUpdateProfileFriendsCount(count) {
+  var safeCount = Math.max(0, Math.floor(Number(count) || 0));
+  try {
+    var profileCount = document.getElementById("profileFriendsCount");
+    if (profileCount) profileCount.textContent = "(" + safeCount + ")";
+  } catch (eProfileFriendsCount) {}
+  try {
+    if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(safeCount);
+  } catch (eSharedFriendsCount) {}
+}
 
 var POKER_FRIENDS_UNREAD_KEY = "poker_profile_friends_unread_v1";
 var POKER_FRIENDS_SEEN_KEY = "poker_profile_friends_seen_v1";
@@ -170,6 +181,7 @@ function initProfileFriends() {
   var defaultFriendsFetchPromise = null;
   var friendsPreviewRetryTimer = null;
   var friendsPreviewRetryCount = 0;
+  var friendsPreviewLoadVersion = 0;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -431,7 +443,7 @@ function initProfileFriends() {
     var base = getApiBase();
     if (!base) return Promise.reject(new Error("api_base_missing"));
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    friendsFetchPromise = fetch(base + "/api/friends" + fq)
+    friendsFetchPromise = fetch(base + "/api/friends" + fq, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.friends) && data.friends.length) return data;
@@ -1351,7 +1363,7 @@ function initProfileFriends() {
       return !id || !friendIds[id];
     });
     try {
-      if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(friends.length);
+      pokerUpdateProfileFriendsCount(friends.length);
     } catch (eFcModal) {}
     try { pokerUpdateFriendsUnreadFromData(data); } catch (eUnreadData) {}
     renderIncomingNotice(incoming.length);
@@ -1444,13 +1456,14 @@ function initProfileFriends() {
   function loadFriendsPreview() {
     var base = getApiBase();
     if (!base) return;
+    var previewLoadVersion = ++friendsPreviewLoadVersion;
     if (!profileFriendsHasCredential()) {
       if (!friendsDataCache) friendsDataCache = readStableFriendsData();
       if (friendsDataCache && friendsDataCache.ok) {
         renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
         renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
         try {
-          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
+          pokerUpdateProfileFriendsCount(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
         } catch (eNoCredCachedPreviewCount) {}
       } else {
         renderPreviewLoading();
@@ -1460,7 +1473,7 @@ function initProfileFriends() {
           var stableData = rememberFriendsData(data) || data;
           renderIncomingNotice(0);
           renderFriendsPreview(stableData.friends || []);
-          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels((stableData.friends || []).length);
+          pokerUpdateProfileFriendsCount((stableData.friends || []).length);
         })
         .catch(function () {});
       scheduleFriendsPreviewRetry();
@@ -1476,13 +1489,26 @@ function initProfileFriends() {
       renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
       renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
       try {
-        if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
+        pokerUpdateProfileFriendsCount(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
       } catch (eCachedPreviewCount) {}
     } else {
       renderPreviewLoading();
     }
+    var primaryPreviewSettled = false;
+    if (!previewHadCachedData) {
+      fetchDefaultFriendsData()
+        .then(function (fallback) {
+          if (primaryPreviewSettled || previewLoadVersion !== friendsPreviewLoadVersion) return;
+          renderIncomingNotice(0);
+          renderFriendsPreview(Array.isArray(fallback.friends) ? fallback.friends : []);
+          pokerUpdateProfileFriendsCount(Array.isArray(fallback.friends) ? fallback.friends.length : 0);
+        })
+        .catch(function () {});
+    }
     fetchFriendsData()
       .then(function (data) {
+        primaryPreviewSettled = true;
+        if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!data || !data.ok) {
           if (!previewHadCachedData) {
             renderIncomingNotice(0);
@@ -1495,10 +1521,12 @@ function initProfileFriends() {
         renderIncomingNotice(Array.isArray(stableData.incoming) ? stableData.incoming.length : 0);
         renderFriendsPreview(Array.isArray(stableData.friends) ? stableData.friends : []);
         try {
-          if (typeof pokerUpdateFriendsCountLabels === "function") pokerUpdateFriendsCountLabels(Array.isArray(stableData.friends) ? stableData.friends.length : 0);
+          pokerUpdateProfileFriendsCount(Array.isArray(stableData.friends) ? stableData.friends.length : 0);
         } catch (ePreviewCount) {}
       })
       .catch(function () {
+        primaryPreviewSettled = true;
+        if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!previewHadCachedData) {
           renderPreviewLoading();
           scheduleFriendsPreviewRetry();
