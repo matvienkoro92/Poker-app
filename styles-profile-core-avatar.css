@@ -3384,3 +3384,36 @@ body.profile-avatar-choice-open {
 .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences .profile-hero-preferences__group[hidden] {
   display: none !important;
 }
+
+/* Keep the compact PWA profile card as one readable two-column composition. */
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
+    grid-column: 1 !important;
+    grid-row: 1 / span 5 !important;
+    align-self: start !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-content: flex-start !important;
+    align-self: start !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__identity-controls {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroPreferences.profile-hero-preferences {
+    grid-column: 2 !important;
+    grid-row: 4 !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase #profileHeroCity.profile-hero-city {
+    grid-column: 2 !important;
+    grid-row: 5 !important;
+  }
+}
