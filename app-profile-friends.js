@@ -409,6 +409,16 @@ function initProfileFriends() {
     return Object.assign({}, source, { ok: true, friends: rows });
   }
 
+  function staticDefaultFriendsData() {
+    var viewer = profileFriendsViewerAccountId();
+    var rows = [
+      { userId: "ID803668", userName: "Анна", pokerPlusNickname: "Анна", avatarUrl: "./assets/avatar-chip.jpg", statusLevel: 1, defaultFriend: true },
+      { userId: "ID403173", userName: "Waaar", pokerPlusNickname: "Waaar", avatarUrl: "./assets/summer-rating-player-waaar.webp", statusLevel: 82, defaultFriend: true },
+      { userId: "ID400800", userName: "ПокерМанки", pokerPlusNickname: "ПокерМанки", avatarUrl: "./assets/summer-rating-player-pokermanki.webp?v=3.547", statusLevel: 66, profileSpecialty: "mtt", defaultFriend: true },
+    ].filter(function (row) { return row.userId !== viewer; });
+    return { ok: true, fallback: true, staticFallback: true, friends: rows, incoming: [], outgoing: [], notices: [] };
+  }
+
   function fetchDefaultFriendsData() {
     if (defaultFriendsFetchPromise) return defaultFriendsFetchPromise;
     var base = getApiBase();
@@ -421,6 +431,7 @@ function initProfileFriends() {
         if (!data || !data.ok || !Array.isArray(data.friends) || !data.friends.length) throw new Error("default_friends_empty");
         return data;
       })
+      .catch(function () { return staticDefaultFriendsData(); })
       .finally(function () { defaultFriendsFetchPromise = null; });
     return defaultFriendsFetchPromise;
   }

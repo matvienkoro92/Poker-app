@@ -85,12 +85,19 @@
     return /^79\d{9}$/.test(digits) ? digits : "";
   }
 
-  function formatRussianPhoneInput(value) {
+  function russianPhoneLocalDigits(value) {
     var digits = String(value || "").replace(/\D/g, "");
-    if (digits === "7" || digits === "8") return "+7";
     if (digits.charAt(0) === "8" || digits.charAt(0) === "7") digits = digits.slice(1);
-    digits = digits.slice(0, 10);
-    if (!digits) return "";
+    return digits.slice(0, 10);
+  }
+
+  function formatRussianPhoneInput(value, showMask) {
+    var digits = russianPhoneLocalDigits(value);
+    if (!digits && !showMask) return "";
+    if (showMask) {
+      var padded = (digits + "__________").slice(0, 10);
+      return "+7 (" + padded.slice(0, 3) + ") " + padded.slice(3, 6) + "-" + padded.slice(6, 8) + "-" + padded.slice(8, 10);
+    }
     var out = "+7";
     if (digits.length) out += " (" + digits.slice(0, 3);
     if (digits.length >= 3) out += ")";
@@ -112,6 +119,7 @@
     if (!item) return "";
     if (item.status === "completed") return "Закрыта";
     if (item.status === "cancelled") return "Отменена";
+    if (item.status === "expired") return "Время истекло";
     if (item.status === "seller_transferred") return "Ждёт подтверждение";
     if (item.status === "buyer_sent") return "Деньги отправлены";
     if (item.status === "reserved") return "В работе " + formatLeft(item.reservedUntil);
@@ -143,7 +151,7 @@
   function visibleItems() {
     var items = state.items.slice();
     if (state.filter === "mine") return items.filter(function (item) { return !!item.isMine; });
-    if (state.filter === "completed") return items.filter(function (item) { return item.status === "completed"; });
+    if (state.filter === "completed") return items.filter(function (item) { return item.status === "completed" || item.status === "expired" || item.status === "cancelled"; });
     return items.filter(function (item) { return item.status !== "completed" && item.status !== "cancelled"; });
   }
 
@@ -443,6 +451,12 @@
     top.appendChild(textNode("span", "transfers-card__status", statusText(item)));
     card.appendChild(top);
 
+    if (item.status === "open" && Number(item.expiresAt || 0) > 0) {
+      var listingTimer = textNode("div", "transfers-card__listing-timer", "Актуально ещё " + formatLeft(item.expiresAt));
+      listingTimer.setAttribute("data-transfer-expires-at", String(item.expiresAt));
+      card.appendChild(listingTimer);
+    }
+
     var meta = textNode("div", "transfers-card__meta");
     [
       renderParticipant("Продавец", item, "owner"),
@@ -621,6 +635,7 @@
     var recipientEl = byId("transfersRecipientInput");
     var phoneEl = byId("transfersPhoneInput");
     var cardEl = byId("transfersCardInput");
+    var expiryEl = byId("transfersExpiryInput");
     var amount = amountEl ? Number(amountEl.value) || 0 : 0;
     if (!amount || amount > state.maxAmount) {
       setFeedback("Максимум " + state.maxAmount + " ₽", "error");
@@ -629,6 +644,8 @@
     var bank = bankEl ? bankEl.value.trim() : "";
     var recipient = recipientEl ? recipientEl.value.trim() : "";
     var phone = phoneEl ? phoneEl.value.trim() : "";
+    var phoneDigitsEntered = russianPhoneLocalDigits(phone).length;
+    if (!phoneDigitsEntered) phone = "";
     var cardNumber = cardEl ? cardEl.value.trim() : "";
     if (state.kind === "cashout" && !bank) {
       setFeedback("Укажите банк", "error");
@@ -665,6 +682,7 @@
       requisites: state.kind === "cashout" ? details : "",
       phoneNumber: normalizedPhone,
       recipientName: recipient,
+      activeMinutes: expiryEl ? Number(expiryEl.value) || 30 : 30,
     }, submit).then(function (data) {
       if (!data || !data.ok) return;
       if (commentEl) commentEl.value = "";
@@ -757,10 +775,34 @@
     if (form) form.addEventListener("submit", handleCreate);
     var phoneInput = byId("transfersPhoneInput");
     if (phoneInput) {
+      phoneInput.addEventListener("focus", function () {
+        phoneInput.value = formatRussianPhoneInput(phoneInput.value, true);
+        var next = phoneInput.value.indexOf("_");
+        if (next >= 0) phoneInput.setSelectionRange(next, next + 1);
+      });
       phoneInput.addEventListener("input", function () {
-        var formatted = formatRussianPhoneInput(phoneInput.value);
+        var formatted = formatRussianPhoneInput(phoneInput.value, true);
         if (phoneInput.value !== formatted) phoneInput.value = formatted;
         phoneInput.setCustomValidity(phoneInput.value && !normalizeRussianPhone(phoneInput.value) ? "Введите полный номер телефона" : "");
+        var next = phoneInput.value.indexOf("_");
+        var caret = next >= 0 ? next : phoneInput.value.length;
+        phoneInput.setSelectionRange(caret, next >= 0 ? caret + 1 : caret);
+      });
+      phoneInput.addEventListener("keydown", function (event) {
+        if (event.key !== "Backspace") return;
+        var digits = russianPhoneLocalDigits(phoneInput.value);
+        if (!digits.length) return;
+        event.preventDefault();
+        phoneInput.value = formatRussianPhoneInput(digits.slice(0, -1), true);
+        phoneInput.setCustomValidity(phoneInput.value && !normalizeRussianPhone(phoneInput.value) ? "Введите полный номер телефона" : "");
+        var next = phoneInput.value.indexOf("_");
+        if (next >= 0) phoneInput.setSelectionRange(next, next + 1);
+      });
+      phoneInput.addEventListener("blur", function () {
+        if (!russianPhoneLocalDigits(phoneInput.value).length) {
+          phoneInput.value = "";
+          phoneInput.setCustomValidity("");
+        }
       });
     }
   }
@@ -902,6 +944,14 @@
         var id = card ? card.getAttribute("data-transfer-card") : "";
         var item = state.items.filter(function (row) { return row.id === id; })[0];
         if (item) el.textContent = statusText(item);
+      });
+      Array.prototype.slice.call(document.querySelectorAll("[data-transfer-expires-at]")).forEach(function (el) {
+        var expiresAt = Number(el.getAttribute("data-transfer-expires-at") || 0);
+        el.textContent = "Актуально ещё " + formatLeft(expiresAt);
+        if (expiresAt > 0 && expiresAt <= Date.now() && el.dataset.expiryRefresh !== "1") {
+          el.dataset.expiryRefresh = "1";
+          loadTransfers(true, { silent: true });
+        }
       });
     }, 1000);
   }

@@ -2547,12 +2547,7 @@
   display: none;
 }
 .view[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection.profile-pokerplus-card--linked:not(.profile-pokerplus-card--loading)::before {
-  left: 44px;
-  right: 44px;
-  top: 27px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 213, 128, 0.72) 40%, rgba(255, 213, 128, 0.72) 60%, transparent);
-  box-shadow: none;
+  display: none;
 }
 .view[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusTitle {
   position: relative;
@@ -2571,15 +2566,8 @@
 }
 .view[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusTitle::before,
 .view[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusTitle::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 58px;
-  height: 1px;
-  background:
-    radial-gradient(circle, #f7d88d 0 2px, transparent 3px),
-    linear-gradient(90deg, transparent, rgba(247, 216, 141, 0.72));
-  transform: translateY(-50%);
+  content: none;
+  display: none;
 }
 .view[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection.profile-pokerplus-card--linked #profilePokerPlusTitle::before {
   right: 100%;

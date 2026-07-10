@@ -67,6 +67,14 @@
                       <input class="transfers-field__input" id="transfersCardInput" type="text" maxlength="40" placeholder="Номер карты" autocomplete="cc-number" inputmode="numeric" />
                     </label>
                   </div>
+                  <label class="transfers-expiry">
+                    <span>Актуальное время размещения</span>
+                    <select class="transfers-expiry__select" id="transfersExpiryInput">
+                      <option value="15">15 минут</option>
+                      <option value="30" selected>30 минут</option>
+                      <option value="60">1 час</option>
+                    </select>
+                  </label>
                 </div>
                 <div class="transfers-create__actions">
                   <button type="submit" class="transfers-create__submit" id="transfersCreateSubmit">Разместить заявку</button>
