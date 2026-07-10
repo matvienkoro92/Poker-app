@@ -601,23 +601,82 @@
     return String(winner) + "-" + String(loser);
   }
 
+  function seriesTargetFromLabel(label) {
+    var normalized = String(label || "").toLowerCase();
+    if (normalized === "полуфинал" || normalized.indexOf("1/2") >= 0) return 2;
+    if (normalized.indexOf("финал") >= 0) return 3;
+    return 0;
+  }
+
+  function matchSeriesTarget(match, data) {
+    var groups = [
+      { rounds: Array.isArray(data && data.rounds) ? data.rounds : [], losers: false },
+      { rounds: Array.isArray(data && data.loserRounds) ? data.loserRounds : [], losers: true },
+    ];
+    for (var groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+      var rounds = groups[groupIndex].rounds;
+      for (var roundIndex = 0; roundIndex < rounds.length; roundIndex += 1) {
+        var matches = Array.isArray(rounds[roundIndex] && rounds[roundIndex].matches) ? rounds[roundIndex].matches : [];
+        if (matches.indexOf(match) < 0) continue;
+        var label = groups[groupIndex].losers
+          ? loserRoundStageLabel(rounds[roundIndex], roundIndex)
+          : roundStageLabel(rounds[roundIndex], roundIndex, rounds);
+        return seriesTargetFromLabel(label);
+      }
+    }
+    return 0;
+  }
+
+  function matchSeriesScore(match) {
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    var live = match && match.liveScore && typeof match.liveScore === "object" ? match.liveScore : null;
+    if (!match || ids.length < 2) return { first: 0, second: 0, text: "0-0" };
+    if (!match.winnerId || !match.score) {
+      var liveFirst = Math.max(0, Math.floor(Number(live && live.first) || 0));
+      var liveSecond = Math.max(0, Math.floor(Number(live && live.second) || 0));
+      return { first: liveFirst, second: liveSecond, text: String(liveFirst) + "-" + String(liveSecond) };
+    }
+    var winnerGames = Math.max(0, Math.floor(Number(match.score.winner) || 0));
+    var loserGames = Math.max(0, Math.floor(Number(match.score.loser) || 0));
+    var winnerId = String(match.score.winnerId || match.winnerId || "");
+    var first = winnerId === String(ids[0]) ? winnerGames : loserGames;
+    var second = winnerId === String(ids[1]) ? winnerGames : loserGames;
+    return { first: first, second: second, text: String(first) + "-" + String(second) };
+  }
+
+  function seriesRuleText(target) {
+    return target ? "Игра до " + String(target) + " побед" : "";
+  }
+
+  function renderBracketMatchSeriesScore(match, data) {
+    var target = matchSeriesTarget(match, data);
+    var ids = Array.isArray(match && match.playerIds) ? match.playerIds.filter(Boolean) : [];
+    if (!target || ids.length < 2) return "";
+    var score = matchSeriesScore(match);
+    if (!data.isAdmin || match.winnerId) {
+      return '<div class="sng-champions-modal__series-score"><span>Счёт матча</span><strong>' + escapeHtml(score.text) + '</strong></div>';
+    }
+    var firstPlayer = data.playersById && data.playersById[ids[0]] ? data.playersById[ids[0]] : { id: ids[0] };
+    var secondPlayer = data.playersById && data.playersById[ids[1]] ? data.playersById[ids[1]] : { id: ids[1] };
+    return '<div class="sng-champions-modal__series-score sng-champions-modal__series-score--editable" data-sng-score-editor="' + escapeHtml(match.id || "") + '">' +
+      '<span>Счёт матча</span>' +
+      '<label title="' + escapeHtml(playerName(firstPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.first) + '" data-sng-score-first aria-label="Победы ' + escapeHtml(playerName(firstPlayer)) + '"></label>' +
+      '<b>:</b>' +
+      '<label title="' + escapeHtml(playerName(secondPlayer)) + '"><input type="number" min="0" max="' + escapeHtml(target - 1) + '" inputmode="numeric" value="' + escapeHtml(score.second) + '" data-sng-score-second aria-label="Победы ' + escapeHtml(playerName(secondPlayer)) + '"></label>' +
+      '<button type="button" data-sng-save-score="' + escapeHtml(match.id || "") + '" aria-label="Сохранить промежуточный счёт">✓</button>' +
+    '</div>';
+  }
+
+  function renderBracketMapSeriesScore(match, data) {
+    if (!matchSeriesTarget(match, data)) return "";
+    return '<span class="sng-champions-modal__map-series-score">Счёт ' + escapeHtml(matchSeriesScore(match).text) + '</span>';
+  }
+
   function matchRequiresScore(match, data) {
     if (!match || !data) return false;
     var ids = (match.playerIds || []).filter(Boolean);
     if (ids.length < 2) return false;
-    var winnersRounds = Array.isArray(data.rounds) ? data.rounds : [];
-    for (var i = 0; i < winnersRounds.length; i += 1) {
-      var round = winnersRounds[i];
-      if (!round || !Array.isArray(round.matches)) continue;
-      if (round.matches.indexOf(match) >= 0) return round.matches.length <= 2;
-    }
-    var loserRounds = Array.isArray(data.loserRounds) ? data.loserRounds : [];
-    for (var j = 0; j < loserRounds.length; j += 1) {
-      var loserRound = loserRounds[j];
-      if (!loserRound || !Array.isArray(loserRound.matches)) continue;
-      if (loserRound.matches.indexOf(match) >= 0) return loserRound.matches.length === 1;
-    }
-    return false;
+    return matchSeriesTarget(match, data) > 0;
   }
 
   function findMatchById(data, matchId) {
@@ -710,8 +769,10 @@
     '</span>';
   }
 
-  function readMatchScore(winnerName) {
-    var text = window.prompt("Введите счёт для " + String(winnerName || "победителя") + ". Например: 2-1", "2-0");
+  function readMatchScore(winnerName, targetWins) {
+    var target = Math.max(1, Number(targetWins) || 1);
+    var example = String(target) + "-0";
+    var text = window.prompt("Введите итоговый счёт для " + String(winnerName || "победителя") + ". Например: " + example, example);
     if (text == null) return null;
     var match = String(text || "").trim().match(/^(\d{1,2})\s*[-:]\s*(\d{1,2})$/);
     if (!match) {
@@ -720,8 +781,8 @@
     }
     var winner = Number(match[1]);
     var loser = Number(match[2]);
-    if (!Number.isFinite(winner) || !Number.isFinite(loser) || winner < 1 || loser < 0 || winner <= loser) {
-      showAlert("Счёт должен быть в пользу выбранного победителя.");
+    if (!Number.isFinite(winner) || !Number.isFinite(loser) || winner !== target || loser < 0 || loser >= target) {
+      showAlert("Итоговый счёт должен соответствовать игре до " + String(target) + " побед.");
       return false;
     }
     return { winner: winner, loser: loser, text: String(winner) + "-" + String(loser) };
@@ -1025,7 +1086,8 @@
     }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
     var matchClass = "sng-champions-modal__bracket-match" +
       (match.playingAt && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
-      (match.winnerId ? " sng-champions-modal__bracket-match--done" : "");
+      (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") +
+      (matchSeriesTarget(match, data) ? " sng-champions-modal__bracket-match--series" : "");
     return '<article class="' + matchClass + '">' +
       '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       renderBracketHeadToHead(match, data) +
@@ -1034,6 +1096,7 @@
       renderPlayingAction(match, players, data) +
       renderRemindAction(match, players, data) +
       renderReadyAction(match, players, data) +
+      renderBracketMatchSeriesScore(match, data) +
     '</article>';
   }
 
@@ -1097,18 +1160,20 @@
     });
     var selectedClass = options.selected ? " sng-champions-modal__map-match--selected" : "";
     var focusClass = options.focus ? " sng-champions-modal__map-match--focus" : "";
+    var seriesClass = matchSeriesTarget(match, data) ? " sng-champions-modal__map-match--series" : "";
     var styleParts = [];
     if (options.rowStart) styleParts.push("--sng-map-row-start:" + String(options.rowStart));
     if (options.rowSpan) styleParts.push("--sng-map-row-span:" + String(options.rowSpan));
     if (options.connectorHeight) styleParts.push("--sng-map-connector-height:" + String(options.connectorHeight));
     var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
-    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
+    return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + seriesClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
       '</span>' +
       renderBracketMapHeadToHead(match, data) +
+      renderBracketMapSeriesScore(match, data) +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
   }
@@ -1158,11 +1223,12 @@
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
           var roundLabel = labelFn(round, index, rounds);
+          var roundSeriesTarget = seriesTargetFromLabel(roundLabel);
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
-            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '">' + escapeHtml(roundLabel) + '</button>' +
+            '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span>' + (roundSeriesTarget ? '<small>' + escapeHtml(seriesRuleText(roundSeriesTarget)) + '</small>' : '') + '</button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
@@ -1264,8 +1330,9 @@
     var classFn = isLosers ? loserRoundStageClass : roundStageClass;
     var stageLabel = labelFn(round, stageIndex, rounds);
     var stageClass = classFn(round, stageIndex, rounds);
+    var stageSeriesTarget = seriesTargetFromLabel(stageLabel);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
-    var showRoundLabel = stageClass === "quarter" || stageClass === "semi";
+    var showRoundLabel = stageClass === "quarter" || stageClass === "semi" || stageSeriesTarget > 0;
     var prevDisabled = stageIndex <= 0;
     var nextDisabled = stageIndex >= rounds.length - 1;
     var stageAttr = isLosers ? "data-sng-loser-stage-index" : "data-sng-stage-index";
@@ -1302,7 +1369,7 @@
       '</div>' +
       stageDotsHtml +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
-        (showRoundLabel ? '<div class="sng-champions-modal__round-label">' + escapeHtml(stageLabel) + '</div>' : '') +
+        (showRoundLabel ? '<div class="sng-champions-modal__round-label' + (stageSeriesTarget ? ' sng-champions-modal__round-label--series' : '') + '"><span>' + escapeHtml(stageLabel) + '</span>' + (stageSeriesTarget ? '<small>' + escapeHtml(seriesRuleText(stageSeriesTarget)) + '</small>' : '') + '</div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
           ((round.matches || []).map(function (match) { return renderBracketMatch(match, previewData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
@@ -1470,6 +1537,26 @@
         .finally(function () { setButtonLoading(remind, false); });
       return;
     }
+    var scoreSave = event.target && event.target.closest ? event.target.closest("[data-sng-save-score]") : null;
+    if (scoreSave) {
+      var scoreEditor = scoreSave.closest ? scoreSave.closest("[data-sng-score-editor]") : null;
+      var firstScoreInput = scoreEditor && scoreEditor.querySelector ? scoreEditor.querySelector("[data-sng-score-first]") : null;
+      var secondScoreInput = scoreEditor && scoreEditor.querySelector ? scoreEditor.querySelector("[data-sng-score-second]") : null;
+      var firstScore = Number(firstScoreInput && firstScoreInput.value);
+      var secondScore = Number(secondScoreInput && secondScoreInput.value);
+      if (!Number.isInteger(firstScore) || !Number.isInteger(secondScore) || firstScore < 0 || secondScore < 0) {
+        showAlert("Введите промежуточный счёт целыми числами.");
+        return;
+      }
+      setButtonLoading(scoreSave, true);
+      postAction({
+        action: "setMatchScore",
+        matchId: scoreSave.getAttribute("data-sng-save-score") || "",
+        score: { first: firstScore, second: secondScore },
+      }, { status: "Сохраняю счёт...", success: "Промежуточный счёт сохранён" })
+        .finally(function () { setButtonLoading(scoreSave, false); });
+      return;
+    }
     var winner = event.target && event.target.closest ? event.target.closest("[data-sng-winner]") : null;
     if (winner) {
       var winnerMatchId = winner.getAttribute("data-sng-winner") || "";
@@ -1479,7 +1566,7 @@
       if (matchRequiresScore(currentMatch, state || {})) {
         var player = state && state.playersById ? state.playersById[winnerPlayerId] : null;
         var playerLabel = playerName(player || { name: winnerPlayerId });
-        score = readMatchScore(playerLabel);
+        score = readMatchScore(playerLabel, matchSeriesTarget(currentMatch, state || {}));
         if (score == null) return;
         if (score === false) return;
       }

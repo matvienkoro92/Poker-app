@@ -320,11 +320,13 @@ if (chatUserModalEl) {
     chatUserModalOpenSeq += 1;
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
+    document.dispatchEvent(new CustomEvent("poker:chat-user-modal-close"));
   }
   function revealChatUserModal(seq) {
     if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
     chatUserModalEl.setAttribute("aria-hidden", "false");
     chatUserModalEl.classList.add("chat-user-modal--open");
+    document.dispatchEvent(new CustomEvent("poker:chat-user-modal-open"));
   }
   function waitChatUserModalAsset(promise, timeoutMs) {
     if (!promise || typeof promise.then !== "function") return Promise.resolve();

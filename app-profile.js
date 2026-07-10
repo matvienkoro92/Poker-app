@@ -1385,6 +1385,62 @@ function pokerProfileNormalizeCity(value) {
     .slice(0, 80);
 }
 
+var pokerProfileCityCatalogPromise = null;
+var pokerProfileCityLookup = null;
+
+function pokerProfileCityKey(value) {
+  return pokerProfileNormalizeCity(value).toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
+}
+
+function pokerProfileLoadCityCatalog() {
+  if (pokerProfileCityLookup) return Promise.resolve(pokerProfileCityLookup);
+  if (pokerProfileCityCatalogPromise) return pokerProfileCityCatalogPromise;
+  pokerProfileCityCatalogPromise = fetch("./assets/profile-cities.json?v=3.001", { cache: "force-cache" })
+    .then(function (response) {
+      if (!response.ok) throw new Error("City catalog unavailable");
+      return response.json();
+    })
+    .then(function (data) {
+      var cities = Array.isArray(data && data.cities) ? data.cities : [];
+      var aliases = data && data.aliases && typeof data.aliases === "object" ? data.aliases : {};
+      var lookup = Object.create(null);
+      cities.forEach(function (city) {
+        var normalized = pokerProfileNormalizeCity(city);
+        var key = pokerProfileCityKey(normalized);
+        if (key && normalized) lookup[key] = normalized;
+      });
+      Object.keys(aliases).forEach(function (alias) {
+        var canonical = pokerProfileNormalizeCity(aliases[alias]);
+        if (canonical) lookup[pokerProfileCityKey(alias)] = canonical;
+      });
+      if (!Object.keys(lookup).length) throw new Error("City catalog is empty");
+      pokerProfileCityLookup = lookup;
+      var options = document.getElementById("profileCityOptions");
+      if (options && !options.childElementCount) {
+        var fragment = document.createDocumentFragment();
+        cities.forEach(function (city) {
+          var option = document.createElement("option");
+          option.value = pokerProfileNormalizeCity(city);
+          fragment.appendChild(option);
+        });
+        options.appendChild(fragment);
+      }
+      return lookup;
+    })
+    .finally(function () {
+      pokerProfileCityCatalogPromise = null;
+    });
+  return pokerProfileCityCatalogPromise;
+}
+
+function pokerProfileResolveRealCity(value) {
+  var normalized = pokerProfileNormalizeCity(value);
+  if (!normalized) return Promise.resolve("");
+  return pokerProfileLoadCityCatalog().then(function (lookup) {
+    return lookup[pokerProfileCityKey(normalized)] || "";
+  });
+}
+
 var profileHeroCityWidthObserver = null;
 var profileHeroCityWidthResizeBound = false;
 
@@ -1493,6 +1549,14 @@ function initProfilePlayerDetails() {
   if (birthInput) {
     birthInput.min = "1965-01-01";
     birthInput.max = "2010-12-31";
+  }
+  if (cityInput) {
+    cityInput.addEventListener("focus", function () {
+      pokerProfileLoadCityCatalog().catch(function () {});
+    });
+    cityInput.addEventListener("input", function () {
+      cityInput.setCustomValidity("");
+    });
   }
   function showDetailsFeedback(text, ms) {
     if (!feedback) return;
@@ -1705,13 +1769,33 @@ function initProfilePlayerDetails() {
   }
   if (citySave) {
     citySave.addEventListener("click", function () {
-      var val = pokerProfileNormalizeCity(cityInput ? cityInput.value : "");
-      postPlayerDetails({ profileCity: val }, { buttons: [citySave], feedback: "city" }).then(function (data) {
-        if (data && data.ok) {
-          setCityState(val);
-          mergeProfileUserInfo({ profileCity: val });
-        }
-      });
+      var rawCity = pokerProfileNormalizeCity(cityInput ? cityInput.value : "");
+      citySave.disabled = true;
+      pokerProfileResolveRealCity(rawCity)
+        .then(function (city) {
+          if (rawCity && !city) {
+            if (cityInput) cityInput.setCustomValidity("Выберите город из списка");
+            showCityFeedback("Выберите город из списка.", 3500);
+            return null;
+          }
+          if (cityInput) {
+            cityInput.setCustomValidity("");
+            cityInput.value = city;
+          }
+          return postPlayerDetails({ profileCity: city }, { buttons: [citySave], feedback: "city" }).then(function (data) {
+            if (data && data.ok) {
+              setCityState(city);
+              mergeProfileUserInfo({ profileCity: city });
+            }
+            return data;
+          });
+        })
+        .catch(function () {
+          showCityFeedback("Не удалось проверить город. Попробуйте ещё раз.", 3500);
+        })
+        .finally(function () {
+          citySave.disabled = false;
+        });
     });
   }
   specialtyBtns.forEach(function (btn) {

@@ -475,6 +475,7 @@ var hallFishCalendarEventsPromise = null;
 var hallFishCurrentIdsCache = null;
 var hallFishCurrentIdsPromise = null;
 var hallFishProfileLoadingObserver = null;
+var hallFishProfileLoadingTimer = null;
 var hallFishActiveTab = "levels";
 var hallFishActiveAchievementTab = "big50";
 var hallFishCalendarMonthOffset = 0;
@@ -495,6 +496,7 @@ var HALL_FISH_PRESET_AVATAR_SRC = {
   cat: "./assets/avatar-cat.jpg",
   robot: "./assets/avatar-robot.jpg",
   bulldog: "./assets/avatar-bulldog.jpg",
+  monkey: "./assets/daily-poker-monkey.webp",
   fox: "./assets/avatar-fox.jpg",
   chip: "./assets/avatar-chip.jpg",
   koala: "./assets/avatar-koala.jpg",
@@ -541,6 +543,15 @@ function hallFishResolveAvatarSrc(value) {
     return HALL_FISH_PRESET_AVATAR_SRC[raw.slice("preset:".length)] || "";
   }
   return raw;
+}
+
+function hallFishStableAvatarSrc(value) {
+  var keys = Object.keys(HALL_FISH_PRESET_AVATAR_SRC);
+  if (!keys.length) return "";
+  var source = String(value || "Игрок");
+  var hash = 0;
+  for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+  return HALL_FISH_PRESET_AVATAR_SRC[keys[hash % keys.length]] || HALL_FISH_PRESET_AVATAR_SRC[keys[0]] || "";
 }
 
 function hallFishLevelFishSrc(level) {
@@ -1028,7 +1039,10 @@ function hallFishLevelPlayerImage(row) {
   }
   var avatar = hallFishResolveAvatarSrc(row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url));
   if (avatar) return { src: avatar, kind: "avatar" };
-  return { src: hallFishLevelFishSrc(row && row.level), kind: "fish" };
+  return {
+    src: hallFishStableAvatarSrc(row && (row.accountId || row.p21Id || row.pokerPlusUserId || nick)),
+    kind: "avatar",
+  };
 }
 
 function hallFishLevelAgeText(value) {
@@ -1824,6 +1838,10 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
 }
 
 function hallFishClearProfileLoadingRows() {
+  if (hallFishProfileLoadingTimer) {
+    clearTimeout(hallFishProfileLoadingTimer);
+    hallFishProfileLoadingTimer = null;
+  }
   if (hallFishProfileLoadingObserver) {
     try {
       hallFishProfileLoadingObserver.disconnect();
@@ -1853,6 +1871,7 @@ function hallFishSetProfileRowLoading(row) {
   if (row.classList && row.classList.contains("hall-fish-birthday-next__row")) row.classList.add("hall-fish-birthday-next__row--loading");
   row.setAttribute("aria-busy", "true");
   row.disabled = true;
+  hallFishProfileLoadingTimer = setTimeout(hallFishClearProfileLoadingRows, 10000);
 }
 
 function hallFishLevelFromRow(row) {
@@ -2326,6 +2345,8 @@ window.openHallFishRatingModal = openHallFishRatingModal;
 function initHallFishRatingModal() {
   if (window.__pokerHallFishRatingBound) return;
   window.__pokerHallFishRatingBound = true;
+  document.addEventListener("poker:chat-user-modal-open", hallFishClearProfileLoadingRows);
+  document.addEventListener("poker:chat-user-modal-close", hallFishClearProfileLoadingRows);
   document.addEventListener("click", function (e) {
     var openBtn = e.target && e.target.closest ? e.target.closest("#headerPokerStatus,.header-greeting--status,[data-hall-fish-open]") : null;
     if (openBtn) {

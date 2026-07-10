@@ -1122,9 +1122,18 @@
   line-height: 1.28;
 }
 .hall-fish-achievement-list .hall-fish-level-row {
-  grid-template-columns: 32px 54px minmax(0, 1fr) minmax(72px, auto);
+  grid-template-columns: 32px 70px minmax(0, 1fr) minmax(72px, auto);
   min-width: 0;
-  min-height: 74px;
+  min-height: 90px;
+}
+.hall-fish-achievement-list .hall-fish-level-row__media {
+  width: 70px;
+  height: 70px;
+}
+.hall-fish-achievement-list .hall-fish-level-row__media--art img {
+  padding: 0;
+  transform: scale(1.62);
+  transform-origin: 50% 30%;
 }
 .hall-fish-achievement-list.hall-fish-level-list {
   padding-bottom: 0;
@@ -1614,7 +1623,12 @@
     height: 38px;
   }
   .hall-fish-achievement-list .hall-fish-level-row {
-    grid-template-columns: 28px 46px minmax(0, 1fr) minmax(58px, auto);
+    grid-template-columns: 28px 58px minmax(0, 1fr) minmax(58px, auto);
+    min-height: 78px;
+  }
+  .hall-fish-achievement-list .hall-fish-level-row__media {
+    width: 58px;
+    height: 58px;
   }
   .hall-fish-achievement-list .hall-fish-level-row__level {
     font-size: 12px;
