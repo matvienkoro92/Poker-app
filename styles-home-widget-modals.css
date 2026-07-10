@@ -8204,6 +8204,24 @@ body.club-choice-vote-open {
   }
 }
 
+/* Desktop PWA uses a narrow CSS viewport despite the large Retina window.
+   Keep both semifinal matches on one row in the regular stage view only. */
+@media (min-width: 431px) and (max-width: 700px) {
+  .sng-champions-modal__round--semi {
+    padding: 18px 8px 8px;
+  }
+
+  .sng-champions-modal__round--semi .sng-champions-modal__round-matches--slider {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .sng-champions-modal__round--semi .sng-champions-modal__bracket-match {
+    gap: 5px;
+    padding: 7px;
+  }
+}
+
 @media (max-width: 430px) {
   .private-cash-modal {
     align-items: flex-end;
