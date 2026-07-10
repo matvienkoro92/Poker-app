@@ -207,11 +207,16 @@
     if (!base || !body) return;
     adminBonusesState.selectedUserId = userId;
     body.innerHTML = "Загрузка истории…";
-    fetch(authUrl("users/" + userId + "/bonus-ledger"), { cache: "no-store" })
+    var found = adminBonusesState.users.find(function (user) { return user.userId === userId; });
+    var historyUserIds = found && Array.isArray(found.historyUserIds) ? found.historyUserIds : [userId];
+    fetch(authUrl("users/" + userId + "/bonus-ledger", {
+      relatedUserIds: historyUserIds.join(","),
+    }), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "История не загрузилась");
         var ops = data.operations || [];
+        var showsSeveralAccounts = Array.isArray(data.userIds) && data.userIds.length > 1;
         if (!ops.length) {
           body.innerHTML = "Операций пока нет.";
           return;
@@ -221,7 +226,7 @@
           return '<article class="admin-bonuses__history-item">' +
             '<div><strong>' + esc(sign + op.amount) + '</strong><span>' + esc(op.operationType) + '</span></div>' +
             '<div>Баланс: ' + esc(op.balanceBefore) + ' → ' + esc(op.balanceAfter) + '</div>' +
-            '<div>' + esc(fmtDate(op.createdAt)) + (op.adminId ? ' · admin: ' + esc(op.adminId) : "") + '</div>' +
+            '<div>' + esc(fmtDate(op.createdAt)) + (showsSeveralAccounts ? ' · счёт: ' + esc(op.userId) : '') + (op.adminId ? ' · admin: ' + esc(op.adminId) : "") + '</div>' +
             (op.comment ? '<p>' + esc(op.comment) + '</p>' : "") +
           '</article>';
         }).join("");

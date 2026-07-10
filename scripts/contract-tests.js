@@ -580,9 +580,43 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(pwa.verifyPwaSessionToken(adminToken, BOT_TOKEN).adminAccess, true, "pwa session carries admin access");
   const bonusAdminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000003", username: "roman1787443" }, BOT_TOKEN);
   const nonBonusAdminToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000004", username: "player" }, BOT_TOKEN);
+  redis.h("poker_app:id_to_user").set("ID111111", "tg_2144406710");
+  redis.h("poker_app:id_to_user").set("ID222222", "tg_2144406710");
+  redis.h("poker_app:visitor_usernames").set("tg_2144406710", "qweenpoker");
+  redis.h("poker_app:bonus_balances").set("ID111111", "849");
+  redis.h("poker_app:daily_poker_played_count").set("ID111111", "36");
+  redis.h("poker_app:daily_poker_played_count").set("ID222222", "5");
+  redis.s("poker_app:bonus_users").add("ID111111");
+  redis.s("poker_app:daily_poker_users").add("ID222222");
   const adminHandler = loadHandler("admin");
-  let bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken }));
+  let bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken, search: "qweenpoker" }));
   assert.strictEqual(bonusRes.statusCode, 200, "roman1787443 can open bonus admin API");
+  assert.strictEqual(bonusRes.body.total, 1, "bonus admin merges zero-balance aliases linked to one Telegram user");
+  assert.strictEqual(bonusRes.body.users[0].bonusBalance, 849, "linked bonus user keeps the real balance");
+  assert.strictEqual(bonusRes.body.users[0].dailyPokerGamesPlayed, 41, "linked bonus user includes alias game stats");
+  assert.deepStrictEqual(bonusRes.body.users[0].historyUserIds, ["ID111111", "ID222222"], "linked bonus user exposes all history account ids");
+  const primaryLedger = {
+    id: "bonus_primary_history", user_id: "ID111111", amount: 20, direction: "credit",
+    operation_type: "admin_credit", balance_before: 829, balance_after: 849,
+    source: "admin_manual", source_id: "admin", admin_id: "admin", comment: "primary", created_at: "2026-07-10T10:00:00.000Z",
+  };
+  const aliasLedger = {
+    id: "bonus_alias_history", user_id: "ID222222", amount: 5, direction: "debit",
+    operation_type: "admin_debit", balance_before: 5, balance_after: 0,
+    source: "admin_manual", source_id: "admin", admin_id: "admin", comment: "alias", created_at: "2026-07-10T11:00:00.000Z",
+  };
+  redis.kv.set("poker_app:bonus_ledger:" + primaryLedger.id, JSON.stringify(primaryLedger));
+  redis.kv.set("poker_app:bonus_ledger:" + aliasLedger.id, JSON.stringify(aliasLedger));
+  redis.l("poker_app:bonus_ledger_user:ID111111").push(primaryLedger.id);
+  redis.l("poker_app:bonus_ledger_user:ID222222").push(aliasLedger.id);
+  const historyRes = await call(adminHandler, req("GET", {
+    path: "users/ID111111/bonus-ledger",
+    pwaSession: bonusAdminToken,
+    relatedUserIds: "ID111111,ID222222",
+  }));
+  assert.strictEqual(historyRes.statusCode, 200, "bonus admin can open linked player history");
+  assert.deepStrictEqual(historyRes.body.operations.map((op) => op.id), [aliasLedger.id, primaryLedger.id], "linked history merges all accounts newest first");
+  assert.deepStrictEqual(historyRes.body.operations.map((op) => op.userId), ["ID222222", "ID111111"], "linked history preserves operation account ids");
   let manualBonusRes = await call(adminHandler, req("POST", { path: "users/ID123456/bonus-credit" }, {
     pwaSession: bonusAdminToken,
     amount: 120,
