@@ -8224,6 +8224,10 @@ body.club-choice-vote-open {
     padding: 7px;
   }
 
+  .sng-champions-modal__round--slider .sng-champions-modal__bracket-match:only-child {
+    grid-column: 1 / -1;
+  }
+
   .sng-champions-modal__round--slider .sng-champions-modal__bracket-player {
     grid-template-columns: 28px minmax(0, 1fr) auto auto;
     gap: 4px;
@@ -8262,7 +8266,15 @@ body.club-choice-vote-open {
     white-space: nowrap;
   }
 
+  .sng-champions-modal__round--slider .sng-champions-modal__ready-badge--score {
+    z-index: 1;
+    grid-column: 3;
+    grid-row: 1;
+  }
+
   .sng-champions-modal__round--slider .sng-champions-modal__bracket-player > strong {
+    grid-column: 4;
+    grid-row: 1;
     font-size: clamp(8px, 1.8vw, 9px);
     white-space: nowrap;
   }
