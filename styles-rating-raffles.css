@@ -11804,6 +11804,15 @@ body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-act
   word-break: normal !important;
 }
 
+@media (max-width: 1000px) {
+  body[data-view="raffles"] .raffles-active-chooser__main-title--cash,
+  body[data-view="raffles"] .raffles-active-chooser__main-title-line,
+  body[data-view="raffles"] .raffles-active-chooser__main-title-accent {
+    font-size: clamp(14px, 4.8cqw, 26px) !important;
+    line-height: 0.9 !important;
+  }
+}
+
 @container (max-width: 360px) {
   body[data-view="raffles"] .raffles-active-chooser__main-title,
   body[data-view="raffles"] .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout) .raffles-active-chooser__main-title {

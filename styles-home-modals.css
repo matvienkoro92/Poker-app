@@ -328,18 +328,19 @@ html.vpn-proxy-modal-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: min(100%, 680px);
-  min-height: 58px;
-  padding: 12px 28px;
+  width: auto;
+  max-width: min(100%, 420px);
+  min-height: 46px;
+  padding: 10px 20px;
   color: #1c1003;
   font: inherit;
-  font-size: clamp(18px, 3.8vw, 28px);
+  font-size: clamp(15px, 2.4vw, 18px);
   font-weight: 1000;
   text-align: center;
   text-decoration: none;
-  line-height: 1.15;
-  border: 2px solid rgba(255, 239, 191, 0.92);
-  border-radius: 999px;
+  line-height: 1.12;
+  border: 1px solid rgba(255, 239, 191, 0.92);
+  border-radius: 14px;
   background:
     linear-gradient(180deg, #fff4b8 0%, #ffc43d 48%, #ff8a00 100%);
   box-shadow:

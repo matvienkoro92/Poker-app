@@ -3389,6 +3389,88 @@ body.profile-avatar-choice-open {
   display: none !important;
 }
 
+/* Compact profile composition for narrow desktop/PWA windows. */
+@media (min-width: 621px) and (max-width: 1000px) {
+  .view[data-view="profile"] .profile-header-row .title {
+    font-size: 32px;
+  }
+
+  .view[data-view="profile"] .profile-tabs {
+    padding: 5px;
+    border-radius: 16px;
+  }
+
+  .view[data-view="profile"] .profile-tabs__btn {
+    min-height: 42px;
+    padding: 6px 8px;
+    border-radius: 13px;
+    font-size: 15px;
+    line-height: 1.08;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 12px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+    height: 260px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
+    font-size: 19px;
+    line-height: 1.1;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-xp {
+    font-size: 17px;
+    line-height: 1.15;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
+    font-size: 44px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
+    font-size: 22px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+  .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 14px;
+  }
+
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
+    grid-template-columns: 120px minmax(0, 1fr);
+    min-height: 190px;
+    gap: 18px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab::after {
+    font-size: 72px;
+  }
+
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-main {
+    min-width: 0;
+    font-size: 21px;
+    overflow-wrap: anywhere;
+  }
+
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-sum {
+    font-size: 46px;
+    white-space: nowrap;
+  }
+
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-more {
+    max-width: 100%;
+    font-size: 18px;
+  }
+}
+
 /* Keep the compact PWA profile card as one readable two-column composition. */
 @media (max-width: 620px) {
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {

@@ -331,11 +331,8 @@
       kindText(item.kind) + " " + formatAmount(item.amount),
     ];
     if (item.comment) lines.push(String(item.comment));
-    if (item.requisites) {
-      lines.push("");
-      lines.push("Реквизиты:");
-      lines.push(String(item.requisites));
-    }
+    lines.push("");
+    lines.push("Реквизиты доступны в приложении игрокам уровня 10+.");
     if (link) {
       lines.push("");
       lines.push("Открыть переводы: " + link);
@@ -344,7 +341,7 @@
   }
 
   function shareTransfer(item) {
-    if (!item || !item.requisites) return;
+    if (!item) return;
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var link = transfersDeepLink();
     var text = buildTransferShareText(item, link);
@@ -691,6 +688,8 @@
       if (phoneEl) phoneEl.value = "";
       if (cardEl) cardEl.value = "";
       if (amountEl) amountEl.value = "";
+      state.filter = "active";
+      render();
     });
   }
 

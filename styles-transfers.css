@@ -1039,6 +1039,74 @@
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.28);
 }
 
+@media (max-width: 1000px) {
+  .transfers-page__header {
+    top: max(11px, calc(env(safe-area-inset-top) + 9px));
+    left: 12px;
+  }
+
+  .transfers-page__back {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+  }
+
+  .transfers-tabs {
+    width: calc(100% - 58px);
+    margin-top: 0;
+    margin-left: 58px;
+  }
+
+  .transfers-tabs__btn,
+  .transfers-tabs__btn:last-child {
+    min-height: 52px;
+    gap: 6px;
+    padding: 0 6px;
+    font-size: 15px;
+  }
+
+  .transfers-tabs__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .transfers-card {
+    padding: 20px;
+    border-radius: 26px;
+  }
+
+  .transfers-card__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 14px;
+  }
+
+  .transfers-card__title-block {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+  }
+
+  .transfers-card__kind--cashout-request {
+    max-width: 36em;
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  .transfers-card__amount {
+    font-size: 48px;
+    white-space: nowrap;
+  }
+
+  .transfers-card__status {
+    max-width: 260px;
+    min-height: 42px;
+    padding: 0 15px;
+    font-size: 15px;
+  }
+}
+
 .transfers-empty {
   margin: 0;
   padding: 22px;
@@ -1263,8 +1331,14 @@
 
 @media (max-width: 560px) {
   .transfers-page__header {
-    top: max(4px, calc(env(safe-area-inset-top) + 2px));
+    top: max(11px, calc(env(safe-area-inset-top) + 9px));
     left: 10px;
+  }
+
+  .transfers-page__back {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
   }
 
   .transfers-tabs {
@@ -1779,4 +1853,22 @@
     width: 16px;
     height: 16px;
   }
+}
+
+.transfers-tabs .transfers-tabs__btn--active,
+.transfers-tabs .transfers-tabs__btn[aria-pressed="true"] {
+  color: #2b1700;
+  border-color: rgba(255, 235, 177, 0.96);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 232, 0.72), transparent 42%),
+    linear-gradient(180deg, #ffd978 0%, #f4a623 56%, #ce6f08 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 0 18px rgba(255, 167, 36, 0.42);
+  text-shadow: 0 1px 0 rgba(255, 242, 197, 0.5);
+}
+
+.transfers-tabs .transfers-tabs__btn--active .transfers-tabs__icon,
+.transfers-tabs .transfers-tabs__btn[aria-pressed="true"] .transfers-tabs__icon {
+  color: #3a2004;
 }
