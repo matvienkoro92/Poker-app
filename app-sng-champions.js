@@ -604,7 +604,7 @@
   function seriesTargetFromLabel(label, losers) {
     var normalized = String(label || "").toLowerCase();
     if (losers) {
-      return normalized === "финал сетки №2" || normalized.indexOf("гранд-финал") >= 0 ? 2 : 0;
+      return normalized === "l финал" || normalized === "финал сетки №2" || normalized.indexOf("гранд-финал") >= 0 ? 2 : 0;
     }
     if (normalized === "полуфинал" || normalized.indexOf("1/2") >= 0) return 2;
     if (normalized.indexOf("финал") >= 0) return 3;
