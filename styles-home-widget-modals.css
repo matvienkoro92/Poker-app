@@ -2812,13 +2812,6 @@
   padding-bottom: 34px;
 }
 
-/* In the expanded stage view, lay out only the selected stage and everything
-   after it. Otherwise an earlier 16-match round keeps 1/4 and 1/2 stretched
-   to the height of the entire tournament. */
-.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--before-active {
-  display: none;
-}
-
 .sng-champions-modal__bracket-map-wrap--winners {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -2839,7 +2832,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 64px;
+  --sng-map-row-height: 56px;
   --sng-map-row-gap: 5px;
   grid-template-columns:
     168px
@@ -2952,7 +2945,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 68px;
+  --sng-map-row-height: 56px;
   --sng-map-row-gap: 5px;
   min-width: 1160px;
   padding-bottom: 54px;
@@ -3633,10 +3626,6 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round-matches {
-  grid-template-rows: repeat(
-    var(--sng-map-stage-rows, var(--sng-map-rows, 16)),
-    var(--sng-map-row-height)
-  );
   align-content: start;
   gap: var(--sng-map-row-gap);
 }

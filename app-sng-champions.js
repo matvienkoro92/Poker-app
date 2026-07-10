@@ -1216,11 +1216,9 @@
     var baseMatchCount = Math.max.apply(null, rounds.map(function (round) {
       return Array.isArray(round && round.matches) ? round.matches.length : 0;
     }).concat([1]));
-    var stageRound = rounds[stageIndex] || null;
-    var stageMatchCount = Math.max(1, Array.isArray(stageRound && stageRound.matches) ? stageRound.matches.length : 0);
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
     var connectorRowStep = isTournamentMap
-      ? (kind === "losers" ? (bracketMapExpanded ? 73 : 68) : (bracketMapExpanded ? 69 : 64))
+      ? (bracketMapExpanded ? 61 : (kind === "losers" ? 68 : 64))
       : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
@@ -1232,7 +1230,7 @@
         mapToggleButton +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
-      '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + ';--sng-map-stage-rows:' + escapeHtml(stageMatchCount) + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
+      '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
@@ -1240,13 +1238,12 @@
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
-          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + (index < stageIndex ? " sng-champions-modal__map-round--before-active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
+          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span></button>' +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
-                var layoutRows = bracketMapExpanded && index >= stageIndex ? stageMatchCount : baseMatchCount;
-                var rowSpan = matchCount ? Math.max(1, Math.round(layoutRows / matchCount)) : 1;
+                var rowSpan = matchCount ? Math.max(1, Math.round(baseMatchCount / matchCount)) : 1;
                 return renderBracketMapMatch(match, data, round, index, rounds, {
                   selected: isSelected,
                   rowStart: (matchIndex * rowSpan) + 1,
