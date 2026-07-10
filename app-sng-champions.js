@@ -1244,15 +1244,16 @@
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
-                var layoutBaseCount = bracketMapExpanded && baseMatchCount > 16 && matchCount < baseMatchCount
-                  ? 16
+                var compactLateRound = bracketMapExpanded && isTournamentMap && matchCount > 0 && matchCount <= 4;
+                var layoutBaseCount = compactLateRound
+                  ? 4
                   : baseMatchCount;
                 var rowSpan = matchCount ? Math.max(1, Math.round(layoutBaseCount / matchCount)) : 1;
                 return renderBracketMapMatch(match, data, round, index, rounds, {
                   selected: isSelected,
                   rowStart: (matchIndex * rowSpan) + 1,
                   rowSpan: rowSpan,
-                  connectorHeight: String(Math.max(28, (rowSpan * connectorRowStep) + (bracketMapExpanded ? 4 : 3))) + "px"
+                  connectorHeight: String(Math.max(28, (rowSpan * (compactLateRound ? 105 : connectorRowStep)) + (bracketMapExpanded ? 4 : 3))) + "px"
                 });
               }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +

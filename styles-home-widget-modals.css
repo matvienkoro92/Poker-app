@@ -3639,6 +3639,12 @@
   align-content: start;
 }
 
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-4 .sng-champions-modal__map-round-matches,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-2 .sng-champions-modal__map-round-matches,
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-round-matches {
+  grid-template-rows: repeat(4, 100px);
+}
+
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match {
   grid-template-columns: 14px minmax(0, 1fr);
   min-height: 80px;
