@@ -1217,6 +1217,7 @@
       return Array.isArray(round && round.matches) ? round.matches.length : 0;
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
+    var expandedRowStyle = bracketMapExpanded && isTournamentMap ? ";--sng-map-row-height:56px" : "";
     var connectorRowStep = isTournamentMap
       ? (bracketMapExpanded ? 61 : (kind === "losers" ? 68 : 64))
       : (bracketMapExpanded ? 47 : 46);
@@ -1230,7 +1231,7 @@
         mapToggleButton +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
-      '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
+      '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + expandedRowStyle + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
         rounds.map(function (round, index) {
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
