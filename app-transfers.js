@@ -140,7 +140,7 @@
   function participantName(item, role) {
     item = item || {};
     var profile = item[role + "Profile"] || {};
-    return profile.name || profile.poker21Id || item[role + "Poker21Id"] || transferDisplayId(item, role) || item[role + "Name"] || "";
+    return profile.name || item[role + "Name"] || "Игрок Poker21";
   }
 
   function participantAvatar(item, role) {
