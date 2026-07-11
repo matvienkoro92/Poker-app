@@ -523,8 +523,8 @@
 }
 .player-crm__period-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 .player-crm__period-metric {
   position: relative;
@@ -575,16 +575,28 @@ button.player-crm__period-metric:focus-visible {
 }
 .player-crm__period-metric span {
   color: #9fb0c5;
-  font-size: 11px;
+  font-size: clamp(8px, 1.15vw, 11px);
   font-weight: 900;
   line-height: 1.25;
   text-transform: uppercase;
 }
 .player-crm__period-metric strong {
   color: var(--text);
-  font-size: 25px;
+  font-size: clamp(19px, 2.6vw, 25px);
   line-height: 1;
   white-space: nowrap;
+}
+.player-crm__analytics-breakdown {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #29364a;
+  border-radius: 16px;
+  background: #0d1422;
+}
+.player-crm__analytics-breakdown h3 {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 18px;
 }
 .player-crm__period-metric--plus strong {
   color: #6ee7a0;

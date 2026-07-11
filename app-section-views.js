@@ -72,6 +72,7 @@
       if (typeof isLocalEnv === "function" && isLocalEnv() && !(document.getElementById("app") && document.getElementById("app").getAttribute("data-api-base"))) return;
     } catch (eL) {}
     try {
+      if (typeof pokerTrackAnalyticsEvent === "function") pokerTrackAnalyticsEvent("section_opened", { section: section });
       var body =
         typeof pokerGuestOrAuthedPostBody === "function"
           ? pokerGuestOrAuthedPostBody({ section: section })

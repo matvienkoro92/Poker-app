@@ -1397,8 +1397,51 @@
         "app-visitor-id.js"
       ],
       "consumedBy": [
+        "app-analytics.js",
         "app-api-tracking.js",
         "app-shell-bootstrap.js"
+      ]
+    },
+    {
+      "name": "getInstallationId",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-visitor-id.js"
+      ],
+      "consumedBy": [
+        "app-analytics.js",
+        "app-club-choice-vote.js",
+        "app-private-cash.js",
+        "app-raffles-public.js",
+        "app-raffles.js",
+        "app-sng-champions.js"
+      ]
+    },
+    {
+      "name": "pokerAnalyticsEnsureSession",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-analytics.js"
+      ],
+      "consumedBy": [
+        "app-analytics.js",
+        "app-api-tracking.js"
+      ]
+    },
+    {
+      "name": "pokerTrackAnalyticsEvent",
+      "domain": "tracking",
+      "exportedBy": [
+        "app-analytics.js"
+      ],
+      "consumedBy": [
+        "app-daily-poker.js",
+        "app-club-choice-vote.js",
+        "app-private-cash.js",
+        "app-raffles-public.js",
+        "app-raffles.js",
+        "app-section-views.js",
+        "app-sng-champions.js"
       ]
     },
     {

@@ -443,19 +443,23 @@ function initPlayerCrmVisitsRuntime(ctx) {
     if (!rows.length) return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__timeline-item\">За выбранный период просмотров по разделам пока нет.</div></div>";
     var total = rows.reduce(function (sum, row) { return sum + (Number(row.count) || 0); }, 0);
     var incomplete = rows.some(function (row) { return row && row.incompleteSections; });
+    var exact = rows.some(function (row) { return row && row.exact; });
     return "<div class=\"player-crm__modal-content\">" +
       (incomplete
         ? "<div class=\"player-crm__notice player-crm__notice--warning\">Детальная разбивка по разделам была неполной, поэтому показан общий счётчик визитов за период.</div>"
         : "") +
       "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visit-sections-table\"><thead><tr>" +
-      "<th>Раздел</th><th>Просмотров</th><th>Доля</th>" +
+      (exact
+        ? "<th>Раздел</th><th>Гости</th><th>Зарегистрированные</th><th>Уникальные</th><th>Открытия</th>"
+        : "<th>Раздел</th><th>Просмотров</th><th>Доля</th>") +
       "</tr></thead><tbody>" + rows.map(function (row) {
         var count = Number(row.count) || 0;
         var pct = total > 0 ? Math.round((count / total) * 100) : 0;
         return "<tr>" +
           "<td>" + esc(sectionLabel(row.section)) + "</td>" +
-          "<td>" + esc(intFmt(count)) + "</td>" +
-          "<td>" + esc(pct) + "%</td>" +
+          (exact
+            ? "<td>" + esc(intFmt(row.guestInstallations)) + "</td><td>" + esc(intFmt(row.registeredVisitors)) + "</td><td>" + esc(intFmt(row.uniqueVisitors)) + "</td><td>" + esc(intFmt(count)) + "</td>"
+            : "<td>" + esc(intFmt(count)) + "</td><td>" + esc(pct) + "%</td>") +
         "</tr>";
       }).join("") + "</tbody></table></div></div>";
   }

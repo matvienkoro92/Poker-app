@@ -47,6 +47,7 @@ const handlers = {
   "club-calendar-events": () => require(path.join(handlersDir, "club-calendar-events.js")),
   "private-cash": () => require(path.join(handlersDir, "private-cash.js")),
   visit: () => require(path.join(handlersDir, "visit.js")),
+  analytics: () => require(path.join(handlersDir, "analytics.js")),
   "section-views": () => require(path.join(handlersDir, "section-views.js")),
   "account-debug": () => require(path.join(handlersDir, "account-debug.js")),
   users: () => require(path.join(handlersDir, "users.js")),

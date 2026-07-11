@@ -497,6 +497,9 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка");
+        if (payload && payload.action === "join" && typeof pokerTrackAnalyticsEvent === "function") {
+          pokerTrackAnalyticsEvent("private_cash_applied", { name: String(payload.eventId || "event"), event_id: "evt_cash_" + String(payload.eventId || "event").replace(/[^a-zA-Z0-9_-]/g, "_") + "_" + (typeof getInstallationId === "function" ? getInstallationId() : "") });
+        }
         state = data.state && data.state.ok ? data.state : data;
         updateHomeButton(state);
         render();

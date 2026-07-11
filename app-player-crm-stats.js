@@ -48,10 +48,11 @@ function initPlayerCrmStatsRuntime(deps) {
     var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
     var audienceSummary = summary && summary.audience && typeof summary.audience === "object" ? summary.audience : null;
     var confirmedAudience = audienceSummary ? Number(audienceSummary.confirmed) || 0 : 0;
-    var probableAudience = audienceSummary ? Number(audienceSummary.probableGuests) || 0 : 0;
-    var estimatedRealAudience = audienceSummary ? Number(audienceSummary.estimatedReal) || 0 : confirmedAudience + probableAudience;
-    var technicalAudience = audienceSummary ? Number(audienceSummary.technical) || 0 : Math.max(0, statPlayers - estimatedRealAudience);
+    var activeAnonymousInstallations = audienceSummary ? Number(audienceSummary.activeAnonymousInstallations) || 0 : 0;
+    var estimatedRealAudience = audienceSummary ? Number(audienceSummary.estimatedReal) || 0 : confirmedAudience + activeAnonymousInstallations;
     var visitsSummary = summary && summary.visits && typeof summary.visits === "object" ? summary.visits : null;
+    var exactVisits = !!(visitsSummary && visitsSummary.exact);
+    var analyticsSummary = summary && summary.analytics && typeof summary.analytics === "object" ? summary.analytics : null;
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statPokerPlusUnlinked = summary ? Number(summary.pokerPlusUnlinked) || 0 : 0;
@@ -69,7 +70,6 @@ function initPlayerCrmStatsRuntime(deps) {
       return current && current[key] != null ? Number(current[key]) || 0 : fallback;
     }
     var currentStats = [
-      ["Технических записей в базе", currentValue("players", players.length), "сейчас", "base"],
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
       ["Poker21 всего", currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0), "сейчас", "pokerplus-total"],
       ["Bot доступен", currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length), "сейчас", "bot-reach"],
@@ -86,7 +86,14 @@ function initPlayerCrmStatsRuntime(deps) {
     var globalFirstVisitDate = visitsSummary && visitsSummary.globalFirstTrackedDate ? String(visitsSummary.globalFirstTrackedDate) : "";
     var visibleFirstVisitDate = firstVisitDate || globalFirstVisitDate;
     var firstVisitDateLabel = visibleFirstVisitDate && visibleFirstVisitDate.length >= 10 ? visibleFirstVisitDate.slice(8, 10) + "." + visibleFirstVisitDate.slice(5, 7) : visibleFirstVisitDate;
-    var periodWarning = summary && summary.historicalDataIncomplete
+    var firstVisitDateFullLabel = visibleFirstVisitDate && visibleFirstVisitDate.length >= 10
+      ? visibleFirstVisitDate.slice(8, 10) + "." + visibleFirstVisitDate.slice(5, 7) + "." + visibleFirstVisitDate.slice(0, 4)
+      : visibleFirstVisitDate;
+    var exactTrackingNotice = exactVisits && firstVisitDateFullLabel
+      ? "<div class=\"player-crm__notice" + (visitsIncomplete ? " player-crm__notice--warning" : "") + "\">Точная аналитика ведётся с " + esc(firstVisitDateFullLabel) + "." +
+        (visitsIncomplete ? " Более ранние технические счётчики не включены." : "") + "</div>"
+      : "";
+    var periodWarning = summary && summary.historicalDataIncomplete && !exactVisits
       ? "<div class=\"player-crm__notice player-crm__notice--warning\">" +
         (visitsUnavailableBeforeStart && firstVisitDateLabel
           ? "Дневная статистика посещений начинается с " + esc(firstVisitDateLabel) + ", поэтому за " + esc(periodLabel()) + " дневные посещения не показываются. Общие данные за всё время остаются в периоде «За все время»."
@@ -118,11 +125,22 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
+    var guestConversionRate = exactVisits ? Math.max(0, Number(visitsSummary.guestConversionRate) || 0) : 0;
+    var guestConversionText = exactVisits
+      ? intFmt(visitsSummary.guestConverted) + " · " + String(guestConversionRate).replace(".", ",") + "%"
+      : "—";
+    var sessionsBeforeRegistrationText = exactVisits
+      ? String(Math.max(0, Number(visitsSummary.averageSessionsBeforeRegistration) || 0)).replace(".", ",")
+      : "—";
     var periodMetrics = [
-      ["Реальная аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience)],
-      ["Подтверждённые пользователи · " + periodLabel(), intFmt(confirmedAudience)],
-      ["Вероятные уникальные гости · " + periodLabel(), intFmt(probableAudience)],
-      ["Отсеяно технических ID · " + periodLabel(), intFmt(technicalAudience)],
+      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience)],
+      ["Новые посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.new) : "—"],
+      ["Повторные посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.repeat) : "—"],
+      ["Сессии · " + periodLabel(), exactVisits ? intFmt(visitsSummary.total) : "—"],
+      ["Гостевые установки · " + periodLabel(), intFmt(activeAnonymousInstallations)],
+      ["Зарегистрированные посетители · " + periodLabel(), intFmt(confirmedAudience)],
+      ["Гость → регистрация · " + periodLabel(), guestConversionText],
+      ["Сессий до регистрации · в среднем", sessionsBeforeRegistrationText],
       ["Зарегано · всего", intFmt(statRegistrations)],
       ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
       ["Зарегано · только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
@@ -136,8 +154,6 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Push · подписки", "+" + intFmt(statPushSubscribers), "data-crm-push-modal", "plus"],
       ["Push · отписки", "−" + intFmt(statPushUnsubscribers), "data-crm-push-modal", "minus"],
       ["Push · итого", intFmt(statPushNet), "data-crm-push-modal"],
-      ["Депозиты · сумма", money(statDeposits)],
-      ["Депозиты · количество", intFmt(statDepositCount)],
       ["Крутка дня · уникальных крутили · " + periodLabel(), dailyPokerValue("uniquePlayers")],
       ["Крутка дня · круток всего · " + periodLabel(), dailyPokerValue("totalSpins")],
       ["Крутка дня · бонусов начислено · " + periodLabel(), dailyPokerValue("bonusAmount")],
@@ -162,11 +178,35 @@ function initPlayerCrmStatsRuntime(deps) {
         "<div class=\"player-crm__stats-section-head\"><h3>За все время</h3><span>состояние базы</span></div>" +
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\">" + currentStats.map(currentCard).join("") + "</div>" +
       "</section>";
+    var analyticsLabels = {
+      home: "Главная", raffles: "Розыгрыши", rating: "Рейтинг", chat: "Чат", profile: "Профиль",
+      "daily-poker": "Крутка дня", "sng-champions": "SNG", "private-cash": "Приватный кеш",
+      raffle_joined: "Участие в розыгрышах", daily_poker_spin: "Крутка дня", sng_joined: "Заявки SNG",
+      private_cash_applied: "Заявки в приватный кеш", club_choice_voted: "Голосование клуба",
+      poker21_linked: "Привязка Poker21", subscription_enabled: "Подписки", push_enabled: "Push",
+    };
+    function analyticsTable(title, rows) {
+      rows = Array.isArray(rows) ? rows.slice(0, 20) : [];
+      if (!rows.length) return "";
+      return "<section class=\"player-crm__analytics-breakdown\"><h3>" + esc(title) + "</h3>" +
+        "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table\"><thead><tr>" +
+        "<th>Раздел / действие</th><th>Гости</th><th>Зарегистрированные</th><th>Уникальные</th><th>Действия</th>" +
+        "</tr></thead><tbody>" + rows.map(function (row) {
+          return "<tr><td>" + esc(analyticsLabels[row.name] || row.name || "—") + "</td>" +
+            "<td>" + esc(intFmt(row.guestInstallations)) + "</td><td>" + esc(intFmt(row.registeredVisitors)) + "</td>" +
+            "<td>" + esc(intFmt(row.uniqueVisitors)) + "</td><td>" + esc(intFmt(row.events)) + "</td></tr>";
+        }).join("") + "</tbody></table></div></section>";
+    }
+    var journeyTables = analyticsSummary && analyticsSummary.available
+      ? analyticsTable("Куда заходили", analyticsSummary.sections) + analyticsTable("В чём участвовали", analyticsSummary.activities)
+      : "";
     if (currentEl) currentEl.innerHTML = currentSection;
     el.innerHTML =
+      exactTrackingNotice +
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__period-metrics\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>";
+      "<div class=\"player-crm__period-metrics\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
+      journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
     return { active: players.length, botSubscribers: botSubscribers, pushSubscribers: pushSubscribers, deposits: deposits, messages: messages };

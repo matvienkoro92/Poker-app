@@ -15,6 +15,7 @@
     "smoke:visual": "node scripts/smoke-visual.js",
     "smoke:chat": "node scripts/smoke-chat-flows.js",
     "test:daily-poker": "node scripts/daily-poker-tests.js",
+    "test:analytics": "node scripts/analytics-tracking-tests.js",
     "test:keyboard-dock": "node scripts/chat-keyboard-dock-math-tests.js",
     "check:syntax": "node scripts/check-js-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",

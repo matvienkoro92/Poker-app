@@ -1057,10 +1057,11 @@
     spendAttemptImmediately();
     setBusy(true);
     showMessage("Начинаем раздачу", false);
+    var playIdempotencyKey = idempotencyKey();
     fetch(authUrl("play"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(authBody({ idempotencyKey: idempotencyKey(), deviceId: dailyPokerDeviceId() })),
+      body: JSON.stringify(authBody({ idempotencyKey: playIdempotencyKey, deviceId: dailyPokerDeviceId() })),
     })
       .then(function (r) {
         return readJson(r).then(function (data) {
@@ -1074,6 +1075,9 @@
       })
       .then(function (data) {
         clearOptimisticSpend();
+        if (typeof pokerTrackAnalyticsEvent === "function") {
+          pokerTrackAnalyticsEvent("daily_poker_spin", { event_id: "evt_daily_" + String(playIdempotencyKey).replace(/[^a-zA-Z0-9_-]/g, "_") });
+        }
         revealCards(data, evt && evt.currentTarget);
       })
       .catch(function (err) {

@@ -8610,6 +8610,23 @@ body.club-choice-vote-open {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.sng-champions-modal__tournament-picker { margin: 0 0 18px; padding: 14px; border: 1px solid rgba(221,160,55,.45); border-radius: 20px; background: rgba(7,11,18,.88); }
+.sng-champions-modal__tournament-picker-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; color:#ffe0a1; font-weight:800; text-transform:uppercase; }
+.sng-champions-modal__tournament-picker-head button { border:1px solid #98651f; border-radius:999px; padding:8px 12px; background:#111722; color:#ffe0a1; font-weight:800; }
+.sng-champions-modal__tournament-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; }
+.sng-champions-modal__tournament-option { min-width:0; padding:12px 14px; border:1px solid #5f492a; border-radius:15px; background:#0d121b; color:#fff0c8; text-align:left; }
+.sng-champions-modal__tournament-option strong,.sng-champions-modal__tournament-option span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sng-champions-modal__tournament-option span { margin-top:5px; color:#aaa18f; font-size:12px; }
+.sng-champions-modal__tournament-option.is-active { border-color:#ff9d19; background:linear-gradient(135deg,#ffe78e,#ff8518); color:#17110a; box-shadow:0 0 20px rgba(255,143,20,.25); }
+.sng-champions-modal__tournament-option.is-active span { color:#513716; }
+.sng-champions-modal__tournament-card { display:grid; grid-template-columns:1fr; gap:14px; }
+.sng-champions-modal__tournament-card--completed { grid-template-columns:minmax(0,1.45fr) minmax(230px,.55fr); align-items:stretch; }
+.sng-champions-modal__tournament-main { min-width:0; }
+.sng-champions-modal__hero { position:relative; }
+.sng-champions-modal__hero .sng-champions-modal__signup-tools { position:absolute; right:12px; top:12px; z-index:2; }
+.sng-champions-modal__champion-card { margin:0; min-height:100%; align-content:center; }
+@media (max-width:720px) { .sng-champions-modal__tournament-card--completed { grid-template-columns:1fr 1fr; } .sng-champions-modal__tournament-options { grid-template-columns:1fr; } }
+
 .sng-champions-modal__tabs--admin {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

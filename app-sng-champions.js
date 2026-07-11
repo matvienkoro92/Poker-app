@@ -23,6 +23,7 @@
   var bracketTimerInterval = null;
   var versionChecking = false;
   var stateRevision = "";
+  var activeTournamentId = "";
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -186,7 +187,8 @@
   }
 
   function fetchState() {
-    return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" }).then(function (res) {
+    var selected = activeTournamentId ? "&tournamentId=" + encodeURIComponent(activeTournamentId) : "";
+    return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + selected + "&_t=" + Date.now(), { cache: "no-store" }).then(function (res) {
       return res.json();
     });
   }
@@ -231,6 +233,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
         state = data;
+        activeTournamentId = data.tournamentId || activeTournamentId;
         rememberStateRevision(data);
         updateHomePlaque();
         render();
@@ -254,13 +257,18 @@
     return fetch(baseUrl() + API_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(apiBody(payload || {})),
+      body: JSON.stringify(apiBody(Object.assign({ tournamentId: activeTournamentId }, payload || {}))),
       signal: controller ? controller.signal : undefined,
     })
       .then(function (res) {
         return res.json().then(function (data) {
           if (!res.ok || !data || !data.ok) throw new Error((data && data.error) || "Ошибка");
+          if (payload && payload.action === "join" && typeof pokerTrackAnalyticsEvent === "function") {
+            var sngEventId = payload.eventId || payload.event_id || data.eventId || data.event_id || "current";
+            pokerTrackAnalyticsEvent("sng_joined", { name: String(sngEventId), event_id: "evt_sng_" + String(sngEventId).replace(/[^a-zA-Z0-9_-]/g, "_") + "_" + (typeof getInstallationId === "function" ? getInstallationId() : "") });
+          }
           state = data;
+          activeTournamentId = data.tournamentId || activeTournamentId;
           rememberStateRevision(data);
           render();
           updateHomePlaque();
@@ -874,13 +882,27 @@
     var pending = (data.counts && Number(data.counts.pending)) || entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; }).length;
     var activeEntries = approved + pending;
     var capacity = Number(data.capacity) || 32;
-    return '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' +
-      '<figure class="sng-champions-modal__hero">' +
+    var winner = data.winnerId && data.playersById ? data.playersById[data.winnerId] : null;
+    var winnerHtml = winner ? '<article class="club-choice-vote-modal__candidate sng-champions-modal__champion-card">' +
+      '<div class="club-choice-vote-modal__candidate-main">' + renderPlayerAvatar(Object.assign({ id: data.winnerId }, winner)) +
+      '<div><span>Победитель турнира</span><strong>' + escapeHtml(winner.pokerPlusNickname || winner.displayName || "Чемпион") + '</strong></div></div></article>' : "";
+    return '<div class="sng-champions-modal__tournament-card' + (winner ? ' sng-champions-modal__tournament-card--completed' : '') + '">' +
+      '<div class="sng-champions-modal__tournament-main"><figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--players" aria-label="Подтвержденных игроков">' + escapeHtml(String(approved) + "/" + String(capacity)) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--requests" aria-label="Активных заявок">' + escapeHtml(activeEntries) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--waiting" aria-label="Ждут подтверждения">' + escapeHtml(pending) + '</span>' +
-      '</figure>';
+        (edit ? '<figcaption class="sng-champions-modal__signup-tools">' + edit + '</figcaption>' : '') +
+      '</figure></div>' + winnerHtml + '</div>';
+  }
+
+  function renderTournamentMenu(data) {
+    var rows = Array.isArray(data.tournaments) ? data.tournaments : [];
+    if (!rows.length) return "";
+    return '<section class="sng-champions-modal__tournament-picker"><div class="sng-champions-modal__tournament-picker-head"><span>Выберите турнир</span>' +
+      (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
+      rows.map(function (item) { return '<button type="button" class="sng-champions-modal__tournament-option' + (item.id === data.tournamentId ? ' is-active' : '') + '" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span></button>'; }).join('') +
+      '</div></section>';
   }
 
   function renderDescription(data) {
@@ -1005,7 +1027,7 @@
     var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
     var columnsHtml = renderEntryColumn("Подтверждены", approvedEntries, data) +
       (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "");
-    return renderSignupSummary(data, entries) +
+    return renderTournamentMenu(data) + renderSignupSummary(data, entries) +
       renderDescription(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
@@ -1465,6 +1487,18 @@
   }
 
   function onModalClick(event) {
+    var tournament = event.target && event.target.closest ? event.target.closest("[data-sng-tournament]") : null;
+    if (tournament) {
+      activeTournamentId = tournament.getAttribute("data-sng-tournament") || "";
+      renderLoading(); loadState(); return;
+    }
+    var createTournament = event.target && event.target.closest ? event.target.closest("[data-sng-create-tournament]") : null;
+    if (createTournament) {
+      var title = window.prompt("Название нового турнира", "СНГ Лига Чемпионов Два Туза");
+      if (!title) return;
+      postAction({ action: "createTournament", title: title }, { status: "Создаю турнир...", success: "Турнир создан" });
+      return;
+    }
     var close = event.target && event.target.closest ? event.target.closest("[data-sng-close]") : null;
     if (close) {
       closeModal();

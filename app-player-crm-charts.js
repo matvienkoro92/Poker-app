@@ -18,6 +18,8 @@ function initPlayerCrmChartsRuntime(deps) {
     visits: "#f8d98a",
     users: "#60a5fa",
     players: "#f8d98a",
+    registeredVisitors: "#34d399",
+    participations: "#fb7185",
     registrations: "#60a5fa",
     poker21: "#c084fc",
     bot: "#34d399",

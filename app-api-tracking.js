@@ -250,7 +250,7 @@ function updateVisitorCounter() {
     return;
   }
 
-  const visitorId = getVisitorId();
+  if (typeof pokerAnalyticsEnsureSession === "function") pokerAnalyticsEnsureSession();
   (function tryTrackRef() {
     var ref = getPokerTrackingRefFromEnv();
     if (ref) {
@@ -260,51 +260,9 @@ function updateVisitorCounter() {
       recordTrackingLinkHit(ref);
     }
   })();
-  var authLeading =
-    typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
-  const apiUrl =
-    base +
-    "/api/visit" +
-    (authLeading === "?" ? "?" : authLeading + "&") +
-    "visitor_id=" +
-    encodeURIComponent(visitorId);
-  const hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
-  const fetchOpts = hasCred
-    ? {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          typeof pokerGuestOrAuthedPostBody === "function"
-            ? pokerGuestOrAuthedPostBody({ visitor_id: visitorId })
-            : { visitor_id: visitorId }
-        ),
-      }
-    : { method: "GET" };
-
-  function doFetch(retryCount) {
-    fetch(apiUrl, fetchOpts)
-      .then(function (res) {
-        if (!res.ok) return Promise.reject(new Error("visit api " + res.status));
-        return res.json();
-      })
-      .then(function (data) {
-        if (hasCounterEls) applyVisitorCounts(data, elTotal, elUnique, elReturning);
-        if (data && data.dtId) sessionStorage.setItem("poker_dt_id", data.dtId);
-        if (data && data.ok === false && hasCounterEls) fetchVisitorStatsOnly();
-      })
-      .catch(function () {
-        if (hasCounterEls) setDash();
-        if (retryCount > 0) {
-          setTimeout(function () { doFetch(retryCount - 1); }, 1500);
-        } else {
-          if (hasCounterEls) {
-            fetchVisitorStatsOnly();
-            setTimeout(updateVisitorCounter, 5000);
-          }
-        }
-      });
-  }
-  doFetch(1);
+  // Legacy /api/visit increments on every request and is no longer a source for business analytics.
+  // Keep its read-only admin counters available without writing another artificial visit.
+  if (hasCounterEls) fetchVisitorStatsOnly();
 }
 
 function applyVisitorCounts(data, elTotal, elUnique, elReturning) {

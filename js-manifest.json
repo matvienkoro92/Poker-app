@@ -245,6 +245,7 @@
       "app-network.js",
       "app-visitor-id.js",
       "app-api-tracking.js",
+      "app-analytics.js",
       "app-shell-bootstrap.js",
       "app.js",
       "app-section-views.js"

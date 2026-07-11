@@ -513,7 +513,14 @@
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
+        function trackSuccessfulVote() {
+          if (!payload || payload.action !== "vote" || typeof pokerTrackAnalyticsEvent !== "function") return;
+          var matchId = String(payload.matchId || "match").replace(/[^a-zA-Z0-9_-]/g, "_");
+          var installation = typeof getInstallationId === "function" ? getInstallationId() : "";
+          pokerTrackAnalyticsEvent("club_choice_voted", { name: matchId, event_id: "evt_vote_" + matchId + "_" + installation });
+        }
         if (data && data.state && data.state.ok) {
+          trackSuccessfulVote();
           state = data.state;
           homePlaqueState = state;
           render();
@@ -521,6 +528,7 @@
           return state;
         }
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка");
+        trackSuccessfulVote();
         state = data;
         homePlaqueState = data;
         render();
