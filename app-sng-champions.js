@@ -1521,7 +1521,7 @@
       var prize = button.querySelector(".home-club-choice-plaque__prize");
       var entry = button.querySelector(".home-club-choice-plaque__entry");
       if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
-      if (title && state.title) title.innerHTML = escapeHtml(state.title).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>');
+      if (title && state.title) title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title">' + escapeHtml(state.title).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>') + '</span>';
       if (prize && state.prizes && state.prizes[0]) prize.textContent = state.prizes[0].text || "";
       if (entry) entry.textContent = "Вход " + String(state.buyIn || "0р");
       if (sub) {

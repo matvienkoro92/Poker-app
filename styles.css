@@ -7887,6 +7887,14 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   vertical-align: -0.04em;
 }
 
+.home-club-choice-plaque--sng .home-club-choice-plaque__dynamic-title {
+  display: inline;
+}
+
+.home-club-choice-plaque--sng .home-club-choice-plaque__dynamic-title .home-club-choice-plaque__ordinal-one {
+  white-space: nowrap;
+}
+
 .app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque {
   padding-right: 12%;
   padding-left: 28%;
