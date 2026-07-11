@@ -24,6 +24,7 @@
   var versionChecking = false;
   var stateRevision = "";
   var activeTournamentId = "";
+  var tournamentDetailOpen = false;
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -151,6 +152,7 @@
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
     activeTabManual = false;
+    tournamentDetailOpen = false;
     startBracketTimerRefresh();
     renderLoading();
     loadState();
@@ -815,12 +817,12 @@
     var tab = activeTabManual
       ? (activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup")
       : (bracketStarted ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup");
-    var createTab = isAdmin ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "create" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "create" ? "true" : "false") + '" data-sng-tab="create">' + (bracketStarted ? "Редактировать" : "Создать") + '</button>' : "";
-    var signupTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Запись</button>';
+    var signupTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Инфо</button>';
     var bracketTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>';
     activeTab = tab;
-    return '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs' + (isAdmin ? " sng-champions-modal__tabs--admin" : "") + '" role="tablist" aria-label="Разделы СНГ">' +
-        (bracketStarted ? bracketTab + signupTab + createTab : createTab + signupTab + bracketTab) +
+    return '<div class="sng-champions-modal__detail-nav"><button type="button" class="sng-champions-modal__back" data-sng-tournament-back>← Турниры</button></div>' +
+      '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs" role="tablist" aria-label="Разделы турнира">' +
+        bracketTab + signupTab +
       '</div>' +
       '<div class="club-choice-vote-modal__tab-panels">' +
         (isAdmin ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="create"' + (tab === "create" ? "" : " hidden") + '>' + createHtml + '</div>' : "") +
@@ -901,7 +903,7 @@
     if (!rows.length) return "";
     return '<section class="sng-champions-modal__tournament-picker"><div class="sng-champions-modal__tournament-picker-head"><span>Выберите турнир</span>' +
       (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
-      rows.map(function (item) { return '<button type="button" class="sng-champions-modal__tournament-option' + (item.id === data.tournamentId ? ' is-active' : '') + '" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span></button>'; }).join('') +
+      rows.map(function (item) { return '<button type="button" class="sng-champions-modal__tournament-option' + (item.id === data.tournamentId ? ' is-active' : '') + '" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' + (item.activeStage ? '<em class="sng-champions-modal__tournament-stage">Сейчас идёт: ' + escapeHtml(item.activeStage) + '</em>' : '') + '</button>'; }).join('') +
       '</div></section>';
   }
 
@@ -1027,7 +1029,7 @@
     var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
     var columnsHtml = renderEntryColumn("Подтверждены", approvedEntries, data) +
       (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "");
-    return renderTournamentMenu(data) + renderSignupSummary(data, entries) +
+    return renderSignupSummary(data, entries) +
       renderDescription(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
@@ -1432,7 +1434,9 @@
     ensureModal();
     var data = state || {};
     setStatus("");
-    bodyEl.innerHTML = renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data);
+    bodyEl.innerHTML = tournamentDetailOpen
+      ? renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data)
+      : renderTournamentMenu(data);
     updateJoinDockBodyClass();
     window.requestAnimationFrame(fitBracketMapsToViewport);
   }
@@ -1490,7 +1494,17 @@
     var tournament = event.target && event.target.closest ? event.target.closest("[data-sng-tournament]") : null;
     if (tournament) {
       activeTournamentId = tournament.getAttribute("data-sng-tournament") || "";
+      tournamentDetailOpen = true;
+      activeTab = "signup";
+      activeTabManual = true;
       renderLoading(); loadState(); return;
+    }
+    var tournamentBack = event.target && event.target.closest ? event.target.closest("[data-sng-tournament-back]") : null;
+    if (tournamentBack) {
+      tournamentDetailOpen = false;
+      activeTabManual = false;
+      render();
+      return;
     }
     var createTournament = event.target && event.target.closest ? event.target.closest("[data-sng-create-tournament]") : null;
     if (createTournament) {
