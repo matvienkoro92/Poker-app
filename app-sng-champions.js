@@ -18,6 +18,7 @@
   var activeLoserBracketStageManual = false;
   var activeBracketView = "winners";
   var bracketMapExpanded = false;
+  var bracketMapFit = { winners: false, losers: false };
   var activeBracketMapSelection = null;
   var bracketTimerInterval = null;
   var versionChecking = false;
@@ -157,6 +158,8 @@
   function closeModal() {
     if (!modal) return;
     bracketMapExpanded = false;
+    bracketMapFit.winners = false;
+    bracketMapFit.losers = false;
     modal.classList.remove("club-choice-vote-modal--open");
     document.body.classList.remove("club-choice-vote-open");
     stopBracketTimerRefresh();
@@ -1209,10 +1212,13 @@
     var stageAttr = options.stageAttr || "data-sng-stage-index";
     var title = options.title || "Вся сетка";
     var kind = options.kind || "winners";
+    var fitToScreen = !!bracketMapFit[kind];
     var selected = selectedBracketMapMatch(rounds, kind);
     var extraClass = options.extraClass ? " " + options.extraClass : "";
     var expandedClass = bracketMapExpanded ? " sng-champions-modal__bracket-map-wrap--expanded" : "";
-    var mapToggleButton = '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Уменьшить" : "Увеличить") + '</button>';
+    var fitClass = fitToScreen ? " sng-champions-modal__bracket-map-wrap--fit" : "";
+    var mapToggleButton = '<button type="button" data-sng-bracket-map="' + (bracketMapExpanded ? "close" : "open") + '">' + (bracketMapExpanded ? "Закрыть" : "Увеличить") + '</button>';
+    var mapFitButton = '<button type="button" data-sng-bracket-map-fit="' + escapeHtml(kind) + '">' + (fitToScreen ? "Вернуть" : "Уменьшить") + '</button>';
     var baseMatchCount = Math.max.apply(null, rounds.map(function (round) {
       return Array.isArray(round && round.matches) ? round.matches.length : 0;
     }).concat([1]));
@@ -1220,14 +1226,10 @@
     var connectorRowStep = isTournamentMap
       ? (kind === "losers" ? (bracketMapExpanded ? 93 : 68) : (bracketMapExpanded ? 89 : 64))
       : (bracketMapExpanded ? 47 : 46);
-    return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
+    return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + fitClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
-        '<span class="sng-champions-modal__bracket-map-title-row">' +
-          (bracketMapExpanded ? '' : '<strong>' + escapeHtml(title) + '</strong>') +
-          '<span class="sng-champions-modal__bracket-map-head-left">' + mapToggleButton + '</span>' +
-        '</span>' +
-        (bracketMapExpanded ? '<strong>' + escapeHtml(title) + '</strong>' : '') +
-        mapToggleButton +
+        '<strong>' + escapeHtml(title) + '</strong>' +
+        '<span class="sng-champions-modal__bracket-map-head-actions">' + mapToggleButton + mapFitButton + '</span>' +
       '</div>' +
       '<div class="sng-champions-modal__bracket-map-legend"><span aria-hidden="true"></span>Красный круг - пара еще не сыграла</div>' +
       '<div class="sng-champions-modal__bracket-map" style="--sng-map-rows:' + escapeHtml(baseMatchCount) + '" role="img" aria-label="Обзор всех этапов СНГ Лиги Чемпионов">' +
@@ -1410,6 +1412,21 @@
     setStatus("");
     bodyEl.innerHTML = renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data);
     updateJoinDockBodyClass();
+    window.requestAnimationFrame(fitBracketMapsToViewport);
+  }
+
+  function fitBracketMapsToViewport() {
+    if (!bodyEl) return;
+    Array.prototype.forEach.call(bodyEl.querySelectorAll(".sng-champions-modal__bracket-map-wrap--fit"), function (wrap) {
+      var map = wrap.querySelector(".sng-champions-modal__bracket-map");
+      if (!map) return;
+      map.style.removeProperty("--sng-map-fit-scale");
+      var wrapStyle = window.getComputedStyle(wrap);
+      var availableWidth = Math.max(1, wrap.clientWidth - (parseFloat(wrapStyle.paddingLeft) || 0) - (parseFloat(wrapStyle.paddingRight) || 0));
+      var availableHeight = Math.max(1, wrap.clientHeight - map.offsetTop - (parseFloat(wrapStyle.paddingBottom) || 0));
+      var scale = Math.min(1, availableWidth / Math.max(1, map.scrollWidth), availableHeight / Math.max(1, map.scrollHeight));
+      map.style.setProperty("--sng-map-fit-scale", String(Math.max(0.08, scale).toFixed(4)));
+    });
   }
 
   function updateHomePlaque() {
@@ -1658,9 +1675,24 @@
     var bracketMap = event.target && event.target.closest ? event.target.closest("[data-sng-bracket-map]") : null;
     if (bracketMap) {
       bracketMapExpanded = bracketMap.getAttribute("data-sng-bracket-map") === "open";
+      bracketMapFit.winners = false;
+      bracketMapFit.losers = false;
       render();
       setTab("bracket");
       window.requestAnimationFrame(scrollSngBodyTop);
+      return;
+    }
+    var bracketMapFitButton = event.target && event.target.closest ? event.target.closest("[data-sng-bracket-map-fit]") : null;
+    if (bracketMapFitButton) {
+      var fitKind = bracketMapFitButton.getAttribute("data-sng-bracket-map-fit") === "losers" ? "losers" : "winners";
+      var nextFit = !bracketMapFit[fitKind];
+      bracketMapExpanded = false;
+      bracketMapFit.winners = false;
+      bracketMapFit.losers = false;
+      bracketMapFit[fitKind] = nextFit;
+      activeBracketView = fitKind;
+      render();
+      setTab("bracket");
       return;
     }
     var action = event.target && event.target.closest ? event.target.closest("[data-sng-action]") : null;
