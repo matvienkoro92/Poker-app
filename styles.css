@@ -8253,7 +8253,7 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   border: 0;
   border-radius: 13px;
   background:
-    url("./assets/home-sng-champions-stadium-bg.webp?v=2") center / 100% 100% no-repeat;
+    url("./assets/home-sng-champions-stadium-bg.webp?v=3") center / 100% 100% no-repeat;
   box-shadow: none;
 }
 
@@ -8274,7 +8274,7 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   color: #fff0c5;
   font-size: clamp(15px, 4.35vw, 21px);
   line-height: 0.86;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   font-weight: 900;
   text-transform: uppercase;
   white-space: normal;
@@ -8695,7 +8695,7 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
   overflow: hidden !important;
   border: 0 !important;
   border-radius: 18px !important;
-  background: url("./assets/home-sng-champions-stadium-bg.webp?v=2") center / 100% 100% no-repeat !important;
+  background: url("./assets/home-sng-champions-stadium-bg.webp?v=3") center / 100% 100% no-repeat !important;
   box-shadow: none !important;
 }
 

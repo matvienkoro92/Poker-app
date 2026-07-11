@@ -1518,10 +1518,16 @@
     buttons.forEach(function (button) {
       var count = button.querySelector(".home-club-choice-plaque__count");
       var sub = button.querySelector(".home-club-choice-plaque__subtext");
+      var title = button.querySelector(".home-club-choice-plaque__text");
+      var prize = button.querySelector(".home-club-choice-plaque__prize");
+      var entry = button.querySelector(".home-club-choice-plaque__entry");
       if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
+      if (title && state.title) title.textContent = state.title;
+      if (prize && state.prizes && state.prizes[0]) prize.textContent = state.prizes[0].text || "";
+      if (entry) entry.textContent = "Вход " + String(state.buyIn || "0р");
       if (sub) {
         if (state.status === "open") sub.textContent = "Запись открыта";
-        else if (state.status === "bracket") sub.textContent = "Сетка идет";
+        else if (state.status === "bracket") sub.textContent = state.activeStage || "Сетка идет";
         else if (state.status === "completed") sub.textContent = "Итоги готовы";
         else sub.textContent = "Запись закрыта";
       }
