@@ -453,7 +453,6 @@
     var matchCount = Math.max(1, Math.floor(participants / 2));
     while (matchCount >= 1) { counts.push(matchCount); if (matchCount === 1) break; matchCount = Math.floor(matchCount / 2); }
     var stages = counts.map(function (count) { return count === 1 ? "Финал" : count === 2 ? "Полуфинал" : "1/" + String(count); });
-    if (data && data.loserBracketEnabled !== false) { counts.push(1); stages.push("Гранд финал"); }
     return counts.map(function (count, roundIndex) {
       var matches = [];
       for (var index = 0; index < count; index += 1) {
@@ -477,7 +476,7 @@
   }
 
   function buildLoserBracketSkeletonRounds() {
-    return [8, 8, 4, 4, 2, 2, 1, 1].map(function (count, roundIndex) {
+    return [8, 8, 4, 4, 2, 2, 1, 1, 1].map(function (count, roundIndex) {
       var matches = [];
       for (var index = 0; index < count; index += 1) {
         matches.push({
@@ -490,6 +489,7 @@
       return {
         id: "loser-preview-round-" + String(roundIndex),
         index: roundIndex + 1,
+        name: roundIndex === 8 ? "Гранд-финал" : "",
         matches: matches,
         loserBracket: true,
       };
@@ -958,7 +958,7 @@
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-champions-hero-v2.webp?v=1" alt=""></span>' +
+            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art.webp?v=1" alt=""></span>' +
             '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
               '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b></span>' +
               '<dl class="sng-champions-modal__tournament-facts">' +
@@ -1273,7 +1273,9 @@
     if (options.connectorHeight) styleParts.push("--sng-map-connector-height:" + String(options.connectorHeight));
     var styleAttr = styleParts.length ? ' style="' + escapeHtml(styleParts.join(";")) + '"' : "";
     var attrs = options.interactive === false ? "" : ' role="button" tabindex="0" data-sng-map-match="' + escapeHtml(match.id || "") + '" data-sng-map-round="' + escapeHtml(roundIndex) + '"';
+    var knockoutReward = Number(options.knockoutAmount) || 0;
     return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + seriesClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
+      (knockoutReward ? '<span class="sng-champions-modal__map-match-reward">+' + escapeHtml(knockoutReward.toLocaleString("ru-RU")) + 'р команде за проход</span>' : '') +
       renderBracketSeriesRule(match, data, true) +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
@@ -1335,7 +1337,6 @@
           var mapKnockout = showMapAwards && data.knockoutEnabled ? Number(mapPayout.knockouts && mapPayout.knockouts[payoutStage]) || 0 : 0;
           var mapPlaces = payoutStage === "Финал" ? [1, 2] : payoutStage === "1/2" ? [3, 4] : payoutStage === "1/4" ? [5] : [];
           var mapAwards = showMapAwards ? '<div class="sng-champions-modal__map-awards">' +
-            (mapKnockout ? '<span class="sng-champions-modal__map-award sng-champions-modal__map-award--ko">KO +' + escapeHtml(mapKnockout.toLocaleString("ru-RU")) + 'р</span>' : '') +
             mapPlaces.map(function (place) { var amount = Number(mapPayout.places && mapPayout.places[place]) || 0; return amount ? '<span class="sng-champions-modal__map-award"><b>' + place + ' место</b> +' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</span>' : ''; }).join('') +
           '</div>' : '';
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
@@ -1352,6 +1353,7 @@
                   selected: isSelected,
                   rowStart: (matchIndex * rowSpan) + 1,
                   rowSpan: rowSpan,
+                  knockoutAmount: mapKnockout,
                   connectorHeight: String(Math.max(28, (rowSpan * connectorRowStep) + (bracketMapExpanded ? 4 : 3))) + "px"
                 });
               }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
@@ -1406,16 +1408,11 @@
   }
 
   function winnerDisplayRounds(data) {
-    var rounds = Array.isArray(data && data.rounds) ? data.rounds.slice() : [];
-    var grand = grandFinalRound(data);
-    if (grand && !rounds.some(function (round) { return round && round.id === grand.id; })) rounds.push(grand);
-    return rounds;
+    return Array.isArray(data && data.rounds) ? data.rounds.slice() : [];
   }
 
   function loserDisplayRounds(data) {
-    return (Array.isArray(data && data.loserRounds) ? data.loserRounds : []).filter(function (round) {
-      return !(round && (Number(round.index) === 9 || String(round.name || "").toLowerCase() === "гранд-финал"));
-    });
+    return Array.isArray(data && data.loserRounds) ? data.loserRounds.slice() : [];
   }
 
   function renderBracketView(data, options) {
@@ -1505,6 +1502,10 @@
 
   function renderBracket(data) {
     var winnersHtml = renderBracketView(data, { kind: "winners", rounds: winnerDisplayRounds(data) });
+    if (data.loserBracketEnabled === false) {
+      activeBracketView = "winners";
+      return '<div class="sng-champions-modal__bracket-subpanel" data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>';
+    }
     var losersHtml = renderBracketView(data, { kind: "losers", rounds: loserDisplayRounds(data) });
     activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
     return '<div class="sng-champions-modal__bracket-subnav" aria-label="Раздел вкладки Сетка">' +

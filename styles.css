@@ -9823,3 +9823,15 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   font-weight: 1000;
   cursor: pointer;
 }
+
+/* Final SNG home-banner overrides: keep after all legacy plaque variants. */
+.app.app--view-home .home-club-actions-block::before {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-club-actions-block .home-club-choice-plaque--sng .home-club-choice-plaque__text,
+.sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__text {
+  font-size: clamp(13px, 3.2vw, 18px) !important;
+  line-height: 0.92 !important;
+}

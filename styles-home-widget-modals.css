@@ -2666,7 +2666,7 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded {
   position: fixed;
-  inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  inset: calc(env(safe-area-inset-top, 0px) + 142px) 8px max(8px, env(safe-area-inset-bottom));
   z-index: 1300;
   align-content: start;
   overflow: auto;
@@ -2686,7 +2686,7 @@
 
 .sng-champions-modal__bracket-map-wrap--fit {
   position: fixed;
-  inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  inset: calc(env(safe-area-inset-top, 0px) + 142px) 8px max(8px, env(safe-area-inset-bottom));
   z-index: 1300;
   align-content: start;
   overflow: hidden;
@@ -3031,7 +3031,7 @@
 @media (max-width: 700px) {
   .sng-champions-modal__bracket-map-wrap--expanded {
     position: fixed;
-    inset: max(8px, env(safe-area-inset-top, 0px)) 8px max(8px, env(safe-area-inset-bottom, 0px));
+    inset: calc(env(safe-area-inset-top, 0px) + 142px) 8px max(8px, env(safe-area-inset-bottom, 0px));
     z-index: 1300;
     max-height: none;
     margin: 0;
@@ -8639,14 +8639,15 @@ body.club-choice-vote-open {
 @media (max-width:520px) { .sng-champions-modal__tournament-facts { width:72%; } }
 
 /* Карточка турнира в списке: трофейная панель + живая информация. */
-.sng-champions-modal__tournament-option-wrap { border-radius:24px; border-color:#d78515; background:#080d14; box-shadow:0 9px 26px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,220,139,.12); }
-.sng-champions-modal__tournament-option { display:grid; grid-template-columns:minmax(155px,31%) minmax(0,1fr); min-height:260px; padding:0!important; overflow:hidden; background:#0b1119!important; }
-.sng-champions-modal__tournament-art { position:relative; display:block!important; min-width:0; overflow:hidden!important; border-right:1px solid rgba(255,202,91,.62); background:#321a06; }
-.sng-champions-modal__tournament-art::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(29,11,0,.12),transparent 58%,rgba(255,154,24,.16)); pointer-events:none; }
-.sng-champions-modal__tournament-art img { width:100%; height:100%; object-fit:cover; object-position:42% center; transform:scale(1.16); filter:saturate(1.12) contrast(1.04); }
-.sng-champions-modal__tournament-content { display:flex!important; flex-direction:column; min-width:0; padding:28px 34px 24px; background:radial-gradient(circle at 88% 85%,rgba(255,224,113,.22),transparent 30%),linear-gradient(135deg,#ffd76e 0%,#ffad22 45%,#ef6c00 100%); color:#160e05; }
-.sng-champions-modal__tournament-title { display:block; overflow:visible!important; color:#110c06; font-size:clamp(18px,2.5vw,30px); line-height:1.08; white-space:normal!important; text-overflow:clip!important; }
-.sng-champions-modal__tournament-live { align-self:flex-start; display:inline-flex!important; align-items:center; gap:7px; max-width:100%; margin-top:14px!important; padding:7px 13px; overflow:visible!important; border-radius:999px; background:rgba(73,35,5,.78); color:#fff0cb!important; font-size:clamp(11px,1.35vw,15px)!important; font-weight:800; white-space:normal!important; }
+.sng-champions-modal__tournament-option-wrap { border-width:2px; border-radius:26px; border-color:#f1a21c; background:#080d14; box-shadow:0 13px 34px rgba(0,0,0,.5),0 0 22px rgba(255,136,18,.12),inset 0 0 0 1px rgba(255,232,173,.18); }
+.sng-champions-modal__tournament-option { display:grid; grid-template-columns:minmax(180px,34%) minmax(0,1fr); min-height:300px; padding:0!important; overflow:hidden; background:#0b1119!important; }
+.sng-champions-modal__tournament-art { position:relative; z-index:1; display:block!important; min-width:0; overflow:hidden!important; border-right:1px solid rgba(255,214,111,.78); background:#321a06; }
+.sng-champions-modal__tournament-art::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(29,11,0,.08),transparent 60%,rgba(255,190,66,.12)); pointer-events:none; }
+.sng-champions-modal__tournament-art img { width:100%; height:100%; object-fit:cover; object-position:center; filter:saturate(1.08) contrast(1.04); }
+.sng-champions-modal__tournament-content { position:relative; display:flex!important; flex-direction:column; min-width:0; padding:30px 72px 25px 38px; background:radial-gradient(circle at 92% 78%,rgba(255,221,108,.28),transparent 25%),linear-gradient(145deg,#ffd864 0%,#f6a21c 38%,#cf4f04 100%); color:#160e05; }
+.sng-champions-modal__tournament-content::after { content:"♠"; position:absolute; right:3%; bottom:-7%; color:rgba(90,31,0,.12); font-size:150px; line-height:1; pointer-events:none; }
+.sng-champions-modal__tournament-title { position:relative; z-index:1; display:block; overflow:visible!important; color:#100b05; font-size:clamp(18px,2.3vw,27px); line-height:1.08; white-space:normal!important; text-overflow:clip!important; text-shadow:0 1px 0 rgba(255,245,207,.34); }
+.sng-champions-modal__tournament-live { position:relative; z-index:1; align-self:flex-start; display:inline-flex!important; align-items:center; gap:7px; max-width:100%; margin-top:14px!important; padding:8px 14px; overflow:visible!important; border:1px solid rgba(255,213,104,.2); border-radius:999px; background:rgba(74,34,4,.82); color:#fff0cb!important; font-size:clamp(11px,1.35vw,15px)!important; font-weight:800; white-space:normal!important; box-shadow:0 5px 12px rgba(83,31,0,.18); }
 .sng-champions-modal__tournament-live > i { width:9px; height:9px; flex:0 0 9px; border-radius:50%; background:#39df5b; box-shadow:0 0 10px #39df5b; }
 .sng-champions-modal__tournament-live b { color:#ffd85c; }
 .sng-champions-modal__tournament-facts { display:grid; grid-template-columns:1fr; gap:9px; width:min(100%,520px); margin:18px 0 0; padding:15px 0 0; border-top:1px solid rgba(87,43,7,.28); }
@@ -8654,12 +8655,12 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-facts dt { display:flex; align-items:center; gap:9px; color:#5f350d!important; font-size:14px; opacity:1!important; }
 .sng-champions-modal__tournament-facts dt i { display:inline-flex; align-items:center; justify-content:center; width:29px; height:29px; flex:0 0 29px; border-radius:50%; background:#21170d; color:#ffcc54; font-size:11px; font-style:normal; font-weight:900; box-shadow:inset 0 0 0 1px rgba(255,199,73,.48); }
 .sng-champions-modal__tournament-facts dd { color:#fff7e4!important; font-size:clamp(14px,1.8vw,21px); text-shadow:0 1px 2px rgba(77,31,0,.55); }
-.sng-champions-modal__participants-toggle { padding:15px 24px; background:linear-gradient(180deg,#101720,#080d13); font-size:16px; }
+.sng-champions-modal__participants-toggle { padding:17px 25px; background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.05),transparent 34%),linear-gradient(180deg,#111922,#070c12); font-size:17px; }
 .sng-champions-modal__participants-toggle b { min-width:48px; padding:5px 13px; font-size:20px; color:#ffd46c; }
 .sng-champions-modal__tournament-option-wrap.is-active .sng-champions-modal__tournament-option { background:#0b1119!important; }
 @media (max-width:640px) {
-  .sng-champions-modal__tournament-option { grid-template-columns:116px minmax(0,1fr); min-height:238px; }
-  .sng-champions-modal__tournament-content { padding:20px 16px 17px; }
+  .sng-champions-modal__tournament-option { grid-template-columns:125px minmax(0,1fr); min-height:250px; }
+  .sng-champions-modal__tournament-content { padding:20px 48px 17px 16px; }
   .sng-champions-modal__tournament-title { font-size:17px; }
   .sng-champions-modal__tournament-facts div { grid-template-columns:1fr auto; gap:7px; }
   .sng-champions-modal__tournament-facts dt { font-size:11px; }
@@ -8708,7 +8709,7 @@ body.club-choice-vote-open {
 .sng-champions-modal__map-awards { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin:7px 2px 10px; min-height:24px; }
 .sng-champions-modal__map-award { display:inline-flex; align-items:center; gap:4px; padding:5px 9px; border:1px solid #ffc243; border-radius:999px; background:linear-gradient(180deg,#6e3e05,#281703); color:#ffe7a1; font-size:11px; font-weight:900; white-space:nowrap; box-shadow:0 0 14px rgba(255,166,25,.48),inset 0 0 7px rgba(255,224,128,.16); text-shadow:0 1px 2px #000; }
 .sng-champions-modal__map-award b { color:#fff5d5; }
-.sng-champions-modal__map-award--ko { border-color:#58f2df; background:linear-gradient(180deg,#07534b,#031e1c); color:#8affef; box-shadow:0 0 15px rgba(47,235,213,.5),inset 0 0 7px rgba(113,255,239,.13); }
+.sng-champions-modal__map-match-reward { position:absolute; left:50%; top:-26px; z-index:7; display:inline-flex; align-items:center; justify-content:center; max-width:calc(100% - 12px); padding:4px 9px; border:1px solid rgba(77,244,222,.72); border-radius:999px; background:rgba(3,38,35,.96); color:#8affef; font-size:10px; font-weight:900; line-height:1.15; white-space:nowrap; transform:translateX(-50%); box-shadow:0 0 10px rgba(47,235,213,.32); text-shadow:0 1px 2px #000; }
 @media (max-width:600px) { .sng-champions-modal__create-tournament { grid-template-columns:1fr; } .sng-champions-modal__create-tournament label { grid-column:1; } }
 .sng-champions-modal__tournament-card { display:grid; grid-template-columns:1fr; gap:14px; }
 .sng-champions-modal__tournament-card--completed { grid-template-columns:minmax(0,1.45fr) minmax(230px,.55fr); align-items:stretch; }
