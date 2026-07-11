@@ -1554,7 +1554,8 @@
       state.heavyLoadingScope = "";
       return Promise.resolve(false);
     }
-    return fetch(base + "/api/player-crm" + crmQuery({ mode: "heavy" }))
+    var heavyMode = scope === "chart" ? "chart" : "heavy";
+    return fetch(base + "/api/player-crm" + crmQuery({ mode: heavyMode }))
       .then(function (r) {
         return r.json().then(function (data) {
           data = data || {};
@@ -1564,7 +1565,21 @@
         });
       })
       .then(function (data) {
-        if (data && data.ok && Array.isArray(data.players)) applyCrmData(data, true);
+        if (scope === "chart") {
+          if (data && data.ok && data.chartAnalytics) {
+            state.chartAnalytics = data.chartAnalytics;
+            if (data.chartRange && data.chartRange.key) {
+              if (data.chartRange.key === "custom") {
+                state.chartDateFrom = data.chartRange.from || state.chartDateFrom;
+                state.chartDateTo = data.chartRange.to || state.chartDateTo;
+              } else {
+                state.chartPeriod = String(data.chartRange.key);
+              }
+            }
+          }
+        } else if (data && data.ok && Array.isArray(data.players)) {
+          applyCrmData(data, true);
+        }
       })
       .catch(function () {})
       .then(function () {
@@ -1675,7 +1690,7 @@
         loadDailyPokerStats();
         if (shouldLoadHeavy) {
           setTimeout(function () {
-            loadCrmHeavyData("heavy");
+            loadCrmHeavyData("chart");
           }, 120);
         }
         return true;

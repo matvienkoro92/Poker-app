@@ -46,6 +46,11 @@ function initPlayerCrmStatsRuntime(deps) {
     var registrationTelegramOnlyCount = registrationRowsByMethod("telegram").length;
     var registrationBothCount = registrationRowsByMethod("both").length;
     var statPlayers = summary ? Number(summary.players) || 0 : periodPlayers.length;
+    var audienceSummary = summary && summary.audience && typeof summary.audience === "object" ? summary.audience : null;
+    var confirmedAudience = audienceSummary ? Number(audienceSummary.confirmed) || 0 : 0;
+    var probableAudience = audienceSummary ? Number(audienceSummary.probableGuests) || 0 : 0;
+    var estimatedRealAudience = audienceSummary ? Number(audienceSummary.estimatedReal) || 0 : confirmedAudience + probableAudience;
+    var technicalAudience = audienceSummary ? Number(audienceSummary.technical) || 0 : Math.max(0, statPlayers - estimatedRealAudience);
     var visitsSummary = summary && summary.visits && typeof summary.visits === "object" ? summary.visits : null;
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
@@ -64,7 +69,7 @@ function initPlayerCrmStatsRuntime(deps) {
       return current && current[key] != null ? Number(current[key]) || 0 : fallback;
     }
     var currentStats = [
-      ["Пользователей в базе", currentValue("players", players.length), "сейчас", "base"],
+      ["Технических записей в базе", currentValue("players", players.length), "сейчас", "base"],
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
       ["Poker21 всего", currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0), "сейчас", "pokerplus-total"],
       ["Bot доступен", currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length), "сейчас", "bot-reach"],
@@ -114,7 +119,10 @@ function initPlayerCrmStatsRuntime(deps) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
     var periodMetrics = [
-      ["Новых пользователей в базе · " + periodLabel(), intFmt(statPlayers)],
+      ["Реальная аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience)],
+      ["Подтверждённые пользователи · " + periodLabel(), intFmt(confirmedAudience)],
+      ["Вероятные уникальные гости · " + periodLabel(), intFmt(probableAudience)],
+      ["Отсеяно технических ID · " + periodLabel(), intFmt(technicalAudience)],
       ["Зарегано · всего", intFmt(statRegistrations)],
       ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
       ["Зарегано · только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
