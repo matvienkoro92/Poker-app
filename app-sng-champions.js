@@ -1420,6 +1420,8 @@
     Array.prototype.forEach.call(bodyEl.querySelectorAll(".sng-champions-modal__bracket-map-wrap--fit"), function (wrap) {
       var map = wrap.querySelector(".sng-champions-modal__bracket-map");
       if (!map) return;
+      wrap.scrollLeft = 0;
+      wrap.scrollTop = 0;
       map.style.removeProperty("--sng-map-fit-scale");
       var wrapStyle = window.getComputedStyle(wrap);
       var availableWidth = Math.max(1, wrap.clientWidth - (parseFloat(wrapStyle.paddingLeft) || 0) - (parseFloat(wrapStyle.paddingRight) || 0));

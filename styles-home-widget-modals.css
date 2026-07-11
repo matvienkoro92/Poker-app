@@ -2705,6 +2705,10 @@
   transform-origin: top left;
 }
 
+.sng-champions-modal__bracket-map-wrap--fit .sng-champions-modal__bracket-map-head {
+  justify-content: flex-start;
+}
+
 .sng-champions-modal__bracket-map-head {
   display: flex;
   align-items: center;
@@ -2776,6 +2780,10 @@
 .sng-champions-modal__bracket-map-head-actions {
   display: inline-flex;
   gap: 6px;
+}
+
+.sng-champions-modal__bracket-map-wrap--fit .sng-champions-modal__bracket-map-head-actions {
+  flex: 0 0 auto;
 }
 
 .sng-champions-modal__bracket-map-legend {

@@ -75,7 +75,44 @@
   font-weight: 700;
 }
 .player-crm__period--main {
-  min-width: 260px;
+  width: 100%;
+  min-width: 0;
+}
+.player-crm__period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.player-crm__period-tabs button {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.62);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.player-crm__period-tabs button:hover,
+.player-crm__period-tabs button:focus-visible {
+  border-color: rgba(248, 217, 138, 0.62);
+  color: var(--text);
+  outline: none;
+}
+.player-crm__period-tabs .player-crm__period-tab--active {
+  border-color: rgba(255, 231, 160, 0.96);
+  background: linear-gradient(180deg, #f8d98a, #c89642);
+  color: #0b1220;
+  box-shadow: 0 5px 14px rgba(199, 163, 106, 0.22);
+}
+[data-theme="light"] .player-crm__period-tabs button {
+  background: rgba(255, 255, 255, 0.86);
+}
+[data-theme="light"] .player-crm__period-tabs .player-crm__period-tab--active {
+  background: linear-gradient(180deg, #f8d98a, #d3a24f);
+  color: #0b1220;
 }
 .player-crm__period-range {
   min-height: 15px;

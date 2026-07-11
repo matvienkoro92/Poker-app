@@ -17,6 +17,8 @@
     search: "",
     selectedId: "",
     players: [],
+    dailyPokerStats: null,
+    dailyPokerStatsLoading: false,
     blockedUsers: [],
     blockedSearch: "",
     registeredAccounts: [],
@@ -1454,6 +1456,31 @@
     }
   }
 
+  function loadDailyPokerStats() {
+    if (state.dailyPokerStats || state.dailyPokerStatsLoading) return;
+    var base = getApiBaseSafe();
+    if (!base) return;
+    state.dailyPokerStatsLoading = true;
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1", { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || data.ok === false) return;
+        var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
+        state.dailyPokerStats = {
+          uniquePlayers: Math.max(0, Number(stats.totalUniquePlayers != null ? stats.totalUniquePlayers : data.totalUniquePlayers) || 0),
+          totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
+          bonusAwards: Math.max(0, Number(data.totalBonusAwards) || 0),
+        };
+      })
+      .catch(function () {})
+      .then(function () {
+        state.dailyPokerStatsLoading = false;
+        if (state.loaded) renderStats();
+      });
+  }
+
   function postBodySafe(extra) {
     try {
       return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra) : extra;
@@ -1643,6 +1670,7 @@
         state.loadingScope = "";
         state.loaded = true;
         renderAll();
+        loadDailyPokerStats();
         if (shouldLoadHeavy) {
           setTimeout(function () {
             loadCrmHeavyData("heavy");
@@ -2777,14 +2805,17 @@
   }
 
   function syncPeriodInputs() {
-    var period = document.getElementById("playerCrmPeriodSelect");
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
     var periodRange = document.getElementById("playerCrmPeriodRange");
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     var chartFrom = document.getElementById("playerCrmChartDateFrom");
     var chartTo = document.getElementById("playerCrmChartDateTo");
-    if (period) period.value = state.period || "30";
+    document.querySelectorAll("[data-crm-period-tab]").forEach(function (button) {
+      var active = button.getAttribute("data-crm-period-tab") === (state.period || "all");
+      button.classList.toggle("player-crm__period-tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
     if (from) {
       from.value = state.dateFrom || "";
       from.max = state.dateTo || "";
@@ -3161,19 +3192,21 @@
         renderBlockedList();
       });
     }
-    var period = document.getElementById("playerCrmPeriodSelect");
-    if (period) {
-      period.addEventListener("change", function () {
-        state.period = period.value || "30";
+    document.querySelectorAll("[data-crm-period-tab]").forEach(function (periodButton) {
+      periodButton.addEventListener("click", function () {
+        state.period = periodButton.getAttribute("data-crm-period-tab") || "all";
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
-        try {
-          period.blur();
-        } catch (ePeriodBlur) {}
         loadCrmData("data");
+        if (state.period === "custom") {
+          window.requestAnimationFrame(function () {
+            var rangeButton = document.getElementById("playerCrmDateRangeBtn");
+            if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("stats");
+          });
+        }
       });
-    }
+    });
     var dateFrom = document.getElementById("playerCrmDateFrom");
     if (dateFrom) dateFrom.addEventListener("change", function () {
       state.dateFrom = dateFrom.value || "";

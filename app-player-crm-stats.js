@@ -89,6 +89,10 @@ function initPlayerCrmStatsRuntime(deps) {
           : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому дашборд показывает нули только по датированным событиям этого периода.") +
         "</div>"
       : "";
+    var dailyPokerStats = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
+    function dailyPokerValue(key) {
+      return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
+    }
     var periodMetrics = [
       ["Зарегано · всего", intFmt(statRegistrations)],
       ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
@@ -105,6 +109,9 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Push · итого", intFmt(statPushNet), "data-crm-push-modal"],
       ["Депозиты · сумма", money(statDeposits)],
       ["Депозиты · количество", intFmt(statDepositCount)],
+      ["Крутка дня · уникальных крутили · за всё время", dailyPokerValue("uniquePlayers")],
+      ["Крутка дня · круток всего · за всё время", dailyPokerValue("totalSpins")],
+      ["Крутка дня · бонусов получили · за всё время", dailyPokerValue("bonusAwards")],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";

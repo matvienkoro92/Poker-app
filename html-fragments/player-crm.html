@@ -22,27 +22,19 @@
           <div class="player-crm__current-stats" id="playerCrmCurrentStats"></div>
 
           <div class="player-crm__hero-tools player-crm__period-toolbar">
-            <label class="player-crm__period player-crm__period--main">
+            <div class="player-crm__period player-crm__period--main">
               <span>Период</span>
-              <select id="playerCrmPeriodSelect">
-                <option value="all" selected>За все время</option>
-                <option value="custom">Даты</option>
-                <option value="yesterday">Вчера</option>
-                <option value="month_2026_02">Февраль</option>
-                <option value="month_2026_03">Март</option>
-                <option value="month_2026_04">Апрель</option>
-                <option value="month_2026_05">Май</option>
-                <option value="period_2026_02_04">Февраль — апрель</option>
-                <option value="last_month">Прошлый месяц</option>
-                <option value="current_month">Текущий месяц</option>
-                <option value="last_week">Прошлая неделя</option>
-                <option value="current_week">Текущая неделя</option>
-                <option value="90">90 дней</option>
-                <option value="30">30 дней</option>
-                <option value="7">7 дней</option>
-              </select>
+              <div class="player-crm__period-tabs" role="tablist" aria-label="Период статистики">
+                <button type="button" data-crm-period-tab="today">Сегодня</button>
+                <button type="button" data-crm-period-tab="yesterday">Вчера</button>
+                <button type="button" data-crm-period-tab="current_week">Текущая неделя</button>
+                <button type="button" data-crm-period-tab="last_week">Прошлая неделя</button>
+                <button type="button" data-crm-period-tab="last_month">Прошлый месяц</button>
+                <button type="button" data-crm-period-tab="all" class="player-crm__period-tab--active" aria-selected="true">За всё время</button>
+                <button type="button" data-crm-period-tab="custom">Период</button>
+              </div>
               <span class="player-crm__period-range" id="playerCrmPeriodRange" aria-live="polite"></span>
-            </label>
+            </div>
             <div class="player-crm__period player-crm__date-field player-crm__date-range-field">
               <span>Даты</span>
               <input id="playerCrmDateFrom" type="hidden" />

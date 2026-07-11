@@ -87,7 +87,30 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
       month_2026_05: { from: "2026-05-01", to: "2026-05-31" },
       period_2026_02_04: { from: "2026-02-01", to: "2026-04-30" },
     };
-    return ranges[key] || null;
+    if (ranges[key]) return ranges[key];
+    var today = localDateKey(new Date());
+    function addDays(dateKey, days) {
+      return new Date(Date.parse(dateKey + "T00:00:00.000Z") + (Number(days) || 0) * 86400000).toISOString().slice(0, 10);
+    }
+    if (key === "current_week") {
+      var currentDay = new Date(today + "T00:00:00.000Z").getUTCDay() || 7;
+      return { from: addDays(today, -currentDay + 1), to: today };
+    }
+    if (key === "last_week") {
+      var day = new Date(today + "T00:00:00.000Z").getUTCDay() || 7;
+      var lastSunday = addDays(today, -day);
+      return { from: addDays(lastSunday, -6), to: lastSunday };
+    }
+    if (key === "current_month") return { from: today.slice(0, 8) + "01", to: today };
+    if (key === "last_month") {
+      var year = Number(today.slice(0, 4));
+      var month = Number(today.slice(5, 7));
+      return {
+        from: new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10),
+        to: new Date(Date.UTC(year, month - 1, 0)).toISOString().slice(0, 10),
+      };
+    }
+    return null;
   }
 
   function selectedPeriodRange() {
