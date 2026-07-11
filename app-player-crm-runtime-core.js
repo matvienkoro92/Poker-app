@@ -7,7 +7,7 @@
     heavyLoadingScope: "",
     loadingScope: "",
     tab: "stats",
-    period: "all",
+    period: "current_week",
     dateFrom: "",
     dateTo: "",
     chartPeriod: "30",
