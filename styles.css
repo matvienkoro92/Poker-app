@@ -7932,6 +7932,16 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   border-radius: 18px;
 }
 
+/* СНГ: спокойнее заголовок и без внешней оранжевой рамки блока. */
+.app.app--view-home .home-club-actions-block::before {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-club-actions-block .home-club-choice-plaque--sng .home-club-choice-plaque__text {
+  font-size: clamp(12px, 3.48vw, 17px);
+}
+
 .app.app--view-home .home-sng-champions-action {
   border-color: rgba(255, 226, 153, 0.92);
   background:
@@ -8733,7 +8743,7 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
   width: min(76%, 420px) !important;
   margin: 0 !important;
   color: #fff0c5 !important;
-  font-size: clamp(18px, 4.7vw, 25px) !important;
+  font-size: clamp(14px, 3.75vw, 20px) !important;
   line-height: 0.88 !important;
   font-family: Georgia, "Times New Roman", serif !important;
   font-weight: 900 !important;

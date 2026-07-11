@@ -340,6 +340,7 @@
   }
 
   function roundStageLabel(round, index, rounds) {
+    if (round && round.stageLabel) return String(round.stageLabel);
     if (round && (String(round.name || "").toLowerCase() === "гранд-финал" || (round.loserBracket && Number(round.index) === 9))) return "Гранд финал";
     if (Array.isArray(rounds) && rounds.length) {
       if (rounds.length === 6) {
@@ -445,8 +446,15 @@
     return String(name || "И").trim().charAt(0).toUpperCase() || "И";
   }
 
-  function buildBracketSkeletonRounds() {
-    return [16, 8, 4, 2, 1, 1].map(function (count, roundIndex) {
+  function buildBracketSkeletonRounds(data) {
+    var participants = Number(data && data.capacity) || 32;
+    if (data && data.tournamentType === "team") participants = Math.max(2, Math.floor(participants / 2));
+    var counts = [];
+    var matchCount = Math.max(1, Math.floor(participants / 2));
+    while (matchCount >= 1) { counts.push(matchCount); if (matchCount === 1) break; matchCount = Math.floor(matchCount / 2); }
+    var stages = counts.map(function (count) { return count === 1 ? "Финал" : count === 2 ? "Полуфинал" : "1/" + String(count); });
+    if (data && data.loserBracketEnabled !== false) { counts.push(1); stages.push("Гранд финал"); }
+    return counts.map(function (count, roundIndex) {
       var matches = [];
       for (var index = 0; index < count; index += 1) {
         matches.push({
@@ -460,7 +468,9 @@
       }
       return {
         id: "preview-round-" + String(roundIndex),
-        name: roundIndex === 5 ? "Гранд-Финал" : "",
+        name: stages[roundIndex] === "Гранд финал" ? "Гранд-Финал" : "",
+        stageLabel: stages[roundIndex],
+        loserBracket: stages[roundIndex] === "Гранд финал",
         matches: matches,
       };
     });
@@ -947,14 +957,18 @@
           : '';
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
-          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong><span>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' +
-            '<dl class="sng-champions-modal__tournament-facts">' +
-              '<div><dt>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
-              '<div><dt>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
-              '<div><dt>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
-              (item.knockoutEnabled ? '<div><dt>Нокаут</dt><dd>Да</dd></div>' : '') +
-            '</dl>' +
-            '</button>' +
+          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
+            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-champions-hero-v2.webp?v=1" alt=""></span>' +
+            '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
+              '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b></span>' +
+              '<dl class="sng-champions-modal__tournament-facts">' +
+                '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
+                '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
+                '<div><dt><i>♧</i>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
+                (item.knockoutEnabled ? '<div><dt><i>KO</i>Нокаут</dt><dd>Да</dd></div>' : '') +
+              '</dl>' +
+            '</span>' +
+          '</button>' +
           '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>' + participantHtml + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
@@ -1315,11 +1329,21 @@
           var matchCount = Array.isArray(round && round.matches) ? round.matches.length : 0;
           var compactRoundClass = matchCount > 0 && matchCount <= 8 ? " sng-champions-modal__map-round--compact" : "";
           var roundLabel = labelFn(round, index, rounds);
+          var payoutStage = roundLabel === "Полуфинал" ? "1/2" : roundLabel;
+          var showMapAwards = kind === "winners" && !round.loserBracket && ["1/4", "1/2", "Финал"].indexOf(payoutStage) >= 0;
+          var mapPayout = data && data.payoutConfig || { places: {}, knockouts: {} };
+          var mapKnockout = showMapAwards && data.knockoutEnabled ? Number(mapPayout.knockouts && mapPayout.knockouts[payoutStage]) || 0 : 0;
+          var mapPlaces = payoutStage === "Финал" ? [1, 2] : payoutStage === "1/2" ? [3, 4] : payoutStage === "1/4" ? [5] : [];
+          var mapAwards = showMapAwards ? '<div class="sng-champions-modal__map-awards">' +
+            (mapKnockout ? '<span class="sng-champions-modal__map-award sng-champions-modal__map-award--ko">KO +' + escapeHtml(mapKnockout.toLocaleString("ru-RU")) + 'р</span>' : '') +
+            mapPlaces.map(function (place) { var amount = Number(mapPayout.places && mapPayout.places[place]) || 0; return amount ? '<span class="sng-champions-modal__map-award"><b>' + place + ' место</b> +' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</span>' : ''; }).join('') +
+          '</div>' : '';
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
           return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span></button>' +
+            mapAwards +
             '<div class="sng-champions-modal__map-round-matches">' +
               ((round.matches || []).map(function (match, matchIndex) {
                 var isSelected = !!(selected && selected.roundIndex === index && selected.match && match && selected.match.id === match.id);
@@ -1399,7 +1423,7 @@
     var isLosers = options.kind === "losers";
     var realRounds = options.rounds || [];
     var isPreview = !realRounds.length;
-    var rounds = isPreview ? (isLosers ? buildLoserBracketSkeletonRounds() : buildBracketSkeletonRounds()) : realRounds;
+    var rounds = isPreview ? (isLosers ? buildLoserBracketSkeletonRounds() : buildBracketSkeletonRounds(data)) : realRounds;
     var previewData = data;
     if (isPreview) {
       previewData = Object.assign({}, data, {
