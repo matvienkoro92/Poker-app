@@ -25,6 +25,8 @@
   var stateRevision = "";
   var activeTournamentId = "";
   var tournamentDetailOpen = false;
+  var expandedTournamentParticipantsId = "";
+  var tournamentCreateFormOpen = false;
   var HOME_SUMMARY_CACHE_MS = 60000;
 
   function baseUrl() {
@@ -138,6 +140,7 @@
     statusEl = document.getElementById("sngChampionsStatus");
     modal.addEventListener("click", onModalClick);
     modal.addEventListener("keydown", onModalKeydown);
+    modal.addEventListener("submit", onModalSubmit);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && modal.classList.contains("club-choice-vote-modal--open")) closeModal();
     });
@@ -811,29 +814,31 @@
     return { winner: winner, loser: loser, text: String(winner) + "-" + String(loser) };
   }
 
-  function renderTabs(createHtml, signupHtml, bracketHtml, data) {
+  function renderTabs(createHtml, signupHtml, bracketHtml, teamsHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var bracketStarted = data && data.status === "bracket";
     var tab = activeTabManual
-      ? (activeTab === "bracket" ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup")
+      ? (activeTab === "bracket" ? "bracket" : activeTab === "teams" && data.tournamentType === "team" ? "teams" : activeTab === "create" && isAdmin ? "create" : "signup")
       : (bracketStarted ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup");
     var signupTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Инфо</button>';
     var bracketTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>';
+    var teamsTab = data.tournamentType === "team" ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "teams" ? " club-choice-vote-modal__tab--active" : "") + '" data-sng-tab="teams">Команды</button>' : '';
     activeTab = tab;
     return '<div class="sng-champions-modal__detail-nav"><button type="button" class="sng-champions-modal__back" data-sng-tournament-back>← Турниры</button></div>' +
       '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs" role="tablist" aria-label="Разделы турнира">' +
-        bracketTab + signupTab +
+        bracketTab + teamsTab + signupTab +
       '</div>' +
       '<div class="club-choice-vote-modal__tab-panels">' +
         (isAdmin ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="create"' + (tab === "create" ? "" : " hidden") + '>' + createHtml + '</div>' : "") +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="signup"' + (tab === "signup" ? "" : " hidden") + '>' + signupHtml + '</div>' +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="bracket"' + (tab === "bracket" ? "" : " hidden") + '>' + bracketHtml + '</div>' +
+        (data.tournamentType === "team" ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="teams"' + (tab === "teams" ? "" : " hidden") + '>' + teamsHtml + '</div>' : '') +
       '</div>';
   }
 
   function setTab(tabName) {
     var isAdmin = !!(state && state.isAdmin);
-    activeTab = tabName === "bracket" ? "bracket" : tabName === "create" && isAdmin ? "create" : "signup";
+    activeTab = tabName === "bracket" ? "bracket" : tabName === "teams" && state && state.tournamentType === "team" ? "teams" : tabName === "create" && isAdmin ? "create" : "signup";
     activeTabManual = true;
     if (!modal) return;
     Array.prototype.slice.call(modal.querySelectorAll("[data-sng-tab]")).forEach(function (button) {
@@ -890,7 +895,10 @@
       '<div><span>Победитель турнира</span><strong>' + escapeHtml(winner.pokerPlusNickname || winner.displayName || "Чемпион") + '</strong></div></div></article>' : "";
     return '<div class="sng-champions-modal__tournament-card' + (winner ? ' sng-champions-modal__tournament-card--completed' : '') + '">' +
       '<div class="sng-champions-modal__tournament-main"><figure class="sng-champions-modal__hero">' +
-        '<img src="./assets/sng-champions-hero.webp?v=1" alt="СНГ Лига Чемпионов: байин 1000р, первое место 50 000р, второе место билет на HOK 10 000р" width="1672" height="941" loading="eager" decoding="async">' +
+        '<img src="./assets/sng-champions-hero-v2.webp?v=1" alt="Кубок СНГ Лиги Чемпионов, фишки и два туза на современной покерной арене" width="1672" height="941" loading="eager" decoding="async">' +
+        '<span class="sng-champions-modal__hero-season">СЕЗОН 2026 · LIVE</span>' +
+        '<strong class="sng-champions-modal__hero-title">СНГ ЛИГА ЧЕМПИОНОВ<small>ДВА ТУЗА</small></strong>' +
+        (data.activeStage ? '<span class="sng-champions-modal__hero-stage"><i></i>' + escapeHtml(data.activeStage) + '</span>' : '') +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--players" aria-label="Подтвержденных игроков">' + escapeHtml(String(approved) + "/" + String(capacity)) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--requests" aria-label="Активных заявок">' + escapeHtml(activeEntries) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--waiting" aria-label="Ждут подтверждения">' + escapeHtml(pending) + '</span>' +
@@ -901,10 +909,48 @@
   function renderTournamentMenu(data) {
     var rows = Array.isArray(data.tournaments) ? data.tournaments : [];
     if (!rows.length) return "";
+    var createForm = data.isAdmin && tournamentCreateFormOpen
+      ? '<form class="sng-champions-modal__create-tournament" data-sng-create-tournament-form>' +
+          '<h3>Новый турнир</h3>' +
+          '<label class="sng-champions-modal__create-wide"><span>Название</span><input type="text" name="title" maxlength="80" required value="1ый СНГ-баттл Лига чемпионов Два туза"></label>' +
+          '<label class="sng-champions-modal__create-wide"><span>Описание</span><textarea name="description" maxlength="280" rows="3" placeholder="Условия и важные детали турнира"></textarea></label>' +
+          '<label><span>Формат</span><select name="tournamentType"><option value="solo">Одиночный</option><option value="team">Командный · по 2 игрока</option></select></label>' +
+          '<label><span>Вход</span><input type="text" name="buyIn" maxlength="80" required value="1000р"></label>' +
+          '<label><span>Количество участников</span><select name="capacity"><option value="16">16</option><option value="32" selected>32</option><option value="64">64</option></select></label>' +
+          '<label><span>1 место</span><input type="text" name="prize1" maxlength="160" required value="50 000р"></label>' +
+          '<label><span>2 место</span><input type="text" name="prize2" maxlength="160" required value="Билет за 10 000р"></label>' +
+          '<label class="sng-champions-modal__create-wide"><span>Сетка лузеров</span><select name="loserBracketEnabled"><option value="true">Да — Double Elimination</option><option value="false">Нет — на выбывание</option></select></label>' +
+          '<label class="sng-champions-modal__create-wide"><span>Нокаут</span><select name="knockoutEnabled"><option value="false">Нет</option><option value="true">Да</option></select></label>' +
+          '<label class="sng-champions-modal__create-wide sng-champions-modal__create-check"><input type="checkbox" name="isTest"><span><b>Тестовый турнир</b><small>Виден только администраторам и не попадает в общие списки и достижения.</small></span></label>' +
+          '<div class="sng-champions-modal__create-actions"><button type="button" data-sng-create-tournament-cancel>Отмена</button><button type="submit">Создать турнир</button></div>' +
+        '</form>'
+      : '';
     return '<section class="sng-champions-modal__tournament-picker"><div class="sng-champions-modal__tournament-picker-head"><span>Выберите турнир</span>' +
       (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
-      rows.map(function (item) { return '<button type="button" class="sng-champions-modal__tournament-option' + (item.id === data.tournamentId ? ' is-active' : '') + '" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' + (item.activeStage ? '<em class="sng-champions-modal__tournament-stage">Сейчас идёт: ' + escapeHtml(item.activeStage) + '</em>' : '') + '</button>'; }).join('') +
-      '</div></section>';
+      rows.map(function (item) {
+        var expanded = expandedTournamentParticipantsId === item.id;
+        var participantRows = expanded && data.tournamentId === item.id ? (data.entries || []).filter(function (entry) { return entry && entry.status !== "rejected"; }) : [];
+        var participantHtml = expanded
+          ? '<div class="sng-champions-modal__tournament-participants">' +
+              (data.tournamentId === item.id
+                ? (participantRows.length ? renderEntryColumn("Участники", participantRows, data) : '<div class="sng-champions-modal__entries-empty">Пока участников нет.</div>')
+                : '<div class="club-choice-vote-modal__loading">Загружаем участников...</div>') +
+            '</div>'
+          : '';
+        return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
+          (data.isAdmin ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
+          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' +
+            '<dl class="sng-champions-modal__tournament-facts">' +
+              '<div><dt>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
+              '<div><dt>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
+              '<div><dt>2 место</dt><dd>' + escapeHtml(item.prize2 || "Билет за 10 000р") + '</dd></div>' +
+              '<div><dt>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
+              '<div><dt>Нокаут</dt><dd>' + (item.knockoutEnabled ? 'Да' : 'Нет') + '</dd></div>' +
+            '</dl>' +
+            (item.activeStage ? '<em class="sng-champions-modal__tournament-stage">Сейчас идёт: ' + escapeHtml(item.activeStage) + '</em>' : '') + '</button>' +
+          '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>' + participantHtml + '</article>';
+      }).join('') +
+      '</div>' + createForm + '</section>';
   }
 
   function renderDescription(data) {
@@ -959,7 +1005,7 @@
 
   function renderAdminPanel(data) {
     if (!data.isAdmin) return "";
-    var canForm = data.status === "open" && data.counts && data.counts.approved >= data.capacity;
+    var canForm = data.status === "open" && data.counts && data.counts.approved >= data.capacity && (data.tournamentType !== "team" || (data.teams || []).length === data.capacity / 2);
     var canBroadcastRoundOne = data.status === "bracket" && data.rounds && data.rounds[0] && data.rounds[0].matches && data.rounds[0].matches.length;
     var prizes = data.prizes || [];
     var prize1 = prizes[0] && prizes[0].text || "30 000р";
@@ -1430,12 +1476,19 @@
       '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "losers" ? "" : " hidden") + ' data-sng-bracket-view-panel="losers">' + losersHtml + '</div>';
   }
 
+  function renderTeams(data) {
+    var teams = data.teams || [];
+    var adminAction = data.isAdmin && data.status === "open" ? '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formTeams">Сформировать команды</button>' : '';
+    return '<section class="sng-champions-modal__teams"><div class="sng-champions-modal__teams-head"><div><h3>Команды</h3><p>Игроки распределяются случайно по два человека.</p></div>' + adminAction + '</div>' +
+      (teams.length ? '<div class="sng-champions-modal__teams-grid">' + teams.map(function (team) { return '<article class="sng-champions-modal__team"><strong>' + escapeHtml(team.name) + '</strong>' + (team.members || []).map(function (member) { return '<span>' + renderPlayerImage(member) + '<b>' + escapeHtml(member.pokerPlusNickname || member.displayName) + '</b></span>'; }).join('') + (team.canRename ? '<button type="button" data-sng-rename-team="' + escapeHtml(team.id) + '" data-sng-team-name="' + escapeHtml(team.name) + '">Изменить название</button>' : '') + '</article>'; }).join('') + '</div>' : '<div class="club-choice-vote-modal__empty">Команды ещё не сформированы.</div>') + '</section>';
+  }
+
   function render() {
     ensureModal();
     var data = state || {};
     setStatus("");
     bodyEl.innerHTML = tournamentDetailOpen
-      ? renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), data)
+      ? renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), renderTeams(data), data)
       : renderTournamentMenu(data);
     updateJoinDockBodyClass();
     window.requestAnimationFrame(fitBracketMapsToViewport);
@@ -1491,11 +1544,43 @@
   }
 
   function onModalClick(event) {
+    var renameTeam = event.target && event.target.closest ? event.target.closest("[data-sng-rename-team]") : null;
+    if (renameTeam) {
+      var teamName = window.prompt("Название команды", renameTeam.getAttribute("data-sng-team-name") || "");
+      if (!teamName) return;
+      postAction({ action: "renameTeam", teamId: renameTeam.getAttribute("data-sng-rename-team") || "", name: teamName }, { status: "Сохраняю название...", success: "Название команды обновлено" });
+      return;
+    }
+    var deleteTournament = event.target && event.target.closest ? event.target.closest("[data-sng-delete-tournament]") : null;
+    if (deleteTournament) {
+      var deleteId = deleteTournament.getAttribute("data-sng-delete-tournament") || "";
+      var deleteTitle = deleteTournament.getAttribute("data-sng-delete-title") || "этот турнир";
+      if (!window.confirm('Удалить турнир «' + deleteTitle + '»? Это действие нельзя отменить.')) return;
+      postAction({ action: "deleteTournament", tournamentId: deleteId }, { status: "Удаляю турнир...", success: "Турнир удалён" }).then(function (data) {
+        if (!data) return;
+        tournamentDetailOpen = false;
+        expandedTournamentParticipantsId = "";
+        activeTournamentId = data.tournamentId || "";
+        render();
+      });
+      return;
+    }
+    var participantsToggle = event.target && event.target.closest ? event.target.closest("[data-sng-tournament-participants]") : null;
+    if (participantsToggle) {
+      var participantsId = participantsToggle.getAttribute("data-sng-tournament-participants") || "";
+      expandedTournamentParticipantsId = expandedTournamentParticipantsId === participantsId ? "" : participantsId;
+      if (expandedTournamentParticipantsId && (!state || state.tournamentId !== participantsId)) {
+        activeTournamentId = participantsId;
+        render();
+        loadState();
+      } else render();
+      return;
+    }
     var tournament = event.target && event.target.closest ? event.target.closest("[data-sng-tournament]") : null;
     if (tournament) {
       activeTournamentId = tournament.getAttribute("data-sng-tournament") || "";
       tournamentDetailOpen = true;
-      activeTab = "signup";
+      activeTab = "bracket";
       activeTabManual = true;
       renderLoading(); loadState(); return;
     }
@@ -1508,9 +1593,14 @@
     }
     var createTournament = event.target && event.target.closest ? event.target.closest("[data-sng-create-tournament]") : null;
     if (createTournament) {
-      var title = window.prompt("Название нового турнира", "СНГ Лига Чемпионов Два Туза");
-      if (!title) return;
-      postAction({ action: "createTournament", title: title }, { status: "Создаю турнир...", success: "Турнир создан" });
+      tournamentCreateFormOpen = true;
+      render();
+      window.requestAnimationFrame(function () { var input = bodyEl && bodyEl.querySelector('[data-sng-create-tournament-form] input[name="title"]'); if (input) input.focus(); });
+      return;
+    }
+    if (event.target && event.target.closest && event.target.closest("[data-sng-create-tournament-cancel]")) {
+      tournamentCreateFormOpen = false;
+      render();
       return;
     }
     var close = event.target && event.target.closest ? event.target.closest("[data-sng-close]") : null;
@@ -1764,6 +1854,35 @@
     if (!mapMatch) return;
     event.preventDefault();
     mapMatch.click();
+  }
+
+  function onModalSubmit(event) {
+    var form = event.target && event.target.matches && event.target.matches("[data-sng-create-tournament-form]") ? event.target : null;
+    if (!form) return;
+    event.preventDefault();
+    var field = function (name) { var input = form.elements && form.elements[name]; return input ? String(input.value || "").trim() : ""; };
+    var checked = function (name) { var input = form.elements && form.elements[name]; return !!(input && input.checked); };
+    var submit = form.querySelector('[type="submit"]');
+    setButtonLoading(submit, true);
+    postAction({
+      action: "createTournament",
+      title: field("title"),
+      description: field("description"),
+      buyIn: field("buyIn"),
+      prize1: field("prize1"),
+      prize2: field("prize2"),
+      tournamentType: field("tournamentType"),
+      capacity: Number(field("capacity")) || 32,
+      loserBracketEnabled: field("loserBracketEnabled") !== "false",
+      knockoutEnabled: field("knockoutEnabled") === "true",
+      isTest: checked("isTest"),
+    }, { status: "Создаю турнир...", success: "Турнир создан" }).then(function (data) {
+      if (!data) return;
+      tournamentCreateFormOpen = false;
+      tournamentDetailOpen = false;
+      activeTournamentId = data.tournamentId || activeTournamentId;
+      render();
+    }).finally(function () { setButtonLoading(submit, false); });
   }
 
   function bind() {
