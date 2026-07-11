@@ -8,6 +8,7 @@ function initPlayerCrmStatsRuntime(deps) {
   var periodLabel = deps.periodLabel || function () { return ""; };
   var chartPeriodLabel = deps.chartPeriodLabel || periodLabel;
   var dateInSelectedPeriod = deps.dateInSelectedPeriod || function () { return true; };
+  var selectedPeriodRange = deps.selectedPeriodRange || function () { return null; };
   var playersInSelectedPeriodByDate = deps.playersInSelectedPeriodByDate || function () { return []; };
   var registrationRowsByMethod = deps.registrationRowsByMethod || function () { return []; };
 
@@ -63,7 +64,7 @@ function initPlayerCrmStatsRuntime(deps) {
       return current && current[key] != null ? Number(current[key]) || 0 : fallback;
     }
     var currentStats = [
-      ["В базе", currentValue("players", players.length), "сейчас", "base"],
+      ["Пользователей в базе", currentValue("players", players.length), "сейчас", "base"],
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
       ["Poker21 всего", currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0), "сейчас", "pokerplus-total"],
       ["Bot доступен", currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length), "сейчас", "bot-reach"],
@@ -89,11 +90,31 @@ function initPlayerCrmStatsRuntime(deps) {
           : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому дашборд показывает нули только по датированным событиям этого периода.") +
         "</div>"
       : "";
-    var dailyPokerStats = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
+    var dailyPokerSource = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
+    var dailyPokerStats = dailyPokerSource;
+    if (dailyPokerSource && state.period !== "all") {
+      var dailyRange = selectedPeriodRange();
+      var dailyUsers = {};
+      var dailySpins = 0;
+      var dailyBonusAmount = 0;
+      (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
+        var date = String(row && row.date || "");
+        if (!dailyRange || date < dailyRange.from || date > dailyRange.to) return;
+        (Array.isArray(row.userIds) ? row.userIds : []).forEach(function (id) { dailyUsers[String(id)] = true; });
+        dailySpins += Math.max(0, Number(row.totalSpins) || 0);
+        dailyBonusAmount += Math.max(0, Number(row.bonusAmount) || 0);
+      });
+      dailyPokerStats = {
+        uniquePlayers: Object.keys(dailyUsers).length,
+        totalSpins: dailySpins,
+        bonusAmount: dailyBonusAmount,
+      };
+    }
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
     var periodMetrics = [
+      ["Новых пользователей в базе · " + periodLabel(), intFmt(statPlayers)],
       ["Зарегано · всего", intFmt(statRegistrations)],
       ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
       ["Зарегано · только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
@@ -109,9 +130,9 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Push · итого", intFmt(statPushNet), "data-crm-push-modal"],
       ["Депозиты · сумма", money(statDeposits)],
       ["Депозиты · количество", intFmt(statDepositCount)],
-      ["Крутка дня · уникальных крутили · за всё время", dailyPokerValue("uniquePlayers")],
-      ["Крутка дня · круток всего · за всё время", dailyPokerValue("totalSpins")],
-      ["Крутка дня · бонусов получили · за всё время", dailyPokerValue("bonusAwards")],
+      ["Крутка дня · уникальных крутили · " + periodLabel(), dailyPokerValue("uniquePlayers")],
+      ["Крутка дня · круток всего · " + periodLabel(), dailyPokerValue("totalSpins")],
+      ["Крутка дня · бонусов начислено · " + periodLabel(), dailyPokerValue("bonusAmount")],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";

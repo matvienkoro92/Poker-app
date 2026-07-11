@@ -152,6 +152,7 @@
       periodLabel: periodLabel,
       chartPeriodLabel: chartPeriodLabel,
       dateInSelectedPeriod: dateInSelectedPeriod,
+      selectedPeriodRange: selectedPeriodRange,
       playersInSelectedPeriodByDate: playersInSelectedPeriodByDate,
       registrationRowsByMethod: registrationRowsByMethod
     })
@@ -1471,7 +1472,8 @@
         state.dailyPokerStats = {
           uniquePlayers: Math.max(0, Number(stats.totalUniquePlayers != null ? stats.totalUniquePlayers : data.totalUniquePlayers) || 0),
           totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
-          bonusAwards: Math.max(0, Number(data.totalBonusAwards) || 0),
+          bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
+          daily: Array.isArray(data.dailyStats) ? data.dailyStats : [],
         };
       })
       .catch(function () {})
