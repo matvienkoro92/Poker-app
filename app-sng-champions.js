@@ -938,16 +938,15 @@
             '</div>'
           : '';
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
-          (data.isAdmin ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
-          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong><span>' + escapeHtml(statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' +
+          (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
+          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '"><strong>' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong><span>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · ' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</span>' +
             '<dl class="sng-champions-modal__tournament-facts">' +
               '<div><dt>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
               '<div><dt>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
-              '<div><dt>2 место</dt><dd>' + escapeHtml(item.prize2 || "Билет за 10 000р") + '</dd></div>' +
               '<div><dt>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
-              '<div><dt>Нокаут</dt><dd>' + (item.knockoutEnabled ? 'Да' : 'Нет') + '</dd></div>' +
+              (item.knockoutEnabled ? '<div><dt>Нокаут</dt><dd>Да</dd></div>' : '') +
             '</dl>' +
-            (item.activeStage ? '<em class="sng-champions-modal__tournament-stage">Сейчас идёт: ' + escapeHtml(item.activeStage) + '</em>' : '') + '</button>' +
+            '</button>' +
           '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>' + participantHtml + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
@@ -1522,7 +1521,7 @@
       var prize = button.querySelector(".home-club-choice-plaque__prize");
       var entry = button.querySelector(".home-club-choice-plaque__entry");
       if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
-      if (title && state.title) title.textContent = state.title;
+      if (title && state.title) title.innerHTML = escapeHtml(state.title).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>');
       if (prize && state.prizes && state.prizes[0]) prize.textContent = state.prizes[0].text || "";
       if (entry) entry.textContent = "Вход " + String(state.buyIn || "0р");
       if (sub) {

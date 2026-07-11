@@ -8632,10 +8632,11 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-option strong,.sng-champions-modal__tournament-option span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sng-champions-modal__tournament-option span { margin-top:5px; color:#aaa18f; font-size:12px; }
 .sng-champions-modal__tournament-stage { display:inline-flex; margin-top:10px; padding:5px 9px; border-radius:999px; background:rgba(8,13,21,.88); color:#ffd98d; font-size:12px; font-style:normal; font-weight:900; text-transform:uppercase; letter-spacing:.03em; }
-.sng-champions-modal__tournament-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 14px; margin:12px 0 0; padding:10px 0 0; border-top:1px solid rgba(50,33,14,.2); }
+.sng-champions-modal__tournament-facts { display:grid; grid-template-columns:minmax(0,1fr); gap:7px; width:50%; margin:12px 0 0; padding:10px 0 0; border-top:1px solid rgba(50,33,14,.2); }
 .sng-champions-modal__tournament-facts div { display:flex; align-items:baseline; gap:6px; min-width:0; }
 .sng-champions-modal__tournament-facts dt { color:inherit; font-size:11px; font-weight:700; opacity:.68; }
 .sng-champions-modal__tournament-facts dd { min-width:0; margin:0; overflow:hidden; color:inherit; font-size:12px; font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:520px) { .sng-champions-modal__tournament-facts { width:72%; } }
 .sng-champions-modal__tournament-option-wrap.is-active { border-color:#ff9d19; background:#0d121b; color:#17110a; box-shadow:0 0 20px rgba(255,143,20,.25); }
 .sng-champions-modal__tournament-option-wrap.is-active .sng-champions-modal__tournament-option { background:linear-gradient(135deg,#ffe78e 0%,#ffb345 46%,#ff8518 100%)!important; color:#17110a; }
 .sng-champions-modal__tournament-option-wrap.is-active .sng-champions-modal__tournament-option span { color:#513716; }

@@ -7879,6 +7879,14 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
   letter-spacing: 0;
 }
 
+.home-club-choice-plaque--sng .home-club-choice-plaque__ordinal-one {
+  display: inline-block;
+  margin-right: 0.02em;
+  font-size: 1.34em;
+  line-height: 0.72;
+  vertical-align: -0.04em;
+}
+
 .app.app--view-home .home-club-actions-block .home-club-choice-actions .home-club-choice-plaque {
   padding-right: 12%;
   padding-left: 28%;
