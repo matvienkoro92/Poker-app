@@ -8663,6 +8663,19 @@ body.club-choice-vote-open {
 .sng-champions-modal__create-actions { display:flex; justify-content:flex-end; gap:10px; }
 .sng-champions-modal__create-actions button { border:1px solid #765426; border-radius:999px; padding:10px 16px; background:#111722; color:#ffe0a1; font-weight:900; }
 .sng-champions-modal__create-actions button[type="submit"] { border-color:#ff9d19; background:linear-gradient(135deg,#ffe28a,#ff891a); color:#17110a; }
+.sng-champions-modal__payout-builder { padding:14px; border:1px solid rgba(255,157,25,.42); border-radius:14px; background:#080e16; }
+.sng-champions-modal__payout-builder[hidden],.sng-champions-modal__payout-grid label[hidden] { display:none!important; }
+.sng-champions-modal__payout-builder h4,.sng-champions-modal__payout-builder h5,.sng-champions-modal__payout-builder p { margin:0 0 9px; }
+.sng-champions-modal__payout-builder p { color:#918978; font-size:12px; }
+.sng-champions-modal__payout-summary { display:flex; gap:10px; margin:12px 0; }
+.sng-champions-modal__payout-summary span { padding:7px 10px; border-radius:999px; background:#121b27; color:#d7cdb8; }
+.sng-champions-modal__payout-summary b { color:#ffe09c; }
+.sng-champions-modal__payout-summary b.is-error { color:#ff8e77; }
+.sng-champions-modal__payout-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(125px,1fr)); gap:8px; margin-bottom:13px; }
+.sng-champions-modal__stage-payout { display:inline-flex!important; margin:5px 3px 0!important; padding:5px 8px; border-radius:999px; background:#053333; color:#7ff4e8!important; font-size:11px!important; font-style:normal!important; font-weight:900; }
+.sng-champions-modal__stage-payout--place { background:#3a2507; color:#ffd47e!important; }
+.sng-champions-modal__match-knockout { display:inline-flex; align-items:center; gap:4px; margin-left:8px; padding:3px 7px; border:1px solid rgba(73,235,220,.35); border-radius:999px; background:#063232; color:#85f4e9; font-size:10px; font-weight:800; }
+.sng-champions-modal__match-knockout b { color:#fff0b8; font-size:11px; }
 @media (max-width:600px) { .sng-champions-modal__create-tournament { grid-template-columns:1fr; } .sng-champions-modal__create-tournament label { grid-column:1; } }
 .sng-champions-modal__tournament-card { display:grid; grid-template-columns:1fr; gap:14px; }
 .sng-champions-modal__tournament-card--completed { grid-template-columns:minmax(0,1.45fr) minmax(230px,.55fr); align-items:stretch; }

@@ -141,6 +141,8 @@
     modal.addEventListener("click", onModalClick);
     modal.addEventListener("keydown", onModalKeydown);
     modal.addEventListener("submit", onModalSubmit);
+    modal.addEventListener("input", updateTournamentPayoutPreview);
+    modal.addEventListener("change", updateTournamentPayoutPreview);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && modal.classList.contains("club-choice-vote-modal--open")) closeModal();
     });
@@ -921,6 +923,12 @@
           '<label><span>2 место</span><input type="text" name="prize2" maxlength="160" required value="Билет за 10 000р"></label>' +
           '<label class="sng-champions-modal__create-wide"><span>Сетка лузеров</span><select name="loserBracketEnabled"><option value="true">Да — Double Elimination</option><option value="false">Нет — на выбывание</option></select></label>' +
           '<label class="sng-champions-modal__create-wide"><span>Нокаут</span><select name="knockoutEnabled"><option value="false">Нет</option><option value="true">Да</option></select></label>' +
+          '<section class="sng-champions-modal__payout-builder sng-champions-modal__create-wide" data-sng-payout-builder hidden>' +
+            '<h4>Распределение призового фонда</h4><p>Нокаут в командном турнире выплачивается команде целиком. При сетке лузеров учитывается только верхняя сетка.</p>' +
+            '<div class="sng-champions-modal__payout-summary"><span>Общий фонд <b data-sng-payout-total>0р</b></span><span>Осталось <b data-sng-payout-left>0р</b></span></div>' +
+            '<h5>Награды за места</h5><div class="sng-champions-modal__payout-grid">' + [1,2,3,4,5].map(function (place) { return '<label><span>' + place + ' место</span><input type="number" min="0" step="100" name="payoutPlace' + place + '" value="0"></label>'; }).join('') + '</div>' +
+            '<h5>Нокауты в верхней сетке</h5><div class="sng-champions-modal__payout-grid">' + ["1/32","1/16","1/8","1/4","1/2","Финал"].map(function (stage, index) { return '<label data-sng-knockout-stage="' + escapeHtml(stage) + '"><span>' + escapeHtml(stage) + '</span><input type="number" min="0" step="100" name="payoutStage' + index + '" value="0"></label>'; }).join('') + '</div>' +
+          '</section>' +
           '<label class="sng-champions-modal__create-wide sng-champions-modal__create-check"><input type="checkbox" name="isTest"><span><b>Тестовый турнир</b><small>Виден только администраторам и не попадает в общие списки и достижения.</small></span></label>' +
           '<div class="sng-champions-modal__create-actions"><button type="button" data-sng-create-tournament-cancel>Отмена</button><button type="submit">Создать турнир</button></div>' +
         '</form>'
@@ -1170,9 +1178,10 @@
       (match.playingAt && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") +
       (matchSeriesTarget(match, data) ? " sng-champions-modal__bracket-match--series" : "");
+    var knockoutBadge = Number(data && data.stageKnockoutAmount) > 0 ? '<span class="sng-champions-modal__match-knockout">Нокаут <b>' + escapeHtml(Number(data.stageKnockoutAmount).toLocaleString("ru-RU")) + 'р</b></span>' : '';
     return '<article class="' + matchClass + '">' +
       renderBracketSeriesRule(match, data, false) +
-      '<header>Пара ' + escapeHtml(match.index || "") + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
+      '<header>Пара ' + escapeHtml(match.index || "") + knockoutBadge + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
       renderBracketHeadToHead(match, data) +
       playerRows +
       tablePasswordHtml +
@@ -1411,6 +1420,15 @@
     var labelFn = isLosers ? loserRoundStageLabel : roundStageLabel;
     var classFn = isLosers ? loserRoundStageClass : roundStageClass;
     var stageLabel = labelFn(round, stageIndex, rounds);
+    var payout = data && data.payoutConfig || { places: {}, knockouts: {} };
+    var upperPayoutStage = !isLosers && !round.loserBracket;
+    var knockoutAmount = upperPayoutStage && data.knockoutEnabled ? Number(payout.knockouts && payout.knockouts[stageLabel]) || 0 : 0;
+    var placeAwards = [];
+    if (upperPayoutStage && stageLabel === "Финал") placeAwards = [1, 2];
+    else if (upperPayoutStage && stageLabel === "1/2") placeAwards = [3, 4];
+    else if (upperPayoutStage && stageLabel === "1/4") placeAwards = [5];
+    var payoutBadges = (knockoutAmount ? '<em class="sng-champions-modal__stage-payout">Нокаут: ' + escapeHtml(knockoutAmount.toLocaleString("ru-RU")) + 'р</em>' : '') + placeAwards.map(function (place) { var amount = Number(payout.places && payout.places[place]) || 0; return amount ? '<em class="sng-champions-modal__stage-payout sng-champions-modal__stage-payout--place">' + place + ' место: ' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</em>' : ''; }).join('');
+    var roundData = Object.assign({}, previewData, { stageKnockoutAmount: knockoutAmount });
     var stageClass = classFn(round, stageIndex, rounds);
     var stageSeriesTarget = seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
@@ -1444,6 +1462,7 @@
         '<div>' +
           '<span>Этап ' + escapeHtml(stageIndex + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
           '<strong>' + escapeHtml(stageLabel) + '</strong>' +
+          payoutBadges +
           (stageStatus ? '<em class="sng-champions-modal__stage-status sng-champions-modal__stage-status--' + escapeHtml(stageStatus.kind) + '">' + escapeHtml(stageStatus.text) + '</em>' : '') +
           (isPreview ? '<em>предпросмотр сетки</em>' : active ? '<em>текущий этап</em>' : '') +
         '</div>' +
@@ -1453,7 +1472,7 @@
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
         (showRoundLabel ? '<div class="sng-champions-modal__round-label"><span>' + escapeHtml(stageLabel) + '</span></div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
-          ((round.matches || []).map(function (match) { return renderBracketMatch(match, previewData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
+          ((round.matches || []).map(function (match) { return renderBracketMatch(match, roundData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
       '</section>' +
       stageDotsHtml +
@@ -1867,6 +1886,10 @@
     event.preventDefault();
     var field = function (name) { var input = form.elements && form.elements[name]; return input ? String(input.value || "").trim() : ""; };
     var checked = function (name) { var input = form.elements && form.elements[name]; return !!(input && input.checked); };
+    var stageNames = ["1/32", "1/16", "1/8", "1/4", "1/2", "Финал"];
+    var payoutConfig = { places: {}, knockouts: {} };
+    [1,2,3,4,5].forEach(function (place) { payoutConfig.places[place] = Number(field("payoutPlace" + place)) || 0; });
+    stageNames.forEach(function (stage, index) { payoutConfig.knockouts[stage] = Number(field("payoutStage" + index)) || 0; });
     var submit = form.querySelector('[type="submit"]');
     setButtonLoading(submit, true);
     postAction({
@@ -1881,6 +1904,7 @@
       loserBracketEnabled: field("loserBracketEnabled") !== "false",
       knockoutEnabled: field("knockoutEnabled") === "true",
       isTest: checked("isTest"),
+      payoutConfig: payoutConfig,
     }, { status: "Создаю турнир...", success: "Турнир создан" }).then(function (data) {
       if (!data) return;
       tournamentCreateFormOpen = false;
@@ -1888,6 +1912,34 @@
       activeTournamentId = data.tournamentId || activeTournamentId;
       render();
     }).finally(function () { setButtonLoading(submit, false); });
+  }
+
+  function updateTournamentPayoutPreview(event) {
+    var form = event && event.target && event.target.closest ? event.target.closest("[data-sng-create-tournament-form]") : null;
+    if (!form) return;
+    var builder = form.querySelector("[data-sng-payout-builder]");
+    var knockout = form.elements.knockoutEnabled && form.elements.knockoutEnabled.value === "true";
+    if (builder) builder.hidden = !knockout;
+    if (!knockout) return;
+    var capacity = Number(form.elements.capacity && form.elements.capacity.value) || 32;
+    var team = form.elements.tournamentType && form.elements.tournamentType.value === "team";
+    var units = team ? capacity / 2 : capacity;
+    var counts = {};
+    while (units > 1) { var matches = units / 2; counts[matches === 1 ? "Финал" : "1/" + matches] = matches; units = matches; }
+    var stageNames = ["1/32", "1/16", "1/8", "1/4", "1/2", "Финал"];
+    var distributed = 0;
+    [1,2,3,4,5].forEach(function (place) { distributed += Number(form.elements["payoutPlace" + place] && form.elements["payoutPlace" + place].value) || 0; });
+    stageNames.forEach(function (stage, index) {
+      var row = form.querySelector('[data-sng-knockout-stage="' + stage + '"]');
+      if (row) row.hidden = !counts[stage];
+      distributed += (Number(form.elements["payoutStage" + index] && form.elements["payoutStage" + index].value) || 0) * (counts[stage] || 0);
+    });
+    var buyIn = Number(String(form.elements.buyIn && form.elements.buyIn.value || "").replace(/[^\d]/g, "")) || 0;
+    var total = buyIn * capacity;
+    var totalEl = form.querySelector("[data-sng-payout-total]");
+    var leftEl = form.querySelector("[data-sng-payout-left]");
+    if (totalEl) totalEl.textContent = total.toLocaleString("ru-RU") + "р";
+    if (leftEl) { leftEl.textContent = (total - distributed).toLocaleString("ru-RU") + "р"; leftEl.classList.toggle("is-error", total - distributed !== 0); }
   }
 
   function bind() {
