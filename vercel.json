@@ -118,6 +118,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron-raffles",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron-bonus-balances-report",
       "schedule": "0 13 * * 0"
     },

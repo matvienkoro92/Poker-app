@@ -10113,3 +10113,71 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* Current SNG banner reused in Daily Poker and Raffles. */
+.sng-inline-feature {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 159, 20, 0.58);
+  border-radius: 18px;
+  background: #050505;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34);
+}
+.sng-inline-feature__image {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #050505;
+  cursor: pointer;
+}
+.sng-inline-feature__image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+}
+.sng-inline-feature__bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 2px solid #f18b0b;
+  background: linear-gradient(180deg, #3b210d, #17100c);
+}
+.sng-inline-feature__stat {
+  display: grid;
+  place-content: center;
+  min-width: 0;
+  min-height: 58px;
+  padding: 7px 9px;
+  text-align: center;
+}
+.sng-inline-feature__stat + .sng-inline-feature__stat {
+  border-left: 1px solid rgba(255, 168, 45, 0.42);
+}
+.sng-inline-feature__stat small {
+  color: #d6aa68;
+  font-size: 10px;
+  font-weight: 800;
+}
+.sng-inline-feature__stat strong {
+  overflow-wrap: anywhere;
+  color: #fff0c9;
+  font-size: clamp(12px, 2.8vw, 18px);
+  line-height: 1.08;
+}
+@media (max-width: 460px) {
+  .sng-inline-feature {
+    border-radius: 12px;
+  }
+  .sng-inline-feature__stat {
+    min-height: 50px;
+    padding: 5px 3px;
+  }
+  .sng-inline-feature__stat small {
+    font-size: 8px;
+  }
+  .sng-inline-feature__stat strong {
+    font-size: 11px;
+  }
+}
