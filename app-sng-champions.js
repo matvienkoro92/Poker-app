@@ -960,7 +960,11 @@
           '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
             '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.png?v=1" alt=""></span>' +
             '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
-              '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b></span>' +
+              '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
+                (item.activePairs && item.activePairs.length
+                  ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
+                  : ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
+              '</span>' +
               '<dl class="sng-champions-modal__tournament-facts">' +
                 '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
                 '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +

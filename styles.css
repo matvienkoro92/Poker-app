@@ -2080,7 +2080,7 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 
 /* СНГ на главной: метаданные живут отдельной строкой между заголовком и CTA. */
 .app.app--view-home .home-club-actions-block:has(.home-sng-champions-action__cta:not([hidden])) {
-  --home-sng-champions-row: clamp(178px, 43vw, 218px);
+  --home-sng-champions-row: clamp(218px, 53vw, 258px);
 }
 
 .app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
@@ -2095,6 +2095,58 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
   .home-club-choice-plaque__text {
   align-self: start !important;
   margin-bottom: clamp(12px, 3vw, 20px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action__figures {
+  position: absolute;
+  top: clamp(22px, 5vw, 32px);
+  bottom: clamp(50px, 12vw, 62px);
+  z-index: 3;
+  width: 31%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.app.app--view-home .home-sng-champions-action__figures--left {
+  left: 0;
+}
+
+.app.app--view-home .home-sng-champions-action__figures--right {
+  right: 0;
+}
+
+.app.app--view-home .home-sng-champions-action__figure {
+  position: absolute;
+  bottom: 0;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 7px 8px rgba(0, 0, 0, 0.74)) drop-shadow(0 0 8px rgba(255, 145, 30, 0.2));
+}
+
+.app.app--view-home .home-sng-champions-action__figure--pryanik {
+  left: -2%;
+  height: 92%;
+}
+
+.app.app--view-home .home-sng-champions-action__figure--emil {
+  left: 36%;
+  height: 76%;
+}
+
+.app.app--view-home .home-sng-champions-action__figure--waaar {
+  right: 36%;
+  height: 78%;
+}
+
+.app.app--view-home .home-sng-champions-action__figure--cooler {
+  right: -3%;
+  height: 90%;
+}
+
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque--sng {
+  z-index: 5;
 }
 
 .app.app--view-home .home-sng-champions-action__cta {
