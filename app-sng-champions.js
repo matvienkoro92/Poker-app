@@ -1620,6 +1620,7 @@
       var amount = Number(String(prize && prize.text || "").replace(/[^\d]/g, "")) || 0;
       return sum + amount;
     }, 0);
+    if (teamKnockoutTitle) prizeFund = 64000;
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-prize]"), function (el) {
       el.textContent = formatHomeMoney(prizeFund || 0);
     });
