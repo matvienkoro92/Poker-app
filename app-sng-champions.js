@@ -171,6 +171,12 @@
     modal.classList.remove("club-choice-vote-modal--open");
     document.body.classList.remove("club-choice-vote-open");
     stopBracketTimerRefresh();
+    fetchHomeSummary(true).then(function (data) {
+      if (!data || !data.ok) return;
+      state = data;
+      rememberStateRevision(data);
+      updateHomePlaque();
+    }).catch(function () {});
   }
 
   function startBracketTimerRefresh() {
@@ -923,7 +929,7 @@
     var capacity = Number(data.capacity) || 32;
     var winner = data.winnerId && data.playersById ? data.playersById[data.winnerId] : null;
     var winnerHtml = winner ? renderChampionHero(Object.assign({ id: data.winnerId }, winner)) : "";
-    return '<div class="sng-champions-modal__tournament-card' + (winner ? ' sng-champions-modal__tournament-card--completed' : '') + '">' +
+    var tournamentHeroHtml = winner ? "" :
       '<div class="sng-champions-modal__tournament-main"><figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero-v2.webp?v=1" alt="Кубок СНГ Лиги Чемпионов, фишки и два туза на современной покерной арене" width="1672" height="941" loading="eager" decoding="async">' +
         '<span class="sng-champions-modal__hero-season">СЕЗОН 2026 · LIVE</span>' +
@@ -933,7 +939,9 @@
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--requests" aria-label="Активных заявок">' + escapeHtml(activeEntries) + '</span>' +
         '<span class="sng-champions-modal__hero-live sng-champions-modal__hero-live--waiting" aria-label="Ждут подтверждения">' + escapeHtml(pending) + '</span>' +
         (edit ? '<figcaption class="sng-champions-modal__signup-tools">' + edit + '</figcaption>' : '') +
-      '</figure></div>' + winnerHtml + '</div>';
+      '</figure></div>';
+    return '<div class="sng-champions-modal__tournament-card' + (winner ? ' sng-champions-modal__tournament-card--completed' : '') + '">' +
+      tournamentHeroHtml + winnerHtml + '</div>';
   }
 
   function renderTournamentMenu(data) {
@@ -984,6 +992,7 @@
                   ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
                   : ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
               '</span>' +
+              (item.status === "completed" && item.winnerName ? '<span class="sng-champions-modal__tournament-winner">Победитель: <b>' + escapeHtml(item.winnerName) + '</b></span>' : '') +
               '<dl class="sng-champions-modal__tournament-facts">' +
                 '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
                 '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
@@ -2070,7 +2079,7 @@
       document.addEventListener("click", function (event) {
         var trigger = event.target && event.target.closest ? event.target.closest("[data-sng-open], #sngChampionsOpen") : null;
         if (!trigger) return;
-        updateHomePlaque();
+        activeTournamentId = "";
         openModal();
       });
     }
