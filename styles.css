@@ -8,7 +8,7 @@
 @import url("./styles-home-legacy-tail.css?v=3.666");
 @import url("./styles-home-rating-promo-legacy.css?v=3.666");
 @import url("./styles-layout.css?v=3.666");
-@import url("./styles-home-overrides.css?v=3.740");
+@import url("./styles-home-overrides.css?v=3.741");
 @import url("./styles-layout-touch-targets.css?v=3.666");
 @import url("./styles-home-rating-promo-late.css?v=3.666");
 
@@ -10066,4 +10066,47 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
 .sng-champions-promo__button.home-club-choice-plaque--sng .home-club-choice-plaque__text {
   font-size: clamp(13px, 3.2vw, 18px) !important;
   line-height: 0.92 !important;
+}
+
+/* The live SNG banner and controls must win over every legacy home variant above. */
+.app.app--view-home .home-club-actions-block {
+  --home-sng-champions-row: auto !important;
+  grid-template-rows: auto var(--home-club-choice-row) !important;
+}
+
+.app.app--view-home .home-sng-champions-feature {
+  display: grid !important;
+  grid-template-rows: auto 64px !important;
+  height: auto !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-sng-champions-action {
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-sng-champions-image-link {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.app--view-home .home-sng-champions-action__bar {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 21 !important;
+  display: grid !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
 }

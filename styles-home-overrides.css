@@ -1885,8 +1885,8 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(255, 151, 31, 0.72);
-  border-radius: clamp(12px, 2.3vw, 18px);
+  border: 0;
+  border-radius: 0;
   background: #07090d;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
 }
@@ -1911,7 +1911,12 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   aspect-ratio: 3 / 1 !important;
   height: auto !important;
   min-height: 0 !important;
-  border-radius: inherit inherit 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app.app--view-home .home-sng-champions-image-link img {
@@ -1925,5 +1930,11 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 .app.app--view-home .home-sng-champions-action__bar {
   position: relative !important;
   inset: auto !important;
+  z-index: 21 !important;
+  display: grid !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   transform: none !important;
 }
