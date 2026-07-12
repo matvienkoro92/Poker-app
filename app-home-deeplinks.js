@@ -50,6 +50,15 @@ function pokerInitHomeDeepLinks(opts) {
       runAfterReady();
     }, 0);
   }
+  function retryDeepLinkAction(action, attemptsLeft) {
+    var left = attemptsLeft == null ? 40 : Math.max(1, Number(attemptsLeft) || 1);
+    var run = function () {
+      var opened = false;
+      try { opened = action() === true; } catch (eAction) { opened = false; }
+      if (!opened && --left > 0) setTimeout(run, 250);
+    };
+    run();
+  }
   /**
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
@@ -168,9 +177,10 @@ function pokerInitHomeDeepLinks(opts) {
     if (startParam === "daily_prediction") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
-        setTimeout(function () {
-          if (typeof openDailyPredictionModal === "function") openDailyPredictionModal();
-        }, 400);
+        setTimeout(function () { retryDeepLinkAction(function () {
+          if (typeof openDailyPredictionModal !== "function") return false;
+          openDailyPredictionModal(); return true;
+        }); }, 250);
       }, 0);
       return;
     }
@@ -252,23 +262,24 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "club_charter") {
       setTimeout(function () {
-        if (typeof window.openClubCharterModal === "function") window.openClubCharterModal();
+        if (typeof setView === "function") setView("home");
+        retryDeepLinkAction(function () {
+          if (typeof window.openClubCharterModal !== "function") return false;
+          window.openClubCharterModal(); return true;
+        });
       }, 0);
       return;
     }
     if (startParam === "private_cash") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
-        var attempts = 0;
-        var openPrivateCash = function () {
-          attempts += 1;
-          if (typeof window.openPrivateCashModal === "function") {
-            window.openPrivateCashModal();
-            return;
+        retryDeepLinkAction(function () {
+          if (typeof window.pokerOpenHomeWidgetModal === "function") {
+            window.pokerOpenHomeWidgetModal("private-cash"); return true;
           }
-          if (attempts < 8) setTimeout(openPrivateCash, 250);
-        };
-        setTimeout(openPrivateCash, 250);
+          if (typeof window.openPrivateCashModal !== "function") return false;
+          window.openPrivateCashModal(); return true;
+        });
       }, 0);
       return;
     }
@@ -282,10 +293,10 @@ function pokerInitHomeDeepLinks(opts) {
             Promise.resolve(window.pokerOpenHomeWidgetModal("sng-champions")).then(function (opened) {
               if (opened) return;
               if (typeof window.openSngChampionsModal === "function") window.openSngChampionsModal();
-              else if (attempts < 8) setTimeout(openSngChampions, 250);
+              else if (attempts < 40) setTimeout(openSngChampions, 250);
             }).catch(function () {
               if (typeof window.openSngChampionsModal === "function") window.openSngChampionsModal();
-              else if (attempts < 8) setTimeout(openSngChampions, 250);
+              else if (attempts < 40) setTimeout(openSngChampions, 250);
             });
             return;
           }
@@ -293,7 +304,7 @@ function pokerInitHomeDeepLinks(opts) {
             window.openSngChampionsModal();
             return;
           }
-          if (attempts < 8) setTimeout(openSngChampions, 250);
+          if (attempts < 40) setTimeout(openSngChampions, 250);
         };
         setTimeout(openSngChampions, 250);
       }, 0);
@@ -302,37 +313,43 @@ function pokerInitHomeDeepLinks(opts) {
     if (startParam === "club_choice_vote" || startParam === "club_choice_vote_current") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
-        var attempts = 0;
-        var openClubChoiceVote = function () {
-          attempts += 1;
-          if (typeof window.openClubChoiceVoteModal === "function") {
-            window.openClubChoiceVoteModal();
-            return;
+        retryDeepLinkAction(function () {
+          if (typeof window.pokerOpenHomeWidgetModal === "function") {
+            window.pokerOpenHomeWidgetModal("club-choice-vote"); return true;
           }
-          if (attempts < 8) setTimeout(openClubChoiceVote, 250);
-        };
-        setTimeout(openClubChoiceVote, 250);
+          if (typeof window.openClubChoiceVoteModal !== "function") return false;
+          window.openClubChoiceVoteModal(); return true;
+        });
       }, 0);
       return;
     }
     if (startParam === "vpn_proxy" || startParam === "vpn_proxy_vpn") {
       setTimeout(function () {
-        if (typeof window.openVpnProxyModal === "function") window.openVpnProxyModal({ tab: "vpn" });
+        if (typeof setView === "function") setView("home");
+        retryDeepLinkAction(function () {
+          if (typeof window.openVpnProxyModal !== "function") return false;
+          window.openVpnProxyModal({ tab: "vpn" }); return true;
+        });
       }, 0);
       return;
     }
     if (startParam === "vpn_proxy_proxy" || startParam === "vpn_proxy_tab_proxy") {
       setTimeout(function () {
-        if (typeof window.openVpnProxyModal === "function") window.openVpnProxyModal({ tab: "proxy" });
+        if (typeof setView === "function") setView("home");
+        retryDeepLinkAction(function () {
+          if (typeof window.openVpnProxyModal !== "function") return false;
+          window.openVpnProxyModal({ tab: "proxy" }); return true;
+        });
       }, 0);
       return;
     }
     if (startParam === "gazette") {
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
-        setTimeout(function () {
-          if (typeof window.openGazette === "function") window.openGazette();
-        }, 250);
+        setTimeout(function () { retryDeepLinkAction(function () {
+          if (typeof window.openGazette !== "function") return false;
+          window.openGazette(); return true;
+        }); }, 250);
       }, 0);
       return;
     }

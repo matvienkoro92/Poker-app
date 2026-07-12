@@ -944,6 +944,24 @@
       tournamentHeroHtml + winnerHtml + '</div>';
   }
 
+  function renderCompletedTournamentOption(item) {
+    var winnerName = String(item && item.winnerName || "Чемпион").trim() || "Чемпион";
+    var art = sngPlayerArt({ displayName: winnerName, pokerPlusNickname: winnerName });
+    return '<button type="button" class="sng-champions-modal__completed-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
+      '<span class="club-choice-vote-modal__hero-winner sng-champions-modal__completed-winner">' +
+        '<span class="club-choice-vote-modal__hero-winner-avatar">' +
+          (art ? '<span class="club-choice-vote-modal__hero-art" aria-hidden="true"><img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>' : '') +
+        '</span>' +
+        '<span class="club-choice-vote-modal__hero-winner-main">' +
+          '<small class="sng-champions-modal__completed-title">' + escapeHtml(item.title || "СНГ-турнир") + '</small>' +
+          '<span class="club-choice-vote-modal__hero-winner-badges"><span class="club-choice-vote-modal__hero-winner-badge">Победитель</span></span>' +
+          '<strong>' + escapeHtml(winnerName) + '</strong>' +
+          '<em>Чемпион турнира</em>' +
+        '</span>' +
+      '</span>' +
+    '</button>';
+  }
+
   function renderTournamentMenu(data) {
     var rows = Array.isArray(data.tournaments) ? data.tournaments : [];
     if (!rows.length) return "";
@@ -982,25 +1000,27 @@
                 : '<div class="club-choice-vote-modal__loading">Загружаем участников...</div>') +
             '</div>'
           : '';
+        var tournamentOptionHtml = item.status === "completed" && item.winnerName
+          ? renderCompletedTournamentOption(item)
+          : '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
+              '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.png?v=1" alt=""></span>' +
+              '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
+                '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
+                  (item.activePairs && item.activePairs.length
+                    ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
+                    : ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
+                '</span>' +
+                '<dl class="sng-champions-modal__tournament-facts">' +
+                  '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
+                  '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
+                  '<div><dt><i>♧</i>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
+                  (item.knockoutEnabled ? '<div><dt><i>KO</i>Нокаут</dt><dd>Да</dd></div>' : '') +
+                '</dl>' +
+              '</span>' +
+            '</button>';
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
-          '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.png?v=1" alt=""></span>' +
-            '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
-              '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
-                (item.activePairs && item.activePairs.length
-                  ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
-                  : ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
-              '</span>' +
-              (item.status === "completed" && item.winnerName ? '<span class="sng-champions-modal__tournament-winner">Победитель: <b>' + escapeHtml(item.winnerName) + '</b></span>' : '') +
-              '<dl class="sng-champions-modal__tournament-facts">' +
-                '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
-                '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
-                '<div><dt><i>♧</i>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
-                (item.knockoutEnabled ? '<div><dt><i>KO</i>Нокаут</dt><dd>Да</dd></div>' : '') +
-              '</dl>' +
-            '</span>' +
-          '</button>' +
+          tournamentOptionHtml +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
             : '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>') + participantHtml + '</article>';

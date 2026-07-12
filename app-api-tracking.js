@@ -106,9 +106,10 @@ function pokerApplyTrackingLinkLanding(ctx) {
   var onceKey = "poker_session_tracking_landing_applied_" + String(ctx.ref).replace(/^ref_/, "");
   try {
     if (sessionStorage.getItem(onceKey)) return;
-    sessionStorage.setItem(onceKey, "1");
   } catch (eOnce) {}
-  setTimeout(function () {
+  var attempts = 0;
+  var applyLanding = function () {
+    attempts += 1;
     try {
       if (targetStartApp && targetStartApp !== "home" && typeof window.__pokerApplyStartAppDeepLink === "function") {
         window.__pokerApplyStartAppDeepLink(targetStartApp, {});
@@ -117,13 +118,19 @@ function pokerApplyTrackingLinkLanding(ctx) {
       } else if (targetStartApp === "home" && typeof setView === "function") {
         setView("home");
       } else if (/^https?:\/\//i.test(targetUrl)) {
+        try { sessionStorage.setItem(onceKey, "1"); } catch (eMarkExternal) {}
         if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:external", params.target_label || "");
         if (!window.location || String(window.location.href || "") !== targetUrl) window.location.href = targetUrl;
         return;
+      } else if (targetStartApp && attempts < 40) {
+        setTimeout(applyLanding, 250);
+        return;
       }
+      try { sessionStorage.setItem(onceKey, "1"); } catch (eMark) {}
       if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:" + (targetView || targetStartApp || "url"), params.target_label || "");
     } catch (eApply) {}
-  }, 80);
+  };
+  setTimeout(applyLanding, 80);
 }
 function recordTrackingLinkHit(ref) {
   if (!ref) return;

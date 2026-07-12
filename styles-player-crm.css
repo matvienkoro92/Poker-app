@@ -1,5 +1,6 @@
 .player-crm {
-  width: min(1120px, 100%);
+  box-sizing: border-box;
+  width: min(1120px, calc(100vw - 24px));
   max-width: 100%;
   min-width: 0;
   margin: 0 auto;
@@ -523,8 +524,10 @@
 }
 .player-crm__period-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 .player-crm__period-metric {
   position: relative;
