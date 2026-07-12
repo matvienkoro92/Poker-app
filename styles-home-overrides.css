@@ -1879,19 +1879,22 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 
 /* Keep the live SNG strip authoritative over older home layout overrides. */
 .app.app--view-home .home-club-actions-block {
-  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 320px) + 64px) !important;
+  --home-sng-champions-row: auto !important;
+  grid-template-rows: auto var(--home-club-choice-row) !important;
 }
 
 .app.app--view-home .home-sng-champions-action {
   display: grid !important;
-  grid-template-rows: minmax(0, 1fr) 64px !important;
-  height: 100% !important;
+  grid-template-rows: auto 64px !important;
+  height: auto !important;
   overflow: hidden !important;
   border: 1px solid rgba(255, 151, 31, 0.72) !important;
   background: #07090d !important;
 }
 
 .app.app--view-home .home-sng-champions-image-link {
+  aspect-ratio: 3 / 1 !important;
+  height: auto !important;
   min-height: 0 !important;
   border-radius: inherit inherit 0 0 !important;
 }
