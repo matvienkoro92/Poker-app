@@ -516,6 +516,8 @@
     "winifly": "./assets/summer-rating-player-winifly.webp",
     "missclick": "./assets/summer-rating-player-missclick.webp",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp",
+    "мужначас": "./assets/summer-rating-player-rybnadzor.webp",
+    "муж на час": "./assets/summer-rating-player-rybnadzor.webp",
     "nikola233": "./assets/summer-rating-player-nikola233.webp",
     "milkyway77": "./assets/summer-rating-player-milkyway.webp",
     "пряник": "./assets/summer-rating-player-pryanik.webp",
@@ -583,6 +585,24 @@
       renderPlayerImage(entry) +
       (entry.level != null ? '<em>' + escapeHtml(String(Math.max(0, Math.floor(Number(entry.level) || 0)))) + '</em>' : '') +
     '</button>';
+  }
+
+  function renderChampionHero(entry) {
+    var profileId = entry && entry.accountId ? String(entry.accountId) : "";
+    var profileName = playerName(entry);
+    var avatar = playerAvatar(entry);
+    var art = sngPlayerArt(entry);
+    var image = art
+      ? '<span class="club-choice-vote-modal__hero-art" aria-hidden="true"><img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>'
+      : renderPlayerAvatar(entry);
+    return '<section class="club-choice-vote-modal__hero-winner sng-champions-modal__champion-hero" aria-label="Победитель турнира">' +
+      '<div class="club-choice-vote-modal__hero-winner-avatar" data-sng-profile="' + escapeHtml(profileId) + '" data-sng-profile-name="' + escapeHtml(profileName) + '" data-sng-profile-avatar="' + escapeHtml(avatar) + '" role="button" tabindex="0">' + image + '</div>' +
+      '<div class="club-choice-vote-modal__hero-winner-main">' +
+        '<span class="club-choice-vote-modal__hero-winner-badges"><span class="club-choice-vote-modal__hero-winner-badge">Победитель</span></span>' +
+        '<strong>' + escapeHtml(profileName) + '</strong>' +
+        '<em>Чемпион турнира</em>' +
+      '</div>' +
+    '</section>';
   }
 
   function renderPlayerNameButton(entry) {
@@ -902,9 +922,7 @@
     var activeEntries = approved + pending;
     var capacity = Number(data.capacity) || 32;
     var winner = data.winnerId && data.playersById ? data.playersById[data.winnerId] : null;
-    var winnerHtml = winner ? '<article class="club-choice-vote-modal__candidate sng-champions-modal__champion-card">' +
-      '<div class="club-choice-vote-modal__candidate-main">' + renderPlayerAvatar(Object.assign({ id: data.winnerId }, winner)) +
-      '<div><span>Победитель турнира</span><strong>' + escapeHtml(winner.pokerPlusNickname || winner.displayName || "Чемпион") + '</strong></div></div></article>' : "";
+    var winnerHtml = winner ? renderChampionHero(Object.assign({ id: data.winnerId }, winner)) : "";
     return '<div class="sng-champions-modal__tournament-card' + (winner ? ' sng-champions-modal__tournament-card--completed' : '') + '">' +
       '<div class="sng-champions-modal__tournament-main"><figure class="sng-champions-modal__hero">' +
         '<img src="./assets/sng-champions-hero-v2.webp?v=1" alt="Кубок СНГ Лиги Чемпионов, фишки и два туза на современной покерной арене" width="1672" height="941" loading="eager" decoding="async">' +

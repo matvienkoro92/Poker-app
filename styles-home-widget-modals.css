@@ -8642,6 +8642,10 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-facts dt { color:inherit; font-size:11px; font-weight:700; opacity:.68; }
 .sng-champions-modal__tournament-facts dd { min-width:0; margin:0; overflow:hidden; color:inherit; font-size:12px; font-weight:900; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:520px) { .sng-champions-modal__tournament-facts { width:72%; } }
+@media (max-width:520px) {
+  .sng-champions-modal__tournament-facts div:nth-child(2) { grid-template-columns:1fr; gap:3px; }
+  .sng-champions-modal__tournament-facts div:nth-child(2) dd { margin-left:32px; overflow:visible; text-overflow:clip; white-space:normal; }
+}
 
 /* Карточка турнира в списке: трофейная панель + живая информация. */
 .sng-champions-modal__tournament-option-wrap { border-width:2px; border-radius:26px; border-color:#f1a21c; background:#080d14; box-shadow:0 13px 34px rgba(0,0,0,.5),0 0 22px rgba(255,136,18,.12),inset 0 0 0 1px rgba(255,232,173,.18); }
@@ -8725,7 +8729,7 @@ body.club-choice-vote-open {
 .sng-champions-modal__map-match-reward { position:absolute; left:50%; top:-26px; z-index:7; display:inline-flex; align-items:center; justify-content:center; max-width:calc(100% - 12px); padding:4px 9px; border:1px solid rgba(77,244,222,.72); border-radius:999px; background:rgba(3,38,35,.96); color:#8affef; font-size:10px; font-weight:900; line-height:1.15; white-space:nowrap; transform:translateX(-50%); box-shadow:0 0 10px rgba(47,235,213,.32); text-shadow:0 1px 2px #000; }
 @media (max-width:600px) { .sng-champions-modal__create-tournament { grid-template-columns:1fr; } .sng-champions-modal__create-tournament label { grid-column:1; } }
 .sng-champions-modal__tournament-card { display:grid; grid-template-columns:1fr; gap:14px; }
-.sng-champions-modal__tournament-card--completed { grid-template-columns:minmax(0,1.45fr) minmax(230px,.55fr); align-items:stretch; }
+.sng-champions-modal__tournament-card--completed { grid-template-columns:minmax(0,1fr); align-items:stretch; }
 .sng-champions-modal__tournament-main { min-width:0; }
 .sng-champions-modal__hero { position:relative; }
 .sng-champions-modal__hero-season { position:absolute; left:50%; top:4%; transform:translateX(-50%); z-index:2; color:#5ce4e4; font-size:clamp(10px,1.1vw,15px); font-weight:900; letter-spacing:.16em; white-space:nowrap; text-shadow:0 2px 10px #000; }
@@ -8736,7 +8740,8 @@ body.club-choice-vote-open {
 @keyframes sng-live-pulse { 50% { opacity:.35; transform:scale(.72); } }
 .sng-champions-modal__hero .sng-champions-modal__signup-tools { position:absolute; right:12px; top:12px; z-index:2; }
 .sng-champions-modal__champion-card { margin:0; min-height:100%; align-content:center; }
-@media (max-width:720px) { .sng-champions-modal__tournament-card--completed { grid-template-columns:1fr 1fr; } .sng-champions-modal__tournament-options { grid-template-columns:1fr; } }
+.sng-champions-modal__champion-hero { width:100%; }
+@media (max-width:720px) { .sng-champions-modal__tournament-card--completed { grid-template-columns:1fr; } .sng-champions-modal__tournament-options { grid-template-columns:1fr; } }
 
 .sng-champions-modal__tabs--admin {
   grid-template-columns: repeat(3, minmax(0, 1fr));
