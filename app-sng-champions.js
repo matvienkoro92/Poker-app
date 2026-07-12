@@ -1413,11 +1413,16 @@
   }
 
   function winnerDisplayRounds(data) {
-    return Array.isArray(data && data.rounds) ? data.rounds.slice() : [];
+    var rounds = Array.isArray(data && data.rounds) ? data.rounds.slice() : [];
+    var grand = grandFinalRound(data);
+    if (grand && !rounds.some(function (round) { return round && round.id === grand.id; })) rounds.push(grand);
+    return rounds;
   }
 
   function loserDisplayRounds(data) {
-    return Array.isArray(data && data.loserRounds) ? data.loserRounds.slice() : [];
+    return (Array.isArray(data && data.loserRounds) ? data.loserRounds : []).filter(function (round) {
+      return !(round && (Number(round.index) === 9 || String(round.name || "").toLowerCase() === "гранд-финал"));
+    });
   }
 
   function renderBracketView(data, options) {
