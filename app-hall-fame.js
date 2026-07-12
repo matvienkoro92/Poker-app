@@ -1801,12 +1801,17 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
         var attrs = userId
           ? ' data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level=""'
           : ' disabled aria-disabled="true"';
+        var birthDateValue = String(row.birthYear) + "-" + String(row.month).padStart(2, "0") + "-" + String(row.day).padStart(2, "0");
+        var adminEdit = canManage && userId
+          ? '<span class="hall-fish-birthday-next__edit" role="button" tabindex="0" data-hall-fish-birthday-edit="' + hallFishEsc(userId) + '" data-hall-fish-birthday-name="' + hallFishEsc(name) + '" data-hall-fish-birthday-value="' + hallFishEsc(birthDateValue) + '" aria-label="Изменить дату рождения ' + hallFishEsc(name) + '">✎</span>'
+          : '';
         return '<button type="button" class="hall-fish-birthday-next__row"' + attrs + ' aria-label="' + hallFishEsc("Открыть профиль " + name) + '">' +
           '<span class="hall-fish-birthday-next__main">' +
             '<strong>' + hallFishEsc(row.nick) + '</strong>' +
             '<span>' + hallFishEsc(hallFishFormatBirthdayDate(row, row.nextDate.getFullYear())) + ' · ' + hallFishEsc(label) + '</span>' +
           '</span>' +
           (ageText ? '<span class="hall-fish-birthday-next__age">' + hallFishEsc(ageText) + '</span>' : '') +
+          adminEdit +
         '</button>';
       }).join("")
     : '<div class="hall-fish-modal__notice hall-fish-modal__notice--compact">' + (hallFishUpcomingFilter === "club" ? "Ближайших праздников клуба нет." : "Ближайших событий нет.") + '</div>';
@@ -2333,6 +2338,49 @@ function hallFishAddCalendarEvent(dateKey) {
     });
 }
 
+function hallFishEditPlayerBirthday(accountId, playerName, currentValue) {
+  if (!hallFishCanManageCalendarEvents()) return;
+  var targetId = String(accountId || "").trim();
+  if (!targetId) return;
+  var nextValue = "";
+  try {
+    nextValue = window.prompt("Дата рождения " + String(playerName || "игрока") + " (ГГГГ-ММ-ДД)", String(currentValue || ""));
+  } catch (ePrompt) {
+    return;
+  }
+  if (nextValue === null) return;
+  nextValue = String(nextValue || "").trim();
+  var parts = hallFishBirthDateParts(nextValue);
+  if (!parts || parts.year < 1965 || parts.year > 2010 || !hallFishBirthdayDateForYear({ month: parts.month, day: parts.day }, parts.year)) {
+    try { window.alert("Введите корректную дату в формате ГГГГ-ММ-ДД. Год — от 1965 до 2010."); } catch (eAlert) {}
+    return;
+  }
+  var base = hallFishGetApiBase();
+  if (!base || typeof pokerApiAuthJsonBody !== "function") return;
+  hallFishFetch(base + "/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetId, birthDate: nextValue })),
+  }, 9000)
+    .then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok || !data || data.ok === false) throw new Error((data && data.error) || "Ошибка сохранения");
+        return data;
+      });
+    })
+    .then(function () {
+      hallFishBirthdayRowsCache = null;
+      try { sessionStorage.removeItem(HALL_FISH_BIRTHDAYS_SESSION_CACHE_KEY); } catch (eCache) {}
+      return hallFishLoadBirthdayRows(true);
+    })
+    .then(function (rows) {
+      hallFishSetBirthdaysState("", rows, hallFishCalendarEventsCache || []);
+    })
+    .catch(function (err) {
+      try { window.alert(err && err.message ? err.message : "Не удалось сохранить дату рождения"); } catch (eAlert) {}
+    });
+}
+
 function openHallFishRatingModal() {
   hallFishSetModalState("Загрузка…");
   Promise.all([
@@ -2474,6 +2522,23 @@ function initHallFishRatingModal() {
       e.preventDefault();
       hallFishCloseAchievementDetail();
     }
+  });
+  document.addEventListener("click", function (e) {
+    var birthdayEdit = e.target && e.target.closest ? e.target.closest("[data-hall-fish-birthday-edit]") : null;
+    if (!birthdayEdit) return;
+    e.preventDefault();
+    e.stopPropagation();
+    hallFishEditPlayerBirthday(
+      birthdayEdit.getAttribute("data-hall-fish-birthday-edit"),
+      birthdayEdit.getAttribute("data-hall-fish-birthday-name"),
+      birthdayEdit.getAttribute("data-hall-fish-birthday-value")
+    );
+  });
+  document.addEventListener("keydown", function (e) {
+    var birthdayEdit = e.target && e.target.closest ? e.target.closest("[data-hall-fish-birthday-edit]") : null;
+    if (!birthdayEdit || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    birthdayEdit.click();
   });
   document.addEventListener("click", function (e) {
     var row = e.target && e.target.closest ? e.target.closest(".hall-fish-level-row[data-user-id],.hall-fish-birthday-next__row[data-user-id]") : null;
