@@ -15,6 +15,141 @@ html[data-theme="gold"] body[data-view="home"] {
   background-color: #030407 !important;
 }
 
+/* Актуальный СНГ: баннер и живая строка параметров турнира. */
+.app.app--view-home .home-club-actions-block {
+  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 220px) + 52px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) 52px !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 151, 31, 0.72) !important;
+  background: #07090d !important;
+}
+
+.app.app--view-home .home-sng-champions-image-link {
+  min-height: 0 !important;
+  border-radius: inherit inherit 0 0 !important;
+}
+
+.app.app--view-home .home-sng-champions-action__bar {
+  position: relative;
+  z-index: 21;
+  display: grid;
+  grid-template-columns: minmax(60px, 0.8fr) minmax(60px, 0.8fr) minmax(100px, 1.15fr) minmax(106px, 1.25fr);
+  align-items: stretch;
+  gap: clamp(4px, 1vw, 8px);
+  min-width: 0;
+  padding: 5px clamp(5px, 1.4vw, 10px) 6px;
+  border-top: 1px solid rgba(255, 165, 48, 0.5);
+  background: linear-gradient(180deg, #17130f 0%, #080a0e 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 229, 170, 0.08);
+}
+
+.app.app--view-home .home-sng-champions-action__stat,
+.app.app--view-home .home-sng-champions-action__cta {
+  position: static !important;
+  inset: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 40px !important;
+  height: 40px;
+  padding: 3px clamp(4px, 1.2vw, 9px) !important;
+  border: 1px solid rgba(255, 153, 29, 0.6) !important;
+  border-radius: 10px !important;
+  color: #ffe6ad !important;
+  background: linear-gradient(180deg, rgba(52, 34, 17, 0.96), rgba(10, 12, 17, 0.98)) !important;
+  box-shadow: inset 0 0 12px rgba(255, 119, 0, 0.08), 0 3px 8px rgba(0, 0, 0, 0.32) !important;
+  font-size: clamp(10px, 2.7vw, 14px) !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-sng-champions-action__stat {
+  gap: clamp(3px, 0.8vw, 6px);
+}
+
+.app.app--view-home .home-sng-champions-action__stat > span {
+  color: #ffae32;
+  font-size: 1.15em;
+  font-weight: 900;
+}
+
+.app.app--view-home .home-sng-champions-action__stat strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 900;
+}
+
+.app.app--view-home .home-sng-champions-action__stat--prize {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app.app--view-home .home-sng-champions-action__stat--prize small {
+  color: rgba(255, 218, 151, 0.72);
+  font-size: clamp(7px, 1.8vw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.app.app--view-home .home-sng-champions-action__cta-wrap {
+  display: grid;
+  grid-template-rows: minmax(25px, 1fr) auto;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  height: 40px;
+}
+
+.app.app--view-home .home-sng-champions-action__cta-wrap .home-sng-champions-action__cta {
+  width: 100%;
+  min-height: 25px !important;
+  height: auto;
+}
+
+.app.app--view-home .home-sng-champions-action__stage {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 221, 157, 0.82);
+  font-size: clamp(7px, 1.8vw, 10px);
+  font-weight: 750;
+  line-height: 1.05;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app.app--view-home .home-sng-champions-action__cta {
+  color: #2b1300 !important;
+  background: linear-gradient(180deg, #ffe18a 0%, #ffae2b 55%, #eb7200 100%) !important;
+  font-weight: 950 !important;
+  text-transform: none !important;
+  text-shadow: 0 1px 0 rgba(255, 244, 196, 0.5) !important;
+  cursor: pointer;
+}
+
+@media (max-width: 390px) {
+  .app.app--view-home .home-sng-champions-action__bar {
+    grid-template-columns: minmax(50px, 0.72fr) minmax(52px, 0.72fr) minmax(86px, 1fr) minmax(92px, 1.15fr);
+    gap: 3px;
+    padding-right: 3px;
+    padding-left: 3px;
+  }
+
+  .app.app--view-home .home-sng-champions-action__stat,
+  .app.app--view-home .home-sng-champions-action__cta {
+    padding-right: 3px !important;
+    padding-left: 3px !important;
+    font-size: 9px !important;
+  }
+}
+
 html[data-theme="gold"].app-view-home #app.app.app--view-home,
 html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home {
   background: var(--home-gold-canvas-bg) !important;
@@ -1723,4 +1858,23 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   .app.app--view-home .tournament-day-home-wrap--freeroll .tournament-day-share-btn.tournament-day-freeroll-play-cta::before {
     font-size: 20px;
   }
+}
+
+/* Keep the live SNG strip authoritative over older home layout overrides. */
+.app.app--view-home .home-club-actions-block {
+  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 220px) + 52px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) 52px !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 151, 31, 0.72) !important;
+  background: #07090d !important;
+}
+
+.app.app--view-home .home-sng-champions-image-link {
+  min-height: 0 !important;
+  border-radius: inherit inherit 0 0 !important;
 }

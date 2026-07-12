@@ -1595,6 +1595,42 @@
       cta.setAttribute("aria-label", canJoin ? "Записаться на СНГ-турнир" : "Смотреть сетку СНГ-турнира");
       cta.classList.toggle("home-sng-champions-action__cta--watch", canWatch);
     });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-buyin]"), function (el) {
+      el.textContent = formatHomeMoney(state.buyIn || "0р");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-players]"), function (el) {
+      el.textContent = String(approved) + "/" + String(state.capacity || 32);
+    });
+    var prizeFund = (state.prizes || []).reduce(function (sum, prize) {
+      var amount = Number(String(prize && prize.text || "").replace(/[^\d]/g, "")) || 0;
+      return sum + amount;
+    }, 0);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-prize]"), function (el) {
+      el.textContent = formatHomeMoney(prizeFund || 0);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-stage]"), function (el) {
+      el.textContent = formatHomeStage(state);
+    });
+  }
+
+  function formatHomeStage(data) {
+    if (data && data.status === "completed") return "Турнир завершён";
+    if (data && data.status === "open") return "Регистрация открыта";
+    var raw = String(data && data.activeStage || "").trim();
+    if (!raw) return data && data.status === "bracket" ? "Идёт текущий раунд" : "Ожидание сетки";
+    var normalized = raw.toLowerCase().replace(/ё/g, "е");
+    if (normalized.indexOf("гранд") >= 0) return "Идёт гранд-финал";
+    if (normalized.indexOf("финал сетки") >= 0) return "Идёт финал сетки №2";
+    if (normalized === "финал" || /(^|\s)финал($|\s)/.test(normalized)) return "Идёт финал";
+    if (normalized === "полуфинал" || normalized.indexOf("1/2") >= 0) return "Идёт полуфинал";
+    var fraction = normalized.match(/1\/(32|16|8|4)/);
+    if (fraction) return "Идёт 1/" + fraction[1];
+    return "Идёт " + raw;
+  }
+
+  function formatHomeMoney(value) {
+    var amount = Number(String(value == null ? "" : value).replace(/[^\d]/g, "")) || 0;
+    return amount.toLocaleString("ru-RU") + " ₽";
   }
 
   function readSettingsPayload(actionName) {
