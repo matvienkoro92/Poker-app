@@ -2085,7 +2085,7 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 
 .app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
   .home-club-choice-plaque--sng {
-  --sng-plaque-bar-bottom: clamp(57px, 13.5vw, 69px);
+  --sng-plaque-bar-bottom: clamp(47px, 11.5vw, 57px);
   --sng-plaque-bar-height: clamp(42px, 9vw, 54px);
   padding-top: clamp(20px, 4.8vw, 30px) !important;
   padding-bottom: calc(var(--sng-plaque-bar-bottom) + var(--sng-plaque-bar-height) + clamp(8px, 2vw, 14px)) !important;

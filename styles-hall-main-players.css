@@ -1432,6 +1432,7 @@
     0 0 18px rgba(251, 191, 36, 0.32);
 }
 .hall-fish-birthday-next__row {
+  position: relative;
   appearance: none;
   -webkit-appearance: none;
   display: grid;
@@ -1449,6 +1450,10 @@
   font: inherit;
   text-align: left;
   touch-action: manipulation;
+}
+
+.hall-fish-birthday-next__row:has(.hall-fish-birthday-next__edit) {
+  padding-right: 62px;
 }
 .hall-fish-birthday-next__main {
   display: grid;
@@ -1515,12 +1520,13 @@
 }
 
 .hall-fish-birthday-next__edit {
-  display: inline-grid;
-  flex: 0 0 auto;
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  margin-left: 10px;
+  width: 34px;
+  height: 34px;
   border: 1px solid rgba(255, 210, 99, 0.74);
   border-radius: 12px;
   color: #171007;

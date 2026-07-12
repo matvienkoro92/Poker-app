@@ -1490,9 +1490,14 @@ function hallFishBirthdayRows(rows) {
     .map(function (row) {
       var parts = hallFishBirthDateParts(row && (row.profileBirthDate || row.birthDate || row.birthday));
       if (!parts) return null;
+      var accountId = String((row && row.accountId) || "").trim();
+      var rawNick = String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "").trim();
+      var nick = /^guest_[a-f0-9]+$/i.test(rawNick)
+        ? (accountId ? "Игрок " + accountId : "Игрок")
+        : (rawNick || (accountId ? "Игрок " + accountId : "Игрок"));
       return {
-        accountId: String((row && row.accountId) || "").trim(),
-        nick: String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "Игрок").trim(),
+        accountId: accountId,
+        nick: nick,
         telegram: String((row && row.telegram) || "").trim(),
         birthYear: parts.year,
         month: parts.month,
