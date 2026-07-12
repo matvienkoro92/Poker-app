@@ -2360,3 +2360,25 @@ button.player-crm__stat:focus-visible,
     max-height: 240px;
   }
 }
+
+/* Period analytics always stay three-up, including narrow admin WebViews. */
+.player-crm .player-crm__period-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.player-crm .player-crm__period-metric {
+  min-width: 0 !important;
+}
+@media (max-width: 520px) {
+  .player-crm .player-crm__period-metrics {
+    gap: 5px;
+  }
+  .player-crm .player-crm__period-metric {
+    min-height: 104px;
+    padding: 10px 7px 10px 10px;
+  }
+  .player-crm .player-crm__period-metric span {
+    font-size: 9px;
+  }
+}
