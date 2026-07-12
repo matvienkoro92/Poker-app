@@ -234,7 +234,9 @@
   function renderChips() {
     var el = document.getElementById("playerCrmFilterChips");
     if (!el) return;
-    el.innerHTML = segments.map(function (seg) {
+    el.innerHTML = segments.filter(function (seg) {
+      return seg.key !== "all" && seg.key !== "has_deposit";
+    }).map(function (seg) {
       var count = segmentPlayers(seg.key).length;
       var cls = "player-crm__chip" + (state.filter === seg.key ? " player-crm__chip--active" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + count + "</button>";
@@ -741,7 +743,28 @@
       return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + esc(intFmt(count)) + "</option>";
     }).join("");
     sel.value = segmentByKey(prev).key;
+    updateBroadcastChannelCounts();
     updateBroadcastAudience();
+  }
+
+  function updateBroadcastChannelCounts() {
+    var sel = document.getElementById("playerCrmBroadcastChannel");
+    if (!sel) return;
+    var players = Array.isArray(state.players) ? state.players : [];
+    var botCount = players.filter(function (player) { return !!((player.channels || {}).bot); }).length;
+    var pushCount = players.filter(function (player) { return !!((player.channels || {}).push); }).length;
+    var combinedCount = players.filter(function (player) {
+      var channels = player.channels || {};
+      return !!channels.bot || !!channels.push;
+    }).length;
+    var labels = {
+      bot: "Бот · " + intFmt(botCount),
+      push: "Push · " + intFmt(pushCount),
+      bot_push: "Бот + push · " + intFmt(combinedCount)
+    };
+    Array.prototype.forEach.call(sel.options || [], function (option) {
+      if (labels[option.value]) option.textContent = labels[option.value];
+    });
   }
 
   function updateBroadcastAudience() {
@@ -1012,7 +1035,19 @@
     var enabled = broadcastButtonEnabled();
     var fields = document.getElementById("playerCrmBroadcastButtonFields");
     if (fields) fields.hidden = !enabled;
-    ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonTarget", "playerCrmBroadcastButtonUrl", "playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonTarget2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
+    if (!enabled) setBroadcastButton2Enabled(false);
+    ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonTarget", "playerCrmBroadcastButtonUrl"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function setBroadcastButton2Enabled(enabled) {
+    var fields = document.getElementById("playerCrmBroadcastButtonFields2");
+    var addButton = document.getElementById("playerCrmBroadcastAddButton2");
+    if (fields) fields.hidden = !enabled;
+    if (addButton) addButton.hidden = !!enabled;
+    ["playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonTarget2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.disabled = !enabled;
     });
@@ -1784,8 +1819,9 @@
     if (!broadcastButtonEnabled()) return {};
     var fields = [
       ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonUrl", "кнопки 1"],
-      ["playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2", "кнопки 2"],
     ];
+    var button2Fields = document.getElementById("playerCrmBroadcastButtonFields2");
+    if (button2Fields && !button2Fields.hidden) fields.push(["playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2", "кнопки 2"]);
     var buttons = [];
     for (var i = 0; i < fields.length; i += 1) {
       var textEl = document.getElementById(fields[i][0]);
@@ -3346,6 +3382,18 @@
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;
     syncBroadcastButtonMode();
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.addEventListener("change", syncBroadcastButtonMode);
+    var broadcastAddButton2 = document.getElementById("playerCrmBroadcastAddButton2");
+    if (broadcastAddButton2) broadcastAddButton2.addEventListener("click", function () { setBroadcastButton2Enabled(true); });
+    var broadcastRemoveButton2 = document.getElementById("playerCrmBroadcastRemoveButton2");
+    if (broadcastRemoveButton2) broadcastRemoveButton2.addEventListener("click", function () {
+      ["playerCrmBroadcastButtonText2", "playerCrmBroadcastButtonUrl2"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      var target = document.getElementById("playerCrmBroadcastButtonTarget2");
+      if (target) target.value = "";
+      setBroadcastButton2Enabled(false);
+    });
     var broadcastButtonTarget = document.getElementById("playerCrmBroadcastButtonTarget");
     if (broadcastButtonTarget) broadcastButtonTarget.addEventListener("change", function () { syncBroadcastButtonTarget(1); });
     var broadcastButtonTarget2 = document.getElementById("playerCrmBroadcastButtonTarget2");

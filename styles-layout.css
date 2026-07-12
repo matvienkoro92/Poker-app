@@ -1462,6 +1462,12 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   transform: none !important;
 }
 
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm__period-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
 #playerCrmView.player-crm-standalone {
   position: fixed !important;
   top: 0 !important;

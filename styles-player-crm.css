@@ -1699,6 +1699,12 @@ button.player-crm__stat:focus-visible,
 #playerCrmBroadcastButtonFields[hidden] {
   display: none !important;
 }
+#playerCrmBroadcastButtonFields2[hidden] {
+  display: none !important;
+}
+.player-crm__broadcast-add-button-row {
+  grid-column: 1 / -1;
+}
 .player-crm__broadcast-filters {
   display: flex;
   flex-wrap: wrap;

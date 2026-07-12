@@ -991,6 +991,7 @@
       (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
       rows.map(function (item) {
         var expanded = expandedTournamentParticipantsId === item.id;
+        var applicationCount = Number(item.approved || 0) + Number(item.pending || 0);
         var signupAvailable = item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
         var participantRows = expanded && data.tournamentId === item.id ? (data.entries || []).filter(function (entry) { return entry && entry.status !== "rejected"; }) : [];
         var participantHtml = expanded
@@ -1008,7 +1009,7 @@
                 '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
                   (item.activePairs && item.activePairs.length
                     ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
-                    : ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
+                    : ' · <b>' + escapeHtml(String(item.status === "open" ? applicationCount : Number(item.approved || 0))) + '/' + escapeHtml(String(item.capacity || 32)) + '</b>') +
                 '</span>' +
                 '<dl class="sng-champions-modal__tournament-facts">' +
                   '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
@@ -1054,7 +1055,8 @@
       var notice = mine.status === "approved"
         ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>'
         : mine.status === "balance_requested"
-          ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>'
+          ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>' +
+            '<div class="sng-champions-modal__join-dock"><button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="balancePaid"' + (mine.balancePaidAt ? ' disabled' : '') + '>' + (mine.balancePaidAt ? 'Сообщено администратору' : 'Я пополнил') + '</button></div>'
           : '<div class="sng-champions-modal__notice sng-champions-modal__notice--pending">Вы подали заявку. Админ должен подтвердить участие.</div>';
       return notice;
     }
@@ -2020,7 +2022,7 @@
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
-      success: name === "join" ? "Заявка отправлена" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары 1/16 разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
+      success: name === "join" ? "Заявка отправлена" : name === "balancePaid" ? "Администратору отправлено сообщение" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары 1/16 разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
     }).finally(function () {
       setButtonLoading(action, false);
     });

@@ -212,7 +212,7 @@
           </div>
           <div class="player-crm__broadcast">
             <div class="player-crm__form-grid">
-              <label>
+              <label hidden aria-hidden="true">
                 <span>Группа</span>
                 <select id="playerCrmBroadcastSegment"></select>
               </label>
@@ -229,6 +229,15 @@
               <span>Сообщение</span>
               <textarea id="playerCrmBroadcastText" rows="6" maxlength="900">Сегодня есть хорошие столы и турнирный движ. Если хочешь зайти, напиши менеджеру — подберём игру по лимиту.</textarea>
             </label>
+            <div class="player-crm__broadcast-attachment">
+              <input type="file" id="playerCrmBroadcastImageInput" class="player-crm__file-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Прикрепить картинку" />
+              <div class="player-crm__broadcast-attachment-row">
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageBtn">Прикрепить картинку</button>
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageRemoveBtn" hidden>Убрать</button>
+                <span id="playerCrmBroadcastImageName">Картинка не выбрана</span>
+              </div>
+              <div class="player-crm__broadcast-image-preview" id="playerCrmBroadcastImagePreview" hidden></div>
+            </div>
             <div class="player-crm__broadcast-emoji" id="playerCrmBroadcastEmojiWrap">
               <div class="player-crm__broadcast-emoji-panel" id="playerCrmBroadcastEmojiPanel" aria-label="Смайлы для текста рассылки"></div>
             </div>
@@ -249,6 +258,11 @@
                 <span>Ссылка кнопки 1</span>
                 <input id="playerCrmBroadcastButtonUrl" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
+              <div class="player-crm__broadcast-add-button-row">
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastAddButton2">Добавить ещё кнопку</button>
+              </div>
+            </div>
+            <div class="player-crm__form-grid" id="playerCrmBroadcastButtonFields2" hidden>
               <label>
                 <span>Название кнопки 2</span>
                 <input id="playerCrmBroadcastButtonText2" maxlength="64" placeholder="Написать менеджеру" />
@@ -261,30 +275,9 @@
                 <span>Ссылка кнопки 2</span>
                 <input id="playerCrmBroadcastButtonUrl2" maxlength="512" inputmode="url" placeholder="https://..." />
               </label>
-            </div>
-            <div class="player-crm__form-grid player-crm__broadcast-batch-grid">
-              <label>
-                <span>Размер пачки</span>
-                <input id="playerCrmBroadcastBatchSize" type="number" min="1" max="500" step="1" value="100" inputmode="numeric" />
-              </label>
-              <label>
-                <span>Номер пачки</span>
-                <input id="playerCrmBroadcastBatchNumber" type="number" min="1" step="1" value="1" inputmode="numeric" />
-              </label>
-            </div>
-            <div class="player-crm__broadcast-batch-row">
-              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastBatchPrevBtn" aria-label="Предыдущая пачка">←</button>
-              <span id="playerCrmBroadcastBatchSummary">Пачка 1/1 · получателей 0</span>
-              <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastBatchNextBtn" aria-label="Следующая пачка">→</button>
-            </div>
-            <div class="player-crm__broadcast-attachment">
-              <input type="file" id="playerCrmBroadcastImageInput" class="player-crm__file-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Прикрепить картинку" />
-              <div class="player-crm__broadcast-attachment-row">
-                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageBtn">Прикрепить картинку</button>
-                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageRemoveBtn" hidden>Убрать</button>
-                <span id="playerCrmBroadcastImageName">Картинка не выбрана</span>
+              <div class="player-crm__broadcast-add-button-row">
+                <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastRemoveButton2">Убрать вторую кнопку</button>
               </div>
-              <div class="player-crm__broadcast-image-preview" id="playerCrmBroadcastImagePreview" hidden></div>
             </div>
             <div class="player-crm__broadcast-actions">
               <button type="button" class="player-crm__primary-btn" id="playerCrmBroadcastPrepareBtn">Подготовить рассылку</button>
