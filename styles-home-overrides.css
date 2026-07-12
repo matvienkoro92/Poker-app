@@ -17,7 +17,7 @@ html[data-theme="gold"] body[data-view="home"] {
 
 /* Актуальный СНГ: баннер и живая строка параметров турнира. */
 .app.app--view-home .home-club-actions-block {
-  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 220px) + 64px) !important;
+  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 320px) + 64px) !important;
 }
 
 .app.app--view-home .home-sng-champions-action {
@@ -38,7 +38,7 @@ html[data-theme="gold"] body[data-view="home"] {
   position: relative;
   z-index: 21;
   display: grid;
-  grid-template-columns: minmax(52px, 0.62fr) minmax(58px, 0.68fr) minmax(126px, 1.55fr) minmax(92px, 0.9fr);
+  grid-template-columns: minmax(82px, 1fr) minmax(138px, 1.6fr) minmax(82px, 1fr);
   align-items: stretch;
   gap: clamp(4px, 1vw, 8px);
   min-width: 0;
@@ -130,8 +130,9 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .app.app--view-home .home-sng-champions-action__cta {
-  color: #2b1300 !important;
-  background: linear-gradient(180deg, #ffe18a 0%, #ffae2b 55%, #eb7200 100%) !important;
+  border-color: #ffd36b !important;
+  color: #1f0d00 !important;
+  background: linear-gradient(180deg, #fff4bd 0%, #ffc13d 48%, #f07800 100%) !important;
   font-weight: 950 !important;
   font-size: clamp(15px, 3.8vw, 20px) !important;
   text-transform: none !important;
@@ -140,13 +141,14 @@ html[data-theme="gold"] body[data-view="home"] {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.66),
     inset 0 -3px 7px rgba(126, 45, 0, 0.34),
-    0 0 18px rgba(255, 145, 25, 0.48),
+    0 0 22px rgba(255, 165, 34, 0.72),
+    0 0 7px rgba(255, 236, 176, 0.64),
     0 6px 13px rgba(0, 0, 0, 0.5) !important;
 }
 
 @media (max-width: 390px) {
   .app.app--view-home .home-sng-champions-action__bar {
-    grid-template-columns: minmax(46px, 0.55fr) minmax(50px, 0.6fr) minmax(112px, 1.45fr) minmax(82px, 0.85fr);
+    grid-template-columns: minmax(70px, 1fr) minmax(118px, 1.6fr) minmax(70px, 1fr);
     gap: 3px;
     padding-right: 3px;
     padding-left: 3px;
@@ -1877,7 +1879,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 
 /* Keep the live SNG strip authoritative over older home layout overrides. */
 .app.app--view-home .home-club-actions-block {
-  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 220px) + 64px) !important;
+  --home-sng-champions-row: calc(clamp(110px, 33.333vw, 320px) + 64px) !important;
 }
 
 .app.app--view-home .home-sng-champions-action {
