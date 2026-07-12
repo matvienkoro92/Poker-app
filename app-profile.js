@@ -1416,16 +1416,6 @@ function pokerProfileLoadCityCatalog() {
       });
       if (!Object.keys(lookup).length) throw new Error("City catalog is empty");
       pokerProfileCityLookup = lookup;
-      var options = document.getElementById("profileCityOptions");
-      if (options && !options.childElementCount) {
-        var fragment = document.createDocumentFragment();
-        cities.forEach(function (city) {
-          var option = document.createElement("option");
-          option.value = pokerProfileNormalizeCity(city);
-          fragment.appendChild(option);
-        });
-        options.appendChild(fragment);
-      }
       return lookup;
     })
     .finally(function () {
@@ -1775,8 +1765,8 @@ function initProfilePlayerDetails() {
       pokerProfileResolveRealCity(rawCity)
         .then(function (city) {
           if (rawCity && !city) {
-            if (cityInput) cityInput.setCustomValidity("Выберите город из списка");
-            showCityFeedback("Выберите город из списка.", 3500);
+            if (cityInput) cityInput.setCustomValidity("Введите корректное название города");
+            showCityFeedback("Введите корректное название города.", 3500);
             return null;
           }
           if (cityInput) {

@@ -169,7 +169,7 @@ var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
-var HOME_TOURNAMENT_BANNER_VERSION = "2026071001";
+var HOME_TOURNAMENT_BANNER_VERSION = "2026071202";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 

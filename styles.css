@@ -2078,6 +2078,44 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
   }
 }
 
+/* СНГ на главной: метаданные живут отдельной строкой между заголовком и CTA. */
+.app.app--view-home .home-club-actions-block:has(.home-sng-champions-action__cta:not([hidden])) {
+  --home-sng-champions-row: clamp(178px, 43vw, 218px);
+}
+
+.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
+  .home-club-choice-plaque--sng {
+  --sng-plaque-bar-bottom: clamp(57px, 13.5vw, 69px);
+  --sng-plaque-bar-height: clamp(42px, 9vw, 54px);
+  padding-top: clamp(20px, 4.8vw, 30px) !important;
+  padding-bottom: calc(var(--sng-plaque-bar-bottom) + var(--sng-plaque-bar-height) + clamp(8px, 2vw, 14px)) !important;
+}
+
+.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
+  .home-club-choice-plaque__text {
+  align-self: start !important;
+  margin-bottom: clamp(12px, 3vw, 20px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action__cta {
+  right: clamp(15px, 3.6vw, 31px) !important;
+  bottom: clamp(9px, 2.2vw, 13px) !important;
+  left: clamp(15px, 3.6vw, 31px) !important;
+  min-height: clamp(39px, 9.2vw, 48px) !important;
+  border-color: rgba(255, 157, 37, 0.78) !important;
+  color: #fff0c9 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 166, 45, 0.14), rgba(2, 4, 9, 0.22)),
+    rgba(5, 8, 15, 0.94) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 222, 146, 0.1),
+    inset 0 0 18px rgba(255, 121, 12, 0.11),
+    0 0 10px rgba(255, 117, 12, 0.2) !important;
+  text-shadow:
+    0 2px 0 rgba(42, 17, 0, 0.96),
+    0 0 8px rgba(255, 176, 68, 0.42) !important;
+}
+
 html.app-view-daily-poker-html-scroll,
 html.app-view-daily-poker-html-scroll body,
 html.app-view-daily-poker-html-scroll #app.app,

@@ -46,7 +46,7 @@ function pokerUpdateProfileFriendsCount(count) {
 
 var POKER_FRIENDS_UNREAD_KEY = "poker_profile_friends_unread_v1";
 var POKER_FRIENDS_SEEN_KEY = "poker_profile_friends_seen_v1";
-var POKER_FRIENDS_STABLE_CACHE_KEY = "poker_profile_friends_stable_v1";
+var POKER_FRIENDS_STABLE_CACHE_KEY = "poker_profile_friends_stable_v2";
 
 function pokerFriendsReadJson(key, fallback) {
   try {
@@ -401,31 +401,8 @@ function initProfileFriends() {
     return "";
   }
 
-  function mergeDefaultFriendsData(data, fallback) {
-    var source = data && data.ok ? data : { ok: true, friends: [], incoming: [], outgoing: [], notices: [] };
-    var rows = Array.isArray(source.friends) ? source.friends.slice() : [];
-    var seen = {};
-    rows.forEach(function (row) {
-      var id = pokerFriendsRowId(row);
-      if (id) seen[id] = true;
-    });
-    (Array.isArray(fallback && fallback.friends) ? fallback.friends : []).forEach(function (row) {
-      var id = pokerFriendsRowId(row);
-      if (!id || seen[id]) return;
-      seen[id] = true;
-      rows.push(row);
-    });
-    return Object.assign({}, source, { ok: true, friends: rows });
-  }
-
   function staticDefaultFriendsData() {
-    var viewer = profileFriendsViewerAccountId();
-    var rows = [
-      { userId: "ID803668", userName: "Анна", pokerPlusNickname: "Анна", avatarUrl: "./assets/avatar-chip.jpg", statusLevel: 1, defaultFriend: true },
-      { userId: "ID403173", userName: "Waaar", pokerPlusNickname: "Waaar", avatarUrl: "./assets/summer-rating-player-waaar.webp", statusLevel: 82, defaultFriend: true },
-      { userId: "ID400800", userName: "ПокерМанки", pokerPlusNickname: "ПокерМанки", avatarUrl: "./assets/summer-rating-player-pokermanki.webp?v=3.547", statusLevel: 66, profileSpecialty: "mtt", defaultFriend: true },
-    ].filter(function (row) { return row.userId !== viewer; });
-    return { ok: true, fallback: true, staticFallback: true, friends: rows, incoming: [], outgoing: [], notices: [] };
+    return { ok: true, fallback: true, staticFallback: true, friends: [], incoming: [], outgoing: [], notices: [] };
   }
 
   function fetchDefaultFriendsData() {
@@ -437,7 +414,7 @@ function initProfileFriends() {
     defaultFriendsFetchPromise = fetch(base + "/api/friends" + query, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data || !data.ok || !Array.isArray(data.friends) || !data.friends.length) throw new Error("default_friends_empty");
+        if (!data || !data.ok || !Array.isArray(data.friends)) throw new Error("default_friends_invalid");
         return data;
       })
       .catch(function () { return staticDefaultFriendsData(); })
@@ -466,10 +443,8 @@ function initProfileFriends() {
     friendsFetchPromise = fetch(base + "/api/friends" + fq, { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data && data.ok && Array.isArray(data.friends) && data.friends.length) return data;
-        return fetchDefaultFriendsData().then(function (fallback) {
-          return mergeDefaultFriendsData(data, fallback);
-        });
+        if (data && data.ok && Array.isArray(data.friends)) return data;
+        return fetchDefaultFriendsData();
       }, function (err) {
         return fetchDefaultFriendsData().catch(function () { throw err; });
       })
@@ -1082,30 +1057,22 @@ function initProfileFriends() {
     return Array.isArray(data && data.friends) ? data.friends.length : 0;
   }
 
-  function friendsHasAnyRows(data) {
-    return !!(data && data.ok && (
-      friendsRowsCount(data) ||
-      (Array.isArray(data.incoming) && data.incoming.length) ||
-      (Array.isArray(data.outgoing) && data.outgoing.length) ||
-      (Array.isArray(data.notices) && data.notices.length)
-    ));
-  }
-
   function readStableFriendsData() {
-    var data = pokerFriendsReadJson(POKER_FRIENDS_STABLE_CACHE_KEY, null);
+    var viewer = profileFriendsViewerAccountId();
+    if (!viewer) return null;
+    var data = pokerFriendsReadJson(POKER_FRIENDS_STABLE_CACHE_KEY + ":" + viewer, null);
     if (!data || data.ok !== true) return null;
     return data;
   }
 
   function writeStableFriendsData(data) {
-    if (!friendsHasAnyRows(data)) return;
-    pokerFriendsWriteJson(POKER_FRIENDS_STABLE_CACHE_KEY, data);
+    var viewer = profileFriendsViewerAccountId();
+    if (!viewer || !data || data.ok !== true) return;
+    pokerFriendsWriteJson(POKER_FRIENDS_STABLE_CACHE_KEY + ":" + viewer, data);
   }
 
   function stableFriendsData(data) {
     if (data && data.ok) {
-      var cached = friendsDataCache && friendsDataCache.ok ? friendsDataCache : readStableFriendsData();
-      if (friendsRowsCount(data) === 0 && friendsRowsCount(cached) > 0) return cached;
       friendsDataCache = data;
       writeStableFriendsData(data);
       return data;
