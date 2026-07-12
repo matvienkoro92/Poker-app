@@ -1227,8 +1227,13 @@
 }
 
 .sng-champions-modal__settings textarea {
-  min-height: 82px;
+  min-height: 156px;
   padding: 10px;
+  resize: vertical;
+}
+
+.sng-champions-modal__create-tournament textarea {
+  min-height: 156px;
   resize: vertical;
 }
 
