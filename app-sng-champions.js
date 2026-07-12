@@ -947,6 +947,7 @@
       (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
       rows.map(function (item) {
         var expanded = expandedTournamentParticipantsId === item.id;
+        var signupAvailable = item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
         var participantRows = expanded && data.tournamentId === item.id ? (data.entries || []).filter(function (entry) { return entry && entry.status !== "rejected"; }) : [];
         var participantHtml = expanded
           ? '<div class="sng-champions-modal__tournament-participants">' +
@@ -973,7 +974,9 @@
               '</dl>' +
             '</span>' +
           '</button>' +
-          '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>' + participantHtml + '</article>';
+          (signupAvailable
+            ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
+            : '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>') + participantHtml + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
   }
@@ -1681,6 +1684,14 @@
         render();
       });
       return;
+    }
+    var tournamentSignup = event.target && event.target.closest ? event.target.closest("[data-sng-tournament-signup]") : null;
+    if (tournamentSignup) {
+      activeTournamentId = tournamentSignup.getAttribute("data-sng-tournament-signup") || "";
+      tournamentDetailOpen = true;
+      activeTab = "signup";
+      activeTabManual = true;
+      renderLoading(); loadState(); return;
     }
     var participantsToggle = event.target && event.target.closest ? event.target.closest("[data-sng-tournament-participants]") : null;
     if (participantsToggle) {
