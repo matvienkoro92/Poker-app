@@ -2079,22 +2079,51 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 }
 
 /* СНГ на главной: метаданные живут отдельной строкой между заголовком и CTA. */
-.app.app--view-home .home-club-actions-block:has(.home-sng-champions-action__cta:not([hidden])) {
-  --home-sng-champions-row: clamp(350px, 82vw, 390px);
+.app.app--view-home .home-club-actions-block.home-club-actions-block--sng-cta {
+  --home-sng-champions-row: clamp(260px, 35vw, 300px);
 }
 
-.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
   .home-club-choice-plaque--sng {
-  --sng-plaque-bar-bottom: clamp(47px, 11.5vw, 57px);
-  --sng-plaque-bar-height: clamp(42px, 9vw, 54px);
+  --sng-plaque-bar-bottom: clamp(67px, 8vw, 74px);
+  --sng-plaque-bar-height: clamp(34px, 5vw, 42px);
+  --sng-plaque-icon-size: clamp(9px, 1.1vw, 11px);
   padding-top: clamp(20px, 4.8vw, 30px) !important;
   padding-bottom: calc(var(--sng-plaque-bar-bottom) + var(--sng-plaque-bar-height) + clamp(8px, 2vw, 14px)) !important;
 }
 
-.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
   .home-club-choice-plaque__text {
   align-self: start !important;
   margin-bottom: clamp(12px, 3vw, 20px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta {
+  overflow: hidden !important;
+}
+
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque--sng::before,
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque--sng::after {
+  transform: none !important;
+}
+
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque__count,
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque__subtext,
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque__prize,
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta
+  .home-club-choice-plaque__entry {
+  gap: clamp(2px, 0.45vw, 4px) !important;
+  height: calc(var(--sng-plaque-bar-height) - 8px) !important;
+  min-height: calc(var(--sng-plaque-bar-height) - 8px) !important;
+  padding: 0 clamp(2px, 0.6vw, 6px) 1px !important;
+  font-size: clamp(8.5px, 1.05vw, 11px) !important;
+  white-space: nowrap !important;
+  transform: translateY(-2px) !important;
 }
 
 .app.app--view-home .home-sng-champions-action__figures {
@@ -2158,9 +2187,54 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
   z-index: 9;
 }
 
+/* Главный СНГ-баннер: единое кликабельное изображение без наложенного UI. */
+.app.app--view-home .home-club-actions-block {
+  --home-sng-champions-row: clamp(110px, 33.333vw, 220px) !important;
+}
+
+.app.app--view-home .home-sng-champions-action {
+  height: var(--home-sng-champions-row) !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: clamp(12px, 2.3vw, 18px) !important;
+  background: transparent !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42) !important;
+}
+
+.app.app--view-home .home-sng-champions-action::before,
+.app.app--view-home .home-sng-champions-action::after {
+  display: none !important;
+  content: none !important;
+}
+
+.app.app--view-home .home-sng-champions-image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.app.app--view-home .home-sng-champions-image-link img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.app.app--view-home .home-sng-champions-image-link:hover img,
+.app.app--view-home .home-sng-champions-image-link:focus-visible img {
+  filter: brightness(1.06);
+}
+
 .app.app--view-home .home-sng-champions-action__cta {
   right: clamp(15px, 3.6vw, 31px) !important;
-  bottom: clamp(9px, 2.2vw, 13px) !important;
+  bottom: clamp(8px, 1.5vw, 12px) !important;
   left: clamp(15px, 3.6vw, 31px) !important;
   min-height: clamp(39px, 9.2vw, 48px) !important;
   border-color: rgba(255, 157, 37, 0.78) !important;
@@ -2974,7 +3048,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   mask-image: linear-gradient(270deg, #000 0%, transparent 86%);
 }
 
-.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden])) .home-club-choice-plaque--sng {
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta .home-club-choice-plaque--sng {
   padding-bottom: clamp(53px, 13vw, 64px);
 }
 
@@ -3018,7 +3092,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 /* Keep room for the contextual action after the later home-plaque overrides. */
-.app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden])) .home-club-choice-plaque--sng {
+.app.app--view-home .home-sng-champions-action.home-sng-champions-action--has-cta .home-club-choice-plaque--sng {
   padding-bottom: clamp(53px, 13vw, 64px) !important;
 }
 
