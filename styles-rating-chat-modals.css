@@ -1079,6 +1079,28 @@
 .chat-user-modal__achievement--club-admin .chat-user-modal__achievement-icon {
   width: min(118%, 124px);
 }
+
+.chat-user-modal__achievement:is(
+  .chat-user-modal__achievement--millionaire,
+  .chat-user-modal__achievement--month-champion,
+  .chat-user-modal__achievement--month-vice-champion,
+  .chat-user-modal__achievement--legend
+) {
+  align-self: start;
+  box-sizing: border-box;
+  width: 100%;
+  height: clamp(180px, 42vw, 215px);
+  min-height: 0;
+}
+
+.chat-user-modal__achievement:is(
+  .chat-user-modal__achievement--millionaire,
+  .chat-user-modal__achievement--month-champion,
+  .chat-user-modal__achievement--month-vice-champion,
+  .chat-user-modal__achievement--legend
+) .chat-user-modal__achievement-icon {
+  max-height: 112px;
+}
 .chat-user-modal__achievement:is(
   .chat-user-modal__achievement--offline-win,
   .chat-user-modal__achievement--top-win-2026
@@ -1102,6 +1124,9 @@
 }
 .chat-user-modal__achievement--offline-win,
 .chat-user-modal__achievement--offline-win:not(.chat-user-modal__achievement--locked) {
+  align-self: stretch;
+  box-sizing: border-box;
+  height: 100%;
   border-color: rgba(255, 184, 62, 0.86);
 }
 .chat-user-modal__achievement:is(
@@ -1154,6 +1179,7 @@
 ) .chat-user-modal__achievement-main {
   position: relative;
   z-index: 1;
+  grid-row: 2;
   align-self: end;
   margin-bottom: 2px;
   padding: 4px 2px;
@@ -1173,6 +1199,8 @@
 ) .chat-user-modal__achievement-stars {
   position: relative;
   z-index: 1;
+  grid-row: 3;
+  align-self: end;
   text-shadow:
     0 1px 3px #000,
     0 0 8px rgba(255, 232, 164, 0.8),

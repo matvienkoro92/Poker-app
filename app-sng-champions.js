@@ -958,7 +958,7 @@
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art.webp?v=3" alt=""></span>' +
+            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.png?v=1" alt=""></span>' +
             '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
               '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b></span>' +
               '<dl class="sng-champions-modal__tournament-facts">' +

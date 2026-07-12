@@ -1028,7 +1028,7 @@ if (chatUserModalEl) {
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) return null;
-        return data.friends.filter(function (row) { return row && row.status === "accepted"; }).length;
+        return data.friends.filter(function (row) { return !!row; }).length;
       })
       .catch(function () { return null; });
   }
