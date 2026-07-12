@@ -2080,7 +2080,7 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 
 /* СНГ на главной: метаданные живут отдельной строкой между заголовком и CTA. */
 .app.app--view-home .home-club-actions-block:has(.home-sng-champions-action__cta:not([hidden])) {
-  --home-sng-champions-row: clamp(218px, 53vw, 258px);
+  --home-sng-champions-row: clamp(270px, 65vw, 310px);
 }
 
 .app.app--view-home .home-sng-champions-action:has(.home-sng-champions-action__cta:not([hidden]))
@@ -2147,6 +2147,15 @@ body[data-view="home"] #app.app > .card > .card__header .header-greeting,
 
 .app.app--view-home .home-sng-champions-action .home-club-choice-plaque--sng {
   z-index: 5;
+}
+
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque__text,
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque__count,
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque__subtext,
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque__prize,
+.app.app--view-home .home-sng-champions-action .home-club-choice-plaque__entry {
+  position: relative;
+  z-index: 9;
 }
 
 .app.app--view-home .home-sng-champions-action__cta {
