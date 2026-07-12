@@ -1878,18 +1878,32 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 /* Keep the live SNG strip authoritative over older home layout overrides. */
+.app.app--view-home .home-sng-champions-feature {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-rows: auto 64px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 151, 31, 0.72);
+  border-radius: clamp(12px, 2.3vw, 18px);
+  background: #07090d;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
 .app.app--view-home .home-club-actions-block {
   --home-sng-champions-row: auto !important;
   grid-template-rows: auto var(--home-club-choice-row) !important;
 }
 
 .app.app--view-home .home-sng-champions-action {
-  display: grid !important;
-  grid-template-rows: auto 64px !important;
+  display: block !important;
   height: auto !important;
   overflow: hidden !important;
-  border: 1px solid rgba(255, 151, 31, 0.72) !important;
-  background: #07090d !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app.app--view-home .home-sng-champions-image-link {
