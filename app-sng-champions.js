@@ -1678,7 +1678,10 @@
 
   function formatHomeStage(data) {
     if (data && data.status === "completed") return "Турнир завершён";
-    if (data && data.status === "open") return "Регистрация открыта";
+    if (data && data.status === "open") {
+      var approved = data.counts && Number(data.counts.approved) || 0;
+      return "Регистрация открыта · " + String(approved) + "/" + String(data.capacity || 32);
+    }
     var raw = String(data && data.activeStage || "").trim();
     if (!raw) return data && data.status === "bracket" ? "Идёт текущий раунд" : "Ожидание сетки";
     var normalized = raw.toLowerCase().replace(/ё/g, "е");

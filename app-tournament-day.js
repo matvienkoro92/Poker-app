@@ -2035,6 +2035,12 @@ function updateTournamentDayBlock() {
     }
     if (homeTrophyMedia) {
       homeTrophyMedia.hidden = !hasDetailBanner;
+      if (hasDetailBanner) {
+        var homeTrophyBackgroundSrc = getHomeTournamentBannerUrl(detailBannerFile);
+        homeTrophyMedia.style.backgroundImage = 'url("' + homeTrophyBackgroundSrc.replace(/"/g, "%22") + '")';
+      } else {
+        homeTrophyMedia.style.removeProperty("background-image");
+      }
       if (hasDetailBanner && detailState.t.bannerWidth && detailState.t.bannerHeight) {
         homeTrophyMedia.style.setProperty("--home-tournament-banner-aspect", detailState.t.bannerWidth + " / " + detailState.t.bannerHeight);
       } else {

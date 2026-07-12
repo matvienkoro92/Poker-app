@@ -524,7 +524,7 @@
 }
 .player-crm__period-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   width: 100%;
   min-width: 0;
@@ -541,6 +541,7 @@
   padding: 14px 14px 13px 18px;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.24);
+  border-right: 4px solid #8fa3b8;
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.48);
   box-shadow:
@@ -604,11 +605,17 @@ button.player-crm__period-metric:focus-visible {
 .player-crm__period-metric--plus strong {
   color: #6ee7a0;
 }
+.player-crm__period-metric--plus {
+  border-right-color: #34d399;
+}
 .player-crm__period-metric--plus::before {
   background: #34d399;
 }
 .player-crm__period-metric--minus strong {
   color: #fb7185;
+}
+.player-crm__period-metric--minus {
+  border-right-color: #fb7185;
 }
 .player-crm__period-metric--minus::before {
   background: #fb7185;
