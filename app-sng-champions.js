@@ -958,7 +958,7 @@
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art.webp?v=1" alt=""></span>' +
+            '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art.webp?v=3" alt=""></span>' +
             '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
               '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) + ' · <b>' + escapeHtml(String(item.approved || 0)) + '/' + escapeHtml(String(item.capacity || 32)) + '</b></span>' +
               '<dl class="sng-champions-modal__tournament-facts">' +
@@ -1342,7 +1342,8 @@
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
-          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
+          var finalStageClass = payoutStage === "Финал" && kind === "winners" ? " sng-champions-modal__map-round--final-stage" : "";
+          return '<div class="sng-champions-modal__map-round' + (index === stageIndex ? " sng-champions-modal__map-round--active" : "") + compactRoundClass + namedStageClass + finalStageClass + ' sng-champions-modal__map-round--matches-' + escapeHtml(matchCount) + '">' +
             '<button type="button" class="sng-champions-modal__map-round-title" ' + stageAttr + '="' + escapeHtml(index) + '"><span>' + escapeHtml(roundLabel) + '</span></button>' +
             mapAwards +
             '<div class="sng-champions-modal__map-round-matches">' +
@@ -1565,7 +1566,14 @@
       var prize = button.querySelector(".home-club-choice-plaque__prize");
       var entry = button.querySelector(".home-club-choice-plaque__entry");
       if (count) count.textContent = String(approved) + "/" + String(state.capacity || 32);
-      if (title && state.title) title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title">' + escapeHtml(state.title).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>') + '</span>';
+      if (title && state.title) {
+        var normalizedTitle = String(state.title).trim();
+        if (/^1(?:ый|й)\s+снг[-\s]?баттл\s+лига\s+чемпионов\s+два\s+туза$/i.test(normalizedTitle)) {
+          title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title home-club-choice-plaque__dynamic-title--battle"><span><b class="home-club-choice-plaque__ordinal-one">1</b>ый СНГ-баттл</span><span>Лига чемпионов</span><span>Два туза</span></span>';
+        } else {
+          title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title">' + escapeHtml(normalizedTitle).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>') + '</span>';
+        }
+      }
       if (prize && state.prizes && state.prizes[0]) prize.textContent = state.prizes[0].text || "";
       if (entry) entry.textContent = "Вход " + String(state.buyIn || "0р");
       if (sub) {
@@ -1574,6 +1582,14 @@
         else if (state.status === "completed") sub.textContent = "Итоги готовы";
         else sub.textContent = "Запись закрыта";
       }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-cta]"), function (cta) {
+      var canJoin = state.status === "open";
+      var canWatch = state.status === "bracket" || state.status === "completed";
+      cta.hidden = !canJoin && !canWatch;
+      cta.textContent = canJoin ? "Записаться" : "Смотреть";
+      cta.setAttribute("aria-label", canJoin ? "Записаться на СНГ-турнир" : "Смотреть сетку СНГ-турнира");
+      cta.classList.toggle("home-sng-champions-action__cta--watch", canWatch);
     });
   }
 
