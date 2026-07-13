@@ -26,6 +26,34 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-06-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-06-07-2026-league2-energetik-22h.jpg"
   ],
+  "07.07.2026": [
+    "rating-compressed-preview/rating-07-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-07-07-2026-league2-turnir-vtornika-18h.jpg"
+  ],
+  "08.07.2026": [
+    "rating-compressed-preview/rating-08-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-08-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-08-07-2026-league2-energetik-22h.jpg"
+  ],
+  "09.07.2026": [
+    "rating-compressed-preview/rating-09-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-09-07-2026-league2-turnir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-09-07-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "10.07.2026": [
+    "rating-compressed-preview/rating-10-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-10-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-10-07-2026-league2-energetik-22h.jpg"
+  ],
+  "11.07.2026": [
+    "rating-compressed-preview/rating-11-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-11-07-2026-league2-energetik-22h.jpg"
+  ],
+  "12.07.2026": [
+    "rating-compressed-preview/rating-12-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-12-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-12-07-2026-league2-energetik-22h.jpg"
+  ],
   "01.06.2026": [
     "rating-compressed-preview/rating-01-06-2026-league2-dv-plo5-30k-12h.jpg",
     "rating-compressed-preview/rating-01-06-2026-league2-bounty-200-50k-gtd-14h.jpg",

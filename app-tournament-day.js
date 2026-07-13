@@ -171,7 +171,6 @@ var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽"
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
 var HOME_TOURNAMENT_BANNER_VERSION = "2026071301";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
-var HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = false;
 
 function getHomeTournamentBannerUrl(file) {
   if (!file) return "";
@@ -227,21 +226,8 @@ function preloadHomeTournamentBanner(file, priority) {
 }
 
 function preloadHomeTournamentBanners(preferredWeekday) {
-  if (HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED) {
-    var preferred = TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday];
-    if (preferred && preferred.banner) preloadHomeTournamentBanner(preferred.banner, "high");
-    return;
-  }
-  HOME_TOURNAMENT_BANNERS_PRELOAD_STARTED = true;
-  var order = [];
-  if (TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday]) order.push(preferredWeekday);
-  HOME_TOURNAMENT_WEEK_ORDER.forEach(function (dow) {
-    if (order.indexOf(dow) === -1) order.push(dow);
-  });
-  order.forEach(function (dow) {
-    var item = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow];
-    if (item && item.banner) preloadHomeTournamentBanner(item.banner, dow === preferredWeekday ? "high" : "low");
-  });
+  var preferred = TOURNAMENT_OF_DAY_BY_WEEKDAY[preferredWeekday];
+  if (preferred && preferred.banner) preloadHomeTournamentBanner(preferred.banner, "high");
 }
 
 function pokerGetFreerollDayLabel(item) {

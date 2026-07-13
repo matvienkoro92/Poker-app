@@ -2748,11 +2748,17 @@ function initWinterRating() {
     var updatedLabel = seasonConfig.updatedLabel || "обновлено 28 июня";
     return "<p class=\"winter-rating__date-tournaments-caption\"><span class=\"winter-rating__date-tournaments-caption-text\">" + label + "</span><span class=\"winter-rating__date-tournaments-updated\">" + updatedLabel + "</span></p>";
   }
-  function fillSpringLeagueBlocks(leaguesWrap, dateStr) {
-    if (!leaguesWrap || leaguesWrap.getAttribute("data-spring-filled") === "1") return;
-    [1, 2].forEach(function (leagueNum) {
+  function fillSpringLeagueBlocks(leaguesWrap, dateStr, preferredLeague) {
+    if (!leaguesWrap) return;
+    var activeTab = leaguesWrap.querySelector(".spring-rating-date-league-tab--active");
+    var activeLeague = preferredLeague === "2" || preferredLeague === 2
+      ? 2
+      : (preferredLeague === "1" || preferredLeague === 1
+        ? 1
+        : (activeTab && activeTab.getAttribute("data-league") === "2" ? 2 : 1));
+    [activeLeague].forEach(function (leagueNum) {
       var block = leaguesWrap.querySelector(".spring-rating-date-league--" + leagueNum);
-      if (!block) return;
+      if (!block || block.getAttribute("data-spring-filled") === "1") return;
       var screensEl = block.querySelector(".winter-rating__screenshots[data-league=\"" + leagueNum + "\"]");
       var tournamentsEl = block.querySelector(".winter-rating__date-tournaments-list[data-league=\"" + leagueNum + "\"]");
       var tableEl = block.querySelector(".winter-rating__date-table-wrap[data-league=\"" + leagueNum + "\"]");
@@ -2765,8 +2771,8 @@ function initWinterRating() {
         var rows = getSpringRatingRowsForDateLeague(dateStr, leagueNum);
         tableEl.innerHTML = rows && rows.length ? renderWinterRatingTable(rows) : "<p class=\"winter-rating__spring-placeholder\">Нет данных за эту дату</p>";
       }
+      block.setAttribute("data-spring-filled", "1");
     });
-    leaguesWrap.setAttribute("data-spring-filled", "1");
   }
   try {
     window.__pokerFillSpringDateLeagues = fillSpringLeagueBlocks;
@@ -2798,6 +2804,7 @@ function initWinterRating() {
             e.preventDefault();
             e.stopPropagation();
             var league = tab.getAttribute("data-league");
+            fillSpringLeagueBlocks(leaguesWrap, dateStr, league);
             leaguesWrap.querySelectorAll(".spring-rating-date-league-tab").forEach(function (t) { t.classList.toggle("spring-rating-date-league-tab--active", t.getAttribute("data-league") === league); });
             leaguesWrap.querySelectorAll(".spring-rating-date-league").forEach(function (b) { b.style.display = b.getAttribute("data-league") === league ? "" : "none"; });
           });
@@ -2888,6 +2895,7 @@ function initWinterRating() {
     var dateModalBody = document.getElementById("winterRatingDateModalBody");
     var dateModalPrev = document.getElementById("winterRatingDateModalPrev");
     var dateModalNext = document.getElementById("winterRatingDateModalNext");
+    var dateModalRenderSeq = 0;
     function refreshDateModalRefs() {
       dateModal = document.getElementById("winterRatingDateModal");
       dateModalBackdrop = document.getElementById("winterRatingDateModalBackdrop");
@@ -3085,58 +3093,64 @@ function initWinterRating() {
     function openDateModal(dateStr, panel, preferredLeague) {
       ensureDateModalNavControls();
       if (!dateModal || !dateModalBody || !panel) return;
-      var lwModal = panel.querySelector(".spring-rating-date-leagues");
-      if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr);
-      dateModalBody.innerHTML = "";
-      var clone = panel.cloneNode(true);
-      clone.classList.remove("winter-rating__date-panel--hidden");
-      dateModalBody.appendChild(clone);
-      var cloneLeaguesWrap = clone.querySelector(".spring-rating-date-leagues");
-      if (cloneLeaguesWrap) {
-        applyDateModalLeague(cloneLeaguesWrap, preferredLeague);
-        cloneLeaguesWrap.addEventListener("click", function (e) {
-          var tab = e.target && e.target.closest ? e.target.closest(".spring-rating-date-league-tab") : null;
-          if (!tab) return;
-          e.preventDefault();
-          e.stopPropagation();
-          var league = tab.getAttribute("data-league");
-          cloneLeaguesWrap.querySelectorAll(".spring-rating-date-league-tab").forEach(function (t) { t.classList.toggle("spring-rating-date-league-tab--active", t.getAttribute("data-league") === league); });
-          cloneLeaguesWrap.querySelectorAll(".spring-rating-date-league").forEach(function (b) { b.style.display = b.getAttribute("data-league") === league ? "" : "none"; });
-        });
-      }
-      dateModalBody.querySelectorAll(".winter-rating__screenshot").forEach(function (cell) {
-        var screensWrap = cell.parentElement;
-        if (!screensWrap || !screensWrap.classList || !screensWrap.classList.contains("winter-rating__screenshots")) return;
-        var dStr = screensWrap.getAttribute("data-rating-date") || dateStr;
-        var leagueAttr = screensWrap.getAttribute("data-league");
-        var leagueNum = leagueAttr === "1" || leagueAttr === "2" ? parseInt(leagueAttr, 10) : undefined;
-        var siblings = screensWrap.querySelectorAll(".winter-rating__screenshot");
-        var idx = Array.prototype.indexOf.call(siblings, cell);
-        if (idx < 0 || typeof openWinterRatingLightbox !== "function") return;
-        var handler = function (e) {
-          if (e) e.preventDefault();
-          openWinterRatingLightbox(dStr, idx, leagueNum, {
-            directItems: Array.prototype.map.call(siblings, function (item) {
-              var img = item.querySelector("img");
-              return {
-                src: img ? (img.currentSrc || img.src || "") : "",
-                alt: img ? (img.alt || "") : "",
-              };
-            }),
-          });
-        };
-        cell.addEventListener("click", handler);
-        cell.addEventListener("keydown", function (e) {
-          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handler(); }
-        });
-      });
       if (dateModalTitle) dateModalTitle.textContent = "Рейтинг на " + dateStr;
       updateDateModalNav(dateStr);
       dateModal.setAttribute("aria-hidden", "false");
       if (document.body) document.body.style.overflow = "hidden";
+      var renderSeq = ++dateModalRenderSeq;
+      dateModalBody.innerHTML = '<p class="winter-rating__spring-placeholder" role="status">Загружаю рейтинг…</p>';
+      var renderModalContent = function () {
+        if (renderSeq !== dateModalRenderSeq || !dateModal || dateModal.getAttribute("aria-hidden") === "true") return;
+        var lwModal = panel.querySelector(".spring-rating-date-leagues");
+        if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr, preferredLeague);
+        var clone = panel.cloneNode(true);
+        clone.classList.remove("winter-rating__date-panel--hidden");
+        dateModalBody.innerHTML = "";
+        dateModalBody.appendChild(clone);
+        var cloneLeaguesWrap = clone.querySelector(".spring-rating-date-leagues");
+        if (cloneLeaguesWrap) {
+          applyDateModalLeague(cloneLeaguesWrap, preferredLeague);
+          cloneLeaguesWrap.addEventListener("click", function (e) {
+            var tab = e.target && e.target.closest ? e.target.closest(".spring-rating-date-league-tab") : null;
+            if (!tab) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var league = tab.getAttribute("data-league");
+            fillSpringLeagueBlocks(cloneLeaguesWrap, dateStr, league);
+            cloneLeaguesWrap.querySelectorAll(".spring-rating-date-league-tab").forEach(function (t) { t.classList.toggle("spring-rating-date-league-tab--active", t.getAttribute("data-league") === league); });
+            cloneLeaguesWrap.querySelectorAll(".spring-rating-date-league").forEach(function (b) { b.style.display = b.getAttribute("data-league") === league ? "" : "none"; });
+          });
+        }
+        dateModalBody.querySelectorAll(".winter-rating__screenshot").forEach(function (cell) {
+          var screensWrap = cell.parentElement;
+          if (!screensWrap || !screensWrap.classList || !screensWrap.classList.contains("winter-rating__screenshots")) return;
+          var dStr = screensWrap.getAttribute("data-rating-date") || dateStr;
+          var leagueAttr = screensWrap.getAttribute("data-league");
+          var leagueNum = leagueAttr === "1" || leagueAttr === "2" ? parseInt(leagueAttr, 10) : undefined;
+          var siblings = screensWrap.querySelectorAll(".winter-rating__screenshot");
+          var idx = Array.prototype.indexOf.call(siblings, cell);
+          if (idx < 0 || typeof openWinterRatingLightbox !== "function") return;
+          var handler = function (e) {
+            if (e) e.preventDefault();
+            openWinterRatingLightbox(dStr, idx, leagueNum, {
+              directItems: Array.prototype.map.call(siblings, function (item) {
+                var img = item.querySelector("img");
+                return { src: img ? (img.currentSrc || img.src || "") : "", alt: img ? (img.alt || "") : "" };
+              }),
+            });
+          };
+          cell.addEventListener("click", handler);
+          cell.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handler(); }
+          });
+        });
+      };
+      var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 0); };
+      raf(function () { setTimeout(renderModalContent, 0); });
     }
     function closeDateModal() {
       if (!dateModal) return;
+      dateModalRenderSeq += 1;
       dateModal.setAttribute("aria-hidden", "true");
       if (document.body) document.body.style.overflow = "";
     }

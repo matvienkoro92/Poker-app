@@ -298,13 +298,13 @@
     <script>
       (function preloadCurrentTournamentPoster() {
         var posters = [
-          "home-tournament-sunday-knockout-week-300k.webp",
-          "home-tournament-mystery-bounty-130k.webp",
-          "home-tournament-tuesday-tractor-120k.webp",
+          "home-tournament-sunday-knockout-week-300k.jpg",
+          "home-tournament-mystery-bounty-130k.jpg",
+          "home-tournament-tuesday-tractor-120k.jpg",
           "home-tournament-wednesday-knockout-250k.jpg",
-          "home-tournament-thursday-mystery-plus-220k.webp",
-          "home-tournament-friday-knockout-progressive-130k.webp",
-          "home-tournament-saturday-freeroll-200k.webp"
+          "home-tournament-thursday-mystery-plus-220k.jpg",
+          "home-tournament-friday-knockout-progressive-130k.jpg",
+          "home-tournament-saturday-freeroll-200k.jpg"
         ];
         var dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
         var day = new Date().toLocaleString("en-US", { timeZone: "Europe/Moscow", weekday: "short" });
@@ -312,7 +312,9 @@
         var preload = document.createElement("link");
         preload.rel = "preload";
         preload.as = "image";
-        preload.href = "./assets/" + file + "?v=2026071202";
+        var posterUrl = "./assets/" + file + "?v=2026071301";
+        document.documentElement.setAttribute("data-current-tournament-poster", posterUrl);
+        preload.href = posterUrl;
         preload.fetchPriority = "high";
         document.head.appendChild(preload);
       })();
@@ -872,7 +874,6 @@
                         <img
                           class="home-tournament-detail__img"
                           id="tournamentDayHomeTrophyImg"
-                          src="./assets/home-tournament-mystery-bounty-130k.jpg?v=2026071301"
                           alt="Poker21 Мистери Баунти 170 000 ₽"
                           width="640"
                           height="915"
@@ -880,6 +881,13 @@
                           decoding="async"
                           fetchpriority="high"
                         />
+                        <script>
+                          (function loadCurrentTournamentPoster() {
+                            var img = document.getElementById("tournamentDayHomeTrophyImg");
+                            var src = document.documentElement.getAttribute("data-current-tournament-poster");
+                            if (img && src) img.src = src;
+                          })();
+                        </script>
                       </div>
                       <div class="home-tournament-detail__content">
                         <div class="home-tournament-detail__eyebrow" id="homeTournamentFocusLabel">Фокус дня</div>
@@ -1718,13 +1726,13 @@
     <script defer src="./app-click-sound.js?v=3.009"></script>
     <script defer src="./app-home-init.js?v=3.729"></script>
     <script defer src="./app-home-media.js?v=3.666"></script>
-    <script defer src="./app-admin-menu-password.js?v=3.001"></script>
+    <script defer src="./app-admin-menu-password.js?v=3.002"></script>
     <script defer src="./app-lazy-loader.js?v=3.672"></script>
     <script defer src="./app-home-planner-access.js?v=3.666"></script>
     <script defer src="./app-home-planner-runtime.js?v=3.666"></script>
     <script defer src="./app-home-planner.js?v=3.666"></script>
     <script defer src="./app-home-tasks.js?v=3.667"></script>
-    <script defer src="./app-tournament-day.js?v=3.679"></script>
+    <script defer src="./app-tournament-day.js?v=3.680"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=3.003"></script>
     <script defer src="./app-home-deeplinks.js?v=3.675"></script>
     <script defer src="./app-home-club-info-modals.js?v=3.667"></script>
@@ -1735,7 +1743,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=3.672"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view.js?v=3.666"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=3.682"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=3.683"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-render-utils.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-identity-formatters.js?v=3.666"></script>
@@ -1891,11 +1899,11 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./spring-rating-data-april.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./spring-rating-data-may.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./spring-rating-data.js?v=3.666"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-images-league1.js?v=3.680"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-images-league1.js?v=3.689"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-images-league2.js?v=3.679"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-meta.js?v=3.672"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-data-june.js?v=3.675"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-data-july.js?v=3.674"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-data-july.js?v=3.683"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-data-august.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./summer-rating-data.js?v=3.666"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-winter" src="./app-rating-winter-runtime.js?v=3.666"></script>

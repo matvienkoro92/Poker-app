@@ -2,9 +2,12 @@
   "use strict";
 
   var ADMIN_MENU_PASSWORD = "7889";
-  var PROTECTED_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, [data-crm-open=\"player-crm\"]";
+  var CALCULATIONS_PASSWORD = "1110";
+  var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"]';
+  var PROTECTED_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, [data-crm-open=\"player-crm\"], " + CALCULATIONS_SELECTOR;
   var bypassTargets = typeof WeakSet === "function" ? new WeakSet() : null;
   var pendingTarget = null;
+  var pendingPassword = ADMIN_MENU_PASSWORD;
 
   function ensurePasswordModal() {
     var modal = document.getElementById("adminMenuPasswordModal");
@@ -38,7 +41,7 @@
         event.preventDefault();
         var input = document.getElementById("adminMenuPasswordInput");
         var message = document.getElementById("adminMenuPasswordMessage");
-        if (!input || input.value !== ADMIN_MENU_PASSWORD) {
+        if (!input || input.value !== pendingPassword) {
           if (message) message.textContent = "Неверный пароль";
           if (input) {
             input.value = "";
@@ -59,10 +62,15 @@
   function openPasswordModal(target) {
     var modal = ensurePasswordModal();
     pendingTarget = target;
+    pendingPassword = target && target.matches && target.matches(CALCULATIONS_SELECTOR)
+      ? CALCULATIONS_PASSWORD
+      : ADMIN_MENU_PASSWORD;
     var input = document.getElementById("adminMenuPasswordInput");
     var message = document.getElementById("adminMenuPasswordMessage");
+    var title = document.getElementById("adminMenuPasswordTitle");
     if (input) input.value = "";
     if (message) message.textContent = "";
+    if (title) title.textContent = pendingPassword === CALCULATIONS_PASSWORD ? "Пароль для вкладки «Расчёты»" : "Введите пароль";
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("admin-menu-password-open");
@@ -79,6 +87,7 @@
     }
     document.body.classList.remove("admin-menu-password-open");
     pendingTarget = null;
+    pendingPassword = ADMIN_MENU_PASSWORD;
   }
 
   function interceptProtectedOpen(event) {
