@@ -1,10 +1,18 @@
 // Summer rating screenshots: League 1.
 var SUMMER_RATING_IMAGES_LEAGUE1 = {
   "01.07.2026": [
+    "rating-compressed-preview/rating-01-07-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-tai-7-half-ko-15k-06h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-dv-turbo-500-80k-10h.jpg",
     "rating-compressed-preview/rating-01-07-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-dv-plo5-30k-12h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-new-hot-pko-15h.jpg",
     "rating-compressed-preview/rating-01-07-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-one-million-gtd-18h.jpg",
     "rating-compressed-preview/rating-01-07-2026-league1-hok-magic-19h.jpg",
-    "rating-compressed-preview/rating-01-07-2026-league1-rebuy-evening-20h.jpg"
+    "rating-compressed-preview/rating-01-07-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-magic-500-120k-22h.jpg",
+    "rating-compressed-preview/rating-01-07-2026-league1-night-magic-80k-23h.jpg"
   ],
   "02.07.2026": [
     "rating-compressed-preview/rating-02-07-2026-league1-dv-rebuy-12h.jpg",

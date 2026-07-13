@@ -119,7 +119,11 @@
     },
     {
       "path": "/api/cron-raffles",
-      "schedule": "*/5 * * * *"
+      "schedule": "31 11 * * *"
+    },
+    {
+      "path": "/api/cron-raffles",
+      "schedule": "16 17 * * *"
     },
     {
       "path": "/api/cron-bonus-balances-report",

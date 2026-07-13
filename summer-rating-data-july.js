@@ -2,6 +2,85 @@
 var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
   "01.07.2026": [
     {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        { "nick": "Em13!!", "place": 1, "reward": 40294, "points": 135 },
+        { "nick": "electrocomvpk", "place": 10, "reward": 600, "points": 0 }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 🌊 1/2 KO🎯15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        { "nick": "nikola233", "place": 1, "reward": 6860, "points": 135 }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 🏆 80K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        { "nick": "Pasiki_Koliki", "place": 2, "reward": 12372, "points": 110 },
+        { "nick": "VORON💰💰💰", "place": 4, "reward": 5331, "points": 70 }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV PLO5 30k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        { "nick": "xx🏯xx", "place": 2, "reward": 6243, "points": 110 }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New – Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        { "nick": "Рыбнадзор", "place": 1, "reward": 22423, "points": 135 },
+        { "nick": "nikola233", "place": 4, "reward": 2879, "points": 70 }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🔥1.000.000 GTD🔥",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        { "nick": "Bredshef84Ufa", "place": 6, "reward": 35167, "points": 50 },
+        { "nick": "Reebook", "place": 11, "reward": 9130, "points": 0 },
+        { "nick": "AKARMARA", "place": 38, "reward": 3158, "points": 0 },
+        { "nick": "Sergeant", "place": 41, "reward": 2920, "points": 0 },
+        { "nick": "Фокс", "place": 80, "reward": 394, "points": 0 }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        { "nick": "CCCP", "place": 2, "reward": 37148, "points": 110 }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        { "nick": "Рыбнадзор", "place": 7, "reward": 2028, "points": 40 }
+      ]
+    },
+    {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
