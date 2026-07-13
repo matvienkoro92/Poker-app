@@ -120,6 +120,11 @@ if (chatUserModalEl) {
   var modalWinterRank = document.getElementById("chatUserModalWinterRank");
   var modalAchievements = document.getElementById("chatUserModalAchievements");
   var modalAchievementsList = document.getElementById("chatUserModalAchievementsList");
+  var modalProfileTabMain = document.getElementById("chatUserModalProfileTabMain");
+  var modalProfileTabAchievements = document.getElementById("chatUserModalProfileTabAchievements");
+  var chatUserModalProfileTab = "main";
+  var chatUserModalAchievementsLoader = null;
+  var chatUserModalAchievementsStarted = false;
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
   var modalStatusXp = document.getElementById("chatUserModalStatusXp");
   var modalStatusFish = modalStatusScale ? modalStatusScale.querySelector(".chat-user-modal__status-fish") : null;
@@ -133,6 +138,38 @@ if (chatUserModalEl) {
   var modalRespectHint = document.getElementById("chatUserModalRespectHint");
   var modalRespectControl = chatUserModalEl.querySelector(".chat-user-modal__respect-control");
   var modalRespectActions = chatUserModalEl.querySelector(".chat-user-modal__respect-actions");
+  function startChatUserModalAchievementsLoad() {
+    if (chatUserModalAchievementsStarted || typeof chatUserModalAchievementsLoader !== "function") return;
+    chatUserModalAchievementsStarted = true;
+    Promise.resolve(chatUserModalAchievementsLoader()).catch(function () {});
+  }
+  function setChatUserModalAchievementsLoader(loader) {
+    chatUserModalAchievementsLoader = typeof loader === "function" ? loader : null;
+    chatUserModalAchievementsStarted = false;
+    if (chatUserModalProfileTab === "achievements") startChatUserModalAchievementsLoad();
+  }
+  function setChatUserModalProfileTab(tab) {
+    chatUserModalProfileTab = tab === "achievements" ? "achievements" : "main";
+    chatUserModalEl.querySelectorAll("[data-chat-user-profile-panel]").forEach(function (panel) {
+      panel.classList.toggle(
+        "chat-user-modal__profile-panel--tab-hidden",
+        panel.getAttribute("data-chat-user-profile-panel") !== chatUserModalProfileTab
+      );
+    });
+    [modalProfileTabMain, modalProfileTabAchievements].forEach(function (btn) {
+      if (!btn) return;
+      var active = btn.getAttribute("data-chat-user-profile-tab") === chatUserModalProfileTab;
+      btn.classList.toggle("chat-user-modal__profile-tab--active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    if (chatUserModalProfileTab === "achievements") startChatUserModalAchievementsLoad();
+  }
+  [modalProfileTabMain, modalProfileTabAchievements].forEach(function (btn) {
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      setChatUserModalProfileTab(btn.getAttribute("data-chat-user-profile-tab"));
+    });
+  });
   var modalAddFriend = document.getElementById("chatUserModalAddFriend");
   var modalFriendRow = modalAddFriend && modalAddFriend.closest ? modalAddFriend.closest(".chat-user-modal__friend-row") : null;
   var modalEditFriendName = document.getElementById("chatUserModalEditFriendName");
@@ -2193,6 +2230,8 @@ if (chatUserModalEl) {
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
     chatUserModalAchievementIdentity = null;
+    setChatUserModalAchievementsLoader(null);
+    setChatUserModalProfileTab("main");
     syncChatUserModalGender("male");
     var cachedBlockedByMe = false;
     try {
@@ -2319,12 +2358,13 @@ if (chatUserModalEl) {
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
         renderChatUserModalPlayerStats(data);
-        var ratingRanksPromise = Promise.resolve([]);
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;
         chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
-        ratingRanksPromise = syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
+        setChatUserModalAchievementsLoader(function () {
+          return syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
+        });
         var ratingArtPromise = syncChatUserModalRatingArt(ratingNick) || Promise.resolve(false);
         if (data && data.ok) {
           if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
@@ -2352,10 +2392,7 @@ if (chatUserModalEl) {
             }
           }
         }
-        return Promise.all([
-          waitChatUserModalAsset(ratingRanksPromise, 2600),
-          waitChatUserModalAsset(ratingArtPromise, 2600),
-        ]).then(function () { return null; });
+        return waitChatUserModalAsset(ratingArtPromise, 1800).then(function () { return null; });
       })
       .catch(function () {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
@@ -2365,12 +2402,11 @@ if (chatUserModalEl) {
         if (modalLastSeen) modalLastSeen.hidden = true;
         applyChatUserModalStatusLevel(fallbackStatusLevel);
         syncChatUserModalRatingTab(fallbackRatingNick);
-        var fallbackRanksPromise = syncChatUserModalRatingRanks(fallbackRatingNick);
+        setChatUserModalAchievementsLoader(function () {
+          return syncChatUserModalRatingRanks(fallbackRatingNick) || Promise.resolve([]);
+        });
         var fallbackArtPromise = syncChatUserModalRatingArt(fallbackRatingNick);
-        return Promise.all([
-          waitChatUserModalAsset(fallbackRanksPromise, 1800),
-          waitChatUserModalAsset(fallbackArtPromise, 1800),
-        ]).then(function () { return null; });
+        return waitChatUserModalAsset(fallbackArtPromise, 1800).then(function () { return null; });
       });
     var respectPromise = fetch(base + "/api/respect?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&"))
       .then(function (r) { return r.json(); })

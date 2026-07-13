@@ -688,6 +688,41 @@
   border-top: 0;
   position: relative;
 }
+
+.chat-user-modal__profile-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 54px 16px 0;
+  padding: 4px;
+  border: 1px solid rgba(245, 180, 72, 0.26);
+  border-radius: 14px;
+  background: rgba(6, 11, 20, 0.78);
+}
+
+.chat-user-modal__profile-tab {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 241, 211, 0.7);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chat-user-modal__profile-tab--active {
+  border-color: rgba(255, 199, 91, 0.68);
+  background: linear-gradient(180deg, rgba(255, 195, 74, 0.3), rgba(123, 68, 12, 0.24));
+  color: #fff0c8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 5px 14px rgba(0, 0, 0, 0.2);
+}
+
+.chat-user-modal__profile-panel--tab-hidden {
+  display: none !important;
+}
 .chat-user-modal__achievements[hidden] {
   display: none !important;
 }

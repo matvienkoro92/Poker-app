@@ -12,7 +12,7 @@ function normalizeWinterNick(n) {
   var lower = n.toLowerCase();
   if (lower === "pryanik2la") return "Пряник";
   if (lower === "фокс") return "Фокс";
-  if (lower === "waaarr" || lower === "waaar" || lower === "waaaar") return "Waaar";
+  if (/^wa{3,5}r+$/.test(lower)) return "Waaar";
   if (lower === "andrushamorf" || lower === "4ezzi") return "FrankL";
   if (lower === "em13" || lower === "em13!!" || lower === "emil13" || lower === "еm13" || lower === "еm13!!") return "Em13!!";
   if (/^хер вам\)+$/.test(lower)) return "хер вам)))))";

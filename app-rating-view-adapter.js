@@ -2720,7 +2720,7 @@ function initWinterRating() {
       ? (getSpringRatingImagesByLeague(leagueNum)[dStr] || [])
       : (getRatingImages()[dStr] || []);
     if (!files || !files.length) return;
-    var cacheV = "v=18";
+    var cacheV = "v=19";
     container.innerHTML = files.map(function (f, i) {
       return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
     }).join("");
@@ -2948,6 +2948,7 @@ function initWinterRating() {
       }
       bindDateModalNavButton(dateModalPrev);
       bindDateModalNavButton(dateModalNext);
+      bindDateModalCloseControls();
     }
     ensureDateModalNavControls();
     function getCalendarCellTone(dateStr) {
@@ -3172,8 +3173,17 @@ function initWinterRating() {
       dateModal.setAttribute("aria-hidden", "true");
       if (document.body) document.body.style.overflow = "";
     }
-    if (dateModalBackdrop) dateModalBackdrop.addEventListener("click", closeDateModal);
-    if (dateModalClose) dateModalClose.addEventListener("click", closeDateModal);
+    function bindDateModalCloseControls() {
+      if (dateModalBackdrop && dateModalBackdrop.getAttribute("data-rating-date-close-bound") !== "1") {
+        dateModalBackdrop.setAttribute("data-rating-date-close-bound", "1");
+        dateModalBackdrop.addEventListener("click", closeDateModal);
+      }
+      if (dateModalClose && dateModalClose.getAttribute("data-rating-date-close-bound") !== "1") {
+        dateModalClose.setAttribute("data-rating-date-close-bound", "1");
+        dateModalClose.addEventListener("click", closeDateModal);
+      }
+    }
+    bindDateModalCloseControls();
     [dateModalPrev, dateModalNext].forEach(function (navBtn) {
       bindDateModalNavButton(navBtn);
     });
