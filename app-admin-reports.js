@@ -38,6 +38,17 @@ function initAdminReportModal() {
   var rakebackTotalsBackdrop = document.getElementById("adminReportRakebackTotalsBackdrop");
   var rakebackSummaryEl = modal ? modal.querySelector(".admin-report-rakeback-summary") : null;
   var calculationsRoot = document.getElementById("adminReportCalculations");
+  var cashTotalRoot = document.getElementById("adminReportCashTotal");
+  var calculationCashCard = document.getElementById("adminReportCalcCashCard");
+  var calculationWinLossCard = document.getElementById("adminReportCalcWinLossCard");
+  var calculationCurrentWeekCard = document.getElementById("adminReportCalcCurrentWeekCard");
+  var calculationGrandCard = document.getElementById("adminReportCalcGrandCard");
+  if (cashTotalRoot) {
+    if (calculationCashCard) cashTotalRoot.appendChild(calculationCashCard);
+    if (calculationWinLossCard) cashTotalRoot.appendChild(calculationWinLossCard);
+    if (calculationCurrentWeekCard) cashTotalRoot.appendChild(calculationCurrentWeekCard);
+    if (calculationGrandCard) cashTotalRoot.appendChild(calculationGrandCard);
+  }
   var calculationGroupSaveBtns = modal ? modal.querySelectorAll("[data-admin-report-calc-save]") : null;
   var calculationGroupEditBtns = modal ? modal.querySelectorAll("[data-admin-report-calc-edit]") : null;
   var calculationGroupStatusEls = modal ? modal.querySelectorAll("[data-admin-report-calc-status]") : null;
@@ -936,6 +947,7 @@ function initAdminReportModal() {
         if (tab.getAttribute("data-admin-report-tab") === "sent") tab.hidden = !allowed;
         if (tab.getAttribute("data-admin-report-tab") === "cash-history") tab.hidden = !allowed;
         if (tab.getAttribute("data-admin-report-tab") === "calculations") tab.hidden = !calculationsAllowed;
+        if (tab.getAttribute("data-admin-report-tab") === "cash-total") tab.hidden = !calculationsAllowed;
       });
     }
     if (panels && panels.length) {
@@ -943,6 +955,7 @@ function initAdminReportModal() {
         if (panel.getAttribute("data-admin-report-panel") === "sent") panel.hidden = !allowed;
         if (panel.getAttribute("data-admin-report-panel") === "cash-history") panel.hidden = !allowed;
         if (panel.getAttribute("data-admin-report-panel") === "calculations") panel.hidden = !calculationsAllowed;
+        if (panel.getAttribute("data-admin-report-panel") === "cash-total") panel.hidden = !calculationsAllowed;
       });
     }
     if (!allowed && sentList) sentList.innerHTML = "";
@@ -1399,7 +1412,7 @@ function initAdminReportModal() {
         canOpen: function (name) {
           if (name === "sent") return canViewSentReports();
           if (name === "cash-history") return canViewSentReports();
-          if (name === "calculations") return canViewCalculationsReports();
+          if (name === "calculations" || name === "cash-total") return canViewCalculationsReports();
           return true;
         },
         beforeSwitch: function (name) {
@@ -1422,7 +1435,7 @@ function initAdminReportModal() {
           if (name === "cash-history") {
             ensureCashHistoryLoadedSoon(false);
           }
-          if (name === "calculations") {
+          if (name === "calculations" || name === "cash-total") {
             runAdminReportAfterPaint(function () {
               openCalculationsReports();
             });
@@ -2961,7 +2974,7 @@ function initAdminReportModal() {
     var activeName = String(name || "form");
     if (activeName === "sent" && !canViewSentReports()) activeName = "form";
     if (activeName === "cash-history" && !canViewSentReports()) activeName = "form";
-    if (activeName === "calculations" && !canViewCalculationsReports()) activeName = "form";
+    if ((activeName === "calculations" || activeName === "cash-total") && !canViewCalculationsReports()) activeName = "form";
     if (tabs && tabs.length) {
       tabs.forEach(function (tab) {
         var selected = tab.getAttribute("data-admin-report-tab") === activeName;

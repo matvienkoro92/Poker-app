@@ -3,7 +3,7 @@
 
   var ADMIN_MENU_PASSWORD = "7889";
   var CALCULATIONS_PASSWORD = "1110";
-  var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"]';
+  var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"], [data-admin-report-tab="cash-total"]';
   var PROTECTED_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, [data-crm-open=\"player-crm\"], " + CALCULATIONS_SELECTOR;
   var bypassTargets = typeof WeakSet === "function" ? new WeakSet() : null;
   var pendingTarget = null;
@@ -70,7 +70,7 @@
     var title = document.getElementById("adminMenuPasswordTitle");
     if (input) input.value = "";
     if (message) message.textContent = "";
-    if (title) title.textContent = pendingPassword === CALCULATIONS_PASSWORD ? "Пароль для вкладки «Расчёты»" : "Введите пароль";
+    if (title) title.textContent = pendingPassword === CALCULATIONS_PASSWORD ? "Пароль для закрытой вкладки" : "Введите пароль";
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("admin-menu-password-open");

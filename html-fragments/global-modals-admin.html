@@ -231,6 +231,7 @@
             <button type="button" class="admin-report-tab" data-admin-report-tab="cash-history" role="tab" aria-selected="false">История кассы</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent" role="tab" aria-selected="false">Отправленные</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="calculations" role="tab" aria-selected="false" hidden>Расчеты</button>
+            <button type="button" class="admin-report-tab" data-admin-report-tab="cash-total" role="tab" aria-selected="false" hidden>Касса итого</button>
           </div>
           <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
             <div class="admin-report-form-body" id="adminReportFormBody">
@@ -389,6 +390,9 @@
               <div id="adminReportSentList"></div>
             </div>
           </div>
+          <div class="admin-report-panel" data-admin-report-panel="cash-total" hidden>
+            <div class="admin-report-calculations admin-report-calculations--cash-total" id="adminReportCashTotal"></div>
+          </div>
           <div class="admin-report-panel" data-admin-report-panel="calculations" hidden>
             <div class="admin-report-calculations" id="adminReportCalculations">
               <section class="admin-report-calculations__club-data" id="adminReportClubData" hidden>
@@ -401,7 +405,7 @@
                 </div>
               </section>
               <div class="admin-report-calculations__side admin-report-calculations__side--left">
-                <section class="admin-report-calculations__column">
+                <section class="admin-report-calculations__column" id="adminReportCalcCashCard">
                   <div class="admin-report-calculations__section-head">
                     <h3 class="admin-report-calculations__title">В кассе на начало недели</h3>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
@@ -435,7 +439,7 @@
                     <output id="adminReportCalcCashTotal">0</output>
                   </div>
                 </section>
-                <section class="admin-report-calculations__column">
+                <section class="admin-report-calculations__column" id="adminReportCalcCurrentWeekCard">
                   <div class="admin-report-calculations__section-head">
                     <h3 class="admin-report-calculations__title">Текущая неделя</h3>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
@@ -480,13 +484,13 @@
                     </div>
                   </div>
                 </section>
-                <div class="admin-report-calculations__field admin-report-calculations__field--grand">
+                <div class="admin-report-calculations__field admin-report-calculations__field--grand" id="adminReportCalcGrandCard">
                   <span>Полное итого</span>
                   <output id="adminReportCalcGrandTotal">0</output>
                 </div>
               </div>
               <div class="admin-report-calculations__side admin-report-calculations__side--right">
-                <section class="admin-report-calculations__column">
+                <section class="admin-report-calculations__column" id="adminReportCalcRakeCard">
                   <div class="admin-report-calculations__section-head">
                     <h3 class="admin-report-calculations__title">Рейк</h3>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
@@ -524,7 +528,7 @@
                     <output id="adminReportFiguresPercentTotal">0</output>
                   </div>
                 </section>
-                <section class="admin-report-calculations__column">
+                <section class="admin-report-calculations__column" id="adminReportCalcWinLossCard">
                   <div class="admin-report-calculations__section-head">
                     <h3 class="admin-report-calculations__title">Проиграно/выиграно</h3>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
