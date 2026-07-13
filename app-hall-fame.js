@@ -1307,10 +1307,10 @@ function hallFishAggregateTournamentAchievements(levelRows) {
   }
   return {
     big50: hallFishRowsWithRank(list.map(function (row) {
-      return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
+      return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший выигрыш " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
     })),
     big100: hallFishRowsWithRank(list.map(function (row) {
-      return Object.assign({}, row, { value: row.big100, tie: row.big100Best, valueText: row.big100 + " зан.", extraText: row.big100Best ? "лучший " + hallFishFormatRub(row.big100Best) : "", detailRows: tournamentDetails(row.big100Rows) });
+      return Object.assign({}, row, { value: row.big100, tie: row.big100Best, valueText: row.big100 + " зан.", extraText: row.big100Best ? "лучший выигрыш " + hallFishFormatRub(row.big100Best) : "", detailRows: tournamentDetails(row.big100Rows) });
     })),
     king: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.firstPlaces, tie: row.big100Best || row.big50Best, valueText: row.firstPlaces + " побед", extraText: "1 место в турнирах", detailRows: tournamentDetails(row.firstPlaceRows) });
@@ -1378,6 +1378,53 @@ function hallFishAggregateClubChoiceRows(rows, levelRows) {
   }));
 }
 
+function hallFishAggregateSngChampionRows(rows, levelRows) {
+  var map = {};
+  var metaByNick = hallFishLevelRowsByNick(levelRows);
+  (Array.isArray(rows) ? rows : []).forEach(function (tournament) {
+    var winner = (Array.isArray(tournament && tournament.winners) ? tournament.winners : []).find(function (row) {
+      return Number(row && row.place) === 1;
+    });
+    if (!winner) return;
+    var nick = String((winner && (winner.pokerPlusNickname || winner.nick || winner.displayName)) || "").trim();
+    var accountId = String((winner && winner.accountId) || "").trim();
+    var key = accountId ? "account:" + accountId : "nick:" + hallFishNormalizeNick(nick);
+    if (!key || key === "nick:") return;
+    if (!map[key]) {
+      var meta = hallFishPlayerMetaByNick(nick, metaByNick);
+      map[key] = {
+        nick: meta.nick || nick || "Игрок",
+        accountId: accountId || meta.accountId,
+        telegram: meta.telegram || (winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : ""),
+        profileBirthDate: meta.profileBirthDate,
+        profileCity: meta.profileCity,
+        avatarUrl: meta.avatarUrl,
+        level: meta.level,
+        value: 0,
+        tie: 0,
+        detailRows: [],
+      };
+    }
+    map[key].value += 1;
+    var completedAt = String((tournament && tournament.completedAt) || "").trim();
+    var completedDate = completedAt ? new Date(completedAt) : null;
+    var dateLabel = completedDate && !isNaN(completedDate.getTime())
+      ? completedDate.toLocaleDateString("ru-RU")
+      : "";
+    map[key].detailRows.push({
+      title: String((tournament && tournament.title) || "СНГ-баттл"),
+      meta: [dateLabel, tournament && tournament.season].filter(Boolean).join(" · "),
+    });
+  });
+  return hallFishRowsWithRank(Object.keys(map).map(function (key) {
+    var row = map[key];
+    return Object.assign({}, row, {
+      valueText: row.value + (row.value === 1 ? " победа" : row.value < 5 ? " победы" : " побед"),
+      extraText: "Победитель СНГ-баттла",
+    });
+  }));
+}
+
 function hallFishReferralsRows(data) {
   return hallFishRowsWithRank((Array.isArray(data && data.ranking) ? data.ranking : []).map(function (row) {
     var nick = String((row && (row.name || row.telegramLogin || row.accountId)) || "Игрок").trim();
@@ -1402,6 +1449,7 @@ function hallFishAchievementSpecs(data) {
     { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
     { key: "viceChampion", title: "Вице-чемп", sectionTitle: "Вице-чемпион месяца", description: "Начисляется игроку, который занял топ-2 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.viceChampion },
     { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
+    { key: "sngChampion", title: "Победитель СНГ-баттла", sectionTitle: "Победитель СНГ-баттла", description: "Даётся за первое место в завершённом СНГ-баттле. Повторные победы одного игрока суммируются.", rows: data && data.sngChampion },
   ];
 }
 
@@ -2193,6 +2241,19 @@ function hallFishLoadClubChoiceAchievementRows() {
     });
 }
 
+function hallFishLoadSngChampionAchievementRows() {
+  var base = hallFishGetApiBase();
+  if (!base) return Promise.resolve([]);
+  return hallFishFetch(base + "/api/sng-champions?mode=achievements", { cache: "default" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      return data && data.ok && Array.isArray(data.rows) ? data.rows : [];
+    })
+    .catch(function () {
+      return Array.isArray(window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS) ? window.POKER_SNG_CHAMPIONS_ACHIEVEMENTS : [];
+    });
+}
+
 function hallFishLoadReferralRows() {
   var base = hallFishGetApiBase();
   var hasCred = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
@@ -2240,11 +2301,12 @@ function hallFishLoadAchievementRows() {
         })
         .then(function (levelRows) {
           var tournamentData = hallFishAggregateTournamentAchievements(levelRows);
-          return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows()])
+          return Promise.all([hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows()])
             .then(function (parts) {
               hallFishAchievementRowsCache = Object.assign({}, tournamentData, {
                 clubChoice: hallFishAggregateClubChoiceRows(parts[0], levelRows),
                 referrals: parts[1],
+                sngChampion: hallFishAggregateSngChampionRows(parts[2], levelRows),
               });
               return hallFishAchievementRowsCache;
             });

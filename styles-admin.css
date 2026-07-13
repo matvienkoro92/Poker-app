@@ -486,6 +486,7 @@ body.admin-report-modal-open .bottom-nav {
   display: flex;
   gap: 8px;
   width: 100%;
+  overflow-x: visible;
   margin-bottom: 12px;
   padding: 4px;
   border: 1px solid rgba(202, 161, 84, 0.28);
@@ -495,6 +496,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-tab {
   flex: 1 1 0;
+  min-width: 0;
   min-height: 44px;
   padding: 0 10px;
   font-size: 15px;
@@ -509,6 +511,11 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-tab[data-admin-report-tab="cash-history"] {
   flex-grow: 1.35;
+}
+.admin-report-tab[data-admin-report-tab="cash-total"] {
+  flex-grow: 1.2;
+  padding-right: 6px;
+  padding-left: 6px;
 }
 .admin-report-tab--active,
 .admin-report-tab[aria-selected="true"] {

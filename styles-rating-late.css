@@ -3182,7 +3182,10 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-counts {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-count {

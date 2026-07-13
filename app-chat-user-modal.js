@@ -458,8 +458,14 @@ if (chatUserModalEl) {
       });
   }
   function chatUserModalRatingNickFromData(data) {
+    var pokerPlusProfile = data && data.pokerPlusProfile && typeof data.pokerPlusProfile === "object"
+      ? data.pokerPlusProfile
+      : data && data.poker21Profile && typeof data.poker21Profile === "object"
+        ? data.poker21Profile
+        : null;
     var raw =
-      data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
+      data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick) ||
+      pokerPlusProfile && (pokerPlusProfile.nickname || pokerPlusProfile.Nike || pokerPlusProfile.nick || pokerPlusProfile.name);
     return String(raw || "").trim();
   }
   function normalizeChatUserModalProfileGender(value) {
@@ -988,11 +994,10 @@ if (chatUserModalEl) {
       (Array.isArray(seasonRow && seasonRow.winners) ? seasonRow.winners : []).forEach(function (winner) {
         if (!chatUserModalRaffleRowsMatch(winner, targetKeys, ratingNick)) return;
         var place = parseInt(winner && winner.place, 10) || 0;
-        if (!place || place > 3) return;
+        if (!place || place > 2) return;
         var label = String(place) + " место";
         if (place === 1) label += " · Чемпион СНГ сезона";
         else if (place === 2) label += " · Финалист СНГ сезона";
-        else label += " · Топ-3 СНГ сезона";
         if (season) label += " · " + season;
         list.push({
           label: label,
@@ -1267,7 +1272,7 @@ if (chatUserModalEl) {
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
-    if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/profile-pokerist.jpg" };
+    if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/chat-profile-achievement-team-friends-v2.png" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
@@ -1298,7 +1303,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
-    if (key.indexOf("снг") >= 0) return "Дается игрокам из топ-3 турнира СНГ Лига Чемпионов Два Туза. 1 место получает статус чемпиона СНГ сезона, 2 место — финалист, 3 место — топ-3 сезона.";
+    if (key.indexOf("снг") >= 0) return "Даётся гранд-финалистам турнира СНГ Лига Чемпионов Два Туза: 1 место получает статус чемпиона СНГ сезона, 2 место — финалиста.";
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
@@ -1592,7 +1597,7 @@ if (chatUserModalEl) {
       }) +
       chatUserModalSummerCupCardHtml() +
       chatUserModalAchievementCardHtml("★", "СНГ Лига Чемпионов", sngChampions, {
-        placeholder: "Топ-3 сезона",
+        placeholder: "Гранд-финалист",
         image: "./assets/chat-profile-achievement-sng-champion-card.webp",
         infoImage: "./assets/chat-profile-achievement-sng-champion-card.webp",
       });
@@ -2336,6 +2341,15 @@ if (chatUserModalEl) {
             updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
             var birthAdminVisible = chatUserModalRenderBirthAdmin(data, id, openingSelfProfile);
             chatUserModalApplyPersonalInfo(data, birthAdminVisible);
+            if (data && data.ok) {
+              var freshRatingNick = chatUserModalRatingNickFromData(data) || fallbackRatingNick;
+              syncChatUserModalTitleFromProfileData(data, userName);
+              syncChatUserModalRatingTab(freshRatingNick);
+              syncChatUserModalRatingArt(freshRatingNick);
+              setChatUserModalAchievementsLoader(function () {
+                return syncChatUserModalRatingRanks(freshRatingNick) || Promise.resolve([]);
+              });
+            }
           }
         })
         .catch(function () {});
