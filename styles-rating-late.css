@@ -2772,6 +2772,9 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__dates {
+  flex-direction: column;
+  align-items: stretch;
+  width: auto;
   min-height: 0;
   margin: 0 12px;
   padding: 0;
@@ -2782,7 +2785,15 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-wrap {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
   margin-bottom: 10px;
+}
+
+.winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__dates .winter-rating__date-item {
@@ -3214,9 +3225,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 .winter-rating.spring-rating.summer-rating[data-summer-filter="top"] .winter-rating__calendar-cell {
   width: 100%;
   min-width: 0;
-  min-height: 0;
-  aspect-ratio: 1;
-  border-radius: 8px;
+  min-height: clamp(32px, 7.4vw, 48px);
+  aspect-ratio: 1 / 0.72;
+  border-radius: 6px;
   box-sizing: border-box;
   overflow: hidden;
 }

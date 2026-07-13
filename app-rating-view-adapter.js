@@ -2896,6 +2896,7 @@ function initWinterRating() {
     var dateModalPrev = document.getElementById("winterRatingDateModalPrev");
     var dateModalNext = document.getElementById("winterRatingDateModalNext");
     var dateModalRenderSeq = 0;
+    var dateModalLoadPromise = null;
     function refreshDateModalRefs() {
       dateModal = document.getElementById("winterRatingDateModal");
       dateModalBackdrop = document.getElementById("winterRatingDateModalBackdrop");
@@ -3092,7 +3093,24 @@ function initWinterRating() {
     }
     function openDateModal(dateStr, panel, preferredLeague) {
       ensureDateModalNavControls();
-      if (!dateModal || !dateModalBody || !panel) return;
+      if (!panel) return;
+      if (!dateModal || !dateModalBody) {
+        if (typeof window.pokerEnsureGlobalModalsHtml !== "function") return;
+        if (!dateModalLoadPromise) {
+          dateModalLoadPromise = Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+            .then(function () {
+              refreshDateModalRefs();
+              ensureDateModalNavControls();
+            })
+            .finally(function () {
+              dateModalLoadPromise = null;
+            });
+        }
+        dateModalLoadPromise.then(function () {
+          if (dateModal && dateModalBody) openDateModal(dateStr, panel, preferredLeague);
+        }).catch(function () {});
+        return;
+      }
       if (dateModalTitle) dateModalTitle.textContent = "Рейтинг на " + dateStr;
       updateDateModalNav(dateStr);
       dateModal.setAttribute("aria-hidden", "false");
@@ -3238,6 +3256,12 @@ function initWinterRating() {
       if (nextEl && canNext) nextEl.addEventListener("click", function () { renderCalendarMonth(monthIndex - 1); });
     }
     renderCalendarMonth(calendarWrap._calendarMonthIndex);
+    if ((!dateModal || !dateModalBody) && typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
+        refreshDateModalRefs();
+        ensureDateModalNavControls();
+      }).catch(function () {});
+    }
     calendarWrap.setAttribute("aria-hidden", "false");
   }
   if (isSummerRatingMode) finishSummerRatingInitialLoadWhenReady(ratingSectionEl);
