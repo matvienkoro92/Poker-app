@@ -5090,8 +5090,9 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__single-top-list {
-  font-size: clamp(8px, 1.3vw, 12px);
-  line-height: 1.3;
+  padding-left: clamp(16px, 2.4vw, 20px);
+  font-size: clamp(10px, 1.55vw, 13px);
+  line-height: 1.32;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__single-top-item {

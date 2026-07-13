@@ -95,6 +95,38 @@ function initRafflesBroadcastRuntime(opts) {
       var totalPrize = Math.round(raffleBroadcastTotalPrize(raffle));
       return totalPrize === 30000 || /30[\s\u00a0\u202f]*000\s*(?:р|₽|руб\.?)?/i.test(title);
     }
+    function raffleBroadcastTournamentGuarantee(raffle) {
+      var direct = String(
+        raffle && (raffle.promoGuarantee || raffle.promo_guarantee || raffle.guarantee) || ""
+      ).trim();
+      if (direct) return direct;
+      var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
+      var source = [
+        raffle && raffle.title,
+        raffle && raffle.cardTitle,
+        raffle && raffle.cardSubtitle,
+      ].concat(groups.map(function (group) { return group && group.prize; }))
+        .filter(Boolean)
+        .join(" ");
+      var guaranteeMatch = source.match(/гаранти[яиейю]\s+(\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?)\s*(₽|р|руб\.?)?/i);
+      if (guaranteeMatch && guaranteeMatch[1]) {
+        return guaranteeMatch[1].replace(/[\u00a0\u202f]/g, " ").trim() + " ₽";
+      }
+      var schedule = typeof POKER_FULL_TOURNAMENT_SCHEDULE !== "undefined" && Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE)
+        ? POKER_FULL_TOURNAMENT_SCHEDULE.slice()
+        : [];
+      schedule.sort(function (a, b) {
+        return String(b && b.name || "").length - String(a && a.name || "").length;
+      });
+      var sourceLower = source.toLocaleLowerCase("ru-RU");
+      for (var si = 0; si < schedule.length; si++) {
+        var scheduleName = String(schedule[si] && schedule[si].name || "").trim();
+        if (!scheduleName || sourceLower.indexOf(scheduleName.toLocaleLowerCase("ru-RU")) === -1) continue;
+        var scheduleGuarantee = String(schedule[si] && schedule[si].guarantee || "").trim();
+        if (scheduleGuarantee) return scheduleGuarantee;
+      }
+      return "";
+    }
     function raffleBroadcastShortSummary(raffle) {
       var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
       var count = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
@@ -130,9 +162,11 @@ function initRafflesBroadcastRuntime(opts) {
             " " +
             pluralizeTickets(count) +
             prizeSuffix;
+          var guarantee = raffleBroadcastTournamentGuarantee(raffle);
+          if (guarantee) summaryText += " на турнир с гарантией " + guarantee;
         }
         var title = raffleBroadcastSummaryTitle(raffle);
-        return title ? title + ": " + summaryText : summaryText;
+        return isCash && title ? title + ": " + summaryText : summaryText;
       }
       var totalPrize = raffleBroadcastTotalPrize(raffle);
       if (totalPrize > 0) return "призовой фонд " + formatRaffleSum(totalPrize);
