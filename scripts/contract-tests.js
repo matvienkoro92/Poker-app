@@ -862,7 +862,7 @@ async function testPrivateCashRandomSeatAssignment(redis) {
     first_name: "Cash " + index,
   }, BOT_TOKEN));
 
-  for (let i = 0; i < 7; i += 1) {
+  for (let i = 0; i < 6; i += 1) {
     const r = await call(handler, req("POST", {}, { pwaSession: tokens[i], action: "join", eventId }, {
       "x-forwarded-for": "10.10.0." + i,
     }));
@@ -877,15 +877,15 @@ async function testPrivateCashRandomSeatAssignment(redis) {
   const participantsKey = "poker_app:private_cash_participants:" + eventId;
   const inGameRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
   const inGameSeats = inGameRows.map((row) => row.seatIndex).sort((a, b) => a - b);
-  assert.deepStrictEqual(inGameSeats, [0, 1, 2, 3, 4, 5, 6], "first seven joins fill each in-game seat once");
+  assert.deepStrictEqual(inGameSeats, [0, 1, 2, 3, 4, 5], "first six joins fill each in-game seat once");
 
-  let r = await call(handler, req("POST", {}, { pwaSession: tokens[7], action: "join", eventId }, {
-    "x-forwarded-for": "10.10.0.8",
+  let r = await call(handler, req("POST", {}, { pwaSession: tokens[6], action: "join", eventId }, {
+    "x-forwarded-for": "10.10.0.7",
   }));
-  assert.strictEqual(r.statusCode, 200, "eighth private cash join succeeds");
+  assert.strictEqual(r.statusCode, 200, "seventh private cash join succeeds");
   const afterReserveRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
-  const reserveRow = afterReserveRows.find((row) => Number(row.seatIndex) >= 7);
-  assert.ok(reserveRow, "eighth join goes to reserve when all seats are busy");
+  const reserveRow = afterReserveRows.find((row) => Number(row.seatIndex) >= 6);
+  assert.ok(reserveRow, "seventh join goes to reserve when all seats are busy");
 
   const cancelled = inGameRows[3];
   r = await call(handler, req("POST", {}, { pwaSession: tokens[3], action: "cancel", eventId }, {
@@ -893,12 +893,12 @@ async function testPrivateCashRandomSeatAssignment(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "pending player can cancel private cash seat");
 
-  r = await call(handler, req("POST", {}, { pwaSession: tokens[8], action: "join", eventId }, {
-    "x-forwarded-for": "10.10.0.9",
+  r = await call(handler, req("POST", {}, { pwaSession: tokens[7], action: "join", eventId }, {
+    "x-forwarded-for": "10.10.0.8",
   }));
   assert.strictEqual(r.statusCode, 200, "new player can join after cancellation");
   const finalRows = Array.from(redis.h(participantsKey).values()).map((raw) => JSON.parse(raw));
-  const replacement = finalRows.find((row) => row.memberId === "tg_7108");
+  const replacement = finalRows.find((row) => row.memberId === "tg_7107");
   assert.ok(replacement, "replacement row is stored");
   assert.strictEqual(replacement.seatIndex, cancelled.seatIndex, "replacement takes the freed in-game seat");
 }
@@ -1127,7 +1127,7 @@ async function testRaffleAccessLevelGate(redis) {
   redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:visitor_p21_ids").set("ID100002", "P21-LOW");
-  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Low Level", totalCounter: { fee: 12000 } }));
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Low Level", totalCounter: { fee: 4000 } }));
 
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.peer,
@@ -1139,7 +1139,7 @@ async function testRaffleAccessLevelGate(redis) {
   assert.strictEqual(r.body.code, "RAFFLE_LEVEL_REQUIRED", "low level response has stable code");
   assert.ok(String(r.body.error || "").includes("Повысьте свой уровень"), "low level response explains upgrade");
 
-  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Enough Level", totalCounter: { fee: 32000 } }));
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Enough Level", totalCounter: { fee: 9000 } }));
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.peer,
     action: "join",

@@ -136,6 +136,7 @@
       "app-profile-avatar.js",
       "app-profile.js",
       "app-profile-shows.js",
+      "app-visitor-id.module.mjs",
       "app-cashout.js"
     ],
     "push": [
@@ -167,7 +168,8 @@
         "app-admin-reports-calculations-logic.js",
         "app-admin-reports-calculations.js",
         "app-admin-broadcast-reports.js",
-        "app-admin-reports.js"
+        "app-admin-reports.js",
+        "app-admin-menu-password.js"
       ],
       "tracking": [
         "app-tracking-links.js"
@@ -219,6 +221,7 @@
     ],
     "playerCrm": [
       "app-player-crm-formatters.js",
+      "app-player-crm-formatters.module.mjs",
       "app-player-crm-periods.js",
       "app-player-crm-stats.js",
       "app-player-crm-charts.js",

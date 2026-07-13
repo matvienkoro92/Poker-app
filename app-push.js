@@ -787,7 +787,7 @@ function initProfileChatPush() {
   try {
     document.addEventListener("pointerdown", pokerUnlockNotifyAudioFromGesture, { capture: true, passive: true });
   } catch (eP) {}
-  var swUrl = "./sw.js?v=3.719";
+  var swUrl = "./sw.js";
   try {
     var swBuild = document && document.documentElement ? String(document.documentElement.getAttribute("data-app-version") || document.documentElement.getAttribute("data-build") || "").trim() : "";
     if (swBuild) swUrl += "?v=" + encodeURIComponent(swBuild);

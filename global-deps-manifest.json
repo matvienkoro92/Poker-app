@@ -1997,6 +1997,60 @@
       "consumedBy": [
         "app-transfers.js"
       ]
+    },
+    {
+      "name": "__pokerClickSoundMuted",
+      "domain": "clickSound",
+      "exportedBy": ["app-click-sound.js"],
+      "consumedBy": ["app-click-sound.js"]
+    },
+    {
+      "name": "playPokerDailyDealSound",
+      "domain": "clickSound",
+      "exportedBy": ["app-click-sound.js"],
+      "consumedBy": ["app-click-sound.js", "app-raffles-completed.js", "app-sng-champions.js"]
+    },
+    {
+      "name": "playDailyPokerDealSound",
+      "domain": "dailyPoker",
+      "exportedBy": ["app-daily-poker.js"],
+      "consumedBy": ["app-click-sound.js", "app-daily-poker.js"]
+    },
+    {
+      "name": "playPokerSubscribeSound",
+      "domain": "clickSound",
+      "exportedBy": ["app-click-sound.js"],
+      "consumedBy": ["app-click-sound.js", "app-daily-poker.js", "app-home-gazette-tasks.js", "app-home-tasks.js", "app-private-cash.js", "app-raffles-subscribe.js", "app-tournament-day.js"]
+    },
+    {
+      "name": "pokerIsClickSoundMuted",
+      "domain": "clickSound",
+      "exportedBy": ["app-click-sound.js"],
+      "consumedBy": ["app-click-sound.js", "app-profile-user-info.js"]
+    },
+    {
+      "name": "pokerSetClickSoundMuted",
+      "domain": "clickSound",
+      "exportedBy": ["app-click-sound.js"],
+      "consumedBy": ["app-click-sound.js", "app-profile-user-info.js"]
+    },
+    {
+      "name": "__pendingHallFishAchievementTab",
+      "domain": "hallDeepLinks",
+      "exportedBy": ["app-home-deeplinks.js", "app-lazy-loader.js"],
+      "consumedBy": ["app-hall-fame.js", "app-home-deeplinks.js", "app-lazy-loader.js"]
+    },
+    {
+      "name": "__pokerTransfersVisualViewportRestoreBound",
+      "domain": "transfers",
+      "exportedBy": ["app-transfers.js"],
+      "consumedBy": ["app-transfers.js"]
+    },
+    {
+      "name": "__pokerAdminReportAccessVerified",
+      "domain": "adminReports",
+      "exportedBy": ["app-visitors-admin.js"],
+      "consumedBy": ["app-admin-reports.js", "app-visitors-admin.js"]
     }
   ]
 }

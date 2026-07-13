@@ -2019,8 +2019,10 @@ function initWinterRating() {
       var openAchievements = function () {
         if (typeof window.openHallFishAchievementsModal === "function") window.openHallFishAchievementsModal();
       };
-      if (typeof window.pokerEnsureScriptDomains === "function") {
-        Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(openAchievements).catch(openAchievements);
+      if (typeof window.pokerEnsureLazyDomains === "function") {
+        Promise.resolve(window.pokerEnsureLazyDomains(["hall"], { styles: true, scripts: true })).then(openAchievements).catch(openAchievements);
+      } else if (typeof window.pokerEnsureScriptDomains === "function") {
+        Promise.resolve(window.pokerEnsureScriptDomains(["hall"])).then(openAchievements).catch(openAchievements);
       } else {
         openAchievements();
       }

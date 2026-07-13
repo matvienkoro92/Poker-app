@@ -62,6 +62,7 @@ const files = {
   appPwaAuth: read("app-pwa-auth.js"),
   appPwaAuthKeyboardLift: read("app-pwa-auth-keyboard-lift.js"),
   appPwaOpenHandlers: read("app-pwa-open-handlers.js"),
+  appPush: read("app-push.js"),
   appChatOpenPeerHydrate: read("app-chat-open-peer-hydrate.js"),
   appChatContactSwipeActions: read("app-chat-contact-swipe-actions.js"),
   appChatDialogPreview: read("app-chat-dialog-preview.js"),
@@ -633,9 +634,9 @@ add("Profile login button opens visible auth overlay", () =>
 );
 
 add("PWA service worker is versioned", () =>
-  has("client", 'var swUrl = "./sw.js"') &&
+  has("appPush", 'var swUrl = "./sw.js"') &&
   has("client", 'getAttribute("data-app-version")') &&
-  has("client", "navigator.serviceWorker.register(swUrl")
+  has("appPush", "navigator.serviceWorker.register(swUrl")
 );
 
 add("PWA saved session restores before empty initData login gate", () =>
@@ -2395,11 +2396,11 @@ add("Shared brand header keeps greeting visible outside chat", () =>
   hasAll("styles", [
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary',
     "display: flex !important;",
-    "flex: 1 1 clamp(112px, 34vw, 172px) !important;",
+    "flex: 1 1 clamp(118px, 38vw, 260px) !important;",
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting',
-    "text-overflow: ellipsis !important;",
+    "text-overflow: clip !important;",
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions',
-    "flex: 0 1 clamp(156px, 43vw, 206px) !important;",
+    "flex: 1 1 clamp(164px, 50vw, 336px) !important;",
   ]) &&
   appearsBefore(
     files.styles,
