@@ -12,6 +12,18 @@ var SUMMER_VIEW_JUNE_WEEK_BLOCKS = [
   { label: "22—28 июня", dates: SUMMER_HOME_JUNE_DAYS_22_28 },
   { label: "29—30 июня", dates: SUMMER_HOME_JUNE_DAYS_29_30 }
 ];
+var SUMMER_HOME_JULY_DAYS_1_7 = ["01.07.2026", "02.07.2026", "03.07.2026", "04.07.2026", "05.07.2026", "06.07.2026", "07.07.2026"];
+var SUMMER_HOME_JULY_DAYS_8_14 = ["08.07.2026", "09.07.2026", "10.07.2026", "11.07.2026", "12.07.2026", "13.07.2026", "14.07.2026"];
+var SUMMER_HOME_JULY_DAYS_15_21 = ["15.07.2026", "16.07.2026", "17.07.2026", "18.07.2026", "19.07.2026", "20.07.2026", "21.07.2026"];
+var SUMMER_HOME_JULY_DAYS_22_28 = ["22.07.2026", "23.07.2026", "24.07.2026", "25.07.2026", "26.07.2026", "27.07.2026", "28.07.2026"];
+var SUMMER_HOME_JULY_DAYS_29_31 = ["29.07.2026", "30.07.2026", "31.07.2026"];
+var SUMMER_VIEW_JULY_WEEK_BLOCKS = [
+  { label: "1—7 июля", dates: SUMMER_HOME_JULY_DAYS_1_7 },
+  { label: "8—14 июля", dates: SUMMER_HOME_JULY_DAYS_8_14 },
+  { label: "15—21 июля", dates: SUMMER_HOME_JULY_DAYS_15_21 },
+  { label: "22—28 июля", dates: SUMMER_HOME_JULY_DAYS_22_28 },
+  { label: "29—31 июля", dates: SUMMER_HOME_JULY_DAYS_29_31 }
+];
 
 var SUMMER_RATING_SEASON = {
   key: "summer",
@@ -24,7 +36,7 @@ var SUMMER_RATING_SEASON = {
   topLabel: "Топы лета",
   maxWinLabel: "за лето",
   top3WinsLabel: "за лето",
-  updatedLabel: "обновлено 28 июня",
+  updatedLabel: "обновлено 12 июля",
   finalAt: new Date(2026, 7, 31, 23, 59, 59, 999),
   finalText: "Итоги 31-го августа",
   loadingDataText: "Рейтинг загружается",
@@ -37,9 +49,10 @@ var SUMMER_RATING_SEASON = {
   openFirstMonthWeek: false,
   topLinkBase: "",
   viewMonths: [
-    { title: "Июнь", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },
+    { title: "Июль", totalId: "springRatingViewMayTotal", weeksHostId: "springRatingViewMayWeeks", blocks: SUMMER_VIEW_JULY_WEEK_BLOCKS },
+    { title: "Июнь", totalId: "springRatingViewAprilTotal", weeksHostId: "springRatingViewAprilWeeks", blocks: SUMMER_VIEW_JUNE_WEEK_BLOCKS },
   ],
   pastWeekDates: [],
-  currentWeekDates: SUMMER_HOME_JUNE_DAYS_1_7,
+  currentWeekDates: SUMMER_HOME_JULY_DAYS_8_14,
   nextWeekDates: [],
 };

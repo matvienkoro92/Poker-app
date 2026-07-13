@@ -2004,7 +2004,7 @@ function initWinterRating() {
   if (tabsUpdatedEl) {
     tabsUpdatedEl.hidden = !isSummerRatingMode;
     tabsUpdatedEl.style.display = isSummerRatingMode ? "" : "none";
-    tabsUpdatedEl.textContent = "обновлено 28 июня";
+    tabsUpdatedEl.textContent = "обновлено 12 июля";
   }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");

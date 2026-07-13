@@ -5074,23 +5074,21 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   }
 }
 
-@media (min-width: 560px) {
-  .winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-    gap: clamp(8px, 1.8vw, 14px);
-  }
+.winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(8px, 1.8vw, 14px);
+}
 
-  .winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-wrap {
-    min-width: 0;
-    margin: 0;
-  }
+.winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-wrap {
+  min-width: 0;
+  margin: 0;
+}
 
-  .winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
-    padding-left: clamp(8px, 1.4vw, 12px);
-    border-left: 1px solid rgba(226, 232, 240, 0.2);
-  }
+.winter-rating.spring-rating.summer-rating .spring-rating-view-week .winter-rating__past-week-wrap + .winter-rating__past-week-wrap {
+  padding-left: clamp(8px, 1.4vw, 12px);
+  border-left: 1px solid rgba(226, 232, 240, 0.2);
 }
 
 body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonus-game-back {
