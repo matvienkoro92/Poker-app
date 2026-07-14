@@ -132,14 +132,18 @@ function initPlayerCrmStatsRuntime(deps) {
     var sessionsBeforeRegistrationText = exactVisits
       ? String(Math.max(0, Number(visitsSummary.averageSessionsBeforeRegistration) || 0)).replace(".", ",")
       : "—";
+    var sessionsPerVisitorText = exactVisits && estimatedRealAudience
+      ? String(Math.round((Math.max(0, Number(visitsSummary.total) || 0) / estimatedRealAudience) * 10) / 10).replace(".", ",")
+      : "—";
     var periodMetrics = [
       [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, null, [
         ["Из них зарегано", intFmt(confirmedAudience)],
+        ["Гости", intFmt(activeAnonymousInstallations)],
         ["Впервые зашли", exactVisits ? intFmt(visitsSummary.new) : "—"],
+        ["Открытий на человека", sessionsPerVisitorText],
       ]],
       ["Новые посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.new) : "—"],
       ["Повторные посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.repeat) : "—"],
-      ["Сессии · " + periodLabel(), exactVisits ? intFmt(visitsSummary.total) : "—"],
       ["Гостевые установки · " + periodLabel(), intFmt(activeAnonymousInstallations)],
       ["Зарегистрированные посетители · " + periodLabel(), intFmt(confirmedAudience)],
       ["Гость → регистрация · " + periodLabel(), guestConversionText],
@@ -214,7 +218,7 @@ function initPlayerCrmStatsRuntime(deps) {
       exactTrackingNotice +
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__period-metrics\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr))\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
+      "<div class=\"player-crm__period-metrics\" style=\"display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
