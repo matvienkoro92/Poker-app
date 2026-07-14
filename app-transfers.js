@@ -8,7 +8,7 @@
     kind: "cashout",
     items: [],
     viewer: null,
-    access: { allowed: false, level: 0, requiredLevel: 10, message: "" },
+    access: null,
     maxAmount: 2500,
     subscribed: false,
   };
@@ -535,8 +535,9 @@
     var form = byId("transfersCreateForm");
     var tabs = document.querySelector(".transfers-tabs");
     var locked = byId("transfersAccessLocked");
-    var access = state.access || {};
-    var allowed = access.allowed !== false;
+    var access = state.access;
+    var accessResolved = !!access;
+    var allowed = !accessResolved || access.allowed !== false;
     if (viewer && state.viewer && state.viewer.accountId) {
       viewer.hidden = false;
       viewer.textContent = "Ваш ID: " + state.viewer.accountId + (state.viewer.level ? " · уровень " + state.viewer.level : "");
@@ -545,8 +546,8 @@
     if (form) form.hidden = !showCreate;
     if (tabs) tabs.hidden = !allowed;
     if (locked) {
-      locked.hidden = allowed;
-      locked.textContent = allowed ? "" : (access.message || "Переводы доступны только игрокам с уровнем 10+.");
+      locked.hidden = !accessResolved || allowed;
+      locked.textContent = !accessResolved || allowed ? "" : (access.message || "Переводы доступны только игрокам с уровнем 10+.");
     }
     renderMode();
     renderTabs();
@@ -568,7 +569,11 @@
     if (empty) {
       empty.hidden = items.length > 0 || state.loading;
       if (!items.length && !state.loading) {
-        empty.textContent = state.filter === "completed" ? "Закрытых сделок пока нет." : "Заявок пока нет.";
+        empty.textContent = state.filter === "completed"
+          ? "Закрытых сделок пока нет."
+          : state.filter === "active"
+            ? "Активных заявок пока нет, можете разместить свой вывод по кнопке «Разместить»."
+            : "Ваших заявок пока нет.";
       }
     }
   }

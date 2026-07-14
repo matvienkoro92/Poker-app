@@ -116,12 +116,13 @@
 }
 
 .transfers-page__access-note {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  order: 2;
+  margin: -8px 0 0;
+  color: rgba(255, 231, 174, 0.76);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
 }
 
 .transfers-page__access-locked,
@@ -671,7 +672,7 @@
 }
 
 .transfers-create {
-  order: 2;
+  order: 3;
   margin-top: 0;
 }
 
@@ -681,7 +682,7 @@
 
 .transfers-list,
 .transfers-empty {
-  order: 3;
+  order: 4;
 }
 
 .transfers-tabs__btn {
@@ -1932,10 +1933,10 @@
   color: #3a2004;
 }
 
-/* Keep the back control optically centered with the transfers navigation. */
+/* Keep the back control vertically centered with the transfers navigation. */
 @media (max-width: 1000px) {
   .transfers-page__back {
-    transform: translateY(11px);
+    transform: none;
   }
 }
 
