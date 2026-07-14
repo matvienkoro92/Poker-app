@@ -5233,6 +5233,13 @@ html #app .winter-rating.spring-rating.summer-rating
 }
 
 html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+  background-position: center 20px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
   #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
 html #app .winter-rating.spring-rating.summer-rating
   #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1),
