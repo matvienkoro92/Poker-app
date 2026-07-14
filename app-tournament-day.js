@@ -1,10 +1,10 @@
-var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.jpg";
-var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.jpg";
-var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-250k.jpg";
-var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.jpg";
-var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.jpg";
-var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.jpg";
-var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-week-300k.jpg";
+var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.webp";
+var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.webp";
+var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-250k.webp";
+var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
+var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.webp";
+var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.webp";
+var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-week-300k.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
@@ -169,7 +169,7 @@ var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "500 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
-var HOME_TOURNAMENT_BANNER_VERSION = "2026071301";
+var HOME_TOURNAMENT_BANNER_VERSION = "2026071401";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 
 function getHomeTournamentBannerUrl(file) {
@@ -2021,12 +2021,7 @@ function updateTournamentDayBlock() {
     }
     if (homeTrophyMedia) {
       homeTrophyMedia.hidden = !hasDetailBanner;
-      if (hasDetailBanner) {
-        var homeTrophyBackgroundSrc = getHomeTournamentBannerUrl(detailBannerFile);
-        homeTrophyMedia.style.backgroundImage = 'url("' + homeTrophyBackgroundSrc.replace(/"/g, "%22") + '")';
-      } else {
-        homeTrophyMedia.style.removeProperty("background-image");
-      }
+      homeTrophyMedia.style.removeProperty("background-image");
       if (hasDetailBanner && detailState.t.bannerWidth && detailState.t.bannerHeight) {
         homeTrophyMedia.style.setProperty("--home-tournament-banner-aspect", detailState.t.bannerWidth + " / " + detailState.t.bannerHeight);
       } else {

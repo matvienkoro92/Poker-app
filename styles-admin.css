@@ -653,7 +653,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__club-data {
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 3;
   min-width: 0;
   padding: 8px;
   border: 1px solid rgba(125, 211, 252, 0.26);
@@ -717,19 +717,34 @@ body.admin-report-modal-open .bottom-nav {
 }
 #adminReportCalcCashCard {
   grid-column: 1;
-  grid-row: 3;
+  grid-row: 4;
 }
 #adminReportCalcRakeCard {
-  grid-column: 2;
-  grid-row: 3;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 #adminReportCalcWinLossCard {
   grid-column: 3;
-  grid-row: 3;
+  grid-row: 4;
 }
 #adminReportCalcCurrentWeekCard {
   grid-column: 1 / -1;
-  grid-row: 1;
+  grid-row: 2;
+}
+#adminReportCalcRakeCard .admin-report-calculations__section-head {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field {
+  min-width: 0;
+  margin-bottom: 0;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field--total,
+#adminReportCalcRakeCard .admin-report-calculations__field--negative {
+  grid-column: span 2;
 }
 .admin-report-calculations--cash-total {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -746,7 +761,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__side--left > .admin-report-calculations__field--grand {
   grid-column: 1 / -1;
-  grid-row: 4;
+  grid-row: 5;
   align-self: start;
 }
 .admin-report-calculations__figures {
@@ -1230,27 +1245,29 @@ body.admin-report-modal-open .bottom-nav {
     gap: 6px;
   }
   #adminReportCalcCashCard,
-  #adminReportCalcRakeCard,
   #adminReportCalcWinLossCard {
-    grid-row: 3;
+    grid-row: 4;
     padding: 5px;
   }
   #adminReportCalcCashCard {
     grid-column: 1;
   }
   #adminReportCalcRakeCard {
-    grid-column: 2;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
   }
   #adminReportCalcWinLossCard {
     grid-column: 3;
   }
   #adminReportCalcCurrentWeekCard {
     grid-column: 1 / -1;
-    grid-row: 1;
+    grid-row: 2;
   }
   .admin-report-calculations__side--left > .admin-report-calculations__field--grand {
     grid-column: 1 / -1;
-    grid-row: 4;
+    grid-row: 5;
   }
   .admin-report-calculations__figures {
     grid-column: 1 / -1;
@@ -1285,7 +1302,7 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 13px;
   }
   #adminReportCalcRakeCard .admin-report-calculations__field--triple {
-    grid-template-columns: minmax(0, 0.74fr) minmax(42px, 0.32fr) minmax(54px, 0.42fr);
+    grid-template-columns: minmax(92px, 1fr) minmax(58px, 0.4fr) minmax(54px, 0.36fr);
   }
   #adminReportCalcCashCard .admin-report-calculations__input,
   #adminReportCalcRakeCard .admin-report-calculations__input,
@@ -1319,6 +1336,13 @@ body.admin-report-modal-open .bottom-nav {
   }
   .admin-report-calculations__column {
     padding: 6px;
+  }
+  #adminReportCalcRakeCard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__field--total,
+  #adminReportCalcRakeCard .admin-report-calculations__field--negative {
+    grid-column: auto;
   }
   .admin-report-calculations__field {
     grid-template-columns: minmax(0, 1fr) minmax(70px, 0.34fr);

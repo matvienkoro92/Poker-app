@@ -328,8 +328,21 @@ function pokerInitWinterRatingWeekTops() {
       }
       if (hasHallSingleTop) {
         hallFameSingleTopSummary.textContent = singleTopTitleText;
-        hallFameSingleTopList.setAttribute("aria-busy", isLoadingWinterSingleTop ? "true" : "false");
-        hallFameSingleTopList.innerHTML = listHtml;
+        // Hall of Fame ships its current top-15 with the fragment so mobile users see it
+        // immediately. Keep those rows visible while the large season archives load;
+        // the interactive, data-backed rows replace them as soon as loading completes.
+        var hasFastHallRows = !!hallFameSingleTopList.querySelector("[data-hall-top2026-fast-row]");
+        var hasCompleteHallArchive = hasSingleTopWinterTournamentData() &&
+          typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" &&
+          SPRING_RATING_TOURNAMENTS_BY_DATE && Object.keys(SPRING_RATING_TOURNAMENTS_BY_DATE).length > 0 &&
+          typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" &&
+          SUMMER_RATING_TOURNAMENTS_BY_DATE && Object.keys(SUMMER_RATING_TOURNAMENTS_BY_DATE).length > 0;
+        var keepFastHallRows = hasFastHallRows && (isLoadingWinterSingleTop || !hasCompleteHallArchive);
+        hallFameSingleTopList.setAttribute("aria-busy", keepFastHallRows ? "false" : (isLoadingWinterSingleTop ? "true" : "false"));
+        if (!keepFastHallRows) {
+          hallFameSingleTopList.innerHTML = listHtml;
+          hallFameSingleTopList.removeAttribute("data-hall-top2026-fast-list");
+        }
       }
     }
     var marchWrap = document.getElementById("winterRatingMarchWinsWrap");

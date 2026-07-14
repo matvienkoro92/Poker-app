@@ -8,6 +8,7 @@
         "app-html-fragments.js"
       ],
       "consumedBy": [
+        "app-html-fragments.js",
         "app-view-router.js"
       ]
     },
@@ -16,6 +17,37 @@
       "domain": "lazyLoader",
       "exportedBy": [
         "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js",
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerEnsureViewStyles",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerEnsureViewLoadingSkeleton",
+      "domain": "htmlFragments",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "pokerClearViewLoadingSkeleton",
+      "domain": "htmlFragments",
+      "exportedBy": [
+        "app-html-fragments.js"
       ],
       "consumedBy": [
         "app-view-router.js"

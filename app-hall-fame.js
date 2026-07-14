@@ -702,6 +702,7 @@ function hallFishEnsureModal() {
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="vote" role="tab" aria-selected="false">Голосование</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -2497,6 +2498,15 @@ function initHallFishRatingModal() {
     var tabKey = tab.getAttribute("data-hall-fish-tab");
     if (tabKey === "achievements") openHallFishAchievementTab();
     else if (tabKey === "birthdays") openHallFishBirthdaysTab();
+    else if (tabKey === "vote") {
+      hallFishCloseModal();
+      if (typeof window.pokerOpenHomeWidgetModal === "function") {
+        window.pokerOpenHomeWidgetModal("club-choice-vote");
+      } else {
+        var voteButton = document.getElementById("clubChoiceVoteOpen");
+        if (voteButton) voteButton.click();
+      }
+    }
     else openHallFishRatingModal();
   });
   document.addEventListener("pointerenter", function (e) {

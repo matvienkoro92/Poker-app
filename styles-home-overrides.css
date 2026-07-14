@@ -727,6 +727,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   width: min(100%, calc(100vw - 8px)) !important;
   max-width: 100% !important;
   min-width: 0 !important;
+  margin-top: 4px !important;
   margin-right: auto !important;
   margin-left: auto !important;
   box-sizing: border-box !important;
@@ -1896,6 +1897,10 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   grid-template-rows: auto var(--home-club-choice-row) !important;
 }
 
+.app.app--view-home .home-club-choice-actions[hidden] {
+  display: none !important;
+}
+
 .app.app--view-home .home-sng-champions-action {
   display: block !important;
   height: auto !important;
@@ -1988,14 +1993,15 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 .app.app--view-home .home-sng-champions-action__cta-wrap .home-sng-champions-action__cta {
-  position: relative !important;
+  position: absolute !important;
+  inset: 5px !important;
   box-sizing: border-box !important;
-  width: calc(100% - 10px) !important;
-  max-width: calc(100% - 10px) !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0 !important;
-  height: 46px !important;
-  min-height: 46px !important;
-  margin: 0 5px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
   padding: 4px !important;
   border: 1px solid #ffd66f !important;
   border-radius: 10px !important;
@@ -2009,6 +2015,8 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 .app.app--view-home .home-sng-champions-action__cta-wrap {
+  position: relative !important;
+  box-sizing: border-box !important;
   place-content: stretch !important;
   align-items: center !important;
   justify-items: stretch !important;

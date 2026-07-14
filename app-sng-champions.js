@@ -1031,11 +1031,16 @@
 
   function renderDescription(data) {
     var text = String(data && data.description || "").trim();
-    if (!text) return "";
+    var edit = data && data.isAdmin
+      ? '<button type="button" class="sng-champions-modal__edit-btn" data-sng-tab="create">Редактировать</button>'
+      : "";
+    if (!text) return edit ? '<div class="sng-champions-modal__signup-tools">' + edit + '</div>' : "";
     var html = text.split(/\n{2,}/).map(function (paragraph) {
       return '<p>' + escapeHtml(paragraph.trim()).replace(/\n/g, "<br>") + '</p>';
     }).join("");
-    return '<div class="sng-champions-modal__description"><span>Описание</span><div class="sng-champions-modal__description-text">' + html + '</div></div>';
+    return '<div class="sng-champions-modal__description">' +
+      '<div class="sng-champions-modal__description-head"><span>Описание</span>' + edit + '</div>' +
+      '<div class="sng-champions-modal__description-text">' + html + '</div></div>';
   }
 
   function renderUserAction(data) {
@@ -1152,8 +1157,7 @@
     var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
     var columnsHtml = renderEntryColumn("Подтверждены", approvedEntries, data) +
       (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "");
-    return renderSignupSummary(data, entries) +
-      renderDescription(data) +
+    return renderDescription(data) +
       renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
         columnsHtml +

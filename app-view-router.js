@@ -664,52 +664,122 @@ function pokerEnsureRafflesAfterShell() {
     });
 }
 
+var pokerPendingViewNavigationSeq = 0;
+var pokerPendingViewNavigation = null;
+
+function pokerShowViewLoadingShell(viewName) {
+  var body = document.body;
+  if (body) {
+    body.setAttribute("data-view", viewName || "");
+    body.setAttribute("data-poker-loading-view", viewName || "");
+    body.classList.add("poker-view-section-loading");
+    body.classList.remove("poker-view-section-load-error");
+  }
+  pokerGetViewNodes().forEach(function (view) {
+    view.classList.toggle("view--active", view.dataset.view === viewName);
+  });
+  navItems.forEach(function (item) {
+    item.classList.toggle("bottom-nav__item--active", item.dataset.viewTarget === viewName);
+  });
+  if (footer) footer.classList.toggle("card__footer--hidden", viewName !== "home");
+  try {
+    pokerSyncViewHtmlScrollClasses(viewName);
+    pokerSyncInertForViewScreensOnly();
+  } catch (ePendingLayout) {}
+  try {
+    if (typeof window.pokerEnsureViewLoadingSkeleton === "function") {
+      window.pokerEnsureViewLoadingSkeleton(viewName);
+    }
+  } catch (ePendingSkeleton) {}
+}
+
+function pokerClearViewLoadingShell(viewName) {
+  if (document.body && document.body.getAttribute("data-poker-loading-view") === String(viewName || "")) {
+    document.body.removeAttribute("data-poker-loading-view");
+    document.body.classList.remove("poker-view-section-loading", "poker-view-section-load-error");
+  }
+  try {
+    if (typeof window.pokerClearViewLoadingSkeleton === "function") {
+      window.pokerClearViewLoadingSkeleton(viewName);
+    }
+  } catch (eClearPendingSkeleton) {}
+}
+
+function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
+  var htmlReady = true;
+  var scriptsReady = true;
+  try {
+    if (!navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
+      var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;
+      htmlReady = window.pokerEnsureViewHtml(htmlViewName);
+    }
+  } catch (eHtmlView) {
+    htmlReady = true;
+  }
+  try {
+    if (!navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
+      scriptsReady = window.pokerEnsureViewScripts(viewName);
+    }
+  } catch (eScriptsView) {
+    scriptsReady = true;
+  }
+
+  var waits = [];
+  if (htmlReady && typeof htmlReady.then === "function") waits.push(Promise.resolve(htmlReady));
+  if (scriptsReady && typeof scriptsReady.then === "function") waits.push(Promise.resolve(scriptsReady));
+  if (!waits.length) return false;
+
+  var fromView = "";
+  try {
+    fromView = document.body ? (document.body.getAttribute("data-view") || "") : "";
+  } catch (eFromView) {}
+  var fromScrollY = 0;
+  try {
+    fromScrollY = getMainDocumentScrollY();
+  } catch (eFromScroll) {}
+  var token = ++pokerPendingViewNavigationSeq;
+  pokerPendingViewNavigation = { token: token, view: viewName };
+  pokerShowViewLoadingShell(viewName);
+
+  Promise.all(waits).then(function () {
+    var pending = pokerPendingViewNavigation;
+    if (!pending || pending.token !== token || pending.view !== viewName) return;
+    var nextOpts = {};
+    Object.keys(navOpts).forEach(function (key) {
+      nextOpts[key] = navOpts[key];
+    });
+    nextOpts.htmlReady = true;
+    nextOpts.scriptsReady = true;
+    nextOpts.fromPendingShell = true;
+    nextOpts.pendingFromView = fromView;
+    nextOpts.pendingFromScrollY = fromScrollY;
+    setView(viewName, nextOpts);
+  }).catch(function (err) {
+    var pending = pokerPendingViewNavigation;
+    if (!pending || pending.token !== token || pending.view !== viewName) return;
+    if (document.body) {
+      document.body.classList.remove("poker-view-section-loading");
+      document.body.classList.add("poker-view-section-load-error");
+    }
+    var activeSkeleton = document.querySelector('.view--active[data-view="' + String(viewName || "").replace(/"/g, '\\"') + '"] .poker-section-skeleton__title');
+    if (activeSkeleton) activeSkeleton.textContent = "Не удалось загрузить. Нажмите раздел ещё раз";
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+      window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
+    }
+    if (typeof console !== "undefined" && console.warn) console.warn("progressive view load", err);
+  });
+  return true;
+}
+
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
-  var useInstantRafflesShell = viewName === "raffles" && !navOpts.htmlReady && !navOpts.scriptsReady;
-  try {
-    if (!useInstantRafflesShell && !navOpts.htmlReady && typeof window.pokerEnsureViewHtml === "function") {
-      var htmlViewName = (viewName === "spring-rating" || viewName === "summer-rating") ? "winter-rating" : viewName;
-      var htmlReady = window.pokerEnsureViewHtml(htmlViewName);
-      if (htmlReady && typeof htmlReady.then === "function") {
-        htmlReady.then(function () {
-          var nextOpts = {};
-          Object.keys(navOpts).forEach(function (key) {
-            nextOpts[key] = navOpts[key];
-          });
-          nextOpts.htmlReady = true;
-          setView(viewName, nextOpts);
-        }).catch(function (err) {
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-            window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
-          }
-          if (typeof console !== "undefined" && console.warn) console.warn("view html fragment", err);
-        });
-        return;
-      }
-    }
-  } catch (eHtmlView) {}
-  try {
-    if (!useInstantRafflesShell && !navOpts.scriptsReady && typeof window.pokerEnsureViewScripts === "function") {
-      var scriptsReady = window.pokerEnsureViewScripts(viewName);
-      if (scriptsReady && typeof scriptsReady.then === "function") {
-        scriptsReady.then(function () {
-          var nextOpts = {};
-          Object.keys(navOpts).forEach(function (key) {
-            nextOpts[key] = navOpts[key];
-          });
-          nextOpts.scriptsReady = true;
-          setView(viewName, nextOpts);
-        }).catch(function (err) {
-          if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-            window.Telegram.WebApp.showAlert("Не удалось загрузить раздел. Попробуйте ещё раз.");
-          }
-          if (typeof console !== "undefined" && console.warn) console.warn("view script domain", err);
-        });
-        return;
-      }
-    }
-  } catch (eScriptsView) {}
+  var previousPendingNavigation = pokerPendingViewNavigation;
+  if (previousPendingNavigation) {
+    pokerPendingViewNavigationSeq += 1;
+    pokerPendingViewNavigation = null;
+    pokerClearViewLoadingShell(previousPendingNavigation.view);
+  }
+  if (pokerBeginProgressiveViewNavigation(viewName, navOpts)) return;
   try {
     pokerPushOpenStateDebug("setView-enter", String(viewName || ""));
   } catch (eSetViewDbg0) {}
@@ -722,7 +792,8 @@ function setView(viewName, navOpts) {
   /* Чаты всегда открываются (нижнее меню). Верификация — pokerEnsure на диалогах/отправке. */
   var prevView = "";
   try {
-    if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
+    if (navOpts.fromPendingShell) prevView = String(navOpts.pendingFromView || "");
+    else if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
   try {
     if (viewName === "raffles" && prevView === "home" && typeof window !== "undefined") {
@@ -818,7 +889,9 @@ function setView(viewName, navOpts) {
     }, 380);
   }
   if (prevView && prevView !== viewName) {
-    viewScrollMemory[prevView] = getMainDocumentScrollY();
+    viewScrollMemory[prevView] = navOpts.fromPendingShell
+      ? (Number(navOpts.pendingFromScrollY) || 0)
+      : getMainDocumentScrollY();
   }
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
@@ -881,6 +954,7 @@ function setView(viewName, navOpts) {
       view.classList.remove("view--active");
     }
   });
+  pokerClearViewLoadingShell(viewName);
   if (viewName !== "player-crm") {
     pokerResetPlayerCrmForcedVisibility();
   }

@@ -1,5 +1,5 @@
-// Lazy HTML fragments for heavy views. Keeps first-load DOM light while
-// preserving existing data-view routing.
+// Progressive HTML hydration for view sections. Lightweight skeletons are
+// built immediately; complete sections are hydrated in the background.
 (function () {
   var loading = Object.create(null);
   var nestedFragmentLoading = Object.create(null);
@@ -23,6 +23,76 @@
     "adminReportModal",
     "broadcastReportsModal",
   ];
+
+  var VIEW_SKELETON_TITLES = {
+    "winter-rating": "Рейтинг",
+    "chat": "Чаты",
+    "download": "Скачать",
+    "bonus-game": "Бонусная игра",
+    "cooler-game": "Кулер",
+    "plasterer-game": "Штукатур",
+    "raffles": "Розыгрыши",
+    "poker-tasks": "Задания клуба",
+    "video-lessons": "Видеоуроки",
+    "hall-of-fame": "Зал славы",
+    "cashout": "Депозит",
+    "transfers": "Переводы",
+    "profile": "Профиль",
+    "admin-bonuses": "Бонусы",
+    "player-crm": "Игроки",
+    "schedule": "Расписание",
+    "streams": "Трансляции",
+    "equilator": "Эквилятор",
+    "learn-play-hub": "Обучение",
+  };
+
+  function skeletonMarkup(viewName, overlay) {
+    var title = VIEW_SKELETON_TITLES[String(viewName || "")] || "Раздел";
+    return (
+      '<div class="poker-section-skeleton' + (overlay ? ' poker-section-skeleton--overlay' : '') + '" data-poker-fragment-skeleton aria-hidden="true">' +
+        '<div class="poker-section-skeleton__head">' +
+          '<span class="poker-section-skeleton__icon"></span>' +
+          '<span class="poker-section-skeleton__title">' + title + '</span>' +
+        '</div>' +
+        '<span class="poker-section-skeleton__line poker-section-skeleton__line--wide"></span>' +
+        '<span class="poker-section-skeleton__line poker-section-skeleton__line--short"></span>' +
+        '<div class="poker-section-skeleton__cards">' +
+          '<span class="poker-section-skeleton__card"></span>' +
+          '<span class="poker-section-skeleton__card"></span>' +
+          '<span class="poker-section-skeleton__card"></span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function ensureViewSkeleton(viewName, overlay) {
+    var view = String(viewName || "").trim();
+    var host = document.querySelector('[data-view="' + view.replace(/"/g, '\\"') + '"]');
+    if (!host || host.querySelector("[data-poker-fragment-skeleton]")) return host;
+    host.insertAdjacentHTML("afterbegin", skeletonMarkup(viewName, !!overlay));
+    host.setAttribute("aria-busy", "true");
+    return host;
+  }
+
+  function buildInitialViewSkeletons() {
+    Array.prototype.slice.call(document.querySelectorAll("[data-html-fragment-view]")).forEach(function (host) {
+      ensureViewSkeleton(host.getAttribute("data-html-fragment-view") || host.getAttribute("data-view") || "", false);
+    });
+  }
+
+  buildInitialViewSkeletons();
+  window.pokerEnsureViewLoadingSkeleton = function (viewName) {
+    return ensureViewSkeleton(viewName, true);
+  };
+  window.pokerClearViewLoadingSkeleton = function (viewName) {
+    var view = String(viewName || "").trim();
+    var host = document.querySelector('[data-view="' + view.replace(/"/g, '\\"') + '"]');
+    if (!host) return;
+    Array.prototype.slice.call(host.querySelectorAll("[data-poker-fragment-skeleton]")).forEach(function (node) {
+      if (node.parentNode) node.parentNode.removeChild(node);
+    });
+    host.removeAttribute("aria-busy");
+  };
 
   function findFragmentHost(viewName) {
     var view = String(viewName || "").trim();
@@ -133,6 +203,18 @@
     if (!next) throw new Error("Fragment has no view: " + viewName);
     next.removeAttribute("data-html-fragment");
     next.removeAttribute("data-html-fragment-view");
+    var keepLoadingSkeleton = !!(
+      host.classList &&
+      host.classList.contains("view--active") &&
+      document.body &&
+      document.body.classList.contains("poker-view-section-loading")
+    );
+    if (keepLoadingSkeleton) {
+      next.insertAdjacentHTML("afterbegin", skeletonMarkup(viewName, true));
+      next.setAttribute("aria-busy", "true");
+    } else {
+      next.removeAttribute("aria-busy");
+    }
     host.parentNode.replaceChild(next, host);
     runFragmentHooks(viewName);
     return next;
@@ -213,6 +295,10 @@
         if (!currentHost) return true;
         hydrateHost(currentHost, html, viewName);
         return true;
+      })
+      .catch(function (err) {
+        delete loading[src];
+        throw err;
       });
     return loading[src];
   };
@@ -298,38 +384,185 @@
     }
   })();
 
-  (function pokerEagerHydratePrimaryViews() {
-    var queue = [
-      "profile"
+  (function pokerProgressivelyHydrateViews() {
+    var primaryStructureQueue = [
+      { view: "profile" },
+      { view: "summer-rating", html: "winter-rating" },
+      { view: "chat" },
+      { view: "download" },
+      { view: "raffles" },
+      { view: "schedule" },
+      { view: "hall-of-fame" },
+      { view: "daily-poker" },
     ];
-    var index = 0;
-    function runNext(deadline) {
-      var started = Date.now();
-      while (index < queue.length) {
-        var viewName = queue[index++];
-        try {
-          window.pokerEnsureViewHtml(viewName);
-        } catch (eViewHydrate) {}
-        if (
-          deadline &&
-          typeof deadline.timeRemaining === "function" &&
-          deadline.timeRemaining() < 8
-        ) break;
-        if (!deadline && Date.now() - started > 18) break;
-      }
-      if (index >= queue.length) return;
-      schedule(runNext);
+    var secondaryStructureQueue = [
+      { view: "learn-play-hub" },
+      { view: "bonus-game" },
+      { view: "cooler-game" },
+      { view: "plasterer-game" },
+      { view: "poker-tasks" },
+      { view: "video-lessons" },
+      { view: "cashout" },
+      { view: "transfers" },
+      { view: "equilator" },
+      { view: "streams" },
+      { view: "spring-rating", html: "winter-rating" },
+      { view: "winter-rating", html: "winter-rating" },
+    ];
+    var mainScriptQueue = [
+      { view: "profile" },
+      { view: "summer-rating", html: "winter-rating" },
+      { view: "chat" },
+    ];
+    var fastConnectionScriptQueue = [
+      { view: "raffles" },
+      { view: "schedule" },
+      { view: "hall-of-fame" },
+      { view: "daily-poker" },
+      { view: "poker-tasks" },
+    ];
+    var adminQueue = [
+      { view: "admin-bonuses" },
+      { view: "player-crm" },
+    ];
+    var started = false;
+    var adminStarted = false;
+
+    function connectionTier() {
+      try {
+        var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (!connection) return "standard";
+        if (connection.saveData) return "constrained";
+        var effectiveType = String(connection.effectiveType || "").toLowerCase();
+        if (/(^|-)2g$/.test(effectiveType)) return "constrained";
+        if (effectiveType === "3g") return "moderate";
+        if (effectiveType === "4g") return "fast";
+      } catch (eConnection) {}
+      return "standard";
     }
-    function schedule(fn) {
+
+    function schedule(fn, timeout) {
+      function runWhenVisible() {
+        if (!document.hidden) {
+          fn();
+          return;
+        }
+        document.addEventListener("visibilitychange", function onVisible() {
+          if (document.hidden) return;
+          document.removeEventListener("visibilitychange", onVisible);
+          fn();
+        });
+      }
       if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(fn, { timeout: 700 });
+        window.requestIdleCallback(runWhenVisible, { timeout: timeout || 900 });
       } else {
-        setTimeout(fn, 80);
+        setTimeout(runWhenVisible, Math.min(timeout || 900, 180));
       }
     }
-    function start() {
-      schedule(runNext);
+
+    function hydrateStructure(entry) {
+      var jobs = [];
+      try {
+        var htmlReady = window.pokerEnsureViewHtml(entry.html || entry.view);
+        if (htmlReady && typeof htmlReady.then === "function") jobs.push(htmlReady);
+      } catch (eViewHtml) {}
+      try {
+        var stylesReady = typeof window.pokerEnsureViewStyles === "function"
+          ? window.pokerEnsureViewStyles(entry.view)
+          : false;
+        if (stylesReady && typeof stylesReady.then === "function") jobs.push(stylesReady);
+      } catch (eViewStyles) {}
+      return Promise.all(jobs).then(function () { return true; });
     }
+
+    function hydrateScripts(entry) {
+      var ready = false;
+      try {
+        ready = typeof window.pokerEnsureViewScripts === "function"
+          ? window.pokerEnsureViewScripts(entry.view)
+          : false;
+      } catch (eViewScripts) {}
+      return Promise.resolve(ready).then(function () { return true; });
+    }
+
+    function runQueue(entries, worker, maxParallel) {
+      var queue = entries.slice();
+      var active = 0;
+      return new Promise(function (resolve) {
+        function pump() {
+          if (!queue.length && active === 0) {
+            resolve(true);
+            return;
+          }
+          while (active < maxParallel && queue.length) {
+            var entry = queue.shift();
+            active += 1;
+            Promise.resolve(worker(entry)).catch(function () {
+              return false;
+            }).then(function () {
+              active -= 1;
+              schedule(pump, 700);
+            });
+          }
+        }
+        pump();
+      });
+    }
+
+    function hasAdminAccess() {
+      try {
+        var auth = window.__pokerTelegramAuth || null;
+        if (auth && auth.adminAccess === true) return true;
+      } catch (eAuth) {}
+      try {
+        var record = typeof pokerReadPwaTgSessionRecord === "function" ? pokerReadPwaTgSessionRecord() : null;
+        if (record && record.adminAccess === true) return true;
+      } catch (eRecord) {}
+      return false;
+    }
+
+    function maybePreloadAdminViews() {
+      if (adminStarted || !hasAdminAccess()) return;
+      adminStarted = true;
+      schedule(function () {
+        runQueue(adminQueue, hydrateStructure, 1).then(function () {
+          return runQueue(adminQueue, hydrateScripts, 1);
+        });
+      }, 2200);
+    }
+
+    function startPublicQueues() {
+      var tier = connectionTier();
+      var structureParallel = tier === "fast" ? 2 : 1;
+      runQueue(primaryStructureQueue, hydrateStructure, structureParallel).then(function () {
+        if (tier !== "constrained") {
+          schedule(function () {
+            var scripts = tier === "fast"
+              ? mainScriptQueue.concat(fastConnectionScriptQueue)
+              : (tier === "moderate" ? mainScriptQueue.slice(0, 2) : mainScriptQueue);
+            runQueue(scripts, hydrateScripts, 1);
+          }, tier === "fast" ? 700 : 1400);
+        }
+        if (tier !== "constrained") {
+          schedule(function () {
+            runQueue(secondaryStructureQueue, hydrateStructure, 1);
+          }, tier === "fast" ? 1100 : 2200);
+        }
+        maybePreloadAdminViews();
+      });
+      if (tier === "constrained") {
+        maybePreloadAdminViews();
+      }
+    }
+
+    function start() {
+      if (started) return;
+      started = true;
+      schedule(startPublicQueues, 900);
+    }
+    window.addEventListener("poker-admin-access", maybePreloadAdminViews);
+    window.addEventListener("poker-telegram-auth", maybePreloadAdminViews);
+    setTimeout(maybePreloadAdminViews, 4200);
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {

@@ -312,6 +312,9 @@
   window.pokerEnsureViewScripts = function (viewName) {
     return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: true });
   };
+  window.pokerEnsureViewStyles = function (viewName) {
+    return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: false });
+  };
   window.pokerPrewarmLikelyViewAssets = function () {
     if (window.__pokerLikelyViewAssetsPrewarmed) return;
     window.__pokerLikelyViewAssetsPrewarmed = true;
@@ -320,6 +323,7 @@
     };
     idle(function () {
       if (document.hidden) return;
+      if (shouldSkipIntentPrewarm()) return;
       var ready = ensureDomainsMaybeAsync(["learning", "profile", "rating-common"], { styles: true, scripts: false });
       if (ready && typeof ready.catch === "function") ready.catch(function () {});
     }, { timeout: 2500 });

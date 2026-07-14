@@ -5196,3 +5196,97 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     --summer-top3-art-left-y: calc(44% + 44px);
   }
 }
+
+/*
+ * Summer podium canonical geometry.
+ * Desktop PWA is the reference: phone, desktop browser and Telegram must use
+ * the same coordinates against the 4:3 podium artwork. Top-3 art sizes remain
+ * owned by summerRatingTop3ArtSizeStyle() in app-rating-view-adapter.js.
+ */
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+  --summer-top3-art-center-x: 50%;
+  --summer-top3-art-center-y: calc(26% + 22px);
+  --summer-top3-art-left-x: calc(11% - 3px);
+  --summer-top3-art-left-y: calc(44% + 44px);
+  --summer-top3-art-right-x: calc(89% - 9px);
+  --summer-top3-art-right-y: calc(50% + 35px);
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2.spring-rating-top3--league {
+  --summer-top3-art-center-x: calc(50% + 3px);
+  --summer-top3-art-center-y: calc(26% + 25px);
+  --summer-top3-art-left-x: calc(11% - 3px);
+  --summer-top3-art-left-y: calc(44% + 44px);
+  --summer-top3-art-right-x: calc(89% - 9px);
+  --summer-top3-art-right-y: calc(50% + 35px);
+  --summer-top3-art-center-size: 23%;
+  --summer-top3-art-left-size: 17%;
+  --summer-top3-art-right-size: 17%;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1),
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(3),
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) {
+  bottom: 28px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2),
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) {
+  bottom: 40px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__nick {
+  top: 49px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+  top: 41px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  top: 33px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2 .spring-rating-top3__nick {
+  top: 52px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating
+  #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
+  top: 34px;
+}
+
+html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
+html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
+  --summer-rating-mobile-lower-podium-height: 164px;
+  --summer-rating-mobile-lower-podium-table-gap: 7px;
+  --summer-rating-mobile-lower-podium-players-y: -69px;
+  --summer-rating-mobile-lower-podium-label-y: 116px;
+  --summer-rating-mobile-lower-podium-hitbox-y: 54px;
+  --summer-rating-mobile-lower-podium-hitbox-height: 98px;
+  height: var(--summer-rating-mobile-lower-podium-height);
+  margin-top: 0;
+  margin-bottom: var(--summer-rating-mobile-lower-podium-table-gap);
+}
+
+html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-label {
+  top: var(--summer-rating-mobile-lower-podium-label-y);
+}
+
+html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hitbox {
+  top: var(--summer-rating-mobile-lower-podium-hitbox-y);
+  height: var(--summer-rating-mobile-lower-podium-hitbox-height);
+}
