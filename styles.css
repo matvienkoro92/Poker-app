@@ -5105,7 +5105,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__hint {
   position: relative;
   z-index: 1;
-  margin: -3px 0 0;
+  margin: 6px 0 0;
   padding: 0 10px;
   color: rgba(255, 238, 202, 0.72);
   font-size: clamp(8px, 1.25vw, 11px);
@@ -10335,4 +10335,37 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   .poker-section-skeleton__card::after {
     animation: none;
   }
+}
+
+/* Compact transition from the live SNG card to the evening tournaments. */
+.app.app--view-home .home-club-actions-block {
+  grid-template-rows: auto !important;
+  gap: 0 !important;
+  margin-bottom: 6px !important;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus {
+  margin-top: 8px !important;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+  display: grid;
+  grid-template-columns: clamp(28px, 7vw, 72px) auto clamp(28px, 7vw, 72px);
+  align-items: center;
+  justify-content: center;
+  column-gap: clamp(10px, 2vw, 18px);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::after {
+  content: "";
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 198, 74, 0.92));
+  box-shadow: 0 0 8px rgba(255, 159, 26, 0.38);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::after {
+  background: linear-gradient(90deg, rgba(255, 198, 74, 0.92), transparent);
 }

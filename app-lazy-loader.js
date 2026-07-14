@@ -29,6 +29,7 @@
     "poker-tasks": ["club-tasks"],
     "hall-of-fame": ["hall"],
     "schedule": ["tournament"],
+    "download": ["cashout"],
     "profile": ["profile"],
     "streams": ["streams"],
     "cashout": ["cashout"],

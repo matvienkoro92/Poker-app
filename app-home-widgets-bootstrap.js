@@ -131,8 +131,21 @@
   function openWidget(key, trigger) {
     var config = WIDGETS[key];
     if (!config) return Promise.resolve(false);
-    var ready = callReadyOpener(config);
-    if (ready !== null) return Promise.resolve(ready);
+    if (hasReadyOpener(config)) {
+      setBusy(trigger, true, config);
+      return ensureDomain(config.domain)
+        .then(function () {
+          return callReadyOpener(config) !== null;
+        })
+        .catch(function (err) {
+          if (typeof console !== "undefined" && console.warn) console.warn("home widget style load", err);
+          showLoadError();
+          return false;
+        })
+        .finally(function () {
+          setBusy(trigger, false, config);
+        });
+    }
     if (typeof config.beforeLoad === "function") config.beforeLoad(trigger);
     setBusy(trigger, true, config);
     window.__pokerHomeWidgetOpening = key;
@@ -166,7 +179,12 @@
 
   function prewarmWidget(key) {
     var config = WIDGETS[key];
-    if (!config || hasReadyOpener(config)) return;
+    if (!config) return;
+    if (hasReadyOpener(config)) {
+      var ensureStyles = typeof window.pokerEnsureStyleDomains === "function" ? window.pokerEnsureStyleDomains : null;
+      if (ensureStyles) Promise.resolve(ensureStyles([config.domain])).catch(function () {});
+      return;
+    }
     ensureDomain(config.domain).catch(function () {});
   }
 
