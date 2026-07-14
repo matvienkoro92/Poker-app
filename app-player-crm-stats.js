@@ -133,7 +133,10 @@ function initPlayerCrmStatsRuntime(deps) {
       ? String(Math.max(0, Number(visitsSummary.averageSessionsBeforeRegistration) || 0)).replace(".", ",")
       : "—";
     var periodMetrics = [
-      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience)],
+      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, null, [
+        ["Из них зарегано", intFmt(confirmedAudience)],
+        ["Впервые зашли", exactVisits ? intFmt(visitsSummary.new) : "—"],
+      ]],
       ["Новые посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.new) : "—"],
       ["Повторные посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.repeat) : "—"],
       ["Сессии · " + periodLabel(), exactVisits ? intFmt(visitsSummary.total) : "—"],
@@ -163,8 +166,14 @@ function initPlayerCrmStatsRuntime(deps) {
       var typeAttr = it[2] ? " type=\"button\"" : "";
       var actionAttr = it[2] ? " " + it[2] : "";
       var toneCls = it[3] ? " player-crm__period-metric--" + it[3] : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + "\"" + actionAttr + ">" +
-        "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong></" + tag + ">";
+      var details = Array.isArray(it[4]) && it[4].length
+        ? "<div class=\"player-crm__period-metric-details\">" + it[4].map(function (row) {
+            return "<span>" + esc(row[0]) + " <b>" + esc(row[1]) + "</b></span>";
+          }).join("") + "</div>"
+        : "";
+      var detailsCls = details ? " player-crm__period-metric--has-details" : "";
+      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + detailsCls + "\"" + actionAttr + ">" +
+        "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
     }
     function currentCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -205,7 +214,7 @@ function initPlayerCrmStatsRuntime(deps) {
       exactTrackingNotice +
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__period-metrics\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
+      "<div class=\"player-crm__period-metrics\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr))\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();

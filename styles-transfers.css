@@ -1936,7 +1936,7 @@
 /* Keep the back control vertically centered with the transfers navigation. */
 @media (max-width: 1000px) {
   .transfers-page__back {
-    transform: none;
+    transform: translateY(4px);
   }
 }
 

@@ -2051,10 +2051,10 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 .app.app--view-home .home-sng-champions-action__cta-wrap .home-sng-champions-action__cta {
-  inset: 7px 9px !important;
-  padding: 5px 8px !important;
-  border: 1px solid rgba(228, 186, 105, 0.58) !important;
-  border-radius: 14px !important;
+  inset: 2px 3px !important;
+  padding: 8px 10px !important;
+  border: 2px solid rgba(228, 186, 105, 0.68) !important;
+  border-radius: 16px !important;
   color: #f7e6be !important;
   background: linear-gradient(180deg, #111722 0%, #080d15 100%) !important;
   box-shadow:

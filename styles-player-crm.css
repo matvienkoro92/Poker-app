@@ -590,6 +590,28 @@ button.player-crm__period-metric:focus-visible {
   line-height: 1;
   white-space: nowrap;
 }
+.player-crm__period-metric--has-details {
+  gap: 7px;
+}
+.player-crm__period-metric-details {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.player-crm__period-metric .player-crm__period-metric-details span {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  color: #9fb0c5;
+  font-size: clamp(8px, 1vw, 10px);
+  line-height: 1.15;
+  text-transform: none;
+}
+.player-crm__period-metric-details b {
+  flex: 0 0 auto;
+  color: var(--text);
+  font-size: 1.08em;
+}
 .player-crm__analytics-breakdown {
   margin-top: 14px;
   padding: 14px;
@@ -1428,26 +1450,37 @@ button.player-crm__stat:focus-visible,
 .player-crm__chart-summary-table-wrap {
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 .player-crm__chart-summary-table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 .player-crm__chart-summary-table th,
 .player-crm__chart-summary-table td {
-  padding: 5px 7px;
+  min-width: 0;
+  padding: 5px 3px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
   color: var(--text);
-  font-size: 12px;
-  line-height: 1.2;
-  text-align: left;
-  white-space: nowrap;
+  font-size: clamp(8px, 1.4vw, 12px);
+  line-height: 1.12;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .player-crm__chart-summary-table th {
   color: var(--text-muted);
   font-weight: 800;
+}
+.player-crm__chart-summary-table th:first-child,
+.player-crm__chart-summary-table td:first-child {
+  width: 11%;
+  padding-left: 2px;
+  text-align: left;
+  white-space: nowrap;
 }
 .player-crm__import {
   display: grid;
@@ -2363,6 +2396,7 @@ button.player-crm__stat:focus-visible,
 
 /* Period analytics always stay three-up, including narrow admin WebViews. */
 .player-crm .player-crm__period-metrics {
+  display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   width: 100% !important;
   min-width: 0 !important;

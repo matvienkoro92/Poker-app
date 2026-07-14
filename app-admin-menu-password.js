@@ -2,9 +2,11 @@
   "use strict";
 
   var ADMIN_MENU_PASSWORD = "7889";
+  var CRM_PASSWORD = "1110";
   var CALCULATIONS_PASSWORD = "1110";
+  var CRM_SELECTOR = '[data-crm-open="player-crm"]';
   var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"], [data-admin-report-tab="cash-total"]';
-  var PROTECTED_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, [data-crm-open=\"player-crm\"], " + CALCULATIONS_SELECTOR;
+  var PROTECTED_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, " + CRM_SELECTOR + ", " + CALCULATIONS_SELECTOR;
   var bypassTargets = typeof WeakSet === "function" ? new WeakSet() : null;
   var pendingTarget = null;
   var pendingPassword = ADMIN_MENU_PASSWORD;
@@ -64,13 +66,15 @@
     pendingTarget = target;
     pendingPassword = target && target.matches && target.matches(CALCULATIONS_SELECTOR)
       ? CALCULATIONS_PASSWORD
-      : ADMIN_MENU_PASSWORD;
+      : target && target.matches && target.matches(CRM_SELECTOR)
+        ? CRM_PASSWORD
+        : ADMIN_MENU_PASSWORD;
     var input = document.getElementById("adminMenuPasswordInput");
     var message = document.getElementById("adminMenuPasswordMessage");
     var title = document.getElementById("adminMenuPasswordTitle");
     if (input) input.value = "";
     if (message) message.textContent = "";
-    if (title) title.textContent = pendingPassword === CALCULATIONS_PASSWORD ? "Пароль для закрытой вкладки" : "Введите пароль";
+    if (title) title.textContent = target && target.matches && target.matches(CALCULATIONS_SELECTOR) ? "Пароль для закрытой вкладки" : "Введите пароль";
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("admin-menu-password-open");
