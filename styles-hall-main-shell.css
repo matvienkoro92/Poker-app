@@ -219,6 +219,15 @@
   color: #f5d49a;
   background: transparent;
 }
+
+@media (max-width: 390px) {
+  #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-trophy-right: -60px;
+    --hall-top2026-trophy-top: 327px;
+    --hall-top2026-trophy-width: 131px;
+  }
+}
+
 #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
   display: none;
 }
