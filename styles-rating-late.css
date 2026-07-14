@@ -2745,7 +2745,7 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
   border: 0;
   border-radius: 0;
   background:
-    url("./assets/summer-rating-stage-bg.webp?v=2") center var(--summer-rating-stage-bg-offset-y) / 100% var(--summer-rating-stage-bg-height) no-repeat,
+    url("./assets/summer-rating-stage-bg.webp?v=2") center var(--summer-rating-stage-bg-offset-y) / 100% auto no-repeat,
     #020812 !important;
   box-shadow: none;
 }
@@ -2767,7 +2767,7 @@ body[data-view="summer-rating"] .view--active[data-view="summer-rating"] > .bonu
   padding-bottom: 18px;
   overflow: visible;
   background:
-    url("./assets/summer-rating-stage-bg.webp?v=2") center var(--summer-rating-stage-bg-offset-y) / 100% var(--summer-rating-stage-bg-height) no-repeat,
+    url("./assets/summer-rating-stage-bg.webp?v=2") center var(--summer-rating-stage-bg-offset-y) / 100% auto no-repeat,
     #020812 !important;
 }
 

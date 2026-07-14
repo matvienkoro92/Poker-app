@@ -276,9 +276,9 @@
     --hall-top2026-list-width: 216px;
     --hall-top2026-list-max-width: 216px;
     --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + 50px);
-    --hall-top2026-trophy-right: -88px;
-    --hall-top2026-trophy-top: 338px;
-    --hall-top2026-trophy-width: 112px;
+    --hall-top2026-trophy-right: -20%;
+    --hall-top2026-trophy-top: calc(439.5px - 25vw);
+    --hall-top2026-trophy-width: 31%;
   }
 
   #hallOfFameView .hall-of-fame__top2026-trophy {
@@ -10182,6 +10182,21 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
   }
 }
 
+/* Unified compact placement for section back controls. */
+.bonus-game-back {
+  left: 3px !important;
+  transform: scale(0.85) !important;
+  transform-origin: left top !important;
+}
+
+#hallOfFameView .hall-of-fame__toolbar {
+  margin-left: 3px !important;
+}
+
+.transfers-page__header {
+  left: 3px !important;
+}
+
 /* Immediate section shells shown while progressive background hydration runs. */
 .poker-section-skeleton {
   box-sizing: border-box;
@@ -10368,4 +10383,62 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::after {
   background: linear-gradient(90deg, rgba(255, 198, 74, 0.92), transparent);
+}
+
+@media (max-width: 560px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+    grid-template-columns: minmax(12px, 1fr) max-content minmax(12px, 1fr);
+    column-gap: clamp(6px, 2vw, 10px);
+    font-size: clamp(11px, 3.35vw, 15px);
+    line-height: 1;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    text-wrap: nowrap;
+  }
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-raffle-bonus:not([hidden]) + .home-tournament-bonuses {
+  padding-top: 2px;
+}
+
+html.site-home-header-mode .app.app--view-home #vpnProxyOpenBtn {
+  display: flex !important;
+}
+
+.sng-inline-feature__cta-wrap {
+  display: grid;
+  min-width: 0;
+  padding: 7px 9px;
+}
+
+.sng-inline-feature__cta-wrap .sng-inline-feature__cta {
+  position: static;
+  inset: auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 8px;
+  border-radius: 12px;
+  font-size: clamp(12px, 2.8vw, 18px);
+  text-transform: none;
+}
+
+@media (max-width: 460px) {
+  .sng-inline-feature__cta-wrap {
+    padding: 5px 3px;
+  }
+
+  .sng-inline-feature__cta-wrap .sng-inline-feature__cta {
+    min-height: 40px;
+    padding-inline: 3px;
+    border-radius: 9px;
+    font-size: 11px;
+  }
+}
+
+html body[data-view] #app .bonus-game-back {
+  left: 3px !important;
+  transform: scale(0.85) !important;
+  transform-origin: left top !important;
 }

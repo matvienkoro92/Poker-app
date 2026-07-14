@@ -1,4 +1,4 @@
 /* Rating CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-hall-rating-lightbox.css?v=3.666");
-@import url("./styles-rating-tables-modals.css?v=3.639");
+@import url("./styles-rating-tables-modals.css?v=3.640");
 @import url("./styles-rating-chat-modals.css?v=3.660");

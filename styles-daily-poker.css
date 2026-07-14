@@ -2825,6 +2825,46 @@
   }
 }
 
+@media (max-width: 390px) {
+  .daily-poker__share-actions {
+    grid-template-columns: minmax(0, 1.65fr) minmax(52px, 0.5fr) minmax(52px, 0.5fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .daily-poker__invite-btn,
+  .daily-poker__notify-btn,
+  .daily-poker__copy-btn {
+    min-width: 0;
+    min-height: 58px;
+    border-width: 1px;
+    border-radius: 13px;
+  }
+
+  .daily-poker__invite-btn {
+    gap: 6px;
+    padding-inline: 7px;
+    font-size: clamp(10px, 3.25vw, 12px);
+  }
+
+  .daily-poker__invite-btn::after {
+    inset: 3px;
+    border-radius: 10px;
+  }
+
+  .daily-poker__invite-icon {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+
+  .daily-poker__notify-icon,
+  .daily-poker__copy-icon {
+    width: 25px;
+    height: 25px;
+  }
+}
+
 @container (max-width: 720px) {
   .daily-poker__table {
     aspect-ratio: 1 / 1;

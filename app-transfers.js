@@ -626,6 +626,7 @@
       .finally(function () {
         state.fetching = false;
         if (!options.silent) setLoading(false);
+        render();
       });
   }
 
