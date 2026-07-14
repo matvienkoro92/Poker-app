@@ -1994,7 +1994,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 
 .app.app--view-home .home-sng-champions-action__cta-wrap .home-sng-champions-action__cta {
   position: absolute !important;
-  inset: 5px !important;
+  inset: 0 !important;
   box-sizing: border-box !important;
   width: auto !important;
   max-width: none !important;
@@ -2003,8 +2003,13 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   min-height: 0 !important;
   margin: 0 !important;
   padding: 4px !important;
-  border: 1px solid #ffd66f !important;
-  border-radius: 10px !important;
+  border: 2px solid #f18b0b !important;
+  border-radius: 0 !important;
+  color: #251000 !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 220, 0.82), transparent 45%),
+    linear-gradient(180deg, #ffe277 0%, #ff9d16 52%, #eb5d00 100%) !important;
+  text-shadow: 0 1px 0 rgba(255, 244, 191, 0.72) !important;
   animation: home-sng-live-action-glow 1.8s ease-in-out infinite !important;
   overflow: hidden !important;
   font-size: clamp(10px, 2.2vw, 18px) !important;

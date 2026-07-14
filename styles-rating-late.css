@@ -5296,3 +5296,14 @@ html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hit
   top: var(--summer-rating-mobile-lower-podium-hitbox-y);
   height: var(--summer-rating-mobile-lower-podium-hitbox-height);
 }
+
+@media (max-width: 700px) {
+  html #app .winter-rating.spring-rating.summer-rating
+    #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+  html #app .winter-rating.spring-rating.summer-rating
+    #springRatingTop3PodiumLeague2.spring-rating-top3--league,
+  html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
+  html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
+    transform: translateY(-32px);
+  }
+}
