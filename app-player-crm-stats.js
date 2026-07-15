@@ -189,7 +189,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var currentSection =
       "<section class=\"player-crm__stats-section\" aria-label=\"Текущее состояние\">" +
         "<div class=\"player-crm__stats-section-head\"><h3>За все время</h3><span>состояние базы</span></div>" +
-        "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\" style=\"display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0\">" + currentStats.map(currentCard).join("") + "</div>" +
+        "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\" style=\"display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important;min-width:0!important\">" + currentStats.map(currentCard).join("") + "</div>" +
       "</section>";
     var analyticsLabels = {
       home: "Главная", raffles: "Розыгрыши", rating: "Рейтинг", chat: "Чат", profile: "Профиль",
