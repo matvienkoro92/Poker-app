@@ -8802,14 +8802,14 @@ body.club-choice-vote-open {
     padding:7px 20px 5px 10px;
   }
   .sng-champions-modal__tournament-title {
-    font-size:12px;
+    font-size:13px;
     line-height:1.02;
   }
   .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live {
     gap:5px;
     margin-top:4px!important;
     padding:4px 7px;
-    font-size:11px!important;
+    font-size:12px!important;
     line-height:1.02;
   }
   .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live > i {
@@ -8824,7 +8824,7 @@ body.club-choice-vote-open {
   }
   .sng-champions-modal__tournament-option .sng-champions-modal__tournament-facts dt {
     gap:4px;
-    font-size:8px;
+    font-size:9px;
   }
   .sng-champions-modal__tournament-option .sng-champions-modal__tournament-facts dt i {
     width:16px;
@@ -8834,7 +8834,7 @@ body.club-choice-vote-open {
   }
   .sng-champions-modal__tournament-option .sng-champions-modal__tournament-facts dd {
     margin-left:20px;
-    font-size:9px;
+    font-size:10px;
     line-height:1;
   }
 }
