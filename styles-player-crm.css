@@ -2401,6 +2401,11 @@ button.player-crm__stat:focus-visible,
   width: 100% !important;
   min-width: 0 !important;
 }
+.player-crm .player-crm__stats-grid--current {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
 .player-crm .player-crm__period-metric {
   min-width: 0 !important;
 }

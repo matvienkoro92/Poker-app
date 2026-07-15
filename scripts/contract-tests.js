@@ -3572,11 +3572,20 @@ async function testRespectVoteWithdraw(redis) {
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
   redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
 
   let r = await call(respect, req("POST", {}, { pwaSession: s.user, targetUserId: "tg_1002", action: "up" }));
   assert.strictEqual(r.statusCode, 200, "respect up succeeds");
   assert.strictEqual(r.body.score, 1, "respect up increments");
   assert.strictEqual(r.body.myVote, "up", "respect stores up vote");
+
+  r = await call(respect, req("GET", { pwaSession: s.peer, userId: "tg_1002", list: "1" }));
+  assert.strictEqual(r.statusCode, 200, "respect voter list succeeds");
+  assert.strictEqual(r.body.voterDisplay.ID100001, "ID100001", "hidden Telegram username is absent from voter list");
+
+  redis.h("poker_app:telegram_visible").set("ID100001", "1");
+  r = await call(respect, req("GET", { pwaSession: s.peer, userId: "tg_1002", list: "1" }));
+  assert.strictEqual(r.body.voterDisplay.ID100001, "@player", "public Telegram username remains visible in voter list");
 
   r = await call(respect, req("POST", {}, { pwaSession: s.user, targetUserId: "tg_1002", action: "withdraw" }));
   assert.strictEqual(r.statusCode, 200, "respect withdraw succeeds");

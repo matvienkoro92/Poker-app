@@ -1160,11 +1160,11 @@
     var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
     var columnsHtml = renderEntryColumn("Подтверждены", approvedEntries, data) +
       (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "");
-    return renderDescription(data) +
-      renderUserAction(data) +
+    return renderUserAction(data) +
       '<div class="sng-champions-modal__entries">' +
         columnsHtml +
       '</div>' +
+      renderDescription(data) +
       renderCancelAction(data);
   }
 
