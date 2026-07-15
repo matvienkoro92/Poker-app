@@ -137,7 +137,7 @@ function initPlayerCrmStatsRuntime(deps) {
       ? String(Math.round((Math.max(0, Number(visitsSummary.total) || 0) / estimatedRealAudience) * 10) / 10).replace(".", ",")
       : "—";
     var periodMetrics = [
-      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, null, [
+      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, "row-one", [
         ["Из них зарегано", intFmt(confirmedAudience)],
         ["Гости", intFmt(activeAnonymousInstallations)],
         ["Новые пользователи", exactVisits ? intFmt(visitsSummary.new) : "—"],
@@ -145,32 +145,32 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Гость → регистрация", guestConversionText],
         ["Сессий до регистрации · в среднем", sessionsBeforeRegistrationText],
       ]],
-      ["Зарегано · всего", intFmt(statRegistrations), null, null, [
+      ["Зарегано · всего", intFmt(statRegistrations), null, "row-one", [
         ["Только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
         ["Только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
         ["И Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
       ]],
-      ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", null, [
-        ["Привязки", "+" + intFmt(statPokerPlus)],
-        ["Отвязки", "−" + intFmt(statPokerPlusUnlinked)],
-        ["Итого", intFmt(statPokerPlusNet)],
+      ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", "row-two", [
+        ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
+        ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
+        ["Итого", intFmt(statPokerPlusNet), null, "total"],
       ], "row-start"],
-      ["Бот", intFmt(statBotNet), "data-crm-bot-modal", null, [
-        ["Подписки", "+" + intFmt(statBotSubscribers)],
-        ["Отписки", "−" + intFmt(statBotUnsubscribers)],
-        ["Итого", intFmt(statBotNet)],
+      ["Бот", intFmt(statBotNet), "data-crm-bot-modal", "row-two", [
+        ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
+        ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
+        ["Итого", intFmt(statBotNet), null, "total"],
       ]],
-      ["Push", intFmt(statPushNet), "data-crm-push-modal", null, [
-        ["Подписки", "+" + intFmt(statPushSubscribers)],
-        ["Отписки", "−" + intFmt(statPushUnsubscribers)],
-        ["Итого", intFmt(statPushNet)],
+      ["Push", intFmt(statPushNet), "data-crm-push-modal", "row-two", [
+        ["Подписки", "+" + intFmt(statPushSubscribers), null, "positive"],
+        ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],
+        ["Итого", intFmt(statPushNet), null, "total"],
       ]],
-      ["Крутка дня", dailyPokerValue("totalSpins"), null, null, [
+      ["Крутка дня", dailyPokerValue("totalSpins"), null, "row-three", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
       ], "row-start"],
-      ["Розыгрыши", raffleStats ? intFmt(raffleStats.uniqueParticipants) : "—", null, null, [
+      ["Розыгрыши", raffleStats ? intFmt(raffleStats.uniqueParticipants) : "—", null, "row-three", [
         ["Уникальных участников", raffleStats ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStats ? intFmt(raffleStats.uniqueWinners) : "—"],
         ["Выиграно и выдано", raffleStats ? money(raffleStats.issuedPrizeAmount) : "—"],
@@ -187,7 +187,8 @@ function initPlayerCrmStatsRuntime(deps) {
             var detailTag = row[2] ? "button" : "span";
             var detailType = row[2] ? " type=\"button\"" : "";
             var detailAction = row[2] ? " " + row[2] : "";
-            return "<" + detailTag + detailType + detailAction + ">" + esc(row[0]) + " <b>" + esc(row[1]) + "</b></" + detailTag + ">";
+            var detailCls = row[3] ? " class=\"player-crm__period-metric-detail--" + esc(row[3]) + "\"" : "";
+            return "<" + detailTag + detailType + detailCls + detailAction + ">" + esc(row[0]) + " <b>" + esc(row[1]) + "</b></" + detailTag + ">";
           }).join("") + "</div>"
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";

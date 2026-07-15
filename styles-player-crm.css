@@ -622,9 +622,40 @@ button.player-crm__period-metric:focus-visible {
   padding: 0;
   border: 0;
   background: none;
-  font: inherit;
+  font-family: inherit;
   text-align: left;
   cursor: pointer;
+}
+.player-crm__period-metric--row-one {
+  border-color: rgba(111, 143, 177, 0.58);
+  background: linear-gradient(155deg, rgba(31, 47, 68, 0.58), rgba(12, 19, 31, 0.96) 58%);
+  box-shadow: inset 3px 0 rgba(147, 178, 207, 0.72), 0 8px 20px rgba(2, 8, 18, 0.15);
+}
+.player-crm__period-metric--row-two {
+  border-color: rgba(143, 111, 61, 0.62);
+  background: linear-gradient(155deg, rgba(54, 43, 25, 0.42), rgba(13, 18, 25, 0.97) 58%);
+  box-shadow: inset 3px 0 rgba(176, 137, 75, 0.72), 0 8px 20px rgba(8, 6, 2, 0.15);
+}
+.player-crm__period-metric--row-three {
+  border-color: rgba(72, 125, 126, 0.58);
+  background: linear-gradient(155deg, rgba(24, 52, 54, 0.48), rgba(12, 20, 27, 0.97) 58%);
+  box-shadow: inset 3px 0 rgba(91, 151, 151, 0.7), 0 8px 20px rgba(2, 10, 12, 0.15);
+}
+.player-crm__period-metric .player-crm__period-metric-details .player-crm__period-metric-detail--positive,
+.player-crm__period-metric-details .player-crm__period-metric-detail--positive b {
+  color: #8fc9a2;
+}
+.player-crm__period-metric .player-crm__period-metric-details .player-crm__period-metric-detail--negative,
+.player-crm__period-metric-details .player-crm__period-metric-detail--negative b {
+  color: #d88f91;
+}
+.player-crm__period-metric-details .player-crm__period-metric-detail--total {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(143, 163, 187, 0.14);
+}
+.player-crm__period-metric-details .player-crm__period-metric-detail--total b {
+  color: #e7edf4;
 }
 .player-crm__period-metric-details b {
   flex: 0 0 auto;
