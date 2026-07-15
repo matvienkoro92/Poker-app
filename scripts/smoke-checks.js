@@ -107,6 +107,8 @@ const files = {
   appRafflesShare: read("app-raffles-share.js"),
   appPlayerCrmFormatters: read("app-player-crm-formatters.js"),
   appPlayerCrmFormattersModule: read("app-player-crm-formatters.module.mjs"),
+  appPlayerCrmStats: read("app-player-crm-stats.js"),
+  stylesPlayerCrm: read("styles-player-crm.css"),
   appPlayerCrmRegistrations: read("app-player-crm-registrations.js"),
   appPlayerCrmViewportShell: read("app-player-crm-viewport-shell.js"),
   appPlayerCrmRuntime: read("app-player-crm-runtime.js"),
@@ -1565,6 +1567,19 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-visitors-admin.js", "app-admin-reports.js") &&
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
+
+add("CRM period metrics stay in a three-column grid on Safari and PWA", () =>
+  hasAll("appPlayerCrmStats", [
+    "player-crm__period-metrics player-crm__period-metrics--three",
+    "display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important",
+  ]) &&
+  hasAll("stylesPlayerCrm", [
+    ".player-crm .player-crm__period-metrics--three",
+    "grid-template-columns: repeat(3, minmax(0, 1fr)) !important;",
+  ]) &&
+  !files.appPlayerCrmStats.includes("display:flex!important;flex-wrap:wrap!important") &&
+  !files.appPlayerCrmStats.includes("calc((100% - 16px)/3)") &&
+  !files.stylesPlayerCrm.includes("flex: 0 0 calc((100% - 16px) / 3)"));
 
 add("PWA auth shell delegates language, code, email, restore, and keyboard modules", () =>
   hasAll("appPwaAuthLanguageUi", [
