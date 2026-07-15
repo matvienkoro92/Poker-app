@@ -1349,7 +1349,7 @@
 @media (max-width: 620px) {
   .sng-champions-modal__join-dock {
     right: 12px;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
     left: 12px;
     padding: 8px;
     border-radius: 14px;
