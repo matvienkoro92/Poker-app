@@ -2401,6 +2401,19 @@ button.player-crm__stat:focus-visible,
   width: 100% !important;
   min-width: 0 !important;
 }
+.player-crm .player-crm__period-metrics--three {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: stretch;
+  gap: 8px;
+}
+.player-crm .player-crm__period-metrics--three > .player-crm__period-metric {
+  box-sizing: border-box !important;
+  flex: 0 0 calc((100% - 16px) / 3) !important;
+  width: calc((100% - 16px) / 3) !important;
+  max-width: calc((100% - 16px) / 3) !important;
+  min-width: 0 !important;
+}
 .player-crm .player-crm__stats-grid--current {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   width: 100% !important;
@@ -2410,8 +2423,14 @@ button.player-crm__stat:focus-visible,
   min-width: 0 !important;
 }
 @media (max-width: 520px) {
-  .player-crm .player-crm__period-metrics {
+  .player-crm .player-crm__period-metrics,
+  .player-crm .player-crm__period-metrics--three {
     gap: 5px;
+  }
+  .player-crm .player-crm__period-metrics--three > .player-crm__period-metric {
+    flex-basis: calc((100% - 10px) / 3) !important;
+    width: calc((100% - 10px) / 3) !important;
+    max-width: calc((100% - 10px) / 3) !important;
   }
   .player-crm .player-crm__period-metric {
     min-height: 104px;

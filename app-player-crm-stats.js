@@ -176,7 +176,7 @@ function initPlayerCrmStatsRuntime(deps) {
           }).join("") + "</div>"
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + detailsCls + "\"" + actionAttr + ">" +
+      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + detailsCls + "\" style=\"box-sizing:border-box;flex:0 0 calc((100% - 16px)/3);width:calc((100% - 16px)/3);max-width:calc((100% - 16px)/3);min-width:0\"" + actionAttr + ">" +
         "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
     }
     function currentCard(it) {
@@ -218,7 +218,7 @@ function initPlayerCrmStatsRuntime(deps) {
       exactTrackingNotice +
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__period-metrics\" style=\"display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
+      "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:flex!important;flex-wrap:wrap!important;align-items:stretch;gap:8px\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
