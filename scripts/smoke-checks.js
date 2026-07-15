@@ -1581,6 +1581,10 @@ add("CRM period metrics stay in a three-column grid on Safari and PWA", () =>
   ]) &&
   !files.appPlayerCrmStats.includes("display:flex!important;flex-wrap:wrap!important") &&
   !files.appPlayerCrmStats.includes("calc((100% - 16px)/3)") &&
+  !files.appPlayerCrmStats.includes('["Новые посетители · " + periodLabel()') &&
+  !files.appPlayerCrmStats.includes('["Повторные посетители · " + periodLabel()') &&
+  !files.appPlayerCrmStats.includes('["Гостевые установки · " + periodLabel()') &&
+  !files.appPlayerCrmStats.includes('["Зарегистрированные посетители · " + periodLabel()') &&
   !files.stylesPlayerCrm.includes("flex: 0 0 calc((100% - 16px) / 3)"));
 
 add("PWA auth shell delegates language, code, email, restore, and keyboard modules", () =>
