@@ -125,6 +125,7 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
+    var raffleStats = summary && summary.raffles && typeof summary.raffles === "object" ? summary.raffles : null;
     var guestConversionRate = exactVisits ? Math.max(0, Number(visitsSummary.guestConversionRate) || 0) : 0;
     var guestConversionText = exactVisits
       ? intFmt(visitsSummary.guestConverted) + " · " + String(guestConversionRate).replace(".", ",") + "%"
@@ -141,38 +142,56 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Гости", intFmt(activeAnonymousInstallations)],
         ["Новые пользователи", exactVisits ? intFmt(visitsSummary.new) : "—"],
         ["Открытий на человека", sessionsPerVisitorText],
+        ["Гость → регистрация", guestConversionText],
+        ["Сессий до регистрации · в среднем", sessionsBeforeRegistrationText],
       ]],
-      ["Гость → регистрация · " + periodLabel(), guestConversionText],
-      ["Сессий до регистрации · в среднем", sessionsBeforeRegistrationText],
-      ["Зарегано · всего", intFmt(statRegistrations)],
-      ["Зарегано · только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
-      ["Зарегано · только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
-      ["Зарегано · и Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
-      ["Poker21 · новые привязки", "+" + intFmt(statPokerPlus), "data-crm-pokerplus-modal", "plus"],
-      ["Poker21 · отвязали", "−" + intFmt(statPokerPlusUnlinked), "data-crm-pokerplus-modal", "minus"],
-      ["Poker21 · итого за период", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal"],
-      ["Бот · подписки", "+" + intFmt(statBotSubscribers), "data-crm-bot-modal", "plus"],
-      ["Бот · отписки", "−" + intFmt(statBotUnsubscribers), "data-crm-bot-modal", "minus"],
-      ["Бот · итого", intFmt(statBotNet), "data-crm-bot-modal"],
-      ["Push · подписки", "+" + intFmt(statPushSubscribers), "data-crm-push-modal", "plus"],
-      ["Push · отписки", "−" + intFmt(statPushUnsubscribers), "data-crm-push-modal", "minus"],
-      ["Push · итого", intFmt(statPushNet), "data-crm-push-modal"],
-      ["Крутка дня · уникальных крутили · " + periodLabel(), dailyPokerValue("uniquePlayers")],
-      ["Крутка дня · круток всего · " + periodLabel(), dailyPokerValue("totalSpins")],
-      ["Крутка дня · бонусов начислено · " + periodLabel(), dailyPokerValue("bonusAmount")],
+      ["Зарегано · всего", intFmt(statRegistrations), null, null, [
+        ["Только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
+        ["Только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
+        ["И Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
+      ]],
+      ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", null, [
+        ["Привязки", "+" + intFmt(statPokerPlus)],
+        ["Отвязки", "−" + intFmt(statPokerPlusUnlinked)],
+        ["Итого", intFmt(statPokerPlusNet)],
+      ], "row-start"],
+      ["Бот", intFmt(statBotNet), "data-crm-bot-modal", null, [
+        ["Подписки", "+" + intFmt(statBotSubscribers)],
+        ["Отписки", "−" + intFmt(statBotUnsubscribers)],
+        ["Итого", intFmt(statBotNet)],
+      ]],
+      ["Push", intFmt(statPushNet), "data-crm-push-modal", null, [
+        ["Подписки", "+" + intFmt(statPushSubscribers)],
+        ["Отписки", "−" + intFmt(statPushUnsubscribers)],
+        ["Итого", intFmt(statPushNet)],
+      ]],
+      ["Крутка дня", dailyPokerValue("totalSpins"), null, null, [
+        ["Уникальных", dailyPokerValue("uniquePlayers")],
+        ["Всего", dailyPokerValue("totalSpins")],
+        ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
+      ], "row-start"],
+      ["Розыгрыши", raffleStats ? intFmt(raffleStats.uniqueParticipants) : "—", null, null, [
+        ["Уникальных участников", raffleStats ? intFmt(raffleStats.uniqueParticipants) : "—"],
+        ["Уникальных победителей", raffleStats ? intFmt(raffleStats.uniqueWinners) : "—"],
+        ["Выиграно и выдано", raffleStats ? money(raffleStats.issuedPrizeAmount) : "—"],
+      ]],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";
       var typeAttr = it[2] ? " type=\"button\"" : "";
       var actionAttr = it[2] ? " " + it[2] : "";
       var toneCls = it[3] ? " player-crm__period-metric--" + it[3] : "";
+      var layoutCls = it[5] ? " player-crm__period-metric--" + it[5] : "";
       var details = Array.isArray(it[4]) && it[4].length
         ? "<div class=\"player-crm__period-metric-details\">" + it[4].map(function (row) {
-            return "<span>" + esc(row[0]) + " <b>" + esc(row[1]) + "</b></span>";
+            var detailTag = row[2] ? "button" : "span";
+            var detailType = row[2] ? " type=\"button\"" : "";
+            var detailAction = row[2] ? " " + row[2] : "";
+            return "<" + detailTag + detailType + detailAction + ">" + esc(row[0]) + " <b>" + esc(row[1]) + "</b></" + detailTag + ">";
           }).join("") + "</div>"
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
-      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + detailsCls + "\"" + actionAttr + ">" +
+      return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + layoutCls + detailsCls + "\"" + actionAttr + ">" +
         "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
     }
     function currentCard(it) {

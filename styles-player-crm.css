@@ -607,7 +607,8 @@ button.player-crm__period-metric:focus-visible {
   gap: 3px;
   min-width: 0;
 }
-.player-crm__period-metric .player-crm__period-metric-details span {
+.player-crm__period-metric .player-crm__period-metric-details span,
+.player-crm__period-metric .player-crm__period-metric-details button {
   display: flex;
   justify-content: space-between;
   gap: 5px;
@@ -615,6 +616,15 @@ button.player-crm__period-metric:focus-visible {
   font-size: clamp(8px, 1vw, 10px);
   line-height: 1.15;
   text-transform: none;
+}
+.player-crm__period-metric .player-crm__period-metric-details button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .player-crm__period-metric-details b {
   flex: 0 0 auto;
@@ -2426,6 +2436,9 @@ button.player-crm__stat:focus-visible,
   width: auto !important;
   max-width: none !important;
   min-width: 0 !important;
+}
+.player-crm .player-crm__period-metric--row-start {
+  grid-column-start: 1;
 }
 .player-crm .player-crm__stats-grid--current {
   display: grid !important;
