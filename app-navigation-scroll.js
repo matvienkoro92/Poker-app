@@ -129,6 +129,7 @@ function setMainDocumentScrollY(y) {
 
 var pokerLastMainScrollUserIntentAt = 0;
 var pokerLastMainScrollDirection = "";
+var pokerLastMainScrollDirectionAt = 0;
 var pokerLastMainTouchY = null;
 var pokerLastMainScrollTopObserved = 0;
 var pokerRestoringHomeScrollJump = false;
@@ -139,8 +140,13 @@ var pokerRestoringHomeScrollJump = false;
   function markWheel(e) {
     mark();
     var dy = e && Number(e.deltaY);
-    if (dy > 0) pokerLastMainScrollDirection = "down";
-    else if (dy < 0) pokerLastMainScrollDirection = "up";
+    if (dy > 0) {
+      pokerLastMainScrollDirection = "down";
+      pokerLastMainScrollDirectionAt = Date.now();
+    } else if (dy < 0) {
+      pokerLastMainScrollDirection = "up";
+      pokerLastMainScrollDirectionAt = Date.now();
+    }
   }
   function markTouchStart(e) {
     mark();
@@ -153,8 +159,13 @@ var pokerRestoringHomeScrollJump = false;
     if (!t || pokerLastMainTouchY == null) return;
     var y = Number(t.clientY);
     var dy = y - pokerLastMainTouchY;
-    if (dy < -3) pokerLastMainScrollDirection = "down";
-    else if (dy > 3) pokerLastMainScrollDirection = "up";
+    if (dy < -3) {
+      pokerLastMainScrollDirection = "down";
+      pokerLastMainScrollDirectionAt = Date.now();
+    } else if (dy > 3) {
+      pokerLastMainScrollDirection = "up";
+      pokerLastMainScrollDirectionAt = Date.now();
+    }
     pokerLastMainTouchY = y;
   }
   function guardHomeScrollJump() {
@@ -163,11 +174,12 @@ var pokerRestoringHomeScrollJump = false;
     var y = getMainDocumentScrollY();
     var prev = pokerLastMainScrollTopObserved || 0;
     var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
+    var recentUpwardGesture = pokerLastMainScrollDirection === "up" && Date.now() - pokerLastMainScrollDirectionAt < 900;
     if (
       view === "home" &&
       prev > 300 &&
-      y < prev - 180 &&
-      pokerLastMainScrollDirection !== "up"
+      y < prev - 24 &&
+      !recentUpwardGesture
     ) {
       pokerRestoringHomeScrollJump = true;
       setMainDocumentScrollY(prev);
