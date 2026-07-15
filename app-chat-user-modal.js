@@ -1979,7 +1979,15 @@ if (chatUserModalEl) {
     });
   }
   function syncChatUserModalTitleFromProfileData(data, fallbackName) {
-    chatUserModalPeerLogin = data && data.userName ? String(data.userName) : "";
+    var telegramHidden = !!(data && data.telegramVisible === false && data.isAdmin !== true);
+    function hidePrivateTelegramLabel(value) {
+      var text = String(value || "").trim();
+      if (telegramHidden && /^@[A-Za-z0-9_]{5,32}$/.test(text)) return "";
+      return text;
+    }
+    chatUserModalPeerLogin = telegramHidden
+      ? "TG скрыт"
+      : (data && data.userName ? String(data.userName) : "");
     var contactNm =
       data && data.contactName != null && String(data.contactName).trim()
         ? String(data.contactName).trim()
@@ -1989,8 +1997,9 @@ if (chatUserModalEl) {
       data && data.chatDisplayName != null && String(data.chatDisplayName).trim()
         ? String(data.chatDisplayName).trim()
         : "";
-    var ratingNick = chatUserModalRatingNickFromData(data);
-    var titleDisp = contactNm || ratingNick || peerChatDisp || chatUserModalPeerLogin || (fallbackName || "Игрок");
+    var ratingNick = hidePrivateTelegramLabel(chatUserModalRatingNickFromData(data));
+    var safeFallbackName = hidePrivateTelegramLabel(fallbackName);
+    var titleDisp = contactNm || ratingNick || peerChatDisp || (chatUserModalPeerLogin !== "TG скрыт" ? chatUserModalPeerLogin : "") || safeFallbackName || "Игрок";
     if (modalTitle) modalTitle.textContent = titleDisp;
     chatUserModalUserName = titleDisp;
     if (modalAvatar) modalAvatar.alt = titleDisp;
@@ -1998,7 +2007,10 @@ if (chatUserModalEl) {
       modalAvatarPlaceholder.textContent = (titleDisp || "И")[0];
     }
     if (modalLoginSub) {
-      if (contactNm && chatUserModalPeerLogin) {
+      if (chatUserModalPeerLogin === "TG скрыт") {
+        modalLoginSub.textContent = "TG скрыт";
+        modalLoginSub.hidden = false;
+      } else if (contactNm && chatUserModalPeerLogin) {
         modalLoginSub.textContent = chatUserModalPeerLogin;
         modalLoginSub.hidden = false;
       } else if (ratingNick && chatUserModalPeerLogin) {
@@ -2219,7 +2231,9 @@ if (chatUserModalEl) {
     return true;
   }
   function openChatUserModalById(id, name, avatarUrl, options) {
-    var userName = name || "Игрок";
+    var userName = String(name || "").trim();
+    if (/^@[A-Za-z0-9_]{5,32}$/.test(userName)) userName = "Игрок";
+    if (!userName) userName = "Игрок";
     if (!id || !chatUserModalEl) {
       if (id) openConversation(id, userName, avatarUrl);
       return;

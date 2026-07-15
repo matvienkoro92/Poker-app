@@ -3665,6 +3665,15 @@ async function testProfileUserLookup(redis) {
     "lookup exposes extended public PokerPlus stats",
   );
 
+  redis.h("poker_app:telegram_visible").delete("ID100002");
+  r = await call(users, req("GET", { pwaSession: s.user, userId: "ID100002" }));
+  assert.strictEqual(r.statusCode, 200, "player can open hidden public profile");
+  assert.strictEqual(r.body.telegramVisible, false, "hidden public profile reports private Telegram state");
+  assert.strictEqual(r.body.userName, "TG скрыт", "public profile hides Telegram username from another player");
+  r = await call(users, req("GET", { pwaSession: s.admin, userId: "ID100002" }));
+  assert.strictEqual(r.statusCode, 200, "admin can open hidden public profile");
+  assert.strictEqual(r.body.userName, "@peer", "admin can see hidden Telegram username");
+
   redis.h("poker_app:visitor_dt_ids").set("tg_661891", "ID661891");
   redis.h("poker_app:id_to_user").set("ID661891", "tg_661891");
   redis.h("poker_app:pokerplus_profiles").set("ID661891", JSON.stringify({
@@ -5329,7 +5338,7 @@ async function testFriendsFlow(redis) {
   assert.ok(peerFriend, "friend list returns added friend");
   assert.strictEqual(peerFriend.userId, peerAccountId, "friend list exposes account id");
   assert.strictEqual(peerFriend.chatUserId, "tg_1002", "friend list resolves chat id");
-  assert.strictEqual(peerFriend.userName, "без TG", "friend list masks hidden telegram username");
+  assert.strictEqual(peerFriend.userName, "TG скрыт", "friend list masks hidden telegram username");
   assert.strictEqual(peerFriend.contactName, "Buddy", "friend list returns alias");
   assert.strictEqual(peerFriend.chatDisplayName, "Peer Display", "friend list exposes stored display name");
   assert.strictEqual(peerFriend.pokerPlusNickname, "Poker21 Buddy", "friend list exposes Poker21 nickname");

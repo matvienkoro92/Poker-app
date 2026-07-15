@@ -823,6 +823,10 @@
   padding-bottom: max(92px, calc(92px + env(safe-area-inset-bottom, 0px)));
 }
 
+.club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock + .club-choice-vote-modal__footer {
+  margin-bottom: max(80px, calc(80px + env(safe-area-inset-bottom, 0px)));
+}
+
 .sng-champions-modal__summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1319,12 +1323,30 @@
 }
 
 .sng-champions-modal__join-dock {
-  position: relative;
-  z-index: 1;
+  position: fixed;
+  z-index: 1002;
+  left: 50%;
+  bottom: env(safe-area-inset-bottom, 0px);
   display: grid;
-  margin: 14px 0 0;
-  padding: 0;
+  width: min(916px, calc(100vw - 64px));
+  margin: 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 184, 70, 0.3);
+  border-radius: 16px;
+  background: rgba(3, 7, 14, 0.94);
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.42);
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
   pointer-events: auto;
+}
+
+@media (max-width: 620px) {
+  .sng-champions-modal__join-dock {
+    width: calc(100vw - 24px);
+    padding: 8px;
+    border-radius: 14px;
+  }
 }
 
 .sng-champions-modal__join-dock .sng-champions-modal__main-action {

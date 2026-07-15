@@ -944,7 +944,7 @@ function initProfileFriends() {
     function addLine(value, kind) {
       var text = String(value || "").trim();
       if (!text) return;
-      if ((kind === "tg" || lines.length > 0) && (text === "без TG" || text === "Игрок")) return;
+      if ((kind === "tg" || lines.length > 0) && (text === "без TG" || text === "TG скрыт" || text === "Игрок")) return;
       var key = text.replace(/^@+/, "").toLowerCase();
       if (seen[key]) return;
       seen[key] = true;

@@ -55,7 +55,7 @@ function initPlayerCrmReportsRuntime(deps) {
 
   function playerLine(p, idx) {
     return (idx + 1) + ". " + (p.name || p.handle || p.accountId || p.id || "—") +
-      " · " + (p.handle || "без TG") +
+      " · " + (p.handle || "TG скрыт") +
       " · " + (p.source || "—");
   }
 
