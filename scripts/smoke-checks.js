@@ -1574,6 +1574,8 @@ add("CRM period metrics stay in a three-column grid on Safari and PWA", () =>
     "display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important",
   ]) &&
   hasAll("stylesPlayerCrm", [
+    ".player-crm__stats > *",
+    "grid-template-columns: minmax(0, 1fr);",
     ".player-crm .player-crm__period-metrics--three",
     "grid-template-columns: repeat(3, minmax(0, 1fr)) !important;",
   ]) &&

@@ -502,10 +502,19 @@
 }
 .player-crm__stats {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-bottom: 12px;
   --crm-stat-color: #c7a36a;
   --crm-stat-color-soft: rgba(199, 163, 106, 0.18);
+}
+.player-crm__stats > * {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 .player-crm__current-stats {
   display: grid;
@@ -613,6 +622,9 @@ button.player-crm__period-metric:focus-visible {
   font-size: 1.08em;
 }
 .player-crm__analytics-breakdown {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   margin-top: 14px;
   padding: 14px;
   border: 1px solid #29364a;
