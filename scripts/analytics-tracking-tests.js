@@ -85,7 +85,17 @@ async function main() {
   await analytics.recordAnalyticsEvent({ installationId: installation, sessionId: "ses_analytics_test_2", eventId: "evt_section_test_2", type: "section_opened", section: "home", accountId: "ID123456" });
   await analytics.recordAnalyticsEvent({ installationId: installation, sessionId: "ses_analytics_test_2", eventId: "evt_spin_test_1", type: "daily_poker_spin", accountId: "ID123456" });
 
-  const summary = await analytics.readAnalyticsSummary(null);
+  // This account existed before the tracked installation. Opening the app on a
+  // new device must not turn an existing person into a new visitor.
+  hash("poker_app:id_to_user").set("ID123456", "tg_123456");
+  hash("poker_app:visitor_first_seen").set("tg_123456", String(Date.UTC(2026, 5, 1, 12, 0, 0)));
+
+  const summary = await analytics.readAnalyticsSummary({
+    from: "2026-07-09",
+    to: "2026-07-10",
+    fromMs: Date.UTC(2026, 6, 8, 21, 0, 0),
+    toMs: Date.UTC(2026, 6, 10, 20, 59, 59, 999),
+  });
   assert.strictEqual(summary.uniqueVisitors, 1, "guest and registered identity are merged");
   assert.strictEqual(summary.guestInstallations, 1, "guest state at first session is preserved");
   assert.strictEqual(summary.registeredVisitors, 1, "verified visitor is counted once");
@@ -94,6 +104,7 @@ async function main() {
   assert.strictEqual(summary.guestConverted, 1, "guest-to-account conversion is retained");
   assert.strictEqual(summary.guestConversionRate, 100, "conversion rate uses deduplicated guest audience");
   assert.strictEqual(summary.averageSessionsBeforeRegistration, 1, "sessions before registration are calculated");
+  assert.strictEqual(summary.newVisitors, 0, "existing account on a new installation is not counted as a new person");
   assert.strictEqual(summary.sections[0].events, 2, "section opens remain event counts");
   assert.strictEqual(summary.sections[0].uniqueVisitors, 1, "section audience is canonicalized");
   assert.strictEqual(summary.activities[0].name, "daily_poker_spin");

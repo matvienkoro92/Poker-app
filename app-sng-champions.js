@@ -1060,32 +1060,32 @@
         '</div>';
     }
     if (data.status === "open" && mine && mine.status !== "rejected") {
-      var notice = mine.status === "approved"
-        ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>'
-        : mine.status === "balance_requested"
-          ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>' +
-            '<div class="sng-champions-modal__join-dock"><button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="balancePaid"' + (mine.balancePaidAt ? ' disabled' : '') + '>' + (mine.balancePaidAt ? 'Сообщено администратору' : 'Я пополнил') + '</button></div>'
-          : '<div class="sng-champions-modal__notice sng-champions-modal__notice--pending">Вы подали заявку. Админ должен подтвердить участие.</div>';
-      return notice;
+      if (mine.status === "approved") {
+        return '<div class="sng-champions-modal__join-dock">' +
+          '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide sng-champions-modal__main-action--confirmed" disabled>✓ Ваша заявка подтверждена</button>' +
+        '</div>';
+      }
+      if (mine.status === "balance_requested") {
+        return '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>' +
+          '<div class="sng-champions-modal__join-dock sng-champions-modal__join-dock--actions">' +
+            '<button type="button" class="sng-champions-modal__main-action" data-sng-action="balancePaid"' + (mine.balancePaidAt ? ' disabled' : '') + '>' + (mine.balancePaidAt ? 'Сообщено администратору' : 'Я пополнил') + '</button>' +
+            '<button type="button" class="sng-champions-modal__secondary-action sng-champions-modal__secondary-action--cancel" data-sng-action="cancel">Отменить запись</button>' +
+          '</div>';
+      }
+      return '<div class="sng-champions-modal__join-dock">' +
+        '<button type="button" class="sng-champions-modal__secondary-action sng-champions-modal__secondary-action--cancel" data-sng-action="cancel">Отменить запись</button>' +
+      '</div>';
     }
     if (mine && mine.status === "approved") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--good">Вы подтверждены в СНГ Лиге Чемпионов Два Туза.</div>';
+      return '<div class="sng-champions-modal__join-dock">' +
+        '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide sng-champions-modal__main-action--confirmed" disabled>✓ Ваша заявка подтверждена</button>' +
+      '</div>';
     }
     if (mine && mine.status === "rejected") {
       return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена.</div>';
     }
     if (data.status === "draft") return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись еще не открыта.</div>';
     return '<div class="sng-champions-modal__notice sng-champions-modal__notice--closed">Запись закрыта, смотрите сетку турнира.</div>';
-  }
-
-  function renderCancelAction(data) {
-    var mine = data && data.myEntry;
-    if (data && data.status === "open" && mine && mine.status !== "rejected") {
-      return '<div class="sng-champions-modal__bottom-actions">' +
-        '<button type="button" class="sng-champions-modal__secondary-action sng-champions-modal__secondary-action--cancel" data-sng-action="cancel">Отменить заявку</button>' +
-      '</div>';
-    }
-    return "";
   }
 
   function renderAdminPanel(data) {
@@ -1158,13 +1158,12 @@
     });
     var approvedEntries = entries.filter(function (entry) { return entry.status === "approved"; });
     var pendingEntries = entries.filter(function (entry) { return entry.status === "pending" || entry.status === "balance_requested"; });
-    var columnsHtml = renderEntryColumn("Подтверждены", approvedEntries, data) +
-      (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "");
+    var columnsHtml = (pendingEntries.length ? renderEntryColumn("Подали заявку", pendingEntries, data) : "") +
+      renderEntryColumn("Подтверждены", approvedEntries, data);
     return '<div class="sng-champions-modal__entries">' +
         columnsHtml +
       '</div>' +
       renderDescription(data) +
-      renderCancelAction(data) +
       renderUserAction(data);
   }
 

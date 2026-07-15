@@ -139,7 +139,7 @@ function initPlayerCrmStatsRuntime(deps) {
       [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, null, [
         ["Из них зарегано", intFmt(confirmedAudience)],
         ["Гости", intFmt(activeAnonymousInstallations)],
-        ["Впервые зашли", exactVisits ? intFmt(visitsSummary.new) : "—"],
+        ["Новые пользователи", exactVisits ? intFmt(visitsSummary.new) : "—"],
         ["Открытий на человека", sessionsPerVisitorText],
       ]],
       ["Новые посетители · " + periodLabel(), exactVisits ? intFmt(visitsSummary.new) : "—"],
