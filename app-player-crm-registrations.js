@@ -220,12 +220,12 @@ function initPlayerCrmPokerPlusRuntime(ctx) {
     });
   }
 
-  function tableHead() {
+  function tableHead(compact) {
     var field = state.pokerPlusSortField || "level";
     var dir = state.pokerPlusSortDir || "desc";
     return "<thead><tr>" +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "linkedAt", "Дата", field, dir) +
-      "<th>Аккаунт</th><th>Poker21 ID</th><th>Ник</th>" +
+      (compact ? "" : "<th>Аккаунт</th>") + "<th>Poker21 ID</th><th>Ник</th>" +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "level", "Уровень", field, dir) +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "fee", "Fee", field, dir) +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "hands", "Раздач", field, dir) +
@@ -233,10 +233,10 @@ function initPlayerCrmPokerPlusRuntime(ctx) {
     "</tr></thead>";
   }
 
-  function tableRow(r) {
+  function tableRow(r, compact) {
     return "<tr>" +
       "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
-      "<td>" + esc(r.accountId || "—") + "</td>" +
+      (compact ? "" : "<td>" + esc(r.accountId || "—") + "</td>") +
       "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
       "<td>" + esc(r.nickname || "—") + "</td>" +
       "<td>" + esc(r.level || "—") + "</td>" +
@@ -263,14 +263,14 @@ function initPlayerCrmPokerPlusRuntime(ctx) {
       return;
     }
     el.innerHTML = summary + "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\">" +
-      tableHead() + "<tbody>" + sortRows(rows).map(tableRow).join("") + "</tbody></table></div>";
+      tableHead(false) + "<tbody>" + sortRows(rows).map(function (row) { return tableRow(row, false); }).join("") + "</tbody></table></div>";
   }
 
   function renderPokerPlusModalList() {
     var rows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (r) { return dateInSelectedPeriod(r && r.linkedAt); });
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">Привязанных аккаунтов Poker21 пока нет.</div>";
-    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table\">" +
-      tableHead() + "<tbody>" + sortRows(rows).map(tableRow).join("") + "</tbody></table></div></div>";
+    return "<div class=\"player-crm__modal-content\"><div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__pokerplus-table player-crm__pokerplus-table--modal\">" +
+      tableHead(true) + "<tbody>" + sortRows(rows).map(function (row) { return tableRow(row, true); }).join("") + "</tbody></table></div></div>";
   }
 
   function renderPokerPlusModal() {
