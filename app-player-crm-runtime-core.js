@@ -19,6 +19,7 @@
     players: [],
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
+    dailyPokerDebitsSort: "date",
     dailyPokerModalOpen: false,
     dailyPokerWinnersLoading: false,
     dailyPokerWinners: null,
@@ -1548,7 +1549,16 @@
     state.dailyPokerStatsLoading = true;
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
-    fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1&summary=1", { cache: "no-store" })
+    var statsRange = selectedPeriodRange();
+    var previousRange = comparisonRange();
+    var requestFrom = statsRange && statsRange.from ? statsRange.from : "";
+    var requestTo = statsRange && statsRange.to ? statsRange.to : "";
+    if (previousRange && previousRange.from && (!requestFrom || previousRange.from < requestFrom)) requestFrom = previousRange.from;
+    if (previousRange && previousRange.to && (!requestTo || previousRange.to > requestTo)) requestTo = previousRange.to;
+    var rangeQuery = requestFrom && requestTo
+      ? "&from=" + encodeURIComponent(requestFrom) + "&to=" + encodeURIComponent(requestTo)
+      : "";
+    fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1&summary=1" + rangeQuery, { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
         if (!data || data.ok === false) return;
@@ -1589,7 +1599,7 @@
     }
     var data = state.dailyPokerWinners;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
-    var debitedUsers = data && Array.isArray(data.debitedUsers) ? data.debitedUsers : [];
+    var debitedUsers = data && Array.isArray(data.debitedUsers) ? data.debitedUsers.slice() : [];
     if (!data) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Не удалось загрузить победителей.</div>";
       return;
@@ -1599,7 +1609,22 @@
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период данных нет.</div>";
       return;
     }
-    var debitsHtml = debitedUsers.length ? "<section class=\"player-crm__daily-debits\"><h3>Кем сколько списано</h3><div class=\"player-crm__daily-winners-list\">" + debitedUsers.map(function (user, index) {
+    var debitSort = state.dailyPokerDebitsSort === "amount" ? "amount" : "date";
+    function latestDebitDate(user) {
+      return (Array.isArray(user && user.issues) ? user.issues : []).reduce(function (latest, issue) {
+        var date = String(issue && issue.date || "");
+        return date > latest ? date : latest;
+      }, "");
+    }
+    debitedUsers.sort(function (a, b) {
+      if (debitSort === "amount") return Number(b && b.amount || 0) - Number(a && a.amount || 0) || latestDebitDate(b).localeCompare(latestDebitDate(a));
+      return latestDebitDate(b).localeCompare(latestDebitDate(a)) || Number(b && b.amount || 0) - Number(a && a.amount || 0);
+    });
+    var debitSortHtml = "<div class=\"player-crm__raffle-sort player-crm__daily-debits-sort\" role=\"group\" aria-label=\"Сортировка списаний\">" +
+      "<span>Сортировать</span>" +
+      "<button type=\"button\" data-crm-daily-debits-sort=\"date\" class=\"" + (debitSort === "date" ? "is-active" : "") + "\">По дате</button>" +
+      "<button type=\"button\" data-crm-daily-debits-sort=\"amount\" class=\"" + (debitSort === "amount" ? "is-active" : "") + "\">По сумме</button></div>";
+    var debitsHtml = debitedUsers.length ? "<section class=\"player-crm__daily-debits\">" + debitSortHtml + "<div class=\"player-crm__daily-winners-list\">" + debitedUsers.map(function (user, index) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || user.pokerPlusName || "—";
       var issues = Array.isArray(user.issues) ? user.issues : [];
@@ -1623,7 +1648,10 @@
         "<span>Дата выдачи <b>" + esc(issueDates.join(", ") || "—") + "</b></span>" +
         "<b class=\"player-crm__raffle-recipient-total\">" + esc(money(user.amount || 0)) + "</b></article>";
     }).join("") + "</div></section>" : "";
-    var winnersHtml = winners.length ? "<details class=\"player-crm__daily-winners-spoiler\"><summary>Победители <b>" + esc(intFmt(winners.length)) + "</b></summary><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
+    var winnersPrizeTotal = Math.max(0, Number(data && data.totalPrizeRubles) || winners.reduce(function (sum, winner) {
+      return sum + Math.max(0, Number(winner && winner.totalPrizeAmount) || 0);
+    }, 0));
+    var winnersHtml = winners.length ? "<details class=\"player-crm__daily-winners-spoiler\"><summary>Победители <b>" + esc(intFmt(winners.length)) + " · выиграно " + esc(money(winnersPrizeTotal)) + "</b></summary><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
       var telegram = winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = winner.pokerPlusNickname || winner.pokerPlusName || "—";
       return "<article class=\"player-crm__daily-winner\">" +
@@ -3366,6 +3394,12 @@
         return;
       }
       if (e.target.closest("[data-crm-close-raffles-modal]")) { closeRafflesModal(); return; }
+      var dailyDebitsSortButton = e.target.closest("[data-crm-daily-debits-sort]");
+      if (dailyDebitsSortButton) {
+        state.dailyPokerDebitsSort = dailyDebitsSortButton.getAttribute("data-crm-daily-debits-sort") === "amount" ? "amount" : "date";
+        renderDailyPokerModal();
+        return;
+      }
       var rafflesSortButton = e.target.closest("[data-crm-raffles-sort]");
       if (rafflesSortButton) {
         state.raffleRecipientsSort = rafflesSortButton.getAttribute("data-crm-raffles-sort") === "cash" ? "cash" : "tickets";
