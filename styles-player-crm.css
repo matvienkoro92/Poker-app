@@ -10,12 +10,26 @@
 .player-crm__hero {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   padding: 10px 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 8px;
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.45));
+}
+.player-crm__hero .player-crm__hero-back {
+  position: static !important;
+  inset: auto !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  transform-origin: center !important;
+  font-size: 22px !important;
 }
 [data-theme="light"] .player-crm__hero {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.76));
@@ -2752,6 +2766,29 @@ button.player-crm__stat:focus-visible,
   color: var(--text);
   font-size: 10px;
   text-overflow: ellipsis;
+}
+.player-crm__raffle-recipient .player-crm__raffle-recipient-cash,
+.player-crm__raffle-recipient .player-crm__raffle-recipient-tickets {
+  align-self: stretch;
+  align-items: center;
+  padding: 5px 7px;
+  border-radius: 7px;
+}
+.player-crm__raffle-recipient .player-crm__raffle-recipient-cash {
+  border: 1px solid rgba(59, 130, 246, 0.34);
+  background: rgba(37, 99, 235, 0.14);
+  color: #7fb4ff;
+}
+.player-crm__raffle-recipient .player-crm__raffle-recipient-cash b {
+  color: #b9d6ff;
+}
+.player-crm__raffle-recipient .player-crm__raffle-recipient-tickets {
+  border: 1px solid rgba(245, 190, 65, 0.38);
+  background: rgba(217, 158, 58, 0.14);
+  color: #e9bd59;
+}
+.player-crm__raffle-recipient .player-crm__raffle-recipient-tickets b {
+  color: #ffe29a;
 }
 .player-crm__raffle-recipient-total {
   color: var(--text);

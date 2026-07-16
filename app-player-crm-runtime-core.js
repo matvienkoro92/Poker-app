@@ -1708,8 +1708,8 @@
         "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
         "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
         "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
-        "<span>Кеш <b>" + esc(money(user.cashAmount || 0)) + "</b></span>" +
-        "<span>Билеты <b>" + esc(money(user.ticketAmount || 0)) + "</b></span>" +
+        "<span class=\"player-crm__raffle-recipient-cash\">Кеш <b>" + esc(money(user.cashAmount || 0)) + "</b></span>" +
+        "<span class=\"player-crm__raffle-recipient-tickets\">Билеты <b>" + esc(money(user.ticketAmount || 0)) + "</b></span>" +
         "<b class=\"player-crm__raffle-recipient-total\">" + esc(money(user.totalAmount || 0)) + "</b></article>";
     }).join("") + "</div></div>";
   }

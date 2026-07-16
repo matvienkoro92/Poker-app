@@ -1441,7 +1441,7 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
   display: block !important;
   flex: 1 1 auto !important;
   position: absolute !important;
-  top: max(74px, calc(env(safe-area-inset-top, 0px) + 62px)) !important;
+  top: 0 !important;
   right: max(12px, var(--screen-gutter-x, 12px)) !important;
   bottom: 0 !important;
   left: max(12px, var(--screen-gutter-x, 12px)) !important;
@@ -1481,7 +1481,7 @@ body[data-view="player-crm"] #playerCrmView.view--active .player-crm__period-met
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  padding: max(46px, calc(env(safe-area-inset-top, 0px) + 34px)) 12px 0 !important;
+  padding: 0 12px !important;
   overflow: hidden !important;
   visibility: visible !important;
   opacity: 1 !important;
