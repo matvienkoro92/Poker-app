@@ -61,6 +61,12 @@
     linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(2, 6, 23, 0.18)),
     rgba(15, 23, 42, 0.18);
 }
+.player-crm__tracking-notice:empty {
+  display: none;
+}
+.player-crm__tracking-notice .player-crm__notice {
+  margin: 0 0 10px;
+}
 [data-theme="light"] .player-crm__hero-tools.player-crm__period-toolbar {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(241, 245, 249, 0.66)),
@@ -404,7 +410,7 @@
 }
 .player-crm__tabs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(136px, 100%), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
   overflow: hidden;
   margin: 0 0 12px;
@@ -716,8 +722,8 @@ button.player-crm__period-metric:focus-visible {
 .player-crm__period-metric .player-crm__period-balance {
   position: absolute;
   top: 76px;
-  left: 31%;
-  right: 14px;
+  left: 35%;
+  right: 8px;
   display: grid;
   gap: 4px;
   text-transform: none;
@@ -726,12 +732,21 @@ button.player-crm__period-metric:focus-visible {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
   color: #91a4bb;
-  font-size: clamp(9px, 2.8cqw, 13px);
+  font-size: clamp(8px, 3cqw, 12px);
   font-weight: 800;
   line-height: 1.1;
   white-space: nowrap;
+}
+@container (max-width: 190px) {
+  .player-crm__period-metric .player-crm__period-balance {
+    left: 34%;
+    gap: 2px;
+  }
+  .player-crm__period-metric .player-crm__period-balance small {
+    font-size: clamp(7px, 5.5cqw, 10px);
+  }
 }
 .player-crm__period-metric .player-crm__period-balance b {
   color: #eaf3fb;
@@ -2855,15 +2870,17 @@ button.player-crm__stat:focus-visible,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .player-crm__tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
   }
   .player-crm__stat-value {
     font-size: 19px;
   }
   .player-crm__tab {
     min-height: 40px;
-    padding: 7px 8px;
-    font-size: 12px;
+    padding: 7px 4px;
+    font-size: 10px;
   }
 }
 @media (max-width: 680px) {

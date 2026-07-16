@@ -15,14 +15,17 @@ function initPlayerCrmStatsRuntime(deps) {
   function renderStats() {
     var el = document.getElementById("playerCrmStats");
     var currentEl = document.getElementById("playerCrmCurrentStats");
+    var trackingNoticeEl = document.getElementById("playerCrmTrackingNotice");
     if (!el) return null;
     if (state.loading && state.loadingScope !== "chart") {
       if (currentEl) currentEl.innerHTML = "";
+      if (trackingNoticeEl) trackingNoticeEl.innerHTML = "";
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
       return null;
     }
     if (state.crmError) {
       if (currentEl) currentEl.innerHTML = "";
+      if (trackingNoticeEl) trackingNoticeEl.innerHTML = "";
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.crmError) + "</div>";
       return null;
     }
@@ -303,7 +306,7 @@ function initPlayerCrmStatsRuntime(deps) {
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
       var balanceHtml = balance
-        ? "<span class=\"player-crm__period-balance\"><small>На начало периода <b>" + esc(intFmt(balance.start)) + "</b></small><small>На конец периода <b>" + esc(intFmt(balance.end)) + "</b></small></span>"
+        ? "<span class=\"player-crm__period-balance\" aria-label=\"Количество на начало и конец периода\"><small>На начало <b>" + esc(intFmt(balance.start)) + "</b></small><small>На конец <b>" + esc(intFmt(balance.end)) + "</b></small></span>"
         : "";
       return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + layoutCls + detailsCls + "\"" + actionAttr + ">" +
         "<span>" + esc(it[0]) + "</span>" + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + balanceHtml + details + "</" + tag + ">";
@@ -363,8 +366,9 @@ function initPlayerCrmStatsRuntime(deps) {
       ? analyticsTable("Куда заходили", analyticsSummary.sections) + analyticsTable("В чём участвовали", analyticsSummary.activities)
       : "";
     if (currentEl) currentEl.innerHTML = currentSection;
+    if (trackingNoticeEl) trackingNoticeEl.innerHTML = exactTrackingNotice;
     el.innerHTML =
-      exactTrackingNotice +
+      (trackingNoticeEl ? "" : exactTrackingNotice) +
       periodWarning +
       (currentEl ? "" : currentSection) +
       "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +

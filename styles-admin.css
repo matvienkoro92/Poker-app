@@ -829,11 +829,33 @@ body.admin-report-modal-open .bottom-nav {
   overflow: hidden;
 }
 .admin-report-calculations__archive-summary {
+  display: flex;
+  align-items: center;
   padding: 8px 9px;
   color: #ffe7b0;
   font-size: 12px;
   font-weight: 900;
   cursor: pointer;
+}
+.admin-report-calculations__archive-details--root > .admin-report-calculations__archive-summary {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  border-bottom: 1px solid rgba(246, 211, 145, 0.2);
+  background: #0b0f19;
+}
+.admin-report-calculations__archive-summary-action {
+  margin-left: auto;
+  color: #f4c96f;
+  font-size: 10px;
+  font-weight: 900;
+}
+.admin-report-calculations__archive-details--root:not([open]) .admin-report-calculations__archive-summary-action {
+  font-size: 0;
+}
+.admin-report-calculations__archive-details--root:not([open]) .admin-report-calculations__archive-summary-action::after {
+  content: "Открыть архив";
+  font-size: 10px;
 }
 .admin-report-calculations__archive-summary::-webkit-details-marker {
   display: none;
@@ -1165,7 +1187,17 @@ body.admin-report-modal-open .bottom-nav {
   color: #ffb3b3;
 }
 .admin-report-calculations__percent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
   color: #ffb3b3 !important;
+}
+.admin-report-calculations__percent::before {
+  content: attr(data-rate-label);
+  color: #b98f8f;
+  font-size: 0.72em;
+  font-weight: 800;
 }
 .admin-report-calculations__field output {
   min-width: 0;
@@ -1302,7 +1334,22 @@ body.admin-report-modal-open .bottom-nav {
     font-size: 13px;
   }
   #adminReportCalcRakeCard .admin-report-calculations__field--triple {
-    grid-template-columns: minmax(92px, 1fr) minmax(58px, 0.4fr) minmax(54px, 0.36fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 24px;
+    gap: 3px 6px;
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__field--triple > span:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__field--triple > input {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__field--triple > output {
+    grid-column: 2;
+    grid-row: 1;
+    height: auto;
   }
   #adminReportCalcCashCard .admin-report-calculations__input,
   #adminReportCalcRakeCard .admin-report-calculations__input,

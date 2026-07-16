@@ -156,7 +156,7 @@
             figuresRakeTotal += rakeAmount;
             figuresPercentTotal += percent;
             var out = figuresPercentOutputs && figuresPercentOutputs[index] ? figuresPercentOutputs[index] : null;
-            if (out) out.textContent = formatReportRubleNumber(percent);
+            if (out) out.textContent = input && String(input.value || "").trim() ? formatReportRubleNumber(percent) : "—";
           });
         }
         var totals = calculationWeekTotals || {};
@@ -355,9 +355,14 @@
           return b - a;
         });
         calculationsArchiveEl.hidden = sortedWeekStarts.length === 0;
-        calculationsArchiveEl.innerHTML = sortedWeekStarts.map(function (weekStart) {
-          return renderCalculationArchiveWeek(source, weekStart);
-        }).join("");
+        calculationsArchiveEl.innerHTML = sortedWeekStarts.length
+          ? '<details class="admin-report-calculations__archive-details admin-report-calculations__archive-details--root" open data-admin-report-calculation-archive-deferred="1">' +
+              '<summary class="admin-report-calculations__archive-summary"><span>Архив</span><b class="admin-report-calculations__archive-summary-action">Закрыть архив</b></summary>' +
+              '<div class="admin-report-calculations__archive-inner">' + sortedWeekStarts.map(function (weekStart) {
+                return renderCalculationArchiveWeek(source, weekStart);
+              }).join("") + "</div>" +
+            "</details>"
+          : "";
       }
 
       function renderCalculationArchiveDeferred(hasArchive) {
