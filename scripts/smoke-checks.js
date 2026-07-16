@@ -1217,7 +1217,7 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     "R:300₽</td>",
     "100 000₽</td>",
     "<span class=\"schedule-freeroll-name\">Фриролл</span>",
-    "R:400₽ / A:800₽</td>",
+    "R:200₽ / A:400₽</td>",
     "<td>PKO/MKO</td>",
     "25 000₽</td>",
     "<td>PLO4</td>",
