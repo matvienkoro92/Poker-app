@@ -584,6 +584,26 @@
               <div class="logo__subtitle">Poker Club</div>
             </div>
           </button>
+          <button
+            type="button"
+            class="header-icon-btn header-crm-shortcut header-crm-btn header-crm-btn--hidden"
+            id="headerCrmBtn"
+            data-crm-open="player-crm"
+            title="Открыть ЦРМ"
+            aria-label="Открыть ЦРМ"
+            aria-hidden="true"
+            hidden
+            disabled
+          >
+            <svg class="header-crm-shortcut__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 19V5m0 14h16M7.5 15.5l3-3 2.8 2.1 4.7-6.1" />
+              <circle cx="7.5" cy="15.5" r="1" />
+              <circle cx="10.5" cy="12.5" r="1" />
+              <circle cx="13.3" cy="14.6" r="1" />
+              <circle cx="18" cy="8.5" r="1" />
+            </svg>
+            <span class="header-crm-shortcut__label">CRM</span>
+          </button>
           <div class="header-actions">
             <div class="header-profile-summary">
               <span class="header-greeting-wrap">
@@ -618,25 +638,6 @@
                     <span class="header-menu-action__body">
                       <span class="header-menu-action__title">Отчёт за смену</span>
                       <span class="header-menu-action__hint">Админская форма</span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    class="header-menu-action header-menu-action--crm header-crm-btn header-crm-btn--hidden"
-                    id="headerCrmBtn"
-                    data-crm-open="player-crm"
-                    title="ЦРМ"
-                    aria-label="Открыть ЦРМ"
-                    aria-hidden="true"
-                    role="menuitem"
-                    data-header-menu-close
-                    hidden
-                    disabled
-                  >
-                    <span class="header-menu-action__icon header-crm-btn__icon" aria-hidden="true">📊</span>
-                    <span class="header-menu-action__body">
-                      <span class="header-menu-action__title">ЦРМ</span>
-                      <span class="header-menu-action__hint">Дашборд игроков</span>
                     </span>
                   </button>
                   <button
