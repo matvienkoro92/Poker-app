@@ -3,6 +3,11 @@ function initPlayerCrmChartsRuntime(deps) {
   var state = deps.state || {};
   var esc = deps.esc || function (value) { return String(value == null ? "" : value); };
   var intFmt = deps.intFmt || function (value) { return String(Number(value) || 0); };
+  var hiddenChartSeries = { deposits: true, depositAmount: true, crmMessages: true, generalMessages: true };
+
+  function visibleChartSeries(series) {
+    return (Array.isArray(series) ? series : []).filter(function (item) { return !hiddenChartSeries[item && item.key]; });
+  }
 
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
@@ -59,7 +64,7 @@ function initPlayerCrmChartsRuntime(deps) {
 
   function enabledChartSeries() {
     var chart = state.chartAnalytics || {};
-    var series = Array.isArray(chart.series) ? chart.series : [];
+    var series = visibleChartSeries(chart.series);
     return series.filter(function (s) {
       return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;
     });
@@ -115,7 +120,7 @@ function initPlayerCrmChartsRuntime(deps) {
   function renderChartAnalytics() {
     var chart = state.chartAnalytics || {};
     var labels = Array.isArray(chart.labels) ? chart.labels : [];
-    var series = Array.isArray(chart.series) ? chart.series : [];
+    var series = visibleChartSeries(chart.series);
     if (!labels.length || !series.length) return "<div class=\"player-crm__timeline-item\">График появится после загрузки данных.</div>";
     var enabledSeries = series.filter(function (s) {
       return s.hasDates !== false && state.chartSeriesEnabled[s.key] !== false;

@@ -10,7 +10,7 @@
     period: "current_week",
     dateFrom: "",
     dateTo: "",
-    chartPeriod: "30",
+    chartPeriod: "current_week",
     chartDateFrom: "",
     chartDateTo: "",
     filter: "has_bot",
@@ -1467,9 +1467,21 @@
   function syncTabs() {
     var tabs = document.querySelectorAll(".player-crm__tab[data-crm-tab]");
     var panels = document.querySelectorAll(".player-crm__tab-panel[data-crm-panel]");
+    var statsStates = ["stats", "overview", "players", "blocked"];
+    var playerStates = ["players", "blocked"];
     tabs.forEach(function (tab) {
-      tab.classList.toggle("player-crm__tab--active", tab.getAttribute("data-crm-tab") === state.tab);
+      var target = tab.getAttribute("data-crm-tab");
+      var level = tab.getAttribute("data-crm-nav-level") || "main";
+      var active = target === state.tab;
+      if (level === "main" && target === "stats") active = statsStates.indexOf(state.tab) !== -1;
+      if (level === "stats" && target === "players") active = playerStates.indexOf(state.tab) !== -1;
+      tab.classList.toggle("player-crm__tab--active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
     });
+    var statsSubtabs = document.querySelector("[data-crm-stats-subtabs]");
+    var playerSubtabs = document.querySelector("[data-crm-player-subtabs]");
+    if (statsSubtabs) statsSubtabs.hidden = statsStates.indexOf(state.tab) === -1;
+    if (playerSubtabs) playerSubtabs.hidden = playerStates.indexOf(state.tab) === -1;
     panels.forEach(function (panel) {
       panel.classList.toggle("player-crm__tab-panel--active", panel.getAttribute("data-crm-panel") === state.tab);
     });
@@ -1779,16 +1791,22 @@
     var current = selectedPeriodRange();
     if (!current || (state.period !== "current_week" && state.period !== "current_month")) return null;
     var from = new Date(current.from + "T00:00:00.000Z");
+    var to = new Date(current.to + "T00:00:00.000Z");
+    var elapsedDays = Math.max(0, Math.round((to.getTime() - from.getTime()) / 86400000));
     if (state.period === "current_week") {
-      var previousTo = new Date(from.getTime() - 86400000);
-      var previousFrom = new Date(previousTo.getTime() - 6 * 86400000);
+      var previousFrom = new Date(from.getTime() - 7 * 86400000);
+      var previousTo = new Date(previousFrom.getTime() + elapsedDays * 86400000);
       return { from: previousFrom.toISOString().slice(0, 10), to: previousTo.toISOString().slice(0, 10), label: "Прошлая неделя" };
     }
     var year = from.getUTCFullYear();
     var month = from.getUTCMonth();
+    var previousMonthFrom = new Date(Date.UTC(year, month - 1, 1));
+    var previousMonthLastDay = new Date(Date.UTC(year, month, 0));
+    var previousMonthTo = new Date(previousMonthFrom.getTime() + elapsedDays * 86400000);
+    if (previousMonthTo > previousMonthLastDay) previousMonthTo = previousMonthLastDay;
     return {
-      from: new Date(Date.UTC(year, month - 1, 1)).toISOString().slice(0, 10),
-      to: new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10),
+      from: previousMonthFrom.toISOString().slice(0, 10),
+      to: previousMonthTo.toISOString().slice(0, 10),
       label: "Прошлый месяц",
     };
   }
@@ -3062,6 +3080,11 @@
       button.classList.toggle("player-crm__period-tab--active", active);
       button.setAttribute("aria-selected", active ? "true" : "false");
     });
+    document.querySelectorAll("[data-crm-chart-period-tab]").forEach(function (button) {
+      var active = button.getAttribute("data-crm-chart-period-tab") === (state.chartPeriod || "current_week");
+      button.classList.toggle("player-crm__period-tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
     if (from) {
       from.value = state.dateFrom || "";
       from.max = state.dateTo || "";
@@ -3467,6 +3490,20 @@
           window.requestAnimationFrame(function () {
             var rangeButton = document.getElementById("playerCrmDateRangeBtn");
             if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("stats");
+          });
+        }
+      });
+    });
+    document.querySelectorAll("[data-crm-chart-period-tab]").forEach(function (periodButton) {
+      periodButton.addEventListener("click", function () {
+        state.chartPeriod = periodButton.getAttribute("data-crm-chart-period-tab") || "current_week";
+        if (state.chartPeriod === "custom") setDefaultChartDates();
+        syncPeriodInputs();
+        loadCrmData("chart");
+        if (state.chartPeriod === "custom") {
+          window.requestAnimationFrame(function () {
+            var rangeButton = document.getElementById("playerCrmChartDateRangeBtn");
+            if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("chart");
           });
         }
       });

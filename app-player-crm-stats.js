@@ -144,20 +144,10 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     function previousDailyPokerUnique() {
       if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
-      var currentRange = selectedPeriodRange();
-      if (!currentRange || !currentRange.from) return null;
-      var currentFrom = new Date(currentRange.from + "T00:00:00.000Z");
-      var previousFrom;
-      var previousTo;
-      if (state.period === "current_week") {
-        previousTo = new Date(currentFrom.getTime() - 86400000);
-        previousFrom = new Date(previousTo.getTime() - 6 * 86400000);
-      } else {
-        previousFrom = new Date(Date.UTC(currentFrom.getUTCFullYear(), currentFrom.getUTCMonth() - 1, 1));
-        previousTo = new Date(Date.UTC(currentFrom.getUTCFullYear(), currentFrom.getUTCMonth(), 0));
-      }
-      var fromKey = previousFrom.toISOString().slice(0, 10);
-      var toKey = previousTo.toISOString().slice(0, 10);
+      var comparisonRange = state.periodComparison && state.periodComparison.range;
+      if (!comparisonRange || !comparisonRange.from || !comparisonRange.to) return null;
+      var fromKey = comparisonRange.from;
+      var toKey = comparisonRange.to;
       var users = {};
       (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
         var date = String(row && row.date || "");

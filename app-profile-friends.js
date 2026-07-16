@@ -47,6 +47,7 @@ function pokerUpdateProfileFriendsCount(count) {
 var POKER_FRIENDS_UNREAD_KEY = "poker_profile_friends_unread_v1";
 var POKER_FRIENDS_SEEN_KEY = "poker_profile_friends_seen_v1";
 var POKER_FRIENDS_STABLE_CACHE_KEY = "poker_profile_friends_stable_v2";
+var POKER_FRIENDS_PREVIEW_CACHE_KEY = "poker_profile_friends_preview_v1";
 
 function pokerFriendsReadJson(key, fallback) {
   try {
@@ -469,6 +470,7 @@ function initProfileFriends() {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) throw new Error("friends_preview_invalid");
+        writeFriendsPreviewData(data);
         return data;
       })
       .finally(function () { friendsPreviewFetchPromise = null; });
@@ -1087,6 +1089,26 @@ function initProfileFriends() {
     pokerFriendsWriteJson(POKER_FRIENDS_STABLE_CACHE_KEY + ":" + viewer, data);
   }
 
+  function readFriendsPreviewData() {
+    var viewer = profileFriendsViewerAccountId();
+    if (!viewer) return null;
+    var data = pokerFriendsReadJson(POKER_FRIENDS_PREVIEW_CACHE_KEY + ":" + viewer, null);
+    return data && data.ok === true && Array.isArray(data.friends) ? data : null;
+  }
+
+  function writeFriendsPreviewData(data) {
+    var viewer = profileFriendsViewerAccountId();
+    if (!viewer || !data || data.ok !== true || !Array.isArray(data.friends)) return;
+    pokerFriendsWriteJson(POKER_FRIENDS_PREVIEW_CACHE_KEY + ":" + viewer, {
+      ok: true,
+      preview: true,
+      friends: data.friends.slice(0, 3),
+      friendCount: Math.max(0, Number(data.friendCount != null ? data.friendCount : data.friends.length) || 0),
+      incomingCount: Math.max(0, Number(data.incomingCount) || 0),
+      cachedAt: Date.now(),
+    });
+  }
+
   function stableFriendsData(data) {
     if (data && data.ok) {
       friendsDataCache = data;
@@ -1486,21 +1508,23 @@ function initProfileFriends() {
       return;
     }
     friendsPreviewRetryCount = 0;
-    var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
+    var previewCache = readFriendsPreviewData();
+    var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok) || !!previewCache;
     if (!previewHadCachedData) {
       friendsDataCache = readStableFriendsData();
       previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok);
     }
     if (previewHadCachedData) {
-      renderIncomingNotice(Array.isArray(friendsDataCache.incoming) ? friendsDataCache.incoming.length : 0);
-      renderFriendsPreview(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends : []);
+      var cachedPreview = friendsDataCache && friendsDataCache.ok ? friendsDataCache : previewCache;
+      renderIncomingNotice(cachedPreview.incomingCount != null ? cachedPreview.incomingCount : (Array.isArray(cachedPreview.incoming) ? cachedPreview.incoming.length : 0));
+      renderFriendsPreview(Array.isArray(cachedPreview.friends) ? cachedPreview.friends : []);
       try {
-        pokerUpdateProfileFriendsCount(Array.isArray(friendsDataCache.friends) ? friendsDataCache.friends.length : 0);
+        pokerUpdateProfileFriendsCount(cachedPreview.friendCount != null ? cachedPreview.friendCount : (Array.isArray(cachedPreview.friends) ? cachedPreview.friends.length : 0));
       } catch (eCachedPreviewCount) {}
     } else {
       renderPreviewLoading();
     }
-    fetchFriendsData()
+    fetchFriendsPreviewData()
       .then(function (data) {
         if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!data || !data.ok) {
@@ -1514,7 +1538,7 @@ function initProfileFriends() {
         renderIncomingNotice(incomingCount);
         renderFriendsPreview(Array.isArray(data.friends) ? data.friends : []);
         try {
-          pokerUpdateProfileFriendsCount(Array.isArray(data.friends) ? data.friends.length : 0);
+        pokerUpdateProfileFriendsCount(data.friendCount != null ? data.friendCount : (Array.isArray(data.friends) ? data.friends.length : 0));
         } catch (ePreviewCount) {}
       })
       .catch(function () {
