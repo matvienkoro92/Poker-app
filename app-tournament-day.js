@@ -3,7 +3,7 @@ var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-150k-
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-300k.webp";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-100k.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-170k.webp";
-var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-300k.webp";
+var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-10-tickets-entry-1.webp";
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-pko-progressive-300k.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
@@ -63,10 +63,10 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   },
   {
     name: "Фриролл",
-    buyin: "0₽ · R:200₽ / A:400₽",
-    guarantee: "300 000₽",
+    buyin: "1₽ · R:200₽ / A:400₽",
+    guarantee: "10 билетов по 10 000₽ каждый",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Фриролл субботы — ребай 200 ₽, аддон 400 ₽, гарантия 300 000 ₽",
+    bannerAlt: "Poker21 Фриролл субботы — вход 1 ₽, ребай 200 ₽, аддон 400 ₽, 10 билетов по 10 000 ₽ каждый",
     bannerWidth: 640,
     bannerHeight: 915
   }
@@ -87,7 +87,7 @@ var HOME_FREEROLL_SCHEDULE = [
     guarantee: "9 000₽",
     desc: "Ежедневный фриролл-сателлит в Poker21. Старт в 16:00 МСК, вход 0₽, гарантия 9 000₽: 3 билета по 3 000₽."
   },
-  { day: "Сб", dow: 6, title: "Фриролл 300 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", guarantee: "300 000₽", desc: "Субботний фриролл в Poker21. Старт в 18:00 МСК, вход 0₽, R:200₽ / A:400₽, гарантия 300 000₽." }
+  { day: "Сб", dow: 6, title: "10 билетов по 10 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", guarantee: "10 билетов по 10 000₽ каждый", desc: "Субботний турнир в Poker21. Старт в 18:00 МСК, вход 1₽, R:200₽ / A:400₽, приз: 10 билетов по 10 000₽ каждый." }
 ];
 
 var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [];
@@ -106,7 +106,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "50 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 89, levels: "12/10/8" },
   { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери", buyin: "300₽", rebuy: "R:300₽", guarantee: "100 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:200₽ / A:400₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "1₽", rebuy: "R:200₽ / A:400₽", guarantee: "10 билетов по 10 000₽ каждый", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 0, category: "Турнир недели", name: "PKO Нокаут Прогрессив", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту на 1 000 000₽", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 36 },
@@ -1855,8 +1855,8 @@ function updateTournamentDayBlock() {
   }
   function getFreerollTournamentInfo(item) {
     if (!item) return TOURNAMENT_OF_DAY_BY_WEEKDAY[6];
-    var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "0₽ · R:200₽ / A:400₽" : "0₽";
-    var fallbackGuarantee = item.daily ? "9 000₽" : "300 000₽";
+    var fallbackBuyin = item.room === "Poker21" && item.dow === 6 ? "1₽ · R:200₽ / A:400₽" : "0₽";
+    var fallbackGuarantee = item.daily ? "9 000₽" : "10 билетов по 10 000₽ каждый";
     return {
       name: item.room === "X-poker" ? "Фриролл X-poker" : "Фриролл",
       buyin: item.buyin || fallbackBuyin,

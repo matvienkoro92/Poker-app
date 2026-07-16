@@ -995,6 +995,7 @@
       rows.map(function (item) {
         var expanded = expandedTournamentParticipantsId === item.id;
         var applicationCount = Number(item.approved || 0) + Number(item.pending || 0);
+        var canDeleteTournament = applicationCount <= 1;
         var signupAvailable = item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
         var participantRows = expanded && data.tournamentId === item.id ? (data.entries || []).filter(function (entry) { return entry && entry.status !== "rejected"; }) : [];
         var participantHtml = expanded
@@ -1023,7 +1024,7 @@
               '</span>' +
             '</button>';
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
-          (data.isAdmin && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
+          (data.isAdmin && canDeleteTournament && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           tournamentOptionHtml +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
