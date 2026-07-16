@@ -167,8 +167,8 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_BUBBLE_BONUSES = { 1: "500 ₽", 2: "500 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "500 ₽" };
-var HOME_TOURNAMENT_BUBBLE_COUNTS = { 1: 2, 2: 2, 3: 1, 4: 1, 5: 2 };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "1000 ₽" };
+var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 };
 var HOME_TOURNAMENT_BANNER_VERSION = "2026071401";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 
@@ -736,6 +736,13 @@ function renderHomeTournamentWeekList(activeWeekday) {
 }
 
 function syncHomeTournamentBonusAvailability(activeWeekday) {
+  var bonusesSection = document.querySelector(".home-tournament-bonuses");
+  var isFreeroll = Number(activeWeekday) === 6;
+  if (bonusesSection) {
+    bonusesSection.hidden = isFreeroll;
+    bonusesSection.style.display = isFreeroll ? "none" : "";
+    bonusesSection.setAttribute("aria-hidden", isFreeroll ? "true" : "false");
+  }
   var league2Active = activeWeekday === 2;
   var leagueNum = league2Active ? 2 : 1;
   var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
@@ -784,7 +791,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
 var HOME_TOURNAMENT_BONUS_INFO = {
   "four-kind": { title: "Бонус за каре", amount: "1000 ₽" },
   "straight-flush": { title: "Бонус за стрит-флеш", amount: "2500 ₽" },
-  "royal-flush": { title: "Бонус за роял", amount: "5000 ₽" }
+  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" }
 };
 
 function fillHomeTournamentBonusModal(kind) {

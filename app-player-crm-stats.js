@@ -159,6 +159,9 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     var raffleStats = summary && summary.raffles && typeof summary.raffles === "object" ? summary.raffles : null;
     var raffleStatsAvailable = !!(raffleStats && raffleStats.available !== false);
+    var raffleAdminBreakdown = raffleStats && raffleStats.issuedByAdminBreakdown || {};
+    var annaRaffleBreakdown = raffleAdminBreakdown.anna || {};
+    var vikaRaffleBreakdown = raffleAdminBreakdown.vika || {};
     var guestConversionRate = exactVisits ? Math.max(0, Number(visitsSummary.guestConversionRate) || 0) : 0;
     var guestConversionText = exactVisits
       ? String(guestConversionRate).replace(".", ",") + "%"
@@ -213,7 +216,11 @@ function initPlayerCrmStatsRuntime(deps) {
       ].concat(raffleStatsAvailable ? [
         ["Кем выдано", ""],
         ["Аня", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.anna || 0)],
+        ["Кеш", money(annaRaffleBreakdown.cash || 0), null, "subdetail"],
+        ["Билеты", money(annaRaffleBreakdown.ticket || 0), null, "subdetail"],
         ["Вика", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.vika || 0)],
+        ["Кеш", money(vikaRaffleBreakdown.cash || 0), null, "subdetail"],
+        ["Билеты", money(vikaRaffleBreakdown.ticket || 0), null, "subdetail"],
       ] : [])],
     ];
     function periodMetricRow(it) {

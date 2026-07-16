@@ -681,6 +681,15 @@ button.player-crm__period-metric:focus-visible {
 .player-crm__period-metric-details .player-crm__period-metric-detail--total b {
   color: #e7edf4;
 }
+.player-crm__period-metric .player-crm__period-metric-details .player-crm__period-metric-detail--subdetail {
+  padding-left: 10px;
+  color: #7f91a7;
+  font-size: clamp(7px, 0.88vw, 9px);
+}
+.player-crm__period-metric-details .player-crm__period-metric-detail--subdetail b {
+  color: #b7c4d3;
+  font-size: 1em;
+}
 .player-crm__period-metric-details b {
   flex: 0 0 auto;
   color: var(--text);
