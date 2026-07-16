@@ -105,6 +105,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var dailyPokerSource = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
     var dailyPokerStats = dailyPokerSource;
     var dailyPokerDebitedUsers = dailyPokerSource && Array.isArray(dailyPokerSource.debitedUsers) ? dailyPokerSource.debitedUsers.slice() : [];
+    var dailyPokerDebitRows = dailyPokerSource && Array.isArray(dailyPokerSource.dailyDebits) ? dailyPokerSource.dailyDebits.slice() : [];
     if (dailyPokerSource && state.period !== "all") {
       var dailyRange = selectedPeriodRange();
       var dailyUsers = {};
@@ -150,6 +151,21 @@ function initPlayerCrmStatsRuntime(deps) {
       });
       if (rows.length > 3) result.push(["Ещё " + intFmt(rows.length - 3), ""]);
       return result;
+    }
+    function adminDebitRows(rows) {
+      var totals = { "2144406710": 0, "1897001087": 0 };
+      var range = state.period !== "all" ? selectedPeriodRange() : null;
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        var date = String(row && row.date || "");
+        if (range && (date < range.from || date > range.to)) return;
+        var adminId = String(row && row.adminId || "").replace(/^tg_/, "");
+        if (Object.prototype.hasOwnProperty.call(totals, adminId)) totals[adminId] += Math.max(0, Number(row.amount) || 0);
+      });
+      return [
+        ["Кем выдано", ""],
+        ["Аня", money(totals["2144406710"])],
+        ["Вика", money(totals["1897001087"])],
+      ];
     }
     var raffleStats = summary && summary.raffles && typeof summary.raffles === "object" ? summary.raffles : null;
     var raffleStatsAvailable = !!(raffleStats && raffleStats.available !== false);
@@ -197,7 +213,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
         ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—"],
-      ].concat(compactPeopleRows(dailyPokerDebitedUsers, "amount", "Кем списано"))],
+      ].concat(adminDebitRows(dailyPokerDebitRows))],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
