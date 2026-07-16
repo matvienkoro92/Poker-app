@@ -174,6 +174,12 @@ function initPlayerCrmStatsRuntime(deps) {
         money: true,
       };
     }
+    var dailyPokerCreditedAmount = dailyPokerStats
+      ? (state.period === "all" ? Number(dailyPokerStats.bonusAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceCredited) || 0)
+      : null;
+    var dailyPokerDebitedAmount = dailyPokerStats
+      ? (state.period === "all" ? Number(dailyPokerStats.debitedAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceDebited) || 0)
+      : null;
     function previousDailyPokerUnique() {
       if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
       var comparisonRange = state.periodComparison && state.periodComparison.range;
@@ -273,8 +279,8 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
-        ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
-        ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—", null, "highlight"],
+        ["Бонусов начислено", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—"],
+        ["Бонусов списано", dailyPokerDebitedAmount != null ? money(dailyPokerDebitedAmount) : "—", null, "highlight"],
       ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerBonusBalance],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],

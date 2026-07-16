@@ -1573,6 +1573,8 @@
           rangeTotalSpinsEnd: Math.max(0, Number(data.rangeTotalSpinsEnd != null ? data.rangeTotalSpinsEnd : (stats.totalSpins != null ? stats.totalSpins : data.totalSpins)) || 0),
           bonusBalanceStart: Math.max(0, Number(data.bonusBalanceStart) || 0),
           bonusBalanceEnd: Math.max(0, Number(data.bonusBalanceEnd) || 0),
+          bonusBalanceCredited: Math.max(0, Number(data.bonusBalanceCredited) || 0),
+          bonusBalanceDebited: Math.max(0, Number(data.bonusBalanceDebited) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
           dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),

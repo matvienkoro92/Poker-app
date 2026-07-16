@@ -851,6 +851,9 @@ button.player-crm__period-metric:focus-visible {
     font-size: clamp(7px, 5.5cqw, 10px);
   }
 }
+.player-crm__period-metric--engagement .player-crm__period-balance {
+  left: 46%;
+}
 .player-crm__period-metric .player-crm__period-balance b {
   color: #eaf3fb;
   font-size: 1.2em;
