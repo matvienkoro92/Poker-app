@@ -155,7 +155,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
         ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
         ["Итого", intFmt(statPokerPlusNet), null, "total"],
-      ], "row-start"],
+      ]],
       ["Бот", intFmt(statBotNet), "data-crm-bot-modal", "engagement", [
         ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
@@ -170,7 +170,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
-      ], "row-start"],
+      ]],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", null, "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
