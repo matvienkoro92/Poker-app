@@ -142,16 +142,6 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
-    function compactPeopleRows(rows, amountKey, heading) {
-      rows = Array.isArray(rows) ? rows.filter(function (row) { return Number(row && row[amountKey]) > 0; }) : [];
-      if (!rows.length) return [];
-      var result = [[heading, ""]];
-      rows.slice(0, 3).forEach(function (row) {
-        result.push([String(row.displayName || row.name || row.telegramUsername || row.pokerPlusNickname || row.id || "Игрок"), money(row[amountKey])]);
-      });
-      if (rows.length > 3) result.push(["Ещё " + intFmt(rows.length - 3), ""]);
-      return result;
-    }
     function adminDebitRows(rows) {
       var totals = { "2144406710": 0, "1897001087": 0 };
       var range = state.period !== "all" ? selectedPeriodRange() : null;
@@ -220,7 +210,11 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—"],
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
-      ].concat(compactPeopleRows(raffleStatsAvailable ? raffleStats.issuedRecipients : [], "totalAmount", "Кем выдано"))],
+      ].concat(raffleStatsAvailable ? [
+        ["Кем выдано", ""],
+        ["Аня", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.anna || 0)],
+        ["Вика", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.vika || 0)],
+      ] : [])],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";
