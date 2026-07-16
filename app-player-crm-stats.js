@@ -266,7 +266,7 @@ function initPlayerCrmStatsRuntime(deps) {
       if (!rows.length) return "";
       return "<section class=\"player-crm__analytics-breakdown\"><h3>" + esc(title) + "</h3>" +
         "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__analytics-table\"><thead><tr>" +
-        "<th>Раздел / действие</th><th>Гости</th><th>Зарегистрированные</th><th>Уникальные</th><th>Действия</th>" +
+        "<th>Раздел / действие</th><th>Гости</th><th>Зарегистрированные</th><th>Уникальные</th><th>Открытия</th>" +
         "</tr></thead><tbody>" + rows.map(function (row) {
           return "<tr><td>" + esc(analyticsLabels[row.name] || row.name || "—") + "</td>" +
             "<td>" + esc(intFmt(row.guestInstallations)) + "</td><td>" + esc(intFmt(row.registeredVisitors)) + "</td>" +

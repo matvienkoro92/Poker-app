@@ -23,6 +23,7 @@
     dailyPokerWinnersLoading: false,
     dailyPokerWinners: null,
     rafflesModalOpen: false,
+    raffleRecipientsLoading: false,
     blockedUsers: [],
     blockedSearch: "",
     registeredAccounts: [],
@@ -1503,7 +1504,7 @@
     state.dailyPokerStatsLoading = true;
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
-    fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1", { cache: "no-store" })
+    fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1&summary=1", { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
         if (!data || data.ok === false) return;
@@ -1513,7 +1514,7 @@
           totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
-          dailyDebits: Array.isArray(data.dailyDebits) ? data.dailyDebits : [],
+          dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),
           debitedUsers: Array.isArray(data.debitedUsers) ? data.debitedUsers : [],
           daily: Array.isArray(data.dailyStats) ? data.dailyStats : [],
         };
@@ -1618,6 +1619,10 @@
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
     var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients : [];
     if (subtitleEl) subtitleEl.textContent = periodLabel() + " · выдано " + money(raffleStats && raffleStats.issuedPrizeAmount || 0);
+    if (state.raffleRecipientsLoading) {
+      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Загружаю список…</div>";
+      return;
+    }
     if (!recipients.length) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период выданных призов нет.</div>";
       return;
@@ -1625,10 +1630,34 @@
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\"><div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || "—";
-      return "<article class=\"player-crm__daily-winner\"><div class=\"player-crm__daily-winner-head\"><strong>" + esc(user.name || pokerName) + "</strong><b>" + esc(money(user.totalAmount || 0)) + "</b></div>" +
-        "<div class=\"player-crm__daily-winner-grid\"><span>Telegram <b>" + esc(telegram) + "</b></span><span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
-        "<span>Кеш <b>" + esc(money(user.cashAmount || 0)) + "</b></span><span>Билеты <b>" + esc(money(user.ticketAmount || 0)) + "</b></span><span>Призы <b>" + esc((user.prizes || []).join(", ") || "—") + "</b></span></div></article>";
+      return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient\">" +
+        "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
+        "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
+        "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+        "<span>Кеш <b>" + esc(money(user.cashAmount || 0)) + "</b></span>" +
+        "<span>Билеты <b>" + esc(money(user.ticketAmount || 0)) + "</b></span>" +
+        "<b class=\"player-crm__raffle-recipient-total\">" + esc(money(user.totalAmount || 0)) + "</b></article>";
     }).join("") + "</div></div>";
+  }
+
+  function loadRaffleRecipients() {
+    var raffleStats = state.statsSummary && state.statsSummary.raffles;
+    if (!raffleStats || raffleStats.recipientsPending !== true || state.raffleRecipientsLoading) return;
+    var base = getApiBaseSafe();
+    if (!base) return;
+    state.raffleRecipientsLoading = true;
+    renderRafflesModal();
+    fetch(base + "/api/player-crm" + crmQuery({ mode: "raffles" }), { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || data.ok === false || !data.raffles) return;
+        state.statsSummary.raffles = data.raffles;
+      })
+      .catch(function () {})
+      .then(function () {
+        state.raffleRecipientsLoading = false;
+        renderRafflesModal();
+      });
   }
 
   function closeRafflesModal() {
@@ -3229,6 +3258,7 @@
       if (e.target.closest("[data-crm-raffles-modal]")) {
         state.rafflesModalOpen = true;
         renderRafflesModal();
+        loadRaffleRecipients();
         return;
       }
       if (e.target.closest("[data-crm-pokerplus-modal]")) {
