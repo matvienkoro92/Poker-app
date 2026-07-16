@@ -43,7 +43,6 @@
                 <button type="button" data-crm-period-tab="all">За всё время</button>
                 <button type="button" data-crm-period-tab="custom">Период</button>
               </div>
-              <span class="player-crm__period-range" id="playerCrmPeriodRange" aria-live="polite">Текущая неделя</span>
             </div>
             <div class="player-crm__period player-crm__date-field player-crm__date-range-field">
               <span>Даты</span>
@@ -57,6 +56,11 @@
               </button>
               <div class="player-crm__range-calendar" id="playerCrmDateRangeCalendar" data-crm-date-range-popover="stats" hidden></div>
             </div>
+          </div>
+          <div class="player-crm__selected-period" aria-live="polite">
+            <strong id="playerCrmPeriodName">Текущая неделя</strong>
+            <span class="player-crm__period-range" id="playerCrmPeriodRange">—</span>
+            <button type="button" class="player-crm__selected-period-refresh" data-crm-refresh-stats>Обновить данные</button>
           </div>
 
           <div class="player-crm__stats" id="playerCrmStats">

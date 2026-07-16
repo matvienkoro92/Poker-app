@@ -1541,8 +1541,8 @@
     }
   }
 
-  function loadDailyPokerStats() {
-    if (state.dailyPokerStats || state.dailyPokerStatsLoading) return;
+  function loadDailyPokerStats(force) {
+    if ((!force && state.dailyPokerStats) || state.dailyPokerStatsLoading) return;
     var base = getApiBaseSafe();
     if (!base) return;
     state.dailyPokerStatsLoading = true;
@@ -1599,13 +1599,31 @@
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период данных нет.</div>";
       return;
     }
-    var debitsHtml = debitedUsers.length ? "<section class=\"player-crm__daily-debits\"><h3>Кем сколько списано</h3><div class=\"player-crm__daily-winners-list\">" + debitedUsers.map(function (user) {
+    var debitsHtml = debitedUsers.length ? "<section class=\"player-crm__daily-debits\"><h3>Кем сколько списано</h3><div class=\"player-crm__daily-winners-list\">" + debitedUsers.map(function (user, index) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || user.pokerPlusName || "—";
-      return "<article class=\"player-crm__daily-winner\"><div class=\"player-crm__daily-winner-head\"><strong>" + esc(user.displayName || pokerName) + "</strong><b>" + esc(money(user.amount || 0)) + "</b></div>" +
-        "<div class=\"player-crm__daily-winner-grid\"><span>Telegram <b>" + esc(telegram) + "</b></span><span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span></div></article>";
+      var issues = Array.isArray(user.issues) ? user.issues : [];
+      var adminNames = [];
+      var issueDates = [];
+      issues.forEach(function (issue) {
+        var adminId = String(issue && issue.adminId || "").replace(/^tg_/, "");
+        var adminName = adminId === "2144406710" ? "Аня" : adminId === "1897001087" ? "Вика" : adminId === "388008256" ? "Роман" : (adminId || "—");
+        var issueDate = String(issue && issue.date || "");
+        var dateParts = issueDate.split("-");
+        var dateLabel = dateParts.length === 3 ? dateParts[2] + "." + dateParts[1] + "." + dateParts[0] : (issueDate || "—");
+        if (adminNames.indexOf(adminName) === -1) adminNames.push(adminName);
+        if (issueDates.indexOf(dateLabel) === -1) issueDates.push(dateLabel);
+      });
+      return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__daily-debit\">" +
+        "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
+        "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.displayName || pokerName) + "</strong>" +
+        "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
+        "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+        "<span>Выдал <b>" + esc(adminNames.join(", ") || "—") + "</b></span>" +
+        "<span>Дата выдачи <b>" + esc(issueDates.join(", ") || "—") + "</b></span>" +
+        "<b class=\"player-crm__raffle-recipient-total\">" + esc(money(user.amount || 0)) + "</b></article>";
     }).join("") + "</div></section>" : "";
-    var winnersHtml = winners.length ? "<section><h3>Победители</h3><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
+    var winnersHtml = winners.length ? "<details class=\"player-crm__daily-winners-spoiler\"><summary>Победители <b>" + esc(intFmt(winners.length)) + "</b></summary><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
       var telegram = winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = winner.pokerPlusNickname || winner.pokerPlusName || "—";
       return "<article class=\"player-crm__daily-winner\">" +
@@ -1620,7 +1638,7 @@
           "<span>Бонусы <b>" + esc(money(winner.bonusTotal || 0)) + "</b></span>" +
           "<span>Всего <b>" + esc(money(winner.totalPrizeAmount || 0)) + "</b></span>" +
         "</div></article>";
-    }).join("") + "</div></section>" : "";
+    }).join("") + "</div></details>" : "";
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + debitsHtml + winnersHtml + "</div>";
   }
 
@@ -3112,6 +3130,7 @@
   function syncPeriodInputs() {
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
+    var periodName = document.getElementById("playerCrmPeriodName");
     var periodRange = document.getElementById("playerCrmPeriodRange");
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     var chartFrom = document.getElementById("playerCrmChartDateFrom");
@@ -3140,6 +3159,10 @@
     });
     syncCrmDateRangeControl("stats");
     if (!showDates) closeCrmDateRangePicker("stats");
+    if (periodName) {
+      var activePeriodButton = document.querySelector("[data-crm-period-tab].player-crm__period-tab--active");
+      periodName.textContent = activePeriodButton ? activePeriodButton.textContent : "Выбранный период";
+    }
     if (periodRange) {
       var rangeLabel = periodRangeLabel();
       periodRange.textContent = rangeLabel;
@@ -3216,6 +3239,11 @@
         }
         if (state.tab === "calculations") openCrmCalculations();
         if (state.tab === "blocked") renderBlockedList();
+        return;
+      }
+      if (e.target.closest("[data-crm-refresh-stats]")) {
+        loadDailyPokerStats(true);
+        loadCrmData("all");
         return;
       }
       if (e.target.closest("[data-crm-refresh-blocked]")) {
