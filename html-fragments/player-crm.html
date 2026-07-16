@@ -11,9 +11,11 @@
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="stats" data-crm-nav-level="main">Статистика</button>
       <button type="button" class="player-crm__tab" data-crm-tab="broadcast" data-crm-nav-level="main">Рассылки</button>
       <button type="button" class="player-crm__tab" data-crm-tab="links" data-crm-nav-level="main">Ссылки</button>
+      <button type="button" class="player-crm__tab" data-crm-tab="calculations" data-crm-nav-level="main">Расчёты</button>
     </nav>
 
     <nav class="player-crm__subtabs" data-crm-stats-subtabs aria-label="Подразделы статистики">
+      <div class="player-crm__subtabs-heading" aria-hidden="true"><span>Статистика</span><b>Подразделы</b></div>
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="stats" data-crm-nav-level="stats">Сводка</button>
       <button type="button" class="player-crm__tab" data-crm-tab="overview" data-crm-nav-level="stats">График</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players" data-crm-nav-level="stats">Игроки</button>
@@ -352,6 +354,12 @@
               <div class="player-crm__send-result player-crm__links-result" id="playerCrmLinksResult" aria-live="polite"></div>
             </div>
             <div class="player-crm__links-list" id="playerCrmLinksList"></div>
+          </div>
+        </section>
+
+        <section class="player-crm__tab-panel player-crm__calculations-panel" data-crm-panel="calculations">
+          <div class="player-crm__calculations-host" id="playerCrmCalculationsHost">
+            <div class="player-crm__notice player-crm__notice--loading">Расчёты загрузятся после открытия вкладки.</div>
           </div>
         </section>
       </main>

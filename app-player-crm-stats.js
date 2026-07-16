@@ -54,6 +54,17 @@ function initPlayerCrmStatsRuntime(deps) {
     var exactVisits = !!(visitsSummary && visitsSummary.exact);
     var analyticsSummary = summary && summary.analytics && typeof summary.analytics === "object" ? summary.analytics : null;
     var statRegistrations = summary ? Number(summary.registrations) || 0 : registrations.length;
+    var registrationRange = selectedPeriodRange();
+    var allRegisteredAccounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+    var registeredTotalNow = summary && summary.current && summary.current.registered != null
+      ? Number(summary.current.registered) || 0
+      : allRegisteredAccounts.length;
+    var registrationsAfterPeriod = registrationRange ? allRegisteredAccounts.filter(function (row) {
+      var linkedDate = String(row && row.linkedAt || "").slice(0, 10);
+      return linkedDate && linkedDate > registrationRange.to;
+    }).length : 0;
+    var registeredAtPeriodEnd = Math.max(0, registeredTotalNow - registrationsAfterPeriod);
+    var registeredAtPeriodStart = Math.max(0, registeredAtPeriodEnd - statRegistrations);
     var statPokerPlus = summary ? Number(summary.pokerPlus) || 0 : pokerPlusPeriodRows.length;
     var statPokerPlusUnlinked = summary ? Number(summary.pokerPlusUnlinked) || 0 : 0;
     var statPokerPlusNet = statPokerPlus - statPokerPlusUnlinked;
@@ -69,11 +80,17 @@ function initPlayerCrmStatsRuntime(deps) {
     function currentValue(key, fallback) {
       return current && current[key] != null ? Number(current[key]) || 0 : fallback;
     }
+    var pokerPlusTotalEnd = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
+    var pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
+    var botTotalEnd = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
+    var botTotalStart = Math.max(0, botTotalEnd - statBotNet);
+    var pushTotalEnd = currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length);
+    var pushTotalStart = Math.max(0, pushTotalEnd - statPushNet);
     var currentStats = [
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
-      ["Poker21 всего", currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0), "сейчас", "pokerplus-total"],
-      ["Bot доступен", currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length), "сейчас", "bot-reach"],
-      ["Push доступен", currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length), "сейчас", "push-reach"],
+      ["Poker21 всего", pokerPlusTotalEnd, "сейчас", "pokerplus-total"],
+      ["Bot доступен", botTotalEnd, "сейчас", "bot-reach"],
+      ["Push доступен", pushTotalEnd, "сейчас", "push-reach"],
     ];
     if (summaryRegistrationCounts) {
       registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
@@ -159,9 +176,9 @@ function initPlayerCrmStatsRuntime(deps) {
     function comparisonInfo(key, currentValue, explicitPrevious) {
       var comparison = state.periodComparison;
       if (!comparison || !comparison.label) return null;
-      var previous = explicitPrevious != null
-        ? Number(explicitPrevious)
-        : Number(comparison.metrics && comparison.metrics[key]);
+      var hasExplicitPrevious = explicitPrevious != null;
+      if (!hasExplicitPrevious && (!comparison.metrics || !Object.prototype.hasOwnProperty.call(comparison.metrics, key))) return null;
+      var previous = hasExplicitPrevious ? Number(explicitPrevious) : Number(comparison.metrics[key]);
       if (!Number.isFinite(previous)) return null;
       var current = Number(currentValue) || 0;
       var change = previous === 0 ? (current === 0 ? 0 : 100) : Math.round(((current - previous) / Math.abs(previous)) * 100);
@@ -210,32 +227,44 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
         ["Только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
         ["И Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
-      ], null, comparisonInfo("registrations", statRegistrations)],
+      ], null, comparisonInfo("registrations", statRegistrations), {
+        start: registeredAtPeriodStart,
+        end: registeredAtPeriodEnd,
+      }],
       ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", "engagement", [
         ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
         ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
         ["Итого", intFmt(statPokerPlusNet), null, "total"],
-      ], null, comparisonInfo("pokerPlus", statPokerPlusNet)],
+      ], null, comparisonInfo("pokerPlus", statPokerPlusNet), {
+        start: pokerPlusTotalStart,
+        end: pokerPlusTotalEnd,
+      }],
       ["Бот", intFmt(statBotNet), "data-crm-bot-modal", "engagement", [
         ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
         ["Итого", intFmt(statBotNet), null, "total"],
-      ], null, comparisonInfo("bot", statBotNet)],
+      ], null, comparisonInfo("bot", statBotNet), {
+        start: botTotalStart,
+        end: botTotalEnd,
+      }],
       ["Push", intFmt(statPushNet), "data-crm-push-modal", "engagement", [
         ["Подписки", "+" + intFmt(statPushSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],
         ["Итого", intFmt(statPushNet), null, "total"],
-      ], null, comparisonInfo("push", statPushNet)],
+      ], null, comparisonInfo("push", statPushNet), {
+        start: pushTotalStart,
+        end: pushTotalEnd,
+      }],
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
-        ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—"],
+        ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—", null, "highlight"],
       ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique())],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
-        ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—"],
+        ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—", null, "highlight"],
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
       ].concat(raffleStatsAvailable ? [
@@ -255,6 +284,7 @@ function initPlayerCrmStatsRuntime(deps) {
       var toneCls = it[3] ? " player-crm__period-metric--" + it[3] : "";
       var layoutCls = it[5] ? " player-crm__period-metric--" + it[5] : "";
       var comparison = it[6];
+      var balance = it[7];
       var comparisonHtml = "";
       if (comparison) {
         var change = Number(comparison.change) || 0;
@@ -272,8 +302,11 @@ function initPlayerCrmStatsRuntime(deps) {
           }).join("") + "</div>"
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
+      var balanceHtml = balance
+        ? "<span class=\"player-crm__period-balance\"><small>На начало периода <b>" + esc(intFmt(balance.start)) + "</b></small><small>На конец периода <b>" + esc(intFmt(balance.end)) + "</b></small></span>"
+        : "";
       return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + layoutCls + detailsCls + "\"" + actionAttr + ">" +
-        "<span>" + esc(it[0]) + "</span>" + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
+        "<span>" + esc(it[0]) + "</span>" + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + balanceHtml + details + "</" + tag + ">";
     }
     function currentCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");

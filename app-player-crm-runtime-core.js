@@ -24,6 +24,7 @@
     dailyPokerWinners: null,
     rafflesModalOpen: false,
     raffleRecipientsLoading: false,
+    raffleRecipientsSort: "tickets",
     blockedUsers: [],
     blockedSearch: "",
     registeredAccounts: [],
@@ -1487,6 +1488,34 @@
     });
   }
 
+  function openCrmCalculations() {
+    var host = document.getElementById("playerCrmCalculationsHost");
+    if (!host) return;
+    if (host.querySelector("[data-admin-report-panel='calculations']")) {
+      if (typeof window.pokerMountAdminReportCalculations === "function") window.pokerMountAdminReportCalculations(host);
+      return;
+    }
+    host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаю расчёты…</div>";
+    var ensureHtml = typeof window.pokerEnsureAdminReportModalHtml === "function"
+      ? window.pokerEnsureAdminReportModalHtml()
+      : Promise.resolve(true);
+    Promise.resolve(ensureHtml)
+      .then(function () {
+        if (typeof window.pokerEnsureLazyDomains === "function") {
+          return window.pokerEnsureLazyDomains(["admin-reports"], { styles: true, scripts: true });
+        }
+        return true;
+      })
+      .then(function () {
+        if (typeof window.pokerInitAdminReportModal === "function") window.pokerInitAdminReportModal();
+        if (typeof window.pokerMountAdminReportCalculations === "function" && window.pokerMountAdminReportCalculations(host)) return;
+        host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Расчёты недоступны для этого аккаунта.</div>";
+      })
+      .catch(function () {
+        host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Не удалось загрузить расчёты. Попробуйте открыть вкладку ещё раз.</div>";
+      });
+  }
+
   function adoptPendingShellTab() {
     var pending = String(window.__pokerPlayerCrmPendingTab || "").trim();
     if (!pending) return;
@@ -1632,7 +1661,14 @@
     }
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
-    var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients : [];
+    var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients.slice() : [];
+    var raffleSort = state.raffleRecipientsSort === "cash" ? "cash" : "tickets";
+    recipients.sort(function (a, b) {
+      var amountKey = raffleSort === "cash" ? "cashAmount" : "ticketAmount";
+      var amountDiff = Number(b && b[amountKey] || 0) - Number(a && a[amountKey] || 0);
+      if (amountDiff) return amountDiff;
+      return Number(b && b.totalAmount || 0) - Number(a && a.totalAmount || 0);
+    });
     if (subtitleEl) subtitleEl.textContent = periodLabel() + " · выдано " + money(raffleStats && raffleStats.issuedPrizeAmount || 0);
     if (state.raffleRecipientsLoading) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Загружаю список…</div>";
@@ -1642,10 +1678,15 @@
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период выданных призов нет.</div>";
       return;
     }
-    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\"><div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user) {
+    var sortHtml = "<div class=\"player-crm__raffle-sort\" role=\"group\" aria-label=\"Сортировка игроков\">" +
+      "<span>Сортировать</span>" +
+      "<button type=\"button\" data-crm-raffles-sort=\"tickets\" class=\"" + (raffleSort === "tickets" ? "is-active" : "") + "\">По билетам</button>" +
+      "<button type=\"button\" data-crm-raffles-sort=\"cash\" class=\"" + (raffleSort === "cash" ? "is-active" : "") + "\">По кешу</button></div>";
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + sortHtml + "<div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user, index) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || "—";
       return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient\">" +
+        "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
         "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
         "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
         "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
@@ -3173,6 +3214,7 @@
           if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
           else renderCrmTrackingLinks();
         }
+        if (state.tab === "calculations") openCrmCalculations();
         if (state.tab === "blocked") renderBlockedList();
         return;
       }
@@ -3296,6 +3338,12 @@
         return;
       }
       if (e.target.closest("[data-crm-close-raffles-modal]")) { closeRafflesModal(); return; }
+      var rafflesSortButton = e.target.closest("[data-crm-raffles-sort]");
+      if (rafflesSortButton) {
+        state.raffleRecipientsSort = rafflesSortButton.getAttribute("data-crm-raffles-sort") === "cash" ? "cash" : "tickets";
+        renderRafflesModal();
+        return;
+      }
       if (e.target.closest("[data-crm-general-messages-modal]")) {
         state.generalMessagesModalOpen = true;
         state.showAllGeneralMessagesModal = false;

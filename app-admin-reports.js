@@ -727,6 +727,8 @@ function initAdminReportModal() {
   }
 
   function canViewCalculationsReports() {
+    var crmHost = document.getElementById("playerCrmCalculationsHost");
+    if (crmHost && calculationsRoot && crmHost.contains(calculationsRoot)) return true;
     var users = [];
     try {
       var resolved = typeof getPokerResolvedTelegramUser === "function" ? getPokerResolvedTelegramUser() : null;
@@ -3597,6 +3599,17 @@ function initAdminReportModal() {
   }
   window.pokerOpenAdminReportModal = function () {
     return openModal();
+  };
+  window.pokerMountAdminReportCalculations = function (host) {
+    if (!host) return false;
+    var panel = document.querySelector("[data-admin-report-panel='calculations']");
+    if (!panel) return false;
+    host.innerHTML = "";
+    host.appendChild(panel);
+    panel.hidden = false;
+    panel.classList.add("admin-report-panel--active");
+    openCalculationsReports();
+    return true;
   };
   window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;
   btn.addEventListener("click", function (e) {
