@@ -1200,7 +1200,7 @@ add("Chat sender label hides Telegram login when a name exists", () =>
 add("Schedule keeps weekly, day and daily tournament order", () =>
   hasAll("html", [
     'data-view="schedule"',
-    'data-html-fragment="./html-fragments/schedule.html"',
+    'data-html-fragment="./html-fragments/schedule.html?v=3.001"',
     'data-html-fragment-view="schedule"',
   ]) &&
   !has("html", 'schedule-section--week-tournament') &&
@@ -1213,8 +1213,9 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     "<td>Турнир Тракториста</td>",
     "<td>Нокаут</td>",
     "<td>Четверг</td>",
-    "<td>Мистери+</td>",
-    "R:1 200₽</td>",
+    "<td>Мистери</td>",
+    "R:300₽</td>",
+    "100 000₽</td>",
     "<span class=\"schedule-freeroll-name\">Фриролл</span>",
     "R:400₽ / A:800₽</td>",
     "<td>PKO/MKO</td>",
@@ -1223,7 +1224,7 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
     "20:00</td>",
   ]) &&
   has("appTournamentDay", 'guarantee: "1 000 000₽"') &&
-  has("appTournamentDay", /buyin:\s*"1 200₽",\s*guarantee:\s*"220 000₽"/) &&
+  has("appTournamentDay", /buyin:\s*"300₽",\s*guarantee:\s*"100 000₽"/) &&
   !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
   !has("scheduleFragment", "Rebuy (19:00)")
 );
@@ -2297,7 +2298,7 @@ add("Secondary utility views are lazy-loaded from HTML fragments", () =>
     './html-fragments/cashout.html',
     'data-html-fragment-view="cashout"',
     'data-view="schedule"',
-    'data-html-fragment="./html-fragments/schedule.html"',
+    'data-html-fragment="./html-fragments/schedule.html?v=3.001"',
     'data-html-fragment-view="schedule"',
   ]) &&
   !has("html", 'id="bonusGameCards"') &&

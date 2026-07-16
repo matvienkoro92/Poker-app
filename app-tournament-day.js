@@ -1,7 +1,7 @@
 var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-mystery-bounty-130k.webp";
 var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-120k.webp";
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-250k.webp";
-var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-plus-220k.webp";
+var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-100k.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-130k.webp";
 var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-freeroll-200k.webp";
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-knockout-week-300k.webp";
@@ -44,11 +44,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Мистери+",
-    buyin: "1 200₽",
-    guarantee: "220 000₽",
+    name: "Мистери",
+    buyin: "300₽",
+    guarantee: "100 000₽",
     banner: HOME_TOURNAMENT_THURSDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Мистери+ четверга — призовые 220 000 ₽",
+    bannerAlt: "Poker21 Мистери четверга — вход 300 ₽, гарантия 100 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
@@ -104,7 +104,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "150 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут", buyin: "5 000₽", rebuy: "R:5 000₽", guarantee: "250 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "50 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 89, levels: "12/10/8" },
-  { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери+", buyin: "1 200₽", rebuy: "R:1 200₽", guarantee: "220 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери", buyin: "300₽", rebuy: "R:300₽", guarantee: "100 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "0₽", rebuy: "R:400₽ / A:800₽", guarantee: "10 билетов по 10 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 0, category: "Турнир недели", name: "Мистери", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },

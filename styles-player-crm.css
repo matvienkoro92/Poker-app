@@ -596,7 +596,7 @@ button.player-crm__period-metric:focus-visible {
 }
 .player-crm__period-metric strong {
   color: var(--text);
-  font-size: clamp(19px, 2.6vw, 25px);
+  font-size: clamp(34px, 4.8vw, 52px);
   line-height: 1;
   white-space: nowrap;
 }
@@ -696,7 +696,7 @@ button.player-crm__period-metric:focus-visible {
     font-size: clamp(11px, 5cqw, 14px);
   }
   .player-crm__period-metric > strong {
-    font-size: clamp(28px, 12cqw, 40px);
+    font-size: clamp(40px, 15cqw, 56px);
   }
   .player-crm__period-metric .player-crm__period-metric-details span,
   .player-crm__period-metric .player-crm__period-metric-details button {
@@ -712,7 +712,7 @@ button.player-crm__period-metric:focus-visible {
     font-size: clamp(12px, 3.4cqw, 15px);
   }
   .player-crm__period-metric > strong {
-    font-size: clamp(32px, 9cqw, 44px);
+    font-size: clamp(48px, 12cqw, 64px);
   }
   .player-crm__period-metric .player-crm__period-metric-details span,
   .player-crm__period-metric .player-crm__period-metric-details button {
@@ -2359,19 +2359,19 @@ button.player-crm__stat:focus-visible,
   line-height: 1.1;
 }
 .player-crm__pokerplus-table--modal th:nth-child(1),
-.player-crm__pokerplus-table--modal td:nth-child(1) { width: 26%; }
+.player-crm__pokerplus-table--modal td:nth-child(1) { width: 23%; }
 .player-crm__pokerplus-table--modal th:nth-child(2),
 .player-crm__pokerplus-table--modal td:nth-child(2) { width: 13%; }
 .player-crm__pokerplus-table--modal th:nth-child(3),
-.player-crm__pokerplus-table--modal td:nth-child(3) { width: 18%; }
+.player-crm__pokerplus-table--modal td:nth-child(3) { width: 17%; }
 .player-crm__pokerplus-table--modal th:nth-child(4),
-.player-crm__pokerplus-table--modal td:nth-child(4) { width: 8%; text-align: right; }
+.player-crm__pokerplus-table--modal td:nth-child(4) { width: 7%; text-align: right; }
 .player-crm__pokerplus-table--modal th:nth-child(5),
-.player-crm__pokerplus-table--modal td:nth-child(5) { width: 10%; text-align: right; }
+.player-crm__pokerplus-table--modal td:nth-child(5) { width: 15%; text-align: right; overflow: visible; text-overflow: clip; }
 .player-crm__pokerplus-table--modal th:nth-child(6),
-.player-crm__pokerplus-table--modal td:nth-child(6) { width: 10%; text-align: right; }
+.player-crm__pokerplus-table--modal td:nth-child(6) { width: 13%; text-align: right; overflow: visible; text-overflow: clip; }
 .player-crm__pokerplus-table--modal th:nth-child(7),
-.player-crm__pokerplus-table--modal td:nth-child(7) { width: 15%; white-space: normal; overflow-wrap: anywhere; }
+.player-crm__pokerplus-table--modal td:nth-child(7) { width: 12%; white-space: normal; overflow-wrap: anywhere; }
 .player-crm__channel-table {
   min-width: 820px;
 }
@@ -2451,7 +2451,7 @@ button.player-crm__stat:focus-visible,
   width: 100%;
   min-width: 0;
   table-layout: fixed;
-  font-size: 10px;
+  font-size: 11px;
 }
 .player-crm__analytics-table th,
 .player-crm__analytics-table td {
@@ -2471,15 +2471,25 @@ button.player-crm__stat:focus-visible,
   width: 16.5%;
   text-align: right;
 }
+.player-crm__analytics-table tbody td:first-child {
+  font-size: 16px;
+}
+.player-crm__analytics-table tbody td:not(:first-child) {
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 @media (max-width: 620px) {
   .player-crm__analytics-breakdown { padding: 9px; }
-  .player-crm__analytics-table { font-size: 8px; }
+  .player-crm__analytics-table { font-size: 9px; }
   .player-crm__analytics-table th,
   .player-crm__analytics-table td { padding: 4px 3px; }
   .player-crm__analytics-table th:first-child,
   .player-crm__analytics-table td:first-child { width: 30%; }
   .player-crm__analytics-table th:not(:first-child),
   .player-crm__analytics-table td:not(:first-child) { width: 17.5%; }
+  .player-crm__analytics-table tbody td:first-child { font-size: 16px; }
+  .player-crm__analytics-table tbody td:not(:first-child) { font-size: 16px; }
 }
 .player-crm__table-link {
   display: inline;

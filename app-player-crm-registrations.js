@@ -225,7 +225,7 @@ function initPlayerCrmPokerPlusRuntime(ctx) {
     var dir = state.pokerPlusSortDir || "desc";
     return "<thead><tr>" +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "linkedAt", "Дата", field, dir) +
-      (compact ? "" : "<th>Аккаунт</th>") + "<th>Poker21 ID</th><th>Ник</th>" +
+      (compact ? "" : "<th>Аккаунт</th>") + "<th>" + (compact ? "Poker21" : "Poker21 ID") + "</th><th>Ник</th>" +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "level", "Уровень", field, dir) +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "fee", "Fee", field, dir) +
       pokerPlayerCrmSortableTh(esc, "pokerplus", "hands", "Раздач", field, dir) +
@@ -234,13 +234,15 @@ function initPlayerCrmPokerPlusRuntime(ctx) {
   }
 
   function tableRow(r, compact) {
+    var linkedLabel = dateTime(r.linkedAt);
+    if (compact) linkedLabel = linkedLabel.replace(/^(\d{2}\.\d{2}\.)\d{2}(\d{2}),?\s*/, "$1$2 ");
     return "<tr>" +
-      "<td>" + esc(dateTime(r.linkedAt)) + "</td>" +
+      "<td>" + esc(linkedLabel) + "</td>" +
       (compact ? "" : "<td>" + esc(r.accountId || "—") + "</td>") +
       "<td>" + esc(r.pokerPlusUserId || "—") + "</td>" +
       "<td>" + esc(r.nickname || "—") + "</td>" +
       "<td>" + esc(r.level || "—") + "</td>" +
-      "<td>" + esc(money(r.fee || 0)) + "</td>" +
+      "<td>" + esc(compact ? intFmt(r.fee || 0) : money(r.fee || 0)) + "</td>" +
       "<td>" + esc(intFmt(r.hands || 0)) + "</td>" +
       "<td>" + esc(r.email || "—") + "</td>" +
     "</tr>";

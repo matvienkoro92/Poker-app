@@ -33,7 +33,7 @@ const TOURNAMENT_DAY_BY_MSK_WEEKDAY = {
   1: { name: "Magic MKO", buyin: 500 },
   2: { name: "Турнир Тракториста", buyin: 300 },
   3: { name: "Турнир Стольник", buyin: 100 },
-  4: { name: "Мистери+", buyin: 1200 },
+  4: { name: "Мистери", buyin: 300 },
   5: { name: "Нокаут Прогрессив", buyin: 500 },
   6: { name: "Фриролл", buyin: 0 },
 };

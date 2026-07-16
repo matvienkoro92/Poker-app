@@ -104,11 +104,14 @@ function initPlayerCrmStatsRuntime(deps) {
       : "";
     var dailyPokerSource = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
     var dailyPokerStats = dailyPokerSource;
+    var dailyPokerDebitedUsers = dailyPokerSource && Array.isArray(dailyPokerSource.debitedUsers) ? dailyPokerSource.debitedUsers.slice() : [];
     if (dailyPokerSource && state.period !== "all") {
       var dailyRange = selectedPeriodRange();
       var dailyUsers = {};
       var dailySpins = 0;
       var dailyBonusAmount = 0;
+      var dailyDebitedAmount = 0;
+      var debitAmountsByUser = {};
       (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
         var date = String(row && row.date || "");
         if (!dailyRange || date < dailyRange.from || date > dailyRange.to) return;
@@ -116,14 +119,37 @@ function initPlayerCrmStatsRuntime(deps) {
         dailySpins += Math.max(0, Number(row.totalSpins) || 0);
         dailyBonusAmount += Math.max(0, Number(row.bonusAmount) || 0);
       });
+      (Array.isArray(dailyPokerSource.dailyDebits) ? dailyPokerSource.dailyDebits : []).forEach(function (row) {
+        var date = String(row && row.date || "");
+        if (!dailyRange || date < dailyRange.from || date > dailyRange.to) return;
+        dailyDebitedAmount += Math.max(0, Number(row.amount) || 0);
+        var userId = String(row && row.userId || "");
+        if (userId) debitAmountsByUser[userId] = (debitAmountsByUser[userId] || 0) + Math.max(0, Number(row.amount) || 0);
+      });
+      var debitProfilesById = {};
+      dailyPokerDebitedUsers.forEach(function (row) { debitProfilesById[String(row && (row.id || row.userId) || "")] = row; });
+      dailyPokerDebitedUsers = Object.keys(debitAmountsByUser).map(function (userId) {
+        return Object.assign({}, debitProfilesById[userId] || { id: userId, displayName: userId }, { amount: debitAmountsByUser[userId] });
+      }).sort(function (a, b) { return Number(b.amount || 0) - Number(a.amount || 0); });
       dailyPokerStats = {
         uniquePlayers: Object.keys(dailyUsers).length,
         totalSpins: dailySpins,
         bonusAmount: dailyBonusAmount,
+        debitedAmount: dailyDebitedAmount,
       };
     }
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
+    }
+    function compactPeopleRows(rows, amountKey, heading) {
+      rows = Array.isArray(rows) ? rows.filter(function (row) { return Number(row && row[amountKey]) > 0; }) : [];
+      if (!rows.length) return [];
+      var result = [[heading, ""]];
+      rows.slice(0, 3).forEach(function (row) {
+        result.push([String(row.displayName || row.name || row.telegramUsername || row.pokerPlusNickname || row.id || "Игрок"), money(row[amountKey])]);
+      });
+      if (rows.length > 3) result.push(["Ещё " + intFmt(rows.length - 3), ""]);
+      return result;
     }
     var raffleStats = summary && summary.raffles && typeof summary.raffles === "object" ? summary.raffles : null;
     var raffleStatsAvailable = !!(raffleStats && raffleStats.available !== false);
@@ -166,18 +192,19 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],
         ["Итого", intFmt(statPushNet), null, "total"],
       ]],
-      ["Крутка дня", dailyPokerValue("totalSpins"), "data-crm-daily-poker-modal", "activity", [
+      ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
-      ]],
-      ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", null, "activity", [
+        ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—"],
+      ].concat(compactPeopleRows(dailyPokerDebitedUsers, "amount", "Кем списано"))],
+      ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
         ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—"],
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
-      ]],
+      ].concat(compactPeopleRows(raffleStatsAvailable ? raffleStats.issuedRecipients : [], "totalAmount", "Кем выдано"))],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";

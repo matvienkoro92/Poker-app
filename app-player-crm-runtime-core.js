@@ -22,6 +22,7 @@
     dailyPokerModalOpen: false,
     dailyPokerWinnersLoading: false,
     dailyPokerWinners: null,
+    rafflesModalOpen: false,
     blockedUsers: [],
     blockedSearch: "",
     registeredAccounts: [],
@@ -1511,6 +1512,9 @@
           uniquePlayers: Math.max(0, Number(stats.totalUniquePlayers != null ? stats.totalUniquePlayers : data.totalUniquePlayers) || 0),
           totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
+          debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
+          dailyDebits: Array.isArray(data.dailyDebits) ? data.dailyDebits : [],
+          debitedUsers: Array.isArray(data.debitedUsers) ? data.debitedUsers : [],
           daily: Array.isArray(data.dailyStats) ? data.dailyStats : [],
         };
       })
@@ -1540,16 +1544,23 @@
     }
     var data = state.dailyPokerWinners;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
+    var debitedUsers = data && Array.isArray(data.debitedUsers) ? data.debitedUsers : [];
     if (!data) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Не удалось загрузить победителей.</div>";
       return;
     }
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · " + intFmt(winners.length) + " победителей · " + money(data.totalPrizeRubles || 0);
-    if (!winners.length) {
-      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период победителей нет.</div>";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · списано " + money(data.totalDebitedAmount || 0) + " · " + intFmt(winners.length) + " победителей";
+    if (!winners.length && !debitedUsers.length) {
+      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период данных нет.</div>";
       return;
     }
-    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\"><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
+    var debitsHtml = debitedUsers.length ? "<section class=\"player-crm__daily-debits\"><h3>Кем сколько списано</h3><div class=\"player-crm__daily-winners-list\">" + debitedUsers.map(function (user) {
+      var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
+      var pokerName = user.pokerPlusNickname || user.pokerPlusName || "—";
+      return "<article class=\"player-crm__daily-winner\"><div class=\"player-crm__daily-winner-head\"><strong>" + esc(user.displayName || pokerName) + "</strong><b>" + esc(money(user.amount || 0)) + "</b></div>" +
+        "<div class=\"player-crm__daily-winner-grid\"><span>Telegram <b>" + esc(telegram) + "</b></span><span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span></div></article>";
+    }).join("") + "</div></section>" : "";
+    var winnersHtml = winners.length ? "<section><h3>Победители</h3><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
       var telegram = winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = winner.pokerPlusNickname || winner.pokerPlusName || "—";
       return "<article class=\"player-crm__daily-winner\">" +
@@ -1564,7 +1575,8 @@
           "<span>Бонусы <b>" + esc(money(winner.bonusTotal || 0)) + "</b></span>" +
           "<span>Всего <b>" + esc(money(winner.totalPrizeAmount || 0)) + "</b></span>" +
         "</div></article>";
-    }).join("") + "</div></div>";
+    }).join("") + "</div></section>" : "";
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + debitsHtml + winnersHtml + "</div>";
   }
 
   function loadDailyPokerWinners() {
@@ -1590,6 +1602,38 @@
   function closeDailyPokerModal() {
     state.dailyPokerModalOpen = false;
     renderDailyPokerModal();
+  }
+
+  function renderRafflesModal() {
+    var modal = document.getElementById("playerCrmRafflesModal");
+    var subtitleEl = document.getElementById("playerCrmRafflesModalSubtitle");
+    var bodyEl = document.getElementById("playerCrmRafflesModalBody");
+    if (!modal || !bodyEl) return;
+    modal.hidden = !state.rafflesModalOpen;
+    if (!state.rafflesModalOpen) {
+      if (document.body && noOpenDialogModals()) document.body.classList.remove("player-crm-dialog-modal-open");
+      return;
+    }
+    if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+    var raffleStats = state.statsSummary && state.statsSummary.raffles;
+    var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients : [];
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · выдано " + money(raffleStats && raffleStats.issuedPrizeAmount || 0);
+    if (!recipients.length) {
+      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период выданных призов нет.</div>";
+      return;
+    }
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\"><div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user) {
+      var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
+      var pokerName = user.pokerPlusNickname || "—";
+      return "<article class=\"player-crm__daily-winner\"><div class=\"player-crm__daily-winner-head\"><strong>" + esc(user.name || pokerName) + "</strong><b>" + esc(money(user.totalAmount || 0)) + "</b></div>" +
+        "<div class=\"player-crm__daily-winner-grid\"><span>Telegram <b>" + esc(telegram) + "</b></span><span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+        "<span>Кеш <b>" + esc(money(user.cashAmount || 0)) + "</b></span><span>Билеты <b>" + esc(money(user.ticketAmount || 0)) + "</b></span><span>Призы <b>" + esc((user.prizes || []).join(", ") || "—") + "</b></span></div></article>";
+    }).join("") + "</div></div>";
+  }
+
+  function closeRafflesModal() {
+    state.rafflesModalOpen = false;
+    renderRafflesModal();
   }
 
   function postBodySafe(extra) {
@@ -3153,6 +3197,7 @@
         closeDailyPokerModal();
         return;
       }
+      if (e.target.closest("[data-crm-close-raffles-modal]")) { closeRafflesModal(); return; }
       if (e.target.closest("[data-crm-general-messages-modal]")) {
         state.generalMessagesModalOpen = true;
         state.showAllGeneralMessagesModal = false;
@@ -3179,6 +3224,11 @@
         renderStats();
         renderDailyPokerModal();
         loadDailyPokerWinners();
+        return;
+      }
+      if (e.target.closest("[data-crm-raffles-modal]")) {
+        state.rafflesModalOpen = true;
+        renderRafflesModal();
         return;
       }
       if (e.target.closest("[data-crm-pokerplus-modal]")) {
@@ -3554,6 +3604,7 @@
       if (e.key === "Escape" && state.botModalOpen) closeBotModal();
       if (e.key === "Escape" && state.pushModalOpen) closePushModal();
       if (e.key === "Escape" && state.dailyPokerModalOpen) closeDailyPokerModal();
+      if (e.key === "Escape" && state.rafflesModalOpen) closeRafflesModal();
       if (e.key === "Escape" && state.playerModalOpen) closePlayerModal();
       if (e.key === "Escape" && state.chatDialogManager) closeManagerDialogModal();
     });
