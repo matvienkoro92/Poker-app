@@ -2852,6 +2852,94 @@ body.profile-avatar-choice-open {
   }
 }
 
+/* A regular browser can expose a wide CSS viewport even inside a visually
+   narrow app column. Keep the club profile compact instead of scaling its
+   mobile presentation typography back up. */
+@media (min-width: 1001px) {
+  .view[data-view="profile"] .profile-tabs {
+    padding: 5px;
+    border-radius: 16px;
+  }
+
+  .view[data-view="profile"] .profile-tabs__btn {
+    min-height: 42px;
+    padding: 6px 10px;
+    border-radius: 13px;
+    font-size: 16px;
+    line-height: 1.08;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+    max-width: min(42vw, 360px);
+    font-size: 32px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__edit-name.profile-hero-card__edit-name {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__verified {
+    width: 38px;
+    height: 38px;
+    font-size: 21px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
+    height: 290px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__hero-status {
+    gap: 10px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
+    gap: 8px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level {
+    gap: 10px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-title {
+    font-size: 21px;
+    line-height: 1.1;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-xp {
+    font-size: 19px;
+    line-height: 1.15;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status-track {
+    height: 14px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-text {
+    font-size: 54px;
+    line-height: 0.95;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__level-rest {
+    font-size: 27px;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+  .view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+    min-height: 46px;
+    padding: 9px 14px;
+    border-radius: 14px;
+    font-size: 16px;
+  }
+}
+
 @media (min-width: 621px) and (max-width: 1100px) {
   .view[data-view="profile"] .profile-header-row {
     gap: 10px;

@@ -600,6 +600,46 @@ button.player-crm__period-metric:focus-visible {
   line-height: 1;
   white-space: nowrap;
 }
+.player-crm__period-metric .player-crm__period-comparison {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+  max-width: 105px;
+  padding: 5px 7px;
+  border: 1px solid rgba(143, 163, 184, 0.2);
+  border-radius: 8px;
+  background: rgba(5, 10, 16, 0.72);
+  text-transform: none;
+}
+.player-crm__period-comparison small {
+  overflow: hidden;
+  max-width: 100%;
+  color: #8293a7;
+  font-size: 7px;
+  font-style: normal;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-crm__period-metric .player-crm__period-comparison b {
+  color: #eef3f8;
+  font-size: 11px;
+  line-height: 1;
+}
+.player-crm__period-comparison em {
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.player-crm__period-comparison--positive em { color: #8fc9a2; }
+.player-crm__period-comparison--negative em { color: #d88f91; }
+.player-crm__period-comparison--neutral em { color: #9fb0c5; }
 .player-crm__period-metric--has-details {
   grid-template-rows: 42px auto minmax(0, 1fr);
   align-content: start;

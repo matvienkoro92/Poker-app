@@ -2320,6 +2320,7 @@ function hallFishLoadAchievementRows() {
 }
 
 function openHallFishAchievementTab() {
+  if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-achievements");
   hallFishSetAchievementState("Загрузка…");
   hallFishLoadAchievementRows()
     .then(function (data) {
@@ -2450,6 +2451,7 @@ function hallFishEditPlayerBirthday(accountId, playerName, currentValue) {
 }
 
 function openHallFishRatingModal() {
+  if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-players");
   hallFishSetModalState("Загрузка…");
   Promise.all([
     hallFishEnsureLevelPlayerArtData().catch(function () { return false; }),

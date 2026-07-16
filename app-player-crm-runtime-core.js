@@ -55,6 +55,9 @@
     campaigns: [],
     sourceAnalytics: [],
     statsSummary: null,
+    periodComparison: null,
+    periodComparisonLoading: false,
+    periodComparisonRequestKey: "",
     chartAnalytics: null,
     chartSeriesEnabled: {
       players: true,
@@ -1772,6 +1775,48 @@
       });
   }
 
+  function comparisonRange() {
+    var current = selectedPeriodRange();
+    if (!current || (state.period !== "current_week" && state.period !== "current_month")) return null;
+    var from = new Date(current.from + "T00:00:00.000Z");
+    if (state.period === "current_week") {
+      var previousTo = new Date(from.getTime() - 86400000);
+      var previousFrom = new Date(previousTo.getTime() - 6 * 86400000);
+      return { from: previousFrom.toISOString().slice(0, 10), to: previousTo.toISOString().slice(0, 10), label: "Прошлая неделя" };
+    }
+    var year = from.getUTCFullYear();
+    var month = from.getUTCMonth();
+    return {
+      from: new Date(Date.UTC(year, month - 1, 1)).toISOString().slice(0, 10),
+      to: new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10),
+      label: "Прошлый месяц",
+    };
+  }
+
+  function loadPeriodComparison() {
+    var range = comparisonRange();
+    state.periodComparison = range ? { label: range.label, range: range, metrics: null } : null;
+    if (!range) return;
+    var base = getApiBaseSafe();
+    if (!base) return;
+    var requestKey = range.from + ":" + range.to;
+    state.periodComparisonRequestKey = requestKey;
+    state.periodComparisonLoading = true;
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    fetch(base + "/api/player-crm" + q + sep + "mode=comparison&from=" + encodeURIComponent(range.from) + "&to=" + encodeURIComponent(range.to), { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (state.periodComparisonRequestKey === requestKey && data && data.ok !== false && data.comparison && state.periodComparison) state.periodComparison.metrics = data.comparison;
+      })
+      .catch(function () {})
+      .then(function () {
+        if (state.periodComparisonRequestKey !== requestKey) return;
+        state.periodComparisonLoading = false;
+        renderStats();
+      });
+  }
+
   function loadCrmData(scope) {
     if (scope === "chart" && state.loaded) return loadCrmHeavyData(scope);
     if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
@@ -1870,6 +1915,7 @@
         state.loaded = true;
         renderAll();
         loadDailyPokerStats();
+        loadPeriodComparison();
         if (shouldLoadHeavy) {
           setTimeout(function () {
             loadCrmHeavyData("chart");

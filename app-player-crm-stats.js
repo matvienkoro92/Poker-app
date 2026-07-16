@@ -142,6 +142,41 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
+    function previousDailyPokerUnique() {
+      if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
+      var currentRange = selectedPeriodRange();
+      if (!currentRange || !currentRange.from) return null;
+      var currentFrom = new Date(currentRange.from + "T00:00:00.000Z");
+      var previousFrom;
+      var previousTo;
+      if (state.period === "current_week") {
+        previousTo = new Date(currentFrom.getTime() - 86400000);
+        previousFrom = new Date(previousTo.getTime() - 6 * 86400000);
+      } else {
+        previousFrom = new Date(Date.UTC(currentFrom.getUTCFullYear(), currentFrom.getUTCMonth() - 1, 1));
+        previousTo = new Date(Date.UTC(currentFrom.getUTCFullYear(), currentFrom.getUTCMonth(), 0));
+      }
+      var fromKey = previousFrom.toISOString().slice(0, 10);
+      var toKey = previousTo.toISOString().slice(0, 10);
+      var users = {};
+      (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
+        var date = String(row && row.date || "");
+        if (date < fromKey || date > toKey) return;
+        (Array.isArray(row.userIds) ? row.userIds : []).forEach(function (id) { users[String(id)] = true; });
+      });
+      return Object.keys(users).length;
+    }
+    function comparisonInfo(key, currentValue, explicitPrevious) {
+      var comparison = state.periodComparison;
+      if (!comparison || !comparison.label) return null;
+      var previous = explicitPrevious != null
+        ? Number(explicitPrevious)
+        : Number(comparison.metrics && comparison.metrics[key]);
+      if (!Number.isFinite(previous)) return null;
+      var current = Number(currentValue) || 0;
+      var change = previous === 0 ? (current === 0 ? 0 : 100) : Math.round(((current - previous) / Math.abs(previous)) * 100);
+      return { label: comparison.label, previous: previous, change: change };
+    }
     function adminDebitRows(rows) {
       var totals = { "2144406710": 0, "1897001087": 0 };
       var range = state.period !== "all" ? selectedPeriodRange() : null;
@@ -180,33 +215,33 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Открытий на человека", sessionsPerVisitorText],
         ["Гость → регистрация", guestConversionText],
         ["Сессий до регистрации", sessionsBeforeRegistrationText],
-      ]],
+      ], null, comparisonInfo("audience", estimatedRealAudience)],
       ["Зарегано · всего", intFmt(statRegistrations), null, "registration", [
         ["Только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
         ["Только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
         ["И Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
-      ]],
+      ], null, comparisonInfo("registrations", statRegistrations)],
       ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", "engagement", [
         ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
         ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
         ["Итого", intFmt(statPokerPlusNet), null, "total"],
-      ]],
+      ], null, comparisonInfo("pokerPlus", statPokerPlusNet)],
       ["Бот", intFmt(statBotNet), "data-crm-bot-modal", "engagement", [
         ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
         ["Итого", intFmt(statBotNet), null, "total"],
-      ]],
+      ], null, comparisonInfo("bot", statBotNet)],
       ["Push", intFmt(statPushNet), "data-crm-push-modal", "engagement", [
         ["Подписки", "+" + intFmt(statPushSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],
         ["Итого", intFmt(statPushNet), null, "total"],
-      ]],
+      ], null, comparisonInfo("push", statPushNet)],
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
         ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—"],
-      ].concat(adminDebitRows(dailyPokerDebitRows))],
+      ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique())],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
@@ -221,7 +256,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Вика", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.vika || 0)],
         ["Кеш", money(vikaRaffleBreakdown.cash || 0), null, "subdetail"],
         ["Билеты", money(vikaRaffleBreakdown.ticket || 0), null, "subdetail"],
-      ] : [])],
+      ] : []), null, comparisonInfo("raffles", raffleStats && raffleStats.uniqueParticipants)],
     ];
     function periodMetricRow(it) {
       var tag = it[2] ? "button" : "div";
@@ -229,6 +264,14 @@ function initPlayerCrmStatsRuntime(deps) {
       var actionAttr = it[2] ? " " + it[2] : "";
       var toneCls = it[3] ? " player-crm__period-metric--" + it[3] : "";
       var layoutCls = it[5] ? " player-crm__period-metric--" + it[5] : "";
+      var comparison = it[6];
+      var comparisonHtml = "";
+      if (comparison) {
+        var change = Number(comparison.change) || 0;
+        var direction = change > 0 ? "positive" : change < 0 ? "negative" : "neutral";
+        var changeText = change > 0 ? "+" + change + "% приток" : change < 0 ? "−" + Math.abs(change) + "% отток" : "0% без изменений";
+        comparisonHtml = "<span class=\"player-crm__period-comparison player-crm__period-comparison--" + direction + "\"><small>" + esc(comparison.label) + "</small><b>" + esc(intFmt(comparison.previous)) + "</b><em>" + esc(changeText) + "</em></span>";
+      }
       var details = Array.isArray(it[4]) && it[4].length
         ? "<div class=\"player-crm__period-metric-details\">" + it[4].map(function (row) {
             var detailTag = row[2] ? "button" : "span";
@@ -240,7 +283,7 @@ function initPlayerCrmStatsRuntime(deps) {
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
       return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + layoutCls + detailsCls + "\"" + actionAttr + ">" +
-        "<span>" + esc(it[0]) + "</span><strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
+        "<span>" + esc(it[0]) + "</span>" + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + details + "</" + tag + ">";
     }
     function currentCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -257,12 +300,32 @@ function initPlayerCrmStatsRuntime(deps) {
     var analyticsLabels = {
       home: "Главная", raffles: "Розыгрыши", rating: "Рейтинг", chat: "Чат", profile: "Профиль",
       "daily-poker": "Крутка дня", "sng-champions": "SNG", "private-cash": "Приватный кеш",
+      "vpn-proxy": "VPN за 100 ₽", "hall-of-fame": "Зал славы", transfers: "Переводы",
+      "club-players": "Игроки", "club-achievements": "Ачивки",
       raffle_joined: "Участие в розыгрышах", daily_poker_spin: "Крутка дня", sng_joined: "Заявки SNG",
       private_cash_applied: "Заявки в приватный кеш", club_choice_voted: "Голосование клуба",
       poker21_linked: "Привязка Poker21", subscription_enabled: "Подписки", push_enabled: "Push",
     };
+    var analyticsSectionOrder = [
+      "home", "raffles", "daily-poker", "profile", "chat",
+      "vpn-proxy", "hall-of-fame", "transfers", "club-players", "club-achievements",
+    ];
     function analyticsTable(title, rows) {
-      rows = Array.isArray(rows) ? rows.slice(0, 20) : [];
+      rows = Array.isArray(rows) ? rows.slice() : [];
+      if (title === "Куда заходили") {
+        ["vpn-proxy", "hall-of-fame", "transfers", "club-players", "club-achievements"].forEach(function (name) {
+          var exists = rows.some(function (row) { return String(row && row.name || "") === name; });
+          if (!exists) rows.push({ name: name, guestInstallations: 0, registeredVisitors: 0, uniqueVisitors: 0, events: 0 });
+        });
+        rows.sort(function (a, b) {
+          var aIndex = analyticsSectionOrder.indexOf(String(a && a.name || ""));
+          var bIndex = analyticsSectionOrder.indexOf(String(b && b.name || ""));
+          if (aIndex < 0) aIndex = analyticsSectionOrder.length;
+          if (bIndex < 0) bIndex = analyticsSectionOrder.length;
+          return aIndex - bIndex || Number(b && b.uniqueVisitors || 0) - Number(a && a.uniqueVisitors || 0) || Number(b && b.events || 0) - Number(a && a.events || 0);
+        });
+      }
+      rows = rows.slice(0, 20);
       if (!rows.length) return "";
       return "<section class=\"player-crm__analytics-breakdown\"><h3>" + esc(title) + "</h3>" +
         "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__analytics-table\"><thead><tr>" +
