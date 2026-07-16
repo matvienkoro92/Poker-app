@@ -608,10 +608,14 @@
     var serverMs = Date.parse(data.serverTime || "");
     if (Number.isFinite(serverMs)) dailyPokerState.serverDeltaMs = serverMs - Date.now();
     var balanceEl = $("dailyPokerBalance");
+    var battleBonusEl = $("dailyPokerBattleBonus");
     var playBtn = $("dailyPokerPlayBtn");
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) {
       balanceEl.innerHTML = buildDailyPokerBalanceHtml(data.bonusBalance);
+    }
+    if (battleBonusEl && Object.prototype.hasOwnProperty.call(data, "bonusBalance")) {
+      battleBonusEl.textContent = formatCompactAmount(data.bonusBalance) + " баллов";
     }
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);

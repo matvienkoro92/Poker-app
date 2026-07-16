@@ -643,6 +643,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 3px;
   gap: 10px;
   min-height: 62px;
   margin-top: 16px;
@@ -6458,18 +6460,20 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail,
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__media {
-    height: 100%;
+    height: auto;
     min-height: 0;
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__media {
-    aspect-ratio: auto;
+    align-self: start;
+    aspect-ratio: var(--home-tournament-banner-aspect, 1049 / 1499);
   }
 
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-detail__img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center top;
   }
 }
 
@@ -8934,6 +8938,114 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 
 .daily-poker__sng-champions {
   margin-top: 10px;
+}
+
+.daily-poker__battle-prompt {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(78%, 520px);
+  min-height: 46px;
+  margin: 14px auto 4px;
+  padding: 10px 58px 10px 22px;
+  overflow: visible;
+  border: 1px solid rgba(255, 166, 33, 0.78);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 0, rgba(255, 220, 135, 0.18), transparent 44%),
+    linear-gradient(180deg, rgba(59, 34, 12, 0.98), rgba(12, 10, 9, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 237, 185, 0.2),
+    0 9px 24px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(255, 142, 21, 0.18);
+  color: #ffe2a0;
+  cursor: pointer;
+  font: inherit;
+  font-size: clamp(14px, 3.2vw, 21px);
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.daily-poker__battle-prompt-title {
+  line-height: 1;
+}
+
+.daily-poker__battle-prompt-bonus {
+  color: rgba(255, 225, 164, 0.78);
+  font-size: 0.58em;
+  font-weight: 850;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+.daily-poker__battle-prompt-bonus strong {
+  color: #ffbd42;
+  font-size: 1.08em;
+}
+
+.daily-poker__battle-prompt::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border: 1px solid rgba(255, 218, 137, 0.14);
+  border-radius: inherit;
+}
+
+.daily-poker__battle-prompt:hover,
+.daily-poker__battle-prompt:focus-visible {
+  border-color: #ffc45a;
+  color: #fff1c7;
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 207, 0.28),
+    0 10px 28px rgba(0, 0, 0, 0.48),
+    0 0 24px rgba(255, 151, 26, 0.32);
+}
+
+.daily-poker__battle-prompt-arrow {
+  position: absolute;
+  right: 19px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: #ffb331;
+  stroke-width: 3.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 7px rgba(255, 154, 25, 0.9));
+  animation: daily-poker-battle-arrow 1.05s ease-in-out infinite;
+}
+
+@keyframes daily-poker-battle-arrow {
+  0%, 100% { transform: translateY(-62%); opacity: 0.72; }
+  50% { transform: translateY(-38%); opacity: 1; }
+}
+
+@media (max-width: 520px) {
+  .daily-poker__battle-prompt {
+    width: min(86%, 420px);
+    min-height: 42px;
+    padding: 9px 48px 9px 18px;
+  }
+
+  .daily-poker__battle-prompt-arrow {
+    right: 14px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily-poker__battle-prompt-arrow {
+    animation: none;
+    transform: translateY(-50%);
+  }
 }
 
 .raffles-sng-champions-ad {

@@ -1843,10 +1843,10 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: auto;
-  max-width: min(100%, 650px);
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
-  margin: 12px 0 0;
+  margin: -7px 0 0;
   padding: 10px 28px 10px 16px;
   border: 1px solid rgba(209, 124, 17, 0.76);
   border-radius: 22px;
@@ -1862,6 +1862,22 @@
   line-height: 1.1;
   text-align: center;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.72);
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .daily-poker__streak-note {
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    font-size: clamp(10px, 2.75vw, 14px);
+  }
+
+  .daily-poker__streak-icon {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
 }
 
 .daily-poker__streak-note strong {
