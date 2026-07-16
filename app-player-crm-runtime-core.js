@@ -1558,6 +1558,9 @@
     var rangeQuery = requestFrom && requestTo
       ? "&from=" + encodeURIComponent(requestFrom) + "&to=" + encodeURIComponent(requestTo)
       : "";
+    if (statsRange && statsRange.from && statsRange.to) {
+      rangeQuery += "&balanceFrom=" + encodeURIComponent(statsRange.from) + "&balanceTo=" + encodeURIComponent(statsRange.to);
+    }
     fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1&summary=1" + rangeQuery, { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
@@ -1568,6 +1571,8 @@
           totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
           rangeTotalSpinsStart: Math.max(0, Number(data.rangeTotalSpinsStart) || 0),
           rangeTotalSpinsEnd: Math.max(0, Number(data.rangeTotalSpinsEnd != null ? data.rangeTotalSpinsEnd : (stats.totalSpins != null ? stats.totalSpins : data.totalSpins)) || 0),
+          bonusBalanceStart: Math.max(0, Number(data.bonusBalanceStart) || 0),
+          bonusBalanceEnd: Math.max(0, Number(data.bonusBalanceEnd) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
           dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),

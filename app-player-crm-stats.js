@@ -166,26 +166,13 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
-    var dailyPokerSpinBalance = null;
+    var dailyPokerBonusBalance = null;
     if (dailyPokerSource) {
-      var selectedDailyRange = state.period === "all" ? null : selectedPeriodRange();
-      if (!selectedDailyRange) {
-        dailyPokerSpinBalance = { start: 0, end: Math.max(0, Number(dailyPokerSource.totalSpins) || 0) };
-      } else {
-        var requestRangeStartBalance = Math.max(0, Number(dailyPokerSource.rangeTotalSpinsStart) || 0);
-        var spinsBeforeSelectedRange = 0;
-        var spinsThroughSelectedRange = 0;
-        (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
-          var date = String(row && row.date || "");
-          var spins = Math.max(0, Number(row && row.totalSpins) || 0);
-          if (date && date < selectedDailyRange.from) spinsBeforeSelectedRange += spins;
-          if (date && date <= selectedDailyRange.to) spinsThroughSelectedRange += spins;
-        });
-        dailyPokerSpinBalance = {
-          start: requestRangeStartBalance + spinsBeforeSelectedRange,
-          end: requestRangeStartBalance + spinsThroughSelectedRange,
-        };
-      }
+      dailyPokerBonusBalance = {
+        start: state.period === "all" ? 0 : Math.max(0, Number(dailyPokerSource.bonusBalanceStart) || 0),
+        end: Math.max(0, Number(dailyPokerSource.bonusBalanceEnd) || 0),
+        money: true,
+      };
     }
     function previousDailyPokerUnique() {
       if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
@@ -288,7 +275,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
         ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—", null, "highlight"],
-      ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerSpinBalance],
+      ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerBonusBalance],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
@@ -331,8 +318,9 @@ function initPlayerCrmStatsRuntime(deps) {
           }).join("") + "</div>"
         : "";
       var detailsCls = details ? " player-crm__period-metric--has-details" : "";
+      var balanceFormatter = balance && balance.money ? money : intFmt;
       var balanceHtml = balance
-        ? "<span class=\"player-crm__period-balance\" aria-label=\"Количество на начало и конец периода\"><small>На начало <b>" + esc(intFmt(balance.start)) + "</b></small><small>На конец <b>" + esc(intFmt(balance.end)) + "</b></small></span>"
+        ? "<span class=\"player-crm__period-balance\" aria-label=\"Баланс на начало и конец периода\"><small>На начало <b>" + esc(balanceFormatter(balance.start)) + "</b></small><small>На конец <b>" + esc(balanceFormatter(balance.end)) + "</b></small></span>"
         : "";
       var titleHtml = heading && heading.eyebrow
         ? "<span class=\"player-crm__period-metric-title player-crm__period-metric-title--with-eyebrow\"><small>" + esc(heading.eyebrow) + "</small><b>" + esc(it[0]) + "</b></span>"
