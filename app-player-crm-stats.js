@@ -83,6 +83,10 @@ function initPlayerCrmStatsRuntime(deps) {
     function currentValue(key, fallback) {
       return current && current[key] != null ? Number(current[key]) || 0 : fallback;
     }
+    function signedMainValue(value) {
+      var number = Number(value) || 0;
+      return number < 0 ? "−" + intFmt(Math.abs(number)) : "+" + intFmt(number);
+    }
     var pokerPlusTotalEnd = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
     var pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
     var botTotalEnd = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
@@ -162,6 +166,27 @@ function initPlayerCrmStatsRuntime(deps) {
     function dailyPokerValue(key) {
       return dailyPokerStats ? intFmt(dailyPokerStats[key]) : "—";
     }
+    var dailyPokerSpinBalance = null;
+    if (dailyPokerSource) {
+      var selectedDailyRange = state.period === "all" ? null : selectedPeriodRange();
+      if (!selectedDailyRange) {
+        dailyPokerSpinBalance = { start: 0, end: Math.max(0, Number(dailyPokerSource.totalSpins) || 0) };
+      } else {
+        var requestRangeStartBalance = Math.max(0, Number(dailyPokerSource.rangeTotalSpinsStart) || 0);
+        var spinsBeforeSelectedRange = 0;
+        var spinsThroughSelectedRange = 0;
+        (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
+          var date = String(row && row.date || "");
+          var spins = Math.max(0, Number(row && row.totalSpins) || 0);
+          if (date && date < selectedDailyRange.from) spinsBeforeSelectedRange += spins;
+          if (date && date <= selectedDailyRange.to) spinsThroughSelectedRange += spins;
+        });
+        dailyPokerSpinBalance = {
+          start: requestRangeStartBalance + spinsBeforeSelectedRange,
+          end: requestRangeStartBalance + spinsThroughSelectedRange,
+        };
+      }
+    }
     function previousDailyPokerUnique() {
       if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
       var comparisonRange = state.periodComparison && state.periodComparison.range;
@@ -218,7 +243,7 @@ function initPlayerCrmStatsRuntime(deps) {
       ? String(Math.round((Math.max(0, Number(visitsSummary.total) || 0) / estimatedRealAudience) * 10) / 10).replace(".", ",")
       : "—";
     var periodMetrics = [
-      [exactVisits ? "Уникальные посетители · " + periodLabel() : "Аудитория · оценка · " + periodLabel(), intFmt(estimatedRealAudience), null, "audience", [
+      [exactVisits ? "Уникальные посетители" : "Аудитория · оценка", intFmt(estimatedRealAudience), null, "audience", [
         ["Из них зарегано", intFmt(confirmedAudience)],
         ["Гости", intFmt(activeAnonymousInstallations)],
         ["Новые пользователи", exactVisits ? intFmt(visitsSummary.new) : "—"],
@@ -226,7 +251,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Гость → регистрация", guestConversionText],
         ["Сессий до регистрации", sessionsBeforeRegistrationText],
       ], null, comparisonInfo("audience", estimatedRealAudience)],
-      ["Зарегано · всего", intFmt(statRegistrations), null, "registration", [
+      ["Зарегано · всего", signedMainValue(statRegistrations), null, "registration", [
         ["Только Telegram", intFmt(registrationTelegramOnlyCount), "data-crm-registrations-modal=\"telegram\""],
         ["Только email", intFmt(registrationEmailOnlyCount), "data-crm-registrations-modal=\"email\""],
         ["И Telegram, и email", intFmt(registrationBothCount), "data-crm-registrations-modal=\"both\""],
@@ -234,36 +259,36 @@ function initPlayerCrmStatsRuntime(deps) {
         start: registeredAtPeriodStart,
         end: registeredAtPeriodEnd,
       }],
-      ["Poker21", intFmt(statPokerPlusNet), "data-crm-pokerplus-modal", "engagement", [
+      ["Poker21", signedMainValue(statPokerPlusNet), "data-crm-pokerplus-modal", "engagement", [
         ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
         ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
         ["Итого", intFmt(statPokerPlusNet), null, "total"],
       ], null, comparisonInfo("pokerPlus", statPokerPlusNet), {
         start: pokerPlusTotalStart,
         end: pokerPlusTotalEnd,
-      }],
-      ["Бот", intFmt(statBotNet), "data-crm-bot-modal", "engagement", [
+      }, { eyebrow: "Привязали" }],
+      ["Бот", signedMainValue(statBotNet), "data-crm-bot-modal", "engagement", [
         ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
         ["Итого", intFmt(statBotNet), null, "total"],
       ], null, comparisonInfo("bot", statBotNet), {
         start: botTotalStart,
         end: botTotalEnd,
-      }],
-      ["Push", intFmt(statPushNet), "data-crm-push-modal", "engagement", [
+      }, { eyebrow: "Подписались на" }],
+      ["Push", signedMainValue(statPushNet), "data-crm-push-modal", "engagement", [
         ["Подписки", "+" + intFmt(statPushSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],
         ["Итого", intFmt(statPushNet), null, "total"],
       ], null, comparisonInfo("push", statPushNet), {
         start: pushTotalStart,
         end: pushTotalEnd,
-      }],
+      }, { eyebrow: "Включили" }],
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerStats ? money(dailyPokerStats.bonusAmount) : "—"],
         ["Бонусов списано", dailyPokerStats ? money(dailyPokerStats.debitedAmount) : "—", null, "highlight"],
-      ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique())],
+      ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerSpinBalance],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
@@ -288,6 +313,7 @@ function initPlayerCrmStatsRuntime(deps) {
       var layoutCls = it[5] ? " player-crm__period-metric--" + it[5] : "";
       var comparison = it[6];
       var balance = it[7];
+      var heading = it[8] && typeof it[8] === "object" ? it[8] : null;
       var comparisonHtml = "";
       if (comparison) {
         var change = Number(comparison.change) || 0;
@@ -308,8 +334,11 @@ function initPlayerCrmStatsRuntime(deps) {
       var balanceHtml = balance
         ? "<span class=\"player-crm__period-balance\" aria-label=\"Количество на начало и конец периода\"><small>На начало <b>" + esc(intFmt(balance.start)) + "</b></small><small>На конец <b>" + esc(intFmt(balance.end)) + "</b></small></span>"
         : "";
+      var titleHtml = heading && heading.eyebrow
+        ? "<span class=\"player-crm__period-metric-title player-crm__period-metric-title--with-eyebrow\"><small>" + esc(heading.eyebrow) + "</small><b>" + esc(it[0]) + "</b></span>"
+        : "<span class=\"player-crm__period-metric-title\">" + esc(it[0]) + "</span>";
       return "<" + tag + typeAttr + " class=\"player-crm__period-metric" + toneCls + layoutCls + detailsCls + "\"" + actionAttr + ">" +
-        "<span>" + esc(it[0]) + "</span>" + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + balanceHtml + details + "</" + tag + ">";
+        titleHtml + comparisonHtml + "<strong>" + esc(it[1]) + "</strong>" + balanceHtml + details + "</" + tag + ">";
     }
     function currentCard(it) {
       var tone = it[3] || String(it[0] || "").toLowerCase().replace(/[^a-zа-я0-9]+/g, "-").replace(/^-|-$/g, "");

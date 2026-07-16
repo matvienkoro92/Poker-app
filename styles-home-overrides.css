@@ -476,6 +476,25 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   cursor: pointer;
 }
 
+.app.app--view-home .card__header > .header-crm-shortcut {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+}
+
+.app.app--view-home .card__header > .header-crm-shortcut:hover {
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.app.app--view-home .card__header > .header-crm-shortcut:active {
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
 .app.app--view-home .header-icon-btn__icon {
   font-size: 18px;
 }

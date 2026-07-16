@@ -1566,6 +1566,8 @@
         state.dailyPokerStats = {
           uniquePlayers: Math.max(0, Number(stats.totalUniquePlayers != null ? stats.totalUniquePlayers : data.totalUniquePlayers) || 0),
           totalSpins: Math.max(0, Number(stats.totalSpins != null ? stats.totalSpins : data.totalSpins) || 0),
+          rangeTotalSpinsStart: Math.max(0, Number(data.rangeTotalSpinsStart) || 0),
+          rangeTotalSpinsEnd: Math.max(0, Number(data.rangeTotalSpinsEnd != null ? data.rangeTotalSpinsEnd : (stats.totalSpins != null ? stats.totalSpins : data.totalSpins)) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
           dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),

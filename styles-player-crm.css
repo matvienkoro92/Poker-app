@@ -737,6 +737,24 @@ button.player-crm__period-metric:focus-visible {
   line-height: 1.25;
   text-transform: uppercase;
 }
+.player-crm__period-metric .player-crm__period-metric-title--with-eyebrow {
+  display: grid;
+  align-content: start;
+  gap: 1px;
+}
+.player-crm__period-metric .player-crm__period-metric-title--with-eyebrow small {
+  color: #8f80ad;
+  font-size: clamp(7px, 0.9vw, 9px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.player-crm__period-metric .player-crm__period-metric-title--with-eyebrow b {
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+}
 .player-crm__period-metric strong {
   color: var(--text);
   font-size: clamp(34px, 4.8vw, 52px);
@@ -871,6 +889,11 @@ button.player-crm__period-metric:focus-visible {
   border-color: rgba(226, 119, 22, 0.82);
   background: radial-gradient(circle at 12% 0, rgba(134, 72, 16, 0.28), transparent 46%), linear-gradient(145deg, #17140f, #0c1015 72%);
   box-shadow: inset 3px 0 rgba(239, 132, 28, 0.82), 0 0 18px rgba(217, 104, 10, 0.13);
+}
+.player-crm__period-metric--audience > .player-crm__period-metric-title {
+  max-width: calc(100% - 118px);
+  font-size: clamp(10px, 4.3cqw, 14px);
+  line-height: 1.12;
 }
 .player-crm__period-metric--audience > strong { color: #ef963e; }
 .player-crm__period-metric--audience::before { background: #df791c; }
