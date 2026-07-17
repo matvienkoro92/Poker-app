@@ -2118,6 +2118,73 @@
     return "<details class=\"player-crm__delivery-log\"><summary>История получателей: " + esc(intFmt(log.length)) + "</summary><div><table><thead><tr><th>user_id</th><th>статус</th><th>канал</th><th>причина</th><th>время</th></tr></thead><tbody>" + rows + "</tbody></table></div></details>";
   }
 
+  function broadcastReportPlayerLabel(userId) {
+    var id = String(userId || "").trim();
+    var player = (Array.isArray(state.players) ? state.players : []).find(function (row) {
+      if (!row) return false;
+      return [row.id, row.accountId, row.dtId, playerBroadcastId(row)]
+        .concat(Array.isArray(row.telegramIds) ? row.telegramIds : [])
+        .some(function (value) { return String(value || "").trim() === id; });
+    });
+    if (!player) return id || "—";
+    return [player.name || player.handle, player.handle && player.handle !== player.name ? player.handle : "", id]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  function broadcastFailureReasonLabel(reason) {
+    var value = String(reason || "").trim();
+    if (value === "push_failed") return "Нет активной push-подписки или устройство отклонило уведомление";
+    if (value === "no_delivery_channel") return "Нет доступного канала доставки";
+    if (value === "telegram_failed") return "Telegram не принял сообщение";
+    if (value === "user_blocked") return "Пользователь заблокировал бота";
+    return value || "Доставка не подтверждена";
+  }
+
+  function renderBroadcastFinalReport(progress) {
+    progress = progress && typeof progress === "object" ? progress : {};
+    var status = String(progress.status || "").trim();
+    if (status !== "done" && status !== "failed" && status !== "canceled") return "";
+    var total = Math.max(0, Number(progress.total) || 0);
+    var processed = Math.max(0, Number(progress.processed) || 0);
+    var delivered = Math.max(0, Number(progress.delivered) || (Array.isArray(progress.sentIds) ? progress.sentIds.length : 0));
+    var pending = Array.isArray(progress.pendingIds) ? progress.pendingIds.length : Math.max(0, total - delivered);
+    var failedIds = Array.isArray(progress.failedIds) ? progress.failedIds : [];
+    var failed = Math.max(failedIds.length, Number(progress.failed) || 0);
+    var sentPush = Math.max(0, Number(progress.sentPush) || 0);
+    var sentBot = Math.max(0, Number(progress.sentBot) || 0);
+    var pushOpenUsers = Math.max(0, Number(progress.pushOpenUsers) || 0);
+    var pushClicks = Math.max(0, Number(progress.pushClicks) || 0);
+    var rate = total > 0 ? Math.round(delivered / total * 1000) / 10 : 0;
+    var log = Array.isArray(progress.deliveryLog) ? progress.deliveryLog : [];
+    var failedRows = log.filter(function (entry) { return entry && entry.status !== "delivered"; });
+    var problemsHtml = failedRows.length
+      ? "<details class=\"player-crm__broadcast-report-problems\" open><summary>Кому не дошло: " + esc(intFmt(failedRows.length)) + "</summary><div>" +
+        failedRows.slice(0, 300).map(function (entry) {
+          return "<p><strong>" + esc(broadcastReportPlayerLabel(entry.userId)) + "</strong><span>" + esc(broadcastFailureReasonLabel(entry.reason)) + "</span></p>";
+        }).join("") + "</div></details>"
+      : "<div class=\"player-crm__broadcast-report-ok\">Ошибочных получателей нет.</div>";
+    return "<section class=\"player-crm__broadcast-report\" aria-label=\"Отчёт о рассылке\">" +
+      "<h4>Отчёт о рассылке</h4>" +
+      "<div class=\"player-crm__broadcast-report-grid\">" +
+        "<span><small>Аудитория</small><strong>" + esc(intFmt(total)) + "</strong></span>" +
+        "<span><small>Обработано</small><strong>" + esc(intFmt(processed)) + "</strong></span>" +
+        "<span><small>Доставлено</small><strong>" + esc(intFmt(delivered)) + "</strong></span>" +
+        "<span><small>Доставка</small><strong>" + esc(String(rate).replace(".", ",") + "%") + "</strong></span>" +
+        "<span><small>Push принято</small><strong>" + esc(intFmt(sentPush)) + "</strong></span>" +
+        "<span><small>Открыли push</small><strong>" + esc(intFmt(pushOpenUsers)) + "</strong></span>" +
+        "<span><small>Открытий всего</small><strong>" + esc(intFmt(pushClicks)) + "</strong></span>" +
+        "<span><small>Бот принято</small><strong>" + esc(intFmt(sentBot)) + "</strong></span>" +
+        "<span><small>Не дошло</small><strong>" + esc(intFmt(Math.max(failed, pending))) + "</strong></span>" +
+      "</div>" +
+      "<p class=\"player-crm__broadcast-report-note\">«Доставлено» означает, что push-сервис Apple/Google или Telegram принял отправку. Открытия появятся в истории после нажатий пользователей.</p>" +
+      (progress.progressId || progress.jobId
+        ? "<button type=\"button\" class=\"player-crm__ghost-btn player-crm__broadcast-report-refresh\" data-crm-refresh-broadcast-report>Обновить открытия</button>"
+        : "") +
+      problemsHtml +
+    "</section>";
+  }
+
   function renderBroadcastProgressResult(text, progress, allowResume) {
     var out = document.getElementById("playerCrmBroadcastResult");
     if (!out) return;
@@ -2125,7 +2192,7 @@
     var failedIds = progress && Array.isArray(progress.failedIds) ? progress.failedIds : [];
     var status = String(progress && progress.status || "").trim();
     var progressId = String((progress && (progress.progressId || progress.jobId)) || state.broadcastProgressId || "").trim();
-    var html = "<div>" + esc(text || "") + "</div>";
+    var html = "<div>" + esc(text || "") + "</div>" + renderBroadcastFinalReport(progress);
     if (progress && progress.asyncJob && progressId && status !== "done" && status !== "canceled" && status !== "failed") {
       html += "<div class=\"player-crm__send-result-actions\">";
       if (status === "paused") {
@@ -2242,6 +2309,24 @@
       .then(function (r) { return r.json(); })
       .then(function (data) { return data && data.ok && data.progress ? data.progress : null; })
       .catch(function () { return null; });
+  }
+
+  function refreshBroadcastFinalReport() {
+    var progress = state.lastBroadcastProgress || {};
+    var progressId = String(progress.progressId || progress.jobId || state.broadcastProgressId || "").trim();
+    var base = getApiBaseSafe();
+    if (!base || !progressId) {
+      setBroadcastResult("Не найден ID завершённой рассылки.");
+      return;
+    }
+    fetchBroadcastProgress(base, progressId).then(function (nextProgress) {
+      if (!nextProgress) {
+        setBroadcastResult("Не удалось обновить отчёт.");
+        return;
+      }
+      state.lastBroadcastProgress = nextProgress;
+      renderBroadcastProgressResult(formatBroadcastProgress(nextProgress, nextProgress.total), nextProgress, false);
+    });
   }
 
   function startBroadcastProgressPolling(base, progressId, totalFallback, out) {
@@ -3646,6 +3731,10 @@
       }
       if (e.target.closest("[data-crm-retry-failed-broadcast]")) {
         retryBroadcastFailed();
+        return;
+      }
+      if (e.target.closest("[data-crm-refresh-broadcast-report]")) {
+        refreshBroadcastFinalReport();
         return;
       }
       if (e.target.closest("[data-crm-pause-job]")) {

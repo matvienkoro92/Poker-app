@@ -220,13 +220,22 @@ function initPlayerCrmReportsRuntime(deps) {
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__campaigns-table\"><thead><tr>" +
-      "<th>Дата</th><th>Статус</th><th>Канал</th><th>Аудитория</th><th>Получатель</th><th>Бот</th><th>Push</th><th>Push открыли</th><th>Push клики</th><th>Кнопка</th><th>В приложение</th><th>Активн.</th><th>Депозиты</th><th>Рег.</th><th>Ошибки</th><th>Трек</th><th>ID</th>" +
+      "<th>Дата</th><th>Статус</th><th>Канал</th><th>Аудитория</th><th>Доставлено</th><th>Не дошло</th><th>% доставки</th><th>Получатель</th><th>Бот</th><th>Push</th><th>Push открыли</th><th>Push клики</th><th>Кнопка</th><th>В приложение</th><th>Активн.</th><th>Депозиты</th><th>Рег.</th><th>Ошибки</th><th>Трек</th><th>ID</th>" +
       "</tr></thead><tbody>" + rows.map(function (campaign) {
+        var audience = Math.max(0, Number(campaign && campaign.audience) || 0);
+        var delivered = Math.max(0, Number(campaign && campaign.delivered) || Number(campaign && campaign.sentPush) || Number(campaign && campaign.sentBot) || 0);
+        var notSent = campaign && campaign.notSent != null
+          ? Math.max(0, Number(campaign.notSent) || 0)
+          : Math.max(0, audience - delivered);
+        var deliveryRate = audience > 0 ? Math.round(delivered / audience * 1000) / 10 : 0;
         return "<tr>" +
           "<td>" + esc(campaignDateLabel(campaign && campaign.createdAt)) + "</td>" +
           "<td>" + esc(campaignStatusLabel(campaign && campaign.status)) + "</td>" +
           "<td>" + esc(channelLabel(campaign && campaign.channel)) + "</td>" +
-          "<td>" + esc(intFmt(campaign && campaign.audience)) + "</td>" +
+          "<td>" + esc(intFmt(audience)) + "</td>" +
+          "<td>" + esc(intFmt(delivered)) + "</td>" +
+          "<td>" + esc(intFmt(notSent)) + "</td>" +
+          "<td>" + esc(String(deliveryRate).replace(".", ",") + "%") + "</td>" +
           "<td>" + esc(campaign && campaign.testRecipient ? campaign.testRecipient : "—") + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.sentBot)) + "</td>" +
           "<td>" + esc(intFmt(campaign && campaign.sentPush)) + "</td>" +
