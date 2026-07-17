@@ -30,6 +30,7 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleDailyStartTime = document.getElementById("raffleDailyStartTime");
     var rafflePrivateCashPrize = document.getElementById("rafflePrivateCashPrize");
     var raffleAccessLevel = document.getElementById("raffleAccessLevel");
+    var raffleGlobalAccessWrap = document.getElementById("raffleGlobalAccessWrap");
     var duplicateOptionsEl = document.getElementById("raffleDuplicateOptions");
     var createBtn = document.getElementById("raffleCreateBtn");
     var raffleAdminActionMode = "";
@@ -47,6 +48,24 @@ function initRafflesAdminCreateRuntime(opts) {
     } catch (e) {
       return "";
     }
+  }
+
+  function setDefaultTicketRaffleEndDate() {
+    if (!raffleEndDateInput || raffleEndDateInput.value) return;
+    var now = new Date();
+    var moscowOffsetMs = 3 * 60 * 60 * 1000;
+    var moscowNow = new Date(now.getTime() + moscowOffsetMs);
+    var target = new Date(Date.UTC(
+      moscowNow.getUTCFullYear(),
+      moscowNow.getUTCMonth(),
+      moscowNow.getUTCDate(),
+      17 - 3,
+      25,
+      0,
+      0
+    ));
+    if (target <= now) target.setUTCDate(target.getUTCDate() + 1);
+    raffleEndDateInput.value = raffleAdminCreateFormatMoscowInput(target);
   }
 
   function nextMoscowWeekdayDateTime(weekday, hour, minute, minDaysAhead) {
@@ -226,6 +245,29 @@ function initRafflesAdminCreateRuntime(opts) {
     return group;
   }
 
+  function activeRaffleGroupAccessSelects() {
+    var type = getRaffleCreateType();
+    if (type === "tickets") {
+      var ticketGroupCount = Math.max(1, parseInt(raffleTicketGroupCount && raffleTicketGroupCount.value, 10) || 1);
+      if (ticketGroupCount === 1) return raffleTicketSingleAccess ? [raffleTicketSingleAccess] : [];
+      return raffleTicketGroups ? Array.prototype.slice.call(raffleTicketGroups.querySelectorAll(".raffle-ticket-group-access")) : [];
+    }
+    if (type === "prizes") {
+      return rafflePhysicalGroupsEl ? Array.prototype.slice.call(rafflePhysicalGroupsEl.querySelectorAll(".raffle-physical-access")) : [];
+    }
+    return raffleGroupsEl ? Array.prototype.slice.call(raffleGroupsEl.querySelectorAll(".raffle-group-access")) : [];
+  }
+
+  function syncRaffleGlobalAccessVisibility() {
+    if (!raffleGlobalAccessWrap) return;
+    var hasPersonalAccess = activeRaffleGroupAccessSelects().some(function (select) {
+      return String(select && select.value != null ? select.value : "").trim() !== "";
+    });
+    raffleGlobalAccessWrap.hidden = hasPersonalAccess;
+    raffleGlobalAccessWrap.setAttribute("aria-hidden", hasPersonalAccess ? "true" : "false");
+    if (hasPersonalAccess && raffleAccessLevel) raffleAccessLevel.value = "0";
+  }
+
   function textLooksLikePrivateCash(value) {
     var text = String(value || "").toLowerCase();
     return text.indexOf("приватный кеш") !== -1 ||
@@ -341,6 +383,7 @@ function initRafflesAdminCreateRuntime(opts) {
     if (raffleCreatePanelPrizes) raffleCreatePanelPrizes.classList.toggle("raffle-create-form__panel--hidden", !isPrizes);
     if (raffleCreatePanelOther) raffleCreatePanelOther.classList.toggle("raffle-create-form__panel--hidden", type !== "other");
     if (isTickets) {
+      setDefaultTicketRaffleEndDate();
       setupTournamentDaySelect();
       buildTicketGroupInputs();
       syncSingleTicketCustomInputs();
@@ -350,6 +393,7 @@ function initRafflesAdminCreateRuntime(opts) {
     } else {
       buildGroupInputs();
     }
+    syncRaffleGlobalAccessVisibility();
   }
 
   setupRaffleAccessLevelSelect();
@@ -410,6 +454,7 @@ function initRafflesAdminCreateRuntime(opts) {
     if (raffleTicketTournamentWrap) raffleTicketTournamentWrap.style.display = n === 1 ? "" : "none";
     if (n === 1) {
       raffleTicketGroups.innerHTML = "";
+      syncRaffleGlobalAccessVisibility();
       return;
     }
     raffleTicketGroups.innerHTML = "";
@@ -431,6 +476,7 @@ function initRafflesAdminCreateRuntime(opts) {
     syncTicketGroupCustomInputs();
     updateRaffleCreateTotal();
     updateTicketGroupWinnersLabels();
+    syncRaffleGlobalAccessVisibility();
   }
 
   function syncSingleTicketCustomInputs() {
@@ -511,6 +557,7 @@ function initRafflesAdminCreateRuntime(opts) {
       raffleGroupsEl.appendChild(div);
     }
     setupRaffleGroupAccessSelects(raffleGroupsEl);
+    syncRaffleGlobalAccessVisibility();
   }
 
   function buildPhysicalPrizeInputs() {
@@ -535,6 +582,7 @@ function initRafflesAdminCreateRuntime(opts) {
       rafflePhysicalGroupsEl.appendChild(div);
     }
     setupRaffleGroupAccessSelects(rafflePhysicalGroupsEl);
+    syncRaffleGlobalAccessVisibility();
   }
 
   function raffleCreateEscapeHtml(value) {
@@ -782,6 +830,11 @@ function initRafflesAdminCreateRuntime(opts) {
   if (raffleTypeTickets) raffleTypeTickets.addEventListener("change", switchRaffleCreatePanel);
   if (raffleTypePrizes) raffleTypePrizes.addEventListener("change", switchRaffleCreatePanel);
   if (raffleTypeOther) raffleTypeOther.addEventListener("change", switchRaffleCreatePanel);
+  if (createForm) createForm.addEventListener("change", function (e) {
+    if (e.target && e.target.classList.contains("raffle-group-access-select")) {
+      syncRaffleGlobalAccessVisibility();
+    }
+  });
   if (raffleDailyEnabled) raffleDailyEnabled.addEventListener("change", syncRaffleDailyControls);
   if (raffleTicketTournamentSelect) raffleTicketTournamentSelect.addEventListener("change", function () {
     syncSingleTicketCustomInputs();
@@ -996,6 +1049,7 @@ function initRafflesAdminCreateRuntime(opts) {
           raffleCreateResetUi();
           if (data && data.ok && data.raffle) {
             createForm.classList.add("raffle-create-form--hidden");
+            if (isTickets && raffleEndDateInput) raffleEndDateInput.value = "";
             focusRaffleAfterMutation(data.raffle.id);
             clearRafflesCache();
             if (typeof setRafflesTab === "function") setRafflesTab("active");

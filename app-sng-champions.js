@@ -1123,6 +1123,11 @@
 
   function renderEntry(entry, data) {
     var adminButtons = "";
+    var adminPoker21Id = "";
+    if (data.isAdmin) {
+      var poker21Id = String(entry && (entry.pokerPlusUserId || entry.p21Id || entry.poker21Id || entry.pokerPlusId) || "").trim();
+      adminPoker21Id = '<span class="sng-champions-modal__entry-poker21"><small>ID Poker21</small><strong>' + escapeHtml(poker21Id || "—") + '</strong></span>';
+    }
     if (data.isAdmin && data.status === "open") {
       if (entry.status !== "approved") {
         adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>';
@@ -1136,6 +1141,7 @@
       '<div class="sng-champions-modal__entry-main">' +
         renderPlayerNameButton(entry) +
         '<span class="sng-champions-modal__entry-status sng-champions-modal__entry-status--' + escapeHtml(entry.status || "pending") + '">' + (entry.status === "approved" ? '<i aria-hidden="true">✓</i>' : '') + escapeHtml(entryStatusLabel(entry.status)) + (entry.mine ? " · это вы" : "") + '</span>' +
+        adminPoker21Id +
         playerMetaHtml(entry, "sng-champions-modal__entry-meta") +
       '</div>' +
       adminActions +

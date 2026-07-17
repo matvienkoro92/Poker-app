@@ -1006,6 +1006,9 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
 .raffle-active-actions--hidden {
   display: none !important;
 }
+.raffle-active-actions:has(> .raffle-action-feedback--hidden) {
+  display: none !important;
+}
 .raffle-active-admin-footer--hidden {
   display: none !important;
 }
@@ -12162,35 +12165,51 @@ body[data-view="raffles"] .raffle-create-form__type-label {
 body[data-view="raffles"] .raffle-create-form__type-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgba(245, 180, 72, 0.24);
+  border-radius: 14px;
+  background: rgba(3, 8, 18, 0.68);
 }
 
 body[data-view="raffles"] .raffle-create-form__type-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
+  display: grid;
+  place-items: center;
   min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.72);
-  color: #fff7e5;
+  min-height: 42px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 239, 201, 0.68);
   font-size: 13px;
+  font-weight: 900;
   line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
 body[data-view="raffles"] .raffle-create-form__type-option:has(input:checked) {
   border-color: rgba(245, 180, 72, 0.72);
-  background: linear-gradient(145deg, rgba(120, 69, 13, 0.34), rgba(31, 25, 20, 0.82));
-  box-shadow: inset 0 0 0 1px rgba(255, 223, 151, 0.08), 0 0 18px rgba(245, 158, 11, 0.08);
+  background: linear-gradient(145deg, rgba(158, 92, 19, 0.54), rgba(54, 37, 20, 0.92));
+  color: #fff2cc;
+  box-shadow: inset 0 0 0 1px rgba(255, 223, 151, 0.1), 0 0 16px rgba(245, 158, 11, 0.1);
+}
+
+body[data-view="raffles"] .raffle-create-form__type-option:has(input:focus-visible) {
+  outline: 2px solid #ffd784;
+  outline-offset: 2px;
 }
 
 body[data-view="raffles"] .raffle-create-form__type-option input {
-  flex: 0 0 auto;
-  width: 17px;
-  height: 17px;
-  margin: 0;
-  accent-color: #e5a63b;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
 }
 
 body[data-view="raffles"] .raffle-create-form__panel {
@@ -12207,6 +12226,10 @@ body[data-view="raffles"] .raffle-create-form .randomizer-label {
   width: 100%;
   min-width: 0;
   margin: 0;
+}
+
+body[data-view="raffles"] .raffle-create-form .randomizer-label[hidden] {
+  display: none !important;
 }
 
 body[data-view="raffles"] .raffle-create-form .randomizer-label__text {
@@ -12239,6 +12262,27 @@ body[data-view="raffles"] .raffle-create-form .randomizer-input:focus {
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.13);
 }
 
+body[data-view="raffles"] .raffle-create-form input[type="datetime-local"].randomizer-input {
+  padding-right: 12px;
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+body[data-view="raffles"] .raffle-create-form input[type="datetime-local"].randomizer-input::-webkit-calendar-picker-indicator {
+  width: 22px;
+  height: 22px;
+  margin-left: 10px;
+  padding: 3px;
+  border-radius: 6px;
+  opacity: 1;
+  filter: invert(88%) sepia(32%) saturate(631%) hue-rotate(344deg) brightness(108%);
+  cursor: pointer;
+}
+
+body[data-view="raffles"] .raffle-create-form input[type="datetime-local"].randomizer-input::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(245, 180, 72, 0.2);
+}
+
 body[data-view="raffles"] .raffle-create-form input[type="number"].randomizer-input {
   justify-self: start;
   width: clamp(78px, 16vw, 112px);
@@ -12252,13 +12296,52 @@ body[data-view="raffles"] .raffle-create-form__daily {
   min-width: 0;
 }
 
-body[data-view="raffles"] .raffle-ticket-winners-wrap--single {
-  grid-template-columns: minmax(0, 1fr) minmax(210px, 0.72fr);
-  align-items: center;
+body[data-view="raffles"] .raffle-ticket-groups {
+  gap: 12px;
 }
 
-body[data-view="raffles"] .raffle-ticket-winners-wrap--single .randomizer-label {
-  grid-template-columns: minmax(0, 1fr) auto;
+body[data-view="raffles"] .raffle-ticket-group-row {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: clamp(12px, 2.4vw, 18px);
+  border: 1px solid rgba(245, 180, 72, 0.34);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.13), transparent 42%),
+    linear-gradient(145deg, rgba(39, 28, 18, 0.86), rgba(8, 14, 25, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 239, 201, 0.05);
+}
+
+body[data-view="raffles"] .raffle-ticket-group-row:nth-child(even) {
+  border-color: rgba(130, 174, 255, 0.3);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(58, 116, 214, 0.14), transparent 42%),
+    linear-gradient(145deg, rgba(18, 31, 52, 0.88), rgba(8, 14, 25, 0.94));
+}
+
+body[data-view="raffles"] .raffle-ticket-group-row > .randomizer-label:first-child .randomizer-label__text {
+  color: #ffd984;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+body[data-view="raffles"] .raffle-ticket-group-row:nth-child(even) > .randomizer-label:first-child .randomizer-label__text {
+  color: #b9d4ff;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap--single {
+  grid-template-columns: minmax(100px, 0.7fr) minmax(150px, 1fr) minmax(210px, 1.25fr);
+  align-items: end;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap--single > .randomizer-label {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: end;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap--single .raffle-ticket-single-winners input {
+  width: 100%;
 }
 
 body[data-view="raffles"] .raffle-create-form__total {
@@ -12296,15 +12379,25 @@ body[data-view="raffles"] #raffleCreateBtn {
 }
 
 @media (max-width: 700px) {
-  body[data-view="raffles"] .raffle-create-form__type-row,
   body[data-view="raffles"] .raffle-create-form .randomizer-label,
-  body[data-view="raffles"] .raffle-ticket-winners-wrap--single,
   body[data-view="raffles"] .raffle-ticket-winners-wrap--single .randomizer-label {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  body[data-view="raffles"] .raffle-ticket-winners-wrap--single {
+    grid-template-columns: minmax(74px, 0.62fr) minmax(116px, 1fr) minmax(170px, 1.35fr);
+    gap: 6px;
+  }
+
+  body[data-view="raffles"] .raffle-ticket-winners-wrap--single > .randomizer-label .randomizer-label__text {
+    font-size: 10px;
+  }
+
   body[data-view="raffles"] .raffle-create-form__type-option {
     align-items: center;
+    min-height: 38px;
+    padding: 6px 4px;
+    font-size: 11px;
   }
 
   body[data-view="raffles"] .raffle-create-form input[type="number"].randomizer-input {

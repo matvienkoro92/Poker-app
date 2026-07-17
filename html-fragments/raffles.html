@@ -45,15 +45,15 @@
                 <div class="raffle-create-form__type-row" role="group" aria-label="Тип розыгрыша">
                   <label class="raffle-create-form__type-option">
                     <input type="radio" name="raffleType" value="tickets" id="raffleTypeTickets" checked />
-                    <span>Розыгрыш беккинг-билетов на турниры</span>
+                    <span>Бэккинг-билеты</span>
                   </label>
                   <label class="raffle-create-form__type-option">
                     <input type="radio" name="raffleType" value="prizes" id="raffleTypePrizes" />
-                    <span>Розыгрыш пицц и бань</span>
+                    <span>Пиццы и бани</span>
                   </label>
                   <label class="raffle-create-form__type-option">
                     <input type="radio" name="raffleType" value="other" id="raffleTypeOther" />
-                    <span>Розыгрыш на кеш. Столы Бонус гейм на Poker21</span>
+                    <span>Кеш Poker21</span>
                   </label>
                 </div>
 
@@ -124,12 +124,12 @@
                         <option value="0">для всех</option>
                       </select>
                     </label>
+                    <label class="randomizer-label raffle-ticket-single-end-date">
+                      <span class="randomizer-label__text">Дата и время завершения (МСК):</span>
+                      <input type="datetime-local" id="raffleEndDate" class="randomizer-input" />
+                    </label>
                     <div class="raffle-ticket-groups" id="raffleTicketGroups"></div>
                   </div>
-                  <label class="randomizer-label">
-                    <span class="randomizer-label__text">Дата и время завершения (МСК):</span>
-                    <input type="datetime-local" id="raffleEndDate" class="randomizer-input" />
-                  </label>
                   <p class="raffle-create-form__total" id="raffleCreateTotal">Итого: 0 ₽</p>
                 </div>
 
@@ -168,7 +168,7 @@
                 </div>
 
                 <div class="raffle-create-form__daily">
-                  <label class="randomizer-label">
+                  <label class="randomizer-label" id="raffleGlobalAccessWrap">
                     <span class="randomizer-label__text">Доступ:</span>
                     <select id="raffleAccessLevel" class="randomizer-input raffle-access-level-select" aria-label="Минимальный уровень доступа">
                       <option value="0" selected>для всех</option>
