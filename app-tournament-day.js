@@ -2,7 +2,6 @@ var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-monday-mystery-bounty-
 var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-150k-r300-a500.webp";
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-300k.webp";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-100k.webp";
-var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-170k.webp";
 var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-10-tickets-entry-1.webp";
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-pko-progressive-300k.webp";
 
@@ -53,13 +52,12 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Нокаут Прогрессив",
-    buyin: "500₽",
-    guarantee: "170 000₽",
-    banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут Прогрессив пятницы — вход 500 ₽, призовые 170 000 ₽",
-    bannerWidth: 640,
-    bannerHeight: 915
+    name: "Фризаут",
+    buyin: "1 000₽",
+    rebuy: "Без ребая и аддона",
+    guarantee: "—",
+    hour: 19,
+    minute: 0
   },
   {
     name: "Фриролл",
@@ -105,7 +103,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут", buyin: "5 000₽", rebuy: "R:5 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "50 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 89, levels: "12/10/8" },
   { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери", buyin: "300₽", rebuy: "R:300₽", guarantee: "100 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
+  { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "—", hour: 19, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Фриролл", buyin: "1₽", rebuy: "R:200₽ / A:400₽", guarantee: "10 билетов по 10 000₽ каждый", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
   { repeat: "weekly", dow: 0, category: "Турнир недели", name: "PKO Нокаут Прогрессив", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
@@ -705,15 +703,20 @@ function renderHomeTournamentWeekList(activeWeekday) {
 
     var name = document.createElement("span");
     name.className = "home-tournament-week-row__name";
-    name.textContent = "Приз " + pokerFormatRubSpacing(item.guarantee);
+    name.textContent = item.guarantee && item.guarantee !== "—"
+      ? "Приз " + pokerFormatRubSpacing(item.guarantee)
+      : (item.rebuy || "Приз —");
 
     var meta = document.createElement("span");
     meta.className = "home-tournament-week-row__meta";
+    var itemHour = Number.isFinite(Number(item.hour)) ? Math.floor(Number(item.hour)) : 18;
+    var itemMinute = Number.isFinite(Number(item.minute)) ? Math.floor(Number(item.minute)) : 0;
+    var itemTime = String(itemHour).padStart(2, "0") + ":" + String(itemMinute).padStart(2, "0");
     meta.textContent =
       (item.name || "Турнир дня") +
       " · " +
       pokerFormatRubSpacing(item.buyin) +
-      " · 18:00 МСК";
+      " · " + itemTime + " МСК";
 
     main.appendChild(name);
     main.appendChild(meta);
@@ -1532,9 +1535,13 @@ function pokerGetDownloadTournamentDayInfo(now) {
   now = now || new Date();
   var msk = pokerGetMskDowAndMinutes(now);
   var dow = msk.dow;
-  if (msk.minutes >= 21 * 60) dow = (dow + 1) % 7;
+  var current = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow] || TOURNAMENT_OF_DAY_BY_WEEKDAY[0];
+  var currentHour = Number.isFinite(Number(current.hour)) ? Math.floor(Number(current.hour)) : 18;
+  if (msk.minutes >= (currentHour + 3) * 60) dow = (dow + 1) % 7;
   var t = TOURNAMENT_OF_DAY_BY_WEEKDAY[dow] || TOURNAMENT_OF_DAY_BY_WEEKDAY[0];
-  return t.name + " · " + t.guarantee + " · 18:00 МСК";
+  var hour = Number.isFinite(Number(t.hour)) ? Math.floor(Number(t.hour)) : 18;
+  var minute = Number.isFinite(Number(t.minute)) ? Math.floor(Number(t.minute)) : 0;
+  return t.name + " · " + t.guarantee + " · " + String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0") + " МСК";
 }
 
 function pokerGetDownloadXpokerFreerollInfo(now) {
@@ -1800,6 +1807,13 @@ function updateTournamentDayBlock() {
   if (buyinEls.length === 0 || guaranteeEls.length === 0 || timerEls.length === 0) return;
   var MSK_START_UTC_HOUR = 15;
   var MSK_END_REG_UTC_HOUR = 18;
+  function tournamentDayStartUtcHour(item) {
+    var mskHour = item && Number.isFinite(Number(item.hour)) ? Math.floor(Number(item.hour)) : 18;
+    return mskHour - 3;
+  }
+  function tournamentDayEndRegUtcHour(item) {
+    return tournamentDayStartUtcHour(item) + 3;
+  }
   function getMskDateParts() {
     var s = new Date().toLocaleString("en-CA", { timeZone: "Europe/Moscow" });
     var parts = s.slice(0, 10).split("-");
@@ -1813,7 +1827,8 @@ function updateTournamentDayBlock() {
   /** Календарная дата МСК, к которой относится показываемый «турнир дня» (после конца рег — уже завтра). */
   function getDisplayedTournamentMskParts(now) {
     var p = getMskDateParts();
-    var endRegToday = new Date(Date.UTC(p.y, p.m, p.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    var todayItem = TOURNAMENT_OF_DAY_BY_WEEKDAY[getMskDayOfWeek()];
+    var endRegToday = new Date(Date.UTC(p.y, p.m, p.d, tournamentDayEndRegUtcHour(todayItem), 0, 0, 0));
     if (now < endRegToday) return p;
     var nextUtc = new Date(Date.UTC(p.y, p.m, p.d, 12, 0, 0, 0));
     nextUtc.setUTCDate(nextUtc.getUTCDate() + 1);
@@ -1822,8 +1837,9 @@ function updateTournamentDayBlock() {
   function getTournamentDayState(now) {
     var p = getMskDateParts();
     var mskDow = getMskDayOfWeek();
-    var startToday = new Date(Date.UTC(p.y, p.m, p.d, MSK_START_UTC_HOUR, 0, 0, 0));
-    var endRegToday = new Date(Date.UTC(p.y, p.m, p.d, MSK_END_REG_UTC_HOUR, 0, 0, 0));
+    var todayItem = TOURNAMENT_OF_DAY_BY_WEEKDAY[mskDow];
+    var startToday = new Date(Date.UTC(p.y, p.m, p.d, tournamentDayStartUtcHour(todayItem), 0, 0, 0));
+    var endRegToday = new Date(Date.UTC(p.y, p.m, p.d, tournamentDayEndRegUtcHour(todayItem), 0, 0, 0));
     if (now < startToday) {
       return { t: TOURNAMENT_OF_DAY_BY_WEEKDAY[mskDow], target: startToday, label: "", weekday: mskDow };
     }
@@ -1831,8 +1847,9 @@ function updateTournamentDayBlock() {
       return { t: TOURNAMENT_OF_DAY_BY_WEEKDAY[mskDow], target: endRegToday, label: "до конца рег ", weekday: mskDow };
     }
     var nextDate = new Date(p.y, p.m, p.d + 1);
-    var nextStart = new Date(Date.UTC(nextDate.getFullYear(), nextDate.getMonth(), nextDate.getDate(), MSK_START_UTC_HOUR, 0, 0, 0));
     var nextMskDow = nextDate.getDay();
+    var nextItem = TOURNAMENT_OF_DAY_BY_WEEKDAY[nextMskDow];
+    var nextStart = new Date(Date.UTC(nextDate.getFullYear(), nextDate.getMonth(), nextDate.getDate(), tournamentDayStartUtcHour(nextItem), 0, 0, 0));
     return { t: TOURNAMENT_OF_DAY_BY_WEEKDAY[nextMskDow], target: nextStart, label: "", weekday: nextMskDow };
   }
   function addDaysToYmd(y, m0, d, add) {
@@ -1846,8 +1863,8 @@ function updateTournamentDayBlock() {
    */
   function getNextWeekdayFreerollSlot(now, targetDow, tInfo, hourOpts) {
     hourOpts = hourOpts || {};
-    var startUtcH = hourOpts.startUtcHour != null ? hourOpts.startUtcHour : MSK_START_UTC_HOUR;
-    var endRegUtcH = hourOpts.endRegUtcHour != null ? hourOpts.endRegUtcHour : MSK_END_REG_UTC_HOUR;
+    var startUtcH = hourOpts.startUtcHour != null ? hourOpts.startUtcHour : tournamentDayStartUtcHour(tInfo);
+    var endRegUtcH = hourOpts.endRegUtcHour != null ? hourOpts.endRegUtcHour : tournamentDayEndRegUtcHour(tInfo);
     var p = getMskDateParts();
     var mskDow = getMskDayOfWeek();
     var offset = (targetDow - mskDow + 7) % 7;
@@ -1936,13 +1953,16 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
+    var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
+    var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;
+    var detailTime = String(detailHour).padStart(2, "0") + ":" + String(detailMinute).padStart(2, "0");
     renderHomeTournamentWeekList(selectedWeekday);
     renderHomeLiveTournament(n);
     var homeTournamentName = document.getElementById("tournamentDayHomeName");
     if (homeTournamentName) homeTournamentName.textContent = detailNameStr || "Турнир дня";
     window._tournamentDayShare = {
       name: detailNameStr,
-      time: "18:00",
+      time: detailTime,
       guarantee: detailGuaranteeStr
     };
     var scheduleTdName = document.getElementById("scheduleTournamentDayName");
@@ -1980,7 +2000,7 @@ function updateTournamentDayBlock() {
     if (scheduleTimer) scheduleTimer.textContent = currentTimerStr;
     var tdWeekTime = document.getElementById("tournamentDayHomeWeekTime");
     if (tdWeekTime && detailState.target) {
-      tdWeekTime.textContent = pokerMskWeekdayShortAt(detailState.target.getTime()) + ", 18:00 МСК";
+      tdWeekTime.textContent = pokerMskWeekdayShortAt(detailState.target.getTime()) + ", " + detailTime + " МСК";
     }
     syncHomeTournamentBonusAvailability(selectedWeekday);
     syncHomeTournamentBubbleBuyinLabel(selectedWeekday);
