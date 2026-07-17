@@ -2146,9 +2146,10 @@
   }
 
   function broadcastImagePayload() {
-    if (!state.broadcastImage || !state.broadcastImage.dataUrl) return {};
+    if (!state.broadcastImage || (!state.broadcastImage.dataUrl && !state.broadcastImage.telegramFileId)) return {};
     return {
       imageDataUrl: state.broadcastImage.dataUrl,
+      imageTelegramFileId: state.broadcastImage.telegramFileId || "",
       imageMimeType: state.broadcastImage.mimeType || "image/jpeg",
       imageName: state.broadcastImage.name || "image.jpg",
       imageSize: state.broadcastImage.size || 0,
@@ -2392,6 +2393,9 @@
       if (img && img.dataUrl) {
         preview.hidden = false;
         preview.innerHTML = "<img src=\"" + esc(img.dataUrl) + "\" alt=\"Прикрепленная картинка\" />";
+      } else if (img && img.telegramFileId) {
+        preview.hidden = false;
+        preview.innerHTML = "<div class=\"player-crm__broadcast-telegram-image\">Фото из последнего поста Telegram</div>";
       } else {
         preview.hidden = true;
         preview.innerHTML = "";
@@ -2404,6 +2408,53 @@
     var input = document.getElementById("playerCrmBroadcastImageInput");
     if (input) input.value = "";
     renderBroadcastImageAttachment();
+  }
+
+  function insertLatestChannelPost() {
+    var button = document.getElementById("playerCrmBroadcastLatestPostBtn");
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    var base = getApiBaseSafe();
+    if (!base) {
+      setBroadcastResult("CRM API недоступна.");
+      return;
+    }
+    var q = authQuerySafe();
+    var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    if (button) button.disabled = true;
+    setBroadcastResult("Загружаем последний пост канала...");
+    fetch(base + "/api/player-crm" + q + sep + "latestChannelPost=1")
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var post = data && data.ok && data.post ? data.post : null;
+        if (!post) {
+          setBroadcastResult("Последний пост канала пока не найден. Бот должен получать публикации канала.");
+          return;
+        }
+        var text = String(post.text || "").trim();
+        if (textEl) {
+          var max = Number(textEl.getAttribute("maxlength")) || 900;
+          textEl.value = text.slice(0, max);
+          try { textEl.dispatchEvent(new Event("input", { bubbles: true })); } catch (eInput) {}
+        }
+        var photoFileId = String(post.photoFileId || "").trim();
+        state.broadcastImage = photoFileId ? {
+          dataUrl: "",
+          telegramFileId: photoFileId,
+          mimeType: "image/jpeg",
+          name: "Последний пост Telegram",
+          size: 0,
+        } : null;
+        var input = document.getElementById("playerCrmBroadcastImageInput");
+        if (input) input.value = "";
+        renderBroadcastImageAttachment();
+        setBroadcastResult("Последний пост канала подставлен" + (photoFileId ? " вместе с фотографией." : "."));
+      })
+      .catch(function () {
+        setBroadcastResult(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Не удалось загрузить последний пост.");
+      })
+      .finally(function () {
+        if (button) button.disabled = false;
+      });
   }
 
   function readFileDataUrl(file) {
@@ -2545,7 +2596,11 @@
         "<div class=\"player-crm__recipient-phone-head\"><strong>Два туза</strong><span>бот</span></div>" +
         "<div class=\"player-crm__recipient-chat\">" +
           "<div class=\"player-crm__recipient-bubble\">" +
-            (image && image.dataUrl ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />" : "") +
+            (image && image.dataUrl
+              ? "<img src=\"" + esc(image.dataUrl) + "\" alt=\"Картинка рассылки\" />"
+              : image && image.telegramFileId
+                ? "<div class=\"player-crm__broadcast-telegram-image\">Фото из поста Telegram</div>"
+                : "") +
             (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
             (hasButton ? "<div class=\"player-crm__recipient-open-buttons\">" + buttonsHtml + "</div>" : "") +
           "</div>" +
@@ -3813,9 +3868,11 @@
       if (sel) sel.value = "";
     });
     var broadcastImageBtn = document.getElementById("playerCrmBroadcastImageBtn");
+    var broadcastLatestPostBtn = document.getElementById("playerCrmBroadcastLatestPostBtn");
     var broadcastImageInput = document.getElementById("playerCrmBroadcastImageInput");
     var broadcastImageRemove = document.getElementById("playerCrmBroadcastImageRemoveBtn");
     if (broadcastImageBtn && broadcastImageInput) broadcastImageBtn.addEventListener("click", function () { broadcastImageInput.click(); });
+    if (broadcastLatestPostBtn) broadcastLatestPostBtn.addEventListener("click", insertLatestChannelPost);
     if (broadcastImageInput) broadcastImageInput.addEventListener("change", function () {
       var file = broadcastImageInput.files && broadcastImageInput.files[0] ? broadcastImageInput.files[0] : null;
       handleBroadcastImageFile(file);

@@ -1388,6 +1388,27 @@ function pokerProfileNormalizeCity(value) {
 
 var pokerProfileCityCatalogPromise = null;
 var pokerProfileCityLookup = null;
+var POKER_PROFILE_EXTRA_CITIES = [
+  // Беларусь
+  "Минск", "Брест", "Витебск", "Гомель", "Гродно", "Могилёв", "Барановичи", "Бобруйск", "Борисов", "Мозырь", "Пинск",
+  // Казахстан
+  "Астана", "Алматы", "Шымкент", "Караганда", "Актобе", "Тараз", "Павлодар", "Усть-Каменогорск", "Семей", "Атырау",
+  "Костанай", "Кызылорда", "Уральск", "Петропавловск", "Актау", "Темиртау", "Туркестан",
+  // Узбекистан
+  "Ташкент", "Самарканд", "Наманган", "Андижан", "Бухара", "Фергана", "Нукус", "Карши", "Коканд", "Маргилан", "Джизак", "Навои", "Термез", "Ургенч",
+  // Кыргызстан
+  "Бишкек", "Ош", "Джалал-Абад", "Каракол", "Токмок", "Узген", "Нарын", "Талас",
+  // Таджикистан
+  "Душанбе", "Худжанд", "Бохтар", "Куляб", "Истаравшан", "Турсунзаде", "Пенджикент",
+  // Азербайджан
+  "Баку", "Гянджа", "Сумгаит", "Ленкорань", "Мингечевир", "Нахичевань", "Шеки", "Ширван",
+  // Армения
+  "Ереван", "Гюмри", "Ванадзор", "Вагаршапат", "Раздан", "Абовян", "Капан",
+  // Молдова
+  "Кишинёв", "Бельцы", "Бендеры", "Тирасполь", "Кагул", "Оргеев", "Сороки", "Унгены",
+  // Туркменистан
+  "Ашхабад", "Туркменабад", "Дашогуз", "Мары", "Балканабад", "Туркменбаши"
+];
 
 function pokerProfileCityKey(value) {
   return pokerProfileNormalizeCity(value).toLocaleLowerCase("ru-RU").replace(/ё/g, "е");
@@ -1406,6 +1427,11 @@ function pokerProfileLoadCityCatalog() {
       var aliases = data && data.aliases && typeof data.aliases === "object" ? data.aliases : {};
       var lookup = Object.create(null);
       cities.forEach(function (city) {
+        var normalized = pokerProfileNormalizeCity(city);
+        var key = pokerProfileCityKey(normalized);
+        if (key && normalized) lookup[key] = normalized;
+      });
+      POKER_PROFILE_EXTRA_CITIES.forEach(function (city) {
         var normalized = pokerProfileNormalizeCity(city);
         var key = pokerProfileCityKey(normalized);
         if (key && normalized) lookup[key] = normalized;

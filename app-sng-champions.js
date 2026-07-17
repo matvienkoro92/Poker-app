@@ -402,7 +402,7 @@
   }
 
   function playerName(player) {
-    return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim() || "Игрок";
+    return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim().replace(/^@+/, "") || "Игрок";
   }
 
   function playerLevelText(player) {

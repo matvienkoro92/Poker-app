@@ -352,6 +352,7 @@ function initPlayerCrmStatsRuntime(deps) {
       "vpn-proxy": "VPN за 100 ₽", "hall-of-fame": "Зал славы", transfers: "Переводы",
       "club-players": "Игроки", "club-achievements": "Ачивки",
       raffle_joined: "Участие в розыгрышах", daily_poker_spin: "Крутка дня", sng_joined: "Заявки SNG",
+      vpn_trial_clicked: "VPN за 100 ₽",
       private_cash_applied: "Заявки в приватный кеш", club_choice_voted: "Голосование клуба",
       poker21_linked: "Привязка Poker21", subscription_enabled: "Подписки", push_enabled: "Push",
     };
@@ -359,6 +360,7 @@ function initPlayerCrmStatsRuntime(deps) {
       "home", "raffles", "daily-poker", "profile", "chat",
       "vpn-proxy", "hall-of-fame", "transfers", "club-players", "club-achievements",
     ];
+    var analyticsActivityOrder = ["daily_poker_spin", "raffle_joined", "sng_joined", "vpn_trial_clicked"];
     function analyticsTable(title, rows) {
       rows = Array.isArray(rows) ? rows.slice() : [];
       if (title === "Куда заходили") {
@@ -371,6 +373,18 @@ function initPlayerCrmStatsRuntime(deps) {
           var bIndex = analyticsSectionOrder.indexOf(String(b && b.name || ""));
           if (aIndex < 0) aIndex = analyticsSectionOrder.length;
           if (bIndex < 0) bIndex = analyticsSectionOrder.length;
+          return aIndex - bIndex || Number(b && b.uniqueVisitors || 0) - Number(a && a.uniqueVisitors || 0) || Number(b && b.events || 0) - Number(a && a.events || 0);
+        });
+      } else if (title === "В чём участвовали") {
+        analyticsActivityOrder.forEach(function (name) {
+          var exists = rows.some(function (row) { return String(row && row.name || "") === name; });
+          if (!exists) rows.push({ name: name, guestInstallations: 0, registeredVisitors: 0, uniqueVisitors: 0, events: 0 });
+        });
+        rows.sort(function (a, b) {
+          var aIndex = analyticsActivityOrder.indexOf(String(a && a.name || ""));
+          var bIndex = analyticsActivityOrder.indexOf(String(b && b.name || ""));
+          if (aIndex < 0) aIndex = analyticsActivityOrder.length;
+          if (bIndex < 0) bIndex = analyticsActivityOrder.length;
           return aIndex - bIndex || Number(b && b.uniqueVisitors || 0) - Number(a && a.uniqueVisitors || 0) || Number(b && b.events || 0) - Number(a && a.events || 0);
         });
       }

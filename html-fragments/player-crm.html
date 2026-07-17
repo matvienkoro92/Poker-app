@@ -29,7 +29,6 @@
     <div class="player-crm__workbench">
       <main class="player-crm__panel player-crm__panel--main">
         <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="stats">
-          <div class="player-crm__tracking-notice" id="playerCrmTrackingNotice"></div>
           <div class="player-crm__hero-tools player-crm__period-toolbar">
             <div class="player-crm__period player-crm__period--main">
               <span>Период</span>
@@ -67,6 +66,7 @@
             <div style="display:block;color:#f4ead6;background:rgba(15,23,42,0.78);border:1px solid rgba(199,163,106,0.35);border-radius:8px;padding:12px;font-weight:800;">Загрузка дашборда…</div>
           </div>
           <div class="player-crm__current-stats" id="playerCrmCurrentStats"></div>
+          <div class="player-crm__tracking-notice" id="playerCrmTrackingNotice"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="overview">
@@ -236,6 +236,7 @@
             <div class="player-crm__broadcast-attachment">
               <input type="file" id="playerCrmBroadcastImageInput" class="player-crm__file-input" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Прикрепить картинку" />
               <div class="player-crm__broadcast-attachment-row">
+                <button type="button" class="player-crm__primary-btn" id="playerCrmBroadcastLatestPostBtn">Вставить последний пост</button>
                 <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageBtn">Прикрепить картинку</button>
                 <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastImageRemoveBtn" hidden>Убрать</button>
                 <span id="playerCrmBroadcastImageName">Картинка не выбрана</span>
@@ -280,10 +281,8 @@
                 <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastRemoveButton2">Убрать вторую кнопку</button>
               </div>
             </div>
-            <div class="player-crm__broadcast-actions">
-              <button type="button" class="player-crm__primary-btn" id="playerCrmBroadcastPrepareBtn">Подготовить рассылку</button>
-              <button type="button" class="player-crm__danger-btn" id="playerCrmBroadcastSendBtn">Отправить сейчас</button>
-              <button type="button" class="player-crm__danger-btn" id="playerCrmBroadcastSendAllBtn">Отправить все пачки</button>
+            <div class="player-crm__broadcast-actions player-crm__broadcast-actions--send">
+              <button type="button" class="player-crm__primary-btn player-crm__broadcast-send-main" id="playerCrmBroadcastSendAllBtn">Отправить все пачки</button>
               <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastTestBtn">Тест</button>
               <button type="button" class="player-crm__ghost-btn" id="playerCrmBroadcastPreviewBtn">Посмотреть</button>
             </div>

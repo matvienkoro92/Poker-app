@@ -240,6 +240,15 @@ function initHomeVpnProxyModal(opts) {
         if (modal.getAttribute("aria-hidden") === "false") syncVpnProxyLocationHashForTab("vpn");
       });
     }
+    var vpnTrialBtn = modal.querySelector(".vpn-proxy-modal__trial-btn");
+    if (vpnTrialBtn && vpnTrialBtn.getAttribute("data-vpn-trial-analytics-bound") !== "1") {
+      vpnTrialBtn.setAttribute("data-vpn-trial-analytics-bound", "1");
+      vpnTrialBtn.addEventListener("click", function () {
+        if (typeof window.pokerTrackAnalyticsEvent === "function") {
+          window.pokerTrackAnalyticsEvent("vpn_trial_clicked", { name: "vpn_100" });
+        }
+      });
+    }
     if (tabProxy) {
       tabProxy.addEventListener("click", function (e) {
         e.preventDefault();
