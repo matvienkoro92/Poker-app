@@ -2055,23 +2055,97 @@ button.player-crm__stat:focus-visible,
 .player-crm__form-grid label {
   min-width: 0;
 }
+.player-crm__broadcast-channel-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 5px;
+  border: 1px solid rgba(199, 163, 106, 0.3);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.28);
+}
+.player-crm__broadcast-channel-tab {
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(8, 13, 24, 0.72);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.player-crm__broadcast-channel-tab:hover,
+.player-crm__broadcast-channel-tab:focus-visible {
+  border-color: rgba(199, 163, 106, 0.64);
+  color: var(--text);
+  outline: none;
+}
+.player-crm__broadcast-channel-tab--active {
+  border-color: rgba(255, 203, 91, 0.88);
+  background: linear-gradient(180deg, rgba(255, 218, 128, 0.96), rgba(211, 158, 56, 0.96));
+  color: #101522;
+  box-shadow: inset 0 0 0 1px rgba(255, 244, 201, 0.74), 0 5px 16px rgba(211, 158, 56, 0.18);
+}
 .player-crm__message-label {
   margin-bottom: 10px;
 }
-.player-crm__broadcast-emoji {
+.player-crm__broadcast-message-wrap {
+  position: relative;
+  display: block;
   min-width: 0;
-  margin: -2px 0 10px;
+}
+.player-crm__broadcast-message-wrap textarea {
+  display: block;
+  width: 100%;
+  padding-right: 52px;
+}
+.player-crm__broadcast-emoji-toggle {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(199, 163, 106, 0.48);
+  border-radius: 9px;
+  background: rgba(8, 13, 24, 0.88);
+  color: var(--text);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+.player-crm__broadcast-emoji-toggle:hover,
+.player-crm__broadcast-emoji-toggle:focus-visible,
+.player-crm__broadcast-emoji-toggle[aria-expanded="true"] {
+  border-color: rgba(199, 163, 106, 0.8);
+  background: rgba(199, 163, 106, 0.18);
+  outline: none;
 }
 .player-crm__broadcast-emoji-panel {
+  position: absolute;
+  right: 8px;
+  bottom: 52px;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  min-width: 0;
-  max-width: 100%;
+  width: min(390px, calc(100% - 16px));
   padding: 8px;
   border: 1px solid rgba(199, 163, 106, 0.3);
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.28);
+  background: rgba(8, 13, 24, 0.98);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.38);
+}
+.player-crm__broadcast-emoji-panel[hidden] {
+  display: none;
 }
 .player-crm__broadcast-emoji-item {
   display: inline-flex;

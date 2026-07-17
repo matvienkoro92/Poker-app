@@ -95,8 +95,8 @@ function initPlayerCrmStatsRuntime(deps) {
     var pushTotalStart = Math.max(0, pushTotalEnd - statPushNet);
     var currentStats = [
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
-      ["Poker21 всего", pokerPlusTotalEnd, "сейчас", "pokerplus-total"],
-      ["Bot доступен", botTotalEnd, "сейчас", "bot-reach"],
+      ["Привязано Poker21", pokerPlusTotalEnd, "сейчас", "pokerplus-total"],
+      ["Подписаны на бот", botTotalEnd, "сейчас", "bot-reach"],
       ["Push доступен", pushTotalEnd, "сейчас", "push-reach"],
     ];
     if (summaryRegistrationCounts) {

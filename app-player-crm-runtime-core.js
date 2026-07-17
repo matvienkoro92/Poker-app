@@ -745,13 +745,14 @@
 
   function renderBroadcastOptions() {
     var sel = document.getElementById("playerCrmBroadcastSegment");
-    if (!sel) return;
-    var prev = sel.value || state.filter || "has_bot";
-    sel.innerHTML = segments.map(function (seg) {
-      var count = segmentPlayers(seg.key).length;
-      return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + esc(intFmt(count)) + "</option>";
-    }).join("");
-    sel.value = segmentByKey(prev).key;
+    if (sel) {
+      var prev = sel.value || state.filter || "has_bot";
+      sel.innerHTML = segments.map(function (seg) {
+        var count = segmentPlayers(seg.key).length;
+        return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + esc(intFmt(count)) + "</option>";
+      }).join("");
+      sel.value = segmentByKey(prev).key;
+    }
     updateBroadcastChannelCounts();
     updateBroadcastAudience();
   }
@@ -762,25 +763,39 @@
     var players = Array.isArray(state.players) ? state.players : [];
     var botCount = players.filter(function (player) { return !!((player.channels || {}).bot); }).length;
     var pushCount = players.filter(function (player) { return !!((player.channels || {}).push); }).length;
-    var combinedCount = players.filter(function (player) {
-      var channels = player.channels || {};
-      return !!channels.bot || !!channels.push;
-    }).length;
     var labels = {
-      bot: "Бот · " + intFmt(botCount),
-      push: "Push · " + intFmt(pushCount),
-      bot_push: "Бот + push · " + intFmt(combinedCount)
+      bot: "Рассылка в бот · " + intFmt(botCount),
+      push: "Push · " + intFmt(pushCount)
     };
-    Array.prototype.forEach.call(sel.options || [], function (option) {
-      if (labels[option.value]) option.textContent = labels[option.value];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-crm-broadcast-channel]"), function (button) {
+      var value = button.getAttribute("data-crm-broadcast-channel") || "bot";
+      if (labels[value]) button.textContent = labels[value];
+      var active = value === sel.value;
+      button.classList.toggle("player-crm__broadcast-channel-tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
     });
   }
 
+  function selectBroadcastChannel(channel) {
+    var input = document.getElementById("playerCrmBroadcastChannel");
+    if (!input) return;
+    input.value = channel === "push" ? "push" : "bot";
+    var batchNumber = document.getElementById("playerCrmBroadcastBatchNumber");
+    if (batchNumber) batchNumber.value = "1";
+    updateBroadcastChannelCounts();
+    updateBroadcastAudience();
+  }
+
   function updateBroadcastAudience() {
-    var sel = document.getElementById("playerCrmBroadcastSegment");
     var el = document.getElementById("playerCrmBroadcastAudience");
-    var key = sel ? sel.value : state.filter;
-    var basePlayers = segmentPlayers(key);
+    var channelEl = document.getElementById("playerCrmBroadcastChannel");
+    var channel = channelEl ? channelEl.value : "bot";
+    var basePlayers = (Array.isArray(state.players) ? state.players : []).filter(function (player) {
+      var channels = player.channels || {};
+      if (channel === "push") return !!channels.push;
+      if (channel === "bot_push") return !!channels.bot || !!channels.push;
+      return !!channels.bot;
+    });
     var filters = broadcastInnerFilterValues();
     var players = applyBroadcastInnerFilters(basePlayers, filters);
     var batch = readBroadcastBatch(players);
@@ -1027,16 +1042,31 @@
   function initBroadcastEmojiPicker() {
     var wrap = document.getElementById("playerCrmBroadcastEmojiWrap");
     var panel = document.getElementById("playerCrmBroadcastEmojiPanel");
-    if (!wrap || !panel || panel.dataset.crmEmojiReady === "1") return;
+    var toggle = document.getElementById("playerCrmBroadcastEmojiToggle");
+    if (!wrap || !panel || !toggle || panel.dataset.crmEmojiReady === "1") return;
     panel.dataset.crmEmojiReady = "1";
     panel.innerHTML = CRM_BROADCAST_EMOJIS.map(function (emoji) {
       return "<button type=\"button\" class=\"player-crm__broadcast-emoji-item\" data-crm-broadcast-emoji=\"" + esc(emoji) + "\" aria-label=\"" + esc("Вставить " + emoji) + "\">" + esc(emoji) + "</button>";
     }).join("");
+    function setEmojiPanelOpen(open) {
+      panel.hidden = !open;
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Закрыть смайлы" : "Открыть смайлы");
+    }
+    toggle.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      setEmojiPanelOpen(panel.hidden);
+    });
     panel.addEventListener("click", function (e) {
       var emojiBtn = e.target && e.target.closest ? e.target.closest("[data-crm-broadcast-emoji]") : null;
       if (!emojiBtn) return;
       e.preventDefault();
       insertBroadcastEmoji(emojiBtn.getAttribute("data-crm-broadcast-emoji") || "");
+      setEmojiPanelOpen(false);
+    });
+    document.addEventListener("click", function (e) {
+      if (!panel.hidden && e.target && !wrap.contains(e.target)) setEmojiPanelOpen(false);
     });
   }
 
@@ -1613,7 +1643,10 @@
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Не удалось загрузить победителей.</div>";
       return;
     }
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · списано " + money(data.totalDebitedAmount || 0) + " · " + intFmt(winners.length) + " победителей";
+    var winnersPrizeTotal = Math.max(0, Number(data && data.totalPrizeRubles) || winners.reduce(function (sum, winner) {
+      return sum + Math.max(0, Number(winner && winner.totalPrizeAmount) || 0);
+    }, 0));
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · списано " + money(data.totalDebitedAmount || 0) + " · выиграно " + money(winnersPrizeTotal) + " · " + intFmt(winners.length) + " победителей";
     if (!winners.length && !debitedUsers.length) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период данных нет.</div>";
       return;
@@ -1657,9 +1690,6 @@
         "<span>Дата выдачи <b>" + esc(issueDates.join(", ") || "—") + "</b></span>" +
         "<b class=\"player-crm__raffle-recipient-total\">" + esc(money(user.amount || 0)) + "</b></article>";
     }).join("") + "</div></section>" : "";
-    var winnersPrizeTotal = Math.max(0, Number(data && data.totalPrizeRubles) || winners.reduce(function (sum, winner) {
-      return sum + Math.max(0, Number(winner && winner.totalPrizeAmount) || 0);
-    }, 0));
     var winnersHtml = winners.length ? "<details class=\"player-crm__daily-winners-spoiler\"><summary>Победители <b>" + esc(intFmt(winners.length)) + " · выиграно " + esc(money(winnersPrizeTotal)) + "</b></summary><div class=\"player-crm__daily-winners-list\">" + winners.map(function (winner) {
       var telegram = winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = winner.pokerPlusNickname || winner.pokerPlusName || "—";
@@ -1717,9 +1747,11 @@
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
     var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients.slice() : [];
-    var raffleSort = state.raffleRecipientsSort === "cash" ? "cash" : "tickets";
+    var raffleSort = state.raffleRecipientsSort === "cash" || state.raffleRecipientsSort === "total"
+      ? state.raffleRecipientsSort
+      : "tickets";
     recipients.sort(function (a, b) {
-      var amountKey = raffleSort === "cash" ? "cashAmount" : "ticketAmount";
+      var amountKey = raffleSort === "cash" ? "cashAmount" : (raffleSort === "total" ? "totalAmount" : "ticketAmount");
       var amountDiff = Number(b && b[amountKey] || 0) - Number(a && a[amountKey] || 0);
       if (amountDiff) return amountDiff;
       return Number(b && b.totalAmount || 0) - Number(a && a.totalAmount || 0);
@@ -1736,7 +1768,8 @@
     var sortHtml = "<div class=\"player-crm__raffle-sort\" role=\"group\" aria-label=\"Сортировка игроков\">" +
       "<span>Сортировать</span>" +
       "<button type=\"button\" data-crm-raffles-sort=\"tickets\" class=\"" + (raffleSort === "tickets" ? "is-active" : "") + "\">По билетам</button>" +
-      "<button type=\"button\" data-crm-raffles-sort=\"cash\" class=\"" + (raffleSort === "cash" ? "is-active" : "") + "\">По кешу</button></div>";
+      "<button type=\"button\" data-crm-raffles-sort=\"cash\" class=\"" + (raffleSort === "cash" ? "is-active" : "") + "\">По кешу</button>" +
+      "<button type=\"button\" data-crm-raffles-sort=\"total\" class=\"" + (raffleSort === "total" ? "is-active" : "") + "\">По общей сумме</button></div>";
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + sortHtml + "<div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user, index) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || "—";
@@ -2489,10 +2522,8 @@
   function showBroadcastPreview() {
     var players = updateBroadcastAudience();
     var batch = readBroadcastBatch(players);
-    var segEl = document.getElementById("playerCrmBroadcastSegment");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var textEl = document.getElementById("playerCrmBroadcastText");
-    var segmentTitle = segEl && segEl.options && segEl.selectedIndex >= 0 ? segEl.options[segEl.selectedIndex].text : "—";
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var image = state.broadcastImage || null;
@@ -2534,7 +2565,7 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Группа<strong>" + esc(segmentTitle) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span></div>" +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Канал<strong>" + esc(channelLabel(channel)) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span></div>" +
             (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылки в кнопках</strong>" + buttonsLinksHtml + "</div>" : "") +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
@@ -2546,16 +2577,15 @@
 
   function runBroadcast(action, options) {
     options = options && typeof options === "object" ? options : {};
-    var segEl = document.getElementById("playerCrmBroadcastSegment");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var textEl = document.getElementById("playerCrmBroadcastText");
     var out = document.getElementById("playerCrmBroadcastResult");
-    var segment = segEl ? segEl.value : "has_bot";
+    var segment = "all";
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
     var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
     var innerFilters = resumeIds.length ? [] : broadcastInnerFilterValues();
-    var players = applyBroadcastInnerFilters(segmentPlayers(segment), innerFilters);
+    var players = updateBroadcastAudience();
     var batch = readBroadcastBatch(players);
     var allAudienceIds = players.map(playerBroadcastId).filter(Boolean);
     var sendAllBatches = options.allBatches === true && !resumeIds.length;
@@ -3411,7 +3441,8 @@
       }
       var rafflesSortButton = e.target.closest("[data-crm-raffles-sort]");
       if (rafflesSortButton) {
-        state.raffleRecipientsSort = rafflesSortButton.getAttribute("data-crm-raffles-sort") === "cash" ? "cash" : "tickets";
+        var raffleSortValue = rafflesSortButton.getAttribute("data-crm-raffles-sort");
+        state.raffleRecipientsSort = raffleSortValue === "cash" || raffleSortValue === "total" ? raffleSortValue : "tickets";
         renderRafflesModal();
         return;
       }
@@ -3546,6 +3577,12 @@
         state.tab = "broadcast";
         syncTabs();
         updateBroadcastAudience();
+        return;
+      }
+      var broadcastChannelTab = e.target.closest("[data-crm-broadcast-channel]");
+      if (broadcastChannelTab) {
+        e.preventDefault();
+        selectBroadcastChannel(broadcastChannelTab.getAttribute("data-crm-broadcast-channel") || "bot");
         return;
       }
       if (e.target.closest("[data-crm-resume-broadcast]")) {
