@@ -170,17 +170,7 @@ function initProfilePokerPlus() {
   }
 
   function pokerPlusUnlinkedHint() {
-    var method = "";
-    try {
-      method = typeof pokerGetAuthMethod === "function" ? pokerGetAuthMethod() : "";
-    } catch (eMethod) {}
-    if (method === "telegram") {
-      return "Poker21 не привязан к этому Telegram. Если вы регистрировались через email, откройте «Профиль в клубе» и привяжите Telegram к той же почте. Или вставьте ключ из Poker21 ниже.";
-    }
-    if (method === "email") {
-      return "Poker21 ещё не привязан к этой почте. Вставьте ключ из Poker21 ниже; после привязки профиль будет открываться в этом аккаунте.";
-    }
-    return "Poker21 ещё не привязан. Вставьте ключ из Poker21 ниже.";
+    return "Вставьте свой ключ из Poker21, чтобы привязать аккаунт. Ключ найдите по кнопке в клубе, указанной на картинке.";
   }
 
   function notifyPokerPlusStatusChange(linked, profile) {
