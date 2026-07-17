@@ -12335,6 +12335,24 @@ body[data-view="raffles"] .raffle-ticket-winners-wrap--single {
   align-items: end;
 }
 
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-single-winners,
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-single-access {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-single-end-date,
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-groups {
+  grid-column: 1 / -1;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-groups {
+  order: 1;
+}
+
+body[data-view="raffles"] .raffle-ticket-winners-wrap:not(.raffle-ticket-winners-wrap--single) > .raffle-ticket-single-end-date {
+  order: 2;
+}
+
 body[data-view="raffles"] .raffle-ticket-winners-wrap--single > .randomizer-label {
   grid-template-columns: minmax(0, 1fr);
   align-content: end;

@@ -122,6 +122,7 @@
                       <select id="raffleTicketSingleAccess" class="randomizer-input raffle-group-access-select" aria-label="Доступ к этим билетам">
                         <option value="">как общий доступ</option>
                         <option value="0">для всех</option>
+                        <option value="1" selected>Уровень 1+</option>
                       </select>
                     </label>
                     <label class="randomizer-label raffle-ticket-single-end-date">
@@ -397,6 +398,7 @@
             </div>
 
             <div class="raffles-panel raffles-panel--hidden" id="rafflesPanelLeaders" data-raffle-panel="leaders">
+              <p class="raffle-empty raffle-winner-leaders__empty" id="raffleWinnerLeadersEmpty">Загружаем статистику победителей…</p>
               <section class="raffle-winner-leaders raffle-winner-leaders--hidden" id="raffleWinnerLeaders" hidden>
                 <div class="raffle-winner-leaders__head">
                   <h3 class="raffle-winner-leaders__title">Кто выигрывал чаще всех</h3>

@@ -51,6 +51,7 @@ function initRaffles() {
   var rafflesPanelActive = document.getElementById("rafflesPanelActive");
   var rafflesPanelCompleted = document.getElementById("rafflesPanelCompleted");
   var rafflesPanelLeaders = document.getElementById("rafflesPanelLeaders");
+  var raffleWinnerLeadersEmpty = document.getElementById("raffleWinnerLeadersEmpty");
   var rafflesTabActiveCount = document.getElementById("rafflesTabActiveCount");
   var rafflesTabActiveSum = document.getElementById("rafflesTabActiveSum");
   var rafflesTabCompletedCount = document.getElementById("rafflesTabCompletedCount");
@@ -3686,6 +3687,13 @@ function initRaffles() {
     rafflesCurrentTab = tab;
     if ((isCompleted || isLeaders) && !rafflesArchiveLoaded) {
       if (isCompleted) renderDeferredCompletedArchivePanel(rafflesLastCompleted || []);
+      if (isLeaders) {
+        if (raffleWinnerLeadersEmpty) {
+          raffleWinnerLeadersEmpty.textContent = "Загружаем статистику победителей…";
+          raffleWinnerLeadersEmpty.classList.remove("raffle-empty--hidden");
+        }
+        requestCompletedArchiveLoad();
+      }
       if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
       return;
     }

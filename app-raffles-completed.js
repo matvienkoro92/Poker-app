@@ -4,6 +4,7 @@ function initRafflesCompletedRuntime(opts) {
     var rafflesCompleted = document.getElementById("rafflesCompleted");
     var rafflesCompletedEmpty = document.getElementById("rafflesCompletedEmpty");
     var raffleWinnerLeaders = document.getElementById("raffleWinnerLeaders");
+    var raffleWinnerLeadersEmpty = document.getElementById("raffleWinnerLeadersEmpty");
     var raffleWinnerLeadersList = document.getElementById("raffleWinnerLeadersList");
     var raffleWinnerLeadersMonths = document.getElementById("raffleWinnerLeadersMonths");
     var raffleWinnerLeadersExpandBtn = document.getElementById("raffleWinnerLeadersExpandBtn");
@@ -692,6 +693,10 @@ function initRafflesCompletedRuntime(opts) {
     if (raffleWinnerLeaders) {
       raffleWinnerLeaders.hidden = !hasRows;
       raffleWinnerLeaders.classList.toggle("raffle-winner-leaders--hidden", !hasRows);
+    }
+    if (raffleWinnerLeadersEmpty) {
+      raffleWinnerLeadersEmpty.textContent = "Пока нет данных о победителях.";
+      raffleWinnerLeadersEmpty.classList.toggle("raffle-empty--hidden", hasRows);
     }
     if (raffleWinnerLeadersList) {
       raffleWinnerLeadersList.innerHTML = hasRows ? raffleWinnerLeaderRowsHtml(raffleWinnerLeaderRows.slice(0, RAFFLE_WINNER_LEADERS_PREVIEW_LIMIT)) : "";
