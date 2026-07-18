@@ -364,7 +364,7 @@
             '<div class="admin-bonuses__issue-player"><strong>' + esc(op.displayName || op.userId) + '</strong><span>' + esc(playerSub) + '</span></div>' +
             '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
             '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
-            '<div class="admin-bonuses__issue-review"><button type="button" class="' + (op.reviewVerified ? "admin-bonuses__issue-review-btn--verified" : "") + '" data-admin-bonus-issue-review="' + esc(op.id) + '"' + (op.reviewVerified ? " disabled" : "") + '>' + (op.reviewVerified ? "✓ Проверено" : "На проверке") + '</button></div>' +
+            '<div class="admin-bonuses__issue-review"><button type="button" class="' + (op.reviewVerified ? "admin-bonuses__issue-review-btn--verified" : "") + '" data-admin-bonus-issue-review="' + esc(op.id) + '"' + (op.reviewVerified ? " disabled" : "") + '>' + (op.reviewVerified ? "✓ Проверено" : "Проверили") + '</button></div>' +
           '</article>';
         }).join("") +
       '</section>';
@@ -411,7 +411,7 @@
       })
       .catch(function (err) {
         button.disabled = false;
-        button.textContent = "На проверке";
+        button.textContent = "Проверили";
         alert(err && err.message ? err.message : POKER_NET_ERR);
       });
   }

@@ -81,16 +81,30 @@ function initAdminReportModal() {
     });
     calculationRakeCard.appendChild(calculationRakeFieldsColumn);
     calculationRakeCard.appendChild(figuresRoot);
+    var calculationSummary = document.createElement("div");
+    calculationSummary.className = "admin-report-calculations__rake-summary";
     var calculationRakeTotalField = document.getElementById("adminReportFiguresRakeTotal");
     calculationRakeTotalField = calculationRakeTotalField && calculationRakeTotalField.closest(".admin-report-calculations__field");
     if (calculationRakeTotalField) {
-      calculationRakeFieldsColumn.insertBefore(calculationRakeTotalField, calculationRakeFieldsColumn.firstChild);
+      calculationSummary.appendChild(calculationRakeTotalField);
     }
     var calculationPercentTotalField = document.getElementById("adminReportFiguresPercentTotal");
     calculationPercentTotalField = calculationPercentTotalField && calculationPercentTotalField.closest(".admin-report-calculations__field");
     if (calculationPercentTotalField) {
       figuresRoot.insertBefore(calculationPercentTotalField, figuresRoot.firstChild);
     }
+    var calculationExpensesTotalField = document.getElementById("adminReportFiguresExpensesTotal");
+    calculationExpensesTotalField = calculationExpensesTotalField && calculationExpensesTotalField.closest(".admin-report-calculations__field");
+    if (calculationExpensesTotalField) {
+      calculationExpensesTotalField.classList.add("admin-report-calculations__field--expenses-highlight");
+      calculationSummary.appendChild(calculationExpensesTotalField);
+    }
+    var calculationRemainderField = document.getElementById("adminReportFiguresRemainder");
+    calculationRemainderField = calculationRemainderField && calculationRemainderField.closest(".admin-report-calculations__field");
+    if (calculationRemainderField) {
+      calculationSummary.appendChild(calculationRemainderField);
+    }
+    if (calculationSummary.children.length) calculationRakeCard.appendChild(calculationSummary);
     var calculationFiguresLower = document.getElementById("adminReportFiguresLower");
     if (calculationFiguresLower) calculationRakeCard.appendChild(calculationFiguresLower);
   }

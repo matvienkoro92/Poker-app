@@ -744,8 +744,9 @@ body.admin-report-modal-open .bottom-nav {
   grid-column: 1;
   grid-row: 2;
   display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
   gap: 5px;
-  align-content: start;
+  align-content: stretch;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field {
   min-width: 0;
@@ -761,6 +762,23 @@ body.admin-report-modal-open .bottom-nav {
   border-color: rgba(74, 222, 128, 0.48);
   background: rgba(34, 197, 94, 0.14);
   color: #bbf7d0;
+}
+.admin-report-calculations__rake-summary {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.admin-report-calculations__rake-summary .admin-report-calculations__field {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+.admin-report-calculations__rake-summary .admin-report-calculations__field--expenses-highlight {
+  border-color: rgba(250, 204, 21, 0.62);
+  background: rgba(250, 204, 21, 0.16);
+  color: #fde68a;
 }
 .admin-report-calculations--cash-total {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -792,7 +810,7 @@ body.admin-report-modal-open .bottom-nav {
   grid-column: 2;
   grid-row: 2;
   display: grid;
-  grid-template-rows: repeat(9, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
   gap: 5px;
   margin: 0;
   padding: 0;
@@ -802,7 +820,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__figures-lower {
   grid-column: 1 / -1;
-  grid-row: 3;
+  grid-row: 4;
   display: grid;
   gap: 5px;
   min-width: 0;
