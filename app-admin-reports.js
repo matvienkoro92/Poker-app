@@ -86,6 +86,7 @@ function initAdminReportModal() {
     var calculationRakeTotalField = document.getElementById("adminReportFiguresRakeTotal");
     calculationRakeTotalField = calculationRakeTotalField && calculationRakeTotalField.closest(".admin-report-calculations__field");
     if (calculationRakeTotalField) {
+      calculationRakeTotalField.classList.add("admin-report-calculations__field--rake-grand");
       calculationSummary.appendChild(calculationRakeTotalField);
     }
     var calculationPercentTotalField = document.getElementById("adminReportFiguresPercentTotal");
@@ -153,8 +154,9 @@ function initAdminReportModal() {
     modal.addEventListener("click", function (event) {
       var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
       if (!trigger || !modal.contains(trigger)) return;
+      event.preventDefault();
       openRakebackOverlay();
-    });
+    }, true);
   }
   if (rakebackOverlayClose && rakebackOverlayClose.dataset.bound !== "1") {
     rakebackOverlayClose.dataset.bound = "1";
