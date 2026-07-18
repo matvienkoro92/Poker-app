@@ -1307,6 +1307,7 @@
 
   var CRM_LINK_TARGETS = [
     { key: "home", label: "Главная", view: "home", startapp: "home" },
+    { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
     { key: "daily-poker", label: "Раздача дня", view: "daily-poker", startapp: "daily_poker" },
     { key: "daily-prediction", label: "Прогноз дня", view: "home", startapp: "daily_prediction" },
     { key: "private-cash", label: "Приватный кеш", view: "home", startapp: "private_cash" },
@@ -1323,7 +1324,6 @@
     { key: "poker-tasks", label: "Покерные задачи", view: "poker-tasks", startapp: "poker_task_mtt" },
     { key: "club-tasks", label: "Задания клуба", view: "poker-tasks", startapp: "club_tasks" },
     { key: "equilator", label: "Эквилятор", view: "equilator", startapp: "equilator" },
-    { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
     { key: "winter-rating", label: "Зимний рейтинг", view: "winter-rating", startapp: "winter_rating" },
     { key: "spring-rating", label: "Весенний рейтинг", view: "spring-rating", startapp: "spring_rating" },
     { key: "spring-rating-league-1", label: "Весенний рейтинг · Лига 1", view: "spring-rating", startapp: "spring_rating_league_1" },
