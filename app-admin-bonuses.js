@@ -10,6 +10,9 @@
     operation: "",
     loading: false,
     totalDebited: null,
+    issuesLoaded: false,
+    issueOperations: [],
+    tournamentOptions: [],
   };
 
   function $(id) {
@@ -75,6 +78,64 @@
   function fmtPoints(value) {
     var amount = Math.max(0, Math.floor(Number(value) || 0));
     return amount.toLocaleString("ru-RU");
+  }
+
+  function businessDateKey(value) {
+    var ms = value instanceof Date ? value.getTime() : Date.parse(String(value || ""));
+    return Number.isFinite(ms) ? new Date(ms - 3 * 60 * 60 * 1000).toISOString().slice(0, 10) : "";
+  }
+
+  function formatBusinessDate(key) {
+    var parts = String(key || "").split("-");
+    if (parts.length !== 3) return key || "Без даты";
+    var date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+    var label = date.toLocaleDateString("ru-RU", { timeZone: "UTC", weekday: "long", day: "2-digit", month: "long" });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  function scheduleTournamentId(item, index) {
+    return [
+      item && item.date ? "date-" + item.date : item && item.repeat === "weekly" ? "weekly-" + item.dow : "daily",
+      item && item.hour != null ? item.hour : 0,
+      item && item.minute != null ? item.minute : 0,
+      item && item.name ? item.name : index,
+    ].join("|");
+  }
+
+  function currentScheduleTournamentOptions() {
+    var source = typeof POKER_FULL_TOURNAMENT_SCHEDULE !== "undefined" && Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE)
+      ? POKER_FULL_TOURNAMENT_SCHEDULE
+      : [];
+    var dateKey = businessDateKey(new Date());
+    var date = new Date(dateKey + "T00:00:00.000Z");
+    var dow = date.getUTCDay();
+    return source.filter(function (item) {
+      if (!item) return false;
+      if (item.date) return item.date === dateKey;
+      if (item.repeat === "daily") return true;
+      return item.repeat === "weekly" && Number(item.dow) === dow;
+    }).map(function (item, index) {
+      var hour = String(Math.max(0, Number(item.hour) || 0)).padStart(2, "0");
+      var minute = String(Math.max(0, Number(item.minute) || 0)).padStart(2, "0");
+      var time = hour + ":" + minute + " МСК";
+      return {
+        id: scheduleTournamentId(item, index),
+        title: String(item.name || item.category || "Турнир"),
+        time: time,
+        buyin: String(item.buyin || ""),
+        label: time + " · " + String(item.name || item.category || "Турнир") + (item.buyin ? " · " + item.buyin : ""),
+      };
+    }).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
+  }
+
+  function populateTournamentOptions() {
+    var select = $("adminBonusesOperationTournament");
+    if (!select) return;
+    adminBonusesState.tournamentOptions = currentScheduleTournamentOptions();
+    select.innerHTML = '<option value="">Выберите турнир</option>' + adminBonusesState.tournamentOptions.map(function (item) {
+      return '<option value="' + esc(item.id) + '">' + esc(item.label) + '</option>';
+    }).join("");
+    select.value = "";
   }
 
   function rowTitle(user) {
@@ -227,6 +288,7 @@
             '<div><strong>' + esc(sign + op.amount) + '</strong><span>' + esc(op.operationType) + '</span></div>' +
             '<div>Баланс: ' + esc(op.balanceBefore) + ' → ' + esc(op.balanceAfter) + '</div>' +
             '<div>' + esc(fmtDate(op.createdAt)) + (showsSeveralAccounts ? ' · счёт: ' + esc(op.userId) : '') + (op.adminId ? ' · admin: ' + esc(op.adminId) : "") + '</div>' +
+            (op.tournamentTitle ? '<p><strong>Турнир:</strong> ' + esc([op.tournamentTime, op.tournamentTitle, op.tournamentBuyin].filter(Boolean).join(" · ")) + '</p>' : "") +
             (op.comment ? '<p>' + esc(op.comment) + '</p>' : "") +
           '</article>';
         }).join("");
@@ -234,6 +296,68 @@
       .catch(function (err) {
         body.innerHTML = esc(err && err.message ? err.message : POKER_NET_ERR);
       });
+  }
+
+  function renderIssues(operations) {
+    var body = $("adminBonusesIssuesBody");
+    if (!body) return;
+    if (!operations || !operations.length) {
+      body.innerHTML = '<div class="admin-bonuses__notice">Списаний пока нет.</div>';
+      return;
+    }
+    var groups = {};
+    operations.forEach(function (op) {
+      var key = op.businessDate || businessDateKey(op.createdAt) || "unknown";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(op);
+    });
+    body.innerHTML = Object.keys(groups).sort().reverse().map(function (key) {
+      var rows = groups[key];
+      var total = rows.reduce(function (sum, row) { return sum + Math.max(0, Number(row.amount) || 0); }, 0);
+      return '<section class="admin-bonuses__issue-day">' +
+        '<h4 class="admin-bonuses__issue-day-title"><span>' + esc(formatBusinessDate(key)) + '</span><strong>Итого ' + esc(fmtPoints(total)) + '</strong></h4>' +
+        rows.map(function (op) {
+          var playerSub = op.username ? "@" + op.username + " · " + op.userId : op.userId;
+          var tournamentTitle = op.tournamentTitle || "Турнир не указан";
+          var tournamentMeta = [op.tournamentTime, op.tournamentBuyin].filter(Boolean).join(" · ");
+          return '<article class="admin-bonuses__issue-row">' +
+            '<div class="admin-bonuses__issue-player"><strong>' + esc(op.displayName || op.userId) + '</strong><span>' + esc(playerSub) + '</span></div>' +
+            '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
+            '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
+          '</article>';
+        }).join("") +
+      '</section>';
+    }).join("");
+  }
+
+  function loadIssues(force) {
+    var body = $("adminBonusesIssuesBody");
+    if (!body || (adminBonusesState.issuesLoaded && !force)) return;
+    body.textContent = "Загрузка выдач…";
+    fetch(authUrl("bonus-issues", { limit: 1500 }), { cache: "no-store" })
+      .then(readJson)
+      .then(function (data) {
+        if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Выдачи не загрузились");
+        adminBonusesState.issueOperations = data.operations || [];
+        adminBonusesState.issuesLoaded = true;
+        renderIssues(adminBonusesState.issueOperations);
+      })
+      .catch(function (err) {
+        body.textContent = err && err.message ? err.message : POKER_NET_ERR;
+      });
+  }
+
+  function setActiveTab(name) {
+    name = name === "issues" ? "issues" : "balances";
+    document.querySelectorAll("[data-admin-bonuses-tab]").forEach(function (button) {
+      var active = button.getAttribute("data-admin-bonuses-tab") === name;
+      button.classList.toggle("admin-bonuses__tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    document.querySelectorAll("[data-admin-bonuses-panel]").forEach(function (panel) {
+      panel.hidden = panel.getAttribute("data-admin-bonuses-panel") !== name;
+    });
+    if (name === "issues") loadIssues(false);
   }
 
   function openOperation(userId, operation) {
@@ -244,12 +368,15 @@
     var userEl = $("adminBonusesOperationUser");
     var amount = $("adminBonusesOperationAmount");
     var comment = $("adminBonusesOperationComment");
+    var tournamentWrap = $("adminBonusesOperationTournamentWrap");
     var message = $("adminBonusesOperationMessage");
     var found = adminBonusesState.users.find(function (u) { return u.userId === userId; });
     if (title) title.textContent = operation === "debit" ? "Списать бонусы" : "Начислить бонусы";
     if (userEl) userEl.textContent = (found ? rowTitle(found) + " · " : "") + userId;
     if (amount) amount.value = "";
     if (comment) comment.value = "";
+    if (tournamentWrap) tournamentWrap.hidden = operation !== "debit";
+    if (operation === "debit") populateTournamentOptions();
     if (message) message.textContent = "";
     if (modal) {
       modal.hidden = false;
@@ -270,12 +397,22 @@
     var operation = adminBonusesState.operation;
     var amountEl = $("adminBonusesOperationAmount");
     var commentEl = $("adminBonusesOperationComment");
+    var tournamentEl = $("adminBonusesOperationTournament");
     var message = $("adminBonusesOperationMessage");
     var amount = Math.floor(Number(amountEl && amountEl.value));
     if (!userId || (operation !== "credit" && operation !== "debit")) return;
     if (!Number.isFinite(amount) || amount <= 0) {
       if (message) message.textContent = "Сумма должна быть больше 0.";
       return;
+    }
+    var tournament = null;
+    if (operation === "debit") {
+      var tournamentId = String(tournamentEl && tournamentEl.value || "");
+      tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === tournamentId; }) || null;
+      if (!tournament) {
+        if (message) message.textContent = "Выберите турнир из расписания.";
+        return;
+      }
     }
     if (!confirm((operation === "debit" ? "Списать " : "Начислить ") + amount + " бонусов?")) return;
     var base = apiBase();
@@ -284,7 +421,7 @@
     fetch(authUrl("users/" + userId + "/" + endpoint), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(authBody({ amount: amount, comment: commentEl && commentEl.value })),
+      body: JSON.stringify(authBody({ amount: amount, comment: commentEl && commentEl.value, tournament: tournament })),
     })
       .then(readJson)
       .then(function (data) {
@@ -292,6 +429,8 @@
         if (message) message.textContent = "Готово. Новый баланс: " + data.bonusBalance;
         loadList();
         loadHistory(userId);
+        adminBonusesState.issuesLoaded = false;
+        if (operation === "debit") loadIssues(true);
         setTimeout(closeOperation, 650);
       })
       .catch(function (err) {
@@ -300,6 +439,18 @@
   }
 
   function bind() {
+    document.querySelectorAll("[data-admin-bonuses-tab]").forEach(function (button) {
+      if (button.dataset.bound === "1") return;
+      button.dataset.bound = "1";
+      button.addEventListener("click", function () {
+        setActiveTab(button.getAttribute("data-admin-bonuses-tab"));
+      });
+    });
+    var issuesRefresh = $("adminBonusesIssuesRefreshBtn");
+    if (issuesRefresh && issuesRefresh.dataset.bound !== "1") {
+      issuesRefresh.dataset.bound = "1";
+      issuesRefresh.addEventListener("click", function () { loadIssues(true); });
+    }
     var refresh = $("adminBonusesRefreshBtn");
     if (refresh && refresh.dataset.bound !== "1") {
       refresh.dataset.bound = "1";

@@ -627,8 +627,18 @@ async function testAuthAndAdmin(redis) {
     pwaSession: bonusAdminToken,
     amount: 45,
     comment: "contract debit",
+    tournament: {
+      id: "weekly-6|18|0|Фриролл",
+      title: "Фриролл",
+      time: "18:00 МСК",
+      buyin: "1₽",
+    },
   }));
   assert.strictEqual(manualBonusRes.statusCode, 200, "bonus admin can debit a user");
+  assert.strictEqual(manualBonusRes.body.operation.tournamentTitle, "Фриролл", "bonus debit keeps the selected tournament");
+  const bonusIssuesRes = await call(adminHandler, req("GET", { path: "bonus-issues", pwaSession: bonusAdminToken }));
+  assert.strictEqual(bonusIssuesRes.statusCode, 200, "bonus admin can open issued bonuses journal");
+  assert.strictEqual(bonusIssuesRes.body.operations[0].tournamentTitle, "Фриролл", "issued bonuses journal returns tournament metadata");
   bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken }));
   assert.strictEqual(bonusRes.body.bonusTotals.totalDebited, 45, "bonus admin API returns total debited points");
   bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: nonBonusAdminToken }));

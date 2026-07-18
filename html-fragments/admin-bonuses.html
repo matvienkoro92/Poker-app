@@ -9,6 +9,12 @@
       <button type="button" class="admin-bonuses__refresh" id="adminBonusesRefreshBtn">Обновить</button>
     </header>
 
+    <div class="admin-bonuses__tabs" role="tablist" aria-label="Раздел бонусных балансов">
+      <button type="button" class="admin-bonuses__tab admin-bonuses__tab--active" data-admin-bonuses-tab="balances" role="tab" aria-selected="true">Балансы</button>
+      <button type="button" class="admin-bonuses__tab" data-admin-bonuses-tab="issues" role="tab" aria-selected="false">Кому выдано</button>
+    </div>
+
+    <div class="admin-bonuses__tab-panel" data-admin-bonuses-panel="balances">
     <div class="admin-bonuses__filters">
       <input type="search" id="adminBonusesSearch" class="admin-bonuses__input" placeholder="id / nickname / email / phone" autocomplete="off" />
       <input type="number" id="adminBonusesMinBalance" class="admin-bonuses__input" placeholder="Баланс от" inputmode="numeric" min="0" />
@@ -53,6 +59,18 @@
       <h3>История операций</h3>
       <div class="admin-bonuses__history-body" id="adminBonusesHistoryBody">Выберите пользователя в таблице.</div>
     </section>
+    </div>
+
+    <section class="admin-bonuses__tab-panel admin-bonuses__issues" data-admin-bonuses-panel="issues" hidden>
+      <div class="admin-bonuses__issues-head">
+        <div>
+          <h3>Кому выдано</h3>
+          <p>Списания сгруппированы по отчётным суткам с 06:00 МСК.</p>
+        </div>
+        <button type="button" class="admin-bonuses__refresh" id="adminBonusesIssuesRefreshBtn">Обновить</button>
+      </div>
+      <div class="admin-bonuses__issues-body" id="adminBonusesIssuesBody">Откройте вкладку, чтобы загрузить выдачи.</div>
+    </section>
   </section>
 
   <div class="admin-bonuses-modal" id="adminBonusesOperationModal" role="dialog" aria-modal="true" aria-labelledby="adminBonusesOperationTitle" aria-hidden="true" hidden>
@@ -64,6 +82,12 @@
       <label class="admin-bonuses-modal__label">
         <span>Сумма</span>
         <input type="number" id="adminBonusesOperationAmount" min="1" inputmode="numeric" />
+      </label>
+      <label class="admin-bonuses-modal__label" id="adminBonusesOperationTournamentWrap" hidden>
+        <span>Турнир из расписания</span>
+        <select id="adminBonusesOperationTournament" required>
+          <option value="">Выберите турнир</option>
+        </select>
       </label>
       <label class="admin-bonuses-modal__label">
         <span>Комментарий</span>

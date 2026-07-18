@@ -8948,13 +8948,13 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
   align-items: center;
   justify-content: center;
   gap: 3px;
-  width: min(78%, 520px);
+  width: 100%;
   min-height: 46px;
-  margin: 14px auto 0;
+  margin: 14px 0 0;
   padding: 10px 58px 10px 22px;
   overflow: visible;
   border: 1px solid rgba(255, 166, 33, 0.78);
-  border-radius: 999px;
+  border-radius: 18px 18px 0 0;
   background:
     radial-gradient(circle at 20% 0, rgba(255, 220, 135, 0.18), transparent 44%),
     linear-gradient(180deg, rgba(59, 34, 12, 0.98), rgba(12, 10, 9, 0.98));
@@ -8994,7 +8994,9 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 }
 
 .daily-poker__battle-prompt + .daily-poker__sng-champions {
-  margin-top: -10px;
+  margin-top: 0;
+  border-top: 0;
+  border-radius: 0 0 18px 18px;
 }
 
 .daily-poker__battle-prompt::before {
@@ -9039,9 +9041,14 @@ html.app-view-equilator-html-scroll #app.app .card .card__content > .view--activ
 
 @media (max-width: 520px) {
   .daily-poker__battle-prompt {
-    width: min(86%, 420px);
+    width: 100%;
     min-height: 42px;
     padding: 9px 48px 9px 18px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .daily-poker__battle-prompt + .daily-poker__sng-champions {
+    border-radius: 0 0 12px 12px;
   }
 
   .daily-poker__battle-prompt-arrow {

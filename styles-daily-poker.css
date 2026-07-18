@@ -369,6 +369,116 @@
   color: #fecaca;
 }
 
+.admin-bonuses__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 14px;
+  padding: 5px;
+  border: 1px solid rgba(246, 211, 145, 0.24);
+  border-radius: 14px;
+  background: rgba(4, 7, 12, 0.72);
+}
+
+.admin-bonuses__tab {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-bonuses__tab--active {
+  border-color: rgba(255, 211, 112, 0.72);
+  background: linear-gradient(180deg, rgba(255, 216, 116, 0.25), rgba(202, 121, 20, 0.18));
+  color: #ffe7b0;
+  box-shadow: 0 0 18px rgba(255, 160, 30, 0.18);
+}
+
+.admin-bonuses__tab-panel[hidden] {
+  display: none !important;
+}
+
+.admin-bonuses__issues {
+  min-width: 0;
+}
+
+.admin-bonuses__issues-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-bonuses__issues-head h3,
+.admin-bonuses__issues-head p {
+  margin: 0;
+}
+
+.admin-bonuses__issues-head p {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.admin-bonuses__issue-day {
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(246, 211, 145, 0.26);
+  border-radius: 13px;
+  background: rgba(5, 8, 13, 0.7);
+}
+
+.admin-bonuses__issue-day-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(246, 211, 145, 0.1);
+  color: #ffe7b0;
+  font-size: 14px;
+}
+
+.admin-bonuses__issue-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(170px, 1.4fr) minmax(70px, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(246, 211, 145, 0.12);
+}
+
+.admin-bonuses__issue-player,
+.admin-bonuses__issue-tournament {
+  min-width: 0;
+}
+
+.admin-bonuses__issue-player strong,
+.admin-bonuses__issue-player span,
+.admin-bonuses__issue-tournament strong,
+.admin-bonuses__issue-tournament span {
+  display: block;
+}
+
+.admin-bonuses__issue-player span,
+.admin-bonuses__issue-tournament span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.admin-bonuses__issue-amount {
+  color: #ffb3b3;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .admin-bonuses__notice--error {
   border-color: rgba(248, 113, 113, 0.45);
 }
@@ -449,6 +559,7 @@
 
 .admin-bonuses__input,
 .admin-bonuses-modal__label input,
+.admin-bonuses-modal__label select,
 .admin-bonuses-modal__label textarea {
   width: 100%;
   min-height: 34px;
@@ -460,6 +571,17 @@
   box-sizing: border-box;
   font: inherit;
   font-size: 12px;
+}
+
+@media (max-width: 620px) {
+  .admin-bonuses__issue-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-bonuses__issue-tournament {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
 }
 
 .admin-bonuses__table-wrap {
@@ -2028,25 +2150,24 @@
   min-width: 0;
   min-height: 52px;
   padding: 0 16px;
-  border: 2px solid rgba(204, 135, 38, 0.86);
-  border-radius: 12px;
-  color: #f5bd4e;
+  border: 2px solid rgba(255, 238, 158, 0.98);
+  border-radius: 16px;
+  color: #201203;
   background:
-    radial-gradient(ellipse at 50% -30%, rgba(255, 208, 105, 0.18), transparent 56%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
-    linear-gradient(180deg, #211b14 0%, #090909 100%);
+    radial-gradient(ellipse at 50% -35%, rgba(255, 255, 255, 0.9), transparent 42%),
+    linear-gradient(135deg, #fff2a1 0%, #ffc62f 42%, #ff8a0b 100%);
   box-shadow:
-    0 0 0 2px rgba(255, 165, 37, 0.1),
-    0 0 18px rgba(255, 126, 15, 0.22),
-    inset 0 1px 0 rgba(255, 238, 185, 0.22),
-    inset 0 -8px 14px rgba(0, 0, 0, 0.5);
+    0 0 0 2px rgba(255, 205, 70, 0.2),
+    0 0 24px rgba(255, 151, 15, 0.58),
+    0 10px 20px rgba(53, 25, 0, 0.38),
+    inset 0 2px 0 rgba(255, 255, 229, 0.78),
+    inset 0 -5px 10px rgba(161, 65, 0, 0.3);
   font-size: clamp(13px, 2.4vw, 18px);
   font-weight: 1000;
   letter-spacing: 0;
   text-transform: uppercase;
-  text-shadow:
-    0 0 10px rgba(255, 173, 45, 0.4),
-    0 2px 3px rgba(0, 0, 0, 0.78);
+  text-shadow: 0 1px 0 rgba(255, 248, 205, 0.7);
+  transition: transform 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
 }
 
 .daily-poker__invite-btn::after {
@@ -2054,9 +2175,9 @@
   position: absolute;
   inset: 3px;
   z-index: -1;
-  border: 1px solid rgba(255, 209, 108, 0.3);
-  border-radius: 9px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 230, 0.16);
+  border: 1px solid rgba(92, 43, 0, 0.4);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 230, 0.38);
   pointer-events: none;
 }
 
@@ -2065,7 +2186,7 @@
 .daily-poker > .daily-poker__share-actions .daily-poker__notify-btn,
 .daily-poker > .daily-poker__share-actions .daily-poker__copy-btn {
   min-height: 52px;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 @media (max-width: 520px) {
@@ -2112,7 +2233,7 @@
   width: 26px;
   height: 26px;
   flex: 0 0 26px;
-  filter: drop-shadow(0 0 10px rgba(255, 174, 48, 0.48));
+  filter: drop-shadow(0 1px 0 rgba(255, 247, 200, 0.6));
 }
 
 .daily-poker__invite-icon svg {
@@ -2200,6 +2321,22 @@
     0 0 22px rgba(255, 118, 0, 0.3);
 }
 
+.daily-poker__invite-btn:hover,
+.daily-poker__invite-btn:focus-visible {
+  filter: saturate(1.12) brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 2px rgba(255, 225, 117, 0.28),
+    0 0 32px rgba(255, 167, 24, 0.78),
+    0 13px 24px rgba(53, 25, 0, 0.42),
+    inset 0 2px 0 rgba(255, 255, 229, 0.86),
+    inset 0 -5px 10px rgba(161, 65, 0, 0.25);
+}
+
+.daily-poker__invite-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
 .daily-poker__notify-btn,
 .daily-poker__copy-btn {
   width: 100%;
@@ -2210,12 +2347,12 @@
   justify-content: center;
   padding: 0;
   border: 2px solid rgba(204, 135, 38, 0.86);
-  border-radius: 12px;
+  border-radius: 16px;
   color: #ffd96b;
   background:
     radial-gradient(ellipse at 50% -20%, rgba(255, 213, 105, 0.18), transparent 54%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
-    linear-gradient(180deg, #19130b 0%, #050505 100%);
+    linear-gradient(145deg, #211a10 0%, #090b0e 52%, #030405 100%);
   box-shadow:
     0 0 0 3px rgba(255, 139, 18, 0.12),
     0 0 16px rgba(255, 128, 15, 0.32),
@@ -2350,9 +2487,16 @@
 }
 
 .daily-poker__result {
+  position: absolute;
+  z-index: 4;
+  right: clamp(10px, 2vw, 22px);
+  bottom: clamp(10px, 2vw, 22px);
+  left: clamp(10px, 2vw, 22px);
+  box-sizing: border-box;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 0;
+  margin-top: 0;
   text-align: left;
   font-size: clamp(15px, 3.1vw, 22px);
   font-weight: 500;
