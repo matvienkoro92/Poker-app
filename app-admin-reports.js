@@ -70,6 +70,10 @@ function initAdminReportModal() {
   var calculationsBotExchipCashoutEl = document.getElementById("adminReportCalcBotExchipCashout");
   var calculationsGrandTotalEl = document.getElementById("adminReportCalcGrandTotal");
   var figuresRoot = document.getElementById("adminReportCalcFigures");
+  var calculationRakeCard = document.getElementById("adminReportCalcRakeCard");
+  if (calculationRakeCard && figuresRoot && figuresRoot.parentNode !== calculationRakeCard) {
+    calculationRakeCard.appendChild(figuresRoot);
+  }
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
   var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;
   var figuresRakeTotalEl = document.getElementById("adminReportFiguresRakeTotal");
@@ -1591,6 +1595,8 @@ function initAdminReportModal() {
       rakebackModule: rakebackModule,
       canViewSentReports: canViewSentReports,
       canViewCalculationsReports: canViewCalculationsReports,
+      getAdminReportApiBase: getAdminReportApiBase,
+      buildAuthBody: buildAuthBody,
       getRakebackIdentityCandidates: getRakebackIdentityCandidates,
       rakebackIdentityMatches: rakebackIdentityMatches,
       getRakebackAccessState: getRakebackAccessState,
@@ -3112,6 +3118,8 @@ function initAdminReportModal() {
       calculationGroupSaveBtns: calculationGroupSaveBtns,
       calculationGroupEditBtns: calculationGroupEditBtns,
       canViewCalculationsReports: canViewCalculationsReports,
+      getAdminReportApiBase: getAdminReportApiBase,
+      buildAuthBody: buildAuthBody,
       escapeReportHtml: escapeReportHtml,
       formatReportInputNumber: formatReportInputNumber,
       formatReportRubleNumber: formatReportRubleNumber,
@@ -4354,6 +4362,8 @@ function initAdminReportModal() {
       calculationsLogic: calculationsLogic,
       canViewSentReports: canViewSentReports,
       canViewCalculationsReports: canViewCalculationsReports,
+      getAdminReportApiBase: getAdminReportApiBase,
+      buildAuthBody: buildAuthBody,
       getRakebackIdentityCandidates: getRakebackIdentityCandidates,
       rakebackIdentityMatches: rakebackIdentityMatches,
       getRakebackAccessState: getRakebackAccessState,

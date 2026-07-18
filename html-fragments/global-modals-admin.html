@@ -496,6 +496,9 @@
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" data-admin-report-calc-save="rake" title="Сохранить рейк" aria-label="Сохранить рейк">✓</button>
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" data-admin-report-calc-edit="rake" title="Редактировать рейк" aria-label="Редактировать рейк" hidden>✎</button>
                       <span class="admin-report-calculations__status" data-admin-report-calc-status="rake"></span>
+                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить цифры" aria-label="Сохранить цифры">✓</button>
+                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" id="adminReportFiguresEditBtn" title="Редактировать цифры" aria-label="Редактировать цифры" hidden>✎</button>
+                      <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
                     </div>
                   </div>
                   <label class="admin-report-calculations__field admin-report-calculations__field--triple">
@@ -559,14 +562,6 @@
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
-                <div class="admin-report-calculations__section-head">
-                  <h3 class="admin-report-calculations__title">Цифры</h3>
-                  <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
-                    <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить цифры" aria-label="Сохранить цифры">✓</button>
-                    <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" id="adminReportFiguresEditBtn" title="Редактировать цифры" aria-label="Редактировать цифры" hidden>✎</button>
-                    <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
-                  </div>
-                </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Рейкбек из отчета текущей недели</span>
                   <output id="adminReportFiguresRakeback">0</output>
@@ -577,11 +572,11 @@
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Розыгрыши</span>
-                  <output id="adminReportFiguresRaffles">—</output>
+                  <output id="adminReportFiguresRaffles">0</output>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Крутка дня</span>
-                  <output id="adminReportFiguresDailyPoker">—</output>
+                  <output id="adminReportFiguresDailyPoker">0</output>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>РБ прошлая</span>

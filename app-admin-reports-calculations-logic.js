@@ -4,6 +4,7 @@
     with (scope) {
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
+      var calculationWeekStatsTotals = { raffles: 0, dailyPoker: 0 };
 
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
@@ -166,6 +167,10 @@
         if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportNegativeDisplay(figuresPercentTotal);
         if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
         if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
+        var figuresRafflesEl = document.getElementById("adminReportFiguresRaffles");
+        var figuresDailyPokerEl = document.getElementById("adminReportFiguresDailyPoker");
+        if (figuresRafflesEl) figuresRafflesEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffles);
+        if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var approxAgentsRake = getFiguresExtraRakeTotal();
@@ -185,6 +190,8 @@
             figuresPercentTotal -
             parseReportNumber(totals.rakeback) -
             parseReportNumber(totals.bonuses) -
+            parseReportNumber(calculationWeekStatsTotals.raffles) -
+            parseReportNumber(calculationWeekStatsTotals.dailyPoker) -
             parseReportNumber(totals.previousRakeback) -
             parseReportNumber(totals.anyaSalary) -
             parseReportNumber(figuresRomanPaidInput ? figuresRomanPaidInput.value : "") +
@@ -418,6 +425,34 @@
           });
       }
 
+      function loadCalculationWeekStats(base, q, week) {
+        var from = new Date(week.start).toISOString().slice(0, 10);
+        var to = new Date(week.end).toISOString().slice(0, 10);
+        var url = base.replace(/\/$/, "") + "/api/player-crm" + q;
+        url = appendCalculationQueryParam(url, "period", "custom");
+        url = appendCalculationQueryParam(url, "from", from);
+        url = appendCalculationQueryParam(url, "to", to);
+        var fetchStats = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
+        return fetchStats(url, { cache: "no-store" }, 15000)
+          .then(function (response) {
+            if (!response || !response.ok) throw new Error("player-crm " + (response && response.status ? response.status : "failed"));
+            return response.json();
+          })
+          .then(function (data) {
+            var raffleStats = data && data.statsSummary && data.statsSummary.raffles;
+            var dailyPokerStats = data && data.dailyPokerStats;
+            calculationWeekStatsTotals = {
+              raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
+              dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
+            };
+            updateFiguresTotals({ syncExtras: false });
+          })
+          .catch(function () {
+            calculationWeekStatsTotals = { raffles: 0, dailyPoker: 0 };
+            updateFiguresTotals({ syncExtras: false });
+          });
+      }
+
       function loadCalculationArchiveReports(base, q) {
         if (!calculationsArchiveEl || calculationArchiveLoading || calculationArchiveLoaded) return;
         calculationArchiveLoading = true;
@@ -456,6 +491,7 @@
         calculationArchiveRequestBase = base;
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
+        loadCalculationWeekStats(base, q, week);
         fetchCalculationReports(base, q, "currentWeek")
           .then(function (data) {
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
@@ -606,6 +642,54 @@
         } catch (e) {}
       }
 
+      function requestServerCalculationDraft(action, draft) {
+        var base = typeof getAdminReportApiBase === "function" ? getAdminReportApiBase() : "";
+        if (!base || typeof buildAuthBody !== "function") return Promise.resolve(null);
+        var payload = {
+          action: action,
+          weekStart: String(getCalculationWeekMeta().start || ""),
+        };
+        if (draft) payload.calculationDraft = draft;
+        var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
+        return fetchDraft(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildAuthBody(payload)),
+          cache: "no-store",
+        }, 15000).then(function (response) {
+          if (!response || !response.ok) throw new Error("calculation draft sync failed");
+          return response.json();
+        });
+      }
+
+      function loadServerCalculationDraft() {
+        return requestServerCalculationDraft("calculation_draft_load").then(function (data) {
+          var stored = data && data.calculationDraft;
+          var draft = stored && stored.draft;
+          if (!draft || typeof draft !== "object") {
+            var localRaw = null;
+            try {
+              localRaw = window.localStorage ? window.localStorage.getItem(getCalculationDraftKey()) : null;
+              draft = localRaw ? JSON.parse(localRaw) : null;
+            } catch (eLocal) {
+              draft = null;
+            }
+            if (!draft || typeof draft !== "object") return false;
+            return saveServerCalculationDraft(draft).then(function () { return true; });
+          }
+          try {
+            if (window.localStorage) window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(draft));
+          } catch (e) {}
+          return applyCalculationsDraft(draft);
+        }).catch(function () {
+          return false;
+        });
+      }
+
+      function saveServerCalculationDraft(draft) {
+        return requestServerCalculationDraft("calculation_draft_save", draft);
+      }
+
       function collectCalculationsDraft() {
         function valuesFrom(list) {
           return Array.prototype.slice.call(list || []).map(function (input) { return input ? input.value : ""; });
@@ -737,19 +821,26 @@
           updateCalculationCashTotal();
           updateFiguresTotals();
         }
+        loadServerCalculationDraft();
       }
 
       function saveCalculationsDraft(group) {
         group = group || "cash";
+        var draft = collectCalculationsDraft();
         try {
           if (window.localStorage) {
-            window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(collectCalculationsDraft()));
+            window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(draft));
           }
+        } catch (e) {
+          setCalculationsStatus(group, "Локально не сохранено");
+        }
+        setCalculationsStatus(group, "Сохраняю…");
+        saveServerCalculationDraft(draft).then(function () {
           setCalculationGroupLocked(group, true);
           setCalculationsStatus(group, "Сохранено");
-        } catch (e) {
-          setCalculationsStatus(group, "Не удалось сохранить");
-        }
+        }).catch(function () {
+          setCalculationsStatus(group, "Не удалось сохранить на сервере");
+        });
       }
 
       function editCalculationsDraft(group) {
@@ -759,15 +850,21 @@
       }
 
       function saveFiguresDraft() {
+        var draft = collectCalculationsDraft();
         try {
           if (window.localStorage) {
-            window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(collectCalculationsDraft()));
+            window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(draft));
           }
+        } catch (e) {
+          setFiguresStatus("Локально не сохранено");
+        }
+        setFiguresStatus("Сохраняю…");
+        saveServerCalculationDraft(draft).then(function () {
           setFiguresLocked(true);
           setFiguresStatus("Сохранено");
-        } catch (e) {
-          setFiguresStatus("Не удалось сохранить");
-        }
+        }).catch(function () {
+          setFiguresStatus("Не удалось сохранить на сервере");
+        });
       }
 
       function editFiguresDraft() {

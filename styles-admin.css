@@ -723,11 +723,10 @@ body.admin-report-modal-open .bottom-nav {
   grid-column: 1 / -1;
   grid-row: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
   padding: 6px;
-  border-bottom: 0;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px;
 }
 #adminReportCalcWinLossCard {
   grid-column: 3;
@@ -741,6 +740,9 @@ body.admin-report-modal-open .bottom-nav {
   grid-column: 1 / -1;
   margin-bottom: 0;
 }
+#adminReportCalcRakeCard > .admin-report-calculations__field {
+  grid-column: 1;
+}
 #adminReportCalcRakeCard .admin-report-calculations__field {
   min-width: 0;
   margin-bottom: 0;
@@ -749,7 +751,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--total,
 #adminReportCalcRakeCard .admin-report-calculations__field--negative {
-  grid-column: span 2;
+  grid-column: 1;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--total {
   border-color: rgba(74, 222, 128, 0.48);
@@ -783,9 +785,13 @@ body.admin-report-modal-open .bottom-nav {
   background: rgba(255, 255, 255, 0.035);
 }
 #adminReportCalcFigures {
-  margin-top: -12px;
-  border-top: 1px solid rgba(202, 161, 84, 0.12);
-  border-radius: 0 0 8px 8px;
+  grid-column: 2;
+  grid-row: 2 / span 6;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .admin-report-calculations__column {
   min-width: 0;
@@ -1305,10 +1311,6 @@ body.admin-report-modal-open .bottom-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
-  #adminReportCalcRakeCard .admin-report-calculations__field--total,
-  #adminReportCalcRakeCard .admin-report-calculations__field--negative {
-    grid-column: auto;
-  }
   #adminReportCalcWinLossCard {
     grid-column: 3;
   }
@@ -1401,7 +1403,9 @@ body.admin-report-modal-open .bottom-nav {
     gap: 8px;
   }
   #adminReportCalcFigures {
-    margin-top: -8px;
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0;
   }
   .admin-report-calculations__column {
     padding: 6px;
