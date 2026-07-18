@@ -628,7 +628,7 @@
 .admin-bonuses__table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 0;
   table-layout: fixed;
 }
 
@@ -653,30 +653,31 @@
 
 .admin-bonuses__table th:nth-child(1),
 .admin-bonuses__table td:nth-child(1) {
-  width: 40%;
+  width: 26%;
 }
 
 .admin-bonuses__table th:nth-child(2),
 .admin-bonuses__table td:nth-child(2) {
-  width: 14%;
-  text-align: right;
+  width: 38%;
+  text-align: left;
 }
 
 .admin-bonuses__table th:nth-child(3),
 .admin-bonuses__table td:nth-child(3) {
-  width: 10%;
-  text-align: center;
+  width: 14%;
+  text-align: right;
 }
 
 .admin-bonuses__table th:nth-child(4),
 .admin-bonuses__table td:nth-child(4) {
-  width: 10%;
+  width: 11%;
   text-align: center;
 }
 
 .admin-bonuses__table th:nth-child(5),
 .admin-bonuses__table td:nth-child(5) {
-  width: 26%;
+  width: 11%;
+  text-align: center;
 }
 
 .admin-bonuses__table td strong {
@@ -732,10 +733,9 @@
   color: rgba(226, 232, 240, 0.64);
 }
 
-.admin-bonuses__user-actions {
+.admin-bonuses__actions-panel {
   display: flex;
   gap: 3px;
-  margin-top: 6px;
   overflow: visible;
   white-space: nowrap;
 }
@@ -755,6 +755,26 @@
   white-space: nowrap;
   color: #f8fafc;
   background: #155e75;
+}
+
+.admin-bonuses__actions-panel button {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 3px 8px rgba(0, 0, 0, 0.22);
+}
+
+.admin-bonuses__actions-panel button[data-admin-bonus-history] {
+  background: linear-gradient(180deg, #2563a8, #174c83);
+}
+
+.admin-bonuses__actions-panel button[data-admin-bonus-credit] {
+  background: linear-gradient(180deg, #16845f, #0d6347);
+}
+
+.admin-bonuses__actions-panel button[data-admin-bonus-debit] {
+  background: linear-gradient(180deg, #a84650, #7f2d37);
 }
 
 .admin-bonuses__show-all-row {
