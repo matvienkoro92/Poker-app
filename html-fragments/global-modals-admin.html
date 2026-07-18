@@ -433,7 +433,7 @@
                     <span>На выводы</span>
                     <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" data-admin-report-calc-cash placeholder="0" />
                   </label>
-                  <div class="admin-report-calculations__field admin-report-calculations__field--total">
+                  <div class="admin-report-calculations__field admin-report-calculations__field--total admin-report-calculations__field--positive">
                     <span>Итого в кассе</span>
                     <output id="adminReportCalcCashTotal">0</output>
                   </div>
@@ -567,14 +567,6 @@
                     <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
                   </div>
                 </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--total">
-                  <span>Итого рейк по всем румам</span>
-                  <output id="adminReportFiguresRakeTotalMirror">0</output>
-                </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                  <span>Процент от рейка</span>
-                  <output id="adminReportFiguresPercentTotalMirror">0</output>
-                </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Рейкбек из отчета текущей недели</span>
                   <output id="adminReportFiguresRakeback">0</output>
@@ -582,6 +574,14 @@
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Бонусы</span>
                   <output id="adminReportFiguresBonuses">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Розыгрыши</span>
+                  <output id="adminReportFiguresRaffles">—</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                  <span>Крутка дня</span>
+                  <output id="adminReportFiguresDailyPoker">—</output>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>РБ прошлая</span>
