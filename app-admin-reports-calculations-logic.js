@@ -4,7 +4,7 @@
     with (scope) {
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
-      var calculationWeekStatsTotals = { raffles: 0, dailyPoker: 0 };
+      var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0 };
 
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
@@ -167,9 +167,11 @@
         if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportNegativeDisplay(figuresPercentTotal);
         if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
         if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
-        var figuresRafflesEl = document.getElementById("adminReportFiguresRaffles");
+        var figuresRafflesTicketsEl = document.getElementById("adminReportFiguresRafflesTickets");
+        var figuresRafflesCashEl = document.getElementById("adminReportFiguresRafflesCash");
         var figuresDailyPokerEl = document.getElementById("adminReportFiguresDailyPoker");
-        if (figuresRafflesEl) figuresRafflesEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffles);
+        if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
+        if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
         if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
@@ -487,12 +489,14 @@
             var dailyPokerStats = results[1];
             calculationWeekStatsTotals = {
               raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
+              raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
+              raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
               dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
             };
             updateFiguresTotals({ syncExtras: false });
           })
           .catch(function () {
-            calculationWeekStatsTotals = { raffles: 0, dailyPoker: 0 };
+            calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0 };
             updateFiguresTotals({ syncExtras: false });
           });
       }
