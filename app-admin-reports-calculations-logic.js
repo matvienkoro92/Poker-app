@@ -179,6 +179,8 @@
         var approxRate = getApproxFiguresRakebackRate();
         var approxRakeback = getApproxFiguresRakebackAmount();
         var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
+        var figuresApproxDetailEl = document.querySelector("#adminReportCalcFigures .admin-report-calculations__approx-detail");
+        if (figuresApproxDetailEl) figuresApproxDetailEl.hidden = !includeApproxRakeback;
         if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
         if (figuresApproxTotalRakeEl) figuresApproxTotalRakeEl.textContent = formatReportRubleNumber(figuresRakeTotal);
         if (figuresApproxAgentsRakeEl) figuresApproxAgentsRakeEl.textContent = formatReportRubleNumber(approxAgentsRake);

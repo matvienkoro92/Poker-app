@@ -740,8 +740,12 @@ body.admin-report-modal-open .bottom-nav {
   grid-column: 1 / -1;
   margin-bottom: 0;
 }
-#adminReportCalcRakeCard > .admin-report-calculations__field {
+#adminReportCalcRakeCard .admin-report-calculations__rake-fields {
   grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  gap: 5px;
+  align-content: start;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field {
   min-width: 0;
@@ -786,7 +790,7 @@ body.admin-report-modal-open .bottom-nav {
 }
 #adminReportCalcFigures {
   grid-column: 2;
-  grid-row: 2 / span 6;
+  grid-row: 2;
   margin: 0;
   padding: 0;
   border: 0;
@@ -1176,6 +1180,9 @@ body.admin-report-modal-open .bottom-nav {
   border-radius: 8px;
   background: rgba(248, 113, 113, 0.055);
 }
+.admin-report-calculations__approx-detail[hidden] {
+  display: none;
+}
 .admin-report-calculations__approx-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(120px, 0.42fr);
@@ -1406,6 +1413,10 @@ body.admin-report-modal-open .bottom-nav {
     grid-column: 1;
     grid-row: auto;
     margin-top: 0;
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__rake-fields {
+    grid-column: 1;
+    grid-row: auto;
   }
   .admin-report-calculations__column {
     padding: 6px;

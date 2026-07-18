@@ -72,6 +72,14 @@ function initAdminReportModal() {
   var figuresRoot = document.getElementById("adminReportCalcFigures");
   var calculationRakeCard = document.getElementById("adminReportCalcRakeCard");
   if (calculationRakeCard && figuresRoot && figuresRoot.parentNode !== calculationRakeCard) {
+    var calculationRakeFieldsColumn = document.createElement("div");
+    calculationRakeFieldsColumn.className = "admin-report-calculations__rake-fields";
+    Array.prototype.slice.call(calculationRakeCard.children).forEach(function (child) {
+      if (child && child.classList && child.classList.contains("admin-report-calculations__field")) {
+        calculationRakeFieldsColumn.appendChild(child);
+      }
+    });
+    calculationRakeCard.appendChild(calculationRakeFieldsColumn);
     calculationRakeCard.appendChild(figuresRoot);
   }
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
