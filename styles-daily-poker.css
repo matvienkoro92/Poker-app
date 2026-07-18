@@ -418,8 +418,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .admin-bonuses__issues-head h3,
@@ -428,13 +428,14 @@
 }
 
 .admin-bonuses__issues-head p {
-  margin-top: 3px;
+  margin-top: 2px;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .admin-bonuses__issue-day {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   overflow: hidden;
   border: 1px solid rgba(246, 211, 145, 0.26);
   border-radius: 13px;
@@ -444,20 +445,28 @@
 .admin-bonuses__issue-day-title {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
-  padding: 10px 12px;
-  background: rgba(246, 211, 145, 0.1);
-  color: #ffe7b0;
-  font-size: 14px;
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(255, 221, 126, 0.72);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 247, 205, 0.72), transparent 48%),
+    linear-gradient(180deg, #edb94d, #c77b16);
+  color: #1b1003;
+  text-shadow: 0 1px 0 rgba(255, 246, 205, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 224, 0.78),
+    0 3px 12px rgba(230, 139, 20, 0.22);
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .admin-bonuses__issue-row {
   display: grid;
   grid-template-columns: minmax(130px, 0.8fr) minmax(170px, 1.4fr) minmax(70px, auto);
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 6px 8px;
+  padding: 7px 9px;
   border-top: 1px solid rgba(246, 211, 145, 0.12);
 }
 
@@ -473,15 +482,24 @@
   display: block;
 }
 
+.admin-bonuses__issue-player strong,
+.admin-bonuses__issue-tournament strong {
+  font-size: 12px;
+  line-height: 1.15;
+}
+
 .admin-bonuses__issue-player span,
 .admin-bonuses__issue-tournament span {
-  margin-top: 2px;
+  margin-top: 1px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 9px;
+  line-height: 1.2;
 }
 
 .admin-bonuses__issue-amount {
   color: #ffb3b3;
+  font-size: 14px;
+  line-height: 1;
   font-weight: 950;
   text-align: right;
   white-space: nowrap;
@@ -589,6 +607,7 @@
   .admin-bonuses__issue-tournament {
     grid-column: 1 / -1;
     grid-row: 2;
+    padding-top: 1px;
   }
 }
 

@@ -11,18 +11,6 @@
   var pendingTarget = null;
   var pendingPassword = ADMIN_MENU_PASSWORD;
 
-  document.addEventListener("click", function (event) {
-    var quickButton = event.target && event.target.closest
-      ? event.target.closest("[data-admin-quick-target]")
-      : null;
-    if (!quickButton || quickButton.disabled || quickButton.hidden) return;
-    var targetId = quickButton.getAttribute("data-admin-quick-target");
-    var target = targetId ? document.getElementById(targetId) : null;
-    if (target && !target.disabled && !target.hidden && target.getAttribute("aria-hidden") !== "true") {
-      target.click();
-    }
-  });
-
   function ensurePasswordModal() {
     var modal = document.getElementById("adminMenuPasswordModal");
     if (modal) return modal;

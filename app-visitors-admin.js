@@ -176,10 +176,8 @@
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");
     var gazetteAdminRow = document.getElementById("gazetteAdminRow");
     var reportBtn = document.getElementById("adminReportBtn");
-    var reportQuickBtn = document.getElementById("headerAdminReportQuickBtn");
     var crmMenuBtn = document.getElementById("headerCrmBtn");
     var bonusAdminBtn = document.getElementById("adminBonusBalancesHeaderBtn");
-    var bonusQuickBtn = document.getElementById("headerBonusBalancesQuickBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !homeAdminVersion) return;
@@ -189,18 +187,9 @@
       reportBtn.setAttribute("aria-hidden", "true");
       reportBtn.disabled = true;
     }
-    if (reportQuickBtn) {
-      reportQuickBtn.hidden = true;
-      reportQuickBtn.setAttribute("aria-hidden", "true");
-      reportQuickBtn.disabled = true;
-    }
     if (bonusAdminBtn) {
       bonusAdminBtn.hidden = true;
       bonusAdminBtn.setAttribute("aria-hidden", "true");
-    }
-    if (bonusQuickBtn) {
-      bonusQuickBtn.hidden = true;
-      bonusQuickBtn.setAttribute("aria-hidden", "true");
     }
     setCrmButtonAllowed(crmMenuBtn, false);
     function showKeyboardLabOnly() {
@@ -219,11 +208,6 @@
         reportBtn.classList.remove("header-admin-report--hidden");
         reportBtn.removeAttribute("aria-hidden");
         reportBtn.disabled = false;
-      }
-      if (reportQuickBtn) {
-        reportQuickBtn.hidden = false;
-        reportQuickBtn.removeAttribute("aria-hidden");
-        reportQuickBtn.disabled = false;
       }
       if (window.__pokerAllowEagerAdminReportPrewarm === true) {
         var prewarmAdminReportModal = window.pokerPrewarmAdminReportModal;
@@ -248,10 +232,6 @@
         bonusAdminBtn.hidden = false;
         bonusAdminBtn.removeAttribute("aria-hidden");
       }
-      if (bonusQuickBtn) {
-        bonusQuickBtn.hidden = false;
-        bonusQuickBtn.removeAttribute("aria-hidden");
-      }
     }
     function showAdminUi() {
       try {
@@ -272,10 +252,6 @@
       if (bonusAdminBtn) {
         bonusAdminBtn.hidden = false;
         bonusAdminBtn.removeAttribute("aria-hidden");
-      }
-      if (bonusQuickBtn) {
-        bonusQuickBtn.hidden = false;
-        bonusQuickBtn.removeAttribute("aria-hidden");
       }
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
