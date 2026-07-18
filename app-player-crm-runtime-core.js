@@ -395,6 +395,9 @@
           '<div class="player-crm__week-report-calc-body">' +
             row("Итого Рунекс", report.botCryptoDep, "", true) +
             '<div class="player-crm__week-report-row"><span>Итого Эксчип</span><strong>' + esc(crmReportMoney(report.botExchipDep)) + " - " + esc(crmReportMoney(report.botExchipCashout)) + " = " + esc(crmReportMoney(exchip)) + "</strong></div>" +
+            row("Продамус", report.prodamus, "player-crm__week-report-row--calc-extra player-crm__week-report-row--calc-extra-start", true) +
+            row("Робокасса", report.robokassa, "player-crm__week-report-row--calc-extra", true) +
+            row("Сергей/Марина", report.sergeyMarina, "player-crm__week-report-row--calc-extra", true) +
           "</div>" +
         "</details>" +
         '<details class="player-crm__week-report-group player-crm__week-report-group--danger player-crm__week-report-bonuses-details">' +

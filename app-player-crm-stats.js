@@ -100,7 +100,10 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     function channelWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive) {
       var subscribed = eventDate(player && player[subscribedKey]);
-      if (!subscribed) return false;
+      if (!subscribed) {
+        var channelKey = subscribedKey === "pushSubscribedAt" ? "push" : "bot";
+        return !!(player && player.channels && player.channels[channelKey]);
+      }
       if (boundary && (inclusive ? subscribed > boundary : subscribed >= boundary)) return false;
       var unsubscribed = eventDate(player && player[unsubscribedKey]);
       if (!unsubscribed) return true;
@@ -109,12 +112,31 @@ function initPlayerCrmStatsRuntime(deps) {
     }
     var pokerPlusRowsNow = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
     var pokerPlusTotalNow = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
+    function uniquePokerPlusCount(rows) {
+      var ids = {};
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        var id = String(row && row.pokerPlusUserId || "").trim();
+        if (id) ids[id] = true;
+      });
+      return Object.keys(ids).length;
+    }
+    var nowDate = new Date();
+    var todayKey = new Date(nowDate.getTime() - nowDate.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    var periodIncludesToday = !!(registrationRange && registrationRange.from <= todayKey && registrationRange.to >= todayKey);
     var pokerPlusTotalStart = registrationRange
-      ? pokerPlusRowsNow.filter(function (row) { return existedAtPeriodStart(row && row.linkedAt); }).length
+      ? uniquePokerPlusCount(pokerPlusRowsNow.filter(function (row) {
+          return !eventDate(row && row.linkedAt) || existedAtPeriodStart(row && row.linkedAt);
+        }))
       : Math.max(0, pokerPlusTotalNow - statPokerPlusNet);
     var pokerPlusTotalEnd = registrationRange
-      ? pokerPlusRowsNow.filter(function (row) { return existedAtPeriodEnd(row && row.linkedAt); }).length
+      ? uniquePokerPlusCount(pokerPlusRowsNow.filter(function (row) {
+          return !eventDate(row && row.linkedAt) || existedAtPeriodEnd(row && row.linkedAt);
+        }))
       : pokerPlusTotalNow;
+    if (periodIncludesToday) {
+      pokerPlusTotalEnd = uniquePokerPlusCount(pokerPlusRowsNow);
+      pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
+    }
     var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
     var botTotalStart = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.from, false);

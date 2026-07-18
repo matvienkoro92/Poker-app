@@ -802,6 +802,12 @@
   padding-top: 6px;
 }
 
+.player-crm__week-report-row--calc-extra-start {
+  margin-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(56, 189, 248, 0.22);
+}
+
 .player-crm__week-report-group--danger {
   border-color: rgba(251, 113, 133, 0.28);
   background: rgba(61, 20, 30, 0.56);
