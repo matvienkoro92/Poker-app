@@ -360,11 +360,19 @@
           var playerSub = op.username ? "@" + op.username + " · " + poker21Label : poker21Label;
           var tournamentTitle = op.tournamentTitle || "Турнир не указан";
           var tournamentMeta = [op.tournamentTime, op.tournamentBuyin].filter(Boolean).join(" · ");
+          var reviewStatus = String(op.reviewStatus || "");
+          var reviewFinal = reviewStatus === "minus" || reviewStatus === "plus";
+          var reviewHtml = reviewFinal
+            ? '<button type="button" class="admin-bonuses__issue-review-result admin-bonuses__issue-review-result--' + reviewStatus + '" disabled>' +
+                (reviewStatus === "plus" ? "+ " + esc(fmtPoints(op.reviewAmount)) : "−") +
+              '</button>'
+            : '<button type="button" data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="minus" aria-label="Не сняли">−</button>' +
+              '<button type="button" data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="plus" aria-label="Сняли">+</button>';
           return '<article class="admin-bonuses__issue-row">' +
             '<div class="admin-bonuses__issue-player"><strong>' + esc(op.displayName || op.userId) + '</strong><span>' + esc(playerSub) + '</span></div>' +
             '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
             '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
-            '<div class="admin-bonuses__issue-review"><button type="button" class="' + (op.reviewVerified ? "admin-bonuses__issue-review-btn--verified" : "") + '" data-admin-bonus-issue-review="' + esc(op.id) + '"' + (op.reviewVerified ? " disabled" : "") + '>' + (op.reviewVerified ? "✓ Проверено" : "Проверили") + '</button></div>' +
+            '<div class="admin-bonuses__issue-review">' + reviewHtml + '</div>' +
           '</article>';
         }).join("") +
       '</section>';
@@ -390,13 +398,24 @@
 
   function verifyIssue(button) {
     var operationId = String(button && button.getAttribute("data-admin-bonus-issue-review") || "");
+    var status = String(button && button.getAttribute("data-admin-bonus-issue-review-status") || "");
     if (!operationId || button.disabled) return;
-    button.disabled = true;
-    button.textContent = "Сохраняем…";
+    var amount = 0;
+    if (status === "plus") {
+      var entered = prompt("Сколько сняли?", "");
+      if (entered == null) return;
+      amount = Number(String(entered).replace(/\s+/g, "").replace(",", "."));
+      if (!isFinite(amount) || amount <= 0) {
+        alert("Введите сумму больше нуля");
+        return;
+      }
+    }
+    var reviewButtons = button.parentNode ? button.parentNode.querySelectorAll("button") : [button];
+    reviewButtons.forEach(function (item) { item.disabled = true; });
     fetch(authUrl("bonus-issues/" + operationId + "/verify"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(authBody({})),
+      body: JSON.stringify(authBody({ status: status, amount: amount })),
     })
       .then(readJson)
       .then(function (data) {
@@ -406,12 +425,13 @@
           operation.reviewVerified = true;
           operation.reviewVerifiedAt = data.review && data.review.verifiedAt || "";
           operation.reviewVerifiedBy = data.review && data.review.adminId || "";
+          operation.reviewStatus = data.review && data.review.status || status;
+          operation.reviewAmount = Number(data.review && data.review.amount) || 0;
         }
         renderIssues(adminBonusesState.issueOperations);
       })
       .catch(function (err) {
-        button.disabled = false;
-        button.textContent = "Проверили";
+        reviewButtons.forEach(function (item) { item.disabled = false; });
         alert(err && err.message ? err.message : POKER_NET_ERR);
       });
   }
