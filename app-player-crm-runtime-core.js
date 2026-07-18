@@ -302,12 +302,12 @@
     var host = document.getElementById("playerCrmWeekReport");
     if (!host) return;
     if (state.weekReportLoading && !state.weekReport) {
-      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт текущей недели</h3><div class="player-crm__week-report-empty">Загружаю отчёт…</div></section>';
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Загружаю отчёт…</div></section>';
       return;
     }
     var report = state.weekReport;
     if (!report) {
-      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт текущей недели</h3><div class="player-crm__week-report-empty">Отчётов за текущую неделю пока нет.</div></section>';
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Отчётов за текущую неделю пока нет.</div></section>';
       return;
     }
     function row(label, value, className, showZero) {
@@ -385,9 +385,10 @@
     var rakebackRows =
       row("РБ прошлая", report.previousRakeback, "", true) +
       row("Рейкбек", report.rakeback, "", true);
+    var rakebackTotal = crmReportNumber(report.previousRakeback) + crmReportNumber(report.rakeback);
     host.innerHTML =
       '<section class="player-crm__week-report-card">' +
-        '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><div class="player-crm__week-report-actions"><button type="button" data-crm-copy-week-report>Скопировать</button><button type="button" data-crm-refresh-week-report>Обновить</button></div></div>' +
+        '<div class="player-crm__week-report-head"><div><h3>Отчёт</h3></div><div class="player-crm__week-report-actions"><button type="button" class="player-crm__week-report-copy-btn" data-crm-copy-week-report aria-label="Скопировать отчёт" title="Скопировать отчёт"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></button><button type="button" data-crm-refresh-week-report>Обновить</button></div></div>' +
         '<div class="player-crm__week-report-main">' + depositHtml + detailHtml + "</div>" +
         '<details class="player-crm__week-report-group player-crm__week-report-group--calc player-crm__week-report-calc-details">' +
           '<summary><span>Рунекс и Эксчип</span><strong>Итого ' + esc(crmReportMoney(runexExchipTotal)) + "</strong></summary>" +
@@ -403,9 +404,11 @@
             raffleRows + dailyPokerDebitedRow +
           "</div>" +
         "</details>" +
-        '<div class="player-crm__week-report-group player-crm__week-report-group--rakeback">' +
-          rakebackRows + anyaVisible +
-        "</div>" +
+        '<details class="player-crm__week-report-group player-crm__week-report-group--rakeback player-crm__week-report-rakeback-details">' +
+          '<summary><span>Рейкбек</span><strong>Итого ' + esc(crmReportMoney(rakebackTotal)) + "</strong></summary>" +
+          '<div class="player-crm__week-report-rakeback-body">' + rakebackRows + "</div>" +
+        "</details>" +
+        (anyaVisible ? '<div class="player-crm__week-report-group player-crm__week-report-group--salary">' + anyaVisible + "</div>" : "") +
       "</section>";
   }
 
@@ -482,13 +485,19 @@
   function copyCrmWeekReport(button) {
     var text = crmWeekReportCopyText();
     if (!text) return;
+    var originalHtml = button ? button.innerHTML : "";
     function done(ok) {
       if (!button) return;
-      var original = button.getAttribute("data-original-label") || button.textContent || "Скопировать";
-      button.setAttribute("data-original-label", original);
-      button.textContent = ok ? "Скопировано" : "Ошибка";
+      button.classList.toggle("player-crm__week-report-copy-btn--success", !!ok);
+      button.setAttribute("aria-label", ok ? "Отчёт скопирован" : "Не удалось скопировать отчёт");
+      button.innerHTML = ok
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"></path></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"></path></svg>';
       setTimeout(function () {
-        if (button && button.isConnected) button.textContent = original;
+        if (!button || !button.isConnected) return;
+        button.classList.remove("player-crm__week-report-copy-btn--success");
+        button.setAttribute("aria-label", "Скопировать отчёт");
+        button.innerHTML = originalHtml;
       }, 1600);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {

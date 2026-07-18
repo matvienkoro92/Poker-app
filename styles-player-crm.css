@@ -343,7 +343,7 @@
   top: calc(100% + 8px);
   right: 0;
   width: min(332px, calc(100vw - 32px));
-  padding: 12px;
+  padding: 9px;
   border: 1px solid rgba(199, 163, 106, 0.45);
   border-radius: 8px;
   background:
@@ -688,7 +688,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 
 .player-crm__week-report-head h3 {
@@ -723,18 +723,43 @@
   gap: 7px;
 }
 
+.player-crm__week-report-head .player-crm__week-report-copy-btn {
+  display: inline-grid;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 8px;
+  place-items: center;
+}
+
+.player-crm__week-report-copy-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.player-crm__week-report-head .player-crm__week-report-copy-btn--success {
+  border-color: rgba(74, 222, 128, 0.5);
+  color: #86efac;
+}
+
 .player-crm__week-report-main,
 .player-crm__week-report-group {
   display: grid;
-  gap: 7px;
-  padding: 10px 12px;
+  gap: 5px;
+  padding: 8px 10px;
   border: 1px solid rgba(199, 163, 106, 0.28);
   border-radius: 14px;
   background: rgba(35, 32, 28, 0.76);
 }
 
 .player-crm__week-report-group {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .player-crm__week-report-group--calc {
@@ -773,8 +798,8 @@
 
 .player-crm__week-report-calc-body {
   display: grid;
-  gap: 7px;
-  padding-top: 8px;
+  gap: 5px;
+  padding-top: 6px;
 }
 
 .player-crm__week-report-group--danger {
@@ -813,14 +838,53 @@
 
 .player-crm__week-report-bonuses-body {
   display: grid;
-  gap: 7px;
-  padding-top: 8px;
+  gap: 5px;
+  padding-top: 6px;
 }
 
 .player-crm__week-report-group--rakeback {
   border-color: rgba(245, 158, 11, 0.38);
   background: rgba(92, 48, 8, 0.5);
   color: #ffe2a8;
+}
+
+.player-crm__week-report-rakeback-details summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+}
+
+.player-crm__week-report-rakeback-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.player-crm__week-report-rakeback-details summary span::before {
+  display: inline-block;
+  width: 16px;
+  margin-right: 4px;
+  content: "›";
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+
+.player-crm__week-report-rakeback-details[open] summary span::before {
+  transform: rotate(90deg);
+}
+
+.player-crm__week-report-rakeback-body {
+  display: grid;
+  gap: 5px;
+  padding-top: 6px;
+}
+
+.player-crm__week-report-group--salary {
+  border-color: rgba(199, 163, 106, 0.28);
+  background: rgba(35, 32, 28, 0.76);
+  color: #f4ead6;
 }
 
 .player-crm__week-report-row {
@@ -964,7 +1028,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  padding: 9px 10px;
+  padding: 7px 9px;
   color: rgba(244, 234, 214, 0.78);
   cursor: pointer;
   list-style: none;
@@ -1005,8 +1069,8 @@
 
 .player-crm__week-report-details-body {
   display: grid;
-  gap: 7px;
-  padding: 1px 10px 9px;
+  gap: 5px;
+  padding: 1px 9px 7px;
 }
 
 .player-crm__week-report-empty {
