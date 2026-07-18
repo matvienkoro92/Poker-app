@@ -240,16 +240,16 @@
       var contact = renderContact(user);
       return '<tr data-user-id="' + esc(user.userId) + '">' +
         '<td class="admin-bonuses__user-cell"><strong>' + esc(name) + '</strong>' + (sub ? '<span>' + esc(sub) + '</span>' : "") + '</td>' +
-        '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
-        '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
-        '<td>' + esc(user.ticketsWon || 0) + '</td>' +
-        '<td>' + esc(fmtDate(user.lastGameAt)) + '</td>' +
-        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
         '<td class="admin-bonuses__actions-cell">' +
           '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
           '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
           '<button type="button" data-admin-bonus-debit="' + esc(user.userId) + '">Списать</button>' +
         '</td>' +
+        '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
+        '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
+        '<td>' + esc(user.ticketsWon || 0) + '</td>' +
+        '<td>' + esc(fmtDate(user.lastGameAt)) + '</td>' +
+        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
       '</tr>';
     }).join("");
   }
@@ -288,10 +288,16 @@
   function loadHistory(userId) {
     var base = apiBase();
     var body = $("adminBonusesHistoryBody");
+    var section = $("adminBonusesHistory");
     if (!base || !body) return;
     adminBonusesState.selectedUserId = userId;
-    body.innerHTML = "Загрузка истории…";
     var found = adminBonusesState.users.find(function (user) { return user.userId === userId; });
+    var heading = section && section.querySelector("h3");
+    if (heading) heading.textContent = "История: " + (found ? rowTitle(found) : userId);
+    body.innerHTML = "Загрузка истории…";
+    if (section && typeof section.scrollIntoView === "function") {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     var historyUserIds = found && Array.isArray(found.historyUserIds) ? found.historyUserIds : [userId];
     fetch(authUrl("users/" + userId + "/bonus-ledger", {
       relatedUserIds: historyUserIds.join(","),
