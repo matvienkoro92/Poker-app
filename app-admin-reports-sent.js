@@ -18,7 +18,7 @@
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
-    var SENT_REPORT_DAY_CUTOFF_MS = 16 * 60 * 60 * 1000;
+    var SENT_REPORT_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
     var escapeReportHtml = helpers.escapeReportHtml || function (value) {
       return String(value == null ? "" : value)
         .replace(/&/g, "&amp;")
@@ -544,15 +544,15 @@
           var toCompact = formatRuMonthDay(weekEndDateMs, true).replace(/\s+/g, "");
           return fromCompact + "-" + toCompact;
         }
-        /** Неделя отчётных дат: Пн -> Вс; реальный переход недели происходит в Пн 16:00 МСК. */
+        /** Неделя отчётных дат: Пн 06:00 МСК -> следующий Пн 05:59:59 МСК. */
         function weekStartMsForReport(ts) {
-          var msk = mskDateFromTs(ts);
+          var msk = new Date(ts + MSK_SHIFT_MS - SENT_REPORT_DAY_CUTOFF_MS);
           var y = msk.getUTCFullYear();
           var m = msk.getUTCMonth();
           var d = msk.getUTCDate();
           var wd = msk.getUTCDay(); // 0=Вс..6=Сб
           var daysFromMonday = (wd + 6) % 7;
-          var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * DAY_MS;
+          var mondayStartMskMs = Date.UTC(y, m, d, 6, 0, 0, 0) - daysFromMonday * DAY_MS;
           return mondayStartMskMs - MSK_SHIFT_MS;
         }
         function weekMetaFromStart(weekStartMs) {
@@ -726,16 +726,16 @@
           });
         }
         function dayStartMsForReport(ts) {
-          var msk = mskDateFromTs(ts);
-          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), msk.getUTCDate(), 0, 0, 0, 0) - MSK_SHIFT_MS;
+          var msk = new Date(ts + MSK_SHIFT_MS - SENT_REPORT_DAY_CUTOFF_MS);
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), msk.getUTCDate(), 6, 0, 0, 0) - MSK_SHIFT_MS;
         }
         function monthStartMsForReport(ts) {
-          var msk = mskDateFromTs(ts);
-          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), 1, 0, 0, 0, 0) - MSK_SHIFT_MS;
+          var msk = new Date(ts + MSK_SHIFT_MS - SENT_REPORT_DAY_CUTOFF_MS);
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth(), 1, 6, 0, 0, 0) - MSK_SHIFT_MS;
         }
         function nextMonthStartMs(monthStartMs) {
           var msk = mskDateFromTs(monthStartMs);
-          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth() + 1, 1, 0, 0, 0, 0) - MSK_SHIFT_MS;
+          return Date.UTC(msk.getUTCFullYear(), msk.getUTCMonth() + 1, 1, 6, 0, 0, 0) - MSK_SHIFT_MS;
         }
         function monthLabelFromStartMs(monthStartMs) {
           return capitalizeWord(new Intl.DateTimeFormat("ru-RU", {

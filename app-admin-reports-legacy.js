@@ -3159,7 +3159,7 @@
       var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
       var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
       var REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
-      var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
+      var REPORT_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
 
       function reportBusinessTimestampMs(ts) {
         var raw = Number(ts);
@@ -3229,15 +3229,15 @@
         return new Date(ts + REPORT_MSK_SHIFT_MS);
       }
 
-      /** Неделя отчётных дат: Пн -> Вс; реальный переход недели происходит в Пн 18:00 МСК. */
+      /** Неделя отчётных дат: Пн 06:00 МСК -> следующий Пн 05:59:59 МСК. */
       function weekStartMsForReport(ts) {
-        var msk = mskDateFromReportTs(ts);
+        var msk = new Date(Number(ts) + REPORT_MSK_SHIFT_MS - REPORT_DAY_CUTOFF_MS);
         var y = msk.getUTCFullYear();
         var m = msk.getUTCMonth();
         var d = msk.getUTCDate();
         var wd = msk.getUTCDay();
         var daysFromMonday = (wd + 6) % 7;
-        var mondayStartMskMs = Date.UTC(y, m, d, 0, 0, 0, 0) - daysFromMonday * REPORT_DAY_MS;
+        var mondayStartMskMs = Date.UTC(y, m, d, 6, 0, 0, 0) - daysFromMonday * REPORT_DAY_MS;
         return mondayStartMskMs - REPORT_MSK_SHIFT_MS;
       }
 

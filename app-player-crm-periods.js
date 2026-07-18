@@ -5,6 +5,10 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   var isoDate = deps.isoDate || function (value) { return String(value || ""); };
   var localDateKey = deps.localDateKey || function (value) { return String(value || "").slice(0, 10); };
   var dateOnly = deps.dateOnly || function (value) { return String(value || "").slice(0, 10); };
+  function businessDateKey(value) {
+    var ms = value instanceof Date ? value.getTime() : Date.parse(String(value || ""));
+    return Number.isFinite(ms) ? new Date(ms - 3 * 60 * 60 * 1000).toISOString().slice(0, 10) : "";
+  }
 
   function setDefaultDates() {
     var to = new Date();
@@ -88,7 +92,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
       period_2026_02_04: { from: "2026-02-01", to: "2026-04-30" },
     };
     if (ranges[key]) return ranges[key];
-    var today = localDateKey(new Date());
+    var today = businessDateKey(new Date());
     function addDays(dateKey, days) {
       return new Date(Date.parse(dateKey + "T00:00:00.000Z") + (Number(days) || 0) * 86400000).toISOString().slice(0, 10);
     }
@@ -120,7 +124,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     }
     var fixed = fixedPeriodRange(state.period);
     if (fixed) return fixed;
-    var today = localDateKey(new Date());
+    var today = businessDateKey(new Date());
     function addDays(key, days) {
       return new Date(Date.parse(key + "T00:00:00.000Z") + (Number(days) || 0) * 86400000).toISOString().slice(0, 10);
     }

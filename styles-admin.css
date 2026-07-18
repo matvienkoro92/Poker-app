@@ -791,6 +791,9 @@ body.admin-report-modal-open .bottom-nav {
 #adminReportCalcFigures {
   grid-column: 2;
   grid-row: 2;
+  display: grid;
+  grid-template-rows: repeat(9, minmax(0, 1fr));
+  gap: 5px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -1114,6 +1117,9 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-calculations__field--checkbox-total {
   grid-template-columns: minmax(0, 1fr) 28px minmax(138px, 0.42fr) minmax(82px, 0.24fr);
+}
+.admin-report-calculations__field--checkbox-total:not(.admin-report-calculations__field--checkbox-total-enabled) {
+  grid-template-columns: minmax(0, 1fr) 28px;
 }
 .admin-report-calculations__checkbox-wrap {
   position: relative;
@@ -1439,6 +1445,7 @@ body.admin-report-modal-open .bottom-nav {
   #adminReportCalcFigures {
     grid-column: 1;
     grid-row: auto;
+    grid-template-rows: none;
     margin-top: 0;
   }
   #adminReportCalcRakeCard .admin-report-calculations__rake-fields {

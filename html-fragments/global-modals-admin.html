@@ -574,6 +574,10 @@
                   <span>Розыгрыши</span>
                   <output id="adminReportFiguresRaffles">0</output>
                 </div>
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                  <span>Беккинг возврат</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input" id="adminReportFiguresBackingReturn" placeholder="0" />
+                </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Крутка дня</span>
                   <output id="adminReportFiguresDailyPoker">0</output>
@@ -586,7 +590,7 @@
                   <span>ЗП</span>
                   <output id="adminReportFiguresSalary">0</output>
                 </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--expenses-total">
+                <div class="admin-report-calculations__field admin-report-calculations__field--total admin-report-calculations__field--expenses-total">
                   <span>Итого расходы</span>
                   <output id="adminReportFiguresExpensesTotal">0</output>
                 </div>
@@ -627,7 +631,7 @@
                     <label><input type="radio" name="adminReportFiguresApproxRate" value="45" /><span>45%</span></label>
                     <label><input type="radio" name="adminReportFiguresApproxRate" value="50" /><span>50%</span></label>
                   </span>
-                  <output id="adminReportFiguresApproxRakeback">0</output>
+                  <output id="adminReportFiguresApproxRakeback" hidden>0</output>
                 </label>
                 <div class="admin-report-calculations__approx-detail" hidden>
                   <div class="admin-report-calculations__approx-row">

@@ -173,6 +173,8 @@
         if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
+        var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
+        var figuresBackingReturn = Math.abs(parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : ""));
         var figuresExpensesTotal =
           Math.abs(parseReportNumber(figuresPercentTotal)) +
           Math.abs(parseReportNumber(totals.rakeback)) +
@@ -180,7 +182,8 @@
           Math.abs(parseReportNumber(calculationWeekStatsTotals.raffles)) +
           Math.abs(parseReportNumber(calculationWeekStatsTotals.dailyPoker)) +
           Math.abs(parseReportNumber(totals.previousRakeback)) +
-          Math.abs(parseReportNumber(totals.anyaSalary));
+          Math.abs(parseReportNumber(totals.anyaSalary)) -
+          figuresBackingReturn;
         var figuresRemainder = figuresRakeTotal - figuresExpensesTotal;
         var figuresExpensesTotalEl = document.getElementById("adminReportFiguresExpensesTotal");
         var figuresRemainderEl = document.getElementById("adminReportFiguresRemainder");
@@ -198,9 +201,16 @@
         var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
         var figuresApproxDetailEl = document.querySelector("#adminReportCalcRakeCard .admin-report-calculations__approx-detail");
         var figuresApproxRatesEl = document.querySelector("#adminReportCalcRakeCard .admin-report-calculations__rate-options");
+        var figuresApproxHeaderEl = figuresApproxRakebackEl && figuresApproxRakebackEl.closest
+          ? figuresApproxRakebackEl.closest(".admin-report-calculations__field--checkbox-total")
+          : null;
         if (figuresApproxDetailEl) figuresApproxDetailEl.hidden = !includeApproxRakeback;
         if (figuresApproxRatesEl) figuresApproxRatesEl.hidden = !includeApproxRakeback;
-        if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
+        if (figuresApproxHeaderEl) figuresApproxHeaderEl.classList.toggle("admin-report-calculations__field--checkbox-total-enabled", includeApproxRakeback);
+        if (figuresApproxRakebackEl) {
+          figuresApproxRakebackEl.hidden = !includeApproxRakeback;
+          figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
+        }
         if (figuresApproxTotalRakeEl) figuresApproxTotalRakeEl.textContent = formatReportRubleNumber(figuresRakeTotal);
         if (figuresApproxAgentsRakeEl) figuresApproxAgentsRakeEl.textContent = formatReportRubleNumber(approxAgentsRake);
         if (figuresApproxIssuedRakeEl) figuresApproxIssuedRakeEl.textContent = formatReportRubleNumber(approxIssuedRake);
@@ -447,8 +457,9 @@
       }
 
       function loadCalculationWeekStats(base, q, week) {
-        var from = new Date(week.start).toISOString().slice(0, 10);
-        var to = new Date(week.end).toISOString().slice(0, 10);
+        var businessDateShiftMs = -3 * 60 * 60 * 1000;
+        var from = new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10);
+        var to = new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10);
         var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
         raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffles");
         raffleUrl = appendCalculationQueryParam(raffleUrl, "from", from);
@@ -750,6 +761,7 @@
           romanPaid: figuresRomanPaidInput ? figuresRomanPaidInput.value : "",
           winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
           agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
+          backingReturn: (document.getElementById("adminReportFiguresBackingReturn") || {}).value || "",
           approxRakebackEnabled: !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked),
           approxRakebackRate: getApproxFiguresRakebackRate(),
           approxRomanRake: figuresApproxRomanRakeInput ? figuresApproxRomanRakeInput.value : "",
@@ -798,6 +810,8 @@
         if (figuresRomanPaidInput) figuresRomanPaidInput.value = draft.romanPaid != null ? draft.romanPaid : "";
         if (figuresWinLossInput) figuresWinLossInput.value = draft.winLoss != null ? draft.winLoss : "";
         if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
+        var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
+        if (figuresBackingReturnInput) figuresBackingReturnInput.value = draft.backingReturn != null ? draft.backingReturn : "";
         if (figuresApproxRakebackEnabledInput) figuresApproxRakebackEnabledInput.checked = draft.approxRakebackEnabled === true;
         if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
           var draftRate = parseReportNumber(draft.approxRakebackRate != null ? draft.approxRakebackRate : "30") || 30;

@@ -12,7 +12,7 @@
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
   var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 18 * 60 * 60 * 1000;
-  var REPORT_DAY_CUTOFF_MS = 18 * 60 * 60 * 1000;
+  var REPORT_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
 
   function readRakebackTemplateSpoilerOpen() {
     return false;
@@ -202,7 +202,7 @@
     var year = Number(date.year) || new Date().getFullYear();
     var weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
     var daysFromMonday = (weekdayIndex + 6) % 7;
-    return Date.UTC(year, month - 1, day, 0, 0, 0, 0) - daysFromMonday * RAKEBACK_DAY_MS - MOSCOW_UTC_OFFSET_MS;
+    return Date.UTC(year, month - 1, day, 6, 0, 0, 0) - daysFromMonday * RAKEBACK_DAY_MS - MOSCOW_UTC_OFFSET_MS;
   }
 
   function getRakebackEntryWeekStart(raw) {

@@ -46,6 +46,7 @@
       });
 
       [
+        elements.backingReturnInput,
         elements.romanPaidInput,
         elements.winLossInput,
         elements.agentsPaidInput,
