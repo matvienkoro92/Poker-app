@@ -1194,6 +1194,8 @@ html.app-view-admin-bonuses-html-scroll body.app-view-long-scroll {
 body[data-view="admin-bonuses"] #app.app {
   flex: 1 1 0 !important;
   align-self: stretch !important;
+  width: 100% !important;
+  max-width: none !important;
   min-height: 0 !important;
   height: 100vh !important;
   height: 100dvh !important;
@@ -1211,13 +1213,16 @@ body[data-view="admin-bonuses"] #app.app .card {
   flex: 1 1 0 !important;
   flex-shrink: 1 !important;
   width: 100% !important;
-  max-width: 420px !important;
+  max-width: none !important;
   min-height: 0 !important;
   height: 100% !important;
   max-height: 100% !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 body[data-view="admin-bonuses"] #app.app .card .card__content {
