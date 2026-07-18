@@ -586,6 +586,14 @@
                   <span>ЗП</span>
                   <output id="adminReportFiguresSalary">0</output>
                 </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--expenses-total">
+                  <span>Итого расходы</span>
+                  <output id="adminReportFiguresExpensesTotal">0</output>
+                </div>
+                <div class="admin-report-calculations__field admin-report-calculations__field--positive admin-report-calculations__field--remainder">
+                  <span>Итого остаток</span>
+                  <output id="adminReportFiguresRemainder">0</output>
+                </div>
                 <div class="admin-report-calculations__figures-lower" id="adminReportFiguresLower">
                 <label class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--visual-minus">
                   <span>Роман выдал</span>
@@ -613,7 +621,7 @@
                     <input type="checkbox" id="adminReportFiguresApproxRakebackEnabled" />
                     <span aria-hidden="true"></span>
                   </span>
-                  <span class="admin-report-calculations__rate-options" role="radiogroup" aria-label="Процент примерного рейкбека">
+                  <span class="admin-report-calculations__rate-options" role="radiogroup" aria-label="Процент примерного рейкбека" hidden>
                     <label><input type="radio" name="adminReportFiguresApproxRate" value="30" checked /><span>30%</span></label>
                     <label><input type="radio" name="adminReportFiguresApproxRate" value="40" /><span>40%</span></label>
                     <label><input type="radio" name="adminReportFiguresApproxRate" value="45" /><span>45%</span></label>

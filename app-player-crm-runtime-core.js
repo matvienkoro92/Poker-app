@@ -2951,17 +2951,19 @@
           try { textEl.dispatchEvent(new Event("input", { bubbles: true })); } catch (eInput) {}
         }
         var photoFileId = String(post.photoFileId || "").trim();
-        state.broadcastImage = photoFileId ? {
-          dataUrl: "",
+        var photoDataUrl = String(post.photoDataUrl || "").trim();
+        var photoMimeType = String(post.photoMimeType || "image/jpeg").trim();
+        state.broadcastImage = photoFileId || photoDataUrl ? {
+          dataUrl: photoDataUrl,
           telegramFileId: photoFileId,
-          mimeType: "image/jpeg",
+          mimeType: photoMimeType,
           name: "Последний пост Telegram",
-          size: 0,
+          size: Number(post.photoSize) || 0,
         } : null;
         var input = document.getElementById("playerCrmBroadcastImageInput");
         if (input) input.value = "";
         renderBroadcastImageAttachment();
-        setBroadcastResult("Последний пост канала подставлен" + (photoFileId ? " вместе с фотографией." : "."));
+        setBroadcastResult("Последний пост канала подставлен" + (photoFileId || photoDataUrl ? " вместе с фотографией." : "."));
       })
       .catch(function () {
         setBroadcastResult(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Не удалось загрузить последний пост.");

@@ -1065,6 +1065,11 @@ body.admin-report-modal-open .bottom-nav {
   border-color: rgba(74, 222, 128, 0.26);
   background: rgba(74, 222, 128, 0.1);
 }
+.admin-report-calculations__field--expenses-total,
+.admin-report-calculations__field--remainder {
+  margin-top: 3px;
+  font-weight: 950;
+}
 .admin-report-calculations__field--negative {
   border-color: rgba(248, 113, 113, 0.28);
   background: rgba(248, 113, 113, 0.1);
@@ -1158,6 +1163,9 @@ body.admin-report-modal-open .bottom-nav {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 3px;
   min-width: 0;
+}
+.admin-report-calculations__rate-options[hidden] {
+  display: none;
 }
 .admin-report-calculations__rate-options label {
   position: relative;
