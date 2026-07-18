@@ -674,15 +674,12 @@
   display: none;
 }
 
-.player-crm__featured-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-  gap: 10px;
-  margin-top: 10px;
+.player-crm__period-metrics > .player-crm__week-report {
+  grid-column: span 2;
+  min-width: 0;
 }
 
-.player-crm__featured-stats-row .player-crm__week-report-card {
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-card {
   margin-top: 0;
 }
 
@@ -955,10 +952,6 @@
 }
 
 @media (max-width: 600px) {
-  .player-crm__featured-stats-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .player-crm__week-report-card {
     padding: 12px;
     border-radius: 14px;
@@ -3606,9 +3599,11 @@ button.player-crm__stat:focus-visible,
   min-width: 0 !important;
 }
 .player-crm .player-crm__period-metric--audience,
-.player-crm .player-crm__period-metric--registration,
-.player-crm .player-crm__period-metric--activity {
+.player-crm .player-crm__period-metric--registration {
   grid-column: span 3;
+}
+.player-crm .player-crm__period-metric--activity {
+  grid-column: span 2;
 }
 .player-crm .player-crm__period-metric--engagement {
   grid-column: span 2;
