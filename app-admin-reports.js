@@ -125,22 +125,28 @@ function initAdminReportModal() {
   var rakebackOverlayPanel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
   var rakebackOverlayClose = modal ? modal.querySelector("[data-admin-report-rakeback-overlay-close]") : null;
   function closeRakebackOverlay() {
-    if (!rakebackOverlayPanel) return;
-    rakebackOverlayPanel.classList.remove("admin-report-panel--rakeback-overlay");
-    rakebackOverlayPanel.removeAttribute("aria-modal");
-    rakebackOverlayPanel.removeAttribute("role");
-    if (figuresRakebackLink) figuresRakebackLink.focus({ preventScroll: true });
+    var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
+    if (!panel) return;
+    panel.classList.remove("admin-report-panel--rakeback-overlay");
+    panel.removeAttribute("aria-modal");
+    panel.removeAttribute("role");
+    var trigger = modal ? modal.querySelector("[data-admin-report-open-rakeback]") : null;
+    if (trigger) trigger.focus({ preventScroll: true });
   }
   function openRakebackOverlay() {
-    if (!rakebackOverlayPanel) return;
-    rakebackOverlayPanel.classList.add("admin-report-panel--rakeback-overlay");
-    rakebackOverlayPanel.setAttribute("role", "dialog");
-    rakebackOverlayPanel.setAttribute("aria-modal", "true");
+    var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
+    if (!panel) return false;
+    panel.classList.add("admin-report-panel--rakeback-overlay");
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-modal", "true");
     try {
       openLazyRakebackModule();
     } catch (e) {}
-    if (rakebackOverlayClose) rakebackOverlayClose.focus({ preventScroll: true });
+    var closeButton = panel.querySelector("[data-admin-report-rakeback-overlay-close]");
+    if (closeButton) closeButton.focus({ preventScroll: true });
+    return true;
   }
+  window.pokerOpenAdminReportRakebackOverlay = openRakebackOverlay;
   if (figuresRakebackLink && figuresRakebackLink.dataset.rakebackOverlayBound !== "1") {
     figuresRakebackLink.dataset.rakebackOverlayBound = "1";
     figuresRakebackLink.addEventListener("keydown", function (event) {
