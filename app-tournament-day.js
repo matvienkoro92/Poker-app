@@ -114,7 +114,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   { repeat: "weekly", dow: 3, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
   { repeat: "weekly", dow: 4, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
   { repeat: "weekly", dow: 5, category: "Ежедневный", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "40 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 6, category: "Ежедневный", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "40 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
+  { repeat: "weekly", dow: 6, category: "Ежедневный", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "70 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
   { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту на 1 000 000₽", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 36 },
   { repeat: "daily", category: "Ежедневный", name: "PLO4", buyin: "300₽", rebuy: "—", guarantee: "10 000₽", hour: 20, minute: 0, durationMinutes: 180, priority: 50 },
