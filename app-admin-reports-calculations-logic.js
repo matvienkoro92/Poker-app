@@ -189,12 +189,13 @@
           Math.abs(parseReportNumber(calculationWeekStatsTotals.raffles)) +
           Math.abs(parseReportNumber(calculationWeekStatsTotals.dailyPoker)) +
           Math.abs(parseReportNumber(totals.previousRakeback)) +
-          Math.abs(parseReportNumber(totals.anyaSalary)) -
-          figuresBackingReturn;
-        var figuresRemainder = figuresRakeTotal - figuresExpensesTotal;
+          Math.abs(parseReportNumber(totals.anyaSalary));
+        var figuresRemainder = figuresRakeTotal - figuresExpensesTotal + figuresBackingReturn;
         var figuresExpensesTotalEl = document.getElementById("adminReportFiguresExpensesTotal");
+        var figuresReturnsTotalEl = document.getElementById("adminReportFiguresReturnsTotal");
         var figuresRemainderEl = document.getElementById("adminReportFiguresRemainder");
         if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = formatReportNegativeDisplay(figuresExpensesTotal);
+        if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = formatReportRubleNumber(figuresBackingReturn);
         if (figuresRemainderEl) figuresRemainderEl.textContent = formatReportRubleNumber(figuresRemainder);
         if (figuresRemainderEl && figuresRemainderEl.parentElement) {
           figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", figuresRemainder < 0);
@@ -236,6 +237,7 @@
             parseReportNumber(figuresWinLossInput ? figuresWinLossInput.value : "") -
             parseReportNumber(figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "") -
             getFiguresExtraAmountTotal() +
+            figuresBackingReturn +
             (includeApproxRakeback ? approxRakeback : 0);
           figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
         }

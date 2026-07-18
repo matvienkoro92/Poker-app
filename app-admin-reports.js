@@ -99,6 +99,11 @@ function initAdminReportModal() {
       calculationExpensesTotalField.classList.add("admin-report-calculations__field--expenses-highlight");
       calculationSummary.appendChild(calculationExpensesTotalField);
     }
+    var calculationReturnsTotalField = document.getElementById("adminReportFiguresReturnsTotal");
+    calculationReturnsTotalField = calculationReturnsTotalField && calculationReturnsTotalField.closest(".admin-report-calculations__field");
+    if (calculationReturnsTotalField) {
+      calculationSummary.appendChild(calculationReturnsTotalField);
+    }
     var calculationRemainderField = document.getElementById("adminReportFiguresRemainder");
     calculationRemainderField = calculationRemainderField && calculationRemainderField.closest(".admin-report-calculations__field");
     if (calculationRemainderField) {
@@ -130,17 +135,24 @@ function initAdminReportModal() {
     rakebackOverlayPanel.classList.add("admin-report-panel--rakeback-overlay");
     rakebackOverlayPanel.setAttribute("role", "dialog");
     rakebackOverlayPanel.setAttribute("aria-modal", "true");
-    openLazyRakebackModule();
+    try {
+      openLazyRakebackModule();
+    } catch (e) {}
     if (rakebackOverlayClose) rakebackOverlayClose.focus({ preventScroll: true });
   }
-  if (figuresRakebackLink && figuresRakebackLink.dataset.bound !== "1") {
-    figuresRakebackLink.dataset.bound = "1";
-    figuresRakebackLink.addEventListener("click", function () {
-      openRakebackOverlay();
-    });
+  if (figuresRakebackLink && figuresRakebackLink.dataset.rakebackOverlayBound !== "1") {
+    figuresRakebackLink.dataset.rakebackOverlayBound = "1";
     figuresRakebackLink.addEventListener("keydown", function (event) {
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
+      openRakebackOverlay();
+    });
+  }
+  if (modal && modal.dataset.rakebackOverlayDelegatedBound !== "1") {
+    modal.dataset.rakebackOverlayDelegatedBound = "1";
+    modal.addEventListener("click", function (event) {
+      var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
+      if (!trigger || !modal.contains(trigger)) return;
       openRakebackOverlay();
     });
   }
