@@ -364,6 +364,7 @@
             '<div class="admin-bonuses__issue-player"><strong>' + esc(op.displayName || op.userId) + '</strong><span>' + esc(playerSub) + '</span></div>' +
             '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
             '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
+            '<div class="admin-bonuses__issue-review"><button type="button" class="' + (op.reviewVerified ? "admin-bonuses__issue-review-btn--verified" : "") + '" data-admin-bonus-issue-review="' + esc(op.id) + '"' + (op.reviewVerified ? " disabled" : "") + '>' + (op.reviewVerified ? "✓ Проверено" : "На проверке") + '</button></div>' +
           '</article>';
         }).join("") +
       '</section>';
@@ -384,6 +385,34 @@
       })
       .catch(function (err) {
         body.textContent = err && err.message ? err.message : POKER_NET_ERR;
+      });
+  }
+
+  function verifyIssue(button) {
+    var operationId = String(button && button.getAttribute("data-admin-bonus-issue-review") || "");
+    if (!operationId || button.disabled) return;
+    button.disabled = true;
+    button.textContent = "Сохраняем…";
+    fetch(authUrl("bonus-issues/" + operationId + "/verify"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(authBody({})),
+    })
+      .then(readJson)
+      .then(function (data) {
+        if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Проверка не сохранилась");
+        var operation = adminBonusesState.issueOperations.find(function (item) { return item.id === operationId; });
+        if (operation) {
+          operation.reviewVerified = true;
+          operation.reviewVerifiedAt = data.review && data.review.verifiedAt || "";
+          operation.reviewVerifiedBy = data.review && data.review.adminId || "";
+        }
+        renderIssues(adminBonusesState.issueOperations);
+      })
+      .catch(function (err) {
+        button.disabled = false;
+        button.textContent = "На проверке";
+        alert(err && err.message ? err.message : POKER_NET_ERR);
       });
   }
 
@@ -435,6 +464,34 @@
     }
   }
 
+  function showOperationSuccess(operation, userId, amount, tournament, balance) {
+    var previous = document.querySelector(".admin-bonuses__success-toast");
+    if (previous) previous.remove();
+    var found = adminBonusesState.users.find(function (user) { return user.userId === userId; });
+    var toast = document.createElement("div");
+    toast.className = "admin-bonuses__success-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "assertive");
+    var action = operation === "debit" ? "Списание прошло успешно" : "Начисление прошло успешно";
+    toast.innerHTML =
+      '<span class="admin-bonuses__success-icon" aria-hidden="true">✓</span>' +
+      '<span><strong>' + esc(action) + '</strong>' +
+      '<small>' + esc((found ? rowTitle(found) : userId) + " · " + fmtPoints(amount) + " бонусов") + '</small>' +
+      (tournament ? '<small>' + esc(tournament.title) + '</small>' : "") +
+      '<small>Новый баланс: ' + esc(fmtPoints(balance)) + '</small></span>';
+    toast.addEventListener("click", function () { toast.remove(); });
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () { toast.classList.add("admin-bonuses__success-toast--visible"); });
+    setTimeout(function () {
+      toast.classList.remove("admin-bonuses__success-toast--visible");
+      setTimeout(function () { toast.remove(); }, 250);
+    }, 4500);
+    try {
+      var tg = window.Telegram && window.Telegram.WebApp;
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+    } catch (e) {}
+  }
+
   function submitOperation() {
     var userId = adminBonusesState.selectedUserId;
     var operation = adminBonusesState.operation;
@@ -480,6 +537,7 @@
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Операция не выполнена");
         if (message) message.textContent = "Готово. Новый баланс: " + data.bonusBalance;
+        showOperationSuccess(operation, userId, amount, tournament, data.bonusBalance);
         loadList();
         loadHistory(userId);
         adminBonusesState.issuesLoaded = false;
@@ -503,6 +561,14 @@
     if (issuesRefresh && issuesRefresh.dataset.bound !== "1") {
       issuesRefresh.dataset.bound = "1";
       issuesRefresh.addEventListener("click", function () { loadIssues(true); });
+    }
+    var issuesBody = $("adminBonusesIssuesBody");
+    if (issuesBody && issuesBody.dataset.reviewBound !== "1") {
+      issuesBody.dataset.reviewBound = "1";
+      issuesBody.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-admin-bonus-issue-review]");
+        if (button) verifyIssue(button);
+      });
     }
     var refresh = $("adminBonusesRefreshBtn");
     if (refresh && refresh.dataset.bound !== "1") {
