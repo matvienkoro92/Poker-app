@@ -681,6 +681,104 @@
 
 .player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-card {
   margin-top: 0;
+  padding: 9px;
+  border-radius: 14px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  margin-bottom: 7px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-head h3 {
+  font-size: 14px;
+  line-height: 1.08;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-head span {
+  font-size: 9px;
+  line-height: 1.15;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-head button {
+  min-height: 28px;
+  padding: 4px 7px;
+  font-size: 9px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-main,
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-group {
+  gap: 5px;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-group {
+  margin-top: 6px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-row {
+  gap: 4px;
+  font-size: 10px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-row span {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit summary {
+  gap: 5px;
+  font-size: 12px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit summary span::before {
+  width: 11px;
+  margin-right: 1px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit-grid {
+  gap: 5px;
+  padding-top: 6px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit-column {
+  gap: 3px;
+  padding: 5px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit-column h4 {
+  font-size: 11px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-deposit-column > div {
+  gap: 3px;
+  font-size: 9px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-details summary {
+  gap: 4px;
+  padding: 7px;
+  font-size: 9px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-details summary span {
+  padding-left: 15px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-details summary strong {
+  font-size: 9px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-rakeback {
+  gap: 4px;
+  padding: 6px;
+}
+
+.player-crm__period-metrics > .player-crm__week-report .player-crm__week-report-row--subdetail {
+  padding-left: 7px;
 }
 
 .player-crm__week-report-card {
