@@ -716,6 +716,13 @@
   font-weight: 800;
 }
 
+.player-crm__week-report-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
 .player-crm__week-report-main,
 .player-crm__week-report-group {
   display: grid;
@@ -736,19 +743,84 @@
   color: #ccefff;
 }
 
+.player-crm__week-report-calc-details summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+}
+
+.player-crm__week-report-calc-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.player-crm__week-report-calc-details summary span::before {
+  display: inline-block;
+  width: 16px;
+  margin-right: 4px;
+  content: "›";
+  color: #7dd3fc;
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+
+.player-crm__week-report-calc-details[open] summary span::before {
+  transform: rotate(90deg);
+}
+
+.player-crm__week-report-calc-body {
+  display: grid;
+  gap: 7px;
+  padding-top: 8px;
+}
+
 .player-crm__week-report-group--danger {
   border-color: rgba(251, 113, 133, 0.28);
   background: rgba(61, 20, 30, 0.56);
   color: #ffd1d8;
 }
 
-.player-crm__week-report-rakeback {
+.player-crm__week-report-bonuses-details summary {
   display: grid;
-  gap: 6px;
-  padding: 8px 10px;
-  border: 1px solid rgba(251, 113, 133, 0.2);
-  border-radius: 10px;
-  background: rgba(20, 8, 13, 0.28);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+}
+
+.player-crm__week-report-bonuses-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.player-crm__week-report-bonuses-details summary span::before {
+  display: inline-block;
+  width: 16px;
+  margin-right: 4px;
+  content: "›";
+  color: #fda4af;
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+
+.player-crm__week-report-bonuses-details[open] summary span::before {
+  transform: rotate(90deg);
+}
+
+.player-crm__week-report-bonuses-body {
+  display: grid;
+  gap: 7px;
+  padding-top: 8px;
+}
+
+.player-crm__week-report-group--rakeback {
+  border-color: rgba(245, 158, 11, 0.38);
+  background: rgba(92, 48, 8, 0.5);
+  color: #ffe2a8;
 }
 
 .player-crm__week-report-row {

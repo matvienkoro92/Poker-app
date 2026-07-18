@@ -266,19 +266,32 @@
           (totals.depositByManagerDay[depositManager][depositWeekday] || 0) + crmReportNumber(report && report.deposit);
       }
       totals.rakeback += crmReportStoredRakeback(report);
-      var extras = Array.isArray(report && report.extraFields) ? report.extraFields : [];
-      if (!extras.length && report && (report.extraName || report.extraAmount != null)) {
-        extras = [{ name: report.extraName || "Доп", amount: report.extraAmount }];
+      var extras = Array.isArray(report && report.extraFields) ? report.extraFields.slice() : [];
+      if (report && (report.extraName || report.extraAmount != null)) {
+        var legacyExtra = { name: report.extraName || "Доп", amount: report.extraAmount };
+        var legacyName = crmReportExtraName(legacyExtra.name);
+        var legacyAmount = crmReportNumber(legacyExtra.amount);
+        var alreadyIncluded = extras.some(function (field) {
+          return field &&
+            crmReportExtraName(field.name) === legacyName &&
+            crmReportNumber(field.amount != null ? field.amount : field.value) === legacyAmount;
+        });
+        if (!alreadyIncluded) extras.push(legacyExtra);
       }
       extras.forEach(function (field) {
         if (!field || !field.name) return;
         var amount = crmReportNumber(field.amount != null ? field.amount : field.value);
         if (crmReportIsPreviousRakeback(field.name)) totals.previousRakeback += amount;
-        else if (!crmReportIsManualRakeback(field.name)) extraMap[field.name] = (extraMap[field.name] || 0) + amount;
+        else if (!crmReportIsManualRakeback(field.name)) {
+          var normalizedName = crmReportExtraName(field.name);
+          if (!normalizedName) return;
+          if (!extraMap[normalizedName]) extraMap[normalizedName] = { name: String(field.name).trim(), amount: 0 };
+          extraMap[normalizedName].amount += amount;
+        }
       });
     });
     totals.extraFields = Object.keys(extraMap).map(function (name) {
-      return { name: name, amount: extraMap[name] };
+      return extraMap[name];
     }).filter(function (field) {
       return field.amount !== 0;
     });
@@ -344,14 +357,14 @@
       detailTotal += anyaSalary;
       detailRows.push(row("Аня ЗП", anyaSalary));
     }
+    var depositDifference = crmReportNumber(report.deposit) - detailTotal;
     var detailHtml = detailRows.length
-      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span><strong>Итого ' + esc(crmReportMoney(detailTotal)) + '</strong></summary><div class="player-crm__week-report-details-body">' +
+      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span><strong>Итого ' + esc(crmReportMoney(detailTotal)) + ' (разница ' + esc(crmReportMoney(depositDifference)) + ')</strong></summary><div class="player-crm__week-report-details-body">' +
           detailRows.join("") +
-        '</div></details><div class="player-crm__week-report-totals">' +
-          row("Разница с депозитом", crmReportNumber(report.deposit) - detailTotal, "player-crm__week-report-row--total", true) +
-        "</div>"
+        "</div></details>"
       : "";
     var exchip = crmReportNumber(report.botExchipDep) - crmReportNumber(report.botExchipCashout);
+    var runexExchipTotal = crmReportNumber(report.botCryptoDep) + exchip;
     var anyaVisible = anyaSalary ? row("Аня ЗП", anyaSalary) : "";
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
     var raffleRows = raffleStats && raffleStats.available !== false
@@ -365,26 +378,137 @@
     var dailyPokerDebitedRow = dailyPokerDebited == null
       ? ""
       : row("Крутка дня списано", dailyPokerDebited, "", true);
+    var bonusesTotal =
+      crmReportNumber(report.bonuses) +
+      crmReportNumber(raffleStats && raffleStats.available !== false ? raffleStats.issuedPrizeAmount : 0) +
+      crmReportNumber(dailyPokerDebited);
     var rakebackRows =
-      '<div class="player-crm__week-report-rakeback">' +
-        row("РБ прошлая", report.previousRakeback, "", true) +
-        row("Рейкбек", report.rakeback, "", true) +
-      "</div>";
+      row("РБ прошлая", report.previousRakeback, "", true) +
+      row("Рейкбек", report.rakeback, "", true);
     host.innerHTML =
       '<section class="player-crm__week-report-card">' +
-        '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><button type="button" data-crm-refresh-week-report>Обновить</button></div>' +
+        '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><div class="player-crm__week-report-actions"><button type="button" data-crm-copy-week-report>Скопировать</button><button type="button" data-crm-refresh-week-report>Обновить</button></div></div>' +
         '<div class="player-crm__week-report-main">' + depositHtml + detailHtml + "</div>" +
-        '<div class="player-crm__week-report-group player-crm__week-report-group--calc">' +
-          row("Итого Рунекс", report.botCryptoDep) +
-          (report.botExchipDep || report.botExchipCashout
-            ? '<div class="player-crm__week-report-row"><span>Итого Эксчип</span><strong>' + esc(crmReportMoney(report.botExchipDep)) + " - " + esc(crmReportMoney(report.botExchipCashout)) + " = " + esc(crmReportMoney(exchip)) + "</strong></div>"
-            : "") +
-        "</div>" +
-        '<div class="player-crm__week-report-group player-crm__week-report-group--danger">' +
-          row("Бонусы", report.bonuses) + rakebackRows + anyaVisible +
-          raffleRows + dailyPokerDebitedRow +
+        '<details class="player-crm__week-report-group player-crm__week-report-group--calc player-crm__week-report-calc-details">' +
+          '<summary><span>Рунекс и Эксчип</span><strong>Итого ' + esc(crmReportMoney(runexExchipTotal)) + "</strong></summary>" +
+          '<div class="player-crm__week-report-calc-body">' +
+            row("Итого Рунекс", report.botCryptoDep, "", true) +
+            '<div class="player-crm__week-report-row"><span>Итого Эксчип</span><strong>' + esc(crmReportMoney(report.botExchipDep)) + " - " + esc(crmReportMoney(report.botExchipCashout)) + " = " + esc(crmReportMoney(exchip)) + "</strong></div>" +
+          "</div>" +
+        "</details>" +
+        '<details class="player-crm__week-report-group player-crm__week-report-group--danger player-crm__week-report-bonuses-details">' +
+          '<summary><span>Бонусы и выдачи</span><strong>Итого ' + esc(crmReportMoney(bonusesTotal)) + "</strong></summary>" +
+          '<div class="player-crm__week-report-bonuses-body">' +
+            row("Бонусы", report.bonuses, "", true) +
+            raffleRows + dailyPokerDebitedRow +
+          "</div>" +
+        "</details>" +
+        '<div class="player-crm__week-report-group player-crm__week-report-group--rakeback">' +
+          rakebackRows + anyaVisible +
         "</div>" +
       "</section>";
+  }
+
+  function crmWeekReportCopyText() {
+    var report = state.weekReport;
+    if (!report) return "";
+    var lines = ["ОТЧЁТ ТЕКУЩЕЙ НЕДЕЛИ", "", "Депозит: " + crmReportMoney(report.deposit), "", "ДЕПОЗИТЫ ПО ДНЯМ"];
+    lines.push("День | Аня | Вика");
+    var depositTotals = { anya: 0, vika: 0 };
+    CRM_REPORT_WEEKDAYS.forEach(function (day) {
+      var anya = crmReportNumber(report.depositByManagerDay && report.depositByManagerDay.anya && report.depositByManagerDay.anya[day.key]);
+      var vika = crmReportNumber(report.depositByManagerDay && report.depositByManagerDay.vika && report.depositByManagerDay.vika[day.key]);
+      depositTotals.anya += anya;
+      depositTotals.vika += vika;
+      lines.push(day.label + " | " + crmReportMoney(anya) + " | " + crmReportMoney(vika));
+    });
+    lines.push("Итого | " + crmReportMoney(depositTotals.anya) + " | " + crmReportMoney(depositTotals.vika));
+
+    var detailRows = [];
+    var detailTotal = 0;
+    [
+      ["Выводы", "cashout"], ["Продамус", "prodamus"], ["Робокасса", "robokassa"],
+      ["Рома крипта", "romaCrypto"], ["Боткрипта", "botCryptoDep"],
+      ["Ботэксчип деп", "botExchipDep"], ["Сергей/Марина", "sergeyMarina"]
+    ].forEach(function (item) {
+      var value = crmReportNumber(report[item[1]]);
+      if (!value) return;
+      detailTotal += value;
+      detailRows.push(item[0] + ": " + crmReportMoney(value));
+    });
+    var anyaSalary = 0;
+    (report.extraFields || []).forEach(function (field) {
+      if (!field) return;
+      var amount = crmReportNumber(field.amount);
+      if (crmReportIsAnyaSalary(field.name)) {
+        anyaSalary += amount;
+        return;
+      }
+      if (!amount) return;
+      detailTotal += amount;
+      detailRows.push(String(field.name || "Доп") + ": " + crmReportMoney(amount));
+    });
+    if (anyaSalary) detailTotal += anyaSalary;
+    lines.push("", "ДЕТАЛИЗАЦИЯ ВЫВОДОВ");
+    lines.push.apply(lines, detailRows);
+    lines.push("Итого выводов: " + crmReportMoney(detailTotal) + " (разница " + crmReportMoney(crmReportNumber(report.deposit) - detailTotal) + ")");
+
+    var exchip = crmReportNumber(report.botExchipDep) - crmReportNumber(report.botExchipCashout);
+    var runexExchipTotal = crmReportNumber(report.botCryptoDep) + exchip;
+    lines.push("", "Итого Рунекс: " + crmReportMoney(report.botCryptoDep));
+    lines.push("Итого Эксчип: " + crmReportMoney(report.botExchipDep) + " - " + crmReportMoney(report.botExchipCashout) + " = " + crmReportMoney(exchip));
+    lines.push("Рунекс и Эксчип итого: " + crmReportMoney(runexExchipTotal));
+    lines.push("", "Бонусы: " + crmReportMoney(report.bonuses));
+    var raffleStats = state.statsSummary && state.statsSummary.raffles;
+    var raffleIssuedTotal = 0;
+    if (raffleStats && raffleStats.available !== false) {
+      raffleIssuedTotal = crmReportNumber(raffleStats.issuedPrizeAmount);
+      lines.push("Розыгрыши итого: " + crmReportMoney(raffleStats.issuedPrizeAmount));
+      lines.push("— Билеты: " + crmReportMoney(raffleStats.issuedTicketAmount));
+      lines.push("— Кеш: " + crmReportMoney(raffleStats.issuedCashAmount));
+    }
+    var dailyPokerDebited = 0;
+    if (state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null) {
+      dailyPokerDebited = crmReportNumber(state.dailyPokerStats.bonusBalanceDebited);
+      lines.push("Крутка дня списано: " + crmReportMoney(state.dailyPokerStats.bonusBalanceDebited));
+    }
+    lines.push("Бонусы и выдачи итого: " + crmReportMoney(crmReportNumber(report.bonuses) + raffleIssuedTotal + dailyPokerDebited));
+    lines.push("", "РБ прошлая: " + crmReportMoney(report.previousRakeback));
+    lines.push("Рейкбек: " + crmReportMoney(report.rakeback));
+    if (anyaSalary) lines.push("Аня ЗП: " + crmReportMoney(anyaSalary));
+    return lines.join("\n");
+  }
+
+  function copyCrmWeekReport(button) {
+    var text = crmWeekReportCopyText();
+    if (!text) return;
+    function done(ok) {
+      if (!button) return;
+      var original = button.getAttribute("data-original-label") || button.textContent || "Скопировать";
+      button.setAttribute("data-original-label", original);
+      button.textContent = ok ? "Скопировано" : "Ошибка";
+      setTimeout(function () {
+        if (button && button.isConnected) button.textContent = original;
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () { done(false); });
+      return;
+    }
+    try {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      var copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      done(copied !== false);
+    } catch (e) {
+      done(false);
+    }
   }
 
   function loadCrmWeekReport(force) {
@@ -3749,6 +3873,11 @@
       }
       if (e.target.closest("[data-crm-refresh-week-report]")) {
         loadCrmWeekReport(true);
+        return;
+      }
+      var copyWeekReportButton = e.target.closest("[data-crm-copy-week-report]");
+      if (copyWeekReportButton) {
+        copyCrmWeekReport(copyWeekReportButton);
         return;
       }
       if (e.target.closest("[data-crm-refresh-blocked]")) {
