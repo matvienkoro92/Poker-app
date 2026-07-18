@@ -171,7 +171,9 @@
     })
     : {};
   function renderStats() {
-    return playerCrmStatsRuntime && typeof playerCrmStatsRuntime.renderStats === "function" ? playerCrmStatsRuntime.renderStats() : null;
+    var result = playerCrmStatsRuntime && typeof playerCrmStatsRuntime.renderStats === "function" ? playerCrmStatsRuntime.renderStats() : null;
+    renderCrmWeekReport();
+    return result;
   }
 
   function crmReportNumber(value) {
@@ -207,12 +209,46 @@
     return crmReportNumber(report && report.rakeback);
   }
 
+  var CRM_REPORT_WEEKDAYS = [
+    { key: "mon", label: "Пн" },
+    { key: "tue", label: "Вт" },
+    { key: "wed", label: "Ср" },
+    { key: "thu", label: "Чт" },
+    { key: "fri", label: "Пт" },
+    { key: "sat", label: "Сб" },
+    { key: "sun", label: "Вс" },
+  ];
+
+  function crmReportDepositManager(report) {
+    var authorId = String(report && report.authorId || "").replace(/^tg_/, "").trim();
+    var authorName = crmReportExtraName(report && report.authorName);
+    if (authorId === "2144406710" || authorName.indexOf("аня") !== -1 || authorName.indexOf("anna") !== -1) return "anya";
+    if (authorId === "1897001087" || authorName.indexOf("вика") !== -1 || authorName.indexOf("vika") !== -1) return "vika";
+    return "";
+  }
+
+  function crmReportDepositWeekday(report) {
+    var weekday = crmReportExtraName(report && report.weekday);
+    var prefixes = [
+      ["пон", "mon"], ["вто", "tue"], ["сре", "wed"], ["чет", "thu"],
+      ["пят", "fri"], ["суб", "sat"], ["вос", "sun"],
+    ];
+    for (var i = 0; i < prefixes.length; i += 1) {
+      if (weekday.indexOf(prefixes[i][0]) === 0) return prefixes[i][1];
+    }
+    var match = String(report && report.date || "").match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (!match) return "";
+    var dayIndex = new Date(Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]), 12)).getUTCDay();
+    return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayIndex] || "";
+  }
+
   function crmWeekReportTotals(reports) {
     var totals = {
       deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
       botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
       bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0,
-      previousRakeback: 0, extraFields: []
+      previousRakeback: 0, extraFields: [],
+      depositByManagerDay: { anya: {}, vika: {} }
     };
     var extraMap = {};
     (Array.isArray(reports) ? reports : []).forEach(function (report) {
@@ -223,6 +259,12 @@
       ].forEach(function (key) {
         totals[key] += crmReportNumber(report && report[key]);
       });
+      var depositManager = crmReportDepositManager(report);
+      var depositWeekday = crmReportDepositWeekday(report);
+      if (depositManager && depositWeekday) {
+        totals.depositByManagerDay[depositManager][depositWeekday] =
+          (totals.depositByManagerDay[depositManager][depositWeekday] || 0) + crmReportNumber(report && report.deposit);
+      }
       totals.rakeback += crmReportStoredRakeback(report);
       var extras = Array.isArray(report && report.extraFields) ? report.extraFields : [];
       if (!extras.length && report && (report.extraName || report.extraAmount != null)) {
@@ -255,10 +297,25 @@
       host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт текущей недели</h3><div class="player-crm__week-report-empty">Отчётов за текущую неделю пока нет.</div></section>';
       return;
     }
-    function row(label, value, className) {
-      if (!value) return "";
+    function row(label, value, className, showZero) {
+      if (!value && !showZero) return "";
       return '<div class="player-crm__week-report-row' + (className ? " " + className : "") + '"><span>' + esc(label) + '</span><strong>' + esc(crmReportMoney(value)) + "</strong></div>";
     }
+    function depositColumn(managerKey, managerLabel) {
+      var managerRows = report.depositByManagerDay && report.depositByManagerDay[managerKey] || {};
+      return '<section class="player-crm__week-report-deposit-column"><h4>' + esc(managerLabel) + "</h4>" +
+        CRM_REPORT_WEEKDAYS.map(function (day) {
+          return '<div><span>' + esc(day.label) + '</span><strong>' + esc(crmReportMoney(managerRows[day.key] || 0)) + "</strong></div>";
+        }).join("") +
+      "</section>";
+    }
+    var depositHtml =
+      '<details class="player-crm__week-report-deposit">' +
+        '<summary><span>Депозит</span><strong>' + esc(crmReportMoney(report.deposit)) + "</strong></summary>" +
+        '<div class="player-crm__week-report-deposit-grid">' +
+          depositColumn("anya", "Аня") + depositColumn("vika", "Вика") +
+        "</div>" +
+      "</details>";
     var detailRows = [];
     var detailTotal = 0;
     [
@@ -284,18 +341,31 @@
       detailRows.push(row("Аня ЗП", anyaSalary));
     }
     var detailHtml = detailRows.length
-      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span><strong>Итого ' + esc(crmReportMoney(detailTotal)) + '</strong></summary><div class="player-crm__week-report-details-body">' +
+      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span></summary><div class="player-crm__week-report-details-body">' +
           detailRows.join("") +
-          row("Итого", detailTotal, "player-crm__week-report-row--total") +
-          row("Разница с депозитом", crmReportNumber(report.deposit) - detailTotal, "player-crm__week-report-row--total") +
-        "</div></details>"
+        '</div></details><div class="player-crm__week-report-totals">' +
+          row("Итого", detailTotal, "player-crm__week-report-row--total", true) +
+          row("Разница с депозитом", crmReportNumber(report.deposit) - detailTotal, "player-crm__week-report-row--total", true) +
+        "</div>"
       : "";
     var exchip = crmReportNumber(report.botExchipDep) - crmReportNumber(report.botExchipCashout);
     var anyaVisible = anyaSalary ? row("Аня ЗП", anyaSalary) : "";
+    var raffleStats = state.statsSummary && state.statsSummary.raffles;
+    var raffleRows = raffleStats && raffleStats.available !== false
+      ? row("Розыгрыши итого", raffleStats.issuedPrizeAmount, "", true) +
+        row("— Билеты", raffleStats.issuedTicketAmount, "player-crm__week-report-row--subdetail", true) +
+        row("— Кеш", raffleStats.issuedCashAmount, "player-crm__week-report-row--subdetail", true)
+      : "";
+    var dailyPokerDebited = state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null
+      ? crmReportNumber(state.dailyPokerStats.bonusBalanceDebited)
+      : null;
+    var dailyPokerDebitedRow = dailyPokerDebited == null
+      ? ""
+      : row("Крутка дня списано", dailyPokerDebited, "", true);
     host.innerHTML =
       '<section class="player-crm__week-report-card">' +
         '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><button type="button" data-crm-refresh-week-report>Обновить</button></div>' +
-        '<div class="player-crm__week-report-main">' + row("Депозит", report.deposit, "player-crm__week-report-row--deposit") + detailHtml + "</div>" +
+        '<div class="player-crm__week-report-main">' + depositHtml + detailHtml + "</div>" +
         '<div class="player-crm__week-report-group player-crm__week-report-group--calc">' +
           row("Итого Рунекс", report.botCryptoDep) +
           (report.botExchipDep || report.botExchipCashout
@@ -304,9 +374,7 @@
         "</div>" +
         '<div class="player-crm__week-report-group player-crm__week-report-group--danger">' +
           row("Бонусы", report.bonuses) + row("РБ прошлая", report.previousRakeback) + row("Рейкбек", report.rakeback) + anyaVisible +
-        "</div>" +
-        '<div class="player-crm__week-report-group">' +
-          row("Ботэксчип вывод", report.botExchipCashout) + row("Переводы", report.transfers) + row("Возврат", report.ret) +
+          raffleRows + dailyPokerDebitedRow +
         "</div>" +
       "</section>";
   }

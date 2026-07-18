@@ -3139,6 +3139,78 @@ async function testRaffleAutoCompleteNotificationDedup(redis) {
   assert.strictEqual((stored.winners || []).length, 1, "auto-complete stores one winner");
 }
 
+async function testDoubleRaffleConcurrentBatchNotifications(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles");
+  const s = sessions();
+  const now = Date.now();
+  const participants = Array.from({ length: 24 }, (_, index) => {
+    const telegramId = 910000 + index;
+    return {
+      userId: "tg_" + telegramId,
+      accountId: "ID" + String(910000 + index),
+      name: "Double player " + index,
+      p21Id: "P21-" + telegramId,
+      pokerPlusStatusLevel: 10,
+    };
+  });
+  participants.forEach((participant) => {
+    redis.h("poker_app:id_to_user").set(participant.accountId, participant.userId);
+  });
+  const raffle = {
+    id: "contract_double_raffle_concurrent",
+    title: "Double concurrent raffle",
+    totalWinners: 10,
+    accessLevel: 10,
+    groups: [
+      { prize: "First batch", count: 7, accessLevel: 10 },
+      { prize: "Second batch", count: 3, accessLevel: 10 },
+    ],
+    resultBatches: [
+      { label: "First 7", endDate: new Date(now - 60_000).toISOString() },
+      { label: "Second 3", endDate: new Date(now + 3600_000).toISOString() },
+    ],
+    endDate: new Date(now + 3600_000).toISOString(),
+    participants,
+    winners: [],
+    status: "active",
+    createdAt: new Date(now - 3600_000).toISOString(),
+  };
+  persistContractRaffle(redis, raffle);
+  redis.s("poker_app:raffle_active_ids").add(raffle.id);
+  redis.kv.set("poker_app:raffle_active_ids:ready", "1");
+
+  const concurrentPublicReads = () => Promise.all(Array.from({ length: 50 }, (_, index) => call(raffles, req("GET",
+    index % 2 === 0
+      ? { pwaSession: s.user, id: raffle.id }
+      : { pwaSession: s.user, activeOnly: "1", bypassListCache: "1" }
+  ))));
+  await concurrentPublicReads();
+  let stored = JSON.parse(redis.kv.get("poker_app:raffle:" + raffle.id));
+  let firstWinners = (stored.winners || []).filter((winner) => Number(winner.groupIndex) === 0);
+  assert.strictEqual(firstWinners.length, 7, "concurrent first batch stores exactly seven winners");
+  const firstStoredIds = new Set(firstWinners.map((winner) => String(winner.userId).replace(/^tg_/, "")));
+  const firstNotifiedIds = new Set(sentMessages
+    .filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш"))
+    .map((msg) => String(msg.body.chat_id)));
+  assert.deepStrictEqual(firstNotifiedIds, firstStoredIds, "concurrent first batch notifies only committed winners");
+
+  stored.resultBatches[1].endDate = new Date(now - 1000).toISOString();
+  stored.endDate = new Date(now - 1000).toISOString();
+  redis.kv.set("poker_app:raffle:" + raffle.id, JSON.stringify(stored));
+  await concurrentPublicReads();
+  stored = JSON.parse(redis.kv.get("poker_app:raffle:" + raffle.id));
+  assert.strictEqual(stored.status, "drawn", "concurrent second batch completes raffle");
+  const initialWinners = (stored.winners || []).filter((winner) => !winner.winnerReroll);
+  assert.strictEqual(initialWinners.length, 10, "concurrent second batch preserves exactly ten initial winners");
+  const finalStoredIds = new Set(initialWinners.map((winner) => String(winner.userId).replace(/^tg_/, "")));
+  const allNotifiedIds = new Set(sentMessages
+    .filter((msg) => String(msg.body.text || "").includes("Вы выиграли розыгрыш"))
+    .map((msg) => String(msg.body.chat_id)));
+  assert.deepStrictEqual(allNotifiedIds, finalStoredIds, "concurrent second batch notifies only committed final winners");
+}
+
 async function testRaffleCronRetriesMissingWinnerNotifications(redis) {
   const sentMessages = [];
   installRecordingFetch(redis, sentMessages);
@@ -5778,6 +5850,7 @@ async function main() {
     ["raffle winner notification caps overflow", testRaffleWinnerNotificationCapsOverflow],
     ["raffle winner notification requires stored winner", testRaffleWinnerNotificationRequiresStoredWinner],
     ["raffle auto-complete notification dedup", testRaffleAutoCompleteNotificationDedup],
+    ["double raffle concurrent batch notifications", testDoubleRaffleConcurrentBatchNotifications],
     ["raffle cron retries missing winner notifications", testRaffleCronRetriesMissingWinnerNotifications],
     ["raffle cron retries missing active batch winner notifications", testRaffleCronRetriesMissingActiveBatchWinnerNotifications],
     ["raffle drawn get does not notify winners", testRaffleDrawnGetDoesNotNotifyWinners],

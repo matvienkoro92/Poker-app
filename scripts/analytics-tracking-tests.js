@@ -109,6 +109,28 @@ async function main() {
   assert.strictEqual(summary.sections[0].uniqueVisitors, 1, "section audience is canonicalized");
   assert.strictEqual(summary.activities[0].name, "daily_poker_spin");
   assert.strictEqual(summary.daily.reduce((sum, row) => sum + row.participations, 0), 1, "participations are available for the chart");
+
+  const largeDay = "2026-07-11";
+  set("poker_app:analytics:v1:days").add(largeDay);
+  for (let index = 0; index < 510; index += 1) {
+    const largeInstallation = "ins_analytics_large_" + index;
+    const largeAccount = "ID" + String(400000 + index);
+    hash("poker_app:analytics:v1:sessions:day:" + largeDay).set(
+      "ses_analytics_large_" + index,
+      JSON.stringify({ i: largeInstallation, a: largeAccount, x: Date.UTC(2026, 6, 11, 12, 0, 0) })
+    );
+    hash("poker_app:analytics:v1:installation_accounts").set(largeInstallation, largeAccount);
+    hash("poker_app:analytics:v1:installation_linked_at").set(largeInstallation, String(Date.UTC(2026, 6, 11, 12, 0, 0)));
+    hash("poker_app:analytics:v1:installation_first_seen").set(largeInstallation, String(Date.UTC(2026, 6, 11, 12, 0, 0)));
+  }
+  const largeSummary = await analytics.readAnalyticsSummary({
+    from: largeDay,
+    to: largeDay,
+    fromMs: Date.UTC(2026, 6, 10, 21, 0, 0),
+    toMs: Date.UTC(2026, 6, 11, 20, 59, 59, 999),
+  });
+  assert.strictEqual(largeSummary.uniqueVisitors, 510, "large analytics audiences are read in safe Redis batches");
+  assert.strictEqual(largeSummary.registeredVisitors, 510, "large registered audiences retain identity links");
   Date.now = realNow;
   console.log("Analytics tracking tests passed.");
 }

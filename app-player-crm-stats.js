@@ -409,6 +409,7 @@ function initPlayerCrmStatsRuntime(deps) {
       periodWarning +
       (currentEl ? "" : currentSection) +
       "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
+      "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
