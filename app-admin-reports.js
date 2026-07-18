@@ -115,10 +115,23 @@ function initAdminReportModal() {
   var figuresPercentTotalEl = document.getElementById("adminReportFiguresPercentTotal");
   var figuresPercentTotalMirrorEl = document.getElementById("adminReportFiguresPercentTotalMirror");
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
+  var figuresRakebackLink = modal ? modal.querySelector("[data-admin-report-open-rakeback]") : null;
+  if (figuresRakebackLink && figuresRakebackLink.dataset.bound !== "1") {
+    figuresRakebackLink.dataset.bound = "1";
+    figuresRakebackLink.addEventListener("click", function () {
+      setActiveTab("rakeback");
+    });
+    figuresRakebackLink.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      setActiveTab("rakeback");
+    });
+  }
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
   var figuresPreviousRakebackEl = document.getElementById("adminReportFiguresPreviousRakeback");
   var figuresSalaryEl = document.getElementById("adminReportFiguresSalary");
   var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
+  var figuresReturnInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-return]") : null;
   var figuresSaveBtn = document.getElementById("adminReportFiguresSaveBtn");
   var figuresEditBtn = document.getElementById("adminReportFiguresEditBtn");
   var figuresSaveStatusEl = document.getElementById("adminReportFiguresSaveStatus");
@@ -516,6 +529,7 @@ function initAdminReportModal() {
         winLossInputs: calculationsWinLossInputs,
         rakeInputs: figuresRakeInputs,
         backingReturnInput: figuresBackingReturnInput,
+        backingReturnInputs: figuresReturnInputs,
         romanPaidInput: figuresRomanPaidInput,
         winLossInput: figuresWinLossInput,
         agentsPaidInput: figuresAgentsPaidInput,
@@ -571,6 +585,7 @@ function initAdminReportModal() {
         winLossInputs: calculationsWinLossInputs,
         rakeInputs: figuresRakeInputs,
         backingReturnInput: figuresBackingReturnInput,
+        backingReturnInputs: figuresReturnInputs,
         romanPaidInput: figuresRomanPaidInput,
         winLossInput: figuresWinLossInput,
         agentsPaidInput: figuresAgentsPaidInput,

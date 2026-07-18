@@ -411,7 +411,11 @@
       }
     }
     var reviewButtons = button.parentNode ? button.parentNode.querySelectorAll("button") : [button];
+    var originalLabel = button.textContent;
     reviewButtons.forEach(function (item) { item.disabled = true; });
+    button.classList.add("admin-bonuses__issue-review-btn--loading");
+    button.textContent = "";
+    button.setAttribute("aria-label", "Сохраняем");
     fetch(authUrl("bonus-issues/" + operationId + "/verify"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -432,6 +436,9 @@
       })
       .catch(function (err) {
         reviewButtons.forEach(function (item) { item.disabled = false; });
+        button.classList.remove("admin-bonuses__issue-review-btn--loading");
+        button.textContent = originalLabel;
+        button.setAttribute("aria-label", status === "plus" ? "Сняли" : "Не сняли");
         alert(err && err.message ? err.message : POKER_NET_ERR);
       });
   }

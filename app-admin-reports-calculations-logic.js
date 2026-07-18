@@ -176,7 +176,12 @@
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
-        var figuresBackingReturn = Math.abs(parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : ""));
+        var figuresRafflesTicketsReturnInput = document.getElementById("adminReportFiguresRafflesTicketsReturn");
+        var figuresRafflesCashReturnInput = document.getElementById("adminReportFiguresRafflesCashReturn");
+        var figuresBackingReturn =
+          Math.abs(parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : "")) +
+          Math.abs(parseReportNumber(figuresRafflesTicketsReturnInput ? figuresRafflesTicketsReturnInput.value : "")) +
+          Math.abs(parseReportNumber(figuresRafflesCashReturnInput ? figuresRafflesCashReturnInput.value : ""));
         var figuresExpensesTotal =
           Math.abs(parseReportNumber(figuresPercentTotal)) +
           Math.abs(parseReportNumber(totals.rakeback)) +
@@ -766,6 +771,8 @@
           winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
           agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
           backingReturn: (document.getElementById("adminReportFiguresBackingReturn") || {}).value || "",
+          raffleTicketsReturn: (document.getElementById("adminReportFiguresRafflesTicketsReturn") || {}).value || "",
+          raffleCashReturn: (document.getElementById("adminReportFiguresRafflesCashReturn") || {}).value || "",
           approxRakebackEnabled: !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked),
           approxRakebackRate: getApproxFiguresRakebackRate(),
           approxRomanRake: figuresApproxRomanRakeInput ? figuresApproxRomanRakeInput.value : "",
@@ -816,6 +823,10 @@
         if (figuresAgentsPaidInput) figuresAgentsPaidInput.value = draft.agentsPaid != null ? draft.agentsPaid : "";
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
         if (figuresBackingReturnInput) figuresBackingReturnInput.value = draft.backingReturn != null ? draft.backingReturn : "";
+        var figuresRafflesTicketsReturnInput = document.getElementById("adminReportFiguresRafflesTicketsReturn");
+        if (figuresRafflesTicketsReturnInput) figuresRafflesTicketsReturnInput.value = draft.raffleTicketsReturn != null ? draft.raffleTicketsReturn : "";
+        var figuresRafflesCashReturnInput = document.getElementById("adminReportFiguresRafflesCashReturn");
+        if (figuresRafflesCashReturnInput) figuresRafflesCashReturnInput.value = draft.raffleCashReturn != null ? draft.raffleCashReturn : "";
         if (figuresApproxRakebackEnabledInput) figuresApproxRakebackEnabledInput.checked = draft.approxRakebackEnabled === true;
         if (figuresApproxRateInputs && figuresApproxRateInputs.length) {
           var draftRate = parseReportNumber(draft.approxRakebackRate != null ? draft.approxRakebackRate : "30") || 30;

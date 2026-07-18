@@ -562,7 +562,7 @@
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback role="button" tabindex="0" aria-label="Открыть вкладку рейкбека">
                   <span>Рейкбек из отчета текущей недели</span>
                   <output id="adminReportFiguresRakeback">0</output>
                 </div>
@@ -574,17 +574,25 @@
                   <span>Розыгрыши билеты</span>
                   <output id="adminReportFiguresRafflesTickets">0</output>
                 </div>
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                  <span>Возврат</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRafflesTicketsReturn" data-admin-report-figures-return placeholder="0" />
+                </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Розыгрыши кеш</span>
                   <output id="adminReportFiguresRafflesCash">0</output>
                 </div>
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                  <span>Возврат</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRafflesCashReturn" data-admin-report-figures-return placeholder="0" />
+                </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Крутка дня</span>
                   <output id="adminReportFiguresDailyPoker">0</output>
                 </div>
                 <label class="admin-report-calculations__field admin-report-calculations__field--positive">
-                  <span>Беккинг возврат</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input" id="adminReportFiguresBackingReturn" placeholder="0" />
+                  <span>Возврат</span>
+                  <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input" id="adminReportFiguresBackingReturn" data-admin-report-figures-return placeholder="0" />
                 </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>РБ прошлая</span>

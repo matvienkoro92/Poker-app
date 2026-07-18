@@ -45,8 +45,14 @@
         call(callbacks.updateFiguresTotals, { syncExtras: false });
       });
 
+      bindList(elements.backingReturnInputs, "input", function () {
+        call(callbacks.scheduleFiguresTotals, { syncExtras: false });
+      });
+      bindList(elements.backingReturnInputs, "change", function () {
+        call(callbacks.updateFiguresTotals, { syncExtras: false });
+      });
+
       [
-        elements.backingReturnInput,
         elements.romanPaidInput,
         elements.winLossInput,
         elements.agentsPaidInput,

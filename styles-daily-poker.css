@@ -519,6 +519,9 @@
 }
 
 .admin-bonuses__issue-review button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 54px;
   min-height: 30px;
   padding: 0 16px;
@@ -531,6 +534,30 @@
   font-size: 11px;
   font-weight: 950;
   cursor: pointer;
+}
+
+.admin-bonuses__issue-review button:disabled:not(.admin-bonuses__issue-review-result) {
+  opacity: 0.48;
+  cursor: wait;
+}
+
+.admin-bonuses__issue-review button.admin-bonuses__issue-review-btn--loading {
+  position: relative;
+  opacity: 1;
+}
+
+.admin-bonuses__issue-review button.admin-bonuses__issue-review-btn--loading::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 3px solid rgba(39, 24, 3, 0.28);
+  border-top-color: #271803;
+  border-radius: 50%;
+  animation: admin-bonuses-review-spin 0.7s linear infinite;
+}
+
+@keyframes admin-bonuses-review-spin {
+  to { transform: rotate(360deg); }
 }
 
 .admin-bonuses__issue-review button.admin-bonuses__issue-review-result {
