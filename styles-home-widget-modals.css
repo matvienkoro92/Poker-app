@@ -1657,10 +1657,11 @@
 }
 
 .sng-champions-modal__entry-poker21 {
-  display: inline-flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: 1fr;
   justify-self: start;
-  gap: 7px;
+  gap: 3px;
+  width: 100%;
   max-width: 100%;
   color: #fff0c9;
   font-size: 14px;
@@ -1675,10 +1676,13 @@
 }
 
 .sng-champions-modal__entry-poker21 strong {
-  overflow: hidden;
+  display: block;
+  max-width: 100%;
+  overflow: visible;
   font-weight: 1000;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .sng-champions-modal__entry-status {

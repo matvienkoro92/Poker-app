@@ -57,6 +57,9 @@
     campaigns: [],
     sourceAnalytics: [],
     statsSummary: null,
+    weekReport: null,
+    weekReportLoading: false,
+    weekReportLoadedAt: 0,
     periodComparison: null,
     periodComparisonLoading: false,
     periodComparisonRequestKey: "",
@@ -169,6 +172,173 @@
     : {};
   function renderStats() {
     return playerCrmStatsRuntime && typeof playerCrmStatsRuntime.renderStats === "function" ? playerCrmStatsRuntime.renderStats() : null;
+  }
+
+  function crmReportNumber(value) {
+    var number = typeof value === "number" ? value : parseFloat(String(value == null ? "" : value).replace(",", "."));
+    return isFinite(number) ? number : 0;
+  }
+
+  function crmReportMoney(value) {
+    return String(Math.round(crmReportNumber(value)));
+  }
+
+  function crmReportExtraName(name) {
+    return String(name || "").trim().toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ");
+  }
+
+  function crmReportIsAnyaSalary(name) {
+    var normalized = crmReportExtraName(name);
+    return normalized.indexOf("аня") !== -1 && (normalized.indexOf("зп") !== -1 || normalized.indexOf("зарплат") !== -1);
+  }
+
+  function crmReportIsPreviousRakeback(name) {
+    var normalized = crmReportExtraName(name);
+    return (normalized.indexOf("рб") !== -1 || normalized.indexOf("рейкбек") !== -1) &&
+      (normalized.indexOf("прошл") !== -1 || normalized.indexOf("пред") !== -1);
+  }
+
+  function crmReportIsManualRakeback(name) {
+    var normalized = crmReportExtraName(name);
+    return normalized === "рб" || normalized === "рейкбек" || normalized === "rakeback";
+  }
+
+  function crmReportStoredRakeback(report) {
+    return crmReportNumber(report && report.rakeback);
+  }
+
+  function crmWeekReportTotals(reports) {
+    var totals = {
+      deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
+      botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
+      bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0,
+      previousRakeback: 0, extraFields: []
+    };
+    var extraMap = {};
+    (Array.isArray(reports) ? reports : []).forEach(function (report) {
+      [
+        "deposit", "cashout", "prodamus", "robokassa", "romaCrypto",
+        "botCryptoDep", "botExchipDep", "botExchipCashout",
+        "bonuses", "transfers", "ret", "sergeyMarina"
+      ].forEach(function (key) {
+        totals[key] += crmReportNumber(report && report[key]);
+      });
+      totals.rakeback += crmReportStoredRakeback(report);
+      var extras = Array.isArray(report && report.extraFields) ? report.extraFields : [];
+      if (!extras.length && report && (report.extraName || report.extraAmount != null)) {
+        extras = [{ name: report.extraName || "Доп", amount: report.extraAmount }];
+      }
+      extras.forEach(function (field) {
+        if (!field || !field.name) return;
+        var amount = crmReportNumber(field.amount != null ? field.amount : field.value);
+        if (crmReportIsPreviousRakeback(field.name)) totals.previousRakeback += amount;
+        else if (!crmReportIsManualRakeback(field.name)) extraMap[field.name] = (extraMap[field.name] || 0) + amount;
+      });
+    });
+    totals.extraFields = Object.keys(extraMap).map(function (name) {
+      return { name: name, amount: extraMap[name] };
+    }).filter(function (field) {
+      return field.amount !== 0;
+    });
+    return totals;
+  }
+
+  function renderCrmWeekReport() {
+    var host = document.getElementById("playerCrmWeekReport");
+    if (!host) return;
+    if (state.weekReportLoading && !state.weekReport) {
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт текущей недели</h3><div class="player-crm__week-report-empty">Загружаю отчёт…</div></section>';
+      return;
+    }
+    var report = state.weekReport;
+    if (!report) {
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт текущей недели</h3><div class="player-crm__week-report-empty">Отчётов за текущую неделю пока нет.</div></section>';
+      return;
+    }
+    function row(label, value, className) {
+      if (!value) return "";
+      return '<div class="player-crm__week-report-row' + (className ? " " + className : "") + '"><span>' + esc(label) + '</span><strong>' + esc(crmReportMoney(value)) + "</strong></div>";
+    }
+    var detailRows = [];
+    var detailTotal = 0;
+    [
+      ["Выводы", "cashout"], ["Продамус", "prodamus"], ["Робокасса", "robokassa"],
+      ["Рома крипта", "romaCrypto"], ["Боткрипта", "botCryptoDep"],
+      ["Ботэксчип деп", "botExchipDep"], ["Сергей/Марина", "sergeyMarina"]
+    ].forEach(function (item) {
+      var value = crmReportNumber(report[item[1]]);
+      if (!value) return;
+      detailTotal += value;
+      detailRows.push(row(item[0], value));
+    });
+    (report.extraFields || []).forEach(function (field) {
+      if (!field || crmReportIsAnyaSalary(field.name)) return;
+      detailTotal += crmReportNumber(field.amount);
+      detailRows.push(row(field.name || "Доп", field.amount));
+    });
+    var anyaSalary = (report.extraFields || []).reduce(function (sum, field) {
+      return sum + (field && crmReportIsAnyaSalary(field.name) ? crmReportNumber(field.amount) : 0);
+    }, 0);
+    if (anyaSalary) {
+      detailTotal += anyaSalary;
+      detailRows.push(row("Аня ЗП", anyaSalary));
+    }
+    var detailHtml = detailRows.length
+      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span><strong>Итого ' + esc(crmReportMoney(detailTotal)) + '</strong></summary><div class="player-crm__week-report-details-body">' +
+          detailRows.join("") +
+          row("Итого", detailTotal, "player-crm__week-report-row--total") +
+          row("Разница с депозитом", crmReportNumber(report.deposit) - detailTotal, "player-crm__week-report-row--total") +
+        "</div></details>"
+      : "";
+    var exchip = crmReportNumber(report.botExchipDep) - crmReportNumber(report.botExchipCashout);
+    var anyaVisible = anyaSalary ? row("Аня ЗП", anyaSalary) : "";
+    host.innerHTML =
+      '<section class="player-crm__week-report-card">' +
+        '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><button type="button" data-crm-refresh-week-report>Обновить</button></div>' +
+        '<div class="player-crm__week-report-main">' + row("Депозит", report.deposit, "player-crm__week-report-row--deposit") + detailHtml + "</div>" +
+        '<div class="player-crm__week-report-group player-crm__week-report-group--calc">' +
+          row("Итого Рунекс", report.botCryptoDep) +
+          (report.botExchipDep || report.botExchipCashout
+            ? '<div class="player-crm__week-report-row"><span>Итого Эксчип</span><strong>' + esc(crmReportMoney(report.botExchipDep)) + " - " + esc(crmReportMoney(report.botExchipCashout)) + " = " + esc(crmReportMoney(exchip)) + "</strong></div>"
+            : "") +
+        "</div>" +
+        '<div class="player-crm__week-report-group player-crm__week-report-group--danger">' +
+          row("Бонусы", report.bonuses) + row("РБ прошлая", report.previousRakeback) + row("Рейкбек", report.rakeback) + anyaVisible +
+        "</div>" +
+        '<div class="player-crm__week-report-group">' +
+          row("Ботэксчип вывод", report.botExchipCashout) + row("Переводы", report.transfers) + row("Возврат", report.ret) +
+        "</div>" +
+      "</section>";
+  }
+
+  function loadCrmWeekReport(force) {
+    if (state.weekReportLoading) return;
+    if (!force && state.weekReportLoadedAt && Date.now() - state.weekReportLoadedAt < 60000) {
+      renderCrmWeekReport();
+      return;
+    }
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    state.weekReportLoading = true;
+    renderCrmWeekReport();
+    var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=currentWeek", { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("week report " + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        var reports = data && data.ok && Array.isArray(data.reports) ? data.reports : [];
+        state.weekReport = reports.length ? crmWeekReportTotals(reports) : null;
+        state.weekReportLoadedAt = Date.now();
+      })
+      .catch(function () {
+        state.weekReport = null;
+      })
+      .then(function () {
+        state.weekReportLoading = false;
+        renderCrmWeekReport();
+      });
   }
 
   function renderManagerDialogsList() {
@@ -784,6 +954,7 @@
     if (batchNumber) batchNumber.value = "1";
     updateBroadcastChannelCounts();
     updateBroadcastAudience();
+    syncBroadcastChannelMode();
   }
 
   function updateBroadcastAudience() {
@@ -995,6 +1166,14 @@
       }).join("");
       sel.dataset.crmBroadcastLinkTargetsReady = "1";
     });
+    var pushSel = document.getElementById("playerCrmBroadcastPushTarget");
+    if (pushSel && pushSel.dataset.crmBroadcastLinkTargetsReady !== "1") {
+      pushSel.innerHTML = CRM_LINK_TARGETS.map(function (target) {
+        return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
+      }).join("");
+      pushSel.value = "chat";
+      pushSel.dataset.crmBroadcastLinkTargetsReady = "1";
+    }
   }
 
   function broadcastButtonTarget(buttonNo) {
@@ -1079,6 +1258,34 @@
       var el = document.getElementById(id);
       if (el) el.disabled = !enabled;
     });
+  }
+
+  function syncBroadcastTextCounter() {
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    var counter = document.getElementById("playerCrmBroadcastTextCounter");
+    if (!textEl || !counter) return;
+    var isPush = (document.getElementById("playerCrmBroadcastChannel") || {}).value === "push";
+    counter.hidden = !isPush;
+    counter.textContent = String(textEl.value || "").length + " / 180";
+  }
+
+  function syncBroadcastChannelMode() {
+    var channelEl = document.getElementById("playerCrmBroadcastChannel");
+    var isPush = !!(channelEl && channelEl.value === "push");
+    Array.prototype.forEach.call(document.querySelectorAll("[data-crm-bot-only]"), function (el) {
+      el.hidden = isPush || (el.id === "playerCrmBroadcastButtonFields" && !broadcastButtonEnabled()) ||
+        (el.id === "playerCrmBroadcastButtonFields2" && el.hidden);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-crm-push-only]"), function (el) {
+      el.hidden = !isPush;
+    });
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    if (textEl) {
+      textEl.maxLength = isPush ? 180 : 900;
+      if (isPush && textEl.value.length > 180) textEl.value = textEl.value.slice(0, 180);
+    }
+    if (!isPush) syncBroadcastButtonMode();
+    syncBroadcastTextCounter();
   }
 
   function setBroadcastButton2Enabled(enabled) {
@@ -2062,6 +2269,7 @@
         state.loaded = true;
         renderAll();
         loadDailyPokerStats();
+        loadCrmWeekReport();
         loadPeriodComparison();
         if (shouldLoadHeavy) {
           setTimeout(function () {
@@ -2213,6 +2421,8 @@
   }
 
   function broadcastImagePayload() {
+    var channelEl = document.getElementById("playerCrmBroadcastChannel");
+    if (channelEl && channelEl.value === "push") return {};
     if (!state.broadcastImage || (!state.broadcastImage.dataUrl && !state.broadcastImage.telegramFileId)) return {};
     return {
       imageDataUrl: state.broadcastImage.dataUrl,
@@ -2224,6 +2434,13 @@
   }
 
   function broadcastButtonPayload() {
+    var channelEl = document.getElementById("playerCrmBroadcastChannel");
+    if (channelEl && channelEl.value === "push") {
+      var pushTargetEl = document.getElementById("playerCrmBroadcastPushTarget");
+      var target = crmLinkTargetByKey(pushTargetEl ? pushTargetEl.value : "chat");
+      var openUrl = buildCrmLinkUrl(target.startapp);
+      return { buttonText: "Открыть", buttonUrl: openUrl, buttons: [{ text: "Открыть", url: openUrl }] };
+    }
     if (!broadcastButtonEnabled()) return {};
     var fields = [
       ["playerCrmBroadcastButtonText", "playerCrmBroadcastButtonUrl", "кнопки 1"],
@@ -2662,7 +2879,7 @@
     var textEl = document.getElementById("playerCrmBroadcastText");
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
-    var image = state.broadcastImage || null;
+    var image = channel === "push" ? null : (state.broadcastImage || null);
     var button = broadcastButtonPayload();
     var hasButton = !!(button && !button.error && button.buttonText);
     var buttons = hasButton && Array.isArray(button.buttons) ? button.buttons : (hasButton ? [{ text: button.buttonText, url: button.buttonUrl }] : []);
@@ -2705,8 +2922,8 @@
         "<div class=\"player-crm__dialog-modal-head\"><div><h3>Предпросмотр</h3><span>" + esc(channelLabel(channel)) + "</span></div><button type=\"button\" class=\"player-crm__dialog-modal-close\" data-crm-broadcast-preview-close aria-label=\"Закрыть\">×</button></div>" +
         "<div class=\"player-crm__dialog-modal-body player-crm__broadcast-preview-body\">" +
           "<div class=\"player-crm__broadcast-preview-scroll\">" +
-            "<div class=\"player-crm__broadcast-preview-meta\"><span>Канал<strong>" + esc(channelLabel(channel)) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span><span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span></div>" +
-            (hasButton ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылки в кнопках</strong>" + buttonsLinksHtml + "</div>" : "") +
+            "<div class=\"player-crm__broadcast-preview-meta\"><span>Канал<strong>" + esc(channelLabel(channel)) + "</strong></span><span>Пачка<strong>" + esc(batch.number + "/" + batch.totalBatches) + "</strong></span><span>Получателей<strong>" + esc(intFmt(batch.count)) + "</strong></span>" + (hasPush && !hasBot ? "<span>Переход<strong>" + esc(crmLinkTargetByKey((document.getElementById("playerCrmBroadcastPushTarget") || {}).value).label) + "</strong></span>" : "<span>Картинка<strong>" + (image ? "Да" : "Нет") + "</strong></span><span>Кнопки<strong>" + (hasButton ? esc(intFmt(buttons.length)) : "Нет") + "</strong></span>") + "</div>" +
+            (hasButton && hasBot ? "<div class=\"player-crm__broadcast-preview-link\"><strong>Ссылки в кнопках</strong>" + buttonsLinksHtml + "</div>" : "") +
             "<div class=\"player-crm__recipient-preview-grid" + gridClass + "\">" + botHtml + pushHtml + "</div>" +
           "</div>" +
         "</div>" +
@@ -2731,7 +2948,7 @@
     var sendAllBatches = options.allBatches === true && !resumeIds.length;
     var audienceIds = resumeIds.length ? resumeIds : (sendAllBatches ? allAudienceIds : batch.ids);
     var targetCount = audienceIds.length;
-    if (!text && !state.broadcastImage) {
+    if (!text && (channel === "push" || !state.broadcastImage)) {
       if (out) out.textContent = "Нужно написать текст или прикрепить картинку.";
       return;
     }
@@ -3450,7 +3667,12 @@
       }
       if (e.target.closest("[data-crm-refresh-stats]")) {
         loadDailyPokerStats(true);
+        loadCrmWeekReport(true);
         loadCrmData("all");
+        return;
+      }
+      if (e.target.closest("[data-crm-refresh-week-report]")) {
+        loadCrmWeekReport(true);
         return;
       }
       if (e.target.closest("[data-crm-refresh-blocked]")) {
@@ -3929,6 +4151,9 @@
     var broadcastButtonEnabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;
     syncBroadcastButtonMode();
+    syncBroadcastChannelMode();
+    var broadcastTextEl = document.getElementById("playerCrmBroadcastText");
+    if (broadcastTextEl) broadcastTextEl.addEventListener("input", syncBroadcastTextCounter);
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.addEventListener("change", syncBroadcastButtonMode);
     var broadcastAddButton2 = document.getElementById("playerCrmBroadcastAddButton2");
     if (broadcastAddButton2) broadcastAddButton2.addEventListener("click", function () { setBroadcastButton2Enabled(true); });
@@ -4042,7 +4267,11 @@
       state.loadingScope = "";
     }
     if (!state.loaded) loadCrmData();
-    else renderAll();
+    else {
+      renderAll();
+      renderCrmWeekReport();
+      loadCrmWeekReport();
+    }
   }
 
   window.pokerInitPlayerCrm = pokerInitPlayerCrm;

@@ -169,17 +169,22 @@ var pokerRestoringHomeScrollJump = false;
     pokerLastMainTouchY = y;
   }
   function guardHomeScrollJump() {
-    mark();
     if (pokerRestoringHomeScrollJump) return;
     var y = getMainDocumentScrollY();
     var prev = pokerLastMainScrollTopObserved || 0;
     var view = document.body && document.body.getAttribute ? String(document.body.getAttribute("data-view") || "") : "";
-    var recentUpwardGesture = pokerLastMainScrollDirection === "up" && Date.now() - pokerLastMainScrollDirectionAt < 900;
+    /*
+     * Не спорим с нативным/inertial scroll: во время быстрого жеста браузер может
+     * на кадр уменьшить scrollTop из-за overscroll или пересчёта высоты контента.
+     * Возврат prev в этот момент и создавал заметное «откидывание» назад.
+     */
+    var recentDirectionalGesture =
+      !!pokerLastMainScrollDirection && Date.now() - pokerLastMainScrollDirectionAt < 1200;
     if (
       view === "home" &&
       prev > 300 &&
       y < prev - 24 &&
-      !recentUpwardGesture
+      !recentDirectionalGesture
     ) {
       pokerRestoringHomeScrollJump = true;
       setMainDocumentScrollY(prev);
