@@ -81,6 +81,8 @@ function initAdminReportModal() {
     });
     calculationRakeCard.appendChild(calculationRakeFieldsColumn);
     calculationRakeCard.appendChild(figuresRoot);
+    var calculationFiguresLower = document.getElementById("adminReportFiguresLower");
+    if (calculationFiguresLower) calculationRakeCard.appendChild(calculationFiguresLower);
   }
   var figuresRakeInputs = modal ? modal.querySelectorAll("[data-admin-report-figures-rake]") : null;
   var figuresPercentOutputs = modal ? modal.querySelectorAll("[data-admin-report-figures-percent]") : null;

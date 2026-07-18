@@ -797,6 +797,21 @@ body.admin-report-modal-open .bottom-nav {
   border-radius: 0;
   background: transparent;
 }
+.admin-report-calculations__figures-lower {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin-top: 2px;
+}
+.admin-report-calculations__figures-lower > .admin-report-calculations__field,
+.admin-report-calculations__figures-lower > .admin-report-calculations__add,
+.admin-report-calculations__figures-lower > .admin-report-calculations__approx-detail,
+.admin-report-calculations__figures-lower > .admin-report-calculations__extras {
+  width: 100%;
+  box-sizing: border-box;
+}
 .admin-report-calculations__column {
   min-width: 0;
   padding: 8px;

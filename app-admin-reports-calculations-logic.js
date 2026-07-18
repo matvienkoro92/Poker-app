@@ -179,7 +179,7 @@
         var approxRate = getApproxFiguresRakebackRate();
         var approxRakeback = getApproxFiguresRakebackAmount();
         var includeApproxRakeback = !!(figuresApproxRakebackEnabledInput && figuresApproxRakebackEnabledInput.checked);
-        var figuresApproxDetailEl = document.querySelector("#adminReportCalcFigures .admin-report-calculations__approx-detail");
+        var figuresApproxDetailEl = document.querySelector("#adminReportCalcRakeCard .admin-report-calculations__approx-detail");
         if (figuresApproxDetailEl) figuresApproxDetailEl.hidden = !includeApproxRakeback;
         if (figuresApproxRakebackEl) figuresApproxRakebackEl.textContent = includeApproxRakeback ? formatReportRubleNumber(approxRakeback) : "0";
         if (figuresApproxTotalRakeEl) figuresApproxTotalRakeEl.textContent = formatReportRubleNumber(figuresRakeTotal);
@@ -430,19 +430,31 @@
       function loadCalculationWeekStats(base, q, week) {
         var from = new Date(week.start).toISOString().slice(0, 10);
         var to = new Date(week.end).toISOString().slice(0, 10);
-        var url = base.replace(/\/$/, "") + "/api/player-crm" + q;
-        url = appendCalculationQueryParam(url, "period", "custom");
-        url = appendCalculationQueryParam(url, "from", from);
-        url = appendCalculationQueryParam(url, "to", to);
+        var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
+        raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffles");
+        raffleUrl = appendCalculationQueryParam(raffleUrl, "from", from);
+        raffleUrl = appendCalculationQueryParam(raffleUrl, "to", to);
+        var dailyPokerUrl = base.replace(/\/$/, "") + "/api/promo/daily-poker/winners" + q;
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "limit", "1");
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "summary", "1");
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "from", from);
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "to", to);
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceFrom", from);
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceTo", to);
         var fetchStats = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
-        return fetchStats(url, { cache: "no-store" }, 15000)
-          .then(function (response) {
-            if (!response || !response.ok) throw new Error("player-crm " + (response && response.status ? response.status : "failed"));
+        return Promise.all([
+          fetchStats(raffleUrl, { cache: "no-store" }, 15000).then(function (response) {
+            if (!response || !response.ok) throw new Error("raffle stats failed");
             return response.json();
-          })
-          .then(function (data) {
-            var raffleStats = data && data.statsSummary && data.statsSummary.raffles;
-            var dailyPokerStats = data && data.dailyPokerStats;
+          }).catch(function () { return {}; }),
+          fetchStats(dailyPokerUrl, { cache: "no-store" }, 15000).then(function (response) {
+            if (!response || !response.ok) throw new Error("daily poker stats failed");
+            return response.json();
+          }).catch(function () { return {}; }),
+        ])
+          .then(function (results) {
+            var raffleStats = results[0] && results[0].raffles;
+            var dailyPokerStats = results[1];
             calculationWeekStatsTotals = {
               raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
               dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
@@ -626,8 +638,9 @@
 
       function setFiguresLocked(locked) {
         figuresSavedLocked = !!locked;
-        if (figuresRoot) {
-          figuresRoot.querySelectorAll("input").forEach(function (input) {
+        var figuresInputsRoot = document.getElementById("adminReportCalcRakeCard") || figuresRoot;
+        if (figuresInputsRoot) {
+          figuresInputsRoot.querySelectorAll("#adminReportCalcFigures input, #adminReportFiguresLower input").forEach(function (input) {
             input.readOnly = input === figuresApproxRomanRakeInput ? false : figuresSavedLocked;
           });
         }
