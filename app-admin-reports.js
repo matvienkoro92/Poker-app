@@ -116,15 +116,44 @@ function initAdminReportModal() {
   var figuresPercentTotalMirrorEl = document.getElementById("adminReportFiguresPercentTotalMirror");
   var figuresRakebackEl = document.getElementById("adminReportFiguresRakeback");
   var figuresRakebackLink = modal ? modal.querySelector("[data-admin-report-open-rakeback]") : null;
+  var rakebackOverlayPanel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
+  var rakebackOverlayClose = modal ? modal.querySelector("[data-admin-report-rakeback-overlay-close]") : null;
+  function closeRakebackOverlay() {
+    if (!rakebackOverlayPanel) return;
+    rakebackOverlayPanel.classList.remove("admin-report-panel--rakeback-overlay");
+    rakebackOverlayPanel.removeAttribute("aria-modal");
+    rakebackOverlayPanel.removeAttribute("role");
+    if (figuresRakebackLink) figuresRakebackLink.focus({ preventScroll: true });
+  }
+  function openRakebackOverlay() {
+    if (!rakebackOverlayPanel) return;
+    rakebackOverlayPanel.classList.add("admin-report-panel--rakeback-overlay");
+    rakebackOverlayPanel.setAttribute("role", "dialog");
+    rakebackOverlayPanel.setAttribute("aria-modal", "true");
+    openLazyRakebackModule();
+    if (rakebackOverlayClose) rakebackOverlayClose.focus({ preventScroll: true });
+  }
   if (figuresRakebackLink && figuresRakebackLink.dataset.bound !== "1") {
     figuresRakebackLink.dataset.bound = "1";
     figuresRakebackLink.addEventListener("click", function () {
-      setActiveTab("rakeback");
+      openRakebackOverlay();
     });
     figuresRakebackLink.addEventListener("keydown", function (event) {
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
-      setActiveTab("rakeback");
+      openRakebackOverlay();
+    });
+  }
+  if (rakebackOverlayClose && rakebackOverlayClose.dataset.bound !== "1") {
+    rakebackOverlayClose.dataset.bound = "1";
+    rakebackOverlayClose.addEventListener("click", closeRakebackOverlay);
+  }
+  if (rakebackOverlayPanel && rakebackOverlayPanel.dataset.overlayKeysBound !== "1") {
+    rakebackOverlayPanel.dataset.overlayKeysBound = "1";
+    rakebackOverlayPanel.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || !rakebackOverlayPanel.classList.contains("admin-report-panel--rakeback-overlay")) return;
+      event.preventDefault();
+      closeRakebackOverlay();
     });
   }
   var figuresBonusesEl = document.getElementById("adminReportFiguresBonuses");
