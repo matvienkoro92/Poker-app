@@ -832,6 +832,16 @@
   background: rgba(15, 23, 42, 0.58);
 }
 
+.admin-bonuses__history-inline-row td {
+  padding: 0 6px 8px;
+  overflow: visible;
+  background: rgba(3, 7, 15, 0.72);
+}
+
+.admin-bonuses__history-inline-row .admin-bonuses__history {
+  margin-top: 6px;
+}
+
 .admin-bonuses__history h3 {
   margin: 0 0 7px;
   font-size: 13px;

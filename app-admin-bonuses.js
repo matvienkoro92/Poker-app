@@ -287,17 +287,27 @@
 
   function loadHistory(userId) {
     var base = apiBase();
-    var body = $("adminBonusesHistoryBody");
-    var section = $("adminBonusesHistory");
-    if (!base || !body) return;
+    var userRow = document.querySelector('#adminBonusesTableBody tr[data-user-id="' + CSS.escape(userId) + '"]');
+    if (!base || !userRow) return;
     adminBonusesState.selectedUserId = userId;
     var found = adminBonusesState.users.find(function (user) { return user.userId === userId; });
-    var heading = section && section.querySelector("h3");
-    if (heading) heading.textContent = "История: " + (found ? rowTitle(found) : userId);
+    var previous = document.querySelector(".admin-bonuses__history-inline-row");
+    if (previous) previous.remove();
+    var detailRow = document.createElement("tr");
+    detailRow.className = "admin-bonuses__history-inline-row";
+    var detailCell = document.createElement("td");
+    detailCell.colSpan = 5;
+    var section = document.createElement("section");
+    section.className = "admin-bonuses__history";
+    section.setAttribute("aria-live", "polite");
+    section.innerHTML = "<h3></h3><div class=\"admin-bonuses__history-body\"></div>";
+    var heading = section.querySelector("h3");
+    var body = section.querySelector(".admin-bonuses__history-body");
+    heading.textContent = "История: " + (found ? rowTitle(found) : userId);
     body.innerHTML = "Загрузка истории…";
-    if (section && typeof section.scrollIntoView === "function") {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    detailCell.appendChild(section);
+    detailRow.appendChild(detailCell);
+    userRow.insertAdjacentElement("afterend", detailRow);
     var historyUserIds = found && Array.isArray(found.historyUserIds) ? found.historyUserIds : [userId];
     fetch(authUrl("users/" + userId + "/bonus-ledger", {
       relatedUserIds: historyUserIds.join(","),
