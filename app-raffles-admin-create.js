@@ -302,10 +302,68 @@ function initRafflesAdminCreateRuntime(opts) {
     return prizeText + (tournamentName ? " — " + tournamentName : "");
   }
 
+  function raffleScheduleBusinessDate() {
+    return new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  }
+
+  function raffleScheduleBuyinValue(value) {
+    var amount = parseFloat(String(value || "").replace(/[^\d,.-]/g, "").replace(",", "."));
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  function filterRaffleTournamentSelectByBusinessDay(select) {
+    var schedule = typeof POKER_FULL_TOURNAMENT_SCHEDULE !== "undefined" && Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE)
+      ? POKER_FULL_TOURNAMENT_SCHEDULE
+      : [];
+    if (!select || !schedule.length) return;
+    var dateKey = raffleScheduleBusinessDate();
+    var dow = new Date(dateKey + "T00:00:00.000Z").getUTCDay();
+    var dayLabels = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+    var items = schedule.filter(function (item) {
+      if (!item) return false;
+      if (item.date) return item.date === dateKey;
+      if (item.repeat === "daily") return true;
+      return item.repeat === "weekly" && Number(item.dow) === dow;
+    }).slice().sort(function (a, b) {
+      return Number(a.hour || 0) - Number(b.hour || 0) ||
+        Number(a.minute || 0) - Number(b.minute || 0) ||
+        String(a.name || "").localeCompare(String(b.name || ""), "ru");
+    });
+
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "— Выберите турнир —";
+    var group = document.createElement("optgroup");
+    group.label = "Турниры отчётных суток";
+    items.forEach(function (item) {
+      var hour = String(Math.max(0, Number(item.hour) || 0)).padStart(2, "0");
+      var minute = String(Math.max(0, Number(item.minute) || 0)).padStart(2, "0");
+      var time = hour + ":" + minute;
+      var scope = item.date
+        ? item.date.split("-").reverse().slice(0, 2).join(".")
+        : item.repeat === "weekly"
+          ? dayLabels[dow]
+          : "";
+      var buyin = raffleScheduleBuyinValue(item.buyin);
+      var option = document.createElement("option");
+      option.value = String(buyin);
+      option.setAttribute("data-price", String(buyin));
+      option.setAttribute("data-name", String(item.name || item.category || "Турнир") + " (" + time + ")");
+      option.textContent = time + " · " + String(item.name || item.category || "Турнир") +
+        (scope ? " (" + scope + ")" : "") + " — " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно");
+      group.appendChild(option);
+    });
+    var custom = document.createElement("option");
+    custom.value = "custom";
+    custom.textContent = "Свой вариант (ввести вручную)";
+    select.replaceChildren(placeholder, group, custom);
+  }
+
   function setupTournamentDaySelect() {
     var select = document.getElementById("raffleTicketTournamentSelect");
     if (!select || select._tournamentDaySetupDone) return;
     select._tournamentDaySetupDone = true;
+    filterRaffleTournamentSelectByBusinessDay(select);
     Array.prototype.forEach.call(select.options || [], function (opt) {
       if (!opt) return;
       if (opt.value !== "" && opt.value !== "custom" && !opt.hasAttribute("data-price")) {

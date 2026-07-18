@@ -80,6 +80,11 @@
     return amount.toLocaleString("ru-RU");
   }
 
+  function tournamentBuyinAmount(value) {
+    var amount = Number(String(value || "").replace(/[^\d]/g, ""));
+    return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  }
+
   function businessDateKey(value) {
     var ms = value instanceof Date ? value.getTime() : Date.parse(String(value || ""));
     return Number.isFinite(ms) ? new Date(ms - 3 * 60 * 60 * 1000).toISOString().slice(0, 10) : "";
@@ -136,6 +141,24 @@
       return '<option value="' + esc(item.id) + '">' + esc(item.label) + '</option>';
     }).join("");
     select.value = "";
+  }
+
+  function syncDebitAmountWithTournament() {
+    if (adminBonusesState.operation !== "debit") return;
+    var select = $("adminBonusesOperationTournament");
+    var amount = $("adminBonusesOperationAmount");
+    var message = $("adminBonusesOperationMessage");
+    var tournamentId = String(select && select.value || "");
+    var tournament = adminBonusesState.tournamentOptions.find(function (item) {
+      return item.id === tournamentId;
+    }) || null;
+    var buyin = tournament ? tournamentBuyinAmount(tournament.buyin) : 0;
+    if (amount) amount.value = tournament ? String(buyin) : "";
+    if (message) {
+      message.textContent = tournament && buyin <= 0
+        ? "Для бесплатного турнира списание не требуется."
+        : "";
+    }
   }
 
   function rowTitle(user) {
@@ -374,7 +397,10 @@
     var found = adminBonusesState.users.find(function (u) { return u.userId === userId; });
     if (title) title.textContent = operation === "debit" ? "Списать бонусы" : "Начислить бонусы";
     if (userEl) userEl.textContent = (found ? rowTitle(found) + " · " : "") + userId;
-    if (amount) amount.value = "";
+    if (amount) {
+      amount.value = "";
+      amount.readOnly = operation === "debit";
+    }
     if (comment) comment.value = "";
     if (tournamentWrap) tournamentWrap.hidden = operation !== "debit";
     if (operation === "debit") populateTournamentOptions();
@@ -402,7 +428,7 @@
     var message = $("adminBonusesOperationMessage");
     var amount = Math.floor(Number(amountEl && amountEl.value));
     if (!userId || (operation !== "credit" && operation !== "debit")) return;
-    if (!Number.isFinite(amount) || amount <= 0) {
+    if (operation !== "debit" && (!Number.isFinite(amount) || amount <= 0)) {
       if (message) message.textContent = "Сумма должна быть больше 0.";
       return;
     }
@@ -412,6 +438,16 @@
       tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === tournamentId; }) || null;
       if (!tournament) {
         if (message) message.textContent = "Выберите турнир из расписания.";
+        return;
+      }
+      var tournamentBuyin = tournamentBuyinAmount(tournament.buyin);
+      if (tournamentBuyin <= 0) {
+        if (message) message.textContent = "Для бесплатного турнира списание не требуется.";
+        return;
+      }
+      if (amount !== tournamentBuyin) {
+        if (amountEl) amountEl.value = String(tournamentBuyin);
+        if (message) message.textContent = "Сумма списания должна совпадать с бай-ином турнира.";
         return;
       }
     }
@@ -493,6 +529,7 @@
     var close = $("adminBonusesOperationClose");
     var backdrop = $("adminBonusesOperationBackdrop");
     var confirmBtn = $("adminBonusesOperationConfirm");
+    var tournamentSelect = $("adminBonusesOperationTournament");
     if (close && close.dataset.bound !== "1") {
       close.dataset.bound = "1";
       close.addEventListener("click", closeOperation);
@@ -504,6 +541,10 @@
     if (confirmBtn && confirmBtn.dataset.bound !== "1") {
       confirmBtn.dataset.bound = "1";
       confirmBtn.addEventListener("click", submitOperation);
+    }
+    if (tournamentSelect && tournamentSelect.dataset.bound !== "1") {
+      tournamentSelect.dataset.bound = "1";
+      tournamentSelect.addEventListener("change", syncDebitAmountWithTournament);
     }
   }
 
