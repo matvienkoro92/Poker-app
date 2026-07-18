@@ -87,17 +87,53 @@ function initPlayerCrmStatsRuntime(deps) {
       var number = Number(value) || 0;
       return number < 0 ? "−" + intFmt(Math.abs(number)) : "+" + intFmt(number);
     }
-    var pokerPlusTotalEnd = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
-    var pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
-    var botTotalEnd = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
-    var botTotalStart = Math.max(0, botTotalEnd - statBotNet);
-    var pushTotalEnd = currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length);
-    var pushTotalStart = Math.max(0, pushTotalEnd - statPushNet);
+    function eventDate(value) {
+      return String(value || "").slice(0, 10);
+    }
+    function existedAtPeriodStart(value) {
+      var date = eventDate(value);
+      return !registrationRange || !registrationRange.from ? !!date : !!date && date < registrationRange.from;
+    }
+    function existedAtPeriodEnd(value) {
+      var date = eventDate(value);
+      return !registrationRange || !registrationRange.to ? !!date : !!date && date <= registrationRange.to;
+    }
+    function channelWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive) {
+      var subscribed = eventDate(player && player[subscribedKey]);
+      if (!subscribed) return false;
+      if (boundary && (inclusive ? subscribed > boundary : subscribed >= boundary)) return false;
+      var unsubscribed = eventDate(player && player[unsubscribedKey]);
+      if (!unsubscribed) return true;
+      if (subscribed > unsubscribed) return true;
+      return boundary ? (inclusive ? unsubscribed > boundary : unsubscribed >= boundary) : false;
+    }
+    var pokerPlusRowsNow = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
+    var pokerPlusTotalNow = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
+    var pokerPlusTotalStart = registrationRange
+      ? pokerPlusRowsNow.filter(function (row) { return existedAtPeriodStart(row && row.linkedAt); }).length
+      : Math.max(0, pokerPlusTotalNow - statPokerPlusNet);
+    var pokerPlusTotalEnd = registrationRange
+      ? pokerPlusRowsNow.filter(function (row) { return existedAtPeriodEnd(row && row.linkedAt); }).length
+      : pokerPlusTotalNow;
+    var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
+    var botTotalStart = registrationRange ? players.filter(function (p) {
+      return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.from, false);
+    }).length : Math.max(0, botTotalNow - statBotNet);
+    var botTotalEnd = registrationRange ? players.filter(function (p) {
+      return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.to, true);
+    }).length : botTotalNow;
+    var pushTotalNow = currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length);
+    var pushTotalStart = registrationRange ? players.filter(function (p) {
+      return channelWasActiveAt(p, "pushSubscribedAt", "pushUnsubscribedAt", registrationRange.from, false);
+    }).length : Math.max(0, pushTotalNow - statPushNet);
+    var pushTotalEnd = registrationRange ? players.filter(function (p) {
+      return channelWasActiveAt(p, "pushSubscribedAt", "pushUnsubscribedAt", registrationRange.to, true);
+    }).length : pushTotalNow;
     var currentStats = [
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
-      ["Привязано Poker21", pokerPlusTotalEnd, "сейчас", "pokerplus-total"],
-      ["Подписаны на бот", botTotalEnd, "сейчас", "bot-reach"],
-      ["Push доступен", pushTotalEnd, "сейчас", "push-reach"],
+      ["Привязано Poker21", pokerPlusTotalNow, "сейчас", "pokerplus-total"],
+      ["Подписаны на бот", botTotalNow, "сейчас", "bot-reach"],
+      ["Push доступен", pushTotalNow, "сейчас", "push-reach"],
     ];
     if (summaryRegistrationCounts) {
       registrationTelegramOnlyCount = Number(summaryRegistrationCounts.telegram) || 0;
@@ -410,8 +446,8 @@ function initPlayerCrmStatsRuntime(deps) {
       (currentEl ? "" : currentSection) +
       "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" +
         periodMetrics.map(periodMetricRow).join("") +
-        "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
       "</div>" +
+      "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
