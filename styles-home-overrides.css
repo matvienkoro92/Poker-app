@@ -499,7 +499,7 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   position: absolute;
   z-index: 3;
   top: calc(100% + 8px);
-  left: 50%;
+  left: 50vw;
   display: flex;
   align-items: center;
   justify-content: center;
