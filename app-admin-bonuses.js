@@ -317,7 +317,8 @@
       return '<section class="admin-bonuses__issue-day">' +
         '<h4 class="admin-bonuses__issue-day-title"><span>' + esc(formatBusinessDate(key)) + '</span><strong>Итого ' + esc(fmtPoints(total)) + '</strong></h4>' +
         rows.map(function (op) {
-          var playerSub = op.username ? "@" + op.username + " · " + op.userId : op.userId;
+          var poker21Label = op.poker21Id ? "Poker21 " + op.poker21Id : "Poker21 не привязан";
+          var playerSub = op.username ? "@" + op.username + " · " + poker21Label : poker21Label;
           var tournamentTitle = op.tournamentTitle || "Турнир не указан";
           var tournamentMeta = [op.tournamentTime, op.tournamentBuyin].filter(Boolean).join(" · ");
           return '<article class="admin-bonuses__issue-row">' +

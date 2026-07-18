@@ -1207,6 +1207,8 @@ body[data-view="admin-bonuses"] #app.app {
   align-items: center !important;
   justify-content: flex-start !important;
   padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 body[data-view="admin-bonuses"] #app.app .card {
@@ -1220,6 +1222,8 @@ body[data-view="admin-bonuses"] #app.app .card {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -1244,12 +1248,12 @@ body[data-view="admin-bonuses"] #app.app .card .card__content {
     calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
     calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
   ) !important;
-  margin-left: calc(-1 * var(--card-padding-x)) !important;
-  margin-right: calc(-1 * var(--card-padding-x)) !important;
-  width: calc(100% + 2 * var(--card-padding-x)) !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
   max-width: none !important;
-  padding-left: var(--card-padding-x) !important;
-  padding-right: var(--card-padding-x) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   box-sizing: border-box !important;
 }
 

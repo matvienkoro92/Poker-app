@@ -393,7 +393,8 @@
   cursor: pointer;
 }
 
-.admin-bonuses__tab--active {
+.admin-bonuses__tab--active,
+.admin-bonuses__tab[aria-selected="true"] {
   border-color: #ffd36f;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 244, 193, 0.52), transparent 58%),
