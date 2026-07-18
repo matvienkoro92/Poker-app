@@ -231,25 +231,24 @@
     var body = $("adminBonusesTableBody");
     if (!body) return;
     if (!users || !users.length) {
-      body.innerHTML = '<tr><td colspan="7" class="admin-bonuses__empty">Пользователей не найдено.</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" class="admin-bonuses__empty">Пользователей не найдено.</td></tr>';
       return;
     }
     body.innerHTML = users.map(function (user) {
       var name = rowTitle(user);
       var sub = user.username ? "@" + user.username : "";
-      var contact = renderContact(user);
       return '<tr data-user-id="' + esc(user.userId) + '">' +
-        '<td class="admin-bonuses__user-cell"><strong>' + esc(name) + '</strong>' + (sub ? '<span>' + esc(sub) + '</span>' : "") + '</td>' +
-        '<td class="admin-bonuses__actions-cell">' +
-          '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
-          '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
-          '<button type="button" data-admin-bonus-debit="' + esc(user.userId) + '">Списать</button>' +
+        '<td class="admin-bonuses__user-cell"><strong>' + esc(name) + '</strong>' + (sub ? '<span>' + esc(sub) + '</span>' : "") +
+          '<div class="admin-bonuses__user-actions">' +
+            '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
+            '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
+            '<button type="button" data-admin-bonus-debit="' + esc(user.userId) + '">Списать</button>' +
+          '</div>' +
         '</td>' +
         '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
         '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
         '<td>' + esc(user.ticketsWon || 0) + '</td>' +
         '<td>' + esc(fmtDate(user.lastGameAt)) + '</td>' +
-        '<td class="admin-bonuses__contact-cell">' + contact + '</td>' +
       '</tr>';
     }).join("");
   }
