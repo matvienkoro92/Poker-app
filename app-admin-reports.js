@@ -81,6 +81,16 @@ function initAdminReportModal() {
     });
     calculationRakeCard.appendChild(calculationRakeFieldsColumn);
     calculationRakeCard.appendChild(figuresRoot);
+    var calculationRakeTotalField = document.getElementById("adminReportFiguresRakeTotal");
+    calculationRakeTotalField = calculationRakeTotalField && calculationRakeTotalField.closest(".admin-report-calculations__field");
+    if (calculationRakeTotalField) {
+      calculationRakeFieldsColumn.insertBefore(calculationRakeTotalField, calculationRakeFieldsColumn.firstChild);
+    }
+    var calculationPercentTotalField = document.getElementById("adminReportFiguresPercentTotal");
+    calculationPercentTotalField = calculationPercentTotalField && calculationPercentTotalField.closest(".admin-report-calculations__field");
+    if (calculationPercentTotalField) {
+      figuresRoot.insertBefore(calculationPercentTotalField, figuresRoot.firstChild);
+    }
     var calculationFiguresLower = document.getElementById("adminReportFiguresLower");
     if (calculationFiguresLower) calculationRakeCard.appendChild(calculationFiguresLower);
   }

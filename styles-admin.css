@@ -1021,6 +1021,9 @@ body.admin-report-modal-open .bottom-nav {
 #adminReportCalcWinLossCard .admin-report-calculations__field output {
   font-size: 12px;
 }
+#adminReportCalcRakeCard [data-admin-report-figures-rake] {
+  color: #86efac;
+}
 .admin-report-calculations__field--triple {
   grid-template-columns: minmax(0, 1fr) minmax(78px, 0.32fr) minmax(70px, 0.28fr);
 }
@@ -1378,7 +1381,7 @@ body.admin-report-modal-open .bottom-nav {
   }
   #adminReportCalcRakeCard .admin-report-calculations__field--triple {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto 24px;
+    grid-template-rows: auto 24px auto;
     gap: 3px 6px;
   }
   #adminReportCalcRakeCard .admin-report-calculations__field--triple > span:first-child {
@@ -1390,8 +1393,9 @@ body.admin-report-modal-open .bottom-nav {
     grid-row: 2;
   }
   #adminReportCalcRakeCard .admin-report-calculations__field--triple > output {
-    grid-column: 2;
-    grid-row: 1;
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: end;
     height: auto;
   }
   #adminReportCalcCashCard .admin-report-calculations__input,
