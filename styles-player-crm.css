@@ -674,9 +674,21 @@
   display: none;
 }
 
+.player-crm__featured-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.player-crm__featured-stats-row .player-crm__week-report-card {
+  margin-top: 0;
+}
+
 .player-crm__week-report-card {
-  margin-top: 18px;
-  padding: 16px;
+  margin-top: 12px;
+  padding: 12px;
   border: 1px solid rgba(199, 163, 106, 0.35);
   border-radius: 18px;
   background: rgba(7, 12, 21, 0.78);
@@ -687,8 +699,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .player-crm__week-report-head h3 {
@@ -719,15 +731,15 @@
 .player-crm__week-report-main,
 .player-crm__week-report-group {
   display: grid;
-  gap: 10px;
-  padding: 13px 15px;
+  gap: 7px;
+  padding: 10px 12px;
   border: 1px solid rgba(199, 163, 106, 0.28);
   border-radius: 14px;
   background: rgba(35, 32, 28, 0.76);
 }
 
 .player-crm__week-report-group {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .player-crm__week-report-group--calc {
@@ -742,6 +754,15 @@
   color: #ffd1d8;
 }
 
+.player-crm__week-report-rakeback {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-radius: 10px;
+  background: rgba(20, 8, 13, 0.28);
+}
+
 .player-crm__week-report-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -749,6 +770,7 @@
   gap: 16px;
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.15;
 }
 
 .player-crm__week-report-row span {
@@ -813,21 +835,21 @@
 .player-crm__week-report-deposit-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding-top: 14px;
+  gap: 8px;
+  padding-top: 8px;
 }
 
 .player-crm__week-report-deposit-column {
   display: grid;
-  gap: 7px;
+  gap: 4px;
   min-width: 0;
-  padding: 10px;
+  padding: 7px 8px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.035);
 }
 
 .player-crm__week-report-deposit-column h4 {
-  margin: 0 0 3px;
+  margin: 0 0 1px;
   text-align: center;
   font-size: 15px;
 }
@@ -838,6 +860,7 @@
   gap: 8px;
   color: #f4ead6;
   font-size: 13px;
+  line-height: 1.12;
 }
 
 .player-crm__week-report-deposit-column > div strong {
@@ -847,15 +870,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+.player-crm__week-report-deposit-column > .player-crm__week-report-deposit-total {
+  margin-top: 2px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(199, 163, 106, 0.28);
+  color: #ffe7ad;
+  font-weight: 800;
+}
+
 .player-crm__week-report-row--total {
-  padding-top: 9px;
+  padding-top: 6px;
   border-top: 1px solid rgba(199, 163, 106, 0.28);
   color: #ffe7ad;
 }
 
 .player-crm__week-report-totals {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .player-crm__week-report-totals .player-crm__week-report-row--total + .player-crm__week-report-row--total {
@@ -872,8 +903,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 9px 10px;
   color: rgba(244, 234, 214, 0.78);
   cursor: pointer;
   list-style: none;
@@ -914,8 +945,8 @@
 
 .player-crm__week-report-details-body {
   display: grid;
-  gap: 12px;
-  padding: 2px 12px 13px;
+  gap: 7px;
+  padding: 1px 10px 9px;
 }
 
 .player-crm__week-report-empty {
@@ -924,6 +955,10 @@
 }
 
 @media (max-width: 600px) {
+  .player-crm__featured-stats-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .player-crm__week-report-card {
     padding: 12px;
     border-radius: 14px;
@@ -939,7 +974,9 @@
   }
 
   .player-crm__week-report-details summary {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    font-size: 12px;
   }
 
 }

@@ -402,14 +402,20 @@ function initPlayerCrmStatsRuntime(deps) {
     var journeyTables = analyticsSummary && analyticsSummary.available
       ? analyticsTable("Куда заходили", analyticsSummary.sections) + analyticsTable("В чём участвовали", analyticsSummary.activities)
       : "";
+    var featuredMetricNames = { "Крутка дня": true, "Розыгрыши": true };
+    var standardPeriodMetrics = periodMetrics.filter(function (metric) { return !featuredMetricNames[metric[0]]; });
+    var featuredPeriodMetrics = periodMetrics.filter(function (metric) { return !!featuredMetricNames[metric[0]]; });
     if (currentEl) currentEl.innerHTML = currentSection;
     if (trackingNoticeEl) trackingNoticeEl.innerHTML = exactTrackingNotice;
     el.innerHTML =
       (trackingNoticeEl ? "" : exactTrackingNotice) +
       periodWarning +
       (currentEl ? "" : currentSection) +
-      "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" + periodMetrics.map(periodMetricRow).join("") + "</div>" +
-      "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
+      "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" + standardPeriodMetrics.map(periodMetricRow).join("") + "</div>" +
+      "<div class=\"player-crm__featured-stats-row\">" +
+        featuredPeriodMetrics.map(periodMetricRow).join("") +
+        "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
+      "</div>" +
       journeyTables;
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();

@@ -303,10 +303,14 @@
     }
     function depositColumn(managerKey, managerLabel) {
       var managerRows = report.depositByManagerDay && report.depositByManagerDay[managerKey] || {};
+      var managerTotal = CRM_REPORT_WEEKDAYS.reduce(function (sum, day) {
+        return sum + crmReportNumber(managerRows[day.key]);
+      }, 0);
       return '<section class="player-crm__week-report-deposit-column"><h4>' + esc(managerLabel) + "</h4>" +
         CRM_REPORT_WEEKDAYS.map(function (day) {
           return '<div><span>' + esc(day.label) + '</span><strong>' + esc(crmReportMoney(managerRows[day.key] || 0)) + "</strong></div>";
         }).join("") +
+        '<div class="player-crm__week-report-deposit-total"><span>Итого</span><strong>' + esc(crmReportMoney(managerTotal)) + "</strong></div>" +
       "</section>";
     }
     var depositHtml =
@@ -341,10 +345,9 @@
       detailRows.push(row("Аня ЗП", anyaSalary));
     }
     var detailHtml = detailRows.length
-      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span></summary><div class="player-crm__week-report-details-body">' +
+      ? '<details class="player-crm__week-report-details"><summary><span>Детализация выводов</span><strong>Итого ' + esc(crmReportMoney(detailTotal)) + '</strong></summary><div class="player-crm__week-report-details-body">' +
           detailRows.join("") +
         '</div></details><div class="player-crm__week-report-totals">' +
-          row("Итого", detailTotal, "player-crm__week-report-row--total", true) +
           row("Разница с депозитом", crmReportNumber(report.deposit) - detailTotal, "player-crm__week-report-row--total", true) +
         "</div>"
       : "";
@@ -362,6 +365,11 @@
     var dailyPokerDebitedRow = dailyPokerDebited == null
       ? ""
       : row("Крутка дня списано", dailyPokerDebited, "", true);
+    var rakebackRows =
+      '<div class="player-crm__week-report-rakeback">' +
+        row("РБ прошлая", report.previousRakeback, "", true) +
+        row("Рейкбек", report.rakeback, "", true) +
+      "</div>";
     host.innerHTML =
       '<section class="player-crm__week-report-card">' +
         '<div class="player-crm__week-report-head"><div><h3>Отчёт текущей недели</h3><span>Сумма отправленных отчётов</span></div><button type="button" data-crm-refresh-week-report>Обновить</button></div>' +
@@ -373,7 +381,7 @@
             : "") +
         "</div>" +
         '<div class="player-crm__week-report-group player-crm__week-report-group--danger">' +
-          row("Бонусы", report.bonuses) + row("РБ прошлая", report.previousRakeback) + row("Рейкбек", report.rakeback) + anyaVisible +
+          row("Бонусы", report.bonuses) + rakebackRows + anyaVisible +
           raffleRows + dailyPokerDebitedRow +
         "</div>" +
       "</section>";
