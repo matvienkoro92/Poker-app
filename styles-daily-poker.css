@@ -435,11 +435,15 @@
 }
 
 .admin-bonuses__issue-day {
-  margin-bottom: 8px;
+  margin-bottom: 20px;
   overflow: hidden;
   border: 1px solid rgba(246, 211, 145, 0.26);
   border-radius: 13px;
   background: rgba(5, 8, 13, 0.7);
+}
+
+.admin-bonuses__issue-day + .admin-bonuses__issue-day {
+  margin-top: 6px;
 }
 
 .admin-bonuses__issue-day-title {
@@ -467,7 +471,8 @@
   align-items: center;
   gap: 6px 8px;
   padding: 7px 9px;
-  border-top: 1px solid rgba(246, 211, 145, 0.12);
+  border-top: 1px solid rgba(246, 211, 145, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 227, 162, 0.035);
 }
 
 .admin-bonuses__issue-player,
