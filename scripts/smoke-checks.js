@@ -1993,6 +1993,11 @@ add("Raffles delegates public, admin, completed, broadcast, subscribe, and share
     'raffle-winner-ready-badge--issued',
     'raffle-winner-row--ready',
     'raffle-winner-row--issued',
+    'raffle-winner-followup-btn--not-seated',
+    'if (activeClass) btn.classList.add(activeClass)',
+    'if (activeClass) btn.classList.remove(activeClass)',
+    'btn.textContent = "✓ Сел"',
+    'if (kind !== "seat") btn.classList.add("raffle-winner-followup-btn--loading")',
     "Выдано",
     "raffle-completed-card__delete-btn",
   ]) &&
@@ -2000,6 +2005,7 @@ add("Raffles delegates public, admin, completed, broadcast, subscribe, and share
     ".raffle-winner-row--ready",
     ".raffle-winner-row--issued",
     ".raffle-winner-ready-badge--issued",
+    ".raffle-winner-followup-btn--not-seated",
   ]) &&
   hasAll("appRafflesPublic", [
     "function initRafflesPublicRuntime",

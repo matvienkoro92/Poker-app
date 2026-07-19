@@ -473,7 +473,7 @@ function initRafflesCompletedRuntime(opts) {
             "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"seated\"" +
             followupAttrs +
             (seatStatus === "seated" ? " disabled" : "") +
-            ">Сел</button>";
+            ">" + (seatStatus === "seated" ? "✓ Сел" : "Сел") + "</button>";
           var noSeatButton = seatStatus
             ? ""
             : "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"seat\" data-followup-value=\"not_seated\"" + followupAttrs + ">Не сел</button>";
@@ -849,8 +849,20 @@ function initRafflesCompletedRuntime(opts) {
     }
     var group = btn.closest(".raffle-winner-followup");
     var buttons = group ? group.querySelectorAll("button") : [btn];
+    var idleText = btn.textContent || "";
+    var activeClass = value === "not_seated"
+      ? "raffle-winner-followup-btn--not-seated"
+      : value === "seated"
+        ? "raffle-winner-followup-btn--seat-active"
+        : value === "minus"
+          ? "raffle-winner-followup-btn--minus"
+          : value === "plus"
+            ? "raffle-winner-followup-btn--plus"
+            : "";
+    if (activeClass) btn.classList.add(activeClass);
+    if (kind === "seat" && value === "seated") btn.textContent = "✓ Сел";
     buttons.forEach(function (item) { item.disabled = true; });
-    btn.classList.add("raffle-winner-followup-btn--loading");
+    if (kind !== "seat") btn.classList.add("raffle-winner-followup-btn--loading");
     rememberRaffleCompletedWinnerTab(btn);
     fetch(base + "/api/raffles", {
       method: "POST",
@@ -877,6 +889,8 @@ function initRafflesCompletedRuntime(opts) {
       })
       .catch(function (err) {
         buttons.forEach(function (item) { item.disabled = false; });
+        if (activeClass) btn.classList.remove(activeClass);
+        btn.textContent = idleText;
         btn.classList.remove("raffle-winner-followup-btn--loading");
         if (tg && tg.showAlert) tg.showAlert(err && err.message ? err.message : POKER_NET_ERR);
         else window.alert(err && err.message ? err.message : POKER_NET_ERR);
