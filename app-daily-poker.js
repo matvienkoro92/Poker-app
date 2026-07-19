@@ -132,8 +132,12 @@
 
   function setResultText(text, isError) {
     var resultEl = $("dailyPokerResult");
-    setLiveText(resultEl, text || "");
     if (resultEl) {
+      var message = String(text || "");
+      resultEl.innerHTML = message
+        ? '<span class="daily-poker__result-primary">' + esc(message) + "</span>"
+        : "";
+      resultEl.hidden = !message.trim();
       resultEl.classList.toggle("daily-poker__result--error", !!isError);
       resultEl.classList.remove("daily-poker__result--prompt", "daily-poker__result--timer", "daily-poker__result--login");
       resultEl.dataset.dailyPokerPrompt = "";
@@ -838,6 +842,16 @@
     return code === "CHANNEL_REQUIRED" || code === "BOT_REQUIRED" || code === "SUBSCRIPTION_REQUIRED" || code === "TELEGRAM_REQUIRED";
   }
 
+  function isDailyPokerIdentityConflictCode(code) {
+    return [
+      "SAME_DEVICE",
+      "SAME_TELEGRAM",
+      "SAME_POKER21",
+      "SAME_DT_ID",
+      "SAME_IP",
+    ].indexOf(String(code || "").toUpperCase()) !== -1;
+  }
+
   function setSubscribeRequirementsVisible(visible) {
     var el = document.querySelector(".daily-poker__subscribe-requirements");
     if (!el) return;
@@ -1094,7 +1108,9 @@
         } else {
           restoreOptimisticSpend();
         }
-        if (err && err.data && isDailyPokerRequirementCode(err.data.code)) {
+        if (err && err.data && isDailyPokerIdentityConflictCode(err.data.code)) {
+          setResultText("", false);
+        } else if (err && err.data && isDailyPokerRequirementCode(err.data.code)) {
           setSubscribeRequirementsVisible(true);
           showMessage(errorTextFrom(err, "Для игры нужно открыть бота и подписаться на канал."), true);
           openDailyPokerRequirementLink(err.data);

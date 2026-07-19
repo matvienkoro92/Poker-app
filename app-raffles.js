@@ -493,6 +493,11 @@ function initRaffles() {
     } catch (eHelpBodyClass) {}
     if (shouldOpen) {
       try {
+        var helpBox = rafflesHelpModal.querySelector(".raffles-help-modal__box");
+        if (helpBox) helpBox.scrollTop = 0;
+        rafflesHelpModal.scrollTop = 0;
+      } catch (eHelpScrollTop) {}
+      try {
         rafflesHelpModalLastFocus = document.activeElement || null;
       } catch (eHelpFocusRead) {
         rafflesHelpModalLastFocus = null;

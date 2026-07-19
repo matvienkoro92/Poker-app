@@ -2336,6 +2336,9 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   width: min(620px, calc(100vw - 24px));
   padding: 18px;
 }
+.raffles-help-modal {
+  z-index: 12000;
+}
 .raffles-help-modal__title {
   color: #ffd45f;
   text-transform: uppercase;

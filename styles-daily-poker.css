@@ -2727,6 +2727,20 @@
   text-shadow: none;
 }
 
+.daily-poker__result--error {
+  height: auto;
+  max-height: none;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+.daily-poker__result--error .daily-poker__result-primary {
+  width: 100%;
+  min-height: 0;
+  white-space: normal;
+  overflow: visible;
+}
+
 .daily-poker__result--login {
   display: flex;
   align-items: center;
@@ -3417,6 +3431,71 @@
   }
 }
 
+/* Keep the utility actions compact below the deal button. */
+.daily-poker__actions > .daily-poker__share-actions {
+  gap: 8px;
+}
+
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-btn,
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__notify-btn,
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__copy-btn {
+  min-height: 40px;
+  height: 40px;
+  border-radius: 11px;
+}
+
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-btn {
+  gap: 7px;
+  padding-inline: 9px;
+  font-size: clamp(11px, 2.8vw, 15px);
+  color: #160900;
+  border-color: #fff2a8;
+  background:
+    radial-gradient(ellipse at 50% -35%, rgba(255, 255, 255, 0.92), transparent 43%),
+    linear-gradient(135deg, #ffe96e 0%, #ffb20d 44%, #f06400 100%) !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 205, 67, 0.35),
+    0 0 22px rgba(255, 137, 0, 0.78),
+    inset 0 2px 0 rgba(255, 255, 224, 0.86),
+    inset 0 -4px 8px rgba(144, 47, 0, 0.32);
+}
+
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-icon,
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__notify-icon,
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__copy-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-icon {
+  flex-basis: 22px;
+}
+
+@media (max-width: 390px) {
+  .daily-poker__actions > .daily-poker__share-actions {
+    gap: 5px;
+  }
+
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-btn,
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__notify-btn,
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__copy-btn {
+    min-height: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-icon,
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__notify-icon,
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__copy-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .daily-poker__actions > .daily-poker__share-actions .daily-poker__invite-icon {
+    flex-basis: 18px;
+  }
+}
+
 @media (max-width: 720px) {
   .daily-poker__table {
     aspect-ratio: 1 / 1;
@@ -3433,6 +3512,12 @@
     max-width: calc(100% - 16px);
     margin: 18px 8px 0;
     padding: 10px 12px;
+  }
+
+  .daily-poker__result--error {
+    min-height: 0;
+    padding-top: 12px;
+    padding-bottom: 14px;
   }
 
   .daily-poker__result--prompt {
