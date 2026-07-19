@@ -14,7 +14,7 @@
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
     var SENT_REPORTS_CACHE_TTL_MS = config.cacheTtlMs || 5 * 60 * 1000;
-    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v7";
+    var SENT_REPORTS_HTML_CACHE_KEY = "poker:adminReportSent:currentWeekHtml:v8";
     var SENT_REPORTS_HTML_CACHE_TTL_MS = 20 * 60 * 1000;
     var POKER_NET_ERR = config.netErrorMessage || "Ошибка сети";
     var SENT_REPORT_MSK_SHIFT_MS = 3 * 60 * 60 * 1000;
@@ -149,6 +149,26 @@
         return isReportAnyaSalaryFieldName(extra.name) ? sum + parseReportNumber(extra.value) : sum;
       }, 0);
     }
+    function getReportBonusManagerKey(report) {
+      var authorId = String(report && report.authorId || "").replace(/^tg_/, "").trim();
+      var authorName = normalizeReportDetailName(report && report.authorName || "");
+      if (authorId === "2144406710" || authorName.indexOf("аня") !== -1 || authorName.indexOf("анна") !== -1) return "anya";
+      if (authorId === "1897001087" || authorName.indexOf("вика") !== -1 || authorName.indexOf("виктория") !== -1) return "vika";
+      return "";
+    }
+    function getReportBonusManagerTotals(report) {
+      var stored = report && report.bonusesByManager;
+      if (stored && typeof stored === "object") {
+        return {
+          anya: parseReportNumber(stored.anya),
+          vika: parseReportNumber(stored.vika),
+        };
+      }
+      var result = { anya: 0, vika: 0 };
+      var managerKey = getReportBonusManagerKey(report);
+      if (managerKey) result[managerKey] = parseReportNumber(report && report.bonuses);
+      return result;
+    }
     var getReportPreviousRakebackTotal = helpers.getReportPreviousRakebackTotal || function (report) {
       return getReportExtraEntries(report).reduce(function (sum, extra) {
         return isReportPreviousRakebackFieldName(extra.name) ? sum + parseReportNumber(extra.value) : sum;
@@ -251,6 +271,11 @@
         });
       }
       pushEntry(expenseEntries, labels.bonuses, report.bonuses, false);
+      if (hasReportValue(report.bonuses)) {
+        var bonusManagers = getReportBonusManagerTotals(report);
+        expenseEntries.push({ label: "— Аня", value: formatReportRubleNumber(bonusManagers.anya) });
+        expenseEntries.push({ label: "— Вика", value: formatReportRubleNumber(bonusManagers.vika) });
+      }
       pushEntry(expenseEntries, "РБ прошлая", getReportPreviousRakebackTotal(report), false);
       pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(report), true);
       pushEntry(otherEntries, labels.botExchipCashout, report.botExchipCashout, false);
@@ -570,13 +595,14 @@
           return {
             deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
             botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
-            bonuses: 0, previousRakeback: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0
+            bonuses: 0, bonusesByManager: { anya: 0, vika: 0 },
+            previousRakeback: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0
           };
         }
 
         function addNumericToTotals(totals, r) {
           Object.keys(totals).forEach(function (k) {
-            if (k === "extraFields") return;
+            if (k === "extraFields" || k === "bonusesByManager") return;
             var v = k === "rakeback"
               ? getReportStoredRakebackTotal(r)
               : (k === "previousRakeback" ? getReportPreviousRakebackTotal(r) : r[k]);
@@ -584,6 +610,9 @@
             var n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
             if (!isNaN(n)) totals[k] += n;
           });
+          var bonusManagers = getReportBonusManagerTotals(r);
+          totals.bonusesByManager.anya += bonusManagers.anya;
+          totals.bonusesByManager.vika += bonusManagers.vika;
         }
 
         function sumReportsInWindow(allItems, fromMs, toMs) {

@@ -24,6 +24,34 @@
       if (bound) return;
       bound = true;
 
+      if (modal && modal.dataset.calculationsRakebackOverlayBound !== "1") {
+        modal.dataset.calculationsRakebackOverlayBound = "1";
+        modal.addEventListener("click", function (event) {
+          var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
+          if (trigger && modal.contains(trigger)) {
+            event.preventDefault();
+            var panel = modal.querySelector('[data-admin-report-panel="rakeback"]');
+            if (panel) {
+              panel.classList.add("admin-report-panel--rakeback-overlay");
+              panel.setAttribute("role", "dialog");
+              panel.setAttribute("aria-modal", "true");
+            }
+            if (typeof window.pokerOpenAdminReportRakebackOverlay === "function") {
+              window.pokerOpenAdminReportRakebackOverlay();
+            }
+            return;
+          }
+          var close = event.target && event.target.closest ? event.target.closest("[data-admin-report-rakeback-overlay-close]") : null;
+          if (!close || !modal.contains(close)) return;
+          var openPanel = modal.querySelector('[data-admin-report-panel="rakeback"]');
+          if (openPanel) {
+            openPanel.classList.remove("admin-report-panel--rakeback-overlay");
+            openPanel.removeAttribute("role");
+            openPanel.removeAttribute("aria-modal");
+          }
+        }, true);
+      }
+
       bindList(elements.cashInputs, "input", function () {
         call(callbacks.scheduleCashTotal);
       });

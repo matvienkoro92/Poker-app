@@ -3456,6 +3456,25 @@ function initAdminReportModal() {
     return 0;
   }
 
+  function getReportBonusManagerTotals(it) {
+    var stored = it && it.bonusesByManager;
+    if (stored && typeof stored === "object") {
+      return {
+        anya: parseReportNumber(stored.anya),
+        vika: parseReportNumber(stored.vika),
+      };
+    }
+    var result = { anya: 0, vika: 0 };
+    var authorId = String(it && it.authorId || "").replace(/^tg_/, "").trim();
+    var authorName = normalizeReportDetailName(it && it.authorName || "");
+    if (authorId === "2144406710" || authorName.indexOf("аня") !== -1 || authorName.indexOf("анна") !== -1) {
+      result.anya = parseReportNumber(it && it.bonuses);
+    } else if (authorId === "1897001087" || authorName.indexOf("вика") !== -1 || authorName.indexOf("виктория") !== -1) {
+      result.vika = parseReportNumber(it && it.bonuses);
+    }
+    return result;
+  }
+
   function buildReportDetailHtml(it) {
     var labels = { deposit: "Депозит", cashout: "Выводы", prodamus: "Продамус", robokassa: "Робокасса", romaCrypto: "Рома крипта", botCryptoDep: "Боткрипта", botExchipDep: "Ботэксчип деп", botExchipCashout: "Ботэксчип вывод", bonuses: "Бонусы", transfers: "Переводы", ret: "Возврат", sergeyMarina: "Сергей/Марина", rakeback: "Рейкбек" };
     var depositChildren = ["cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "sergeyMarina"];
@@ -3552,6 +3571,11 @@ function initAdminReportModal() {
       });
     }
     pushEntry(expenseEntries, labels.bonuses, it.bonuses, false);
+    if (hasReportValue(it.bonuses)) {
+      var bonusManagers = getReportBonusManagerTotals(it);
+      expenseEntries.push({ label: "— Аня", value: formatReportRubleNumber(bonusManagers.anya) });
+      expenseEntries.push({ label: "— Вика", value: formatReportRubleNumber(bonusManagers.vika) });
+    }
     pushEntry(expenseEntries, "РБ прошлая", getReportPreviousRakebackTotal(it), false);
     pushEntry(expenseEntries, labels.rakeback, getReportStoredRakebackTotal(it), true);
     pushEntry(otherEntries, labels.botExchipCashout, it.botExchipCashout, false);
