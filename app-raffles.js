@@ -2304,6 +2304,9 @@ function initRaffles() {
           totalPrize,
           prizeTopPillsHtml
         );
+        var ticketRegistrationWarning = !isCashPrize
+          ? '<div class="raffles-ticket-registration-warning" role="note"><strong>Важно:</strong> если вы уже зарегистрированы в турнире, не участвуйте в розыгрыше билета на него. Второй билет выдать невозможно — не забирайте возможность у игроков, у которых билета ещё нет.</div>'
+          : "";
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
@@ -2336,7 +2339,8 @@ function initRaffles() {
           '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
           activeRaffleInfoSummaryHtml(raffle) +
           "</button>" +
-          "</div>"
+          "</div>" +
+          ticketRegistrationWarning
         );
       })
       .join("");

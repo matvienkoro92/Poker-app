@@ -2379,6 +2379,43 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   background: #ffd45f;
   box-shadow: 0 0 12px rgba(255, 190, 56, 0.72);
 }
+.raffles-help-modal__content li.raffles-help-modal__warning {
+  border-color: rgba(255, 96, 72, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 91, 58, 0.24), rgba(255, 184, 51, 0.12)),
+    rgba(30, 5, 5, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 213, 103, 0.12),
+    0 0 22px rgba(255, 74, 45, 0.18);
+}
+.raffles-help-modal__content li.raffles-help-modal__warning::before {
+  background: #ff5747;
+  box-shadow: 0 0 14px rgba(255, 70, 49, 0.92);
+}
+.raffles-help-modal__content li.raffles-help-modal__warning strong {
+  color: #ff8a72;
+}
+.raffles-ticket-registration-warning {
+  grid-column: 1 / -1;
+  margin: -4px 10px 12px;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 96, 72, 0.72);
+  border-radius: 13px;
+  background:
+    linear-gradient(135deg, rgba(255, 91, 58, 0.24), rgba(255, 184, 51, 0.12)),
+    rgba(30, 5, 5, 0.88);
+  color: #fff0d7;
+  font-size: clamp(12px, 2.3vw, 15px);
+  font-weight: 800;
+  line-height: 1.28;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 213, 103, 0.12),
+    0 0 22px rgba(255, 74, 45, 0.18);
+}
+.raffles-ticket-registration-warning strong {
+  color: #ff8a72;
+  font-weight: 1000;
+}
 .raffles-help-modal__content strong {
   color: #ffd45f;
   font-weight: 1000;

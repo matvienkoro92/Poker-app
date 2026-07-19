@@ -434,6 +434,25 @@
   line-height: 1.25;
 }
 
+.admin-bonuses__issues-week-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 5px 9px;
+  border: 1px solid rgba(246, 211, 145, 0.38);
+  border-radius: 9px;
+  background: rgba(246, 211, 145, 0.1);
+  color: #ffe0a0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-bonuses__issues-week-total strong {
+  color: #fff1c8;
+  font-size: 14px;
+}
+
 .admin-bonuses__issue-day {
   margin-bottom: 20px;
   overflow: hidden;

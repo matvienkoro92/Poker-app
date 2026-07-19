@@ -98,6 +98,28 @@
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
+  function currentBusinessWeekStartKey() {
+    var key = businessDateKey(new Date());
+    var parts = key.split("-");
+    if (parts.length !== 3) return key;
+    var date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+    date.setUTCDate(date.getUTCDate() - ((date.getUTCDay() + 6) % 7));
+    return date.toISOString().slice(0, 10);
+  }
+
+  function renderIssuesWeekTotal(operations) {
+    var totalEl = $("adminBonusesIssuesWeekTotal");
+    if (!totalEl) return;
+    var weekStart = currentBusinessWeekStartKey();
+    var currentDay = businessDateKey(new Date());
+    var total = (Array.isArray(operations) ? operations : []).reduce(function (sum, op) {
+      var key = String(op && op.businessDate || businessDateKey(op && op.createdAt) || "");
+      if (!key || key < weekStart || key > currentDay) return sum;
+      return sum + Math.max(0, Number(op && op.amount) || 0);
+    }, 0);
+    totalEl.textContent = fmtPoints(total);
+  }
+
   function scheduleTournamentId(item, index) {
     return [
       item && item.date ? "date-" + item.date : item && item.repeat === "weekly" ? "weekly-" + item.dow : "daily",
@@ -340,6 +362,7 @@
   function renderIssues(operations) {
     var body = $("adminBonusesIssuesBody");
     if (!body) return;
+    renderIssuesWeekTotal(operations);
     if (!operations || !operations.length) {
       body.innerHTML = '<div class="admin-bonuses__notice">Списаний пока нет.</div>';
       return;

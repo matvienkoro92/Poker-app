@@ -242,6 +242,18 @@
     return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayIndex] || "";
   }
 
+  function crmDailyPokerDebitsByManager(stats) {
+    var totals = { anya: 0, vika: 0 };
+    var rows = stats && Array.isArray(stats.dailyDebits) ? stats.dailyDebits : [];
+    rows.forEach(function (row) {
+      var adminId = String(row && row.adminId || "").replace(/^tg_/, "").trim();
+      var amount = crmReportNumber(row && row.amount);
+      if (adminId === "2144406710") totals.anya += amount;
+      if (adminId === "1897001087") totals.vika += amount;
+    });
+    return totals;
+  }
+
   function crmWeekReportTotals(reports) {
     var totals = {
       deposit: 0, cashout: 0, prodamus: 0, robokassa: 0, romaCrypto: 0,
@@ -381,7 +393,12 @@
       : null;
     var dailyPokerDebitedRow = dailyPokerDebited == null
       ? ""
-      : row("Крутка дня списано", dailyPokerDebited, "", true);
+      : (function () {
+          var managerTotals = crmDailyPokerDebitsByManager(state.dailyPokerStats);
+          return row("Крутка дня списано", dailyPokerDebited, "", true) +
+            row("— Аня", managerTotals.anya, "player-crm__week-report-row--subdetail", true) +
+            row("— Вика", managerTotals.vika, "player-crm__week-report-row--subdetail", true);
+        })();
     var bonusesTotal =
       crmReportNumber(report.bonuses) +
       crmReportNumber(raffleStats && raffleStats.available !== false ? raffleStats.issuedPrizeAmount : 0) +
@@ -485,6 +502,9 @@
     if (state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null) {
       dailyPokerDebited = crmReportNumber(state.dailyPokerStats.bonusBalanceDebited);
       lines.push("Крутка дня списано: " + crmReportMoney(state.dailyPokerStats.bonusBalanceDebited));
+      var dailyPokerManagerTotals = crmDailyPokerDebitsByManager(state.dailyPokerStats);
+      lines.push("— Аня: " + crmReportMoney(dailyPokerManagerTotals.anya));
+      lines.push("— Вика: " + crmReportMoney(dailyPokerManagerTotals.vika));
     }
     lines.push("Бонусы и выдачи итого: " + crmReportMoney(crmReportNumber(report.bonuses) + raffleIssuedTotal + dailyPokerDebited));
     lines.push("", "РБ прошлая: " + crmReportMoney(report.previousRakeback));
