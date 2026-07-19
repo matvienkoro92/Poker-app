@@ -5523,6 +5523,64 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   gap: 4px;
   min-width: 0;
 }
+.raffle-winner-followup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.raffle-winner-followup-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 38px;
+  min-height: 27px;
+  padding: 4px 9px;
+  border: 1px solid rgba(253, 224, 71, 0.92);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.34), rgba(161, 98, 7, 0.3));
+  color: #fef08a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 10px rgba(250, 204, 21, 0.12);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+  cursor: pointer;
+}
+.raffle-winner-followup-btn--seat-active,
+.raffle-winner-followup-btn--plus {
+  border-color: rgba(74, 222, 128, 0.96);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.72), rgba(21, 128, 61, 0.58));
+  color: #dcfce7;
+}
+.raffle-winner-followup-btn--not-seated,
+.raffle-winner-followup-btn--minus {
+  border-color: rgba(248, 113, 113, 0.96);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.76), rgba(153, 27, 27, 0.62));
+  color: #fee2e2;
+}
+.raffle-winner-followup-btn--loading {
+  position: relative;
+  color: transparent;
+}
+.raffle-winner-followup-btn--loading::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff7c2;
+  border-radius: 50%;
+  animation: raffle-loading-spin 0.7s linear infinite;
+}
+.raffle-winner-followup-btn:disabled {
+  cursor: default;
+  opacity: 1;
+}
 .raffle-winner-row__profile.raffle-participants__profile-btn {
   flex: 0 1 auto;
   min-width: 0;
