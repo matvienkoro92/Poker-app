@@ -248,7 +248,8 @@
       botCryptoDep: 0, botExchipDep: 0, botExchipCashout: 0,
       bonuses: 0, transfers: 0, ret: 0, sergeyMarina: 0, rakeback: 0,
       previousRakeback: 0, extraFields: [],
-      depositByManagerDay: { anya: {}, vika: {} }
+      depositByManagerDay: { anya: {}, vika: {} },
+      bonusesByManager: { anya: 0, vika: 0 }
     };
     var extraMap = {};
     (Array.isArray(reports) ? reports : []).forEach(function (report) {
@@ -264,6 +265,9 @@
       if (depositManager && depositWeekday) {
         totals.depositByManagerDay[depositManager][depositWeekday] =
           (totals.depositByManagerDay[depositManager][depositWeekday] || 0) + crmReportNumber(report && report.deposit);
+      }
+      if (depositManager) {
+        totals.bonusesByManager[depositManager] += crmReportNumber(report && report.bonuses);
       }
       totals.rakeback += crmReportStoredRakeback(report);
       var extras = Array.isArray(report && report.extraFields) ? report.extraFields.slice() : [];
@@ -404,6 +408,8 @@
           '<summary><span>Бонусы и выдачи</span><strong>Итого ' + esc(crmReportMoney(bonusesTotal)) + "</strong></summary>" +
           '<div class="player-crm__week-report-bonuses-body">' +
             row("Бонусы", report.bonuses, "", true) +
+            row("— Аня", report.bonusesByManager && report.bonusesByManager.anya, "player-crm__week-report-row--subdetail", true) +
+            row("— Вика", report.bonusesByManager && report.bonusesByManager.vika, "player-crm__week-report-row--subdetail", true) +
             raffleRows + dailyPokerDebitedRow +
           "</div>" +
         "</details>" +
@@ -465,6 +471,8 @@
     lines.push("Итого Эксчип: " + crmReportMoney(report.botExchipDep) + " - " + crmReportMoney(report.botExchipCashout) + " = " + crmReportMoney(exchip));
     lines.push("Рунекс и Эксчип итого: " + crmReportMoney(runexExchipTotal));
     lines.push("", "Бонусы: " + crmReportMoney(report.bonuses));
+    lines.push("— Аня: " + crmReportMoney(report.bonusesByManager && report.bonusesByManager.anya));
+    lines.push("— Вика: " + crmReportMoney(report.bonusesByManager && report.bonusesByManager.vika));
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
     var raffleIssuedTotal = 0;
     if (raffleStats && raffleStats.available !== false) {
