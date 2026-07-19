@@ -2524,6 +2524,19 @@
   transform: translateY(1px) scale(0.99);
 }
 
+.daily-poker > .daily-poker__share-actions .daily-poker__invite-btn {
+  color: #170b00;
+  background:
+    radial-gradient(ellipse at 50% -30%, rgba(255, 255, 255, 0.92), transparent 40%),
+    linear-gradient(135deg, #ffe87a 0%, #ffb000 46%, #f06400 100%) !important;
+  border-color: #fff0a3;
+  box-shadow:
+    0 0 0 2px rgba(255, 190, 31, 0.28),
+    0 0 30px rgba(255, 138, 0, 0.72),
+    inset 0 2px 0 rgba(255, 255, 224, 0.82),
+    inset 0 -5px 10px rgba(139, 47, 0, 0.28);
+}
+
 .daily-poker__notify-btn,
 .daily-poker__copy-btn {
   width: 100%;
