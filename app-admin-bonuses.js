@@ -403,7 +403,8 @@
         '<h4 class="admin-bonuses__issue-day-title"><span>' + esc(formatBusinessDate(key)) + '</span><strong>Итого ' + esc(fmtPoints(total)) + '</strong></h4>' +
         rows.map(function (op) {
           var poker21Label = op.poker21Id ? "Poker21 " + op.poker21Id : "Poker21 не привязан";
-          var playerSub = op.username ? "@" + op.username + " · " + poker21Label : poker21Label;
+          var poker21Nickname = op.poker21Nickname || op.displayName || op.userId;
+          var playerSub = [op.displayName && op.displayName !== poker21Nickname ? op.displayName : "", op.username ? "@" + op.username : ""].filter(Boolean).join(" · ");
           var tournamentTitle = op.tournamentTitle || "Турнир не указан";
           var tournamentMeta = [op.tournamentTime, op.tournamentBuyin].filter(Boolean).join(" · ");
           var reviewStatus = String(op.reviewStatus || "");
@@ -415,7 +416,11 @@
             : '<button type="button" data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="minus" aria-label="Не сняли">−</button>' +
               '<button type="button" data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="plus" aria-label="Сняли">+</button>';
           return '<article class="admin-bonuses__issue-row">' +
-            '<div class="admin-bonuses__issue-player"><strong>' + esc(op.displayName || op.userId) + '</strong><span>' + esc(playerSub) + '</span></div>' +
+            '<div class="admin-bonuses__issue-player">' +
+              '<strong class="admin-bonuses__issue-poker-nick">' + esc(poker21Nickname) + '</strong>' +
+              '<strong class="admin-bonuses__issue-poker-id">' + esc(poker21Label) + '</strong>' +
+              (playerSub ? '<span>' + esc(playerSub) + '</span>' : "") +
+            '</div>' +
             '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
             '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
             '<div class="admin-bonuses__issue-review">' + reviewHtml + '</div>' +

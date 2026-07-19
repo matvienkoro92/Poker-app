@@ -512,6 +512,21 @@
   line-height: 1.15;
 }
 
+.admin-bonuses__issue-player .admin-bonuses__issue-poker-nick {
+  color: #fff4c7;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.08;
+}
+
+.admin-bonuses__issue-player .admin-bonuses__issue-poker-id {
+  margin-top: 3px;
+  color: #ffd76c;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
 .admin-bonuses__issue-player span,
 .admin-bonuses__issue-tournament span {
   margin-top: 1px;
