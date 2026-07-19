@@ -274,7 +274,7 @@
         '</td>' +
         '<td class="admin-bonuses__actions-cell">' +
           '<div class="admin-bonuses__actions-panel">' +
-            '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '">История</button>' +
+            '<button type="button" data-admin-bonus-history="' + esc(user.userId) + '" aria-expanded="false">История</button>' +
             '<button type="button" data-admin-bonus-credit="' + esc(user.userId) + '">Начислить</button>' +
             '<button type="button" data-admin-bonus-debit="' + esc(user.userId) + '">Списать</button>' +
           '</div>' +
@@ -321,12 +321,25 @@
     var base = apiBase();
     var userRow = document.querySelector('#adminBonusesTableBody tr[data-user-id="' + CSS.escape(userId) + '"]');
     if (!base || !userRow) return;
+    var previous = document.querySelector(".admin-bonuses__history-inline-row");
+    var historyButtons = document.querySelectorAll("[data-admin-bonus-history]");
+    if (previous && previous.dataset.userId === userId) {
+      previous.remove();
+      adminBonusesState.selectedUserId = "";
+      historyButtons.forEach(function (button) {
+        button.setAttribute("aria-expanded", "false");
+      });
+      return;
+    }
+    if (previous) previous.remove();
+    historyButtons.forEach(function (button) {
+      button.setAttribute("aria-expanded", button.getAttribute("data-admin-bonus-history") === userId ? "true" : "false");
+    });
     adminBonusesState.selectedUserId = userId;
     var found = adminBonusesState.users.find(function (user) { return user.userId === userId; });
-    var previous = document.querySelector(".admin-bonuses__history-inline-row");
-    if (previous) previous.remove();
     var detailRow = document.createElement("tr");
     detailRow.className = "admin-bonuses__history-inline-row";
+    detailRow.dataset.userId = userId;
     var detailCell = document.createElement("td");
     detailCell.colSpan = 5;
     var section = document.createElement("section");
