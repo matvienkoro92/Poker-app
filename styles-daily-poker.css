@@ -2297,12 +2297,17 @@
 
 .daily-poker__share-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(86px, 0.52fr) minmax(86px, 0.52fr);
+  grid-template-columns: minmax(86px, 0.52fr) minmax(0, 1.7fr) minmax(86px, 0.52fr);
   align-items: stretch;
   gap: 16px;
   width: min(100%, 860px);
   min-width: 0;
   margin: 6px auto 8px;
+}
+
+.daily-poker__actions > .daily-poker__share-actions {
+  width: 100%;
+  margin: 0;
 }
 
 .daily-poker__private-cash {
@@ -2377,14 +2382,7 @@
 }
 
 .daily-poker__invite-btn::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  z-index: -1;
-  border: 1px solid rgba(92, 43, 0, 0.4);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 230, 0.38);
-  pointer-events: none;
+  content: none;
 }
 
 /* Compact utility row sits directly above the cards. */
@@ -2706,22 +2704,25 @@
 }
 
 .daily-poker__result {
-  position: absolute;
+  position: relative;
   z-index: 4;
-  right: clamp(10px, 2vw, 22px);
-  bottom: clamp(10px, 2vw, 22px);
-  left: clamp(10px, 2vw, 22px);
+  right: auto;
+  bottom: auto;
+  left: auto;
   box-sizing: border-box;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 0;
-  margin-top: 0;
+  margin: 10px 0 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   text-align: left;
   font-size: clamp(15px, 3.1vw, 22px);
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1.28;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
   text-shadow: none;
 }
@@ -2788,7 +2789,7 @@
   flex: 1 1 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
 }
 
@@ -2800,7 +2801,9 @@
 
 .daily-poker__result-nowrap {
   display: block;
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .daily-poker__result-meta {
@@ -2826,7 +2829,7 @@
 
 .daily-poker__result-meta span {
   max-width: 100%;
-  overflow-wrap: normal;
+  overflow-wrap: anywhere;
   word-break: normal;
 }
 
@@ -3198,6 +3201,18 @@
     margin-bottom: 14px;
   }
 
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__hero-stat dt {
+    font-size: clamp(6px, 0.78vw, 8px);
+    line-height: 1.02;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+
+  html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__hero-stat dd {
+    font-size: clamp(12px, 1.55vw, 15px);
+  }
+
   html.app-view-browser-local.app-view-daily-poker-html-scroll .daily-poker__intro {
     margin-top: 0;
   }
@@ -3232,7 +3247,7 @@
   }
 
   .daily-poker__share-actions {
-    grid-template-columns: minmax(0, 1.55fr) minmax(74px, 0.58fr) minmax(74px, 0.58fr);
+    grid-template-columns: minmax(74px, 0.58fr) minmax(0, 1.55fr) minmax(74px, 0.58fr);
     gap: 10px;
   }
 
@@ -3279,7 +3294,7 @@
   }
 
   .daily-poker__share-actions {
-    grid-template-columns: minmax(0, 1.55fr) minmax(74px, 0.58fr) minmax(74px, 0.58fr);
+    grid-template-columns: minmax(74px, 0.58fr) minmax(0, 1.55fr) minmax(74px, 0.58fr);
     gap: 10px;
   }
 
@@ -3317,7 +3332,7 @@
 
 @media (max-width: 390px) {
   .daily-poker__share-actions {
-    grid-template-columns: minmax(0, 1.65fr) minmax(52px, 0.5fr) minmax(52px, 0.5fr);
+    grid-template-columns: minmax(52px, 0.5fr) minmax(0, 1.65fr) minmax(52px, 0.5fr);
     gap: 6px;
     margin-top: 8px;
   }
@@ -3408,6 +3423,20 @@
     min-height: 0;
     padding: 0;
     border-radius: 20px;
+  }
+
+  .daily-poker__result {
+    position: relative;
+    inset: auto;
+    z-index: 5;
+    width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
+    margin: 18px 8px 0;
+    padding: 10px 12px;
+  }
+
+  .daily-poker__result--prompt {
+    min-height: 0;
   }
 
   .daily-poker__zone--hole {

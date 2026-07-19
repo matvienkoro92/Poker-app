@@ -2305,7 +2305,7 @@ function initRaffles() {
           prizeTopPillsHtml
         );
         var ticketRegistrationWarning = !isCashPrize
-          ? '<div class="raffles-ticket-registration-warning" role="note"><strong>Важно:</strong> если вы уже зарегистрированы в турнире, не участвуйте в розыгрыше билета на него. Второй билет выдать невозможно — не забирайте возможность у игроков, у которых билета ещё нет.</div>'
+          ? '<div class="raffles-ticket-registration-warning" role="note"><span><strong>Важно:</strong> если вы уже зарегистрированы в турнире, не участвуйте в розыгрыше билета на него. Второй билет выдать невозможно — не забирайте возможность у игроков, у которых билета ещё нет.</span><button type="button" class="raffles-ticket-registration-warning__rules" data-raffles-help-open>Все правила</button></div>'
           : "";
         return (
           '<div class="raffles-active-chooser__item' +
@@ -2352,6 +2352,13 @@ function initRaffles() {
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
     rafflesActiveChooser.dataset.bound = "1";
     rafflesActiveChooser.addEventListener("click", function (e) {
+      var helpBtn = e.target && e.target.closest ? e.target.closest("[data-raffles-help-open]") : null;
+      if (helpBtn && rafflesActiveChooser.contains(helpBtn)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setRafflesHelpModalOpen(true);
+        return;
+      }
       var referralsBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-referrals-open]") : null;
       if (referralsBtn && rafflesActiveChooser.contains(referralsBtn)) {
         e.preventDefault();
