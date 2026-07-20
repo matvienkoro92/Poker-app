@@ -184,6 +184,7 @@ function initAdminReportModal() {
   var figuresSaveBtn = document.getElementById("adminReportFiguresSaveBtn");
   var figuresEditBtn = document.getElementById("adminReportFiguresEditBtn");
   var figuresSaveStatusEl = document.getElementById("adminReportFiguresSaveStatus");
+  var figuresDateInput = document.getElementById("adminReportFiguresDate");
   var figuresRomanPaidInput = document.getElementById("adminReportFiguresRomanPaid");
   var figuresWinLossInput = document.getElementById("adminReportFiguresWinLoss");
   var figuresAgentsPaidInput = document.getElementById("adminReportFiguresAgentsPaid");
@@ -1621,6 +1622,7 @@ function initAdminReportModal() {
       figuresSaveBtn: figuresSaveBtn,
       figuresEditBtn: figuresEditBtn,
       figuresSaveStatusEl: figuresSaveStatusEl,
+      figuresDateInput: figuresDateInput,
       figuresRomanPaidInput: figuresRomanPaidInput,
       figuresWinLossInput: figuresWinLossInput,
       figuresAgentsPaidInput: figuresAgentsPaidInput,

@@ -685,6 +685,7 @@
             input.readOnly = input === figuresApproxRomanRakeInput ? false : figuresSavedLocked;
           });
         }
+        if (figuresDateInput) figuresDateInput.disabled = figuresSavedLocked;
         if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = figuresSavedLocked;
         if (figuresSaveBtn) figuresSaveBtn.hidden = figuresSavedLocked;
         if (figuresEditBtn) figuresEditBtn.hidden = !figuresSavedLocked;
@@ -766,6 +767,7 @@
           });
         }
         return {
+          figuresDate: figuresDateInput ? figuresDateInput.value : "",
           cash: valuesFrom(calculationsCashInputs),
           roomWinLoss: valuesFrom(calculationsWinLossInputs),
           rake: valuesFrom(figuresRakeInputs),
@@ -802,6 +804,7 @@
 
       function applyCalculationsDraft(draft) {
         if (!draft) return false;
+        if (figuresDateInput) figuresDateInput.value = draft.figuresDate || localCalculationDateValue();
         var cash = Array.isArray(draft.cash) ? draft.cash : [];
         if (calculationsCashInputs && calculationsCashInputs.length) {
           calculationsCashInputs.forEach(function (input, index) {
@@ -865,6 +868,7 @@
           raw = window.localStorage ? window.localStorage.getItem(getCalculationDraftKey()) : null;
         } catch (e) {}
         if (!raw) {
+          if (figuresDateInput && !figuresDateInput.value) figuresDateInput.value = localCalculationDateValue();
           setCalculationsLocked(false);
           setFiguresLocked(false);
           return false;
@@ -876,6 +880,12 @@
           setFiguresLocked(false);
           return false;
         }
+      }
+
+      function localCalculationDateValue() {
+        var now = new Date();
+        var offset = now.getTimezoneOffset() * 60000;
+        return new Date(now.getTime() - offset).toISOString().slice(0, 10);
       }
 
       function hydrateCalculationsDraftOnce() {
