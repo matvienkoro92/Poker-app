@@ -2153,8 +2153,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 
 .admin-report-rakeback-period {
-  margin: 12px 0;
-  padding: 14px;
+  margin: 8px 0;
+  padding: 10px;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.46);
@@ -2162,25 +2162,28 @@ button.admin-report-rakeback-summary__row:focus-visible {
 
 .admin-report-rakeback-period__title {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 7px;
   color: #b8b1a6;
+  font-size: 13px;
   font-weight: 800;
 }
 
 .admin-report-rakeback-period__tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 6px;
 }
 
 .admin-report-rakeback-period__tabs button {
-  min-height: 44px;
-  padding: 8px 10px;
+  min-height: 34px;
+  padding: 5px 8px;
   border: 1px solid rgba(100, 116, 139, 0.55);
   border-radius: 999px;
   color: #aaa49b;
   background: rgba(15, 23, 42, 0.9);
   font: inherit;
+  font-size: 12px;
+  line-height: 1.1;
   font-weight: 800;
   cursor: pointer;
 }
@@ -2227,8 +2230,20 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 
 @media (max-width: 680px) {
+  .admin-report-rakeback-period {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
   .admin-report-rakeback-period__tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 6px;
+  }
+
+  .admin-report-rakeback-period__tabs button {
+    min-height: 30px;
+    padding: 4px 6px;
+    font-size: 11px;
   }
 
   .admin-report-rakeback-period__custom {
@@ -2240,6 +2255,12 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-date-badge input {
   display: none;
+}
+.admin-report-rakeback-row[data-rakeback-period-readonly="1"] .admin-report-rakeback-actions {
+  pointer-events: none;
+}
+.admin-report-rakeback-row[data-rakeback-period-readonly="1"] .admin-report-rakeback-actions button {
+  opacity: 1;
 }
 .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
   padding-left: 31px;

@@ -688,6 +688,11 @@
       colorBtn.hidden = false;
       colorBtn.disabled = !!busy;
     }
+    if (row.getAttribute("data-rakeback-period-readonly") === "1") {
+      [saveBtn, editBtn, addBtn, removeBtn, colorBtn].forEach(function (button) {
+        if (button) button.disabled = true;
+      });
+    }
   }
 
   function updateSharedRowDateBadge(row, baseEntryAt) {
@@ -2435,7 +2440,7 @@
 
     function syncRoomTabs() {
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
-        var selected = !archiveMode && normalizeRoom(tab.getAttribute("data-rakeback-room-tab")) === activeRoom;
+        var selected = normalizeRoom(tab.getAttribute("data-rakeback-room-tab")) === activeRoom;
         tab.classList.toggle("admin-report-rakeback-room-tab--active", selected);
         tab.setAttribute("aria-selected", selected ? "true" : "false");
       });
@@ -2479,10 +2484,10 @@
           updateTemplateRowActions(row, loading);
         });
       }
-      if (roomTotalLabelEl) roomTotalLabelEl.textContent = archiveMode ? "Итого архив" : "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
+      if (roomTotalLabelEl) roomTotalLabelEl.textContent = "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
       syncRakebackHeaderLabels();
-      var visibleShared = archiveMode ? getArchiveRows() : getVisibleSharedRows();
-      var allShared = archiveMode ? visibleShared : getSharedRowsForTotal();
+      var visibleShared = archiveMode ? getArchiveRows(activeRoom) : getVisibleSharedRows();
+      var allShared = archiveMode ? getArchiveRows() : getSharedRowsForTotal();
       var roomTotals = getRakebackTotals(visibleShared);
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
@@ -2499,16 +2504,42 @@
       activeRoom = normalizeRoom(activeRoom);
       if (archiveMode) {
         var archiveFragment = document.createDocumentFragment();
-        var archiveRows = getArchiveRows();
-        var archiveWeeks = getArchiveWeeks(archiveRows);
+        var archiveRows = getArchiveRows(activeRoom);
         if (sharedArchiveLoading && !sharedArchiveLoaded) {
           archiveFragment.appendChild(createArchiveEmptyRow("Загружаю архив…"));
-        } else if (archiveWeeks.length) {
-          archiveWeeks.forEach(function (week) {
-            appendArchiveTableWeek(archiveFragment, week);
+        } else if (archiveRows.length) {
+          var archiveBaseIndex = 0;
+          var archiveBaseEntryByGroup = {};
+          var archiveDateTotalsByKey = {};
+          var archiveLastDateKey = "";
+          getRakebackDateTotals(archiveRows).forEach(function (day) {
+            if (day && day.key) archiveDateTotalsByKey[day.key] = day;
+          });
+          archiveRows.forEach(function (row) {
+            var groupId = String(row.groupId || "").trim();
+            var entryAt = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());
+            var entryDateKey = getDateInputValue(entryAt);
+            if (entryDateKey && entryDateKey !== archiveLastDateKey) {
+              var dayTotal = archiveDateTotalsByKey[entryDateKey];
+              archiveFragment.appendChild(createEntryDateSeparator(entryAt, dayTotal ? formatRakebackSummaryPair(dayTotal.rake, dayTotal.amount) : "0 / 0"));
+              archiveLastDateKey = entryDateKey;
+            }
+            if (getSharedRowKind(row) !== "addon") {
+              archiveBaseIndex += 1;
+              archiveBaseEntryByGroup[groupId] = entryAt;
+            }
+            var renderRow = row;
+            if (getSharedRowKind(row) === "addon") {
+              renderRow = {};
+              Object.keys(row).forEach(function (key) { renderRow[key] = row[key]; });
+              renderRow.baseEntryAt = archiveBaseEntryByGroup[groupId] || entryAt;
+            }
+            var rowEl = createSharedRow(renderRow, Math.max(0, archiveBaseIndex - 1));
+            rowEl.setAttribute("data-rakeback-period-readonly", "1");
+            archiveFragment.appendChild(rowEl);
           });
         } else {
-          archiveFragment.appendChild(createArchiveEmptyRow());
+          archiveFragment.appendChild(createArchiveEmptyRow("За выбранный период записей нет"));
         }
         body.replaceChildren(archiveFragment);
         syncRoomTabs();
@@ -2882,7 +2913,6 @@
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
         tab.addEventListener("click", function () {
           activeRoom = normalizeRoom(tab.getAttribute("data-rakeback-room-tab"));
-          archiveMode = false;
           render();
         });
       });
