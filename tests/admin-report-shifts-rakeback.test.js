@@ -50,3 +50,24 @@ test("a rakeback row created after an existing report is not attached to that ol
   assert.equal(_test.shouldAttachRakebackRowToExistingReport(newRow, report), false);
   assert.equal(_test.shouldAttachRakebackRowToExistingReport(existingRow, report), true);
 });
+
+test("a new row created from a previous-week template gets the current entry date", () => {
+  const now = Date.parse("2026-07-20T18:20:40.000Z");
+  const createdAt = Date.parse("2026-07-20T18:20:24.566Z");
+  const oldTemplateDate = Date.parse("2026-07-19T03:00:00.000Z");
+  const rows = _test.normalizeNewTemplateEntryDates([{
+    groupId: "shell_template_1784571624566_b302a02f2cd7",
+    kind: "base",
+    room: "P21",
+    playerId: "590773",
+    rake: 15545,
+    percent: 65,
+    saved: true,
+    createdAt,
+    standardAt: createdAt,
+    entryAddedAt: oldTemplateDate,
+  }], now);
+
+  assert.equal(rows[0].entryAddedAt, createdAt);
+  assert.equal(rows[0].accounted, false);
+});
