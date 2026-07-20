@@ -495,29 +495,29 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   transform: translate(-50%, -50%) scale(0.96);
 }
 .app.app--view-home .card__header > .header-crm-shortcut.header-crm-shortcut--compact {
-  left: calc(50% - 42px);
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  left: calc(50% - 24px);
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 13px;
 }
 .app.app--view-home .header-admin-shortcuts--with-crm .header-admin-shortcut {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 13px;
 }
 @media (max-width: 520px) {
   .app.app--view-home .card__header > .header-crm-shortcut.header-crm-shortcut--compact {
-    left: calc(50% - 36px);
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
+    left: calc(50% - 22px);
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
   }
   .app.app--view-home .header-admin-shortcuts--with-crm .header-admin-shortcut {
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
   }
 }
 
