@@ -405,10 +405,16 @@
     return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim().replace(/^@+/, "") || "Игрок";
   }
 
-  function teamMembersHtml(player, className) {
+  function teamMembersHtml(player, className, match) {
     if (!player || player.team !== true || !Array.isArray(player.members) || !player.members.length) return "";
-    var names = player.members.map(playerName).filter(Boolean).join(" · ");
-    return names ? '<small class="' + escapeHtml(className) + '">' + escapeHtml(names) + '</small>' : "";
+    var teamReady = !!(match && match.readyById && match.readyById[player.id] === true);
+    var memberReady = match && match.readyMemberIds && typeof match.readyMemberIds === "object" ? match.readyMemberIds : {};
+    return '<small class="' + escapeHtml(className) + '">' + player.members.map(function (member) {
+      var ready = teamReady || memberReady[member.id] === true;
+      return '<span class="sng-champions-modal__team-member-ready sng-champions-modal__team-member-ready--' + (ready ? "yes" : "waiting") + '">' +
+        (ready ? "✓ " : "○ ") + escapeHtml(playerName(member)) + (ready ? " — готов" : " — не готов") +
+      '</span>';
+    }).join("") + '</small>';
   }
 
   function playerLevelText(player) {
@@ -640,7 +646,7 @@
     '</button>';
   }
 
-  function renderBracketPlayerName(player) {
+  function renderBracketPlayerName(player, match) {
     var profileId = player && player.accountId ? String(player.accountId) : "";
     var profileName = playerName(player);
     var avatar = playerAvatar(player);
@@ -650,7 +656,7 @@
       : "";
     return '<span class="sng-champions-modal__bracket-player-main">' +
       '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
-      teamMembersHtml(player, "sng-champions-modal__bracket-team-members") +
+      teamMembersHtml(player, "sng-champions-modal__bracket-team-members", match) +
       playerMetaHtml(player, "sng-champions-modal__bracket-player-level") +
       (telegram ? '<a class="sng-champions-modal__bracket-player-telegram" href="' + escapeHtml(telegram.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(telegram.label) + '</a>' : '') +
     '</span>';
@@ -1200,7 +1206,7 @@
       (won ? " sng-champions-modal__bracket-player--winner" : "");
     return '<div class="' + playerClass + '">' +
       renderBracketPlayerAvatar(player) +
-      renderBracketPlayerName(player) +
+      renderBracketPlayerName(player, match) +
       readyBadge +
       scoreBadge +
       (won ? '<strong>Победитель</strong>' : adminButton) +
@@ -1233,7 +1239,7 @@
     if (!data || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
     var myParticipantId = currentTournamentParticipantId(data);
     if (!myParticipantId || players.indexOf(myParticipantId) < 0) return "";
-    if (match.readyById && match.readyById[myParticipantId] === true) {
+    if (currentUserReadyForMatch(match, data, myParticipantId)) {
       return '<div class="sng-champions-modal__ready-action sng-champions-modal__ready-action--done">Вы нажали «Готов»</div>';
     }
     return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';
@@ -1249,6 +1255,56 @@
       if (myTeam && myTeam.id) myParticipantId = myTeam.id;
     }
     return myParticipantId;
+  }
+
+  function currentUserReadyForMatch(match, data, participantId) {
+    if (!match || !data || !participantId) return false;
+    var myId = data.myEntryId || (data.myEntry && data.myEntry.id) || "";
+    if (data.tournamentType === "team") {
+      return !!(
+        (myId && match.readyMemberIds && match.readyMemberIds[myId] === true) ||
+        (match.readyById && match.readyById[participantId] === true)
+      );
+    }
+    return !!(match.readyById && match.readyById[participantId] === true);
+  }
+
+  function setCurrentUserReadyLocally(matchId, ready) {
+    if (!state || !matchId) return null;
+    var match = null;
+    (state.rounds || []).concat(state.loserRounds || []).some(function (round) {
+      match = (round && round.matches || []).find(function (item) { return item && item.id === matchId; }) || null;
+      return !!match;
+    });
+    var participantId = currentTournamentParticipantId(state);
+    var myId = state.myEntryId || (state.myEntry && state.myEntry.id) || "";
+    if (!match || !participantId || !myId) return null;
+    match.readyById = match.readyById && typeof match.readyById === "object" ? match.readyById : {};
+    match.readyMemberIds = match.readyMemberIds && typeof match.readyMemberIds === "object" ? match.readyMemberIds : {};
+    var snapshot = {
+      match: match,
+      participantId: participantId,
+      myId: myId,
+      participantReady: match.readyById[participantId] === true,
+      memberReady: match.readyMemberIds[myId] === true,
+    };
+    if (state.tournamentType === "team") {
+      if (ready) match.readyMemberIds[myId] = true;
+      else if (!snapshot.memberReady) delete match.readyMemberIds[myId];
+    } else if (ready) {
+      match.readyById[participantId] = true;
+    } else if (!snapshot.participantReady) {
+      delete match.readyById[participantId];
+    }
+    return snapshot;
+  }
+
+  function restoreCurrentUserReadySnapshot(snapshot) {
+    if (!snapshot || !snapshot.match) return;
+    if (snapshot.participantReady) snapshot.match.readyById[snapshot.participantId] = true;
+    else delete snapshot.match.readyById[snapshot.participantId];
+    if (snapshot.memberReady) snapshot.match.readyMemberIds[snapshot.myId] = true;
+    else delete snapshot.match.readyMemberIds[snapshot.myId];
   }
 
   function renderPinnedReadyAction(data) {
@@ -1271,7 +1327,7 @@
       ownRound = round;
       return true;
     });
-    if (!ownMatch || (ownMatch.readyById && ownMatch.readyById[myParticipantId] === true)) return "";
+    if (!ownMatch || currentUserReadyForMatch(ownMatch, data, myParticipantId)) return "";
     return '<div class="sng-champions-modal__join-dock sng-champions-modal__ready-dock">' +
       '<span>Ваша пара · ' + escapeHtml(roundStageLabel(ownRound || {})) + '</span>' +
       '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(ownMatch.id || "") + '">Готов</button>' +
@@ -1343,7 +1399,7 @@
     var ready = match.readyById && match.readyById[id] === true;
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
-      teamMembersHtml(player, "sng-champions-modal__map-team-members") +
+      teamMembersHtml(player, "sng-champions-modal__map-team-members", match) +
       playerMetaHtml(player, "sng-champions-modal__map-player-meta") +
     '</span>';
   }
@@ -1917,11 +1973,19 @@
         if (typeof window.playPokerDailyDealSound === "function") window.playPokerDailyDealSound();
         else if (typeof window.playDailyPokerDealSound === "function") window.playDailyPokerDealSound();
       } catch (eReadySound) {}
+      var readyMatchId = ready.getAttribute("data-sng-ready") || "";
       setButtonLoading(ready, true);
+      var readySnapshot = setCurrentUserReadyLocally(readyMatchId, true);
+      if (readySnapshot) render();
       postAction({
         action: "setReady",
-        matchId: ready.getAttribute("data-sng-ready") || "",
+        matchId: readyMatchId,
       }, { status: "Отмечаю готовность...", success: "Готовность сохранена" })
+        .then(function (data) {
+          if (data) return;
+          restoreCurrentUserReadySnapshot(readySnapshot);
+          render();
+        })
         .finally(function () { setButtonLoading(ready, false); });
       return;
     }

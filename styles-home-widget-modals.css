@@ -1347,18 +1347,32 @@
 }
 
 .sng-champions-modal__ready-dock {
-  gap: 6px;
-  border-color: rgba(134, 239, 172, 0.72);
-  background: rgba(3, 16, 10, 0.96);
-  box-shadow: 0 -10px 32px rgba(34, 197, 94, 0.3), 0 0 24px rgba(74, 222, 128, 0.16);
+  gap: 7px;
+  padding: 12px;
+  border: 2px solid #cfff35;
+  background: linear-gradient(180deg, rgba(26, 54, 5, 0.98), rgba(2, 18, 8, 0.98));
+  box-shadow: 0 -10px 38px rgba(183, 255, 45, 0.48), 0 0 30px rgba(112, 255, 71, 0.38), inset 0 0 20px rgba(190, 255, 52, 0.1);
 }
 
 .sng-champions-modal__ready-dock > span {
-  color: rgba(220, 252, 231, 0.82);
-  font-size: 10px;
+  color: #efffc8;
+  font-size: 11px;
   font-weight: 900;
   text-align: center;
   text-transform: uppercase;
+}
+
+.sng-champions-modal__ready-dock .sng-champions-modal__ready-btn {
+  min-height: 56px;
+  border: 3px solid #fffbd0 !important;
+  color: #102000 !important;
+  background: linear-gradient(135deg, #fffbd1 0%, #efff00 30%, #9dff00 65%, #28f477 100%) !important;
+  box-shadow: inset 0 2px 0 #fff, 0 0 18px #f4ff3b, 0 0 42px rgba(166, 255, 0, 0.95), 0 0 68px rgba(32, 255, 112, 0.58) !important;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.88);
+  filter: brightness(1.18) saturate(1.28);
 }
 
 @media (max-width: 620px) {
@@ -2429,6 +2443,9 @@
 }
 
 .sng-champions-modal__bracket-team-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
   min-width: 0;
   overflow: hidden;
   color: rgba(255, 239, 201, 0.68);
@@ -2438,6 +2455,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.sng-champions-modal__team-member-ready {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sng-champions-modal__team-member-ready--yes { color: #86efac; text-shadow: 0 0 7px rgba(74, 222, 128, 0.5); }
+.sng-champions-modal__team-member-ready--waiting { color: rgba(255, 239, 201, 0.6); }
 
 .sng-champions-modal__bracket-player-level span {
   min-width: 0;
@@ -3680,6 +3707,9 @@
 }
 
 .sng-champions-modal__map-team-members {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
   color: rgba(255, 239, 201, 0.64);
   font-size: 0.76em;
   font-weight: 800;
