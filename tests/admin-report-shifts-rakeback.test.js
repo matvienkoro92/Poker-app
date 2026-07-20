@@ -35,3 +35,18 @@ test("matched draft rows are marked with the created report", () => {
   assert.equal(rows[0].reportId, "new-report");
   assert.equal(rows[0].reportedAmount, 300);
 });
+
+test("a rakeback row created after an existing report is not attached to that old report", () => {
+  const report = { createdAt: "2026-07-20T00:33:50.578Z", date: "19.07.2026" };
+  const newRow = {
+    createdAt: Date.parse("2026-07-20T18:05:13.377Z"),
+    entryAddedAt: Date.parse("2026-07-20T18:05:13.377Z"),
+  };
+  const existingRow = {
+    createdAt: Date.parse("2026-07-19T23:55:00.000Z"),
+    entryAddedAt: Date.parse("2026-07-19T23:55:00.000Z"),
+  };
+
+  assert.equal(_test.shouldAttachRakebackRowToExistingReport(newRow, report), false);
+  assert.equal(_test.shouldAttachRakebackRowToExistingReport(existingRow, report), true);
+});
