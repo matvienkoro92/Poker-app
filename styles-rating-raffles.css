@@ -2257,7 +2257,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
 }
 .raffle-active-info-modal {
   position: fixed;
-  z-index: 3600;
+  z-index: 20000;
   inset: 0;
   display: flex;
   align-items: flex-start;
@@ -2265,6 +2265,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   padding: max(18px, env(safe-area-inset-top)) 12px calc(104px + env(safe-area-inset-bottom));
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .raffle-active-info-modal--hidden {
   display: none !important;
@@ -2284,6 +2285,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   max-height: calc(100dvh - max(18px, env(safe-area-inset-top)) - 104px - env(safe-area-inset-bottom));
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 16px;
   border: 1px solid rgba(255, 232, 166, 0.66);
   border-radius: 18px;
@@ -2337,7 +2339,19 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   padding: 18px;
 }
 .raffles-help-modal {
-  z-index: 12000;
+  z-index: 20010;
+}
+
+body.raffle-active-info-modal-open,
+body.raffles-help-modal-open {
+  overflow: hidden !important;
+}
+body.raffle-active-info-modal-open .card__header,
+body.raffle-active-info-modal-open .bottom-nav,
+body.raffles-help-modal-open .card__header,
+body.raffles-help-modal-open .bottom-nav {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 .raffles-help-modal__title {
   color: #ffd45f;

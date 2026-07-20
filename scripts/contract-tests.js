@@ -1090,9 +1090,18 @@ async function testRaffleAccessLevelGate(redis) {
     action: "join",
     raffleId: "contract_raffle_access_all",
     deviceId: "access-all-device",
-  }));
+  }, { "x-forwarded-for": "10.0.0.20" }));
   assert.strictEqual(r.statusCode, 200, "access level 0 allows a user without Poker21 profile");
   assert.strictEqual(r.body.raffle.participants[0].p21Id, "", "access level 0 stores empty p21 id when not linked");
+
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.peer,
+    action: "join",
+    raffleId: "contract_raffle_access_all",
+    deviceId: "access-all-device-peer",
+  }, { "x-forwarded-for": "10.0.0.20" }));
+  assert.strictEqual(r.statusCode, 200, "shared public IP does not block a different legitimate device");
+  assert.strictEqual(r.body.raffle.participants.length, 2, "both accounts on a shared IP can participate");
 
   const firstLevelRaffle = {
     id: "contract_raffle_access_first_level",
@@ -1119,6 +1128,15 @@ async function testRaffleAccessLevelGate(redis) {
   assert.strictEqual(r.body.code, "RAFFLE_LEVEL_REQUIRED", "missing Poker21 first level response keeps level code");
   assert.strictEqual(r.body.error, "Привяжите аккаунт Poker21 в профиле.", "missing Poker21 first level response explains binding");
   assert.strictEqual(r.body.requiresPoker21Profile, true, "missing Poker21 first level response marks profile requirement");
+
+  redis.h("poker_app:pokerplus_profiles").set("tg_1001", JSON.stringify({ nickname: "Legacy Linked", totalCounter: { fee: 500000 } }));
+  r = await call(raffles, req("POST", {}, {
+    pwaSession: s.user,
+    action: "join",
+    raffleId: "contract_raffle_access_first_level",
+    deviceId: "access-first-level-legacy-profile",
+  }, { "x-forwarded-for": "10.0.0.21" }));
+  assert.strictEqual(r.statusCode, 200, "raffle level lookup follows the account preferred Telegram id");
 
   const gatedRaffle = {
     id: "contract_raffle_access_level",
@@ -1147,7 +1165,7 @@ async function testRaffleAccessLevelGate(redis) {
   }, { "x-forwarded-for": "10.0.0.22" }));
   assert.strictEqual(r.statusCode, 403, "raffle blocks a player below required Poker21 level");
   assert.strictEqual(r.body.code, "RAFFLE_LEVEL_REQUIRED", "low level response has stable code");
-  assert.ok(String(r.body.error || "").includes("Повысьте свой уровень"), "low level response explains upgrade");
+  assert.ok(String(r.body.error || "").includes("Ваш уровень:"), "low level response explains the current level");
 
   redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Enough Level", totalCounter: { fee: 9000 } }));
   r = await call(raffles, req("POST", {}, {

@@ -448,9 +448,24 @@ function initRaffles() {
     raffleActiveInfoModalTitle.textContent = title ? "Инфо: " + title : "Инфо о розыгрыше";
   }
 
+  function mountRaffleModalAtDocumentRoot(modal) {
+    if (!modal || !document || !document.body || modal.parentNode === document.body) return;
+    document.body.appendChild(modal);
+  }
+
+  function resetRaffleModalScroll(modal) {
+    if (!modal) return;
+    try {
+      modal.scrollTop = 0;
+      var box = modal.querySelector(".raffle-active-info-modal__box");
+      if (box) box.scrollTop = 0;
+    } catch (eModalScrollTop) {}
+  }
+
   function setRaffleActiveInfoModalOpen(open) {
     if (!raffleActiveInfoModal) return;
     var shouldOpen = !!open;
+    if (shouldOpen) mountRaffleModalAtDocumentRoot(raffleActiveInfoModal);
     raffleActiveInfoModal.classList.toggle("raffle-active-info-modal--hidden", !shouldOpen);
     raffleActiveInfoModal.hidden = !shouldOpen;
     raffleActiveInfoModal.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
@@ -460,6 +475,7 @@ function initRaffles() {
       }
     } catch (eBodyClass) {}
     if (shouldOpen) {
+      resetRaffleModalScroll(raffleActiveInfoModal);
       try {
         raffleActiveInfoModalLastFocus = document.activeElement || null;
       } catch (eFocusRead) {
@@ -483,6 +499,7 @@ function initRaffles() {
   function setRafflesHelpModalOpen(open) {
     if (!rafflesHelpModal) return;
     var shouldOpen = !!open;
+    if (shouldOpen) mountRaffleModalAtDocumentRoot(rafflesHelpModal);
     rafflesHelpModal.classList.toggle("raffle-active-info-modal--hidden", !shouldOpen);
     rafflesHelpModal.hidden = !shouldOpen;
     rafflesHelpModal.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
@@ -493,11 +510,7 @@ function initRaffles() {
       }
     } catch (eHelpBodyClass) {}
     if (shouldOpen) {
-      try {
-        var helpBox = rafflesHelpModal.querySelector(".raffles-help-modal__box");
-        if (helpBox) helpBox.scrollTop = 0;
-        rafflesHelpModal.scrollTop = 0;
-      } catch (eHelpScrollTop) {}
+      resetRaffleModalScroll(rafflesHelpModal);
       try {
         rafflesHelpModalLastFocus = document.activeElement || null;
       } catch (eHelpFocusRead) {
