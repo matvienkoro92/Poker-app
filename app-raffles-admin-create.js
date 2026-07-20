@@ -345,12 +345,23 @@ function initRafflesAdminCreateRuntime(opts) {
           ? dayLabels[dow]
           : "";
       var buyin = raffleScheduleBuyinValue(item.buyin);
+      var guarantee = String(item.guarantee || "").trim();
+      var isTournamentDay = String(item.category || "").trim().toLowerCase() === "турнир дня";
       var option = document.createElement("option");
       option.value = String(buyin);
       option.setAttribute("data-price", String(buyin));
       option.setAttribute("data-name", String(item.name || item.category || "Турнир") + " (" + time + ")");
-      option.textContent = time + " · " + String(item.name || item.category || "Турнир") +
-        (scope ? " (" + scope + ")" : "") + " — " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно");
+      if (isTournamentDay) {
+        option.setAttribute("data-tournament-day", "1");
+        option.style.color = "#22c55e";
+        option.style.backgroundColor = "#052e16";
+        option.style.fontWeight = "900";
+      }
+      option.textContent = time + " · " + (isTournamentDay ? "🟢 ТУРНИР ДНЯ · " : "") +
+        String(item.name || item.category || "Турнир") +
+        (scope ? " (" + scope + ")" : "") +
+        " — вход " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно") +
+        (guarantee ? " · призы: " + guarantee : "");
       group.appendChild(option);
     });
     var custom = document.createElement("option");
@@ -416,7 +427,9 @@ function initRafflesAdminCreateRuntime(opts) {
     var dayMap = { 1: "(Пн)", 2: "(Вт)", 3: "(Ср)", 4: "(Чт)", 5: "(Пт)", 6: "(Сб)", 0: "(Вс)" };
     var marker = dayMap[weekday];
     if (!marker) return;
-    var options = tdGroup ? tdGroup.querySelectorAll("option") : [];
+    var options = tdGroup
+      ? tdGroup.querySelectorAll("option")
+      : select.querySelectorAll('option[data-tournament-day="1"]');
     var todayOpt = null;
     for (var oi = 0; oi < options.length; oi++) {
       var txt = options[oi].textContent || "";
