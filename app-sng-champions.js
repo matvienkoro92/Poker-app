@@ -1231,6 +1231,15 @@
 
   function renderReadyAction(match, players, data) {
     if (!data || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
+    var myParticipantId = currentTournamentParticipantId(data);
+    if (!myParticipantId || players.indexOf(myParticipantId) < 0) return "";
+    if (match.readyById && match.readyById[myParticipantId] === true) {
+      return '<div class="sng-champions-modal__ready-action sng-champions-modal__ready-action--done">Вы нажали «Готов»</div>';
+    }
+    return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';
+  }
+
+  function currentTournamentParticipantId(data) {
     var myId = data.myEntryId || (data.myEntry && data.myEntry.id) || "";
     var myParticipantId = myId;
     if (myId && data.tournamentType === "team") {
@@ -1239,11 +1248,34 @@
       });
       if (myTeam && myTeam.id) myParticipantId = myTeam.id;
     }
-    if (!myParticipantId || players.indexOf(myParticipantId) < 0) return "";
-    if (match.readyById && match.readyById[myParticipantId] === true) {
-      return '<div class="sng-champions-modal__ready-action sng-champions-modal__ready-action--done">Вы нажали «Готов»</div>';
-    }
-    return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';
+    return myParticipantId;
+  }
+
+  function renderPinnedReadyAction(data) {
+    if (!data || data.status !== "bracket") return "";
+    var myParticipantId = currentTournamentParticipantId(data);
+    if (!myParticipantId) return "";
+    var rounds = (data.rounds || []).concat(data.loserRounds || []);
+    var orderedRounds = rounds.slice().sort(function (a, b) {
+      return (b && b.id === data.currentRoundId ? 1 : 0) - (a && a.id === data.currentRoundId ? 1 : 0);
+    });
+    var ownMatch = null;
+    var ownRound = null;
+    orderedRounds.some(function (round) {
+      var match = (round && round.matches || []).find(function (item) {
+        var ids = (item && item.playerIds || []).filter(Boolean);
+        return !item.winnerId && ids.length >= 2 && ids.indexOf(myParticipantId) >= 0;
+      });
+      if (!match) return false;
+      ownMatch = match;
+      ownRound = round;
+      return true;
+    });
+    if (!ownMatch || (ownMatch.readyById && ownMatch.readyById[myParticipantId] === true)) return "";
+    return '<div class="sng-champions-modal__join-dock sng-champions-modal__ready-dock">' +
+      '<span>Ваша пара · ' + escapeHtml(roundStageLabel(ownRound || {})) + '</span>' +
+      '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(ownMatch.id || "") + '">Готов</button>' +
+    '</div>';
   }
 
   function renderPlayingAction(match, players, data) {
@@ -1596,9 +1628,10 @@
 
   function renderBracket(data) {
     var winnersHtml = renderBracketView(data, { kind: "winners", rounds: winnerDisplayRounds(data) });
+    var pinnedReadyHtml = renderPinnedReadyAction(data);
     if (data.loserBracketEnabled === false) {
       activeBracketView = "winners";
-      return '<div class="sng-champions-modal__bracket-subpanel" data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>';
+      return '<div class="sng-champions-modal__bracket-subpanel" data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' + pinnedReadyHtml;
     }
     var losersHtml = renderBracketView(data, { kind: "losers", rounds: loserDisplayRounds(data) });
     activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
@@ -1610,7 +1643,7 @@
         '</div>' +
       '</div>' +
       '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "winners" ? "" : " hidden") + ' data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' +
-      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "losers" ? "" : " hidden") + ' data-sng-bracket-view-panel="losers">' + losersHtml + '</div>';
+      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "losers" ? "" : " hidden") + ' data-sng-bracket-view-panel="losers">' + losersHtml + '</div>' + pinnedReadyHtml;
   }
 
   function renderTeams(data) {
