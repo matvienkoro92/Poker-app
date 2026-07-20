@@ -190,6 +190,7 @@ function initRafflesPublicRuntime(opts) {
         .then(parseRaffleApiResponse)
         .then(function (data) {
           if (data && data.ok) {
+            if (typeof syncRafflesViewerLevelFromResponse === "function") syncRafflesViewerLevelFromResponse(data);
             if (!data.alreadyJoined && typeof pokerTrackAnalyticsEvent === "function") {
               pokerTrackAnalyticsEvent("raffle_joined", { name: String(currentRaffleId), event_id: "evt_raffle_" + String(currentRaffleId).replace(/[^a-zA-Z0-9_-]/g, "_") + "_" + (typeof getInstallationId === "function" ? getInstallationId() : "") });
             }

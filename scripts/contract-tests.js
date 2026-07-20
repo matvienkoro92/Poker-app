@@ -1137,6 +1137,7 @@ async function testRaffleAccessLevelGate(redis) {
     deviceId: "access-first-level-legacy-profile",
   }, { "x-forwarded-for": "10.0.0.21" }));
   assert.strictEqual(r.statusCode, 200, "raffle level lookup follows the account preferred Telegram id");
+  assert.ok(r.body.viewerPokerPlusStatusLevel >= 1, "successful join returns the confirmed viewer level for UI sync");
 
   const gatedRaffle = {
     id: "contract_raffle_access_level",

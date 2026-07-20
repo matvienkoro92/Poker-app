@@ -1050,6 +1050,13 @@ function initRaffles() {
     );
   }
 
+  function syncRafflesViewerLevelFromResponse(data) {
+    if (!data || data.viewerPokerPlusStatusLevel == null) return;
+    var confirmedLevel = parseInt(data.viewerPokerPlusStatusLevel, 10);
+    if (!isFinite(confirmedLevel) || confirmedLevel < 0) return;
+    rafflesViewerPokerPlusStatusLevel = confirmedLevel;
+  }
+
   function activeRaffleResultsTimeText(raffle) {
     if (!raffle || !raffle.endDate) return "";
     var end = new Date(raffle.endDate);
@@ -2221,6 +2228,7 @@ function initRaffles() {
       .then(parseRaffleActionResponse)
       .then(function (data) {
         if (data && data.ok) {
+          syncRafflesViewerLevelFromResponse(data);
           if (action === "join" && !data.alreadyJoined && typeof pokerTrackAnalyticsEvent === "function") {
             pokerTrackAnalyticsEvent("raffle_joined", { name: String(raffleId), event_id: "evt_raffle_" + String(raffleId).replace(/[^a-zA-Z0-9_-]/g, "_") + "_" + (typeof getInstallationId === "function" ? getInstallationId() : "") });
           }
@@ -3866,6 +3874,7 @@ function initRaffles() {
       openRaffleTelegramLinkingFlow: openRaffleTelegramLinkingFlow,
       renderRaffle: renderRaffle,
       refreshActiveChooserAfterAction: refreshActiveChooserAfterAction,
+      syncRafflesViewerLevelFromResponse: syncRafflesViewerLevelFromResponse,
       rafflesViewerIsGuestOnly: rafflesViewerIsGuestOnly,
       rafflesViewerApiReady: rafflesViewerApiReady,
       getRaffleDeviceId: getRaffleDeviceId,
