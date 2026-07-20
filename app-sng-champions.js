@@ -1602,7 +1602,7 @@
     var teams = data.teams || [];
     var adminAction = data.isAdmin && data.status === "open"
       ? '<div class="sng-champions-modal__teams-admin-actions">' +
-          '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="formTeams">' + (teams.length ? 'Переформировать команды' : 'Сформировать команды') + '</button>' +
+          (!teams.length ? '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="formTeams">Сформировать команды</button>' : '') +
           (teams.length >= 2 ? '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs">Запустить турнир</button>' : '') +
         '</div>'
       : '';
