@@ -1091,7 +1091,9 @@
 
   function renderAdminPanel(data) {
     if (!data.isAdmin) return "";
-    var canForm = data.status === "open" && data.counts && data.counts.approved >= data.capacity && (data.tournamentType !== "team" || (data.teams || []).length === data.capacity / 2);
+    var minimumApproved = data.tournamentType === "team" ? 4 : 2;
+    var firstStageLabel = data.tournamentType === "team" ? "1/8" : (Number(data.capacity) >= 32 ? "1/16" : "1/8");
+    var canForm = data.status === "open" && data.counts && data.counts.approved >= minimumApproved && (data.tournamentType !== "team" || (data.teams || []).length >= 2);
     var canBroadcastRoundOne = data.status === "bracket" && data.rounds && data.rounds[0] && data.rounds[0].matches && data.rounds[0].matches.length;
     var prizes = data.prizes || [];
     var prize1 = prizes[0] && prizes[0].text || "30 000р";
@@ -1108,11 +1110,11 @@
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="updateSettings">Сохранить изменения</button>' +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open"' + (canOpen ? "" : " disabled") + '>Открыть турнир</button>' +
         '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs"' + (canForm ? "" : " disabled") + '>Сформировать пары</button>' +
-        '<button type="button" class="sng-champions-modal__main-action" data-sng-action="broadcastRoundOnePairs"' + (canBroadcastRoundOne ? "" : " disabled") + '>Разослать пары 1/16</button>' +
+        '<button type="button" class="sng-champions-modal__main-action" data-sng-action="broadcastRoundOnePairs"' + (canBroadcastRoundOne ? "" : " disabled") + '>Разослать пары ' + escapeHtml(firstStageLabel) + '</button>' +
         '<button type="button" class="sng-champions-modal__danger-action" data-sng-action="reset">Сбросить</button>' +
       '</div>' +
       (canOpen ? "" : '<p class="sng-champions-modal__admin-hint">Турнир уже создан: меняйте описание, байин и призы через «Сохранить изменения».</p>') +
-      (canForm ? "" : '<p class="sng-champions-modal__admin-hint">Для формирования пар нужно 32 подтвержденных игрока.</p>') +
+      (canForm ? "" : '<p class="sng-champions-modal__admin-hint">Для старта нужно минимум ' + escapeHtml(String(minimumApproved)) + ' подтвержденных игрока' + (data.tournamentType === "team" ? ' и минимум 2 сформированные команды.' : '.') + '</p>') +
     '</section>';
   }
 
@@ -1405,9 +1407,11 @@
           var mapPayout = data && data.payoutConfig || { places: {}, knockouts: {} };
           var mapKnockout = showMapAwards && data.knockoutEnabled ? Number(mapPayout.knockouts && mapPayout.knockouts[payoutStage]) || 0 : 0;
           var mapPlaces = payoutStage === "Финал" ? [1, 2] : payoutStage === "1/2" ? [3, 4] : payoutStage === "1/4" ? [5] : [];
-          var mapAwards = showMapAwards ? '<div class="sng-champions-modal__map-awards">' +
-            mapPlaces.map(function (place) { var amount = Number(mapPayout.places && mapPayout.places[place]) || 0; return amount ? '<span class="sng-champions-modal__map-award"><b>' + place + ' место</b> +' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</span>' : ''; }).join('') +
-          '</div>' : '';
+          var mapAwardItems = showMapAwards ? mapPlaces.map(function (place) {
+            var amount = Number(mapPayout.places && mapPayout.places[place]) || 0;
+            return amount ? '<span class="sng-champions-modal__map-award"><b>' + place + ' место</b> +' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</span>' : '';
+          }).join('') : '';
+          var mapAwards = mapAwardItems ? '<div class="sng-champions-modal__map-awards">' + mapAwardItems + '</div>' : '';
           var namedStageClass = ["1/4", "Полуфинал", "Финал", "Гранд финал"].indexOf(roundLabel) >= 0
             ? " sng-champions-modal__map-round--named-stage"
             : "";
@@ -2035,7 +2039,7 @@
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
-      success: name === "join" ? "Заявка отправлена" : name === "balancePaid" ? "Администратору отправлено сообщение" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары 1/16 разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
+      success: name === "join" ? "Заявка отправлена" : name === "balancePaid" ? "Администратору отправлено сообщение" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары " + (state && state.tournamentType === "team" ? "1/8" : "первого раунда") + " разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
     }).finally(function () {
       setButtonLoading(action, false);
     });
