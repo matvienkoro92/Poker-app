@@ -12623,3 +12623,76 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
 }
+
+/* Fit the fact-card typography to each tile without wrapping or overlap. */
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access {
+  gap: clamp(3px, 1.6cqw, 6px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact-icon,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-icon,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-track,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-units {
+  display: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact-label,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact-value,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-label,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-digits,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-side,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-count,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access-label,
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access-line {
+  position: static !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  text-overflow: clip !important;
+  text-align: center !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact-label {
+  font-size: clamp(12px, 7cqw, 18px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--result-time .raffles-active-chooser__fact-value {
+  font-size: clamp(17px, 10cqw, 26px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__fact--countdown {
+  grid-template-rows: auto auto !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-label {
+  font-size: clamp(9px, 5.5cqw, 13px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-digits {
+  font-size: clamp(18px, 10.5cqw, 27px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-count {
+  font-size: clamp(15px, 8.5cqw, 22px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access-label {
+  font-size: clamp(14px, 8cqw, 20px) !important;
+  line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access-line {
+  font-size: clamp(13px, 7.2cqw, 18px) !important;
+  line-height: 1 !important;
+}
