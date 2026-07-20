@@ -244,26 +244,42 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.header-admin-shortcut .header-admin-shortcut__two-lines {
+  display: grid;
+  gap: 1px;
+  overflow: visible;
+  line-height: 0.9;
+  text-overflow: clip;
+}
+.header-admin-shortcut__two-lines b,
+.header-admin-shortcut__two-lines small {
+  font: inherit;
+  line-height: inherit;
+}
+.header-admin-shortcut__two-lines small {
+  font-size: 0.88em;
+  color: rgba(255, 225, 161, 0.82);
+}
 .header-crm-shortcut.header-crm-shortcut--compact {
-  left: calc(50% - 24px);
-  width: 42px;
-  min-width: 42px;
-  height: 42px;
-  border-radius: 13px;
+  left: calc(50% - 25px);
+  width: 48px;
+  min-width: 48px;
+  height: 54px;
+  border-radius: 15px;
 }
 .header-crm-shortcut.header-crm-shortcut--compact .header-crm-shortcut__icon {
   width: 17px;
   height: 17px;
 }
 .header-admin-shortcuts--with-crm {
-  left: calc(50% + 46px);
+  left: calc(50% + 52px);
   gap: 5px;
 }
 .header-admin-shortcuts--with-crm .header-admin-shortcut {
-  width: 42px;
-  min-width: 42px;
-  height: 42px;
-  border-radius: 13px;
+  width: 48px;
+  min-width: 48px;
+  height: 54px;
+  border-radius: 15px;
 }
 .header-admin-shortcuts--with-crm .header-admin-shortcut svg {
   width: 16px;
@@ -292,18 +308,18 @@
   .header-admin-shortcut span { font-size: 5.5px; }
   .header-crm-shortcut.header-crm-shortcut--compact {
     left: calc(50% - 22px);
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
+    width: 40px;
+    min-width: 40px;
+    height: 46px;
   }
   .header-admin-shortcuts--with-crm {
-    left: calc(50% + 39px);
+    left: calc(50% + 43px);
     gap: 4px;
   }
   .header-admin-shortcuts--with-crm .header-admin-shortcut {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
+    width: 40px;
+    min-width: 40px;
+    height: 46px;
   }
 }
 
