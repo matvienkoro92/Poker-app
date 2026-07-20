@@ -4738,6 +4738,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   font-weight: 800;
   line-height: 1.25;
   text-align: center;
+  white-space: pre-line;
   overflow-wrap: anywhere;
 }
 .raffle-join-error--hidden {
