@@ -1110,7 +1110,7 @@
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="updateSettings">Сохранить изменения</button>' +
         '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="open"' + (canOpen ? "" : " disabled") + '>Открыть турнир</button>' +
         '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs"' + (canForm ? "" : " disabled") + '>Сформировать пары</button>' +
-        '<button type="button" class="sng-champions-modal__main-action" data-sng-action="broadcastRoundOnePairs"' + (canBroadcastRoundOne ? "" : " disabled") + '>Разослать пары ' + escapeHtml(firstStageLabel) + '</button>' +
+        '<button type="button" class="sng-champions-modal__main-action" data-sng-action="broadcastRoundOnePairs"' + (canBroadcastRoundOne ? "" : " disabled") + '>Повторить рассылку пар ' + escapeHtml(firstStageLabel) + '</button>' +
         '<button type="button" class="sng-champions-modal__danger-action" data-sng-action="reset">Сбросить</button>' +
       '</div>' +
       (canOpen ? "" : '<p class="sng-champions-modal__admin-hint">Турнир уже создан: меняйте описание, байин и призы через «Сохранить изменения».</p>') +
@@ -2093,9 +2093,16 @@
     var builder = form.querySelector("[data-sng-payout-builder]");
     var knockout = form.elements.knockoutEnabled && form.elements.knockoutEnabled.value === "true";
     if (builder) builder.hidden = !knockout;
-    if (!knockout) return;
     var capacity = Number(form.elements.capacity && form.elements.capacity.value) || 32;
     var team = form.elements.tournamentType && form.elements.tournamentType.value === "team";
+    var loserBracketField = form.elements.loserBracketEnabled;
+    if (loserBracketField) {
+      if (team) loserBracketField.value = "false";
+      loserBracketField.disabled = team;
+      var loserBracketLabel = loserBracketField.closest ? loserBracketField.closest("label") : null;
+      if (loserBracketLabel) loserBracketLabel.hidden = team;
+    }
+    if (!knockout) return;
     var units = team ? capacity / 2 : capacity;
     var counts = {};
     while (units > 1) { var matches = units / 2; counts[matches === 1 ? "Финал" : "1/" + matches] = matches; units = matches; }
