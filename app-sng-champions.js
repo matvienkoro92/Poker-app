@@ -1006,18 +1006,9 @@
     return '<section class="sng-champions-modal__tournament-picker"><div class="sng-champions-modal__tournament-picker-head"><span>Выберите турнир</span>' +
       (data.isAdmin ? '<button type="button" data-sng-create-tournament>+ Новый турнир</button>' : '') + '</div><div class="sng-champions-modal__tournament-options">' +
       rows.map(function (item) {
-        var expanded = expandedTournamentParticipantsId === item.id;
         var applicationCount = Number(item.approved || 0) + Number(item.pending || 0);
         var canDeleteTournament = applicationCount <= 1;
         var signupAvailable = item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
-        var participantRows = expanded && data.tournamentId === item.id ? (data.entries || []).filter(function (entry) { return entry && entry.status !== "rejected"; }) : [];
-        var participantHtml = expanded
-          ? '<div class="sng-champions-modal__tournament-participants">' +
-              (data.tournamentId === item.id
-                ? (participantRows.length ? renderEntryColumn("Участники", participantRows, data) : '<div class="sng-champions-modal__entries-empty">Пока участников нет.</div>')
-                : '<div class="club-choice-vote-modal__loading">Загружаем участников...</div>') +
-            '</div>'
-          : '';
         var tournamentOptionHtml = item.status === "completed" && item.winnerName
           ? renderCompletedTournamentOption(item)
           : '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
@@ -1041,7 +1032,7 @@
           tournamentOptionHtml +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
-            : '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Смотреть</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>') + participantHtml + '</article>';
+            : '') + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
   }
@@ -1980,6 +1971,7 @@
       postAction({
         action: "setReady",
         matchId: readyMatchId,
+        entryId: state && (state.myEntryId || (state.myEntry && state.myEntry.id)) || "",
       }, { status: "Отмечаю готовность...", success: "Готовность сохранена" })
         .then(function (data) {
           if (data) return;
