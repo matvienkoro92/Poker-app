@@ -463,34 +463,31 @@ function initRafflesCompletedRuntime(opts) {
         " data-winner-slot-id=\"" + winnerSlotAttr + "\"";
       var followupHtml = "";
       if (prizeIssued) {
-        if (seatStatus === "not_seated") {
-          followupHtml =
-            "<span class=\"raffle-winner-followup\"><button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--not-seated\" disabled>Не сел</button></span>";
-        } else {
-          var seatButton =
-            "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--seat" +
-            (seatStatus === "seated" ? " raffle-winner-followup-btn--seat-active" : "") +
-            "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"seated\"" +
-            followupAttrs +
-            (seatStatus === "seated" ? " disabled" : "") +
-            ">" + (seatStatus === "seated" ? "✓ Сел" : "Сел") + "</button>";
-          var noSeatButton = seatStatus
-            ? ""
-            : "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"seat\" data-followup-value=\"not_seated\"" + followupAttrs + ">Не сел</button>";
-          var outcomeButtons = "";
-          if (seatStatus === "seated") {
-            if (cashoutStatus === "plus") {
-              outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--plus\" disabled>+ " + escapeHtml(Math.round(cashoutAmount)) + "</button>";
-            } else if (cashoutStatus === "minus") {
-              outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--minus\" disabled>−</button>";
-            } else {
-              outcomeButtons =
-                "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"minus\"" + followupAttrs + " aria-label=\"Ничего не забрал\">−</button>" +
-                "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"plus\"" + followupAttrs + " aria-label=\"Забрал сумму\">+</button>";
-            }
+        var seatButton =
+          "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--seat" +
+          (seatStatus === "seated" ? " raffle-winner-followup-btn--seat-active" : "") +
+          "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"seated\"" +
+          followupAttrs +
+          ">" + (seatStatus === "seated" ? "✓ Сел" : "Сел") + "</button>";
+        var noSeatButton =
+          "<button type=\"button\" class=\"raffle-winner-followup-btn" +
+          (seatStatus === "not_seated" ? " raffle-winner-followup-btn--not-seated" : "") +
+          "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"not_seated\"" +
+          followupAttrs +
+          ">" + (seatStatus === "not_seated" ? "✓ Не сел" : "Не сел") + "</button>";
+        var outcomeButtons = "";
+        if (seatStatus === "seated") {
+          if (cashoutStatus === "plus") {
+            outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--plus\" disabled>+ " + escapeHtml(Math.round(cashoutAmount)) + "</button>";
+          } else if (cashoutStatus === "minus") {
+            outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--minus\" disabled>−</button>";
+          } else {
+            outcomeButtons =
+              "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"minus\"" + followupAttrs + " aria-label=\"Ничего не забрал\">−</button>" +
+              "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"plus\"" + followupAttrs + " aria-label=\"Забрал сумму\">+</button>";
           }
-          followupHtml = "<span class=\"raffle-winner-followup\">" + seatButton + noSeatButton + outcomeButtons + "</span>";
         }
+        followupHtml = "<span class=\"raffle-winner-followup\">" + seatButton + noSeatButton + outcomeButtons + "</span>";
       }
       var adminControls =
         "<span class=\"raffle-winner-row__controls\">" +

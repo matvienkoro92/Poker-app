@@ -976,6 +976,7 @@
     var archiveWeekOpen = {};
     var archiveWeekRoomActive = {};
     var sharedUpdatedAt = "";
+    var sharedSaveQueue = Promise.resolve();
     var sharedAutoLoadStarted = false;
     var sharedAutoLoadRetryCount = 0;
     var sharedArchiveLoaded = false;
@@ -2178,6 +2179,14 @@
     }
 
     function saveSharedDraftNow(showStatus, patch) {
+      function runSave() {
+        return performSharedDraftSave(showStatus, patch);
+      }
+      sharedSaveQueue = sharedSaveQueue.then(runSave, runSave);
+      return sharedSaveQueue;
+    }
+
+    function performSharedDraftSave(showStatus, patch) {
       var base = getApiBaseSafe();
       if (!base || !hasApiCredentialSafe()) {
         if (showStatus) setStatus("Нет подключения для сохранения");
@@ -2212,11 +2221,15 @@
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
           var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows));
+          var currentLocalRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           if (archiveMode) {
-            sharedRows = mergeLoadedRowsIntoExisting(serverRows, localRows);
+            sharedRows = mergeLoadedRowsIntoExisting(serverRows, currentLocalRows);
             sharedArchiveLoaded = true;
           } else {
-            sharedRows = mergeRowsWithPatchedLocalUpserts(mergeRowsWithLocalUnsaved(serverRows, localRows), localRows, patchMode ? patch : null);
+            // Several IDs/subrows can be saved before the previous request
+            // returns. Preserve the current table so an older response cannot
+            // redraw it from an earlier snapshot.
+            sharedRows = mergeLoadedRowsIntoExisting(serverRows, currentLocalRows);
             sharedArchiveAvailable = data.rakebackDraft.hasArchive === true || sharedArchiveAvailable;
           }
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
@@ -2677,7 +2690,7 @@
         }
         if (!options.skipRender) render();
         setStatus(color && parseNumber(percent) === 0 && !discount15 ? "Цвет закреплен за шаблоном" : "Процент закреплен за шаблоном", true);
-        saveSharedDraftNow(options.showStatus !== false, {
+        return saveSharedDraftNow(options.showStatus !== false, {
           upsertGroupIds: [row.groupId],
           deleteRowKeys: [getEmptyGroupTemplateServerKey(room, playerId)],
           skipRender: options.skipRender === true,
@@ -3016,10 +3029,26 @@
             var saveGroupId = saveRow.getAttribute("data-rakeback-group") || "";
             var saveLocalKey = getSharedDomRowLocalKey(saveRow);
             var wasPersisted = saveRow.getAttribute("data-rakeback-persisted") === "1";
+            var saveRoomInput = saveRow.querySelector("[data-rakeback-room]");
+            var saveDiscountInput = saveRow.querySelector("[data-rakeback-discount15]");
+            var savedPlayerId = String(idInput.value || "").trim();
+            var savedRoom = normalizeRoom(saveRoomInput && saveRoomInput.value ? saveRoomInput.value : activeRoom);
+            var savedPercent = parseNumber(percentInput.value);
+            var savedDiscount15 = !!(saveDiscountInput && saveDiscountInput.checked);
+            var savedColor = normalizeRakebackRowColor(saveRow.getAttribute("data-rakeback-row-color"));
             setSharedRowSaved(saveRow, true, false);
             sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
             saveSharedDraftNow(true, { upsertGroupIds: [saveGroupId] }).then(function (ok) {
-              if (ok) return;
+              if (ok) {
+                // The percentage entered into a regular rakeback row is also
+                // the player's new default for future weeks.
+                saveTemplateRowDefaults(savedRoom, savedPlayerId, savedPercent, savedDiscount15, {
+                  color: savedColor,
+                  showStatus: false,
+                  skipRender: true,
+                });
+                return;
+              }
               var failedRow = findSharedDomRowByLocalKey(saveLocalKey) || findSharedDomRowByGroupId(saveGroupId);
               if (!failedRow) return;
               failedRow.setAttribute("data-rakeback-persisted", wasPersisted ? "1" : "0");
