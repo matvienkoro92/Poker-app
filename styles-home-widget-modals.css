@@ -2394,6 +2394,17 @@
   white-space: normal;
 }
 
+.sng-champions-modal__bracket-team-members {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 239, 201, 0.68);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sng-champions-modal__bracket-player-level span {
   min-width: 0;
   overflow: hidden;
@@ -3593,6 +3604,7 @@
 }
 
 .sng-champions-modal__map-player-name,
+.sng-champions-modal__map-team-members,
 .sng-champions-modal__map-player-meta {
   display: block;
   min-width: 0;
@@ -3600,6 +3612,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sng-champions-modal__map-team-members {
+  color: rgba(255, 239, 201, 0.64);
+  font-size: 0.76em;
+  font-weight: 800;
+  line-height: 0.95;
 }
 
 .sng-champions-modal__map-player-meta {

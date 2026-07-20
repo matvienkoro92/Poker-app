@@ -405,6 +405,12 @@
     return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim().replace(/^@+/, "") || "Игрок";
   }
 
+  function teamMembersHtml(player, className) {
+    if (!player || player.team !== true || !Array.isArray(player.members) || !player.members.length) return "";
+    var names = player.members.map(playerName).filter(Boolean).join(" · ");
+    return names ? '<small class="' + escapeHtml(className) + '">' + escapeHtml(names) + '</small>' : "";
+  }
+
   function playerLevelText(player) {
     var raw = player && player.level;
     if (raw == null || raw === "") return "";
@@ -644,6 +650,7 @@
       : "";
     return '<span class="sng-champions-modal__bracket-player-main">' +
       '<button type="button" class="sng-champions-modal__bracket-player-name"' + attrs + '>' + escapeHtml(profileName) + '</button>' +
+      teamMembersHtml(player, "sng-champions-modal__bracket-team-members") +
       playerMetaHtml(player, "sng-champions-modal__bracket-player-level") +
       (telegram ? '<a class="sng-champions-modal__bracket-player-telegram" href="' + escapeHtml(telegram.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(telegram.label) + '</a>' : '') +
     '</span>';
@@ -1297,6 +1304,7 @@
     var ready = match.readyById && match.readyById[id] === true;
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
+      teamMembersHtml(player, "sng-champions-modal__map-team-members") +
       playerMetaHtml(player, "sng-champions-modal__map-player-meta") +
     '</span>';
   }
