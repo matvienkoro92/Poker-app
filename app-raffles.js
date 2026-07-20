@@ -150,6 +150,7 @@ function initRaffles() {
   var rafflesActiveBroadcastList = [];
   var rafflesActiveInfoOpenId = "";
   var rafflesSubscriptionGate = null;
+  var rafflesViewerPokerPlusStatusLevel = 0;
   var raffleCurrentHomeParent = raffleCurrent ? raffleCurrent.parentNode : null;
   var raffleCurrentHomeNext = raffleCurrent ? raffleCurrent.nextSibling : null;
   var raffleActiveInfoModalLastFocus = null;
@@ -970,6 +971,21 @@ function initRaffles() {
     return [level > 0 ? level + "+" : "ВСЕ"];
   }
 
+  function raffleLowestAccessLevelForViewer(raffle) {
+    var fallback = raffleAccessLevel(raffle);
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    if (!groups.length) return fallback;
+    var lowest = null;
+    groups.forEach(function (group) {
+      var raw = group && group.accessLevel != null && String(group.accessLevel) !== ""
+        ? group.accessLevel
+        : fallback;
+      var level = normalizeRaffleAccessLevel(raw);
+      lowest = lowest == null ? level : Math.min(lowest, level);
+    });
+    return lowest == null ? fallback : lowest;
+  }
+
   function raffleAccessLevelCompactText(raffle) {
     var lines = raffleAccessLevelCompactLines(raffle);
     var value = String(lines[0] || "").trim();
@@ -1001,13 +1017,17 @@ function initRaffles() {
     var accessLines = raffleAccessLevelCompactLines(raffle);
     var accessValue = String(accessLines[0] || "").trim();
     var accessDisplay = !accessValue || accessValue.toUpperCase() === "ВСЕ" ? "для всех" : "Уровень " + accessValue;
+    var requiredLevel = raffleLowestAccessLevelForViewer(raffle);
+    var accessStateClass = rafflesViewerPokerPlusStatusLevel >= requiredLevel
+      ? " raffles-active-chooser__access--allowed"
+      : " raffles-active-chooser__access--denied";
     var accessHtml =
       '<span class="raffles-active-chooser__access-label">Доступ:</span>' +
       '<span class="raffles-active-chooser__access-line">' +
       escapeHtml(accessDisplay) +
       "</span>";
     return (
-      '<span class="raffles-active-chooser__access" aria-label="Доступ к розыгрышу: ' +
+      '<span class="raffles-active-chooser__access' + accessStateClass + '" aria-label="Доступ к розыгрышу: ' +
       escapeHtml(accessLabel) +
       '">' +
       '<span class="raffles-active-chooser__access-value">' +
@@ -3247,6 +3267,10 @@ function initRaffles() {
 
   function applyRafflesData(data, switchToCompleted) {
         if (!data || !data.ok) return;
+        rafflesViewerPokerPlusStatusLevel = Math.max(
+          0,
+          parseInt(data.viewerPokerPlusStatusLevel, 10) || 0
+        );
         if (data.archiveDeferred !== true) rafflesArchiveLoaded = true;
         var pendingCompletedId = readPendingCompletedRaffleId();
         var pendingActiveId = readPendingActiveRaffleId();
