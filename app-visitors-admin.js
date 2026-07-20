@@ -169,13 +169,16 @@
     var balanceShortcut = document.getElementById("headerBalancesShortcutBtn");
     if (!wrap || !reportShortcut || !balanceShortcut) return;
     var ownerSeesCrm = userCanSeeCrmMenuButton();
+    var crmBtn = document.getElementById("headerCrmBtn");
     var reportBtn = document.getElementById("adminReportBtn");
     var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
-    var showReport = !ownerSeesCrm && !!(reportBtn && !reportBtn.hidden && !reportBtn.disabled);
-    var showBalances = !ownerSeesCrm && !!(balanceBtn && !balanceBtn.hidden);
+    var showReport = !!(reportBtn && !reportBtn.hidden && !reportBtn.disabled);
+    var showBalances = !!(balanceBtn && !balanceBtn.hidden);
     reportShortcut.hidden = !showReport;
     balanceShortcut.hidden = !showBalances;
     wrap.hidden = !showReport && !showBalances;
+    wrap.classList.toggle("header-admin-shortcuts--with-crm", ownerSeesCrm);
+    if (crmBtn) crmBtn.classList.toggle("header-crm-shortcut--compact", ownerSeesCrm && (showReport || showBalances));
   }
 
   function renderHomeAdminIdentityStatus(forceVisible) {
