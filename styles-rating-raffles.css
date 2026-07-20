@@ -5531,6 +5531,10 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   flex-basis: min(184px, 42%);
   max-width: 42%;
 }
+.raffle-winner-row--admin.raffle-winner-row--issued .raffle-winner-row__actions--admin {
+  flex-basis: min(224px, 58%);
+  max-width: 58%;
+}
 .raffle-winner-row__controls {
   display: flex;
   align-items: center;
@@ -5542,15 +5546,16 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
+  white-space: nowrap;
 }
 .raffle-winner-followup-btn {
   appearance: none;
   -webkit-appearance: none;
-  min-width: 38px;
+  min-width: 34px;
   min-height: 27px;
-  padding: 4px 9px;
+  padding: 4px 7px;
   border: 1px solid #fde047 !important;
   border-radius: 9px;
   background: linear-gradient(180deg, #fde047, #ca8a04) !important;
@@ -6622,6 +6627,10 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
     width: auto;
     max-width: 44%;
     margin-left: auto;
+  }
+  .raffle-winner-row--admin.raffle-winner-row--issued .raffle-winner-row__actions--admin {
+    flex-basis: min(218px, 62%);
+    max-width: 62%;
   }
   .raffle-winner-row__meta,
   .raffle-winner-row__controls {

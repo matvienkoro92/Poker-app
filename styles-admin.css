@@ -515,6 +515,9 @@
   align-items: center;
   box-sizing: border-box;
 }
+#adminReportModal .admin-report-date:empty {
+  display: none;
+}
 #app:has(#adminReportModal[aria-hidden="false"]) ~ .bottom-nav,
 html.admin-report-modal-open .bottom-nav,
 body.admin-report-modal-open .bottom-nav {
@@ -525,11 +528,12 @@ body.admin-report-modal-open .bottom-nav {
   gap: 8px;
   width: 100%;
   overflow-x: visible;
-  margin-bottom: 12px;
-  padding: 4px;
-  border: 1px solid rgba(202, 161, 84, 0.28);
+  margin-bottom: 8px;
+  padding: 5px;
+  border: 1px solid rgba(255, 201, 91, 0.52);
   border-radius: 14px;
-  background: rgba(10, 12, 18, 0.34);
+  background: linear-gradient(180deg, rgba(48, 34, 17, 0.78), rgba(10, 12, 18, 0.94));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 225, 165, 0.08);
   box-sizing: border-box;
 }
 .admin-report-tab {
@@ -543,7 +547,7 @@ body.admin-report-modal-open .bottom-nav {
   border-radius: 10px;
   border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
+  color: #ffe6b2;
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
@@ -557,14 +561,14 @@ body.admin-report-modal-open .bottom-nav {
 }
 .admin-report-tab--active,
 .admin-report-tab[aria-selected="true"] {
-  background: linear-gradient(180deg, #ffe7b0 0%, #d8a94f 100%);
+  background: linear-gradient(180deg, #fff0c4 0%, #f1bd52 58%, #c98b27 100%);
   color: #11151c;
   border-color: rgba(255, 231, 176, 0.86);
   text-shadow: none;
   box-shadow:
     inset 0 0 0 2px rgba(255, 245, 214, 0.42),
     inset 0 -4px 0 rgba(17, 21, 28, 0.22),
-    0 0 18px rgba(246, 211, 145, 0.24);
+    0 0 22px rgba(255, 190, 64, 0.42);
 }
 @media (max-width: 420px) {
   .admin-report-tabs {
@@ -1822,13 +1826,13 @@ button.admin-report-rakeback-summary__row:focus-visible {
   gap: 0;
   flex: 0 0 auto;
   min-height: 38px;
-  margin: 0 0 12px;
+  margin: 0 0 6px;
   padding: 0;
   border: 1px solid rgba(246, 211, 145, 0.42);
   border-radius: 10px;
   overflow: hidden;
-  background: #11151c;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  background: linear-gradient(180deg, #151923, #090c12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 5px 14px rgba(0, 0, 0, 0.2);
 }
 .admin-report-rakeback-room-tab {
   min-height: 38px;
@@ -1914,7 +1918,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     0 0 18px rgba(246, 211, 145, 0.24);
 }
 .admin-report-rakeback-room-tab--active {
-  background: linear-gradient(180deg, #ffe7b0 0%, #d8a94f 100%);
+  background: linear-gradient(180deg, #ffe7a8 0%, #e4aa3f 100%);
   color: #11151c;
   text-shadow: none;
   box-shadow:
@@ -1929,9 +1933,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-toolbar {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) minmax(0, 1fr);
-  align-items: end;
-  gap: 10px;
-  margin: 10px 0 8px;
+  align-items: center;
+  gap: 7px;
+  margin: 5px 0 6px;
 }
 .admin-report-rakeback-refresh-btn {
   min-height: 36px;
@@ -1984,10 +1988,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-search,
 .admin-report-rakeback-sort {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: start;
-  gap: 5px;
+  display: block;
   flex: 0 0 auto;
   margin: 0;
   color: var(--text-muted);
@@ -2153,36 +2154,29 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 
 .admin-report-rakeback-period {
-  margin: 8px 0;
-  padding: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.46);
-}
-
-.admin-report-rakeback-period__title {
-  display: block;
-  margin-bottom: 7px;
-  color: #b8b1a6;
-  font-size: 13px;
-  font-weight: 800;
+  margin: 4px 0 6px;
+  padding: 6px;
+  border: 1px solid rgba(112, 135, 171, 0.4);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(17, 26, 43, 0.84), rgba(8, 12, 21, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .admin-report-rakeback-period__tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
 }
 
 .admin-report-rakeback-period__tabs button {
-  min-height: 34px;
-  padding: 5px 8px;
+  min-height: 29px;
+  padding: 4px 7px;
   border: 1px solid rgba(100, 116, 139, 0.55);
   border-radius: 999px;
   color: #aaa49b;
   background: rgba(15, 23, 42, 0.9);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.1;
   font-weight: 800;
   cursor: pointer;
@@ -2196,7 +2190,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   border-color: #ffe6a3;
   color: #111827;
   background: linear-gradient(180deg, #f9d981, #d8a640);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32), 0 0 12px rgba(240, 176, 54, 0.24);
 }
 
 .admin-report-rakeback-period__custom {
@@ -2231,17 +2225,17 @@ button.admin-report-rakeback-summary__row:focus-visible {
 
 @media (max-width: 680px) {
   .admin-report-rakeback-period {
-    padding: 8px;
-    border-radius: 12px;
+    padding: 5px;
+    border-radius: 10px;
   }
 
   .admin-report-rakeback-period__tabs {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 5px;
+    gap: 4px;
   }
 
   .admin-report-rakeback-period__tabs button {
-    min-height: 30px;
+    min-height: 27px;
     padding: 4px 3px;
     font-size: 9px;
   }
@@ -2333,7 +2327,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   line-height: 1.2;
 }
 .admin-report-rakeback-date-separator--entries td {
-  padding: 8px 6px 7px;
+  padding: 9px 5px 7px;
   background: rgba(4, 6, 12, 0.96) !important;
 }
 .admin-report-rakeback-date-separator__stack {
@@ -2344,12 +2338,17 @@ button.admin-report-rakeback-summary__row:focus-visible {
   gap: 3px;
 }
 .admin-report-rakeback-date-separator--entries .admin-report-rakeback-date-separator__stack {
-  display: inline-grid;
-  grid-template-columns: auto auto;
-  align-items: baseline;
-  justify-items: center;
-  column-gap: 8px;
-  row-gap: 5px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid rgba(245, 179, 60, 0.78);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(122, 69, 10, 0.74), rgba(42, 29, 16, 0.76) 50%, rgba(13, 18, 28, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 235, 190, 0.14), 0 0 18px rgba(234, 157, 35, 0.13);
+  box-sizing: border-box;
 }
 .admin-report-rakeback-date-separator--entries span {
   min-height: 0;
@@ -2360,16 +2359,26 @@ button.admin-report-rakeback-summary__row:focus-visible {
   box-shadow: none;
   font-size: 12px;
 }
+.admin-report-rakeback-date-separator--entries .admin-report-rakeback-date-separator__date {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe7a6, #d99c33);
+  color: #17120b;
+  font-size: 13px;
+  font-weight: 950;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
+}
 .admin-report-rakeback-date-separator__weekday {
-  color: rgba(255, 231, 176, 0.72);
-  font-size: 11px;
+  justify-self: start;
+  color: #fff0c7;
+  font-size: 12px;
   font-style: normal;
   font-weight: 800;
   line-height: 1;
 }
 .admin-report-rakeback-date-separator__total {
-  grid-column: 1 / -1;
-  color: #ffe7b0;
+  grid-column: auto;
+  color: #ffd878;
   font-size: 18px;
   font-weight: 900;
   line-height: 1;
@@ -3100,7 +3109,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-toolbar {
     grid-template-columns: minmax(84px, auto) auto minmax(0, 1fr) minmax(0, 1fr);
-    margin: 8px 0 6px;
+    margin: 4px 0 5px;
     gap: 6px;
   }
   .admin-report-rakeback-refresh-btn {
@@ -3110,7 +3119,6 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-search,
   .admin-report-rakeback-sort {
-    gap: 5px;
     font-size: 11px;
   }
   .admin-report-rakeback-search__input,

@@ -228,7 +228,6 @@
           <div class="admin-report-tabs" role="tablist">
             <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form" role="tab" aria-selected="true">Отчет</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback" role="tab" aria-selected="false">Рейкбек</button>
-            <button type="button" class="admin-report-tab" data-admin-report-tab="cash-history" role="tab" aria-selected="false">История кассы</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent" role="tab" aria-selected="false">Отправленные</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="cash-total" role="tab" aria-selected="false" hidden>Касса итого</button>
           </div>
@@ -262,7 +261,6 @@
           <div class="admin-report-panel" data-admin-report-panel="rakeback">
             <button type="button" class="admin-report-rakeback-overlay-close" data-admin-report-rakeback-overlay-close aria-label="Закрыть рейкбек">×</button>
             <div class="admin-report-rakeback-period">
-              <span class="admin-report-rakeback-period__title">Период</span>
               <div class="admin-report-rakeback-period__tabs" role="tablist" aria-label="Период рейкбека">
                 <button type="button" data-rakeback-period="today">Сегодня</button>
                 <button type="button" data-rakeback-period="yesterday">Вчера</button>
@@ -288,12 +286,10 @@
               <button type="button" class="admin-report-rakeback-refresh-btn" id="adminReportRakebackRefreshBtn">Обновить</button>
               <button type="button" class="admin-report-add-extra-btn admin-report-rakeback-add-row-btn" id="adminReportRakebackAddBtn" title="Добавить строку" aria-label="Добавить строку">+</button>
               <label class="admin-report-rakeback-search" for="adminReportRakebackSearch">
-                <span>Поиск по айди</span>
-                <input type="search" class="admin-report-rakeback-search__input" id="adminReportRakebackSearch" enterkeyhint="search" autocomplete="off" placeholder="ID игрока" />
+                <input type="search" class="admin-report-rakeback-search__input" id="adminReportRakebackSearch" enterkeyhint="search" autocomplete="off" placeholder="ID игрока" aria-label="Поиск по ID игрока" />
               </label>
               <label class="admin-report-rakeback-sort" for="adminReportRakebackSort">
-                <span>Сортировка строк</span>
-                <select class="admin-report-rakeback-sort__select" id="adminReportRakebackSort">
+                <select class="admin-report-rakeback-sort__select" id="adminReportRakebackSort" aria-label="Сортировка строк">
                   <option value="created">Дата: новые сверху</option>
                   <option value="created_percent">Дата + процент</option>
                   <option value="color">По цветам</option>
