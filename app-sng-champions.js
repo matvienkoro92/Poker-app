@@ -1030,6 +1030,7 @@
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && canDeleteTournament && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           tournamentOptionHtml +
+          '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--watch" data-sng-tournament="' + escapeHtml(item.id) + '"><span>Смотреть</span></button>' +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
             : '') + '</article>';

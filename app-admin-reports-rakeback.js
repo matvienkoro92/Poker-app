@@ -918,6 +918,7 @@
 
     function getRakebackDateTotals(rows) {
       var dateMap = {};
+      var previousRakeByGroup = {};
       (Array.isArray(rows) ? rows : []).forEach(function (row, index) {
         if (!row || row.saved !== true) return;
         var stamp = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
@@ -929,11 +930,12 @@
         var groupKey = String(row.groupId || "").trim() || ("row_" + index);
         if (!Object.prototype.hasOwnProperty.call(day.finalRakeByGroup, groupKey)) day.groupOrder.push(groupKey);
         day.finalRakeByGroup[groupKey] = getReportAmount(row.room, row.rake);
-        var roomAmount = row.roomAmount != null && row.roomAmount !== ""
-          ? parseNumber(row.roomAmount)
-          : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
-        var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
-        day.amount += amount;
+        var currentRake = parseNumber(row.rake);
+        var previousRake = previousRakeByGroup[groupKey] != null ? previousRakeByGroup[groupKey] : 0;
+        var effectiveRake = getSharedRowKind(row) === "addon" ? currentRake - previousRake : currentRake;
+        var roomAmount = effectiveRake * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+        day.amount += getReportAmount(row.room, Math.round(roomAmount * 100) / 100);
+        previousRakeByGroup[groupKey] = currentRake;
       });
       return Object.keys(dateMap).map(function (key) {
         var day = dateMap[key];
@@ -1411,14 +1413,17 @@
       rows = (Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.saved === true;
       });
+      var previousRakeByGroup = {};
       return {
         rake: getFinalRakeTotal(rows),
-        amount: rows.reduce(function (sum, row) {
-          var roomAmount = row.roomAmount != null && row.roomAmount !== ""
-            ? parseNumber(row.roomAmount)
-            : parseNumber(row.rake) * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
-          var amount = row.amount != null && row.amount !== "" ? parseNumber(row.amount) : getReportAmount(row.room, roomAmount);
-          return sum + amount;
+        amount: rows.reduce(function (sum, row, index) {
+          var groupKey = String(row.groupId || "").trim() || ("row_" + index);
+          var currentRake = parseNumber(row.rake);
+          var previousRake = previousRakeByGroup[groupKey] != null ? previousRakeByGroup[groupKey] : 0;
+          var effectiveRake = getSharedRowKind(row) === "addon" ? currentRake - previousRake : currentRake;
+          var roomAmount = effectiveRake * parseNumber(row.percent) / 100 * (row.discount15 ? 0.85 : 1);
+          previousRakeByGroup[groupKey] = currentRake;
+          return sum + getReportAmount(row.room, Math.round(roomAmount * 100) / 100);
         }, 0),
       };
     }
@@ -2272,6 +2277,7 @@
         action: "rakeback_draft_save",
         date: "shared",
         rakebackDraftScope: archiveMode ? "archive" : "currentWeek",
+        allowAccountedRakebackOverwrite: archiveMode,
         rakebackRows: getRowsForSave(localRows, patchMode ? patch : null),
       };
       if (patchMode) {
@@ -2547,6 +2553,7 @@
           archiveFragment.appendChild(createArchiveEmptyRow("За выбранный период записей нет"));
         }
         body.replaceChildren(archiveFragment);
+        syncSharedGroupRows();
         syncRoomTabs();
         syncControls();
         return 0;
