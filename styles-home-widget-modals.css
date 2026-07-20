@@ -8700,6 +8700,11 @@ body.club-choice-vote-open {
 .sng-champions-modal__teams-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:14px; }
 .sng-champions-modal__teams-head h3,.sng-champions-modal__teams-head p { margin:0; }
 .sng-champions-modal__teams-head p { margin-top:4px; color:#9f9788; }
+.sng-champions-modal__teams-admin-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+@media (max-width:700px) {
+  .sng-champions-modal__teams-head { align-items:stretch; flex-direction:column; }
+  .sng-champions-modal__teams-admin-actions { display:grid; grid-template-columns:1fr 1fr; }
+}
 .sng-champions-modal__teams-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
 .sng-champions-modal__team { padding:14px; border:1px solid #654a27; border-radius:15px; background:#0b1119; }
 .sng-champions-modal__team > strong { display:block; margin-bottom:10px; color:#ffe0a0; font-size:17px; }

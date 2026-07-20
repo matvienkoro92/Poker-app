@@ -1600,7 +1600,12 @@
 
   function renderTeams(data) {
     var teams = data.teams || [];
-    var adminAction = data.isAdmin && data.status === "open" ? '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formTeams">Сформировать команды</button>' : '';
+    var adminAction = data.isAdmin && data.status === "open"
+      ? '<div class="sng-champions-modal__teams-admin-actions">' +
+          '<button type="button" class="sng-champions-modal__secondary-action" data-sng-action="formTeams">' + (teams.length ? 'Переформировать команды' : 'Сформировать команды') + '</button>' +
+          (teams.length >= 2 ? '<button type="button" class="sng-champions-modal__main-action" data-sng-action="formPairs">Запустить турнир</button>' : '') +
+        '</div>'
+      : '';
     return '<section class="sng-champions-modal__teams"><div class="sng-champions-modal__teams-head"><div><h3>Команды</h3><p>Игроки распределяются случайно по два человека.</p></div>' + adminAction + '</div>' +
       (teams.length ? '<div class="sng-champions-modal__teams-grid">' + teams.map(function (team) { return '<article class="sng-champions-modal__team"><strong>' + escapeHtml(team.name) + '</strong>' + (team.members || []).map(function (member) { return '<span>' + renderPlayerImage(member) + '<b>' + escapeHtml(member.pokerPlusNickname || member.displayName) + '</b></span>'; }).join('') + (team.canRename ? '<button type="button" data-sng-rename-team="' + escapeHtml(team.id) + '" data-sng-team-name="' + escapeHtml(team.name) + '">Изменить название</button>' : '') + '</article>'; }).join('') + '</div>' : '<div class="club-choice-vote-modal__empty">Команды ещё не сформированы.</div>') + '</section>';
   }
@@ -2036,6 +2041,7 @@
     if (!action) return;
     var name = action.getAttribute("data-sng-action") || "";
     if (name === "reset" && !window.confirm("Сбросить СНГ Лигу Чемпионов Два Туза?")) return;
+    if (name === "formPairs" && !window.confirm("Запустить турнир и закрыть запись? Команды и пары будут зафиксированы.")) return;
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
