@@ -688,11 +688,6 @@
       colorBtn.hidden = false;
       colorBtn.disabled = !!busy;
     }
-    if (row.getAttribute("data-rakeback-period-readonly") === "1") {
-      [saveBtn, editBtn, addBtn, removeBtn, colorBtn].forEach(function (button) {
-        if (button) button.disabled = true;
-      });
-    }
   }
 
   function updateSharedRowDateBadge(row, baseEntryAt) {
@@ -1464,6 +1459,18 @@
         return from || to ? [from || 0, to || Number.MAX_SAFE_INTEGER] : null;
       }
       return null;
+    }
+
+    function getNewRowEntryTime() {
+      var now = Date.now();
+      var bounds = getRakebackPeriodBounds();
+      if (!bounds) return now;
+      var from = Number(bounds[0]) || 0;
+      var to = Number(bounds[1]);
+      if (!isFinite(to)) to = now;
+      if (now >= from && now <= to) return now;
+      if (now > to) return Math.max(from, to - (RAKEBACK_DAY_MS / 2));
+      return Math.min(to, from + (RAKEBACK_DAY_MS / 2));
     }
 
     function rakebackRowMatchesPeriod(row) {
@@ -2455,7 +2462,7 @@
       }
       if (addBtn) {
         addBtn.hidden = false;
-        addBtn.disabled = archiveMode || loading;
+        addBtn.disabled = loading;
       }
       if (archiveBtn) {
         archiveBtn.hidden = false;
@@ -2534,9 +2541,7 @@
               Object.keys(row).forEach(function (key) { renderRow[key] = row[key]; });
               renderRow.baseEntryAt = archiveBaseEntryByGroup[groupId] || entryAt;
             }
-            var rowEl = createSharedRow(renderRow, Math.max(0, archiveBaseIndex - 1));
-            rowEl.setAttribute("data-rakeback-period-readonly", "1");
-            archiveFragment.appendChild(rowEl);
+            archiveFragment.appendChild(createSharedRow(renderRow, Math.max(0, archiveBaseIndex - 1)));
           });
         } else {
           archiveFragment.appendChild(createArchiveEmptyRow("За выбранный период записей нет"));
@@ -2636,9 +2641,8 @@
           if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
           else if (typeof event.stopPropagation === "function") event.stopPropagation();
         }
-        if (archiveMode) return;
         if (searchInput && searchInput.value) searchInput.value = "";
-        var now = Date.now();
+        var now = getNewRowEntryTime();
         var row = {
           groupId: "shell_" + now + "_" + Math.random().toString(16).slice(2),
           kind: "base",
@@ -2661,7 +2665,7 @@
       }
 
       function addSharedAddonFromRow(baseRow) {
-        if (!baseRow || archiveMode) return;
+        if (!baseRow) return;
         syncSharedGroupRows();
         var localRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
         var baseKey = getSharedDomRowLocalKey(baseRow);

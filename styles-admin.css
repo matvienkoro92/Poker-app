@@ -2256,12 +2256,6 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-date-badge input {
   display: none;
 }
-.admin-report-rakeback-row[data-rakeback-period-readonly="1"] .admin-report-rakeback-actions {
-  pointer-events: none;
-}
-.admin-report-rakeback-row[data-rakeback-period-readonly="1"] .admin-report-rakeback-actions button {
-  opacity: 1;
-}
 .admin-report-rakeback-id-cell .admin-report-rakeback-input--id {
   padding-left: 31px;
 }

@@ -8705,12 +8705,21 @@ body.club-choice-vote-open {
   .sng-champions-modal__teams-head { align-items:stretch; flex-direction:column; }
   .sng-champions-modal__teams-admin-actions { display:grid; grid-template-columns:1fr 1fr; }
 }
-.sng-champions-modal__teams-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+.sng-champions-modal__teams-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .sng-champions-modal__team { padding:14px; border:1px solid #654a27; border-radius:15px; background:#0b1119; }
 .sng-champions-modal__team > strong { display:block; margin-bottom:10px; color:#ffe0a0; font-size:17px; }
 .sng-champions-modal__team > span { display:flex; align-items:center; gap:9px; margin-top:7px; color:#f5ead3; }
+.sng-champions-modal__team > span > b:last-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sng-champions-modal__team .sng-champions-modal__entry-avatar-media,.sng-champions-modal__team > span > b:first-child { width:30px; height:30px; flex:0 0 30px; border-radius:50%; overflow:hidden; }
 .sng-champions-modal__team button { margin-top:12px; border:1px solid #70532e; border-radius:999px; padding:7px 10px; background:#111925; color:#ffd990; font-weight:800; }
+@media (max-width:520px) {
+  .sng-champions-modal__teams-grid { gap:8px; }
+  .sng-champions-modal__team { min-width:0; padding:10px; border-radius:13px; }
+  .sng-champions-modal__team > strong { margin-bottom:8px; overflow:hidden; font-size:14px; text-overflow:ellipsis; white-space:nowrap; }
+  .sng-champions-modal__team > span { gap:6px; margin-top:6px; font-size:12px; }
+  .sng-champions-modal__team .sng-champions-modal__entry-avatar-media,.sng-champions-modal__team > span > b:first-child { width:25px; height:25px; flex-basis:25px; }
+  .sng-champions-modal__team button { width:100%; margin-top:9px; padding:6px 5px; font-size:10px; white-space:nowrap; }
+}
 .sng-champions-modal__detail-nav { display:flex; margin:0 0 10px; }
 .sng-champions-modal__back { border:1px solid #765426; border-radius:999px; padding:9px 14px; background:#0d131d; color:#ffe0a1; font-weight:800; }
 
