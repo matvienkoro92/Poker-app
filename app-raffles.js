@@ -1778,7 +1778,7 @@ function initRaffles() {
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var id = String(copyBtn.getAttribute("data-raffle-active-copy-id") || "").trim();
     var link = String(copyBtn.getAttribute("data-raffle-active-copy-link") || "").trim() || activeRaffleSpecificShareLink(id);
-    var originalText = copyBtn.dataset.copyDefaultText || copyBtn.textContent || "Скопировать";
+    var originalText = copyBtn.dataset.copyDefaultText || copyBtn.textContent || "Скопировать ссылку";
     copyBtn.dataset.copyDefaultText = originalText;
     copyRaffleActiveText(link).then(function (copied) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -1790,7 +1790,7 @@ function initRaffles() {
         if (handleRafflesActiveChooserCopy.timer) clearTimeout(handleRafflesActiveChooserCopy.timer);
         handleRafflesActiveChooserCopy.timer = setTimeout(function () {
           copyBtn.classList.remove("raffles-active-chooser__copy-btn--copied");
-          copyBtn.textContent = copyBtn.dataset.copyDefaultText || "Скопировать";
+          copyBtn.textContent = copyBtn.dataset.copyDefaultText || "Скопировать ссылку";
           copyBtn.setAttribute("aria-label", "Скопировать ссылку на этот розыгрыш");
           handleRafflesActiveChooserCopy.timer = null;
         }, 1800);
@@ -1819,7 +1819,7 @@ function initRaffles() {
       escapeHtml(id) +
       '" data-raffle-active-copy-link="' +
       escapeHtml(shareLink) +
-      '" aria-label="Скопировать ссылку на этот розыгрыш">Скопировать</button>' +
+      '" aria-label="Скопировать ссылку на этот розыгрыш">Скопировать ссылку</button>' +
       "</span>"
     );
   }
