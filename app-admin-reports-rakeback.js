@@ -719,6 +719,7 @@
     saved = saved !== false;
     var isAddon = row.getAttribute("data-rakeback-kind") === "addon";
     row.classList.toggle("admin-report-rakeback-row--saved", saved);
+    row.classList.toggle("admin-report-rakeback-row--dirty", !saved);
     row.setAttribute("data-rakeback-saved", saved ? "1" : "0");
     row.querySelectorAll("input").forEach(function (input) {
       if (input.hasAttribute("data-rakeback-discount15")) {
@@ -878,6 +879,11 @@
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
     var roomTotalEl = config.roomTotalEl || document.getElementById("adminReportRakebackRoomTotal");
     var statusEl = config.statusEl || document.getElementById("adminReportRakebackStatus");
+    var filterButtons = modal ? modal.querySelectorAll("[data-rakeback-filter]") : [];
+    var auditListEl = document.getElementById("adminReportRakebackAuditList");
+    var undoEl = document.getElementById("adminReportRakebackUndo");
+    var undoTextEl = document.getElementById("adminReportRakebackUndoText");
+    var undoBtn = document.getElementById("adminReportRakebackUndoBtn");
     var summaryEl = config.summaryEl || (modal ? modal.querySelector(".admin-report-rakeback-summary") : null);
     var rakeHeaderEl = config.rakeHeaderEl || document.getElementById("adminReportRakebackRakeHeader");
     var amountHeaderEl = config.amountHeaderEl || document.getElementById("adminReportRakebackAmountHeader");
@@ -898,7 +904,105 @@
     var templateRowsOpen = config.templatesOpen === true || readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
     var activePeriod = "current_week";
+    var activeQuickFilter = "all";
+    var sharedAudit = [];
+    var pendingDelete = null;
     var bound = false;
+
+    function renderAudit() {
+      if (!auditListEl) return;
+      if (!sharedAudit.length) {
+        auditListEl.textContent = "Изменений пока нет";
+        return;
+      }
+      auditListEl.innerHTML = sharedAudit.slice(0, 80).map(function (item) {
+        var at = item && item.at ? new Date(item.at) : null;
+        var stamp = at && !isNaN(at.getTime()) ? at.toLocaleString("ru-RU") : "";
+        return '<div class="admin-report-rakeback-audit__item"><div>' + escapeHtml(item && item.text || "Изменение") + '</div><div class="admin-report-rakeback-audit__meta">' + escapeHtml(item && item.by || "Администратор") + (stamp ? " · " + escapeHtml(stamp) : "") + "</div></div>";
+      }).join("");
+    }
+
+    function applyQuickFilter() {
+      if (!body) return;
+      var counts = { all: 0, with_rb: 0, without_rb: 0, changed: 0 };
+      Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-row]")).forEach(function (row) {
+        var show = true;
+        var hasRb = hasRakebackDomValue(row);
+        var isShared = row.hasAttribute("data-rakeback-shared-row");
+        var changed = row.classList.contains("admin-report-rakeback-row--dirty") || row.hasAttribute("data-rakeback-template-default-dirty") || (isShared && row.getAttribute("data-rakeback-saved") !== "1");
+        if (isShared) {
+          counts.all += 1;
+          counts[hasRb ? "with_rb" : "without_rb"] += 1;
+        }
+        if (changed) counts.changed += 1;
+        if (activeQuickFilter === "with_rb") show = isShared && hasRb;
+        else if (activeQuickFilter === "without_rb") show = isShared && !hasRb;
+        else if (activeQuickFilter === "changed") show = changed;
+        row.setAttribute("data-rakeback-filter-hidden", show ? "0" : "1");
+      });
+      Array.prototype.slice.call(filterButtons || []).forEach(function (button) {
+        var key = button.getAttribute("data-rakeback-filter") || "all";
+        var selected = key === activeQuickFilter;
+        var countEl = button.querySelector("[data-rakeback-filter-count]");
+        if (countEl) countEl.textContent = String(counts[key] || 0);
+        button.classList.toggle("admin-report-rakeback-filter--active", selected);
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+      });
+      Array.prototype.slice.call(body.querySelectorAll(".admin-report-rakeback-date-separator")).forEach(function (separator) {
+        var next = separator.nextElementSibling;
+        var hasVisibleRow = false;
+        while (next && !next.classList.contains("admin-report-rakeback-date-separator")) {
+          if (next.hasAttribute("data-rakeback-row") && next.getAttribute("data-rakeback-filter-hidden") !== "1") {
+            hasVisibleRow = true;
+            break;
+          }
+          next = next.nextElementSibling;
+        }
+        separator.hidden = activeQuickFilter !== "all" && !hasVisibleRow;
+      });
+    }
+
+    function hasUnsavedChanges() {
+      if (!body) return false;
+      if (saving) return true;
+      return !!body.querySelector(
+        ".admin-report-rakeback-row--dirty,[data-rakeback-shared-row][data-rakeback-saved=\"0\"],[data-rakeback-template-default-dirty]"
+      );
+    }
+
+    function confirmUnsavedLeave() {
+      if (!hasUnsavedChanges()) return true;
+      if (typeof window === "undefined" || typeof window.confirm !== "function") return false;
+      return window.confirm("Есть несохранённые изменения. Уйти?");
+    }
+
+    function syncDuplicatePlayerIds() {
+      if (!body) return;
+      var groups = {};
+      var rows = Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row][data-rakeback-kind=\"base\"]"));
+      rows.forEach(function (row) {
+        row.classList.remove("admin-report-rakeback-row--duplicate");
+        row.removeAttribute("data-rakeback-duplicate");
+        var roomInput = row.querySelector("[data-rakeback-room]");
+        var idInput = row.querySelector("[data-rakeback-player-id]");
+        if (idInput) idInput.removeAttribute("title");
+        var id = String(idInput && idInput.value || "").trim().toLowerCase();
+        if (!id) return;
+        var day = getDateInputValue(row.getAttribute("data-rakeback-entry-added-at") || row.getAttribute("data-rakeback-created-at"));
+        var key = normalizeRoom(roomInput && roomInput.value || activeRoom) + "|" + day + "|" + id;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+      });
+      Object.keys(groups).forEach(function (key) {
+        if (groups[key].length < 2) return;
+        groups[key].forEach(function (row) {
+          row.classList.add("admin-report-rakeback-row--duplicate");
+          row.setAttribute("data-rakeback-duplicate", "1");
+          var idInput = row.querySelector("[data-rakeback-player-id]");
+          if (idInput) idInput.setAttribute("title", "Дубликат ID в этом руме и дате");
+        });
+      });
+    }
 
     function syncRakebackHeaderLabels() {
       var suffix = !archiveMode && usesRakebackChipUnits(activeRoom) ? " (в фишках)" : "";
@@ -920,7 +1024,7 @@
       var dateMap = {};
       var previousRakeByGroup = {};
       (Array.isArray(rows) ? rows : []).forEach(function (row, index) {
-        if (!row || row.saved !== true) return;
+        if (!row || (activeQuickFilter !== "changed" && row.saved !== true)) return;
         var stamp = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
         if (!stamp) return;
         var key = getDateInputValue(stamp);
@@ -1395,6 +1499,17 @@
       return getSharedRowsForTotal(activeRoom);
     }
 
+    function dataRowMatchesQuickFilter(row) {
+      if (activeQuickFilter === "with_rb") return hasRakebackReportValue(row);
+      if (activeQuickFilter === "without_rb") return !hasRakebackReportValue(row);
+      if (activeQuickFilter === "changed") return !!(row && row.saved !== true);
+      return true;
+    }
+
+    function filterRowsForQuickTotals(rows) {
+      return (Array.isArray(rows) ? rows : []).filter(dataRowMatchesQuickFilter);
+    }
+
     function getFinalRakeTotal(rows) {
       var finalRakeByGroup = {};
       var groupOrder = [];
@@ -1411,7 +1526,7 @@
 
     function getRakebackTotals(rows) {
       rows = (Array.isArray(rows) ? rows : []).filter(function (row) {
-        return row && row.saved === true;
+        return row && (activeQuickFilter === "changed" || row.saved === true);
       });
       var previousRakeByGroup = {};
       return {
@@ -1948,6 +2063,45 @@
       return window.confirm(message + "?");
     }
 
+    function commitPendingDelete() {
+      if (!pendingDelete) return;
+      var item = pendingDelete;
+      pendingDelete = null;
+      if (item.timer) clearTimeout(item.timer);
+      if (undoEl) undoEl.hidden = true;
+      if (!item.persisted) return;
+      if (item.kind === "addon") {
+        saveSharedDraftNow(true, { upsertGroupIds: [item.groupId], deleteRowKeys: item.serverKey ? [item.serverKey] : [] });
+      } else {
+        saveSharedDraftNow(true, { deleteGroupIds: [item.groupId] });
+      }
+    }
+
+    function offerDeleteUndo(item) {
+      commitPendingDelete();
+      pendingDelete = item;
+      if (undoTextEl) undoTextEl.textContent = item.kind === "addon" ? "Подзапись удалена" : "Запись удалена";
+      if (undoEl) undoEl.hidden = false;
+      item.timer = setTimeout(commitPendingDelete, 7000);
+    }
+
+    function undoPendingDelete() {
+      if (!pendingDelete) return;
+      var item = pendingDelete;
+      pendingDelete = null;
+      if (item.timer) clearTimeout(item.timer);
+      if (undoEl) undoEl.hidden = true;
+      if (item.kind === "addon") delete locallyDeletedRowKeys[item.localKey];
+      else delete locallyDeletedGroupIds[item.groupId];
+      var restoredKeys = {};
+      item.rows.forEach(function (row) { restoredKeys[getSharedRowLocalKey(row)] = true; });
+      sharedRows = item.rows.concat(mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (row) {
+        return !restoredKeys[getSharedRowLocalKey(row)];
+      }));
+      render();
+      setStatus("Удаление отменено");
+    }
+
     function collectRows(options) {
       options = options || {};
       if (!body) return sharedRows.slice();
@@ -2306,6 +2460,8 @@
             sharedArchiveAvailable = data.rakebackDraft.hasArchive === true || sharedArchiveAvailable;
           }
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
+          sharedAudit = Array.isArray(data.rakebackDraft.audit) ? data.rakebackDraft.audit : sharedAudit;
+          renderAudit();
           if (!skipRender) {
             var scrollSnapshot = preserveScroll ? captureRakebackScroll(body) : null;
             render();
@@ -2360,6 +2516,8 @@
           sharedArchiveAvailable = draft && draft.hasArchive === true;
         }
         sharedUpdatedAt = draft && draft.updatedAt ? draft.updatedAt : sharedUpdatedAt;
+        sharedAudit = draft && Array.isArray(draft.audit) ? draft.audit : sharedAudit;
+        renderAudit();
         render();
         if (options.showStatus) setStatus(includeArchive ? "Архив загружен" : "Обновлено");
         return true;
@@ -2449,6 +2607,7 @@
           previousRakeByGroup[groupId] = parseNumber(rakeInput ? rakeInput.value : "");
         }
       });
+      syncDuplicatePlayerIds();
     }
 
     function syncRoomTabs() {
@@ -2497,10 +2656,13 @@
           updateTemplateRowActions(row, loading);
         });
       }
-      if (roomTotalLabelEl) roomTotalLabelEl.textContent = "Итого " + (ROOM_LABELS[activeRoom] || activeRoom);
+      var filterSuffix = activeQuickFilter === "all" ? "" : " · фильтр";
+      if (roomTotalLabelEl) roomTotalLabelEl.textContent = "Итого " + (ROOM_LABELS[activeRoom] || activeRoom) + filterSuffix;
+      var grandLabelEl = summaryEl && summaryEl.querySelector(".admin-report-rakeback-summary__row--grand .admin-report-rakeback-summary__label");
+      if (grandLabelEl) grandLabelEl.textContent = "Итого по всем румам" + filterSuffix;
       syncRakebackHeaderLabels();
-      var visibleShared = archiveMode ? getArchiveRows(activeRoom) : getVisibleSharedRows();
-      var allShared = archiveMode ? getArchiveRows() : getSharedRowsForTotal();
+      var visibleShared = filterRowsForQuickTotals(archiveMode ? getArchiveRows(activeRoom) : getVisibleSharedRows());
+      var allShared = filterRowsForQuickTotals(archiveMode ? getArchiveRows() : getSharedRowsForTotal());
       var roomTotals = getRakebackTotals(visibleShared);
       var allTotals = getRakebackTotals(allShared);
       if (roomTotalEl) roomTotalEl.textContent = String(Math.round(roomTotals.rake)) + " / " + String(Math.round(roomTotals.amount));
@@ -2525,7 +2687,7 @@
           var archiveBaseEntryByGroup = {};
           var archiveDateTotalsByKey = {};
           var archiveLastDateKey = "";
-          getRakebackDateTotals(archiveRows).forEach(function (day) {
+          getRakebackDateTotals(filterRowsForQuickTotals(archiveRows)).forEach(function (day) {
             if (day && day.key) archiveDateTotalsByKey[day.key] = day;
           });
           archiveRows.forEach(function (row) {
@@ -2556,6 +2718,7 @@
         syncSharedGroupRows();
         syncRoomTabs();
         syncControls();
+        applyQuickFilter();
         return 0;
       }
       var query = getSearchQuery();
@@ -2573,7 +2736,7 @@
       var baseEntryByGroup = {};
       var dateTotalsByKey = {};
       var lastEntryDateKey = "";
-      getRakebackDateTotals(visibleShared).forEach(function (day) {
+      getRakebackDateTotals(filterRowsForQuickTotals(visibleShared)).forEach(function (day) {
         if (day && day.key) dateTotalsByKey[day.key] = day;
       });
       visibleShared.forEach(function (row, index) {
@@ -2614,6 +2777,7 @@
       }
       syncRoomTabs();
       syncControls();
+      applyQuickFilter();
       return (showTemplateRows ? ids.length : 0) + visibleShared.length;
     }
 
@@ -2923,13 +3087,23 @@
       }
       Array.prototype.slice.call(roomTabs || []).forEach(function (tab) {
         tab.addEventListener("click", function () {
-          activeRoom = normalizeRoom(tab.getAttribute("data-rakeback-room-tab"));
+          var nextRoom = normalizeRoom(tab.getAttribute("data-rakeback-room-tab"));
+          if (nextRoom !== activeRoom && !confirmUnsavedLeave()) return;
+          activeRoom = nextRoom;
+          render();
+        });
+      });
+      Array.prototype.slice.call(filterButtons || []).forEach(function (button) {
+        button.addEventListener("click", function () {
+          activeQuickFilter = button.getAttribute("data-rakeback-filter") || "all";
           render();
         });
       });
       Array.prototype.slice.call(periodTabs || []).forEach(function (tab) {
         tab.addEventListener("click", function () {
-          activePeriod = tab.getAttribute("data-rakeback-period") || "current_week";
+          var nextPeriod = tab.getAttribute("data-rakeback-period") || "current_week";
+          if (nextPeriod !== activePeriod && !confirmUnsavedLeave()) return;
+          activePeriod = nextPeriod;
           archiveMode = activePeriod !== "current_week";
           syncPeriodTabs();
           render();
@@ -2977,6 +3151,18 @@
         totalsBackdrop.dataset.adminReportRakebackTotalsCloseBound = "1";
         totalsBackdrop.addEventListener("click", closeRakebackTotalsModal);
       }
+      if (undoBtn && undoBtn.dataset.rakebackUndoBound !== "1") {
+        undoBtn.dataset.rakebackUndoBound = "1";
+        undoBtn.addEventListener("click", undoPendingDelete);
+      }
+      if (modal && modal.dataset.rakebackUnloadGuardBound !== "1") {
+        modal.dataset.rakebackUnloadGuardBound = "1";
+        window.addEventListener("beforeunload", function (event) {
+          if (!hasUnsavedChanges()) return;
+          event.preventDefault();
+          event.returnValue = "";
+        });
+      }
       if (body) {
         body.addEventListener("input", function (event) {
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row],[data-rakeback-template-row]") : null;
@@ -2987,9 +3173,11 @@
             scheduleTemplateRowDefaultSave(row);
             return;
           }
+          row.classList.add("admin-report-rakeback-row--dirty");
           syncSharedGroupRows();
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           syncControls();
+          applyQuickFilter();
         });
         body.addEventListener("change", function (event) {
           var row = event.target && event.target.closest ? event.target.closest("[data-rakeback-shared-row],[data-rakeback-template-row]") : null;
@@ -3000,9 +3188,11 @@
             scheduleTemplateRowDefaultSave(row);
             return;
           }
+          row.classList.add("admin-report-rakeback-row--dirty");
           syncSharedGroupRows();
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           syncControls();
+          applyQuickFilter();
           if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
         });
         body.addEventListener("click", function (event) {
@@ -3203,17 +3393,24 @@
           var localKey = getSharedDomRowLocalKey(row);
           var serverKey = getSharedDomRowServerKey(row);
           var persisted = row.getAttribute("data-rakeback-persisted") === "1";
+          var deletedRowsSnapshot = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
+            if (kind === "addon") return getSharedRowLocalKey(item) === localKey;
+            return String(item.groupId || "") === groupId;
+          });
           markSharedRowDeleted(row, kind, localKey);
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
             if (kind === "addon") return getSharedRowLocalKey(item) !== localKey;
             return String(item.groupId || "") !== groupId;
           });
           render();
-          if (persisted && kind === "addon") {
-            saveSharedDraftNow(true, { upsertGroupIds: [groupId], deleteRowKeys: serverKey ? [serverKey] : [] });
-          } else if (persisted) {
-            saveSharedDraftNow(true, { deleteGroupIds: [groupId] });
-          }
+          offerDeleteUndo({
+            kind: kind,
+            groupId: groupId,
+            localKey: localKey,
+            serverKey: serverKey,
+            persisted: persisted,
+            rows: deletedRowsSnapshot,
+          });
         });
       }
     }
@@ -3246,6 +3443,8 @@
         });
       },
       isArchiveMode: function () { return archiveMode; },
+      hasUnsavedChanges: hasUnsavedChanges,
+      confirmLeave: confirmUnsavedLeave,
       open: open,
       loadSharedDraft: loadSharedDraft,
       render: render,

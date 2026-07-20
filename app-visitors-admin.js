@@ -136,6 +136,7 @@
     var menuBtn = document.getElementById("headerCrmBtn");
     if (!btn && !menuBtn) return;
     setCrmButtonAllowed(menuBtn, userCanSeeCrmMenuButton());
+    syncHeaderAdminShortcuts();
     var allowed = userCanOpenCrm();
     if (allowed || crmAccessProbeState === "allowed") {
       crmAccessProbeState = "allowed";
@@ -162,6 +163,21 @@
       });
   }
 
+  function syncHeaderAdminShortcuts() {
+    var wrap = document.getElementById("headerAdminShortcuts");
+    var reportShortcut = document.getElementById("headerReportsShortcutBtn");
+    var balanceShortcut = document.getElementById("headerBalancesShortcutBtn");
+    if (!wrap || !reportShortcut || !balanceShortcut) return;
+    var ownerSeesCrm = userCanSeeCrmMenuButton();
+    var reportBtn = document.getElementById("adminReportBtn");
+    var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
+    var showReport = !ownerSeesCrm && !!(reportBtn && !reportBtn.hidden && !reportBtn.disabled);
+    var showBalances = !ownerSeesCrm && !!(balanceBtn && !balanceBtn.hidden);
+    reportShortcut.hidden = !showReport;
+    balanceShortcut.hidden = !showBalances;
+    wrap.hidden = !showReport && !showBalances;
+  }
+
   function renderHomeAdminIdentityStatus(forceVisible) {
     var el = document.getElementById("homeAdminVersionTop");
     if (!el) return;
@@ -178,9 +194,23 @@
     var reportBtn = document.getElementById("adminReportBtn");
     var crmMenuBtn = document.getElementById("headerCrmBtn");
     var bonusAdminBtn = document.getElementById("adminBonusBalancesHeaderBtn");
+    var reportsShortcutBtn = document.getElementById("headerReportsShortcutBtn");
+    var balancesShortcutBtn = document.getElementById("headerBalancesShortcutBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
-    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !homeAdminVersion) return;
+    if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !reportsShortcutBtn && !balancesShortcutBtn && !homeAdminVersion) return;
+    if (reportsShortcutBtn && reportsShortcutBtn.dataset.adminShortcutBound !== "1") {
+      reportsShortcutBtn.dataset.adminShortcutBound = "1";
+      reportsShortcutBtn.addEventListener("click", function () {
+        if (reportBtn && !reportBtn.hidden && !reportBtn.disabled) reportBtn.click();
+      });
+    }
+    if (balancesShortcutBtn && balancesShortcutBtn.dataset.adminShortcutBound !== "1") {
+      balancesShortcutBtn.dataset.adminShortcutBound = "1";
+      balancesShortcutBtn.addEventListener("click", function () {
+        if (bonusAdminBtn && !bonusAdminBtn.hidden) bonusAdminBtn.click();
+      });
+    }
     if (reportBtn) {
       reportBtn.hidden = true;
       reportBtn.classList.add("header-admin-report--hidden");
@@ -192,6 +222,7 @@
       bonusAdminBtn.setAttribute("aria-hidden", "true");
     }
     setCrmButtonAllowed(crmMenuBtn, false);
+    syncHeaderAdminShortcuts();
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
@@ -209,6 +240,7 @@
         reportBtn.removeAttribute("aria-hidden");
         reportBtn.disabled = false;
       }
+      syncHeaderAdminShortcuts();
       if (window.__pokerAllowEagerAdminReportPrewarm === true) {
         var prewarmAdminReportModal = window.pokerPrewarmAdminReportModal;
         if (typeof prewarmAdminReportModal === "function") {
@@ -232,6 +264,7 @@
         bonusAdminBtn.hidden = false;
         bonusAdminBtn.removeAttribute("aria-hidden");
       }
+      syncHeaderAdminShortcuts();
     }
     function showAdminUi() {
       try {
@@ -253,6 +286,7 @@
         bonusAdminBtn.hidden = false;
         bonusAdminBtn.removeAttribute("aria-hidden");
       }
+      syncHeaderAdminShortcuts();
       if (window.updateGazetteSubsCount) window.updateGazetteSubsCount();
       if (typeof window.pokerInitAdminSectionViewsUi === "function") window.pokerInitAdminSectionViewsUi();
       if (typeof window.__pokerSyncRomanTaskPlanner === "function") window.__pokerSyncRomanTaskPlanner();

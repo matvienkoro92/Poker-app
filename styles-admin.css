@@ -554,6 +554,13 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-tab[data-admin-report-tab="cash-history"] {
   flex-grow: 1.35;
 }
+.admin-report-tab[data-admin-report-tab="sent"] {
+  flex-grow: 1.35;
+  padding-right: 5px;
+  padding-left: 5px;
+  font-size: clamp(12px, 1.55vw, 15px);
+  letter-spacing: -0.02em;
+}
 .admin-report-tab[data-admin-report-tab="cash-total"] {
   flex-grow: 1.2;
   padding-right: 6px;
@@ -580,14 +587,18 @@ body.admin-report-modal-open .bottom-nav {
     display: none;
   }
   .admin-report-tab {
-    flex: 0 0 auto;
-    min-width: 82px;
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 42px;
     padding: 0 6px;
     font-size: 13px;
   }
   .admin-report-tab[data-admin-report-tab="cash-history"] {
     min-width: 116px;
+  }
+  .admin-report-tab[data-admin-report-tab="sent"] {
+    min-width: 0;
+    font-size: 11px;
   }
 }
 .admin-report-panel {
@@ -2024,6 +2035,151 @@ button.admin-report-rakeback-summary__row:focus-visible {
   border-color: rgba(246, 211, 145, 0.7);
   outline: none;
   box-shadow: 0 0 0 2px rgba(246, 211, 145, 0.18);
+}
+.admin-report-rakeback-quickbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+}
+.admin-report-rakeback-filters {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 4px;
+  min-width: 0;
+}
+.admin-report-rakeback-filters button,
+.admin-report-rakeback-audit summary {
+  min-height: 27px;
+  padding: 4px 9px;
+  border: 1px solid rgba(112, 135, 171, 0.48);
+  border-radius: 999px;
+  background: #0d1422;
+  color: #b8b1a6;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.admin-report-rakeback-filters .admin-report-rakeback-filter--active {
+  border-color: #ffe6a3;
+  background: linear-gradient(180deg, #f9d981, #d8a640);
+  color: #111827;
+}
+.admin-report-rakeback-filters [data-rakeback-filter-count] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 17px;
+  min-height: 17px;
+  margin-left: 3px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: currentColor;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}
+.admin-report-rakeback-filters .admin-report-rakeback-filter--active [data-rakeback-filter-count] {
+  background: rgba(17, 24, 39, 0.16);
+}
+.admin-report-rakeback-audit {
+  position: relative;
+  flex: 0 0 auto;
+}
+.admin-report-rakeback-audit summary {
+  display: grid;
+  place-items: center;
+  list-style: none;
+}
+.admin-report-rakeback-audit summary::-webkit-details-marker { display: none; }
+.admin-report-rakeback-audit__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  right: 0;
+  width: min(310px, 82vw);
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid rgba(246, 211, 145, 0.5);
+  border-radius: 10px;
+  background: #090d15;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  color: #ddd2bd;
+  font-size: 11px;
+}
+.admin-report-rakeback-audit__item {
+  padding: 6px;
+  border-bottom: 1px solid rgba(246, 211, 145, 0.13);
+}
+.admin-report-rakeback-audit__item:last-child { border-bottom: 0; }
+.admin-report-rakeback-audit__meta { color: #9fa9ba; font-size: 9px; }
+.admin-report-rakeback-row--dirty td,
+.admin-report-rakeback-row[data-rakeback-template-default-dirty="1"] td {
+  box-shadow: inset 0 1px 0 rgba(250, 204, 21, 0.42), inset 0 -1px 0 rgba(250, 204, 21, 0.42);
+}
+.admin-report-rakeback-row--dirty .admin-report-rakeback-id-cell::after,
+.admin-report-rakeback-row[data-rakeback-template-default-dirty="1"] .admin-report-rakeback-id-cell::after {
+  content: "НЕ СОХР.";
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #17120b;
+  font-size: 7px;
+  font-weight: 950;
+  line-height: 1;
+}
+.admin-report-rakeback-row[data-rakeback-filter-hidden="1"] { display: none !important; }
+.admin-report-rakeback-row--duplicate td {
+  background: rgba(127, 29, 29, 0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(248, 113, 113, 0.72), inset 0 -1px 0 rgba(248, 113, 113, 0.72);
+}
+.admin-report-rakeback-row--duplicate .admin-report-rakeback-input--id {
+  border-color: #fb7185 !important;
+  color: #fecaca !important;
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.18), 0 0 13px rgba(244, 63, 94, 0.22);
+}
+.admin-report-rakeback-row--duplicate .admin-report-rakeback-id-cell::before {
+  content: "ДУБЛИКАТ";
+  position: absolute;
+  z-index: 5;
+  right: 4px;
+  bottom: 2px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: #e11d48;
+  color: #fff1f2;
+  font-size: 7px;
+  font-weight: 950;
+  line-height: 1;
+}
+.admin-report-rakeback-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.7);
+  border-radius: 10px;
+  background: #221a0b;
+  color: #ffe7b0;
+  font-size: 12px;
+  font-weight: 850;
+}
+.admin-report-rakeback-undo[hidden] { display: none; }
+.admin-report-rakeback-undo button {
+  border: 0;
+  background: transparent;
+  color: #facc15;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
 }
 #adminReportModal .admin-report-rakeback-wrap {
   flex: 1 1 auto;

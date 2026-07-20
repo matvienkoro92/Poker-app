@@ -127,6 +127,7 @@ function initAdminReportModal() {
   function closeRakebackOverlay() {
     var panel = modal ? modal.querySelector('[data-admin-report-panel="rakeback"]') : null;
     if (!panel) return;
+    if (rakebackModule && typeof rakebackModule.confirmLeave === "function" && !rakebackModule.confirmLeave()) return;
     panel.classList.remove("admin-report-panel--rakeback-overlay");
     panel.removeAttribute("aria-modal");
     panel.removeAttribute("role");
@@ -1518,6 +1519,8 @@ function initAdminReportModal() {
       panels: panels,
       callbacks: {
         canOpen: function (name) {
+          var activeRakebackPanel = modal && modal.querySelector('[data-admin-report-panel="rakeback"].admin-report-panel--active');
+          if (name !== "rakeback" && activeRakebackPanel && rakebackModule && typeof rakebackModule.confirmLeave === "function" && !rakebackModule.confirmLeave()) return false;
           if (name === "sent") return canViewSentReports();
           if (name === "cash-history") return canViewSentReports();
           if (name === "calculations" || name === "cash-total") return canViewCalculationsReports();
@@ -3699,6 +3702,8 @@ function initAdminReportModal() {
   }
 
   function closeModal() {
+    var activeRakebackPanel = modal && modal.querySelector('[data-admin-report-panel="rakeback"].admin-report-panel--active');
+    if (activeRakebackPanel && rakebackModule && typeof rakebackModule.confirmLeave === "function" && !rakebackModule.confirmLeave()) return;
     if (rakebackModule) rakebackModule.close();
     else suspendRakebackDomRows();
     modal.setAttribute("aria-hidden", "true");

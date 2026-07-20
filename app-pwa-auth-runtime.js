@@ -603,7 +603,7 @@
 
   function formatHeaderGreeting(name) {
     var displayName = name != null ? String(name).trim() : "";
-    return displayName ? "Привет, " + displayName + "!" : "Привет!";
+    return displayName || "Профиль";
   }
 
   function escapeHeaderGreetingHtml(value) {
@@ -619,13 +619,10 @@
     el.setAttribute("title", text);
     el.setAttribute("aria-label", text);
     if (!displayName) {
-      el.textContent = "Привет!";
+      el.textContent = "Профиль";
       return;
     }
-    el.innerHTML =
-      '<span class="header-greeting__hello">Привет,</span> ' +
-      '<span class="header-greeting__name">' + escapeHeaderGreetingHtml(displayName) + '</span>' +
-      '<span class="header-greeting__bang">!</span>';
+    el.innerHTML = '<span class="header-greeting__name">' + escapeHeaderGreetingHtml(displayName) + '</span>';
   }
 
   function isHeaderGuestLoginMode() {

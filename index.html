@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v90" data-app-version="3.772">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v90" data-app-version="3.779">
   <head>
     <!-- До app.js/styles: класс iOS PWA — иначе таббар первые кадры без bottom-фикса и остаётся чёрная полоса снизу -->
     <script>
@@ -319,7 +319,7 @@
         document.head.appendChild(preload);
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=3.719" />
+    <link rel="stylesheet" href="./styles.css?v=3.720" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=3.718" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat.css?v=3.718" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=3.718" />
@@ -334,7 +334,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=3.727" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=3.718" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=3.718" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="admin admin-reports auth-debug share-stats tracking admin-bonuses" href="./styles-admin.css?v=3.734" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="admin admin-reports auth-debug share-stats tracking admin-bonuses" href="./styles-admin.css?v=3.738" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="player-crm" href="./styles-player-crm.css?v=3.775" />
     <!-- Главная: скролл как в остальных разделах — прокручивается вся страница -->
     <style id="home-layout-critical">
@@ -604,11 +604,26 @@
             </svg>
             <span class="header-crm-shortcut__label">CRM</span>
           </button>
+          <div class="header-admin-shortcuts" id="headerAdminShortcuts" aria-label="Админские разделы" hidden>
+            <button type="button" class="header-icon-btn header-admin-shortcut" id="headerReportsShortcutBtn" title="Отчёты" aria-label="Открыть отчёты" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z" />
+                <path d="M9 2h6v4H9zM8 10h8M8 14h8M8 18h5" />
+              </svg>
+              <span>Отчёты</span>
+            </button>
+            <button type="button" class="header-icon-btn header-admin-shortcut" id="headerBalancesShortcutBtn" title="Бонусные балансы" aria-label="Открыть бонусные балансы" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9 8h4.2a2.3 2.3 0 0 1 0 4.6H9V8Zm0 4.6h4.8a2.4 2.4 0 0 1 0 4.8H9v-4.8ZM11 6v2M11 17.4V20" />
+              </svg>
+              <span>Балансы</span>
+            </button>
+          </div>
           <div class="header-actions">
             <div class="header-profile-summary">
               <span class="header-greeting-wrap">
                 <button type="button" class="header-greeting" id="headerGreeting" title="Войти в аккаунт" aria-label="Войти в аккаунт">Войти</button>
-                <span class="header-greeting__arrow" id="headerGreetingArrow" aria-hidden="true">▾</span>
               </span>
               <span class="header-status header-status--hidden" id="headerPokerStatus" aria-hidden="true">
                 <img class="header-status__fish" id="headerPokerStatusFish" src="./assets/profile-status-fish-level-01.png" alt="" width="32" height="32" loading="lazy" decoding="async" aria-hidden="true" data-status-fish-level="0" />
@@ -1839,7 +1854,7 @@
     <script defer src="./app-pwa-auth-entry-screen.js?v=3.718"></script>
     <script defer src="./app-pwa-auth-mode.js?v=3.718"></script>
     <script defer src="./app-pwa-auth-overlay.js?v=3.718"></script>
-    <script defer src="./app-pwa-auth-runtime.js?v=3.718"></script>
+    <script defer src="./app-pwa-auth-runtime.js?v=3.719"></script>
     <script defer src="./app-pwa-auth.js?v=3.718"></script>
     <script defer src="./app-pwa-auth-keyboard-lift.js?v=3.718"></script>
     <script defer src="./app-push.js?v=3.718"></script>
@@ -1889,8 +1904,8 @@
     <script defer src="./app-shell-bootstrap.js?v=3.718"></script>
     <script defer src="./app.js?v=3.718"></script>
     <script defer src="./app-section-views.js?v=3.718"></script>
-    <script defer src="./app-visitors-admin.js?v=3.718"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.732"></script>
+    <script defer src="./app-visitors-admin.js?v=3.719"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=3.733"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=3.718"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=3.718"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.765"></script>

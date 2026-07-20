@@ -229,7 +229,6 @@
             <button type="button" class="admin-report-tab admin-report-tab--active" data-admin-report-tab="form" role="tab" aria-selected="true">Отчет</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="rakeback" role="tab" aria-selected="false">Рейкбек</button>
             <button type="button" class="admin-report-tab" data-admin-report-tab="sent" role="tab" aria-selected="false">Отправленные</button>
-            <button type="button" class="admin-report-tab" data-admin-report-tab="cash-total" role="tab" aria-selected="false" hidden>Касса итого</button>
           </div>
           <div class="admin-report-panel admin-report-panel--active" data-admin-report-panel="form">
             <div class="admin-report-form-body" id="adminReportFormBody">
@@ -299,6 +298,18 @@
                 </select>
               </label>
             </div>
+            <div class="admin-report-rakeback-quickbar">
+              <div class="admin-report-rakeback-filters" id="adminReportRakebackFilters" role="group" aria-label="Фильтр строк">
+                <button type="button" class="admin-report-rakeback-filter--active" data-rakeback-filter="all">Все <span data-rakeback-filter-count>0</span></button>
+                <button type="button" data-rakeback-filter="with_rb">С РБ <span data-rakeback-filter-count>0</span></button>
+                <button type="button" data-rakeback-filter="without_rb">Без РБ <span data-rakeback-filter-count>0</span></button>
+                <button type="button" data-rakeback-filter="changed">Изменённые <span data-rakeback-filter-count>0</span></button>
+              </div>
+              <details class="admin-report-rakeback-audit">
+                <summary>Журнал</summary>
+                <div class="admin-report-rakeback-audit__list" id="adminReportRakebackAuditList">Изменений пока нет</div>
+              </details>
+            </div>
             <div class="share-stats-admin-modal__table-wrap admin-report-rakeback-wrap admin-report-rakeback-wrap--by-room">
               <table class="admin-report-rakeback-table">
                 <thead>
@@ -322,6 +333,10 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="admin-report-rakeback-undo" id="adminReportRakebackUndo" hidden>
+              <span id="adminReportRakebackUndoText">Строка удалена</span>
+              <button type="button" id="adminReportRakebackUndoBtn">Отменить</button>
             </div>
             <p class="admin-report-rakeback-status" id="adminReportRakebackStatus" hidden></p>
             <div class="admin-report-rakeback-summary">
