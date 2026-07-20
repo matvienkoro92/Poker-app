@@ -1657,10 +1657,30 @@ function initRaffles() {
       if (cashTitle) return cashTitle;
     }
     var explicitTitle = String(raffle && (raffle.cardTitle || raffle.card_title) || "").replace(/\s+/g, " ").trim();
-    if (explicitTitle) return explicitTitle;
+    if (explicitTitle) return activeRaffleTitleWithTournament(raffle, explicitTitle);
     var ticketTitle = activeRaffleChooserPrizeTitle(raffle).replace(/\s+/g, " ").trim();
-    if (ticketTitle) return ticketTitle;
+    if (ticketTitle) return activeRaffleTitleWithTournament(raffle, ticketTitle);
     return "Розыгрыш";
+  }
+
+  function activeRaffleTitleWithTournament(raffle, title) {
+    var cleanTitle = String(title || "").replace(/\s+/g, " ").trim();
+    if (!cleanTitle) return "";
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var tournamentNames = [];
+    groups.forEach(function (group) {
+      var prize = String(group && group.prize || "").trim();
+      var tournamentName =
+        typeof pokerRafflesParsePrizeTournamentNameFromPrize === "function"
+          ? pokerRafflesParsePrizeTournamentNameFromPrize(prize)
+          : "";
+      tournamentName = String(tournamentName || "").replace(/\s+/g, " ").trim();
+      if (tournamentName && tournamentNames.indexOf(tournamentName) === -1) tournamentNames.push(tournamentName);
+    });
+    if (tournamentNames.length !== 1) return cleanTitle;
+    var tournamentName = tournamentNames[0];
+    if (cleanTitle.toLowerCase().indexOf(tournamentName.toLowerCase()) !== -1) return cleanTitle;
+    return cleanTitle + " на " + tournamentName;
   }
 
   function activeRaffleSubtitleText(raffle) {
