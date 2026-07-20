@@ -60,6 +60,9 @@
     weekReport: null,
     weekReportLoading: false,
     weekReportLoadedAt: 0,
+    weekReportPeriodKey: "",
+    weekReportRequestKey: "",
+    weekReportPendingReload: false,
     periodComparison: null,
     periodComparisonLoading: false,
     periodComparisonRequestKey: "",
@@ -242,6 +245,14 @@
     return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][dayIndex] || "";
   }
 
+  function crmReportDateKey(report) {
+    var match = String(report && report.date || "").match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (match) {
+      return match[3] + "-" + String(match[2]).padStart(2, "0") + "-" + String(match[1]).padStart(2, "0");
+    }
+    return dateOnly(report && report.createdAt);
+  }
+
   function crmDailyPokerDebitsByManager(stats) {
     var totals = { anya: 0, vika: 0 };
     var rows = stats && Array.isArray(stats.dailyDebits) ? stats.dailyDebits : [];
@@ -323,7 +334,7 @@
     }
     var report = state.weekReport;
     if (!report) {
-      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Отчётов за отчётную неделю пока нет.</div></section>';
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Отчётов за выбранный период пока нет.</div></section>';
       return;
     }
     function row(label, value, className, showZero) {
@@ -552,25 +563,39 @@
   }
 
   function loadCrmWeekReport(force) {
-    if (state.weekReportLoading) return;
-    if (!force && state.weekReportLoadedAt && Date.now() - state.weekReportLoadedAt < 60000) {
+    var range = selectedPeriodRange();
+    var periodRequestKey = range ? range.from + "|" + range.to : "all";
+    if (state.weekReportLoading) {
+      if (state.weekReportRequestKey !== periodRequestKey) state.weekReportPendingReload = true;
+      return;
+    }
+    if (!force && state.weekReportPeriodKey === periodRequestKey && state.weekReportLoadedAt && Date.now() - state.weekReportLoadedAt < 60000) {
       renderCrmWeekReport();
       return;
     }
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     state.weekReportLoading = true;
+    state.weekReportRequestKey = periodRequestKey;
+    state.weekReportPendingReload = false;
     renderCrmWeekReport();
     var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=crmWeek", { cache: "no-store" })
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=all", { cache: "no-store" })
       .then(function (response) {
-        if (!response.ok) throw new Error("week report " + response.status);
+        if (!response.ok) throw new Error("period report " + response.status);
         return response.json();
       })
       .then(function (data) {
         var reports = data && data.ok && Array.isArray(data.reports) ? data.reports : [];
+        if (range) {
+          reports = reports.filter(function (report) {
+            var key = crmReportDateKey(report);
+            return key && key >= range.from && key <= range.to;
+          });
+        }
         state.weekReport = reports.length ? crmWeekReportTotals(reports) : null;
         state.weekReportLoadedAt = Date.now();
+        state.weekReportPeriodKey = periodRequestKey;
       })
       .catch(function () {
         state.weekReport = null;
@@ -578,6 +603,9 @@
       .then(function () {
         state.weekReportLoading = false;
         renderCrmWeekReport();
+        var currentRange = selectedPeriodRange();
+        var currentKey = currentRange ? currentRange.from + "|" + currentRange.to : "all";
+        if (state.weekReportPendingReload || currentKey !== periodRequestKey) loadCrmWeekReport(true);
       });
   }
 
