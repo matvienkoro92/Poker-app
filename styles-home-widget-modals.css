@@ -2138,7 +2138,7 @@
 }
 
 .sng-champions-modal__round-matches--slider {
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
@@ -8357,16 +8357,15 @@ body.club-choice-vote-open {
   }
 }
 
-/* A consistent two-column stage layout for the narrow desktop PWA.
-   This applies only to regular round cards, never to the overview map. */
+/* Regular round cards stay full-width; the overview map keeps its own layout. */
 @media (min-width: 431px) and (max-width: 700px) {
   .sng-champions-modal__round--slider {
     padding: 18px 8px 8px;
   }
 
   .sng-champions-modal__round--slider .sng-champions-modal__round-matches--slider {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     gap: 8px;
   }
 
