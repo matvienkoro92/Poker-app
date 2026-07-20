@@ -1232,8 +1232,15 @@
   function renderReadyAction(match, players, data) {
     if (!data || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
     var myId = data.myEntryId || (data.myEntry && data.myEntry.id) || "";
-    if (!myId || players.indexOf(myId) < 0) return "";
-    if (match.readyById && match.readyById[myId] === true) {
+    var myParticipantId = myId;
+    if (myId && data.tournamentType === "team") {
+      var myTeam = (data.teams || []).find(function (team) {
+        return team && Array.isArray(team.memberIds) && team.memberIds.indexOf(myId) >= 0;
+      });
+      if (myTeam && myTeam.id) myParticipantId = myTeam.id;
+    }
+    if (!myParticipantId || players.indexOf(myParticipantId) < 0) return "";
+    if (match.readyById && match.readyById[myParticipantId] === true) {
       return '<div class="sng-champions-modal__ready-action sng-champions-modal__ready-action--done">Вы нажали «Готов»</div>';
     }
     return '<button type="button" class="sng-champions-modal__ready-btn" data-sng-ready="' + escapeHtml(match.id || "") + '">Готов</button>';

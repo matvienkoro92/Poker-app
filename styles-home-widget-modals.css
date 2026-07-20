@@ -2140,6 +2140,7 @@
 .sng-champions-modal__round-matches--slider {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
+  gap: 24px;
 }
 
 .sng-champions-modal__bracket-match {
@@ -2147,9 +2148,22 @@
   display: grid;
   gap: 7px;
   padding: 9px;
-  border: 1px solid rgba(255, 184, 70, 0.22);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
+  border: 2px solid rgba(255, 184, 70, 0.34);
+  border-radius: 14px;
+  background: rgba(4, 8, 14, 0.82);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+.sng-champions-modal__round-matches--slider > .sng-champions-modal__bracket-match + .sng-champions-modal__bracket-match::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  right: 8%;
+  left: 8%;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 184, 70, 0.72), transparent);
+  box-shadow: 0 0 10px rgba(255, 184, 70, 0.24);
 }
 
 .sng-champions-modal__bracket-match--series {
@@ -2204,6 +2218,11 @@
   color: rgba(255, 239, 201, 0.66);
   font-size: 12px;
   font-weight: 850;
+  margin: -9px -9px 2px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 184, 70, 0.28);
+  border-radius: 12px 12px 5px 5px;
+  background: linear-gradient(90deg, rgba(255, 184, 70, 0.14), rgba(255, 184, 70, 0.03));
 }
 
 .sng-champions-modal__bracket-match header small {
@@ -8366,7 +8385,7 @@ body.club-choice-vote-open {
   .sng-champions-modal__round--slider .sng-champions-modal__round-matches--slider {
     grid-template-columns: minmax(0, 1fr);
     align-items: start;
-    gap: 8px;
+    gap: 24px;
   }
 
   .sng-champions-modal__round--slider .sng-champions-modal__bracket-match {
