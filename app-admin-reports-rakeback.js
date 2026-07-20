@@ -869,6 +869,10 @@
     var refreshBtn = config.refreshBtn || document.getElementById("adminReportRakebackRefreshBtn");
     var addBtn = config.addBtn || document.getElementById("adminReportRakebackAddBtn");
     var archiveBtn = config.archiveBtn || document.getElementById("adminReportRakebackArchiveBtn");
+    var periodTabs = modal ? modal.querySelectorAll("[data-rakeback-period]") : [];
+    var customPeriodEl = document.getElementById("adminReportRakebackCustomPeriod");
+    var periodDateFrom = document.getElementById("adminReportRakebackDateFrom");
+    var periodDateTo = document.getElementById("adminReportRakebackDateTo");
     var roomTabs = config.roomTabs || (modal ? modal.querySelectorAll("[data-rakeback-room-tab]") : []);
     var totalEl = config.totalEl || document.getElementById("adminReportRakebackTotal");
     var roomTotalLabelEl = config.roomTotalLabelEl || document.getElementById("adminReportRakebackRoomTotalLabel");
@@ -893,6 +897,7 @@
     var activeRoom = normalizeRoom(config.activeRoom || "P21");
     var templateRowsOpen = config.templatesOpen === true || readRakebackTemplateSpoilerOpen();
     var archiveMode = false;
+    var activePeriod = "current_week";
     var bound = false;
 
     function syncRakebackHeaderLabels() {
@@ -1421,11 +1426,61 @@
     function getArchiveRows(room) {
       var query = getSearchQuery();
       return orderSharedRowsForDisplay(sharedRows.filter(function (row) {
-        if (!row || row.saved !== true || !isArchivedRakebackRow(row) || !hasRakebackReportValue(row)) return false;
+        if (!row || row.saved !== true || !hasRakebackReportValue(row)) return false;
+        if (!rakebackRowMatchesPeriod(row)) return false;
         if (room && normalizeRoom(row.room) !== normalizeRoom(room)) return false;
         var playerId = String(row.playerId || row.id || "").trim().toLowerCase();
         return !query || playerId.indexOf(query) !== -1;
       }));
+    }
+
+    function getMoscowDateStart(offsetDays) {
+      var now = new Date(Date.now() + MOSCOW_UTC_OFFSET_MS);
+      return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (offsetDays || 0)) - MOSCOW_UTC_OFFSET_MS;
+    }
+
+    function getRakebackPeriodBounds() {
+      var today = getMoscowDateStart(0);
+      var todayDate = new Date(today + MOSCOW_UTC_OFFSET_MS);
+      var weekday = (todayDate.getUTCDay() + 6) % 7;
+      var monthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth(), 1) - MOSCOW_UTC_OFFSET_MS;
+      if (activePeriod === "today") return [today, today + RAKEBACK_DAY_MS - 1];
+      if (activePeriod === "yesterday") return [today - RAKEBACK_DAY_MS, today - 1];
+      if (activePeriod === "current_week") return [today - weekday * RAKEBACK_DAY_MS, today + RAKEBACK_DAY_MS - 1];
+      if (activePeriod === "last_week") return [today - (weekday + 7) * RAKEBACK_DAY_MS, today - weekday * RAKEBACK_DAY_MS - 1];
+      if (activePeriod === "current_month") return [monthStart, today + RAKEBACK_DAY_MS - 1];
+      if (activePeriod === "last_month") {
+        var lastMonthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth() - 1, 1) - MOSCOW_UTC_OFFSET_MS;
+        return [lastMonthStart, monthStart - 1];
+      }
+      if (activePeriod === "custom") {
+        var from = periodDateFrom && periodDateFrom.value ? Date.parse(periodDateFrom.value + "T00:00:00+03:00") : 0;
+        var to = periodDateTo && periodDateTo.value ? Date.parse(periodDateTo.value + "T00:00:00+03:00") + RAKEBACK_DAY_MS - 1 : 0;
+        return from || to ? [from || 0, to || Number.MAX_SAFE_INTEGER] : null;
+      }
+      return null;
+    }
+
+    function rakebackRowMatchesPeriod(row) {
+      var bounds = getRakebackPeriodBounds();
+      if (!bounds) return true;
+      var stamp = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
+      return stamp >= bounds[0] && stamp <= bounds[1];
+    }
+
+    function activePeriodNeedsArchive() {
+      if (activePeriod === "all") return true;
+      var bounds = getRakebackPeriodBounds();
+      return !!(bounds && bounds[0] < getCurrentRakebackWeekStart());
+    }
+
+    function syncPeriodTabs() {
+      Array.prototype.slice.call(periodTabs || []).forEach(function (tab) {
+        var selected = tab.getAttribute("data-rakeback-period") === activePeriod;
+        tab.classList.toggle("admin-report-rakeback-period__tab--active", selected);
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+      });
+      if (customPeriodEl) customPeriodEl.hidden = activePeriod !== "custom";
     }
 
     function getArchiveWeeks(rows) {
@@ -2387,6 +2442,7 @@
     }
 
     function syncControls() {
+      syncPeriodTabs();
       if (refreshBtn) {
         refreshBtn.hidden = false;
         refreshBtn.disabled = loading;
@@ -2830,6 +2886,20 @@
           render();
         });
       });
+      Array.prototype.slice.call(periodTabs || []).forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          activePeriod = tab.getAttribute("data-rakeback-period") || "current_week";
+          archiveMode = activePeriod !== "current_week";
+          syncPeriodTabs();
+          render();
+          if (activePeriodNeedsArchive() && !sharedArchiveLoaded && !sharedArchiveLoading) {
+            loadSharedDraft({ includeArchive: true, force: true, background: true });
+          }
+        });
+      });
+      [periodDateFrom, periodDateTo].forEach(function (input) {
+        if (input) input.addEventListener("change", render);
+      });
       if (searchInput) {
         searchInput.addEventListener("input", render);
         searchInput.addEventListener("keydown", function (event) {
@@ -2841,7 +2911,7 @@
       if (sortSelect) sortSelect.addEventListener("change", render);
       if (refreshBtn) {
         refreshBtn.onclick = function () {
-          loadSharedDraft({ force: true, showStatus: true, includeArchive: archiveMode });
+          loadSharedDraft({ force: true, showStatus: true, includeArchive: activePeriodNeedsArchive() });
         };
       }
       if (addBtn) {
@@ -3113,9 +3183,10 @@
 
     function setArchiveMode(active) {
       archiveMode = !!active;
+      activePeriod = archiveMode ? "all" : "current_week";
       var count = render();
-      if (archiveMode && !sharedArchiveLoaded && !sharedArchiveLoading) {
-        loadSharedDraft({ includeArchive: true, force: true, showStatus: true });
+      if (activePeriodNeedsArchive() && !sharedArchiveLoaded && !sharedArchiveLoading) {
+        loadSharedDraft({ includeArchive: true, force: true, background: true });
       } else if (!archiveMode) {
         scheduleSharedDraftAutoload();
       }
