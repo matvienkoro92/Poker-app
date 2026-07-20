@@ -1041,7 +1041,7 @@
           tournamentOptionHtml +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
-            : '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Участники</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>') + participantHtml + '</article>';
+            : '<button type="button" class="sng-champions-modal__participants-toggle" data-sng-tournament-participants="' + escapeHtml(item.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><span>Смотреть</span><b>' + escapeHtml(String(item.approved || 0)) + '</b><i>⌄</i></button>') + participantHtml + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
   }
