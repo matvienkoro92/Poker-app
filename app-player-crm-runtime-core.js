@@ -323,7 +323,7 @@
     }
     var report = state.weekReport;
     if (!report) {
-      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Отчётов за текущую неделю пока нет.</div></section>';
+      host.innerHTML = '<section class="player-crm__week-report-card"><h3>Отчёт</h3><div class="player-crm__week-report-empty">Отчётов за отчётную неделю пока нет.</div></section>';
       return;
     }
     function row(label, value, className, showZero) {
@@ -441,7 +441,7 @@
   function crmWeekReportCopyText() {
     var report = state.weekReport;
     if (!report) return "";
-    var lines = ["ОТЧЁТ ТЕКУЩЕЙ НЕДЕЛИ", "", "Депозит: " + crmReportMoney(report.deposit), "", "ДЕПОЗИТЫ ПО ДНЯМ"];
+    var lines = ["ОТЧЁТ ЗА НЕДЕЛЮ", "", "Депозит: " + crmReportMoney(report.deposit), "", "ДЕПОЗИТЫ ПО ДНЯМ"];
     lines.push("День | Аня | Вика");
     var depositTotals = { anya: 0, vika: 0 };
     CRM_REPORT_WEEKDAYS.forEach(function (day) {
@@ -562,7 +562,7 @@
     state.weekReportLoading = true;
     renderCrmWeekReport();
     var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=currentWeek", { cache: "no-store" })
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=crmWeek", { cache: "no-store" })
       .then(function (response) {
         if (!response.ok) throw new Error("week report " + response.status);
         return response.json();
