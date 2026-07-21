@@ -286,10 +286,7 @@
   }
 
   function normalizeRakebackRoomAmount(room, value) {
-    var amount = parseNumber(value);
-    return normalizeRoom(room) === "P21"
-      ? Math.round(amount)
-      : Math.round(amount * 100) / 100;
+    return Math.round(parseNumber(value));
   }
 
   function getReportAmount(room, roomAmount) {
