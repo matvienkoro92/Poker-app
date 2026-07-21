@@ -261,7 +261,7 @@
   color: rgba(255, 225, 161, 0.82);
 }
 .header-crm-shortcut.header-crm-shortcut--compact {
-  left: calc(50% - 25px);
+  left: calc(50% - 77px);
   width: 48px;
   min-width: 48px;
   height: 54px;
@@ -272,7 +272,7 @@
   height: 17px;
 }
 .header-admin-shortcuts--with-crm {
-  left: calc(50% + 52px);
+  left: calc(50% + 29px);
   gap: 5px;
 }
 .header-admin-shortcuts--with-crm .header-admin-shortcut {
@@ -307,13 +307,13 @@
   .header-admin-shortcut svg { width: 17px; height: 17px; }
   .header-admin-shortcut span { font-size: 5.5px; }
   .header-crm-shortcut.header-crm-shortcut--compact {
-    left: calc(50% - 22px);
+    left: calc(50% - 66px);
     width: 40px;
     min-width: 40px;
     height: 46px;
   }
   .header-admin-shortcuts--with-crm {
-    left: calc(50% + 43px);
+    left: calc(50% + 22px);
     gap: 4px;
   }
   .header-admin-shortcuts--with-crm .header-admin-shortcut {

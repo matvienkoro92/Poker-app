@@ -397,7 +397,8 @@
     var raffleRows = raffleStats && raffleStats.available !== false
       ? row("Розыгрыши итого", raffleStats.issuedPrizeAmount, "", true) +
         row("— Билеты", raffleStats.issuedTicketAmount, "player-crm__week-report-row--subdetail", true) +
-        row("— Кеш", raffleStats.issuedCashAmount, "player-crm__week-report-row--subdetail", true)
+        row("— Кеш", raffleStats.issuedCashAmount, "player-crm__week-report-row--subdetail", true) +
+        row("— Возврат", raffleStats.returnedAmount, "player-crm__week-report-row--subdetail", true)
       : "";
     var dailyPokerDebited = state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null
       ? crmReportNumber(state.dailyPokerStats.bonusBalanceDebited)
@@ -508,6 +509,7 @@
       lines.push("Розыгрыши итого: " + crmReportMoney(raffleStats.issuedPrizeAmount));
       lines.push("— Билеты: " + crmReportMoney(raffleStats.issuedTicketAmount));
       lines.push("— Кеш: " + crmReportMoney(raffleStats.issuedCashAmount));
+      lines.push("— Возврат: " + crmReportMoney(raffleStats.returnedAmount));
     }
     var dailyPokerDebited = 0;
     if (state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null) {
@@ -2080,9 +2082,11 @@
           bonusBalanceEnd: Math.max(0, Number(data.bonusBalanceEnd) || 0),
           bonusBalanceCredited: Math.max(0, Number(data.bonusBalanceCredited) || 0),
           bonusBalanceDebited: Math.max(0, Number(data.bonusBalanceDebited) || 0),
+          bonusBalanceReturned: Math.max(0, Number(data.bonusBalanceReturned) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
           dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),
+          dailyReturns: Array.isArray(data.dailyReturnStats) ? data.dailyReturnStats : [],
           debitedUsers: Array.isArray(data.debitedUsers) ? data.debitedUsers : [],
           daily: Array.isArray(data.dailyStats) ? data.dailyStats : [],
         };

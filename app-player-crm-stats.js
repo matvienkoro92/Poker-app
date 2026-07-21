@@ -233,10 +233,13 @@ function initPlayerCrmStatsRuntime(deps) {
       };
     }
     var dailyPokerCreditedAmount = dailyPokerStats
-      ? (state.period === "all" ? Number(dailyPokerStats.bonusAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceCredited) || 0)
+      ? Number(dailyPokerStats.bonusAmount) || 0
       : null;
     var dailyPokerDebitedAmount = dailyPokerStats
       ? (state.period === "all" ? Number(dailyPokerStats.debitedAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceDebited) || 0)
+      : null;
+    var dailyPokerReturnedAmount = dailyPokerStats
+      ? Math.max(0, Number(dailyPokerSource && dailyPokerSource.bonusBalanceReturned) || 0)
       : null;
     function previousDailyPokerUnique() {
       if (!dailyPokerSource || (state.period !== "current_week" && state.period !== "current_month")) return null;
@@ -339,12 +342,14 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Всего", dailyPokerValue("totalSpins")],
         ["Бонусов начислено", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—"],
         ["Бонусов списано", dailyPokerDebitedAmount != null ? money(dailyPokerDebitedAmount) : "—", null, "highlight"],
+        ["Возврат", dailyPokerReturnedAmount != null ? (dailyPokerReturnedAmount > 0 ? "+" : "") + money(dailyPokerReturnedAmount) : "—", null, "positive"],
       ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerBonusBalance],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [
         ["Уникальных участников", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—"],
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
         ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—", null, "highlight"],
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
+        ["Возврат", raffleStatsAvailable ? ((Number(raffleStats.returnedAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedAmount || 0) : "—", null, "positive"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
       ].concat(raffleStatsAvailable ? [
         ["Кем выдано", ""],

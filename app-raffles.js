@@ -170,6 +170,18 @@ function initRaffles() {
     }
   }
 
+  function consumeRafflesOpenCompletedTabRequest() {
+    try {
+      if (typeof window === "undefined" || !window.__pokerRafflesOpenCompletedTab) return false;
+      window.__pokerRafflesOpenCompletedTab = false;
+      window.__pokerRafflesOpenActiveTab = false;
+      window.__pendingRaffleCompletedId = "";
+      return true;
+    } catch (eConsumeCompletedTab) {
+      return false;
+    }
+  }
+
   if (adminWrap && rafflesPanelCreate && adminWrap.parentNode !== rafflesPanelCreate) {
     rafflesPanelCreate.appendChild(adminWrap);
   }
@@ -4277,7 +4289,8 @@ function initRaffles() {
   initRaffles.__boundRaffleCompleteBtn = raffleCompleteBtn;
   initRaffles.__boundRafflesCompleted = rafflesCompleted;
   initRaffles.__openRequestedActiveTab = function () {
-    if (consumeRafflesOpenActiveTabRequest()) setRafflesTab("active");
+    if (consumeRafflesOpenCompletedTabRequest()) setRafflesTab("completed");
+    else if (consumeRafflesOpenActiveTabRequest()) setRafflesTab("active");
   };
   initRaffles.__reload = function () {
     loadRaffles();

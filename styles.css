@@ -1,16 +1,16 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=3.825");
-@import url("./styles-home-rating-promo.css?v=3.825");
-@import url("./styles-auth.css?v=3.825");
-@import url("./styles-home.css?v=3.825");
-@import url("./styles-home-legacy-prelude.css?v=3.825");
-@import url("./styles-download.css?v=3.825");
-@import url("./styles-home-legacy-tail.css?v=3.825");
-@import url("./styles-home-rating-promo-legacy.css?v=3.825");
-@import url("./styles-layout.css?v=3.825");
-@import url("./styles-home-overrides.css?v=3.825");
-@import url("./styles-layout-touch-targets.css?v=3.825");
-@import url("./styles-home-rating-promo-late.css?v=3.825");
+@import url("./styles-base.css?v=3.826");
+@import url("./styles-home-rating-promo.css?v=3.826");
+@import url("./styles-auth.css?v=3.826");
+@import url("./styles-home.css?v=3.826");
+@import url("./styles-home-legacy-prelude.css?v=3.826");
+@import url("./styles-download.css?v=3.826");
+@import url("./styles-home-legacy-tail.css?v=3.826");
+@import url("./styles-home-rating-promo-legacy.css?v=3.826");
+@import url("./styles-layout.css?v=3.826");
+@import url("./styles-home-overrides.css?v=3.826");
+@import url("./styles-layout-touch-targets.css?v=3.826");
+@import url("./styles-home-rating-promo-late.css?v=3.826");
 
 .profile-status__fish,
 .profile-status-fish-inline,

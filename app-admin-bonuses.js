@@ -98,6 +98,20 @@
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
+  function tournamentTimeMinutes(value) {
+    var match = String(value || "").match(/(?:^|\D)([01]?\d|2[0-3]):([0-5]\d)(?:\D|$)/);
+    if (!match) return Number.POSITIVE_INFINITY;
+    return Number(match[1]) * 60 + Number(match[2]);
+  }
+
+  function compareIssueTournaments(a, b) {
+    var timeDifference = tournamentTimeMinutes(a && a.tournamentTime) - tournamentTimeMinutes(b && b.tournamentTime);
+    if (timeDifference) return timeDifference;
+    var titleDifference = String(a && a.tournamentTitle || "").localeCompare(String(b && b.tournamentTitle || ""), "ru");
+    if (titleDifference) return titleDifference;
+    return Date.parse(String(a && a.createdAt || "")) - Date.parse(String(b && b.createdAt || ""));
+  }
+
   function currentBusinessWeekStartKey() {
     var key = businessDateKey(new Date());
     var parts = key.split("-");
@@ -397,7 +411,7 @@
       groups[key].push(op);
     });
     body.innerHTML = Object.keys(groups).sort().reverse().map(function (key) {
-      var rows = groups[key];
+      var rows = groups[key].slice().sort(compareIssueTournaments);
       var total = rows.reduce(function (sum, row) { return sum + Math.max(0, Number(row.amount) || 0); }, 0);
       return '<section class="admin-bonuses__issue-day">' +
         '<h4 class="admin-bonuses__issue-day-title"><span>' + esc(formatBusinessDate(key)) + '</span><strong>Итого ' + esc(fmtPoints(total)) + '</strong></h4>' +

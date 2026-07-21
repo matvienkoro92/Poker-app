@@ -167,16 +167,19 @@
     var wrap = document.getElementById("headerAdminShortcuts");
     var reportShortcut = document.getElementById("headerReportsShortcutBtn");
     var balanceShortcut = document.getElementById("headerBalancesShortcutBtn");
-    if (!wrap || !reportShortcut || !balanceShortcut) return;
+    var rafflesShortcut = document.getElementById("headerRafflesShortcutBtn");
+    if (!wrap || !reportShortcut || !balanceShortcut || !rafflesShortcut) return;
     var ownerSeesCrm = userCanSeeCrmMenuButton();
     var crmBtn = document.getElementById("headerCrmBtn");
     var reportBtn = document.getElementById("adminReportBtn");
     var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
     var showReport = !!(reportBtn && !reportBtn.hidden && !reportBtn.disabled);
     var showBalances = !!(balanceBtn && !balanceBtn.hidden);
+    var showRaffles = ownerSeesCrm || showReport || showBalances;
     reportShortcut.hidden = !showReport;
     balanceShortcut.hidden = !showBalances;
-    wrap.hidden = !showReport && !showBalances;
+    rafflesShortcut.hidden = !showRaffles;
+    wrap.hidden = !showReport && !showBalances && !showRaffles;
     wrap.classList.toggle("header-admin-shortcuts--with-crm", ownerSeesCrm);
     if (crmBtn) crmBtn.classList.toggle("header-crm-shortcut--compact", ownerSeesCrm && (showReport || showBalances));
   }
@@ -199,6 +202,7 @@
     var bonusAdminBtn = document.getElementById("adminBonusBalancesHeaderBtn");
     var reportsShortcutBtn = document.getElementById("headerReportsShortcutBtn");
     var balancesShortcutBtn = document.getElementById("headerBalancesShortcutBtn");
+    var rafflesShortcutBtn = document.getElementById("headerRafflesShortcutBtn");
     var homeFooterVersion = document.getElementById("homeFooterAppVersion");
     var homeAdminVersion = document.getElementById("homeAdminVersionTop");
     if (!wrap && !keyboardLabWrap && !ratingAdminRow && !gazetteAdminRow && !reportBtn && !bonusAdminBtn && !reportsShortcutBtn && !balancesShortcutBtn && !homeAdminVersion) return;
@@ -212,6 +216,14 @@
       balancesShortcutBtn.dataset.adminShortcutBound = "1";
       balancesShortcutBtn.addEventListener("click", function () {
         if (bonusAdminBtn && !bonusAdminBtn.hidden) bonusAdminBtn.click();
+      });
+    }
+    if (rafflesShortcutBtn && rafflesShortcutBtn.dataset.adminShortcutBound !== "1") {
+      rafflesShortcutBtn.dataset.adminShortcutBound = "1";
+      rafflesShortcutBtn.addEventListener("click", function () {
+        window.__pokerRafflesOpenCompletedTab = true;
+        window.__pokerRafflesOpenActiveTab = false;
+        if (typeof setView === "function") setView("raffles", { raffleCompletedTarget: true });
       });
     }
     if (reportBtn) {
