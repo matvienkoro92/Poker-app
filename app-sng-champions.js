@@ -1362,14 +1362,14 @@
       var winnerMemberId = String(selectedId || "") === String(firstTeam.id || "") ? gamePlayers.first : gamePlayers.second;
       var winnerMember = winnerMemberId && data.playersById ? data.playersById[winnerMemberId] : null;
       var selectedLabel = selectedId && data.playersById[selectedId]
-        ? playerName(data.playersById[selectedId]) + (winnerMember ? " (" + playerName(winnerMember) + ")" : "")
+        ? (winnerMember ? playerName(winnerMember) + " (" + playerName(data.playersById[selectedId]) + ")" : playerName(data.playersById[selectedId]))
         : "Не отмечен";
       if (!data.isAdmin || match.winnerId) {
         return '<strong>' + escapeHtml(selectedLabel) + '</strong>';
       }
       return '<div class="sng-champions-modal__team-round-actions">' + [firstTeam, secondTeam].map(function (team) {
         var active = String(selectedId || "") === String(team.id || "");
-        var label = playerName(team) + (active && winnerMember ? " (" + playerName(winnerMember) + ")" : "");
+        var label = active && winnerMember ? playerName(winnerMember) + " (" + playerName(team) + ")" : playerName(team);
         return '<button type="button" class="sng-champions-modal__team-round-winner' + (active ? ' is-active' : '') + '" data-sng-singles-winner="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(game) + '" data-sng-player="' + escapeHtml(team.id || "") + '">' + escapeHtml(label) + '</button>';
       }).join("") + '</div>';
     }
@@ -1394,9 +1394,25 @@
         '</div>'
       : '<strong><span>' + escapeHtml(singles.first && data.playersById[singles.first] ? playerName(data.playersById[singles.first]) : "Не выбран") +
         '</span><span>' + escapeHtml(singles.second && data.playersById[singles.second] ? playerName(data.playersById[singles.second]) : "Не выбран") + '</span></strong>';
-    var secondWinnerControls = singles.first && singles.second
-      ? '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small>' + gameWinnerControls(2, match.singlesRoundWinnerId) + '</div>'
-      : "";
+    function singlesDuelPlayer(team, memberId, side) {
+      var member = memberId && data.playersById ? data.playersById[memberId] : null;
+      var won = String(match.singlesRoundWinnerId || "") === String(team.id || "");
+      var tag = data.isAdmin && !match.winnerId ? "button" : "div";
+      var attrs = tag === "button"
+        ? ' type="button" data-sng-singles-winner="' + escapeHtml(match.id || "") + '" data-sng-game="2" data-sng-player="' + escapeHtml(team.id || "") + '"'
+        : "";
+      return '<' + tag + ' class="sng-champions-modal__singles-duel-player sng-champions-modal__singles-duel-player--' + side + (won ? ' is-winner' : '') + '"' + attrs + '>' +
+        '<small>' + escapeHtml(playerName(team)) + '</small>' +
+        '<strong>' + escapeHtml(member ? playerName(member) : "Не выбран") + '</strong>' +
+        (won ? '<em>Победитель</em>' : '') +
+      '</' + tag + '>';
+    }
+    function scoreAfterSecondRound() {
+      if (!match.singlesRoundWinnerId) return "";
+      var firstScore = (roundWinnerId === String(firstTeam.id || "") ? 1 : 0) + (String(match.singlesRoundWinnerId) === String(firstTeam.id || "") ? 1 : 0);
+      var secondScore = (roundWinnerId === String(secondTeam.id || "") ? 1 : 0) + (String(match.singlesRoundWinnerId) === String(secondTeam.id || "") ? 1 : 0);
+      return '<div class="sng-champions-modal__singles-duel-score"><small>Счёт после 2-го раунда</small><strong>' + escapeHtml(firstScore) + ' : ' + escapeHtml(secondScore) + '</strong></div>';
+    }
     var decider = match.deciderPlayers && typeof match.deciderPlayers === "object" ? match.deciderPlayers : null;
     var deciderControls = decider
       ? '<div class="sng-champions-modal__team-round--singles"><span>3-й раунд · 1×1</span>' +
@@ -1407,12 +1423,21 @@
           '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>' +
         '</div>'
       : "";
+    var secondRoundPasswordHtml = roundPasswordControls(2) || '<div class="sng-champions-modal__round-password sng-champions-modal__round-password--empty"><span>Пароль стола</span><strong>—</strong></div>';
     var secondRoundControls = roundWinnerId
-      ? '<div class="sng-champions-modal__team-round--singles"><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--participants"><small>Участники</small>' + singlesControls + '</div>' +
-          (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>'
+      ? (singles.first && singles.second
+          ? '<div class="sng-champions-modal__team-round--singles sng-champions-modal__team-round--singles-duel"><span>2-й раунд · 1×1</span>' +
+              singlesDuelPlayer(firstTeam, singles.first, "left") + secondRoundPasswordHtml + singlesDuelPlayer(secondTeam, singles.second, "right") + scoreAfterSecondRound() +
+            '</div>'
+          : '<div class="sng-champions-modal__team-round--singles"><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--participants"><small>Участники</small>' + singlesControls + '</div></div>')
       : "";
+    var firstRoundWinnerSideClass = !roundWinnerId
+      ? ""
+      : roundWinnerId === String(secondTeam.id || "")
+        ? " sng-champions-modal__team-round-result--right-team"
+        : " sng-champions-modal__team-round-result--left-team";
     return '<section class="sng-champions-modal__team-rounds">' +
-      '<div class="sng-champions-modal__team-round--team-game"><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
+      '<div class="sng-champions-modal__team-round--team-game"><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner' + firstRoundWinnerSideClass + '"><small>Победитель:</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
       secondRoundControls +
       deciderControls +
     '</section>';
