@@ -1399,7 +1399,7 @@
       : "";
     var decider = match.deciderPlayers && typeof match.deciderPlayers === "object" ? match.deciderPlayers : null;
     var deciderControls = decider
-      ? '<div><span>3-й раунд · 1×1</span>' +
+      ? '<div class="sng-champions-modal__team-round--singles"><span>3-й раунд · 1×1</span>' +
           '<div class="sng-champions-modal__team-round-result"><small>Участники</small><strong>' +
             escapeHtml(decider.first && data.playersById[decider.first] ? playerName(data.playersById[decider.first]) : "Не выбран") +
             ' — ' + escapeHtml(decider.second && data.playersById[decider.second] ? playerName(data.playersById[decider.second]) : "Не выбран") +
@@ -1408,7 +1408,7 @@
         '</div>'
       : "";
     var secondRoundControls = roundWinnerId
-      ? '<div><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result"><small>Участники</small>' + singlesControls + '</div>' +
+      ? '<div class="sng-champions-modal__team-round--singles"><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result"><small>Участники</small>' + singlesControls + '</div>' +
           (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>'
       : "";
     return '<section class="sng-champions-modal__team-rounds">' +
@@ -1479,9 +1479,12 @@
     var advanced = playerAdvancedToOpenMatch(id, match, data);
     var lost = match.winnerId && !won;
     var ready = match.readyById && match.readyById[id] === true;
+    var compactMembers = player && player.team === true && Array.isArray(player.members) && player.members.length
+      ? '<small class="sng-champions-modal__map-team-members">' + escapeHtml(player.members.map(function (member) { return playerName(member); }).join(" · ")) + '</small>'
+      : "";
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
-      teamMembersHtml(player, "sng-champions-modal__map-team-members", match) +
+      compactMembers +
       playerMetaHtml(player, "sng-champions-modal__map-player-meta") +
     '</span>';
   }
