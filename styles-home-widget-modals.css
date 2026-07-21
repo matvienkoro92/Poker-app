@@ -2454,6 +2454,8 @@
 
 .sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--left-team {
   grid-column: 1;
+  justify-items: start;
+  text-align: left;
 }
 
 .sng-champions-modal__team-round--team-game:has(> .sng-champions-modal__team-round-result--left-team) > .sng-champions-modal__round-password {
@@ -2462,6 +2464,20 @@
 
 .sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--right-team {
   grid-column: 2;
+  justify-items: end;
+  text-align: right;
+}
+
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--left-team > small,
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--left-team .sng-champions-modal__team-round-actions,
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--left-team .sng-champions-modal__team-round-actions > strong {
+  text-align: left;
+}
+
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--right-team > small,
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--right-team .sng-champions-modal__team-round-actions,
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result--right-team .sng-champions-modal__team-round-actions > strong {
+  text-align: right;
 }
 
 .sng-champions-modal__team-round--team-game > .sng-champions-modal__round-password {
