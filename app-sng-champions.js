@@ -1412,7 +1412,7 @@
           (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>'
       : "";
     return '<section class="sng-champions-modal__team-rounds">' +
-      '<div class="sng-champions-modal__team-round--team-game"><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
+      '<div class="sng-champions-modal__team-round--team-game"><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
       secondRoundControls +
       deciderControls +
     '</section>';
@@ -1481,7 +1481,10 @@
     var ready = match.readyById && match.readyById[id] === true;
     var compactMembers = player && player.team === true && Array.isArray(player.members) && player.members.length
       ? '<small class="sng-champions-modal__map-team-members">' + player.members.map(function (member) {
-          return '<span>' + escapeHtml(playerName(member)) + '</span>';
+          var memberReady = ready || !!(match.readyMemberIds && match.readyMemberIds[member.id] === true);
+          return '<span class="sng-champions-modal__team-member-ready--' + (memberReady ? 'yes' : 'waiting') + '">' +
+            (memberReady ? '✓ ' : '') + escapeHtml(playerName(member)) +
+          '</span>';
         }).join("") + '</small>'
       : "";
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
@@ -1579,7 +1582,7 @@
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
     var connectorRowStep = isTournamentMap
-      ? (bracketMapExpanded ? 98 : 90)
+      ? (bracketMapExpanded ? 112 : 104)
       : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + fitClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
