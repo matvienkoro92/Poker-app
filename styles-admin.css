@@ -2210,7 +2210,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
   padding-bottom: 5px;
   border-top: 1px solid rgba(255, 205, 105, 0.62);
   border-bottom: 1px solid rgba(255, 205, 105, 0.72);
-  background: linear-gradient(180deg, rgba(111, 70, 18, 0.68), rgba(43, 29, 13, 0.9));
+  background-color: #2b1d0d;
+  background-image: linear-gradient(180deg, #6f4612 0%, #2b1d0d 100%);
   color: #ffe4aa;
   font-size: 12px;
   font-weight: 700;
@@ -2501,7 +2502,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   line-height: 1.2;
 }
 .admin-report-rakeback-date-separator--entries td {
-  padding: 9px 5px 7px;
+  padding: 9px 0 7px;
   background: rgba(4, 6, 12, 0.96) !important;
 }
 .admin-report-rakeback-date-separator__stack {
@@ -2518,8 +2519,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
   width: 100%;
   min-height: 42px;
   padding: 6px 10px;
-  border: 1px solid rgba(245, 179, 60, 0.78);
-  border-radius: 10px;
+  border-top: 1px solid rgba(245, 179, 60, 0.78);
+  border-bottom: 1px solid rgba(245, 179, 60, 0.78);
+  border-radius: 0;
   background: linear-gradient(90deg, rgba(122, 69, 10, 0.74), rgba(42, 29, 16, 0.76) 50%, rgba(13, 18, 28, 0.94));
   box-shadow: inset 0 1px 0 rgba(255, 235, 190, 0.14), 0 0 18px rgba(234, 157, 35, 0.13);
   box-sizing: border-box;
@@ -3045,9 +3047,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
   pointer-events: none;
 }
 .admin-report-rakeback-discount:checked + .admin-report-rakeback-discount-box {
-  border-color: rgba(246, 211, 145, 0.92);
-  background: #f6d391;
-  box-shadow: 0 0 0 1px rgba(246, 211, 145, 0.28);
+  border-color: #4ade80;
+  background: #22c55e;
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.36), 0 0 8px rgba(34, 197, 94, 0.3);
 }
 .admin-report-rakeback-discount:checked + .admin-report-rakeback-discount-box::after {
   content: "";
@@ -3063,6 +3065,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-discount:disabled + .admin-report-rakeback-discount-box {
   opacity: 0.55;
+}
+.admin-report-rakeback-discount:checked:disabled + .admin-report-rakeback-discount-box {
+  opacity: 0.9;
 }
 .admin-report-rakeback-amount {
   display: inline-flex;
@@ -3464,7 +3469,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     min-width: 0;
     padding-left: 3px;
     padding-right: 3px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .admin-report-rakeback-rest {
     min-width: 42px;
@@ -3537,7 +3542,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 24%;
+    width: 26%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
@@ -3553,11 +3558,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(6),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(6) {
-    width: 16%;
+    width: 13%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 24%;
+    width: 25%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -3566,7 +3571,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     padding-bottom: 2px;
     padding-left: 3px;
     padding-right: 3px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .admin-report-rakeback-rake-with-rest {
     grid-template-columns: minmax(0, 1fr) minmax(34px, auto);
@@ -3575,24 +3580,29 @@ button.admin-report-rakeback-summary__row:focus-visible {
   .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
     padding-left: 2px;
     padding-right: 2px;
-    font-size: 10px;
+    font-size: 11px;
   }
   .admin-report-rakeback-rest {
     min-width: 34px;
     padding-left: 1px;
     padding-right: 1px;
-    font-size: 9px;
+    font-size: 10px;
   }
   .admin-report-rakeback-amount {
     min-height: 30px;
-    font-size: 12px;
+    font-size: 13px;
   }
   .admin-report-rakeback-actions {
+    box-sizing: border-box;
+    padding-right: 4px !important;
     text-align: right !important;
   }
+  .admin-report-rakeback-actions .admin-report-rakeback-icon-btn {
+    margin-left: 1px;
+  }
   .admin-report-rakeback-icon-btn {
-    width: 22px !important;
-    min-width: 22px !important;
+    width: 21px !important;
+    min-width: 21px !important;
     height: 24px !important;
     border-radius: 8px;
     font-size: 14px;

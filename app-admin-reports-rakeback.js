@@ -285,6 +285,13 @@
     return normalizeRoom(room) !== "P21";
   }
 
+  function normalizeRakebackRoomAmount(room, value) {
+    var amount = parseNumber(value);
+    return normalizeRoom(room) === "P21"
+      ? Math.round(amount)
+      : Math.round(amount * 100) / 100;
+  }
+
   function getReportAmount(room, roomAmount) {
     return Math.round(parseNumber(roomAmount)) * getRakebackRoomMultiplier(room);
   }
@@ -572,12 +579,13 @@
     } else if (restEl) {
       restEl.textContent = "";
     }
+    var room = roomSelect && roomSelect.value ? roomSelect.value : "P21";
     var roomAmount = baseRake * parseNumber(percentInput ? percentInput.value : "") / 100;
     if (discountInput && discountInput.checked) roomAmount *= 0.85;
-    roomAmount = Math.round(roomAmount * 100) / 100;
+    roomAmount = normalizeRakebackRoomAmount(room, roomAmount);
     row.setAttribute("data-rakeback-base-rake", String(baseRake || 0));
     row.setAttribute("data-rakeback-room-amount", String(roomAmount || 0));
-    row.setAttribute("data-rakeback-amount-value", String(getReportAmount(roomSelect && roomSelect.value ? roomSelect.value : "P21", roomAmount)));
+    row.setAttribute("data-rakeback-amount-value", String(getReportAmount(room, roomAmount)));
     if (amountEl) amountEl.textContent = roomAmount ? String(roomAmount) : "";
     if (restEl) restEl.classList.toggle("admin-report-rakeback-rest--negative", baseRake < 0);
     if (amountEl) amountEl.classList.toggle("admin-report-rakeback-amount--negative", roomAmount < 0);
@@ -2141,7 +2149,7 @@
         var rakeDelta = kind === "addon" ? (hasRakeInputValue ? rake - previousRake : 0) : rake;
         var roomAmount = rakeDelta * percent / 100;
         if (discountInput && discountInput.checked) roomAmount *= 0.85;
-        roomAmount = Math.round(roomAmount * 100) / 100;
+        roomAmount = normalizeRakebackRoomAmount(room, roomAmount);
         var amount = getReportAmount(room, roomAmount);
         if (kind !== "addon" || hasRakeInputValue) previousRakeByGroup[groupId] = rake;
         var reportedAt = row.getAttribute("data-rakeback-reported-at") || "";
@@ -2204,6 +2212,7 @@
         var roomAmount = row.roomAmount != null && row.roomAmount !== ""
           ? row.roomAmount
           : Math.round(parseNumber(rake) * parseNumber(percent) / 100 * (row.discount15 || row.subtract15 ? 0.85 : 1) * 100) / 100;
+        roomAmount = normalizeRakebackRoomAmount(room, roomAmount);
         var carryForward = row.carryForward === true || row.templateCarryForward === true;
         var reportedAt = row.reportedAt || "";
         var reportId = row.reportId || "";
@@ -3069,7 +3078,7 @@
           if (percentInput && typeof percentInput.focus === "function") percentInput.focus();
           return;
         }
-        var roomAmount = Math.round(rake * percent / 100 * (discount15 ? 0.85 : 1) * 100) / 100;
+        var roomAmount = normalizeRakebackRoomAmount(room, rake * percent / 100 * (discount15 ? 0.85 : 1));
         var now = Date.now();
         var row = {
           groupId: "shell_template_" + now + "_" + Math.random().toString(16).slice(2),
