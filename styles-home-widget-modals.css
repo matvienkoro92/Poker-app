@@ -2431,6 +2431,22 @@
   gap: 8px;
 }
 
+.sng-champions-modal__team-rounds > .sng-champions-modal__team-round--team-game {
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1.4fr);
+  align-items: stretch;
+  gap: 10px;
+}
+
+.sng-champions-modal__team-round--team-game > span {
+  grid-column: 1 / -1;
+}
+
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__round-password,
+.sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result {
+  min-width: 0;
+  margin-top: 0;
+}
+
 .sng-champions-modal__team-round--singles > span {
   grid-column: 1 / -1;
 }
@@ -2449,11 +2465,27 @@
   text-align: center;
 }
 
-@media (max-width: 700px) {
-  .sng-champions-modal__team-rounds > .sng-champions-modal__team-round--singles {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.sng-champions-modal__team-round-result--participants > strong {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
 }
+
+.sng-champions-modal__team-round-result--participants > strong > span {
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sng-champions-modal__team-round--singles > .sng-champions-modal__round-password {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+}
+
 
 .sng-champions-modal__team-rounds > div > span {
   display: block;
@@ -3332,7 +3364,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 72px;
+  --sng-map-row-height: 87px;
   --sng-map-row-gap: 3px;
   grid-template-columns:
     152px
@@ -3346,7 +3378,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 78px;
+  --sng-map-row-height: 94px;
   --sng-map-row-gap: 4px;
   grid-template-columns:
     220px
@@ -3386,7 +3418,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 72px;
+  --sng-map-row-height: 87px;
   --sng-map-row-gap: 3px;
   grid-template-columns:
     152px
@@ -3459,7 +3491,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 78px;
+  --sng-map-row-height: 94px;
   --sng-map-row-gap: 4px;
   grid-template-columns:
     220px
@@ -3618,11 +3650,11 @@
 
 .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-round-matches {
   align-content: start;
-  grid-template-rows: repeat(var(--sng-map-rows, 16), 136px);
+  grid-template-rows: repeat(var(--sng-map-rows, 16), 184px);
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-round-matches {
-  grid-template-rows: repeat(var(--sng-map-rows, 16), 148px);
+  grid-template-rows: repeat(var(--sng-map-rows, 16), 196px);
 }
 
 .sng-champions-modal__map-match {
@@ -3832,8 +3864,8 @@
   position: absolute;
   z-index: -1;
   top: 50%;
-  right: -15px;
-  width: 15px;
+  right: -22px;
+  width: 22px;
   height: 3px;
   border-radius: 999px;
   background: var(--sng-map-lane);
@@ -3846,9 +3878,14 @@
   height: var(--sng-map-connector-height, 42px);
   border-radius: 0;
   background:
-    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 100% 3px no-repeat,
-    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right top / 3px 100% no-repeat;
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 70% 3px no-repeat,
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) 70% top / 3px 100% no-repeat,
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right 50% / 30% 3px no-repeat;
   transform: none;
+}
+
+.sng-champions-modal__map-match--has-next:nth-child(even)::after {
+  background: linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left center / 70% 3px no-repeat;
 }
 
 .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match--has-next::after {
@@ -3961,12 +3998,12 @@
 
 .sng-champions-modal__map-match--series {
   align-self: center;
-  min-height: 118px;
+  min-height: 152px;
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed,
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
-  min-height: 118px;
+  min-height: 152px;
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
@@ -3974,8 +4011,9 @@
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 8px 27px 15px 16px;
-  gap: 4px;
+  inset: 10px 27px 10px 16px;
+  grid-template-rows: repeat(2, minmax(58px, 1fr));
+  gap: 5px;
 }
 
 .sng-champions-modal__map-player {
@@ -4005,12 +4043,25 @@
 }
 
 .sng-champions-modal__map-team-members {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 1px;
   width: 100%;
   color: rgba(255, 239, 201, 0.64);
   font-size: 0.76em;
   font-weight: 800;
   line-height: 0.95;
+}
+
+.sng-champions-modal__map-team-members > span {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sng-champions-modal__map-player-meta {
@@ -4229,15 +4280,24 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed,
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed {
-  min-height: 128px;
+  min-height: 164px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series {
-  min-height: 128px;
+  min-height: 164px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
-  min-height: 128px;
+  min-height: 164px;
+}
+
+.sng-champions-modal__map-match--series .sng-champions-modal__map-player {
+  align-content: center;
+  min-height: 0;
+}
+
+.sng-champions-modal__map-match--series .sng-champions-modal__map-team-members {
+  flex-shrink: 0;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
@@ -4323,9 +4383,14 @@
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next:nth-child(odd)::after {
   height: var(--sng-map-connector-height, 44px);
   background:
-    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 100% 4px no-repeat,
-    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right top / 4px 100% no-repeat;
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left top / 70% 4px no-repeat,
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) 70% top / 4px 100% no-repeat,
+    linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) right 50% / 30% 4px no-repeat;
   transform: none;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--has-next:nth-child(even)::after {
+  background: linear-gradient(var(--sng-map-lane), var(--sng-map-lane)) left center / 70% 4px no-repeat;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-1 .sng-champions-modal__map-match--has-next::after {

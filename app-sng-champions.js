@@ -1392,27 +1392,27 @@
           '<select data-sng-singles-second aria-label="Игрок команды ' + escapeHtml(playerName(secondTeam)) + '">' + memberOptions(secondTeam, singles.second) + '</select>' +
           '<button type="button" data-sng-save-singles="' + escapeHtml(match.id || "") + '">Сохранить пару</button>' +
         '</div>'
-      : '<strong>' + escapeHtml(singles.first && data.playersById[singles.first] ? playerName(data.playersById[singles.first]) : "Не выбран") +
-        ' — ' + escapeHtml(singles.second && data.playersById[singles.second] ? playerName(data.playersById[singles.second]) : "Не выбран") + '</strong>';
+      : '<strong><span>' + escapeHtml(singles.first && data.playersById[singles.first] ? playerName(data.playersById[singles.first]) : "Не выбран") +
+        '</span><span>' + escapeHtml(singles.second && data.playersById[singles.second] ? playerName(data.playersById[singles.second]) : "Не выбран") + '</span></strong>';
     var secondWinnerControls = singles.first && singles.second
-      ? '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small>' + gameWinnerControls(2, match.singlesRoundWinnerId) + '</div>'
+      ? '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small>' + gameWinnerControls(2, match.singlesRoundWinnerId) + '</div>'
       : "";
     var decider = match.deciderPlayers && typeof match.deciderPlayers === "object" ? match.deciderPlayers : null;
     var deciderControls = decider
       ? '<div class="sng-champions-modal__team-round--singles"><span>3-й раунд · 1×1</span>' +
-          '<div class="sng-champions-modal__team-round-result"><small>Участники</small><strong>' +
+          '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--participants"><small>Участники</small><strong><span>' +
             escapeHtml(decider.first && data.playersById[decider.first] ? playerName(data.playersById[decider.first]) : "Не выбран") +
-            ' — ' + escapeHtml(decider.second && data.playersById[decider.second] ? playerName(data.playersById[decider.second]) : "Не выбран") +
-          '</strong></div>' + roundPasswordControls(3) +
-          '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>' +
+            '</span><span>' + escapeHtml(decider.second && data.playersById[decider.second] ? playerName(data.playersById[decider.second]) : "Не выбран") +
+          '</span></strong></div>' + roundPasswordControls(3) +
+          '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель:</small>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>' +
         '</div>'
       : "";
     var secondRoundControls = roundWinnerId
-      ? '<div class="sng-champions-modal__team-round--singles"><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result"><small>Участники</small>' + singlesControls + '</div>' +
+      ? '<div class="sng-champions-modal__team-round--singles"><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--participants"><small>Участники</small>' + singlesControls + '</div>' +
           (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>'
       : "";
     return '<section class="sng-champions-modal__team-rounds">' +
-      '<div><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
+      '<div class="sng-champions-modal__team-round--team-game"><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
       secondRoundControls +
       deciderControls +
     '</section>';
@@ -1480,7 +1480,9 @@
     var lost = match.winnerId && !won;
     var ready = match.readyById && match.readyById[id] === true;
     var compactMembers = player && player.team === true && Array.isArray(player.members) && player.members.length
-      ? '<small class="sng-champions-modal__map-team-members">' + escapeHtml(player.members.map(function (member) { return playerName(member); }).join(" · ")) + '</small>'
+      ? '<small class="sng-champions-modal__map-team-members">' + player.members.map(function (member) {
+          return '<span>' + escapeHtml(playerName(member)) + '</span>';
+        }).join("") + '</small>'
       : "";
     return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
@@ -1577,7 +1579,7 @@
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
     var connectorRowStep = isTournamentMap
-      ? (kind === "losers" ? (bracketMapExpanded ? 93 : 68) : (bracketMapExpanded ? 89 : 64))
+      ? (bracketMapExpanded ? 98 : 90)
       : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + fitClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
