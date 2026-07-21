@@ -1357,12 +1357,19 @@
       }).join("");
     }
     function gameWinnerControls(game, selectedId) {
+      var gamePlayers = game === 3 && match.deciderPlayers ? match.deciderPlayers : singles;
+      var winnerMemberId = String(selectedId || "") === String(firstTeam.id || "") ? gamePlayers.first : gamePlayers.second;
+      var winnerMember = winnerMemberId && data.playersById ? data.playersById[winnerMemberId] : null;
+      var selectedLabel = selectedId && data.playersById[selectedId]
+        ? playerName(data.playersById[selectedId]) + (winnerMember ? " (" + playerName(winnerMember) + ")" : "")
+        : "Не отмечен";
       if (!data.isAdmin || match.winnerId) {
-        return '<strong>' + escapeHtml(selectedId && data.playersById[selectedId] ? playerName(data.playersById[selectedId]) : "Не отмечен") + '</strong>';
+        return '<strong>' + escapeHtml(selectedLabel) + '</strong>';
       }
       return '<div class="sng-champions-modal__team-round-actions">' + [firstTeam, secondTeam].map(function (team) {
         var active = String(selectedId || "") === String(team.id || "");
-        return '<button type="button" class="sng-champions-modal__team-round-winner' + (active ? ' is-active' : '') + '" data-sng-singles-winner="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(game) + '" data-sng-player="' + escapeHtml(team.id || "") + '">' + escapeHtml(playerName(team)) + '</button>';
+        var label = playerName(team) + (active && winnerMember ? " (" + playerName(winnerMember) + ")" : "");
+        return '<button type="button" class="sng-champions-modal__team-round-winner' + (active ? ' is-active' : '') + '" data-sng-singles-winner="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(game) + '" data-sng-player="' + escapeHtml(team.id || "") + '">' + escapeHtml(label) + '</button>';
       }).join("") + '</div>';
     }
     function roundPasswordControls(game) {
