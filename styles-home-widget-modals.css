@@ -2255,6 +2255,17 @@
     0 10px 26px rgba(255, 184, 70, 0.16);
 }
 
+.sng-champions-modal__bracket-match--waiting {
+  border-color: rgba(255, 211, 102, 0.92);
+  background:
+    linear-gradient(135deg, rgba(255, 190, 54, 0.12), rgba(255, 128, 0, 0.04)),
+    rgba(5, 9, 16, 0.94);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 239, 184, 0.18),
+    0 0 0 2px rgba(255, 184, 70, 0.08),
+    0 10px 30px rgba(255, 165, 35, 0.2);
+}
+
 .sng-champions-modal__bracket-match--done {
   border-color: rgba(134, 239, 172, 0.74);
   background:
@@ -2263,6 +2274,8 @@
   box-shadow:
     inset 0 0 0 1px rgba(187, 247, 208, 0.2),
     0 10px 28px rgba(22, 163, 74, 0.18);
+  filter: saturate(0.68) brightness(0.78);
+  opacity: 0.82;
 }
 
 .sng-champions-modal__bracket-match header {
@@ -3917,7 +3930,7 @@
 }
 
 .sng-champions-modal__map-match--series {
-  align-self: end;
+  align-self: center;
   min-height: 118px;
 }
 

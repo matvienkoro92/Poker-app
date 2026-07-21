@@ -1441,16 +1441,16 @@
     }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
     var matchClass = "sng-champions-modal__bracket-match" +
       (hasStartedRound && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
+      (!hasStartedRound && !match.winnerId ? " sng-champions-modal__bracket-match--waiting" : "") +
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") +
       (matchSeriesTarget(match, data) ? " sng-champions-modal__bracket-match--series" : "");
     var knockoutBadge = Number(data && data.stageKnockoutAmount) > 0 ? '<span class="sng-champions-modal__match-knockout">Нокаут <b>' + escapeHtml(Number(data.stageKnockoutAmount).toLocaleString("ru-RU")) + 'р</b></span>' : '';
     return '<article class="' + matchClass + '">' +
       renderBracketSeriesRule(match, data, false) +
-      '<header><strong>Пара ' + escapeHtml(match.index || "") + '</strong>' + knockoutBadge +
+      '<header><strong>Пара ' + escapeHtml(match.index || "") + (Number(data && data.stageMatchCount) > 0 ? ' из ' + escapeHtml(data.stageMatchCount) : '') + '</strong>' + knockoutBadge +
         '<span class="sng-champions-modal__match-header-meta">' + (countdown && !match.winnerId ? '<small>' + escapeHtml(countdown) + '</small>' : '') +
           '<em class="sng-champions-modal__match-status sng-champions-modal__match-status--' + matchStatusClass + '">' + escapeHtml(matchStatus) + '</em>' +
         '</span></header>' +
-      renderBracketHeadToHead(match, data) +
       playerRows +
       renderTeamMatchRounds(match, players, data) +
       tablePasswordHtml +
@@ -1713,7 +1713,10 @@
     else if (upperPayoutStage && stageLabel === "1/2") placeAwards = [3, 4];
     else if (upperPayoutStage && stageLabel === "1/4") placeAwards = [5];
     var payoutBadges = (knockoutAmount ? '<em class="sng-champions-modal__stage-payout">Нокаут: ' + escapeHtml(knockoutAmount.toLocaleString("ru-RU")) + 'р</em>' : '') + placeAwards.map(function (place) { var amount = Number(payout.places && payout.places[place]) || 0; return amount ? '<em class="sng-champions-modal__stage-payout sng-champions-modal__stage-payout--place">' + place + ' место: ' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</em>' : ''; }).join('');
-    var roundData = Object.assign({}, previewData, { stageKnockoutAmount: knockoutAmount });
+    var roundData = Object.assign({}, previewData, {
+      stageKnockoutAmount: knockoutAmount,
+      stageMatchCount: Array.isArray(round && round.matches) ? round.matches.length : 0,
+    });
     var stageClass = classFn(round, stageIndex, rounds);
     var stageSeriesTarget = data.tournamentType === "team" ? 2 : seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
