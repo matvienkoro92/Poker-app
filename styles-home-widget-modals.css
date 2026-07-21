@@ -8929,6 +8929,7 @@ body.club-choice-vote-open {
   box-sizing:border-box;
   justify-content:center;
   min-height:48px;
+  margin-top:8px;
   border-top:2px solid rgba(255,184,70,.72);
   color:#ffe6a3;
   background:linear-gradient(180deg,#17202b 0%,#080d14 100%);
