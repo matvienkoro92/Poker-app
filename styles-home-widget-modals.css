@@ -2472,12 +2472,6 @@
   white-space: nowrap;
 }
 
-@media (max-width: 560px) {
-  .sng-champions-modal__team-rounds > .sng-champions-modal__team-round--team-game {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 .sng-champions-modal__team-round--singles > span {
   grid-column: 1 / -1;
 }
@@ -2690,6 +2684,98 @@
   padding: 7px 8px;
   border-radius: 8px;
   background: rgba(5, 8, 14, 0.78);
+}
+
+.sng-champions-modal__bracket-pair-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sng-champions-modal__bracket-pair-grid > .sng-champions-modal__bracket-player {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  min-width: 0;
+  padding: 10px;
+  text-align: center;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-avatar,
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__ready-badge {
+  display: none;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-player-main {
+  justify-items: center;
+  width: 100%;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-player-name {
+  max-width: 100%;
+  text-align: center;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-team-members {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  width: 100%;
+  gap: 3px;
+  white-space: normal;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__team-member-ready {
+  max-width: 100%;
+  text-align: center;
+}
+
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-player > strong,
+.sng-champions-modal__bracket-pair-grid .sng-champions-modal__winner-btn {
+  max-width: 100%;
+  margin-top: 5px;
+}
+
+.sng-champions-modal__bracket-pair-vs {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  color: #241301;
+  font-size: 12px;
+  font-weight: 1000;
+  border: 1px solid rgba(255, 241, 185, 0.82);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff1ad, #ffc84b 52%, #f39a0d);
+  box-shadow: 0 0 12px rgba(255, 184, 70, 0.25);
+}
+
+@media (max-width: 520px) {
+  .sng-champions-modal__bracket-pair-grid {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .sng-champions-modal__bracket-pair-grid > .sng-champions-modal__bracket-player {
+    padding: 7px 5px;
+  }
+
+  .sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-player-name {
+    font-size: 11px;
+  }
+
+  .sng-champions-modal__bracket-pair-grid .sng-champions-modal__bracket-team-members {
+    font-size: 8px;
+  }
+
+  .sng-champions-modal__bracket-pair-vs {
+    width: 24px;
+    height: 24px;
+    font-size: 9px;
+  }
 }
 
 .sng-champions-modal__bracket-avatar {

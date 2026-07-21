@@ -1192,7 +1192,7 @@
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
-    var scoreBadge = won && matchScoreText(match) ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--score">Счёт ' + escapeHtml(matchScoreText(match)) + '</small>' : "";
+    var scoreBadge = won && data.tournamentType !== "team" && matchScoreText(match) ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--score">Счёт ' + escapeHtml(matchScoreText(match)) + '</small>' : "";
     var playerClass = "sng-champions-modal__bracket-player" +
       (advanced ? " sng-champions-modal__bracket-player--advanced" : "") +
       (ready && !won && !match.winnerId ? " sng-champions-modal__bracket-player--ready" : "") +
@@ -1436,9 +1436,16 @@
     var tablePasswordHtml = data.tournamentType === "team" ? "" : '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
       '<span>Пароль стола</span><strong>' + (tablePassword ? escapeHtml(tablePassword) : '&nbsp;') + '</strong>' +
     '</div>';
-    var playerRows = players.length ? players.map(function (id) {
+    var playerRowItems = players.length ? players.map(function (id) {
       return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
-    }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
+    }) : [];
+    if (players.length === 1 && !match.winnerId) playerRowItems.push(renderBracketPendingPlayer());
+    var playerRows = playerRowItems.length
+      ? (data.tournamentType === "team" && playerRowItems.length === 2
+          ? '<div class="sng-champions-modal__bracket-pair-grid">' + playerRowItems[0] + '<span class="sng-champions-modal__bracket-pair-vs">VS</span>' + playerRowItems[1] + '</div>'
+          : playerRowItems.join(""))
+      : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
+    var seriesScoreHtml = renderBracketMatchSeriesScore(match, data);
     var matchClass = "sng-champions-modal__bracket-match" +
       (hasStartedRound && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
       (!hasStartedRound && !match.winnerId ? " sng-champions-modal__bracket-match--waiting" : "") +
@@ -1452,12 +1459,13 @@
           '<em class="sng-champions-modal__match-status sng-champions-modal__match-status--' + matchStatusClass + '">' + escapeHtml(matchStatus) + '</em>' +
         '</span></header>' +
       playerRows +
+      (data.tournamentType === "team" ? seriesScoreHtml : "") +
       renderTeamMatchRounds(match, players, data) +
       tablePasswordHtml +
       (data.tournamentType === "team" ? "" : renderPlayingAction(match, players, data)) +
       renderRemindAction(match, players, data) +
       renderReadyAction(match, players, data) +
-      renderBracketMatchSeriesScore(match, data) +
+      (data.tournamentType === "team" ? "" : seriesScoreHtml) +
     '</article>';
   }
 
@@ -1733,7 +1741,6 @@
     var stageClass = classFn(round, stageIndex, rounds);
     var stageSeriesTarget = data.tournamentType === "team" ? 2 : seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
-    var showRoundLabel = stageClass === "quarter" || stageClass === "semi" || stageSeriesTarget > 0;
     var prevDisabled = stageIndex <= 0;
     var nextDisabled = stageIndex >= rounds.length - 1;
     var stageAttr = isLosers ? "data-sng-loser-stage-index" : "data-sng-stage-index";
@@ -1772,7 +1779,6 @@
       '</div>' +
       stageDotsHtml +
       '<section class="sng-champions-modal__round sng-champions-modal__round--slider' + (active ? " sng-champions-modal__round--active" : "") + (stageClass ? " sng-champions-modal__round--" + stageClass : "") + '">' +
-        (showRoundLabel ? '<div class="sng-champions-modal__round-label"><span>' + escapeHtml(stageLabel) + '</span></div>' : '') +
         '<div class="sng-champions-modal__round-matches sng-champions-modal__round-matches--slider">' +
           ((round.matches || []).map(function (match) { return renderBracketMatch(match, roundData); }).join("") || '<div class="club-choice-vote-modal__empty">Пары пустые.</div>') +
         '</div>' +
