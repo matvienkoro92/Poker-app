@@ -2345,9 +2345,14 @@
 }
 
 .sng-champions-modal__team-rounds > div > span {
-  color: #ffd56f;
-  font-size: 11px;
+  display: block;
+  width: 100%;
+  color: #ffe48a;
+  font-size: clamp(14px, 2.2vw, 17px);
   font-weight: 1000;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 190, 55, 0.42), 0 1px 0 rgba(0, 0, 0, 0.9);
 }
 
 .sng-champions-modal__team-round-hint {
@@ -2396,6 +2401,65 @@
 
 .sng-champions-modal__singles-picker button {
   grid-column: 1 / -1;
+  color: #211000;
+  background: linear-gradient(180deg, #ffeaa0, #f6a51f);
+  cursor: pointer;
+}
+
+.sng-champions-modal__round-password {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 213, 111, 0.3);
+  border-radius: 8px;
+  background: rgba(5, 8, 14, 0.72);
+}
+
+.sng-champions-modal__round-password span {
+  color: rgba(255, 239, 201, 0.68);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__round-password strong {
+  color: #ffe48a;
+  font-size: 15px;
+}
+
+.sng-champions-modal__round-password--editable {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.sng-champions-modal__round-password--editable label {
+  display: grid;
+  gap: 4px;
+}
+
+.sng-champions-modal__round-password--editable input,
+.sng-champions-modal__round-password--editable button {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 213, 111, 0.42);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__round-password--editable input {
+  width: 100%;
+  color: #fff0c8;
+  background: #080b12;
+}
+
+.sng-champions-modal__round-password--editable button {
+  align-self: end;
   color: #211000;
   background: linear-gradient(180deg, #ffeaa0, #f6a51f);
   cursor: pointer;
@@ -3115,8 +3179,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 60px;
-  --sng-map-row-gap: 4px;
+  --sng-map-row-height: 104px;
+  --sng-map-row-gap: 10px;
   grid-template-columns:
     152px
     152px
@@ -3129,8 +3193,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 82px;
-  --sng-map-row-gap: 7px;
+  --sng-map-row-height: 116px;
+  --sng-map-row-gap: 12px;
   grid-template-columns:
     220px
     220px
@@ -3169,8 +3233,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 64px;
-  --sng-map-row-gap: 4px;
+  --sng-map-row-height: 108px;
+  --sng-map-row-gap: 10px;
   grid-template-columns:
     152px
     152px
@@ -3242,8 +3306,8 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 86px;
-  --sng-map-row-gap: 7px;
+  --sng-map-row-height: 118px;
+  --sng-map-row-gap: 12px;
   grid-template-columns:
     220px
     220px
@@ -3735,6 +3799,10 @@
   box-shadow: 0 0 8px rgba(255, 184, 70, 0.14);
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+.sng-champions-modal__map-match--series {
+  align-self: end;
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed,
@@ -8930,7 +8998,7 @@ body.club-choice-vote-open {
 
 /* Карточка турнира в списке: трофейная панель + живая информация. */
 .sng-champions-modal__tournament-option-wrap { border-width:2px; border-radius:26px; border-color:#f1a21c; background:#080d14; box-shadow:0 13px 34px rgba(0,0,0,.5),0 0 22px rgba(255,136,18,.12),inset 0 0 0 1px rgba(255,232,173,.18); }
-.sng-champions-modal__tournament-option { display:grid; grid-template-columns:minmax(180px,34%) minmax(0,1fr); min-height:210px; padding:0!important; overflow:hidden; background:#0b1119!important; }
+.sng-champions-modal__tournament-option { display:grid; grid-template-columns:minmax(180px,34%) minmax(0,1fr); min-height:230px; padding:0!important; overflow:hidden; background:#0b1119!important; }
 .sng-champions-modal__tournament-art { position:relative; z-index:1; display:block!important; min-width:0; overflow:hidden!important; border-right:1px solid rgba(255,214,111,.78); background:#321a06; }
 .sng-champions-modal__tournament-art::before { content:""; position:absolute; top:0; right:0; left:0; z-index:2; height:clamp(18px,3.2vw,30px); background:radial-gradient(circle at 18% 40%,rgba(255,185,63,.16) 0 2px,transparent 3px),radial-gradient(circle at 68% 70%,rgba(83,28,2,.18) 0 2px,transparent 3px),linear-gradient(180deg,#b3540b,#934006); background-size:22px 18px,26px 21px,100% 100%; box-shadow:inset 0 -2px 5px rgba(74,24,0,.24); pointer-events:none; }
 .sng-champions-modal__tournament-art::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(29,11,0,.08),transparent 60%,rgba(255,190,66,.12)); pointer-events:none; }

@@ -1344,6 +1344,7 @@
     if (!firstTeam || !secondTeam || !Array.isArray(firstTeam.members) || !Array.isArray(secondTeam.members)) return "";
     var roundWinnerId = String(match.teamRoundWinnerId || "");
     var singles = match.singlesPlayers && typeof match.singlesPlayers === "object" ? match.singlesPlayers : {};
+    var roundPasswords = match.roundPasswords && typeof match.roundPasswords === "object" ? match.roundPasswords : {};
     var winnerControls = data.isAdmin && !match.winnerId
       ? [firstTeam, secondTeam].map(function (team) {
           var active = roundWinnerId === String(team.id || "");
@@ -1364,6 +1365,16 @@
         return '<button type="button" class="sng-champions-modal__team-round-winner' + (active ? ' is-active' : '') + '" data-sng-singles-winner="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(game) + '" data-sng-player="' + escapeHtml(team.id || "") + '">' + escapeHtml(playerName(team)) + '</button>';
       }).join("") + '</div>';
     }
+    function roundPasswordControls(game) {
+      var password = String(roundPasswords[String(game)] || "").replace(/\D/g, "").slice(0, 4);
+      if (!data.isAdmin || match.winnerId) {
+        return password ? '<div class="sng-champions-modal__round-password"><span>Пароль стола</span><strong>' + escapeHtml(password) + '</strong></div>' : "";
+      }
+      return '<div class="sng-champions-modal__round-password sng-champions-modal__round-password--editable" data-sng-round-password-editor="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(game) + '">' +
+        '<label><span>Пароль стола</span><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="' + escapeHtml(password) + '" data-sng-round-password-input></label>' +
+        '<button type="button" data-sng-save-round-password="' + escapeHtml(match.id || "") + '">Играют</button>' +
+      '</div>';
+    }
     var singlesControls = data.isAdmin && !match.winnerId && !roundWinnerId
       ? '<small class="sng-champions-modal__team-round-hint">Сначала отметьте победителя раунда 2×2</small>'
       : data.isAdmin && !match.winnerId
@@ -1383,11 +1394,11 @@
       ? '<div><span>3-й раунд · 1×1 · решающая игра</span><strong>' +
           escapeHtml(decider.first && data.playersById[decider.first] ? playerName(data.playersById[decider.first]) : "Не выбран") +
           ' — ' + escapeHtml(decider.second && data.playersById[decider.second] ? playerName(data.playersById[decider.second]) : "Не выбран") +
-        '</strong>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>'
+        '</strong>' + roundPasswordControls(3) + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>'
       : "";
     return '<section class="sng-champions-modal__team-rounds">' +
-      '<div><span>1-й раунд · 2×2 · победитель</span><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div>' +
-      '<div><span>2-й раунд · 1×1 · кто играет</span>' + singlesControls + '</div>' +
+      '<div><span>1-й раунд · 2×2 · победитель</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div>' +
+      '<div><span>2-й раунд · 1×1 · кто играет</span>' + singlesControls + (singles.first && singles.second ? roundPasswordControls(2) : "") + '</div>' +
       secondWinnerControls +
       deciderControls +
     '</section>';
@@ -1404,7 +1415,7 @@
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
     var tablePassword = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
-    var tablePasswordHtml = '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
+    var tablePasswordHtml = data.tournamentType === "team" ? "" : '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
       '<span>Пароль стола</span><strong>' + (tablePassword ? escapeHtml(tablePassword) : '&nbsp;') + '</strong>' +
     '</div>';
     var playerRows = players.length ? players.map(function (id) {
@@ -1422,7 +1433,7 @@
       playerRows +
       renderTeamMatchRounds(match, players, data) +
       tablePasswordHtml +
-      renderPlayingAction(match, players, data) +
+      (data.tournamentType === "team" ? "" : renderPlayingAction(match, players, data)) +
       renderRemindAction(match, players, data) +
       renderReadyAction(match, players, data) +
       renderBracketMatchSeriesScore(match, data) +
@@ -2088,6 +2099,26 @@
         score: { first: firstScore, second: secondScore },
       }, { status: "Сохраняю счёт...", success: "Счёт матча сохранён" })
         .finally(function () { setButtonLoading(scoreSave, false); });
+      return;
+    }
+    var roundPasswordSave = event.target && event.target.closest ? event.target.closest("[data-sng-save-round-password]") : null;
+    if (roundPasswordSave) {
+      var roundPasswordEditor = roundPasswordSave.closest ? roundPasswordSave.closest("[data-sng-round-password-editor]") : null;
+      var roundPasswordInput = roundPasswordEditor && roundPasswordEditor.querySelector ? roundPasswordEditor.querySelector("[data-sng-round-password-input]") : null;
+      var roundPassword = roundPasswordInput ? String(roundPasswordInput.value || "").replace(/\D/g, "").slice(0, 4) : "";
+      if (!/^\d{4}$/.test(roundPassword)) {
+        showAlert("Введите пароль стола из 4 цифр.");
+        if (roundPasswordInput && roundPasswordInput.focus) roundPasswordInput.focus();
+        return;
+      }
+      setButtonLoading(roundPasswordSave, true);
+      postAction({
+        action: "setTeamRoundPassword",
+        matchId: roundPasswordSave.getAttribute("data-sng-save-round-password") || "",
+        game: Number(roundPasswordEditor && roundPasswordEditor.getAttribute("data-sng-game")) || 0,
+        password: roundPassword,
+      }, { status: "Создаю стол и отправляю оповещение...", success: "Стол создан, оповещение отправлено" })
+        .finally(function () { setButtonLoading(roundPasswordSave, false); });
       return;
     }
     var teamRoundWinner = event.target && event.target.closest ? event.target.closest("[data-sng-team-round-winner]") : null;
