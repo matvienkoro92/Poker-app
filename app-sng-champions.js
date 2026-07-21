@@ -1626,7 +1626,7 @@
                   rowStart: (matchIndex * rowSpan) + 1,
                   rowSpan: rowSpan,
                   knockoutAmount: mapKnockout,
-                  connectorHeight: String(Math.max(28, (rowSpan * connectorRowStep) + (bracketMapExpanded ? 4 : 3))) + "px"
+                  connectorHeight: String(Math.max(28, rowSpan * connectorRowStep)) + "px"
                 });
               }).join("") || '<span class="sng-champions-modal__map-empty">Пусто</span>') +
             '</div>' +

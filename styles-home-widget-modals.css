@@ -3393,8 +3393,9 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 101px;
-  --sng-map-row-gap: 3px;
+  /* Match centers stay 135px apart: 112px card + 23px clear gap. */
+  --sng-map-row-height: 127px;
+  --sng-map-row-gap: 8px;
   grid-template-columns:
     152px
     152px
@@ -3407,8 +3408,9 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 108px;
-  --sng-map-row-gap: 4px;
+  /* Expanded connectors use the same 148px center step. */
+  --sng-map-row-height: 140px;
+  --sng-map-row-gap: 8px;
   grid-template-columns:
     220px
     220px
@@ -4053,14 +4055,16 @@
   position: absolute;
   z-index: 3;
   top: 5px;
-  right: 28px;
-  left: 16px;
+  right: 27px;
+  left: 27px;
   display: grid;
   grid-template-columns: auto auto;
   align-items: center;
   justify-content: center;
   gap: 7px;
   min-height: 18px;
+  min-width: 0;
+  overflow: hidden;
   padding: 0 6px;
   border: 1px solid rgba(255, 184, 70, 0.42);
   border-radius: 999px;
@@ -4077,7 +4081,7 @@
 
 .sng-champions-modal__map-match--series .sng-champions-modal__map-players {
   position: absolute;
-  inset: 29px 27px 6px 16px;
+  inset: 29px 27px 6px;
   z-index: 1;
   display: grid;
   grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -4085,6 +4089,8 @@
   justify-items: center;
   gap: 0;
   height: auto;
+  min-width: 0;
+  overflow: hidden;
   padding: 0;
   pointer-events: none;
   transform: none;
@@ -4096,13 +4102,13 @@
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 29px 27px 6px 16px;
+  inset: 29px 27px 6px;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0;
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 29px 27px 6px 16px;
+  inset: 29px 27px 6px;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0;
 }
@@ -4111,8 +4117,22 @@
   box-sizing: border-box;
   align-content: center;
   width: 100%;
+  max-width: 100%;
   min-height: 0;
+  overflow: hidden;
   padding: 3px 4px;
+}
+
+.sng-champions-modal__map-match--series .sng-champions-modal__map-players > .sng-champions-modal__map-player--pending {
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: 0;
+  max-width: calc(100% - 8px);
+  justify-self: center;
+  padding-right: 10px;
+  padding-left: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sng-champions-modal__map-match--series .sng-champions-modal__map-players > .sng-champions-modal__map-player + .sng-champions-modal__map-player {
@@ -4401,7 +4421,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series .sng-champions-modal__map-players {
-  inset: 35px 32px 8px 20px;
+  inset: 35px 32px 8px;
   transform: none;
 }
 
@@ -4420,19 +4440,19 @@
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 35px 32px 8px 20px;
+  inset: 35px 32px 8px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--compact .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
-  inset: 35px 32px 8px 20px;
+  inset: 35px 32px 8px;
   gap: 0;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-match--series .sng-champions-modal__map-match-head {
   top: 6px;
   right: 32px;
-  left: 20px;
+  left: 32px;
   min-height: 22px;
   gap: 9px;
 }
