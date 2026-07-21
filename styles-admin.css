@@ -3069,12 +3069,18 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-actions {
   position: relative;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
+  display: table-cell;
+  text-align: right !important;
+  white-space: nowrap;
   overflow: visible;
+}
+.admin-report-rakeback-actions .admin-report-rakeback-icon-btn {
+  display: inline-flex;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.admin-report-rakeback-actions .admin-report-rakeback-icon-btn[hidden] {
+  display: none !important;
 }
 .admin-report-rakeback-icon-btn {
   width: 34px;
@@ -3459,9 +3465,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
     font-size: 9px;
   }
   .admin-report-rakeback-actions {
-    justify-content: flex-end;
-    gap: 2px;
+    text-align: right !important;
   }
+  .admin-report-rakeback-actions .admin-report-rakeback-icon-btn { margin-left: 2px; }
   .admin-report-rakeback-icon-btn {
     width: 26px;
     min-width: 26px;
@@ -3573,7 +3579,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
     font-size: 12px;
   }
   .admin-report-rakeback-actions {
-    gap: 2px;
+    text-align: right !important;
   }
   .admin-report-rakeback-icon-btn {
     width: 22px !important;
