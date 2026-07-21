@@ -1494,8 +1494,10 @@
     '</span>';
   }
 
-  function renderBracketMapPendingPlayer() {
-    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending">???</span>';
+  function renderBracketMapPendingPlayer(noOpponent) {
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending' + (noOpponent ? ' sng-champions-modal__map-player--bye' : '') + '">' +
+      (noOpponent ? 'Нет соперника' : '???') +
+    '</span>';
   }
 
   function nextMapMatchIndex(round, match, roundIndex, rounds) {
@@ -1522,6 +1524,7 @@
     var knownCount = playerIds.filter(function (id) { return !!id; }).length;
     var hasKnownPlayer = knownCount > 0;
     var hasPendingPlayer = playerIds.some(function (id) { return !id; });
+    var automaticBye = knownCount === 1 && !!(match.autoWinnerId || match.winnerId);
     var waitingForOpponent = !match.winnerId && hasKnownPlayer && hasPendingPlayer;
     var unplayed = !match.winnerId && knownCount >= 2;
     var hasRichPlayerMeta = playerIds.some(function (id) {
@@ -1543,7 +1546,7 @@
       renderBracketSeriesRule(match, data, true) +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(); }).join("") +
+        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(automaticBye); }).join("") +
       '</span>' +
       renderBracketMapHeadToHead(match, data) +
       renderBracketMapSeriesScore(match, data) +
@@ -1582,7 +1585,7 @@
     }).concat([1]));
     var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
     var connectorRowStep = isTournamentMap
-      ? (bracketMapExpanded ? 112 : 104)
+      ? (bracketMapExpanded ? 148 : 135)
       : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + fitClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
