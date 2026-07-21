@@ -231,6 +231,15 @@
     return getWeekStartFromDateParts(getRakebackEntryDateParts(raw));
   }
 
+  function getRakebackReportWeekStart(raw) {
+    var shifted = new Date(normalizeTimeValue(raw) - REPORT_DAY_CUTOFF_MS + MOSCOW_UTC_OFFSET_MS);
+    return getWeekStartFromDateParts({
+      year: shifted.getUTCFullYear(),
+      month: shifted.getUTCMonth() + 1,
+      day: shifted.getUTCDate(),
+    });
+  }
+
   function getCurrentRakebackWeekStart() {
     var shifted = new Date(normalizeTimeValue(Date.now()) - REPORT_DAY_CUTOFF_MS + MOSCOW_UTC_OFFSET_MS);
     return getWeekStartFromDateParts({
@@ -1431,7 +1440,10 @@
 
     function rowWeekStart(row) {
       var time = rowEntryTime(row);
-      return time ? getRakebackEntryWeekStart(time) : 0;
+      // Week membership must use the same 06:00 MSK report cutoff as the
+      // server. The 18:00 entry-date cutoff is only for the date label; using
+      // it here moved Monday rows into the previous week after a server save.
+      return time ? getRakebackReportWeekStart(time) : 0;
     }
 
     function isArchivedRakebackRow(row) {
@@ -2242,6 +2254,14 @@
         var carryForward = row.carryForward === true || row.templateCarryForward === true;
         var reportedAt = row.reportedAt || "";
         var reportId = row.reportId || "";
+        var createdAt = row.createdAt || row.addedAt || row.created || Date.now();
+        var entryAddedAt = row.entryAddedAt || row.firstAddedAt || createdAt;
+        if (!carryForward && !reportedAt && !reportId && String(row.groupId || "").indexOf("shell_template_") === 0) {
+          // A newly filled template is dated when its value was entered, not
+          // when the empty shell first appeared. Also repairs already stored
+          // rows that inherited Monday's template date.
+          entryAddedAt = createdAt;
+        }
         return {
           groupId: String(row.groupId || "").trim() || ("shell_" + Date.now() + "_" + Math.random().toString(16).slice(2)),
           kind: row.kind === "addon" ? "addon" : "base",
@@ -2256,9 +2276,9 @@
           saved: true,
           persisted: true,
           ownerId: row.ownerId || row.authorId || "",
-          createdAt: row.createdAt || row.addedAt || row.created || Date.now(),
+          createdAt: createdAt,
           standardAt: row.standardAt || row.orderAt || row.sortAt || row.createdAt || Date.now(),
-          entryAddedAt: row.entryAddedAt || row.firstAddedAt || row.createdAt || Date.now(),
+          entryAddedAt: entryAddedAt,
           reportId: reportId,
           reportedAt: reportedAt,
           accounted: row.accounted === true || !!reportedAt || !!reportId,

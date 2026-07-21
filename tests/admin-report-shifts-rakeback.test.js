@@ -71,3 +71,24 @@ test("a new row created from a previous-week template gets the current entry dat
   assert.equal(rows[0].entryAddedAt, createdAt);
   assert.equal(rows[0].accounted, false);
 });
+
+test("a new row created from a same-week template gets its actual creation date", () => {
+  const now = Date.parse("2026-07-21T18:10:02.237Z");
+  const createdAt = Date.parse("2026-07-21T18:10:02.135Z");
+  const mondayTemplateDate = Date.parse("2026-07-20T03:00:00.000Z");
+  const rows = _test.normalizeNewTemplateEntryDates([{
+    groupId: "shell_template_1784657402135_deadbeef",
+    kind: "base",
+    room: "X",
+    playerId: "2818330",
+    rake: 240.61,
+    percent: 55,
+    saved: true,
+    createdAt,
+    standardAt: createdAt,
+    entryAddedAt: mondayTemplateDate,
+  }], now);
+
+  assert.equal(rows[0].entryAddedAt, createdAt);
+  assert.equal(rows[0].accounted, false);
+});
