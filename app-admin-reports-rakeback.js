@@ -1139,6 +1139,7 @@
     var archiveWeekOpen = {};
     var archiveWeekRoomActive = {};
     var sharedUpdatedAt = "";
+    var sharedCurrentSnapshotLoaded = false;
     var sharedSaveQueue = Promise.resolve();
     var sharedAutoLoadStarted = false;
     var sharedAutoLoadRetryCount = 0;
@@ -2537,6 +2538,7 @@
             sharedArchiveAvailable = data.rakebackDraft.hasArchive === true || sharedArchiveAvailable;
           }
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
+          sharedCurrentSnapshotLoaded = true;
           sharedAudit = Array.isArray(data.rakebackDraft.audit) ? data.rakebackDraft.audit : sharedAudit;
           renderAudit();
           if (!skipRender) {
@@ -2580,7 +2582,12 @@
       var updatedAtWhenLoadStarted = sharedUpdatedAt;
       var q = getAuthQuery();
       q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared&scope=" + encodeURIComponent(includeArchive ? "archive" : "currentWeek");
-      if (sharedUpdatedAt && !options.force && !includeArchive) q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
+      // `updatedAt` can outlive the rows when the modal is closed and filled
+      // again. Only request `notModified` while a complete current snapshot is
+      // actually still present in memory.
+      if (sharedUpdatedAt && sharedCurrentSnapshotLoaded && !options.force && !includeArchive) {
+        q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
+      }
       if (markBusy) loading = true;
       if (includeArchive) sharedArchiveLoading = true;
       if (options.showStatus) setStatus(includeArchive ? "Загружаю архив…" : "Обновляю…", true);
@@ -2603,6 +2610,13 @@
           return true;
         }
         if (draft && draft.notModified === true) {
+          if (!sharedCurrentSnapshotLoaded) {
+            return loadSharedDraft({
+              background: options.background === true,
+              force: true,
+              showStatus: options.showStatus === true,
+            });
+          }
           if (options.showStatus) setStatus("Уже актуально");
           return true;
         }
@@ -2614,6 +2628,7 @@
         } else {
           sharedRows = mergeRowsWithLocalUnsaved(serverRows, localRows);
           sharedArchiveAvailable = draft && draft.hasArchive === true;
+          sharedCurrentSnapshotLoaded = true;
         }
         sharedUpdatedAt = draft && draft.updatedAt ? draft.updatedAt : sharedUpdatedAt;
         sharedAudit = draft && Array.isArray(draft.audit) ? draft.audit : sharedAudit;
@@ -2636,7 +2651,7 @@
     }
 
     function scheduleSharedDraftAutoload() {
-      if (sharedAutoLoadStarted || sharedUpdatedAt || archiveMode) return;
+      if (sharedAutoLoadStarted || sharedCurrentSnapshotLoaded || archiveMode) return;
       if (!getApiBaseSafe() || !hasApiCredentialSafe()) {
         if (sharedAutoLoadRetryCount >= 3) return;
         sharedAutoLoadRetryCount += 1;
@@ -2884,6 +2899,8 @@
     function fillTable(rows, legacyRakeback) {
       if (Array.isArray(rows)) {
         sharedRows = normalizeDraftRows(rows);
+        sharedCurrentSnapshotLoaded = false;
+        sharedAutoLoadStarted = false;
         if (!sharedRows.length && legacyRakeback != null && legacyRakeback !== "" && parseNumber(legacyRakeback) !== 0) {
           sharedRows = normalizeDraftRows([{
             kind: "base",
