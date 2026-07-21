@@ -727,8 +727,7 @@
     var target = matchSeriesTarget(match, data);
     if (!target) return "";
     if (!map) return "";
-    var label = "Счёт " + matchSeriesScore(match).text;
-    return '<span class="sng-champions-modal__' + (map ? 'map-' : '') + 'series-rule">' + escapeHtml(label) + '</span>';
+    return '<span class="sng-champions-modal__' + (map ? 'map-' : '') + 'series-rule">' + escapeHtml(seriesRuleText(target)) + '</span>';
   }
 
   function renderBracketMatchSeriesScore(match, data) {
@@ -751,7 +750,8 @@
   }
 
   function renderBracketMapSeriesScore(match, data) {
-    return "";
+    if (!matchSeriesTarget(match, data)) return "";
+    return '<span class="sng-champions-modal__map-series-score">Счёт ' + escapeHtml(matchSeriesScore(match).text) + '</span>';
   }
 
   function matchRequiresScore(match, data) {
@@ -1543,13 +1543,15 @@
     var knockoutReward = Number(options.knockoutAmount) || 0;
     return '<article class="sng-champions-modal__map-match' + selectedClass + focusClass + seriesClass + (match.winnerId ? " sng-champions-modal__map-match--done" : "") + (waitingForOpponent ? " sng-champions-modal__map-match--waiting" : "") + (unplayed ? " sng-champions-modal__map-match--unplayed" : "") + (hasRichPlayerMeta ? " sng-champions-modal__map-match--rich" : "") + (nextIndex ? " sng-champions-modal__map-match--has-next" : "") + mapLaneClass(nextIndex) + '"' + styleAttr + attrs + '>' +
       (knockoutReward ? '<span class="sng-champions-modal__map-match-reward">+' + escapeHtml(knockoutReward.toLocaleString("ru-RU")) + 'р команде за проход</span>' : '') +
-      renderBracketSeriesRule(match, data, true) +
       '<span class="sng-champions-modal__map-match-index">' + escapeHtml(match.index || "") + '</span>' +
+      '<span class="sng-champions-modal__map-match-head">' +
+        renderBracketMapSeriesScore(match, data) +
+        renderBracketSeriesRule(match, data, true) +
+      '</span>' +
       '<span class="sng-champions-modal__map-players">' +
         playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(automaticBye); }).join("") +
       '</span>' +
       renderBracketMapHeadToHead(match, data) +
-      renderBracketMapSeriesScore(match, data) +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
     '</article>';
   }
