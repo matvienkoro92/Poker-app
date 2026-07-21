@@ -3323,6 +3323,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
     background-size: 5px 5px, 5px 5px;
   }
   .admin-report-rakeback-wrap {
+    width: calc(100% + 12px);
+    margin-right: -12px;
     overflow-x: hidden;
   }
   .admin-report-rakeback-table {
