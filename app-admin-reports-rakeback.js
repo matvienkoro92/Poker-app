@@ -909,6 +909,15 @@
     var pendingDelete = null;
     var bound = false;
 
+    function formatAuditAuthor(raw) {
+      var value = String(raw || "").trim();
+      var id = value.replace(/^tg_/, "");
+      if (id === "388008256") return "Роман";
+      if (id === "2144406710") return "Аня";
+      if (id === "1897001087") return "Вика";
+      return value || "Администратор";
+    }
+
     function renderAudit() {
       if (!auditListEl) return;
       if (!sharedAudit.length) {
@@ -918,7 +927,7 @@
       auditListEl.innerHTML = sharedAudit.slice(0, 80).map(function (item) {
         var at = item && item.at ? new Date(item.at) : null;
         var stamp = at && !isNaN(at.getTime()) ? at.toLocaleString("ru-RU") : "";
-        return '<div class="admin-report-rakeback-audit__item"><div>' + escapeHtml(item && item.text || "Изменение") + '</div><div class="admin-report-rakeback-audit__meta">' + escapeHtml(item && item.by || "Администратор") + (stamp ? " · " + escapeHtml(stamp) : "") + "</div></div>";
+        return '<div class="admin-report-rakeback-audit__item"><div>' + escapeHtml(item && item.text || "Изменение") + '</div><div class="admin-report-rakeback-audit__meta">' + escapeHtml(formatAuditAuthor(item && item.by)) + (stamp ? " · " + escapeHtml(stamp) : "") + "</div></div>";
       }).join("");
     }
 
@@ -2071,9 +2080,18 @@
       if (undoEl) undoEl.hidden = true;
       if (!item.persisted) return;
       if (item.kind === "addon") {
-        saveSharedDraftNow(true, { upsertGroupIds: [item.groupId], deleteRowKeys: item.serverKey ? [item.serverKey] : [] });
+        saveSharedDraftNow(true, {
+          upsertGroupIds: [item.groupId],
+          deleteRowKeys: item.serverKey ? [item.serverKey] : [],
+          auditAction: "delete",
+          auditDeletedCount: 1,
+        });
       } else {
-        saveSharedDraftNow(true, { deleteGroupIds: [item.groupId] });
+        saveSharedDraftNow(true, {
+          deleteGroupIds: [item.groupId],
+          auditAction: "delete",
+          auditDeletedCount: Math.max(1, Array.isArray(item.rows) ? item.rows.length : 1),
+        });
       }
     }
 
@@ -2438,6 +2456,10 @@
         payload.rakebackPatch = true;
         payload.deleteRakebackGroupIds = patch.deleteGroupIds || [];
         payload.deleteRakebackRowKeys = patch.deleteRowKeys || [];
+      }
+      if (patch && patch.auditAction) {
+        payload.rakebackAuditAction = patch.auditAction;
+        payload.rakebackAuditDeletedCount = Number(patch.auditDeletedCount) || 0;
       }
       saving = true;
       syncControls();
