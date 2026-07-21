@@ -12,7 +12,6 @@
   var RAKEBACK_PENDING_ROWS_STORAGE_KEY = "poker_admin_report_rakeback_pending_rows_v1";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
-  var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 18 * 60 * 60 * 1000;
   var REPORT_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
 
   function readRakebackTemplateSpoilerOpen() {
@@ -197,7 +196,10 @@
   }
 
   function getRakebackEntryDateParts(raw) {
-    var shifted = new Date(normalizeTimeValue(raw) + MOSCOW_UTC_OFFSET_MS - RAKEBACK_ENTRY_DATE_CUTOFF_MS);
+    // Keep display and round-trip parsing on the same report-day boundary.
+    // Using 18:00 here while getTimeFromDateInput used 06:00 moved a row one
+    // day backwards on every save/reload cycle.
+    var shifted = new Date(normalizeTimeValue(raw) + MOSCOW_UTC_OFFSET_MS - REPORT_DAY_CUTOFF_MS);
     return {
       year: shifted.getUTCFullYear(),
       month: shifted.getUTCMonth() + 1,
