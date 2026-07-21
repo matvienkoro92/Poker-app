@@ -9,6 +9,7 @@
   };
   var ARCHIVE_ROOM_TABS = ["P21", "X"];
   var RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY = "poker_admin_report_rakeback_templates_open";
+  var RAKEBACK_PENDING_ROWS_STORAGE_KEY = "poker_admin_report_rakeback_pending_rows_v1";
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
   var RAKEBACK_ENTRY_DATE_CUTOFF_MS = 18 * 60 * 60 * 1000;
@@ -22,6 +23,27 @@
     try {
       if (typeof window === "undefined" || !window.localStorage) return;
       window.localStorage.setItem(RAKEBACK_TEMPLATE_SPOILER_STORAGE_KEY, open ? "1" : "0");
+    } catch (e) {}
+  }
+
+  function readPendingRakebackRows() {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return [];
+      var parsed = JSON.parse(window.localStorage.getItem(RAKEBACK_PENDING_ROWS_STORAGE_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function writePendingRakebackRows(rows) {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return;
+      var pending = (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return row && row.persisted !== true && String(row.playerId || "").trim();
+      }).slice(0, 100);
+      if (pending.length) window.localStorage.setItem(RAKEBACK_PENDING_ROWS_STORAGE_KEY, JSON.stringify(pending));
+      else window.localStorage.removeItem(RAKEBACK_PENDING_ROWS_STORAGE_KEY);
     } catch (e) {}
   }
 
@@ -460,7 +482,10 @@
     var requestFetch = typeof winFetch === "function" ? winFetch.bind(window) : null;
     if (!requestFetch) return Promise.reject(new Error("fetch unavailable"));
     return requestFetch(url, options || {}).then(function (response) {
-      return response.json();
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (data && typeof data === "object") data.__httpStatus = response.status;
+        return data;
+      });
     });
   }
 
@@ -1097,7 +1122,11 @@
       totalsModal.hidden = true;
       if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "false");
     }
-    var sharedRows = [];
+    var sharedRows = normalizeDraftRows(readPendingRakebackRows()).map(function (row) {
+      row.saved = false;
+      row.persisted = false;
+      return row;
+    });
     var archiveWeekOpen = {};
     var archiveWeekRoomActive = {};
     var sharedUpdatedAt = "";
@@ -2497,12 +2526,20 @@
           }
           else syncControls();
           if (showStatus) setStatus("Сохранено");
+          writePendingRakebackRows(sharedRows);
           return true;
         }
-        if (showStatus) setStatus((data && data.error) || "Не удалось сохранить");
+        writePendingRakebackRows(localRows);
+        if (showStatus) {
+          var authFailed = data && (data.__httpStatus === 401 || data.__httpStatus === 403);
+          setStatus(authFailed
+            ? "Сессия истекла. Запись не пропала — войдите заново и нажмите ✓"
+            : ((data && data.error) || "Не удалось сохранить. Запись оставлена в таблице"), true);
+        }
         return false;
       }).catch(function () {
-        if (showStatus) setStatus("Не удалось сохранить");
+        writePendingRakebackRows(localRows);
+        if (showStatus) setStatus("Нет связи. Запись не пропала и сохранена на этом устройстве", true);
         return false;
       }).then(function (result) {
         saving = false;
@@ -2520,6 +2557,7 @@
       }
       var includeArchive = options.includeArchive === true || options.scope === "archive";
       var markBusy = options.background !== true;
+      var updatedAtWhenLoadStarted = sharedUpdatedAt;
       var q = getAuthQuery();
       q += (q.indexOf("?") >= 0 ? "&" : "?") + "rakebackDraft=1&date=shared&scope=" + encodeURIComponent(includeArchive ? "archive" : "currentWeek");
       if (sharedUpdatedAt && !options.force && !includeArchive) q += "&knownUpdatedAt=" + encodeURIComponent(sharedUpdatedAt);
@@ -2530,6 +2568,20 @@
       else if (markBusy) syncControls();
       return requestJson(base + "/api/admin-report-shifts" + q).then(function (data) {
         var draft = data && data.ok ? data.rakebackDraft : null;
+        var responseUpdatedAt = draft && draft.updatedAt ? String(draft.updatedAt) : "";
+        var currentUpdatedAtMs = sharedUpdatedAt ? Date.parse(sharedUpdatedAt) : 0;
+        var responseUpdatedAtMs = responseUpdatedAt ? Date.parse(responseUpdatedAt) : 0;
+        var saveFinishedWhileLoading = updatedAtWhenLoadStarted !== sharedUpdatedAt;
+        var staleResponse = !!(
+          sharedUpdatedAt && (
+            (responseUpdatedAtMs && currentUpdatedAtMs && responseUpdatedAtMs < currentUpdatedAtMs) ||
+            (!responseUpdatedAt && saveFinishedWhileLoading)
+          )
+        );
+        if (staleResponse) {
+          if (options.showStatus) setStatus("Данные уже обновлены");
+          return true;
+        }
         if (draft && draft.notModified === true) {
           if (options.showStatus) setStatus("Уже актуально");
           return true;
@@ -3105,9 +3157,14 @@
         setStatus("Шаблон сохранен в записи", true);
         saveSharedDraftNow(true, { upsertGroupIds: [row.groupId], preserveScroll: true }).then(function (ok) {
           if (ok) return;
-          sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
-            return getSharedRowLocalKey(item) !== rowKey;
+          sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).map(function (item) {
+            if (getSharedRowLocalKey(item) === rowKey) {
+              item.saved = false;
+              item.persisted = false;
+            }
+            return item;
           });
+          writePendingRakebackRows(sharedRows);
           var fallbackScrollSnapshot = captureRakebackScroll(body);
           render();
           restoreRakebackScroll(fallbackScrollSnapshot);
