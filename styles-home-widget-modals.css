@@ -2330,6 +2330,77 @@
   cursor: pointer;
 }
 
+.sng-champions-modal__team-rounds {
+  display: grid;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid rgba(255, 213, 111, 0.3);
+  border-radius: 10px;
+  background: rgba(2, 5, 11, 0.62);
+}
+
+.sng-champions-modal__team-rounds > div {
+  display: grid;
+  gap: 6px;
+}
+
+.sng-champions-modal__team-rounds > div > span {
+  color: #ffd56f;
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.sng-champions-modal__team-round-hint {
+  color: rgba(255, 239, 201, 0.6);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.sng-champions-modal__team-round-actions,
+.sng-champions-modal__singles-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sng-champions-modal__team-round-winner,
+.sng-champions-modal__singles-picker button,
+.sng-champions-modal__singles-picker select {
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 213, 111, 0.4);
+  border-radius: 8px;
+  color: #fff0c8;
+  background: #080b12;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.sng-champions-modal__team-round-winner.is-active {
+  border-color: #63e9a0;
+  color: #b7ffd2;
+  background: #123d29;
+}
+
+.sng-champions-modal__singles-picker {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.sng-champions-modal__singles-picker b {
+  color: rgba(255, 239, 201, 0.66);
+  font-size: 10px;
+}
+
+.sng-champions-modal__singles-picker button {
+  grid-column: 1 / -1;
+  color: #211000;
+  background: linear-gradient(180deg, #ffeaa0, #f6a51f);
+  cursor: pointer;
+}
+
 .sng-champions-modal__bracket-player {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto auto;
