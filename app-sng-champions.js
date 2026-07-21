@@ -1998,7 +1998,7 @@
         action: "setPlaying",
         matchId: matchId,
         tablePassword: tablePassword,
-      }, { status: "Отмечаю матч...", success: "Матч отмечен как играющий" })
+      }, { status: "Отправляю оповещение...", success: "Оповещение о столе отправлено" })
         .finally(function () { setButtonLoading(playing, false); });
       return;
     }
