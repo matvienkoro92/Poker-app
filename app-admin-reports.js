@@ -987,6 +987,10 @@ function initAdminReportModal() {
     return !!getRakebackAccessState().canEdit;
   }
 
+  function shouldOpenRakebackByDefault() {
+    return rakebackIdentityMatches(getRakebackIdentityCandidates(), ["1897001087"], [], []);
+  }
+
   function canRefreshSharedRakebackDraft() {
     return !!getRakebackAccessState().canRefresh;
   }
@@ -3732,8 +3736,10 @@ function initAdminReportModal() {
     if (!rakebackModule) applySavedRakebackSortMode();
     if (calculationsModule) calculationsModule.reset();
     else resetCalculationsHydration();
-    setActiveTab("form");
+    var initialTab = shouldOpenRakebackByDefault() ? "rakeback" : "form";
+    setActiveTab(initialTab);
     fillReportForm(null, { skipRakeback: true });
+    if (initialTab === "rakeback") openLazyRakebackModule();
     syncRakebackAccessControls();
     return true;
   }

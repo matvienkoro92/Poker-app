@@ -698,6 +698,15 @@
     );
   }
 
+  function shouldOpenAdminReportRakebackByDefault() {
+    return adminReportShellIdentityMatches(
+      getAdminReportShellUsers(),
+      ["1897001087"],
+      [],
+      []
+    );
+  }
+
   function setAdminReportShellTab(name) {
     var modal = document.getElementById("adminReportModal");
     if (!modal) return "form";
@@ -1060,6 +1069,9 @@
       document.body.classList.add("admin-report-modal-open");
       document.body.style.overflow = "hidden";
     }
+    var initialTab = shouldOpenAdminReportRakebackByDefault() ? "rakeback" : "form";
+    setAdminReportShellTab(initialTab);
+    if (initialTab === "rakeback") openAdminReportRakebackShell().catch(function () {});
     return true;
   }
 

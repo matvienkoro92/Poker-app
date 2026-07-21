@@ -3323,8 +3323,6 @@ button.admin-report-rakeback-summary__row:focus-visible {
     background-size: 5px 5px, 5px 5px;
   }
   .admin-report-rakeback-wrap {
-    width: calc(100% + 12px);
-    margin-right: -12px;
     overflow-x: hidden;
   }
   .admin-report-rakeback-table {
@@ -3544,11 +3542,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 26%;
+    width: 29%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 22%;
+    width: 19%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -3596,7 +3594,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-actions {
     box-sizing: border-box;
-    padding-right: 4px !important;
+    padding-right: 8px !important;
     text-align: right !important;
   }
   .admin-report-rakeback-actions .admin-report-rakeback-icon-btn {
