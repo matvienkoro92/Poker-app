@@ -2035,6 +2035,22 @@
   box-shadow: 0 0 16px rgba(72, 255, 145, 0.44);
 }
 
+.sng-champions-modal__stage-head .sng-champions-modal__stage-format {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 27px;
+  padding: 4px 14px;
+  color: #fff0bf;
+  border: 1px solid rgba(255, 213, 111, 0.68);
+  border-radius: 999px;
+  background: rgba(7, 10, 17, 0.92);
+  box-shadow: 0 0 12px rgba(255, 173, 35, 0.18);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 1000;
+}
+
 .sng-champions-modal__stage-arrow {
   width: 46px;
   height: 46px;
@@ -2086,6 +2102,15 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 236, 174, 0.12),
     0 0 22px rgba(255, 184, 70, 0.2);
+}
+
+/* В режиме списка каждая пара оформлена сама; общая рамка только перегружает экран. */
+.sng-champions-modal__round.sng-champions-modal__round--slider {
+  padding-right: 0;
+  padding-left: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .sng-champions-modal__round-label {
@@ -2170,16 +2195,16 @@
 .sng-champions-modal__round-matches--slider {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 24px;
+  gap: 30px;
 }
 
 .sng-champions-modal__bracket-match {
   position: relative;
   display: grid;
-  gap: 7px;
-  padding: 9px;
-  border: 2px solid rgba(255, 184, 70, 0.34);
-  border-radius: 14px;
+  gap: 9px;
+  padding: 13px;
+  border: 3px solid rgba(255, 184, 70, 0.48);
+  border-radius: 18px;
   background: rgba(4, 8, 14, 0.82);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
 }
@@ -2197,7 +2222,7 @@
 }
 
 .sng-champions-modal__bracket-match--series {
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .sng-champions-modal__series-rule {
@@ -2245,21 +2270,63 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  color: rgba(255, 239, 201, 0.66);
-  font-size: 12px;
-  font-weight: 850;
-  margin: -9px -9px 2px;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255, 184, 70, 0.28);
-  border-radius: 12px 12px 5px 5px;
-  background: linear-gradient(90deg, rgba(255, 184, 70, 0.14), rgba(255, 184, 70, 0.03));
+  min-height: 48px;
+  color: #251502;
+  margin: -13px -13px 4px;
+  padding: 9px 14px;
+  border-bottom: 2px solid rgba(255, 241, 185, 0.82);
+  border-radius: 15px 15px 7px 7px;
+  background: linear-gradient(180deg, #fff1ad 0%, #ffc84b 52%, #f39a0d 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 4px 14px rgba(255, 171, 24, 0.2);
+}
+
+.sng-champions-modal__bracket-match header > strong {
+  color: #241301;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.64);
+}
+
+.sng-champions-modal__match-header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
 }
 
 .sng-champions-modal__bracket-match header small {
-  color: #ffd56f;
+  color: rgba(50, 28, 2, 0.72);
   font-size: 10px;
   font-weight: 900;
   text-align: right;
+}
+
+.sng-champions-modal__match-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid rgba(36, 19, 1, 0.35);
+  border-radius: 999px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.sng-champions-modal__match-status--waiting { color: #4b310e; background: rgba(255, 248, 216, 0.72); }
+.sng-champions-modal__match-status--playing { color: #062c19; background: #9ff4be; border-color: #278c55; }
+.sng-champions-modal__match-status--done { color: #f3fff7; background: #167443; border-color: #0d4c2c; }
+
+@media (max-width: 520px) {
+  .sng-champions-modal__bracket-match header > strong { font-size: 17px; }
+  .sng-champions-modal__match-header-meta { gap: 5px; }
+  .sng-champions-modal__bracket-match header small { display: none; }
+  .sng-champions-modal__match-status { min-height: 25px; padding: 0 9px; font-size: 10px; }
 }
 
 .sng-champions-modal__series-score {
@@ -2378,6 +2445,24 @@
   color: #fff0c8;
   font-size: 15px;
   text-align: center;
+}
+
+.sng-champions-modal__team-round-result--winner {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+}
+
+.sng-champions-modal__team-round-result--winner > small {
+  white-space: nowrap;
+}
+
+.sng-champions-modal__team-round-result--winner > strong {
+  text-align: left;
+}
+
+.sng-champions-modal__team-round-actions:has(> strong:only-child) {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .sng-champions-modal__team-round-hint {
@@ -3204,7 +3289,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 136px;
+  --sng-map-row-height: 72px;
   --sng-map-row-gap: 3px;
   grid-template-columns:
     152px
@@ -3218,7 +3303,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 148px;
+  --sng-map-row-height: 78px;
   --sng-map-row-gap: 4px;
   grid-template-columns:
     220px
@@ -3258,7 +3343,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 136px;
+  --sng-map-row-height: 72px;
   --sng-map-row-gap: 3px;
   grid-template-columns:
     152px
@@ -3331,7 +3416,7 @@
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 148px;
+  --sng-map-row-height: 78px;
   --sng-map-row-gap: 4px;
   grid-template-columns:
     220px
@@ -3490,6 +3575,11 @@
 
 .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-round-matches {
   align-content: start;
+  grid-template-rows: repeat(var(--sng-map-rows, 16), 136px);
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-round--matches-16 .sng-champions-modal__map-round-matches {
+  grid-template-rows: repeat(var(--sng-map-rows, 16), 148px);
 }
 
 .sng-champions-modal__map-match {
@@ -3808,7 +3898,7 @@
   z-index: 5;
   top: -17px;
   left: 50%;
-  min-width: 72px;
+  min-width: 76px;
   padding: 3px 6px;
   overflow: hidden;
   color: #ffe5a3;

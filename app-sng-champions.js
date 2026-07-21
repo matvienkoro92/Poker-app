@@ -726,7 +726,9 @@
   function renderBracketSeriesRule(match, data, map) {
     var target = matchSeriesTarget(match, data);
     if (!target) return "";
-    return '<span class="sng-champions-modal__' + (map ? 'map-' : '') + 'series-rule">' + escapeHtml(seriesRuleText(target)) + '</span>';
+    if (!map) return "";
+    var label = "Счёт " + matchSeriesScore(match).text;
+    return '<span class="sng-champions-modal__' + (map ? 'map-' : '') + 'series-rule">' + escapeHtml(label) + '</span>';
   }
 
   function renderBracketMatchSeriesScore(match, data) {
@@ -749,8 +751,7 @@
   }
 
   function renderBracketMapSeriesScore(match, data) {
-    if (!matchSeriesTarget(match, data)) return "";
-    return '<span class="sng-champions-modal__map-series-score">Счёт ' + escapeHtml(matchSeriesScore(match).text) + '</span>';
+    return "";
   }
 
   function matchRequiresScore(match, data) {
@@ -1394,7 +1395,7 @@
       : '<strong>' + escapeHtml(singles.first && data.playersById[singles.first] ? playerName(data.playersById[singles.first]) : "Не выбран") +
         ' — ' + escapeHtml(singles.second && data.playersById[singles.second] ? playerName(data.playersById[singles.second]) : "Не выбран") + '</strong>';
     var secondWinnerControls = singles.first && singles.second
-      ? '<div class="sng-champions-modal__team-round-result"><small>Победитель</small>' + gameWinnerControls(2, match.singlesRoundWinnerId) + '</div>'
+      ? '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small>' + gameWinnerControls(2, match.singlesRoundWinnerId) + '</div>'
       : "";
     var decider = match.deciderPlayers && typeof match.deciderPlayers === "object" ? match.deciderPlayers : null;
     var deciderControls = decider
@@ -1403,13 +1404,16 @@
             escapeHtml(decider.first && data.playersById[decider.first] ? playerName(data.playersById[decider.first]) : "Не выбран") +
             ' — ' + escapeHtml(decider.second && data.playersById[decider.second] ? playerName(data.playersById[decider.second]) : "Не выбран") +
           '</strong></div>' + roundPasswordControls(3) +
-          '<div class="sng-champions-modal__team-round-result"><small>Победитель</small>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>' +
+          '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small>' + gameWinnerControls(3, match.deciderRoundWinnerId) + '</div>' +
         '</div>'
       : "";
+    var secondRoundControls = roundWinnerId
+      ? '<div><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result"><small>Участники</small>' + singlesControls + '</div>' +
+          (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>'
+      : "";
     return '<section class="sng-champions-modal__team-rounds">' +
-      '<div><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result"><small>Победитель</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
-      '<div><span>2-й раунд · 1×1</span><div class="sng-champions-modal__team-round-result"><small>Участники</small>' + singlesControls + '</div>' +
-        (singles.first && singles.second ? roundPasswordControls(2) : "") + secondWinnerControls + '</div>' +
+      '<div><span>1-й раунд · 2×2</span>' + roundPasswordControls(1) + '<div class="sng-champions-modal__team-round-result sng-champions-modal__team-round-result--winner"><small>Победитель —</small><div class="sng-champions-modal__team-round-actions">' + winnerControls + '</div></div></div>' +
+      secondRoundControls +
       deciderControls +
     '</section>';
   }
@@ -1424,6 +1428,10 @@
   function renderBracketMatch(match, data) {
     var players = (match.playerIds || []).filter(Boolean);
     var countdown = formatReadyCountdown(match, data);
+    var roundPasswords = match.roundPasswords && typeof match.roundPasswords === "object" ? match.roundPasswords : {};
+    var hasStartedRound = !!match.playingAt || Object.keys(roundPasswords).some(function (game) { return !!roundPasswords[game]; });
+    var matchStatus = match.winnerId ? "Сыграли" : hasStartedRound ? "Играют" : "Ожидают";
+    var matchStatusClass = match.winnerId ? "done" : hasStartedRound ? "playing" : "waiting";
     var tablePassword = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
     var tablePasswordHtml = data.tournamentType === "team" ? "" : '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
       '<span>Пароль стола</span><strong>' + (tablePassword ? escapeHtml(tablePassword) : '&nbsp;') + '</strong>' +
@@ -1432,13 +1440,16 @@
       return renderBracketPlayer((data.playersById && data.playersById[id]) || { id: id, displayName: "Игрок" }, match, data);
     }).join("") + (players.length === 1 && !match.winnerId ? renderBracketPendingPlayer() : "") : '<div class="club-choice-vote-modal__empty">Ожидает победителей.</div>';
     var matchClass = "sng-champions-modal__bracket-match" +
-      (match.playingAt && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
+      (hasStartedRound && !match.winnerId ? " sng-champions-modal__bracket-match--playing" : "") +
       (match.winnerId ? " sng-champions-modal__bracket-match--done" : "") +
       (matchSeriesTarget(match, data) ? " sng-champions-modal__bracket-match--series" : "");
     var knockoutBadge = Number(data && data.stageKnockoutAmount) > 0 ? '<span class="sng-champions-modal__match-knockout">Нокаут <b>' + escapeHtml(Number(data.stageKnockoutAmount).toLocaleString("ru-RU")) + 'р</b></span>' : '';
     return '<article class="' + matchClass + '">' +
       renderBracketSeriesRule(match, data, false) +
-      '<header>Пара ' + escapeHtml(match.index || "") + knockoutBadge + (countdown ? '<small>' + escapeHtml(countdown) + '</small>' : '') + '</header>' +
+      '<header><strong>Пара ' + escapeHtml(match.index || "") + '</strong>' + knockoutBadge +
+        '<span class="sng-champions-modal__match-header-meta">' + (countdown && !match.winnerId ? '<small>' + escapeHtml(countdown) + '</small>' : '') +
+          '<em class="sng-champions-modal__match-status sng-champions-modal__match-status--' + matchStatusClass + '">' + escapeHtml(matchStatus) + '</em>' +
+        '</span></header>' +
       renderBracketHeadToHead(match, data) +
       playerRows +
       renderTeamMatchRounds(match, players, data) +
@@ -1704,7 +1715,7 @@
     var payoutBadges = (knockoutAmount ? '<em class="sng-champions-modal__stage-payout">Нокаут: ' + escapeHtml(knockoutAmount.toLocaleString("ru-RU")) + 'р</em>' : '') + placeAwards.map(function (place) { var amount = Number(payout.places && payout.places[place]) || 0; return amount ? '<em class="sng-champions-modal__stage-payout sng-champions-modal__stage-payout--place">' + place + ' место: ' + escapeHtml(amount.toLocaleString("ru-RU")) + 'р</em>' : ''; }).join('');
     var roundData = Object.assign({}, previewData, { stageKnockoutAmount: knockoutAmount });
     var stageClass = classFn(round, stageIndex, rounds);
-    var stageSeriesTarget = seriesTargetFromLabel(stageLabel, isLosers);
+    var stageSeriesTarget = data.tournamentType === "team" ? 2 : seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
     var showRoundLabel = stageClass === "quarter" || stageClass === "semi" || stageSeriesTarget > 0;
     var prevDisabled = stageIndex <= 0;
@@ -1736,6 +1747,7 @@
         '<div>' +
           '<span>Этап ' + escapeHtml(stageIndex + 1) + ' из ' + escapeHtml(rounds.length) + '</span>' +
           '<strong>' + escapeHtml(stageLabel) + '</strong>' +
+          (stageSeriesTarget ? '<em class="sng-champions-modal__stage-format">Игра до ' + escapeHtml(stageSeriesTarget) + ' побед</em>' : '') +
           payoutBadges +
           (stageStatus ? '<em class="sng-champions-modal__stage-status sng-champions-modal__stage-status--' + escapeHtml(stageStatus.kind) + '">' + escapeHtml(stageStatus.text) + '</em>' : '') +
           (isPreview ? '<em>предпросмотр сетки</em>' : active ? '<em>текущий этап</em>' : '') +
