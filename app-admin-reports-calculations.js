@@ -12,6 +12,71 @@
     var modal = config.modal || document.getElementById("adminReportModal");
     var elements = config.elements || {};
     var bound = false;
+    var dateCalendarMonth = null;
+
+    function dateKey(date) {
+      var y = date.getFullYear();
+      var m = String(date.getMonth() + 1).padStart(2, "0");
+      var d = String(date.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + d;
+    }
+
+    function parseDateKey(value) {
+      var match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;
+    }
+
+    function formatDateLabel(value) {
+      var date = parseDateKey(value);
+      if (!date) return "Выбрать дату";
+      return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(date);
+    }
+
+    function syncDateButton() {
+      var input = document.getElementById("adminReportFiguresDate");
+      var label = document.getElementById("adminReportFiguresDateLabel");
+      if (label) label.textContent = formatDateLabel(input && input.value);
+    }
+
+    function renderDateCalendar() {
+      var calendar = document.getElementById("adminReportFiguresDateCalendar");
+      var input = document.getElementById("adminReportFiguresDate");
+      if (!calendar) return;
+      var selected = parseDateKey(input && input.value);
+      var view = dateCalendarMonth || selected || new Date();
+      dateCalendarMonth = new Date(view.getFullYear(), view.getMonth(), 1);
+      var monthLabel = new Intl.DateTimeFormat("ru-RU", { month: "long", year: "numeric" }).format(dateCalendarMonth);
+      var first = new Date(dateCalendarMonth.getFullYear(), dateCalendarMonth.getMonth(), 1);
+      var offset = (first.getDay() + 6) % 7;
+      var cursor = new Date(first.getFullYear(), first.getMonth(), 1 - offset);
+      var selectedKey = input ? input.value : "";
+      var todayKey = dateKey(new Date());
+      var html = '<div class="player-crm__range-calendar-head">' +
+        '<button type="button" class="player-crm__range-calendar-nav" data-admin-calc-date-nav="-1" aria-label="Предыдущий месяц">‹</button>' +
+        '<strong>' + monthLabel + '</strong>' +
+        '<button type="button" class="player-crm__range-calendar-nav" data-admin-calc-date-nav="1" aria-label="Следующий месяц">›</button>' +
+        '<button type="button" class="player-crm__range-calendar-close" data-admin-calc-date-close aria-label="Закрыть календарь">×</button>' +
+        '</div><div class="player-crm__range-calendar-state">Выберите дату расчёта</div>' +
+        '<div class="player-crm__range-calendar-weekdays"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>' +
+        '<div class="player-crm__range-calendar-days">';
+      for (var i = 0; i < 42; i += 1) {
+        var key = dateKey(cursor);
+        var classes = ["player-crm__range-calendar-day"];
+        if (cursor.getMonth() !== dateCalendarMonth.getMonth()) classes.push("player-crm__range-calendar-day--outside");
+        if (key === todayKey) classes.push("player-crm__range-calendar-day--today");
+        if (key === selectedKey) classes.push("player-crm__range-calendar-day--single");
+        html += '<button type="button" class="' + classes.join(" ") + '" data-admin-calc-date="' + key + '">' + cursor.getDate() + '</button>';
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      calendar.innerHTML = html + "</div>";
+    }
+
+    function closeDateCalendar() {
+      var calendar = document.getElementById("adminReportFiguresDateCalendar");
+      var button = document.getElementById("adminReportFiguresDateButton");
+      if (calendar) calendar.hidden = true;
+      if (button) button.setAttribute("aria-expanded", "false");
+    }
 
     function bindList(list, eventName, handler) {
       Array.prototype.slice.call(list || []).forEach(function (item) {
@@ -23,6 +88,39 @@
     function bind() {
       if (bound) return;
       bound = true;
+
+      var dateInput = document.getElementById("adminReportFiguresDate");
+      var dateButton = document.getElementById("adminReportFiguresDateButton");
+      var dateCalendar = document.getElementById("adminReportFiguresDateCalendar");
+      if (dateInput) dateInput.addEventListener("change", syncDateButton);
+      if (dateButton) dateButton.addEventListener("click", function () {
+        if (dateButton.disabled) return;
+        var opening = !dateCalendar || dateCalendar.hidden;
+        if (opening) {
+          dateCalendarMonth = parseDateKey(dateInput && dateInput.value) || new Date();
+          renderDateCalendar();
+          if (dateCalendar) dateCalendar.hidden = false;
+        } else closeDateCalendar();
+        dateButton.setAttribute("aria-expanded", opening ? "true" : "false");
+      });
+      if (dateCalendar) dateCalendar.addEventListener("click", function (event) {
+        var nav = event.target.closest("[data-admin-calc-date-nav]");
+        var day = event.target.closest("[data-admin-calc-date]");
+        if (nav) {
+          dateCalendarMonth = new Date(dateCalendarMonth.getFullYear(), dateCalendarMonth.getMonth() + Number(nav.getAttribute("data-admin-calc-date-nav") || 0), 1);
+          renderDateCalendar();
+        } else if (day && dateInput) {
+          dateInput.value = day.getAttribute("data-admin-calc-date") || "";
+          dateInput.dispatchEvent(new Event("change"));
+          closeDateCalendar();
+          call(callbacks.saveDraftQuiet);
+        } else if (event.target.closest("[data-admin-calc-date-close]")) closeDateCalendar();
+      });
+      document.addEventListener("click", function (event) {
+        if (!dateCalendar || dateCalendar.hidden || event.target.closest(".admin-report-calculations__date-picker")) return;
+        closeDateCalendar();
+      });
+      syncDateButton();
 
       if (modal && modal.dataset.calculationsRakebackOverlayBound !== "1") {
         modal.dataset.calculationsRakebackOverlayBound = "1";

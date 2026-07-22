@@ -66,6 +66,7 @@ const handlers = {
   "cron-daily-poker-reminders": () => require(path.join(handlersDir, "cron-daily-poker-reminders.js")),
   "cron-tournament-reminders": () => require(path.join(handlersDir, "cron-tournament-reminders.js")),
   "cron-bonus-balances-report": () => require(path.join(handlersDir, "cron-bonus-balances-report.js")),
+  "cron-engagement-automations": () => require(path.join(handlersDir, "cron-engagement-automations.js")),
   "freeroll-reminder-subscribe": () => require(path.join(handlersDir, "freeroll-reminder-subscribe.js")),
   "daily-poker-reminder": () => require(path.join(handlersDir, "daily-poker-reminder.js")),
   "tournament-reminder": () => require(path.join(handlersDir, "tournament-reminder.js")),

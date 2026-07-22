@@ -134,6 +134,10 @@
       "schedule": "0 13 * * 0"
     },
     {
+      "path": "/api/cron-engagement-automations",
+      "schedule": "17 * * * *"
+    },
+    {
       "path": "/api/deploy-hook",
       "schedule": "0 12 * * *"
     }

@@ -523,7 +523,14 @@
                       <h3 class="admin-report-calculations__title">Рейк</h3>
                       <label class="admin-report-calculations__date">
                         <span>Дата</span>
-                        <input type="date" id="adminReportFiguresDate" aria-label="Дата расчёта рейка" />
+                        <span class="admin-report-calculations__date-picker">
+                          <input type="hidden" id="adminReportFiguresDate" />
+                          <button type="button" class="admin-report-calculations__date-button" id="adminReportFiguresDateButton" aria-label="Выбрать дату расчёта рейка" aria-expanded="false" aria-controls="adminReportFiguresDateCalendar">
+                            <span id="adminReportFiguresDateLabel">Выбрать дату</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path></svg>
+                          </button>
+                          <div class="player-crm__range-calendar admin-report-calculations__date-calendar" id="adminReportFiguresDateCalendar" hidden></div>
+                        </span>
                       </label>
                     </div>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
@@ -605,25 +612,28 @@
                   <span>Розыгрыши билеты</span>
                   <output id="adminReportFiguresRafflesTickets">0</output>
                 </div>
-                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive admin-report-calculations__field--return">
                   <span>Возврат</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRafflesTicketsReturn" data-admin-report-figures-return placeholder="0" />
+                  <output class="admin-report-calculations__return-auto" data-admin-report-figures-return-auto="raffleTickets">Авто: 0</output>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input admin-report-calculations__input--adjustment" id="adminReportFiguresRafflesTicketsReturn" data-admin-report-figures-return placeholder="+/− 0" aria-label="Поправка возврата билетов: можно прибавить или вычесть" />
                 </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Розыгрыши кеш</span>
                   <output id="adminReportFiguresRafflesCash">0</output>
                 </div>
-                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive admin-report-calculations__field--return">
                   <span>Возврат</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input" id="adminReportFiguresRafflesCashReturn" data-admin-report-figures-return placeholder="0" />
+                  <output class="admin-report-calculations__return-auto" data-admin-report-figures-return-auto="raffleCash">Авто: 0</output>
+                  <input type="number" inputmode="decimal" enterkeyhint="next" class="admin-report-calculations__input admin-report-calculations__input--adjustment" id="adminReportFiguresRafflesCashReturn" data-admin-report-figures-return placeholder="+/− 0" aria-label="Поправка возврата кеша: можно прибавить или вычесть" />
                 </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Крутка дня</span>
                   <output id="adminReportFiguresDailyPoker">0</output>
                 </div>
-                <label class="admin-report-calculations__field admin-report-calculations__field--positive">
+                <label class="admin-report-calculations__field admin-report-calculations__field--positive admin-report-calculations__field--return">
                   <span>Возврат</span>
-                  <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input" id="adminReportFiguresBackingReturn" data-admin-report-figures-return placeholder="0" />
+                  <output class="admin-report-calculations__return-auto" data-admin-report-figures-return-auto="dailyPoker">Авто: 0</output>
+                  <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input admin-report-calculations__input--adjustment" id="adminReportFiguresBackingReturn" data-admin-report-figures-return placeholder="+/− 0" aria-label="Поправка возврата крутки дня: можно прибавить или вычесть" />
                 </label>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>РБ прошлая</span>

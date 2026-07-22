@@ -4,7 +4,7 @@
     with (scope) {
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
-      var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0 };
+      var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
 
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
@@ -178,10 +178,22 @@
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
         var figuresRafflesTicketsReturnInput = document.getElementById("adminReportFiguresRafflesTicketsReturn");
         var figuresRafflesCashReturnInput = document.getElementById("adminReportFiguresRafflesCashReturn");
-        var figuresBackingReturn =
-          Math.abs(parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : "")) +
-          Math.abs(parseReportNumber(figuresRafflesTicketsReturnInput ? figuresRafflesTicketsReturnInput.value : "")) +
-          Math.abs(parseReportNumber(figuresRafflesCashReturnInput ? figuresRafflesCashReturnInput.value : ""));
+        var raffleTicketsReturn = parseReportNumber(calculationWeekStatsTotals.raffleTicketsReturn) + parseReportNumber(figuresRafflesTicketsReturnInput ? figuresRafflesTicketsReturnInput.value : "");
+        var raffleCashReturn = parseReportNumber(calculationWeekStatsTotals.raffleCashReturn) + parseReportNumber(figuresRafflesCashReturnInput ? figuresRafflesCashReturnInput.value : "");
+        var dailyPokerReturn = parseReportNumber(calculationWeekStatsTotals.dailyPokerReturn) + parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : "");
+        var figuresBackingReturn = raffleTicketsReturn + raffleCashReturn + dailyPokerReturn;
+        var returnOutputs = document.querySelectorAll("[data-admin-report-figures-return-auto]");
+        if (returnOutputs && returnOutputs.length) {
+          returnOutputs.forEach(function (output) {
+            var kind = output.getAttribute("data-admin-report-figures-return-auto");
+            var base = kind === "raffleTickets"
+              ? calculationWeekStatsTotals.raffleTicketsReturn
+              : kind === "raffleCash"
+                ? calculationWeekStatsTotals.raffleCashReturn
+                : calculationWeekStatsTotals.dailyPokerReturn;
+            output.textContent = "Авто: " + formatReportRubleNumber(base);
+          });
+        }
         var figuresExpensesTotal =
           Math.abs(parseReportNumber(figuresPercentTotal)) +
           Math.abs(parseReportNumber(totals.rakeback)) +
@@ -499,11 +511,14 @@
               raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
               raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
               dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
+              raffleTicketsReturn: Number(raffleStats && raffleStats.returnedTicketAmount) || 0,
+              raffleCashReturn: Number(raffleStats && (raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount)) || 0,
+              dailyPokerReturn: Number(dailyPokerStats && dailyPokerStats.bonusBalanceReturned) || 0,
             };
             updateFiguresTotals({ syncExtras: false });
           })
           .catch(function () {
-            calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0 };
+            calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
             updateFiguresTotals({ syncExtras: false });
           });
       }
@@ -686,6 +701,8 @@
           });
         }
         if (figuresDateInput) figuresDateInput.disabled = figuresSavedLocked;
+        var figuresDateButton = document.getElementById("adminReportFiguresDateButton");
+        if (figuresDateButton) figuresDateButton.disabled = figuresSavedLocked;
         if (figuresAddFieldBtn) figuresAddFieldBtn.disabled = figuresSavedLocked;
         if (figuresSaveBtn) figuresSaveBtn.hidden = figuresSavedLocked;
         if (figuresEditBtn) figuresEditBtn.hidden = !figuresSavedLocked;
@@ -805,6 +822,7 @@
       function applyCalculationsDraft(draft) {
         if (!draft) return false;
         if (figuresDateInput) figuresDateInput.value = draft.figuresDate || localCalculationDateValue();
+        if (figuresDateInput) figuresDateInput.dispatchEvent(new Event("change"));
         var cash = Array.isArray(draft.cash) ? draft.cash : [];
         if (calculationsCashInputs && calculationsCashInputs.length) {
           calculationsCashInputs.forEach(function (input, index) {
@@ -869,6 +887,7 @@
         } catch (e) {}
         if (!raw) {
           if (figuresDateInput && !figuresDateInput.value) figuresDateInput.value = localCalculationDateValue();
+          if (figuresDateInput) figuresDateInput.dispatchEvent(new Event("change"));
           setCalculationsLocked(false);
           setFiguresLocked(false);
           return false;

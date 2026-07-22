@@ -957,18 +957,50 @@ body.admin-report-modal-open .bottom-nav {
   font-size: 11px;
   font-weight: 800;
 }
-.admin-report-calculations__date input {
-  min-width: 126px;
-  padding: 5px 7px;
+.admin-report-calculations__date-picker {
+  position: relative;
+  display: block;
+}
+.admin-report-calculations__date-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 142px;
+  min-height: 32px;
+  padding: 5px 8px;
   border: 1px solid rgba(202, 161, 84, 0.42);
   border-radius: 7px;
   background: rgba(5, 10, 18, 0.88);
   color: #ffe7b0;
   font: inherit;
-  color-scheme: dark;
+  cursor: pointer;
+  text-align: left;
 }
-.admin-report-calculations__date input:disabled {
+.admin-report-calculations__date-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+.admin-report-calculations__date-button:hover,
+.admin-report-calculations__date-button:focus-visible,
+.admin-report-calculations__date-button[aria-expanded="true"] {
+  border-color: rgba(245, 158, 11, 0.72);
+  color: var(--accent);
+  outline: none;
+}
+.admin-report-calculations__date-button:disabled {
   opacity: 0.78;
+  cursor: default;
+}
+.admin-report-calculations__date-calendar {
+  top: calc(100% + 6px);
+  left: 0;
+  right: auto;
 }
 .admin-report-calculations__title {
   margin: 0 0 6px;
@@ -1205,6 +1237,36 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-calculations__field--positive {
   border-color: rgba(74, 222, 128, 0.26);
   background: rgba(74, 222, 128, 0.1);
+}
+
+.admin-report-calculations__field--return {
+  grid-template-columns: minmax(0, 1fr) auto minmax(82px, 0.34fr);
+}
+
+#adminReportCalcRakeCard .admin-report-calculations__field--return {
+  grid-template-columns: minmax(0, 1fr) auto minmax(74px, 0.38fr);
+}
+
+#adminReportCalcRakeCard .admin-report-calculations__field--return .admin-report-calculations__return-auto {
+  margin-left: auto;
+  color: #91d8ad;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-report-calculations__input--adjustment {
+  width: 88px;
+}
+
+@media (max-width: 420px) {
+  .admin-report-calculations__field--return,
+  #adminReportCalcRakeCard .admin-report-calculations__field--return {
+    grid-template-columns: minmax(0, 1fr) auto minmax(70px, 0.34fr);
+  }
+  #adminReportCalcRakeCard .admin-report-calculations__field--return .admin-report-calculations__return-auto {
+    font-size: 10px;
+  }
 }
 .admin-report-calculations__field--expenses-total,
 .admin-report-calculations__field--remainder {
