@@ -2443,6 +2443,7 @@
 
 .sng-champions-modal__team-round--team-game > .sng-champions-modal__round-password,
 .sng-champions-modal__team-round--team-game > .sng-champions-modal__team-round-result {
+  grid-row: 2;
   min-width: 0;
   margin-top: 0;
 }
@@ -2778,6 +2779,21 @@ button.sng-champions-modal__singles-duel-player {
   color: #211000;
   background: linear-gradient(180deg, #ffeaa0, #f6a51f);
   cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .sng-champions-modal__singles-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sng-champions-modal__singles-picker b,
+  .sng-champions-modal__singles-picker button {
+    grid-column: 1;
+  }
+
+  .sng-champions-modal__singles-picker b {
+    text-align: center;
+  }
 }
 
 .sng-champions-modal__round-password {

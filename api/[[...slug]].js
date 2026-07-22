@@ -53,6 +53,7 @@ const handlers = {
   users: () => require(path.join(handlersDir, "users.js")),
   user: () => require(path.join(handlersDir, "user.js")),
   admin: () => require(path.join(handlersDir, "admin.js")),
+  "admin-menu-access": () => require(path.join(handlersDir, "admin-menu-access.js")),
   promo: () => require(path.join(handlersDir, "promo.js")),
   pikhanina: () => require(path.join(handlersDir, "pikhanina.js")),
   "visitors-list": () => require(path.join(handlersDir, "visitors-list.js")),
