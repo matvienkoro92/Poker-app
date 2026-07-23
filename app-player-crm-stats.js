@@ -193,6 +193,7 @@ function initPlayerCrmStatsRuntime(deps) {
       var dailyUsers = {};
       var dailySpins = 0;
       var dailyBonusAmount = 0;
+      var dailyTicketAmount = 0;
       var dailyDebitedAmount = 0;
       var debitAmountsByUser = {};
       (Array.isArray(dailyPokerSource.daily) ? dailyPokerSource.daily : []).forEach(function (row) {
@@ -201,6 +202,7 @@ function initPlayerCrmStatsRuntime(deps) {
         (Array.isArray(row.userIds) ? row.userIds : []).forEach(function (id) { dailyUsers[String(id)] = true; });
         dailySpins += Math.max(0, Number(row.totalSpins) || 0);
         dailyBonusAmount += Math.max(0, Number(row.bonusAmount) || 0);
+        dailyTicketAmount += Math.max(0, Number(row.ticketAmount) || 0);
       });
       (Array.isArray(dailyPokerSource.dailyDebits) ? dailyPokerSource.dailyDebits : []).forEach(function (row) {
         var date = String(row && row.date || "");
@@ -218,6 +220,7 @@ function initPlayerCrmStatsRuntime(deps) {
         uniquePlayers: Object.keys(dailyUsers).length,
         totalSpins: dailySpins,
         bonusAmount: dailyBonusAmount,
+        ticketAmount: dailyTicketAmount,
         debitedAmount: dailyDebitedAmount,
       };
     }
@@ -235,8 +238,8 @@ function initPlayerCrmStatsRuntime(deps) {
     var dailyPokerCreditedAmount = dailyPokerStats
       ? Number(dailyPokerStats.bonusAmount) || 0
       : null;
-    var dailyPokerTicketAmount = dailyPokerSource
-      ? Number(dailyPokerSource.ticketAmount) || 0
+    var dailyPokerTicketAmount = dailyPokerStats
+      ? Number(dailyPokerStats.ticketAmount) || 0
       : null;
     var dailyPokerPrizeAmount = dailyPokerCreditedAmount != null && dailyPokerTicketAmount != null
       ? dailyPokerCreditedAmount + dailyPokerTicketAmount
