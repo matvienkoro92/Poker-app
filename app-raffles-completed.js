@@ -936,6 +936,29 @@ function initRafflesCompletedRuntime(opts) {
     }
     if (activeClass) btn.classList.add(activeClass);
     if (kind === "seat" && value === "seated") btn.textContent = "✓ Сел";
+    var optimisticOutcomeButtons = [];
+    if (kind === "seat" && value === "seated" && group && !group.querySelector('[data-raffle-winner-followup="outcome"]')) {
+      ["minus", "plus"].forEach(function (outcome) {
+        var outcomeButton = document.createElement("button");
+        outcomeButton.type = "button";
+        outcomeButton.className = "raffle-winner-followup-btn";
+        outcomeButton.textContent = outcome === "minus" ? "−" : "+";
+        outcomeButton.setAttribute("data-raffle-winner-followup", "outcome");
+        outcomeButton.setAttribute("data-followup-value", outcome);
+        outcomeButton.setAttribute("data-raffle-id", rid);
+        outcomeButton.setAttribute("data-winner-user-id", wid);
+        outcomeButton.setAttribute("data-winner-slot-id", winnerSlotId);
+        outcomeButton.setAttribute("aria-label", outcome === "minus" ? "Ничего не забрал" : "Забрал сумму");
+        outcomeButton.disabled = true;
+        outcomeButton.addEventListener("click", function (event) {
+          if (event.__raffleFollowupHandled || outcomeButton.disabled) return;
+          event.stopPropagation();
+          setRaffleWinnerFollowup(outcomeButton);
+        });
+        group.appendChild(outcomeButton);
+        optimisticOutcomeButtons.push(outcomeButton);
+      });
+    }
     buttons.forEach(function (item) { item.disabled = true; });
     if (kind !== "seat") btn.classList.add("raffle-winner-followup-btn--loading");
     rememberRaffleCompletedWinnerTab(btn);
@@ -960,6 +983,7 @@ function initRafflesCompletedRuntime(opts) {
           });
       })
       .then(function (data) {
+        optimisticOutcomeButtons.forEach(function (item) { item.disabled = false; });
         if (data && data.currentWeekReturns) {
           raffleCurrentWeekReturns = data.currentWeekReturns;
           if (weekReturnsBadge) {
@@ -972,6 +996,7 @@ function initRafflesCompletedRuntime(opts) {
         refreshRafflesAfterWinnerAction(data);
       })
       .catch(function (err) {
+        optimisticOutcomeButtons.forEach(function (item) { item.remove(); });
         buttons.forEach(function (item) { item.disabled = false; });
         if (activeClass) btn.classList.remove(activeClass);
         btn.textContent = idleText;

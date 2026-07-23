@@ -12844,3 +12844,32 @@ body[data-view="raffles"] .raffles-active-chooser__item
   font-weight: 1000 !important;
   line-height: 0.82 !important;
 }
+
+/* The participant label must not be clipped by a rounded tile mask. */
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__fact--participants {
+  border-radius: 0 !important;
+}
+
+/* Scale access copy to the tile instead of leaving a large empty center. */
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__access {
+  gap: clamp(2px, 1.2cqw, 6px) !important;
+  padding: clamp(6px, 2.4cqw, 12px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__access-label {
+  font-size: clamp(24px, 14cqw, 42px) !important;
+  font-weight: 1000 !important;
+  line-height: 0.9 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__access-value,
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__access-line {
+  font-size: clamp(20px, 11cqw, 34px) !important;
+  font-weight: 1000 !important;
+  line-height: 0.92 !important;
+}
