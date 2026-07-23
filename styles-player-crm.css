@@ -2591,6 +2591,31 @@ button.player-crm__stat:focus-visible,
 [data-crm-push-only][hidden] {
   display: none !important;
 }
+.player-crm__broadcast-format-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  clear: both;
+  padding: 7px 0 8px;
+}
+.player-crm__broadcast-format-toolbar button {
+  min-width: 38px;
+  min-height: 34px;
+  padding: 5px 10px;
+  border: 1px solid rgba(199, 163, 106, 0.48);
+  border-radius: 9px;
+  background: rgba(8, 13, 24, 0.88);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.player-crm__broadcast-format-toolbar button:hover,
+.player-crm__broadcast-format-toolbar button:focus-visible {
+  border-color: rgba(199, 163, 106, 0.8);
+  background: rgba(199, 163, 106, 0.18);
+  outline: none;
+}
 .player-crm__broadcast-message-wrap {
   position: relative;
   display: block;

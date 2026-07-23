@@ -1470,6 +1470,18 @@
       pushSel.value = "chat";
       pushSel.dataset.crmBroadcastLinkTargetsReady = "1";
     }
+    var defaultButtonText = document.getElementById("playerCrmBroadcastButtonText");
+    var defaultButtonTarget = document.getElementById("playerCrmBroadcastButtonTarget");
+    var defaultButtonUrl = document.getElementById("playerCrmBroadcastButtonUrl");
+    if (defaultButtonText && !String(defaultButtonText.value || "").trim()) {
+      defaultButtonText.value = "Участвовать в розыгрыше";
+    }
+    if (defaultButtonTarget && !String(defaultButtonTarget.value || "").trim()) {
+      defaultButtonTarget.value = "raffles";
+    }
+    if (defaultButtonUrl && !String(defaultButtonUrl.value || "").trim()) {
+      defaultButtonUrl.value = buildCrmLinkUrl("raffles");
+    }
   }
 
   function broadcastButtonTarget(buttonNo) {
@@ -1512,6 +1524,91 @@
     try {
       textEl.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (eEmojiInput) {}
+  }
+
+  function insertBroadcastFormat(kind) {
+    var textEl = document.getElementById("playerCrmBroadcastText");
+    if (!textEl || textEl.disabled) return;
+    var value = String(textEl.value || "");
+    var start = typeof textEl.selectionStart === "number" ? textEl.selectionStart : value.length;
+    var end = typeof textEl.selectionEnd === "number" ? textEl.selectionEnd : start;
+    var selected = value.slice(start, end);
+    var open = "";
+    var close = "";
+    var fallback = "";
+    if (kind === "bold") {
+      open = "<b>";
+      close = "</b>";
+      fallback = "жирный текст";
+    } else if (kind === "italic") {
+      open = "<i>";
+      close = "</i>";
+      fallback = "текст курсивом";
+    } else if (kind === "link") {
+      var enteredUrl = window.prompt ? window.prompt("Вставьте ссылку, начинающуюся с https://") : "";
+      if (!enteredUrl) return;
+      var normalizedUrl = "";
+      try {
+        var parsedUrl = new URL(String(enteredUrl).trim());
+        if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") throw new Error("bad_protocol");
+        normalizedUrl = parsedUrl.href;
+      } catch (eUrl) {
+        setBroadcastResult("Ссылка должна начинаться с https:// или http://");
+        return;
+      }
+      open = '<a href="' + normalizedUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;") + '">';
+      close = "</a>";
+      fallback = "текст ссылки";
+    } else {
+      return;
+    }
+    var inner = selected || fallback;
+    var replacement = open + inner + close;
+    var max = Number(textEl.getAttribute("maxlength")) || 0;
+    var next = value.slice(0, start) + replacement + value.slice(end);
+    if (max && next.length > max) {
+      setBroadcastResult("Не хватает места: превышен лимит текста рассылки.");
+      return;
+    }
+    textEl.value = next;
+    try {
+      textEl.focus();
+      textEl.selectionStart = start + open.length;
+      textEl.selectionEnd = start + open.length + inner.length;
+      textEl.dispatchEvent(new Event("input", { bubbles: true }));
+    } catch (eFormatFocus) {}
+  }
+
+  function initBroadcastFormatToolbar() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-crm-broadcast-format]"), function (button) {
+      if (button.dataset.crmBroadcastFormatReady === "1") return;
+      button.dataset.crmBroadcastFormatReady = "1";
+      button.addEventListener("click", function () {
+        insertBroadcastFormat(button.getAttribute("data-crm-broadcast-format") || "");
+      });
+    });
+  }
+
+  function broadcastFormattedPreviewHtml(text) {
+    var source = String(text || "");
+    var out = "";
+    var last = 0;
+    var tagRe = /<\/?(?:b|strong|i|em)>|<a\s+href="(https?:\/\/[^"]+)"\s*>|<\/a>/gi;
+    var match;
+    while ((match = tagRe.exec(source))) {
+      out += esc(source.slice(last, match.index));
+      if (match[1]) out += '<a href="' + esc(match[1]) + '" target="_blank" rel="noopener noreferrer">';
+      else out += match[0].toLowerCase();
+      last = tagRe.lastIndex;
+    }
+    return out + esc(source.slice(last));
+  }
+
+  function broadcastPlainText(text) {
+    return String(text || "")
+      .replace(/<\/?(?:b|strong|i|em)>/gi, "")
+      .replace(/<a\s+href="[^"]+"\s*>/gi, "")
+      .replace(/<\/a>/gi, "");
   }
 
   function initBroadcastEmojiPicker() {
@@ -3185,6 +3282,7 @@
     var textEl = document.getElementById("playerCrmBroadcastText");
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
+    if (channel === "push") text = broadcastPlainText(text);
     var image = channel === "push" ? null : (state.broadcastImage || null);
     var button = broadcastButtonPayload();
     var hasButton = !!(button && !button.error && button.buttonText);
@@ -3209,7 +3307,7 @@
               : image && image.telegramFileId
                 ? "<div class=\"player-crm__broadcast-telegram-image\">Фото из поста Telegram</div>"
                 : "") +
-            (text ? "<p class=\"player-crm__recipient-bubble-text\">" + esc(text) + "</p>" : "") +
+            (text ? "<p class=\"player-crm__recipient-bubble-text\">" + broadcastFormattedPreviewHtml(text) + "</p>" : "") +
             (hasButton ? "<div class=\"player-crm__recipient-open-buttons\">" + buttonsHtml + "</div>" : "") +
           "</div>" +
         "</div>" +
@@ -3246,6 +3344,7 @@
     var segment = "all";
     var channel = channelEl ? channelEl.value : "bot";
     var text = textEl ? String(textEl.value || "").trim() : "";
+    if (channel === "push") text = broadcastPlainText(text);
     var resumeIds = Array.isArray(options.audienceIds) ? options.audienceIds.map(function (id) { return String(id || "").trim(); }).filter(Boolean) : [];
     var innerFilters = resumeIds.length ? [] : broadcastInnerFilterValues();
     var players = updateBroadcastAudience();
@@ -4458,6 +4557,7 @@
     var broadcastPreview = document.getElementById("playerCrmBroadcastPreviewBtn");
     if (broadcastPreview) broadcastPreview.addEventListener("click", showBroadcastPreview);
     initBroadcastEmojiPicker();
+    initBroadcastFormatToolbar();
     renderBroadcastLinkTargetOptions();
     var broadcastButtonEnabledEl = document.getElementById("playerCrmBroadcastButtonEnabled");
     if (broadcastButtonEnabledEl) broadcastButtonEnabledEl.checked = false;

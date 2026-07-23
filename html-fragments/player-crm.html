@@ -237,6 +237,11 @@
             <label class="player-crm__message-label">
               <span>Сообщение</span>
               <span class="player-crm__broadcast-text-counter" id="playerCrmBroadcastTextCounter" aria-live="polite">Осталось: 900 символов</span>
+              <span class="player-crm__broadcast-format-toolbar" data-crm-bot-only aria-label="Форматирование текста">
+                <button type="button" data-crm-broadcast-format="bold" aria-label="Выделить жирным"><strong>Ж</strong></button>
+                <button type="button" data-crm-broadcast-format="italic" aria-label="Выделить курсивом"><em>К</em></button>
+                <button type="button" data-crm-broadcast-format="link" aria-label="Вставить ссылку">🔗 Ссылка</button>
+              </span>
               <span class="player-crm__broadcast-message-wrap" id="playerCrmBroadcastEmojiWrap">
                 <textarea id="playerCrmBroadcastText" rows="6" maxlength="900"></textarea>
                 <button type="button" class="player-crm__broadcast-emoji-toggle" id="playerCrmBroadcastEmojiToggle" aria-label="Открыть смайлы" aria-expanded="false" aria-controls="playerCrmBroadcastEmojiPanel">🙂</button>
