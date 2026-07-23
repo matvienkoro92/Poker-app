@@ -870,31 +870,33 @@
     return { winner: winner, loser: loser, text: String(winner) + "-" + String(loser) };
   }
 
-  function renderTabs(createHtml, signupHtml, bracketHtml, teamsHtml, data) {
+  function renderTabs(createHtml, signupHtml, bracketHtml, pairsHtml, teamsHtml, data) {
     var isAdmin = !!(data && data.isAdmin);
     var bracketStarted = data && data.status === "bracket";
     var tab = activeTabManual
-      ? (activeTab === "bracket" ? "bracket" : activeTab === "teams" && data.tournamentType === "team" ? "teams" : activeTab === "create" && isAdmin ? "create" : "signup")
+      ? (activeTab === "bracket" ? "bracket" : activeTab === "pairs" ? "pairs" : activeTab === "teams" && data.tournamentType === "team" ? "teams" : activeTab === "create" && isAdmin ? "create" : "signup")
       : (bracketStarted ? "bracket" : activeTab === "create" && isAdmin ? "create" : "signup");
     var signupTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "signup" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "signup" ? "true" : "false") + '" data-sng-tab="signup">Запись</button>';
     var bracketTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "bracket" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "bracket" ? "true" : "false") + '" data-sng-tab="bracket">Сетка</button>';
+    var pairsTab = '<button type="button" class="club-choice-vote-modal__tab' + (tab === "pairs" ? " club-choice-vote-modal__tab--active" : "") + '" role="tab" aria-selected="' + (tab === "pairs" ? "true" : "false") + '" data-sng-tab="pairs">Пары</button>';
     var teamsTab = data.tournamentType === "team" ? '<button type="button" class="club-choice-vote-modal__tab' + (tab === "teams" ? " club-choice-vote-modal__tab--active" : "") + '" data-sng-tab="teams">Команды</button>' : '';
     activeTab = tab;
     return '<div class="sng-champions-modal__detail-nav"><button type="button" class="sng-champions-modal__back" data-sng-tournament-back>← Турниры</button></div>' +
       '<div class="club-choice-vote-modal__tabs sng-champions-modal__tabs" role="tablist" aria-label="Разделы турнира">' +
-        bracketTab + teamsTab + signupTab +
+        bracketTab + pairsTab + teamsTab + signupTab +
       '</div>' +
       '<div class="club-choice-vote-modal__tab-panels">' +
         (isAdmin ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="create"' + (tab === "create" ? "" : " hidden") + '>' + createHtml + '</div>' : "") +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="signup"' + (tab === "signup" ? "" : " hidden") + '>' + signupHtml + '</div>' +
         '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="bracket"' + (tab === "bracket" ? "" : " hidden") + '>' + bracketHtml + '</div>' +
+        '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="pairs"' + (tab === "pairs" ? "" : " hidden") + '>' + pairsHtml + '</div>' +
         (data.tournamentType === "team" ? '<div class="club-choice-vote-modal__tab-panel" data-sng-tab-panel="teams"' + (tab === "teams" ? "" : " hidden") + '>' + teamsHtml + '</div>' : '') +
       '</div>';
   }
 
   function setTab(tabName) {
     var isAdmin = !!(state && state.isAdmin);
-    activeTab = tabName === "bracket" ? "bracket" : tabName === "teams" && state && state.tournamentType === "team" ? "teams" : tabName === "create" && isAdmin ? "create" : "signup";
+    activeTab = tabName === "bracket" ? "bracket" : tabName === "pairs" ? "pairs" : tabName === "teams" && state && state.tournamentType === "team" ? "teams" : tabName === "create" && isAdmin ? "create" : "signup";
     activeTabManual = true;
     if (!modal) return;
     Array.prototype.slice.call(modal.querySelectorAll("[data-sng-tab]")).forEach(function (button) {
@@ -1791,8 +1793,8 @@
       title: isLosers ? "Сетка №2" : "Вся сетка винеров",
       extraClass: isLosers ? "sng-champions-modal__bracket-map-wrap--losers" : "sng-champions-modal__bracket-map-wrap--winners",
     });
+    if (options.mapOnly) return bracketMapHtml;
     return '<div class="sng-champions-modal__bracket-slider' + (isPreview ? " sng-champions-modal__bracket-slider--preview" : "") + '">' +
-      bracketMapHtml +
       '<div class="sng-champions-modal__stage-head">' +
         '<button type="button" class="sng-champions-modal__stage-arrow" ' + stageMoveAttr + '="prev"' + (prevDisabled ? " disabled" : "") + ' aria-label="Предыдущий этап">‹</button>' +
         '<div>' +
@@ -1816,6 +1818,25 @@
   }
 
   function renderBracket(data) {
+    var winnersHtml = renderBracketView(data, { kind: "winners", rounds: winnerDisplayRounds(data), mapOnly: true });
+    if (data.loserBracketEnabled === false) {
+      activeBracketView = "winners";
+      return '<div class="sng-champions-modal__bracket-subpanel" data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>';
+    }
+    var losersHtml = renderBracketView(data, { kind: "losers", rounds: loserDisplayRounds(data), mapOnly: true });
+    activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
+    return '<div class="sng-champions-modal__bracket-subnav" aria-label="Раздел вкладки Сетка">' +
+        '<span class="sng-champions-modal__bracket-subnav-label">Вкладка Сетка</span>' +
+        '<div class="sng-champions-modal__bracket-subtabs" role="tablist" aria-label="Сетки турнира">' +
+          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "winners" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="winners" aria-selected="' + (activeBracketView === "winners" ? "true" : "false") + '">Сетка Винеров</button>' +
+          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Сетка №2</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "winners" ? "" : " hidden") + ' data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' +
+      '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "losers" ? "" : " hidden") + ' data-sng-bracket-view-panel="losers">' + losersHtml + '</div>';
+  }
+
+  function renderPairs(data) {
     var winnersHtml = renderBracketView(data, { kind: "winners", rounds: winnerDisplayRounds(data) });
     var pinnedReadyHtml = renderPinnedReadyAction(data);
     if (data.loserBracketEnabled === false) {
@@ -1824,11 +1845,11 @@
     }
     var losersHtml = renderBracketView(data, { kind: "losers", rounds: loserDisplayRounds(data) });
     activeBracketView = activeBracketView === "losers" ? "losers" : "winners";
-    return '<div class="sng-champions-modal__bracket-subnav" aria-label="Раздел вкладки Сетка">' +
-        '<span class="sng-champions-modal__bracket-subnav-label">Вкладка Сетка</span>' +
-        '<div class="sng-champions-modal__bracket-subtabs" role="tablist" aria-label="Сетки турнира">' +
-          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "winners" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="winners" aria-selected="' + (activeBracketView === "winners" ? "true" : "false") + '">Сетка Винеров</button>' +
-          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Сетка №2</button>' +
+    return '<div class="sng-champions-modal__bracket-subnav" aria-label="Раздел вкладки Пары">' +
+        '<span class="sng-champions-modal__bracket-subnav-label">Вкладка Пары</span>' +
+        '<div class="sng-champions-modal__bracket-subtabs" role="tablist" aria-label="Пары турнирных сеток">' +
+          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "winners" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="winners" aria-selected="' + (activeBracketView === "winners" ? "true" : "false") + '">Пары винеров</button>' +
+          '<button type="button" class="sng-champions-modal__bracket-subtab' + (activeBracketView === "losers" ? " sng-champions-modal__bracket-subtab--active" : "") + '" data-sng-bracket-view="losers" aria-selected="' + (activeBracketView === "losers" ? "true" : "false") + '">Пары сетки №2</button>' +
         '</div>' +
       '</div>' +
       '<div class="sng-champions-modal__bracket-subpanel"' + (activeBracketView === "winners" ? "" : " hidden") + ' data-sng-bracket-view-panel="winners">' + winnersHtml + '</div>' +
@@ -1852,7 +1873,7 @@
     var data = state || {};
     setStatus("");
     bodyEl.innerHTML = tournamentDetailOpen
-      ? renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), renderTeams(data), data)
+      ? renderTabs(renderCreate(data), renderSignup(data), renderBracket(data), renderPairs(data), renderTeams(data), data)
       : renderTournamentMenu(data);
     updateJoinDockBodyClass();
     window.requestAnimationFrame(fitBracketMapsToViewport);
@@ -2262,7 +2283,7 @@
     if (bracketView) {
       activeBracketView = bracketView.getAttribute("data-sng-bracket-view") === "losers" ? "losers" : "winners";
       render();
-      setTab("bracket");
+      setTab(activeTab === "pairs" ? "pairs" : "bracket");
       return;
     }
     var stage = event.target && event.target.closest ? event.target.closest("[data-sng-stage]") : null;
@@ -2270,7 +2291,7 @@
       activeBracketStageManual = true;
       activeBracketStage += stage.getAttribute("data-sng-stage") === "next" ? 1 : -1;
       render();
-      setTab("bracket");
+      setTab("pairs");
       return;
     }
     var loserStage = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage]") : null;
@@ -2279,7 +2300,7 @@
       activeLoserBracketStage += loserStage.getAttribute("data-sng-loser-stage") === "next" ? 1 : -1;
       activeBracketView = "losers";
       render();
-      setTab("bracket");
+      setTab("pairs");
       return;
     }
     var stageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-stage-index]") : null;
@@ -2288,7 +2309,7 @@
       activeBracketStage = Math.max(0, Number(stageIndex.getAttribute("data-sng-stage-index")) || 0);
       activeBracketView = "winners";
       render();
-      setTab("bracket");
+      setTab(activeTab === "pairs" ? "pairs" : "bracket");
       return;
     }
     var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
@@ -2310,7 +2331,7 @@
       };
       bracketMapExpanded = true;
       render();
-      setTab("bracket");
+      setTab("pairs");
       return;
     }
     var loserStageIndex = event.target && event.target.closest ? event.target.closest("[data-sng-loser-stage-index]") : null;
@@ -2319,7 +2340,7 @@
       activeLoserBracketStage = Math.max(0, Number(loserStageIndex.getAttribute("data-sng-loser-stage-index")) || 0);
       activeBracketView = "losers";
       render();
-      setTab("bracket");
+      setTab(activeTab === "pairs" ? "pairs" : "bracket");
       return;
     }
     var bracketMap = event.target && event.target.closest ? event.target.closest("[data-sng-bracket-map]") : null;

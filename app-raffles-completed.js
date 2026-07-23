@@ -496,7 +496,14 @@ function initRafflesCompletedRuntime(opts) {
         var outcomeButtons = "";
         if (seatStatus === "seated") {
           if (cashoutStatus === "plus") {
-            outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--plus\" disabled>+ " + escapeHtml(Math.round(cashoutAmount)) + "</button>";
+            outcomeButtons =
+              "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--plus\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"plus\" data-followup-current-amount=\"" +
+              escapeHtml(Math.round(cashoutAmount)) +
+              "\"" +
+              followupAttrs +
+              " aria-label=\"Изменить сумму выигрыша\" title=\"Нажмите, чтобы изменить сумму\">+ " +
+              escapeHtml(Math.round(cashoutAmount).toLocaleString("ru-RU")) +
+              "</button>";
           } else if (cashoutStatus === "minus") {
             outcomeButtons = "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--minus\" disabled>−</button>";
           } else {
@@ -896,7 +903,8 @@ function initRafflesCompletedRuntime(opts) {
     if (!rid || (!wid && !winnerSlotId) || !kind || !value) return;
     var amount = 0;
     if (kind === "outcome" && value === "plus") {
-      var entered = window.prompt("Сколько забрал?", "");
+      var currentAmount = Math.max(0, Number(btn.getAttribute("data-followup-current-amount")) || 0);
+      var entered = window.prompt(currentAmount > 0 ? "Изменить сумму:" : "Сколько забрал?", currentAmount > 0 ? String(Math.round(currentAmount)) : "");
       if (entered == null) return;
       amount = Number(String(entered).replace(/\s+/g, "").replace(",", "."));
       if (!isFinite(amount) || amount <= 0) {

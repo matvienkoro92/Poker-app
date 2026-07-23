@@ -3687,8 +3687,8 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  /* Match centers stay 135px apart: 112px card + 23px clear gap. */
-  --sng-map-row-height: 127px;
+  /* Team cards need room for the team name and both member names. */
+  --sng-map-row-height: 151px;
   --sng-map-row-gap: 8px;
   grid-template-columns:
     152px
@@ -3702,8 +3702,7 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  /* Expanded connectors use the same 148px center step. */
-  --sng-map-row-height: 140px;
+  --sng-map-row-height: 164px;
   --sng-map-row-gap: 8px;
   grid-template-columns:
     220px
@@ -3743,7 +3742,7 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 101px;
+  --sng-map-row-height: 125px;
   --sng-map-row-gap: 3px;
   grid-template-columns:
     152px
@@ -3816,7 +3815,7 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--losers .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 108px;
+  --sng-map-row-height: 132px;
   --sng-map-row-gap: 4px;
   grid-template-columns:
     220px
@@ -4369,9 +4368,9 @@ button.sng-champions-modal__singles-duel-player {
 
 .sng-champions-modal__map-match--series {
   align-self: center;
-  height: 112px;
-  min-height: 112px;
-  max-height: 112px;
+  height: 136px;
+  min-height: 136px;
+  max-height: 136px;
 }
 
 .sng-champions-modal__map-match--series .sng-champions-modal__map-players {
@@ -4399,7 +4398,7 @@ button.sng-champions-modal__singles-duel-player {
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed,
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--rich.sng-champions-modal__map-match--done {
-  min-height: 112px;
+  min-height: 136px;
 }
 
 .sng-champions-modal__map-match--series.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players {
