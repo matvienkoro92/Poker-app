@@ -8,7 +8,7 @@ var POKER_STATIC_OLD_CACHES = ["poker-static-v1", "poker-static-v2", "poker-stat
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
-var POKER_SW_BUILD = "3.726";
+var POKER_SW_BUILD = "3.727";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
@@ -357,12 +357,6 @@ self.addEventListener("notificationclick", function (event) {
       setTimeout(resolve, ms);
     });
   }
-  function navigateClient(client) {
-    if (!client || typeof client.navigate !== "function") return Promise.resolve(client);
-    return client.navigate(targetUrl).catch(function () {
-      return client;
-    });
-  }
   function notifyClient(client) {
     if (!client) return Promise.resolve();
     try {
@@ -372,11 +366,8 @@ self.addEventListener("notificationclick", function (event) {
   }
   function notifyClientRobust(client) {
     if (!client) return Promise.resolve();
-    return navigateClient(client)
-      .then(function (navigatedClient) {
-        return notifyClient(navigatedClient || client);
-      })
-      .then(function () { return waitMs(450); })
+    return notifyClient(client)
+      .then(function () { return waitMs(80); })
       .then(function () { return notifyClient(client); })
       .catch(function () {});
   }

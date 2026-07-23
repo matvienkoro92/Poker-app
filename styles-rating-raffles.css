@@ -12706,7 +12706,7 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-count {
-  font-size: clamp(22px, 12cqw, 34px) !important;
+  font-size: clamp(34px, 18cqw, 52px) !important;
   line-height: 1 !important;
 }
 
@@ -12726,7 +12726,7 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  font-size: clamp(8px, 4.5cqw, 12px) !important;
+  font-size: clamp(11px, 6cqw, 17px) !important;
   line-height: 1 !important;
   letter-spacing: 0.01em !important;
   text-align: center !important;
