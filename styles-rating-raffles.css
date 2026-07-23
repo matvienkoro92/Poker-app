@@ -12706,8 +12706,34 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-count {
-  font-size: clamp(15px, 8.5cqw, 22px) !important;
+  font-size: clamp(22px, 12cqw, 34px) !important;
   line-height: 1 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-side {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(2px, 1.2cqw, 5px) !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-count::after {
+  content: none !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__participants-label {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: clamp(8px, 4.5cqw, 12px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__access-label {
@@ -12738,4 +12764,22 @@ body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser_
   border-radius: 14px !important;
   font-size: clamp(12px, 1.4vw, 16px) !important;
   text-overflow: clip !important;
+}
+
+@media (max-width: 520px) {
+  body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__countdown-label {
+    min-width: 0 !important;
+    font-size: 8px !important;
+    letter-spacing: -0.035em !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item .raffles-active-chooser__copy-btn {
+    width: 100% !important;
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+    font-size: clamp(9px, 2.8vw, 11px) !important;
+    letter-spacing: -0.02em !important;
+    white-space: nowrap !important;
+  }
 }
