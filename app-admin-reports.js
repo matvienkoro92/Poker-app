@@ -2947,6 +2947,25 @@ function initAdminReportModal() {
   function getCalculationWeekMeta() {
     var value = callLegacyModule("getCalculationWeekMeta", arguments);
     if (value !== undefined) return value;
+    var selectedRange = window.__pokerAdminCalculationRange;
+    if (selectedRange && (selectedRange.all || selectedRange.from && selectedRange.to)) {
+      var selectedStart = selectedRange.all ? 1 : Date.parse(String(selectedRange.from) + "T03:00:00.000Z");
+      var selectedEnd = selectedRange.all ? Date.now() : Date.parse(String(selectedRange.to) + "T03:00:00.000Z") + REPORT_DAY_MS - 1;
+      if (Number.isFinite(selectedStart) && Number.isFinite(selectedEnd)) {
+        return {
+          start: selectedStart,
+          end: selectedEnd,
+          draftKey: selectedRange.all
+            ? 1
+            : (/^(current_week|last_week)$/.test(String(selectedRange.key || "")) ? selectedStart : String(selectedRange.from).replace(/\D/g, "") + String(selectedRange.to).replace(/\D/g, "")),
+          from: selectedRange.all ? "" : String(selectedRange.from),
+          to: selectedRange.all ? "" : String(selectedRange.to),
+          key: String(selectedRange.key || "custom"),
+          all: !!selectedRange.all,
+          label: String(selectedRange.label || (fallbackFormatReportWeekBoundary(selectedStart) + " – " + fallbackFormatReportWeekBoundary(selectedEnd))),
+        };
+      }
+    }
     var info = getShiftReportDateInfo();
     var baseTs = info && info.iso ? new Date(info.iso).getTime() : Date.now();
     if (baseTs !== baseTs) baseTs = Date.now();
@@ -3755,6 +3774,14 @@ function initAdminReportModal() {
     panel.hidden = false;
     panel.classList.add("admin-report-panel--active");
     openCalculationsReports();
+    return true;
+  };
+  window.pokerRefreshAdminReportCalculations = function () {
+    if (calculationsModule && typeof calculationsModule.open === "function") {
+      if (typeof calculationsModule.reset === "function") calculationsModule.reset();
+      calculationsModule.open();
+    }
+    else openCalculationsReports();
     return true;
   };
   window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;

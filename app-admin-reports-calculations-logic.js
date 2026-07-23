@@ -5,6 +5,8 @@
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
       var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
+      var calculationPeriodReportsCache = null;
+      var calculationPeriodRequestSeq = 0;
 
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
@@ -478,20 +480,23 @@
       }
 
       function loadCalculationWeekStats(base, q, week) {
+        var requestSeq = ++calculationPeriodRequestSeq;
         var businessDateShiftMs = -3 * 60 * 60 * 1000;
-        var from = new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10);
-        var to = new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10);
+        var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
+        var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
         raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffles");
-        raffleUrl = appendCalculationQueryParam(raffleUrl, "from", from);
-        raffleUrl = appendCalculationQueryParam(raffleUrl, "to", to);
         var dailyPokerUrl = base.replace(/\/$/, "") + "/api/promo/daily-poker/winners" + q;
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "limit", "1");
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "summary", "1");
-        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "from", from);
-        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "to", to);
-        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceFrom", from);
-        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceTo", to);
+        if (from && to) {
+          raffleUrl = appendCalculationQueryParam(raffleUrl, "from", from);
+          raffleUrl = appendCalculationQueryParam(raffleUrl, "to", to);
+          dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "from", from);
+          dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "to", to);
+          dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceFrom", from);
+          dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceTo", to);
+        }
         var fetchStats = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
         return Promise.all([
           fetchStats(raffleUrl, { cache: "no-store" }, 15000).then(function (response) {
@@ -502,8 +507,9 @@
             if (!response || !response.ok) throw new Error("daily poker stats failed");
             return response.json();
           }).catch(function () { return {}; }),
-        ])
+          ])
           .then(function (results) {
+            if (requestSeq !== calculationPeriodRequestSeq) return;
             var raffleStats = results[0] && results[0].raffles;
             var dailyPokerStats = results[1];
             calculationWeekStatsTotals = {
@@ -518,6 +524,7 @@
             updateFiguresTotals({ syncExtras: false });
           })
           .catch(function () {
+            if (requestSeq !== calculationPeriodRequestSeq) return;
             calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
             updateFiguresTotals({ syncExtras: false });
           });
@@ -552,7 +559,10 @@
         if (!canViewCalculationsReports()) return;
         var week = getCalculationWeekMeta();
         if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
-        var currentCache = Array.isArray(calculationReportsCache) ? calculationReportsCache : [];
+        var useAllReports = !!(week && week.key && week.key !== "current_week");
+        var currentCache = useAllReports && Array.isArray(calculationPeriodReportsCache)
+          ? calculationPeriodReportsCache
+          : (Array.isArray(calculationReportsCache) ? calculationReportsCache : []);
         setCalculationTotalsText(currentCache.length ? sumCalculationReports(currentCache, week) : {});
         renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -562,11 +572,17 @@
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
         loadCalculationWeekStats(base, q, week);
-        fetchCalculationReports(base, q, "currentWeek")
+        if (useAllReports && Array.isArray(calculationPeriodReportsCache)) return;
+        fetchCalculationReports(base, q, useAllReports ? "all" : "currentWeek")
           .then(function (data) {
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
-            calculationReportsCache = Array.isArray(items) ? items : [];
-            setCalculationTotalsText(sumCalculationReports(calculationReportsCache, week));
+            if (useAllReports) calculationPeriodReportsCache = Array.isArray(items) ? items : [];
+            else calculationReportsCache = Array.isArray(items) ? items : [];
+            var activeWeek = getCalculationWeekMeta();
+            var activeUsesAllReports = !!(activeWeek && activeWeek.key && activeWeek.key !== "current_week");
+            if (activeUsesAllReports === useAllReports) {
+              setCalculationTotalsText(sumCalculationReports(useAllReports ? calculationPeriodReportsCache : calculationReportsCache, activeWeek));
+            }
             if (data && data.hasArchive) {
               if (calculationArchiveLoaded && Array.isArray(calculationArchiveReportsCache) && calculationArchiveReportsCache.length) {
                 renderCalculationArchive(calculationArchiveReportsCache);
@@ -719,9 +735,11 @@
       function requestServerCalculationDraft(action, draft) {
         var base = typeof getAdminReportApiBase === "function" ? getAdminReportApiBase() : "";
         if (!base || typeof buildAuthBody !== "function") return Promise.resolve(null);
+        var calculationRangeMeta = getCalculationWeekMeta();
+        var calculationRangeStart = calculationRangeMeta.draftKey != null ? calculationRangeMeta.draftKey : calculationRangeMeta.start;
         var payload = {
           action: action,
-          weekStart: String(getCalculationWeekMeta().start || ""),
+          weekStart: String(calculationRangeStart != null ? calculationRangeStart : ""),
         };
         if (draft) payload.calculationDraft = draft;
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;

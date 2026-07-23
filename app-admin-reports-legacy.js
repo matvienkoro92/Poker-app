@@ -3251,6 +3251,25 @@
       }
 
       function getCalculationWeekMeta() {
+        var selectedRange = window.__pokerAdminCalculationRange;
+        if (selectedRange && (selectedRange.all || selectedRange.from && selectedRange.to)) {
+          var start = selectedRange.all ? 1 : Date.parse(String(selectedRange.from) + "T03:00:00.000Z");
+          var end = selectedRange.all ? Date.now() : Date.parse(String(selectedRange.to) + "T03:00:00.000Z") + REPORT_DAY_MS - 1;
+          if (Number.isFinite(start) && Number.isFinite(end)) {
+            return {
+              start: start,
+              end: end,
+              draftKey: selectedRange.all
+                ? 1
+                : (/^(current_week|last_week)$/.test(String(selectedRange.key || "")) ? start : String(selectedRange.from).replace(/\D/g, "") + String(selectedRange.to).replace(/\D/g, "")),
+              from: selectedRange.all ? "" : String(selectedRange.from),
+              to: selectedRange.all ? "" : String(selectedRange.to),
+              key: String(selectedRange.key || "custom"),
+              all: !!selectedRange.all,
+              label: String(selectedRange.label || (formatReportWeekBoundary(start) + " – " + formatReportWeekBoundary(end))),
+            };
+          }
+        }
         var info = getShiftReportDateInfo();
         var baseTs = info && info.iso ? new Date(info.iso).getTime() : Date.now();
         if (baseTs !== baseTs) baseTs = Date.now();
@@ -3279,7 +3298,7 @@
 
       function getCalculationDraftKey() {
         var week = getCalculationWeekMeta();
-        return "poker_admin_report_calculations_draft:" + String(week.start || "current");
+        return "poker_admin_report_calculations_draft:" + String(week.draftKey != null ? week.draftKey : (week.start != null ? week.start : "current"));
       }
 
       function getRakebackDraftKey() {

@@ -4015,7 +4015,7 @@
     state.showAllPlayers = false;
     syncPeriodInputs();
     closeCrmDateRangePicker("stats");
-    loadCrmData("data");
+    if (state.tab !== "calculations") loadCrmData("data");
   }
 
   function pickCrmDateRangeDay(scope, key) {
@@ -4056,6 +4056,24 @@
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     var chartFrom = document.getElementById("playerCrmChartDateFrom");
     var chartTo = document.getElementById("playerCrmChartDateTo");
+    var calculationRange = selectedPeriodRange();
+    var calculationRangeState = {
+      key: String(state.period || "all"),
+      from: calculationRange && calculationRange.from ? calculationRange.from : "",
+      to: calculationRange && calculationRange.to ? calculationRange.to : "",
+      label: periodLabel(),
+      all: state.period === "all",
+    };
+    var previousCalculationRangeKey = window.__pokerAdminCalculationRange
+      ? [window.__pokerAdminCalculationRange.key, window.__pokerAdminCalculationRange.from, window.__pokerAdminCalculationRange.to].join(":")
+      : "";
+    var nextCalculationRangeKey = [calculationRangeState.key, calculationRangeState.from, calculationRangeState.to].join(":");
+    window.__pokerAdminCalculationRange = calculationRangeState;
+    if (previousCalculationRangeKey && previousCalculationRangeKey !== nextCalculationRangeKey && state.tab === "calculations") {
+      window.setTimeout(function () {
+        if (typeof window.pokerRefreshAdminReportCalculations === "function") window.pokerRefreshAdminReportCalculations();
+      }, 0);
+    }
     document.querySelectorAll("[data-crm-period-tab]").forEach(function (button) {
       var active = button.getAttribute("data-crm-period-tab") === (state.period || "all");
       button.classList.toggle("player-crm__period-tab--active", active);
@@ -4523,7 +4541,7 @@
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
-        loadCrmData("data");
+        if (state.tab !== "calculations") loadCrmData("data");
         if (state.period === "custom") {
           window.requestAnimationFrame(function () {
             var rangeButton = document.getElementById("playerCrmDateRangeBtn");
