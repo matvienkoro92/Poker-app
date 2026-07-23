@@ -39,10 +39,10 @@ function initPlayerCrmStatsRuntime(deps) {
     function hasPeriodDate(value) {
       return !!value && dateInSelectedPeriod(value);
     }
-    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
-    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
-    var botUnsubscribers = players.filter(function (p) { return !(p && p.channels && p.channels.bot) && hasPeriodDate(p && p.botUnsubscribedAt); }).length;
-    var pushUnsubscribers = players.filter(function (p) { return !(p && p.channels && p.channels.push) && hasPeriodDate(p && p.pushUnsubscribedAt); }).length;
+    var botSubscribers = players.filter(function (p) { return hasPeriodDate(p && p.botSubscribedAt); }).length;
+    var pushSubscribers = players.filter(function (p) { return hasPeriodDate(p && p.pushSubscribedAt); }).length;
+    var botUnsubscribers = players.filter(function (p) { return hasPeriodDate(p && p.botUnsubscribedAt); }).length;
+    var pushUnsubscribers = players.filter(function (p) { return hasPeriodDate(p && p.pushUnsubscribedAt); }).length;
     var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var pokerPlusPeriodRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var registrationEmailOnlyCount = registrationRowsByMethod("email").length;
@@ -235,6 +235,12 @@ function initPlayerCrmStatsRuntime(deps) {
     var dailyPokerCreditedAmount = dailyPokerStats
       ? Number(dailyPokerStats.bonusAmount) || 0
       : null;
+    var dailyPokerTicketAmount = dailyPokerSource
+      ? Number(dailyPokerSource.ticketAmount) || 0
+      : null;
+    var dailyPokerPrizeAmount = dailyPokerCreditedAmount != null && dailyPokerTicketAmount != null
+      ? dailyPokerCreditedAmount + dailyPokerTicketAmount
+      : null;
     var dailyPokerDebitedAmount = dailyPokerStats
       ? (state.period === "all" ? Number(dailyPokerStats.debitedAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceDebited) || 0)
       : null;
@@ -340,7 +346,9 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
-        ["Бонусов начислено", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—"],
+        ["Призов начислено", dailyPokerPrizeAmount != null ? money(dailyPokerPrizeAmount) : "—", null, "highlight"],
+        ["Бонусами", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—", null, "subdetail"],
+        ["Билетами", dailyPokerTicketAmount != null ? money(dailyPokerTicketAmount) : "—", null, "subdetail"],
         ["Бонусов списано", dailyPokerDebitedAmount != null ? money(dailyPokerDebitedAmount) : "—", null, "highlight"],
         ["Возврат", dailyPokerReturnedAmount != null ? (dailyPokerReturnedAmount > 0 ? "+" : "") + money(dailyPokerReturnedAmount) : "—", null, "positive"],
       ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerBonusBalance],

@@ -67,8 +67,8 @@ function initPlayerCrmReportsRuntime(deps) {
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
     var registrations = (Array.isArray(state.registeredAccounts) ? state.registeredAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
     var pokerPlusRows = (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).filter(function (row) { return dateInSelectedPeriod(row && row.linkedAt); });
-    var botSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.bot) && dateInSelectedPeriod(p.botSubscribedAt); }).length;
-    var pushSubscribers = players.filter(function (p) { return !!(p.channels && p.channels.push) && dateInSelectedPeriod(p.pushSubscribedAt); }).length;
+    var botSubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.botSubscribedAt); }).length;
+    var pushSubscribers = players.filter(function (p) { return dateInSelectedPeriod(p && p.pushSubscribedAt); }).length;
     var chat = state.chatStats || {};
     return [
       "Дашборд · График",

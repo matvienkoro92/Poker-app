@@ -4056,8 +4056,8 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.statusCode, 200, "daily poker winners succeeds");
   assert.strictEqual(r.body.ok, true, "daily poker winners returns ok");
   assert.strictEqual(r.body.period, "all_time", "daily poker winners returns all-time period");
-  assert.strictEqual(r.body.totalWinners, 2, "daily poker winners excludes non-ruble games and admins");
-  assert.strictEqual(r.body.totalPrizeRubles, 800, "daily poker winners exposes all-time ruble total");
+  assert.strictEqual(r.body.totalWinners, 3, "daily poker winners includes ticket and bonus prizes while excluding admins");
+  assert.strictEqual(r.body.totalPrizeRubles, 900, "daily poker winners exposes the complete all-time ticket and bonus total");
   assert.strictEqual(r.body.totalUniquePlayers, expectedSpinStats.totalUniquePlayers, "daily poker winners exposes all-time unique public spinners");
   assert.strictEqual(r.body.todayUniquePlayers, expectedSpinStats.todayUniquePlayers, "daily poker winners exposes unique public spinners today");
   assert.strictEqual(r.body.todayTotalSpins, expectedSpinStats.todayTotalSpins, "daily poker winners exposes public spins total today");
@@ -4072,7 +4072,7 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.firstSpinAt, expectedSpinStats.firstSpinAt, "daily poker winners exposes first public spin timestamp");
   assert.strictEqual(r.body.firstSpinDate, expectedSpinStats.firstSpinDate, "daily poker winners exposes first public spin date");
   assert.deepStrictEqual(r.body.spinStats, expectedSpinStats, "daily poker winners exposes grouped spin stats");
-  assert.strictEqual(r.body.winners.length, 2, "daily poker winners returns public winners");
+  assert.strictEqual(r.body.winners.length, 3, "daily poker winners returns public ticket and bonus winners");
   assert.strictEqual(r.body.isAdmin, false, "daily poker winners marks regular viewer");
   assert.strictEqual(r.body.winners[0].displayName, "Leader Poker21 Name", "daily poker winners prefers Poker21 name publicly");
   assert.strictEqual(r.body.winners[0].pokerPlusNickname, "LeaderPoker21Nick", "daily poker winners exposes Poker21 nick publicly");
@@ -4090,7 +4090,7 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.winners[1].spinCount, 3, "daily poker winners exposes peer spin count");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Admin Display"), false, "daily poker winners hides admins");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Attempt Display"), false, "daily poker winners hides attempt-only prizes");
-  assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), false, "daily poker winners hides bonus-only prizes");
+  assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), true, "daily poker winners includes bonus-only prizes");
 
   const adminWinners = await call(promo, req("GET", { path: "daily-poker/winners", pwaSession: s.admin, limit: "5" }));
   assert.strictEqual(adminWinners.statusCode, 200, "daily poker admin winners succeeds");

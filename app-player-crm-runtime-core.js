@@ -21,9 +21,11 @@
     dailyPokerStatsLoading: false,
     dailyPokerDebitsSort: "date",
     dailyPokerModalOpen: false,
+    dailyPokerModalTab: "issued",
     dailyPokerWinnersLoading: false,
     dailyPokerWinners: null,
     rafflesModalOpen: false,
+    rafflesModalTab: "issued",
     raffleRecipientsLoading: false,
     raffleRecipientsSort: "tickets",
     blockedUsers: [],
@@ -2213,6 +2215,7 @@
           bonusBalanceDebited: Math.max(0, Number(data.bonusBalanceDebited) || 0),
           bonusBalanceReturned: Math.max(0, Number(data.bonusBalanceReturned) || 0),
           bonusAmount: Math.max(0, Number(data.totalBonusAmount) || 0),
+          ticketAmount: Math.max(0, (Number(data.totalPrizeRubles) || 0) - (Number(data.totalBonusAmount) || 0)),
           debitedAmount: Math.max(0, Number(data.totalDebitedAmount) || 0),
           dailyDebits: Array.isArray(data.dailyDebitStats) ? data.dailyDebitStats : (Array.isArray(data.dailyDebits) ? data.dailyDebits : []),
           dailyReturns: Array.isArray(data.dailyReturnStats) ? data.dailyReturnStats : [],
@@ -2247,6 +2250,8 @@
     var data = state.dailyPokerWinners;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
     var debitedUsers = data && Array.isArray(data.debitedUsers) ? data.debitedUsers.slice() : [];
+    var returnedUsers = data && Array.isArray(data.returnedUsers) ? data.returnedUsers.slice() : [];
+    var dailyPokerTab = state.dailyPokerModalTab === "returns" ? "returns" : "issued";
     if (!data) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Не удалось загрузить победителей.</div>";
       return;
@@ -2254,9 +2259,31 @@
     var winnersPrizeTotal = Math.max(0, Number(data && data.totalPrizeRubles) || winners.reduce(function (sum, winner) {
       return sum + Math.max(0, Number(winner && winner.totalPrizeAmount) || 0);
     }, 0));
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · списано " + money(data.totalDebitedAmount || 0) + " · выиграно " + money(winnersPrizeTotal) + " · " + intFmt(winners.length) + " победителей";
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + (dailyPokerTab === "returns"
+      ? " · возвращено " + money(data.bonusBalanceReturned || 0) + " · " + intFmt(returnedUsers.length) + " возвратов"
+      : " · списано " + money(data.totalDebitedAmount || 0) + " · выиграно " + money(winnersPrizeTotal) + " · " + intFmt(winners.length) + " победителей");
+    var dailyPokerTabsHtml = "<div class=\"player-crm__raffle-tabs\" role=\"tablist\" aria-label=\"Операции крутки дня\">" +
+      "<button type=\"button\" role=\"tab\" data-crm-daily-poker-tab=\"issued\" aria-selected=\"" + (dailyPokerTab === "issued" ? "true" : "false") + "\" class=\"" + (dailyPokerTab === "issued" ? "is-active" : "") + "\">Выдачи <b>" + esc(intFmt(debitedUsers.length)) + "</b></button>" +
+      "<button type=\"button\" role=\"tab\" data-crm-daily-poker-tab=\"returns\" aria-selected=\"" + (dailyPokerTab === "returns" ? "true" : "false") + "\" class=\"" + (dailyPokerTab === "returns" ? "is-active" : "") + "\">Возвраты <b>" + esc(intFmt(returnedUsers.length)) + "</b></button></div>";
+    if (dailyPokerTab === "returns") {
+      var dailyReturnsHtml = returnedUsers.length ? "<div class=\"player-crm__daily-winners-list\">" + returnedUsers.map(function (user, index) {
+        var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
+        var pokerName = user.pokerPlusNickname || user.pokerPlusName || "—";
+        var returnedDate = user.returnedAt ? dateTime(user.returnedAt) : String(user.date || "—").split("-").reverse().join(".");
+        return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__daily-return\">" +
+          "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
+          "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.displayName || pokerName) + "</strong>" +
+          "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
+          "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+          "<span>Выдача <b>" + esc(user.tournamentTitle || money(user.debitAmount || 0)) + "</b></span>" +
+          "<span>Дата возврата <b>" + esc(returnedDate) + "</b></span>" +
+          "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b></article>";
+      }).join("") + "</div>" : "<div class=\"player-crm__timeline-item\">За выбранный период возвратов нет.</div>";
+      bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + dailyPokerTabsHtml + dailyReturnsHtml + "</div>";
+      return;
+    }
     if (!winners.length && !debitedUsers.length) {
-      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период данных нет.</div>";
+      bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + dailyPokerTabsHtml + "<div class=\"player-crm__timeline-item\">За выбранный период выдач нет.</div></div>";
       return;
     }
     var debitSort = state.dailyPokerDebitsSort === "amount" ? "amount" : "date";
@@ -2314,7 +2341,7 @@
           "<span>Всего <b>" + esc(money(winner.totalPrizeAmount || 0)) + "</b></span>" +
         "</div></article>";
     }).join("") + "</div></details>" : "";
-    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + debitsHtml + winnersHtml + "</div>";
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + dailyPokerTabsHtml + debitsHtml + winnersHtml + "</div>";
   }
 
   function loadDailyPokerWinners() {
@@ -2344,6 +2371,7 @@
 
   function renderRafflesModal() {
     var modal = document.getElementById("playerCrmRafflesModal");
+    var titleEl = document.getElementById("playerCrmRafflesModalTitle");
     var subtitleEl = document.getElementById("playerCrmRafflesModalSubtitle");
     var bodyEl = document.getElementById("playerCrmRafflesModalBody");
     if (!modal || !bodyEl) return;
@@ -2355,6 +2383,9 @@
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
     var recipients = raffleStats && Array.isArray(raffleStats.issuedRecipients) ? raffleStats.issuedRecipients.slice() : [];
+    var returns = raffleStats && Array.isArray(raffleStats.returnedRecipients) ? raffleStats.returnedRecipients.slice() : [];
+    var raffleTab = state.rafflesModalTab === "returns" ? "returns" : "issued";
+    if (titleEl) titleEl.textContent = raffleTab === "returns" ? "Возвраты с Розыгрышей" : "Кому сколько выдано в Розыгрышах";
     var raffleSort = state.raffleRecipientsSort === "cash" || state.raffleRecipientsSort === "total"
       ? state.raffleRecipientsSort
       : "tickets";
@@ -2364,13 +2395,36 @@
       if (amountDiff) return amountDiff;
       return Number(b && b.totalAmount || 0) - Number(a && a.totalAmount || 0);
     });
-    if (subtitleEl) subtitleEl.textContent = periodLabel() + " · выдано " + money(raffleStats && raffleStats.issuedPrizeAmount || 0);
+    if (subtitleEl) subtitleEl.textContent = periodLabel() + (raffleTab === "returns"
+      ? " · возвращено " + money(raffleStats && raffleStats.returnedAmount || 0)
+      : " · выдано " + money(raffleStats && raffleStats.issuedPrizeAmount || 0));
     if (state.raffleRecipientsLoading) {
       bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">Загружаю список…</div>";
       return;
     }
+    var tabsHtml = "<div class=\"player-crm__raffle-tabs\" role=\"tablist\" aria-label=\"Данные розыгрышей\">" +
+      "<button type=\"button\" role=\"tab\" data-crm-raffles-tab=\"issued\" aria-selected=\"" + (raffleTab === "issued" ? "true" : "false") + "\" class=\"" + (raffleTab === "issued" ? "is-active" : "") + "\">Выдачи <b>" + esc(intFmt(recipients.length)) + "</b></button>" +
+      "<button type=\"button\" role=\"tab\" data-crm-raffles-tab=\"returns\" aria-selected=\"" + (raffleTab === "returns" ? "true" : "false") + "\" class=\"" + (raffleTab === "returns" ? "is-active" : "") + "\">Возвраты <b>" + esc(intFmt(raffleStats && raffleStats.returnCount || 0)) + "</b></button></div>";
+    if (raffleTab === "returns") {
+      var returnsHtml = returns.length ? "<div class=\"player-crm__daily-winners-list\">" + returns.map(function (user, index) {
+        var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
+        var pokerName = user.pokerPlusNickname || "—";
+        var returnKind = user.kind === "cash" ? "Кеш" : "Билет";
+        return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__raffle-return\">" +
+          "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
+          "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
+          "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
+          "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+          "<span>Розыгрыш <b>" + esc(user.raffleTitle || user.raffleId || "—") + "</b></span>" +
+          "<span class=\"player-crm__raffle-return-kind\">" + esc(returnKind) + " <b>" + esc(user.reason || "Возврат") + "</b></span>" +
+          "<span>Дата <b>" + esc(dateTime(user.returnedAt) || "—") + "</b></span>" +
+          "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b></article>";
+      }).join("") + "</div>" : "<div class=\"player-crm__timeline-item\">За выбранный период возвратов нет.</div>";
+      bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + tabsHtml + returnsHtml + "</div>";
+      return;
+    }
     if (!recipients.length) {
-      bodyEl.innerHTML = "<div class=\"player-crm__timeline-item\">За выбранный период выданных призов нет.</div>";
+      bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + tabsHtml + "<div class=\"player-crm__timeline-item\">За выбранный период выданных призов нет.</div></div>";
       return;
     }
     var sortHtml = "<div class=\"player-crm__raffle-sort\" role=\"group\" aria-label=\"Сортировка игроков\">" +
@@ -2378,7 +2432,7 @@
       "<button type=\"button\" data-crm-raffles-sort=\"tickets\" class=\"" + (raffleSort === "tickets" ? "is-active" : "") + "\">По билетам</button>" +
       "<button type=\"button\" data-crm-raffles-sort=\"cash\" class=\"" + (raffleSort === "cash" ? "is-active" : "") + "\">По кешу</button>" +
       "<button type=\"button\" data-crm-raffles-sort=\"total\" class=\"" + (raffleSort === "total" ? "is-active" : "") + "\">По общей сумме</button></div>";
-    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + sortHtml + "<div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user, index) {
+    bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + tabsHtml + sortHtml + "<div class=\"player-crm__daily-winners-list\">" + recipients.map(function (user, index) {
       var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
       var pokerName = user.pokerPlusNickname || "—";
       return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient\">" +
@@ -4211,10 +4265,22 @@
         renderDailyPokerModal();
         return;
       }
+      var dailyPokerTabButton = e.target.closest("[data-crm-daily-poker-tab]");
+      if (dailyPokerTabButton) {
+        state.dailyPokerModalTab = dailyPokerTabButton.getAttribute("data-crm-daily-poker-tab") === "returns" ? "returns" : "issued";
+        renderDailyPokerModal();
+        return;
+      }
       var rafflesSortButton = e.target.closest("[data-crm-raffles-sort]");
       if (rafflesSortButton) {
         var raffleSortValue = rafflesSortButton.getAttribute("data-crm-raffles-sort");
         state.raffleRecipientsSort = raffleSortValue === "cash" || raffleSortValue === "total" ? raffleSortValue : "tickets";
+        renderRafflesModal();
+        return;
+      }
+      var rafflesTabButton = e.target.closest("[data-crm-raffles-tab]");
+      if (rafflesTabButton) {
+        state.rafflesModalTab = rafflesTabButton.getAttribute("data-crm-raffles-tab") === "returns" ? "returns" : "issued";
         renderRafflesModal();
         return;
       }
@@ -4241,6 +4307,7 @@
       }
       if (e.target.closest("[data-crm-daily-poker-modal]")) {
         state.dailyPokerModalOpen = true;
+        state.dailyPokerModalTab = "issued";
         renderStats();
         renderDailyPokerModal();
         loadDailyPokerWinners();
@@ -4248,6 +4315,7 @@
       }
       if (e.target.closest("[data-crm-raffles-modal]")) {
         state.rafflesModalOpen = true;
+        state.rafflesModalTab = "issued";
         renderRafflesModal();
         loadRaffleRecipients();
         return;

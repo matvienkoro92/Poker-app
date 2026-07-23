@@ -421,6 +421,10 @@
           var playerSub = [op.displayName && op.displayName !== poker21Nickname ? op.displayName : "", op.username ? "@" + op.username : ""].filter(Boolean).join(" · ");
           var tournamentTitle = op.tournamentTitle || "Турнир не указан";
           var tournamentMeta = [op.tournamentTime, op.tournamentBuyin].filter(Boolean).join(" · ");
+          var currentBalance = Number(op.currentBalance);
+          var balanceAfterHtml = Number.isFinite(currentBalance)
+            ? '<span class="admin-bonuses__issue-balance">Текущий баланс <strong>' + esc(fmtPoints(Math.max(0, currentBalance))) + '</strong></span>'
+            : "";
           var reviewStatus = String(op.reviewStatus || "");
           var reviewFinal = reviewStatus === "minus" || reviewStatus === "plus";
           var reviewHtml = reviewFinal
@@ -436,7 +440,7 @@
               (playerSub ? '<span>' + esc(playerSub) + '</span>' : "") +
             '</div>' +
             '<div class="admin-bonuses__issue-tournament"><strong>' + esc(tournamentTitle) + '</strong><span>' + esc(tournamentMeta || fmtDate(op.createdAt)) + '</span></div>' +
-            '<div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' +
+            '<div class="admin-bonuses__issue-amount-wrap"><div class="admin-bonuses__issue-amount">−' + esc(fmtPoints(op.amount)) + '</div>' + balanceAfterHtml + '</div>' +
             '<div class="admin-bonuses__issue-review">' + reviewHtml + '</div>' +
           '</article>';
         }).join("") +
