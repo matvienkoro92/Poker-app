@@ -10,6 +10,7 @@
     operation: "",
     loading: false,
     totalDebited: null,
+    totalBalance: null,
     issuesLoaded: false,
     issueOperations: [],
     tournamentOptions: [],
@@ -273,6 +274,18 @@
     value.textContent = fmtPoints(total);
   }
 
+  function syncTotalBalance(total) {
+    var wrap = $("adminBonusesTotalBalance");
+    var value = $("adminBonusesTotalBalanceValue");
+    if (!wrap || !value) return;
+    if (total == null || !Number.isFinite(Number(total))) {
+      wrap.hidden = true;
+      return;
+    }
+    wrap.hidden = false;
+    value.textContent = fmtPoints(total);
+  }
+
   function renderTable(users) {
     var body = $("adminBonusesTableBody");
     if (!body) return;
@@ -318,15 +331,18 @@
         adminBonusesState.users = data.users || [];
         adminBonusesState.total = Number(data.total || adminBonusesState.users.length || 0);
         adminBonusesState.totalDebited = data.bonusTotals ? data.bonusTotals.totalDebited : 0;
+        adminBonusesState.totalBalance = data.bonusTotals ? data.bonusTotals.totalBalance : 0;
         renderTable(adminBonusesState.users);
         syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
         syncTotalDebited(adminBonusesState.totalDebited);
+        syncTotalBalance(adminBonusesState.totalBalance);
         setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
       .catch(function (err) {
         adminBonusesState.loading = false;
         syncShowAllButton(0, 0);
         syncTotalDebited(adminBonusesState.totalDebited);
+        syncTotalBalance(adminBonusesState.totalBalance);
         setStatus(err && err.message ? err.message : POKER_NET_ERR, true);
       });
   }

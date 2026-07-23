@@ -512,6 +512,13 @@
   line-height: 1.15;
 }
 
+.admin-bonuses__issue-tournament strong {
+  color: #fff4c7;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.08;
+}
+
 .admin-bonuses__issue-player .admin-bonuses__issue-poker-nick {
   color: #fff4c7;
   font-size: 17px;
@@ -553,13 +560,13 @@
   align-items: baseline;
   gap: 4px;
   color: var(--text-muted);
-  font-size: 9px;
-  font-weight: 750;
+  font-size: 12px;
+  font-weight: 850;
   white-space: nowrap;
 }
 .admin-bonuses__issue-balance strong {
   color: #9ae678;
-  font-size: 11px;
+  font-size: 17px;
   font-weight: 950;
 }
 
@@ -923,12 +930,19 @@
   display: none;
 }
 
+.admin-bonuses__totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .admin-bonuses__total-debited {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 0;
   padding: 8px 10px;
   border: 1px solid rgba(199, 163, 106, 0.3);
   border-radius: 8px;
@@ -947,6 +961,20 @@
   font-size: 16px;
   line-height: 1;
   white-space: nowrap;
+}
+
+.admin-bonuses__total-balance {
+  border-color: rgba(130, 207, 97, 0.35);
+}
+
+.admin-bonuses__total-balance strong {
+  color: #9ae678;
+}
+
+@media (max-width: 620px) {
+  .admin-bonuses__totals {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-bonuses__history {
