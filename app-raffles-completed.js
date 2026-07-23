@@ -19,6 +19,14 @@ function initRafflesCompletedRuntime(opts) {
     var raffleCompletedTimerRefreshAfter = 0;
     var raffleCompletedTimerRefreshMarks = {};
     var raffleCompletedActiveWinnerTabs = {};
+    var raffleCurrentWeekReturns = null;
+
+  function raffleCurrentWeekReturnsHtml() {
+    if (!raffleCurrentWeekReturns || !isFinite(Number(raffleCurrentWeekReturns.amount))) return "";
+    var amount = Math.max(0, Math.round(Number(raffleCurrentWeekReturns.amount) || 0));
+    return "<span class=\"raffle-winner-week-returns\" title=\"Все возвраты с розыгрышей за текущую неделю\">" +
+      "Возвраты недели: <b>" + escapeHtml(amount.toLocaleString("ru-RU")) + " ₽</b></span>";
+  }
 
   function raffleCompletedWinnerTabsKey(raffle) {
     return String((raffle && (raffle.id || raffle.completedNumber)) || "completed");
@@ -462,6 +470,12 @@ function initRafflesCompletedRuntime(opts) {
         " data-winner-user-id=\"" + uidAttr + "\"" +
         " data-winner-slot-id=\"" + winnerSlotAttr + "\"";
       var followupHtml = "";
+      var reminderHtml = !winnerReady && !readyExpired && !prizeIssued && !prizeDeclined && raffleWinnerHasPendingReadyDeadline(w)
+        ? "<button type=\"button\" class=\"raffle-winner-remind-btn\" data-raffle-winner-remind=\"1\"" +
+          " data-raffle-id=\"" + escapeHtml(actionRaffleId) + "\"" +
+          " data-winner-user-id=\"" + uidAttr + "\"" +
+          " data-winner-slot-id=\"" + winnerSlotAttr + "\">Напомнить</button>"
+        : "";
       if (prizeIssued) {
         var seatButton =
           "<button type=\"button\" class=\"raffle-winner-followup-btn raffle-winner-followup-btn--seat" +
@@ -474,7 +488,8 @@ function initRafflesCompletedRuntime(opts) {
           (seatStatus === "not_seated" ? " raffle-winner-followup-btn--not-seated" : "") +
           "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"not_seated\"" +
           followupAttrs +
-          ">" + (seatStatus === "not_seated" ? "✓ Не сел" : "Не сел") + "</button>";
+          ">" + (seatStatus === "not_seated" ? "✓ Не сел" : "Не сел") + "</button>" +
+          (seatStatus === "not_seated" ? raffleCurrentWeekReturnsHtml() : "");
         var outcomeButtons = "";
         if (seatStatus === "seated") {
           if (cashoutStatus === "plus") {
@@ -493,6 +508,7 @@ function initRafflesCompletedRuntime(opts) {
         "<span class=\"raffle-winner-row__controls\">" +
         statusHtml +
         readyAction +
+        reminderHtml +
         "<span class=\"raffle-winner-btns\"><button type=\"button\" class=\"raffle-winner-btn raffle-winner-btn--ok" +
         okActive +
         "\" data-raffle-id=\"" +
@@ -826,6 +842,49 @@ function initRafflesCompletedRuntime(opts) {
     });
   }
 
+  function remindRaffleWinnerReady(btn) {
+    if (!btn || btn.disabled || !base || !rafflesIsAdmin) return;
+    var rid = btn.getAttribute("data-raffle-id") || "";
+    var wid = btn.getAttribute("data-winner-user-id") || "";
+    var winnerSlotId = btn.getAttribute("data-winner-slot-id") || "";
+    if (!rid || (!wid && !winnerSlotId)) return;
+    var idleText = btn.textContent || "Напомнить";
+    btn.disabled = true;
+    btn.textContent = "Отправляю…";
+    rememberRaffleCompletedWinnerTab(btn);
+    fetch(base + "/api/raffles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerGuestOrAuthedPostBody({
+        action: "remindWinnerReady",
+        raffleId: rid,
+        winnerUserId: wid,
+        winnerSlotId: winnerSlotId
+      })),
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; })
+          .then(function (data) {
+            if (!r.ok || !data || !data.ok) throw new Error(data && data.error ? data.error : "Напоминание не отправлено");
+            return data;
+          });
+      })
+      .then(function (data) {
+        btn.textContent = "✓ Отправлено" + (data && data.remaining ? " · " + data.remaining : "");
+        window.setTimeout(function () {
+          if (!btn || !btn.isConnected) return;
+          btn.disabled = false;
+          btn.textContent = idleText;
+        }, 3500);
+      })
+      .catch(function (error) {
+        btn.disabled = false;
+        btn.textContent = idleText;
+        if (tg && tg.showAlert) tg.showAlert(error && error.message ? error.message : POKER_NET_ERR);
+        else window.alert(error && error.message ? error.message : POKER_NET_ERR);
+      });
+  }
+
   function setRaffleWinnerFollowup(btn) {
     if (!btn || btn.disabled || !base) return;
     var rid = btn.getAttribute("data-raffle-id") || "";
@@ -856,6 +915,16 @@ function initRafflesCompletedRuntime(opts) {
           : value === "plus"
             ? "raffle-winner-followup-btn--plus"
             : "";
+    var weekReturnsBadge = null;
+    if (kind === "seat" && value === "not_seated" && group) {
+      weekReturnsBadge = group.querySelector(".raffle-winner-week-returns");
+      if (!weekReturnsBadge) {
+        weekReturnsBadge = document.createElement("span");
+        weekReturnsBadge.className = "raffle-winner-week-returns raffle-winner-week-returns--loading";
+        btn.insertAdjacentElement("afterend", weekReturnsBadge);
+      }
+      weekReturnsBadge.textContent = "Возвраты недели: считаю…";
+    }
     if (activeClass) btn.classList.add(activeClass);
     if (kind === "seat" && value === "seated") btn.textContent = "✓ Сел";
     buttons.forEach(function (item) { item.disabled = true; });
@@ -882,6 +951,15 @@ function initRafflesCompletedRuntime(opts) {
           });
       })
       .then(function (data) {
+        if (data && data.currentWeekReturns) {
+          raffleCurrentWeekReturns = data.currentWeekReturns;
+          if (weekReturnsBadge) {
+            weekReturnsBadge.classList.remove("raffle-winner-week-returns--loading");
+            weekReturnsBadge.innerHTML = "Возвраты недели: <b>" +
+              escapeHtml(Math.max(0, Math.round(Number(data.currentWeekReturns.amount) || 0)).toLocaleString("ru-RU")) +
+              " ₽</b>";
+          }
+        }
         refreshRafflesAfterWinnerAction(data);
       })
       .catch(function (err) {
@@ -889,6 +967,9 @@ function initRafflesCompletedRuntime(opts) {
         if (activeClass) btn.classList.remove(activeClass);
         btn.textContent = idleText;
         btn.classList.remove("raffle-winner-followup-btn--loading");
+        if (weekReturnsBadge && weekReturnsBadge.classList.contains("raffle-winner-week-returns--loading")) {
+          weekReturnsBadge.remove();
+        }
         if (tg && tg.showAlert) tg.showAlert(err && err.message ? err.message : POKER_NET_ERR);
         else window.alert(err && err.message ? err.message : POKER_NET_ERR);
       });
@@ -1584,6 +1665,15 @@ function initRafflesCompletedRuntime(opts) {
           return;
         }
         setRaffleWinnerFollowup(followupBtn);
+        return;
+      }
+      var remindBtn = e.target.closest("[data-raffle-winner-remind]");
+      if (remindBtn && rafflesIsAdmin) {
+        if (!base || !pokerApiHasCredential()) {
+          if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+          return;
+        }
+        remindRaffleWinnerReady(remindBtn);
         return;
       }
       var winnerBtn = e.target.closest(".raffle-winner-btn");

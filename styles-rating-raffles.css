@@ -5607,6 +5607,49 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   cursor: default;
   opacity: 1;
 }
+.raffle-winner-remind-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 27px;
+  padding: 4px 9px;
+  border: 1px solid rgba(250, 204, 21, 0.78);
+  border-radius: 9px;
+  background: rgba(66, 45, 8, 0.78);
+  color: #fde68a;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.raffle-winner-remind-btn:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+.raffle-winner-week-returns {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 4px 7px;
+  border: 1px solid rgba(74, 222, 128, 0.72);
+  border-radius: 9px;
+  background: rgba(20, 83, 45, 0.72);
+  color: #bbf7d0;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.raffle-winner-week-returns b {
+  margin-left: 4px;
+  color: #f0fdf4;
+  font-size: 11px;
+  font-weight: 950;
+}
+.raffle-winner-week-returns--loading {
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.55);
+  background: rgba(66, 45, 8, 0.72);
+}
 .raffle-winner-row__profile.raffle-participants__profile-btn {
   flex: 0 1 auto;
   min-width: 0;
