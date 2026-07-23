@@ -1104,6 +1104,19 @@ function initRafflesCompletedRuntime(opts) {
   function bindRaffleWinnerStatusButtons(container, raffleId) {
     if (!container || !base) return;
     syncRaffleCompletedTimers();
+    container.querySelectorAll("[data-raffle-winner-followup]").forEach(function (btn) {
+      if (btn.dataset.followupBound === "1") return;
+      btn.dataset.followupBound = "1";
+      btn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        if (!rafflesIsAdmin || btn.disabled) return;
+        if (!pokerApiHasCredential()) {
+          if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
+          return;
+        }
+        setRaffleWinnerFollowup(btn);
+      });
+    });
     container.querySelectorAll(".raffle-winner-ready-btn").forEach(function (btn) {
       if (btn.dataset.readyBound === "1") return;
       btn.dataset.readyBound = "1";
