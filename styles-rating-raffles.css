@@ -12,7 +12,7 @@
   margin: 0 0 10px;
   padding: 7px 13px;
   border: 1px solid rgba(255, 203, 83, 0.72);
-  border-radius: 999px;
+  border-radius: 9px;
   background:
     linear-gradient(180deg, rgba(255, 209, 103, 0.16), rgba(4, 6, 10, 0.54)),
     rgba(8, 10, 14, 0.72);
@@ -790,7 +790,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   align-self: flex-start;
   padding: 8px 12px;
   border: 1px solid var(--accent);
-  border-radius: 9px;
+  border-radius: 999px;
   background: rgba(249, 115, 22, 0.12);
   color: var(--accent);
   font-size: 13px;
@@ -5613,7 +5613,7 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   min-height: 27px;
   padding: 4px 9px;
   border: 1px solid rgba(250, 204, 21, 0.78);
-  border-radius: 9px;
+  border-radius: 999px;
   background: rgba(66, 45, 8, 0.78);
   color: #fde68a;
   font: inherit;
@@ -5625,6 +5625,11 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
 .raffle-winner-remind-btn:disabled {
   cursor: default;
   opacity: 0.82;
+}
+.raffle-winner-remind-btn--sent {
+  border-color: rgba(74, 222, 128, 0.76);
+  background: rgba(20, 83, 45, 0.78);
+  color: #bbf7d0;
 }
 .raffle-winner-week-returns {
   display: inline-flex;

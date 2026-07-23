@@ -3,7 +3,7 @@
 
   var CRM_SELECTOR = '[data-crm-open="player-crm"]';
   var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"], [data-admin-report-tab="cash-total"]';
-  var ADMIN_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn, #headerRafflesShortcutBtn";
+  var ADMIN_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn";
   var PROTECTED_SELECTOR = ADMIN_SELECTOR + ", " + CRM_SELECTOR + ", " + CALCULATIONS_SELECTOR;
   var bypassTargets = typeof WeakSet === "function" ? new WeakSet() : null;
   var pendingTarget = null;

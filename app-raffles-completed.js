@@ -470,11 +470,14 @@ function initRafflesCompletedRuntime(opts) {
         " data-winner-user-id=\"" + uidAttr + "\"" +
         " data-winner-slot-id=\"" + winnerSlotAttr + "\"";
       var followupHtml = "";
+      var reminderSent = !!w.winnerReadyReminderSentAt;
       var reminderHtml = !winnerReady && !readyExpired && !prizeIssued && !prizeDeclined && raffleWinnerHasPendingReadyDeadline(w)
-        ? "<button type=\"button\" class=\"raffle-winner-remind-btn\" data-raffle-winner-remind=\"1\"" +
+        ? "<button type=\"button\" class=\"raffle-winner-remind-btn" + (reminderSent ? " raffle-winner-remind-btn--sent" : "") + "\" data-raffle-winner-remind=\"1\"" +
           " data-raffle-id=\"" + escapeHtml(actionRaffleId) + "\"" +
           " data-winner-user-id=\"" + uidAttr + "\"" +
-          " data-winner-slot-id=\"" + winnerSlotAttr + "\">Напомнить</button>"
+          " data-winner-slot-id=\"" + winnerSlotAttr + "\"" +
+          (reminderSent ? " disabled aria-disabled=\"true\"" : "") + ">" +
+          (reminderSent ? "✓ Отправлено" : "Напомнить") + "</button>"
         : "";
       if (prizeIssued) {
         var seatButton =
@@ -870,12 +873,10 @@ function initRafflesCompletedRuntime(opts) {
           });
       })
       .then(function (data) {
-        btn.textContent = "✓ Отправлено" + (data && data.remaining ? " · " + data.remaining : "");
-        window.setTimeout(function () {
-          if (!btn || !btn.isConnected) return;
-          btn.disabled = false;
-          btn.textContent = idleText;
-        }, 3500);
+        btn.textContent = "✓ Отправлено";
+        btn.classList.add("raffle-winner-remind-btn--sent");
+        btn.setAttribute("aria-disabled", "true");
+        if (data && data.raffle) refreshRafflesAfterWinnerAction(data);
       })
       .catch(function (error) {
         btn.disabled = false;

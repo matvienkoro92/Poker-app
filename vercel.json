@@ -123,7 +123,7 @@
     },
     {
       "path": "/api/cron-raffles",
-      "schedule": "1,6,11 15 * * *"
+      "schedule": "1,6,11 16 * * *"
     },
     {
       "path": "/api/cron-raffles",
