@@ -3891,7 +3891,13 @@
     var monthIndex = (Number(monthParts[1]) || (new Date().getMonth() + 1)) - 1;
     var first = new Date(year, monthIndex, 1);
     var offset = (first.getDay() + 6) % 7;
-    var todayKey = localDateKey(new Date());
+    var today = new Date();
+    var todayKey = localDateKey(today);
+    var currentWeekStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    currentWeekStartDate.setDate(currentWeekStartDate.getDate() - ((currentWeekStartDate.getDay() + 6) % 7));
+    var currentWeekEndDate = new Date(currentWeekStartDate.getFullYear(), currentWeekStartDate.getMonth(), currentWeekStartDate.getDate() + 6);
+    var currentWeekStartKey = localDateKey(currentWeekStartDate);
+    var currentWeekEndKey = localDateKey(currentWeekEndDate);
     var from = crmDateRangePicker.draftFrom || "";
     var to = crmDateRangePicker.draftTo || "";
     var status = "";
@@ -3912,6 +3918,7 @@
       var key = crmDateKeyFromParts(date.getFullYear(), date.getMonth(), date.getDate());
       var classes = ["player-crm__range-calendar-day"];
       if (date.getMonth() !== monthIndex) classes.push("player-crm__range-calendar-day--outside");
+      if (key >= currentWeekStartKey && key <= currentWeekEndKey) classes.push("player-crm__range-calendar-day--current-week");
       if (key === todayKey) classes.push("player-crm__range-calendar-day--today");
       if (from && to && key > from && key < to) classes.push("player-crm__range-calendar-day--inside");
       if (from && key === from) classes.push("player-crm__range-calendar-day--start");
@@ -3933,7 +3940,7 @@
     var range = crmRangeValues(scope);
     crmDateRangePicker = {
       scope: scope,
-      month: crmMonthKeyFromDateKey(range.from || range.to || localDateKey(new Date())),
+      month: crmMonthKeyFromDateKey(localDateKey(new Date())),
       draftFrom: range.from || "",
       draftTo: range.to || "",
       pending: false,

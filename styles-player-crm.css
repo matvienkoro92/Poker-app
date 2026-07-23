@@ -438,6 +438,11 @@
 .player-crm__range-calendar-day--outside {
   opacity: 0.42;
 }
+.player-crm__range-calendar-day--current-week {
+  border-color: rgba(130, 207, 97, 0.58);
+  background: rgba(94, 167, 61, 0.2);
+  color: #b8f09f;
+}
 .player-crm__range-calendar-day--today {
   border-color: rgba(56, 189, 248, 0.64);
 }
