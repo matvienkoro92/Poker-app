@@ -5572,6 +5572,9 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
 }
 .raffle-winner-followup-btn--seat-active,
 .raffle-winner-followup-btn--plus {
+  position: relative;
+  z-index: 12;
+  pointer-events: auto !important;
   border-color: rgba(74, 222, 128, 0.96) !important;
   background: linear-gradient(180deg, #22c55e, #15803d) !important;
   color: #dcfce7 !important;

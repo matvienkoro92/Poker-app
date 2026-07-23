@@ -1104,19 +1104,6 @@ function initRafflesCompletedRuntime(opts) {
   function bindRaffleWinnerStatusButtons(container, raffleId) {
     if (!container || !base) return;
     syncRaffleCompletedTimers();
-    container.querySelectorAll("[data-raffle-winner-followup]").forEach(function (btn) {
-      if (btn.dataset.followupBound === "1") return;
-      btn.dataset.followupBound = "1";
-      btn.addEventListener("click", function (event) {
-        event.stopPropagation();
-        if (!rafflesIsAdmin || btn.disabled) return;
-        if (!pokerApiHasCredential()) {
-          if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
-          return;
-        }
-        setRaffleWinnerFollowup(btn);
-      });
-    });
     container.querySelectorAll(".raffle-winner-ready-btn").forEach(function (btn) {
       if (btn.dataset.readyBound === "1") return;
       btn.dataset.readyBound = "1";
@@ -1639,6 +1626,15 @@ function initRafflesCompletedRuntime(opts) {
     if (raffleWinnerLeadersModalBackdrop) raffleWinnerLeadersModalBackdrop.addEventListener("click", closeRaffleWinnerLeadersModal);
 
   if (rafflesCompleted) {
+    if (document.documentElement.dataset.raffleFollowupCaptureBound !== "1") {
+      document.documentElement.dataset.raffleFollowupCaptureBound = "1";
+      document.addEventListener("click", function (e) {
+        var followupBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-winner-followup]") : null;
+        if (!followupBtn || !rafflesIsAdmin || followupBtn.disabled) return;
+        e.__raffleFollowupHandled = true;
+        setRaffleWinnerFollowup(followupBtn);
+      }, true);
+    }
     rafflesCompleted.addEventListener("click", function (e) {
       var groupTab = e.target.closest("[data-raffle-winner-tab]");
       if (groupTab) {
@@ -1682,6 +1678,7 @@ function initRafflesCompletedRuntime(opts) {
       }
       var followupBtn = e.target.closest("[data-raffle-winner-followup]");
       if (followupBtn && rafflesIsAdmin) {
+        if (e.__raffleFollowupHandled) return;
         if (!base || !pokerApiHasCredential()) {
           if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
           return;
