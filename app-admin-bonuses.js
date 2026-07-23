@@ -444,7 +444,11 @@
           var reviewStatus = String(op.reviewStatus || "");
           var reviewFinal = reviewStatus === "minus" || reviewStatus === "plus";
           var reviewHtml = reviewFinal
-            ? '<button type="button" class="admin-bonuses__issue-review-result admin-bonuses__issue-review-result--' + reviewStatus + '" disabled>' +
+            ? '<button type="button" class="admin-bonuses__issue-review-result admin-bonuses__issue-review-result--' + reviewStatus + '"' +
+                (reviewStatus === "plus"
+                  ? ' data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="plus" data-admin-bonus-issue-review-amount="' + esc(op.reviewAmount) + '" title="Нажмите, чтобы изменить сумму" aria-label="Изменить снятую сумму"'
+                  : " disabled") +
+                '>' +
                 (reviewStatus === "plus" ? "+ " + esc(fmtPoints(op.reviewAmount)) : "−") +
               '</button>'
             : '<button type="button" data-admin-bonus-issue-review="' + esc(op.id) + '" data-admin-bonus-issue-review-status="minus" aria-label="Не сняли">−</button>' +
@@ -487,7 +491,8 @@
     if (!operationId || button.disabled) return;
     var amount = 0;
     if (status === "plus") {
-      var entered = prompt("Сколько сняли?", "");
+      var currentAmount = Math.max(0, Number(button.getAttribute("data-admin-bonus-issue-review-amount")) || 0);
+      var entered = prompt(currentAmount > 0 ? "Изменить снятую сумму:" : "Сколько сняли?", currentAmount > 0 ? String(currentAmount) : "");
       if (entered == null) return;
       amount = Number(String(entered).replace(/\s+/g, "").replace(",", "."));
       if (!isFinite(amount) || amount <= 0) {

@@ -629,8 +629,13 @@
   color: #ecfdf5;
   background: linear-gradient(180deg, #16845f, #0d6347);
   box-shadow: inset 0 1px 0 rgba(209, 250, 229, 0.22), 0 4px 12px rgba(16, 185, 129, 0.2);
-  cursor: default;
+  cursor: pointer;
   opacity: 1;
+}
+
+.admin-bonuses__issue-review button.admin-bonuses__issue-review-result--plus:hover,
+.admin-bonuses__issue-review button.admin-bonuses__issue-review-result--plus:focus-visible {
+  filter: brightness(1.12);
 }
 
 .admin-bonuses__issue-review button.admin-bonuses__issue-review-result--minus {
