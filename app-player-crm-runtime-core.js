@@ -1467,7 +1467,7 @@
       pushSel.innerHTML = CRM_LINK_TARGETS.map(function (target) {
         return "<option value=\"" + esc(target.key) + "\">" + esc(target.label) + "</option>";
       }).join("");
-      pushSel.value = "chat";
+      pushSel.value = "raffles";
       pushSel.dataset.crmBroadcastLinkTargetsReady = "1";
     }
     var defaultButtonText = document.getElementById("playerCrmBroadcastButtonText");
