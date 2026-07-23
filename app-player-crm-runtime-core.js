@@ -1560,9 +1560,15 @@
     var textEl = document.getElementById("playerCrmBroadcastText");
     var counter = document.getElementById("playerCrmBroadcastTextCounter");
     if (!textEl || !counter) return;
-    var isPush = (document.getElementById("playerCrmBroadcastChannel") || {}).value === "push";
-    counter.hidden = !isPush;
-    counter.textContent = String(textEl.value || "").length + " / 180";
+    var max = Number(textEl.getAttribute("maxlength")) || 900;
+    var remaining = Math.max(0, max - String(textEl.value || "").length);
+    var mod100 = remaining % 100;
+    var mod10 = remaining % 10;
+    var word = mod100 >= 11 && mod100 <= 19
+      ? "символов"
+      : (mod10 === 1 ? "символ" : (mod10 >= 2 && mod10 <= 4 ? "символа" : "символов"));
+    counter.hidden = false;
+    counter.textContent = "Осталось: " + remaining + " " + word;
   }
 
   function syncBroadcastChannelMode() {
