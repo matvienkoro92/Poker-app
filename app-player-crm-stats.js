@@ -90,53 +90,35 @@ function initPlayerCrmStatsRuntime(deps) {
     function eventDate(value) {
       return String(value || "").slice(0, 10);
     }
-    function existedAtPeriodStart(value) {
-      var date = eventDate(value);
-      return !registrationRange || !registrationRange.from ? !!date : !!date && date < registrationRange.from;
-    }
-    function existedAtPeriodEnd(value) {
-      var date = eventDate(value);
-      return !registrationRange || !registrationRange.to ? !!date : !!date && date <= registrationRange.to;
+    function stateWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive, currentActive) {
+      var subscribed = Date.parse(String(player && player[subscribedKey] || ""));
+      var unsubscribed = Date.parse(String(player && player[unsubscribedKey] || ""));
+      var events = [];
+      if (Number.isFinite(subscribed)) events.push({ time: subscribed, active: true });
+      if (Number.isFinite(unsubscribed)) events.push({ time: unsubscribed, active: false });
+      events.sort(function (a, b) { return a.time - b.time; });
+      if (!events.length || !boundary) return !!currentActive;
+      var boundaryTime = Date.parse(boundary + (inclusive ? "T23:59:59.999" : "T00:00:00.000"));
+      if (!Number.isFinite(boundaryTime)) return !!currentActive;
+      var before = events.filter(function (event) { return event.time < boundaryTime || (inclusive && event.time === boundaryTime); });
+      if (before.length) return !!before[before.length - 1].active;
+      return !events[0].active;
     }
     function channelWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive) {
-      var subscribed = eventDate(player && player[subscribedKey]);
-      if (!subscribed) {
-        var channelKey = subscribedKey === "pushSubscribedAt" ? "push" : "bot";
-        return !!(player && player.channels && player.channels[channelKey]);
-      }
-      if (boundary && (inclusive ? subscribed > boundary : subscribed >= boundary)) return false;
-      var unsubscribed = eventDate(player && player[unsubscribedKey]);
-      if (!unsubscribed) return true;
-      if (subscribed > unsubscribed) return true;
-      return boundary ? (inclusive ? unsubscribed > boundary : unsubscribed >= boundary) : false;
+      var channelKey = subscribedKey === "pushSubscribedAt" ? "push" : "bot";
+      return stateWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive, !!(player && player.channels && player.channels[channelKey]));
     }
-    var pokerPlusRowsNow = Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : [];
     var pokerPlusTotalNow = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
-    function uniquePokerPlusCount(rows) {
-      var ids = {};
-      (Array.isArray(rows) ? rows : []).forEach(function (row) {
-        var id = String(row && row.pokerPlusUserId || "").trim();
-        if (id) ids[id] = true;
-      });
-      return Object.keys(ids).length;
-    }
     var nowDate = new Date();
     var todayKey = new Date(nowDate.getTime() - nowDate.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     var periodIncludesToday = !!(registrationRange && registrationRange.from <= todayKey && registrationRange.to >= todayKey);
-    var pokerPlusTotalStart = registrationRange
-      ? uniquePokerPlusCount(pokerPlusRowsNow.filter(function (row) {
-          return !eventDate(row && row.linkedAt) || existedAtPeriodStart(row && row.linkedAt);
-        }))
-      : Math.max(0, pokerPlusTotalNow - statPokerPlusNet);
-    var pokerPlusTotalEnd = registrationRange
-      ? uniquePokerPlusCount(pokerPlusRowsNow.filter(function (row) {
-          return !eventDate(row && row.linkedAt) || existedAtPeriodEnd(row && row.linkedAt);
-        }))
-      : pokerPlusTotalNow;
-    if (periodIncludesToday) {
-      pokerPlusTotalEnd = uniquePokerPlusCount(pokerPlusRowsNow);
-      pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
-    }
+    var pokerPlusTotalStart = registrationRange ? players.filter(function (p) {
+      return stateWasActiveAt(p, "pokerPlusLinkedAt", "pokerPlusUnlinkedAt", registrationRange.from, false, !!(p && p.pokerPlusUserId));
+    }).length : Math.max(0, pokerPlusTotalNow - statPokerPlusNet);
+    var pokerPlusTotalEnd = registrationRange ? players.filter(function (p) {
+      return stateWasActiveAt(p, "pokerPlusLinkedAt", "pokerPlusUnlinkedAt", registrationRange.to, true, !!(p && p.pokerPlusUserId));
+    }).length : pokerPlusTotalNow;
+    if (periodIncludesToday) pokerPlusTotalEnd = pokerPlusTotalNow;
     var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
     var botTotalStart = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.from, false);
@@ -144,6 +126,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var botTotalEnd = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.to, true);
     }).length : botTotalNow;
+    if (periodIncludesToday) botTotalEnd = botTotalNow;
     var pushTotalNow = currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length);
     var pushTotalStart = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "pushSubscribedAt", "pushUnsubscribedAt", registrationRange.from, false);
@@ -151,6 +134,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var pushTotalEnd = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "pushSubscribedAt", "pushUnsubscribedAt", registrationRange.to, true);
     }).length : pushTotalNow;
+    if (periodIncludesToday) pushTotalEnd = pushTotalNow;
     var currentStats = [
       ["Зарегано всего", currentValue("registered", Array.isArray(state.registeredAccounts) ? state.registeredAccounts.length : 0), "сейчас", "registered-total"],
       ["Привязано Poker21", pokerPlusTotalNow, "сейчас", "pokerplus-total"],

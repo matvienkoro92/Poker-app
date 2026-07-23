@@ -19,6 +19,8 @@
     players: [],
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
+    dailyPokerStatsRangeKey: "",
+    dailyPokerStatsPending: false,
     dailyPokerDebitsSort: "date",
     dailyPokerModalOpen: false,
     dailyPokerModalTab: "issued",
@@ -2125,6 +2127,18 @@
     panels.forEach(function (panel) {
       panel.classList.toggle("player-crm__tab-panel--active", panel.getAttribute("data-crm-panel") === state.tab);
     });
+    var sharedPeriodToolbar = document.querySelector("[data-crm-shared-period-toolbar]");
+    var statsPanel = document.querySelector(".player-crm__tab-panel[data-crm-panel='stats']");
+    var calculationsPanel = document.querySelector(".player-crm__tab-panel[data-crm-panel='calculations']");
+    if (sharedPeriodToolbar && statsPanel && calculationsPanel) {
+      if (state.tab === "calculations") {
+        if (sharedPeriodToolbar.parentElement !== calculationsPanel) {
+          calculationsPanel.insertBefore(sharedPeriodToolbar, calculationsPanel.firstChild);
+        }
+      } else if (sharedPeriodToolbar.parentElement !== statsPanel) {
+        statsPanel.insertBefore(sharedPeriodToolbar, statsPanel.firstChild);
+      }
+    }
   }
 
   function openCrmCalculations() {
@@ -2181,13 +2195,21 @@
   }
 
   function loadDailyPokerStats(force) {
-    if ((!force && state.dailyPokerStats) || state.dailyPokerStatsLoading) return;
     var base = getApiBaseSafe();
     if (!base) return;
+    var statsRange = selectedPeriodRange();
+    var rangeKey = statsRange && statsRange.from && statsRange.to
+      ? statsRange.from + ":" + statsRange.to
+      : "all";
+    if (!force && state.dailyPokerStats && state.dailyPokerStatsRangeKey === rangeKey) return;
+    if (state.dailyPokerStatsLoading) {
+      state.dailyPokerStatsPending = true;
+      return;
+    }
     state.dailyPokerStatsLoading = true;
+    state.dailyPokerStatsPending = false;
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
-    var statsRange = selectedPeriodRange();
     var previousRange = comparisonRange();
     var requestFrom = statsRange && statsRange.from ? statsRange.from : "";
     var requestTo = statsRange && statsRange.to ? statsRange.to : "";
@@ -2222,11 +2244,20 @@
           debitedUsers: Array.isArray(data.debitedUsers) ? data.debitedUsers : [],
           daily: Array.isArray(data.dailyStats) ? data.dailyStats : [],
         };
+        state.dailyPokerStatsRangeKey = rangeKey;
       })
       .catch(function () {})
       .then(function () {
         state.dailyPokerStatsLoading = false;
         if (state.loaded) renderStats();
+        var currentRange = selectedPeriodRange();
+        var currentRangeKey = currentRange && currentRange.from && currentRange.to
+          ? currentRange.from + ":" + currentRange.to
+          : "all";
+        if (state.dailyPokerStatsPending || rangeKey !== currentRangeKey) {
+          state.dailyPokerStatsPending = false;
+          loadDailyPokerStats(true);
+        }
       });
   }
 
