@@ -4369,9 +4369,10 @@
         loadDailyPokerWinners();
         return;
       }
-      if (e.target.closest("[data-crm-raffles-modal]")) {
+      var rafflesModalButton = e.target.closest("[data-crm-raffles-modal]");
+      if (rafflesModalButton) {
         state.rafflesModalOpen = true;
-        state.rafflesModalTab = "issued";
+        state.rafflesModalTab = rafflesModalButton.getAttribute("data-crm-raffles-modal") === "returns" ? "returns" : "issued";
         renderRafflesModal();
         loadRaffleRecipients();
         return;

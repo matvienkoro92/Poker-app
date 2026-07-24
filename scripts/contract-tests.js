@@ -5501,6 +5501,14 @@ async function testChatPushSubscribeAndBroadcast(redis) {
   const myAccountId = redis.h("poker_app:visitor_dt_ids").get("tg_1001");
   assert.strictEqual(redis.s("poker_app:chat_push_registry").has(myAccountId), true, "chat push registry stores account id");
   assert.strictEqual(redis.h("poker_app:chat_push_sub:" + myAccountId).size, 1, "chat push stores subscription hash");
+  redis.h("poker_app:chat_push_subscribed_at").set(myAccountId, "123456789");
+  r = await call(pushSubscribe, req("POST", {}, { pwaSession: s.user, action: "subscribe", subscription }));
+  assert.strictEqual(r.statusCode, 200, "chat push repeat subscribe succeeds");
+  assert.strictEqual(
+    redis.h("poker_app:chat_push_subscribed_at").get(myAccountId),
+    "123456789",
+    "chat push repeat subscribe does not create a new subscription event"
+  );
 
   const webpushRuntime = require("web-push");
   const sentPushes = [];
