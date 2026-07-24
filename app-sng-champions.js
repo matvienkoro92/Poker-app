@@ -683,7 +683,6 @@
   }
 
   function matchSeriesTarget(match, data) {
-    if (data && data.tournamentType === "team") return 2;
     var groups = [
       { rounds: Array.isArray(data && data.rounds) ? data.rounds : [], losers: false },
       { rounds: Array.isArray(data && data.loserRounds) ? data.loserRounds : [], losers: true },
@@ -696,6 +695,9 @@
         var label = groups[groupIndex].losers
           ? loserRoundStageLabel(rounds[roundIndex], roundIndex)
           : roundStageLabel(rounds[roundIndex], roundIndex, rounds);
+        if (data && data.tournamentType === "team") {
+          return !groups[groupIndex].losers && String(label || "").toLowerCase().indexOf("финал") >= 0 ? 3 : 2;
+        }
         return seriesTargetFromLabel(label, groups[groupIndex].losers);
       }
     }
@@ -1769,7 +1771,9 @@
       stageMatchCount: Array.isArray(round && round.matches) ? round.matches.length : 0,
     });
     var stageClass = classFn(round, stageIndex, rounds);
-    var stageSeriesTarget = data.tournamentType === "team" ? 2 : seriesTargetFromLabel(stageLabel, isLosers);
+    var stageSeriesTarget = data.tournamentType === "team"
+      ? (!isLosers && String(stageLabel || "").toLowerCase().indexOf("финал") >= 0 ? 3 : 2)
+      : seriesTargetFromLabel(stageLabel, isLosers);
     var stageStatus = isPreview ? null : bracketRoundStatus(round);
     var prevDisabled = stageIndex <= 0;
     var nextDisabled = stageIndex >= rounds.length - 1;

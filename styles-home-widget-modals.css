@@ -9964,3 +9964,52 @@ body.club-choice-vote-open {
     line-height: 1.2;
   }
 }
+
+/* SNG bracket final: preserve the normal column width and give the two team
+   rows enough vertical room. This must remain after the legacy map overrides. */
+.sng-champions-modal__bracket-map-wrap--winners
+  .sng-champions-modal__map-round--final-stage
+  .sng-champions-modal__map-match--series {
+  width: 100%;
+  height: 176px !important;
+  min-height: 176px;
+  max-height: 176px;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners
+  .sng-champions-modal__map-round--final-stage
+  .sng-champions-modal__map-match--series
+  .sng-champions-modal__map-players {
+  inset: 30px 28px 8px 18px;
+  gap: 4px;
+  overflow: visible;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners
+  .sng-champions-modal__map-round--final-stage
+  .sng-champions-modal__map-match--series
+  .sng-champions-modal__map-player {
+  align-content: center;
+  gap: 3px;
+  min-height: 0;
+  padding: 6px 8px;
+  color: #fff2c8;
+  font-size: 14px;
+  line-height: 1.08;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.sng-champions-modal__bracket-map-wrap--winners
+  .sng-champions-modal__map-round--final-stage
+  .sng-champions-modal__map-team-members {
+  gap: 2px;
+  font-size: 10px;
+  line-height: 1.05;
+}
+
+.sng-champions-modal__bracket-map-wrap--winners
+  .sng-champions-modal__map-round--final-stage
+  .sng-champions-modal__map-player-meta {
+  font-size: 9px;
+  line-height: 1;
+}
