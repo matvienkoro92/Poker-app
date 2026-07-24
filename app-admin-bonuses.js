@@ -124,7 +124,8 @@
 
   function renderIssuesWeekTotal(operations) {
     var totalEl = $("adminBonusesIssuesWeekTotal");
-    if (!totalEl) return;
+    var returnEl = $("adminBonusesIssuesWeekReturn");
+    if (!totalEl && !returnEl) return;
     var weekStart = currentBusinessWeekStartKey();
     var currentDay = businessDateKey(new Date());
     var total = (Array.isArray(operations) ? operations : []).reduce(function (sum, op) {
@@ -132,7 +133,13 @@
       if (!key || key < weekStart || key > currentDay) return sum;
       return sum + Math.max(0, Number(op && op.amount) || 0);
     }, 0);
-    totalEl.textContent = fmtPoints(total);
+    var returned = (Array.isArray(operations) ? operations : []).reduce(function (sum, op) {
+      var key = String(op && op.businessDate || businessDateKey(op && op.createdAt) || "");
+      if (!key || key < weekStart || key > currentDay || String(op && op.reviewStatus || "") !== "plus") return sum;
+      return sum + Math.max(0, Number(op && op.reviewAmount) || 0);
+    }, 0);
+    if (totalEl) totalEl.textContent = fmtPoints(total);
+    if (returnEl) returnEl.textContent = "+" + fmtPoints(returned);
   }
 
   function scheduleTournamentId(item, index) {
