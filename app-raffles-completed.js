@@ -593,6 +593,77 @@ function initRafflesCompletedRuntime(opts) {
     return "";
   }
 
+  function raffleCurrentMoscowWeekRange() {
+    var shifted = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    var mondayOffset = (shifted.getUTCDay() + 6) % 7;
+    var startShifted = Date.UTC(
+      shifted.getUTCFullYear(),
+      shifted.getUTCMonth(),
+      shifted.getUTCDate() - mondayOffset
+    );
+    var start = startShifted - 3 * 60 * 60 * 1000;
+    return { start: start, end: start + 7 * 24 * 60 * 60 * 1000 };
+  }
+
+  function raffleDateIsInRange(value, range) {
+    var timestamp = new Date(value || "").getTime();
+    return isFinite(timestamp) && timestamp >= range.start && timestamp < range.end;
+  }
+
+  function raffleCurrentWeekIssueTotals(completed) {
+    var range = raffleCurrentMoscowWeekRange();
+    var totals = {
+      ticket: { issued: 0, returned: 0 },
+      cash: { issued: 0, returned: 0 }
+    };
+    (Array.isArray(completed) ? completed : []).forEach(function (raffle) {
+      var kind = String(raffle && (raffle.prizeKind || raffle.prize_kind) || "").toLowerCase() === "cash"
+        ? "cash"
+        : "ticket";
+      (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (winner) {
+        if (raffleWinnerIsReroll(winner)) return;
+        var prizeAmount = raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, winner));
+        if (String(winner && winner.winnerStatus || "") === "ok" &&
+            raffleDateIsInRange(winner && winner.winnerStatusAt, range)) {
+          totals[kind].issued += prizeAmount;
+        }
+        if (kind === "ticket" &&
+            String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
+            raffleDateIsInRange(winner && winner.winnerSeatStatusAt, range)) {
+          totals.ticket.returned += prizeAmount;
+        }
+        if (kind === "cash" &&
+            String(winner && winner.winnerCashoutStatus || "") === "plus" &&
+            raffleDateIsInRange(winner && winner.winnerCashoutAt, range)) {
+          totals.cash.returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
+        }
+      });
+    });
+    return totals;
+  }
+
+  function raffleCurrentWeekIssueTotalsHtml(completed) {
+    if (!rafflesIsAdmin) return "";
+    var totals = raffleCurrentWeekIssueTotals(completed);
+    function amount(value) {
+      var rounded = Math.max(0, Math.round(Number(value) || 0));
+      return typeof formatRaffleSum === "function"
+        ? formatRaffleSum(rounded)
+        : rounded.toLocaleString("ru-RU") + " ₽";
+    }
+    function row(label, values) {
+      return "<div class=\"raffles-week-issue-summary__row\">" +
+        "<strong>" + label + "</strong>" +
+        "<span>Выдано <b>" + escapeHtml(amount(values.issued)) + "</b></span>" +
+        "<span>Возврат <b>+" + escapeHtml(amount(values.returned)) + "</b></span>" +
+        "</div>";
+    }
+    return "<section class=\"raffles-week-issue-summary\" aria-label=\"Выдачи и возвраты за текущую неделю\">" +
+      row("Билеты", totals.ticket) +
+      row("Кеш", totals.cash) +
+      "</section>";
+  }
+
   function raffleWinnerLeaderTotalText(amount) {
     var n = Math.round(parseFloat(amount) || 0);
     if (n <= 0) return "";
@@ -1576,7 +1647,9 @@ function initRafflesCompletedRuntime(opts) {
     if (list.length <= 0) return "";
     var currentHtml = list.slice(0, 2).map(buildCompletedRaffleCardHtml).join("");
     var archive = list.slice(2);
-    return currentHtml + buildCompletedArchiveHtml(archive, raffleCompletedMonthTotalsByKey(list));
+    return currentHtml +
+      raffleCurrentWeekIssueTotalsHtml(list) +
+      buildCompletedArchiveHtml(archive, raffleCompletedMonthTotalsByKey(list));
   }
 
   function refreshCompletedRaffleCard(refreshBtn) {

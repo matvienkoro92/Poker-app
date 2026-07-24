@@ -6399,6 +6399,49 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
 .raffles-completed-list:empty + .raffles-completed-empty { display: block; }
 .raffles-completed-list:not(:empty) + .raffles-completed-empty { display: none; }
 .raffles-completed-empty { color: var(--text-muted); margin: 12px 0; }
+.raffles-week-issue-summary {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.36);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.52);
+}
+.raffles-week-issue-summary__row {
+  display: grid;
+  grid-template-columns: minmax(70px, 0.7fr) minmax(115px, 1fr) minmax(115px, 1fr);
+  align-items: center;
+  gap: 10px;
+  color: #e5e7eb;
+  font-size: 13px;
+}
+.raffles-week-issue-summary__row + .raffles-week-issue-summary__row {
+  padding-top: 8px;
+  border-top: 1px solid rgba(245, 158, 11, 0.18);
+}
+.raffles-week-issue-summary__row strong {
+  color: #fde68a;
+  font-size: 14px;
+}
+.raffles-week-issue-summary__row span {
+  white-space: nowrap;
+}
+.raffles-week-issue-summary__row b {
+  color: #fff7ed;
+}
+.raffles-week-issue-summary__row span:last-child b {
+  color: #86efac;
+}
+@media (max-width: 520px) {
+  .raffles-week-issue-summary__row {
+    grid-template-columns: 62px 1fr;
+    gap: 5px 10px;
+  }
+  .raffles-week-issue-summary__row strong {
+    grid-row: 1 / span 2;
+  }
+}
 .raffles-completed-spoiler {
   display: block;
   border: 1px solid rgba(245, 158, 11, 0.34);
