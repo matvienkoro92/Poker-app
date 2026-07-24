@@ -696,7 +696,8 @@
           ? loserRoundStageLabel(rounds[roundIndex], roundIndex)
           : roundStageLabel(rounds[roundIndex], roundIndex, rounds);
         if (data && data.tournamentType === "team") {
-          return !groups[groupIndex].losers && String(label || "").toLowerCase().indexOf("финал") >= 0 ? 3 : 2;
+          var teamStage = String(label || "").toLowerCase();
+          return !groups[groupIndex].losers && teamStage.indexOf("финал") >= 0 && teamStage.indexOf("полуфинал") < 0 ? 3 : 2;
         }
         return seriesTargetFromLabel(label, groups[groupIndex].losers);
       }
@@ -1192,7 +1193,7 @@
     var matchPlayers = (match.playerIds || []).filter(Boolean);
     var ready = match.readyById && match.readyById[player.id] === true;
     var advanced = playerAdvancedToOpenMatch(player.id, match, data);
-    var adminButton = data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && !match.winnerId
+    var adminButton = data.tournamentType !== "team" && data.isAdmin && data.status === "bracket" && matchPlayers.length >= 2 && !match.winnerId
       ? '<button type="button" class="sng-champions-modal__winner-btn" data-sng-winner="' + escapeHtml(match.id) + '" data-sng-player="' + escapeHtml(player.id) + '">Победил</button>'
       : "";
     var readyBadge = !won ? '<small class="sng-champions-modal__ready-badge sng-champions-modal__ready-badge--' + (ready ? "ready" : "waiting") + '">' + (ready ? "Готов" : "Ждет") + '</small>' : "";
@@ -1347,6 +1348,57 @@
     var firstTeam = data.playersById && data.playersById[players[0]];
     var secondTeam = data.playersById && data.playersById[players[1]];
     if (!firstTeam || !secondTeam || !Array.isArray(firstTeam.members) || !Array.isArray(secondTeam.members)) return "";
+    if (matchSeriesTarget(match, data) === 3) {
+      var finalGames = Array.isArray(match.finalGames) ? match.finalGames : [];
+      var finalPairs = match.finalSinglesPlayers && typeof match.finalSinglesPlayers === "object" ? match.finalSinglesPlayers : {};
+      var finalPasswords = match.roundPasswords && typeof match.roundPasswords === "object" ? match.roundPasswords : {};
+      var firstScore = finalGames.filter(function (game) { return String(game.winnerId || "") === String(firstTeam.id || ""); }).length;
+      var secondScore = finalGames.filter(function (game) { return String(game.winnerId || "") === String(secondTeam.id || ""); }).length;
+      var nextGame = finalGames.length + 1;
+      var nextType = Math.max(firstScore, secondScore) < 2 ? "2×2" : "1×1";
+      function finalMemberOptions(team, selectedId) {
+        return '<option value="">Выберите игрока</option>' + team.members.map(function (member) {
+          return '<option value="' + escapeHtml(member.id || "") + '"' + (String(member.id || "") === String(selectedId || "") ? ' selected' : '') + '>' + escapeHtml(playerName(member)) + '</option>';
+        }).join("");
+      }
+      function finalWinnerButton(team, memberId) {
+        var member = memberId && data.playersById ? data.playersById[memberId] : null;
+        var tag = data.isAdmin && !match.winnerId ? "button" : "div";
+        var attrs = tag === "button"
+          ? ' type="button" data-sng-final-winner="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(nextGame) + '" data-sng-player="' + escapeHtml(team.id || "") + '"'
+          : "";
+        return '<' + tag + ' class="sng-champions-modal__singles-duel-player"' + attrs + '>' +
+          '<small>' + escapeHtml(playerName(team)) + '</small><strong>' + escapeHtml(member ? playerName(member) : playerName(team)) + '</strong>' +
+        '</' + tag + '>';
+      }
+      var history = finalGames.map(function (game, index) {
+        var winner = String(game.winnerId || "") === String(firstTeam.id || "") ? firstTeam : secondTeam;
+        return '<div class="sng-champions-modal__singles-duel-score"><small>' + escapeHtml(index + 1) + '-я игра · ' + escapeHtml(game.type === "1x1" ? "1×1" : "2×2") + '</small><strong>' + escapeHtml(playerName(winner)) + '</strong></div>';
+      }).join("");
+      if (match.winnerId) {
+        return '<section class="sng-champions-modal__team-rounds">' + history + '</section>';
+      }
+      var password = String(finalPasswords[String(nextGame)] || "").replace(/\D/g, "").slice(0, 4);
+      var passwordHtml = data.isAdmin
+        ? '<div class="sng-champions-modal__round-password sng-champions-modal__round-password--editable" data-sng-round-password-editor="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(nextGame) + '"><label><span>Пароль стола</span><input type="text" inputmode="numeric" maxlength="4" value="' + escapeHtml(password) + '" data-sng-round-password-input></label><button type="button" data-sng-save-round-password="' + escapeHtml(match.id || "") + '">Играют</button></div>'
+        : (password ? '<div class="sng-champions-modal__round-password"><span>Пароль стола</span><strong>' + escapeHtml(password) + '</strong></div>' : "");
+      var current;
+      if (nextType === "2×2") {
+        current = '<div class="sng-champions-modal__team-round--singles sng-champions-modal__team-round--singles-duel"><span>' + escapeHtml(nextGame) + '-я игра · 2×2</span>' +
+          finalWinnerButton(firstTeam, "") + passwordHtml + finalWinnerButton(secondTeam, "") + '</div>';
+      } else {
+        var pair = finalPairs[String(nextGame)] || {};
+        current = pair.first && pair.second
+          ? '<div class="sng-champions-modal__team-round--singles sng-champions-modal__team-round--singles-duel"><span>' + escapeHtml(nextGame) + '-я игра · 1×1</span>' +
+              finalWinnerButton(firstTeam, pair.first) + passwordHtml + finalWinnerButton(secondTeam, pair.second) + '</div>'
+          : '<div class="sng-champions-modal__team-round--singles"><span>' + escapeHtml(nextGame) + '-я игра · 1×1</span><div class="sng-champions-modal__singles-picker" data-sng-final-singles-editor="' + escapeHtml(match.id || "") + '" data-sng-game="' + escapeHtml(nextGame) + '">' +
+              '<select data-sng-singles-first>' + finalMemberOptions(firstTeam, pair.first) + '</select><b>против</b><select data-sng-singles-second>' + finalMemberOptions(secondTeam, pair.second) + '</select>' +
+              '<button type="button" data-sng-save-final-singles="' + escapeHtml(match.id || "") + '">Сохранить пару</button></div></div>';
+      }
+      return '<section class="sng-champions-modal__team-rounds">' +
+        '<div class="sng-champions-modal__singles-duel-score"><small>Счёт финала · до 3</small><strong>' + escapeHtml(firstScore) + ' : ' + escapeHtml(secondScore) + '</strong></div>' +
+        history + current + '</section>';
+    }
     var roundWinnerId = String(match.teamRoundWinnerId || "");
     var singles = match.singlesPlayers && typeof match.singlesPlayers === "object" ? match.singlesPlayers : {};
     var roundPasswords = match.roundPasswords && typeof match.roundPasswords === "object" ? match.roundPasswords : {};
@@ -2216,6 +2268,38 @@
         password: roundPassword,
       }, { status: "Создаю стол и отправляю оповещение...", success: "Стол создан, оповещение отправлено" })
         .finally(function () { setButtonLoading(roundPasswordSave, false); });
+      return;
+    }
+    var finalSinglesSave = event.target && event.target.closest ? event.target.closest("[data-sng-save-final-singles]") : null;
+    if (finalSinglesSave) {
+      var finalSinglesEditor = finalSinglesSave.closest ? finalSinglesSave.closest("[data-sng-final-singles-editor]") : null;
+      var finalFirst = finalSinglesEditor && finalSinglesEditor.querySelector ? finalSinglesEditor.querySelector("[data-sng-singles-first]") : null;
+      var finalSecond = finalSinglesEditor && finalSinglesEditor.querySelector ? finalSinglesEditor.querySelector("[data-sng-singles-second]") : null;
+      if (!finalFirst || !finalFirst.value || !finalSecond || !finalSecond.value) {
+        showAlert("Выберите по одному игроку из каждой команды.");
+        return;
+      }
+      setButtonLoading(finalSinglesSave, true);
+      postAction({
+        action: "setTeamFinalPlayers",
+        matchId: finalSinglesSave.getAttribute("data-sng-save-final-singles") || "",
+        game: Number(finalSinglesEditor && finalSinglesEditor.getAttribute("data-sng-game")) || 0,
+        firstEntryId: finalFirst.value,
+        secondEntryId: finalSecond.value,
+      }, { status: "Сохраняю пару 1×1...", success: "Пара сохранена" })
+        .finally(function () { setButtonLoading(finalSinglesSave, false); });
+      return;
+    }
+    var finalWinner = event.target && event.target.closest ? event.target.closest("[data-sng-final-winner]") : null;
+    if (finalWinner) {
+      setButtonLoading(finalWinner, true);
+      postAction({
+        action: "setTeamFinalWinner",
+        matchId: finalWinner.getAttribute("data-sng-final-winner") || "",
+        playerId: finalWinner.getAttribute("data-sng-player") || "",
+        game: Number(finalWinner.getAttribute("data-sng-game")) || 0,
+      }, { status: "Сохраняю очко финала...", success: "Счёт финала обновлён" })
+        .finally(function () { setButtonLoading(finalWinner, false); });
       return;
     }
     var teamRoundWinner = event.target && event.target.closest ? event.target.closest("[data-sng-team-round-winner]") : null;
