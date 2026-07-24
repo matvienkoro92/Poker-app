@@ -3801,6 +3801,8 @@ function initRaffles() {
   if (rafflesCompleted && rafflesCompleted.dataset.archiveDeferredBound !== "1") {
     rafflesCompleted.dataset.archiveDeferredBound = "1";
     rafflesCompleted.addEventListener("click", function (e) {
+      if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.handleDeferredArchiveClick === "function" &&
+          rafflesCompletedRuntime.handleDeferredArchiveClick(e)) return;
       var summary = e && e.target && e.target.closest ? e.target.closest("summary") : null;
       var details = summary && summary.parentElement;
       if (!details || details.getAttribute("data-raffles-archive-deferred") !== "1") return;

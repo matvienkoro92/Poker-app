@@ -1605,6 +1605,162 @@ function initRafflesCompletedRuntime(opts) {
       "</span>";
   }
 
+  function raffleArchiveLoadingHtml(count, text) {
+    var rows = "";
+    for (var i = 0; i < (count || 3); i++) {
+      rows += "<span class=\"raffles-archive-skeleton__row\"><i></i><b></b></span>";
+    }
+    return "<div class=\"raffles-archive-skeleton\" aria-busy=\"true\">" +
+      "<span class=\"raffles-archive-skeleton__label\">" + escapeHtml(text || "Загружаем") + "</span>" +
+      rows +
+      "</div>";
+  }
+
+  function raffleArchiveFetch(scope, params) {
+    var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
+    var suffix = Object.keys(params || {}).map(function (key) {
+      return "&" + encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+    }).join("");
+    return fetch(base + "/api/raffles" + query + "&scope=" + encodeURIComponent(scope) + suffix + "&_t=" + Date.now())
+      .then(function (response) {
+        return response.json().catch(function () { return { ok: false, error: "Ошибка ответа сервера" }; })
+          .then(function (data) {
+            if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка загрузки архива");
+            return data;
+          });
+      });
+  }
+
+  function raffleArchiveBadgeFromTotals(totals) {
+    return raffleCompletedArchiveBadgeHtml([], totals || { count: 0, sum: 0 });
+  }
+
+  function raffleArchiveMonthLabelFromKey(key) {
+    var parts = String(key || "").split("-");
+    var date = new Date(Date.UTC(parseInt(parts[0], 10) || 2000, Math.max(0, (parseInt(parts[1], 10) || 1) - 1), 1));
+    var label = date.toLocaleDateString("ru-RU", { month: "long", year: "numeric", timeZone: "UTC" });
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    return /г\.?$/.test(label) ? label : label + " г.";
+  }
+
+  function raffleArchiveShortDate(value) {
+    var parts = String(value || "").split("-");
+    var date = new Date(Date.UTC(parseInt(parts[0], 10), (parseInt(parts[1], 10) || 1) - 1, parseInt(parts[2], 10) || 1));
+    return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" }).replace(/\.$/, "");
+  }
+
+  function raffleArchiveMonthHtml(month) {
+    return "<details class=\"raffles-completed-archive-month\" data-raffles-archive-month=\"" + escapeHtml(month.key) + "\">" +
+      "<summary class=\"raffles-completed-archive-month__summary\">" +
+      "<span class=\"raffles-completed-archive-month__title\">" + escapeHtml(raffleArchiveMonthLabelFromKey(month.key)) + "</span>" +
+      raffleArchiveBadgeFromTotals(month) +
+      "</summary>" +
+      "<div class=\"raffles-completed-archive-month__body\" data-raffles-archive-month-body>" +
+      raffleArchiveLoadingHtml(3, "Загрузим недели после открытия") +
+      "</div>" +
+      "</details>";
+  }
+
+  function raffleArchiveWeekHtml(week) {
+    return "<details class=\"raffles-completed-archive-week\" data-raffles-archive-week=\"" + escapeHtml(week.key) + "\">" +
+      "<summary class=\"raffles-completed-archive-week__summary\">" +
+      "<span class=\"raffles-completed-archive-week__title\">" +
+      escapeHtml(raffleArchiveShortDate(week.key) + " — " + raffleArchiveShortDate(week.endKey)) +
+      "</span>" +
+      raffleArchiveBadgeFromTotals(week) +
+      "</summary>" +
+      "<div class=\"raffles-completed-archive-week__body\" data-raffles-archive-week-body>" +
+      raffleArchiveLoadingHtml(2, "Загрузим розыгрыши после открытия") +
+      "</div>" +
+      "</details>";
+  }
+
+  function loadDeferredArchiveIndex(details) {
+    if (!details || details.dataset.archiveLoaded === "1" || details.dataset.archiveLoading === "1") return;
+    details.dataset.archiveLoading = "1";
+    var body = details.querySelector(".raffles-completed-archive__body");
+    if (body) body.innerHTML = raffleArchiveLoadingHtml(5, "Загружаем месяцы");
+    raffleArchiveFetch("archive-index")
+      .then(function (data) {
+        details.dataset.archiveLoaded = "1";
+        delete details.dataset.archiveLoading;
+        var badge = details.querySelector(".raffles-completed-spoiler__count");
+        if (badge) badge.outerHTML = raffleArchiveBadgeFromTotals(data.totals);
+        if (body) body.innerHTML = (data.months || []).map(raffleArchiveMonthHtml).join("") ||
+          "<div class=\"raffles-completed-empty\">Архив пока пуст.</div>";
+      })
+      .catch(function (error) {
+        delete details.dataset.archiveLoading;
+        if (body) body.innerHTML = "<button type=\"button\" class=\"raffles-archive-retry\" data-raffles-archive-retry=\"index\">" +
+          escapeHtml(error && error.message || "Повторить загрузку") + "</button>";
+      });
+  }
+
+  function loadDeferredArchiveMonth(details) {
+    if (!details || details.dataset.loaded === "1" || details.dataset.loading === "1") return;
+    details.dataset.loading = "1";
+    var body = details.querySelector("[data-raffles-archive-month-body]");
+    if (body) body.innerHTML = raffleArchiveLoadingHtml(4, "Загружаем недели");
+    raffleArchiveFetch("archive-month", { month: details.getAttribute("data-raffles-archive-month") || "" })
+      .then(function (data) {
+        details.dataset.loaded = "1";
+        delete details.dataset.loading;
+        if (body) body.innerHTML = (data.weeks || []).map(raffleArchiveWeekHtml).join("") ||
+          "<div class=\"raffles-completed-empty\">В этом месяце нет розыгрышей.</div>";
+      })
+      .catch(function () {
+        delete details.dataset.loading;
+        if (body) body.innerHTML = "<button type=\"button\" class=\"raffles-archive-retry\" data-raffles-archive-retry=\"month\">Повторить загрузку</button>";
+      });
+  }
+
+  function loadDeferredArchiveWeek(details) {
+    if (!details || details.dataset.loaded === "1" || details.dataset.loading === "1") return;
+    details.dataset.loading = "1";
+    var body = details.querySelector("[data-raffles-archive-week-body]");
+    if (body) body.innerHTML = raffleArchiveLoadingHtml(3, "Загружаем розыгрыши");
+    raffleArchiveFetch("archive-week", { week: details.getAttribute("data-raffles-archive-week") || "" })
+      .then(function (data) {
+        details.dataset.loaded = "1";
+        delete details.dataset.loading;
+        if (body) body.innerHTML = (data.raffles || []).map(buildCompletedRaffleCardHtml).join("") ||
+          "<div class=\"raffles-completed-empty\">На этой неделе нет розыгрышей.</div>";
+        syncRaffleCompletedTimers();
+      })
+      .catch(function () {
+        delete details.dataset.loading;
+        if (body) body.innerHTML = "<button type=\"button\" class=\"raffles-archive-retry\" data-raffles-archive-retry=\"week\">Повторить загрузку</button>";
+      });
+  }
+
+  function handleDeferredArchiveClick(event) {
+    var retry = event && event.target && event.target.closest ? event.target.closest("[data-raffles-archive-retry]") : null;
+    if (retry) {
+      var retryKind = retry.getAttribute("data-raffles-archive-retry");
+      var retryDetails = retry.closest("details");
+      if (retryKind === "index") loadDeferredArchiveIndex(retryDetails);
+      else if (retryKind === "month") loadDeferredArchiveMonth(retryDetails);
+      else if (retryKind === "week") loadDeferredArchiveWeek(retryDetails);
+      return true;
+    }
+    var summary = event && event.target && event.target.closest ? event.target.closest("summary") : null;
+    var details = summary && summary.parentElement;
+    if (!details) return false;
+    if (details.getAttribute("data-raffles-archive-deferred") === "1") {
+      setTimeout(function () { loadDeferredArchiveIndex(details); }, 0);
+      return true;
+    }
+    if (details.hasAttribute("data-raffles-archive-month")) {
+      setTimeout(function () { loadDeferredArchiveMonth(details); }, 0);
+      return true;
+    }
+    if (details.hasAttribute("data-raffles-archive-week")) {
+      setTimeout(function () { loadDeferredArchiveWeek(details); }, 0);
+      return true;
+    }
+    return false;
+  }
+
   function buildCompletedArchiveHtml(archive, monthTotalsByKey) {
     archive = sortCompletedRafflesNewestFirst(archive);
     if (!archive.length) return "";
@@ -1864,7 +2020,8 @@ function initRafflesCompletedRuntime(opts) {
     return {
       renderPanel: renderCompletedRafflesPanel,
       buildWinnerRowHtml: buildRaffleWinnerRowHtml,
-      bindWinnerStatusButtons: bindRaffleWinnerStatusButtons
+      bindWinnerStatusButtons: bindRaffleWinnerStatusButtons,
+      handleDeferredArchiveClick: handleDeferredArchiveClick
     };
   }
 }

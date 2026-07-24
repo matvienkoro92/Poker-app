@@ -6511,6 +6511,101 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   gap: 12px;
   padding: 0 12px 12px;
 }
+.raffles-completed-archive-week {
+  display: block;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 9px;
+  background: rgba(2, 6, 23, 0.3);
+  overflow: hidden;
+}
+.raffles-completed-archive-week + .raffles-completed-archive-week {
+  margin-top: 8px;
+}
+.raffles-completed-archive-week__summary {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+.raffles-completed-archive-week__summary::-webkit-details-marker {
+  display: none;
+}
+.raffles-completed-archive-week__summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-right: 2px solid #fde68a;
+  border-bottom: 2px solid #fde68a;
+  transform: rotate(-45deg);
+  transition: transform 0.16s ease;
+}
+.raffles-completed-archive-week[open] > .raffles-completed-archive-week__summary::before {
+  transform: rotate(45deg);
+}
+.raffles-completed-archive-week__summary .raffles-completed-spoiler__count {
+  margin-left: auto;
+}
+.raffles-completed-archive-week__body {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+.raffles-archive-skeleton {
+  display: grid;
+  gap: 9px;
+  width: 100%;
+}
+.raffles-archive-skeleton__label {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+}
+.raffles-archive-skeleton__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.32);
+}
+.raffles-archive-skeleton__row i,
+.raffles-archive-skeleton__row b {
+  display: block;
+  height: 16px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(253, 230, 138, 0.22), rgba(148, 163, 184, 0.12));
+  background-size: 220% 100%;
+  animation: rafflesArchiveSkeleton 1.15s linear infinite;
+}
+.raffles-archive-skeleton__row i {
+  width: min(48%, 210px);
+}
+.raffles-archive-skeleton__row b {
+  width: min(31%, 130px);
+}
+.raffles-archive-retry {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 9px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+  font: inherit;
+  font-weight: 800;
+}
+@keyframes rafflesArchiveSkeleton {
+  to { background-position: -220% 0; }
+}
 .raffles-completed-current-empty {
   margin: 0;
   padding: 12px 14px;
