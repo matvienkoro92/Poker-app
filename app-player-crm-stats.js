@@ -346,7 +346,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
         ["Возврат", raffleStatsAvailable ? ((Number(raffleStats.returnedAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedAmount || 0) : "—", null, "positive"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
-        ["Возврат билеты", raffleStatsAvailable ? ((Number(raffleStats.returnedTicketAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedTicketAmount || 0) : "—", "data-crm-raffles-modal=\"returns\"", "positive"],
+        ["Возврат билеты", raffleStatsAvailable ? ((Number(raffleStats.returnedTicketAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedTicketAmount || 0) : "—", null, "positive"],
       ].concat(raffleStatsAvailable ? [
         ["Кем выдано", ""],
         ["Аня", money(raffleStats.issuedByAdmin && raffleStats.issuedByAdmin.anna || 0)],
