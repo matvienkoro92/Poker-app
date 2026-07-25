@@ -492,8 +492,8 @@ function initRafflesCompletedRuntime(opts) {
           (seatStatus === "not_seated" ? " raffle-winner-followup-btn--not-seated" : "") +
           "\" data-raffle-winner-followup=\"seat\" data-followup-value=\"not_seated\"" +
           followupAttrs +
-          ">" + (seatStatus === "not_seated" ? "✓ Не сел" : "Не сел") + "</button>" +
-          (seatStatus === "not_seated" ? raffleCurrentWeekReturnsHtml() : "");
+          ">" + (seatStatus === "not_seated" ? "✓ Не сел" : "Не сел") + "</button>";
+        var weekReturnsHtml = seatStatus === "not_seated" ? raffleCurrentWeekReturnsHtml() : "";
         var outcomeButtons = "";
         if (seatStatus === "seated") {
           if (cashoutStatus === "plus") {
@@ -513,7 +513,11 @@ function initRafflesCompletedRuntime(opts) {
               "<button type=\"button\" class=\"raffle-winner-followup-btn\" data-raffle-winner-followup=\"outcome\" data-followup-value=\"plus\"" + followupAttrs + " aria-label=\"Забрал сумму\">+</button>";
           }
         }
-        followupHtml = "<span class=\"raffle-winner-followup\">" + seatButton + noSeatButton + outcomeButtons + "</span>";
+        followupHtml =
+          "<span class=\"raffle-winner-followup\">" +
+          "<span class=\"raffle-winner-followup__seat\">" + seatButton + noSeatButton + "</span>" +
+          outcomeButtons + weekReturnsHtml +
+          "</span>";
       }
       var adminControls =
         "<span class=\"raffle-winner-row__controls\">" +
@@ -537,8 +541,9 @@ function initRafflesCompletedRuntime(opts) {
         uidAttr +
         "\" data-winner-slot-id=\"" +
         winnerSlotAttr +
-        "\" title=\"Отклонить\">✗</button></span></span>" +
-        followupHtml;
+        "\" title=\"Отклонить\">✗</button></span>" +
+        followupHtml +
+        "</span>";
       return (
         "<li class=\"" + rowClass + "\">" +
         numberHtml +
@@ -1011,7 +1016,8 @@ function initRafflesCompletedRuntime(opts) {
       if (!weekReturnsBadge) {
         weekReturnsBadge = document.createElement("span");
         weekReturnsBadge.className = "raffle-winner-week-returns raffle-winner-week-returns--loading";
-        btn.insertAdjacentElement("afterend", weekReturnsBadge);
+        var seatButtons = btn.closest(".raffle-winner-followup__seat");
+        (seatButtons || btn).insertAdjacentElement("afterend", weekReturnsBadge);
       }
       weekReturnsBadge.textContent = "Возвраты недели: считаю…";
     }

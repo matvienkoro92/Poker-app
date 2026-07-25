@@ -5545,10 +5545,23 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
 .raffle-winner-followup {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   flex-wrap: nowrap;
   gap: 4px;
   white-space: nowrap;
+}
+.raffle-winner-followup__seat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+}
+.raffle-winner-followup__seat .raffle-winner-followup-btn {
+  width: 100%;
+  min-height: 24px;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 .raffle-winner-followup-btn {
   appearance: none;
@@ -6591,6 +6604,7 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   color: #cbd5e1;
   font: inherit;
   cursor: pointer;
+  transition: opacity 0.16s ease, transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 .raffles-archive-day-tab span {
   grid-column: 1 / -1;
@@ -6620,12 +6634,30 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
 .raffles-archive-day-tab--empty {
   opacity: 0.5;
 }
-.raffles-archive-day-tab--active {
-  border-color: rgba(245, 158, 11, 0.78);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.25), rgba(146, 64, 14, 0.18));
-  color: #fff7ed;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12) inset;
+body[data-view="raffles"] .raffles-archive-day-tabs .raffles-archive-day-tab--active {
+  border-color: #fbbf24;
+  background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
+  color: #241505;
+  box-shadow:
+    0 0 0 1px rgba(255, 247, 237, 0.52) inset,
+    0 5px 18px rgba(245, 158, 11, 0.32);
   opacity: 1;
+  transform: translateY(-1px);
+}
+body[data-view="raffles"] .raffles-archive-day-tabs .raffles-archive-day-tab--active i {
+  background: rgba(66, 32, 6, 0.82);
+  color: #fff7ed;
+}
+body[data-view="raffles"] .raffles-archive-day-tabs .raffles-archive-day-tab--active::after {
+  content: "";
+  position: absolute;
+  right: 22%;
+  bottom: -5px;
+  left: 22%;
+  height: 3px;
+  border-radius: 999px;
+  background: #fde68a;
+  box-shadow: 0 0 10px rgba(253, 230, 138, 0.9);
 }
 .raffles-archive-day-panel {
   display: grid;
@@ -6772,6 +6804,7 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   background: rgba(15, 23, 42, 0.56);
 }
 .raffles-recent-tab {
+  position: relative;
   min-width: 0;
   min-height: 48px;
   display: flex;
@@ -6785,6 +6818,8 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   color: #a8a29e;
   font: inherit;
   cursor: pointer;
+  opacity: 0.62;
+  transition: opacity 0.16s ease, transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 .raffles-recent-tab strong {
   overflow: hidden;
@@ -6799,11 +6834,29 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   font-size: 12px;
   font-weight: 800;
 }
-.raffles-recent-tab--active {
-  border-color: rgba(245, 158, 11, 0.68);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.22), rgba(146, 64, 14, 0.14));
-  color: #fff7ed;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.08) inset;
+body[data-view="raffles"] .raffles-recent-tabs__list .raffles-recent-tab--active {
+  border-color: #fbbf24;
+  background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
+  color: #241505;
+  box-shadow:
+    0 0 0 1px rgba(255, 247, 237, 0.52) inset,
+    0 5px 18px rgba(245, 158, 11, 0.32);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+body[data-view="raffles"] .raffles-recent-tabs__list .raffles-recent-tab--active span {
+  color: #422006;
+}
+body[data-view="raffles"] .raffles-recent-tabs__list .raffles-recent-tab--active::after {
+  content: "";
+  position: absolute;
+  right: 22%;
+  bottom: -5px;
+  left: 22%;
+  height: 3px;
+  border-radius: 999px;
+  background: #fde68a;
+  box-shadow: 0 0 10px rgba(253, 230, 138, 0.9);
 }
 .raffles-recent-panel[hidden] {
   display: none;
