@@ -3705,11 +3705,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(2),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(2) {
-    width: 32%;
+    width: 29%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(3),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(3) {
-    width: 16%;
+    width: 21%;
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(4),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(4) {
@@ -3725,7 +3725,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   }
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table th:nth-child(7),
   .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table td:nth-child(7) {
-    width: 25%;
+    width: 23%;
   }
   .admin-report-rakeback-select,
   .admin-report-rakeback-input {
@@ -3743,7 +3743,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input {
     padding-left: 2px;
     padding-right: 2px;
-    font-size: 11px;
+    font-size: 10px;
   }
   .admin-report-rakeback-rest {
     min-width: 34px;
