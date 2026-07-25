@@ -738,13 +738,10 @@
     var input = row.querySelector("[data-rakeback-entry-date]");
     if (!badge || !label || !input) return;
     var entryAt = normalizeTimeValue(row.getAttribute("data-rakeback-entry-added-at") || row.getAttribute("data-rakeback-created-at"));
-    var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
-    var saved = row.getAttribute("data-rakeback-saved") === "1";
-    var show = kind !== "addon" || !saved || !isSameEntryDate(entryAt, baseEntryAt || entryAt);
     label.textContent = formatEntryDateLabel(entryAt);
     input.value = getDateInputValue(entryAt);
-    badge.hidden = !show;
-    row.setAttribute("data-rakeback-entry-date-visible", show ? "1" : "0");
+    badge.hidden = true;
+    row.setAttribute("data-rakeback-entry-date-visible", "0");
   }
 
   function applySharedRowDateInput(row) {
@@ -839,7 +836,7 @@
     tr.setAttribute("data-rakeback-accounted", data.accounted === true || data.reportedAt || data.reportId ? "1" : "0");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent title="Продолжение записи">↳ ' + escapeHtml(data.playerId || data.id || "") + "</span>" : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent title="Продолжение записи"><b data-rakeback-addon-parent-id>↳ ' + escapeHtml(data.playerId || data.id || "") + '</b><small data-rakeback-addon-index>подзапись</small></span>' : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
       '<td>' + (kind === "addon"
         ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
         : '<input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
@@ -2699,12 +2696,18 @@
       });
       var previousRakeByRow = new Map();
       var previousRakeByGroup = {};
+      var addonIndexByRow = new Map();
+      var addonCountByGroup = {};
       rows.slice().sort(function (a, b) {
         var aTime = normalizeTimeValue(a.getAttribute("data-rakeback-entry-added-at") || a.getAttribute("data-rakeback-created-at"));
         var bTime = normalizeTimeValue(b.getAttribute("data-rakeback-entry-added-at") || b.getAttribute("data-rakeback-created-at"));
         return aTime - bTime;
       }).forEach(function (row) {
         var groupId = row.getAttribute("data-rakeback-group") || "";
+        if (row.getAttribute("data-rakeback-kind") === "addon") {
+          addonCountByGroup[groupId] = (addonCountByGroup[groupId] || 0) + 1;
+          addonIndexByRow.set(row, addonCountByGroup[groupId]);
+        }
         previousRakeByRow.set(row, previousRakeByGroup[groupId] || 0);
         var rakeInput = row.querySelector("[data-rakeback-rake]");
         var hasRakeInputValue = !!(rakeInput && String(rakeInput.value || "").trim());
@@ -2724,8 +2727,12 @@
           if (baseId && idInput) idInput.value = baseId.value;
           var parentLabel = row.querySelector("[data-rakeback-addon-parent]");
           if (baseId && parentLabel) {
-            parentLabel.textContent = "↳ " + baseId.value;
-            parentLabel.title = "Продолжение записи " + baseId.value + " от " + formatEntryDateLabel(baseEntryByGroup[groupId]);
+            var parentIdLabel = parentLabel.querySelector("[data-rakeback-addon-parent-id]");
+            var addonIndexLabel = parentLabel.querySelector("[data-rakeback-addon-index]");
+            var addonIndex = addonIndexByRow.get(row) || 1;
+            if (parentIdLabel) parentIdLabel.textContent = "↳ " + baseId.value;
+            if (addonIndexLabel) addonIndexLabel.textContent = "подзапись " + addonIndex;
+            parentLabel.title = "Подзапись " + addonIndex + " записи " + baseId.value + " от " + formatEntryDateLabel(baseEntryByGroup[groupId]);
           }
         }
         updateSharedRowDateBadge(row, baseEntryByGroup[groupId] || row.getAttribute("data-rakeback-entry-added-at"));

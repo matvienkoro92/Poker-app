@@ -2517,20 +2517,37 @@ button.admin-report-rakeback-summary__row:focus-visible {
   visibility: hidden;
 }
 .admin-report-rakeback-addon-parent {
-  display: block;
+  display: flex;
   position: absolute;
   left: 29px;
   right: 4px;
   top: 50%;
   overflow: hidden;
   transform: translateY(-50%);
+  flex-direction: column;
+  align-items: flex-start;
   color: rgba(255, 231, 176, 0.82);
   font-size: 11px;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.05;
+  pointer-events: none;
+}
+.admin-report-rakeback-addon-parent b,
+.admin-report-rakeback-addon-parent small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  pointer-events: none;
+}
+.admin-report-rakeback-addon-parent b {
+  font: inherit;
+}
+.admin-report-rakeback-addon-parent small {
+  margin-top: 2px;
+  color: rgba(255, 231, 176, 0.58);
+  font-size: 9px;
+  font-weight: 700;
 }
 .admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-addon-parent {
   left: 78px;
