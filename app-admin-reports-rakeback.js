@@ -2747,10 +2747,12 @@
     function applyWeeklyGroupColors(domRows) {
       var groupMeta = {};
       var manualColorByGroup = {};
+      var groupsWithAddons = {};
       sharedRows.forEach(function (row) {
         if (!row || isCarryForwardTemplateRow(row)) return;
         var groupId = String(row.groupId || "").trim();
         if (!groupId) return;
+        if (getSharedRowKind(row) === "addon") groupsWithAddons[groupId] = true;
         var time = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
         if (!groupMeta[groupId] || time < groupMeta[groupId].time) groupMeta[groupId] = { groupId: groupId, time: time };
         var manualColor = normalizeRakebackRowColor(row.color || row.rowColor || row.highlightColor);
@@ -2765,6 +2767,8 @@
       var accentByGroup = {};
       Object.keys(groupMeta).map(function (groupId) {
         return groupMeta[groupId];
+      }).filter(function (meta) {
+        return !!groupsWithAddons[meta.groupId];
       }).sort(function (a, b) {
         return a.time - b.time || a.groupId.localeCompare(b.groupId);
       }).forEach(function (meta, index) {
@@ -2774,6 +2778,12 @@
       });
       domRows.forEach(function (row) {
         var groupId = row.getAttribute("data-rakeback-group") || "";
+        if (!groupsWithAddons[groupId]) {
+          row.removeAttribute("data-rakeback-group-color");
+          row.style.removeProperty("--rakeback-group-bg");
+          row.style.removeProperty("--rakeback-group-accent");
+          return;
+        }
         var color = manualColorByGroup[groupId] || colorByGroup[groupId];
         if (!color) return;
         row.setAttribute("data-rakeback-group-color", "1");
