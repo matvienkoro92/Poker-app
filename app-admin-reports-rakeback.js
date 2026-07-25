@@ -586,9 +586,18 @@
     var groupId = row.getAttribute("data-rakeback-group") || "";
     var rows = row.parentNode ? Array.prototype.slice.call(row.parentNode.querySelectorAll("[data-rakeback-shared-row]")) : [];
     var lastAddon = null;
+    var lastAddonTime = 0;
     rows.forEach(function (current) {
       if ((current.getAttribute("data-rakeback-group") || "") === groupId && current.getAttribute("data-rakeback-kind") === "addon") {
-        lastAddon = current;
+        var currentTime =
+          Number(current.getAttribute("data-rakeback-standard-at")) ||
+          Number(current.getAttribute("data-rakeback-created-at")) ||
+          Number(current.getAttribute("data-rakeback-entry-added-at")) ||
+          0;
+        if (!lastAddon || currentTime > lastAddonTime) {
+          lastAddon = current;
+          lastAddonTime = currentTime;
+        }
       }
     });
     return !lastAddon || lastAddon === row;
@@ -1516,15 +1525,43 @@
     function orderSharedRowsForDisplay(rows) {
       rows = Array.isArray(rows) ? rows : [];
       var addonsByGroup = {};
+      var baseRows = [];
+      var orphanAddons = [];
       rows.forEach(function (row) {
         var groupId = String(row.groupId || "").trim();
-        if (!groupId || getSharedRowKind(row) !== "addon") return;
+        if (getSharedRowKind(row) !== "addon") {
+          baseRows.push(row);
+          return;
+        }
+        if (!groupId) {
+          orphanAddons.push(row);
+          return;
+        }
         if (!addonsByGroup[groupId]) addonsByGroup[groupId] = [];
         addonsByGroup[groupId].push(row);
       });
       Object.keys(addonsByGroup).forEach(function (groupId) {
         addonsByGroup[groupId].sort(compareRowsByEntryDateAsc);
       });
+      // During ID search, show each history as a readable chain: the base
+      // record first, followed by its add-ons in chronological order.
+      if (getSearchQuery()) {
+        var searchOrdered = [];
+        sortRows(baseRows, addonsByGroup).forEach(function (row) {
+          var groupId = String(row.groupId || "").trim();
+          searchOrdered.push(row);
+          (addonsByGroup[groupId] || []).forEach(function (addon) {
+            searchOrdered.push(addon);
+          });
+          delete addonsByGroup[groupId];
+        });
+        Object.keys(addonsByGroup).forEach(function (groupId) {
+          addonsByGroup[groupId].forEach(function (addon) {
+            orphanAddons.push(addon);
+          });
+        });
+        return searchOrdered.concat(orphanAddons.sort(compareRowsByEntryDateAsc));
+      }
       return rows.slice().sort(function (a, b) {
         var dayOrder = rowEntryDay(b) - rowEntryDay(a);
         if (dayOrder) return dayOrder;
