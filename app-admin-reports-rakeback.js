@@ -219,6 +219,19 @@
     return weekdays[weekdayIndex] || "";
   }
 
+  function getCurrentCalendarEntryTime() {
+    var moscowNow = new Date(Date.now() + MOSCOW_UTC_OFFSET_MS);
+    return Date.UTC(
+      moscowNow.getUTCFullYear(),
+      moscowNow.getUTCMonth(),
+      moscowNow.getUTCDate(),
+      12,
+      0,
+      0,
+      0
+    ) - MOSCOW_UTC_OFFSET_MS;
+  }
+
   function getWeekStartFromDateParts(date) {
     date = date || {};
     var day = Number(date.day) || 1;
@@ -552,6 +565,12 @@
     stack.appendChild(total);
     td.appendChild(stack);
     tr.appendChild(td);
+    return tr;
+  }
+
+  function createEmptyEntryDateSeparator(entryAt) {
+    var tr = createEntryDateSeparator(entryAt, "Записей пока не было");
+    tr.classList.add("admin-report-rakeback-date-separator--empty");
     return tr;
   }
 
@@ -2812,6 +2831,12 @@
     }
 
     function applyWeeklyGroupColors(domRows) {
+      function getAutomaticGroupHue(index) {
+        // Reserve the gold/orange 21–69° range for date headers so group
+        // rows never visually merge with those separators.
+        var slot = (50 + index * 137) % 310;
+        return slot < 290 ? 70 + slot : slot - 290;
+      }
       var groupMeta = {};
       var manualColorByGroup = {};
       var groupsWithAddons = {};
@@ -2839,7 +2864,7 @@
       }).sort(function (a, b) {
         return a.time - b.time || a.groupId.localeCompare(b.groupId);
       }).forEach(function (meta, index) {
-        var hue = Math.round((38 + index * 137.508) % 360);
+        var hue = getAutomaticGroupHue(index);
         colorByGroup[meta.groupId] = manualColorByGroup[meta.groupId] || ("hsl(" + hue + " 62% 30%)");
         accentByGroup[meta.groupId] = "hsl(" + hue + " 82% 58%)";
       });
@@ -2992,6 +3017,16 @@
       getRakebackDateTotals(filterRowsForQuickTotals(visibleShared)).forEach(function (day) {
         if (day && day.key) dateTotalsByKey[day.key] = day;
       });
+      var currentCalendarDayAt = !query && activeQuickFilter === "all" ? getCurrentCalendarEntryTime() : 0;
+      var currentCalendarDayKey = currentCalendarDayAt ? getDateInputValue(currentCalendarDayAt) : "";
+      var hasCurrentCalendarDayRows = currentCalendarDayKey && visibleShared.some(function (row) {
+        var entryAt = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
+        return getDateInputValue(entryAt) === currentCalendarDayKey;
+      });
+      if (currentCalendarDayAt && !hasCurrentCalendarDayRows) {
+        fragment.appendChild(createEmptyEntryDateSeparator(currentCalendarDayAt));
+        lastEntryDateKey = currentCalendarDayKey;
+      }
       visibleShared.forEach(function (row, index) {
         var groupId = String(row.groupId || "").trim();
         var entryAt = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt || Date.now());

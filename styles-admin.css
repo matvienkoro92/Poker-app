@@ -2731,6 +2731,11 @@ button.admin-report-rakeback-summary__row:focus-visible {
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
+.admin-report-rakeback-date-separator--empty .admin-report-rakeback-date-separator__total {
+  color: rgba(255, 231, 176, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+}
 .admin-report-rakeback-template-toggle {
   appearance: none;
   display: inline-flex;
