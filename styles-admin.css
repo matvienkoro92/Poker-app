@@ -1899,6 +1899,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+.admin-report-rakeback-totals-modal__rank {
+  display: inline-block;
+  min-width: 20px;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 .admin-report-rakeback-totals-modal__formula {
   grid-column: 1 / -1;
   margin-top: -4px;

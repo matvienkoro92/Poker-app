@@ -1141,7 +1141,37 @@
           '<span class="admin-report-rakeback-totals-modal__room">Итого</span>' +
           '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(dateGrandTotal.rake, dateGrandTotal.amount)) + "</span>" +
         "</div>" : "";
-      totalsList.innerHTML = roomHtml + dateHtml;
+      var rowsByPlayerId = {};
+      getRakebackSavedRowsForTotals().forEach(function (row) {
+        var playerId = String(row && (row.playerId || row.id) || "").trim();
+        if (!playerId) return;
+        var key = playerId.toLowerCase();
+        if (!rowsByPlayerId[key]) rowsByPlayerId[key] = { playerId: playerId, rows: [] };
+        rowsByPlayerId[key].rows.push(row);
+      });
+      var playerTotals = Object.keys(rowsByPlayerId).map(function (key) {
+        var item = rowsByPlayerId[key];
+        var totals = getRakebackTotals(item.rows);
+        return { playerId: item.playerId, rake: totals.rake, amount: totals.amount };
+      }).sort(function (a, b) {
+        return b.amount - a.amount || b.rake - a.rake || a.playerId.localeCompare(b.playerId);
+      });
+      var playerGrandTotal = playerTotals.reduce(function (total, item) {
+        total.rake += parseNumber(item.rake);
+        total.amount += parseNumber(item.amount);
+        return total;
+      }, { rake: 0, amount: 0 });
+      var playerHtml = playerTotals.length ? '<div class="admin-report-rakeback-totals-modal__section-title">Итого по ID</div>' + playerTotals.map(function (item, index) {
+        return '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--player">' +
+          '<span class="admin-report-rakeback-totals-modal__room"><small class="admin-report-rakeback-totals-modal__rank">' + escapeHtml(String(index + 1)) + '.</small> ' + escapeHtml(item.playerId) + "</span>" +
+          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(item.rake, item.amount)) + "</span>" +
+        "</div>";
+      }).join("") +
+        '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--grand">' +
+          '<span class="admin-report-rakeback-totals-modal__room">Итого</span>' +
+          '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(playerGrandTotal.rake, playerGrandTotal.amount)) + "</span>" +
+        "</div>" : "";
+      totalsList.innerHTML = roomHtml + dateHtml + playerHtml;
     }
 
     function openRakebackTotalsModal() {
