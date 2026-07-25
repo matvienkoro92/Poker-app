@@ -6558,6 +6558,82 @@ body[data-view="raffles"] .raffle-participant-line__specialty {
   padding: 10px;
   border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
+.raffles-archive-days {
+  min-width: 0;
+}
+.raffles-archive-day-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(62px, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 2px 0 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+.raffles-archive-day-tabs::-webkit-scrollbar {
+  display: none;
+}
+.raffles-archive-day-tab {
+  position: relative;
+  min-width: 62px;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-content: center;
+  justify-content: center;
+  column-gap: 5px;
+  padding: 7px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.58);
+  color: #cbd5e1;
+  font: inherit;
+  cursor: pointer;
+}
+.raffles-archive-day-tab span {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.raffles-archive-day-tab b {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.raffles-archive-day-tab i {
+  min-width: 16px;
+  height: 16px;
+  align-self: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 16px;
+}
+.raffles-archive-day-tab--empty {
+  opacity: 0.5;
+}
+.raffles-archive-day-tab--active {
+  border-color: rgba(245, 158, 11, 0.78);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.25), rgba(146, 64, 14, 0.18));
+  color: #fff7ed;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12) inset;
+  opacity: 1;
+}
+.raffles-archive-day-panel {
+  display: grid;
+  gap: 10px;
+}
+.raffles-archive-day-panel[hidden] {
+  display: none;
+}
 .raffles-archive-skeleton {
   display: grid;
   gap: 9px;
@@ -12985,6 +13061,18 @@ body[data-view="raffles"] .raffles-active-chooser__item
 
 /* The participant label must not be clipped by a rounded tile mask. */
 body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__fact--participants {
+  border-radius: 0 !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--cash
+  .raffles-active-chooser__fact--participants
+  .raffles-active-chooser__participants-side {
+  border-radius: 0 !important;
+}
+
+body[data-view="raffles"]
+  .raffles-active-chooser__item--ticket:not(.raffles-active-chooser__item--knockout)
   .raffles-active-chooser__fact--participants {
   border-radius: 0 !important;
 }

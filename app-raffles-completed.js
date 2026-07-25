@@ -20,6 +20,7 @@ function initRafflesCompletedRuntime(opts) {
     var raffleCompletedTimerRefreshMarks = {};
     var raffleCompletedActiveWinnerTabs = {};
     var raffleCurrentWeekReturns = null;
+    var raffleCurrentWeekIssueTotalsServer = null;
 
   function raffleCurrentWeekReturnsHtml() {
     if (!raffleCurrentWeekReturns || !isFinite(Number(raffleCurrentWeekReturns.amount))) return "";
@@ -611,6 +612,11 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function raffleCurrentWeekIssueTotals(completed) {
+    if (raffleCurrentWeekIssueTotalsServer &&
+        raffleCurrentWeekIssueTotalsServer.ticket &&
+        raffleCurrentWeekIssueTotalsServer.cash) {
+      return raffleCurrentWeekIssueTotalsServer;
+    }
     var range = raffleCurrentMoscowWeekRange();
     var totals = {
       ticket: { issued: 0, returned: 0 },
@@ -640,6 +646,10 @@ function initRafflesCompletedRuntime(opts) {
       });
     });
     return totals;
+  }
+
+  function setRaffleCurrentWeekIssueTotals(totals) {
+    raffleCurrentWeekIssueTotalsServer = totals && totals.ticket && totals.cash ? totals : null;
   }
 
   function raffleCurrentWeekIssueTotalsHtml(completed) {
@@ -1055,6 +1065,9 @@ function initRafflesCompletedRuntime(opts) {
       })
       .then(function (data) {
         optimisticOutcomeButtons.forEach(function (item) { item.disabled = false; });
+        if (data && data.currentWeekIssueTotals) {
+          setRaffleCurrentWeekIssueTotals(data.currentWeekIssueTotals);
+        }
         if (data && data.currentWeekReturns) {
           raffleCurrentWeekReturns = data.currentWeekReturns;
           if (weekReturnsBadge) {
@@ -1649,6 +1662,84 @@ function initRafflesCompletedRuntime(opts) {
     return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" }).replace(/\.$/, "");
   }
 
+  function raffleArchiveDayKey(raffle) {
+    var date = raffleCompletedDate(raffle);
+    if (!date) return "";
+    var moscow = new Date(date.getTime() + 3 * 60 * 60 * 1000);
+    return [
+      moscow.getUTCFullYear(),
+      String(moscow.getUTCMonth() + 1).padStart(2, "0"),
+      String(moscow.getUTCDate()).padStart(2, "0")
+    ].join("-");
+  }
+
+  function raffleArchiveWeekDays(weekKey) {
+    var parts = String(weekKey || "").split("-");
+    var start = Date.UTC(
+      parseInt(parts[0], 10) || 2000,
+      Math.max(0, (parseInt(parts[1], 10) || 1) - 1),
+      parseInt(parts[2], 10) || 1
+    );
+    var weekdayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+    return weekdayNames.map(function (name, index) {
+      var date = new Date(start + index * 24 * 60 * 60 * 1000);
+      return {
+        key: [
+          date.getUTCFullYear(),
+          String(date.getUTCMonth() + 1).padStart(2, "0"),
+          String(date.getUTCDate()).padStart(2, "0")
+        ].join("-"),
+        name: name,
+        day: date.getUTCDate()
+      };
+    });
+  }
+
+  function raffleArchiveWeekDaysHtml(weekKey, raffles) {
+    var days = raffleArchiveWeekDays(weekKey);
+    var byDay = {};
+    sortCompletedRafflesNewestFirst(raffles).forEach(function (raffle) {
+      var key = raffleArchiveDayKey(raffle);
+      if (!byDay[key]) byDay[key] = [];
+      byDay[key].push(raffle);
+    });
+    var activeKey = "";
+    days.forEach(function (day) {
+      if ((byDay[day.key] || []).length) activeKey = day.key;
+    });
+    if (!activeKey && days.length) activeKey = days[0].key;
+    var domKey = String(weekKey || "week").replace(/[^a-zA-Z0-9_-]/g, "-");
+    var tabs = days.map(function (day) {
+      var count = (byDay[day.key] || []).length;
+      var active = day.key === activeKey;
+      return "<button type=\"button\" class=\"raffles-archive-day-tab" +
+        (active ? " raffles-archive-day-tab--active" : "") +
+        (count ? "" : " raffles-archive-day-tab--empty") +
+        "\" role=\"tab\" aria-selected=\"" + (active ? "true" : "false") +
+        "\" aria-controls=\"raffles-archive-day-panel-" + escapeHtml(domKey + "-" + day.key) +
+        "\" data-raffles-archive-day-tab=\"" + escapeHtml(day.key) + "\">" +
+        "<span>" + escapeHtml(day.name) + "</span><b>" + escapeHtml(day.day) + "</b>" +
+        (count ? "<i>" + escapeHtml(count) + "</i>" : "") +
+        "</button>";
+    }).join("");
+    var panels = days.map(function (day) {
+      var items = byDay[day.key] || [];
+      var active = day.key === activeKey;
+      return "<div class=\"raffles-archive-day-panel" + (active ? " raffles-archive-day-panel--active" : "") +
+        "\" id=\"raffles-archive-day-panel-" + escapeHtml(domKey + "-" + day.key) +
+        "\" role=\"tabpanel\" data-raffles-archive-day-panel=\"" + escapeHtml(day.key) + "\"" +
+        (active ? "" : " hidden") + ">" +
+        (items.length
+          ? items.map(buildCompletedRaffleCardHtml).join("")
+          : "<div class=\"raffles-completed-empty\">В этот день розыгрышей не было.</div>") +
+        "</div>";
+    }).join("");
+    return "<div class=\"raffles-archive-days\" data-raffles-archive-days>" +
+      "<div class=\"raffles-archive-day-tabs\" role=\"tablist\" aria-label=\"Дни недели\">" + tabs + "</div>" +
+      panels +
+      "</div>";
+  }
+
   function raffleArchiveMonthHtml(month) {
     return "<details class=\"raffles-completed-archive-month\" data-raffles-archive-month=\"" + escapeHtml(month.key) + "\">" +
       "<summary class=\"raffles-completed-archive-month__summary\">" +
@@ -1723,8 +1814,9 @@ function initRafflesCompletedRuntime(opts) {
       .then(function (data) {
         details.dataset.loaded = "1";
         delete details.dataset.loading;
-        if (body) body.innerHTML = (data.raffles || []).map(buildCompletedRaffleCardHtml).join("") ||
-          "<div class=\"raffles-completed-empty\">На этой неделе нет розыгрышей.</div>";
+        if (body) body.innerHTML = (data.raffles || []).length
+          ? raffleArchiveWeekDaysHtml(data.week || details.getAttribute("data-raffles-archive-week") || "", data.raffles)
+          : "<div class=\"raffles-completed-empty\">На этой неделе нет розыгрышей.</div>";
         syncRaffleCompletedTimers();
       })
       .catch(function () {
@@ -1734,6 +1826,27 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function handleDeferredArchiveClick(event) {
+    var dayTab = event && event.target && event.target.closest
+      ? event.target.closest("[data-raffles-archive-day-tab]")
+      : null;
+    if (dayTab) {
+      var daysRoot = dayTab.closest("[data-raffles-archive-days]");
+      var dayKey = dayTab.getAttribute("data-raffles-archive-day-tab") || "";
+      if (daysRoot && dayKey) {
+        daysRoot.querySelectorAll("[data-raffles-archive-day-tab]").forEach(function (tab) {
+          var active = tab === dayTab;
+          tab.classList.toggle("raffles-archive-day-tab--active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        daysRoot.querySelectorAll("[data-raffles-archive-day-panel]").forEach(function (panel) {
+          var active = panel.getAttribute("data-raffles-archive-day-panel") === dayKey;
+          panel.classList.toggle("raffles-archive-day-panel--active", active);
+          panel.hidden = !active;
+        });
+        syncRaffleCompletedTimers();
+      }
+      return true;
+    }
     var retry = event && event.target && event.target.closest ? event.target.closest("[data-raffles-archive-retry]") : null;
     if (retry) {
       var retryKind = retry.getAttribute("data-raffles-archive-retry");
@@ -2019,6 +2132,7 @@ function initRafflesCompletedRuntime(opts) {
 
     return {
       renderPanel: renderCompletedRafflesPanel,
+      setCurrentWeekIssueTotals: setRaffleCurrentWeekIssueTotals,
       buildWinnerRowHtml: buildRaffleWinnerRowHtml,
       bindWinnerStatusButtons: bindRaffleWinnerStatusButtons,
       handleDeferredArchiveClick: handleDeferredArchiveClick

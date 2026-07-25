@@ -35,6 +35,83 @@ function contractMoscowStartOnOrBefore(date, time) {
   return start;
 }
 
+async function testRaffleCurrentWeekReturnsCalculation() {
+  const raffles = loadHandler("raffles");
+  const {
+    currentMoscowWeekRange,
+    currentWeekRaffleWinnerReturnAmount,
+    currentWeekRaffleIssueTotalsFromRaffles,
+  } = raffles._test;
+  const range = currentMoscowWeekRange(new Date("2026-07-25T12:00:00.000Z"));
+  const raffle = {
+    groups: [
+      { prize: "Беккинг-билет 500 ₽ — Magic MKO" },
+      { prize: "Беккинг-байин 1000 ₽ на кеш 20/40" },
+    ],
+  };
+
+  assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
+    groupIndex: 0,
+    winnerSeatStatus: "not_seated",
+    winnerSeatStatusAt: "2026-07-20T14:42:06.930Z",
+  }, range), 500, "not-seated return uses the actual group prize");
+
+  assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
+    groupIndex: 1,
+    winnerSeatStatus: "not_seated",
+    winnerSeatStatusAt: "2026-07-21T18:17:36.527Z",
+    winnerReroll: true,
+  }, range), 0, "rerolled winner is not counted twice");
+
+  assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
+    groupIndex: 1,
+    winnerSeatStatus: "seated",
+    winnerCashoutStatus: "plus",
+    winnerCashoutAmount: 2635,
+    winnerCashoutAt: "2026-07-23T22:33:20.669Z",
+  }, range), 2635, "cashout return keeps the stored amount");
+
+  assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
+    groupIndex: 1,
+    winnerSeatStatus: "not_seated",
+    winnerSeatStatusAt: "2026-07-19T20:59:59.999Z",
+  }, range), 0, "return before the Moscow week is excluded");
+
+  const totals = currentWeekRaffleIssueTotalsFromRaffles([{
+    prizeKind: "tournament_ticket",
+    groups: raffle.groups,
+    winners: [
+      {
+        groupIndex: 0,
+        winnerStatus: "ok",
+        winnerStatusAt: "2026-07-20T12:00:00.000Z",
+        winnerSeatStatus: "not_seated",
+        winnerSeatStatusAt: "2026-07-20T14:42:06.930Z",
+      },
+      {
+        groupIndex: 0,
+        winnerStatus: "ok",
+        winnerStatusAt: "2026-07-20T12:00:00.000Z",
+        winnerSeatStatus: "seated",
+        winnerCashoutStatus: "plus",
+        winnerCashoutAmount: 2635,
+        winnerCashoutAt: "2026-07-23T22:33:20.669Z",
+      },
+      {
+        groupIndex: 0,
+        winnerStatus: "ok",
+        winnerStatusAt: "2026-07-20T12:00:00.000Z",
+        winnerSeatStatus: "not_seated",
+        winnerSeatStatusAt: "2026-07-20T14:42:06.930Z",
+        winnerReroll: true,
+      },
+    ],
+  }], new Date("2026-07-25T12:00:00.000Z"));
+  assert.deepStrictEqual(totals.ticket, { issued: 1000, returned: 500 }, "ticket totals use the full current week");
+  assert.deepStrictEqual(totals.cash, { issued: 0, returned: 2635 }, "cashout is classified as cash return");
+  assert.strictEqual(totals.returnCount, 2, "rerolled return is excluded from the count");
+}
+
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";
 process.env.UPSTASH_REDIS_REST_TOKEN = "mock-token";
 process.env.TELEGRAM_BOT_TOKEN = BOT_TOKEN;
@@ -5863,6 +5940,7 @@ async function main() {
     ["chat send/edit/delete", testChatSendEditDelete],
     ["crm app user block", testCrmAppUserBlock],
     ["raffle join/leave", testRaffleJoinLeave],
+    ["raffle current week returns calculation", testRaffleCurrentWeekReturnsCalculation],
     ["raffle access level gate", testRaffleAccessLevelGate],
     ["raffle admin upsert participant tickets", testRaffleAdminUpsertParticipantAddsTickets],
     ["raffle admin add prize groups", testRaffleAdminAddPrizeGroups],

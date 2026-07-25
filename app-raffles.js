@@ -3333,6 +3333,9 @@ function initRaffles() {
           switchToCompleted = true;
         }
         rafflesIsAdmin = !!data.isAdmin;
+        if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+          rafflesCompletedRuntime.setCurrentWeekIssueTotals(data.currentWeekIssueTotals || null);
+        }
         if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
           window.pokerMarkAdminAccess("raffles");
         }
