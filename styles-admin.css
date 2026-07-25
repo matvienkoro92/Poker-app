@@ -1867,6 +1867,18 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-totals-modal__row:first-child {
   border-top: 0;
 }
+.admin-report-rakeback-totals-modal__row--grand {
+  margin-top: 2px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 205, 105, 0.48);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(111, 70, 18, 0.34), rgba(43, 29, 13, 0.28));
+}
+.admin-report-rakeback-totals-modal__row--grand .admin-report-rakeback-totals-modal__room,
+.admin-report-rakeback-totals-modal__row--grand .admin-report-rakeback-totals-modal__amount {
+  color: #ffe4aa;
+  font-weight: 900;
+}
 .admin-report-rakeback-totals-modal__section-title {
   margin: 14px 0 2px;
   padding-top: 14px;
@@ -2503,6 +2515,25 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-row--addon .admin-report-rakeback-input--id {
   padding-left: 7px;
   visibility: hidden;
+}
+.admin-report-rakeback-addon-parent {
+  display: block;
+  position: absolute;
+  left: 29px;
+  right: 4px;
+  top: 50%;
+  overflow: hidden;
+  transform: translateY(-50%);
+  color: rgba(255, 231, 176, 0.82);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-addon-parent {
+  left: 78px;
 }
 .admin-report-rakeback-row--addon .admin-report-rakeback-date-badge {
   left: 29px;
