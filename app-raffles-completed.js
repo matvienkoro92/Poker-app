@@ -1826,6 +1826,27 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function handleDeferredArchiveClick(event) {
+    var recentTab = event && event.target && event.target.closest
+      ? event.target.closest("[data-raffles-recent-tab]")
+      : null;
+    if (recentTab) {
+      var recentRoot = recentTab.closest("[data-raffles-recent-tabs]");
+      var recentIndex = recentTab.getAttribute("data-raffles-recent-tab") || "0";
+      if (recentRoot) {
+        recentRoot.querySelectorAll("[data-raffles-recent-tab]").forEach(function (tab) {
+          var active = tab === recentTab;
+          tab.classList.toggle("raffles-recent-tab--active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        recentRoot.querySelectorAll("[data-raffles-recent-panel]").forEach(function (panel) {
+          var active = panel.getAttribute("data-raffles-recent-panel") === recentIndex;
+          panel.classList.toggle("raffles-recent-panel--active", active);
+          panel.hidden = !active;
+        });
+        syncRaffleCompletedTimers();
+      }
+      return true;
+    }
     var dayTab = event && event.target && event.target.closest
       ? event.target.closest("[data-raffles-archive-day-tab]")
       : null;
@@ -1911,10 +1932,70 @@ function initRafflesCompletedRuntime(opts) {
       "</details>";
   }
 
+  function raffleRecentCompletedKindLabel(raffle) {
+    var explicit = String(raffle && (raffle.prizeKind || raffle.prize_kind) || "").toLowerCase();
+    if (explicit === "cash") return "Кеш";
+    if (explicit === "tournament_ticket" || explicit === "ticket") return "Билеты";
+    var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
+    var text = String(raffle && (raffle.title || raffle.name) || "") + " " +
+      groups.map(function (group) { return String(group && group.prize || ""); }).join(" ");
+    return /(?:кеш|кэш|cash)/i.test(text) ? "Кеш" : "Билеты";
+  }
+
+  function raffleRecentCompletedResultTime(raffle) {
+    var batchTime = String(raffle && raffle.resultBatchTime || "").trim();
+    if (batchTime) return batchTime;
+    var completed = raffleCompletedDate(raffle);
+    if (!completed) return "";
+    try {
+      return completed.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Europe/Moscow"
+      });
+    } catch (eResultTime) {
+      return String(completed.getHours()).padStart(2, "0") + ":" +
+        String(completed.getMinutes()).padStart(2, "0");
+    }
+  }
+
+  function raffleRecentCompletedTabsHtml(items) {
+    var recent = Array.isArray(items) ? items.slice(0, 2) : [];
+    if (!recent.length) return "";
+    if (recent.length === 1) return buildCompletedRaffleCardHtml(recent[0]);
+    var tabs = recent.map(function (raffle, index) {
+      var kind = raffleRecentCompletedKindLabel(raffle);
+      var time = raffleRecentCompletedResultTime(raffle);
+      var active = index === 0;
+      return "<button type=\"button\" class=\"raffles-recent-tab" +
+        (active ? " raffles-recent-tab--active" : "") +
+        "\" role=\"tab\" aria-selected=\"" + (active ? "true" : "false") +
+        "\" data-raffles-recent-tab=\"" + index + "\">" +
+        "<strong>" + escapeHtml(kind) + "</strong>" +
+        (time ? "<span>" + escapeHtml(time) + "</span>" : "") +
+        "</button>";
+    }).join("");
+    var panels = recent.map(function (raffle, index) {
+      var active = index === 0;
+      return "<div class=\"raffles-recent-panel" + (active ? " raffles-recent-panel--active" : "") +
+        "\" role=\"tabpanel\" data-raffles-recent-panel=\"" + index + "\"" +
+        (active ? "" : " hidden") + ">" +
+        buildCompletedRaffleCardHtml(raffle) +
+        "</div>";
+    }).join("");
+    return "<section class=\"raffles-recent-tabs\" data-raffles-recent-tabs>" +
+      "<div class=\"raffles-recent-tabs__list\" role=\"tablist\" aria-label=\"Последние завершённые розыгрыши\">" +
+      tabs +
+      "</div>" +
+      panels +
+      "</section>";
+  }
+
   function buildCompletedRafflesListHtml(completed) {
     var list = sortCompletedRafflesNewestFirst(completed);
     if (list.length <= 0) return "";
-    var currentHtml = list.slice(0, 2).map(buildCompletedRaffleCardHtml).join("");
+    var currentHtml = raffleRecentCompletedTabsHtml(list);
     var archive = list.slice(2);
     return currentHtml +
       raffleCurrentWeekIssueTotalsHtml(list) +
