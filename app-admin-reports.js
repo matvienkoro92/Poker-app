@@ -988,7 +988,7 @@ function initAdminReportModal() {
   }
 
   function shouldOpenRakebackByDefault() {
-    return rakebackIdentityMatches(getRakebackIdentityCandidates(), ["1897001087"], [], []);
+    return rakebackIdentityMatches(getRakebackIdentityCandidates(), ["1897001087", "388008256"], [], []);
   }
 
   function canRefreshSharedRakebackDraft() {

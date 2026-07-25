@@ -2762,13 +2762,15 @@
         if (groupId && manualColor && !manualColorByGroup[groupId]) manualColorByGroup[groupId] = manualColor;
       });
       var colorByGroup = {};
+      var accentByGroup = {};
       Object.keys(groupMeta).map(function (groupId) {
         return groupMeta[groupId];
       }).sort(function (a, b) {
         return a.time - b.time || a.groupId.localeCompare(b.groupId);
       }).forEach(function (meta, index) {
         var hue = Math.round((38 + index * 137.508) % 360);
-        colorByGroup[meta.groupId] = manualColorByGroup[meta.groupId] || ("hsl(" + hue + " 46% 21%)");
+        colorByGroup[meta.groupId] = manualColorByGroup[meta.groupId] || ("hsl(" + hue + " 62% 30%)");
+        accentByGroup[meta.groupId] = "hsl(" + hue + " 82% 58%)";
       });
       domRows.forEach(function (row) {
         var groupId = row.getAttribute("data-rakeback-group") || "";
@@ -2776,6 +2778,11 @@
         if (!color) return;
         row.setAttribute("data-rakeback-group-color", "1");
         row.style.setProperty("--rakeback-group-bg", color);
+        if (!manualColorByGroup[groupId]) {
+          row.style.setProperty("--rakeback-group-accent", accentByGroup[groupId]);
+        } else {
+          row.style.removeProperty("--rakeback-group-accent");
+        }
       });
     }
 

@@ -701,7 +701,7 @@
   function shouldOpenAdminReportRakebackByDefault() {
     return adminReportShellIdentityMatches(
       getAdminReportShellUsers(),
-      ["1897001087"],
+      ["1897001087", "388008256"],
       [],
       []
     );

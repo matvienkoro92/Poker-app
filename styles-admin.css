@@ -2517,15 +2517,16 @@ button.admin-report-rakeback-summary__row:focus-visible {
   visibility: hidden;
 }
 .admin-report-rakeback-addon-parent {
-  display: flex;
+  display: grid;
   position: absolute;
   left: 8px;
   right: 4px;
   top: 50%;
   overflow: hidden;
   transform: translateY(-50%);
-  flex-direction: column;
-  align-items: flex-start;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 4px;
   color: rgba(255, 231, 176, 0.82);
   font-size: 11px;
   font-weight: 800;
@@ -2544,15 +2545,23 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font: inherit;
 }
 .admin-report-rakeback-addon-parent small {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-  margin-top: 2px;
+  display: contents;
   color: rgba(255, 231, 176, 0.58);
   font-size: 9px;
   font-weight: 700;
 }
+.admin-report-rakeback-addon-parent small span {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 231, 176, 0.58);
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .admin-report-rakeback-addon-parent small em {
+  grid-column: 1 / -1;
+  margin-top: 2px;
   overflow: hidden;
   color: #60a5fa;
   font-style: normal;
@@ -2601,6 +2610,16 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 #adminReportModal .admin-report-rakeback-row[data-rakeback-group-color]:not([data-rakeback-row-color]) > td:not(.admin-report-rakeback-actions) {
   background: var(--rakeback-group-bg, #101016);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--rakeback-group-accent, #f6d391) 38%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--rakeback-group-accent, #f6d391) 30%, transparent);
+}
+#adminReportModal .admin-report-rakeback-row[data-rakeback-group-color]:not([data-rakeback-row-color]) > td:first-child,
+#adminReportModal .admin-report-rakeback-wrap--by-room .admin-report-rakeback-row[data-rakeback-group-color]:not([data-rakeback-row-color]) > td:nth-child(2) {
+  box-shadow:
+    inset 4px 0 0 var(--rakeback-group-accent, #f6d391),
+    inset 0 1px 0 color-mix(in srgb, var(--rakeback-group-accent, #f6d391) 38%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--rakeback-group-accent, #f6d391) 30%, transparent);
 }
 #adminReportModal .admin-report-rakeback-table td[data-rakeback-cell-selected],
 #adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td[data-rakeback-cell-selected] {
