@@ -2519,7 +2519,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-addon-parent {
   display: flex;
   position: absolute;
-  left: 29px;
+  left: 8px;
   right: 4px;
   top: 50%;
   overflow: hidden;
@@ -2550,7 +2550,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 700;
 }
 .admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-addon-parent {
-  left: 78px;
+  left: 8px;
 }
 .admin-report-rakeback-row--addon .admin-report-rakeback-date-badge {
   left: 29px;
@@ -3048,7 +3048,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   padding-left: 18px;
 }
 .admin-report-rakeback-row--addon td:first-child::before {
-  content: "";
+  content: none;
   position: absolute;
   left: 5px;
   top: -10px;
@@ -3061,7 +3061,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   pointer-events: none;
 }
 .admin-report-rakeback-row--addon td:first-child::after {
-  content: "";
+  content: none;
   position: absolute;
   left: 14px;
   top: 50%;
@@ -3078,7 +3078,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   padding-left: 18px;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-row--addon td:nth-child(2)::before {
-  content: "";
+  content: none;
   position: absolute;
   left: 5px;
   top: -10px;
@@ -3091,7 +3091,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   pointer-events: none;
 }
 .admin-report-rakeback-wrap--by-room .admin-report-rakeback-row--addon td:nth-child(2)::after {
-  content: "";
+  content: none;
   position: absolute;
   left: 11px;
   top: 50%;
