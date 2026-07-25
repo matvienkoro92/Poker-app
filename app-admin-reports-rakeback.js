@@ -836,7 +836,7 @@
     tr.setAttribute("data-rakeback-accounted", data.accounted === true || data.reportedAt || data.reportId ? "1" : "0");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent title="Подзапись"><b data-rakeback-addon-parent-id>' + escapeHtml(data.playerId || data.id || "") + '</b><small data-rakeback-addon-index>ПОДЗАПИСЬ</small></span>' : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent title="Подзапись"><b data-rakeback-addon-parent-id>' + escapeHtml(data.playerId || data.id || "") + '</b><small><span data-rakeback-addon-index>ПЗ</span><em data-rakeback-addon-previous-rake></em></small></span>' : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
       '<td>' + (kind === "addon"
         ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
         : '<input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
@@ -2699,8 +2699,8 @@
       var addonIndexByRow = new Map();
       var addonCountByGroup = {};
       rows.slice().sort(function (a, b) {
-        var aTime = normalizeTimeValue(a.getAttribute("data-rakeback-entry-added-at") || a.getAttribute("data-rakeback-created-at"));
-        var bTime = normalizeTimeValue(b.getAttribute("data-rakeback-entry-added-at") || b.getAttribute("data-rakeback-created-at"));
+        var aTime = normalizeTimeValue(a.getAttribute("data-rakeback-standard-at") || a.getAttribute("data-rakeback-created-at") || a.getAttribute("data-rakeback-entry-added-at"));
+        var bTime = normalizeTimeValue(b.getAttribute("data-rakeback-standard-at") || b.getAttribute("data-rakeback-created-at") || b.getAttribute("data-rakeback-entry-added-at"));
         return aTime - bTime;
       }).forEach(function (row) {
         var groupId = row.getAttribute("data-rakeback-group") || "";
@@ -2729,16 +2729,54 @@
           if (baseId && parentLabel) {
             var parentIdLabel = parentLabel.querySelector("[data-rakeback-addon-parent-id]");
             var addonIndexLabel = parentLabel.querySelector("[data-rakeback-addon-index]");
+            var previousRakeLabel = parentLabel.querySelector("[data-rakeback-addon-previous-rake]");
             var addonIndex = addonIndexByRow.get(row) || 1;
             if (parentIdLabel) parentIdLabel.textContent = baseId.value;
-            if (addonIndexLabel) addonIndexLabel.textContent = "ПОДЗАПИСЬ №" + addonIndex;
+            if (addonIndexLabel) addonIndexLabel.textContent = "ПЗ №" + addonIndex + " ·";
+            if (previousRakeLabel) previousRakeLabel.textContent = "пред. " + (formatInputNumber(previousRakeByRow.get(row)) || "0");
             parentLabel.title = "Подзапись " + addonIndex + " записи " + baseId.value + " от " + formatEntryDateLabel(baseEntryByGroup[groupId]);
           }
         }
         updateSharedRowDateBadge(row, baseEntryByGroup[groupId] || row.getAttribute("data-rakeback-entry-added-at"));
         syncSharedRowAmount(row, row.getAttribute("data-rakeback-kind") === "addon" ? previousRakeByRow.get(row) : 0);
       });
+      applyWeeklyGroupColors(rows);
       syncDuplicatePlayerIds();
+    }
+
+    function applyWeeklyGroupColors(domRows) {
+      var groupMeta = {};
+      var manualColorByGroup = {};
+      sharedRows.forEach(function (row) {
+        if (!row || isCarryForwardTemplateRow(row)) return;
+        var groupId = String(row.groupId || "").trim();
+        if (!groupId) return;
+        var time = rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
+        if (!groupMeta[groupId] || time < groupMeta[groupId].time) groupMeta[groupId] = { groupId: groupId, time: time };
+        var manualColor = normalizeRakebackRowColor(row.color || row.rowColor || row.highlightColor);
+        if (manualColor && !manualColorByGroup[groupId]) manualColorByGroup[groupId] = manualColor;
+      });
+      domRows.forEach(function (row) {
+        var groupId = row.getAttribute("data-rakeback-group") || "";
+        var manualColor = normalizeRakebackRowColor(row.getAttribute("data-rakeback-row-color"));
+        if (groupId && manualColor && !manualColorByGroup[groupId]) manualColorByGroup[groupId] = manualColor;
+      });
+      var colorByGroup = {};
+      Object.keys(groupMeta).map(function (groupId) {
+        return groupMeta[groupId];
+      }).sort(function (a, b) {
+        return a.time - b.time || a.groupId.localeCompare(b.groupId);
+      }).forEach(function (meta, index) {
+        var hue = Math.round((38 + index * 137.508) % 360);
+        colorByGroup[meta.groupId] = manualColorByGroup[meta.groupId] || ("hsl(" + hue + " 46% 21%)");
+      });
+      domRows.forEach(function (row) {
+        var groupId = row.getAttribute("data-rakeback-group") || "";
+        var color = manualColorByGroup[groupId] || colorByGroup[groupId];
+        if (!color) return;
+        row.setAttribute("data-rakeback-group-color", "1");
+        row.style.setProperty("--rakeback-group-bg", color);
+      });
     }
 
     function syncRoomTabs() {
@@ -2983,15 +3021,20 @@
           return;
         }
         var previousAddonData = null;
-        orderSharedRowsForDisplay(localRows).forEach(function (row) {
+        var previousAddonTime = 0;
+        localRows.forEach(function (row) {
           if (String(row.groupId || "") === String(baseData.groupId || "") && getSharedRowKind(row) === "addon") {
-            previousAddonData = row;
+            var addonTime = parseRowTime(row, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
+            if (!previousAddonData || addonTime > previousAddonTime) {
+              previousAddonTime = addonTime;
+              previousAddonData = row;
+            }
           }
         });
-        var now = Date.now();
+        var now = getNewRowEntryTime();
         var sourceData = previousAddonData || baseData;
         var sourceOrderAt = parseRowTime(sourceData, ["standardAt", "createdAt", "addedAt", "created", "entryAddedAt"]);
-        var orderAt = previousAddonData ? Math.max(now, sourceOrderAt + 1) : now;
+        var orderAt = Math.max(Date.now(), sourceOrderAt + 1);
         var addon = {
           groupId: baseData.groupId,
           kind: "addon",
@@ -3004,9 +3047,9 @@
           saved: false,
           persisted: false,
           ownerId: baseData.ownerId || "",
-          createdAt: now,
+          createdAt: Date.now(),
           standardAt: orderAt,
-          entryAddedAt: previousAddonData ? (previousAddonData.entryAddedAt || previousAddonData.createdAt || now) : now,
+          entryAddedAt: now,
         };
         sharedRows = localRows.concat(addon);
         render();

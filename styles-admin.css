@@ -2544,10 +2544,21 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font: inherit;
 }
 .admin-report-rakeback-addon-parent small {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
   margin-top: 2px;
   color: rgba(255, 231, 176, 0.58);
   font-size: 9px;
   font-weight: 700;
+}
+.admin-report-rakeback-addon-parent small em {
+  overflow: hidden;
+  color: #60a5fa;
+  font-style: normal;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .admin-report-rakeback-row--addon[data-rakeback-entry-date-visible="1"] .admin-report-rakeback-addon-parent {
   left: 8px;
@@ -2587,6 +2598,9 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 #adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td:not(.admin-report-rakeback-actions) {
   background: var(--rakeback-row-bg, #101016);
+}
+#adminReportModal .admin-report-rakeback-row[data-rakeback-group-color]:not([data-rakeback-row-color]) > td:not(.admin-report-rakeback-actions) {
+  background: var(--rakeback-group-bg, #101016);
 }
 #adminReportModal .admin-report-rakeback-table td[data-rakeback-cell-selected],
 #adminReportModal .admin-report-rakeback-row[data-rakeback-row-color] > td[data-rakeback-cell-selected] {
