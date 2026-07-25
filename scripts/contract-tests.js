@@ -61,7 +61,7 @@ async function testRaffleCurrentWeekReturnsCalculation() {
     winnerSeatStatus: "not_seated",
     winnerSeatStatusAt: "2026-07-21T18:17:36.527Z",
     winnerReroll: true,
-  }, range), 0, "rerolled winner is not counted twice");
+  }, range), 1000, "issued reroll return is counted as a real return");
 
   assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
     groupIndex: 1,
@@ -107,9 +107,9 @@ async function testRaffleCurrentWeekReturnsCalculation() {
       },
     ],
   }], new Date("2026-07-25T12:00:00.000Z"));
-  assert.deepStrictEqual(totals.ticket, { issued: 1000, returned: 500 }, "ticket totals use the full current week");
-  assert.deepStrictEqual(totals.cash, { issued: 0, returned: 2635 }, "cashout is classified as cash return");
-  assert.strictEqual(totals.returnCount, 2, "rerolled return is excluded from the count");
+  assert.deepStrictEqual(totals.ticket, { issued: 1500, returned: 3635 }, "issued rerolls remain part of the weekly totals");
+  assert.deepStrictEqual(totals.cash, { issued: 0, returned: 0 }, "returns stay grouped by the source raffle type");
+  assert.strictEqual(totals.returnCount, 3, "issued reroll return is included in the count");
 }
 
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";

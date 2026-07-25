@@ -6666,6 +6666,68 @@ body[data-view="raffles"] .raffles-archive-day-tabs .raffles-archive-day-tab--ac
 .raffles-archive-day-panel[hidden] {
   display: none;
 }
+.raffles-archive-raffle-tabs {
+  min-width: 0;
+}
+.raffles-archive-raffle-tabs__list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(112px, 1fr);
+  gap: 7px;
+  margin: 0 0 10px;
+  padding: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 11px;
+  background: rgba(15, 23, 42, 0.5);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.raffles-archive-raffle-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+.raffles-archive-raffle-tab {
+  position: relative;
+  min-width: 112px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+  color: rgba(248, 234, 208, 0.68);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.68;
+}
+.raffles-archive-raffle-tab strong {
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.raffles-archive-raffle-tab span {
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+body[data-view="raffles"] .raffles-archive-raffle-tabs__list .raffles-archive-raffle-tab--active {
+  border-color: #fbbf24;
+  background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
+  color: #241505;
+  box-shadow:
+    0 0 0 1px rgba(255, 247, 237, 0.5) inset,
+    0 4px 14px rgba(245, 158, 11, 0.28);
+  opacity: 1;
+}
+body[data-view="raffles"] .raffles-archive-raffle-tabs__list .raffles-archive-raffle-tab--active span {
+  color: #422006;
+}
+.raffles-archive-raffle-panel[hidden] {
+  display: none;
+}
 .raffles-archive-skeleton {
   display: grid;
   gap: 9px;

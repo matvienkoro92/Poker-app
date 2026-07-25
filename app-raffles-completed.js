@@ -632,21 +632,17 @@ function initRafflesCompletedRuntime(opts) {
         ? "cash"
         : "ticket";
       (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (winner) {
-        if (raffleWinnerIsReroll(winner)) return;
         var prizeAmount = raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, winner));
         if (String(winner && winner.winnerStatus || "") === "ok" &&
             raffleDateIsInRange(winner && winner.winnerStatusAt, range)) {
           totals[kind].issued += prizeAmount;
         }
-        if (kind === "ticket" &&
-            String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
+        if (String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
             raffleDateIsInRange(winner && winner.winnerSeatStatusAt, range)) {
-          totals.ticket.returned += prizeAmount;
-        }
-        if (kind === "cash" &&
-            String(winner && winner.winnerCashoutStatus || "") === "plus" &&
+          totals[kind].returned += prizeAmount;
+        } else if (String(winner && winner.winnerCashoutStatus || "") === "plus" &&
             raffleDateIsInRange(winner && winner.winnerCashoutAt, range)) {
-          totals.cash.returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
+          totals[kind].returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
         }
       });
     });
@@ -1701,6 +1697,39 @@ function initRafflesCompletedRuntime(opts) {
     });
   }
 
+  function raffleArchiveDayRaffleTabsHtml(items, dayKey) {
+    var raffles = sortCompletedRafflesNewestFirst(items);
+    if (!raffles.length) return "<div class=\"raffles-completed-empty\">В этот день розыгрышей не было.</div>";
+    var tabs = raffles.map(function (raffle, index) {
+      var kind = raffleRecentCompletedKindLabel(raffle);
+      var time = raffleRecentCompletedResultTime(raffle);
+      var active = index === 0;
+      return "<button type=\"button\" class=\"raffles-archive-raffle-tab" +
+        (active ? " raffles-archive-raffle-tab--active" : "") +
+        "\" role=\"tab\" aria-selected=\"" + (active ? "true" : "false") +
+        "\" data-raffles-archive-raffle-tab=\"" + index + "\">" +
+        "<strong>" + escapeHtml(kind) + "</strong>" +
+        (time ? "<span>" + escapeHtml(time) + "</span>" : "") +
+        "</button>";
+    }).join("");
+    var panels = raffles.map(function (raffle, index) {
+      var active = index === 0;
+      return "<div class=\"raffles-archive-raffle-panel" +
+        (active ? " raffles-archive-raffle-panel--active" : "") +
+        "\" role=\"tabpanel\" data-raffles-archive-raffle-panel=\"" + index + "\"" +
+        (active ? "" : " hidden") + ">" +
+        buildCompletedRaffleCardHtml(raffle) +
+        "</div>";
+    }).join("");
+    return "<section class=\"raffles-archive-raffle-tabs\" data-raffles-archive-raffle-tabs=\"" +
+      escapeHtml(dayKey || "day") + "\">" +
+      "<div class=\"raffles-archive-raffle-tabs__list\" role=\"tablist\" aria-label=\"Розыгрыши выбранного дня\">" +
+      tabs +
+      "</div>" +
+      panels +
+      "</section>";
+  }
+
   function raffleArchiveWeekDaysHtml(weekKey, raffles) {
     var days = raffleArchiveWeekDays(weekKey);
     var byDay = {};
@@ -1735,9 +1764,7 @@ function initRafflesCompletedRuntime(opts) {
         "\" id=\"raffles-archive-day-panel-" + escapeHtml(domKey + "-" + day.key) +
         "\" role=\"tabpanel\" data-raffles-archive-day-panel=\"" + escapeHtml(day.key) + "\"" +
         (active ? "" : " hidden") + ">" +
-        (items.length
-          ? items.map(buildCompletedRaffleCardHtml).join("")
-          : "<div class=\"raffles-completed-empty\">В этот день розыгрышей не было.</div>") +
+        raffleArchiveDayRaffleTabsHtml(items, day.key) +
         "</div>";
     }).join("");
     return "<div class=\"raffles-archive-days\" data-raffles-archive-days>" +
@@ -1832,6 +1859,27 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function handleDeferredArchiveClick(event) {
+    var archiveRaffleTab = event && event.target && event.target.closest
+      ? event.target.closest("[data-raffles-archive-raffle-tab]")
+      : null;
+    if (archiveRaffleTab) {
+      var archiveRaffleRoot = archiveRaffleTab.closest("[data-raffles-archive-raffle-tabs]");
+      var archiveRaffleIndex = archiveRaffleTab.getAttribute("data-raffles-archive-raffle-tab") || "0";
+      if (archiveRaffleRoot) {
+        archiveRaffleRoot.querySelectorAll("[data-raffles-archive-raffle-tab]").forEach(function (tab) {
+          var active = tab === archiveRaffleTab;
+          tab.classList.toggle("raffles-archive-raffle-tab--active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        archiveRaffleRoot.querySelectorAll("[data-raffles-archive-raffle-panel]").forEach(function (panel) {
+          var active = panel.getAttribute("data-raffles-archive-raffle-panel") === archiveRaffleIndex;
+          panel.classList.toggle("raffles-archive-raffle-panel--active", active);
+          panel.hidden = !active;
+        });
+        syncRaffleCompletedTimers();
+      }
+      return true;
+    }
     var recentTab = event && event.target && event.target.closest
       ? event.target.closest("[data-raffles-recent-tab]")
       : null;
