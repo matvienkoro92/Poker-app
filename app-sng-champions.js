@@ -2429,6 +2429,7 @@
     }
     var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
     if (mapMatch) {
+      if (event.target.closest(".sng-champions-modal__map-player")) return;
       var mapRoundIndex = Math.max(0, Number(mapMatch.getAttribute("data-sng-map-round")) || 0);
       var isLoserMap = !!(mapMatch.closest && mapMatch.closest(".sng-champions-modal__bracket-map-wrap--losers"));
       if (isLoserMap) {
@@ -2505,6 +2506,7 @@
     }
     var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
     if (!mapMatch) return;
+    if (event.target.closest(".sng-champions-modal__map-player")) return;
     event.preventDefault();
     mapMatch.click();
   }

@@ -4510,6 +4510,18 @@ button.sng-champions-modal__singles-duel-player {
   text-align: center;
 }
 
+/* Player rows are independent actions inside an otherwise clickable match card. */
+.sng-champions-modal__map-match .sng-champions-modal__map-players,
+.sng-champions-modal__map-match--unplayed .sng-champions-modal__map-players,
+.sng-champions-modal__map-match--series .sng-champions-modal__map-players {
+  pointer-events: auto;
+}
+
+.sng-champions-modal__map-player,
+.sng-champions-modal__map-team-member[data-sng-profile] {
+  pointer-events: auto;
+}
+
 .sng-champions-modal__map-team-members > span {
   display: block;
   width: 100%;

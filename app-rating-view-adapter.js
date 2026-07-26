@@ -382,6 +382,17 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 }
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "porquinho": { src: "./assets/sng-finalist-porquinho.png" },
+  "поркиньо": { src: "./assets/sng-finalist-porquinho.png" },
+  "поркиньё": { src: "./assets/sng-finalist-porquinho.png" },
+  "штукатур": { src: "./assets/sng-finalist-shtukatur.png" },
+  "shtukatur": { src: "./assets/sng-finalist-shtukatur.png" },
+  "hakas": { src: "./assets/sng-finalist-hakas.png" },
+  "хакас": { src: "./assets/sng-finalist-hakas.png" },
+  "aza": { src: "./assets/sng-finalist-aza.png" },
+  "aza32": { src: "./assets/sng-finalist-aza.png" },
+  "аза": { src: "./assets/sng-finalist-aza.png" },
+  "аза32": { src: "./assets/sng-finalist-aza.png" },
   "waaar": { src: "./assets/summer-rating-player-waaar.webp", place: 1, league: 1 },
   "покерманки": { src: "./assets/summer-rating-player-pokermanki.webp?v=3.547", place: 2, league: 1 },
   "coo1er91": { src: "./assets/summer-rating-player-cooler.webp", place: 3, league: 1 },
