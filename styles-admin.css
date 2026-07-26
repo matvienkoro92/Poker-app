@@ -1176,6 +1176,21 @@ body.admin-report-modal-open .bottom-nav {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.admin-report-calculations__reconciliation {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+.admin-report-calculations__reconciliation output {
+  color: #fca5a5;
+}
+.admin-report-calculations__reconciliation output[data-match="1"] {
+  color: #86efac;
+}
 #adminReportCalcCashCard .admin-report-calculations__field,
 #adminReportCalcRakeCard .admin-report-calculations__field,
 #adminReportCalcWinLossCard .admin-report-calculations__field {

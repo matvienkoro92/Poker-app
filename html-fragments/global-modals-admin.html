@@ -591,8 +591,12 @@
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback role="button" tabindex="0" aria-label="Открыть вкладку рейкбека" onclick="var m=this.closest('#adminReportModal'),p=m&&m.querySelector('[data-admin-report-panel=&quot;rakeback&quot;]');if(p){p.classList.add('admin-report-panel--rakeback-overlay');p.setAttribute('role','dialog');p.setAttribute('aria-modal','true');}if(window.pokerOpenAdminReportRakebackOverlay){window.pokerOpenAdminReportRakebackOverlay();}">
-                  <span>Рейкбек из отчета текущей недели</span>
+                  <span>РБ в CRM текущей недели</span>
                   <output id="adminReportFiguresRakeback">0</output>
+                  <small class="admin-report-calculations__reconciliation">
+                    <span>В отчётах: <output id="adminReportFiguresRakebackSent">0</output></span>
+                    <span>Расхождение: <output id="adminReportFiguresRakebackDifference">0</output></span>
+                  </small>
                 </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Бонусы</span>

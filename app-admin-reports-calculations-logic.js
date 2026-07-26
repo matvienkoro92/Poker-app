@@ -49,6 +49,11 @@
         }
         if (!calculationsGrandTotalEl) return;
         var totals = calculationWeekTotals || {};
+        var sentRakeback = Number(totals.sentRakeback);
+        var crmRakeback = Number(totals.rakeback);
+        var rakebackDifference = Number.isFinite(sentRakeback) && Number.isFinite(crmRakeback)
+          ? crmRakeback - sentRakeback
+          : NaN;
         var roomWinLossTotal = getCalculationRoomWinLossTotal();
         var grand =
           parseReportNumber(calculationCashTotal) +
@@ -168,6 +173,15 @@
         if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
         if (figuresPercentTotalMirrorEl) figuresPercentTotalMirrorEl.textContent = formatReportNegativeDisplay(figuresPercentTotal);
         if (figuresRakebackEl) figuresRakebackEl.textContent = formatReportNegativeDisplay(totals.rakeback);
+        var figuresRakebackSentEl = document.getElementById("adminReportFiguresRakebackSent");
+        var figuresRakebackDifferenceEl = document.getElementById("adminReportFiguresRakebackDifference");
+        if (figuresRakebackSentEl) figuresRakebackSentEl.textContent = Number.isFinite(sentRakeback) ? formatReportRubleNumber(sentRakeback) : "—";
+        if (figuresRakebackDifferenceEl) {
+          figuresRakebackDifferenceEl.textContent = Number.isFinite(rakebackDifference)
+            ? (rakebackDifference > 0 ? "+" : "") + formatReportRubleNumber(rakebackDifference)
+            : "—";
+          figuresRakebackDifferenceEl.setAttribute("data-match", rakebackDifference === 0 ? "1" : "0");
+        }
         if (figuresBonusesEl) figuresBonusesEl.textContent = formatReportNegativeDisplay(totals.bonuses);
         var figuresRafflesTicketsEl = document.getElementById("adminReportFiguresRafflesTickets");
         var figuresRafflesCashEl = document.getElementById("adminReportFiguresRafflesCash");
@@ -281,6 +295,7 @@
 
       function setCalculationTotalsWithCurrentRakeback(totals, week) {
         totals = totals || {};
+        if (totals.sentRakeback == null) totals.sentRakeback = Number(totals.rakeback) || 0;
         setCalculationTotalsText(totals);
         if (!week || week.key !== "current_week" || typeof loadCurrentRakebackCalculationTotals !== "function") return;
         var expectedWeekStart = week.start;

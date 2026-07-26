@@ -914,7 +914,16 @@
         function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(list || [], meta.start, meta.end);
-          if (isCurrent && Number.isFinite(currentRakebackAmount)) totals.rakeback = currentRakebackAmount;
+          var rakebackComparisonHtml = "";
+          if (isCurrent && Number.isFinite(currentRakebackAmount)) {
+            totals.rakebackCrm = currentRakebackAmount;
+            totals.rakebackDifference = currentRakebackAmount - totals.rakeback;
+            rakebackComparisonHtml =
+              '<div class="admin-report-sent-detail__inner">' +
+                '<div class="admin-report-sent-detail__row"><span>РБ в CRM</span><strong>' + escapeReportHtml(formatReportRubleNumber(totals.rakebackCrm)) + "</strong></div>" +
+                '<div class="admin-report-sent-detail__row"><span>Расхождение</span><strong>' + escapeReportHtml(formatReportRubleNumber(totals.rakebackDifference)) + "</strong></div>" +
+              "</div>";
+          }
           var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
           var totalDetailHtml = buildReportDetailHtml(totals);
           return {
@@ -928,6 +937,7 @@
                     "</summary>" +
                     '<div class="admin-report-sent-week-subspoiler__inner">' +
                       (totalDetailHtml ? '<div class="admin-report-sent-detail__inner">' + totalDetailHtml + "</div>" : '<p class="admin-report-sent-period-hint">Итогов за неделю пока нет.</p>') +
+                      rakebackComparisonHtml +
                     "</div>" +
                   "</details>" +
                   '<details class="admin-report-sent-week-subspoiler">' +
@@ -970,8 +980,10 @@
           ret: "Возврат",
           sergeyMarina: "Сергей/Марина",
           rakeback: "Рейкбек",
+          rakebackCrm: "РБ в CRM",
+          rakebackDifference: "Расхождение РБ",
         };
-        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "previousRakeback", "transfers", "ret", "sergeyMarina", "rakeback"];
+        var weekKeys = ["deposit", "cashout", "prodamus", "robokassa", "romaCrypto", "botCryptoDep", "botExchipDep", "botExchipCashout", "bonuses", "previousRakeback", "transfers", "ret", "sergeyMarina", "rakeback", "rakebackCrm", "rakebackDifference"];
 
         function copyTextToClipboard(text) {
           if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
@@ -997,7 +1009,7 @@
           lines.push("Итого за неделю " + label);
           weekKeys.forEach(function (k) {
             var v = totals[k];
-            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + ((k === "rakeback" || k === "previousRakeback") ? formatReportRubleNumber(v) : String(v)));
+            if (v != null && v !== "" && (typeof v !== "number" || v !== 0)) lines.push(weekLabels[k] + ": " + (/^rakeback/.test(k) || k === "previousRakeback" ? formatReportRubleNumber(v) : String(v)));
           });
           if (totals.extraFields && totals.extraFields.length) {
             totals.extraFields.forEach(function (f) {

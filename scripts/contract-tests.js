@@ -1144,6 +1144,44 @@ async function testCrmPokerPlusStatsDeduplicatePokerId() {
   assert.strictEqual(summary.pokerPlusNet, 1, "period Poker21 net does not include duplicate account bindings");
 }
 
+async function testSundayReportCollectsPendingWeeklyRakeback() {
+  const reportShifts = loadHandler("admin-report-shifts")._test;
+  function row(groupId, stamp, ownerId, accounted) {
+    return {
+      groupId,
+      kind: "base",
+      room: "P21",
+      playerId: groupId,
+      rake: 1000,
+      percent: 20,
+      amount: 200,
+      saved: true,
+      ownerId,
+      entryAddedAt: Date.parse(stamp),
+      createdAt: Date.parse(stamp),
+      accounted: accounted === true,
+    };
+  }
+  const result = reportShifts.collectDraftRakebackRowsForReport({
+    rows: [
+      row("monday_pending", "2026-07-20T08:00:00.000Z", "tg_admin", false),
+      row("sunday_pending", "2026-07-26T08:00:00.000Z", "tg_admin", false),
+      row("previous_week", "2026-07-19T08:00:00.000Z", "tg_admin", false),
+      row("another_owner", "2026-07-22T08:00:00.000Z", "tg_other", false),
+      row("already_accounted", "2026-07-23T08:00:00.000Z", "tg_admin", true),
+    ],
+  }, {
+    id: "sunday_report",
+    date: "26.07.2026",
+    createdAt: "2026-07-26T18:00:00.000Z",
+  }, "tg_admin");
+  assert.deepStrictEqual(
+    result.rows.map((item) => item.groupId).sort(),
+    ["monday_pending", "sunday_pending"],
+    "Sunday report closes the week with all still-unaccounted rows for its author only"
+  );
+}
+
 async function testRaffleJoinLeave(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -6034,6 +6072,7 @@ async function main() {
     ["crm app user block", testCrmAppUserBlock],
     ["crm week Monday 06:00 MSK cutoff", testCrmWeekUsesMondaySixMoscowCutoff],
     ["crm Poker21 stats deduplicate Poker21 ID", testCrmPokerPlusStatsDeduplicatePokerId],
+    ["Sunday report collects pending weekly rakeback", testSundayReportCollectsPendingWeeklyRakeback],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle current week returns calculation", testRaffleCurrentWeekReturnsCalculation],
     ["raffle access level gate", testRaffleAccessLevelGate],
