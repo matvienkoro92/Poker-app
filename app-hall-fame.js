@@ -1228,8 +1228,8 @@ var HALL_FISH_SNG_GROUPS = [
     finalists: [
       { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"] },
       { name: "Штукатур", aliases: ["штукатур", "shtukatur"] },
-      { name: "Hakas", aliases: ["hakas", "хакас"] },
-      { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"] },
+      { name: "Hakas", aliases: ["hakas", "хакас"], winner: true },
+      { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"], winner: true },
     ],
   },
   {

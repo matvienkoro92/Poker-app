@@ -9872,6 +9872,11 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-winner b { color:#211307; font-weight:1000; }
 .sng-champions-modal__completed-option { display:block; width:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
 .sng-champions-modal__completed-winner { width:100%; border:0; border-radius:24px 24px 0 0; }
+.sng-champions-modal__completed-team-art { display:flex; align-items:flex-end; justify-content:center; width:100%; min-height:clamp(230px,31vw,330px); }
+.sng-champions-modal__completed-team-player { position:relative; display:grid; place-items:end center; width:58%; min-width:0; height:clamp(230px,31vw,330px); margin:0 -4%; }
+.sng-champions-modal__completed-team-player img { display:block; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 14px 18px rgba(0,0,0,.54)) drop-shadow(0 0 18px rgba(255,171,42,.22)); }
+.sng-champions-modal__completed-team-player b { align-self:center; color:#ffe49d; font-size:44px; }
+.sng-champions-modal__completed-team-player em { position:absolute; right:4%; bottom:4px; left:4%; padding:5px 8px; border:1px solid rgba(255,211,112,.58); border-radius:999px; color:#fff0c8; background:rgba(5,8,14,.9); box-shadow:0 5px 15px rgba(0,0,0,.38); font-size:clamp(10px,1.5vw,14px); font-style:normal; font-weight:1000; line-height:1; text-align:center; }
 .sng-champions-modal__completed-title { display:block; max-width:100%; margin-bottom:5px; overflow:visible; color:rgba(255,235,190,.82); font-size:clamp(12px,2vw,18px); font-weight:900; line-height:1.2; white-space:normal; text-transform:none; }
 .sng-champions-modal__tournament-option-wrap.is-active .sng-champions-modal__completed-option { background:transparent!important; }
 .sng-champions-modal__tournament-option .sng-champions-modal__tournament-facts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 14px; }
@@ -9880,6 +9885,10 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live { gap:9px; padding:8px 14px; font-size:clamp(15px,2vw,20px)!important; }
 .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live > i { width:12px; height:12px; flex-basis:12px; }
 @media (max-width:640px) {
+  .sng-champions-modal__completed-winner--team { grid-template-columns:minmax(155px,46%) minmax(0,1fr); gap:6px; padding:9px 7px; }
+  .sng-champions-modal__completed-team-art { min-height:180px; }
+  .sng-champions-modal__completed-team-player { height:180px; margin:0 -7%; }
+  .sng-champions-modal__completed-team-player em { right:0; bottom:1px; left:0; padding:4px 3px; font-size:9px; }
   .sng-champions-modal__tournament-content {
     padding:7px 20px 5px 10px;
   }

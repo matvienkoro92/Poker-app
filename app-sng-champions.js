@@ -990,17 +990,31 @@
 
   function renderCompletedTournamentOption(item) {
     var winnerName = String(item && item.winnerName || "Чемпион").trim() || "Чемпион";
-    var art = sngPlayerArt({ displayName: winnerName, pokerPlusNickname: winnerName });
+    var winnerMembers = item && Array.isArray(item.winnerMembers) ? item.winnerMembers.filter(Boolean) : [];
+    var art = winnerMembers.length ? "" : sngPlayerArt({ displayName: winnerName, pokerPlusNickname: winnerName });
+    var winnersArtHtml = winnerMembers.length
+      ? '<span class="sng-champions-modal__completed-team-art">' + winnerMembers.map(function (member) {
+          var memberName = playerName(member);
+          var memberArt = sngPlayerArt(member);
+          return '<span class="sng-champions-modal__completed-team-player">' +
+            (memberArt ? '<img src="' + escapeHtml(memberArt) + '" alt="" loading="lazy" decoding="async">' : '<b>' + escapeHtml(playerInitial(member)) + '</b>') +
+            '<em>' + escapeHtml(memberName) + '</em>' +
+          '</span>';
+        }).join("") + '</span>'
+      : (art ? '<span class="club-choice-vote-modal__hero-art" aria-hidden="true"><img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>' : '');
+    var winnerLabel = winnerMembers.length
+      ? winnerMembers.map(function (member) { return playerName(member); }).join(" + ")
+      : winnerName;
     return '<button type="button" class="sng-champions-modal__completed-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-      '<span class="club-choice-vote-modal__hero-winner sng-champions-modal__completed-winner">' +
+      '<span class="club-choice-vote-modal__hero-winner sng-champions-modal__completed-winner' + (winnerMembers.length ? ' sng-champions-modal__completed-winner--team' : '') + '">' +
         '<span class="club-choice-vote-modal__hero-winner-avatar">' +
-          (art ? '<span class="club-choice-vote-modal__hero-art" aria-hidden="true"><img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>' : '') +
+          winnersArtHtml +
         '</span>' +
         '<span class="club-choice-vote-modal__hero-winner-main">' +
           '<small class="sng-champions-modal__completed-title">' + escapeHtml(item.title || "СНГ-турнир") + '</small>' +
-          '<span class="club-choice-vote-modal__hero-winner-badges"><span class="club-choice-vote-modal__hero-winner-badge">Победитель</span></span>' +
-          '<strong>' + escapeHtml(winnerName) + '</strong>' +
-          '<em>Чемпион турнира</em>' +
+          '<span class="club-choice-vote-modal__hero-winner-badges"><span class="club-choice-vote-modal__hero-winner-badge">' + (winnerMembers.length ? 'Победители' : 'Победитель') + '</span></span>' +
+          '<strong>' + escapeHtml(winnerLabel) + '</strong>' +
+          '<em>' + (winnerMembers.length ? 'Чемпионы турнира · ' + escapeHtml(winnerName) : 'Чемпион турнира') + '</em>' +
         '</span>' +
       '</span>' +
     '</button>';
