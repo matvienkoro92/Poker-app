@@ -1789,8 +1789,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 .admin-report-rakeback-row--history-ghost {
   pointer-events: none;
-  opacity: 0.42;
-  filter: grayscale(0.7) brightness(0.62);
+  opacity: 0.54;
+  filter: grayscale(0.62) brightness(0.74);
 }
 .admin-report-rakeback-row--history-ghost[hidden] {
   display: none !important;
@@ -1799,8 +1799,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
   min-height: 26px;
   padding-top: 3px;
   padding-bottom: 3px;
-  background: rgba(5, 7, 11, 0.94) !important;
-  color: rgba(203, 213, 225, 0.7);
+  background: rgba(9, 12, 18, 0.9) !important;
+  color: rgba(218, 226, 238, 0.82);
 }
 .admin-report-rakeback-history-ghost__room,
 .admin-report-rakeback-history-ghost__value,
@@ -1817,15 +1817,15 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 850;
 }
 .admin-report-rakeback-history-ghost__id small {
-  color: rgba(148, 163, 184, 0.72);
+  color: rgba(174, 188, 207, 0.82);
   font-size: 7px;
 }
 .admin-report-rakeback-history-ghost__label {
   display: inline-flex;
   padding: 2px 5px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(174, 188, 207, 0.3);
   border-radius: 999px;
-  color: rgba(203, 213, 225, 0.62);
+  color: rgba(218, 226, 238, 0.76);
   font-size: 7px;
   font-weight: 850;
   text-transform: uppercase;
