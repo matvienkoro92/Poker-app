@@ -98,7 +98,7 @@ function initPlayerCrmStatsRuntime(deps) {
       if (Number.isFinite(unsubscribed)) events.push({ time: unsubscribed, active: false });
       events.sort(function (a, b) { return a.time - b.time; });
       if (!events.length || !boundary) return !!currentActive;
-      var boundaryTime = Date.parse(boundary + (inclusive ? "T23:59:59.999" : "T00:00:00.000"));
+      var boundaryTime = Date.parse(boundary + (inclusive ? "T23:59:59.999Z" : "T00:00:00.000Z"));
       if (!Number.isFinite(boundaryTime)) return !!currentActive;
       var before = events.filter(function (event) { return event.time < boundaryTime || (inclusive && event.time === boundaryTime); });
       if (before.length) return !!before[before.length - 1].active;
@@ -119,6 +119,8 @@ function initPlayerCrmStatsRuntime(deps) {
       return stateWasActiveAt(p, "pokerPlusLinkedAt", "pokerPlusUnlinkedAt", registrationRange.to, true, !!(p && p.pokerPlusUserId));
     }).length : pokerPlusTotalNow;
     if (periodIncludesToday) pokerPlusTotalEnd = pokerPlusTotalNow;
+    var statPokerPlusBalanceNet = pokerPlusTotalEnd - pokerPlusTotalStart;
+    var statPokerPlusBalanceUnlinked = Math.max(0, statPokerPlusUnlinked, statPokerPlus - statPokerPlusBalanceNet);
     var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
     var botTotalStart = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.from, false);
@@ -306,11 +308,11 @@ function initPlayerCrmStatsRuntime(deps) {
         start: registeredAtPeriodStart,
         end: registeredAtPeriodEnd,
       }],
-      ["Poker21", signedMainValue(statPokerPlusNet), "data-crm-pokerplus-modal", "engagement", [
+      ["Poker21", signedMainValue(statPokerPlusBalanceNet), "data-crm-pokerplus-modal", "engagement", [
         ["Привязки", "+" + intFmt(statPokerPlus), null, "positive"],
-        ["Отвязки", "−" + intFmt(statPokerPlusUnlinked), null, "negative"],
-        ["Итого", intFmt(statPokerPlusNet), null, "total"],
-      ], null, comparisonInfo("pokerPlus", statPokerPlusNet), {
+        ["Отвязки", "−" + intFmt(statPokerPlusBalanceUnlinked), null, "negative"],
+        ["Итого", intFmt(statPokerPlusBalanceNet), null, "total"],
+      ], null, comparisonInfo("pokerPlus", statPokerPlusBalanceNet), {
         start: pokerPlusTotalStart,
         end: pokerPlusTotalEnd,
       }, { eyebrow: "Привязали" }],

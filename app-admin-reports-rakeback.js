@@ -550,6 +550,9 @@
     var weekday = document.createElement("em");
     var total = document.createElement("b");
     tr.className = "admin-report-rakeback-date-separator admin-report-rakeback-date-separator--entries";
+    if (getDateInputValue(entryAt) === getDateInputValue(getCurrentCalendarEntryTime())) {
+      tr.classList.add("admin-report-rakeback-date-separator--today");
+    }
     tr.setAttribute("data-rakeback-generated", "1");
     tr.setAttribute("data-rakeback-entry-date-separator", "1");
     td.colSpan = 7;
@@ -973,6 +976,8 @@
     var activeQuickFilter = "all";
     var sharedAudit = [];
     var pendingDelete = null;
+    var rakebackPlayerNicknames = {};
+    var rakebackPlayerNicknameRequestKey = "";
     var bound = false;
 
     function formatAuditAuthor(raw) {
@@ -1123,6 +1128,39 @@
       });
     }
 
+    function loadRakebackPlayerNicknames(playerIds) {
+      var ids = Array.from(new Set((Array.isArray(playerIds) ? playerIds : [])
+        .map(function (id) { return String(id || "").trim(); })
+        .filter(Boolean)))
+        .sort();
+      var missingIds = ids.filter(function (id) {
+        return !Object.prototype.hasOwnProperty.call(rakebackPlayerNicknames, id);
+      });
+      if (!missingIds.length) return;
+      var requestKey = missingIds.join(",");
+      if (requestKey === rakebackPlayerNicknameRequestKey) return;
+      rakebackPlayerNicknameRequestKey = requestKey;
+      var authQuery = getAuthQuery();
+      var separator = authQuery.indexOf("?") >= 0 ? "&" : "?";
+      requestJson(
+        getApiBaseSafe() + "/api/admin-report-shifts" + authQuery + separator +
+        "rakebackPlayerNicknames=1&playerIds=" + encodeURIComponent(requestKey),
+        { cache: "no-store" }
+      ).then(function (data) {
+        rakebackPlayerNicknameRequestKey = "";
+        missingIds.forEach(function (id) {
+          rakebackPlayerNicknames[id] = "";
+        });
+        var nicknames = data && data.nicknames && typeof data.nicknames === "object" ? data.nicknames : {};
+        Object.keys(nicknames).forEach(function (id) {
+          rakebackPlayerNicknames[id] = String(nicknames[id] || "").trim();
+        });
+        if (totalsModal && !totalsModal.hidden) renderRakebackTotalsModal();
+      }).catch(function () {
+        rakebackPlayerNicknameRequestKey = "";
+      });
+    }
+
     function renderRakebackTotalsModal() {
       if (!totalsList) return;
       var roomTotals = Object.keys(ROOM_LABELS).map(function (room) {
@@ -1165,13 +1203,25 @@
         var playerId = String(row && (row.playerId || row.id) || "").trim();
         if (!playerId) return;
         var key = playerId.toLowerCase();
-        if (!rowsByPlayerId[key]) rowsByPlayerId[key] = { playerId: playerId, rows: [] };
+        if (!rowsByPlayerId[key]) rowsByPlayerId[key] = { playerId: playerId, rows: [], rooms: {} };
         rowsByPlayerId[key].rows.push(row);
+        var room = normalizeRoom(row.room);
+        rowsByPlayerId[key].rooms[room] = true;
       });
       var playerTotals = Object.keys(rowsByPlayerId).map(function (key) {
         var item = rowsByPlayerId[key];
         var totals = getRakebackTotals(item.rows);
-        return { playerId: item.playerId, rake: totals.rake, amount: totals.amount };
+        var rooms = Object.keys(item.rooms).map(function (room) {
+          return ROOM_LABELS[room] || room;
+        });
+        return {
+          playerId: item.playerId,
+          rooms: rooms,
+          hasPoker21: !!item.rooms.P21,
+          nickname: rakebackPlayerNicknames[item.playerId] || "",
+          rake: totals.rake,
+          amount: totals.amount,
+        };
       }).sort(function (a, b) {
         return b.amount - a.amount || b.rake - a.rake || a.playerId.localeCompare(b.playerId);
       });
@@ -1182,7 +1232,7 @@
       }, { rake: 0, amount: 0 });
       var playerHtml = playerTotals.length ? '<div class="admin-report-rakeback-totals-modal__section-title">Итого по ID</div>' + playerTotals.map(function (item, index) {
         return '<div class="admin-report-rakeback-totals-modal__row admin-report-rakeback-totals-modal__row--player">' +
-          '<span class="admin-report-rakeback-totals-modal__room"><small class="admin-report-rakeback-totals-modal__rank">' + escapeHtml(String(index + 1)) + '.</small> ' + escapeHtml(item.playerId) + "</span>" +
+          '<span class="admin-report-rakeback-totals-modal__room"><small class="admin-report-rakeback-totals-modal__rank">' + escapeHtml(String(index + 1)) + '.</small> ' + escapeHtml(item.playerId) + (item.nickname ? '<small class="admin-report-rakeback-totals-modal__player-nickname">' + escapeHtml(item.nickname) + "</small>" : "") + '<small class="admin-report-rakeback-totals-modal__player-rooms">' + escapeHtml(item.rooms.join(" · ")) + "</small></span>" +
           '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(item.rake, item.amount)) + "</span>" +
         "</div>";
       }).join("") +
@@ -1191,6 +1241,11 @@
           '<span class="admin-report-rakeback-totals-modal__amount">' + escapeHtml(formatRakebackSummaryPair(playerGrandTotal.rake, playerGrandTotal.amount)) + "</span>" +
         "</div>" : "";
       totalsList.innerHTML = roomHtml + dateHtml + playerHtml;
+      loadRakebackPlayerNicknames(playerTotals.filter(function (item) {
+        return item.hasPoker21;
+      }).map(function (item) {
+        return item.playerId;
+      }));
     }
 
     function openRakebackTotalsModal() {

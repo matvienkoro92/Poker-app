@@ -530,6 +530,17 @@
   }
 
   var SNG_PLAYER_ART_BY_NICK = {
+    "porquinho": "./assets/sng-finalist-porquinho.png",
+    "поркиньо": "./assets/sng-finalist-porquinho.png",
+    "поркиньё": "./assets/sng-finalist-porquinho.png",
+    "штукатур": "./assets/sng-finalist-shtukatur.png",
+    "shtukatur": "./assets/sng-finalist-shtukatur.png",
+    "hakas": "./assets/sng-finalist-hakas.png",
+    "хакас": "./assets/sng-finalist-hakas.png",
+    "aza": "./assets/sng-finalist-aza.png",
+    "aza32": "./assets/sng-finalist-aza.png",
+    "аза": "./assets/sng-finalist-aza.png",
+    "аза32": "./assets/sng-finalist-aza.png",
     "waaar": "./assets/summer-rating-player-waaar.webp",
     "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
     "coo1er91": "./assets/summer-rating-player-cooler.webp",

@@ -132,6 +132,14 @@ if (chatUserModalEl) {
   var modalStatusCards = modalStatusScale ? modalStatusScale.querySelectorAll(".chat-user-modal__status-card") : [];
   var modalPersonalBlock = document.getElementById("chatUserModalPersonalBlock");
   var modalWriteBtn = document.getElementById("chatUserModalWriteBtn");
+  var modalSuperpowerBtn = document.getElementById("chatUserModalSuperpowerBtn");
+  var superpowerModal = document.getElementById("profileSuperpowerModal");
+  var superpowerModalArt = document.getElementById("profileSuperpowerModalArt");
+  var superpowerModalTitle = document.getElementById("profileSuperpowerModalTitle");
+  var superpowerModalLead = document.getElementById("profileSuperpowerModalLead");
+  var superpowerModalMoves = document.getElementById("profileSuperpowerModalMoves");
+  var superpowerModalUltimateTitle = document.getElementById("profileSuperpowerModalUltimateTitle");
+  var superpowerModalUltimateText = document.getElementById("profileSuperpowerModalUltimateText");
   var modalBlockBtn = document.getElementById("chatUserModalBlockBtn");
   var modalRespectUp = document.getElementById("chatUserModalRespectUp");
   var modalRespectDown = document.getElementById("chatUserModalRespectDown");
@@ -193,6 +201,117 @@ if (chatUserModalEl) {
   var chatUserModalBlockedByMe = false;
   var chatUserModalBlockBusy = false;
   var chatUserModalBlockSeq = 0;
+  var chatUserModalSuperpower = null;
+  var CHAT_USER_SUPERPOWERS = {
+    "porquinho": {
+      title: "🐗 Поркиньо",
+      art: "./assets/sng-finalist-porquinho.png",
+      lead: "Поркиньо превращает обычные жёлуди в тяжёлые покерные снаряды и закидывает ими всю арену.",
+      moves: [
+        ["Жёлудевый беспредел", "выпускает серию раскалённых желудей, которые рикошетят от стен и противников."],
+        ["Шесть тузов", "достаёт невозможную комбинацию из шести тузов и временно усиливает скорость, удачу и урон всей команды."],
+        ["Пивной кураж", "делает глоток пива Poker21, после чего перестаёт чувствовать удары и становится ещё наглее."],
+      ],
+      ultimateTitle: "«Я пздц омашист!»",
+      ultimateText: "Поркиньо подбрасывает шесть тузов, открывает бутылку пива и вызывает гигантский дождь из взрывающихся желудей. Последний жёлудь превращается в огромную фишку Poker21 и падает прямо на противника.",
+    },
+    "поркиньо": null,
+    "поркиньё": null,
+    "штукатур": {
+      title: "🧱 Штукатур",
+      art: "./assets/sng-finalist-shtukatur.png",
+      lead: "Штукатур управляет кирпичом, бетоном и штукатуркой, создавая стены прямо во время боя.",
+      moves: [
+        ["Непробиваемая кладка", "мгновенно поднимает перед командой толстую кирпичную защиту."],
+        ["Быстрая отделка", "замазывает трещины в броне союзников и частично восстанавливает им здоровье."],
+        ["Цементные оковы", "заливает ноги противника раствором, временно обездвиживая его."],
+      ],
+      ultimateTitle: "«Под ключ!»",
+      ultimateText: "Штукатур возводит вокруг врага целую комнату из кирпича, оштукатуривает её со всех сторон, а затем одним ударом шпателя обрушивает конструкцию внутрь. После атаки остаётся идеально ровная стена с логотипом Poker21.",
+    },
+    "shtukatur": null,
+    "hakas": {
+      title: "🦅 Hakas",
+      art: "./assets/sng-finalist-hakas.png",
+      lead: "Hakas сражается вместе со своим орлом и использует силу гор, ветра и степи.",
+      moves: [
+        ["Атака орла", "выпускает орла, который пикирует на противника и сбивает его с ног."],
+        ["Глаз хищника", "орёл отмечает слабое место врага, увеличивая урон следующей атаки."],
+        ["Степной вихрь", "Hakas вызывает мощный поток ветра, который отбрасывает противников назад."],
+      ],
+      ultimateTitle: "«Крылья Хакасии»",
+      ultimateText: "Над ареной темнеет небо, появляется огромный силуэт орла, состоящий из оранжевой энергии. Hakas указывает на врага, и орёл стремительно пикирует вниз, создавая ударную волну в форме двух тузов.",
+    },
+    "хакас": null,
+    "aza32": {
+      title: "🎖 Aza32",
+      art: "./assets/sng-finalist-aza.png",
+      lead: "Aza32 управляет боевым дроном, анализирует арену и атакует противников с высокой точностью.",
+      moves: [
+        ["Дрон-разведчик", "запускает дрон, который отслеживает движения противников."],
+        ["Точечный удар", "дрон выпускает импульсный заряд точно в выбранную цель."],
+        ["Дымовая завеса", "скрывает команду в густом дыму и мешает врагам прицеливаться."],
+      ],
+      ultimateTitle: "«Протокол 21»",
+      ultimateText: "Aza32 активирует сразу несколько дронов. Они окружают противника, сканируют его, формируют в воздухе символ «21», а затем одновременно выпускают мощный энергетический залп. Финальный дрон сбрасывает взрывную фишку Poker21.",
+    },
+    "aza": null,
+    "аза32": null,
+    "аза": null,
+  };
+  CHAT_USER_SUPERPOWERS["поркиньо"] = CHAT_USER_SUPERPOWERS.porquinho;
+  CHAT_USER_SUPERPOWERS["поркиньё"] = CHAT_USER_SUPERPOWERS.porquinho;
+  CHAT_USER_SUPERPOWERS.shtukatur = CHAT_USER_SUPERPOWERS["штукатур"];
+  CHAT_USER_SUPERPOWERS["хакас"] = CHAT_USER_SUPERPOWERS.hakas;
+  CHAT_USER_SUPERPOWERS.aza = CHAT_USER_SUPERPOWERS.aza32;
+  CHAT_USER_SUPERPOWERS["аза32"] = CHAT_USER_SUPERPOWERS.aza32;
+  CHAT_USER_SUPERPOWERS["аза"] = CHAT_USER_SUPERPOWERS.aza32;
+
+  function chatUserSuperpowerKey(value) {
+    return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
+  }
+  function chatUserSuperpowerFor(values) {
+    for (var index = 0; index < values.length; index += 1) {
+      var power = CHAT_USER_SUPERPOWERS[chatUserSuperpowerKey(values[index])];
+      if (power) return power;
+    }
+    return null;
+  }
+  function syncChatUserModalSuperpower(data, fallbackName, fallbackRatingNick) {
+    chatUserModalSuperpower = chatUserSuperpowerFor([
+      chatUserModalRatingNickFromData(data),
+      data && data.pokerPlusNickname,
+      data && data.poker21Nickname,
+      fallbackRatingNick,
+      fallbackName,
+      chatUserModalUserName,
+    ]);
+    if (modalSuperpowerBtn) modalSuperpowerBtn.hidden = !chatUserModalSuperpower;
+  }
+  function closeChatUserSuperpowerModal() {
+    if (!superpowerModal) return;
+    superpowerModal.classList.remove("profile-superpower-modal--open");
+    superpowerModal.setAttribute("aria-hidden", "true");
+  }
+  function openChatUserSuperpowerModal() {
+    var power = chatUserModalSuperpower;
+    if (!power || !superpowerModal) return;
+    if (superpowerModalArt) {
+      superpowerModalArt.src = power.art;
+      superpowerModalArt.alt = power.title;
+    }
+    if (superpowerModalTitle) superpowerModalTitle.textContent = power.title;
+    if (superpowerModalLead) superpowerModalLead.textContent = power.lead;
+    if (superpowerModalMoves) {
+      superpowerModalMoves.innerHTML = power.moves.map(function (move) {
+        return "<li><strong>" + escapeHtml(move[0]) + "</strong><span>" + escapeHtml(move[1]) + "</span></li>";
+      }).join("");
+    }
+    if (superpowerModalUltimateTitle) superpowerModalUltimateTitle.textContent = power.ultimateTitle;
+    if (superpowerModalUltimateText) superpowerModalUltimateText.textContent = power.ultimateText;
+    superpowerModal.setAttribute("aria-hidden", "false");
+    superpowerModal.classList.add("profile-superpower-modal--open");
+  }
   function chatUserModalFormatXp(value) {
     if (typeof pokerProfileFormatRake === "function") return pokerProfileFormatRake(value);
     var n = Math.max(0, Math.floor(Number(value) || 0));
@@ -355,6 +474,7 @@ if (chatUserModalEl) {
   }
   function closeChatUserModal() {
     chatUserModalOpenSeq += 1;
+    closeChatUserSuperpowerModal();
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
     document.dispatchEvent(new CustomEvent("poker:chat-user-modal-close"));
@@ -2249,6 +2369,7 @@ if (chatUserModalEl) {
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
     chatUserModalAchievementIdentity = null;
+    syncChatUserModalSuperpower(null, userName, fallbackRatingNick);
     setChatUserModalAchievementsLoader(null);
     setChatUserModalProfileTab("main");
     syncChatUserModalGender("male");
@@ -2357,6 +2478,7 @@ if (chatUserModalEl) {
             chatUserModalApplyPersonalInfo(data, birthAdminVisible);
             if (data && data.ok) {
               var freshRatingNick = chatUserModalRatingNickFromData(data) || fallbackRatingNick;
+              syncChatUserModalSuperpower(data, userName, freshRatingNick);
               syncChatUserModalTitleFromProfileData(data, userName);
               syncChatUserModalRatingTab(freshRatingNick);
               syncChatUserModalRatingArt(freshRatingNick);
@@ -2388,6 +2510,7 @@ if (chatUserModalEl) {
         renderChatUserModalPlayerStats(data);
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;
+        syncChatUserModalSuperpower(data, userName, ratingNick);
         chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
         setChatUserModalAchievementsLoader(function () {
@@ -2430,6 +2553,7 @@ if (chatUserModalEl) {
         if (modalLastSeen) modalLastSeen.hidden = true;
         applyChatUserModalStatusLevel(fallbackStatusLevel);
         syncChatUserModalRatingTab(fallbackRatingNick);
+        syncChatUserModalSuperpower(null, userName, fallbackRatingNick);
         setChatUserModalAchievementsLoader(function () {
           return syncChatUserModalRatingRanks(fallbackRatingNick) || Promise.resolve([]);
         });
@@ -2464,6 +2588,17 @@ if (chatUserModalEl) {
         if (typeof setView === "function") setView("chat");
         if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs(uid, uname);
         else openConversation(uid, uname, null);
+      }
+    });
+  }
+  if (modalSuperpowerBtn) modalSuperpowerBtn.addEventListener("click", openChatUserSuperpowerModal);
+  if (superpowerModal) {
+    superpowerModal.addEventListener("click", function (event) {
+      if (event.target && event.target.closest("[data-profile-superpower-close]")) closeChatUserSuperpowerModal();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && superpowerModal.classList.contains("profile-superpower-modal--open")) {
+        closeChatUserSuperpowerModal();
       }
     });
   }

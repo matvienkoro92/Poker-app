@@ -53,6 +53,7 @@
               </div>
             </div>
             <div class="chat-user-modal__top-actions">
+              <button type="button" class="chat-user-modal__superpower-btn" id="chatUserModalSuperpowerBtn" hidden>⚡ СуперСила</button>
               <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
               <div class="chat-user-modal__friend-row">
                 <div class="chat-user-modal__friend-buttons">
@@ -130,6 +131,27 @@
             <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блокировать</button>
           </div>
         </div>
+      </div>
+      <div class="profile-superpower-modal" id="profileSuperpowerModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="profileSuperpowerModalTitle">
+        <div class="profile-superpower-modal__backdrop" data-profile-superpower-close></div>
+        <article class="profile-superpower-modal__inner">
+          <button type="button" class="profile-superpower-modal__close" data-profile-superpower-close aria-label="Закрыть">×</button>
+          <div class="profile-superpower-modal__art-wrap">
+            <img class="profile-superpower-modal__art" id="profileSuperpowerModalArt" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="profile-superpower-modal__content">
+            <span class="profile-superpower-modal__eyebrow">⚡ СуперСила</span>
+            <h3 class="profile-superpower-modal__title" id="profileSuperpowerModalTitle"></h3>
+            <p class="profile-superpower-modal__lead" id="profileSuperpowerModalLead"></p>
+            <h4>Основные приёмы</h4>
+            <ol class="profile-superpower-modal__moves" id="profileSuperpowerModalMoves"></ol>
+            <section class="profile-superpower-modal__ultimate">
+              <span>Суперудар</span>
+              <strong id="profileSuperpowerModalUltimateTitle"></strong>
+              <p id="profileSuperpowerModalUltimateText"></p>
+            </section>
+          </div>
+        </article>
       </div>
       <div class="chat-dialog-preview-modal" id="chatDialogPreviewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="chatDialogPreviewTitle" aria-label="Превью диалога">
         <div class="chat-dialog-preview-modal__backdrop" id="chatDialogPreviewBackdrop"></div>
