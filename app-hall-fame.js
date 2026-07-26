@@ -1081,7 +1081,7 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
 }
 
 function hallFishLevelSearchText(row) {
-  return [
+  var parts = [
     row && row.name,
     row && row.pokerPlusNickname,
     row && row.nick,
@@ -1094,7 +1094,20 @@ function hallFishLevelSearchText(row) {
     row && row.city,
   ].map(function (value) {
     return String(value || "").toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
-  }).filter(Boolean).join(" ");
+  }).filter(Boolean);
+  var base = parts.join(" ");
+  [
+    ["porquinho", "поркиньо", "поркиньё", "поркинио"],
+    ["shtukatur", "штукатур"],
+    ["hakas", "хакас"],
+    ["aza32", "aza", "аза32", "аза"],
+    ["misterfox", "mrfox", "мистерfox", "мистерфокс", "фокс"],
+  ].forEach(function (aliases) {
+    if (aliases.some(function (alias) { return base.indexOf(alias) >= 0; })) {
+      parts = parts.concat(aliases);
+    }
+  });
+  return parts.join(" ");
 }
 
 function hallFishFilterLevelRows(rows, query) {
