@@ -3006,19 +3006,41 @@
 .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy,
 .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy {
   padding-left: 0;
+  overflow: hidden;
 }
 .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy small,
 .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy small {
   margin-bottom: 8px;
-  font-size: 10px;
+  max-width: 100%;
+  font-size: clamp(8px, 1.5vw, 10px);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy strong,
 .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy strong {
-  font-size: clamp(24px, 5.5vw, 38px);
+  max-width: 100%;
+  font-size: clamp(17px, 3.8vw, 27px);
+  line-height: 1;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  text-wrap: balance;
+  white-space: normal;
 }
 .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy b,
 .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
-  font-size: clamp(14px, 3.2vw, 21px);
+  max-width: 100%;
+  font-size: clamp(11px, 2.7vw, 18px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy em,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy em {
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: clamp(8px, 1.8vw, 11px);
+  white-space: nowrap;
 }
 .chat-user-modal__sng-champion-banner--team-runner-up {
   border-color: #c7d2fe;
@@ -3099,10 +3121,29 @@
   }
   .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy strong,
   .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy strong {
-    font-size: 22px;
+    font-size: clamp(15px, 5vw, 20px);
   }
   .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy b,
   .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
-    font-size: 13px;
+    font-size: clamp(10px, 3.3vw, 13px);
+  }
+}
+@media (max-width: 360px) {
+  .chat-user-modal__sng-champion-banner--team-winner,
+  .chat-user-modal__sng-champion-banner--team-runner-up {
+    grid-template-columns: 46% minmax(0, 1fr);
+    padding-right: 6px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy {
+    gap: 3px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy strong,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy strong {
+    font-size: 15px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy b,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
+    font-size: 10px;
   }
 }
