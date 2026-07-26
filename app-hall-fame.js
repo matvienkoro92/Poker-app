@@ -708,9 +708,9 @@ function hallFishEnsureModal() {
       '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
-        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="vote" role="tab" aria-selected="false">Голосование</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="sng" role="tab" aria-selected="false">СНГ-батлы</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -1575,38 +1575,41 @@ function hallFishAggregateSngChampionRows(rows, levelRows) {
   var map = {};
   var metaByNick = hallFishLevelRowsByNick(levelRows);
   (Array.isArray(rows) ? rows : []).forEach(function (tournament) {
-    var winner = (Array.isArray(tournament && tournament.winners) ? tournament.winners : []).find(function (row) {
+    var teamWinners = Array.isArray(tournament && tournament.winnerMembers) ? tournament.winnerMembers.filter(Boolean) : [];
+    var singleWinners = (Array.isArray(tournament && tournament.winners) ? tournament.winners : []).filter(function (row) {
       return Number(row && row.place) === 1;
     });
-    if (!winner) return;
-    var nick = String((winner && (winner.pokerPlusNickname || winner.nick || winner.displayName)) || "").trim();
-    var accountId = String((winner && winner.accountId) || "").trim();
-    var key = accountId ? "account:" + accountId : "nick:" + hallFishNormalizeNick(nick);
-    if (!key || key === "nick:") return;
-    if (!map[key]) {
-      var meta = hallFishPlayerMetaByNick(nick, metaByNick);
-      map[key] = {
-        nick: meta.nick || nick || "Игрок",
-        accountId: accountId || meta.accountId,
-        telegram: meta.telegram || (winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : ""),
-        profileBirthDate: meta.profileBirthDate,
-        profileCity: meta.profileCity,
-        avatarUrl: meta.avatarUrl,
-        level: meta.level,
-        value: 0,
-        tie: 0,
-        detailRows: [],
-      };
-    }
-    map[key].value += 1;
-    var completedAt = String((tournament && tournament.completedAt) || "").trim();
-    var completedDate = completedAt ? new Date(completedAt) : null;
-    var dateLabel = completedDate && !isNaN(completedDate.getTime())
-      ? completedDate.toLocaleDateString("ru-RU")
-      : "";
-    map[key].detailRows.push({
-      title: String((tournament && tournament.title) || "СНГ-баттл"),
-      meta: [dateLabel, tournament && tournament.season].filter(Boolean).join(" · "),
+    var champions = teamWinners.length ? teamWinners : singleWinners;
+    champions.forEach(function (winner) {
+      var nick = String((winner && (winner.pokerPlusNickname || winner.nick || winner.displayName)) || "").trim();
+      var accountId = String((winner && winner.accountId) || "").trim();
+      var key = accountId ? "account:" + accountId : "nick:" + hallFishNormalizeNick(nick);
+      if (!key || key === "nick:") return;
+      if (!map[key]) {
+        var meta = hallFishPlayerMetaByNick(nick, metaByNick);
+        map[key] = {
+          nick: meta.nick || nick || "Игрок",
+          accountId: accountId || meta.accountId,
+          telegram: meta.telegram || (winner.telegramUsername ? "@" + String(winner.telegramUsername).replace(/^@+/, "") : ""),
+          profileBirthDate: meta.profileBirthDate,
+          profileCity: meta.profileCity,
+          avatarUrl: meta.avatarUrl,
+          level: meta.level,
+          value: 0,
+          tie: 0,
+          detailRows: [],
+        };
+      }
+      map[key].value += 1;
+      var completedAt = String((tournament && tournament.completedAt) || "").trim();
+      var completedDate = completedAt ? new Date(completedAt) : null;
+      var dateLabel = completedDate && !isNaN(completedDate.getTime())
+        ? completedDate.toLocaleDateString("ru-RU")
+        : "";
+      map[key].detailRows.push({
+        title: String((tournament && tournament.title) || "СНГ-баттл"),
+        meta: [dateLabel, tournament && tournament.season].filter(Boolean).join(" · "),
+      });
     });
   });
   return hallFishRowsWithRank(Object.keys(map).map(function (key) {

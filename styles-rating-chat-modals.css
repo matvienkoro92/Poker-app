@@ -2058,6 +2058,13 @@
 .chat-user-modal__superpower-btn[hidden] {
   display: none;
 }
+.chat-user-modal__title-block > .chat-user-modal__superpower-btn {
+  width: fit-content;
+  min-height: 36px;
+  margin-top: 5px;
+  padding: 0 14px;
+  font-size: 13px;
+}
 .profile-superpower-modal {
   position: fixed;
   inset: 0;

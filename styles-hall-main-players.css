@@ -774,6 +774,9 @@
   min-width: 0;
   padding-bottom: 78px;
 }
+.hall-fish-level-list.hall-fish-sng-finalists__list {
+  padding-bottom: 0;
+}
 
 .hall-fish-level-search {
   position: sticky;
