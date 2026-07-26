@@ -867,7 +867,7 @@
     tr.setAttribute("data-rakeback-accounted", data.accounted === true || data.reportedAt || data.reportId ? "1" : "0");
     tr.innerHTML =
       '<td><select class="admin-report-rakeback-select" data-rakeback-room>' + createRoomOptions(room) + "</select></td>" +
-      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent title="Подзапись"><b data-rakeback-addon-parent-id>' + escapeHtml(data.playerId || data.id || "") + '</b><small><span data-rakeback-addon-index>ПЗ</span><em data-rakeback-addon-previous-rake></em></small></span>' : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
+      '<td class="admin-report-rakeback-id-cell"><span class="admin-report-rakeback-row-number" data-rakeback-row-number aria-label="Номер строки"' + (kind === "addon" ? " hidden" : "") + ">" + (kind === "addon" ? "" : String(index + 1)) + '</span><span class="admin-report-rakeback-date-badge" data-rakeback-date-badge title="Дата записи"><span data-rakeback-date-label>' + escapeHtml(formatEntryDateLabel(entryAt)) + '</span><input type="hidden" data-rakeback-entry-date aria-hidden="true" tabindex="-1" value="' + escapeHtml(getDateInputValue(entryAt)) + '" /></span>' + (kind === "addon" ? '<span class="admin-report-rakeback-addon-parent" data-rakeback-addon-parent data-rakeback-copy-addon-id role="button" tabindex="0" title="Скопировать ID"><b data-rakeback-addon-parent-id>' + escapeHtml(data.playerId || data.id || "") + '</b><small><span data-rakeback-addon-index>ПЗ</span><em data-rakeback-addon-previous-rake></em></small></span>' : "") + '<input type="text" class="admin-report-rakeback-input admin-report-rakeback-input--id" data-rakeback-player-id enterkeyhint="next" autocomplete="off" value="' + escapeHtml(data.playerId || data.id || "") + '" /></td>' +
       '<td>' + (kind === "addon"
         ? '<div class="admin-report-rakeback-rake-with-rest"><input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" /><span class="admin-report-rakeback-rest" data-rakeback-rest title="Остаток"></span></div>'
         : '<input type="number" inputmode="decimal" min="0" class="admin-report-rakeback-input" data-rakeback-rake enterkeyhint="next" value="' + escapeHtml(formatInputNumber(data.rake)) + '" />') + '</td>' +
@@ -3624,6 +3624,16 @@
           if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
         });
         body.addEventListener("click", function (event) {
+          var addonIdCopy = event.target && event.target.closest ? event.target.closest("[data-rakeback-copy-addon-id]") : null;
+          if (addonIdCopy) {
+            var addonCopyRow = addonIdCopy.closest("[data-rakeback-shared-row]");
+            var addonCopyInput = addonCopyRow && addonCopyRow.querySelector("[data-rakeback-player-id]");
+            if (addonCopyInput && copyRakebackIdInput(addonCopyInput)) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+          }
           var idCopyInput = event.target && event.target.closest ? event.target.closest("[data-rakeback-player-id]") : null;
           if (idCopyInput && copyRakebackIdInput(idCopyInput)) {
             event.preventDefault();

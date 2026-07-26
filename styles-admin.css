@@ -2625,7 +2625,12 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-size: 11px;
   font-weight: 800;
   line-height: 1.05;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: copy;
+}
+.admin-report-rakeback-addon-parent:focus-visible {
+  outline: 1px solid rgba(255, 231, 176, 0.72);
+  outline-offset: 2px;
 }
 .admin-report-rakeback-addon-parent b,
 .admin-report-rakeback-addon-parent small {
