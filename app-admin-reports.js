@@ -354,6 +354,19 @@ function initAdminReportModal() {
     return rakebackModule;
   }
 
+  function loadCurrentRakebackCalculationTotals() {
+    function readTotals() {
+      var module = ensureLazyRakebackModule();
+      if (!module || typeof module.loadCurrentWeekTotals !== "function") return null;
+      return module.loadCurrentWeekTotals();
+    }
+    var immediate = readTotals();
+    if (immediate) return Promise.resolve(immediate);
+    return loadAdminReportScript("app-admin-reports-rakeback.js").then(function () {
+      return readTotals();
+    });
+  }
+
   function getSharedRakebackModule() {
     if (rakebackModule && typeof rakebackModule.open === "function") return rakebackModule;
     var sharedModule = window.__adminReportRakebackShellModule;
@@ -1455,6 +1468,7 @@ function initAdminReportModal() {
         formatRuWeekdayDateFromTs: formatRuWeekdayDateFromTs,
         getReportStoredRakebackTotal: getReportStoredRakebackTotal,
         getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
+        loadCurrentRakebackCalculationTotals: loadCurrentRakebackCalculationTotals,
         isReportUsdtRateFieldName: isReportUsdtRateFieldName,
         isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,
         mergeReportExtrasIntoMap: mergeReportExtrasIntoMap,
@@ -3261,6 +3275,7 @@ function initAdminReportModal() {
       getReportExtraEntries: getReportExtraEntries,
       getReportPreviousRakebackTotal: getReportPreviousRakebackTotal,
       getReportStoredRakebackTotal: getReportStoredRakebackTotal,
+      loadCurrentRakebackCalculationTotals: loadCurrentRakebackCalculationTotals,
       isReportAnyaSalaryFieldName: isReportAnyaSalaryFieldName,
       isReportManualRakebackFieldName: isReportManualRakebackFieldName,
       isReportPreviousRakebackFieldName: isReportPreviousRakebackFieldName,

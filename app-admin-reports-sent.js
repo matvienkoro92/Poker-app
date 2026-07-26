@@ -10,6 +10,7 @@
     config = config || {};
     var callbacks = config.callbacks || {};
     var helpers = config.helpers || {};
+    var loadCurrentRakebackCalculationTotals = helpers.loadCurrentRakebackCalculationTotals;
     var sentList = config.list || document.getElementById("adminReportSentList");
     var sentReportsLoadedAt = 0;
     var sentReportsLoading = false;
@@ -530,6 +531,18 @@
     }
     fetchReportsForScope("currentWeek")
       .then(function (data) {
+        if (typeof loadCurrentRakebackCalculationTotals !== "function") {
+          return { data: data, rakebackTotals: null };
+        }
+        return Promise.resolve(loadCurrentRakebackCalculationTotals()).then(function (rakebackTotals) {
+          return { data: data, rakebackTotals: rakebackTotals };
+        }).catch(function () {
+          return { data: data, rakebackTotals: null };
+        });
+      })
+      .then(function (loaded) {
+        var data = loaded && loaded.data ? loaded.data : {};
+        var currentRakebackAmount = Number(loaded && loaded.rakebackTotals && loaded.rakebackTotals.amount);
         sentReportsLoading = false;
         if (!sentList) return;
         var items = (data && data.ok && data.reports) ? data.reports : [];
@@ -901,6 +914,7 @@
         function buildWeekBlock(weekStartMs, list, idPrefixBase, isCurrent) {
           var meta = weekMetaFromStart(weekStartMs);
           var totals = sumReportsInWindow(list || [], meta.start, meta.end);
+          if (isCurrent && Number.isFinite(currentRakebackAmount)) totals.rakeback = currentRakebackAmount;
           var detailsHtml = buildDaysSpoilersHtmlFromList(list, idPrefixBase + meta.key + "-");
           var totalDetailHtml = buildReportDetailHtml(totals);
           return {

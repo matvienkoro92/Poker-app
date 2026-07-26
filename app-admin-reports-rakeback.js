@@ -1713,9 +1713,10 @@
       }, 0);
     }
 
-    function getRakebackTotals(rows) {
+    function getRakebackTotals(rows, options) {
+      options = options || {};
       rows = (Array.isArray(rows) ? rows : []).filter(function (row) {
-        return row && (activeQuickFilter === "changed" || row.saved === true);
+        return row && (options.savedOnly === true ? row.saved === true : (activeQuickFilter === "changed" || row.saved === true));
       }).sort(compareRowsByEntryDateAsc);
       var previousRakeByGroup = {};
       return {
@@ -1730,6 +1731,16 @@
           return sum + getReportAmount(row.room, Math.round(roomAmount * 100) / 100);
         }, 0),
       };
+    }
+
+    function getCurrentWeekSavedTotals() {
+      var rows = sharedRows.filter(function (row) {
+        return row &&
+          row.saved === true &&
+          !isCarryForwardTemplateRow(row) &&
+          isCurrentRakebackRow(row);
+      });
+      return getRakebackTotals(rows, { savedOnly: true });
     }
 
     function getArchiveRows(room) {
@@ -3801,6 +3812,7 @@
       collectRows: collectRows,
       fillTable: fillTable,
       getActiveRoom: function () { return activeRoom; },
+      getCurrentWeekTotals: getCurrentWeekSavedTotals,
       getUnaccountedRows: function () {
         return getUnsentReportRakebackRows().filter(function (row) {
           return row && String(row.playerId || "").trim();
@@ -3811,6 +3823,11 @@
       confirmLeave: confirmUnsavedLeave,
       open: open,
       loadSharedDraft: loadSharedDraft,
+      loadCurrentWeekTotals: function () {
+        return loadSharedDraft({ background: true, force: true }).then(function () {
+          return getCurrentWeekSavedTotals();
+        });
+      },
       render: render,
       saveSharedDraft: saveSharedDraftNow,
       setArchiveMode: setArchiveMode,

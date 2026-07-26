@@ -279,6 +279,23 @@
         updateFiguresTotals({ syncExtras: false });
       }
 
+      function setCalculationTotalsWithCurrentRakeback(totals, week) {
+        totals = totals || {};
+        setCalculationTotalsText(totals);
+        if (!week || week.key !== "current_week" || typeof loadCurrentRakebackCalculationTotals !== "function") return;
+        var expectedWeekStart = week.start;
+        Promise.resolve(loadCurrentRakebackCalculationTotals()).then(function (rakebackTotals) {
+          var activeWeek = getCalculationWeekMeta();
+          if (!activeWeek || activeWeek.key !== "current_week" || activeWeek.start !== expectedWeekStart) return;
+          var currentAmount = Number(rakebackTotals && rakebackTotals.amount);
+          if (!Number.isFinite(currentAmount)) return;
+          var updatedTotals = {};
+          Object.keys(totals).forEach(function (key) { updatedTotals[key] = totals[key]; });
+          updatedTotals.rakeback = currentAmount;
+          setCalculationTotalsText(updatedTotals);
+        }).catch(function () {});
+      }
+
       function sumCalculationReports(items, week) {
         var totals = {
           deposit: 0,
@@ -563,7 +580,7 @@
         var currentCache = useAllReports && Array.isArray(calculationPeriodReportsCache)
           ? calculationPeriodReportsCache
           : (Array.isArray(calculationReportsCache) ? calculationReportsCache : []);
-        setCalculationTotalsText(currentCache.length ? sumCalculationReports(currentCache, week) : {});
+        setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week) : {}, week);
         renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
         if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
@@ -590,7 +607,10 @@
             var activeWeek = getCalculationWeekMeta();
             var activeUsesAllReports = !!(activeWeek && activeWeek.key && activeWeek.key !== "current_week");
             if (activeUsesAllReports === useAllReports) {
-              setCalculationTotalsText(sumCalculationReports(useAllReports ? calculationPeriodReportsCache : calculationReportsCache, activeWeek));
+              setCalculationTotalsWithCurrentRakeback(
+                sumCalculationReports(useAllReports ? calculationPeriodReportsCache : calculationReportsCache, activeWeek),
+                activeWeek
+              );
             }
             if (data && data.hasArchive) {
               if (calculationArchiveLoaded && Array.isArray(calculationArchiveReportsCache) && calculationArchiveReportsCache.length) {
@@ -607,7 +627,7 @@
             }
           })
           .catch(function () {
-            if (!currentCache.length) setCalculationTotalsText({});
+            if (!currentCache.length) setCalculationTotalsWithCurrentRakeback({}, getCalculationWeekMeta());
             renderCalculationArchive(calculationArchiveReportsCache);
           });
       }
