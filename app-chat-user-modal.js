@@ -114,6 +114,9 @@ if (chatUserModalEl) {
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
   var modalRatingTabSum = document.getElementById("chatUserModalRatingTabSum");
+  var chatUserModalRatingTotalCache = {};
+  var chatUserModalRatingTotalRequests = {};
+  var chatUserModalRatingTotalSeq = 0;
   var modalRatingRanks = document.getElementById("chatUserModalRatingRanks");
   var modalSummerRank = document.getElementById("chatUserModalSummerRank");
   var modalSpringRank = document.getElementById("chatUserModalSpringRank");
@@ -618,7 +621,10 @@ if (chatUserModalEl) {
     var hasNick = !!chatUserModalRatingNick;
     if (modalRatingTabs) modalRatingTabs.hidden = !hasNick;
     if (modalRatingTabSum) {
-      modalRatingTabSum.textContent = hasNick ? "Загрузка..." : "";
+      var cacheKey = chatUserModalRatingTotalCacheKey(chatUserModalRatingNick);
+      modalRatingTabSum.textContent = hasNick
+        ? (chatUserModalRatingTotalCache[cacheKey] || "Загрузка...")
+        : "";
       modalRatingTabSum.hidden = !hasNick;
     }
     if (modalRatingTab) {
@@ -633,6 +639,7 @@ if (chatUserModalEl) {
         modalRatingTab.setAttribute("aria-label", "Призовые в турнирах. Подробнее");
       }
     }
+    if (hasNick) loadChatUserModalRatingTotalReward(chatUserModalRatingNick);
   }
   function hideChatUserModalRatingArtImg() {
     if (!modalRatingArtImg) return;
@@ -755,11 +762,51 @@ if (chatUserModalEl) {
     if (!modalRatingTabSum) return;
     var ratingNick = String(nick || "").trim();
     var text = chatUserModalRatingTotalRewardText(ratingNick);
+    var cacheKey = chatUserModalRatingTotalCacheKey(ratingNick);
+    if (text && cacheKey) chatUserModalRatingTotalCache[cacheKey] = text;
     modalRatingTabSum.textContent = text;
     modalRatingTabSum.hidden = !text;
     if (modalRatingTab && text) {
       modalRatingTab.setAttribute("aria-label", "Призовые в турнирах " + text + ". Подробнее");
     }
+  }
+  function chatUserModalRatingTotalCacheKey(nick) {
+    return String(nick || "").trim().replace(/^@+/, "").toLowerCase();
+  }
+  function loadChatUserModalRatingTotalReward(nick) {
+    var ratingNick = String(nick || "").trim();
+    var cacheKey = chatUserModalRatingTotalCacheKey(ratingNick);
+    if (!cacheKey) return Promise.resolve("");
+    chatUserModalRatingTotalSeq += 1;
+    var seq = chatUserModalRatingTotalSeq;
+    if (!chatUserModalRatingTotalRequests[cacheKey]) {
+      var ready = typeof window.pokerEnsureScriptDomains === "function"
+        ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-summer"]))
+        : Promise.resolve(false);
+      chatUserModalRatingTotalRequests[cacheKey] = ready.then(function () {
+        var text = chatUserModalRatingTotalRewardText(ratingNick);
+        if (text) chatUserModalRatingTotalCache[cacheKey] = text;
+        return text;
+      }).catch(function () {
+        return chatUserModalRatingTotalRewardText(ratingNick);
+      }).then(function (text) {
+        delete chatUserModalRatingTotalRequests[cacheKey];
+        return text;
+      });
+    }
+    return chatUserModalRatingTotalRequests[cacheKey].then(function (text) {
+      if (seq !== chatUserModalRatingTotalSeq || !chatUserModalSameRatingNick(chatUserModalRatingNick, ratingNick)) return text;
+      if (modalRatingTabSum) {
+        modalRatingTabSum.textContent = text || "—";
+        modalRatingTabSum.hidden = false;
+      }
+      if (modalRatingTab) {
+        modalRatingTab.setAttribute("aria-label", text
+          ? "Призовые в турнирах " + text + ". Подробнее"
+          : "Призовые в турнирах. Подробнее");
+      }
+      return text;
+    });
   }
   function chatUserModalRatingTotalRewardText(nick) {
     var ratingNick = String(nick || "").trim();

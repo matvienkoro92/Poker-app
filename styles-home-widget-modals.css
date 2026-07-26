@@ -15,6 +15,28 @@
   display: flex;
 }
 
+.hall-fish-modal__body > .club-choice-vote-modal--embedded {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  display: block;
+  padding: 0;
+}
+.hall-fish-modal__body > .club-choice-vote-modal--embedded .club-choice-vote-modal__backdrop,
+.hall-fish-modal__body > .club-choice-vote-modal--embedded .club-choice-vote-modal__close {
+  display: none;
+}
+.hall-fish-modal__body > .club-choice-vote-modal--embedded .club-choice-vote-modal__panel {
+  width: 100%;
+  max-height: none;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+.hall-fish-modal__body > .club-choice-vote-modal--embedded .club-choice-vote-modal__body {
+  overflow: visible;
+}
+
 .club-choice-vote-modal__backdrop {
   position: absolute;
   inset: 0;

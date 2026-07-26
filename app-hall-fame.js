@@ -657,6 +657,7 @@ function hallFishRefreshVisibleRows(rows) {
       hallFishAchievementRowsCache = null;
       return;
     }
+    if (hallFishActiveTab === "vote") return;
     if (hallFishActiveTab === "sng") {
       hallFishSetSngFinalistsState(rows);
       return;
@@ -1220,11 +1221,25 @@ function hallFishRenderRows(rows, currentIds) {
     '<div data-hall-fish-level-results>' + hallFishRenderLevelResults(filteredRows, currentIds, hallFishLevelSearchQuery) + '</div>';
 }
 
-var HALL_FISH_SNG_FINALISTS = [
-  { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"] },
-  { name: "Штукатур", aliases: ["штукатур", "shtukatur"] },
-  { name: "Hakas", aliases: ["hakas", "хакас"] },
-  { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"] },
+var HALL_FISH_SNG_GROUPS = [
+  {
+    title: "1-й командный СНГ-баттл",
+    subtitle: "Финалисты командного турнира",
+    finalists: [
+      { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"] },
+      { name: "Штукатур", aliases: ["штукатур", "shtukatur"] },
+      { name: "Hakas", aliases: ["hakas", "хакас"] },
+      { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"] },
+    ],
+  },
+  {
+    title: "1-й одиночный СНГ-баттл",
+    subtitle: "Финалисты одиночного турнира",
+    finalists: [
+      { name: "Рыбнадзор", aliases: ["рыбнадзор", "мужначас", "muzhnachas"], winner: true },
+      { name: "Фокс", aliases: ["фокс", "misterfox", "mrfox"] },
+    ],
+  },
 ];
 
 function hallFishFindSngFinalistRow(rows, finalist) {
@@ -1238,18 +1253,30 @@ function hallFishFindSngFinalistRow(rows, finalist) {
 }
 
 function hallFishRenderSngFinalists(rows) {
-  var cards = HALL_FISH_SNG_FINALISTS.map(function (finalist, index) {
-    var row = hallFishFindSngFinalistRow(rows, finalist);
-    if (row) return hallFishLevelRowHtml(row, index + 1, "hall-fish-level-row--sng-finalist");
-    return '<div class="hall-fish-level-row hall-fish-level-row--sng-finalist hall-fish-level-row--sng-missing">' +
-      '<span class="hall-fish-level-row__rank">' + hallFishEsc(index + 1) + '</span>' +
-      '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(finalist.name) + '</span>' +
-      '<span class="hall-fish-level-row__tg">Финалист СНГ-батла</span></span>' +
-    '</div>';
+  var groups = HALL_FISH_SNG_GROUPS.map(function (group) {
+    var cards = group.finalists.map(function (finalist, index) {
+      var winnerBadge = finalist.winner ? '<span class="hall-fish-sng-finalists__winner">★ Победитель</span>' : "";
+      var row = hallFishFindSngFinalistRow(rows, finalist);
+      if (row) {
+        var card = hallFishLevelRowHtml(row, index + 1, "hall-fish-level-row--sng-finalist" + (finalist.winner ? " hall-fish-level-row--sng-winner" : ""));
+        return winnerBadge
+          ? card.replace('<span class="hall-fish-level-row__main">', '<span class="hall-fish-level-row__main">' + winnerBadge)
+          : card;
+      }
+      return '<div class="hall-fish-level-row hall-fish-level-row--sng-finalist hall-fish-level-row--sng-missing' + (finalist.winner ? " hall-fish-level-row--sng-winner" : "") + '">' +
+        '<span class="hall-fish-level-row__rank">' + hallFishEsc(index + 1) + '</span>' +
+        '<span class="hall-fish-level-row__main">' + winnerBadge + '<span class="hall-fish-level-row__name">' + hallFishEsc(finalist.name) + '</span>' +
+        '<span class="hall-fish-level-row__tg">Финалист СНГ-батла</span></span>' +
+      '</div>';
+    });
+    return '<section class="hall-fish-sng-finalists__group">' +
+      '<header class="hall-fish-sng-finalists__group-head"><h4>' + hallFishEsc(group.title) + '</h4><span>' + hallFishEsc(group.subtitle) + '</span></header>' +
+      '<div class="hall-fish-level-list hall-fish-sng-finalists__list">' + cards.join("") + '</div>' +
+    '</section>';
   });
   return '<section class="hall-fish-sng-finalists">' +
     '<header class="hall-fish-sng-finalists__head"><small>Лига чемпионов Два туза</small><h3>Финалисты СНГ-батла</h3><p>Нажмите на игрока, чтобы открыть его профиль.</p></header>' +
-    '<div class="hall-fish-level-list hall-fish-sng-finalists__list">' + cards.join("") + '</div>' +
+    groups.join("") +
   '</section>';
 }
 
@@ -2214,6 +2241,7 @@ function hallFishPrefetchTopProfiles(rows) {
 }
 
 function hallFishSetModalState(message, rows, currentIds) {
+  hallFishDetachEmbeddedVote();
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var myRank = document.getElementById("hallFishRatingMyRank");
@@ -2232,6 +2260,7 @@ function hallFishSetModalState(message, rows, currentIds) {
 }
 
 function hallFishSetAchievementState(message, data) {
+  hallFishDetachEmbeddedVote();
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var myRank = document.getElementById("hallFishRatingMyRank");
@@ -2245,6 +2274,7 @@ function hallFishSetAchievementState(message, data) {
 }
 
 function hallFishSetBirthdaysState(message, rows, events) {
+  hallFishDetachEmbeddedVote();
   var modal = hallFishEnsureModal();
   var subtitle = document.getElementById("hallFishRatingSubtitle");
   var myRank = document.getElementById("hallFishRatingMyRank");
@@ -2258,6 +2288,7 @@ function hallFishSetBirthdaysState(message, rows, events) {
 }
 
 function hallFishSetSngFinalistsState(rows) {
+  hallFishDetachEmbeddedVote();
   var modal = hallFishEnsureModal();
   var myRank = document.getElementById("hallFishRatingMyRank");
   var body = document.getElementById("hallFishRatingBody");
@@ -2300,19 +2331,56 @@ function hallFishToggleUpcomingExpanded() {
 }
 
 function hallFishUpdateTabs(activeTab) {
-  hallFishActiveTab = ["achievements", "birthdays", "sng"].indexOf(activeTab) >= 0 ? activeTab : "levels";
+  hallFishActiveTab = ["achievements", "birthdays", "vote", "sng"].indexOf(activeTab) >= 0 ? activeTab : "levels";
   var modal = hallFishEnsureModal();
   var panel = modal ? modal.querySelector(".hall-fish-modal__panel") : null;
   if (panel) {
     panel.classList.toggle("hall-fish-modal__panel--achievements", hallFishActiveTab === "achievements");
     panel.classList.toggle("hall-fish-modal__panel--birthdays", hallFishActiveTab === "birthdays");
     panel.classList.toggle("hall-fish-modal__panel--sng", hallFishActiveTab === "sng");
+    panel.classList.toggle("hall-fish-modal__panel--vote", hallFishActiveTab === "vote");
     panel.classList.toggle("hall-fish-modal__panel--levels", hallFishActiveTab === "levels");
   }
   document.querySelectorAll("[data-hall-fish-tab]").forEach(function (tab) {
     var isActive = tab.getAttribute("data-hall-fish-tab") === hallFishActiveTab;
     tab.classList.toggle("hall-fish-modal__tab--active", isActive);
     tab.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+}
+
+function hallFishDetachEmbeddedVote() {
+  if (typeof window.pokerUnmountClubChoiceVoteInline === "function") {
+    window.pokerUnmountClubChoiceVoteInline();
+    return;
+  }
+  var embedded = document.querySelector(".club-choice-vote-modal--embedded");
+  if (!embedded) return;
+  embedded.classList.remove("club-choice-vote-modal--embedded", "club-choice-vote-modal--open");
+  document.body.appendChild(embedded);
+}
+
+function openHallFishVoteTab() {
+  var modal = hallFishEnsureModal();
+  var body = document.getElementById("hallFishRatingBody");
+  var myRank = document.getElementById("hallFishRatingMyRank");
+  hallFishUpdateTabs("vote");
+  if (myRank) myRank.hidden = true;
+  if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Загружаем голосования…</div>';
+  modal.hidden = false;
+  if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  var ready = typeof window.pokerEnsureLazyDomains === "function"
+    ? window.pokerEnsureLazyDomains(["home-widget-club-choice"], { styles: true, scripts: true })
+    : Promise.resolve();
+  Promise.resolve(ready).then(function () {
+    if (hallFishActiveTab !== "vote") return;
+    var currentBody = document.getElementById("hallFishRatingBody");
+    if (!currentBody || typeof window.pokerMountClubChoiceVoteInline !== "function") throw new Error("vote-inline-unavailable");
+    currentBody.innerHTML = "";
+    if (!window.pokerMountClubChoiceVoteInline(currentBody)) throw new Error("vote-inline-mount-failed");
+  }).catch(function () {
+    if (hallFishActiveTab === "vote" && body) {
+      body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить голосования. Попробуйте ещё раз позже.</div>';
+    }
   });
 }
 
@@ -2330,6 +2398,7 @@ function openHallFishSngFinalistsTab() {
 }
 
 function hallFishCloseModal() {
+  hallFishDetachEmbeddedVote();
   hallFishClearProfileLoadingRows();
   var modal = document.getElementById("hallFishRatingModal");
   if (modal) modal.hidden = true;
@@ -2726,15 +2795,7 @@ function initHallFishRatingModal() {
     if (tabKey === "achievements") openHallFishAchievementTab();
     else if (tabKey === "birthdays") openHallFishBirthdaysTab();
     else if (tabKey === "sng") openHallFishSngFinalistsTab();
-    else if (tabKey === "vote") {
-      hallFishCloseModal();
-      if (typeof window.pokerOpenHomeWidgetModal === "function") {
-        window.pokerOpenHomeWidgetModal("club-choice-vote");
-      } else {
-        var voteButton = document.getElementById("clubChoiceVoteOpen");
-        if (voteButton) voteButton.click();
-      }
-    }
+    else if (tabKey === "vote") openHallFishVoteTab();
     else openHallFishRatingModal();
   });
   document.addEventListener("pointerenter", function (e) {

@@ -351,6 +351,10 @@
 
   function openModal() {
     ensureModal();
+    if (modal.classList.contains("club-choice-vote-modal--embedded")) {
+      modal.classList.remove("club-choice-vote-modal--embedded");
+      document.body.appendChild(modal);
+    }
     try {
       if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-choice-vote");
     } catch (eTrack) {}
@@ -366,6 +370,27 @@
     if (!modal) return;
     modal.classList.remove("club-choice-vote-modal--open");
     document.body.classList.remove("club-choice-vote-open");
+    stopTimer();
+  }
+
+  function mountInline(host) {
+    if (!host || !host.appendChild) return false;
+    ensureModal();
+    activeRoundTab = "votes";
+    activeVotesRoundId = "";
+    modal.classList.add("club-choice-vote-modal--embedded", "club-choice-vote-modal--open");
+    document.body.classList.remove("club-choice-vote-open");
+    host.appendChild(modal);
+    renderLoading();
+    loadState();
+    return true;
+  }
+
+  function unmountInline() {
+    if (!modal || !modal.classList.contains("club-choice-vote-modal--embedded")) return;
+    modal.classList.remove("club-choice-vote-modal--embedded", "club-choice-vote-modal--open");
+    document.body.classList.remove("club-choice-vote-open");
+    document.body.appendChild(modal);
     stopTimer();
   }
 
@@ -1351,6 +1376,8 @@
   }
 
   window.openClubChoiceVoteModal = openModal;
+  window.pokerMountClubChoiceVoteInline = mountInline;
+  window.pokerUnmountClubChoiceVoteInline = unmountInline;
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();
