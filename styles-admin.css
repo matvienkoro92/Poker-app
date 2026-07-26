@@ -2268,6 +2268,39 @@ button.admin-report-rakeback-summary__row:focus-visible {
   font-weight: 950;
   line-height: 1;
 }
+.admin-report-rakeback-row--history-ghost {
+  pointer-events: none;
+  filter: grayscale(0.72) brightness(0.58);
+  opacity: 0.46;
+}
+.admin-report-rakeback-row--history-ghost[hidden] {
+  display: none !important;
+}
+#adminReportModal .admin-report-rakeback-row--history-ghost > td {
+  background: linear-gradient(90deg, rgba(8, 11, 17, 0.94), rgba(5, 7, 11, 0.96)) !important;
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08), inset 0 -1px 0 rgba(148, 163, 184, 0.08) !important;
+}
+.admin-report-rakeback-row--history-ghost .admin-report-rakeback-input,
+.admin-report-rakeback-row--history-ghost .admin-report-rakeback-select,
+.admin-report-rakeback-row--history-ghost .admin-report-rakeback-amount {
+  color: rgba(203, 213, 225, 0.72) !important;
+  -webkit-text-fill-color: rgba(203, 213, 225, 0.72) !important;
+  text-shadow: none !important;
+}
+.admin-report-rakeback-history-ghost__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  color: rgba(203, 213, 225, 0.68);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 .admin-report-rakeback-undo {
   display: flex;
   align-items: center;
