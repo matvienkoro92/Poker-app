@@ -39,7 +39,7 @@ function pokerFormatChatLastSeenRu(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return "";
     return (
-      "был онлайн\n" +
+      "был онлайн: " +
       d.toLocaleString("ru-RU", {
         day: "numeric",
         month: "short",
@@ -817,6 +817,42 @@ if (chatUserModalEl) {
       });
     }
     return rows;
+  }
+  function chatUserModalIsRybnadzor(ratingNick) {
+    return ["Рыбнадзор", "МужНаЧас", "Муж на час"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
+  function chatUserModalIsFox(ratingNick) {
+    return ["Фокс", "мистерFox", "Мистер Fox", "MrFox", "Mr Fox"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
+  function chatUserModalSngChampionBannerHtml(ratingNick) {
+    var placement = chatUserModalIsRybnadzor(ratingNick) ? {
+      badge: "Победитель",
+      name: "МужНаЧас",
+      result: "Чемпион турнира",
+      art: "./assets/summer-rating-player-rybnadzor.webp",
+      className: "winner",
+    } : chatUserModalIsFox(ratingNick) ? {
+      badge: "2 место",
+      name: "мистерFox",
+      result: "Финалист турнира",
+      art: "./assets/summer-rating-league2-player-mr-fox.webp",
+      className: "runner-up",
+    } : null;
+    if (!placement) return "";
+    return '<button type="button" class="chat-user-modal__sng-champion-banner chat-user-modal__sng-champion-banner--' + escapeHtml(placement.className) + '" data-chat-sng-champion-open="1" aria-label="Смотреть первый СНГ-баттл Лиги чемпионов Два туза">' +
+      '<span class="chat-user-modal__sng-champion-art" aria-hidden="true"><img src="' + escapeHtml(placement.art) + '" alt="" loading="lazy" decoding="async"></span>' +
+      '<span class="chat-user-modal__sng-champion-copy">' +
+        '<small>1ый СНГ-баттл Лига чемпионов Два туза</small>' +
+        '<em>' + escapeHtml(placement.badge) + '</em>' +
+        '<strong>' + escapeHtml(placement.name) + '</strong>' +
+        '<b>' + escapeHtml(placement.result) + '</b>' +
+      '</span>' +
+      '<span class="chat-user-modal__sng-champion-watch">Смотреть</span>' +
+    '</button>';
   }
   function chatUserModalOfflineTournamentWins(ratingNick) {
     if (!String(ratingNick || "").trim()) return [];
@@ -1844,7 +1880,7 @@ if (chatUserModalEl) {
         placeholder: "Топ-3 по количеству побед в розыгрышах за месяц",
       }) +
       goldTicketHtml;
-    return [
+    return chatUserModalSngChampionBannerHtml(ratingNick) + [
       chatUserModalAchievementGroupHtml("Кубки", cupsHtml),
       chatUserModalAchievementGroupHtml("Заносы", winsHtml),
       chatUserModalAchievementGroupHtml("Социальные", socialHtml),
@@ -2666,6 +2702,13 @@ if (chatUserModalEl) {
   }
   if (modalAchievementsList) {
     modalAchievementsList.addEventListener("click", function (e) {
+      var sngChampion = e.target && e.target.closest ? e.target.closest("[data-chat-sng-champion-open]") : null;
+      if (sngChampion) {
+        e.preventDefault();
+        closeChatUserModal();
+        if (typeof window.openSngChampionsModal === "function") window.openSngChampionsModal();
+        return;
+      }
       var card = e.target && e.target.closest ? e.target.closest("[data-chat-achievement-info]") : null;
       if (!card) return;
       e.preventDefault();

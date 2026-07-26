@@ -478,6 +478,8 @@ var hallFishProfileLoadingObserver = null;
 var hallFishProfileLoadingTimer = null;
 var hallFishActiveTab = "levels";
 var hallFishActiveAchievementTab = "big50";
+var hallFishLevelSearchQuery = "";
+var hallFishLevelCurrentIds = [];
 var hallFishCalendarMonthOffset = 0;
 var hallFishUpcomingFilter = "all";
 var hallFishUpcomingExpanded = false;
@@ -1078,16 +1080,62 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
   '</button>';
 }
 
-function hallFishRenderRows(rows, currentIds) {
-  if (!rows.length) return '<div class="hall-fish-modal__notice">Пока нет игроков с уровнем.</div>';
+function hallFishLevelSearchText(row) {
+  return [
+    row && row.name,
+    row && row.pokerPlusNickname,
+    row && row.nick,
+    row && row.telegram,
+    row && row.p21Id,
+    row && row.pokerPlusUserId,
+    row && row.poker21Id,
+    row && row.accountId,
+    row && row.profileCity,
+    row && row.city,
+  ].map(function (value) {
+    return String(value || "").toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
+  }).filter(Boolean).join(" ");
+}
+
+function hallFishFilterLevelRows(rows, query) {
+  var needle = String(query || "").toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
+  if (!needle) return Array.isArray(rows) ? rows : [];
+  return (Array.isArray(rows) ? rows : []).filter(function (row) {
+    return hallFishLevelSearchText(row).indexOf(needle) >= 0;
+  });
+}
+
+function hallFishRenderLevelResults(rows, currentIds, query) {
+  if (!rows.length) {
+    return '<div class="hall-fish-modal__notice">' +
+      (String(query || "").trim() ? "Похожих игроков не найдено." : "Пока нет игроков с уровнем.") +
+    '</div>';
+  }
   var mine = hallFishFindMyLevelRow(rows, currentIds);
   return '<div class="hall-fish-level-list">' + rows.map(function (row, idx) {
-    var isMine = mine && mine.rank === idx + 1;
-    return hallFishLevelRowHtml(row, idx + 1, isMine ? "hall-fish-level-row--mine" : "");
+    var sourceRows = hallFishRatingRowsCache || rows;
+    var sourceRank = sourceRows.indexOf(row) + 1;
+    var rank = sourceRank > 0 ? sourceRank : idx + 1;
+    var isMine = mine && mine.row === row;
+    return hallFishLevelRowHtml(row, rank, isMine ? "hall-fish-level-row--mine" : "");
   }).join("") + '</div>' +
-    (mine ? '<div class="hall-fish-level-sticky-mine" aria-label="Ваша строка рейтинга">' +
+    (!String(query || "").trim() && mine ? '<div class="hall-fish-level-sticky-mine" aria-label="Ваша строка рейтинга">' +
       hallFishLevelRowHtml(mine.row, mine.rank, "hall-fish-level-row--mine hall-fish-level-row--sticky") +
     '</div>' : '');
+}
+
+function hallFishRenderRows(rows, currentIds) {
+  var filteredRows = hallFishFilterLevelRows(rows, hallFishLevelSearchQuery);
+  return '<div class="hall-fish-level-search">' +
+      '<label class="hall-fish-level-search__field">' +
+        '<span aria-hidden="true">⌕</span>' +
+        '<input type="search" data-hall-fish-level-search value="' + hallFishEsc(hallFishLevelSearchQuery) + '" placeholder="Поиск по нику или ID" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Поиск игрока по нику или ID">' +
+      '</label>' +
+      '<small class="hall-fish-level-search__count" data-hall-fish-level-search-count>' +
+        (hallFishLevelSearchQuery ? "Найдено: " + hallFishEsc(filteredRows.length) : "Игроков: " + hallFishEsc(rows.length)) +
+      '</small>' +
+    '</div>' +
+    '<div data-hall-fish-level-results>' + hallFishRenderLevelResults(filteredRows, currentIds, hallFishLevelSearchQuery) + '</div>';
 }
 
 function hallFishRenderLevelSkeleton() {
@@ -2034,6 +2082,7 @@ function hallFishSetModalState(message, rows, currentIds) {
   var body = document.getElementById("hallFishRatingBody");
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("levels");
+  hallFishLevelCurrentIds = Array.isArray(currentIds) ? currentIds.slice() : [];
   if (myRank) {
     myRank.hidden = false;
     myRank.textContent = rows ? hallFishMyRankText(rows, currentIds) : "Ваш рейтинг —/—";
@@ -2452,6 +2501,7 @@ function hallFishEditPlayerBirthday(accountId, playerName, currentValue) {
 
 function openHallFishRatingModal() {
   if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-players");
+  hallFishLevelSearchQuery = "";
   hallFishSetModalState("Загрузка…");
   Promise.all([
     hallFishEnsureLevelPlayerArtData().catch(function () { return false; }),
@@ -2489,6 +2539,18 @@ function initHallFishRatingModal() {
       openHallFishRatingModal();
       return;
     }
+  });
+  document.addEventListener("input", function (e) {
+    var input = e.target && e.target.matches && e.target.matches("[data-hall-fish-level-search]") ? e.target : null;
+    if (!input) return;
+    hallFishLevelSearchQuery = String(input.value || "");
+    var rows = hallFishRatingRowsCache || hallFishReadRowsSessionCache() || [];
+    var filteredRows = hallFishFilterLevelRows(rows, hallFishLevelSearchQuery);
+    var body = document.getElementById("hallFishRatingBody");
+    var results = body && body.querySelector("[data-hall-fish-level-results]");
+    var count = body && body.querySelector("[data-hall-fish-level-search-count]");
+    if (results) results.innerHTML = hallFishRenderLevelResults(filteredRows, hallFishLevelCurrentIds, hallFishLevelSearchQuery);
+    if (count) count.textContent = hallFishLevelSearchQuery ? "Найдено: " + filteredRows.length : "Игроков: " + rows.length;
   });
   document.addEventListener("click", function (e) {
     if (e.target && e.target.closest && e.target.closest("[data-hall-fish-close]")) hallFishCloseModal();

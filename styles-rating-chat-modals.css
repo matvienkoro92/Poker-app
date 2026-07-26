@@ -2651,11 +2651,14 @@
 }
 .chat-user-modal__last-seen {
   margin: 4px 0 0;
-  font-size: 12px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(9px, 2.2vw, 11px);
   font-weight: 500;
   color: var(--text-muted);
-  line-height: 1.25;
-  white-space: pre-line;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 [data-theme="light"] .chat-user-modal__last-seen {
   color: rgba(71, 85, 105, 0.88);
@@ -2827,4 +2830,137 @@
   outline: 2px solid rgba(255, 211, 111, 0.9);
   outline-offset: 2px;
   box-shadow: 0 0 18px rgba(255, 177, 38, 0.24);
+}
+
+.chat-user-modal__sng-champion-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(110px, 31%) minmax(0, 1fr);
+  width: 100%;
+  min-height: 218px;
+  margin: 0 0 18px;
+  padding: 0 18px 54px;
+  overflow: hidden;
+  border: 2px solid #f2a819;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 18% 42%, rgba(210, 117, 30, 0.34), transparent 39%),
+    linear-gradient(110deg, #3e2a17, #100b09 50%, #05080e);
+  box-shadow: 0 0 22px rgba(242, 168, 25, 0.2), inset 0 0 0 1px rgba(255, 231, 172, 0.1);
+  color: #ffe8b5;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.chat-user-modal__sng-champion-art {
+  position: relative;
+  align-self: stretch;
+  min-width: 0;
+}
+.chat-user-modal__sng-champion-art img {
+  position: absolute;
+  inset: 6px -12px -2px -18px;
+  width: calc(100% + 30px);
+  height: calc(100% - 4px);
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
+}
+.chat-user-modal__sng-champion-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-self: center;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 20px 0 12px 8px;
+}
+.chat-user-modal__sng-champion-copy small {
+  margin-bottom: 12px;
+  color: #d9c7a5;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+.chat-user-modal__sng-champion-copy em {
+  padding: 5px 13px;
+  border: 1px solid #ffe09b;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd66f, #ed9306);
+  color: #1b1206;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.chat-user-modal__sng-champion-banner--runner-up {
+  border-color: #c7d2fe;
+  background:
+    radial-gradient(circle at 18% 42%, rgba(129, 140, 248, 0.25), transparent 39%),
+    linear-gradient(110deg, #262538, #100d18 50%, #05080e);
+  box-shadow: 0 0 22px rgba(165, 180, 252, 0.2), inset 0 0 0 1px rgba(224, 231, 255, 0.12);
+}
+.chat-user-modal__sng-champion-banner--runner-up .chat-user-modal__sng-champion-copy em {
+  border-color: #eef2ff;
+  background: linear-gradient(180deg, #eef2ff, #a5b4fc);
+}
+.chat-user-modal__sng-champion-banner--runner-up .chat-user-modal__sng-champion-copy b {
+  color: #c7d2fe;
+}
+.chat-user-modal__sng-champion-copy strong {
+  max-width: 100%;
+  margin-top: 7px;
+  overflow: hidden;
+  color: #fff0c9;
+  font-size: clamp(29px, 8vw, 48px);
+  line-height: 0.95;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-user-modal__sng-champion-copy b {
+  margin-top: 7px;
+  color: #ffc84c;
+  font-size: clamp(17px, 4vw, 26px);
+  line-height: 1.05;
+}
+.chat-user-modal__sng-champion-watch {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border-top: 1px solid rgba(242, 168, 25, 0.42);
+  background: #0a0f18;
+  color: #ffe8b5;
+  font-size: 18px;
+  font-weight: 950;
+  text-align: center;
+}
+.chat-user-modal__sng-champion-banner:hover,
+.chat-user-modal__sng-champion-banner:focus-visible {
+  border-color: #ffd86e;
+  box-shadow: 0 0 28px rgba(242, 168, 25, 0.34), inset 0 0 0 1px rgba(255, 231, 172, 0.16);
+}
+@media (max-width: 430px) {
+  .chat-user-modal__sng-champion-banner {
+    grid-template-columns: 34% minmax(0, 1fr);
+    min-height: 190px;
+    padding-right: 10px;
+    padding-left: 8px;
+    border-radius: 18px;
+  }
+  .chat-user-modal__sng-champion-copy {
+    padding-left: 0;
+  }
+  .chat-user-modal__sng-champion-copy small {
+    margin-bottom: 8px;
+    font-size: 10px;
+  }
+  .chat-user-modal__sng-champion-copy strong {
+    font-size: 30px;
+  }
 }
