@@ -889,69 +889,6 @@
     return tr;
   }
 
-  function createSharedHistoryGhostRow(data, index, baseEntryAt, previousRake, addonIndex) {
-    var renderData = {};
-    Object.keys(data || {}).forEach(function (key) { renderData[key] = data[key]; });
-    renderData.saved = true;
-    renderData.baseEntryAt = baseEntryAt || renderData.baseEntryAt || renderData.entryAddedAt || renderData.createdAt;
-    var tr = createSharedRow(renderData, index);
-    tr.classList.add("admin-report-rakeback-row--history-ghost");
-    tr.removeAttribute("data-rakeback-row");
-    tr.removeAttribute("data-rakeback-shared-row");
-    tr.removeAttribute("data-rakeback-saved");
-    tr.removeAttribute("data-rakeback-persisted");
-    tr.setAttribute("data-rakeback-history-ghost", "1");
-    tr.setAttribute("data-rakeback-generated", "1");
-    tr.setAttribute("aria-hidden", "true");
-    tr.hidden = activeQuickFilter !== "all";
-    tr.querySelectorAll("input, select, button").forEach(function (control) {
-      control.disabled = true;
-      control.tabIndex = -1;
-    });
-    if (getSharedRowKind(data) === "addon") {
-      var parentLabel = tr.querySelector("[data-rakeback-addon-parent]");
-      var addonIndexLabel = parentLabel && parentLabel.querySelector("[data-rakeback-addon-index]");
-      var previousRakeLabel = parentLabel && parentLabel.querySelector("[data-rakeback-addon-previous-rake]");
-      if (addonIndexLabel) addonIndexLabel.textContent = "ПЗ №" + String(addonIndex || 1) + " ·";
-      if (previousRakeLabel) previousRakeLabel.textContent = "пред. " + (formatInputNumber(previousRake) || "0");
-      syncSharedRowAmount(tr, previousRake);
-    }
-    var actions = tr.querySelector(".admin-report-rakeback-actions");
-    if (actions) actions.innerHTML = '<span class="admin-report-rakeback-history-ghost__label">история</span>';
-    return tr;
-  }
-
-  function getPreviousSharedSeriesRows(row, sourceRows) {
-    var groupId = String(row && row.groupId || "").trim();
-    if (!groupId || getSharedRowKind(row) !== "addon") return [];
-    var targetKey = getSharedRowLocalKey(row);
-    var series = (Array.isArray(sourceRows) ? sourceRows : []).filter(function (candidate) {
-      return candidate && String(candidate.groupId || "").trim() === groupId && !isCarryForwardTemplateRow(candidate);
-    }).sort(compareRowsByEntryDateAsc);
-    var targetIndex = series.findIndex(function (candidate) {
-      return candidate === row || getSharedRowLocalKey(candidate) === targetKey;
-    });
-    return targetIndex > 0 ? series.slice(0, targetIndex) : [];
-  }
-
-  function appendPreviousSharedSeriesGhosts(fragment, row, sourceRows, baseIndex) {
-    if (!fragment || !row || getSharedRowKind(row) !== "addon") return;
-    var previousRows = getPreviousSharedSeriesRows(row, sourceRows);
-    var baseRow = previousRows.find(function (candidate) {
-      return getSharedRowKind(candidate) !== "addon";
-    });
-    var baseEntryAt = baseRow
-      ? rowEntryTime(baseRow) || normalizeTimeValue(baseRow.entryAddedAt || baseRow.createdAt || baseRow.standardAt)
-      : rowEntryTime(row) || normalizeTimeValue(row.entryAddedAt || row.createdAt || row.standardAt);
-    var previousRake = 0;
-    var addonIndex = 0;
-    previousRows.forEach(function (previousRow) {
-      if (getSharedRowKind(previousRow) === "addon") addonIndex += 1;
-      fragment.appendChild(createSharedHistoryGhostRow(previousRow, baseIndex, baseEntryAt, previousRake, addonIndex));
-      previousRake = parseNumber(previousRow.rake);
-    });
-  }
-
   function createTemplateRow(room, playerId, index, collapsed, defaults) {
     defaults = defaults || {};
     var defaultColor = normalizeRakebackRowColor(defaults.color || defaults.rowColor || defaults.highlightColor);
@@ -2083,7 +2020,6 @@
             baseIndex += 1;
             baseEntryByGroup[groupId] = entryAt;
           } else {
-            appendPreviousSharedSeriesGhosts(fragment, row, week && week.rows, Math.max(0, baseIndex - 1));
             renderRow = {};
             Object.keys(row || {}).forEach(function (key) { renderRow[key] = row[key]; });
             renderRow.baseEntryAt = baseEntryByGroup[groupId] || entryAt;
@@ -3119,8 +3055,6 @@
             if (getSharedRowKind(row) !== "addon") {
               archiveBaseIndex += 1;
               archiveBaseEntryByGroup[groupId] = entryAt;
-            } else {
-              appendPreviousSharedSeriesGhosts(archiveFragment, row, sharedRows, Math.max(0, archiveBaseIndex - 1));
             }
             var renderRow = row;
             if (getSharedRowKind(row) === "addon") {
@@ -3180,8 +3114,6 @@
         if (getSharedRowKind(row) !== "addon") {
           baseIndex += 1;
           baseEntryByGroup[groupId] = entryAt;
-        } else {
-          appendPreviousSharedSeriesGhosts(fragment, row, sharedRows, Math.max(0, baseIndex - 1));
         }
         var renderRow = row;
         if (getSharedRowKind(row) === "addon") {
