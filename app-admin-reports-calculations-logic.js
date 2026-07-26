@@ -575,6 +575,15 @@
         if (useAllReports && Array.isArray(calculationPeriodReportsCache)) return;
         fetchCalculationReports(base, q, useAllReports ? "all" : "currentWeek")
           .then(function (data) {
+            var items = data && data.ok && Array.isArray(data.reports) ? data.reports : [];
+            if (useAllReports || items.length) return data;
+            // The authoritative week boundary is Monday 06:00 MSK. If the
+            // optimized currentWeek endpoint is empty around the handover,
+            // fall back to the full list and filter it below with that exact
+            // boundary instead of showing false zeroes.
+            return fetchCalculationReports(base, q, "all");
+          })
+          .then(function (data) {
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
             if (useAllReports) calculationPeriodReportsCache = Array.isArray(items) ? items : [];
             else calculationReportsCache = Array.isArray(items) ? items : [];

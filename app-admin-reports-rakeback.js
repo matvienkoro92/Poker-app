@@ -1744,27 +1744,36 @@
     }
 
     function getMoscowDateStart(offsetDays) {
-      var now = new Date(Date.now() + MOSCOW_UTC_OFFSET_MS);
-      return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (offsetDays || 0)) - MOSCOW_UTC_OFFSET_MS;
+      var businessDate = new Date(Date.now() + MOSCOW_UTC_OFFSET_MS - REPORT_DAY_CUTOFF_MS);
+      return Date.UTC(
+        businessDate.getUTCFullYear(),
+        businessDate.getUTCMonth(),
+        businessDate.getUTCDate() + (offsetDays || 0),
+        REPORT_DAY_CUTOFF_MS / (60 * 60 * 1000),
+        0,
+        0,
+        0
+      ) - MOSCOW_UTC_OFFSET_MS;
     }
 
     function getRakebackPeriodBounds() {
       var today = getMoscowDateStart(0);
       var todayDate = new Date(today + MOSCOW_UTC_OFFSET_MS);
       var weekday = (todayDate.getUTCDay() + 6) % 7;
-      var monthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth(), 1) - MOSCOW_UTC_OFFSET_MS;
+      var cutoffHour = REPORT_DAY_CUTOFF_MS / (60 * 60 * 1000);
+      var monthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth(), 1, cutoffHour) - MOSCOW_UTC_OFFSET_MS;
       if (activePeriod === "today") return [today, today + RAKEBACK_DAY_MS - 1];
       if (activePeriod === "yesterday") return [today - RAKEBACK_DAY_MS, today - 1];
       if (activePeriod === "current_week") return [today - weekday * RAKEBACK_DAY_MS, today + RAKEBACK_DAY_MS - 1];
       if (activePeriod === "last_week") return [today - (weekday + 7) * RAKEBACK_DAY_MS, today - weekday * RAKEBACK_DAY_MS - 1];
       if (activePeriod === "current_month") return [monthStart, today + RAKEBACK_DAY_MS - 1];
       if (activePeriod === "last_month") {
-        var lastMonthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth() - 1, 1) - MOSCOW_UTC_OFFSET_MS;
+        var lastMonthStart = Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth() - 1, 1, cutoffHour) - MOSCOW_UTC_OFFSET_MS;
         return [lastMonthStart, monthStart - 1];
       }
       if (activePeriod === "custom") {
-        var from = periodDateFrom && periodDateFrom.value ? Date.parse(periodDateFrom.value + "T00:00:00+03:00") : 0;
-        var to = periodDateTo && periodDateTo.value ? Date.parse(periodDateTo.value + "T00:00:00+03:00") + RAKEBACK_DAY_MS - 1 : 0;
+        var from = periodDateFrom && periodDateFrom.value ? Date.parse(periodDateFrom.value + "T06:00:00+03:00") : 0;
+        var to = periodDateTo && periodDateTo.value ? Date.parse(periodDateTo.value + "T06:00:00+03:00") + RAKEBACK_DAY_MS - 1 : 0;
         return from || to ? [from || 0, to || Number.MAX_SAFE_INTEGER] : null;
       }
       return null;

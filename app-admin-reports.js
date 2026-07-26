@@ -1145,7 +1145,7 @@ function initAdminReportModal() {
   function getCashHistoryMskDateInfo(value) {
     var ms = getCashHistoryTimestampMs(value);
     if (!Number.isFinite(ms)) return null;
-    var shiftedMs = ms + REPORT_MSK_SHIFT_MS;
+    var shiftedMs = ms + REPORT_MSK_SHIFT_MS - REPORT_DAY_CUTOFF_MS;
     var shifted = new Date(shiftedMs);
     return {
       date: cashHistoryDateStringFromUtcMs(shiftedMs),
@@ -1154,7 +1154,7 @@ function initAdminReportModal() {
   }
 
   function getCashHistoryMskTodayString() {
-    return cashHistoryDateStringFromUtcMs(Date.now() + REPORT_MSK_SHIFT_MS);
+    return cashHistoryDateStringFromUtcMs(Date.now() + REPORT_MSK_SHIFT_MS - REPORT_DAY_CUTOFF_MS);
   }
 
   function getCashHistoryWeekStartString(dateString) {

@@ -5,9 +5,11 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   var isoDate = deps.isoDate || function (value) { return String(value || ""); };
   var localDateKey = deps.localDateKey || function (value) { return String(value || "").slice(0, 10); };
   var dateOnly = deps.dateOnly || function (value) { return String(value || "").slice(0, 10); };
+  var MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
+  var BUSINESS_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
   function businessDateKey(value) {
     var ms = value instanceof Date ? value.getTime() : Date.parse(String(value || ""));
-    return Number.isFinite(ms) ? new Date(ms - 3 * 60 * 60 * 1000).toISOString().slice(0, 10) : "";
+    return Number.isFinite(ms) ? new Date(ms + MSK_OFFSET_MS - BUSINESS_DAY_CUTOFF_MS).toISOString().slice(0, 10) : "";
   }
 
   function setDefaultDates() {

@@ -1080,6 +1080,42 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.statusCode, 200, "unblocked app user can use chat again");
 }
 
+async function testCrmWeekUsesMondaySixMoscowCutoff() {
+  const utils = require(path.join(root, "lib", "player-crm-utils"));
+  const reportShifts = loadHandler("admin-report-shifts")._test;
+  const originalNow = Date.now;
+  try {
+    Date.now = () => Date.parse("2026-07-27T02:59:59.999Z");
+    let current = utils.rangeForPeriodKey("current_week");
+    let previous = utils.rangeForPeriodKey("last_week");
+    assert.strictEqual(current.from, "2026-07-20", "before Monday 06:00 MSK current week still starts on the previous Monday");
+    assert.strictEqual(current.to, "2026-07-26", "before Monday 06:00 MSK Sunday is still the current business day");
+    assert.strictEqual(previous.from, "2026-07-13", "previous week starts one report week earlier before handover");
+    assert.strictEqual(previous.to, "2026-07-19", "previous week ends before the active report week");
+    assert.strictEqual(
+      reportShifts.crmDisplayWeekStartMs(),
+      Date.parse("2026-07-20T03:00:00.000Z"),
+      "reports keep the ending week active until Monday 06:00 MSK"
+    );
+
+    Date.now = () => Date.parse("2026-07-27T03:00:00.000Z");
+    current = utils.rangeForPeriodKey("current_week");
+    previous = utils.rangeForPeriodKey("last_week");
+    assert.strictEqual(current.from, "2026-07-27", "at Monday 06:00 MSK a new current week starts");
+    assert.strictEqual(current.to, "2026-07-27", "the new current week initially contains Monday");
+    assert.strictEqual(previous.from, "2026-07-20", "after handover last week starts on the preceding Monday");
+    assert.strictEqual(previous.to, "2026-07-26", "after handover last week ends on the preceding Sunday");
+    assert.strictEqual(current.fromMs, Date.parse("2026-07-27T03:00:00.000Z"), "server range starts exactly at Monday 06:00 MSK");
+    assert.strictEqual(
+      reportShifts.crmDisplayWeekStartMs(),
+      Date.parse("2026-07-27T03:00:00.000Z"),
+      "reports switch to the new week exactly at Monday 06:00 MSK"
+    );
+  } finally {
+    Date.now = originalNow;
+  }
+}
+
 async function testRaffleJoinLeave(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -5968,6 +6004,7 @@ async function main() {
     ["private cash random seat assignment", testPrivateCashRandomSeatAssignment],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["crm app user block", testCrmAppUserBlock],
+    ["crm week Monday 06:00 MSK cutoff", testCrmWeekUsesMondaySixMoscowCutoff],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle current week returns calculation", testRaffleCurrentWeekReturnsCalculation],
     ["raffle access level gate", testRaffleAccessLevelGate],
