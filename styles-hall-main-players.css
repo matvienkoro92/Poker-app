@@ -687,13 +687,14 @@
 .hall-fish-level-search {
   position: sticky;
   z-index: 8;
-  top: 0;
+  top: -10px;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 14px;
-  padding: 5px 0 10px;
-  background: linear-gradient(180deg, #101827 72%, rgba(16, 24, 39, 0));
+  margin: -10px 0 14px;
+  padding: 10px 0;
+  background: #101827;
+  box-shadow: 0 8px 10px #101827;
 }
 
 .hall-fish-level-search__field {

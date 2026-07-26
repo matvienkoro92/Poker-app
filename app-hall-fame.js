@@ -1080,6 +1080,36 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
   '</button>';
 }
 
+function hallFishSearchLatinToCyrillic(value) {
+  var text = String(value || "").toLowerCase();
+  [
+    ["shch", "щ"], ["yo", "ё"], ["zh", "ж"], ["kh", "х"], ["ts", "ц"],
+    ["ch", "ч"], ["sh", "ш"], ["yu", "ю"], ["ya", "я"], ["ye", "е"],
+  ].forEach(function (pair) {
+    text = text.split(pair[0]).join(pair[1]);
+  });
+  var map = {
+    a: "а", b: "б", c: "к", d: "д", e: "е", f: "ф", g: "г", h: "х",
+    i: "и", j: "дж", k: "к", l: "л", m: "м", n: "н", o: "о", p: "п",
+    q: "к", r: "р", s: "с", t: "т", u: "у", v: "в", w: "в", x: "кс",
+    y: "й", z: "з",
+  };
+  return text.replace(/[a-z]/g, function (letter) { return map[letter] || letter; });
+}
+
+function hallFishSearchCyrillicToLatin(value) {
+  var map = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh",
+    з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o",
+    п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts",
+    ч: "ch", ш: "sh", щ: "shch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu",
+    я: "ya",
+  };
+  return String(value || "").toLowerCase().replace(/[а-яё]/g, function (letter) {
+    return map[letter] != null ? map[letter] : letter;
+  });
+}
+
 function hallFishLevelSearchText(row) {
   var parts = [
     row && row.name,
@@ -1095,6 +1125,10 @@ function hallFishLevelSearchText(row) {
   ].map(function (value) {
     return String(value || "").toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
   }).filter(Boolean);
+  parts.slice().forEach(function (part) {
+    parts.push(hallFishSearchLatinToCyrillic(part));
+    parts.push(hallFishSearchCyrillicToLatin(part));
+  });
   var base = parts.join(" ");
   [
     ["porquinho", "поркиньо", "поркиньё", "поркинио"],
