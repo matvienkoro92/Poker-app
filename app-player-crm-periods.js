@@ -260,7 +260,19 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
     var q = String(state.search || "").trim().toLowerCase();
     return segmentPlayers(state.filter).filter(function (p) {
       if (!q) return true;
-      var hay = [p.name, p.handle, p.source, p.manager, p.note].concat(p.tags || []).join(" ").toLowerCase();
+      var hay = [
+        p.id,
+        p.accountId,
+        p.dtId,
+        p.pokerPlusUserId,
+        p.p21Id,
+        p.poker21Id,
+        p.name,
+        p.handle,
+        p.source,
+        p.manager,
+        p.note,
+      ].concat(p.runtimeIds || [], p.telegramIds || [], p.tags || []).join(" ").toLowerCase();
       return hay.indexOf(q) >= 0;
     });
   }

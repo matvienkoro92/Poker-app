@@ -1226,10 +1226,10 @@ var HALL_FISH_SNG_GROUPS = [
     title: "1-й командный СНГ-баттл",
     subtitle: "Финалисты командного турнира",
     finalists: [
-      { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"] },
-      { name: "Штукатур", aliases: ["штукатур", "shtukatur"] },
       { name: "Hakas", aliases: ["hakas", "хакас"], winner: true },
       { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"], winner: true },
+      { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"], finalist: true },
+      { name: "Штукатур", aliases: ["штукатур", "shtukatur"], finalist: true },
     ],
   },
   {
@@ -1237,7 +1237,7 @@ var HALL_FISH_SNG_GROUPS = [
     subtitle: "Финалисты одиночного турнира",
     finalists: [
       { name: "Рыбнадзор", aliases: ["рыбнадзор", "мужначас", "muzhnachas"], winner: true },
-      { name: "Фокс", aliases: ["фокс", "misterfox", "mrfox"] },
+      { name: "Фокс", aliases: ["фокс", "misterfox", "mrfox"], finalist: true },
     ],
   },
 ];
@@ -1255,7 +1255,9 @@ function hallFishFindSngFinalistRow(rows, finalist) {
 function hallFishRenderSngFinalists(rows) {
   var groups = HALL_FISH_SNG_GROUPS.map(function (group) {
     var cards = group.finalists.map(function (finalist, index) {
-      var winnerBadge = finalist.winner ? '<span class="hall-fish-sng-finalists__winner">★ Победитель</span>' : "";
+      var winnerBadge = finalist.winner
+        ? '<span class="hall-fish-sng-finalists__winner">★ Победитель</span>'
+        : (finalist.finalist ? '<span class="hall-fish-sng-finalists__winner hall-fish-sng-finalists__winner--finalist">Финалист</span>' : "");
       var row = hallFishFindSngFinalistRow(rows, finalist);
       if (row) {
         var card = hallFishLevelRowHtml(row, index + 1, "hall-fish-level-row--sng-finalist" + (finalist.winner ? " hall-fish-level-row--sng-winner" : ""));

@@ -518,6 +518,12 @@
   text-transform: uppercase;
   box-shadow: 0 0 14px rgba(251, 191, 36, 0.28);
 }
+.hall-fish-sng-finalists__winner--finalist {
+  border-color: rgba(148, 194, 255, 0.78);
+  background: linear-gradient(180deg, #d9eaff, #78a8e8);
+  color: #071528;
+  box-shadow: 0 0 14px rgba(96, 165, 250, 0.24);
+}
 .hall-fish-level-row--sng-finalist {
   border-color: rgba(251, 146, 60, 0.58);
   background:
@@ -1790,8 +1796,16 @@
   }
   .hall-fish-modal__tab {
     min-height: 36px;
-    padding: 7px 6px;
-    font-size: 10px;
+    padding: 7px 3px;
+    font-size: clamp(7.8px, 2.35vw, 10px);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .hall-fish-modal__tab[data-hall-fish-tab="birthdays"],
+  .hall-fish-modal__tab[data-hall-fish-tab="vote"] {
+    font-size: clamp(7.2px, 2.15vw, 9px);
+    letter-spacing: -0.03em;
   }
   .hall-fish-achievement-tab {
     min-height: 32px;

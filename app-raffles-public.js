@@ -291,6 +291,8 @@ function initRafflesPublicRuntime(opts) {
       }
       var btn = e.target.closest(".raffle-participants__profile-btn");
       if (!btn || !root.contains(btn)) return;
+      var selection = typeof window.getSelection === "function" ? window.getSelection() : null;
+      if (selection && String(selection).trim()) return;
       e.preventDefault();
       var id = btn.getAttribute("data-user-id");
       var nm = (btn.getAttribute("data-user-name") || "").trim() || id;

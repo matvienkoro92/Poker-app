@@ -515,8 +515,8 @@ function initRafflesCompletedRuntime(opts) {
         }
         followupHtml =
           "<span class=\"raffle-winner-followup\">" +
-          "<span class=\"raffle-winner-followup__seat\">" + seatButton + noSeatButton + "</span>" +
-          outcomeButtons + weekReturnsHtml +
+          "<span class=\"raffle-winner-followup__seat\">" + seatButton + noSeatButton + weekReturnsHtml + "</span>" +
+          outcomeButtons +
           "</span>";
       }
       var adminControls =
@@ -2014,6 +2014,24 @@ function initRafflesCompletedRuntime(opts) {
     }
   }
 
+  function raffleRecentCompletedWasYesterday(raffle) {
+    var completed = raffleCompletedDate(raffle);
+    if (!completed) return false;
+    function moscowDateKey(date) {
+      try {
+        return new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Europe/Moscow",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).format(date);
+      } catch (eMoscowDate) {
+        return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
+      }
+    }
+    return moscowDateKey(completed) === moscowDateKey(new Date(Date.now() - 24 * 60 * 60 * 1000));
+  }
+
   function raffleRecentCompletedTabsHtml(items) {
     var recent = Array.isArray(items) ? items.slice(0, 2) : [];
     if (!recent.length) return "";
@@ -2021,13 +2039,14 @@ function initRafflesCompletedRuntime(opts) {
     var tabs = recent.map(function (raffle, index) {
       var kind = raffleRecentCompletedKindLabel(raffle);
       var time = raffleRecentCompletedResultTime(raffle);
+      var yesterday = raffleRecentCompletedWasYesterday(raffle);
       var active = index === 0;
       return "<button type=\"button\" class=\"raffles-recent-tab" +
         (active ? " raffles-recent-tab--active" : "") +
         "\" role=\"tab\" aria-selected=\"" + (active ? "true" : "false") +
         "\" data-raffles-recent-tab=\"" + index + "\">" +
         "<strong>" + escapeHtml(kind) + "</strong>" +
-        (time ? "<span>" + escapeHtml(time) + "</span>" : "") +
+        (time ? "<span>" + escapeHtml(time + (yesterday ? " (вчера)" : "")) + "</span>" : "") +
         "</button>";
     }).join("");
     var panels = recent.map(function (raffle, index) {
