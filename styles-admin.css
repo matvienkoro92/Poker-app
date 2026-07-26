@@ -1787,6 +1787,49 @@ button.admin-report-rakeback-summary__row:focus-visible {
   outline: 2px solid rgba(255, 231, 176, 0.7);
   outline-offset: 3px;
 }
+.admin-report-rakeback-row--history-ghost {
+  pointer-events: none;
+  opacity: 0.42;
+  filter: grayscale(0.7) brightness(0.62);
+}
+.admin-report-rakeback-row--history-ghost[hidden] {
+  display: none !important;
+}
+#adminReportModal .admin-report-rakeback-row--history-ghost > td {
+  min-height: 26px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  background: rgba(5, 7, 11, 0.94) !important;
+  color: rgba(203, 213, 225, 0.7);
+}
+.admin-report-rakeback-history-ghost__room,
+.admin-report-rakeback-history-ghost__value,
+.admin-report-rakeback-history-ghost__discount,
+.admin-report-rakeback-history-ghost__amount {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+}
+.admin-report-rakeback-history-ghost__id {
+  display: grid;
+  gap: 1px;
+  font-size: 9px;
+  font-weight: 850;
+}
+.admin-report-rakeback-history-ghost__id small {
+  color: rgba(148, 163, 184, 0.72);
+  font-size: 7px;
+}
+.admin-report-rakeback-history-ghost__label {
+  display: inline-flex;
+  padding: 2px 5px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  color: rgba(203, 213, 225, 0.62);
+  font-size: 7px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
 .admin-report-rakeback-summary__row--room {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

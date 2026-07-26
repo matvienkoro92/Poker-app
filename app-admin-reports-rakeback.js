@@ -889,6 +889,31 @@
     return tr;
   }
 
+  function createLightweightHistoryRow(data, baseIndex, previousRake, addonIndex) {
+    var room = normalizeRoom(data && data.room || "P21");
+    var kind = getSharedRowKind(data);
+    var currentRake = parseNumber(data && data.rake);
+    var effectiveRake = kind === "addon" ? currentRake - parseNumber(previousRake) : currentRake;
+    var percent = parseNumber(data && data.percent);
+    var amount = getReportAmount(room, Math.round(effectiveRake * percent / 100 * (data && data.discount15 ? 0.85 : 1) * 100) / 100);
+    var entryAt = normalizeTimeValue(data && (data.entryAddedAt || data.createdAt || data.standardAt));
+    var marker = kind === "addon" ? "↳ ПЗ " + String(addonIndex || 1) : String((baseIndex || 0) + 1);
+    var tr = document.createElement("tr");
+    tr.className = "admin-report-rakeback-row admin-report-rakeback-row--history-ghost";
+    tr.setAttribute("data-rakeback-history-ghost", "1");
+    tr.setAttribute("data-rakeback-generated", "1");
+    tr.setAttribute("aria-hidden", "true");
+    tr.innerHTML =
+      '<td><span class="admin-report-rakeback-history-ghost__room">' + escapeHtml(ROOM_LABELS[room] || room) + "</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__id"><small>' + escapeHtml(marker) + " · " + escapeHtml(formatEntryDateLabel(entryAt)) + "</small>" + escapeHtml(data && (data.playerId || data.id) || "") + "</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__value">' + escapeHtml(formatInputNumber(currentRake) || "0") + "</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__value">' + escapeHtml(formatInputNumber(percent) || "0") + "%</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__discount">' + (data && (data.discount15 || data.subtract15) ? "−15%" : "—") + "</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__amount">' + escapeHtml(formatInputNumber(amount) || "0") + "</span></td>" +
+      '<td><span class="admin-report-rakeback-history-ghost__label">история</span></td>';
+    return tr;
+  }
+
   function createTemplateRow(room, playerId, index, collapsed, defaults) {
     defaults = defaults || {};
     var defaultColor = normalizeRakebackRowColor(defaults.color || defaults.rowColor || defaults.highlightColor);
@@ -979,6 +1004,29 @@
     var rakebackPlayerNicknames = {};
     var rakebackPlayerNicknameRequestKey = "";
     var bound = false;
+
+    function appendLightweightSeriesHistory(fragment, row, sourceRows, baseIndex) {
+      if (!fragment || !row || getSharedRowKind(row) !== "addon" || activeQuickFilter !== "all") return;
+      var groupId = String(row.groupId || "").trim();
+      if (!groupId) return;
+      var targetKey = getSharedRowLocalKey(row);
+      var series = (Array.isArray(sourceRows) ? sourceRows : []).filter(function (candidate) {
+        return candidate &&
+          String(candidate.groupId || "").trim() === groupId &&
+          !isCarryForwardTemplateRow(candidate);
+      }).sort(compareRowsByEntryDateAsc);
+      var targetIndex = series.findIndex(function (candidate) {
+        return candidate === row || getSharedRowLocalKey(candidate) === targetKey;
+      });
+      if (targetIndex <= 0) return;
+      var previousRake = 0;
+      var addonIndex = 0;
+      series.slice(0, targetIndex).forEach(function (previousRow) {
+        if (getSharedRowKind(previousRow) === "addon") addonIndex += 1;
+        fragment.appendChild(createLightweightHistoryRow(previousRow, baseIndex, previousRake, addonIndex));
+        previousRake = parseNumber(previousRow.rake);
+      });
+    }
 
     function formatAuditAuthor(raw) {
       var value = String(raw || "").trim();
@@ -2020,6 +2068,7 @@
             baseIndex += 1;
             baseEntryByGroup[groupId] = entryAt;
           } else {
+            appendLightweightSeriesHistory(fragment, row, week && week.rows, Math.max(0, baseIndex - 1));
             renderRow = {};
             Object.keys(row || {}).forEach(function (key) { renderRow[key] = row[key]; });
             renderRow.baseEntryAt = baseEntryByGroup[groupId] || entryAt;
@@ -3055,6 +3104,8 @@
             if (getSharedRowKind(row) !== "addon") {
               archiveBaseIndex += 1;
               archiveBaseEntryByGroup[groupId] = entryAt;
+            } else {
+              appendLightweightSeriesHistory(archiveFragment, row, archiveRows, Math.max(0, archiveBaseIndex - 1));
             }
             var renderRow = row;
             if (getSharedRowKind(row) === "addon") {
@@ -3114,6 +3165,8 @@
         if (getSharedRowKind(row) !== "addon") {
           baseIndex += 1;
           baseEntryByGroup[groupId] = entryAt;
+        } else {
+          appendLightweightSeriesHistory(fragment, row, visibleShared, Math.max(0, baseIndex - 1));
         }
         var renderRow = row;
         if (getSharedRowKind(row) === "addon") {
