@@ -9891,15 +9891,18 @@ body.club-choice-vote-open {
 .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live { gap:9px; padding:8px 14px; font-size:clamp(15px,2vw,20px)!important; }
 .sng-champions-modal__tournament-option .sng-champions-modal__tournament-live > i { width:12px; height:12px; flex-basis:12px; }
 @media (max-width:640px) {
-  .sng-champions-modal__completed-winner--team { grid-template-columns:minmax(180px,54%) minmax(0,1fr); gap:5px; padding:10px 9px 10px 5px; }
-  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-avatar { min-height:205px; }
-  .sng-champions-modal__completed-team-art { min-height:205px; padding:10px 2px 2px; }
-  .sng-champions-modal__completed-team-player { width:58%; height:193px; margin:0 -4%; }
-  .sng-champions-modal__completed-team-player img { transform:scale(1.1); }
-  .sng-champions-modal__completed-team-player:first-child img { transform:translateX(3%) scale(1.1); }
-  .sng-champions-modal__completed-team-player:last-child img { transform:translateX(-3%) scale(1.1); }
-  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-main strong { font-size:clamp(18px,5.4vw,25px); }
-  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-main em { font-size:clamp(12px,3.8vw,17px); }
+  .sng-champions-modal__completed-winner--team { grid-template-columns:minmax(205px,62%) minmax(0,1fr); gap:0; padding:5px 8px 5px 2px; }
+  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-avatar { min-height:190px; }
+  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-main { padding-left:5px; gap:4px; }
+  .sng-champions-modal__completed-team-art { min-height:190px; padding:0; }
+  .sng-champions-modal__completed-team-player { width:54%; height:190px; margin:0 -2%; }
+  .sng-champions-modal__completed-team-player img { transform:scale(1.32); }
+  .sng-champions-modal__completed-team-player:first-child img { transform:translateX(3%) scale(1.32); }
+  .sng-champions-modal__completed-team-player:last-child img { transform:translateX(-3%) scale(1.32); }
+  .sng-champions-modal__completed-winner--team .sng-champions-modal__completed-title { margin-bottom:2px; font-size:9.5px; line-height:1.08; }
+  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-badge { min-height:20px; padding:0 8px; font-size:9px; }
+  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-main strong { font-size:clamp(17px,4.8vw,21px); line-height:.95; }
+  .sng-champions-modal__completed-winner--team .club-choice-vote-modal__hero-winner-main em { font-size:clamp(11px,3.4vw,14px); line-height:1; }
   .sng-champions-modal__tournament-content {
     padding:7px 20px 5px 10px;
   }
