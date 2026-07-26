@@ -132,6 +132,7 @@ if (chatUserModalEl) {
   var modalStatusCards = modalStatusScale ? modalStatusScale.querySelectorAll(".chat-user-modal__status-card") : [];
   var modalPersonalBlock = document.getElementById("chatUserModalPersonalBlock");
   var modalWriteBtn = document.getElementById("chatUserModalWriteBtn");
+  var modalCopyProfileBtn = document.getElementById("chatUserModalCopyProfileBtn");
   var modalSuperpowerBtn = document.getElementById("chatUserModalSuperpowerBtn");
   var superpowerModal = document.getElementById("profileSuperpowerModal");
   var superpowerModalArt = document.getElementById("profileSuperpowerModalArt");
@@ -2624,6 +2625,58 @@ if (chatUserModalEl) {
         if (typeof setView === "function") setView("chat");
         if (typeof window.chatOpenConvFromDialogs === "function") window.chatOpenConvFromDialogs(uid, uname);
         else openConversation(uid, uname, null);
+      }
+    });
+  }
+  if (modalCopyProfileBtn) {
+    modalCopyProfileBtn.addEventListener("click", function () {
+      var profileId = String(chatUserModalUserId || "").trim();
+      if (!profileId) return;
+      var startParam = "player_profile_" + profileId.replace(/[^A-Za-z0-9_-]/g, "_");
+      var link = "";
+      if (typeof buildMiniAppStartLink === "function") link = buildMiniAppStartLink(startParam);
+      if (!link && typeof pokerBuildWebsiteStartLink === "function") link = pokerBuildWebsiteStartLink(startParam);
+      if (!link && window.location) {
+        var baseUrl = String(window.location.origin || "") + String(window.location.pathname || "/");
+        link = baseUrl + (baseUrl.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(startParam);
+      }
+      function showCopiedMessage(ok) {
+        var previous = document.querySelector(".chat-user-modal__copy-toast");
+        if (previous) previous.remove();
+        var toast = document.createElement("div");
+        toast.className = "chat-user-modal__copy-toast";
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
+        toast.textContent = ok ? "Ссылка на профиль скопирована" : "Не удалось скопировать ссылку";
+        document.body.appendChild(toast);
+        requestAnimationFrame(function () { toast.classList.add("chat-user-modal__copy-toast--visible"); });
+        setTimeout(function () {
+          toast.classList.remove("chat-user-modal__copy-toast--visible");
+          setTimeout(function () { toast.remove(); }, 220);
+        }, 2200);
+      }
+      function fallbackCopy() {
+        try {
+          var input = document.createElement("textarea");
+          input.value = link;
+          input.setAttribute("readonly", "");
+          input.style.position = "fixed";
+          input.style.opacity = "0";
+          document.body.appendChild(input);
+          input.select();
+          var copied = document.execCommand("copy");
+          input.remove();
+          showCopiedMessage(copied);
+        } catch (eFallbackCopy) {
+          showCopiedMessage(false);
+        }
+      }
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(link).then(function () {
+          showCopiedMessage(true);
+        }).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
       }
     });
   }

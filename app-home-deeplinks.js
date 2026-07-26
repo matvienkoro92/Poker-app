@@ -98,6 +98,30 @@ function pokerInitHomeDeepLinks(opts) {
       }, 0);
       return;
     }
+    var playerProfileMatch = startParam.match(/^player_profile_([A-Za-z0-9_-]+)$/);
+    if (playerProfileMatch && playerProfileMatch[1]) {
+      var sharedProfileId = playerProfileMatch[1];
+      setTimeout(function () {
+        if (typeof setView === "function") setView("home");
+        var ready = typeof window.pokerEnsureLazyDomains === "function"
+          ? window.pokerEnsureLazyDomains(["chat"], { styles: true, scripts: true })
+          : Promise.resolve();
+        Promise.resolve(ready).catch(function () {}).then(function () {
+          retryDeepLinkAction(function () {
+            if (typeof window.pokerOpenChatUserModalSafe === "function") {
+              window.pokerOpenChatUserModalSafe(sharedProfileId, "Игрок", "");
+              return true;
+            }
+            if (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true) {
+              window.openChatUserModalById(sharedProfileId, "Игрок", "");
+              return true;
+            }
+            return false;
+          }, 40);
+        });
+      }, 0);
+      return;
+    }
     if (startParam === "spring_rating_league_1" || startParam === "spring_rating_league_2") {
       var leagueNum = startParam === "spring_rating_league_1" ? "1" : "2";
       openViewThen("spring-rating", function () {
