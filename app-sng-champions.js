@@ -405,15 +405,25 @@
     return String(player && (player.pokerPlusNickname || player.displayName) || "Игрок").trim().replace(/^@+/, "") || "Игрок";
   }
 
+  function playerProfileAttrs(player) {
+    var profileId = player && player.accountId ? String(player.accountId) : "";
+    if (!profileId) return "";
+    return ' data-sng-profile="' + escapeHtml(profileId) +
+      '" data-sng-profile-name="' + escapeHtml(playerName(player)) +
+      '" data-sng-profile-avatar="' + escapeHtml(playerAvatar(player)) + '"';
+  }
+
   function teamMembersHtml(player, className, match) {
     if (!player || player.team !== true || !Array.isArray(player.members) || !player.members.length) return "";
     var teamReady = !!(match && match.readyById && match.readyById[player.id] === true);
     var memberReady = match && match.readyMemberIds && typeof match.readyMemberIds === "object" ? match.readyMemberIds : {};
     return '<small class="' + escapeHtml(className) + '">' + player.members.map(function (member) {
       var ready = teamReady || memberReady[member.id] === true;
-      return '<span class="sng-champions-modal__team-member-ready sng-champions-modal__team-member-ready--' + (ready ? "yes" : "waiting") + '">' +
+      var tag = member && member.accountId ? "button" : "span";
+      var attrs = tag === "button" ? ' type="button"' + playerProfileAttrs(member) : "";
+      return '<' + tag + ' class="sng-champions-modal__team-member-ready sng-champions-modal__team-member-ready--' + (ready ? "yes" : "waiting") + '"' + attrs + '>' +
         (ready ? "✓ " : "○ ") + escapeHtml(playerName(member)) + (ready ? " — готов" : " — не готов") +
-      '</span>';
+      '</' + tag + '>';
     }).join("") + '</small>';
   }
 
@@ -1585,12 +1595,16 @@
     var compactMembers = player && player.team === true && Array.isArray(player.members) && player.members.length
       ? '<small class="sng-champions-modal__map-team-members">' + player.members.map(function (member) {
           var memberReady = ready || !!(match.readyMemberIds && match.readyMemberIds[member.id] === true);
-          return '<span class="sng-champions-modal__team-member-ready--' + (memberReady ? 'yes' : 'waiting') + '">' +
+          var memberTag = member && member.accountId ? "button" : "span";
+          var memberAttrs = memberTag === "button" ? ' type="button"' + playerProfileAttrs(member) : "";
+          return '<' + memberTag + ' class="sng-champions-modal__map-team-member sng-champions-modal__team-member-ready--' + (memberReady ? 'yes' : 'waiting') + '"' + memberAttrs + '>' +
             (memberReady ? '✓ ' : '') + escapeHtml(playerName(member)) +
-          '</span>';
+          '</' + memberTag + '>';
         }).join("") + '</small>'
       : "";
-    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '">' +
+    var profileAttrs = player.team === true ? "" : playerProfileAttrs(player);
+    var profileRole = profileAttrs ? ' role="button" tabindex="0"' : "";
+    return '<span class="sng-champions-modal__map-player' + (advanced ? " sng-champions-modal__map-player--advanced" : "") + (ready && !match.winnerId ? " sng-champions-modal__map-player--ready" : "") + (lost ? " sng-champions-modal__map-player--lost" : "") + (won ? " sng-champions-modal__map-player--winner" : "") + (waitingForOpponent ? " sng-champions-modal__map-player--waiting" : "") + (unplayed ? " sng-champions-modal__map-player--unplayed" : "") + '"' + profileRole + profileAttrs + '>' +
       '<span class="sng-champions-modal__map-player-name">' + escapeHtml(playerName(player)) + '</span>' +
       compactMembers +
       playerMetaHtml(player, "sng-champions-modal__map-player-meta") +
@@ -2159,6 +2173,8 @@
     }
     var profile = event.target && event.target.closest ? event.target.closest("[data-sng-profile]") : null;
     if (profile) {
+      event.preventDefault();
+      event.stopPropagation();
       var profileId = profile.getAttribute("data-sng-profile") || "";
       var profileName = profile.getAttribute("data-sng-profile-name") || "Игрок";
       var profileAvatar = profile.getAttribute("data-sng-profile-avatar") || "";
@@ -2481,6 +2497,12 @@
 
   function onModalKeydown(event) {
     if (event.key !== "Enter" && event.key !== " ") return;
+    var profile = event.target && event.target.closest ? event.target.closest("[data-sng-profile]") : null;
+    if (profile) {
+      event.preventDefault();
+      profile.click();
+      return;
+    }
     var mapMatch = event.target && event.target.closest ? event.target.closest("[data-sng-map-match]") : null;
     if (!mapMatch) return;
     event.preventDefault();

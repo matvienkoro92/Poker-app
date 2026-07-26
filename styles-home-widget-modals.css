@@ -3099,14 +3099,36 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__team-member-ready {
+  display: block;
+  width: fit-content;
   min-width: 0;
+  padding: 0;
+  border: 0;
   overflow: hidden;
+  background: transparent;
+  font: inherit;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .sng-champions-modal__team-member-ready--yes { color: #86efac; text-shadow: 0 0 7px rgba(74, 222, 128, 0.5); }
 .sng-champions-modal__team-member-ready--waiting { color: rgba(255, 239, 201, 0.6); }
+
+.sng-champions-modal__team-member-ready[data-sng-profile],
+.sng-champions-modal__map-player[data-sng-profile],
+.sng-champions-modal__map-team-member[data-sng-profile] {
+  cursor: pointer;
+}
+
+.sng-champions-modal__team-member-ready[data-sng-profile]:hover,
+.sng-champions-modal__team-member-ready[data-sng-profile]:focus-visible,
+.sng-champions-modal__map-team-member[data-sng-profile]:hover,
+.sng-champions-modal__map-team-member[data-sng-profile]:focus-visible {
+  color: #fff1bd;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 .sng-champions-modal__bracket-player-level span {
   min-width: 0;
@@ -4475,6 +4497,17 @@ button.sng-champions-modal__singles-duel-player {
   font-size: 0.76em;
   font-weight: 800;
   line-height: 0.95;
+}
+
+.sng-champions-modal__map-team-member {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
 }
 
 .sng-champions-modal__map-team-members > span {
