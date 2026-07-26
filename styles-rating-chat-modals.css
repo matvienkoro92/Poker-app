@@ -485,45 +485,27 @@
   padding-bottom: 10px;
   box-sizing: border-box;
 }
-.chat-user-modal__utility-row {
+.chat-user-modal__write-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) 48px;
   gap: 8px;
 }
-.chat-user-modal__utility-row .chat-user-modal__superpower-btn {
-  min-width: 0;
-  min-height: 48px;
-  padding: 0 7px;
-  font-size: 11px;
-}
-.chat-user-modal__utility-row .chat-user-modal__superpower-btn[hidden] + .chat-user-modal__copy-profile-btn {
-  grid-column: 1 / -1;
-}
 .chat-user-modal__copy-profile-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-width: 0;
+  display: grid;
+  place-items: center;
+  min-width: 48px;
   min-height: 48px;
-  padding: 0 9px;
-  border: 1px solid rgba(255, 210, 111, 0.86);
+  padding: 0;
+  border: 1px solid rgba(255, 198, 88, 0.45);
   border-radius: 12px;
-  background:
-    radial-gradient(circle at 28% 0%, rgba(255, 225, 130, 0.22), transparent 52%),
-    linear-gradient(180deg, #273247, #111827);
-  color: #ffe3a0;
-  font: inherit;
-  font-size: 10px;
-  font-weight: 900;
-  white-space: nowrap;
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(5, 10, 19, 0.98));
+  color: #ffd978;
   cursor: pointer;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.13), 0 0 14px rgba(245, 158, 11, 0.12);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
 }
 .chat-user-modal__copy-profile-btn svg {
-  flex: 0 0 auto;
-  width: 17px;
-  height: 17px;
+  width: 21px;
+  height: 21px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.9;
@@ -2349,27 +2331,18 @@
     padding: 8px 8px;
     font-size: 10.5px;
   }
-  .chat-user-modal__utility-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px;
-  }
-  .chat-user-modal__utility-row .chat-user-modal__superpower-btn {
-    min-width: 0;
-    min-height: 35px;
-    padding: 0 3px;
-    gap: 2px;
-    font-size: 8px;
+  .chat-user-modal__write-row {
+    grid-template-columns: minmax(0, 1fr) 35px;
+    gap: 5px;
   }
   .chat-user-modal__copy-profile-btn {
+    min-width: 35px;
     min-height: 35px;
-    padding: 0 3px;
     border-radius: 10px;
-    gap: 2px;
-    font-size: 7.5px;
   }
   .chat-user-modal__copy-profile-btn svg {
-    width: 12px;
-    height: 12px;
+    width: 17px;
+    height: 17px;
   }
 
   .chat-user-modal__top-actions .chat-user-modal__friend-btn {
@@ -2633,11 +2606,6 @@
     padding: 7px 6px;
     font-size: 10px;
   }
-  .chat-user-modal__copy-profile-btn {
-    min-height: 33px;
-    font-size: 7px;
-  }
-
   .chat-user-modal__top-actions .chat-user-modal__friend-btn {
     display: flex;
     align-items: center;
