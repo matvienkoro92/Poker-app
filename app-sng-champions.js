@@ -994,11 +994,9 @@
     var art = winnerMembers.length ? "" : sngPlayerArt({ displayName: winnerName, pokerPlusNickname: winnerName });
     var winnersArtHtml = winnerMembers.length
       ? '<span class="sng-champions-modal__completed-team-art">' + winnerMembers.map(function (member) {
-          var memberName = playerName(member);
           var memberArt = sngPlayerArt(member);
           return '<span class="sng-champions-modal__completed-team-player">' +
             (memberArt ? '<img src="' + escapeHtml(memberArt) + '" alt="" loading="lazy" decoding="async">' : '<b>' + escapeHtml(playerInitial(member)) + '</b>') +
-            '<em>' + escapeHtml(memberName) + '</em>' +
           '</span>';
         }).join("") + '</span>'
       : (art ? '<span class="club-choice-vote-modal__hero-art" aria-hidden="true"><img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async"></span>' : '');
