@@ -112,7 +112,12 @@ function initPlayerCrmStatsRuntime(deps) {
       var channelKey = subscribedKey === "pushSubscribedAt" ? "push" : "bot";
       return stateWasActiveAt(player, subscribedKey, unsubscribedKey, boundary, inclusive, !!(player && player.channels && player.channels[channelKey]));
     }
-    var pokerPlusTotalNow = currentValue("pokerPlus", Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts.length : 0);
+    var uniquePokerPlusIdsNow = {};
+    (Array.isArray(state.pokerPlusAccounts) ? state.pokerPlusAccounts : []).forEach(function (row) {
+      var pokerPlusId = String(row && row.pokerPlusUserId || "").trim();
+      if (pokerPlusId) uniquePokerPlusIdsNow[pokerPlusId] = true;
+    });
+    var pokerPlusTotalNow = Object.keys(uniquePokerPlusIdsNow).length;
     var nowDate = new Date();
     var todayKey = new Date(nowDate.getTime() - nowDate.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     var periodIncludesToday = !!(registrationRange && registrationRange.from <= todayKey && registrationRange.to >= todayKey);

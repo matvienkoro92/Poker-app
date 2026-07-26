@@ -1116,6 +1116,34 @@ async function testCrmWeekUsesMondaySixMoscowCutoff() {
   }
 }
 
+async function testCrmPokerPlusStatsDeduplicatePokerId() {
+  const crm = loadHandler("player-crm");
+  const summary = crm._test.computeStatsSummary({
+    players: [
+      { pokerPlusUserId: "4430", pokerPlusLinkedAt: "2026-07-27T04:00:00.000Z", channels: {}, deposits: {}, depositCount: {} },
+      { pokerPlusUserId: "4430", pokerPlusLinkedAt: "2026-07-27T04:30:00.000Z", channels: {}, deposits: {}, depositCount: {} },
+    ],
+    registeredAccounts: [],
+    pokerPlusAccounts: [
+      { accountId: "tg_1", pokerPlusUserId: "4430", linkedAt: "2026-07-27T04:00:00.000Z" },
+      { accountId: "mail_ID000001", pokerPlusUserId: "4430", linkedAt: "2026-07-27T04:30:00.000Z" },
+    ],
+    range: {
+      from: "2026-07-27",
+      to: "2026-07-27",
+      fromMs: Date.parse("2026-07-27T03:00:00.000Z"),
+      toMs: Date.parse("2026-07-28T02:59:59.999Z"),
+    },
+    rangeKey: "current_week",
+    visitDailySummary: null,
+    activeAnonymousInstallations: 0,
+    analyticsSummary: null,
+  });
+  assert.strictEqual(summary.current.pokerPlus, 1, "current Poker21 total counts a Poker21 ID only once");
+  assert.strictEqual(summary.pokerPlus, 1, "period Poker21 bindings count a Poker21 ID only once");
+  assert.strictEqual(summary.pokerPlusNet, 1, "period Poker21 net does not include duplicate account bindings");
+}
+
 async function testRaffleJoinLeave(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -6005,6 +6033,7 @@ async function main() {
     ["chat send/edit/delete", testChatSendEditDelete],
     ["crm app user block", testCrmAppUserBlock],
     ["crm week Monday 06:00 MSK cutoff", testCrmWeekUsesMondaySixMoscowCutoff],
+    ["crm Poker21 stats deduplicate Poker21 ID", testCrmPokerPlusStatsDeduplicatePokerId],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle current week returns calculation", testRaffleCurrentWeekReturnsCalculation],
     ["raffle access level gate", testRaffleAccessLevelGate],
