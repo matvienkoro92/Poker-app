@@ -1085,6 +1085,7 @@ function hallFishSearchLatinToCyrillic(value) {
   [
     ["shch", "щ"], ["yo", "ё"], ["zh", "ж"], ["kh", "х"], ["ts", "ц"],
     ["ch", "ч"], ["sh", "ш"], ["yu", "ю"], ["ya", "я"], ["ye", "е"],
+    ["oo", "у"],
   ].forEach(function (pair) {
     text = text.split(pair[0]).join(pair[1]);
   });
@@ -1110,6 +1111,23 @@ function hallFishSearchCyrillicToLatin(value) {
   });
 }
 
+function hallFishSearchPhoneticKey(value) {
+  var text = hallFishSearchCyrillicToLatin(value)
+    .replace(/[^a-z0-9]+/g, "")
+    .replace(/0/g, "o");
+  text = text
+    .replace(/i([bcdfghjklmnpqrstvwxyz])e/g, "ai$1")
+    .replace(/a([bcdfghjklmnpqrstvwxyz])e/g, "ei$1");
+  [
+    ["shch", "sch"], ["ph", "f"], ["wh", "w"], ["kh", "h"], ["ck", "k"],
+    ["qu", "kv"], ["oo", "u"], ["ee", "i"], ["oe", "e"], ["x", "ks"],
+    ["q", "k"], ["c", "k"], ["w", "v"], ["y", "i"],
+  ].forEach(function (pair) {
+    text = text.split(pair[0]).join(pair[1]);
+  });
+  return text;
+}
+
 function hallFishLevelSearchText(row) {
   var parts = [
     row && row.name,
@@ -1128,6 +1146,7 @@ function hallFishLevelSearchText(row) {
   parts.slice().forEach(function (part) {
     parts.push(hallFishSearchLatinToCyrillic(part));
     parts.push(hallFishSearchCyrillicToLatin(part));
+    parts.push(hallFishSearchPhoneticKey(part));
   });
   var base = parts.join(" ");
   [
@@ -1147,8 +1166,19 @@ function hallFishLevelSearchText(row) {
 function hallFishFilterLevelRows(rows, query) {
   var needle = String(query || "").toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
   if (!needle) return Array.isArray(rows) ? rows : [];
+  var needles = [
+    needle,
+    hallFishSearchLatinToCyrillic(needle),
+    hallFishSearchCyrillicToLatin(needle),
+    hallFishSearchPhoneticKey(needle),
+  ].filter(function (value, index, list) {
+    return value && list.indexOf(value) === index;
+  });
   return (Array.isArray(rows) ? rows : []).filter(function (row) {
-    return hallFishLevelSearchText(row).indexOf(needle) >= 0;
+    var searchText = hallFishLevelSearchText(row);
+    return needles.some(function (variant) {
+      return searchText.indexOf(variant) >= 0;
+    });
   });
 }
 
