@@ -76,6 +76,10 @@ function initPlayerCrmStatsRuntime(deps) {
     var statBotUnsubscribers = summary ? Number(summary.botUnsub) || 0 : botUnsubscribers;
     var statPushUnsubscribers = summary ? Number(summary.pushUnsub) || 0 : pushUnsubscribers;
     var statBotNet = summary && summary.botNet != null ? Number(summary.botNet) || 0 : statBotSubscribers - statBotUnsubscribers;
+    var botHistoryReliableFrom = summary && summary.botHistoryReliableFrom
+      ? String(summary.botHistoryReliableFrom)
+      : "";
+    var botHistoryReliable = !registrationRange || !botHistoryReliableFrom || registrationRange.from >= botHistoryReliableFrom;
     var statPushNet = summary && summary.pushNet != null ? Number(summary.pushNet) || 0 : statPushSubscribers - statPushUnsubscribers;
     var statDeposits = summary ? Number(summary.deposits) || 0 : deposits;
     var statDepositCount = summary && summary.depositCount != null ? Number(summary.depositCount) || 0 : pd.reduce(function (sum, x) { return sum + (Number(x.depositCount) || 0); }, 0);
@@ -120,11 +124,11 @@ function initPlayerCrmStatsRuntime(deps) {
     }).length : pokerPlusTotalNow;
     if (periodIncludesToday) pokerPlusTotalEnd = pokerPlusTotalNow;
     var statPokerPlusBalanceNet = pokerPlusTotalEnd - pokerPlusTotalStart;
-    var statPokerPlusBalanceUnlinked = Math.max(0, statPokerPlusUnlinked, statPokerPlus - statPokerPlusBalanceNet);
+    var statPokerPlusBalanceUnlinked = statPokerPlusUnlinked;
     var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
-    var botTotalStart = registrationRange ? players.filter(function (p) {
-      return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.from, false);
-    }).length : Math.max(0, botTotalNow - statBotNet);
+    var botTotalStart = botHistoryReliable
+      ? Math.max(0, botTotalNow - statBotNet)
+      : null;
     var botTotalEnd = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.to, true);
     }).length : botTotalNow;
@@ -316,14 +320,17 @@ function initPlayerCrmStatsRuntime(deps) {
         start: pokerPlusTotalStart,
         end: pokerPlusTotalEnd,
       }, { eyebrow: "Привязали" }],
-      ["Бот", signedMainValue(statBotNet), "data-crm-bot-modal", "engagement", [
+      ["Бот", botHistoryReliable ? signedMainValue(statBotNet) : "—", "data-crm-bot-modal", "engagement", botHistoryReliable ? [
         ["Подписки", "+" + intFmt(statBotSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statBotUnsubscribers), null, "negative"],
         ["Итого", intFmt(statBotNet), null, "total"],
-      ], null, comparisonInfo("bot", statBotNet), {
+      ] : [
+        ["Точный учёт", "с " + botHistoryReliableFrom.split("-").reverse().join("."), null, "highlight"],
+        ["Сейчас", intFmt(botTotalNow), null, "total"],
+      ], null, botHistoryReliable ? comparisonInfo("bot", statBotNet) : null, botHistoryReliable ? {
         start: botTotalStart,
         end: botTotalEnd,
-      }, { eyebrow: "Подписались на" }],
+      } : null, { eyebrow: "Подписались на" }],
       ["Push", signedMainValue(statPushNet), "data-crm-push-modal", "engagement", [
         ["Подписки", "+" + intFmt(statPushSubscribers), null, "positive"],
         ["Отписки", "−" + intFmt(statPushUnsubscribers), null, "negative"],

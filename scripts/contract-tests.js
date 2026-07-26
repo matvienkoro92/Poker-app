@@ -4292,12 +4292,19 @@ async function testPokerPlusFastBindWithEmailUsesMail(redis) {
 
   const { bindMiniAppPlayer } = require(path.join(root, "lib", "pokerplus"));
   const profile = await bindMiniAppPlayer("ID100001", [], "ABC123", "Player@Test.com", { fast: true });
+  const firstBoundAt = redis.h("poker_app:pokerplus_bound_at").get("ID100001");
+  await bindMiniAppPlayer("ID100001", [], "ABC123", "Player@Test.com", { fast: true });
   assert.strictEqual(profile.pokerPlusUserId, "P21-MAIL", "fast-requested bind still uses mail when email is available");
   assert.ok(
     attempts.some((payload) => payload.user_app_id === "ID100001" && payload.mail === "Player@Test.com"),
     "bind retries with dtId and linked email for email-only accounts",
   );
   assert.strictEqual(redis.h("poker_app:pokerplus_emails").get("ID100001"), "Player@Test.com", "successful email bind stores the matched Poker21 mail");
+  assert.strictEqual(
+    redis.h("poker_app:pokerplus_bound_at").get("ID100001"),
+    firstBoundAt,
+    "updating an existing Poker21 binding does not rewrite its binding date",
+  );
 }
 
 async function testPokerPlusKeyBindFailurePrefersBindingFailed(redis) {
@@ -5704,6 +5711,7 @@ async function testRatingGazetteNotifications(redis) {
   assert.strictEqual(r.statusCode, 200, "rating subscribe succeeds");
   assert.strictEqual(r.body.subscribed, true, "rating subscribe returns subscribed");
   assert.strictEqual(redis.s("poker_app:rating_subscribers").has("1001"), true, "rating subscribe stores Telegram chat id");
+  const firstBotSubscribedAt = redis.h("poker_app:bot_subscribed_at").get("1001");
 
   const ratingNotify = loadHandler("rating-notify");
   r = await call(ratingNotify, req("POST", {}, {
@@ -5726,6 +5734,11 @@ async function testRatingGazetteNotifications(redis) {
   assert.strictEqual(r.statusCode, 200, "gazette subscribe succeeds");
   assert.strictEqual(r.body.subscribed, true, "gazette subscribe returns subscribed");
   assert.strictEqual(redis.s("poker_app:gazette_subscribers").has("1001"), true, "gazette subscribe stores Telegram chat id");
+  assert.strictEqual(
+    redis.h("poker_app:bot_subscribed_at").get("1001"),
+    firstBotSubscribedAt,
+    "enabling another notification type does not rewrite the bot subscription date",
+  );
 
   const gazetteNotify = loadHandler("gazette-notify");
   r = await call(gazetteNotify, req("POST", {}, {
@@ -5748,6 +5761,22 @@ async function testRatingGazetteNotifications(redis) {
   }, { "x-cron-secret": "contract-cron-secret" }));
   assert.strictEqual(r.statusCode, 200, "gazette notify duplicate succeeds");
   assert.strictEqual(r.body.alreadySent, true, "gazette notify duplicate is idempotent");
+
+  r = await call(ratingSubscribe, req("POST", {}, { pwaSession: s.user, unsubscribe: true }));
+  assert.strictEqual(r.statusCode, 200, "rating unsubscribe succeeds");
+  assert.strictEqual(
+    redis.h("poker_app:bot_unsubscribed_at").has("1001"),
+    false,
+    "disabling one notification type does not record a bot unsubscribe while another remains",
+  );
+
+  r = await call(gazetteSubscribe, req("POST", {}, { pwaSession: s.user, unsubscribe: true }));
+  assert.strictEqual(r.statusCode, 200, "gazette unsubscribe succeeds");
+  assert.strictEqual(
+    redis.h("poker_app:bot_unsubscribed_at").has("1001"),
+    true,
+    "disabling the last notification type records a real bot unsubscribe",
+  );
 }
 
 async function testChatCoreInvariants() {
