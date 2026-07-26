@@ -876,8 +876,42 @@ if (chatUserModalEl) {
       return chatUserModalSameRatingNick(nick, ratingNick);
     });
   }
+  function chatUserModalIsHakas(ratingNick) {
+    return ["Hakas", "Хакас"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
+  function chatUserModalIsAza32(ratingNick) {
+    return ["Aza32", "Aza", "Аза32", "Аза"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
+  function chatUserModalIsPorquinho(ratingNick) {
+    return ["Porquinho", "Поркиньо", "Поркиньё"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
+  function chatUserModalIsShtukatur(ratingNick) {
+    return ["Штукатур", "Shtukatur"].some(function (nick) {
+      return chatUserModalSameRatingNick(nick, ratingNick);
+    });
+  }
   function chatUserModalSngChampionBannerHtml(ratingNick) {
-    var placement = chatUserModalIsRybnadzor(ratingNick) ? {
+    var placement = (chatUserModalIsHakas(ratingNick) || chatUserModalIsAza32(ratingNick)) ? {
+      badge: "Победители",
+      name: "Hakas + Aza32",
+      result: "Чемпионы командного турнира",
+      arts: ["./assets/sng-finalist-aza.png", "./assets/sng-finalist-hakas.png"],
+      className: "team-winner",
+      title: "1ый командный СНГ-нокаут баттл Два туза",
+    } : (chatUserModalIsPorquinho(ratingNick) || chatUserModalIsShtukatur(ratingNick)) ? {
+      badge: "Финалисты",
+      name: "Porquinho + Штукатур",
+      result: "Финалисты командного турнира",
+      arts: ["./assets/sng-finalist-porquinho.png", "./assets/sng-finalist-shtukatur.png"],
+      className: "team-runner-up",
+      title: "1ый командный СНГ-нокаут баттл Два туза",
+    } : chatUserModalIsRybnadzor(ratingNick) ? {
       badge: "Победитель",
       name: "МужНаЧас",
       result: "Чемпион турнира",
@@ -891,10 +925,15 @@ if (chatUserModalEl) {
       className: "runner-up",
     } : null;
     if (!placement) return "";
+    var artHtml = placement.arts
+      ? placement.arts.map(function (art) {
+          return '<img src="' + escapeHtml(art) + '" alt="" loading="lazy" decoding="async">';
+        }).join("")
+      : '<img src="' + escapeHtml(placement.art) + '" alt="" loading="lazy" decoding="async">';
     return '<button type="button" class="chat-user-modal__sng-champion-banner chat-user-modal__sng-champion-banner--' + escapeHtml(placement.className) + '" data-chat-sng-champion-open="1" aria-label="Смотреть первый СНГ-баттл Лиги чемпионов Два туза">' +
-      '<span class="chat-user-modal__sng-champion-art" aria-hidden="true"><img src="' + escapeHtml(placement.art) + '" alt="" loading="lazy" decoding="async"></span>' +
+      '<span class="chat-user-modal__sng-champion-art" aria-hidden="true">' + artHtml + '</span>' +
       '<span class="chat-user-modal__sng-champion-copy">' +
-        '<small>1ый СНГ-баттл Лига чемпионов Два туза</small>' +
+        '<small>' + escapeHtml(placement.title || "1ый СНГ-баттл Лига чемпионов Два туза") + '</small>' +
         '<em>' + escapeHtml(placement.badge) + '</em>' +
         '<strong>' + escapeHtml(placement.name) + '</strong>' +
         '<b>' + escapeHtml(placement.result) + '</b>' +

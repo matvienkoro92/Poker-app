@@ -2982,6 +2982,58 @@
 .chat-user-modal__sng-champion-banner--runner-up .chat-user-modal__sng-champion-copy b {
   color: #c7d2fe;
 }
+.chat-user-modal__sng-champion-banner--team-winner,
+.chat-user-modal__sng-champion-banner--team-runner-up {
+  grid-template-columns: minmax(180px, 46%) minmax(0, 1fr);
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-art img,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-art img {
+  inset: auto;
+  bottom: 0;
+  width: 64%;
+  height: calc(100% - 2px);
+  object-fit: contain;
+  object-position: center bottom;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-art img:first-child,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-art img:first-child {
+  left: -5%;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-art img:last-child,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-art img:last-child {
+  right: -5%;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy {
+  padding-left: 0;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy small,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy small {
+  margin-bottom: 8px;
+  font-size: 10px;
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy strong,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy strong {
+  font-size: clamp(24px, 5.5vw, 38px);
+}
+.chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy b,
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
+  font-size: clamp(14px, 3.2vw, 21px);
+}
+.chat-user-modal__sng-champion-banner--team-runner-up {
+  border-color: #c7d2fe;
+  background:
+    radial-gradient(circle at 18% 42%, rgba(129, 140, 248, 0.25), transparent 39%),
+    linear-gradient(110deg, #262538, #100d18 50%, #05080e);
+  box-shadow: 0 0 22px rgba(165, 180, 252, 0.2), inset 0 0 0 1px rgba(224, 231, 255, 0.12);
+}
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy em {
+  border-color: #eef2ff;
+  background: linear-gradient(180deg, #eef2ff, #a5b4fc);
+}
+.chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
+  color: #c7d2fe;
+}
 .chat-user-modal__sng-champion-copy strong {
   max-width: 100%;
   margin-top: 7px;
@@ -3035,5 +3087,22 @@
   }
   .chat-user-modal__sng-champion-copy strong {
     font-size: 30px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner,
+  .chat-user-modal__sng-champion-banner--team-runner-up {
+    grid-template-columns: 48% minmax(0, 1fr);
+    padding-left: 3px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-art img,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-art img {
+    width: 68%;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy strong,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy strong {
+    font-size: 22px;
+  }
+  .chat-user-modal__sng-champion-banner--team-winner .chat-user-modal__sng-champion-copy b,
+  .chat-user-modal__sng-champion-banner--team-runner-up .chat-user-modal__sng-champion-copy b {
+    font-size: 13px;
   }
 }
