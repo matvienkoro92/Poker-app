@@ -657,6 +657,10 @@ function hallFishRefreshVisibleRows(rows) {
       hallFishAchievementRowsCache = null;
       return;
     }
+    if (hallFishActiveTab === "sng") {
+      hallFishSetSngFinalistsState(rows);
+      return;
+    }
     hallFishLoadCurrentIds()
       .then(function (ids) {
         hallFishSetModalState("", rows, ids);
@@ -705,6 +709,7 @@ function hallFishEnsureModal() {
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="vote" role="tab" aria-selected="false">Голосование</button>' +
+        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="sng" role="tab" aria-selected="false">СНГ-батлы</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
     '</section>';
@@ -1215,6 +1220,39 @@ function hallFishRenderRows(rows, currentIds) {
     '<div data-hall-fish-level-results>' + hallFishRenderLevelResults(filteredRows, currentIds, hallFishLevelSearchQuery) + '</div>';
 }
 
+var HALL_FISH_SNG_FINALISTS = [
+  { name: "Porquinho", aliases: ["porquinho", "поркиньо", "поркиньё"] },
+  { name: "Штукатур", aliases: ["штукатур", "shtukatur"] },
+  { name: "Hakas", aliases: ["hakas", "хакас"] },
+  { name: "Aza32", aliases: ["aza32", "aza", "аза32", "аза"] },
+];
+
+function hallFishFindSngFinalistRow(rows, finalist) {
+  return (Array.isArray(rows) ? rows : []).find(function (row) {
+    var text = hallFishLevelSearchText(row);
+    return finalist.aliases.some(function (alias) {
+      var key = String(alias || "").toLowerCase();
+      return text.split(/\s+/).indexOf(key) >= 0;
+    });
+  }) || null;
+}
+
+function hallFishRenderSngFinalists(rows) {
+  var cards = HALL_FISH_SNG_FINALISTS.map(function (finalist, index) {
+    var row = hallFishFindSngFinalistRow(rows, finalist);
+    if (row) return hallFishLevelRowHtml(row, index + 1, "hall-fish-level-row--sng-finalist");
+    return '<div class="hall-fish-level-row hall-fish-level-row--sng-finalist hall-fish-level-row--sng-missing">' +
+      '<span class="hall-fish-level-row__rank">' + hallFishEsc(index + 1) + '</span>' +
+      '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(finalist.name) + '</span>' +
+      '<span class="hall-fish-level-row__tg">Финалист СНГ-батла</span></span>' +
+    '</div>';
+  });
+  return '<section class="hall-fish-sng-finalists">' +
+    '<header class="hall-fish-sng-finalists__head"><small>Лига чемпионов Два туза</small><h3>Финалисты СНГ-батла</h3><p>Нажмите на игрока, чтобы открыть его профиль.</p></header>' +
+    '<div class="hall-fish-level-list hall-fish-sng-finalists__list">' + cards.join("") + '</div>' +
+  '</section>';
+}
+
 function hallFishRenderLevelSkeleton() {
   var rows = [];
   for (var i = 1; i <= 6; i += 1) {
@@ -1660,17 +1698,22 @@ function hallFishBirthDateParts(value) {
 }
 
 function hallFishBirthdayRows(rows) {
-  return (Array.isArray(rows) ? rows : [])
+  var byPoker21Id = Object.create(null);
+  var byNickAndDate = Object.create(null);
+  var uniqueRows = [];
+  (Array.isArray(rows) ? rows : [])
     .map(function (row) {
       var parts = hallFishBirthDateParts(row && (row.profileBirthDate || row.birthDate || row.birthday));
       if (!parts) return null;
       var accountId = String((row && row.accountId) || "").trim();
+      var poker21Id = String((row && (row.p21Id || row.pokerPlusUserId || row.poker21Id)) || "").trim();
       var rawNick = String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "").trim();
       var nick = /^guest_[a-f0-9]+$/i.test(rawNick)
         ? (accountId ? "Игрок " + accountId : "Игрок")
         : (rawNick || (accountId ? "Игрок " + accountId : "Игрок"));
       return {
         accountId: accountId,
+        poker21Id: poker21Id,
         nick: nick,
         telegram: String((row && row.telegram) || "").trim(),
         birthYear: parts.year,
@@ -1678,7 +1721,25 @@ function hallFishBirthdayRows(rows) {
         day: parts.day,
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .forEach(function (row) {
+      var nickKey = String(row.nick || "").toLowerCase().replace(/[^a-zа-яё0-9]+/gi, "");
+      var dateKey = [row.birthYear, row.month, row.day].join("-");
+      var nickDateKey = nickKey ? nickKey + ":" + dateKey : "";
+      var existing = (row.poker21Id && byPoker21Id[row.poker21Id]) || (nickDateKey && byNickAndDate[nickDateKey]) || null;
+      if (existing) {
+        if (!existing.accountId && row.accountId) existing.accountId = row.accountId;
+        if (!existing.poker21Id && row.poker21Id) existing.poker21Id = row.poker21Id;
+        if (!existing.telegram && row.telegram) existing.telegram = row.telegram;
+        if (row.poker21Id) byPoker21Id[row.poker21Id] = existing;
+        if (nickDateKey) byNickAndDate[nickDateKey] = existing;
+        return;
+      }
+      uniqueRows.push(row);
+      if (row.poker21Id) byPoker21Id[row.poker21Id] = row;
+      if (nickDateKey) byNickAndDate[nickDateKey] = row;
+    });
+  return uniqueRows;
 }
 
 function hallFishBirthdayDateForYear(row, year) {
@@ -2196,6 +2257,17 @@ function hallFishSetBirthdaysState(message, rows, events) {
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
 
+function hallFishSetSngFinalistsState(rows) {
+  var modal = hallFishEnsureModal();
+  var myRank = document.getElementById("hallFishRatingMyRank");
+  var body = document.getElementById("hallFishRatingBody");
+  hallFishUpdateTabs("sng");
+  if (myRank) myRank.hidden = true;
+  if (body) body.innerHTML = rows ? hallFishRenderSngFinalists(rows) : hallFishRenderLevelSkeleton();
+  modal.hidden = false;
+  if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+}
+
 function hallFishMoveCalendarMonth(delta) {
   var d = parseInt(delta, 10);
   if (!d) return;
@@ -2228,12 +2300,13 @@ function hallFishToggleUpcomingExpanded() {
 }
 
 function hallFishUpdateTabs(activeTab) {
-  hallFishActiveTab = activeTab === "achievements" || activeTab === "birthdays" ? activeTab : "levels";
+  hallFishActiveTab = ["achievements", "birthdays", "sng"].indexOf(activeTab) >= 0 ? activeTab : "levels";
   var modal = hallFishEnsureModal();
   var panel = modal ? modal.querySelector(".hall-fish-modal__panel") : null;
   if (panel) {
     panel.classList.toggle("hall-fish-modal__panel--achievements", hallFishActiveTab === "achievements");
     panel.classList.toggle("hall-fish-modal__panel--birthdays", hallFishActiveTab === "birthdays");
+    panel.classList.toggle("hall-fish-modal__panel--sng", hallFishActiveTab === "sng");
     panel.classList.toggle("hall-fish-modal__panel--levels", hallFishActiveTab === "levels");
   }
   document.querySelectorAll("[data-hall-fish-tab]").forEach(function (tab) {
@@ -2241,6 +2314,19 @@ function hallFishUpdateTabs(activeTab) {
     tab.classList.toggle("hall-fish-modal__tab--active", isActive);
     tab.setAttribute("aria-selected", isActive ? "true" : "false");
   });
+}
+
+function openHallFishSngFinalistsTab() {
+  hallFishSetSngFinalistsState(null);
+  hallFishLoadRows()
+    .then(function (rows) {
+      hallFishSetSngFinalistsState(Array.isArray(rows) ? rows : []);
+    })
+    .catch(function () {
+      var body = document.getElementById("hallFishRatingBody");
+      hallFishUpdateTabs("sng");
+      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить финалистов. Попробуйте ещё раз позже.</div>';
+    });
 }
 
 function hallFishCloseModal() {
@@ -2639,6 +2725,7 @@ function initHallFishRatingModal() {
     var tabKey = tab.getAttribute("data-hall-fish-tab");
     if (tabKey === "achievements") openHallFishAchievementTab();
     else if (tabKey === "birthdays") openHallFishBirthdaysTab();
+    else if (tabKey === "sng") openHallFishSngFinalistsTab();
     else if (tabKey === "vote") {
       hallFishCloseModal();
       if (typeof window.pokerOpenHomeWidgetModal === "function") {

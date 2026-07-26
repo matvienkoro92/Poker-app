@@ -441,12 +441,53 @@
 }
 .hall-fish-modal__tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   padding: 12px 58px 14px 12px;
   border-bottom: 1px solid rgba(251, 191, 36, 0.2);
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.36), rgba(2, 6, 23, 0.12));
+}
+
+.hall-fish-sng-finalists {
+  display: grid;
+  gap: 14px;
+}
+.hall-fish-sng-finalists__head {
+  padding: 18px;
+  border: 1px solid rgba(251, 191, 36, 0.34);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(251, 146, 60, 0.2), transparent 42%),
+    linear-gradient(135deg, rgba(67, 35, 15, 0.92), rgba(12, 18, 31, 0.98));
+}
+.hall-fish-sng-finalists__head small {
+  color: #f59e0b;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+.hall-fish-sng-finalists__head h3 {
+  margin: 4px 0;
+  color: #fde68a;
+  font-size: 24px;
+}
+.hall-fish-sng-finalists__head p {
+  margin: 0;
+  color: rgba(255, 237, 213, 0.7);
+  font-size: 12px;
+  font-weight: 750;
+}
+.hall-fish-sng-finalists__list {
+  padding-bottom: 12px;
+}
+.hall-fish-level-row--sng-finalist {
+  border-color: rgba(251, 146, 60, 0.58);
+  background:
+    radial-gradient(circle at 10% 50%, rgba(249, 115, 22, 0.16), transparent 30%),
+    linear-gradient(135deg, rgba(31, 20, 18, 0.98), rgba(7, 13, 24, 0.98));
+}
+.hall-fish-level-row--sng-missing {
+  grid-template-columns: 42px minmax(0, 1fr);
 }
 .hall-fish-modal__tab {
   appearance: none;
