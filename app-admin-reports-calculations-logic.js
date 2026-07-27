@@ -7,6 +7,8 @@
       var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
       var calculationPeriodReportsCache = null;
       var calculationPeriodRequestSeq = 0;
+      var calculationInitialLoadRetryTimer = null;
+      var calculationInitialLoadRetryCount = 0;
 
       function updateCalculationCashTotal() {
         if (calculationCashUpdateTimer) {
@@ -598,7 +600,21 @@
         setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week) : {}, week);
         renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
-        if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+        if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+          if (!calculationInitialLoadRetryTimer && calculationInitialLoadRetryCount < 12) {
+            calculationInitialLoadRetryCount += 1;
+            calculationInitialLoadRetryTimer = setTimeout(function () {
+              calculationInitialLoadRetryTimer = null;
+              loadCalculationsReports();
+            }, calculationInitialLoadRetryCount < 4 ? 350 : 800);
+          }
+          return;
+        }
+        calculationInitialLoadRetryCount = 0;
+        if (calculationInitialLoadRetryTimer) {
+          clearTimeout(calculationInitialLoadRetryTimer);
+          calculationInitialLoadRetryTimer = null;
+        }
         var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
         calculationArchiveRequestBase = base;
         calculationArchiveRequestQuery = q;
