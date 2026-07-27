@@ -196,6 +196,21 @@ class MemoryRedis {
       }
       return this.result(n);
     }
+    if (cmd === "EVAL") {
+      const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
+      const keys = command.slice(3, 3 + keyCount).map(String);
+      const args = command.slice(3 + keyCount).map(String);
+      if (
+        /redis\.call\(['"]get['"]/.test(String(command[1] || "")) &&
+        /redis\.call\(['"]del['"]/.test(String(command[1] || "")) &&
+        keys[0] &&
+        this.kv.get(keys[0]) === args[0]
+      ) {
+        this.kv.delete(keys[0]);
+        return this.result(1);
+      }
+      return this.result(0);
+    }
     if (cmd === "HGET") return this.result(this.h(key).has(String(command[2])) ? this.h(key).get(String(command[2])) : null);
     if (cmd === "HSET") {
       const h = this.h(key);
@@ -1787,6 +1802,15 @@ async function testParticipationRequiresBotAndChannel(redis) {
   assert.strictEqual(r.statusCode, 403, "guest raffle join requires login before Telegram subscription gate");
   assert.strictEqual(r.body.code, "RAFFLE_LOGIN_REQUIRED", "guest raffle join returns login-required code");
   assert.ok(!r.body.botUrl && !r.body.channelUrl, "guest raffle join does not show subscription links before login");
+
+  r = await call(promo, req("POST", { path: "daily-poker/play" }, {
+    pwaSession: s.user,
+    idempotencyKey: "daily-gate-poker21",
+  }));
+  assert.strictEqual(r.statusCode, 403, "daily poker play requires a linked Poker21 account");
+  assert.strictEqual(r.body.code, "POKER21_REQUIRED", "daily poker returns Poker21-required code");
+  assert.strictEqual(r.body.requiresPoker21Profile, true, "daily poker explains that Poker21 profile is required");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "P21-1001");
 
   installTelegramGateFetch(redis, { botOk: false, channelOk: true });
   r = await call(raffles, req("POST", {}, {
@@ -4415,6 +4439,16 @@ async function testPokerPlusKeyBindFallbackMatrix(redis) {
   assert.strictEqual(attempts[0].mail, undefined, "first bind attempt omits mail");
   assert.strictEqual(attempts[6].key, "ABC123", "bind removes invisible chars and Cyrillic lookalikes");
   assert.strictEqual(redis.h("poker_app:pokerplus_user_ids").get("ID100001"), "P21-42", "bind stores PokerPlus user id");
+  await assert.rejects(
+    () => bindMiniAppPlayer("ID100002", ["tg_1001"], "ABC123", ""),
+    (error) => error && error.statusCode === 409 && error.code === "POKER21_ALREADY_BOUND",
+    "bind rejects the same PokerPlus account on a second internal profile",
+  );
+  assert.strictEqual(
+    redis.h("poker_app:pokerplus_user_ids").has("ID100002"),
+    false,
+    "rejected duplicate bind is not stored",
+  );
 }
 
 async function testPokerPlusFastBindWithEmailUsesMail(redis) {
