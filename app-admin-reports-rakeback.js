@@ -1332,12 +1332,16 @@
 
     function getTemplateIds(room) {
       room = normalizeRoom(room);
-      var ids = (templates[room] || []).slice();
+      var carriedIds = [];
       sharedRows.forEach(function (row) {
         if (!isCarryForwardTemplateRow(row) || normalizeRoom(row.room) !== room) return;
         var playerId = String(row.playerId || row.id || "").trim();
-        if (playerId) ids.push(playerId);
+        if (playerId) carriedIds.push(playerId);
       });
+      // The current week's server-generated list is ranked by the previous
+      // week's rake and already excludes templates inactive for four weeks.
+      // Static IDs are only a legacy fallback before that list exists.
+      var ids = carriedIds.length ? carriedIds : (templates[room] || []).slice();
       var seen = {};
       return (Array.isArray(ids) ? ids : []).map(function (id) {
         return String(id || "").trim();
