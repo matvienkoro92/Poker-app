@@ -1182,6 +1182,57 @@ async function testSundayReportCollectsPendingWeeklyRakeback() {
   );
 }
 
+async function testRakebackReportUsesAddonDelta() {
+  const reportShifts = loadHandler("admin-report-shifts")._test;
+  const rows = [
+    {
+      groupId: "series",
+      kind: "base",
+      room: "P21",
+      playerId: "4430",
+      rake: 1000,
+      percent: 20,
+      amount: 200,
+      entryAddedAt: Date.parse("2026-07-20T08:00:00.000Z"),
+    },
+    {
+      groupId: "series",
+      kind: "addon",
+      room: "P21",
+      playerId: "4430",
+      rake: 1500,
+      percent: 20,
+      amount: 300,
+      entryAddedAt: Date.parse("2026-07-21T08:00:00.000Z"),
+    },
+  ];
+  const contributions = reportShifts.rakebackReportedContributionMap(rows);
+  assert.strictEqual(contributions.get("series|base|P21|4430"), 200, "base row reports its full contribution");
+  assert.strictEqual(
+    contributions.get("series|addon|P21|4430|" + String(rows[1].entryAddedAt)),
+    100,
+    "addon reports only the rake delta contribution"
+  );
+  const report = reportShifts.recalcReportTotalsFromRows({
+    deposit: 0,
+    rakebackRows: rows.map((row) => ({
+      ...row,
+      reportedAmount: contributions.get(
+        row.kind === "addon"
+          ? "series|addon|P21|4430|" + String(row.entryAddedAt)
+          : "series|base|P21|4430"
+      ),
+    })),
+  });
+  assert.strictEqual(report.rakeback, 300, "report total sums base and addon delta without cumulative duplication");
+  const weekStart = Date.parse("2026-07-20T03:00:00.000Z");
+  assert.strictEqual(
+    reportShifts.rakebackWeekReportedTotal(rows.map((row) => ({ ...row, saved: true })), weekStart),
+    300,
+    "weekly report total uses the same base plus addon-delta formula as CRM"
+  );
+}
+
 async function testRaffleJoinLeave(redis) {
   const raffles = loadHandler("raffles");
   const s = sessions();
@@ -6073,6 +6124,7 @@ async function main() {
     ["crm week Monday 06:00 MSK cutoff", testCrmWeekUsesMondaySixMoscowCutoff],
     ["crm Poker21 stats deduplicate Poker21 ID", testCrmPokerPlusStatsDeduplicatePokerId],
     ["Sunday report collects pending weekly rakeback", testSundayReportCollectsPendingWeeklyRakeback],
+    ["rakeback report uses addon delta", testRakebackReportUsesAddonDelta],
     ["raffle join/leave", testRaffleJoinLeave],
     ["raffle current week returns calculation", testRaffleCurrentWeekReturnsCalculation],
     ["raffle access level gate", testRaffleAccessLevelGate],
