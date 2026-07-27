@@ -4,6 +4,8 @@
     loaded: false,
     loading: false,
     heavyLoading: false,
+    playersPending: false,
+    playersScope: "summary",
     heavyLoadingScope: "",
     loadingScope: "",
     tab: "stats",
@@ -2521,6 +2523,8 @@
     if (!data || !data.ok || !Array.isArray(data.players)) return false;
     if (!heavyOnly) {
       state.players = data.players;
+      state.playersPending = data.playersPending === true;
+      state.playersScope = data.playersScope || (data.playersPending === true ? "summary" : "players");
       state.blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : [];
       state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : [];
       state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : [];
@@ -2533,6 +2537,7 @@
       state.crmError = "";
     } else {
       state.players = data.players;
+      state.playersPending = false;
       state.blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : state.blockedUsers;
       state.registeredAccounts = Array.isArray(data.registeredAccounts) ? data.registeredAccounts : state.registeredAccounts;
       state.pokerPlusAccounts = Array.isArray(data.pokerPlusAccounts) ? data.pokerPlusAccounts : state.pokerPlusAccounts;
@@ -2573,7 +2578,11 @@
       state.heavyLoadingScope = "";
       return Promise.resolve(false);
     }
-    var heavyMode = scope === "chart" ? "chart" : "heavy";
+    var heavyMode = scope === "chart"
+      ? "chart"
+      : scope === "broadcast"
+        ? "send"
+        : "players";
     return fetch(base + "/api/player-crm" + crmQuery({ mode: heavyMode }))
       .then(function (r) {
         return r.json().then(function (data) {
@@ -2598,6 +2607,7 @@
           }
         } else if (data && data.ok && Array.isArray(data.players)) {
           applyCrmData(data, true);
+          state.playersScope = scope === "broadcast" ? "broadcast" : "players";
         }
       })
       .catch(function () {})
@@ -2659,7 +2669,7 @@
 
   function loadCrmData(scope) {
     if (scope === "chart" && state.loaded) return loadCrmHeavyData(scope);
-    if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 18000) {
+    if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 95000) {
       state.loading = false;
       state.loadingScope = "";
     }
@@ -2697,7 +2707,7 @@
       controller = new AbortController();
       timeoutId = setTimeout(function () {
         try { controller.abort(); } catch (eAbort) {}
-      }, 16000);
+      }, 90000);
     }
     var shouldLoadHeavy = false;
     return fetch(base + "/api/player-crm" + crmQuery({ mode: "core" }), controller ? { signal: controller.signal } : undefined)
@@ -4171,6 +4181,8 @@
       if (tab) {
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
         syncTabs();
+        if (["players", "blocked"].indexOf(state.tab) !== -1 && state.playersScope !== "players") loadCrmHeavyData("players");
+        if (state.tab === "broadcast" && state.playersScope !== "broadcast") loadCrmHeavyData("broadcast");
         if (state.tab === "links") {
           renderCrmLinkTargetOptions();
           if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
@@ -4274,6 +4286,7 @@
         state.tab = "players";
         state.selectedId = "";
         state.showAllPlayers = false;
+        if (state.playersScope !== "players") loadCrmHeavyData("players");
         renderAll();
         return;
       }

@@ -1054,6 +1054,7 @@ async function testCrmAppUserBlock(redis) {
   redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "4430");
   redis.s("poker_app:visitors").add("tg_1001");
 
   let r = await call(crm, req("POST", {}, {
@@ -1065,10 +1066,20 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.statusCode, 200, "CRM owner can block app user");
   assert.strictEqual(r.body.blocked, true, "CRM block response marks blocked");
 
-  r = await call(crm, req("GET", { pwaSession: s.admin, mode: "core" }));
+  const coreRequest = req("GET", { pwaSession: s.admin, mode: "core" });
+  coreRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&mode=core";
+  r = await call(crm, coreRequest);
   assert.strictEqual(r.statusCode, 200, "CRM loads blocked list");
   assert.ok((r.body.blockedUsers || []).some((row) => row && row.reason === "contract block"), "CRM exposes blocked users list");
+  assert.deepStrictEqual(r.body.players, [], "CRM core response omits the heavy player collection");
+  assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
+
+  const heavyRequest = req("GET", { pwaSession: s.admin, mode: "players" });
+  heavyRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&mode=players";
+  r = await call(crm, heavyRequest);
+  assert.strictEqual(r.statusCode, 200, "CRM linked player list loads on demand");
   assert.ok((r.body.players || []).some((row) => row && row.appBlocked === true), "CRM marks blocked player rows");
+  assert.ok((r.body.players || []).every((row) => row && row.pokerPlusUserId), "CRM player list contains only Poker21-linked accounts");
 
   r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "blocked globally" }));
   assert.strictEqual(r.statusCode, 403, "globally blocked user cannot use chat");
