@@ -716,13 +716,16 @@
   function renderChips() {
     var el = document.getElementById("playerCrmFilterChips");
     if (!el) return;
-    el.innerHTML = segments.filter(function (seg) {
+    var segmentChips = segments.filter(function (seg) {
       return seg.key !== "all" && seg.key !== "has_deposit";
     }).map(function (seg) {
       var count = segmentPlayers(seg.key).length;
       var cls = "player-crm__chip" + (state.filter === seg.key ? " player-crm__chip--active" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + count + "</button>";
     }).join("");
+    var blockedCount = Array.isArray(state.blockedUsers) ? state.blockedUsers.length : 0;
+    el.innerHTML = segmentChips +
+      "<button type=\"button\" class=\"player-crm__chip\" data-crm-tab=\"blocked\" data-crm-nav-level=\"players\">Заблокированные · " + blockedCount + "</button>";
   }
 
   function renderList() {
@@ -737,12 +740,14 @@
     }
     el.innerHTML = visibleItems.map(function (p) {
       var pd = periodData(p);
+      var poker21Id = String(p.pokerPlusUserId || p.p21Id || p.poker21Id || "").trim();
+      var playerMeta = [p.handle, poker21Id ? "ID Poker21: " + poker21Id : "", p.source, p.manager].filter(Boolean).join(" · ");
       var cls = "player-crm__player" + (p.id === state.selectedId ? " player-crm__player--active" : "") + (p.appBlocked ? " player-crm__player--blocked" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-player=\"" + esc(p.id) + "\">" +
         "<span class=\"player-crm__player-head\"><span class=\"player-crm__player-name\">" + esc(p.name) + "</span>" + (p.appBlocked ? "<span class=\"player-crm__blocked-badge\">заблокирован</span>" : "") + "</span>" +
-        "<span class=\"player-crm__player-meta\">" + esc(p.handle) + " · " + esc(p.source) + " · " + esc(p.manager) + "</span>" +
+        "<span class=\"player-crm__player-meta\">" + esc(playerMeta) + "</span>" +
         "<span class=\"player-crm__player-note\">" + esc(money(pd.deposits)) + " · сообщений " + esc(pd.messages) + "</span>" +
-        "</button>";
+      "</button>";
     }).join("") + (!state.showAllPlayers && total > visibleItems.length
       ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать всех " + esc(total) + "</button>"
       : "");

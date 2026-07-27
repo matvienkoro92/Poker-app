@@ -1071,6 +1071,10 @@ async function testCrmAppUserBlock(redis) {
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
   redis.h("poker_app:pokerplus_user_ids").set("ID100001", "4430");
   redis.s("poker_app:visitors").add("tg_1001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  redis.h("poker_app:visitor_usernames").set("tg_1002", "bot_only_player");
+  redis.s("poker_app:visitors").add("tg_1002");
 
   let r = await call(crm, req("POST", {}, {
     pwaSession: s.admin,
@@ -1094,7 +1098,11 @@ async function testCrmAppUserBlock(redis) {
   r = await call(crm, heavyRequest);
   assert.strictEqual(r.statusCode, 200, "CRM linked player list loads on demand");
   assert.ok((r.body.players || []).some((row) => row && row.appBlocked === true), "CRM marks blocked player rows");
-  assert.ok((r.body.players || []).every((row) => row && row.pokerPlusUserId), "CRM player list contains only Poker21-linked accounts");
+  assert.ok((r.body.players || []).some((row) => row && row.pokerPlusUserId === "4430"), "CRM player list includes Poker21-linked accounts");
+  assert.ok(
+    (r.body.players || []).some((row) => row && row.accountId === "ID100002" && row.channels && row.channels.bot && !row.pokerPlusUserId),
+    "CRM player list also includes bot subscribers without Poker21",
+  );
 
   r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "blocked globally" }));
   assert.strictEqual(r.statusCode, 403, "globally blocked user cannot use chat");

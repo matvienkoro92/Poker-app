@@ -235,8 +235,8 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   var segments = [
     { key: "all", label: "Все", desc: "Вся живая база.", match: function () { return true; } },
     { key: "has_bot", label: "Подписан на бот", desc: "Игрок связан с Telegram-ботом и доступен для бот-рассылки.", match: function (p) { return !!(p.channels && p.channels.bot); } },
+    { key: "has_poker21", label: "Привязан Poker21", desc: "К профилю привязан аккаунт Poker21.", match: function (p) { return !!String(p.pokerPlusUserId || p.p21Id || p.poker21Id || "").trim(); } },
     { key: "has_deposit", label: "Есть депозит", desc: "Есть депозит в журнале за выбранный период.", match: function (p) { return periodData(p).deposits > 0; } },
-    { key: "active_30", label: "Активность", desc: "Есть депозит или сообщение за выбранный период.", match: function (p) { var pd = periodData(p); return pd.deposits > 0 || pd.messages > 0; } },
     { key: "has_push", label: "Есть push", desc: "Можно достать игрока push-уведомлением.", match: function (p) { return !!(p.channels && p.channels.push); } },
   ];
 
