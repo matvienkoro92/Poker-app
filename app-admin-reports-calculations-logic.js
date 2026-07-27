@@ -313,7 +313,7 @@
         }).catch(function () {});
       }
 
-      function sumCalculationReports(items, week) {
+      function sumCalculationReports(items, week, alreadyScopedToWeek) {
         var totals = {
           deposit: 0,
           bonuses: 0,
@@ -326,7 +326,7 @@
         if (!Array.isArray(items) || !week) return totals;
         items.forEach(function (report) {
           var t = reportEffectiveTimestampMs(report);
-          if (!t || t < week.start || t > week.end) return;
+          if (!alreadyScopedToWeek && (!t || t < week.start || t > week.end)) return;
           totals.deposit += parseReportNumber(report && report.deposit);
           totals.bonuses += parseReportNumber(report && report.bonuses);
           totals.previousRakeback += getReportPreviousRakebackTotal(report);
@@ -597,7 +597,7 @@
         var currentCache = useAllReports && Array.isArray(calculationPeriodReportsCache)
           ? calculationPeriodReportsCache
           : (Array.isArray(calculationReportsCache) ? calculationReportsCache : []);
-        setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week) : {}, week);
+        setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week, !useAllReports) : {}, week);
         renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
         if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
@@ -639,7 +639,11 @@
             var activeUsesAllReports = !!(activeWeek && activeWeek.key && activeWeek.key !== "current_week");
             if (activeUsesAllReports === useAllReports) {
               setCalculationTotalsWithCurrentRakeback(
-                sumCalculationReports(useAllReports ? calculationPeriodReportsCache : calculationReportsCache, activeWeek),
+                sumCalculationReports(
+                  useAllReports ? calculationPeriodReportsCache : calculationReportsCache,
+                  activeWeek,
+                  !useAllReports
+                ),
                 activeWeek
               );
             }
