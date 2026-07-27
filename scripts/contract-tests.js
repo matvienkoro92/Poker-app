@@ -43,7 +43,13 @@ async function testRaffleCurrentWeekReturnsCalculation() {
     currentWeekRaffleIssueTotalsFromRaffles,
   } = raffles._test;
   const range = currentMoscowWeekRange(new Date("2026-07-25T12:00:00.000Z"));
+  assert.strictEqual(
+    new Date(range.startMs).toISOString(),
+    "2026-07-20T03:00:00.000Z",
+    "raffle week starts Monday at 06:00 Moscow"
+  );
   const raffle = {
+    drawnAt: "2026-07-26T17:15:00.000Z",
     groups: [
       { prize: "Беккинг-билет 500 ₽ — Magic MKO" },
       { prize: "Беккинг-байин 1000 ₽ на кеш 20/40" },
@@ -53,8 +59,8 @@ async function testRaffleCurrentWeekReturnsCalculation() {
   assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
     groupIndex: 0,
     winnerSeatStatus: "not_seated",
-    winnerSeatStatusAt: "2026-07-20T14:42:06.930Z",
-  }, range), 500, "not-seated return uses the actual group prize");
+    winnerSeatStatusAt: "2026-07-27T10:42:06.930Z",
+  }, range), 500, "return belongs to the raffle date, not the later status-edit date");
 
   assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
     groupIndex: 1,
@@ -71,14 +77,18 @@ async function testRaffleCurrentWeekReturnsCalculation() {
     winnerCashoutAt: "2026-07-23T22:33:20.669Z",
   }, range), 2635, "cashout return keeps the stored amount");
 
-  assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
+  assert.strictEqual(currentWeekRaffleWinnerReturnAmount({
+    ...raffle,
+    drawnAt: "2026-07-19T20:59:59.999Z",
+  }, {
     groupIndex: 1,
     winnerSeatStatus: "not_seated",
-    winnerSeatStatusAt: "2026-07-19T20:59:59.999Z",
+    winnerSeatStatusAt: "2026-07-20T14:00:00.000Z",
   }, range), 0, "return before the Moscow week is excluded");
 
   const totals = currentWeekRaffleIssueTotalsFromRaffles([{
     prizeKind: "tournament_ticket",
+    drawnAt: "2026-07-26T17:15:00.000Z",
     groups: raffle.groups,
     winners: [
       {

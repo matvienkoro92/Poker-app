@@ -600,12 +600,13 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function raffleCurrentMoscowWeekRange() {
-    var shifted = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    var shifted = new Date(Date.now() + 3 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000);
     var mondayOffset = (shifted.getUTCDay() + 6) % 7;
     var startShifted = Date.UTC(
       shifted.getUTCFullYear(),
       shifted.getUTCMonth(),
-      shifted.getUTCDate() - mondayOffset
+      shifted.getUTCDate() - mondayOffset,
+      6
     );
     var start = startShifted - 3 * 60 * 60 * 1000;
     return { start: start, end: start + 7 * 24 * 60 * 60 * 1000 };
@@ -631,6 +632,7 @@ function initRafflesCompletedRuntime(opts) {
       var kind = String(raffle && (raffle.prizeKind || raffle.prize_kind) || "").toLowerCase() === "cash"
         ? "cash"
         : "ticket";
+      var raffleDate = raffle && (raffle.drawnAt || raffle.completedAt || raffle.endDate || raffle.createdAt);
       (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (winner) {
         var prizeAmount = raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, winner));
         if (String(winner && winner.winnerStatus || "") === "ok" &&
@@ -638,10 +640,10 @@ function initRafflesCompletedRuntime(opts) {
           totals[kind].issued += prizeAmount;
         }
         if (String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
-            raffleDateIsInRange(winner && winner.winnerSeatStatusAt, range)) {
+            raffleDateIsInRange(raffleDate, range)) {
           totals[kind].returned += prizeAmount;
         } else if (String(winner && winner.winnerCashoutStatus || "") === "plus" &&
-            raffleDateIsInRange(winner && winner.winnerCashoutAt, range)) {
+            raffleDateIsInRange(raffleDate, range)) {
           totals[kind].returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
         }
       });
