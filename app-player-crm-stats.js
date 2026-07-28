@@ -117,7 +117,9 @@ function initPlayerCrmStatsRuntime(deps) {
       var pokerPlusId = String(row && row.pokerPlusUserId || "").trim();
       if (pokerPlusId) uniquePokerPlusIdsNow[pokerPlusId] = true;
     });
-    var pokerPlusTotalNow = Object.keys(uniquePokerPlusIdsNow).length;
+    var pokerPlusTotalNow = summary && summary.current && summary.current.pokerPlus != null
+      ? Number(summary.current.pokerPlus) || 0
+      : Object.keys(uniquePokerPlusIdsNow).length;
     var nowDate = new Date();
     var todayKey = new Date(nowDate.getTime() - nowDate.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     var periodIncludesToday = !!(registrationRange && registrationRange.from <= todayKey && registrationRange.to >= todayKey);
@@ -127,8 +129,14 @@ function initPlayerCrmStatsRuntime(deps) {
     var pokerPlusTotalEnd = registrationRange ? players.filter(function (p) {
       return stateWasActiveAt(p, "pokerPlusLinkedAt", "pokerPlusUnlinkedAt", registrationRange.to, true, !!(p && p.pokerPlusUserId));
     }).length : pokerPlusTotalNow;
-    if (periodIncludesToday) pokerPlusTotalEnd = pokerPlusTotalNow;
-    var statPokerPlusBalanceNet = pokerPlusTotalEnd - pokerPlusTotalStart;
+    if (periodIncludesToday) {
+      pokerPlusTotalEnd = pokerPlusTotalNow;
+      pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
+    } else if (!players.length) {
+      pokerPlusTotalEnd = Math.max(0, pokerPlusTotalNow);
+      pokerPlusTotalStart = Math.max(0, pokerPlusTotalEnd - statPokerPlusNet);
+    }
+    var statPokerPlusBalanceNet = statPokerPlusNet;
     var statPokerPlusBalanceUnlinked = statPokerPlusUnlinked;
     var botTotalNow = currentValue("botReach", players.filter(function (p) { return !!(p.channels && p.channels.bot); }).length);
     var botTotalStart = botHistoryReliable

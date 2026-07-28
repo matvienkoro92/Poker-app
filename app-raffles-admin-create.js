@@ -333,8 +333,10 @@ function initRafflesAdminCreateRuntime(opts) {
     var placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "— Выберите турнир —";
+    var tournamentDayGroup = document.createElement("optgroup");
+    tournamentDayGroup.label = "Турнир дня";
     var group = document.createElement("optgroup");
-    group.label = "Турниры отчётных суток";
+    group.label = "Остальные турниры отчётных суток";
     items.forEach(function (item) {
       var hour = String(Math.max(0, Number(item.hour) || 0)).padStart(2, "0");
       var minute = String(Math.max(0, Number(item.minute) || 0)).padStart(2, "0");
@@ -362,12 +364,15 @@ function initRafflesAdminCreateRuntime(opts) {
         (scope ? " (" + scope + ")" : "") +
         " — вход " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно") +
         (guarantee ? " · призы: " + guarantee : "");
-      group.appendChild(option);
+      (isTournamentDay ? tournamentDayGroup : group).appendChild(option);
     });
     var custom = document.createElement("option");
     custom.value = "custom";
     custom.textContent = "Свой вариант (ввести вручную)";
-    select.replaceChildren(placeholder, group, custom);
+    select.replaceChildren(placeholder);
+    if (tournamentDayGroup.children.length) select.appendChild(tournamentDayGroup);
+    if (group.children.length) select.appendChild(group);
+    select.appendChild(custom);
   }
 
   function setupTournamentDaySelect() {

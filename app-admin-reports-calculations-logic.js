@@ -570,6 +570,7 @@
         var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var url = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
         url = appendCalculationQueryParam(url, "calculationSummary", "1");
+        url = appendCalculationQueryParam(url, "includeRaffles", "0");
         url = appendCalculationQueryParam(url, "scope", scope);
         if (from && to) {
           url = appendCalculationQueryParam(url, "from", from);
@@ -653,12 +654,19 @@
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
         if (useAllReports && Array.isArray(calculationPeriodReportsCache)) {
-          fetchCalculationSummary(base, q, "all", week).then(applyCalculationSummaryStats).catch(function () {});
+          fetchCalculationSummary(base, q, "all", week).then(function (data) {
+            applyCalculationSummaryStats(data);
+            loadCalculationWeekStats(base, q, week);
+          }).catch(function () {});
           return;
         }
         fetchCalculationSummary(base, q, useAllReports ? "all" : "currentWeek", week)
           .then(function (data) {
             applyCalculationSummaryStats(data);
+            // Raffle aggregation is the slowest part of the calculation view.
+            // Let the report totals render first and hydrate raffle figures in
+            // the background instead of blocking the whole tab.
+            loadCalculationWeekStats(base, q, week);
             var items = data && data.ok && Array.isArray(data.reports) ? data.reports : [];
             if (useAllReports || items.length) return data;
             // The authoritative week boundary is Monday 06:00 MSK. If the
