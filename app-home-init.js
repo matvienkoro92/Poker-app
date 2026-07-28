@@ -491,7 +491,11 @@ function updateRaffleBadge(activeCount, activeTotalRub) {
       }
     }
   } catch (eRaffleHint) {}
-  var cache = (typeof window !== "undefined" && window._rafflesCache && window._rafflesCache.data && window._rafflesCache.data.activeRaffle) ? window._rafflesCache.data.activeRaffle : null;
+  var raffleCacheData = typeof window !== "undefined" && window._rafflesCache ? window._rafflesCache.data : null;
+  var cache = raffleCacheData && (
+    raffleCacheData.activeRaffle ||
+    (Array.isArray(raffleCacheData.activeRaffles) ? raffleCacheData.activeRaffles[0] : null)
+  );
   var hasTournamentDayTickets = false;
   if (cache) {
     var title = (cache.title || "").toLowerCase();

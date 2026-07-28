@@ -3183,10 +3183,7 @@ function initRaffles() {
       switchToCompleted = !!loadOptions.switchToCompleted;
     }
     switchToCompleted = !!switchToCompleted;
-    if (
-      !loadOptions.includeArchive &&
-      (readPendingCompletedRaffleId() || readPendingActiveRaffleId())
-    ) {
+    if (!loadOptions.includeArchive && readPendingActiveRaffleId()) {
       loadOptions.includeArchive = true;
     }
     var loadSeq = ++rafflesLoadSeq;
@@ -3265,7 +3262,6 @@ function initRaffles() {
       var useActiveScope =
         !isLocal &&
         !loadOptions.includeArchive &&
-        !readPendingCompletedRaffleId() &&
         !readPendingActiveRaffleId();
       var bypassActiveScopeCache =
         useActiveScope &&
@@ -3279,14 +3275,38 @@ function initRaffles() {
         (useActiveScope ? "&scope=active" : "") +
         (bypassActiveScopeCache ? "&bypassListCache=1" : "") +
         (isLocal ? "&demo=1" : "");
-      fetch(url)
-        .then(function (r) {
+      var pendingCompletedTarget = !loadOptions.includeArchive ? readPendingCompletedRaffleId() : "";
+      var pendingCompletedFetch = pendingCompletedTarget
+        ? fetch(
+            base + "/api/raffles" + qLead + "&scope=completed-one&target=" +
+            encodeURIComponent(pendingCompletedTarget) + "&_t=" + Date.now()
+          ).then(function (r) {
+            return r.json().catch(function () { return null; });
+          }).catch(function () { return null; })
+        : Promise.resolve(null);
+      Promise.all([fetch(url), pendingCompletedFetch])
+        .then(function (responses) {
+          var r = responses[0];
+          var pendingData = responses[1];
           return r.json().catch(function () {
             return { ok: false, error: "bad_json" };
           }).then(function (data) {
-            if (data && typeof data === "object") data.__status = r.status;
-            return data;
+            if (data && data.ok && pendingData && pendingData.ok && pendingData.raffle) {
+              var targetRaffle = pendingData.raffle;
+              var recent = Array.isArray(data.recentCompletedRaffles) ? data.recentCompletedRaffles.slice() : [];
+              if (!recent.some(function (raffle) { return raffle && raffle.id === targetRaffle.id; })) {
+                recent.unshift(targetRaffle);
+              }
+              data.recentCompletedRaffles = recent;
+              data.raffles = recent;
+            }
+            return { response: r, data: data };
           });
+        })
+        .then(function (result) {
+          var data = result.data;
+          if (data && typeof data === "object") data.__status = result.response.status;
+          return data;
         })
         .then(function (data) {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
@@ -3347,6 +3367,9 @@ function initRaffles() {
           setRafflesTab("active");
         }
         var raw = data.raffles || [];
+        if (data.activeOnly === true && Array.isArray(data.activeRaffles)) {
+          raw = data.activeRaffles.concat(Array.isArray(data.recentCompletedRaffles) ? data.recentCompletedRaffles : raw);
+        }
         var seen = {};
         var allRaffles = raw.filter(function (r) {
           var id = r && r.id;

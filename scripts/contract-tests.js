@@ -1805,6 +1805,46 @@ async function testRaffleActiveListIncludesDailySibling(redis) {
     2,
     "raffles payload keeps both active raffle records"
   );
+
+  const compact = await call(raffles, req("GET", {
+    pwaSession: s.user,
+    scope: "active",
+    bypassListCache: "1",
+  }));
+  assert.strictEqual(compact.statusCode, 200, "compact active raffle list succeeds");
+  assert.deepStrictEqual(
+    (compact.body.activeRaffles || []).map((raffle) => raffle.id).sort(),
+    ["contract_active_daily", "contract_active_regular"].sort(),
+    "compact active payload keeps every active raffle"
+  );
+  assert.strictEqual(
+    (compact.body.raffles || []).some((raffle) => raffle && raffle.status === "active"),
+    false,
+    "compact active payload does not duplicate active raffle records"
+  );
+  assert.strictEqual(
+    Object.prototype.hasOwnProperty.call(compact.body, "activeRaffle"),
+    false,
+    "compact active payload does not duplicate the first active raffle"
+  );
+
+  const completed = {
+    ...first,
+    id: "contract_completed_target",
+    status: "drawn",
+    completedNumber: 777,
+    completedAt: new Date(base - 500).toISOString(),
+    winners: [{ userId: "tg_1001", name: "Winner", prize: "Ticket", groupIndex: 0 }],
+  };
+  redis.kv.set("poker_app:raffle:contract_completed_target", JSON.stringify(completed));
+  redis.l("poker_app:raffle_ids").push("contract_completed_target");
+  const completedOne = await call(raffles, req("GET", {
+    pwaSession: s.user,
+    scope: "completed-one",
+    target: "777",
+  }));
+  assert.strictEqual(completedOne.statusCode, 200, "completed raffle deeplink target loads separately");
+  assert.strictEqual(completedOne.body.raffle.id, "contract_completed_target", "completed raffle deeplink resolves archive number");
 }
 
 async function testParticipationRequiresBotAndChannel(redis) {
