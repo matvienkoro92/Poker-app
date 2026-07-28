@@ -5,7 +5,7 @@
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
       var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
-      var calculationPeriodReportsCache = null;
+      var calculationPeriodReportsCache = {};
       var calculationPeriodRequestSeq = 0;
       var calculationInitialLoadRetryTimer = null;
       var calculationInitialLoadRetryCount = 0;
@@ -632,8 +632,12 @@
         var week = getCalculationWeekMeta();
         if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
         var useAllReports = !!(week && week.key && week.key !== "current_week");
-        var currentCache = useAllReports && Array.isArray(calculationPeriodReportsCache)
-          ? calculationPeriodReportsCache
+        var periodCacheKey = week && [week.key, week.from, week.to].join(":");
+        var cachedPeriodReports = useAllReports && periodCacheKey && calculationPeriodReportsCache
+          ? calculationPeriodReportsCache[periodCacheKey]
+          : null;
+        var currentCache = useAllReports && Array.isArray(cachedPeriodReports)
+          ? cachedPeriodReports
           : (Array.isArray(calculationReportsCache) ? calculationReportsCache : []);
         setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week, !useAllReports) : {}, week);
         renderCalculationArchive(calculationArchiveReportsCache);
@@ -657,7 +661,7 @@
         calculationArchiveRequestBase = base;
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
-        if (useAllReports && Array.isArray(calculationPeriodReportsCache)) {
+        if (useAllReports && Array.isArray(cachedPeriodReports)) {
           fetchCalculationSummary(base, q, "all", week).then(function (data) {
             applyCalculationSummaryStats(data);
             loadCalculationWeekStats(base, q, week);
@@ -681,16 +685,17 @@
           })
           .then(function (data) {
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
-            if (useAllReports) calculationPeriodReportsCache = Array.isArray(items) ? items : [];
+            if (useAllReports && periodCacheKey) calculationPeriodReportsCache[periodCacheKey] = Array.isArray(items) ? items : [];
             else calculationReportsCache = Array.isArray(items) ? items : [];
             var activeWeek = getCalculationWeekMeta();
             var activeUsesAllReports = !!(activeWeek && activeWeek.key && activeWeek.key !== "current_week");
-            if (activeUsesAllReports === useAllReports) {
+            var activePeriodCacheKey = activeWeek && [activeWeek.key, activeWeek.from, activeWeek.to].join(":");
+            if (activeUsesAllReports === useAllReports && (!useAllReports || activePeriodCacheKey === periodCacheKey)) {
               setCalculationTotalsWithCurrentRakeback(
                 sumCalculationReports(
-                  useAllReports ? calculationPeriodReportsCache : calculationReportsCache,
+                  useAllReports ? calculationPeriodReportsCache[periodCacheKey] : calculationReportsCache,
                   activeWeek,
-                  !useAllReports
+                  true
                 ),
                 activeWeek
               );
