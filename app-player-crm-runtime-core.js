@@ -738,13 +738,18 @@
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + count + "</button>";
     }).join("");
     var blockedCount = Array.isArray(state.blockedUsers) ? state.blockedUsers.length : 0;
+    var blockedCls = "player-crm__chip" + (state.filter === "blocked" ? " player-crm__chip--active" : "");
     el.innerHTML = segmentChips +
-      "<button type=\"button\" class=\"player-crm__chip\" data-crm-tab=\"blocked\" data-crm-nav-level=\"players\">Заблокированные · " + blockedCount + "</button>";
+      "<button type=\"button\" class=\"" + blockedCls + "\" data-crm-filter=\"blocked\">Заблокированные · " + blockedCount + "</button>";
   }
 
   function renderList() {
     var el = document.getElementById("playerCrmList");
     if (!el) return;
+    if (state.filter === "blocked") {
+      el.innerHTML = blockedRowsHtml(state.search);
+      return;
+    }
     var items = filteredPlayers().sort(sortForWork);
     var total = items.length;
     var visibleItems = state.showAllPlayers ? items : items.slice(0, 15);
@@ -769,10 +774,49 @@
         : "");
   }
 
+  function blockedRowsHtml(search) {
+    var q = String(search || "").trim().toLowerCase();
+    var rows = Array.isArray(state.blockedUsers) ? state.blockedUsers.slice() : [];
+    if (q) {
+      rows = rows.filter(function (row) {
+        var player = row.player || {};
+        return [
+          row.id,
+          row.reason,
+          row.targetLabel,
+          row.adminName,
+          (row.aliases || []).join(" "),
+          player.name,
+          player.handle,
+          player.accountId,
+          player.dtId,
+        ].join(" ").toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    if (!rows.length) return "<div class=\"player-crm__timeline-item\">Заблокированных игроков пока нет.</div>";
+    return rows.map(function (row) {
+      var player = row.player || {};
+      var title = row.targetLabel || player.name || player.handle || row.id || "Игрок";
+      var sub = [player.handle, player.accountId || row.id, (row.aliases || []).slice(0, 3).join(", ")].filter(Boolean).join(" · ");
+      var reason = row.reason || "без причины";
+      var date = row.createdAt ? new Date(row.createdAt).toLocaleString("ru-RU") : "дата неизвестна";
+      return "<article class=\"player-crm__blocked-row\">" +
+        "<div><strong>" + esc(title) + "</strong><span>" + esc(sub) + "</span><small>" + esc(reason) + " · " + esc(date) + "</small></div>" +
+        "<div class=\"player-crm__blocked-actions\">" +
+          (player.id ? "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-open-player=\"" + esc(player.id) + "\">Карточка</button>" : "") +
+          "<button type=\"button\" class=\"player-crm__danger-btn\" data-crm-unblock-id=\"" + esc(row.id || "") + "\">Разблокировать</button>" +
+        "</div>" +
+      "</article>";
+    }).join("");
+  }
+
   function renderBlockedList() {
     var el = document.getElementById("playerCrmBlockedList");
     var summary = document.getElementById("playerCrmBlockedSummary");
-    if (!el) return;
+    if (!el) {
+      if (state.filter === "blocked") renderList();
+      return;
+    }
     var q = String(state.blockedSearch || "").trim().toLowerCase();
     var rows = Array.isArray(state.blockedUsers) ? state.blockedUsers.slice() : [];
     if (q) {
@@ -2144,9 +2188,7 @@
       tab.setAttribute("aria-selected", active ? "true" : "false");
     });
     var statsSubtabs = document.querySelector("[data-crm-stats-subtabs]");
-    var playerSubtabs = document.querySelector("[data-crm-player-subtabs]");
     if (statsSubtabs) statsSubtabs.hidden = statsStates.indexOf(state.tab) === -1;
-    if (playerSubtabs) playerSubtabs.hidden = playerStates.indexOf(state.tab) === -1;
     panels.forEach(function (panel) {
       panel.classList.toggle("player-crm__tab-panel--active", panel.getAttribute("data-crm-panel") === state.tab);
     });
@@ -2169,6 +2211,7 @@
     if (!host) return;
     if (host.querySelector("[data-admin-report-panel='calculations']")) {
       if (typeof window.pokerMountAdminReportCalculations === "function") window.pokerMountAdminReportCalculations(host);
+      loadCrmCalculationSummary();
       return;
     }
     host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаю расчёты…</div>";
@@ -2184,12 +2227,43 @@
       })
       .then(function () {
         if (typeof window.pokerInitAdminReportModal === "function") window.pokerInitAdminReportModal();
-        if (typeof window.pokerMountAdminReportCalculations === "function" && window.pokerMountAdminReportCalculations(host)) return;
+        if (typeof window.pokerMountAdminReportCalculations === "function" && window.pokerMountAdminReportCalculations(host)) {
+          loadCrmCalculationSummary();
+          return;
+        }
         host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Расчёты недоступны для этого аккаунта.</div>";
       })
       .catch(function () {
         host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Не удалось загрузить расчёты. Попробуйте открыть вкладку ещё раз.</div>";
       });
+  }
+
+  function loadCrmCalculationSummary() {
+    var base = getApiBaseSafe();
+    var range = selectedPeriodRange();
+    if (!base || !range || !range.from || !range.to) return;
+    var params = {
+      calculationSummary: "1",
+      includeRaffles: "0",
+      includeDailyPoker: "0",
+      scope: state.period === "current_week" ? "currentWeek" : "all",
+      from: range.from,
+      to: range.to,
+    };
+    fetch(base + "/api/admin-report-shifts" + crmQuery(params), { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("calculation summary " + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        if (state.tab !== "calculations") return;
+        var activeRange = selectedPeriodRange();
+        if (!activeRange || activeRange.from !== range.from || activeRange.to !== range.to) return;
+        if (typeof window.pokerApplyAdminReportCalculationSummary === "function") {
+          window.pokerApplyAdminReportCalculationSummary(data);
+        }
+      })
+      .catch(function () {});
   }
 
   function adoptPendingShellTab() {
@@ -4329,6 +4403,7 @@
       var filter = e.target.closest("[data-crm-filter]");
       if (filter) {
         state.filter = filter.getAttribute("data-crm-filter") || "all";
+        if (state.filter === "blocked") loadCrmBlockedData();
         state.selectedId = "";
         state.showAllPlayers = false;
         renderAll();
@@ -4631,6 +4706,7 @@
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
+        if (state.tab === "calculations") loadCrmCalculationSummary();
         if (state.tab !== "calculations") loadCrmData("data");
         if (state.period === "custom") {
           window.requestAnimationFrame(function () {

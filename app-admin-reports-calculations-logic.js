@@ -602,6 +602,21 @@
         updateFiguresTotals({ syncExtras: false });
       }
 
+      function applyCalculationSummaryPayload(data) {
+        if (!data || data.ok === false) return false;
+        var week = getCalculationWeekMeta();
+        var items = Array.isArray(data.reports) ? data.reports : [];
+        applyCalculationSummaryStats(data);
+        if (week && week.key && week.key !== "current_week") {
+          var cacheKey = [week.key, week.from, week.to].join(":");
+          calculationPeriodReportsCache[cacheKey] = items;
+        } else {
+          calculationReportsCache = items;
+        }
+        setCalculationTotalsWithCurrentRakeback(sumCalculationReports(items, week, true), week);
+        return true;
+      }
+
       function loadCalculationArchiveReports(base, q) {
         if (!calculationsArchiveEl || calculationArchiveLoading || calculationArchiveLoaded) return;
         calculationArchiveLoading = true;
@@ -1123,6 +1138,7 @@
         scheduleFiguresTotals: scheduleFiguresTotals,
         setCalculationTotalsText: setCalculationTotalsText,
         sumCalculationReports: sumCalculationReports,
+        applyCalculationSummaryPayload: applyCalculationSummaryPayload,
         getCalculationArchiveReportRows: getCalculationArchiveReportRows,
         renderCalculationArchiveReport: renderCalculationArchiveReport,
         renderCalculationArchiveWeek: renderCalculationArchiveWeek,

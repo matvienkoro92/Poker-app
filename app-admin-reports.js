@@ -3808,6 +3808,9 @@ function initAdminReportModal() {
     else openCalculationsReports();
     return true;
   };
+  window.pokerApplyAdminReportCalculationSummary = function (data) {
+    return callCalculationsLogic("applyCalculationSummaryPayload", [data]) === true;
+  };
   window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;
   btn.addEventListener("click", function (e) {
     if (openModal() === false) {

@@ -250,9 +250,10 @@ function initPlayerCrmStatsRuntime(deps) {
     var dailyPokerPrizeAmount = dailyPokerCreditedAmount != null && dailyPokerTicketAmount != null
       ? dailyPokerCreditedAmount + dailyPokerTicketAmount
       : null;
-    var dailyPokerBalanceCreditedAmount = dailyPokerStats
-      ? Math.max(0, Number(dailyPokerSource && dailyPokerSource.bonusBalanceCredited) || 0)
-      : null;
+    // Every Daily Poker monetary and ticket reward is persisted as a credit in
+    // the bonus ledger. The game rows are the authoritative period source here:
+    // the bounded ledger history can temporarily undercount an older credit.
+    var dailyPokerBalanceCreditedAmount = dailyPokerPrizeAmount;
     var dailyPokerDebitedAmount = dailyPokerStats
       ? (state.period === "all" ? Number(dailyPokerStats.debitedAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceDebited) || 0)
       : null;

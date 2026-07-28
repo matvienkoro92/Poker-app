@@ -20,11 +20,6 @@
       <button type="button" class="player-crm__tab" data-crm-tab="players" data-crm-nav-level="stats">Игроки</button>
     </nav>
 
-    <nav class="player-crm__subtabs player-crm__subtabs--players" data-crm-player-subtabs aria-label="Подразделы игроков" hidden>
-      <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="players" data-crm-nav-level="players">Список игроков</button>
-      <button type="button" class="player-crm__tab" data-crm-tab="blocked" data-crm-nav-level="players">Блокировки</button>
-    </nav>
-
     <div class="player-crm__workbench">
       <main class="player-crm__panel player-crm__panel--main">
         <section class="player-crm__tab-panel player-crm__tab-panel--active" data-crm-panel="stats">
@@ -114,20 +109,6 @@
             </label>
           </div>
           <div class="player-crm__registrations" id="playerCrmRegistrations"></div>
-        </section>
-
-        <section class="player-crm__tab-panel" data-crm-panel="blocked">
-          <div class="player-crm__section-head">
-            <div>
-              <h3>Заблокированные</h3>
-              <span id="playerCrmBlockedSummary">глобальный доступ к приложению</span>
-            </div>
-            <button type="button" class="player-crm__send-section-btn" data-crm-refresh-blocked>Обновить</button>
-          </div>
-          <div class="player-crm__filters">
-            <input type="search" class="player-crm__search" id="playerCrmBlockedSearch" placeholder="Поиск: ник, ID, причина" autocomplete="off" />
-          </div>
-          <div class="player-crm__blocked-list" id="playerCrmBlockedList" aria-live="polite"></div>
         </section>
 
         <section class="player-crm__tab-panel" data-crm-panel="pokerplus">
