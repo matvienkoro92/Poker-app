@@ -714,7 +714,9 @@ async function testAuthAndAdmin(redis) {
   redis.s("poker_app:bonus_users").add("ID111111");
   redis.s("poker_app:daily_poker_users").add("ID222222");
   const adminHandler = loadHandler("admin");
-  let bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken, search: "qweenpoker" }));
+  let bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken }));
+  assert.strictEqual(bonusRes.statusCode, 200, "bonus balances initial page loads before search");
+  bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken, search: "qweenpoker" }));
   assert.strictEqual(bonusRes.statusCode, 200, "roman1787443 can open bonus admin API");
   assert.strictEqual(bonusRes.body.total, 1, "bonus admin merges zero-balance aliases linked to one Telegram user");
   assert.strictEqual(bonusRes.body.users[0].bonusBalance, 849, "linked bonus user keeps the real balance");
