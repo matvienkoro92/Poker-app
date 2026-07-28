@@ -13,7 +13,12 @@
     totalBalance: null,
     issuesLoaded: false,
     issueOperations: [],
+    issuesCursor: "",
+    issuesHasMore: false,
+    issuesLoading: false,
     tournamentOptions: [],
+    listController: null,
+    listRequestSeq: 0,
   };
 
   function $(id) {
@@ -327,12 +332,21 @@
       syncShowAllButton(0, 0);
       return;
     }
+    if (adminBonusesState.listController) {
+      try { adminBonusesState.listController.abort(); } catch (eAbort) {}
+    }
+    adminBonusesState.listController = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var requestSeq = ++adminBonusesState.listRequestSeq;
     adminBonusesState.loading = true;
     syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
     setStatus("Загрузка…", false);
-    fetch(listUrl(), { cache: "no-store" })
+    fetch(listUrl(), {
+      cache: "no-store",
+      signal: adminBonusesState.listController ? adminBonusesState.listController.signal : undefined,
+    })
       .then(readJson)
       .then(function (data) {
+        if (requestSeq !== adminBonusesState.listRequestSeq) return;
         adminBonusesState.loading = false;
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Ошибка загрузки");
         adminBonusesState.users = data.users || [];
@@ -346,6 +360,8 @@
         setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
       .catch(function (err) {
+        if (err && err.name === "AbortError") return;
+        if (requestSeq !== adminBonusesState.listRequestSeq) return;
         adminBonusesState.loading = false;
         syncShowAllButton(0, 0);
         syncTotalDebited(adminBonusesState.totalDebited);
@@ -472,23 +488,39 @@
           '</article>';
         }).join("") +
       '</section>';
-    }).join("");
+    }).join("") + (adminBonusesState.issuesHasMore
+      ? '<div class="admin-bonuses__show-all-row"><button type="button" class="admin-bonuses__show-all" data-admin-bonus-issues-more>Показать ещё</button></div>'
+      : "");
   }
 
-  function loadIssues(force) {
+  function loadIssues(force, append) {
     var body = $("adminBonusesIssuesBody");
-    if (!body || (adminBonusesState.issuesLoaded && !force)) return;
-    body.textContent = "Загрузка выдач…";
-    fetch(authUrl("bonus-issues", { limit: 1500 }), { cache: "no-store" })
+    if (!body || adminBonusesState.issuesLoading || (adminBonusesState.issuesLoaded && !force && !append)) return;
+    if (!append) {
+      adminBonusesState.issuesCursor = "";
+      body.textContent = "Загрузка выдач…";
+    }
+    adminBonusesState.issuesLoading = true;
+    fetch(authUrl("bonus-issues", {
+      limit: 75,
+      cursor: append ? adminBonusesState.issuesCursor : "",
+    }), { cache: "no-store" })
       .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Выдачи не загрузились");
-        adminBonusesState.issueOperations = data.operations || [];
+        adminBonusesState.issueOperations = append
+          ? adminBonusesState.issueOperations.concat(data.operations || [])
+          : (data.operations || []);
+        adminBonusesState.issuesCursor = String(data.nextCursor || "");
+        adminBonusesState.issuesHasMore = data.hasMore === true && !!adminBonusesState.issuesCursor;
         adminBonusesState.issuesLoaded = true;
         renderIssues(adminBonusesState.issueOperations);
       })
       .catch(function (err) {
         body.textContent = err && err.message ? err.message : POKER_NET_ERR;
+      })
+      .then(function () {
+        adminBonusesState.issuesLoading = false;
       });
   }
 
@@ -690,6 +722,11 @@
     if (issuesBody && issuesBody.dataset.reviewBound !== "1") {
       issuesBody.dataset.reviewBound = "1";
       issuesBody.addEventListener("click", function (event) {
+        var more = event.target.closest("[data-admin-bonus-issues-more]");
+        if (more) {
+          loadIssues(false, true);
+          return;
+        }
         var button = event.target.closest("[data-admin-bonus-issue-review]");
         if (button) verifyIssue(button);
       });
@@ -717,7 +754,7 @@
       el.addEventListener(id === "adminBonusesSort" ? "change" : "input", function () {
         adminBonusesState.showingAll = false;
         clearTimeout(el.__adminBonusesTimer);
-        el.__adminBonusesTimer = setTimeout(loadList, 350);
+        el.__adminBonusesTimer = setTimeout(loadList, 650);
       });
     });
     var body = $("adminBonusesTableBody");

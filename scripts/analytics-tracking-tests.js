@@ -43,6 +43,15 @@ function redis(command) {
     return added;
   }
   if (op === "SMEMBERS") return Array.from(set(key));
+  if (op === "SSCAN") {
+    const cursor = Math.max(0, parseInt(args[0], 10) || 0);
+    const countIndex = args.findIndex((value) => String(value).toUpperCase() === "COUNT");
+    const count = countIndex >= 0 ? Math.max(1, parseInt(args[countIndex + 1], 10) || 10) : 10;
+    const values = Array.from(set(key));
+    const page = values.slice(cursor, cursor + count);
+    const next = cursor + page.length >= values.length ? "0" : String(cursor + page.length);
+    return [next, page];
+  }
   if (op === "HSET" || op === "HSETNX") {
     const [field, value] = args;
     if (op === "HSETNX" && hash(key).has(field)) return 0;
@@ -56,6 +65,15 @@ function redis(command) {
     const out = [];
     hash(key).forEach((value, field) => out.push(field, value));
     return out;
+  }
+  if (op === "HSCAN") {
+    const cursor = Math.max(0, parseInt(args[0], 10) || 0);
+    const countIndex = args.findIndex((value) => String(value).toUpperCase() === "COUNT");
+    const count = countIndex >= 0 ? Math.max(1, parseInt(args[countIndex + 1], 10) || 10) : 10;
+    const entries = Array.from(hash(key).entries());
+    const page = entries.slice(cursor, cursor + count);
+    const next = cursor + page.length >= entries.length ? "0" : String(cursor + page.length);
+    return [next, page.flat()];
   }
   throw new Error("Unsupported Redis command in analytics test: " + op);
 }

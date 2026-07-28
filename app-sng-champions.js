@@ -540,17 +540,17 @@
   }
 
   var SNG_PLAYER_ART_BY_NICK = {
-    "porquinho": "./assets/sng-finalist-porquinho.png",
-    "поркиньо": "./assets/sng-finalist-porquinho.png",
-    "поркиньё": "./assets/sng-finalist-porquinho.png",
-    "штукатур": "./assets/sng-finalist-shtukatur.png",
-    "shtukatur": "./assets/sng-finalist-shtukatur.png",
-    "hakas": "./assets/sng-finalist-hakas.png",
-    "хакас": "./assets/sng-finalist-hakas.png",
-    "aza": "./assets/sng-finalist-aza.png",
-    "aza32": "./assets/sng-finalist-aza.png",
-    "аза": "./assets/sng-finalist-aza.png",
-    "аза32": "./assets/sng-finalist-aza.png",
+    "porquinho": "./assets/sng-finalist-porquinho.webp",
+    "поркиньо": "./assets/sng-finalist-porquinho.webp",
+    "поркиньё": "./assets/sng-finalist-porquinho.webp",
+    "штукатур": "./assets/sng-finalist-shtukatur.webp",
+    "shtukatur": "./assets/sng-finalist-shtukatur.webp",
+    "hakas": "./assets/sng-finalist-hakas.webp",
+    "хакас": "./assets/sng-finalist-hakas.webp",
+    "aza": "./assets/sng-finalist-aza.webp",
+    "aza32": "./assets/sng-finalist-aza.webp",
+    "аза": "./assets/sng-finalist-aza.webp",
+    "аза32": "./assets/sng-finalist-aza.webp",
     "waaar": "./assets/summer-rating-player-waaar.webp",
     "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
     "coo1er91": "./assets/summer-rating-player-cooler.webp",
@@ -1052,7 +1052,7 @@
         var tournamentOptionHtml = item.status === "completed" && item.winnerName
           ? renderCompletedTournamentOption(item)
           : '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
-              '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.png?v=1" alt=""></span>' +
+              '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.webp?v=1" alt="" loading="lazy" decoding="async"></span>' +
               '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
                 '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
                   (item.activePairs && item.activePairs.length
@@ -1994,7 +1994,7 @@
     var teamKnockoutTitle = state.status !== "draft" && /^1(?:ый|й)\s+командный\s+снг[-\s]?нокаут\s+баттл\s+два\s+туза$/i.test(normalizedHomeTitle);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       banner.src = teamKnockoutTitle
-        ? "./assets/home-sng-champions-click-banner-team-knockout.png?v=1"
+        ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=1"
         : "./assets/home-sng-champions-click-banner.webp?v=2";
     });
     var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-sng-open], #sngChampionsOpen"));

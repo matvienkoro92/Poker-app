@@ -3810,7 +3810,7 @@ button.player-crm__stat:focus-visible,
   }
 }
 
-/* Period analytics always stay three-up, including narrow admin WebViews. */
+/* Period analytics use six tracks with responsive two/three-card spans. */
 .player-crm .player-crm__period-metrics {
   display: grid !important;
   grid-template-columns: repeat(6, minmax(0, 1fr)) !important;

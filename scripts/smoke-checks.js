@@ -850,7 +850,7 @@ add("Chat shell is lazy-loaded from a hydrated HTML fragment", () =>
 add("Download HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="download"',
-    'data-html-fragment="./html-fragments/download.html"',
+    'data-html-fragment="./html-fragments/download.html?v=',
     'data-html-fragment-view="download"',
   ]) &&
   !has("html", 'data-download-page="poker21"') &&
@@ -1200,7 +1200,7 @@ add("Chat sender label hides Telegram login when a name exists", () =>
 add("Schedule keeps weekly, day and daily tournament order", () =>
   hasAll("html", [
     'data-view="schedule"',
-    'data-html-fragment="./html-fragments/schedule.html?v=3.001"',
+    'data-html-fragment="./html-fragments/schedule.html?v=',
     'data-html-fragment-view="schedule"',
   ]) &&
   !has("html", 'schedule-section--week-tournament') &&
@@ -1276,7 +1276,7 @@ add("Poker21 profile privacy/status controls are wired", () =>
 add("Hall of fame shell is lazy-loaded from a hydrated HTML fragment", () =>
   hasAll("html", [
     'data-view="hall-of-fame"',
-    'data-html-fragment="./html-fragments/hall-of-fame.html"',
+    'data-html-fragment="./html-fragments/hall-of-fame.html?v=',
     'data-html-fragment-view="hall-of-fame"',
   ]) &&
   !has("html", 'id="hallOfFameView"') &&
@@ -1296,7 +1296,7 @@ add("Hall of fame shell is lazy-loaded from a hydrated HTML fragment", () =>
 add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   hasAll("html", [
     'id="globalModalsFragmentHost"',
-    './html-fragments/global-modals.html',
+    './html-fragments/global-modals.html?v=',
     '<nav class="bottom-nav"',
     'id="chatNavBtn"',
   ]) &&
@@ -1308,7 +1308,7 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
     'data-global-modal-fragment="./html-fragments/global-modals-admin.html"',
     'data-global-modal-fragment="./html-fragments/global-modals-home.html"',
     './html-fragments/global-modals-chat-rating.html',
-    'data-global-modal-fragment="./html-fragments/global-modals-access.html"',
+    './html-fragments/global-modals-access.html?v=',
   ]) &&
   hasAll("globalModalsAll", [
     'id="adminReportModal"',
@@ -1558,8 +1558,7 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-raffles.js", "app-raffles-share.js") &&
     appearsBefore(order, "app-player-crm-formatters.js", "app-player-crm-periods.js") &&
     appearsBefore(order, "app-player-crm-periods.js", "app-player-crm-stats.js") &&
-    appearsBefore(order, "app-player-crm-stats.js", "app-player-crm-charts.js") &&
-    appearsBefore(order, "app-player-crm-charts.js", "app-player-crm-reports.js") &&
+    appearsBefore(order, "app-player-crm-stats.js", "app-player-crm-reports.js") &&
     appearsBefore(order, "app-player-crm-reports.js", "app-player-crm-registrations.js") &&
     appearsBefore(order, "app-player-crm-registrations.js", "app-player-crm-viewport-shell.js") &&
     appearsBefore(order, "app-player-crm-viewport-shell.js", "app-player-crm-runtime.js") &&
@@ -1569,16 +1568,16 @@ add("JS manifest preserves critical load order", () => {
     appearsBefore(order, "app-admin-reports.js", "app-auth-debug.js");
 });
 
-add("CRM period metrics stay in a three-column grid on Safari and PWA", () =>
+add("CRM period metrics stay in the six-track responsive grid on Safari and PWA", () =>
   hasAll("appPlayerCrmStats", [
     "player-crm__period-metrics player-crm__period-metrics--three",
-    "display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important",
+    "display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important",
   ]) &&
   hasAll("stylesPlayerCrm", [
     ".player-crm__stats > *",
     "grid-template-columns: minmax(0, 1fr);",
     ".player-crm .player-crm__period-metrics--three",
-    "grid-template-columns: repeat(3, minmax(0, 1fr)) !important;",
+    "grid-template-columns: repeat(6, minmax(0, 1fr)) !important;",
   ]) &&
   !files.appPlayerCrmStats.includes("display:flex!important;flex-wrap:wrap!important") &&
   !files.appPlayerCrmStats.includes("calc((100% - 16px)/3)") &&
@@ -1714,8 +1713,9 @@ add("Large domain entrypoints stay thin after runtime split", () =>
   hasAll("playerCrmFragment", [
     'data-crm-close="player-crm"',
     "Загрузка дашборда…",
-    "График загрузится после открытия дашборда.",
   ]) &&
+  !has("playerCrmFragment", 'data-crm-tab="overview"') &&
+  !has("playerCrmFragment", 'data-crm-panel="overview"') &&
   hasAll("appPlayerCrmRuntime", [
     "function pokerInitPlayerCrm",
     "window.pokerInitPlayerCrm",
@@ -2269,7 +2269,7 @@ add("Equilator HTML is lazy-loaded from a fragment", () =>
 add("Raffles HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="raffles"',
-    './html-fragments/raffles.html',
+    './html-fragments/raffles.html?v=',
     'data-html-fragment-view="raffles"',
   ]) &&
   !has("html", 'id="rafflesAdminWrap"') &&
@@ -2301,10 +2301,10 @@ add("Secondary utility views are lazy-loaded from HTML fragments", () =>
     'data-html-fragment="./html-fragments/poker-tasks.html"',
     'data-html-fragment-view="poker-tasks"',
     'data-view="cashout"',
-    './html-fragments/cashout.html',
+    './html-fragments/cashout.html?v=',
     'data-html-fragment-view="cashout"',
     'data-view="schedule"',
-    'data-html-fragment="./html-fragments/schedule.html?v=3.001"',
+    'data-html-fragment="./html-fragments/schedule.html?v=',
     'data-html-fragment-view="schedule"',
   ]) &&
   !has("html", 'id="bonusGameCards"') &&
@@ -2317,7 +2317,7 @@ add("Secondary utility views are lazy-loaded from HTML fragments", () =>
   hasAll("coolerGameFragment", ['id="coolerGameCards"', 'data-view="cooler-game"']) &&
   hasAll("plastererGameFragment", ['id="plastererBoard"', 'data-view="plasterer-game"']) &&
   hasAll("pokerTasksFragment", ['id="pokerTasksStartBtn"', 'data-view="poker-tasks"']) &&
-  hasAll("cashoutFragment", ['class="cashout-manager-block"', 'data-view="cashout"']) &&
+  hasAll("cashoutFragment", ['cashout-manager-block', 'data-view="cashout"']) &&
   hasAll("scheduleFragment", ['schedule-section--week-tournament', 'data-view="schedule"']) &&
   fs.existsSync(path.join(root, "html-fragments", "bonus-game.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "cooler-game.html")) &&
@@ -2711,13 +2711,15 @@ add("Hidden cashout manager photos do not preload on home", () =>
 
 add("Public build stays under the mobile asset budget", () => {
   const publicBytes = dirSizeBytes(path.join(root, "public"));
-  const budgetBytes = 95 * 1024 * 1024;
+  const budgets = JSON.parse(read("asset-budgets.json")).budgetsMiB;
+  const budgetBytes = Number(budgets.publicBuild) * 1024 * 1024;
   return publicBytes > 0 && publicBytes <= budgetBytes;
 });
 
 add("Individual shipped assets stay under the mobile file budget", () => {
   const publicDir = path.join(root, "public");
-  const maxBytes = 2 * 1024 * 1024;
+  const budgets = JSON.parse(read("asset-budgets.json")).budgetsMiB;
+  const maxBytes = Number(budgets.individualFile) * 1024 * 1024;
   let largest = 0;
   function walk(dir) {
     if (!fs.existsSync(dir)) return;
@@ -2730,6 +2732,61 @@ add("Individual shipped assets stay under the mobile file budget", () => {
   walk(publicDir);
   return largest > 0 && largest <= maxBytes;
 });
+
+add("Startup eager images stay under their own bandwidth budget", () => {
+  const budgets = JSON.parse(read("asset-budgets.json")).budgetsMiB;
+  const eagerAssets = new Set();
+  const imageTag = /<img\b[^>]*>/gi;
+  let match;
+  while ((match = imageTag.exec(files.html))) {
+    const tag = match[0];
+    if (!/loading=["']eager["']/i.test(tag) && !/fetchpriority=["']high["']/i.test(tag)) continue;
+    const src = tag.match(/\bsrc=["']\.\/assets\/([^"'?#]+)(?:[?#][^"']*)?["']/i);
+    if (src && src[1]) eagerAssets.add(src[1]);
+  }
+  let bytes = 0;
+  eagerAssets.forEach((rel) => {
+    const file = path.join(root, "public", "assets", rel);
+    if (fs.existsSync(file)) bytes += fs.statSync(file).size;
+  });
+  return bytes <= Number(budgets.startupEager) * 1024 * 1024;
+});
+
+add("Core and seasonal assets stay inside separate budgets", () => {
+  const config = JSON.parse(read("asset-budgets.json"));
+  const budgets = config.budgetsMiB;
+  const currentMonths = new Set((config.seasonRouting.currentMonths || []).map(Number));
+  const archiveMonths = new Set((config.seasonRouting.archiveMonths || []).map(Number));
+  const totals = { core: 0, current: 0, archive: 0 };
+  function walkAssets(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walkAssets(file);
+        continue;
+      }
+      const rel = path.relative(path.join(root, "public", "assets"), file);
+      const date = rel.match(/rating-(\d{2})-(\d{2})-2026/i);
+      const month = date ? Number(date[2]) : 0;
+      if (currentMonths.has(month)) totals.current += fs.statSync(file).size;
+      else if (archiveMonths.has(month)) totals.archive += fs.statSync(file).size;
+      else totals.core += fs.statSync(file).size;
+    }
+  }
+  walkAssets(path.join(root, "public", "assets"));
+  return totals.core <= Number(budgets.coreAndLazyAssets) * 1024 * 1024 &&
+    totals.current <= Number(budgets.currentSeason) * 1024 * 1024 &&
+    totals.archive <= Number(budgets.archiveSeasons) * 1024 * 1024;
+});
+
+add("Archived rating seasons are excluded from startup execution", () =>
+  hasAll("html", [
+    'type="application/poker-lazy" data-poker-lazy-domain="rating-spring"',
+    'type="application/poker-lazy" data-poker-lazy-domain="rating-winter"',
+  ]) &&
+  !/<script(?![^>]*type=["']application\/poker-lazy["'])[^>]*src=["'][^"']*(?:spring-rating|winter-rating)/i.test(files.html)
+);
 
 add("CSS domain entrypoints cover auth and tournament styles", () =>
   localCssFilesReferencedByEntrypoints().includes("styles-auth.css") &&

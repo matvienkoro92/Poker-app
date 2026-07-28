@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "budgetsMiB": {
+    "startupEager": 0.75,
+    "coreAndLazyAssets": 30,
+    "currentSeason": 18,
+    "archiveSeasons": 42,
+    "publicBuild": 95,
+    "individualFile": 2
+  },
+  "seasonRouting": {
+    "currentMonths": [6, 7, 8],
+    "archiveMonths": [1, 2, 3, 4, 5],
+    "archiveScriptDomains": ["rating-spring", "rating-winter"]
+  }
+}

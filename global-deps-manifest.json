@@ -2083,6 +2083,60 @@
       "domain": "adminReports",
       "exportedBy": ["app-visitors-admin.js"],
       "consumedBy": ["app-admin-reports.js", "app-visitors-admin.js"]
+    },
+    {
+      "name": "pokerOpenAdminReportRakebackOverlay",
+      "domain": "adminReports",
+      "exportedBy": ["app-admin-reports.js"],
+      "consumedBy": ["app-admin-reports-calculations.js", "app-admin-reports.js"]
+    },
+    {
+      "name": "pokerMountAdminReportCalculations",
+      "domain": "adminReports",
+      "exportedBy": ["app-admin-reports.js"],
+      "consumedBy": ["app-admin-reports.js", "app-player-crm-runtime-core.js"]
+    },
+    {
+      "name": "pokerRefreshAdminReportCalculations",
+      "domain": "adminReports",
+      "exportedBy": ["app-admin-reports.js"],
+      "consumedBy": ["app-admin-reports.js", "app-player-crm-runtime-core.js"]
+    },
+    {
+      "name": "pokerMountClubChoiceVoteInline",
+      "domain": "clubChoice",
+      "exportedBy": ["app-club-choice-vote.js"],
+      "consumedBy": ["app-club-choice-vote.js", "app-hall-fame.js"]
+    },
+    {
+      "name": "pokerUnmountClubChoiceVoteInline",
+      "domain": "clubChoice",
+      "exportedBy": ["app-club-choice-vote.js"],
+      "consumedBy": ["app-club-choice-vote.js", "app-hall-fame.js"]
+    },
+    {
+      "name": "__pokerAdminCalculationRange",
+      "domain": "adminReports",
+      "exportedBy": ["app-player-crm-runtime-core.js"],
+      "consumedBy": ["app-admin-reports-legacy.js", "app-admin-reports.js", "app-player-crm-runtime-core.js"]
+    },
+    {
+      "name": "__pokerRafflesOpenCompletedTab",
+      "domain": "raffles",
+      "exportedBy": ["app-raffles.js", "app-visitors-admin.js"],
+      "consumedBy": ["app-raffles.js", "app-visitors-admin.js"]
+    },
+    {
+      "name": "__pokerRafflesOpenActiveTab",
+      "domain": "raffles",
+      "exportedBy": ["app-visitors-admin.js"],
+      "consumedBy": ["app-raffles.js", "app-visitors-admin.js"]
+    },
+    {
+      "name": "POKER_ARCHIVE_ASSET_BASE_URL",
+      "domain": "assetRuntime",
+      "exportedBy": ["asset-runtime-config.js"],
+      "consumedBy": ["app-home-media.js"]
     }
   ]
 }

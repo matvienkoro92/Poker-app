@@ -564,6 +564,39 @@
           });
       }
 
+      function fetchCalculationSummary(base, q, scope, week) {
+        var businessDateShiftMs = -3 * 60 * 60 * 1000;
+        var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
+        var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
+        var url = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
+        url = appendCalculationQueryParam(url, "calculationSummary", "1");
+        url = appendCalculationQueryParam(url, "scope", scope);
+        if (from && to) {
+          url = appendCalculationQueryParam(url, "from", from);
+          url = appendCalculationQueryParam(url, "to", to);
+        }
+        var fetchSummary = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
+        return fetchSummary(url, { cache: "no-store" }, 20000).then(function (response) {
+          if (!response || !response.ok) throw new Error("calculation summary failed");
+          return response.json();
+        });
+      }
+
+      function applyCalculationSummaryStats(data) {
+        var raffleStats = data && data.raffles;
+        var dailyPokerStats = data && data.dailyPoker;
+        calculationWeekStatsTotals = {
+          raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
+          raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
+          raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
+          dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
+          raffleTicketsReturn: Number(raffleStats && raffleStats.returnedTicketAmount) || 0,
+          raffleCashReturn: Number(raffleStats && (raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount)) || 0,
+          dailyPokerReturn: Number(dailyPokerStats && dailyPokerStats.bonusBalanceReturned) || 0,
+        };
+        updateFiguresTotals({ syncExtras: false });
+      }
+
       function loadCalculationArchiveReports(base, q) {
         if (!calculationsArchiveEl || calculationArchiveLoading || calculationArchiveLoaded) return;
         calculationArchiveLoading = true;
@@ -619,10 +652,13 @@
         calculationArchiveRequestBase = base;
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
-        loadCalculationWeekStats(base, q, week);
-        if (useAllReports && Array.isArray(calculationPeriodReportsCache)) return;
-        fetchCalculationReports(base, q, useAllReports ? "all" : "currentWeek")
+        if (useAllReports && Array.isArray(calculationPeriodReportsCache)) {
+          fetchCalculationSummary(base, q, "all", week).then(applyCalculationSummaryStats).catch(function () {});
+          return;
+        }
+        fetchCalculationSummary(base, q, useAllReports ? "all" : "currentWeek", week)
           .then(function (data) {
+            applyCalculationSummaryStats(data);
             var items = data && data.ok && Array.isArray(data.reports) ? data.reports : [];
             if (useAllReports || items.length) return data;
             // The authoritative week boundary is Monday 06:00 MSK. If the

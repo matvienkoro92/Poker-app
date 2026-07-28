@@ -209,7 +209,7 @@ if (chatUserModalEl) {
   var CHAT_USER_SUPERPOWERS = {
     "porquinho": {
       title: "🐗 Поркиньо",
-      art: "./assets/sng-finalist-porquinho.png",
+      art: "./assets/sng-finalist-porquinho.webp",
       lead: "Поркиньо превращает обычные жёлуди в тяжёлые покерные снаряды и закидывает ими всю арену.",
       moves: [
         ["Жёлудевый беспредел", "выпускает серию раскалённых желудей, которые рикошетят от стен и противников."],
@@ -223,7 +223,7 @@ if (chatUserModalEl) {
     "поркиньё": null,
     "штукатур": {
       title: "🧱 Штукатур",
-      art: "./assets/sng-finalist-shtukatur.png",
+      art: "./assets/sng-finalist-shtukatur.webp",
       lead: "Штукатур управляет кирпичом, бетоном и штукатуркой, создавая стены прямо во время боя.",
       moves: [
         ["Непробиваемая кладка", "мгновенно поднимает перед командой толстую кирпичную защиту."],
@@ -236,7 +236,7 @@ if (chatUserModalEl) {
     "shtukatur": null,
     "hakas": {
       title: "🦅 Hakas",
-      art: "./assets/sng-finalist-hakas.png",
+      art: "./assets/sng-finalist-hakas.webp",
       lead: "Hakas сражается вместе со своим орлом и использует силу гор, ветра и степи.",
       moves: [
         ["Атака орла", "выпускает орла, который пикирует на противника и сбивает его с ног."],
@@ -249,7 +249,7 @@ if (chatUserModalEl) {
     "хакас": null,
     "aza32": {
       title: "🎖 Aza32",
-      art: "./assets/sng-finalist-aza.png",
+      art: "./assets/sng-finalist-aza.webp",
       lead: "Aza32 управляет боевым дроном, анализирует арену и атакует противников с высокой точностью.",
       moves: [
         ["Дрон-разведчик", "запускает дрон, который отслеживает движения противников."],
@@ -901,14 +901,14 @@ if (chatUserModalEl) {
       badge: "Победители",
       name: "Hakas + Aza32",
       result: "Чемпионы командного турнира",
-      arts: ["./assets/sng-finalist-aza.png", "./assets/sng-finalist-hakas.png"],
+      arts: ["./assets/sng-finalist-aza.webp", "./assets/sng-finalist-hakas.webp"],
       className: "team-winner",
       title: "1ый командный СНГ-нокаут баттл Два туза",
     } : (chatUserModalIsPorquinho(ratingNick) || chatUserModalIsShtukatur(ratingNick)) ? {
       badge: "Финалисты",
       name: "Porquinho + Штукатур",
       result: "Финалисты командного турнира",
-      arts: ["./assets/sng-finalist-porquinho.png", "./assets/sng-finalist-shtukatur.png"],
+      arts: ["./assets/sng-finalist-porquinho.webp", "./assets/sng-finalist-shtukatur.webp"],
       className: "team-runner-up",
       title: "1ый командный СНГ-нокаут баттл Два туза",
     } : chatUserModalIsRybnadzor(ratingNick) ? {
@@ -1505,17 +1505,17 @@ if (chatUserModalEl) {
     if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-card.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
-    if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.png" };
+    if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-offline-win.webp" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
     if (key.indexOf("вице") >= 0 && key.indexOf("месяц") >= 0) return { mod: "month-vice-champion", label: "ВИЦЕ<br>ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/chat-profile-achievement-month-vice-champion.webp" };
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/chat-profile-achievement-month-champion.webp" };
-    if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.png" };
+    if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
     if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
-    if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/chat-profile-achievement-team-friends-v2.png" };
+    if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/chat-profile-achievement-team-friends-v2.webp" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };

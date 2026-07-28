@@ -247,6 +247,7 @@ function initAdminReportModal() {
   var cashHistoryLoadedAt = 0;
   var cashHistoryRows = [];
   var cashHistoryMeta = null;
+  var cashHistoryPage = 1;
   var calculationClubDataLoading = false;
   var calculationClubDataLoadedAt = 0;
   var rakebackModuleLoadPromise = null;
@@ -1344,7 +1345,10 @@ function initAdminReportModal() {
           "</tr>" +
         "</thead>" +
         "<tbody>" + bodyHtml + "</tbody>" +
-      "</table>";
+      "</table>" +
+      (cashHistoryMeta && Number(cashHistoryMeta.page || cashHistoryPage) < Number(cashHistoryMeta.totalPage || 1)
+        ? '<button type="button" class="admin-report-cash-history__refresh" data-admin-report-cash-history-more>Показать ещё</button>'
+        : "");
     var status = cashHistoryFiltersActive() ? String(rows.length) + " из " + totalRows + " записей" : String(rows.length) + " записей";
     if (!cashHistoryFiltersActive() && cashHistoryMeta && cashHistoryMeta.totalCount && Number(cashHistoryMeta.totalCount) !== rows.length) {
       status += " из " + cashHistoryMeta.totalCount;
@@ -1359,10 +1363,12 @@ function initAdminReportModal() {
     renderCashHistoryTable(getFilteredCashHistoryRows(), cashHistoryRows.length);
   }
 
-  function renderCashHistoryRecords(data) {
+  function renderCashHistoryRecords(data, append) {
     var chipLogs = data && data.chipLogs ? data.chipLogs : null;
     cashHistoryMeta = chipLogs || null;
-    cashHistoryRows = chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : [];
+    cashHistoryRows = append
+      ? cashHistoryRows.concat(chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : [])
+      : (chipLogs && Array.isArray(chipLogs.list) ? chipLogs.list : []);
     updateCashHistoryOperatorOptions(cashHistoryRows);
     applyCashHistoryPeriodPreset();
     applyCashHistoryFilters();
@@ -1385,7 +1391,7 @@ function initAdminReportModal() {
     });
   }
 
-  function loadCashHistoryRecords(forceRefresh) {
+  function loadCashHistoryRecords(forceRefresh, append) {
     if (!cashHistoryList) return undefined;
     if (!canViewSentReports()) {
       cashHistoryList.innerHTML = cashHistoryMessageHtml("Нет доступа к истории кассы.");
@@ -1393,7 +1399,7 @@ function initAdminReportModal() {
       return undefined;
     }
     var now = Date.now();
-    if (!forceRefresh && cashHistoryLoadedAt && now - cashHistoryLoadedAt < CASH_HISTORY_CACHE_TTL_MS) return undefined;
+    if (!append && !forceRefresh && cashHistoryLoadedAt && now - cashHistoryLoadedAt < CASH_HISTORY_CACHE_TTL_MS) return undefined;
     if (cashHistoryLoading) return undefined;
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     if (!base) {
@@ -1406,7 +1412,9 @@ function initAdminReportModal() {
       setCashHistoryStatus("", "error");
       return undefined;
     }
-    var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ all: true, pageSize: 200 }) : { all: true, pageSize: 200 };
+    cashHistoryPage = append ? cashHistoryPage + 1 : 1;
+    var requestData = { page: cashHistoryPage, pageSize: 100 };
+    var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(requestData) : requestData;
     var fetchFn = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : (typeof fetch === "function" ? fetch : null);
     if (!fetchFn) {
       cashHistoryList.innerHTML = cashHistoryMessageHtml("Браузер не может выполнить запрос истории кассы.");
@@ -1415,7 +1423,7 @@ function initAdminReportModal() {
     }
     cashHistoryLoading = true;
     if (cashHistoryRefreshBtn) cashHistoryRefreshBtn.disabled = true;
-    cashHistoryList.innerHTML = cashHistoryMessageHtml("Загружаю историю кассы...");
+    if (!append) cashHistoryList.innerHTML = cashHistoryMessageHtml("Загружаю историю кассы...");
     setCashHistoryStatus("Загрузка...", "loading");
     return fetchFn(base.replace(/\/$/, "") + "/api/pokerplus-chip-logs", {
       method: "POST",
@@ -1440,10 +1448,11 @@ function initAdminReportModal() {
           cashHistoryMeta = null;
           return;
         }
-        renderCashHistoryRecords(payload);
+        renderCashHistoryRecords(payload, append === true);
         cashHistoryLoadedAt = Date.now();
       })
       .catch(function (err) {
+        if (append) cashHistoryPage = Math.max(1, cashHistoryPage - 1);
         var fallbackMessage = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети";
         cashHistoryList.innerHTML = cashHistoryMessageHtml((err && err.message) || fallbackMessage);
         setCashHistoryStatus("Ошибка", "error");
@@ -3821,6 +3830,14 @@ function initAdminReportModal() {
   if (cashHistoryRefreshBtn) {
     cashHistoryRefreshBtn.addEventListener("click", function () {
       loadCashHistoryRecords(true);
+    });
+  }
+  if (cashHistoryList && cashHistoryList.dataset.cashHistoryMoreBound !== "1") {
+    cashHistoryList.dataset.cashHistoryMoreBound = "1";
+    cashHistoryList.addEventListener("click", function (event) {
+      if (event.target && event.target.closest("[data-admin-report-cash-history-more]")) {
+        loadCashHistoryRecords(false, true);
+      }
     });
   }
   if (cashHistoryOperatorFilter) {

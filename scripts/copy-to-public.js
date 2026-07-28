@@ -9,6 +9,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
+const archiveAssetBaseUrl = String(process.env.POKER_ARCHIVE_ASSET_BASE_URL || '').trim().replace(/\/+$/, '');
 
 function stripAssetUrl(raw) {
   return String(raw || '')
@@ -59,6 +60,8 @@ const baseFiles = [
   'css-manifest.json',
   'js-manifest.json',
   'global-deps-manifest.json',
+  'asset-budgets.json',
+  'asset-runtime-config.js',
   'preview-iphone.html',
   'manifest.json',
   'sw.js',
@@ -89,6 +92,11 @@ for (const file of toCopy) {
   fs.copyFileSync(src, path.join(publicDir, file));
   console.log('Copied:', file);
 }
+
+fs.writeFileSync(
+  path.join(publicDir, 'asset-runtime-config.js'),
+  `window.POKER_ARCHIVE_ASSET_BASE_URL = ${JSON.stringify(archiveAssetBaseUrl)};\n`
+);
 
 function copyDirRecursive(src, dest) {
   if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
@@ -159,6 +167,8 @@ function copyReferencedAssets() {
   const refs = collectReferencedAssets();
   let copied = 0;
   for (const rel of Array.from(refs).sort()) {
+    const archiveMatch = String(rel).match(/(?:^|\/)rating-\d{2}-(\d{2})-2026/i);
+    if (archiveAssetBaseUrl && archiveMatch && Number(archiveMatch[1]) <= 5) continue;
     const src = path.join(assetDir, rel);
     if (!src.startsWith(assetDir + path.sep)) continue;
     if (!fs.existsSync(src) || fs.statSync(src).isDirectory()) continue;

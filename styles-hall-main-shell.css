@@ -319,7 +319,7 @@
     linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0) 30%, rgba(255, 132, 24, 0.05) 100%),
     radial-gradient(ellipse at 50% 30%, rgba(171, 89, 30, 0.16) 0%, rgba(72, 26, 8, 0.14) 42%, rgba(13, 5, 2, 0) 78%),
     linear-gradient(180deg, rgba(22, 8, 3, 0) 0%, rgba(41, 15, 5, 0.34) 56%, rgba(16, 6, 2, 0.56) 100%),
-    url("./assets/hall-top2026-lower-floor-clean.png?v=3.001"),
+    url("./assets/hall-top2026-lower-floor-clean.webp?v=3.001"),
     url("./assets/hall-top2026-bg-dark.webp?v=3.537");
   background-position: center top, center bottom, center bottom, center var(--hall-top2026-lower-bg-y), center var(--hall-top2026-bg-y);
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;

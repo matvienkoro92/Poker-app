@@ -17,7 +17,6 @@
     <nav class="player-crm__subtabs" data-crm-stats-subtabs aria-label="Подразделы статистики">
       <div class="player-crm__subtabs-heading" aria-hidden="true"><span>Статистика</span><b>Подразделы</b></div>
       <button type="button" class="player-crm__tab player-crm__tab--active" data-crm-tab="stats" data-crm-nav-level="stats">Сводка</button>
-      <button type="button" class="player-crm__tab" data-crm-tab="overview" data-crm-nav-level="stats">График</button>
       <button type="button" class="player-crm__tab" data-crm-tab="players" data-crm-nav-level="stats">Игроки</button>
     </nav>
 
@@ -60,46 +59,6 @@
           <div class="player-crm__tracking-notice" id="playerCrmTrackingNotice"></div>
           <div class="player-crm__stats" id="playerCrmStats">
             <div style="display:block;color:#f4ead6;background:rgba(15,23,42,0.78);border:1px solid rgba(199,163,106,0.35);border-radius:8px;padding:12px;font-weight:800;">Загрузка дашборда…</div>
-          </div>
-        </section>
-
-        <section class="player-crm__tab-panel" data-crm-panel="overview">
-          <div class="player-crm__section-head">
-            <div>
-              <h3>График</h3>
-              <span id="playerCrmAnalyticsPeriod">За все время</span>
-            </div>
-            <button type="button" class="player-crm__send-section-btn" data-crm-send-section="overview">Отправить</button>
-          </div>
-          <div class="player-crm__chart-period-row" aria-label="Период графика">
-            <div class="player-crm__period player-crm__period--main">
-              <span>Период</span>
-              <div class="player-crm__period-tabs" role="tablist" aria-label="Период графика">
-                <button type="button" data-crm-chart-period-tab="today">Сегодня</button>
-                <button type="button" data-crm-chart-period-tab="yesterday">Вчера</button>
-                <button type="button" data-crm-chart-period-tab="current_week" class="player-crm__period-tab--active" aria-selected="true">Текущая неделя</button>
-                <button type="button" data-crm-chart-period-tab="last_week">Прошлая неделя</button>
-                <button type="button" data-crm-chart-period-tab="current_month">Текущий месяц</button>
-                <button type="button" data-crm-chart-period-tab="last_month">Прошлый месяц</button>
-                <button type="button" data-crm-chart-period-tab="all">За всё время</button>
-                <button type="button" data-crm-chart-period-tab="custom">Период</button>
-              </div>
-            </div>
-            <div class="player-crm__period player-crm__chart-date-field player-crm__date-range-field">
-              <span>Диапазон</span>
-              <input id="playerCrmChartDateFrom" type="hidden" />
-              <input id="playerCrmChartDateTo" type="hidden" />
-              <button type="button" class="player-crm__date-range-btn" id="playerCrmChartDateRangeBtn" data-crm-date-range="chart" aria-expanded="false" aria-controls="playerCrmChartDateRangeCalendar">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
-                </svg>
-                <span id="playerCrmChartDateRangeText">Выбрать диапазон</span>
-              </button>
-              <div class="player-crm__range-calendar" id="playerCrmChartDateRangeCalendar" data-crm-date-range-popover="chart" hidden></div>
-            </div>
-          </div>
-          <div class="player-crm__analytics" id="playerCrmAnalytics">
-            <div style="display:block;color:#f4ead6;background:rgba(15,23,42,0.78);border:1px solid rgba(148,163,184,0.24);border-radius:8px;padding:12px;font-weight:700;">График загрузится после открытия дашборда.</div>
           </div>
         </section>
 

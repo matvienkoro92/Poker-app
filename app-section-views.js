@@ -1,6 +1,14 @@
 // Просмотры разделов (админ): счётчик в Redis, полоска внизу каждого экрана
 (function pokerAdminSectionViews() {
   var debounceTimer = null;
+  function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
   function apiBase() {
     return typeof getApiBase === "function" ? getApiBase() : "";
   }

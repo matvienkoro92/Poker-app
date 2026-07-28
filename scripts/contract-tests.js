@@ -10,7 +10,7 @@ const BOT_TOKEN = "contract-test-bot-token";
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
 const DAILY_CASH_START_TIME = "20:16";
 const DAILY_CASH_DURATION_MS = (23 * 60 + 59) * 60 * 1000;
-const DAILY_CASH_SERIES_ID = "raffle_daily_cash_20_16";
+const DAILY_CASH_SERIES_ID = "raffle_daily_cash_20_40_20_15";
 
 function contractMoscowParts(date) {
   const d = new Date(date.getTime() + MSK_OFFSET_MS);
@@ -184,6 +184,11 @@ class MemoryRedis {
       this.kv.set(key, String(next));
       return this.result(next);
     }
+    if (cmd === "INCRBY") {
+      const next = (parseInt(this.kv.get(key) || "0", 10) || 0) + (parseInt(command[2], 10) || 0);
+      this.kv.set(key, String(next));
+      return this.result(next);
+    }
     if (cmd === "DEL") {
       let n = 0;
       for (let i = 1; i < command.length; i += 1) {
@@ -246,6 +251,15 @@ class MemoryRedis {
       const out = [];
       for (const [field, value] of this.h(key).entries()) out.push(field, value);
       return this.result(out);
+    }
+    if (cmd === "HSCAN") {
+      const cursor = Math.max(0, parseInt(command[2], 10) || 0);
+      const countIndex = command.findIndex((value) => String(value).toUpperCase() === "COUNT");
+      const count = countIndex >= 0 ? Math.max(1, parseInt(command[countIndex + 1], 10) || 10) : 10;
+      const entries = Array.from(this.h(key).entries());
+      const page = entries.slice(cursor, cursor + count);
+      const next = cursor + page.length >= entries.length ? "0" : String(cursor + page.length);
+      return this.result([next, page.flat()]);
     }
     if (cmd === "HMGET") {
       const h = this.h(key);
@@ -323,6 +337,15 @@ class MemoryRedis {
     }
     if (cmd === "SISMEMBER") return this.result(this.s(key).has(String(command[2])) ? 1 : 0);
     if (cmd === "SMEMBERS") return this.result(Array.from(this.s(key)));
+    if (cmd === "SSCAN") {
+      const cursor = Math.max(0, parseInt(command[2], 10) || 0);
+      const countIndex = command.findIndex((value) => String(value).toUpperCase() === "COUNT");
+      const count = countIndex >= 0 ? Math.max(1, parseInt(command[countIndex + 1], 10) || 10) : 10;
+      const values = Array.from(this.s(key));
+      const page = values.slice(cursor, cursor + count);
+      const next = cursor + page.length >= values.length ? "0" : String(cursor + page.length);
+      return this.result([next, page]);
+    }
     if (cmd === "SCARD") return this.result(this.s(key).size);
     if (cmd === "ZADD") {
       this.z(key).set(String(command[3]), Number(command[2]) || 0);
@@ -733,7 +756,7 @@ async function testAuthAndAdmin(redis) {
       id: "weekly-6|18|0|Фриролл",
       title: "Фриролл",
       time: "18:00 МСК",
-      buyin: "1₽",
+      buyin: "45₽",
     },
   }));
   assert.strictEqual(manualBonusRes.statusCode, 200, "bonus admin can debit a user");
@@ -1330,7 +1353,9 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.statusCode, 400, "raffle blocks another account from the same device");
   assert.strictEqual(r.body.code, "SAME_DEVICE", "raffle returns same-device code");
   const storedAfterSameDevice = JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle"));
-  assert.strictEqual(storedAfterSameDevice.participants.length, 1, "same-device account is not added");
+  const separatelyStoredParticipants = JSON.parse(redis.kv.get("poker_app:raffle_participants_data:contract_raffle") || "[]");
+  assert.strictEqual(storedAfterSameDevice.participants, undefined, "participants are not kept in monolithic raffle JSON");
+  assert.strictEqual(separatelyStoredParticipants.length, 1, "same-device account is not added");
 
   r = await call(raffles, req("POST", {}, { pwaSession: s.user, action: "leave", raffleId: "contract_raffle" }));
   assert.strictEqual(r.statusCode, 200, "raffle leave succeeds");
@@ -2200,7 +2225,7 @@ async function testRaffleWinnerReadyAdminNotifications(redis) {
   process.env.WEBPUSH_CONTACT_EMAIL = "mailto:contract@example.test";
   const raffleNotifications = require(path.join(root, "lib", "raffle-notifications"));
   const workingAdmin = raffleNotifications.resolveWorkingRaffleAdmin(new Date());
-  const adminIds = [...new Set([workingAdmin && workingAdmin.userId, "tg_388008256"].filter(Boolean))];
+  const adminIds = [...new Set([workingAdmin && workingAdmin.userId].filter(Boolean))];
   const sentPushes = [];
   let webpushRuntime = null;
   let originalSendNotification = null;
@@ -2815,9 +2840,9 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.raffle.winners[0].name, "Участник", "non-admin does not receive winner telegram login as name");
   assert.strictEqual(r.body.raffle.participants[1].name, "Роман", "non-admin receives Poker21 participant name by p21 id");
   assert.strictEqual(r.body.raffle.participants[1].pokerPlusNickname, "Роман", "non-admin receives Poker21 participant nickname by p21 id");
-  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 4, "non-admin receives Poker21 participant fish level");
+  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 10, "non-admin receives Poker21 participant fish level");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "non-admin receives winner Poker21 nickname");
-  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 2, "non-admin receives winner fish level");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 5, "non-admin receives winner fish level");
 
   r = await call(raffles, req("GET", { pwaSession: s.admin, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "admin can load raffle");
@@ -2828,9 +2853,9 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.body.raffle.winners[0].name, "@player_public", "admin receives winner telegram login name");
   assert.strictEqual(r.body.raffle.participants[1].name, "Роман", "admin receives Poker21 participant name by p21 id");
   assert.strictEqual(r.body.raffle.participants[1].pokerPlusNickname, "Роман", "admin receives Poker21 participant nickname by p21 id");
-  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 4, "admin receives Poker21 participant fish level");
+  assert.strictEqual(r.body.raffle.participants[1].pokerPlusStatusLevel, 10, "admin receives Poker21 participant fish level");
   assert.strictEqual(r.body.raffle.winners[0].pokerPlusNickname, "Poker21Nick", "admin receives winner Poker21 nickname");
-  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 2, "admin receives winner fish level");
+  assert.strictEqual(r.body.raffle.winners[0].pokerPlusStatusLevel, 5, "admin receives winner fish level");
 
   r = await call(raffles, req("GET", { pwaSession: s.user }));
   const listed = (r.body.raffles || []).find((item) => item.id === "contract_raffle_tg_privacy");
@@ -2858,7 +2883,7 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   assert.strictEqual(r.statusCode, 200, "non-admin can load p21-only participant raffle");
   assert.strictEqual(r.body.raffle.participants[0].name, "Роман", "non-admin receives Poker21 name without user id");
   assert.strictEqual(r.body.raffle.participants[0].pokerPlusNickname, "Роман", "non-admin receives Poker21 nickname without user id");
-  assert.strictEqual(r.body.raffle.participants[0].pokerPlusStatusLevel, 4, "non-admin receives Poker21 fish level without user id");
+  assert.strictEqual(r.body.raffle.participants[0].pokerPlusStatusLevel, 10, "non-admin receives Poker21 fish level without user id");
 }
 
 async function testRaffleCashBroadcastAndWinnerInstruction(redis) {
@@ -3689,8 +3714,8 @@ async function testRaffleDailyRecurring(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can create a daily raffle");
   assert.strictEqual(r.body.raffle.daily, true, "daily raffle is marked daily");
-  assert.strictEqual(r.body.raffle.accessLevel, 1, "daily cash raffle defaults to level 1+ access");
-  assert.strictEqual(r.body.raffle.recurrence.template.accessLevel, 1, "daily cash template defaults to level 1+ access");
+  assert.strictEqual(r.body.raffle.accessLevel, 10, "daily cash raffle defaults to level 10+ access");
+  assert.strictEqual(r.body.raffle.recurrence.template.accessLevel, 10, "daily cash template defaults to level 10+ access");
   assert.strictEqual(r.body.raffle.recurrence.startTime, DAILY_CASH_START_TIME, "cash daily start time is canonical");
   assert.strictEqual(r.body.raffle.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cash daily uses one canonical series");
   assert.strictEqual(r.body.raffle.recurrence.durationMs, DAILY_CASH_DURATION_MS, "cash daily lasts until 20:15 next day");
@@ -3748,8 +3773,8 @@ async function testRaffleDailyRecurring(redis) {
   const generated = (r.body.raffles || []).filter((raffle) => raffle.recurrence && raffle.recurrence.seriesId === DAILY_CASH_SERIES_ID && raffle.id !== source.id);
   assert.strictEqual(generated.length, 1, "due daily series creates one next raffle");
   assert.strictEqual(generated[0].status, "active", "generated daily raffle is active");
-  assert.strictEqual(generated[0].accessLevel, 1, "generated daily cash raffle uses level 1+ access");
-  assert.strictEqual(generated[0].recurrence.template.accessLevel, 1, "generated daily cash template keeps level 1+ access");
+  assert.strictEqual(generated[0].accessLevel, 10, "generated daily cash raffle uses level 10+ access");
+  assert.strictEqual(generated[0].recurrence.template.accessLevel, 10, "generated daily cash template keeps level 10+ access");
   assert.strictEqual(generated[0].createdAt, dueStart.toISOString(), "generated daily raffle starts at scheduled time");
   assert.strictEqual(generated[0].endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "generated daily raffle keeps original duration");
   assert.strictEqual(
@@ -3801,8 +3826,8 @@ async function testRaffleDailyScheduleDedupe(redis) {
     const stored = JSON.parse(redis.kv.get("poker_app:raffle:" + sourceId));
     assert.ok(stored.recurrence.qstashScheduleId, "stored daily raffle keeps QStash schedule id");
     assert.strictEqual(stored.recurrence.startTime, DAILY_CASH_START_TIME, "stored cash daily keeps canonical time");
-    assert.strictEqual(stored.accessLevel, 1, "stored cash daily keeps level 1+ access");
-    assert.strictEqual(stored.recurrence.template.accessLevel, 1, "stored cash daily template keeps level 1+ access");
+    assert.strictEqual(stored.accessLevel, 10, "stored cash daily keeps level 10+ access");
+    assert.strictEqual(stored.recurrence.template.accessLevel, 10, "stored cash daily template keeps level 10+ access");
 
     const dueStart = contractMoscowStartOnOrBefore(new Date(), DAILY_CASH_START_TIME);
     const firstStart = new Date(dueStart.getTime() - 24 * 3600_000).toISOString();
@@ -3825,7 +3850,7 @@ async function testRaffleDailyScheduleDedupe(redis) {
       stored.recurrence.qstashScheduleId,
       "generated daily raffle reuses the original QStash schedule id",
     );
-    assert.strictEqual(generated[0].accessLevel, 1, "scheduled daily generated raffle keeps level 1+ access");
+    assert.strictEqual(generated[0].accessLevel, 10, "scheduled daily generated raffle keeps level 10+ access");
     assert.strictEqual(scheduleCalls.length, 1, "generated daily raffle does not create a second QStash schedule");
   } finally {
     if (previousQstashToken === undefined) delete process.env.QSTASH_TOKEN;
@@ -3885,8 +3910,8 @@ async function testRaffleDailyCronTick(redis) {
   assert.strictEqual(generated.createdAt, dueStart.toISOString(), "cron generated daily raffle starts at scheduled time");
   assert.strictEqual(generated.endDate, new Date(dueStart.getTime() + durationMs).toISOString(), "cron generated daily raffle keeps duration");
   assert.strictEqual(generated.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cron generated daily raffle uses canonical cash series");
-  assert.strictEqual(generated.accessLevel, 1, "cron generated daily cash raffle keeps level 1+ access");
-  assert.strictEqual(generated.recurrence.template.accessLevel, 1, "cron generated daily cash template keeps level 1+ access");
+  assert.strictEqual(generated.accessLevel, 10, "cron generated daily cash raffle keeps level 10+ access");
+  assert.strictEqual(generated.recurrence.template.accessLevel, 10, "cron generated daily cash template keeps level 10+ access");
 }
 
 async function testRaffleDuplicateOptions(redis) {
@@ -4168,6 +4193,7 @@ async function testDailyPokerWinners(redis) {
     publicSpinDates.reduce((sum, pair) => sum + (dateSet.has(pair[1]) ? 1 : 0), 0) + (dateSet.has(meta.gameDate) ? 1 : 0);
   const expectedSpinStats = {
     totalUniquePlayers: new Set(publicSpinDates.map(([accountId]) => accountId)).size,
+    totalSpins: 6,
     todayUniquePlayers: expectedUniqueForDates(new Set([meta.gameDate])),
     todayTotalSpins: expectedTotalForDates(new Set([meta.gameDate])),
     weekUniquePlayers: expectedUniqueForDates(weekDateSet),
@@ -4359,7 +4385,7 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.isAdmin, false, "daily poker winners marks regular viewer");
   assert.strictEqual(r.body.winners[0].displayName, "Leader Poker21 Name", "daily poker winners prefers Poker21 name publicly");
   assert.strictEqual(r.body.winners[0].pokerPlusNickname, "LeaderPoker21Nick", "daily poker winners exposes Poker21 nick publicly");
-  assert.strictEqual(r.body.winners[0].pokerPlusStatusLevel, 4, "daily poker winners exposes leader fish level");
+  assert.strictEqual(r.body.winners[0].pokerPlusStatusLevel, 10, "daily poker winners exposes leader fish level");
   assert.strictEqual(r.body.winners[0].telegramUsername, undefined, "daily poker winners hides Telegram username publicly");
   assert.strictEqual(r.body.winners[0].telegramDisplayName, undefined, "daily poker winners hides Telegram display publicly");
   assert.strictEqual(r.body.winners[0].totalPrizeAmount, 500, "daily poker winners exposes leader total");
@@ -4367,13 +4393,13 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(r.body.winners[0].spinCount, 1, "daily poker winners exposes leader spin count");
   assert.strictEqual(r.body.winners[1].displayName, "Peer Poker21 Name", "daily poker winners resolves Poker21 display names");
   assert.strictEqual(r.body.winners[1].pokerPlusNickname, "PeerPoker21Nick", "daily poker winners exposes peer Poker21 nick");
-  assert.strictEqual(r.body.winners[1].pokerPlusStatusLevel, 2, "daily poker winners exposes peer fish level");
+  assert.strictEqual(r.body.winners[1].pokerPlusStatusLevel, 5, "daily poker winners exposes peer fish level");
   assert.strictEqual(r.body.winners[1].totalPrizeAmount, 350, "daily poker winners aggregates all-time prizes");
   assert.strictEqual(r.body.winners[1].prize, "Всего: 300 ₽ + 50 бонусов", "daily poker winners formats mixed total prize");
   assert.strictEqual(r.body.winners[1].spinCount, 3, "daily poker winners exposes peer spin count");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Admin Display"), false, "daily poker winners hides admins");
   assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Attempt Display"), false, "daily poker winners hides attempt-only prizes");
-  assert.strictEqual(r.body.winners.some((winner) => winner.displayName === "Bonus Display"), true, "daily poker winners includes bonus-only prizes");
+  assert.strictEqual(r.body.winners.some((winner) => winner.totalPrizeAmount === 50), true, "daily poker winners includes bonus-only prizes");
 
   const adminWinners = await call(promo, req("GET", { path: "daily-poker/winners", pwaSession: s.admin, limit: "5" }));
   assert.strictEqual(adminWinners.statusCode, 200, "daily poker admin winners succeeds");

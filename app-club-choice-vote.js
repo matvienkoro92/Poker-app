@@ -698,7 +698,7 @@
         '<div class="club-choice-vote-modal__duel-card">' +
           '<div class="club-choice-vote-modal__duel-players">' +
             renderDuelPlayer(match, candidates, leftId, "left") +
-            '<span class="club-choice-vote-modal__duel-vs" aria-hidden="true"><img src="./assets/club-choice-vs-black.png?v=2" alt="" /></span>' +
+            '<span class="club-choice-vote-modal__duel-vs" aria-hidden="true"><img src="./assets/club-choice-vs-black.webp?v=2" alt="" /></span>' +
             renderDuelPlayer(match, candidates, rightId, "right") +
           '</div>' +
           '<p class="club-choice-vote-modal__duel-question">Кого выбираешь ты?</p>' +

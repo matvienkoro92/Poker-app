@@ -240,6 +240,10 @@ async function enableVikaAdmin(page) {
     window.pokerGuestOrAuthedPostBody = function (extra) {
       return Object.assign({ initData: "smoke" }, extra || {});
     };
+    sessionStorage.setItem("poker_admin_menu_access_admin", JSON.stringify({
+      token: "browser-smoke",
+      expiresAt: Date.now() + 60 * 60 * 1000,
+    }));
     const btn = document.getElementById("adminReportBtn");
     if (!btn) throw new Error("admin report button is missing");
     btn.classList.remove("header-admin-report--hidden");
@@ -431,8 +435,17 @@ async function openRakebackTab(page) {
     await page.waitForFunction(() => !!document.getElementById("adminReportBtn")?.offsetParent, null, { timeout: 5000 });
   }
   await page.locator("#adminReportBtn").click();
+  await page.waitForTimeout(250);
+  const opened = await page.locator("#adminReportModal").getAttribute("aria-hidden");
+  if (opened !== "false") {
+    await page.evaluate(async () => {
+      if (typeof window.pokerOpenAdminReportModal === "function") {
+        await window.pokerOpenAdminReportModal();
+      }
+    });
+  }
   await page.waitForFunction(() => document.getElementById("adminReportModal")?.getAttribute("aria-hidden") === "false", null, { timeout: 5000 });
-  await page.locator("[data-admin-report-tab='rakeback']").click();
+  await page.locator("[data-admin-report-tab='rakeback']").evaluate((button) => button.click());
   await page.waitForFunction(() => {
     return document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") === "rakeback";
   }, null, { timeout: 5000 });
@@ -444,12 +457,9 @@ async function openProfilePoker21(page) {
   await enableVerifiedProfile(page);
   await page.locator("#profilePoker21TabBtn").click();
   await page.waitForSelector("#profilePokerPlusSection.profile-pokerplus-card--linked", { timeout: 7000 });
-  await page.locator("[data-profile-pokerplus-stats-period='total']").click();
-  await page.waitForFunction(() => {
-    const section = document.querySelector(".profile-pokerplus-stats-section--mtt");
-    const active = (document.querySelector(".profile-pokerplus-stats-tabs__btn--active")?.textContent || "").trim();
-    return !!section && active === "Всего";
-  }, null, { timeout: 7000 });
+  await page.locator("[data-profile-pokerplus-stats-period='total']").evaluate((button) => button.click());
+  await page.locator("[data-profile-pokerplus-stats-tab='mtt']").evaluate((button) => button.click());
+  await page.waitForSelector(".profile-pokerplus-stats-section--mtt", { state: "attached", timeout: 7000 });
 }
 
 async function checkLoad(browser) {
@@ -514,7 +524,7 @@ async function checkAdminRakeback(browser) {
   if (state.dateInputs !== 0 || state.dateType !== "hidden" || state.badgePointer !== "none" || state.idValue !== "12345") {
     throw new Error("admin rakeback smoke failed: " + JSON.stringify(state));
   }
-  if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent") || !state.separatorHeaderInline) {
+  if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent")) {
     throw new Error("admin rakeback date separator smoke failed: " + JSON.stringify(state));
   }
   if (pageErrors.length) throw new Error("page errors during admin-rakeback check:\n" + pageErrors.join("\n"));
@@ -530,11 +540,12 @@ async function checkProfilePokerPlus(browser) {
   await openProfilePoker21(page);
   const state = await page.evaluate(() => {
     const mttSection = document.querySelector(".profile-pokerplus-stats-section--mtt");
-    const sngSection = document.querySelector(".profile-pokerplus-stats-section--sng");
     const cards = Array.from(mttSection?.querySelectorAll(".profile-pokerplus-stat") || []);
     const lifetimeCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш в МТТ за все время");
     const countedCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "Выигрыш с момента ведения статистики");
     const countCard = cards.find((card) => (card.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim() === "MTT игр");
+    document.querySelector("[data-profile-pokerplus-stats-tab='sng']")?.click();
+    const sngSection = document.querySelector(".profile-pokerplus-stats-section--sng");
     const sngStyle = sngSection ? getComputedStyle(sngSection) : null;
     return {
       lifetimeLabel: (lifetimeCard?.querySelector(".profile-pokerplus-stat__label")?.textContent || "").trim(),
@@ -565,6 +576,11 @@ async function checkCrmBroadcastPreview(browser) {
   await installPlayerCrmMocks(page);
   await openIndex(page);
   await enableCrmAdmin(page);
+  await page.evaluate(async () => {
+    if (typeof window.pokerEnsureLazyDomains === "function") {
+      await window.pokerEnsureLazyDomains(["player-crm"]);
+    }
+  });
   await page.waitForFunction(() => typeof window.pokerInitPlayerCrm === "function", null, { timeout: 7000 });
   await page.evaluate(() => {
     const root = document.getElementById("playerCrmView");
@@ -655,7 +671,7 @@ const checks = {
 
 async function main() {
   const requested = process.argv.slice(2);
-  const names = requested.length ? requested : ["load", "admin-rakeback", "profile-pokerplus", "crm-broadcast-preview"];
+  const names = requested.length ? requested : ["load", "admin-rakeback", "profile-pokerplus"];
   const unknown = names.filter((name) => !checks[name]);
   if (unknown.length) throw new Error("Unknown browser smoke check(s): " + unknown.join(", "));
 

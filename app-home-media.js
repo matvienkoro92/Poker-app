@@ -2,10 +2,16 @@
 
 function getAssetUrl(relativePath) {
   try {
+    var cleanPath = String(relativePath || "").replace(/^\.?\/?assets\//, "");
+    var ratingDate = cleanPath.match(/rating-(\d{2})-(\d{2})-2026/i);
+    var archiveBase = typeof window !== "undefined" ? String(window.POKER_ARCHIVE_ASSET_BASE_URL || "").replace(/\/+$/, "") : "";
+    if (archiveBase && ratingDate && Number(ratingDate[2]) <= 5) {
+      return archiveBase + "/" + cleanPath.replace(/^\/+/, "");
+    }
     var base = typeof document !== "undefined" && document.baseURI ? document.baseURI : (typeof location !== "undefined" && location.href) || "";
-    if (!base) return "./assets/" + relativePath;
-    var href = new URL("assets/" + relativePath, base).href;
-    return href || "./assets/" + relativePath;
+    if (!base) return "./assets/" + cleanPath;
+    var href = new URL("assets/" + cleanPath, base).href;
+    return href || "./assets/" + cleanPath;
   } catch (e) {
     return "./assets/" + relativePath;
   }

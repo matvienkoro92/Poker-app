@@ -805,12 +805,12 @@
                 <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
                 <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
                 <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
-                <img class="home-mini-icon__hero home-mini-icon__hero--raffles" src="./assets/home-menu-icon-raffle-tickets.png?v=3.701" alt="" width="408" height="354" loading="lazy" decoding="async" aria-hidden="true" />
+                <img class="home-mini-icon__hero home-mini-icon__hero--raffles" src="./assets/home-menu-icon-raffle-tickets.webp?v=3.701" alt="" width="408" height="354" loading="lazy" decoding="async" aria-hidden="true" />
                 <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
               </a>
               <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--freerolls" data-home-freerolls-open="1" title="Фрироллы" aria-label="Ближайшие фрироллы">
                 <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
-                <img class="home-mini-icon__hero home-mini-icon__hero--freerolls" src="./assets/home-menu-icon-freeroll-cup.png?v=3.701" alt="" width="398" height="404" loading="lazy" decoding="async" aria-hidden="true" />
+                <img class="home-mini-icon__hero home-mini-icon__hero--freerolls" src="./assets/home-menu-icon-freeroll-cup.webp?v=3.701" alt="" width="398" height="404" loading="lazy" decoding="async" aria-hidden="true" />
                 <span class="home-mini-icon__label" id="homeMiniFreerollsLabel">Фрироллы</span>
               </a>
               <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба">
@@ -823,7 +823,7 @@
               <div class="home-sng-champions-feature">
                 <div class="home-sng-champions-action" aria-label="СНГ Лига Чемпионов Два Туза">
                   <button type="button" class="home-sng-champions-image-link" id="sngChampionsOpen" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
-                    <img src="./assets/home-sng-champions-click-banner.webp?v=2" alt="" width="2172" height="724" loading="eager" decoding="async" data-sng-home-banner />
+                    <img src="./assets/home-sng-champions-click-banner.webp?v=2" alt="" width="2172" height="724" loading="lazy" decoding="async" fetchpriority="low" data-sng-home-banner />
                   </button>
                 </div>
                 <div class="home-sng-champions-action__bar" aria-label="Параметры актуального СНГ-турнира">
@@ -1284,7 +1284,7 @@
               <div class="daily-poker__feature">
                 <header class="daily-poker__header">
                   <button type="button" class="bonus-game-back daily-poker__back" data-view-target="home" aria-label="На главную">←</button>
-                  <img class="daily-poker__hero-monkey" src="./assets/daily-poker-monkey.webp?v=3.319" alt="" loading="eager" decoding="async" aria-hidden="true" />
+                  <img class="daily-poker__hero-monkey" src="./assets/daily-poker-monkey.webp?v=3.319" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
                   <div class="daily-poker__heading">
                     <p class="daily-poker__eyebrow">Daily Poker Deal</p>
                     <h2 class="daily-poker__title" id="dailyPokerTitle">Раздача дня</h2>
@@ -1399,7 +1399,7 @@
                 </button>
                 <div class="daily-poker__sng-champions sng-inline-feature" aria-label="СНГ Лига Чемпионов Два Туза">
                   <button type="button" class="sng-inline-feature__image" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
-                    <img src="./assets/home-sng-champions-click-banner-team-knockout.png?v=1" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
+                    <img src="./assets/home-sng-champions-click-banner-team-knockout.webp?v=1" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
                   </button>
                   <div class="sng-inline-feature__bar">
                     <span class="sng-inline-feature__stat"><small>Участники</small><strong data-sng-home-players>—/32</strong></span>
@@ -1761,6 +1761,7 @@
     <script defer src="./app-shared-helpers.js?v=3.852"></script>
     <script defer src="./app-click-sound.js?v=3.852"></script>
     <script defer src="./app-home-init.js?v=3.852"></script>
+    <script src="./asset-runtime-config.js?v=1"></script>
     <script defer src="./app-home-media.js?v=3.852"></script>
     <script defer src="./app-admin-menu-password.js?v=3.852"></script>
     <script defer src="./app-lazy-loader.js?v=3.852"></script>
@@ -1915,7 +1916,6 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=3.852"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=3.852"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-stats.js?v=3.852"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-charts.js?v=3.852"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-reports.js?v=3.852"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-registrations.js?v=3.852"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-viewport-shell.js?v=3.852"></script>

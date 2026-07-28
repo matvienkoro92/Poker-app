@@ -19,6 +19,9 @@
     search: "",
     selectedId: "",
     players: [],
+    playersPage: 0,
+    playersTotal: 0,
+    playersHasMore: false,
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
     dailyPokerStatsRangeKey: "",
@@ -750,7 +753,9 @@
       "</button>";
     }).join("") + (!state.showAllPlayers && total > visibleItems.length
       ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать всех " + esc(total) + "</button>"
-      : "");
+      : state.playersHasMore
+        ? "<button type=\"button\" class=\"player-crm__show-all\" id=\"playerCrmShowAllBtn\">Показать ещё</button>"
+        : "");
   }
 
   function renderBlockedList() {
@@ -2116,7 +2121,7 @@
   function syncTabs() {
     var tabs = document.querySelectorAll(".player-crm__tab[data-crm-tab]");
     var panels = document.querySelectorAll(".player-crm__tab-panel[data-crm-panel]");
-    var statsStates = ["stats", "overview", "players", "blocked"];
+    var statsStates = ["stats", "players", "blocked"];
     var playerStates = ["players", "blocked"];
     tabs.forEach(function (tab) {
       var target = tab.getAttribute("data-crm-tab");
@@ -2571,7 +2576,8 @@
     return true;
   }
 
-  function loadCrmHeavyData(scope) {
+  function loadCrmHeavyData(scope, options) {
+    options = options || {};
     if (state.heavyLoading) return Promise.resolve(false);
     state.heavyLoading = true;
     state.heavyLoadingScope = scope || "heavy";
@@ -2588,7 +2594,11 @@
       : scope === "broadcast"
         ? "send"
         : "players";
-    return fetch(base + "/api/player-crm" + crmQuery({ mode: heavyMode }))
+    var heavyUrl = base + "/api/player-crm" + crmQuery({ mode: heavyMode });
+    if (heavyMode === "players") {
+      heavyUrl += "&page=" + encodeURIComponent(options.page || 1) + "&limit=100";
+    }
+    return fetch(heavyUrl)
       .then(function (r) {
         return r.json().then(function (data) {
           data = data || {};
@@ -2611,7 +2621,18 @@
             }
           }
         } else if (data && data.ok && Array.isArray(data.players)) {
+          var previousPlayers = options.append ? state.players.slice() : [];
           applyCrmData(data, true);
+          if (options.append) {
+            var known = {};
+            previousPlayers.concat(state.players).forEach(function (player) {
+              if (player && player.id) known[player.id] = player;
+            });
+            state.players = Object.keys(known).map(function (id) { return known[id]; });
+          }
+          state.playersPage = Number(data.playersPage || options.page || 1);
+          state.playersTotal = Number(data.playersTotal || state.players.length);
+          state.playersHasMore = data.playersHasMore === true;
           state.playersScope = scope === "broadcast" ? "broadcast" : "players";
         }
       })
@@ -2622,6 +2643,20 @@
         renderAll();
         return true;
       });
+  }
+
+  function loadCrmBlockedData() {
+    var base = getApiBaseSafe();
+    if (!base) return;
+    fetch(base + "/api/player-crm" + crmQuery({ mode: "blocked" }), { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || data.ok === false) return;
+        state.blockedUsers = Array.isArray(data.blockedUsers) ? data.blockedUsers : [];
+        renderBlockedList();
+        renderChips();
+      })
+      .catch(function () {});
   }
 
   function comparisonRange() {
@@ -2772,11 +2807,6 @@
         loadDailyPokerStats();
         loadCrmWeekReport();
         loadPeriodComparison();
-        if (shouldLoadHeavy) {
-          setTimeout(function () {
-            loadCrmHeavyData("chart");
-          }, 120);
-        }
         return true;
       });
   }
@@ -4186,7 +4216,8 @@
       if (tab) {
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
         syncTabs();
-        if (["players", "blocked"].indexOf(state.tab) !== -1 && state.playersScope !== "players") loadCrmHeavyData("players");
+        if (state.tab === "players" && state.playersScope !== "players") loadCrmHeavyData("players", { page: 1 });
+        if (state.tab === "blocked") loadCrmBlockedData();
         if (state.tab === "broadcast" && state.playersScope !== "broadcast") loadCrmHeavyData("broadcast");
         if (state.tab === "links") {
           renderCrmLinkTargetOptions();
@@ -4213,7 +4244,7 @@
         return;
       }
       if (e.target.closest("[data-crm-refresh-blocked]")) {
-        loadCrmData("data");
+        loadCrmBlockedData();
         return;
       }
       var sendSection = e.target.closest("[data-crm-send-section]");
@@ -4297,7 +4328,8 @@
       }
       if (e.target && e.target.id === "playerCrmShowAllBtn") {
         state.showAllPlayers = true;
-        renderList();
+        if (state.playersHasMore) loadCrmHeavyData("players", { page: state.playersPage + 1, append: true });
+        else renderList();
         return;
       }
       if (e.target.closest("[data-crm-close-dialog-modal]")) {
