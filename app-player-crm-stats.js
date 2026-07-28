@@ -121,7 +121,10 @@ function initPlayerCrmStatsRuntime(deps) {
       ? Number(summary.current.pokerPlus) || 0
       : Object.keys(uniquePokerPlusIdsNow).length;
     var nowDate = new Date();
-    var todayKey = new Date(nowDate.getTime() - nowDate.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    // CRM periods close at 06:00 MSK. This must match businessDateKey() from
+    // app-player-crm-periods.js; using the device calendar date breaks totals
+    // between local midnight and the reporting cutoff.
+    var todayKey = new Date(nowDate.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
     var periodIncludesToday = !!(registrationRange && registrationRange.from <= todayKey && registrationRange.to >= todayKey);
     var pokerPlusTotalStart = registrationRange ? players.filter(function (p) {
       return stateWasActiveAt(p, "pokerPlusLinkedAt", "pokerPlusUnlinkedAt", registrationRange.from, false, !!(p && p.pokerPlusUserId));
@@ -146,7 +149,7 @@ function initPlayerCrmStatsRuntime(deps) {
       return channelWasActiveAt(p, "botSubscribedAt", "botUnsubscribedAt", registrationRange.to, true);
     }).length : botTotalNow;
     if (periodIncludesToday) botTotalEnd = botTotalNow;
-    var pushTotalNow = currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length);
+    var pushTotalNow = currentValue("pushSubscriptions", currentValue("pushReach", players.filter(function (p) { return !!(p.channels && p.channels.push); }).length));
     var pushTotalStart = registrationRange ? players.filter(function (p) {
       return channelWasActiveAt(p, "pushSubscribedAt", "pushUnsubscribedAt", registrationRange.from, false);
     }).length : Math.max(0, pushTotalNow - statPushNet);
@@ -246,6 +249,9 @@ function initPlayerCrmStatsRuntime(deps) {
       : null;
     var dailyPokerPrizeAmount = dailyPokerCreditedAmount != null && dailyPokerTicketAmount != null
       ? dailyPokerCreditedAmount + dailyPokerTicketAmount
+      : null;
+    var dailyPokerBalanceCreditedAmount = dailyPokerStats
+      ? Math.max(0, Number(dailyPokerSource && dailyPokerSource.bonusBalanceCredited) || 0)
       : null;
     var dailyPokerDebitedAmount = dailyPokerStats
       ? (state.period === "all" ? Number(dailyPokerStats.debitedAmount) || 0 : Number(dailyPokerSource && dailyPokerSource.bonusBalanceDebited) || 0)
@@ -355,10 +361,11 @@ function initPlayerCrmStatsRuntime(deps) {
       ["Крутка дня", dailyPokerValue("uniquePlayers"), "data-crm-daily-poker-modal", "activity", [
         ["Уникальных", dailyPokerValue("uniquePlayers")],
         ["Всего", dailyPokerValue("totalSpins")],
-        ["Призов начислено", dailyPokerPrizeAmount != null ? money(dailyPokerPrizeAmount) : "—", null, "highlight"],
-        ["Бонусами", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—", null, "subdetail"],
-        ["Билетами", dailyPokerTicketAmount != null ? money(dailyPokerTicketAmount) : "—", null, "subdetail"],
-        ["Бонусов списано", dailyPokerDebitedAmount != null ? money(dailyPokerDebitedAmount) : "—", null, "highlight"],
+        ["В баланс начислено", dailyPokerBalanceCreditedAmount != null ? money(dailyPokerBalanceCreditedAmount) : "—", null, "highlight"],
+        ["Стоимость призов", dailyPokerPrizeAmount != null ? money(dailyPokerPrizeAmount) : "—", null, "subdetail"],
+        ["— бонусами", dailyPokerCreditedAmount != null ? money(dailyPokerCreditedAmount) : "—", null, "subdetail"],
+        ["— билетами", dailyPokerTicketAmount != null ? money(dailyPokerTicketAmount) : "—", null, "subdetail"],
+        ["Из баланса списано", dailyPokerDebitedAmount != null ? money(dailyPokerDebitedAmount) : "—", null, "highlight"],
         ["Возврат", dailyPokerReturnedAmount != null ? (dailyPokerReturnedAmount > 0 ? "+" : "") + money(dailyPokerReturnedAmount) : "—", null, "positive"],
       ].concat(adminDebitRows(dailyPokerDebitRows)), null, comparisonInfo("dailyPoker", dailyPokerStats && dailyPokerStats.uniquePlayers, previousDailyPokerUnique()), dailyPokerBonusBalance],
       ["Розыгрыши", raffleStatsAvailable ? intFmt(raffleStats.uniqueParticipants) : "—", "data-crm-raffles-modal", "activity", [

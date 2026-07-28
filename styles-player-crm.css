@@ -1988,6 +1988,18 @@ button.player-crm__stat:focus-visible,
   min-height: 32px;
   font-size: 12px;
 }
+#playerCrmFilterChips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+#playerCrmFilterChips .player-crm__chip {
+  min-width: 0;
+  padding: 0 6px;
+  font-size: clamp(9px, 1.25vw, 12px);
+  line-height: 1.1;
+  white-space: nowrap;
+}
 .player-crm__list {
   display: grid;
   gap: 8px;

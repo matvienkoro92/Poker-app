@@ -719,10 +719,21 @@
   function renderChips() {
     var el = document.getElementById("playerCrmFilterChips");
     if (!el) return;
+    var currentTotals = state.statsSummary && state.statsSummary.current && typeof state.statsSummary.current === "object"
+      ? state.statsSummary.current
+      : {};
+    var totalKeys = {
+      has_bot: "botReach",
+      has_poker21: "pokerPlus",
+      has_push: "pushSubscriptions",
+    };
     var segmentChips = segments.filter(function (seg) {
       return seg.key !== "all" && seg.key !== "has_deposit";
     }).map(function (seg) {
-      var count = segmentPlayers(seg.key).length;
+      var totalKey = totalKeys[seg.key];
+      var count = totalKey && currentTotals[totalKey] != null
+        ? Math.max(0, Number(currentTotals[totalKey]) || 0)
+        : segmentPlayers(seg.key).length;
       var cls = "player-crm__chip" + (state.filter === seg.key ? " player-crm__chip--active" : "");
       return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + count + "</button>";
     }).join("");
@@ -3756,7 +3767,7 @@
     }, "Связки ID сохранены.");
   }
 
-  function setSelectedPlayerBlocked(blocked, explicitId) {
+  function setSelectedPlayerBlocked(blocked, explicitId, actionButton) {
     var p = selectedPlayer();
     var targetId = explicitId || (p && (p.accountId || p.id));
     if (!targetId) return;
@@ -3775,15 +3786,37 @@
         } catch (ePromptBlock) {}
       }
     }
+    if (actionButton) {
+      actionButton.disabled = true;
+      actionButton.textContent = blocked ? "Блокирую…" : "Разблокирую…";
+    }
     postCrmAction({
       action: blocked ? "block_player" : "unblock_player",
       targetId: targetId,
       targetLabel: p && (p.name || p.handle || p.accountId || p.id),
       reason: reason,
-    }, blocked ? "Игрок заблокирован." : "Игрок разблокирован.");
+    }, blocked ? "Игрок заблокирован." : "Игрок разблокирован.", {
+      onSuccess: function () {
+        if (!blocked) {
+          state.blockedUsers = (state.blockedUsers || []).filter(function (row) {
+            return String(row && row.id || "") !== String(targetId);
+          });
+          renderBlockedList();
+          loadCrmBlockedData();
+        } else {
+          loadCrmData();
+        }
+      },
+      onFinally: function (ok) {
+        if (!actionButton || ok) return;
+        actionButton.disabled = false;
+        actionButton.textContent = blocked ? "Заблокировать" : "Разблокировать";
+      },
+    });
   }
 
-  function postCrmAction(payload, okText) {
+  function postCrmAction(payload, okText, options) {
+    options = options || {};
     var base = getApiBaseSafe();
     var out = document.getElementById("playerCrmBroadcastResult");
     var hasCred = false;
@@ -3792,6 +3825,7 @@
     } catch (eCred) {}
     if (!base || !hasCred) {
       if (out) out.textContent = "Действие доступно после входа админа.";
+      if (typeof options.onFinally === "function") options.onFinally(false, null);
       return;
     }
     fetch(base + "/api/player-crm", {
@@ -3800,9 +3834,14 @@
       body: JSON.stringify(postBodySafe(payload)),
     }).then(function (r) { return r.json(); }).then(function (data) {
       if (out) out.textContent = data && data.ok ? okText : (data && data.error ? data.error : "Не удалось выполнить действие.");
-      if (data && data.ok) loadCrmData();
+      if (data && data.ok) {
+        if (typeof options.onSuccess === "function") options.onSuccess(data);
+        else loadCrmData();
+      }
+      if (typeof options.onFinally === "function") options.onFinally(!!(data && data.ok), data);
     }).catch(function () {
       if (out) out.textContent = typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети.";
+      if (typeof options.onFinally === "function") options.onFinally(false, null);
     });
   }
 
@@ -4804,7 +4843,7 @@
       if (e.target && e.target.id === "playerCrmUnblockPlayerBtn") setSelectedPlayerBlocked(false);
       var unblock = e.target.closest("[data-crm-unblock-id]");
       if (unblock) {
-        setSelectedPlayerBlocked(false, unblock.getAttribute("data-crm-unblock-id") || "");
+        setSelectedPlayerBlocked(false, unblock.getAttribute("data-crm-unblock-id") || "", unblock);
         return;
       }
       var chartToggle = e.target.closest("[data-crm-chart-series]");

@@ -571,6 +571,10 @@
         var url = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
         url = appendCalculationQueryParam(url, "calculationSummary", "1");
         url = appendCalculationQueryParam(url, "includeRaffles", "0");
+        // Report totals must not wait for the much heavier bonus-ledger range
+        // aggregation. Daily Poker and raffles hydrate below after the compact
+        // report payload has already rendered.
+        url = appendCalculationQueryParam(url, "includeDailyPoker", "0");
         url = appendCalculationQueryParam(url, "scope", scope);
         if (from && to) {
           url = appendCalculationQueryParam(url, "from", from);
