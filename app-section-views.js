@@ -81,15 +81,6 @@
     } catch (eL) {}
     try {
       if (typeof pokerTrackAnalyticsEvent === "function") pokerTrackAnalyticsEvent("section_opened", { section: section });
-      var body =
-        typeof pokerGuestOrAuthedPostBody === "function"
-          ? pokerGuestOrAuthedPostBody({ section: section })
-          : { section: section };
-      fetch(base + "/api/section-views", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }).catch(function () {});
     } catch (ePost) {}
   };
   function recordCurrentViewOnce() {

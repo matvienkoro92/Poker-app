@@ -315,7 +315,8 @@
         var posterUrl = "./assets/" + file + "?v=2026071401";
         document.documentElement.setAttribute("data-current-tournament-poster", posterUrl);
         preload.href = posterUrl;
-        preload.fetchPriority = "high";
+        preload.fetchPriority = "low";
+        preload.media = "(min-width: 1200px)";
         document.head.appendChild(preload);
       })();
     </script>
@@ -1852,7 +1853,7 @@
     <script defer src="./app-profile-user-info.js?v=3.858"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js?v=3.858"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-email-auth.js?v=3.858"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=3.865"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=3.866"></script>
     <script defer src="./app-profile-avatar-cache.js?v=3.858"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-avatar.js?v=3.858"></script>
     <script defer src="./rating-player-totals.js?v=3.001"></script>

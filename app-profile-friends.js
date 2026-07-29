@@ -193,7 +193,7 @@ function initProfileFriends() {
   var defaultFriendsFetchPromise = null;
   var friendsPreviewRetryTimer = null;
   var friendsPreviewRetryCount = 0;
-  var friendsPreviewLoadVersion = 0;
+  var friendsPreviewLastSuccessAt = 0;
   if (!btn || !modal || !listEl) return;
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
@@ -483,11 +483,12 @@ function initProfileFriends() {
     }, friendsPreviewRetryCount <= 3 ? 450 : 1000);
   }
 
-  function recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData) {
+  function recoverFriendsPreviewFromFullData(requestStartedAt, previewHadCachedData) {
     if (friendsPreviewRetryCount < 3) return;
     fetchFriendsData()
       .then(function (data) {
-        if (previewLoadVersion !== friendsPreviewLoadVersion || !data || !data.ok) return;
+        if (!data || !data.ok) return;
+        friendsPreviewLastSuccessAt = Date.now();
         friendsPreviewRetryCount = 0;
         var stableData = stableFriendsData(data) || data;
         renderIncomingNotice(Array.isArray(stableData.incoming) ? stableData.incoming.length : 0);
@@ -495,7 +496,7 @@ function initProfileFriends() {
         pokerUpdateProfileFriendsCount(Array.isArray(stableData.friends) ? stableData.friends.length : 0);
       })
       .catch(function () {
-        if (previewLoadVersion !== friendsPreviewLoadVersion || previewHadCachedData) return;
+        if (friendsPreviewLastSuccessAt >= requestStartedAt || previewHadCachedData) return;
         scheduleFriendsPreviewRetry();
       });
   }
@@ -1681,7 +1682,7 @@ function initProfileFriends() {
   function loadFriendsPreview() {
     var base = getApiBase();
     if (!base) return;
-    var previewLoadVersion = ++friendsPreviewLoadVersion;
+    var requestStartedAt = Date.now();
     if (!profileFriendsHasCredential()) {
       if (!friendsDataCache) friendsDataCache = readStableFriendsData();
       if (friendsDataCache && friendsDataCache.ok) {
@@ -1722,15 +1723,15 @@ function initProfileFriends() {
     }
     fetchFriendsPreviewData()
       .then(function (data) {
-        if (previewLoadVersion !== friendsPreviewLoadVersion) return;
         if (!data || !data.ok) {
           if (!previewHadCachedData) {
             renderPreviewLoading();
             scheduleFriendsPreviewRetry();
-            recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData);
+            recoverFriendsPreviewFromFullData(requestStartedAt, previewHadCachedData);
           }
           return;
         }
+        friendsPreviewLastSuccessAt = Date.now();
         var incomingCount = Math.max(0, Number(data.incomingCount) || 0);
         friendsPreviewRetryCount = 0;
         renderIncomingNotice(incomingCount);
@@ -1740,11 +1741,11 @@ function initProfileFriends() {
         } catch (ePreviewCount) {}
       })
       .catch(function () {
-        if (previewLoadVersion !== friendsPreviewLoadVersion) return;
+        if (friendsPreviewLastSuccessAt >= requestStartedAt) return;
         if (!previewHadCachedData) {
           renderPreviewLoading();
           scheduleFriendsPreviewRetry();
-          recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData);
+          recoverFriendsPreviewFromFullData(requestStartedAt, previewHadCachedData);
         }
       });
   }

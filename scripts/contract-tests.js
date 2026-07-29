@@ -978,6 +978,7 @@ async function testAuthAndAdmin(redis) {
 
 async function testPrivateCashRandomSeatAssignment(redis) {
   const handler = loadHandler("private-cash");
+  const s = sessions();
   const { signPwaSession } = require(path.join(root, "lib", "poker-pwa-session"));
   const eventId = "contract_private_cash_random_seats";
   redis.kv.set("poker_app:private_cash_event:" + eventId, JSON.stringify({
@@ -1038,6 +1039,25 @@ async function testPrivateCashRandomSeatAssignment(redis) {
   const replacement = finalRows.find((row) => row.memberId === "tg_7107");
   assert.ok(replacement, "replacement row is stored");
   assert.strictEqual(replacement.seatIndex, cancelled.seatIndex, "replacement takes the freed in-game seat");
+
+  redis.h("poker_app:visitor_dt_ids").set("tg_7999", "ID107999");
+  redis.h("poker_app:id_to_user").set("ID107999", "tg_7999");
+  redis.h("poker_app:visitor_usernames").set("tg_7999", "indexed_cash_player");
+  redis.h("poker_app:visitor_chat_display_names").set("ID107999", "Индекс Игрок");
+  redis.h("poker_app:pokerplus_user_ids").set("ID107999", "P21-INDEX");
+  redis.h("poker_app:pokerplus_profiles").set("ID107999", JSON.stringify({ nickname: "Indexed Poker" }));
+  const indexedSuggestReq = req("GET", { pwaSession: s.admin, suggest: "1", query: "indexed" });
+  indexedSuggestReq.url = "/api/private-cash?pwaSession=" + encodeURIComponent(s.admin) + "&suggest=1&query=indexed";
+  r = await call(handler, indexedSuggestReq);
+  assert.strictEqual(r.statusCode, 200, "private cash indexed suggestions build succeeds");
+  assert.ok(r.body.suggestions.some((row) => row.accountId === "ID107999"), "private cash suggestions include indexed player");
+  assert.ok(redis.kv.get("poker_app:private_cash_search_ready:v1"), "private cash suggestions mark reverse index ready");
+  assert.ok(redis.h("poker_app:private_cash_search_docs:v1").has("ID107999"), "private cash suggestions store compact player document");
+  const indexedSuggestReuseReq = req("GET", { pwaSession: s.admin, suggest: "1", query: "indexed" });
+  indexedSuggestReuseReq.url = "/api/private-cash?pwaSession=" + encodeURIComponent(s.admin) + "&suggest=1&query=indexed";
+  r = await call(handler, indexedSuggestReuseReq);
+  assert.strictEqual(r.statusCode, 200, "private cash indexed suggestions reuse succeeds");
+  assert.ok(r.body.suggestions.some((row) => row.accountId === "ID107999"), "private cash indexed suggestions reuse player document");
 }
 
 async function testChatSendEditDelete(redis) {
@@ -4115,6 +4135,13 @@ async function testProfileUserLookup(redis) {
     },
     "lookup exposes extended public PokerPlus stats",
   );
+  r = await call(users, req("GET", { pwaSession: s.admin, username: "pe", suggest: "1" }));
+  assert.strictEqual(r.statusCode, 200, "player username suggestions build succeeds");
+  assert.ok(r.body.suggestions.some((row) => row.userId === "tg_1002"), "player username suggestions include matching user");
+  assert.ok(redis.kv.get("poker_app:visitor_username_search_ready:v1"), "player username suggestions mark prefix index ready");
+  r = await call(users, req("GET", { pwaSession: s.admin, username: "pe", suggest: "1" }));
+  assert.strictEqual(r.statusCode, 200, "player username suggestions reuse prefix index");
+  assert.ok(r.body.suggestions.some((row) => row.userId === "tg_1002"), "indexed player username suggestions remain stable");
 
   redis.h("poker_app:telegram_visible").delete("ID100002");
   r = await call(users, req("GET", { pwaSession: s.user, userId: "ID100002" }));
@@ -4138,6 +4165,13 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.p21Id, "124128", "rating nick lookup uses PokerPlus id from cached profile");
   assert.strictEqual(r.body.pokerPlusVerified, true, "rating nick lookup marks cached PokerPlus profile verified");
   assert.strictEqual(r.body.pokerPlusNickname, "Em13", "rating nick lookup returns cached PokerPlus nickname");
+  assert.strictEqual(
+    redis.h("poker_app:pokerplus_accounts_by_nickname").get("em13"),
+    "ID661891",
+    "rating nick lookup backfills reverse nickname index",
+  );
+  r = await call(users, req("GET", { pwaSession: s.user, ratingNick: "Em13!!" }));
+  assert.strictEqual(r.statusCode, 200, "rating nick lookup reuses reverse nickname index");
 
   redis.h("poker_app:visitor_dt_ids").set("tg_661892", "ID661892");
   redis.h("poker_app:id_to_user").set("ID661892", "tg_661892");
@@ -5634,6 +5668,7 @@ async function testAuthEmailAndPwaCode(redis) {
   assert.strictEqual(r.body.dtId, emailDtId, "email verify returns account id");
   assert.ok(r.body.pwaSession, "email verify returns PWA session");
   assert.strictEqual(redis.h("poker_app:email_links").get("player@test.com"), emailDtId, "email verify links email");
+  assert.strictEqual(redis.h("poker_app:email_by_dt_id").get(emailDtId), "player@test.com", "email verify stores reverse email index");
   assert.strictEqual(redis.kv.has("poker_app:email_code:player@test.com"), false, "email verify clears code");
 
   r = await call(authEmail, req("POST", {}, {

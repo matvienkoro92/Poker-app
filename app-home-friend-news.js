@@ -9,6 +9,25 @@
   var events = [];
   var activeIndex = 0;
   var lastFriendsSignature = "";
+  var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
+
+  function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
+    var now = Date.now();
+    try {
+      var stored = JSON.parse(sessionStorage.getItem(REMOTE_CACHE_PREFIX + cacheKey) || "null");
+      if (stored && stored.at && now - Number(stored.at) < ttlMs && stored.data) {
+        return Promise.resolve(stored.data);
+      }
+    } catch (error) {}
+    return fetch(url, requestOptions || {}).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      try {
+        sessionStorage.setItem(REMOTE_CACHE_PREFIX + cacheKey, JSON.stringify({ at: Date.now(), data: data }));
+      } catch (error) {}
+      return data;
+    });
+  }
 
   function el(id) {
     return document.getElementById(id);
@@ -358,19 +377,26 @@
     if (signature) lastFriendsSignature = signature;
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
-    Promise.all([
-      suppliedFriends
-        ? Promise.resolve({ ok: true, friends: suppliedFriends })
-        : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); }),
-      fetch(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", { cache: "no-store" })
-        .then(function (response) { return response.json(); }),
-      fetch(base + "/api/sng-champions?mode=achievements", { cache: "default" })
-        .then(function (response) { return response.json(); })
-        .catch(function () { return { rows: [] }; }),
-      fetch(base + "/api/club-choice-vote?mode=achievements", { cache: "default" })
-        .then(function (response) { return response.json(); })
-        .catch(function () { return { rows: [] }; }),
-    ]).then(function (results) {
+    var friendsPromise = suppliedFriends
+      ? Promise.resolve({ ok: true, friends: suppliedFriends })
+      : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); });
+    friendsPromise.then(function (friendsPayload) {
+      var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
+      if (!friends.length) {
+        events = [];
+        render();
+        return null;
+      }
+      return Promise.all([
+        Promise.resolve(friendsPayload),
+        cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" }),
+        cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng", 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { rows: [] }; }),
+        cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice", 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { rows: [] }; }),
+      ]);
+    }).then(function (results) {
+      if (!results) return;
       var friends = results[0] && Array.isArray(results[0].friends) ? results[0].friends : [];
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var sngRows = results[2] && Array.isArray(results[2].rows) ? results[2].rows : [];

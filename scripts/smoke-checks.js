@@ -763,8 +763,8 @@ add("PWA Telegram code requests use current auth and avoid stale username binds"
   ]) &&
   hasAll("telegramBotWebhookHandler", [
     "usernameRedisCommands",
-    "HGETALL",
-    "commands.push([\"HDEL\", USERNAMES_KEY, key])",
+    "HGET\", USERNAME_TO_USER_KEY",
+    "commands.push([\"HDEL\", USERNAMES_KEY, previousOwner])",
   ])
 );
 
