@@ -439,14 +439,32 @@ function initProfileFriends() {
     return { ok: true, fallback: true, staticFallback: true, friends: [], incoming: [], outgoing: [], notices: [] };
   }
 
+  function fetchFriendsJson(url, timeoutMs) {
+    var controller = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = null;
+    if (controller) {
+      timer = window.setTimeout(function () { controller.abort(); }, Math.max(1000, Number(timeoutMs) || 7000));
+    }
+    return fetch(url, {
+      cache: "no-store",
+      signal: controller ? controller.signal : undefined,
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("friends_http_" + response.status);
+        return response.json();
+      })
+      .finally(function () {
+        if (timer) window.clearTimeout(timer);
+      });
+  }
+
   function fetchDefaultFriendsData() {
     if (defaultFriendsFetchPromise) return defaultFriendsFetchPromise;
     var base = getApiBase();
     if (!base) return Promise.reject(new Error("api_base_missing"));
     var viewer = profileFriendsViewerAccountId();
     var query = "?publicDefaults=1" + (viewer ? "&viewerAccountId=" + encodeURIComponent(viewer) : "");
-    defaultFriendsFetchPromise = fetch(base + "/api/friends" + query, { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    defaultFriendsFetchPromise = fetchFriendsJson(base + "/api/friends" + query, 5000)
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) throw new Error("default_friends_invalid");
         return data;
@@ -465,6 +483,23 @@ function initProfileFriends() {
     }, friendsPreviewRetryCount <= 3 ? 450 : 1000);
   }
 
+  function recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData) {
+    if (friendsPreviewRetryCount < 3) return;
+    fetchFriendsData()
+      .then(function (data) {
+        if (previewLoadVersion !== friendsPreviewLoadVersion || !data || !data.ok) return;
+        friendsPreviewRetryCount = 0;
+        var stableData = stableFriendsData(data) || data;
+        renderIncomingNotice(Array.isArray(stableData.incoming) ? stableData.incoming.length : 0);
+        renderFriendsPreview(Array.isArray(stableData.friends) ? stableData.friends : []);
+        pokerUpdateProfileFriendsCount(Array.isArray(stableData.friends) ? stableData.friends.length : 0);
+      })
+      .catch(function () {
+        if (previewLoadVersion !== friendsPreviewLoadVersion || previewHadCachedData) return;
+        scheduleFriendsPreviewRetry();
+      });
+  }
+
   function rememberFriendsData(data) {
     return stableFriendsData(data) || data;
   }
@@ -474,8 +509,7 @@ function initProfileFriends() {
     var base = getApiBase();
     if (!base) return Promise.reject(new Error("api_base_missing"));
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    friendsFetchPromise = fetch(base + "/api/friends" + fq, { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    friendsFetchPromise = fetchFriendsJson(base + "/api/friends" + fq, 9000)
       .then(function (data) {
         if (data && data.ok && Array.isArray(data.friends)) return data;
         return fetchDefaultFriendsData();
@@ -498,8 +532,7 @@ function initProfileFriends() {
     var base = getApiBase();
     if (!base) return Promise.reject(new Error("api_base_missing"));
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
-    friendsPreviewFetchPromise = fetch(base + "/api/friends" + fq + "&preview=1", { cache: "no-store" })
-      .then(function (r) { return r.json(); })
+    friendsPreviewFetchPromise = fetchFriendsJson(base + "/api/friends" + fq + "&preview=1", 6000)
       .then(function (data) {
         if (!data || !data.ok || !Array.isArray(data.friends)) throw new Error("friends_preview_invalid");
         writeFriendsPreviewData(data);
@@ -1672,7 +1705,6 @@ function initProfileFriends() {
       scheduleFriendsPreviewRetry();
       return;
     }
-    friendsPreviewRetryCount = 0;
     var previewCache = readFriendsPreviewData();
     var previewHadCachedData = !!(friendsDataCache && friendsDataCache.ok) || !!previewCache;
     if (!previewHadCachedData) {
@@ -1696,10 +1728,12 @@ function initProfileFriends() {
           if (!previewHadCachedData) {
             renderPreviewLoading();
             scheduleFriendsPreviewRetry();
+            recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData);
           }
           return;
         }
         var incomingCount = Math.max(0, Number(data.incomingCount) || 0);
+        friendsPreviewRetryCount = 0;
         renderIncomingNotice(incomingCount);
         renderFriendsPreview(Array.isArray(data.friends) ? data.friends : []);
         try {
@@ -1711,6 +1745,7 @@ function initProfileFriends() {
         if (!previewHadCachedData) {
           renderPreviewLoading();
           scheduleFriendsPreviewRetry();
+          recoverFriendsPreviewFromFullData(previewLoadVersion, previewHadCachedData);
         }
       });
   }

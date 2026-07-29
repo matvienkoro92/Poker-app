@@ -829,6 +829,28 @@ function renderProfileRatingTotalState(state) {
   );
 }
 
+function renderProfileFastRatingTotal(ratingNick) {
+  var total = document.getElementById("profileRatingTotal");
+  var getFastTotal = typeof window.pokerGetRatingPlayerTotalRewardFast === "function"
+    ? window.pokerGetRatingPlayerTotalRewardFast
+    : null;
+  if (!total || !getFastTotal || !ratingNick) return false;
+  var reward = Number(getFastTotal(ratingNick)) || 0;
+  if (reward <= 0) return false;
+  var text = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(reward) + " ₽";
+  total.innerHTML =
+    '<div class="chat-user-modal__rating-tabs">' +
+      '<button type="button" class="chat-user-modal__rating-tab" data-profile-rating-total="1" aria-label="Призовые в турнирах ' +
+        profileEscapeHtml(text) + '. Подробнее">' +
+        '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
+          profileEscapeHtml(text) +
+        '</span></span>' +
+        '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
+      '</button>' +
+    '</div>';
+  return true;
+}
+
 function profileAchievementRatingNickFromData(data) {
   var raw = data && (data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || data.nickname || data.nick);
   var nick = String(raw || "").trim();
@@ -1008,6 +1030,7 @@ function refreshProfileAchievementsShowcase(profileData) {
     .then(function (data) {
       if (seq !== profileAchievementsShowcaseSeq) return false;
       resolvedProfileData = data && data.ok ? data : resolvedProfileData;
+      renderProfileFastRatingTotal(profileAchievementRatingNickFromData(data));
       if (!cachedResult) {
         cachedResult = readProfileAchievementsCache(data);
         if (cachedResult) applyProfileAchievementsResult(cachedResult);

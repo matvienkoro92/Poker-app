@@ -2143,6 +2143,12 @@
       "domain": "assetRuntime",
       "exportedBy": ["asset-runtime-config.js"],
       "consumedBy": ["app-home-media.js"]
+    },
+    {
+      "name": "pokerGetRatingPlayerTotalRewardFast",
+      "domain": "ratingPlayerTotals",
+      "exportedBy": ["rating-player-totals.js"],
+      "consumedBy": ["app-profile.js"]
     }
   ]
 }

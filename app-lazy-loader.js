@@ -5,6 +5,7 @@
   var scriptPromises = Object.create(null);
   var stylePromises = Object.create(null);
   var profileFriendsPreviewPrewarmPromise = null;
+  var profileAchievementScriptsPrefetched = false;
 
   var DOMAIN_DEPS = {
     "home-widget-club-choice": ["home-widget-modals"],
@@ -287,6 +288,28 @@
     return profileFriendsPreviewPrewarmPromise;
   }
 
+  function prefetchProfileAchievementScripts() {
+    if (profileAchievementScriptsPrefetched) return;
+    profileAchievementScriptsPrefetched = true;
+    var domains = ["chat", "rating-winter", "rating-spring", "rating-summer"];
+    var seen = Object.create(null);
+    domains.forEach(function (domain) {
+      lazyScriptsForDomain(domain).forEach(function (sourceNode) {
+        var src = sourceNode && sourceNode.getAttribute ? sourceNode.getAttribute("src") : "";
+        if (!src || seen[src]) return;
+        seen[src] = true;
+        try {
+          var link = document.createElement("link");
+          link.rel = "prefetch";
+          link.as = "script";
+          link.href = src;
+          link.setAttribute("data-poker-profile-prefetch", domain);
+          (document.head || document.documentElement).appendChild(link);
+        } catch (eProfileAchievementPrefetch) {}
+      });
+    });
+  }
+
   function viewIntentTarget(target) {
     if (!target || !target.closest) return "";
     var el = target.closest("[data-view-target]");
@@ -361,6 +384,7 @@
     if (window.__pokerLikelyViewAssetsPrewarmed) return;
     window.__pokerLikelyViewAssetsPrewarmed = true;
     prewarmProfileFriendsPreview();
+    prefetchProfileAchievementScripts();
     var idle = window.requestIdleCallback || function (cb) {
       return setTimeout(cb, 900);
     };
