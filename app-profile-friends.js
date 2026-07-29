@@ -261,6 +261,37 @@ function initProfileFriends() {
     return 0;
   }
 
+  function profileFriendsIsAdmin(row, displayName) {
+    var adminIds = { "388008256": true, "2144406710": true, "1897001087": true };
+    var ids = [
+      row && row.userId,
+      row && row.chatUserId,
+      row && row.accountId,
+      row && row.dtId,
+    ];
+    for (var i = 0; i < ids.length; i += 1) {
+      var digits = String(ids[i] || "").replace(/\D+/g, "");
+      if (adminIds[digits]) return true;
+    }
+    var names = [
+      displayName,
+      row && row.contactName,
+      row && row.chatDisplayName,
+      row && row.pokerPlusNickname,
+      row && row.userName,
+    ].map(function (value) {
+      return String(value || "").replace(/^@+/, "").trim().toLowerCase();
+    });
+    return names.some(function (name) {
+      return /^(анна|аня|anna|вика|виктория|vika|роман|roman|roman1787443)$/.test(name);
+    });
+  }
+
+  function profileFriendsAdminTagHtml(row, displayName, className) {
+    if (!profileFriendsIsAdmin(row, displayName)) return "";
+    return '<span class="' + esc(className || "profile-friends__admin-tag") + '">Админ</span>';
+  }
+
   function alertText(text) {
     if (tg && tg.showAlert) tg.showAlert(text);
     else if (typeof alert === "function") alert(text);
@@ -611,13 +642,50 @@ function initProfileFriends() {
     });
   }
 
+  function profileSearchLatinToRu(value) {
+    var text = String(value || "").toLowerCase();
+    [
+      ["shch", "щ"], ["yo", "ё"], ["zh", "ж"], ["kh", "х"], ["ts", "ц"],
+      ["ch", "ч"], ["sh", "ш"], ["yu", "ю"], ["ya", "я"], ["ye", "е"], ["oo", "у"]
+    ].forEach(function (pair) {
+      text = text.split(pair[0]).join(pair[1]);
+    });
+    var map = {
+      a: "а", b: "б", c: "к", d: "д", e: "е", f: "ф", g: "г", h: "х",
+      i: "и", j: "дж", k: "к", l: "л", m: "м", n: "н", o: "о", p: "п",
+      q: "к", r: "р", s: "с", t: "т", u: "у", v: "в", w: "в", x: "кс",
+      y: "й", z: "з"
+    };
+    return text.replace(/[a-z]/g, function (letter) { return map[letter] || letter; });
+  }
+
+  function profileSearchPhoneticKey(value) {
+    var text = profileSearchRuToLatin(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .replace(/0/g, "o");
+    text = text
+      .replace(/i([bcdfghjklmnpqrstvwxyz])e/g, "ai$1")
+      .replace(/a([bcdfghjklmnpqrstvwxyz])e/g, "ei$1");
+    [
+      ["shch", "sch"], ["ph", "f"], ["wh", "w"], ["kh", "h"], ["ck", "k"],
+      ["qu", "kv"], ["oo", "u"], ["ee", "i"], ["oe", "e"], ["x", "ks"],
+      ["q", "k"], ["c", "k"], ["w", "v"], ["y", "i"]
+    ].forEach(function (pair) {
+      text = text.split(pair[0]).join(pair[1]);
+    });
+    return text;
+  }
+
   function profileSearchForms(value) {
     var source = String(value || "").trim();
     var variants = [
       source,
       source.replace(/^@+/, ""),
       profileSearchKeyboardRuToEn(source),
-      profileSearchRuToLatin(source)
+      profileSearchRuToLatin(source),
+      profileSearchLatinToRu(source),
+      profileSearchPhoneticKey(source)
     ];
     var out = [];
     variants.forEach(function (variant) {
@@ -751,14 +819,45 @@ function initProfileFriends() {
       }
       findFriendPlayers.innerHTML = picked.map(function (row) {
         var name = String(row.name || row.telegram || "Игрок").replace(/^@+/, "");
-        var avatar = row.avatarUrl || "./assets/avatar-chip.jpg";
+        var fallbackAvatar = profileFindFriendFallbackAvatar(row.accountId || name);
+        var avatar = profileFindFriendAvatarSrc(row.avatarUrl) || fallbackAvatar;
         return '<span class="profile-find-friend__player" title="' + esc(name) + '">' +
-          '<span class="profile-find-friend__avatar"><img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async"></span>' +
+          '<span class="profile-find-friend__avatar"><img src="' + esc(avatar) + '" data-fallback-src="' + esc(fallbackAvatar) + '" alt="" loading="lazy" decoding="async"></span>' +
           '<strong>' + esc(name) + '</strong>' +
           '<small>' + esc((Number(row.level) || 0) + " ур.") + '</small>' +
         '</span>';
       }).join("");
+      findFriendPlayers.querySelectorAll("img[data-fallback-src]").forEach(function (img) {
+        img.addEventListener("error", function () {
+          var fallback = img.getAttribute("data-fallback-src") || "./assets/avatar-chip.jpg";
+          if (img.getAttribute("src") !== fallback) img.setAttribute("src", fallback);
+        }, { once: true });
+      });
     });
+  }
+
+  function profileFindFriendAvatarSrc(value) {
+    var raw = String(value || "").trim();
+    if (!raw) return "";
+    if (raw.indexOf("preset:") !== 0) return raw;
+    var presetId = raw.slice("preset:".length);
+    try {
+      if (typeof pokerFindPresetAvatarById === "function") {
+        var preset = pokerFindPresetAvatarById(presetId);
+        if (preset && preset.src) return preset.src;
+      }
+    } catch (ePresetAvatar) {}
+    return "./assets/avatar-" + presetId.replace(/[^a-z0-9_-]/gi, "") + ".jpg";
+  }
+
+  function profileFindFriendFallbackAvatar(value) {
+    var presets = typeof POKER_PROFILE_AVATAR_PRESETS !== "undefined" && Array.isArray(POKER_PROFILE_AVATAR_PRESETS)
+      ? POKER_PROFILE_AVATAR_PRESETS
+      : [{ src: "./assets/avatar-chip.jpg" }];
+    var source = String(value || "Игрок");
+    var hash = 0;
+    for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    return presets[hash % presets.length].src || "./assets/avatar-chip.jpg";
   }
 
   function loadProfileSearchSuggestRows() {
@@ -1194,6 +1293,7 @@ function initProfileFriends() {
       var level = previewLevel(row);
       var specialtyTag = profileFriendsSpecialtyTagHtml(row);
       var birthdayTag = profileFriendsBirthdayPreviewTagHtml(row);
+      var adminTag = profileFriendsAdminTagHtml(row, meta.modalName);
       return (
         '<button type="button" class="profile-friends__avatar-btn" data-user-id="' + esc(row && row.userId || "") +
         '" data-chat-user-id="' + esc(row && row.chatUserId || "") +
@@ -1205,6 +1305,7 @@ function initProfileFriends() {
           '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
         "</span>" +
         '<span class="profile-friends__friend-name">' + esc(meta.modalName) + "</span>" +
+        adminTag +
         specialtyTag +
         birthdayTag +
         "</button>"
@@ -1272,6 +1373,7 @@ function initProfileFriends() {
     var level = previewLevel(row);
     var specialtyTag = profileFriendsSpecialtyTagHtml(row, "friends-list-modal__specialty-tag");
     var birthdayTag = profileFriendsBirthdayTagHtml(row, "friends-list-modal__birthday-tag");
+    var adminTag = profileFriendsAdminTagHtml(row, meta.modalName, "friends-list-modal__admin-tag");
     var initial = String(meta.modalName || meta.lines && meta.lines[0] && meta.lines[0].text || "?").trim().charAt(0) || "?";
     var avatarHtml =
       '<span class="friends-list-modal__avatar-wrap" aria-hidden="true">' +
@@ -1288,7 +1390,7 @@ function initProfileFriends() {
         var cls = idx === 0 ? "friends-list-modal__item-name" : "friends-list-modal__item-login";
         return '<span class="' + cls + '">' + esc(line && line.text) + "</span>";
       }).join("") +
-      '<span class="friends-list-modal__item-meta">' + specialtyTag + birthdayTag + "</span>" +
+      '<span class="friends-list-modal__item-meta">' + adminTag + specialtyTag + birthdayTag + "</span>" +
       (noteHtml || "") +
       "</span>";
     return (

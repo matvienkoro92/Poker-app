@@ -838,6 +838,28 @@
   }
 }
 
+.profile-friends__admin-tag,
+.friends-list-modal__admin-tag {
+  display: inline-flex;
+  min-height: 18px;
+  padding: 2px 8px;
+  align-items: center;
+  justify-content: center;
+  color: #1a1204;
+  background: linear-gradient(180deg, #ffe899, #e9a91e);
+  border: 1px solid rgba(255, 232, 153, 0.9);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(235, 169, 30, 0.28);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.profile-friends__admin-tag {
+  margin-top: 5px;
+}
+
 .profile-find-friend {
   margin: 14px 0 18px;
   padding: 18px;

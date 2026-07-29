@@ -111,6 +111,9 @@ if (chatUserModalEl) {
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
   var modalGender = document.getElementById("chatUserModalGender");
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
+  var modalPlayerStatsSection = modalPlayerStats && modalPlayerStats.closest
+    ? modalPlayerStats.closest(".chat-user-modal__player-stats")
+    : null;
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
   var modalRatingTabSum = document.getElementById("chatUserModalRatingTabSum");
@@ -126,6 +129,7 @@ if (chatUserModalEl) {
   var modalProfileTabMain = document.getElementById("chatUserModalProfileTabMain");
   var modalProfileTabAchievements = document.getElementById("chatUserModalProfileTabAchievements");
   var chatUserModalProfileTab = "main";
+  var chatUserModalHideCompetitiveStats = false;
   var chatUserModalAchievementsLoader = null;
   var chatUserModalAchievementsStarted = false;
   var modalStatusScale = document.getElementById("chatUserModalStatusScale");
@@ -619,19 +623,20 @@ if (chatUserModalEl) {
   function syncChatUserModalRatingTab(nick) {
     chatUserModalRatingNick = String(nick || "").trim();
     var hasNick = !!chatUserModalRatingNick;
-    if (modalRatingTabs) modalRatingTabs.hidden = !hasNick;
+    var ratingHidden = chatUserModalHideCompetitiveStats || !hasNick;
+    if (modalRatingTabs) modalRatingTabs.hidden = ratingHidden;
     if (modalRatingTabSum) {
       var cacheKey = chatUserModalRatingTotalCacheKey(chatUserModalRatingNick);
       modalRatingTabSum.textContent = hasNick
         ? (chatUserModalRatingTotalCache[cacheKey] || "Загрузка...")
         : "";
-      modalRatingTabSum.hidden = !hasNick;
+      modalRatingTabSum.hidden = ratingHidden;
     }
     if (modalRatingTab) {
-      modalRatingTab.hidden = !hasNick;
-      modalRatingTab.disabled = !hasNick;
-      modalRatingTab.setAttribute("aria-disabled", hasNick ? "false" : "true");
-      if (hasNick) {
+      modalRatingTab.hidden = ratingHidden;
+      modalRatingTab.disabled = ratingHidden;
+      modalRatingTab.setAttribute("aria-disabled", ratingHidden ? "true" : "false");
+      if (!ratingHidden) {
         modalRatingTab.setAttribute("title", "Призовые в турнирах " + chatUserModalRatingNick);
         modalRatingTab.setAttribute("aria-label", "Призовые в турнирах " + chatUserModalRatingNick + ". Подробнее");
       } else {
@@ -1466,6 +1471,12 @@ if (chatUserModalEl) {
       return adminNames[name] === true;
     });
   }
+  function syncChatUserModalCompetitivePrivacy(ratingNick, profileData, userId) {
+    chatUserModalHideCompetitiveStats = chatUserModalIsClubAdminUser(ratingNick, profileData, userId);
+    if (modalPlayerStatsSection) modalPlayerStatsSection.hidden = chatUserModalHideCompetitiveStats;
+    if (modalRatingTabs && chatUserModalHideCompetitiveStats) modalRatingTabs.hidden = true;
+    if (modalRatingRanks && chatUserModalHideCompetitiveStats) modalRatingRanks.hidden = true;
+  }
   function getChatUserModalAchievementMetricsReady(ratingNick, profileData, userId, isSelfProfile) {
     var isClubAdmin = chatUserModalIsClubAdminUser(ratingNick, profileData, userId);
     var privateCash2040Played = chatUserModalPrivateCash2040PlayedCount(ratingNick, profileData, userId);
@@ -2153,7 +2164,7 @@ if (chatUserModalEl) {
     var seq = chatUserModalRanksSeq;
     var ratingNick = String(nick || "").trim();
     var hasNick = !!ratingNick;
-    if (modalRatingRanks) modalRatingRanks.hidden = !hasNick;
+    if (modalRatingRanks) modalRatingRanks.hidden = chatUserModalHideCompetitiveStats || !hasNick;
     if (modalSummerRank) modalSummerRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalSpringRank) modalSpringRank.textContent = hasNick ? "Загрузка..." : "—";
     if (modalWinterRank) modalWinterRank.textContent = hasNick ? "Загрузка..." : "—";
@@ -2492,6 +2503,7 @@ if (chatUserModalEl) {
     chatUserModalPeerLogin = "";
     chatUserModalContactName = "";
     chatUserModalAchievementIdentity = null;
+    syncChatUserModalCompetitivePrivacy(fallbackRatingNick || userName, null, id);
     syncChatUserModalSuperpower(null, userName, fallbackRatingNick);
     setChatUserModalAchievementsLoader(null);
     setChatUserModalProfileTab("main");
@@ -2601,6 +2613,7 @@ if (chatUserModalEl) {
             chatUserModalApplyPersonalInfo(data, birthAdminVisible);
             if (data && data.ok) {
               var freshRatingNick = chatUserModalRatingNickFromData(data) || fallbackRatingNick;
+              syncChatUserModalCompetitivePrivacy(freshRatingNick || userName, data, id);
               syncChatUserModalSuperpower(data, userName, freshRatingNick);
               syncChatUserModalTitleFromProfileData(data, userName);
               syncChatUserModalRatingTab(freshRatingNick);
@@ -2630,9 +2643,10 @@ if (chatUserModalEl) {
         }
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
-        renderChatUserModalPlayerStats(data);
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;
+        syncChatUserModalCompetitivePrivacy(ratingNick || userName, data, id);
+        if (!chatUserModalHideCompetitiveStats) renderChatUserModalPlayerStats(data);
         syncChatUserModalSuperpower(data, userName, ratingNick);
         chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
