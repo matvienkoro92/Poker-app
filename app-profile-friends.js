@@ -764,11 +764,28 @@ function initProfileFriends() {
   function loadProfileSearchSuggestRows() {
     if (searchSuggestRowsCache) return Promise.resolve(searchSuggestRowsCache);
     if (searchSuggestRowsPromise) return searchSuggestRowsPromise;
+    try {
+      var cachedLevelRows = JSON.parse(sessionStorage.getItem("poker_hall_fish_level_rows_v2") || "null");
+      if (
+        cachedLevelRows &&
+        Array.isArray(cachedLevelRows.rows) &&
+        Date.now() - Number(cachedLevelRows.ts || 0) < 60000
+      ) {
+        searchSuggestRowsCache = profileSearchRowsFromCrmData({ levelRows: cachedLevelRows.rows });
+        return Promise.resolve(searchSuggestRowsCache);
+      }
+    } catch (eLevelRowsCache) {}
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1", { cache: "default" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "suggestions_failed");
+        try {
+          sessionStorage.setItem("poker_hall_fish_level_rows_v2", JSON.stringify({
+            ts: Date.now(),
+            rows: data.levelRows || [],
+          }));
+        } catch (eWriteLevelRowsCache) {}
         searchSuggestRowsCache = profileSearchRowsFromCrmData(data);
         return searchSuggestRowsCache;
       })
@@ -1161,7 +1178,7 @@ function initProfileFriends() {
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
     if (panelEl) panelEl.classList.remove("profile-friends--loading");
-    renderFindFriendPlayers(friends);
+    window.setTimeout(function () { renderFindFriendPlayers(friends); }, 120);
     var rows = (Array.isArray(friends) ? friends.slice() : [])
       .map(function (row, index) {
         return { row: row, index: index, priority: profileFriendsBirthdayPriority(row) };
@@ -1194,6 +1211,11 @@ function initProfileFriends() {
       );
     }).join("");
     previewEl.innerHTML = html + inviteSlotHtml();
+    try {
+      window.dispatchEvent(new CustomEvent("poker-profile-friends-ready", {
+        detail: { friends: Array.isArray(friends) ? friends.slice() : [] },
+      }));
+    } catch (eFriendsReadyEvent) {}
     wirePreviewButtons();
   }
 

@@ -8,6 +8,7 @@
   var rotateTimer = null;
   var events = [];
   var activeIndex = 0;
+  var lastFriendsSignature = "";
 
   function el(id) {
     return document.getElementById(id);
@@ -346,13 +347,21 @@
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  function load() {
+  function load(friendsOverride) {
     var base = apiBase();
     if (!base) return;
+    var suppliedFriends = Array.isArray(friendsOverride) ? friendsOverride : null;
+    var signature = suppliedFriends
+      ? (suppliedFriends.map(friendId).filter(Boolean).sort().join("|") || "__empty__")
+      : "";
+    if (signature && signature === lastFriendsSignature) return;
+    if (signature) lastFriendsSignature = signature;
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
     Promise.all([
-      fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); }),
+      suppliedFriends
+        ? Promise.resolve({ ok: true, friends: suppliedFriends })
+        : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); }),
       fetch(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", { cache: "no-store" })
         .then(function (response) { return response.json(); }),
       fetch(base + "/api/sng-champions?mode=achievements", { cache: "default" })
@@ -387,8 +396,13 @@
 
   function init() {
     mountWhenProfileReady();
-    load();
-    window.addEventListener("poker-auth-changed", load);
+    window.addEventListener("poker-profile-friends-ready", function (event) {
+      var friends = event && event.detail && Array.isArray(event.detail.friends) ? event.detail.friends : [];
+      load(friends);
+    });
+    window.addEventListener("poker-auth-changed", function () {
+      lastFriendsSignature = "";
+    });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
