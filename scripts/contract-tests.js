@@ -1122,6 +1122,29 @@ async function testCrmAppUserBlock(redis) {
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
   redis.h("poker_app:visitor_usernames").set("tg_1002", "bot_only_player");
   redis.s("poker_app:visitors").add("tg_1002");
+  const raffleId = "contract_crm_external_participants";
+  const raffleNow = new Date().toISOString();
+  redis.l("poker_app:raffle_ids").push(raffleId);
+  redis.kv.set("poker_app:raffle:" + raffleId, JSON.stringify({
+    id: raffleId,
+    status: "completed",
+    createdAt: raffleNow,
+    completedAt: raffleNow,
+    drawnAt: raffleNow,
+    participantsCount: 9,
+    participants: undefined,
+    winners: [
+      { accountId: "ID100001", name: "Winner One" },
+      { accountId: "ID100002", name: "Winner Two" },
+    ],
+  }));
+  redis.kv.set("poker_app:raffle_participants_data:" + raffleId, JSON.stringify(
+    Array.from({ length: 9 }, (_, index) => ({
+      accountId: "ID" + String(200001 + index),
+      name: "Participant " + String(index + 1),
+      joinedAt: raffleNow,
+    }))
+  ));
 
   let r = await call(crm, req("POST", {}, {
     pwaSession: s.admin,
@@ -1147,6 +1170,8 @@ async function testCrmAppUserBlock(redis) {
   r = await call(crm, coreRequest);
   assert.strictEqual(r.statusCode, 200, "CRM loads blocked list");
   assert.ok((r.body.blockedUsers || []).some((row) => row && row.reason === "contract block"), "CRM exposes blocked users list");
+  assert.strictEqual(r.body.statsSummary.raffles.uniqueParticipants, 9, "CRM reads unique raffle participants from external participant storage");
+  assert.strictEqual(r.body.statsSummary.raffles.uniqueWinners, 2, "CRM keeps the unique raffle winner count from stored winners");
   assert.deepStrictEqual(r.body.players, [], "CRM core response omits the heavy player collection");
   assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
 

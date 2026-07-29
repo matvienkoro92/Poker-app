@@ -114,6 +114,7 @@ const files = {
   appPlayerCrmRuntime: read("app-player-crm-runtime.js"),
   appPlayerCrm: read("app-player-crm.js"),
   appAdminReports: read("app-admin-reports.js"),
+  appAdminReportsCalculationsLogic: read("app-admin-reports-calculations-logic.js"),
   appRating: read("app-rating.js"),
   appRatingViewAdapter: read("app-rating-view-adapter.js"),
   appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
@@ -2929,6 +2930,15 @@ add("CRM calculation summary survives delayed lazy module loading", () =>
     "schedulePendingCalculationSummaryApply",
     "ensureCalculationsModuleLoaded()",
     'callCalculationsLogic("applyCalculationSummaryPayload", [payload]) === true',
+  ])
+);
+
+add("CRM calculations render report and raffle totals without runtime errors", () =>
+  hasAll("appAdminReportsCalculationsLogic", [
+    "var sentRakeback = Number(totals.sentRakeback);",
+    "var crmRakeback = Number(totals.rakeback);",
+    "var rakebackDifference = Number.isFinite(sentRakeback)",
+    "results[0].statsSummary && results[0].statsSummary.raffles",
   ])
 );
 

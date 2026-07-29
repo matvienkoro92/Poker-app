@@ -170,6 +170,11 @@
           });
         }
         var totals = calculationWeekTotals || {};
+        var sentRakeback = Number(totals.sentRakeback);
+        var crmRakeback = Number(totals.rakeback);
+        var rakebackDifference = Number.isFinite(sentRakeback) && Number.isFinite(crmRakeback)
+          ? crmRakeback - sentRakeback
+          : NaN;
         if (figuresRakeTotalEl) figuresRakeTotalEl.textContent = formatReportRubleNumber(figuresRakeTotal);
         if (figuresRakeTotalMirrorEl) figuresRakeTotalMirrorEl.textContent = formatReportRubleNumber(figuresRakeTotal);
         if (figuresPercentTotalEl) figuresPercentTotalEl.textContent = formatReportRubleNumber(figuresPercentTotal);
@@ -544,7 +549,10 @@
           ])
           .then(function (results) {
             if (requestSeq !== calculationPeriodRequestSeq) return;
-            var raffleStats = results[0] && results[0].raffles;
+            var raffleStats = results[0] && (
+              results[0].raffles ||
+              results[0].statsSummary && results[0].statsSummary.raffles
+            );
             var dailyPokerStats = results[1];
             calculationWeekStatsTotals = {
               raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
