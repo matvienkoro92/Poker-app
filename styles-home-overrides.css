@@ -107,6 +107,10 @@ html[data-theme="gold"] body[data-view="home"] {
   color: #ffc75b;
 }
 
+.home-friend-news--empty {
+  color: #8292a8;
+}
+
 .home-friend-news__event-text {
   overflow: hidden;
   font-size: 13px;
@@ -227,6 +231,35 @@ html[data-theme="gold"] body[data-view="home"] {
   margin-top: 4px;
   color: #7f90a7;
   font-size: 11px;
+}
+
+.home-friend-news-modal__empty {
+  display: flex;
+  min-height: 220px;
+  padding: 34px 24px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #8fa0b6;
+  text-align: center;
+}
+
+.home-friend-news-modal__empty > span {
+  margin-bottom: 12px;
+  color: #71d954;
+  font-size: 30px;
+}
+
+.home-friend-news-modal__empty strong {
+  color: #e8eef7;
+  font-size: 17px;
+}
+
+.home-friend-news-modal__empty small {
+  max-width: 310px;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 body.home-friend-news-modal-open {

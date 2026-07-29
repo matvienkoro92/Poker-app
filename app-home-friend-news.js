@@ -273,10 +273,20 @@
     var track = el("homeFriendNewsTrack");
     var list = el("homeFriendNewsList");
     if (!root || !track || !list) return;
-    root.hidden = !events.length;
-    if (!events.length) return;
+    root.hidden = false;
+    if (!events.length) {
+      events = [{
+        id: "empty",
+        type: "empty",
+        icon: "♣",
+        text: "Здесь появятся новости ваших друзей",
+        at: "",
+      }];
+    }
     track.innerHTML = events.map(function (row) { return eventHtml(row, true); }).join("");
-    list.innerHTML = events.map(function (row) { return eventHtml(row, false); }).join("");
+    list.innerHTML = events[0].id === "empty"
+      ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
+      : events.map(function (row) { return eventHtml(row, false); }).join("");
     showIndex(0, false);
     startRotation();
   }
@@ -355,6 +365,7 @@
   function init() {
     ensureDom();
     bind();
+    render();
     load();
     window.addEventListener("poker-auth-changed", load);
   }
