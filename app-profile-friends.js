@@ -1732,7 +1732,7 @@ function initProfileFriends() {
     } else {
       listEl.innerHTML = '<p class="friends-list-modal__loading">Загрузка...</p>';
     }
-    fetchFriendsPreviewData()
+    fetchFriendsData()
       .then(function (data) {
         if (!data || !data.ok) {
           if (!displayedCachedData) listEl.innerHTML = '<p class="friends-list-modal__empty">Ошибка загрузки</p>';

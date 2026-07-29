@@ -5833,6 +5833,28 @@ async function testFriendsFlow(redis) {
   assert.strictEqual(redis.h("poker_app:friend_requests:out:" + myAccountId).has(peerAccountId), true, "friend add stores outgoing request");
   assert.strictEqual(redis.h("poker_app:friend_requests:in:" + peerAccountId).has(myAccountId), true, "friend add stores incoming request");
 
+  r = await call(friends, req("GET", { pwaSession: s.peer, preview: "1" }));
+  assert.strictEqual(r.statusCode, 200, "friend preview succeeds");
+  assert.strictEqual(r.body.preview, true, "friend preview marks compact response");
+  assert.strictEqual(r.body.incomingCount, 1, "friend preview includes incoming request count");
+
+  r = await call(friends, req("POST", {}, { pwaSession: s.user, action: "cancel", targetUserId: peerAccountId }));
+  assert.strictEqual(r.statusCode, 200, "friend request cancel succeeds");
+  assert.strictEqual(r.body.cancelled, true, "friend request cancel returns state");
+  assert.strictEqual(redis.h("poker_app:friend_requests:out:" + myAccountId).has(peerAccountId), false, "cancel removes outgoing request");
+  assert.strictEqual(redis.h("poker_app:friend_requests:in:" + peerAccountId).has(myAccountId), false, "cancel removes peer incoming request");
+
+  r = await call(friends, req("POST", {}, { pwaSession: s.user, targetUserId: peerAccountId }));
+  assert.strictEqual(r.statusCode, 200, "friend request can be sent again after cancel");
+  r = await call(friends, req("POST", {}, { pwaSession: s.peer, action: "reject", targetUserId: myAccountId }));
+  assert.strictEqual(r.statusCode, 200, "friend reject succeeds");
+  assert.strictEqual(r.body.rejected, true, "friend reject returns state");
+  r = await call(friends, req("GET", { pwaSession: s.user }));
+  assert.strictEqual(r.statusCode, 200, "friend notices load succeeds");
+  assert.strictEqual((r.body.notices || []).some((row) => row && row.userId === peerAccountId && row.status === "rejected"), true, "friend reject creates notice");
+
+  r = await call(friends, req("POST", {}, { pwaSession: s.user, targetUserId: peerAccountId }));
+  assert.strictEqual(r.statusCode, 200, "friend request can be sent again after reject");
   r = await call(friends, req("POST", {}, { pwaSession: s.peer, action: "accept", targetUserId: myAccountId }));
   assert.strictEqual(r.statusCode, 200, "friend accept succeeds");
   assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), true, "friend accept stores normalized account id");

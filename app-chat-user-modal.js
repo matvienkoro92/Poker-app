@@ -2,6 +2,10 @@
 
 function initChatUserModals(opts) {
   opts = opts || {};
+  var existingChatUserModal = document.getElementById("chatUserModal");
+  if (existingChatUserModal) existingChatUserModal.__pokerRuntimeOpts = opts;
+  if (existingChatUserModal && existingChatUserModal.dataset.chatUserModalBound === "1") return;
+  if (existingChatUserModal) existingChatUserModal.dataset.chatUserModalBound = "1";
   var base = opts.base || (typeof getApiBase === "function" ? getApiBase() : "");
   var tg = opts.tg || (window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null);
   var escapeHtml = typeof opts.escapeHtml === "function"
@@ -13,8 +17,18 @@ function initChatUserModals(opts) {
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;");
       };
-  var openConversation = typeof opts.openConversation === "function" ? opts.openConversation : function () {};
-  var updateCurrentPeerTitle = typeof opts.updateCurrentPeerTitle === "function" ? opts.updateCurrentPeerTitle : function () {};
+  var openConversation = function () {
+    var runtimeOpts = chatUserModalEl && chatUserModalEl.__pokerRuntimeOpts || {};
+    if (typeof runtimeOpts.openConversation === "function") {
+      return runtimeOpts.openConversation.apply(null, arguments);
+    }
+  };
+  var updateCurrentPeerTitle = function () {
+    var runtimeOpts = chatUserModalEl && chatUserModalEl.__pokerRuntimeOpts || {};
+    if (typeof runtimeOpts.updateCurrentPeerTitle === "function") {
+      return runtimeOpts.updateCurrentPeerTitle.apply(null, arguments);
+    }
+  };
 
 function syncChatRespectDisplayForUser(userId, score) {
   if (!userId || score == null || typeof document === "undefined") return;
@@ -2978,6 +2992,11 @@ if (chatUserModalEl) {
     });
   }
   if (modalAddFriend) {
+    function showChatUserFriendAlert(message) {
+      var text = String(message || "Ошибка");
+      if (tg && tg.showAlert) tg.showAlert(text);
+      else if (typeof alert === "function") alert(text);
+    }
     modalAddFriend.addEventListener("click", function () {
       var friendBase = typeof getApiBase === "function" ? getApiBase() : base;
       if (!chatUserModalUserId || !friendBase || !pokerApiHasCredential() || modalAddFriend.disabled) return;
@@ -3012,12 +3031,13 @@ if (chatUserModalEl) {
               if (typeof window.chatRefresh === "function") window.chatRefresh();
               if (tg && tg.showAlert) tg.showAlert(d.message || "Заявка отменена");
               else if (typeof alert === "function") alert(d.message || "Заявка отменена");
-            } else if (tg && tg.showAlert) {
-              tg.showAlert((d && d.error) || "Ошибка");
+            } else {
+              showChatUserFriendAlert((d && d.error) || "Ошибка");
             }
           })
           .catch(function () {
             modalAddFriend.disabled = false;
+            showChatUserFriendAlert(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети");
           });
         return;
       }
@@ -3045,11 +3065,12 @@ if (chatUserModalEl) {
             if (tg && tg.showAlert) tg.showAlert(d.message || "Заявка отправлена");
             else if (typeof alert === "function") alert(d.message || "Заявка отправлена");
           } else {
-            if (tg && tg.showAlert) tg.showAlert((d && d.error) || "Ошибка");
+            showChatUserFriendAlert((d && d.error) || "Ошибка");
           }
         })
         .catch(function () {
           modalAddFriend.disabled = false;
+          showChatUserFriendAlert(typeof POKER_NET_ERR !== "undefined" ? POKER_NET_ERR : "Ошибка сети");
         });
     });
   }
