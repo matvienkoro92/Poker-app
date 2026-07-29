@@ -4535,6 +4535,8 @@
       }
       var rafflesModalButton = e.target.closest("[data-crm-raffles-modal]");
       if (rafflesModalButton) {
+        e.preventDefault();
+        e.stopPropagation();
         state.rafflesModalOpen = true;
         state.rafflesModalTab = rafflesModalButton.getAttribute("data-crm-raffles-modal") === "returns" ? "returns" : "issued";
         renderRafflesModal();
