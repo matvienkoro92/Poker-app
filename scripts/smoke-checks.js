@@ -113,6 +113,7 @@ const files = {
   appPlayerCrmViewportShell: read("app-player-crm-viewport-shell.js"),
   appPlayerCrmRuntime: read("app-player-crm-runtime.js"),
   appPlayerCrm: read("app-player-crm.js"),
+  appAdminReports: read("app-admin-reports.js"),
   appRating: read("app-rating.js"),
   appRatingViewAdapter: read("app-rating-view-adapter.js"),
   appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
@@ -2918,6 +2919,16 @@ add("Admin auth debug panel is wired", () =>
     "window.pokerInitAuthDebugModal",
     "pokerReadPwaSessionRecordAsync",
     "adminAuthDebugOutput",
+  ])
+);
+
+add("CRM calculation summary survives delayed lazy module loading", () =>
+  hasAll("appAdminReports", [
+    "pendingCalculationSummaryPayload",
+    "applyPendingCalculationSummary",
+    "schedulePendingCalculationSummaryApply",
+    "ensureCalculationsModuleLoaded()",
+    'callCalculationsLogic("applyCalculationSummaryPayload", [payload]) === true',
   ])
 );
 

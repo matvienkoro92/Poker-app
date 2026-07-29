@@ -3204,6 +3204,8 @@ function initAdminReportModal() {
   }
 
   var calculationsLogic = null;
+  var pendingCalculationSummaryPayload = null;
+  var pendingCalculationSummaryApplyPromise = null;
 
   function createCalculationsLogicScope() {
     var scope = {
@@ -3310,6 +3312,32 @@ function initAdminReportModal() {
   function callCalculationsLogic(method, args) {
     var logic = getCalculationsLogic();
     return logic && typeof logic[method] === "function" ? logic[method].apply(logic, args || []) : undefined;
+  }
+
+  function applyPendingCalculationSummary() {
+    if (!pendingCalculationSummaryPayload) return false;
+    var payload = pendingCalculationSummaryPayload;
+    var applied = callCalculationsLogic("applyCalculationSummaryPayload", [payload]) === true;
+    if (applied && pendingCalculationSummaryPayload === payload) {
+      pendingCalculationSummaryPayload = null;
+    }
+    return applied;
+  }
+
+  function schedulePendingCalculationSummaryApply() {
+    if (pendingCalculationSummaryApplyPromise) return pendingCalculationSummaryApplyPromise;
+    pendingCalculationSummaryApplyPromise = ensureCalculationsModuleLoaded()
+      .then(function () {
+        applyPendingCalculationSummary();
+      })
+      .catch(function () {})
+      .then(function () {
+        pendingCalculationSummaryApplyPromise = null;
+        if (pendingCalculationSummaryPayload && window.AdminReportCalculationsLogic) {
+          applyPendingCalculationSummary();
+        }
+      });
+    return pendingCalculationSummaryApplyPromise;
   }
 
   function updateCalculationCashTotal() {
@@ -3809,7 +3837,10 @@ function initAdminReportModal() {
     return true;
   };
   window.pokerApplyAdminReportCalculationSummary = function (data) {
-    return callCalculationsLogic("applyCalculationSummaryPayload", [data]) === true;
+    pendingCalculationSummaryPayload = data;
+    if (applyPendingCalculationSummary()) return true;
+    schedulePendingCalculationSummaryApply();
+    return false;
   };
   window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;
   btn.addEventListener("click", function (e) {
