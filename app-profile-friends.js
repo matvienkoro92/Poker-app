@@ -169,6 +169,8 @@ window.pokerUpdateFriendsUnreadFromData = pokerUpdateFriendsUnreadFromData;
 window.pokerMarkFriendsSeen = pokerMarkFriendsSeen;
 window.pokerRefreshFriendsUnreadIndicators = pokerRefreshFriendsUnreadIndicators;
 
+var pokerProfileFriendsModalReadyPromise = null;
+
 function initProfileFriends() {
   var btn = document.getElementById("profileFriendsBtn");
   var modal = document.getElementById("friendsListModal");
@@ -194,7 +196,27 @@ function initProfileFriends() {
   var friendsPreviewRetryTimer = null;
   var friendsPreviewRetryCount = 0;
   var friendsPreviewLastSuccessAt = 0;
-  if (!btn || !modal || !listEl) return;
+  if (!btn) return;
+  if (!modal || !listEl) {
+    if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      if (!pokerProfileFriendsModalReadyPromise) {
+        pokerProfileFriendsModalReadyPromise = Promise.resolve(window.pokerEnsureGlobalModalsHtml())
+          .finally(function () {
+            pokerProfileFriendsModalReadyPromise = null;
+          });
+      }
+      pokerProfileFriendsModalReadyPromise
+        .then(function () { initProfileFriends(); })
+        .catch(function () {
+          if (panelEl) {
+            panelEl.classList.remove("profile-friends--loading");
+            panelEl.setAttribute("aria-busy", "false");
+          }
+          if (previewEl) previewEl.innerHTML = '<p class="profile-friends__load-error">Не удалось загрузить друзей. Откройте вкладку ещё раз.</p>';
+        });
+    }
+    return;
+  }
   if (btn.dataset.friendsBound) return;
   btn.dataset.friendsBound = "1";
 
