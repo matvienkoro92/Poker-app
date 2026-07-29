@@ -1257,7 +1257,6 @@ function initProfileFriends() {
     });
   }
 
-  initProfileFriendsScrollGuard();
   initProfileFriendsSearch();
 
   function friendsRowsCount(data) {
