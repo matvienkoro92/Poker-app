@@ -877,11 +877,14 @@ function initProfileFriends() {
         var name = String(row.name || row.telegram || "Игрок").replace(/^@+/, "");
         var fallbackAvatar = profileFindFriendFallbackAvatar(row.accountId || name);
         var avatar = profileFindFriendAvatarSrc(row.avatarUrl) || fallbackAvatar;
-        return '<span class="profile-find-friend__player" title="' + esc(name) + '">' +
+        return '<button type="button" class="profile-find-friend__player" data-find-friend-user-id="' + esc(row.accountId) +
+          '" data-find-friend-user-name="' + esc(name) +
+          '" data-find-friend-avatar="' + esc(avatar) +
+          '" aria-label="Открыть профиль ' + esc(name) + '" title="' + esc(name) + '">' +
           '<span class="profile-find-friend__avatar"><img src="' + esc(avatar) + '" data-fallback-src="' + esc(fallbackAvatar) + '" alt="" loading="lazy" decoding="async"></span>' +
           '<strong>' + esc(name) + '</strong>' +
           '<small>' + esc((Number(row.level) || 0) + " ур.") + '</small>' +
-        '</span>';
+        '</button>';
       }).join("");
       findFriendPlayers.querySelectorAll("img[data-fallback-src]").forEach(function (img) {
         img.addEventListener("error", function () {
@@ -889,6 +892,48 @@ function initProfileFriends() {
           if (img.getAttribute("src") !== fallback) img.setAttribute("src", fallback);
         }, { once: true });
       });
+    });
+  }
+
+  function initFindFriendActions() {
+    if (findFriendPlayers && findFriendPlayers.dataset.findFriendActionsBound !== "1") {
+      findFriendPlayers.dataset.findFriendActionsBound = "1";
+      findFriendPlayers.addEventListener("click", function (event) {
+        var player = event.target && event.target.closest
+          ? event.target.closest("[data-find-friend-user-id]")
+          : null;
+        if (!player || !findFriendPlayers.contains(player)) return;
+        event.preventDefault();
+        openFoundProfile({
+          userId: player.getAttribute("data-find-friend-user-id") || "",
+          name: player.getAttribute("data-find-friend-user-name") || "Игрок",
+          avatarUrl: player.getAttribute("data-find-friend-avatar") || "",
+        }, player.getAttribute("data-find-friend-user-name") || "", true);
+      });
+    }
+
+    var openFindFriendBtn = document.querySelector("#profileFindFriendPanel [data-hall-fish-open]");
+    if (!openFindFriendBtn || openFindFriendBtn.dataset.findFriendOpenBound === "1") return;
+    openFindFriendBtn.dataset.findFriendOpenBound = "1";
+    openFindFriendBtn.addEventListener("click", function (event) {
+      event.preventDefault();
+      var openModal = function () {
+        if (typeof window.openHallFishRatingModal === "function") {
+          window.openHallFishRatingModal();
+          return true;
+        }
+        return false;
+      };
+      if (openModal()) return;
+      if (typeof window.pokerEnsureLazyDomains === "function") {
+        Promise.resolve(window.pokerEnsureLazyDomains(["hall"]))
+          .then(function () {
+            if (!openModal()) alertText("Не удалось открыть список игроков.");
+          })
+          .catch(function () { alertText("Не удалось открыть список игроков."); });
+        return;
+      }
+      alertText("Не удалось открыть список игроков.");
     });
   }
 
@@ -1281,6 +1326,7 @@ function initProfileFriends() {
   }
 
   initProfileFriendsSearch();
+  initFindFriendActions();
 
   function friendsRowsCount(data) {
     return Array.isArray(data && data.friends) ? data.friends.length : 0;

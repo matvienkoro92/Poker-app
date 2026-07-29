@@ -1,6 +1,6 @@
 /* Profile CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-profile-core-avatar.css?v=3.188");
 @import url("./styles-profile-poker21.css?v=3.152");
-@import url("./styles-profile-status-social.css?v=3.137");
+@import url("./styles-profile-status-social.css?v=3.138");
 @import url("./styles-profile-adjacent-tools.css?v=3.392");
 @import url("./styles-profile-modals-tail.css?v=3.600");

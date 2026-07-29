@@ -2979,11 +2979,12 @@ if (chatUserModalEl) {
   }
   if (modalAddFriend) {
     modalAddFriend.addEventListener("click", function () {
-      if (!chatUserModalUserId || !base || !pokerApiHasCredential() || modalAddFriend.disabled) return;
+      var friendBase = typeof getApiBase === "function" ? getApiBase() : base;
+      if (!chatUserModalUserId || !friendBase || !pokerApiHasCredential() || modalAddFriend.disabled) return;
       var isPendingCancel = modalAddFriend.getAttribute("data-chat-user-friend-pending") === "1";
       if (isPendingCancel) {
         modalAddFriend.disabled = true;
-        fetch(base + "/api/friends", {
+        fetch(friendBase + "/api/friends", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(pokerApiAuthJsonBody({ action: "cancel", targetUserId: chatUserModalUserId })),
@@ -3022,7 +3023,7 @@ if (chatUserModalEl) {
       }
       var contactName = (chatUserModalUserName || chatUserModalPeerLogin || "").trim();
       modalAddFriend.disabled = true;
-      fetch(base + "/api/friends", {
+      fetch(friendBase + "/api/friends", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
