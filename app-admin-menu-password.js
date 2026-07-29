@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var CRM_SELECTOR = '[data-crm-open="player-crm"]';
+  var CRM_SELECTOR = '[data-crm-open="player-crm"], #adminCrmBtn';
   var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"], [data-admin-report-tab="cash-total"]';
   var ADMIN_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn";
   var PROTECTED_SELECTOR = ADMIN_SELECTOR + ", " + CRM_SELECTOR + ", " + CALCULATIONS_SELECTOR;
@@ -27,6 +27,11 @@
     } catch (error) {
       return null;
     }
+  }
+
+  function accessToken(scope) {
+    var cached = readCachedAccess(scope);
+    return cached ? String(cached.token || "") : "";
   }
 
   function writeCachedAccess(scope, token, expiresIn) {
@@ -168,5 +173,8 @@
     openPasswordModal(target);
   }
 
+  document.addEventListener("touchend", interceptProtectedOpen, { passive: false, capture: true });
   document.addEventListener("click", interceptProtectedOpen, true);
+  window.pokerHasAdminMenuAccess = function (scope) { return !!readCachedAccess(scope); };
+  window.pokerAdminMenuAccessToken = accessToken;
 })();

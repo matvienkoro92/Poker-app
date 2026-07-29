@@ -2149,6 +2149,18 @@
       "domain": "ratingPlayerTotals",
       "exportedBy": ["rating-player-totals.js"],
       "consumedBy": ["app-profile.js"]
+    },
+    {
+      "name": "pokerHasAdminMenuAccess",
+      "domain": "adminMenuAccess",
+      "exportedBy": ["app-admin-menu-password.js"],
+      "consumedBy": ["app-view-router.js"]
+    },
+    {
+      "name": "pokerAdminMenuAccessToken",
+      "domain": "adminMenuAccess",
+      "exportedBy": ["app-admin-menu-password.js"],
+      "consumedBy": ["app-player-crm-runtime-core.js"]
     }
   ]
 }

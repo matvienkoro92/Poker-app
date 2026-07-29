@@ -135,15 +135,15 @@
     var btn = document.getElementById("adminCrmBtn");
     var menuBtn = document.getElementById("headerCrmBtn");
     if (!btn && !menuBtn) return;
-    setCrmButtonAllowed(menuBtn, userCanSeeCrmMenuButton());
+    setCrmButtonAllowed(menuBtn, false);
+    setCrmButtonAllowed(btn, false);
     syncHeaderAdminShortcuts();
-    var allowed = userCanOpenCrm();
-    if (allowed || crmAccessProbeState === "allowed") {
-      crmAccessProbeState = "allowed";
+    if (crmAccessProbeState === "allowed") {
+      setCrmButtonAllowed(menuBtn, true);
       setCrmButtonAllowed(btn, true);
+      syncHeaderAdminShortcuts();
       return;
     }
-    setCrmButtonAllowed(btn, false);
     var url = buildCrmAccessProbeUrl();
     if (!url || crmAccessProbeState === "pending") return;
     if (crmAccessProbeState === "denied" && crmAccessProbeKey === url) return;
@@ -155,11 +155,15 @@
       })
       .then(function (data) {
         crmAccessProbeState = data && data.ok ? "allowed" : "denied";
+        setCrmButtonAllowed(menuBtn, crmAccessProbeState === "allowed");
         setCrmButtonAllowed(btn, crmAccessProbeState === "allowed");
+        syncHeaderAdminShortcuts();
       })
       .catch(function () {
         crmAccessProbeState = "denied";
+        setCrmButtonAllowed(menuBtn, false);
         setCrmButtonAllowed(btn, false);
+        syncHeaderAdminShortcuts();
       });
   }
 
@@ -169,7 +173,7 @@
     var balanceShortcut = document.getElementById("headerBalancesShortcutBtn");
     var rafflesShortcut = document.getElementById("headerRafflesShortcutBtn");
     if (!wrap || !reportShortcut || !balanceShortcut || !rafflesShortcut) return;
-    var ownerSeesCrm = userCanSeeCrmMenuButton();
+    var ownerSeesCrm = crmAccessProbeState === "allowed";
     var crmBtn = document.getElementById("headerCrmBtn");
     var reportBtn = document.getElementById("adminReportBtn");
     var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
@@ -1270,7 +1274,7 @@
       if (!crmBtn || crmBtn.dataset.crmAccessBound === "1") return;
       crmBtn.dataset.crmAccessBound = "1";
       crmBtn.addEventListener("click", function (e) {
-        if (userCanOpenCrm() || crmAccessProbeState === "allowed") return;
+        if (crmAccessProbeState === "allowed") return;
         e.preventDefault();
         e.stopPropagation();
         syncCrmButtonAccess();

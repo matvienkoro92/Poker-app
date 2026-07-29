@@ -1110,7 +1110,9 @@ async function testCrmAppUserBlock(redis) {
   const crm = loadHandler("player-crm");
   const chat = loadHandler("chat");
   const user = loadHandler("user");
+  const { signAccessToken } = require(path.join(root, "lib", "admin-menu-access-token"));
   const s = sessions();
+  const menuAccessToken = signAccessToken("crm", "tg_388008256", BOT_TOKEN);
   redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
@@ -1125,13 +1127,23 @@ async function testCrmAppUserBlock(redis) {
     pwaSession: s.admin,
     action: "block_player",
     targetId: "tg_1001",
+    reason: "must be rejected without password",
+  }));
+  assert.strictEqual(r.statusCode, 403, "CRM rejects an owner without the password token");
+  assert.strictEqual(r.body.code, "crm_password_required", "CRM reports the missing password token");
+
+  r = await call(crm, req("POST", {}, {
+    pwaSession: s.admin,
+    menuAccessToken,
+    action: "block_player",
+    targetId: "tg_1001",
     reason: "contract block",
   }));
   assert.strictEqual(r.statusCode, 200, "CRM owner can block app user");
   assert.strictEqual(r.body.blocked, true, "CRM block response marks blocked");
 
   const coreRequest = req("GET", { pwaSession: s.admin, mode: "core" });
-  coreRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&mode=core";
+  coreRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=core";
   r = await call(crm, coreRequest);
   assert.strictEqual(r.statusCode, 200, "CRM loads blocked list");
   assert.ok((r.body.blockedUsers || []).some((row) => row && row.reason === "contract block"), "CRM exposes blocked users list");
@@ -1139,7 +1151,7 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
 
   const heavyRequest = req("GET", { pwaSession: s.admin, mode: "players" });
-  heavyRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&mode=players";
+  heavyRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=players";
   r = await call(crm, heavyRequest);
   assert.strictEqual(r.statusCode, 200, "CRM linked player list loads on demand");
   assert.ok((r.body.players || []).some((row) => row && row.appBlocked === true), "CRM marks blocked player rows");
@@ -1159,6 +1171,7 @@ async function testCrmAppUserBlock(redis) {
 
   r = await call(crm, req("POST", {}, {
     pwaSession: s.admin,
+    menuAccessToken,
     action: "unblock_player",
     targetId: "tg_1001",
   }));

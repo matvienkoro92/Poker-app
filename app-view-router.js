@@ -773,6 +773,13 @@ function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
 
 function setView(viewName, navOpts) {
   navOpts = navOpts || {};
+  if (
+    viewName === "player-crm" &&
+    (typeof window.pokerHasAdminMenuAccess !== "function" || !window.pokerHasAdminMenuAccess("crm"))
+  ) {
+    viewName = "home";
+    navOpts = {};
+  }
   var previousPendingNavigation = pokerPendingViewNavigation;
   if (previousPendingNavigation) {
     pokerPendingViewNavigationSeq += 1;

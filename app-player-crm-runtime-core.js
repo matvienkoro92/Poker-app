@@ -2284,11 +2284,17 @@
   }
 
   function authQuerySafe() {
+    var query = "?initData=";
     try {
-      return typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    } catch (e) {
-      return "?initData=";
+      query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : query;
+    } catch (e) {}
+    var menuAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
+      ? window.pokerAdminMenuAccessToken("crm")
+      : "";
+    if (menuAccessToken) {
+      query += (query.indexOf("?") >= 0 ? "&" : "?") + "menuAccessToken=" + encodeURIComponent(menuAccessToken);
     }
+    return query;
   }
 
   function loadDailyPokerStats(force) {
@@ -2601,6 +2607,10 @@
 
   function postBodySafe(extra) {
     try {
+      extra = extra && typeof extra === "object" ? extra : {};
+      if (typeof window.pokerAdminMenuAccessToken === "function") {
+        extra.menuAccessToken = window.pokerAdminMenuAccessToken("crm");
+      }
       return typeof pokerGuestOrAuthedPostBody === "function" ? pokerGuestOrAuthedPostBody(extra) : extra;
     } catch (e) {
       return extra;
