@@ -1349,6 +1349,9 @@ function initProfileFriends() {
       var specialtyTag = profileFriendsSpecialtyTagHtml(row);
       var birthdayTag = profileFriendsBirthdayPreviewTagHtml(row);
       var adminTag = profileFriendsAdminTagHtml(row, meta.modalName);
+      var roleTags = adminTag || specialtyTag
+        ? '<span class="profile-friends__role-tags">' + adminTag + specialtyTag + "</span>"
+        : "";
       return (
         '<button type="button" class="profile-friends__avatar-btn" data-user-id="' + esc(row && row.userId || "") +
         '" data-chat-user-id="' + esc(row && row.chatUserId || "") +
@@ -1360,8 +1363,7 @@ function initProfileFriends() {
           '<span class="profile-friends__level-badge">' + esc(level) + "</span>" +
         "</span>" +
         '<span class="profile-friends__friend-name">' + esc(meta.modalName) + "</span>" +
-        adminTag +
-        specialtyTag +
+        roleTags +
         birthdayTag +
         "</button>"
       );

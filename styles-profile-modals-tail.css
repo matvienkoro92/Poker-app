@@ -188,6 +188,7 @@
     inset 0 1px 0 rgba(255, 232, 166, 0.1),
     0 18px 54px rgba(0, 0, 0, 0.62),
     0 0 32px rgba(245, 158, 11, 0.12);
+  touch-action: pan-y pinch-zoom;
 }
 .friends-list-modal__close {
   position: absolute;
@@ -220,10 +221,14 @@
   text-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
 }
 .friends-list-modal__list {
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   flex: 1;
   min-height: 0;
   padding-right: 2px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
 }
 .friends-list-modal__section {
   margin: 0 0 18px;

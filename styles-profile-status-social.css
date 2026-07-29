@@ -857,7 +857,15 @@
 }
 
 .profile-friends__admin-tag {
-  margin-top: 5px;
+  margin-top: 0;
+}
+
+.profile-friends__role-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
 }
 
 .profile-find-friend {
@@ -1290,7 +1298,7 @@
   background: rgba(34, 197, 94, 0.12);
 }
 .profile-friends__specialty-tag {
-  margin-top: 4px;
+  margin-top: 0;
 }
 .profile-friends__birthday-tag {
   justify-self: center;

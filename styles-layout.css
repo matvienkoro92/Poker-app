@@ -1636,6 +1636,18 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
   html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection {
     touch-action: pan-y pinch-zoom !important;
   }
+
+  body[data-view="profile"] #app.app .profile-view--tab-friends [data-profile-friends-panel],
+  html:has(body[data-view="profile"]) #app.app .profile-view--tab-friends [data-profile-friends-panel],
+  html.app-view-profile-html-scroll #app.app .profile-view--tab-friends [data-profile-friends-panel] {
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  body[data-view="profile"] #app.app .profile-view--tab-friends .profile-friends,
+  html:has(body[data-view="profile"]) #app.app .profile-view--tab-friends .profile-friends,
+  html.app-view-profile-html-scroll #app.app .profile-view--tab-friends .profile-friends {
+    overflow: visible;
+  }
 }
 
 body[data-view="profile"] #app.app,
