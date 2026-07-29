@@ -1648,6 +1648,20 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
   html.app-view-profile-html-scroll #app.app .profile-view--tab-friends .profile-friends {
     overflow: visible;
   }
+
+  body[data-view="profile"] #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
+  html:has(body[data-view="profile"]) #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
+  html.app-view-profile-html-scroll #app.app .view--active[data-view="profile"].profile-view--tab-friends::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: max(
+      140px,
+      calc(var(--app-bottom-tabbar-pad, 105px) + 48px)
+    );
+    flex: 0 0 auto;
+    pointer-events: none;
+  }
 }
 
 body[data-view="profile"] #app.app,
