@@ -16,6 +16,233 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 /* Актуальный СНГ: баннер и живая строка параметров турнира. */
+.home-friend-news {
+  margin: 12px 0 2px;
+}
+
+.home-friend-news[hidden],
+.home-friend-news-modal[hidden] {
+  display: none !important;
+}
+
+.home-friend-news__ticker {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  overflow: hidden;
+  color: #e8eef8;
+  background: linear-gradient(110deg, rgba(24, 31, 43, 0.98), rgba(15, 20, 29, 0.98));
+  border: 1px solid rgba(139, 158, 184, 0.22);
+  border-radius: 15px;
+  box-shadow: 0 8px 22px rgba(4, 8, 15, 0.18);
+  cursor: pointer;
+}
+
+.home-friend-news__badge {
+  margin-right: 8px;
+  color: #71db55;
+  font-size: 10px;
+  filter: drop-shadow(0 0 5px rgba(113, 219, 85, 0.65));
+}
+
+.home-friend-news__label {
+  margin-right: 11px;
+  color: #93a2b7;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-friend-news__viewport {
+  display: block;
+  height: 24px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.home-friend-news__track {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.48s cubic-bezier(0.22, 0.72, 0.2, 1);
+  will-change: transform;
+}
+
+.home-friend-news__track--instant {
+  transition: none;
+}
+
+.home-friend-news__slide {
+  display: flex;
+  align-items: center;
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.home-friend-news__event-icon {
+  display: inline-grid;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-right: 7px;
+  place-items: center;
+  color: #70d8ff;
+  font-size: 13px;
+}
+
+.home-friend-news--level {
+  color: #73db55;
+}
+
+.home-friend-news--birthday {
+  color: #ff718d;
+}
+
+.home-friend-news--achievement {
+  color: #ffc75b;
+}
+
+.home-friend-news__event-text {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-friend-news__arrow {
+  margin-left: 8px;
+  color: #8fa0b7;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.home-friend-news-modal {
+  position: fixed;
+  z-index: 16000;
+  inset: 0;
+  display: grid;
+  align-items: end;
+}
+
+.home-friend-news-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(3, 7, 13, 0.74);
+  border: 0;
+  backdrop-filter: blur(5px);
+}
+
+.home-friend-news-modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 560px);
+  max-height: min(78vh, 720px);
+  margin: 0 auto;
+  overflow: hidden;
+  color: #edf3fb;
+  background: #111822;
+  border: 1px solid rgba(141, 160, 185, 0.22);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.38);
+}
+
+.home-friend-news-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 15px;
+  border-bottom: 1px solid rgba(142, 160, 184, 0.14);
+}
+
+.home-friend-news-modal__header span {
+  display: block;
+  margin-bottom: 3px;
+  color: #71d954;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-friend-news-modal__header h2 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.home-friend-news-modal__close {
+  width: 38px;
+  height: 38px;
+  color: #c7d1df;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  border-radius: 50%;
+  font-size: 26px;
+}
+
+.home-friend-news-modal__list {
+  padding: 8px 14px max(18px, env(safe-area-inset-bottom));
+  overflow: auto;
+}
+
+.home-friend-news-modal__item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  min-height: 66px;
+  padding: 9px 6px;
+  border-bottom: 1px solid rgba(142, 160, 184, 0.12);
+}
+
+.home-friend-news-modal__icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  background: rgba(112, 216, 255, 0.1);
+  border-radius: 10px;
+}
+
+.home-friend-news-modal__copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.home-friend-news-modal__copy strong {
+  font-size: 14px;
+  line-height: 1.32;
+}
+
+.home-friend-news-modal__copy small {
+  margin-top: 4px;
+  color: #7f90a7;
+  font-size: 11px;
+}
+
+body.home-friend-news-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 520px) {
+  .home-friend-news__ticker {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .home-friend-news__label {
+    display: none;
+  }
+}
+
 .app.app--view-home .home-club-actions-block {
   --home-sng-champions-row: calc(clamp(110px, 33.333vw, 320px) + 64px) !important;
 }
