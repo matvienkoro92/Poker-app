@@ -47,13 +47,13 @@
   }
 
   function ensureDom() {
-    var shortcuts = document.querySelector(".home-daily-shortcuts");
-    if (shortcuts && !el("homeFriendNews")) {
-      shortcuts.insertAdjacentHTML("afterend",
-        '<section class="home-friend-news" id="homeFriendNews" aria-label="Последние новости друзей" hidden>' +
+    var friendsPanel = el("profileFriendsPanel");
+    if (friendsPanel && !el("homeFriendNews")) {
+      friendsPanel.insertAdjacentHTML("beforebegin",
+        '<section class="home-friend-news" id="homeFriendNews" data-profile-friends-panel aria-label="Обновления друзей" hidden>' +
           '<button type="button" class="home-friend-news__ticker" id="homeFriendNewsOpen" aria-haspopup="dialog" aria-controls="homeFriendNewsModal">' +
             '<span class="home-friend-news__badge" aria-hidden="true">●</span>' +
-            '<span class="home-friend-news__label">Последние новости</span>' +
+            '<span class="home-friend-news__label">Обновления друзей</span>' +
             '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeFriendNewsTrack" aria-live="polite"></span></span>' +
             '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
           "</button>" +
@@ -65,7 +65,7 @@
           '<button type="button" class="home-friend-news-modal__backdrop" data-home-friend-news-close aria-label="Закрыть новости"></button>' +
           '<section class="home-friend-news-modal__panel" role="dialog" aria-modal="true" aria-labelledby="homeFriendNewsModalTitle">' +
             '<header class="home-friend-news-modal__header"><div><span>Друзья и клуб</span>' +
-              '<h2 id="homeFriendNewsModalTitle">Последние новости</h2></div>' +
+              '<h2 id="homeFriendNewsModalTitle">Обновления друзей</h2></div>' +
               '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
             '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
           "</section>" +
@@ -308,8 +308,13 @@
   function bind() {
     var open = el("homeFriendNewsOpen");
     var modal = el("homeFriendNewsModal");
-    if (open) open.addEventListener("click", openModal);
-    if (modal) modal.addEventListener("click", function (event) {
+    if (open && open.dataset.friendNewsBound !== "1") {
+      open.dataset.friendNewsBound = "1";
+      open.addEventListener("click", openModal);
+    }
+    if (modal && modal.dataset.friendNewsBound !== "1") {
+      modal.dataset.friendNewsBound = "1";
+      modal.addEventListener("click", function (event) {
       if (event.target.closest("[data-home-friend-news-close]")) {
         closeModal();
         return;
@@ -320,7 +325,25 @@
         closeModal();
         setView(view);
       }
+      });
+    }
+  }
+
+  function mountWhenProfileReady() {
+    ensureDom();
+    if (el("homeFriendNews")) {
+      bind();
+      render();
+      return;
+    }
+    var observer = new MutationObserver(function () {
+      if (!el("profileFriendsPanel")) return;
+      observer.disconnect();
+      ensureDom();
+      bind();
+      render();
     });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   function load() {
@@ -363,9 +386,7 @@
   }
 
   function init() {
-    ensureDom();
-    bind();
-    render();
+    mountWhenProfileReady();
     load();
     window.addEventListener("poker-auth-changed", load);
   }

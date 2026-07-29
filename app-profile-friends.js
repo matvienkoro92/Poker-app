@@ -181,6 +181,7 @@ function initProfileFriends() {
   var searchBtn = document.getElementById("profileFriendsSearchBtn");
   var searchSuggestions = document.getElementById("profileFriendsSearchSuggestions");
   var searchResult = document.getElementById("profileFriendsSearchResult");
+  var findFriendPlayers = document.getElementById("profileFindFriendPlayers");
   var searchFoundProfile = null;
   var searchSuggestRowsCache = null;
   var searchSuggestRowsPromise = null;
@@ -716,9 +717,48 @@ function initProfileFriends() {
           name: String((row && row.name) || "").trim(),
           telegram: String((row && row.telegram) || "").trim(),
           level: Number(row && row.level) || 0,
+          avatarUrl: String((row && row.avatarUrl) || "").trim(),
         };
       })
       .filter(function (row) { return !!row.accountId && (row.name || row.telegram); });
+  }
+
+  function renderFindFriendPlayers(friends) {
+    if (!findFriendPlayers) return;
+    loadProfileSearchSuggestRows().then(function (rows) {
+      var excluded = {};
+      (Array.isArray(friends) ? friends : []).forEach(function (row) {
+        [row && row.userId, row && row.accountId, row && row.dtId, row && row.chatUserId].forEach(function (id) {
+          id = String(id || "").trim();
+          if (id) excluded[id] = true;
+        });
+      });
+      var viewer = profileFriendsViewerAccountId();
+      if (viewer) excluded[viewer] = true;
+      var available = rows.filter(function (row) {
+        return row && row.accountId && !excluded[String(row.accountId)];
+      });
+      for (var i = available.length - 1; i > 0; i -= 1) {
+        var randomIndex = Math.floor(Math.random() * (i + 1));
+        var swap = available[i];
+        available[i] = available[randomIndex];
+        available[randomIndex] = swap;
+      }
+      var picked = available.slice(0, 5);
+      if (!picked.length) {
+        findFriendPlayers.innerHTML = '<span class="profile-find-friend__empty">Новые игроки скоро появятся</span>';
+        return;
+      }
+      findFriendPlayers.innerHTML = picked.map(function (row) {
+        var name = String(row.name || row.telegram || "Игрок").replace(/^@+/, "");
+        var avatar = row.avatarUrl || "./assets/avatar-chip.jpg";
+        return '<span class="profile-find-friend__player" title="' + esc(name) + '">' +
+          '<span class="profile-find-friend__avatar"><img src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async"></span>' +
+          '<strong>' + esc(name) + '</strong>' +
+          '<small>' + esc((Number(row.level) || 0) + " ур.") + '</small>' +
+        '</span>';
+      }).join("");
+    });
   }
 
   function loadProfileSearchSuggestRows() {
@@ -1121,6 +1161,7 @@ function initProfileFriends() {
   function renderFriendsPreview(friends) {
     if (!previewEl) return;
     if (panelEl) panelEl.classList.remove("profile-friends--loading");
+    renderFindFriendPlayers(friends);
     var rows = (Array.isArray(friends) ? friends.slice() : [])
       .map(function (row, index) {
         return { row: row, index: index, priority: profileFriendsBirthdayPriority(row) };

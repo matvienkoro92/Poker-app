@@ -180,6 +180,7 @@
     },
     "home": [
       "app-home-init.js",
+      "app-home-daily-total.js",
       "app-home-media.js",
       "app-home-planner-access.js",
       "app-home-planner-runtime.js",

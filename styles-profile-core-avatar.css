@@ -170,7 +170,7 @@
 .profile-tabs {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 12px 0 18px;
   padding: 4px;
@@ -252,10 +252,16 @@
 }
 .view[data-view="profile"].profile-view--tab-club [data-profile-poker21-panel],
 .view[data-view="profile"].profile-view--tab-club [data-profile-achievements-panel],
+.view[data-view="profile"].profile-view--tab-club [data-profile-friends-panel],
 .view[data-view="profile"].profile-view--tab-poker21 [data-profile-club-panel],
 .view[data-view="profile"].profile-view--tab-poker21 [data-profile-achievements-panel],
+.view[data-view="profile"].profile-view--tab-poker21 [data-profile-friends-panel],
 .view[data-view="profile"].profile-view--tab-achievements [data-profile-club-panel],
-.view[data-view="profile"].profile-view--tab-achievements [data-profile-poker21-panel] {
+.view[data-view="profile"].profile-view--tab-achievements [data-profile-poker21-panel],
+.view[data-view="profile"].profile-view--tab-achievements [data-profile-friends-panel],
+.view[data-view="profile"].profile-view--tab-friends [data-profile-club-panel],
+.view[data-view="profile"].profile-view--tab-friends [data-profile-poker21-panel],
+.view[data-view="profile"].profile-view--tab-friends [data-profile-achievements-panel] {
   display: none !important;
 }
 [data-theme="light"] .profile-tabs {
@@ -271,7 +277,7 @@
 }
 @media (max-width: 360px) {
   .profile-tabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 5px;
     padding: 3px;
   }

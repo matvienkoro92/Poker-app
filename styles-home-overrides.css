@@ -16,8 +16,43 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 /* Актуальный СНГ: баннер и живая строка параметров турнира. */
+.home-daily-deal-hero {
+  margin-bottom: 54px;
+}
+
+.home-daily-deal-hero__won {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  bottom: -45px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  transform: translateX(-50%);
+  color: #9ca9ba;
+  font-size: clamp(11px, 3.1vw, 14px);
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.home-daily-deal-hero__won strong {
+  color: #ffd36b;
+  font-size: 1.12em;
+  font-weight: 1000;
+  text-shadow: 0 0 10px rgba(255, 139, 20, 0.38);
+}
+
 .home-friend-news {
   margin: 12px 0 2px;
+}
+
+.view[data-view="profile"].profile-view--tab-friends .home-friend-news {
+  margin: 0 0 12px;
 }
 
 .home-friend-news[hidden],

@@ -9,11 +9,12 @@ function profileEscapeHtml(value) {
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
-  var activeTab = tab === "poker21" || tab === "achievements" ? tab : "club";
+  var activeTab = tab === "poker21" || tab === "achievements" || tab === "friends" ? tab : "club";
   if (root) {
     root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
     root.classList.toggle("profile-view--tab-club", activeTab === "club");
     root.classList.toggle("profile-view--tab-achievements", activeTab === "achievements");
+    root.classList.toggle("profile-view--tab-friends", activeTab === "friends");
     root.dataset.profileActiveTab = activeTab;
   }
   tabs.forEach(function (btn) {
