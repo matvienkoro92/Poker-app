@@ -4,6 +4,7 @@
   var loadedStyleDomains = Object.create(null);
   var scriptPromises = Object.create(null);
   var stylePromises = Object.create(null);
+  var profileFriendsPreviewPrewarmPromise = null;
 
   var DOMAIN_DEPS = {
     "home-widget-club-choice": ["home-widget-modals"],
@@ -246,6 +247,46 @@
     }
   }
 
+  function profileFriendsPrewarmViewerId() {
+    var candidates = [];
+    try { candidates.push(sessionStorage.getItem("poker_dt_id")); } catch (eSessionProfileFriendsPrewarm) {}
+    try { candidates.push(localStorage.getItem("poker_dt_id")); } catch (eLocalProfileFriendsPrewarm) {}
+    for (var i = 0; i < candidates.length; i++) {
+      var value = String(candidates[i] || "").trim().toUpperCase();
+      if (/^ID\d{6}$/.test(value)) return value;
+    }
+    return "";
+  }
+
+  function prewarmProfileFriendsPreview() {
+    if (profileFriendsPreviewPrewarmPromise) return profileFriendsPreviewPrewarmPromise;
+    if (typeof getApiBase !== "function") return Promise.resolve(false);
+    if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return Promise.resolve(false);
+    var viewer = profileFriendsPrewarmViewerId();
+    if (!viewer) return Promise.resolve(false);
+    var base = getApiBase();
+    if (!base) return Promise.resolve(false);
+    var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
+    profileFriendsPreviewPrewarmPromise = fetch(base + "/api/friends" + query + "&preview=1", { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || data.ok !== true || !Array.isArray(data.friends)) return false;
+        try {
+          localStorage.setItem("poker_profile_friends_preview_v1:" + viewer, JSON.stringify({
+            ok: true,
+            preview: true,
+            friends: data.friends.slice(0, 3),
+            friendCount: Math.max(0, Number(data.friendCount != null ? data.friendCount : data.friends.length) || 0),
+            incomingCount: Math.max(0, Number(data.incomingCount) || 0),
+            cachedAt: Date.now(),
+          }));
+        } catch (eProfileFriendsPrewarmCache) {}
+        return true;
+      })
+      .catch(function () { return false; });
+    return profileFriendsPreviewPrewarmPromise;
+  }
+
   function viewIntentTarget(target) {
     if (!target || !target.closest) return "";
     var el = target.closest("[data-view-target]");
@@ -319,6 +360,7 @@
   window.pokerPrewarmLikelyViewAssets = function () {
     if (window.__pokerLikelyViewAssetsPrewarmed) return;
     window.__pokerLikelyViewAssetsPrewarmed = true;
+    prewarmProfileFriendsPreview();
     var idle = window.requestIdleCallback || function (cb) {
       return setTimeout(cb, 900);
     };
@@ -329,6 +371,10 @@
       if (ready && typeof ready.catch === "function") ready.catch(function () {});
     }, { timeout: 2500 });
   };
+  window.addEventListener("poker-telegram-auth", function () {
+    profileFriendsPreviewPrewarmPromise = null;
+    prewarmProfileFriendsPreview();
+  });
   window.pokerHasGlobalModalScriptsForTarget = function (target) {
     return globalModalDomainsForTarget(target).length > 0;
   };

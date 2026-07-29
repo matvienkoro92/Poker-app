@@ -33,6 +33,7 @@ function setProfileTab(tab) {
     } catch (eLazyPpProfile) {}
   }
   if (activeTab === "poker21") initProfilePoker21Tabs();
+  if (activeTab === "achievements") refreshProfileAchievementsShowcase();
 }
 
 function setProfilePoker21Tab(tab) {
@@ -763,6 +764,55 @@ function initProfilePublicShowcase() {
 }
 
 var profileAchievementsShowcaseSeq = 0;
+var profileAchievementsShowcasePromise = null;
+var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v1";
+var PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+
+function profileAchievementsCacheKey(data) {
+  var userId = profileAchievementUserIdFromData(data);
+  if (!userId) return "";
+  return "poker_profile_achievements_" + PROFILE_ACHIEVEMENTS_CACHE_VERSION + ":" + userId;
+}
+
+function readProfileAchievementsCache(data) {
+  try {
+    var key = profileAchievementsCacheKey(data);
+    if (!key || typeof localStorage === "undefined") return null;
+    var cached = JSON.parse(localStorage.getItem(key) || "null");
+    if (!cached || !cached.result || Date.now() - Number(cached.ts || 0) > PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE) return null;
+    return cached.result;
+  } catch (eProfileAchievementsCacheRead) {
+    return null;
+  }
+}
+
+function writeProfileAchievementsCache(data, result) {
+  try {
+    var key = profileAchievementsCacheKey(data);
+    if (!key || !result || typeof localStorage === "undefined") return;
+    localStorage.setItem(key, JSON.stringify({
+      ts: Date.now(),
+      result: {
+        totalRewardHtml: result.totalRewardHtml || "",
+        achievementsHtml: result.achievementsHtml || "",
+        ranksHtml: result.ranksHtml || "",
+      },
+    }));
+  } catch (eProfileAchievementsCacheWrite) {}
+}
+
+function applyProfileAchievementsResult(result) {
+  var showcase = document.getElementById("profileAchievementsShowcase");
+  var total = document.getElementById("profileRatingTotal");
+  var achievements = document.getElementById("profileAchievementsList");
+  var ranks = document.getElementById("profileSeasonRanks");
+  if (!showcase || !achievements || !ranks || !result) return false;
+  if (total) total.innerHTML = result.totalRewardHtml || renderProfileRatingTotalState("empty");
+  achievements.innerHTML = result.achievementsHtml || "";
+  ranks.innerHTML = result.ranksHtml || "";
+  showcase.hidden = false;
+  return true;
+}
 
 function renderProfileRatingTotalState(state) {
   var label = state === "empty"
@@ -944,14 +994,24 @@ function refreshProfileAchievementsShowcase(profileData) {
   var achievements = document.getElementById("profileAchievementsList");
   var ranks = document.getElementById("profileSeasonRanks");
   if (!showcase || !achievements || !ranks) return Promise.resolve(false);
+  if (profileAchievementsShowcasePromise) return profileAchievementsShowcasePromise;
   var seq = ++profileAchievementsShowcaseSeq;
-  renderProfileAchievementsShowcaseLoading();
   var dataReady = profileData && profileData.ok
     ? Promise.resolve(profileData)
     : (typeof loadCurrentProfileUserInfo === "function" ? loadCurrentProfileUserInfo() : Promise.resolve(null));
-  return Promise.resolve(dataReady)
+  var resolvedProfileData = profileData && profileData.ok ? profileData : null;
+  var cachedData = profileData && profileData.ok ? profileData : pokerProfileUserInfoCache;
+  var cachedResult = readProfileAchievementsCache(cachedData);
+  if (cachedResult) applyProfileAchievementsResult(cachedResult);
+  else renderProfileAchievementsShowcaseLoading();
+  profileAchievementsShowcasePromise = Promise.resolve(dataReady)
     .then(function (data) {
       if (seq !== profileAchievementsShowcaseSeq) return false;
+      resolvedProfileData = data && data.ok ? data : resolvedProfileData;
+      if (!cachedResult) {
+        cachedResult = readProfileAchievementsCache(data);
+        if (cachedResult) applyProfileAchievementsResult(cachedResult);
+      }
       return ensureProfileAchievementsBuilder().then(function (ready) {
         if (!ready || typeof window.pokerBuildProfileAchievements !== "function") throw new Error("achievement-builder-unavailable");
         return window.pokerBuildProfileAchievements({
@@ -964,14 +1024,13 @@ function refreshProfileAchievementsShowcase(profileData) {
     })
     .then(function (result) {
       if (seq !== profileAchievementsShowcaseSeq || !result) return false;
-      if (total) total.innerHTML = result.totalRewardHtml || renderProfileRatingTotalState("empty");
-      achievements.innerHTML = result.achievementsHtml || "";
-      ranks.innerHTML = result.ranksHtml || "";
-      showcase.hidden = false;
+      writeProfileAchievementsCache(resolvedProfileData || pokerProfileUserInfoCache, result);
+      applyProfileAchievementsResult(result);
       return true;
     })
     .catch(function () {
       if (seq !== profileAchievementsShowcaseSeq) return false;
+      if (cachedResult) return true;
       if (total) total.innerHTML = renderProfileRatingTotalState("error");
       achievements.innerHTML =
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
@@ -982,7 +1041,11 @@ function refreshProfileAchievementsShowcase(profileData) {
           "Идет загрузка истории сезонов..." +
         "</div>";
       return false;
+    })
+    .finally(function () {
+      profileAchievementsShowcasePromise = null;
     });
+  return profileAchievementsShowcasePromise;
 }
 
 function initProfileAchievementsShowcase() {
@@ -1019,7 +1082,16 @@ function initProfileAchievementsShowcase() {
       }
     });
   }
-  refreshProfileAchievementsShowcase();
+  var idle = window.requestIdleCallback || function (callback) {
+    return window.setTimeout(callback, 1800);
+  };
+  idle(function () {
+    try {
+      var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (connection && (connection.saveData || /(^|-)2g$/i.test(String(connection.effectiveType || "")))) return;
+    } catch (eProfileAchievementsConnection) {}
+    refreshProfileAchievementsShowcase();
+  }, { timeout: 5000 });
 }
 
 function syncProfileStatusVisibility(isVerified) {

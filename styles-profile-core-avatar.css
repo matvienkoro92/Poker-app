@@ -2858,6 +2858,16 @@ body.profile-avatar-choice-open {
   }
 }
 
+/* Scale long action labels to the actual button width without wrapping or clipping. */
+.view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
+  container-type: inline-size;
+}
+
+.view[data-view="profile"] .profile-public-showcase .profile-status__refresh-btn,
+.view[data-view="profile"] .profile-public-showcase .profile-status__points-info-btn {
+  font-size: clamp(14px, 6cqw, 27px);
+}
+
 /* A regular browser can expose a wide CSS viewport even inside a visually
    narrow app column. Keep the club profile compact instead of scaling its
    mobile presentation typography back up. */
