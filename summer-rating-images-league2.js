@@ -247,5 +247,86 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-30-06-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-30-06-2026-league1-turnir-vtornika-18h.jpg",
     "rating-compressed-preview/rating-30-06-2026-league2-energetik-22h.jpg"
+  ],
+  "14.07.2026": [
+    "rating-compressed-preview/rating-14-07-2026-league2-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-14-07-2026-league2-ok-21h.jpg"
+  ],
+  "15.07.2026": [
+    "rating-compressed-preview/rating-15-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-15-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-15-07-2026-league2-ok-21h.jpg"
+  ],
+  "16.07.2026": [
+    "rating-compressed-preview/rating-16-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-16-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-16-07-2026-league2-turnir-chetverga-18h.jpg",
+    "rating-compressed-preview/rating-16-07-2026-league2-ok-21h.jpg"
+  ],
+  "18.07.2026": [
+    "rating-compressed-preview/rating-18-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-18-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-18-07-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "19.07.2026": [
+    "rating-compressed-preview/rating-19-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-19-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-19-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-19-07-2026-league2-energetiktournament-22h.jpg"
+  ],
+  "20.07.2026": [
+    "rating-compressed-preview/rating-20-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-20-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-20-07-2026-league2-ok-21h.jpg"
+  ],
+  "21.07.2026": [
+    "rating-compressed-preview/rating-21-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-21-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-21-07-2026-league2-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-21-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-21-07-2026-league2-ok-21h.jpg"
+  ],
+  "22.07.2026": [
+    "rating-compressed-preview/rating-22-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-22-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-22-07-2026-league2-turnir-sredy-18h.jpg"
+  ],
+  "23.07.2026": [
+    "rating-compressed-preview/rating-23-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-23-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-23-07-2026-league2-chetverg-mko-18h.jpg",
+    "rating-compressed-preview/rating-23-07-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "24.07.2026": [
+    "rating-compressed-preview/rating-24-07-2026-league2-tournament-rebuy-14h.jpg"
+  ],
+  "25.07.2026": [
+    "rating-compressed-preview/rating-25-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-mok-17h-2.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-subbotnij-sat-1m56-18h.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-ok-21h.jpg"
+  ],
+  "26.07.2026": [
+    "rating-compressed-preview/rating-26-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-ok-21h.jpg"
+  ],
+  "27.07.2026": [
+    "rating-compressed-preview/rating-27-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-ok-21h.jpg"
+  ],
+  "28.07.2026": [
+    "rating-compressed-preview/rating-28-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-28-07-2026-league2-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-28-07-2026-league2-tournament-plo6-20h.jpg"
+  ],
+  "29.07.2026": [
+    "rating-compressed-preview/rating-29-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-29-07-2026-league2-mok-17h-2.jpg",
+    "rating-compressed-preview/rating-29-07-2026-league2-ok-21h.jpg"
   ]
 };

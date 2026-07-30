@@ -5790,6 +5790,22 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   line-height: 1.35;
 }
 
+.home-league-top-modal__meta-accent {
+  display: inline;
+  padding: 1px 4px 2px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #ffd96e, #f4a91d);
+  color: #281404;
+  font-weight: 1000;
+  line-height: 1.55;
+  text-transform: uppercase;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow:
+    0 0 0 1px rgba(255, 231, 154, 0.28),
+    0 2px 8px rgba(255, 166, 0, 0.24);
+}
+
 .home-league-top-modal__list {
   display: grid;
   gap: 6px;
@@ -5919,6 +5935,10 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 [data-theme="light"] .home-league-top-modal__meta,
 [data-theme="light"] .home-league-top-modal__empty {
   color: #475569;
+}
+
+[data-theme="light"] .home-league-top-modal__meta-accent {
+  color: #2b1603;
 }
 
 [data-theme="light"] .home-league-top-modal__item,
@@ -10570,4 +10590,208 @@ html body[data-view] #app .bonus-game-back {
   left: 3px !important;
   transform: scale(0.85) !important;
   transform-origin: left top !important;
+}
+
+/* Tournament bonuses: large two-row poker award cards. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
+  gap: 10px;
+  padding: 14px 10px 11px;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(255, 184, 54, 0.2), transparent 54%),
+    linear-gradient(180deg, rgba(28, 18, 8, 0.84), rgba(2, 5, 6, 0.94));
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid--has-bubble {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid:not(.home-tournament-bonuses__grid--has-bubble)
+  .home-tournament-bonus {
+  grid-column: span 3;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--has-bubble
+  .home-tournament-bonus {
+  grid-column: span 2;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--has-bubble
+  .home-tournament-bonus:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4),
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
+  --bonus-accent: 255, 183, 48;
+  min-height: clamp(72px, 9vw, 92px);
+  padding: 12px 10px 11px 48px;
+  border: 1px solid rgba(var(--bonus-accent), 0.78);
+  border-radius: 14px;
+  background:
+    linear-gradient(115deg, rgba(var(--bonus-accent), 0.16), transparent 38%),
+    radial-gradient(circle at 88% 12%, rgba(255, 244, 204, 0.11), transparent 34%),
+    linear-gradient(150deg, rgba(35, 29, 20, 0.98), rgba(9, 11, 12, 0.98) 62%);
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.35),
+    0 0 13px rgba(var(--bonus-accent), 0.16),
+    inset 0 1px 0 rgba(255, 246, 215, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.72);
+  isolation: isolate;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(2) {
+  --bonus-accent: 255, 136, 46;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(3) {
+  --bonus-accent: 255, 207, 75;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(4) {
+  --bonus-accent: 104, 198, 164;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(5) {
+  --bonus-accent: 131, 164, 255;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n)::before {
+  content: "★";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  z-index: -1;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(var(--bonus-accent), 0.58);
+  border-radius: 50%;
+  place-items: center;
+  color: rgb(var(--bonus-accent));
+  font-size: 11px;
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(var(--bonus-accent), 0.55);
+  background:
+    radial-gradient(circle, rgba(var(--bonus-accent), 0.17), rgba(0, 0, 0, 0.5));
+  box-shadow:
+    0 0 0 3px rgba(var(--bonus-accent), 0.06),
+    inset 0 0 7px rgba(var(--bonus-accent), 0.16);
+  transform: translateY(-50%);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus-info="four-kind"]::before {
+  content: "4K";
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus-info="straight-flush"]::before {
+  content: "SF";
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus-info="royal-flush"]::before {
+  content: "RF";
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus]::before {
+  content: "KO";
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus.home-tournament-bonus--bubble-buyin::before {
+  content: "BB";
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus="league1"]
+  .home-tournament-bonus__amount,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus[data-home-tournament-bonus="league2"]
+  .home-tournament-bonus__amount,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonus--bubble-buyin
+  .home-tournament-bonus__amount {
+  width: 100%;
+  overflow: visible;
+  color: rgb(var(--bonus-accent));
+  font-size: clamp(15px, 2.4vw, 22px);
+  line-height: 1;
+  text-overflow: unset;
+  text-shadow:
+    0 2px 0 rgba(61, 29, 4, 0.9),
+    0 0 10px rgba(var(--bonus-accent), 0.38);
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
+  width: 100%;
+  margin-top: 5px;
+  color: rgba(255, 244, 222, 0.9);
+  font-size: clamp(9px, 1.35vw, 12px);
+  line-height: 1.08;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__hint {
+  margin-top: 0;
+  font-size: clamp(9px, 1.4vw, 12px);
+}
+
+@media (max-width: 560px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
+    padding: 12px 8px 10px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses__grid--has-bubble {
+    gap: 7px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4),
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
+    min-height: 76px;
+    padding: 11px 4px 9px;
+    border-radius: 12px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n)::before {
+    top: 7px;
+    right: 6px;
+    left: auto;
+    width: 18px;
+    height: 18px;
+    font-size: 7px;
+    opacity: 0.58;
+    transform: none;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonus[data-home-tournament-bonus="league1"]
+    .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonus[data-home-tournament-bonus="league2"]
+    .home-tournament-bonus__amount,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonus--bubble-buyin
+    .home-tournament-bonus__amount {
+    font-size: clamp(13px, 4vw, 18px);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus__label {
+    margin-top: 4px;
+    font-size: clamp(8px, 2.5vw, 11px);
+    overflow-wrap: anywhere;
+  }
 }

@@ -820,12 +820,26 @@ async function importRatingInput() {
     acc[`league${t.league}Tournaments`]++;
     t.players.forEach((p) => {
       acc[`league${t.league}Points`] += pointsForPlayer(p);
+      acc[`league${t.league}Reward`] += Number(p.reward) * (Number(t.multiplier) || 1);
     });
     return acc;
-  }, { tournaments: 0, players: 0, league1Tournaments: 0, league2Tournaments: 0, league1Points: 0, league2Points: 0 });
+  }, {
+    tournaments: 0,
+    players: 0,
+    league1Tournaments: 0,
+    league2Tournaments: 0,
+    league1Points: 0,
+    league2Points: 0,
+    league1Reward: 0,
+    league2Reward: 0
+  });
+  const rewardLabel = (value) => new Intl.NumberFormat("ru-RU", {
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2
+  }).format(value);
   console.log(`- verified: ${summary.tournaments} tournaments, ${summary.players} positive results`);
-  console.log(`- league 1: ${summary.league1Tournaments} tournaments, ${summary.league1Points} points`);
-  console.log(`- league 2: ${summary.league2Tournaments} tournaments, ${summary.league2Points} points`);
+  console.log(`- league 1: ${summary.league1Tournaments} tournaments, ${summary.league1Points} points, ${rewardLabel(summary.league1Reward)} winnings`);
+  console.log(`- league 2: ${summary.league2Tournaments} tournaments, ${summary.league2Points} points, ${rewardLabel(summary.league2Reward)} winnings`);
 
   if (!opts.dryRun && opts.check) {
     runChecked("npm", ["run", "rating:validate"]);

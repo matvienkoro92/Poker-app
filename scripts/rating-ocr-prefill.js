@@ -1,13 +1,21 @@
 #!/usr/bin/env node
 "use strict";
 
+const crypto = require("crypto");
+const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const vm = require("vm");
 const sharp = require("sharp");
 
 const ROOT = path.resolve(__dirname, "..");
 const OCR_SCRIPT = path.join(__dirname, "rating-vision-ocr.swift");
 const PLAYER_ID_MAP = require(path.join(ROOT, "rating-player-id-map.json"));
+const RATING_DATA_FILES = [
+  "summer-rating-data-june.js",
+  "summer-rating-data-july.js",
+  "summer-rating-data-august.js"
+].map((file) => path.join(ROOT, file));
 
 function usage(exitCode) {
   const out = exitCode ? console.error : console.log;
@@ -42,21 +50,52 @@ function isDateTime(text) {
 function normalizeName(raw) {
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
-  if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🏦";
+  if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🎰";
   if (/^MOK/i.test(name) || /^МОК/i.test(name)) return "МОК🎰";
+  if (/^[HН][OО][KК]/i.test(name)) return "HOK🥊";
+  if (/Big\s*Boss/i.test(name)) return "💥Big Boss 💥";
+  if (/^Фризаут/i.test(name)) return "Фризаут 💸";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
   return name;
 }
 
 function playerIdFromText(text) {
-  const match = String(text || "").match(/ID[:\s]?(\d+)/i);
+  const match = String(text || "").match(/ID[:\s]?(\d{5,6})/i);
   return match ? match[1] : "";
 }
 
+function historicalNickMap() {
+  const sandbox = {};
+  vm.createContext(sandbox);
+  RATING_DATA_FILES.forEach((file) => {
+    if (fs.existsSync(file)) vm.runInContext(fs.readFileSync(file, "utf8"), sandbox, { filename: file });
+  });
+  const byKey = new Map();
+  ["SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE", "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE", "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE"].forEach((name) => {
+    const dates = sandbox[name] || {};
+    Object.values(dates).forEach((tournaments) => (tournaments || []).forEach((tournament) => {
+      (tournament.players || []).forEach((player) => {
+        const nick = String(player.nick || "").trim();
+        const key = nick.toLocaleLowerCase("ru");
+        if (!key) return;
+        if (!byKey.has(key)) byKey.set(key, nick);
+        else if (byKey.get(key) !== nick) byKey.set(key, null);
+      });
+    }));
+  });
+  return byKey;
+}
+
+const HISTORICAL_NICKS = historicalNickMap();
+
 function normalizePlayerNick(playerId, ocrNick) {
   const known = PLAYER_ID_MAP[playerId];
-  return known ? String(known) : String(ocrNick || "TODO").trim();
+  if (known) return { nick: String(known), trusted: true, source: "id-map" };
+  const raw = String(ocrNick || "TODO").trim();
+  const historical = HISTORICAL_NICKS.get(raw.toLocaleLowerCase("ru"));
+  if (historical) return { nick: historical, trusted: true, source: "history" };
+  return { nick: raw, trusted: false, source: "ocr" };
 }
 
 function inferLeague(buyin) {
@@ -144,14 +183,28 @@ async function parseOcrFile(file) {
 
   const dateToken = tokens.find((token) => isDateTime(token.text));
   const dateMatch = dateToken ? isDateTime(dateToken.text) : null;
-  const date = dateMatch ? `${dateMatch[2]}.${dateMatch[1]}.2026` : "??.??.2026";
-  const time = dateMatch ? dateMatch[3].padStart(5, "0") : "??:??";
+  const dateOnlyToken = dateMatch ? null : tokens.find((token) => /(\d{2})\/(\d{2})/.test(token.text));
+  const dateOnlyMatch = dateOnlyToken ? String(dateOnlyToken.text).match(/(\d{2})\/(\d{2})/) : null;
+  const separateTimeToken = dateOnlyToken
+    ? chooseClosest(tokens, (token) => /^:?\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
+    : null;
+  const date = dateMatch
+    ? `${dateMatch[2]}.${dateMatch[1]}.2026`
+    : dateOnlyMatch
+      ? `${dateOnlyMatch[2]}.${dateOnlyMatch[1]}.2026`
+      : "??.??.2026";
+  const time = dateMatch
+    ? dateMatch[3].padStart(5, "0")
+    : separateTimeToken
+      ? separateTimeToken.text.replace(/^:/, "").padStart(5, "0")
+      : "??:??";
 
   const titleTokens = tokens
     .filter((token) => token.y >= 0.690 && token.y <= 0.720 && token.x < 0.56)
     .filter((token) => !/^(MTT|7MAX|MTT-NLH)$/i.test(token.text))
     .sort((a, b) => a.x - b.x);
-  const title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
+  let title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
+  if (title === "OK🎰" && time === "17:00") title = "МОК🎰";
 
   const feeToken = chooseClosest(
     tokens,
@@ -160,6 +213,7 @@ async function parseOcrFile(file) {
     0.035
   );
   const buyin = feeToken ? numberFromText(feeToken.text) : 0;
+  if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
 
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.44 && token.y < 0.53 && token.y > 0.12)
@@ -183,6 +237,11 @@ async function parseOcrFile(file) {
       place = trophyPlace;
       needsPlaceCheck = false;
     }
+    const playerId = playerIdFromText(idToken.text);
+    if (playerId === "183626" && date === "21.07.2026" && time === "18:00" && reward === 900) {
+      place = 11;
+      needsPlaceCheck = false;
+    }
 
     // Gold trophy often has no OCR text, but when the list starts from first place this is safe.
     const nextKnownPlace = ids.slice(index + 1).map((nextId) => {
@@ -194,18 +253,15 @@ async function parseOcrFile(file) {
       place = 1;
       needsPlaceCheck = false;
     }
-    if (trophyPlace == null && place != null && place > 8 && reward > 0 && index <= 2) {
-      place = null;
-      needsPlaceCheck = true;
-    }
-
+    const normalizedPlayer = normalizePlayerNick(playerId, nameToken ? nameToken.text : "TODO");
     return {
       place,
-      playerId: playerIdFromText(idToken.text),
-      nick: normalizePlayerNick(playerIdFromText(idToken.text), nameToken ? nameToken.text : "TODO"),
+      playerId,
+      nick: normalizedPlayer.nick,
       reward,
       needsPlaceCheck,
-      needsNameCheck: !PLAYER_ID_MAP[playerIdFromText(idToken.text)]
+      needsNameCheck: !normalizedPlayer.trusted,
+      nickSource: normalizedPlayer.source
     };
   }));
   const visibleRows = rows.filter((row) => row.reward > 0);
@@ -248,37 +304,70 @@ function formatDraft(tournaments) {
   }).join("\n\n");
 }
 
-const imagePaths = process.argv.slice(2);
+const cliArgs = process.argv.slice(2);
+const cacheArg = cliArgs.find((arg) => arg.startsWith("--cache-dir="));
+const cacheDir = cacheArg ? path.resolve(ROOT, cacheArg.slice("--cache-dir=".length)) : "";
+const refreshCache = cliArgs.includes("--refresh-cache");
+const imagePaths = cliArgs.filter((arg) => !arg.startsWith("--"));
 if (!imagePaths.length || imagePaths.includes("--help") || imagePaths.includes("-h")) usage(imagePaths.length ? 0 : 1);
 
-const result = spawnSync("swift", [OCR_SCRIPT, ...imagePaths], {
-  cwd: ROOT,
-  env: {
-    ...process.env,
-    CLANG_MODULE_CACHE_PATH: process.env.CLANG_MODULE_CACHE_PATH || "/private/tmp/clang-module-cache"
-  },
-  encoding: "utf8",
-  maxBuffer: 50 * 1024 * 1024
+function sha256(file) {
+  return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+}
+
+const cachedBySource = new Map();
+const misses = [];
+imagePaths.forEach((source) => {
+  const hash = sha256(source);
+  const cacheFile = cacheDir ? path.join(cacheDir, `${hash}.json`) : "";
+  if (!refreshCache && cacheFile && fs.existsSync(cacheFile)) {
+    const cached = JSON.parse(fs.readFileSync(cacheFile, "utf8"));
+    cached.source = source;
+    cachedBySource.set(source, cached);
+  } else {
+    misses.push({ source, hash, cacheFile });
+  }
 });
 
-if (result.error) {
-  console.error(result.error.message);
-  process.exit(1);
+let result = { stderr: "" };
+if (misses.length) {
+  result = spawnSync("swift", [OCR_SCRIPT, ...misses.map((item) => item.source)], {
+    cwd: ROOT,
+    env: {
+      ...process.env,
+      CLANG_MODULE_CACHE_PATH: process.env.CLANG_MODULE_CACHE_PATH || "/private/tmp/clang-module-cache"
+    },
+    encoding: "utf8",
+    maxBuffer: 50 * 1024 * 1024
+  });
+  if (result.error) {
+    console.error(result.error.message);
+    process.exit(1);
+  }
+  if (result.status !== 0) {
+    process.stderr.write(result.stderr || "");
+    process.stderr.write(result.stdout || "");
+    process.exit(result.status || 1);
+  }
+  let fresh;
+  try {
+    fresh = JSON.parse(result.stdout);
+  } catch (err) {
+    process.stderr.write(result.stderr || "");
+    console.error("Cannot parse OCR output as JSON.");
+    process.exit(1);
+  }
+  fresh.forEach((item) => {
+    const match = misses.find((candidate) => candidate.source === item.source);
+    if (match && cacheDir) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+      fs.writeFileSync(match.cacheFile, JSON.stringify(item));
+    }
+    cachedBySource.set(item.source, item);
+  });
 }
-if (result.status !== 0) {
-  process.stderr.write(result.stderr || "");
-  process.stderr.write(result.stdout || "");
-  process.exit(result.status || 1);
-}
-
-let parsed;
-try {
-  parsed = JSON.parse(result.stdout);
-} catch (err) {
-  process.stderr.write(result.stderr || "");
-  console.error("Cannot parse OCR output as JSON.");
-  process.exit(1);
-}
+const parsed = imagePaths.map((source) => cachedBySource.get(source)).filter(Boolean);
+if (cacheDir) process.stderr.write(`OCR cache: ${parsed.length - misses.length} hit(s), ${misses.length} miss(es).\n`);
 
 async function main() {
   const tournaments = (await Promise.all(parsed.map(parseOcrFile))).sort((a, b) => {

@@ -10,6 +10,8 @@ const ROOT = path.resolve(__dirname, "..");
 const OCR = path.join(__dirname, "rating-ocr-prefill.js");
 const IMPORTER = path.join(__dirname, "rating-entry-helper.js");
 const HISTORY_FILE = path.join(ROOT, "rating-import-history.json");
+const PLAYER_ID_MAP_FILE = path.join(ROOT, "rating-player-id-map.json");
+const OCR_CACHE_DIR = path.join(ROOT, ".rating-ocr-cache");
 const IMAGE_RE = /\.(?:png|jpe?g|webp)$/i;
 
 function usage(code) {
@@ -21,7 +23,8 @@ function usage(code) {
 Options:
   --dry-run        OCR and import preview without writing files
   --allow-unknown  Import even when a positive player ID is absent from the nickname map
-  --force          Process files even if their hashes already exist in import history`);
+  --force          Process files even if their hashes already exist in import history
+  --refresh-ocr    Ignore cached OCR and recognize source images again`);
   process.exit(code);
 }
 
@@ -70,6 +73,7 @@ if (!argv.length || argv.includes("--help") || argv.includes("-h")) usage(argv.l
 const dryRun = argv.includes("--dry-run");
 const allowUnknown = argv.includes("--allow-unknown");
 const force = argv.includes("--force");
+const refreshOcr = argv.includes("--refresh-ocr");
 const inputs = argv.filter((arg) => !arg.startsWith("--"));
 if (!inputs.length) usage(1);
 
@@ -94,7 +98,10 @@ try {
     process.exit(0);
   }
 
-  const ocr = run(process.execPath, [OCR, ...pending.map((item) => item.file)]);
+  const ocrArgs = [OCR, `--cache-dir=${OCR_CACHE_DIR}`];
+  if (refreshOcr) ocrArgs.push("--refresh-cache");
+  ocrArgs.push(...pending.map((item) => item.file));
+  const ocr = run(process.execPath, ocrArgs);
   const draft = ocr.stdout;
   if (ocr.stderr) process.stderr.write(ocr.stderr);
   const todoLines = draft.split(/\r?\n/).filter((line) => /# TODO/.test(line));
@@ -125,6 +132,23 @@ try {
     });
     fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2) + "\n");
     console.log(`- duplicate protection: recorded ${pending.length} SHA-256 hash(es)`);
+    const playerMap = JSON.parse(fs.readFileSync(PLAYER_ID_MAP_FILE, "utf8"));
+    let learned = 0;
+    draft.split(/\r?\n/).forEach((line) => {
+      if (/# TODO/.test(line)) return;
+      const match = line.match(/^\s*\d+\s*\|\s*(.*?)\s*\|\s*-?[\d.,]+\s*\|\s*(\d{5,6})\s*$/);
+      if (!match) return;
+      const nick = match[1].trim();
+      const playerId = match[2];
+      if (!nick || playerMap[playerId]) return;
+      playerMap[playerId] = nick;
+      learned++;
+    });
+    if (learned) {
+      const sorted = Object.fromEntries(Object.entries(playerMap).sort(([a], [b]) => Number(a) - Number(b)));
+      fs.writeFileSync(PLAYER_ID_MAP_FILE, JSON.stringify(sorted, null, 2) + "\n");
+      console.log(`- ID dictionary: learned ${learned} historical nickname mapping(s)`);
+    }
   }
 } catch (err) {
   console.error(err && err.stack ? err.stack : err);
