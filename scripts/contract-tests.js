@@ -5927,6 +5927,13 @@ async function testFriendsFlow(redis) {
   r = await call(friends, req("POST", {}, { pwaSession: s.peer, action: "accept", targetUserId: myAccountId }));
   assert.strictEqual(r.statusCode, 200, "friend accept succeeds");
   assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), true, "friend accept stores normalized account id");
+  const friendshipDate = redis.h("poker_app:friendship_dates:" + myAccountId).get(peerAccountId);
+  assert.ok(friendshipDate && !Number.isNaN(new Date(friendshipDate).getTime()), "friend accept stores exact friendship date");
+  assert.strictEqual(
+    redis.h("poker_app:friendship_dates:" + peerAccountId).get(myAccountId),
+    friendshipDate,
+    "friend accept stores the same friendship date for both players"
+  );
 
   r = await call(friends, req("POST", {}, {
     pwaSession: s.user,
@@ -5950,6 +5957,7 @@ async function testFriendsFlow(redis) {
   assert.strictEqual(peerFriend.contactName, "Buddy", "friend list returns alias");
   assert.strictEqual(peerFriend.chatDisplayName, "Peer Display", "friend list exposes stored display name");
   assert.strictEqual(peerFriend.pokerPlusNickname, "Poker21 Buddy", "friend list exposes Poker21 nickname");
+  assert.strictEqual(peerFriend.friendSince, friendshipDate, "friend list exposes exact friendship date");
 
   redis.h("poker_app:visitor_dt_ids").set("tg_1003", "ID100003");
   redis.h("poker_app:id_to_user").set("ID100003", "tg_1003");

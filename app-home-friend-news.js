@@ -4,7 +4,7 @@
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
   var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v2";
-  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v5";
+  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v6";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
@@ -214,30 +214,23 @@
   }
 
   function collectNewFriendEvents(friends) {
-    var previous = readJson(FRIEND_IDS_KEY, null);
     var next = {};
-    var savedEvents = readJson(GENERATED_EVENTS_KEY, []);
-    if (previous) {
-      Object.keys(previous).forEach(function (id) {
-        if (previous[id]) next[id] = true;
-      });
-    }
-    (friends || []).forEach(function (friend) {
+    var exactEvents = (friends || []).map(function (friend) {
       var id = friendId(friend);
-      if (!id) return;
+      var friendSince = String(friend && friend.friendSince || "").trim();
+      if (!id) return null;
       next[id] = true;
-      if (previous && !previous[id]) {
-        savedEvents.unshift({
-          id: "friend:" + id,
-          type: "friend",
-          icon: "♣",
-          text: "Вы теперь друзья с " + friendPokerIdentity(friend),
-          at: new Date().toISOString(),
-        });
-      }
-    });
+      if (!friendSince || !isRecentEvent(friendSince)) return null;
+      return {
+        id: "friend:" + id + ":" + friendSince,
+        type: "friend",
+        icon: "♣",
+        text: "Вы теперь друзья с " + friendPokerIdentity(friend),
+        at: friendSince,
+      };
+    }).filter(Boolean);
     writeJson(FRIEND_IDS_KEY, next);
-    return saveGeneratedEvents(savedEvents);
+    return exactEvents;
   }
 
   function saveGeneratedEvents(rows) {
@@ -623,8 +616,10 @@
 
   function showIndex(index, animate) {
     var track = el("homeFriendNewsTrack");
+    var ticker = el("homeFriendNewsOpen");
     if (!track || !events.length) return;
     activeIndex = (index + events.length) % events.length;
+    if (ticker) ticker.setAttribute("data-news-type", String(events[activeIndex].type || "empty"));
     if (!animate) track.classList.add("home-friend-news__track--instant");
     track.style.transform = "translateY(-" + (activeIndex * 100) + "%)";
     if (!animate) requestAnimationFrame(function () { track.classList.remove("home-friend-news__track--instant"); });
