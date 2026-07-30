@@ -1423,10 +1423,6 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
       viceMonthChampions: 0,
       league1Place: 0,
       league2Place: 0,
-      league1Points: 0,
-      league2Points: 0,
-      league1Reward: 0,
-      league2Reward: 0,
     };
   });
   pokerRatingAchievementAllTournamentRows().forEach(function (row) {
@@ -1496,8 +1492,6 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
       var key = snapshotNickKey(row && row.nick);
       if (!snapshots[key]) return;
       snapshots[key][leagueNum === 1 ? "league1Place" : "league2Place"] = index + 1;
-      snapshots[key][leagueNum === 1 ? "league1Points" : "league2Points"] = Number(row && row.points) || 0;
-      snapshots[key][leagueNum === 1 ? "league1Reward" : "league2Reward"] = Number(row && row.reward) || 0;
     });
   });
   snapshots.__recentEvents = recentEvents.sort(function (a, b) {
