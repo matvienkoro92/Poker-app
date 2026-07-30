@@ -662,22 +662,21 @@
   color: rgba(246, 238, 221, 0.7);
 }
 .chat-user-modal__status-title::before {
-  content: "♛";
+  content: "";
   position: absolute;
-  left: 0;
-  top: -7px;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: #f0bc62;
-  border: 1px solid rgba(225, 171, 76, 0.54);
+  left: -2px;
+  top: -10px;
+  width: 39px;
+  height: 39px;
+  border: 1px solid rgba(255, 190, 62, 0.62);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 35%, rgba(225, 171, 76, 0.24), transparent 54%),
-    rgba(6, 10, 18, 0.78);
-  font-size: 18px;
-  line-height: 1;
+    url("./assets/fish-king-home.png") center / 46px 46px no-repeat,
+    radial-gradient(circle at 50% 38%, rgba(255, 206, 91, 0.26), transparent 62%),
+    rgba(6, 10, 18, 0.86);
+  box-shadow:
+    0 0 16px rgba(255, 167, 24, 0.22),
+    inset 0 1px 0 rgba(255, 239, 184, 0.18);
 }
 .chat-user-modal__status-xp {
   margin: 0 0 8px 42px;
@@ -1679,21 +1678,57 @@
 }
 .chat-user-modal__rating-tab {
   display: grid;
-  justify-items: center;
-  gap: 2px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid rgba(249, 115, 22, 0.42);
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(249, 115, 22, 0.22), rgba(180, 83, 9, 0.18));
-  color: var(--text);
+  min-height: 66px;
+  padding: 10px 16px 10px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 190, 63, 0.72);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 235, 158, 0.34), transparent 38%),
+    linear-gradient(115deg, rgba(143, 71, 4, 0.96), rgba(221, 127, 9, 0.88) 52%, rgba(92, 41, 3, 0.96));
+  color: #fff8df;
   font: inherit;
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 900;
   line-height: 1.15;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 22px rgba(175, 85, 3, 0.24),
+    inset 0 1px 0 rgba(255, 248, 214, 0.3),
+    inset 0 -1px 0 rgba(70, 28, 0, 0.5);
+}
+.chat-user-modal__rating-tab-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #fff0a8;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.34), transparent 38%),
+    rgba(61, 26, 0, 0.38);
+  border: 1px solid rgba(255, 226, 128, 0.5);
+  border-radius: 13px;
+  box-shadow: 0 5px 14px rgba(54, 20, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.chat-user-modal__rating-tab-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chat-user-modal__rating-tab-copy {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 5px;
+  text-align: left;
 }
 .chat-user-modal__rating-tab-sum,
 .chat-user-modal__rating-tab-main,
@@ -1702,7 +1737,7 @@
 }
 .chat-user-modal__rating-tab-sum {
   display: inline;
-  color: #ffd36f;
+  color: #fff0a3;
   font: inherit;
   font-weight: 1000;
   white-space: nowrap;
@@ -1712,17 +1747,22 @@
 }
 .chat-user-modal__rating-tab-main {
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 950;
+  text-shadow: 0 1px 1px rgba(73, 28, 0, 0.55);
 }
 .chat-user-modal__rating-tab-more {
-  color: rgba(255, 215, 132, 0.86);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 235, 177, 0.9);
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
 }
 .chat-user-modal__rating-tab:hover:not(:disabled) {
-  border-color: rgba(251, 146, 60, 0.66);
-  background: linear-gradient(180deg, rgba(251, 146, 60, 0.28), rgba(217, 119, 6, 0.24));
+  border-color: rgba(255, 220, 123, 0.9);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }
 .chat-user-modal__rating-tab:disabled {
   cursor: default;
@@ -2743,6 +2783,34 @@
 [data-theme="light"] .chat-user-modal__birth-badge {
   background: rgba(219, 238, 255, 0.9);
   color: #245a91;
+}
+
+.chat-user-modal__top-actions .chat-user-modal__friend-buttons {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+.chat-user-modal__top-actions .chat-user-modal__friend-btn,
+.chat-user-modal__top-actions .chat-user-modal__remove-friend {
+  grid-column: 1;
+  min-height: 38px;
+  height: 38px;
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.chat-user-modal__top-actions .chat-user-modal__block-btn {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  min-width: 58px;
+  min-height: 38px;
+  height: 38px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
 }
 .chat-user-modal__gender[hidden] {
   display: none !important;

@@ -529,10 +529,10 @@ if (chatUserModalEl) {
     modalBlockBtn.disabled = chatUserModalBlockBusy;
     modalBlockBtn.classList.toggle("chat-user-modal__block-btn--active", chatUserModalBlockedByMe);
     modalBlockBtn.textContent = chatUserModalBlockBusy
-      ? "Сохраняем..."
+      ? "..."
       : chatUserModalBlockedByMe
-        ? "Разблокировать"
-        : "Блокировать";
+        ? "Разблок"
+        : "Блок";
     modalBlockBtn.setAttribute(
       "aria-label",
       chatUserModalBlockedByMe ? "Разблокировать игрока" : "Заблокировать игрока"
@@ -2299,7 +2299,7 @@ if (chatUserModalEl) {
     if (modalAddFriend) {
       modalAddFriend.style.display = isFriend ? "none" : "";
       modalAddFriend.disabled = !!isFriend;
-      modalAddFriend.textContent = pending ? "Отменить заявку" : "Добавить в друзья";
+      modalAddFriend.textContent = pending ? "Отменить" : "Добавить";
       modalAddFriend.setAttribute("data-chat-user-friend-pending", pending ? "1" : "0");
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--added", !!isFriend);
       modalAddFriend.classList.toggle("chat-user-modal__friend-btn--pending", pending);

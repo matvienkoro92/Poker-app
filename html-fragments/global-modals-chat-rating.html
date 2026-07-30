@@ -63,8 +63,9 @@
               </div>
               <div class="chat-user-modal__friend-row">
                 <div class="chat-user-modal__friend-buttons">
-                  <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить в друзья</button>
+                  <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить</button>
                   <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
+                  <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блок</button>
                 </div>
                 <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
               </div>
@@ -103,8 +104,13 @@
           </div>
           <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" data-chat-user-profile-panel="main" hidden>
             <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">
-              <span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum" id="chatUserModalRatingTabSum" hidden></span></span>
-              <span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>
+              <span class="chat-user-modal__rating-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"></path><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"></path></svg>
+              </span>
+              <span class="chat-user-modal__rating-tab-copy">
+                <span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum" id="chatUserModalRatingTabSum" hidden></span></span>
+                <span class="chat-user-modal__rating-tab-more">Подробнее <span aria-hidden="true">›</span></span>
+              </span>
             </button>
           </div>
           <section class="chat-user-modal__achievements" id="chatUserModalAchievements" data-chat-user-profile-panel="achievements" hidden>
@@ -124,13 +130,6 @@
               <span class="chat-user-modal__rating-rank-label">Зима</span>
               <span class="chat-user-modal__rating-rank-value" id="chatUserModalWinterRank">—</span>
             </div>
-          </div>
-          <section class="chat-user-modal__personal-block chat-user-modal__personal-block--hidden" id="chatUserModalPersonalBlock" data-chat-user-profile-panel="main">
-            <h4 class="chat-user-modal__section-title">О игроке</h4>
-            <div class="chat-user-modal__personal" id="chatUserModalPersonal"></div>
-          </section>
-          <div class="chat-user-modal__actions" data-chat-user-profile-panel="main">
-            <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блокировать</button>
           </div>
         </div>
       </div>
