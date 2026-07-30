@@ -387,7 +387,12 @@
     }
     if (typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function") return read();
     if (typeof window.pokerEnsureScriptDomains === "function") {
-      return Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(read).catch(function () { return {}; });
+      return Promise.resolve(window.pokerEnsureScriptDomains([
+        "rating-common",
+        "rating-winter",
+        "rating-spring",
+        "rating-summer",
+      ])).then(read).catch(function () { return {}; });
     }
     return Promise.resolve({});
   }
