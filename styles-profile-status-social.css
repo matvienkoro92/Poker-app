@@ -878,7 +878,7 @@
     radial-gradient(circle at 8% 0%, rgba(38, 112, 157, 0.28), transparent 38%),
     linear-gradient(135deg, rgba(12, 29, 44, 0.98), rgba(8, 12, 20, 0.98));
   box-shadow: inset 0 1px 0 rgba(255, 225, 151, 0.08), 0 14px 30px rgba(0, 0, 0, 0.22);
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 .profile-find-friend__head {
@@ -925,13 +925,26 @@
 }
 
 .profile-find-friend__players {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 9px;
+  --profile-find-friend-gap: 9px;
+  display: flex;
+  gap: var(--profile-find-friend-gap);
+  width: 100%;
+  padding: 0 0 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.profile-find-friend__players::-webkit-scrollbar {
+  display: none;
 }
 
 .profile-find-friend__player {
   display: flex;
+  flex: 0 0 calc((100% - 36px) / 5);
   min-width: 0;
   padding: 0;
   align-items: center;
@@ -945,6 +958,7 @@
   text-align: center;
   appearance: none;
   -webkit-appearance: none;
+  scroll-snap-align: start;
 }
 
 .profile-find-friend__player::before,
@@ -1036,7 +1050,10 @@
   }
 
   .profile-find-friend__players {
-    gap: 5px;
+    --profile-find-friend-gap: 5px;
+  }
+  .profile-find-friend__player {
+    flex-basis: calc((100% - 20px) / 5);
   }
 }
 

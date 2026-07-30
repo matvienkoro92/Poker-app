@@ -1447,6 +1447,10 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
         place: Number(row && row.place) || 0,
         reward: reward,
         tournament: String(row && (row.tournamentLabel || row.time) || "").trim(),
+        firstPlacesCount: snapshot.firstPlaces,
+        bigWins50Count: snapshot.bigWins50,
+        bigWins100Count: snapshot.bigWins100,
+        totalReward: snapshot.totalReward,
       });
     }
   });

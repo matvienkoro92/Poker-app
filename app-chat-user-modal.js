@@ -756,6 +756,52 @@ if (chatUserModalEl) {
     if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
     return Promise.resolve(false);
   }
+  function applyChatUserModalRoundRatingArt(art, nick) {
+    if (!modalAvatar || !modalAvatarPlaceholder || !art || !art.src || art.defaultHero === true) return;
+    if (nick && chatUserModalRatingNick && !chatUserModalSameRatingNick(chatUserModalRatingNick, nick)) return;
+    modalAvatar.src = art.src;
+    modalAvatar.alt = "Персональный образ " + (art.nick || nick || chatUserModalUserName || "игрока");
+    modalAvatar.onerror = function () {
+      applyChatUserModalBaseAvatar(
+        chatUserModalHeroAvatarUrl,
+        chatUserModalUserId,
+        chatUserModalUserName || "Игрок"
+      );
+    };
+    modalAvatar.classList.add("chat-user-modal__avatar--rating-art");
+    modalAvatar.style.display = "";
+    modalAvatarPlaceholder.style.display = "none";
+  }
+  function chatUserModalStableFallbackAvatar(value) {
+    var presets = typeof POKER_PROFILE_AVATAR_PRESETS !== "undefined" && Array.isArray(POKER_PROFILE_AVATAR_PRESETS)
+      ? POKER_PROFILE_AVATAR_PRESETS
+      : [
+          "tiger", "raccoon", "skull", "phoenix", "octopus", "cat", "robot", "bulldog",
+          "monkey", "fox", "chip", "koala", "raven", "crocodile", "rabbit", "chameleon",
+          "panda", "wolf", "owl", "bat", "gorilla",
+        ].map(function (id) {
+          return { src: id === "monkey" ? "./assets/daily-poker-monkey.webp" : "./assets/avatar-" + id + ".jpg" };
+        });
+    var source = String(value || "Игрок");
+    var hash = 0;
+    for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    var preset = presets[hash % presets.length];
+    return String(preset && preset.src || "./assets/avatar-chip.jpg");
+  }
+  function applyChatUserModalBaseAvatar(avatarUrl, id, title) {
+    if (!modalAvatar || !modalAvatarPlaceholder) return;
+    var fallback = chatUserModalStableFallbackAvatar(id || title);
+    var requested = String(avatarUrl || "").trim();
+    modalAvatar.classList.remove("chat-user-modal__avatar--rating-art");
+    modalAvatar.src = requested || fallback;
+    modalAvatar.alt = title || "Игрок";
+    modalAvatar.onerror = function () {
+      modalAvatar.onerror = null;
+      modalAvatar.src = fallback;
+    };
+    modalAvatar.style.display = "";
+    modalAvatarPlaceholder.style.display = "none";
+  }
   function syncChatUserModalRatingArt(nick) {
     var art = null;
     if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
@@ -774,6 +820,7 @@ if (chatUserModalEl) {
         resolve(!!ok);
       }
       modalRatingArtImg.onload = function () {
+        applyChatUserModalRoundRatingArt(art, nick);
         done(true);
       };
       modalRatingArtImg.onerror = function () {
@@ -2638,17 +2685,7 @@ if (chatUserModalEl) {
     if (modalVerifiedBadge) modalVerifiedBadge.classList.add("chat-user-modal__verified--hidden");
     if (modalTitle) modalTitle.textContent = userName;
     if (modalAvatar && modalAvatarPlaceholder) {
-      if (avatarUrl) {
-        modalAvatar.src = avatarUrl;
-        modalAvatar.alt = userName;
-        modalAvatar.style.display = "";
-        modalAvatarPlaceholder.style.display = "none";
-      } else {
-        modalAvatar.removeAttribute("src");
-        modalAvatar.style.display = "none";
-        modalAvatarPlaceholder.textContent = (userName || "И")[0];
-        modalAvatarPlaceholder.style.display = "";
-      }
+      applyChatUserModalBaseAvatar(avatarUrl, id, userName);
     }
     syncChatUserModalRatingArt("");
     if (modalP21) modalP21.textContent = "";
@@ -2713,7 +2750,14 @@ if (chatUserModalEl) {
               syncChatUserModalSuperpower(data, userName, freshRatingNick);
               syncChatUserModalTitleFromProfileData(data, userName);
               syncChatUserModalRatingTab(freshRatingNick);
-              loadChatUserModalNews({ userId: id, ratingNick: freshRatingNick, displayName: userName });
+              loadChatUserModalNews({
+                userId: id,
+                ratingNick: freshRatingNick,
+                displayName: userName,
+                p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
+                profileBirthDate: data && (data.profileBirthDate || data.birthDate),
+                avatarUrl: avatarUrl,
+              });
               syncChatUserModalRatingArt(freshRatingNick);
               setChatUserModalAchievementsLoader(function () {
                 return syncChatUserModalRatingRanks(freshRatingNick) || Promise.resolve([]);
@@ -2748,7 +2792,14 @@ if (chatUserModalEl) {
         syncChatUserModalSuperpower(data, userName, ratingNick);
         chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
-        loadChatUserModalNews({ userId: id, ratingNick: ratingNick, displayName: userName });
+        loadChatUserModalNews({
+          userId: id,
+          ratingNick: ratingNick,
+          displayName: userName,
+          p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
+          profileBirthDate: data && (data.profileBirthDate || data.birthDate),
+          avatarUrl: avatarUrl,
+        });
         setChatUserModalAchievementsLoader(function () {
           return syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
         });

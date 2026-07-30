@@ -140,6 +140,37 @@
     return parts.join(" · ") || friendName(row);
   }
 
+  function friendAvatar(row) {
+    return String(row && (
+      row.avatarUrl ||
+      row.avatar ||
+      row.photoUrl ||
+      row.pokerPlusAvatarUrl ||
+      row.profileAvatarUrl
+    ) || "").trim();
+  }
+
+  function attachFriendAvatars(rows, friends) {
+    var candidates = (friends || []).map(function (friend) {
+      return {
+        id: friendId(friend),
+        nick: friendName(friend),
+        nickKey: matchKey(friend && friend.pokerPlusNickname) || matchKey(friendName(friend)),
+        avatar: friendAvatar(friend),
+      };
+    }).filter(function (candidate) { return candidate.avatar; });
+    return (rows || []).map(function (row) {
+      if (!row || row.actorAvatar) return row;
+      var text = String(row.text || "");
+      var actor = candidates.find(function (candidate) {
+        if (candidate.id && String(row.actorId || "") === candidate.id) return true;
+        if (candidate.nickKey && matchKey(row.actorNick) === candidate.nickKey) return true;
+        return candidate.nick && text.indexOf(candidate.nick) !== -1;
+      });
+      return actor ? Object.assign({}, row, { actorAvatar: actor.avatar }) : row;
+    });
+  }
+
   function enrichFriendsWithPoker21(friends, publicRows) {
     var byAccount = {};
     (Array.isArray(publicRows) ? publicRows : []).forEach(function (row) {
@@ -373,6 +404,59 @@
         actorNick: String(friend && friend.pokerPlusNickname || displayName).trim(),
       };
     }).filter(Boolean).slice(0, MAX_EVENTS);
+  }
+
+  function recentTournamentAchievementEvents(friends, snapshots) {
+    var byNick = {};
+    (friends || []).forEach(function (friend) {
+      var key = matchKey(friend && friend.pokerPlusNickname);
+      if (key && !byNick[key]) byNick[key] = friend;
+    });
+    var out = [];
+    (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).forEach(function (row) {
+      var friend = byNick[String(row && row.nickKey || "")];
+      if (!friend) return;
+      var reward = Number(row && row.reward) || 0;
+      var place = Number(row && row.place) || 0;
+      var baseId = friendId(friend) + ":" + String(row && (row.dateLabel || row.date)) + ":" + place + ":" + reward;
+      var name = String(row && row.nick || "").trim() || friendName(friend);
+      var shared = {
+        type: "achievement",
+        icon: "◆",
+        at: row && row.date,
+        target: "winter-rating",
+        actorId: friendId(friend),
+        actorNick: String(friend && friend.pokerPlusNickname || name).trim(),
+      };
+      if (place === 1) {
+        out.push(Object.assign({}, shared, {
+          id: "history:achievement:king:" + baseId,
+          text: name + " продвинулся в ачивке «Король турниров»: " +
+            Math.max(1, Number(row && row.firstPlacesCount) || 1) + " побед",
+        }));
+      }
+      if (reward >= 100000) {
+        out.push(Object.assign({}, shared, {
+          id: "history:achievement:100k:" + baseId,
+          text: name + " продвинулся в ачивке «Занос от 100к»: " +
+            Math.max(1, Number(row && row.bigWins100Count) || 1),
+        }));
+      } else if (reward >= 50000) {
+        out.push(Object.assign({}, shared, {
+          id: "history:achievement:50k:" + baseId,
+          text: name + " продвинулся в ачивке «Занос от 50 до 100к»: " +
+            Math.max(1, Number(row && row.bigWins50Count) || 1),
+        }));
+      }
+      if (reward > 0) {
+        out.push(Object.assign({}, shared, {
+          id: "history:achievement:millionaire:" + baseId,
+          text: name + " продвинулся в ачивке «Миллионер клуба»: " +
+            formatRub(Number(row && row.totalReward) || reward),
+        }));
+      }
+    });
+    return out.slice(0, MAX_EVENTS);
   }
 
   function tournamentSnapshotsReady(friends) {
@@ -611,11 +695,16 @@
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
+    var avatar = String(row && row.actorAvatar || "").trim();
+    var visual = avatar
+      ? '<img class="home-friend-news__avatar" src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
+      : eventIconSvg(row.type);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       '" data-home-news-target="' + esc(row.target || "") + '">' +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
-      ' home-friend-news--' + esc(row.type) + '" aria-hidden="true">' + eventIconSvg(row.type) + "</span>" +
+      ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
+      '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong><small>" + esc(timeLabel) + "</small>") +
       "</span></span>";
@@ -797,14 +886,15 @@
         results[4] || {},
         results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
       );
-      events = collectLevelEvents(friends).concat(
+      events = attachFriendAvatars(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         collectTournamentEvents(friends, tournamentSnapshots),
         recentTournamentEvents(friends, tournamentSnapshots),
+        recentTournamentAchievementEvents(friends, tournamentSnapshots),
         winnerEvents(friends, winners),
         birthdayEvents(friends),
         achievementEvents(friends, sngRows, choiceRows)
-      )
+      ), friends)
         .sort(function (a, b) {
           var aBirthday = a.type === "birthday" ? Number(a.upcomingDays) : null;
           var bBirthday = b.type === "birthday" ? Number(b.upcomingDays) : null;
@@ -848,13 +938,49 @@
     var id = String(player.userId || player.accountId || player.id || "").trim();
     var nick = String(player.pokerPlusNickname || player.ratingNick || player.nick || player.name || "").replace(/^@+/, "").trim();
     if (!nick) return Promise.resolve([]);
+    var base = apiBase();
+    var suffix = authSuffix();
+    var joiner = suffix ? "&" : "?";
+    var playerCacheKey = matchKey(nick);
     var pseudoFriend = {
       userId: id || ("player:" + matchKey(nick)),
+      accountId: String(player.accountId || id || "").trim(),
+      p21Id: String(player.p21Id || player.poker21Id || player.pokerPlusUserId || "").trim(),
       pokerPlusNickname: nick,
       pokerPlusName: String(player.pokerPlusName || player.displayName || "").trim(),
+      profileBirthDate: String(player.profileBirthDate || player.birthDate || "").trim(),
+      avatarUrl: String(player.avatarUrl || player.avatar || "").trim(),
     };
-    return tournamentSnapshotsReady([pseudoFriend]).then(function (snapshots) {
-      var history = recentTournamentEvents([pseudoFriend], snapshots || {});
+    var emptyRows = Promise.resolve({ rows: [] });
+    var emptyWinners = Promise.resolve({ winners: [] });
+    return Promise.all([
+      tournamentSnapshotsReady([pseudoFriend]),
+      base
+        ? cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "player-daily:" + playerCacheKey + ":" + suffix, 60 * 1000, { cache: "default" })
+          .catch(function () { return { winners: [] }; })
+        : emptyWinners,
+      base
+        ? cachedFetchJson(base + "/api/sng-champions?mode=achievements", "player-sng", 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { rows: [] }; })
+        : emptyRows,
+      base
+        ? cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "player-choice", 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { rows: [] }; })
+        : emptyRows,
+    ]).then(function (results) {
+      var snapshots = results[0] || {};
+      var history = recentTournamentEvents([pseudoFriend], snapshots);
+      var tournamentAchievements = recentTournamentAchievementEvents([pseudoFriend], snapshots);
+      var daily = winnerEvents(
+        [pseudoFriend],
+        results[1] && Array.isArray(results[1].winners) ? results[1].winners : []
+      );
+      var achievements = achievementEvents(
+        [pseudoFriend],
+        results[2] && Array.isArray(results[2].rows) ? results[2].rows : [],
+        results[3] && Array.isArray(results[3].rows) ? results[3].rows : []
+      );
+      var birthdays = birthdayEvents([pseudoFriend]);
       var cached = readRenderedEventsCache().filter(function (row) {
         if (!row || row.id === "empty") return false;
         if (id && String(row.actorId || "").trim() === id) return true;
@@ -864,7 +990,7 @@
           matchKey(text.slice(0, nick.length)) === matchKey(nick) &&
           (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
       });
-      return history.concat(cached)
+      return attachFriendAvatars(history.concat(tournamentAchievements, daily, achievements, birthdays, cached), [pseudoFriend])
         .sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
         .filter(function (row, index, rows) {
           return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;

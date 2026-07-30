@@ -878,7 +878,7 @@ function initProfileFriends() {
         available[i] = available[randomIndex];
         available[randomIndex] = swap;
       }
-      var picked = available.slice(0, 5);
+      var picked = available.slice(0, 20);
       if (!picked.length) {
         findFriendPlayers.innerHTML = '<span class="profile-find-friend__empty">Новые игроки скоро появятся</span>';
         return;
