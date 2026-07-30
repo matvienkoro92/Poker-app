@@ -161,11 +161,18 @@
   function relativeTime(value) {
     var time = new Date(value || 0).getTime();
     if (!time) return "";
+    var eventDate = new Date(time);
+    var nowDate = new Date();
+    var dateLabel = eventDate.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: eventDate.getFullYear() === nowDate.getFullYear() ? undefined : "numeric",
+    });
     var delta = Math.max(0, Date.now() - time);
-    if (delta < 3600000) return Math.max(1, Math.floor(delta / 60000)) + " мин назад";
-    if (delta < 86400000) return Math.floor(delta / 3600000) + " ч назад";
-    if (delta < 172800000) return "вчера";
-    return new Date(time).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+    if (delta < 3600000) return dateLabel + " · " + Math.max(1, Math.floor(delta / 60000)) + " мин назад";
+    if (delta < 86400000) return dateLabel + " · " + Math.floor(delta / 3600000) + " ч назад";
+    if (delta < 172800000) return dateLabel + " · вчера";
+    return dateLabel;
   }
 
   function collectLevelEvents(friends) {
@@ -554,7 +561,8 @@
 
   function eventHtml(row, ticker) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
-      ? "через " + Number(row.upcomingDays) + " дн."
+      ? new Date(row.at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) +
+        " · через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       '" data-home-news-target="' + esc(row.target || "") + '">' +
