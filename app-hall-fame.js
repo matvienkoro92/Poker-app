@@ -1739,10 +1739,8 @@ function hallFishBirthdayRows(rows) {
       if (!parts) return null;
       var accountId = String((row && row.accountId) || "").trim();
       var poker21Id = String((row && (row.p21Id || row.pokerPlusUserId || row.poker21Id)) || "").trim();
-      var rawNick = String((row && (row.name || row.pokerPlusNickname || row.telegram)) || "").trim();
-      var nick = /^guest_[a-f0-9]+$/i.test(rawNick)
-        ? (accountId ? "Игрок " + accountId : "Игрок")
-        : (rawNick || (accountId ? "Игрок " + accountId : "Игрок"));
+      var nick = String((row && row.pokerPlusNickname) || "").trim();
+      if (!poker21Id || !nick || /^guest_[a-f0-9]+$/i.test(nick)) return null;
       return {
         accountId: accountId,
         poker21Id: poker21Id,
@@ -2044,14 +2042,19 @@ function hallFishRenderBirthdays(rows, calendarEvents) {
   var filteredUpcoming = hallFishUpcomingFilter === "club"
     ? hallFishCalendarYearEvents(events, year).map(function (event) { return Object.assign({ kind: "event" }, event); })
     : upcomingAll.filter(function (row) {
-    if (hallFishUpcomingFilter === "birthdays") return row.kind === "birthday";
+    if (hallFishUpcomingFilter === "birthdays") {
+      return row.kind === "birthday" && Number(row.daysLeft) >= 0 && Number(row.daysLeft) <= 365;
+    }
     return true;
   });
   var upcomingUntilYearEnd = filteredUpcoming.filter(function (row) {
     return row.nextDate && row.nextDate <= yearEnd;
   });
-  var canShowMore = upcomingUntilYearEnd.length > 10;
-  var upcoming = hallFishUpcomingExpanded ? upcomingUntilYearEnd : filteredUpcoming.slice(0, 10);
+  var showAllBirthdays = hallFishUpcomingFilter === "birthdays";
+  var canShowMore = !showAllBirthdays && upcomingUntilYearEnd.length > 10;
+  var upcoming = showAllBirthdays
+    ? filteredUpcoming
+    : (hallFishUpcomingExpanded ? upcomingUntilYearEnd : filteredUpcoming.slice(0, 10));
   var upcomingTabs = [
     { key: "all", label: "Все ближайшие события" },
     { key: "birthdays", label: "Дни рождения" },

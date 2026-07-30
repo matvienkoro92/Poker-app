@@ -141,6 +141,8 @@ if (chatUserModalEl) {
   var modalNewsFullList = document.getElementById("chatUserModalNewsFullList");
   var chatUserModalNewsRows = [];
   var chatUserModalNewsSeq = 0;
+  var chatUserModalNewsFeedback = {};
+  var chatUserModalNewsCommentsOpen = {};
   var chatUserModalRatingTotalCache = {};
   var chatUserModalRatingTotalRequests = {};
   var chatUserModalRatingTotalSeq = 0;
@@ -514,12 +516,44 @@ if (chatUserModalEl) {
   }
   function chatUserModalNewsItem(row) {
     var type = String(row && row.type || "achievement");
+    var rowId = String(row && row.id || "");
+    var feedback = chatUserModalNewsFeedback[rowId] || {};
+    var reactions = feedback.reactions || {};
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--player-news-accent:' + escapeHtml(row.playerAccent) + ';--player-news-rgb:' + escapeHtml(row.playerRgb) + '"'
       : "";
-    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) + '"' + playerStyle + ">" +
+    var reactionButtons = ["❤️", "🔥", "👏"].map(function (emoji) {
+      var count = Math.max(0, Number(reactions[emoji]) || 0);
+      return '<button type="button" class="chat-user-modal__news-reaction' +
+        (feedback.myReaction === emoji ? " chat-user-modal__news-reaction--mine" : "") +
+        '" data-profile-event-reaction="' + escapeHtml(emoji) + '" aria-label="Поставить реакцию ' + escapeHtml(emoji) + '">' +
+        escapeHtml(emoji) + (count ? "<span>" + count + "</span>" : "") + "</button>";
+    }).join("");
+    var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
+    var commentsHtml = comments.length
+      ? comments.map(function (comment) {
+          return '<div class="chat-user-modal__news-comment"><strong>' + escapeHtml(comment.author || "Игрок") +
+            '</strong><p>' + escapeHtml(comment.text || "") + "</p></div>";
+        }).join("")
+      : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
+    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
+      '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
       '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
-      '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong></span>" +
+      '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong>" +
+        '<span class="chat-user-modal__news-actions">' + reactionButtons +
+          '<button type="button" class="chat-user-modal__news-comment-toggle' +
+            (chatUserModalNewsCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
+            '" data-profile-event-comments aria-label="Открыть комментарии">💬' +
+            (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") + "</button>" +
+        "</span>" +
+        '<span class="chat-user-modal__news-comments"' + (chatUserModalNewsCommentsOpen[rowId] ? "" : " hidden") + ">" +
+          '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
+          '<form class="chat-user-modal__news-comment-form">' +
+            '<input type="text" maxlength="500" placeholder="Написать комментарий…" aria-label="Комментарий к событию">' +
+            '<button type="submit">Отправить</button>' +
+          "</form>" +
+        "</span>" +
+      "</span>" +
     "</article>";
   }
   function chatUserModalNewsGroups(rows) {
@@ -542,6 +576,8 @@ if (chatUserModalEl) {
   function resetChatUserModalNews() {
     chatUserModalNewsSeq += 1;
     chatUserModalNewsRows = [];
+    chatUserModalNewsFeedback = {};
+    chatUserModalNewsCommentsOpen = {};
     if (modalNews) modalNews.hidden = true;
     if (modalNewsList) modalNewsList.innerHTML = "";
     closeChatUserModalNews();
@@ -563,15 +599,96 @@ if (chatUserModalEl) {
       if (modalNewsCount) modalNewsCount.textContent = chatUserModalNewsRows.length + " событий";
       if (modalNewsAll) modalNewsAll.hidden = false;
       if (modalNews) modalNews.hidden = false;
+      loadChatUserModalNewsFeedback();
     }).catch(function () {
       if (seq === chatUserModalNewsSeq && modalNews) modalNews.hidden = true;
+    });
+  }
+  function renderChatUserModalNewsRows() {
+    if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
+    if (modalNewsDialog && !modalNewsDialog.hidden && modalNewsFullList) {
+      modalNewsFullList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows);
+    }
+  }
+  function chatUserModalFeedbackRequest(payload) {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(payload) : payload;
+    return fetch(base + "/api/profile-event-feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then(function (response) {
+      return response.json().then(function (data) {
+        if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка");
+        return data;
+      });
+    });
+  }
+  function loadChatUserModalNewsFeedback() {
+    var ids = chatUserModalNewsRows.map(function (row) { return String(row && row.id || ""); }).filter(Boolean);
+    if (!ids.length) return;
+    chatUserModalFeedbackRequest({ action: "list", eventIds: ids }).then(function (data) {
+      chatUserModalNewsFeedback = data.feedback || {};
+      renderChatUserModalNewsRows();
+    }).catch(function () {});
+  }
+  function updateChatUserModalNewsFeedback(eventId, feedback) {
+    chatUserModalNewsFeedback[eventId] = feedback || {};
+    renderChatUserModalNewsRows();
+  }
+  function handleChatUserModalNewsInteraction(event) {
+    var target = event.target;
+    var item = target && target.closest ? target.closest("[data-profile-event-id]") : null;
+    var eventId = item && item.getAttribute("data-profile-event-id");
+    if (!eventId) return;
+    var reaction = target.closest("[data-profile-event-reaction]");
+    if (reaction) {
+      event.preventDefault();
+      chatUserModalFeedbackRequest({
+        action: "reaction",
+        eventId: eventId,
+        emoji: reaction.getAttribute("data-profile-event-reaction"),
+      }).then(function (data) {
+        updateChatUserModalNewsFeedback(eventId, data.feedback);
+      }).catch(function (error) {
+        if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
+      });
+      return;
+    }
+    if (target.closest("[data-profile-event-comments]")) {
+      event.preventDefault();
+      chatUserModalNewsCommentsOpen[eventId] = !chatUserModalNewsCommentsOpen[eventId];
+      renderChatUserModalNewsRows();
+    }
+  }
+  function handleChatUserModalNewsSubmit(event) {
+    var form = event.target && event.target.closest ? event.target.closest(".chat-user-modal__news-comment-form") : null;
+    if (!form) return;
+    event.preventDefault();
+    var item = form.closest("[data-profile-event-id]");
+    var eventId = item && item.getAttribute("data-profile-event-id");
+    var input = form.querySelector("input");
+    var text = String(input && input.value || "").trim();
+    if (!eventId || !text) return;
+    var submit = form.querySelector("button");
+    if (submit) submit.disabled = true;
+    chatUserModalFeedbackRequest({ action: "comment", eventId: eventId, text: text }).then(function (data) {
+      chatUserModalNewsCommentsOpen[eventId] = true;
+      updateChatUserModalNewsFeedback(eventId, data.feedback);
+    }).catch(function (error) {
+      if (submit) submit.disabled = false;
+      if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
     });
   }
   function openChatUserModalNews() {
     if (!modalNewsDialog || !chatUserModalNewsRows.length) return;
     if (modalNewsTitle) modalNewsTitle.textContent = "События · " + String(chatUserModalRatingNick || chatUserModalUserName || "игрок");
     if (modalNewsFullList) modalNewsFullList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows);
+    // Keep the full event dialog outside the scrollable profile card.
+    // Otherwise mobile WebKit positions and clips the fixed dialog inside that card.
+    if (modalNewsDialog.parentNode !== document.body) document.body.appendChild(modalNewsDialog);
     modalNewsDialog.hidden = false;
+    if (modalNewsFullList) modalNewsFullList.scrollTop = 0;
   }
   function closeChatUserModalNews() {
     if (modalNewsDialog) modalNewsDialog.hidden = true;
@@ -762,6 +879,9 @@ if (chatUserModalEl) {
   function applyChatUserModalRoundRatingArt(art, nick) {
     if (!modalAvatar || !modalAvatarPlaceholder || !art || !art.src || art.defaultHero === true) return;
     if (nick && chatUserModalRatingNick && !chatUserModalSameRatingNick(chatUserModalRatingNick, nick)) return;
+    // A photo uploaded by the player is their primary round avatar.
+    // Rating character art still remains in the large profile artwork.
+    if (/^data:image\//i.test(String(chatUserModalHeroAvatarUrl || "").trim())) return;
     modalAvatar.src = art.src;
     modalAvatar.alt = "Персональный образ " + (art.nick || nick || chatUserModalUserName || "игрока");
     modalAvatar.onerror = function () {
@@ -3005,10 +3125,16 @@ if (chatUserModalEl) {
     });
   }
   if (modalNewsAll) modalNewsAll.addEventListener("click", openChatUserModalNews);
+  if (modalNews) {
+    modalNews.addEventListener("click", handleChatUserModalNewsInteraction);
+    modalNews.addEventListener("submit", handleChatUserModalNewsSubmit);
+  }
   if (modalNewsDialog) {
     modalNewsDialog.addEventListener("click", function (event) {
       if (event.target && event.target.closest("[data-chat-user-news-close]")) closeChatUserModalNews();
+      else handleChatUserModalNewsInteraction(event);
     });
+    modalNewsDialog.addEventListener("submit", handleChatUserModalNewsSubmit);
   }
   function openChatUserModalSummerRatingFromAchievement() {
     closeChatUserModal();

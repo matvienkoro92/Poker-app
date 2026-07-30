@@ -1994,7 +1994,7 @@
     var teamKnockoutTitle = state.status !== "draft" && /^1(?:ый|й)\s+командный\s+снг[-\s]?нокаут\s+баттл\s+два\s+туза$/i.test(normalizedHomeTitle);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       banner.src = teamKnockoutTitle
-        ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=2"
+        ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=3"
         : "./assets/home-sng-champions-click-banner.webp?v=2";
     });
     var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-sng-open], #sngChampionsOpen"));

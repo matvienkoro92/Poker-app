@@ -4314,6 +4314,147 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       ]
     }
   ],
-  "30.07.2026": [],
+  "30.07.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 12500,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 5,
+          "reward": 150,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 8,
+          "reward": 210,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Четверг МКО",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Whenstarzz",
+          "place": 1,
+          "reward": 35560,
+          "points": 135
+        },
+        {
+          "nick": "WildBoar",
+          "place": 2,
+          "reward": 7170,
+          "points": 110
+        },
+        {
+          "nick": "ПаПа_МоЖеТ",
+          "place": 4,
+          "reward": 3540,
+          "points": 70
+        },
+        {
+          "nick": "n1kk1ex",
+          "place": 11,
+          "reward": 1450,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 18,
+          "reward": 540,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "HOK🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Hakas",
+          "place": 5,
+          "reward": 6607.81,
+          "points": 60
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 5125,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "KaizenAce",
+          "place": 1,
+          "reward": 14200,
+          "points": 135
+        },
+        {
+          "nick": "MissClick",
+          "place": 2,
+          "reward": 6600,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 353.75,
+          "points": 60
+        },
+        {
+          "nick": "Nikolay54rus",
+          "place": 6,
+          "reward": 2.5,
+          "points": 50
+        }
+      ]
+    }
+  ],
   "31.07.2026": []
 };

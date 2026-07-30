@@ -61,7 +61,7 @@ function normalizeName(raw) {
 }
 
 function playerIdFromText(text) {
-  const match = String(text || "").match(/ID[:\s]?(\d{5,6})/i);
+  const match = String(text || "").match(/ID[:\s]?(\d{5,8})/i);
   return match ? match[1] : "";
 }
 
@@ -175,11 +175,83 @@ async function detectTrophyPlace(source, visionCenterY) {
   return null;
 }
 
+async function detectBlueInterface(source) {
+  const { data, info } = await sharp(source, { limitInputPixels: false })
+    .resize({ width: 120, withoutEnlargement: true })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let blue = 0;
+  let red = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const brightness = Math.max(r, g, b);
+    if (brightness < 24) continue;
+    if (b > 42 && b > r * 1.22 && b > g * 1.08) blue++;
+    if (r > 42 && r > b * 1.22 && r > g * 1.08) red++;
+  }
+  const pixels = Math.max(1, data.length / info.channels);
+  return blue / pixels >= 0.025 && blue > red * 1.15;
+}
+
+function parseBlueResultCard(file, tokens) {
+  const rankToken = tokens.find((token) => /(?:Ранг|Rank)\s*(\d{1,3})\s*\/\s*\d+/i.test(token.text));
+  if (!rankToken) return null;
+  const rankMatch = rankToken.text.match(/(?:Ранг|Rank)\s*(\d{1,3})\s*\/\s*\d+/i);
+  const idToken = tokens.find((token) => /ID[:\s]?\d{5,8}/i.test(token.text));
+  const playerId = idToken ? playerIdFromText(idToken.text) : "";
+  const idCenter = idToken ? idToken.y + idToken.height / 2 : 0.44;
+  const nameToken = chooseClosest(tokens, looksLikePlayerName, idCenter + 0.025, 0.05);
+  const rewardToken = tokens
+    .filter((token) => token.y >= 0.16 && token.y <= 0.29 && numberFromText(token.text) > 0)
+    .sort((a, b) => Math.abs((a.x + a.width / 2) - 0.5) - Math.abs((b.x + b.width / 2) - 0.5))[0];
+  if (!rewardToken) return null;
+
+  const baseName = path.basename(file.source);
+  const dateMatch = baseName.match(/rating-(\d{2})-(\d{2})-(\d{4})/i);
+  const timeMatch = baseName.match(/-(\d{1,2})h(?:\.[a-z0-9]+)?$/i);
+  const leagueMatch = baseName.match(/-league([12])-?/i);
+  const title = tokens
+    .filter((token) => token.y >= 0.285 && token.y <= 0.37)
+    .filter((token) => !/^MTT$/i.test(token.text))
+    .sort((a, b) => b.y - a.y || a.x - b.x)
+    .map((token) => token.text)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim() || "TODO";
+  const normalizedPlayer = normalizePlayerNick(playerId, nameToken ? nameToken.text : "TODO");
+  return {
+    source: file.source,
+    date: dateMatch ? `${dateMatch[1]}.${dateMatch[2]}.${dateMatch[3]}` : "??.??.2026",
+    time: timeMatch ? `${timeMatch[1].padStart(2, "0")}:00` : "??:??",
+    name: title,
+    league: leagueMatch ? Number(leagueMatch[1]) : 1,
+    buyin: 0,
+    blue: true,
+    rows: [{
+      place: Number(rankMatch[1]),
+      playerId,
+      nick: normalizedPlayer.nick,
+      reward: numberFromText(rewardToken.text),
+      needsPlaceCheck: false,
+      needsNameCheck: !normalizedPlayer.trusted,
+      nickSource: normalizedPlayer.source
+    }]
+  };
+}
+
 async function parseOcrFile(file) {
   const tokens = (file.tokens || []).map((token) => ({
     ...token,
     text: String(token.text || "").trim()
   })).filter((token) => token.text);
+  const blue = await detectBlueInterface(file.source);
+  if (blue) {
+    const resultCard = parseBlueResultCard(file, tokens);
+    if (resultCard) return resultCard;
+  }
 
   const dateToken = tokens.find((token) => isDateTime(token.text));
   const dateMatch = dateToken ? isDateTime(dateToken.text) : null;
@@ -214,9 +286,8 @@ async function parseOcrFile(file) {
   );
   const buyin = feeToken ? numberFromText(feeToken.text) : 0;
   if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
-
   const ids = tokens
-    .filter((token) => /(?:^|[^a-z])ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.44 && token.y < 0.53 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
   const rows = await Promise.all(ids.map(async (idToken, index) => {
@@ -232,7 +303,7 @@ async function parseOcrFile(file) {
     let place = placeToken ? integerFromText(placeToken.text) : null;
     const reward = rewardToken ? numberFromText(rewardToken.text) : 0;
     let needsPlaceCheck = place == null;
-    const trophyPlace = await detectTrophyPlace(file.source, idCenter);
+    const trophyPlace = blue ? null : await detectTrophyPlace(file.source, idCenter);
     if (trophyPlace != null) {
       place = trophyPlace;
       needsPlaceCheck = false;
@@ -273,6 +344,7 @@ async function parseOcrFile(file) {
     name: title,
     league: inferLeague(buyin),
     buyin,
+    blue,
     rows: visibleRows
   };
 }
@@ -289,6 +361,7 @@ function formatDraft(tournaments) {
       `time: ${tournament.time}`,
       `name: ${tournament.name}`,
       `buyin: ${tournament.buyin}`,
+      `blue: ${tournament.blue ? "yes" : "no"}`,
       `source: ${tournament.source}`,
       "players:"
     ];

@@ -3,7 +3,7 @@
   "budgetsMiB": {
     "startupEager": 0.75,
     "coreAndLazyAssets": 30,
-    "currentSeason": 18,
+    "currentSeason": 20,
     "archiveSeasons": 42,
     "publicBuild": 95,
     "individualFile": 2
