@@ -184,6 +184,8 @@ function initProfileFriends() {
   var searchSuggestions = document.getElementById("profileFriendsSearchSuggestions");
   var searchResult = document.getElementById("profileFriendsSearchResult");
   var findFriendPlayers = document.getElementById("profileFindFriendPlayers");
+  var findFriendPrev = document.getElementById("profileFindFriendPrev");
+  var findFriendNext = document.getElementById("profileFindFriendNext");
   var searchFoundProfile = null;
   var searchSuggestRowsCache = null;
   var searchSuggestRowsPromise = null;
@@ -902,10 +904,38 @@ function initProfileFriends() {
           if (img.getAttribute("src") !== fallback) img.setAttribute("src", fallback);
         }, { once: true });
       });
+      window.requestAnimationFrame(updateFindFriendNav);
     });
   }
 
+  function updateFindFriendNav() {
+    if (!findFriendPlayers) return;
+    var maxScroll = Math.max(0, findFriendPlayers.scrollWidth - findFriendPlayers.clientWidth);
+    if (findFriendPrev) findFriendPrev.disabled = findFriendPlayers.scrollLeft <= 2;
+    if (findFriendNext) findFriendNext.disabled = findFriendPlayers.scrollLeft >= maxScroll - 2 || maxScroll <= 2;
+  }
+
+  function scrollFindFriendPlayers(direction) {
+    if (!findFriendPlayers) return;
+    var distance = Math.max(1, findFriendPlayers.clientWidth - 44);
+    findFriendPlayers.scrollBy({ left: direction * distance, behavior: "smooth" });
+  }
+
   function initFindFriendActions() {
+    if (findFriendPrev && findFriendPrev.dataset.findFriendNavBound !== "1") {
+      findFriendPrev.dataset.findFriendNavBound = "1";
+      findFriendPrev.addEventListener("click", function () { scrollFindFriendPlayers(-1); });
+    }
+    if (findFriendNext && findFriendNext.dataset.findFriendNavBound !== "1") {
+      findFriendNext.dataset.findFriendNavBound = "1";
+      findFriendNext.addEventListener("click", function () { scrollFindFriendPlayers(1); });
+    }
+    if (findFriendPlayers && findFriendPlayers.dataset.findFriendScrollBound !== "1") {
+      findFriendPlayers.dataset.findFriendScrollBound = "1";
+      findFriendPlayers.addEventListener("scroll", updateFindFriendNav, { passive: true });
+      window.addEventListener("resize", updateFindFriendNav, { passive: true });
+      updateFindFriendNav();
+    }
     if (findFriendPlayers && findFriendPlayers.dataset.findFriendActionsBound !== "1") {
       findFriendPlayers.dataset.findFriendActionsBound = "1";
       findFriendPlayers.addEventListener("click", function (event) {

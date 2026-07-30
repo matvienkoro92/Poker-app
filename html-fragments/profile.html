@@ -168,12 +168,16 @@
                 </div>
                 <button type="button" class="profile-find-friend__open" data-hall-fish-open="1">Найти друга <span id="profileFindFriendLinkedCount" aria-label="Количество игроков с привязанным Poker21">(…)</span> <span aria-hidden="true">›</span></button>
               </div>
-              <div class="profile-find-friend__players" id="profileFindFriendPlayers" aria-live="polite">
-                <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
-                <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
-                <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
-                <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
-                <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+              <div class="profile-find-friend__viewport">
+                <button type="button" class="profile-find-friend__nav profile-find-friend__nav--prev" id="profileFindFriendPrev" aria-label="Предыдущие игроки">‹</button>
+                <div class="profile-find-friend__players" id="profileFindFriendPlayers" aria-live="polite">
+                  <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+                  <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+                  <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+                  <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+                  <span class="profile-find-friend__skeleton" aria-hidden="true"></span>
+                </div>
+                <button type="button" class="profile-find-friend__nav profile-find-friend__nav--next" id="profileFindFriendNext" aria-label="Следующие игроки">›</button>
               </div>
             </section>
             <section class="profile-achievements-showcase" id="profileAchievementsShowcase" data-profile-achievements-panel aria-label="Достижения и история сезонов">

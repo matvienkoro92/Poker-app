@@ -929,7 +929,8 @@
   display: flex;
   gap: var(--profile-find-friend-gap);
   width: 100%;
-  padding: 0 0 5px;
+  padding: 0 38px 5px;
+  scroll-padding-inline: 38px;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -940,6 +941,48 @@
 
 .profile-find-friend__players::-webkit-scrollbar {
   display: none;
+}
+
+.profile-find-friend__viewport {
+  position: relative;
+}
+
+.profile-find-friend__nav {
+  position: absolute;
+  z-index: 3;
+  top: 36%;
+  display: grid;
+  width: 34px;
+  height: 52px;
+  padding: 0;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid rgba(255, 198, 82, 0.66);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(25, 31, 41, 0.98), rgba(7, 12, 20, 0.98));
+  color: #ffd36b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.34), 0 0 16px rgba(255, 180, 45, 0.1);
+  font: inherit;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.profile-find-friend__nav--prev {
+  left: 0;
+}
+
+.profile-find-friend__nav--next {
+  right: 0;
+}
+
+.profile-find-friend__nav:disabled {
+  opacity: 0.26;
+  pointer-events: none;
+}
+
+.profile-find-friend__nav:not(:disabled):active {
+  transform: translateY(-50%) scale(0.94);
 }
 
 .profile-find-friend__player {
@@ -1051,9 +1094,17 @@
 
   .profile-find-friend__players {
     --profile-find-friend-gap: 5px;
+    padding-inline: 32px;
+    scroll-padding-inline: 32px;
   }
   .profile-find-friend__player {
     flex-basis: calc((100% - 20px) / 5);
+  }
+  .profile-find-friend__nav {
+    width: 29px;
+    height: 46px;
+    border-radius: 10px;
+    font-size: 27px;
   }
 }
 

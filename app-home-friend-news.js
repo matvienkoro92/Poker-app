@@ -17,6 +17,18 @@
   var loadSequence = 0;
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
+  var PLAYER_NEWS_COLORS = [
+    { accent: "#65c7ff", rgb: "101, 199, 255" },
+    { accent: "#68e2ad", rgb: "104, 226, 173" },
+    { accent: "#ffbf59", rgb: "255, 191, 89" },
+    { accent: "#ff829f", rgb: "255, 130, 159" },
+    { accent: "#aa92ff", rgb: "170, 146, 255" },
+    { accent: "#ff9368", rgb: "255, 147, 104" },
+    { accent: "#64e2df", rgb: "100, 226, 223" },
+    { accent: "#d9e56b", rgb: "217, 229, 107" },
+    { accent: "#f080d8", rgb: "240, 128, 216" },
+    { accent: "#7fa9ff", rgb: "127, 169, 255" },
+  ];
 
   function readRenderedEventsCache() {
     try {
@@ -150,6 +162,13 @@
     ) || "").trim();
   }
 
+  function playerNewsColor(value) {
+    var source = matchKey(value) || "player";
+    var hash = 0;
+    for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    return PLAYER_NEWS_COLORS[hash % PLAYER_NEWS_COLORS.length];
+  }
+
   function attachFriendAvatars(rows, friends) {
     var candidates = (friends || []).map(function (friend) {
       return {
@@ -158,16 +177,24 @@
         nickKey: matchKey(friend && friend.pokerPlusNickname) || matchKey(friendName(friend)),
         avatar: friendAvatar(friend),
       };
-    }).filter(function (candidate) { return candidate.avatar; });
+    });
     return (rows || []).map(function (row) {
-      if (!row || row.actorAvatar) return row;
+      if (!row || row.playerAccent) return row;
       var text = String(row.text || "");
       var actor = candidates.find(function (candidate) {
         if (candidate.id && String(row.actorId || "") === candidate.id) return true;
         if (candidate.nickKey && matchKey(row.actorNick) === candidate.nickKey) return true;
         return candidate.nick && text.indexOf(candidate.nick) !== -1;
       });
-      return actor ? Object.assign({}, row, { actorAvatar: actor.avatar }) : row;
+      if (!actor) return row;
+      var color = playerNewsColor(actor.id || actor.nickKey || actor.nick);
+      return Object.assign({}, row, {
+        actorAvatar: actor.avatar || row.actorAvatar || "",
+        actorId: row.actorId || actor.id,
+        actorNick: row.actorNick || actor.nick,
+        playerAccent: color.accent,
+        playerRgb: color.rgb,
+      });
     });
   }
 
@@ -296,7 +323,9 @@
   function collectTournamentEvents(friends, snapshots) {
     var previous = readJson(TOURNAMENT_SNAPSHOTS_KEY, null);
     var next = {};
-    var savedEvents = readJson(GENERATED_EVENTS_KEY, []);
+    var savedEvents = readJson(GENERATED_EVENTS_KEY, []).filter(function (row) {
+      return String(row && row.id || "").indexOf("achievement:totalReward:") !== 0;
+    });
     (friends || []).forEach(function (friend) {
       var id = friendId(friend);
       var nickKey = matchKey(friend && friend.pokerPlusNickname);
@@ -328,19 +357,6 @@
       });
       var oldMillionaireTier = Number(before.millionaireTier) || 0;
       var newMillionaireTier = Number(current.millionaireTier) || 0;
-      var oldTotalReward = Number(before.totalReward) || 0;
-      var newTotalReward = Number(current.totalReward) || 0;
-      if (Object.prototype.hasOwnProperty.call(before, "totalReward") && newTotalReward > oldTotalReward) {
-        savedEvents.unshift({
-          id: "achievement:totalReward:" + id + ":" + newTotalReward,
-          type: "achievement",
-          icon: "◆",
-          text: friendName(friend) + " продвинулся в ачивке «Миллионер клуба»: " +
-            formatRub(oldTotalReward) + " → " + formatRub(newTotalReward),
-          at: new Date().toISOString(),
-          target: "winter-rating",
-        });
-      }
       if (Object.prototype.hasOwnProperty.call(before, "millionaireTier") && newMillionaireTier > oldMillionaireTier) {
         savedEvents.unshift({
           id: "achievement:millionaire:" + id + ":" + newMillionaireTier,
@@ -446,13 +462,6 @@
           id: "history:achievement:50k:" + baseId,
           text: name + " продвинулся в ачивке «Занос от 50 до 100к»: " +
             Math.max(1, Number(row && row.bigWins50Count) || 1),
-        }));
-      }
-      if (reward > 0) {
-        out.push(Object.assign({}, shared, {
-          id: "history:achievement:millionaire:" + baseId,
-          text: name + " продвинулся в ачивке «Миллионер клуба»: " +
-            formatRub(Number(row && row.totalReward) || reward),
         }));
       }
     });
@@ -699,9 +708,12 @@
     var visual = avatar
       ? '<img class="home-friend-news__avatar" src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
       : eventIconSvg(row.type);
+    var playerStyle = row && row.playerAccent && row.playerRgb
+      ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
+      : "";
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
-      '" data-home-news-target="' + esc(row.target || "") + '">' +
+      '" data-home-news-target="' + esc(row.target || "") + '"' + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
@@ -736,7 +748,17 @@
     var ticker = el("homeFriendNewsOpen");
     if (!track || !events.length) return;
     activeIndex = (index + events.length) % events.length;
-    if (ticker) ticker.setAttribute("data-news-type", String(events[activeIndex].type || "empty"));
+    if (ticker) {
+      var active = events[activeIndex] || {};
+      ticker.setAttribute("data-news-type", String(active.type || "empty"));
+      if (active.playerAccent && active.playerRgb) {
+        ticker.style.setProperty("--friend-news-accent", active.playerAccent);
+        ticker.style.setProperty("--friend-news-rgb", active.playerRgb);
+      } else {
+        ticker.style.removeProperty("--friend-news-accent");
+        ticker.style.removeProperty("--friend-news-rgb");
+      }
+    }
     if (!animate) track.classList.add("home-friend-news__track--instant");
     track.style.transform = "translateY(-" + (activeIndex * 100) + "%)";
     if (!animate) requestAnimationFrame(function () { track.classList.remove("home-friend-news__track--instant"); });

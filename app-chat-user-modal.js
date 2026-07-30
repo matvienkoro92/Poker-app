@@ -514,7 +514,10 @@ if (chatUserModalEl) {
   }
   function chatUserModalNewsItem(row) {
     var type = String(row && row.type || "achievement");
-    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) + '">' +
+    var playerStyle = row && row.playerAccent && row.playerRgb
+      ? ' style="--player-news-accent:' + escapeHtml(row.playerAccent) + ';--player-news-rgb:' + escapeHtml(row.playerRgb) + '"'
+      : "";
+    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) + '"' + playerStyle + ">" +
       '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
       '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong></span>" +
     "</article>";
@@ -2489,7 +2492,7 @@ if (chatUserModalEl) {
       setRespectButton(modalRespectUp, "+", "Поднять уважение", "up", true);
       setRespectButton(modalRespectDown, "\u2212", "Отменить уважение", "withdraw", false);
       if (modalRespectHint) {
-        modalRespectHint.textContent = respectHintText("Вы подняли уважение игроку");
+        modalRespectHint.textContent = respectHintText("Вы подняли уважение");
         modalRespectHint.hidden = false;
       }
       return;
@@ -2498,7 +2501,7 @@ if (chatUserModalEl) {
       setRespectButton(modalRespectDown, "\u2212", "Уменьшить уважение", "down", true);
       setRespectButton(modalRespectUp, "+", "Вернуть уважение", "withdraw", false);
       if (modalRespectHint) {
-        modalRespectHint.textContent = respectHintText("Вы уменьшили уважение игроку");
+        modalRespectHint.textContent = respectHintText("Вы уменьшили уважение");
         modalRespectHint.hidden = false;
       }
     }
@@ -3087,8 +3090,8 @@ if (chatUserModalEl) {
               }
             });
           var msg = (d && d.error) || "Ошибка";
-          if (d && d.error === "already_raised") msg = "Вы подняли уважение игроку";
-          else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение игроку";
+          if (d && d.error === "already_raised") msg = "Вы подняли уважение";
+          else if (d && d.error === "already_lowered") msg = "Вы уменьшили уважение";
           if (tg && tg.showAlert) tg.showAlert(msg);
         }
       })
