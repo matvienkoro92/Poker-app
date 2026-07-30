@@ -113,6 +113,24 @@
               </span>
             </button>
           </div>
+          <section class="chat-user-modal__news" id="chatUserModalNews" data-chat-user-profile-panel="main" hidden>
+            <div class="chat-user-modal__news-heading">
+              <span>Последние события</span>
+              <small id="chatUserModalNewsCount"></small>
+            </div>
+            <div class="chat-user-modal__news-list" id="chatUserModalNewsList"></div>
+            <button type="button" class="chat-user-modal__news-all" id="chatUserModalNewsAll">Посмотреть все <span aria-hidden="true">›</span></button>
+          </section>
+          <div class="chat-user-modal__news-dialog" id="chatUserModalNewsDialog" hidden>
+            <button type="button" class="chat-user-modal__news-backdrop" data-chat-user-news-close aria-label="Закрыть события игрока"></button>
+            <section class="chat-user-modal__news-panel" role="dialog" aria-modal="true" aria-labelledby="chatUserModalNewsTitle">
+              <header class="chat-user-modal__news-panel-header">
+                <div><span>Профиль игрока</span><h3 id="chatUserModalNewsTitle">События игрока</h3></div>
+                <button type="button" class="chat-user-modal__news-close" data-chat-user-news-close aria-label="Закрыть">×</button>
+              </header>
+              <div class="chat-user-modal__news-full-list" id="chatUserModalNewsFullList"></div>
+            </section>
+          </div>
           <section class="chat-user-modal__achievements" id="chatUserModalAchievements" data-chat-user-profile-panel="achievements" hidden>
             <h4 class="chat-user-modal__achievements-title">Достижения</h4>
             <div class="chat-user-modal__achievements-list" id="chatUserModalAchievementsList"></div>

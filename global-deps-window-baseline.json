@@ -698,6 +698,7 @@
     "app-rating-view-adapter.js:pokerOpenTournamentRatingPlayer",
     "app-rating-view-adapter.js:pokerOpenUnifiedPlayerProfileByRatingNick",
     "app-rating-view-adapter.js:pokerRatingAchievementMonthLabel",
+    "app-home-friend-news.js:pokerGetPlayerNews",
     "app-rating-view-adapter.js:switchSpringRatingMainTab",
     "app-rating-view-adapter.js:tryTelegramWebAppExpandBurst",
     "app-rating-view-adapter.js:updateWinterRatingWeekTopPreviews",

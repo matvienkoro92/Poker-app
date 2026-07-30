@@ -3255,3 +3255,233 @@
     font-size: 10px;
   }
 }
+
+/* Player activity uses the same visual language as friend news. */
+.chat-user-modal__news {
+  margin: 14px 4px 28px;
+  overflow: hidden;
+  border: 1px solid rgba(220, 166, 67, 0.42);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(18, 25, 37, 0.98), rgba(7, 11, 18, 0.98));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+.chat-user-modal__news[hidden],
+.chat-user-modal__news-dialog[hidden] {
+  display: none !important;
+}
+.chat-user-modal__news-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  color: #ffd780;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.chat-user-modal__news-heading small {
+  color: #8ea0b8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.chat-user-modal__news-list,
+.chat-user-modal__news-day-list {
+  display: grid;
+}
+.chat-user-modal__news-day-list {
+  overflow: hidden;
+  border: 1px solid rgba(143, 161, 184, 0.16);
+  border-radius: 18px;
+}
+.chat-user-modal__news-item {
+  --player-news-accent: #ffc45d;
+  --player-news-rgb: 255, 196, 93;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  min-height: 76px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(143, 161, 184, 0.16);
+  background: linear-gradient(90deg, rgba(var(--player-news-rgb), 0.13), rgba(var(--player-news-rgb), 0.025) 48%, transparent);
+  box-shadow: inset 4px 0 0 rgba(var(--player-news-rgb), 0.75);
+}
+.chat-user-modal__news-item:last-child {
+  border-bottom: 0;
+}
+.chat-user-modal__news-item--rating {
+  --player-news-accent: #66b7ff;
+  --player-news-rgb: 102, 183, 255;
+}
+.chat-user-modal__news-item--level {
+  --player-news-accent: #9f8cff;
+  --player-news-rgb: 159, 140, 255;
+}
+.chat-user-modal__news-item--daily {
+  --player-news-accent: #ff8f6b;
+  --player-news-rgb: 255, 143, 107;
+}
+.chat-user-modal__news-item--birthday {
+  --player-news-accent: #ff7ea8;
+  --player-news-rgb: 255, 126, 168;
+}
+.chat-user-modal__news-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(var(--player-news-rgb), 0.35);
+  border-radius: 14px;
+  background: rgba(var(--player-news-rgb), 0.13);
+  color: var(--player-news-accent);
+  box-shadow: 0 6px 18px rgba(var(--player-news-rgb), 0.13);
+}
+.chat-user-modal__news-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chat-user-modal__news-copy {
+  min-width: 0;
+}
+.chat-user-modal__news-copy strong {
+  display: block;
+  color: #eef4ff;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.chat-user-modal__news-all {
+  width: calc(100% - 28px);
+  min-height: 48px;
+  margin: 12px 14px 14px;
+  border: 1px solid rgba(255, 201, 91, 0.48);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 190, 58, 0.2), rgba(255, 125, 0, 0.09));
+  color: #ffe2a0;
+  font: inherit;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+.chat-user-modal__news-dialog {
+  position: fixed;
+  z-index: 10025;
+  inset: 0;
+  display: grid;
+  align-items: end;
+}
+.chat-user-modal__news-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.76);
+  backdrop-filter: blur(8px);
+}
+.chat-user-modal__news-panel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: min(88dvh, 900px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(154, 177, 207, 0.28);
+  border-radius: 28px 28px 0 0;
+  background: #101925;
+  color: #eef4ff;
+}
+.chat-user-modal__news-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  border-bottom: 1px solid rgba(143, 161, 184, 0.18);
+}
+.chat-user-modal__news-panel-header span {
+  color: #64e8b2;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.chat-user-modal__news-panel-header h3 {
+  margin: 3px 0 0;
+  color: #ffe0a0;
+  font-size: clamp(24px, 5vw, 36px);
+}
+.chat-user-modal__news-close {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #090e17;
+  color: #ffe4a8;
+  font-size: 38px;
+  line-height: 1;
+}
+.chat-user-modal__news-full-list {
+  max-height: calc(min(88dvh, 900px) - 96px);
+  padding: 14px 16px max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+.chat-user-modal__news-day + .chat-user-modal__news-day {
+  margin-top: 20px;
+}
+.chat-user-modal__news-date {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0 10px;
+  color: #ffda89;
+  font-size: 13px;
+  font-weight: 950;
+  text-align: center;
+  text-transform: uppercase;
+}
+.chat-user-modal__news-date::before,
+.chat-user-modal__news-date::after {
+  height: 1px;
+  flex: 1;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(218, 164, 65, 0.55));
+}
+.chat-user-modal__news-date::after {
+  transform: scaleX(-1);
+}
+.chat-user-modal__news-list .chat-user-modal__news-day-list {
+  border-width: 0;
+  border-radius: 0;
+}
+.chat-user-modal__news-list .chat-user-modal__news-date {
+  margin-inline: 14px;
+}
+@media (max-width: 520px) {
+  .chat-user-modal__news {
+    margin-inline: 0;
+    border-radius: 18px;
+  }
+  .chat-user-modal__news-item {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 68px;
+    padding: 10px 12px;
+  }
+  .chat-user-modal__news-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  .chat-user-modal__news-copy strong {
+    font-size: 14px;
+  }
+}

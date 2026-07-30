@@ -369,6 +369,8 @@
         text: displayName + " " + action + (detail ? " · " + detail : ""),
         at: row.date,
         target: "winter-rating",
+        actorId: friendId(friend),
+        actorNick: String(friend && friend.pokerPlusNickname || displayName).trim(),
       };
     }).filter(Boolean).slice(0, 20);
   }
@@ -831,6 +833,36 @@
     });
     setInterval(function () { load(); }, 5 * 60 * 1000);
   }
+
+  window.pokerGetPlayerNews = function (identity) {
+    var player = identity && typeof identity === "object" ? identity : {};
+    var id = String(player.userId || player.accountId || player.id || "").trim();
+    var nick = String(player.pokerPlusNickname || player.ratingNick || player.nick || player.name || "").replace(/^@+/, "").trim();
+    if (!nick) return Promise.resolve([]);
+    var pseudoFriend = {
+      userId: id || ("player:" + matchKey(nick)),
+      pokerPlusNickname: nick,
+      pokerPlusName: String(player.pokerPlusName || player.displayName || "").trim(),
+    };
+    return tournamentSnapshotsReady([pseudoFriend]).then(function (snapshots) {
+      var history = recentTournamentEvents([pseudoFriend], snapshots || {});
+      var cached = readRenderedEventsCache().filter(function (row) {
+        if (!row || row.id === "empty") return false;
+        if (id && String(row.actorId || "").trim() === id) return true;
+        if (nick && matchKey(row.actorNick) === matchKey(nick)) return true;
+        var text = String(row.text || "").trim();
+        return !!nick &&
+          matchKey(text.slice(0, nick.length)) === matchKey(nick) &&
+          (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
+      });
+      return history.concat(cached)
+        .sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
+        .filter(function (row, index, rows) {
+          return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+        })
+        .slice(0, MAX_EVENTS);
+    }).catch(function () { return []; });
+  };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
   else init();

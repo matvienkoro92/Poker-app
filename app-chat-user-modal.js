@@ -132,6 +132,15 @@ if (chatUserModalEl) {
   var modalRatingTabs = document.getElementById("chatUserModalRatingTabs");
   var modalRatingTab = document.getElementById("chatUserModalRatingTab");
   var modalRatingTabSum = document.getElementById("chatUserModalRatingTabSum");
+  var modalNews = document.getElementById("chatUserModalNews");
+  var modalNewsList = document.getElementById("chatUserModalNewsList");
+  var modalNewsCount = document.getElementById("chatUserModalNewsCount");
+  var modalNewsAll = document.getElementById("chatUserModalNewsAll");
+  var modalNewsDialog = document.getElementById("chatUserModalNewsDialog");
+  var modalNewsTitle = document.getElementById("chatUserModalNewsTitle");
+  var modalNewsFullList = document.getElementById("chatUserModalNewsFullList");
+  var chatUserModalNewsRows = [];
+  var chatUserModalNewsSeq = 0;
   var chatUserModalRatingTotalCache = {};
   var chatUserModalRatingTotalRequests = {};
   var chatUserModalRatingTotalSeq = 0;
@@ -477,10 +486,92 @@ if (chatUserModalEl) {
   }
   function closeChatUserModal() {
     chatUserModalOpenSeq += 1;
+    closeChatUserModalNews();
     closeChatUserSuperpowerModal();
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
     document.dispatchEvent(new CustomEvent("poker:chat-user-modal-close"));
+  }
+  function chatUserModalNewsDate(value) {
+    var date = new Date(value || 0);
+    if (!Number.isFinite(date.getTime())) return "";
+    return date.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  }
+  function chatUserModalNewsDayKey(value) {
+    var date = new Date(value || 0);
+    if (!Number.isFinite(date.getTime())) return "unknown";
+    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+  }
+  function chatUserModalNewsIcon(type) {
+    var icons = {
+      level: '<svg viewBox="0 0 24 24"><path d="m12 3 4.3 4.3-2.2 2.2L12 7.4 9.9 9.5 7.7 7.3 12 3Z"/><path d="m12 9.3 4.3 4.3-2.2 2.2-2.1-2.1-2.1 2.1-2.2-2.2L12 9.3Z"/><path d="M5 20h14"/></svg>',
+      rating: '<svg viewBox="0 0 24 24"><path d="M5 18V13M12 18V9M19 18V5"/><path d="m4 8 5-4 4 3 6-5"/><path d="M16 2h3v3"/></svg>',
+      achievement: '<svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"/></svg>',
+      daily: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>',
+      birthday: '<svg viewBox="0 0 24 24"><path d="M4 12h16v8H4v-8ZM3 9h18v4H3V9Z"/><path d="M12 9v11M12 9H8.5a2.5 2.5 0 1 1 2.5-2.5L12 9Zm0 0h3.5A2.5 2.5 0 1 0 13 6.5L12 9Z"/></svg>',
+    };
+    return icons[type] || icons.achievement;
+  }
+  function chatUserModalNewsItem(row) {
+    var type = String(row && row.type || "achievement");
+    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) + '">' +
+      '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
+      '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong></span>" +
+    "</article>";
+  }
+  function chatUserModalNewsGroups(rows) {
+    var groups = [];
+    (rows || []).forEach(function (row) {
+      var key = chatUserModalNewsDayKey(row && row.at);
+      var group = groups[groups.length - 1];
+      if (!group || group.key !== key) {
+        group = { key: key, at: row && row.at, rows: [] };
+        groups.push(group);
+      }
+      group.rows.push(row);
+    });
+    return groups.map(function (group) {
+      return '<section class="chat-user-modal__news-day"><div class="chat-user-modal__news-date"><span>' +
+        escapeHtml(chatUserModalNewsDate(group.at)) + '</span></div><div class="chat-user-modal__news-day-list">' +
+        group.rows.map(chatUserModalNewsItem).join("") + "</div></section>";
+    }).join("");
+  }
+  function resetChatUserModalNews() {
+    chatUserModalNewsSeq += 1;
+    chatUserModalNewsRows = [];
+    if (modalNews) modalNews.hidden = true;
+    if (modalNewsList) modalNewsList.innerHTML = "";
+    closeChatUserModalNews();
+  }
+  function loadChatUserModalNews(identity) {
+    var seq = ++chatUserModalNewsSeq;
+    if (typeof window.pokerGetPlayerNews !== "function") {
+      if (modalNews) modalNews.hidden = true;
+      return;
+    }
+    Promise.resolve(window.pokerGetPlayerNews(identity)).then(function (rows) {
+      if (seq !== chatUserModalNewsSeq) return;
+      chatUserModalNewsRows = Array.isArray(rows) ? rows : [];
+      if (!chatUserModalNewsRows.length) {
+        if (modalNews) modalNews.hidden = true;
+        return;
+      }
+      if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
+      if (modalNewsCount) modalNewsCount.textContent = chatUserModalNewsRows.length + " событий";
+      if (modalNewsAll) modalNewsAll.hidden = false;
+      if (modalNews) modalNews.hidden = false;
+    }).catch(function () {
+      if (seq === chatUserModalNewsSeq && modalNews) modalNews.hidden = true;
+    });
+  }
+  function openChatUserModalNews() {
+    if (!modalNewsDialog || !chatUserModalNewsRows.length) return;
+    if (modalNewsTitle) modalNewsTitle.textContent = "События · " + String(chatUserModalRatingNick || chatUserModalUserName || "игрок");
+    if (modalNewsFullList) modalNewsFullList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows);
+    modalNewsDialog.hidden = false;
+  }
+  function closeChatUserModalNews() {
+    if (modalNewsDialog) modalNewsDialog.hidden = true;
   }
   function revealChatUserModal(seq) {
     if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
@@ -2522,6 +2613,7 @@ if (chatUserModalEl) {
     if (modalRespectActions) modalRespectActions.style.display = openingSelfProfile ? "none" : "";
     setChatUserModalBlockState(cachedBlockedByMe, true);
     syncChatUserModalRatingTab("");
+    resetChatUserModalNews();
     chatUserModalRanksSeq += 1;
     if (modalRatingRanks) modalRatingRanks.hidden = true;
     if (modalSummerRank) modalSummerRank.textContent = "—";
@@ -2621,6 +2713,7 @@ if (chatUserModalEl) {
               syncChatUserModalSuperpower(data, userName, freshRatingNick);
               syncChatUserModalTitleFromProfileData(data, userName);
               syncChatUserModalRatingTab(freshRatingNick);
+              loadChatUserModalNews({ userId: id, ratingNick: freshRatingNick, displayName: userName });
               syncChatUserModalRatingArt(freshRatingNick);
               setChatUserModalAchievementsLoader(function () {
                 return syncChatUserModalRatingRanks(freshRatingNick) || Promise.resolve([]);
@@ -2655,6 +2748,7 @@ if (chatUserModalEl) {
         syncChatUserModalSuperpower(data, userName, ratingNick);
         chatUserModalAchievementIdentity = data && data.ok ? data : null;
         syncChatUserModalRatingTab(ratingNick);
+        loadChatUserModalNews({ userId: id, ratingNick: ratingNick, displayName: userName });
         setChatUserModalAchievementsLoader(function () {
           return syncChatUserModalRatingRanks(ratingNick) || Promise.resolve([]);
         });
@@ -2696,6 +2790,7 @@ if (chatUserModalEl) {
         if (modalLastSeen) modalLastSeen.hidden = true;
         applyChatUserModalStatusLevel(fallbackStatusLevel);
         syncChatUserModalRatingTab(fallbackRatingNick);
+        loadChatUserModalNews({ userId: id, ratingNick: fallbackRatingNick, displayName: userName });
         syncChatUserModalSuperpower(null, userName, fallbackRatingNick);
         setChatUserModalAchievementsLoader(function () {
           return syncChatUserModalRatingRanks(fallbackRatingNick) || Promise.resolve([]);
@@ -2853,6 +2948,12 @@ if (chatUserModalEl) {
       } else if (typeof openWinterRatingPlayerModalReady === "function") {
         openWinterRatingPlayerModalReady(nick, { season: "summer" });
       }
+    });
+  }
+  if (modalNewsAll) modalNewsAll.addEventListener("click", openChatUserModalNews);
+  if (modalNewsDialog) {
+    modalNewsDialog.addEventListener("click", function (event) {
+      if (event.target && event.target.closest("[data-chat-user-news-close]")) closeChatUserModalNews();
     });
   }
   function openChatUserModalSummerRatingFromAchievement() {
