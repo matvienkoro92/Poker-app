@@ -131,6 +131,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-12-07-2026-league1-sunday-tournament-18h.jpg",
     "rating-compressed-preview/rating-12-07-2026-league1-rebuy-evening-20h.jpg"
   ],
+  "13.07.2026": [
+    "rating-compressed-preview/rating-13-07-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-13-07-2026-league1-tournir-ponedelnika-18h.jpg",
+    "rating-compressed-preview/rating-13-07-2026-league1-rebuy-evening-20h.jpg"
+  ],
   "01.06.2026": [
     "rating-compressed-preview/rating-01-06-2026-league1-bali-yana-08h.jpg",
     "rating-compressed-preview/rating-01-06-2026-league1-dv-rebuy-12h.jpg",

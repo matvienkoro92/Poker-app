@@ -1877,7 +1877,83 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       ]
     }
   ],
-  "13.07.2026": [],
+  "13.07.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        { "nick": "Киса", "place": 1, "reward": 14400, "points": 135 },
+        { "nick": "Hakas", "place": 5, "reward": 2000, "points": 60 }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        { "nick": "Stepchik", "place": 1, "reward": 2200, "points": 135 },
+        { "nick": "WildBoar", "place": 2, "reward": 1430, "points": 110 },
+        { "nick": "мистерFox", "place": 3, "reward": 590, "points": 90 },
+        { "nick": "Mary", "place": 5, "reward": 400, "points": 60 }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        { "nick": "itachi", "place": 2, "reward": 11655, "points": 110 },
+        { "nick": "Hakas", "place": 3, "reward": 350, "points": 90 }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        { "nick": "🦈Shark-Eyed🦈", "place": 2, "reward": 37300, "points": 110 },
+        { "nick": "kriak", "place": 4, "reward": 8830, "points": 70 },
+        { "nick": "Надзор", "place": 3, "reward": 7620, "points": 90 },
+        { "nick": "@Felix", "place": 6, "reward": 4380, "points": 50 },
+        { "nick": "<Amaliya>", "place": 14, "reward": 2570, "points": 0 }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        { "nick": "zagrebnagreb", "place": 5, "reward": 300, "points": 60 }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        { "nick": "Waaar", "place": 1, "reward": 19500, "points": 135 },
+        { "nick": "Пряник", "place": 2, "reward": 11260, "points": 110 },
+        { "nick": "ПокерМанки", "place": 3, "reward": 5800, "points": 90 }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        { "nick": "MilkyWay77", "place": 2, "reward": 4630, "points": 110 },
+        { "nick": "мистерFox", "place": 3, "reward": 1890, "points": 90 }
+      ]
+    }
+  ],
   "14.07.2026": [],
   "15.07.2026": [],
   "16.07.2026": [],

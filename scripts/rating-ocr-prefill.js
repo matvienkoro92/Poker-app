@@ -3,9 +3,11 @@
 
 const path = require("path");
 const { spawnSync } = require("child_process");
+const sharp = require("sharp");
 
 const ROOT = path.resolve(__dirname, "..");
 const OCR_SCRIPT = path.join(__dirname, "rating-vision-ocr.swift");
+const PLAYER_ID_MAP = require(path.join(ROOT, "rating-player-id-map.json"));
 
 function usage(exitCode) {
   const out = exitCode ? console.error : console.log;
@@ -41,16 +43,25 @@ function normalizeName(raw) {
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
   if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🏦";
-  if (/^MOK/i.test(name) || /^МОК/i.test(name)) return "MOK🏦";
+  if (/^MOK/i.test(name) || /^МОК/i.test(name)) return "МОК🎰";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
   return name;
 }
 
-function inferLeague(name) {
-  const n = String(name || "").toLowerCase();
-  if (n.includes("ok") || n.includes("mok") || n.includes("ок") || n.includes("мок")) return 2;
-  if (n.includes("вторника") || n.includes("среды")) return 2;
+function playerIdFromText(text) {
+  const match = String(text || "").match(/ID[:\s]?(\d+)/i);
+  return match ? match[1] : "";
+}
+
+function normalizePlayerNick(playerId, ocrNick) {
+  const known = PLAYER_ID_MAP[playerId];
+  return known ? String(known) : String(ocrNick || "TODO").trim();
+}
+
+function inferLeague(buyin) {
+  const amount = Number(buyin);
+  if (Number.isFinite(amount) && amount >= 100) return amount >= 500 ? 1 : 2;
   return 1;
 }
 
@@ -91,7 +102,41 @@ function chooseClosest(tokens, predicate, targetY, maxDistance) {
   return best;
 }
 
-function parseOcrFile(file) {
+async function detectTrophyPlace(source, visionCenterY) {
+  const image = sharp(source, { limitInputPixels: false });
+  const meta = await image.metadata();
+  const width = meta.width || 0;
+  const height = meta.height || 0;
+  if (!width || !height) return null;
+  const left = Math.max(0, Math.round(width * 0.52));
+  const cropWidth = Math.min(width - left, Math.round(width * 0.13));
+  const centerY = Math.round((1 - visionCenterY) * height);
+  const cropHeight = Math.round(height * 0.056);
+  const top = Math.max(0, Math.min(height - cropHeight, centerY - Math.round(cropHeight / 2)));
+  const { data } = await image
+    .extract({ left, top, width: cropWidth, height: cropHeight })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let gold = 0;
+  let silver = 0;
+  let bronze = 0;
+  for (let i = 0; i < data.length; i += 3) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (r > 115 && g > 75 && g < 180 && b < 100 && r > g * 1.1) gold++;
+    if (r > 55 && g > 55 && b > 55 && Math.max(r, g, b) - Math.min(r, g, b) < 25) silver++;
+    if (r > 75 && g > 45 && g < 115 && b > 35 && b < 105 && r > g * 1.1) bronze++;
+  }
+  const area = cropWidth * cropHeight;
+  if (gold > area * 0.12) return 1;
+  if (silver > area * 0.14) return 2;
+  if (bronze > area * 0.10 && gold < area * 0.05) return 3;
+  return null;
+}
+
+async function parseOcrFile(file) {
   const tokens = (file.tokens || []).map((token) => ({
     ...token,
     text: String(token.text || "").trim()
@@ -117,10 +162,10 @@ function parseOcrFile(file) {
   const buyin = feeToken ? numberFromText(feeToken.text) : 0;
 
   const ids = tokens
-    .filter((token) => /^ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.44 && token.y < 0.53 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.44 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
-  const rows = ids.map((idToken, index) => {
+  const rows = await Promise.all(ids.map(async (idToken, index) => {
     const idCenter = idToken.y + idToken.height / 2;
     const nameToken = chooseClosest(
       tokens,
@@ -133,6 +178,11 @@ function parseOcrFile(file) {
     let place = placeToken ? integerFromText(placeToken.text) : null;
     const reward = rewardToken ? numberFromText(rewardToken.text) : 0;
     let needsPlaceCheck = place == null;
+    const trophyPlace = await detectTrophyPlace(file.source, idCenter);
+    if (trophyPlace != null) {
+      place = trophyPlace;
+      needsPlaceCheck = false;
+    }
 
     // Gold trophy often has no OCR text, but when the list starts from first place this is safe.
     const nextKnownPlace = ids.slice(index + 1).map((nextId) => {
@@ -140,32 +190,34 @@ function parseOcrFile(file) {
       const token = chooseClosest(tokens, isPlaceToken, nextCenter + 0.018, 0.045);
       return token ? integerFromText(token.text) : null;
     }).find((value) => value != null);
-    if (place == null && index === 0 && nextKnownPlace === 2) {
+    if (trophyPlace == null && place == null && index === 0 && nextKnownPlace === 2) {
       place = 1;
       needsPlaceCheck = false;
     }
-    if (place != null && place > 8 && reward > 0 && index <= 2) {
+    if (trophyPlace == null && place != null && place > 8 && reward > 0 && index <= 2) {
       place = null;
       needsPlaceCheck = true;
     }
 
     return {
       place,
-      nick: nameToken ? nameToken.text : "TODO",
+      playerId: playerIdFromText(idToken.text),
+      nick: normalizePlayerNick(playerIdFromText(idToken.text), nameToken ? nameToken.text : "TODO"),
       reward,
       needsPlaceCheck,
-      needsNameCheck: !nameToken
+      needsNameCheck: !PLAYER_ID_MAP[playerIdFromText(idToken.text)]
     };
-  }).filter((row) => row.nick !== "TODO" || row.reward || row.place != null);
+  }));
+  const visibleRows = rows.filter((row) => row.reward > 0);
 
   return {
     source: file.source,
     date,
     time,
     name: title,
-    league: inferLeague(title),
+    league: inferLeague(buyin),
     buyin,
-    rows
+    rows: visibleRows
   };
 }
 
@@ -186,8 +238,11 @@ function formatDraft(tournaments) {
     ];
     tournament.rows.forEach((row) => {
       const place = row.place == null ? "?" : row.place;
-      const suffix = row.needsPlaceCheck ? " # TODO place" : "";
-      lines.push(`${place} | ${row.nick} | ${row.reward}${suffix}`);
+      const checks = [];
+      if (row.needsPlaceCheck) checks.push("place");
+      if (row.needsNameCheck) checks.push(`nick ID:${row.playerId || "unknown"}`);
+      const suffix = checks.length ? ` # TODO ${checks.join(", ")}` : "";
+      lines.push(`${place} | ${row.nick} | ${row.reward} | ${row.playerId}${suffix}`);
     });
     return lines.join("\n");
   }).join("\n\n");
@@ -225,17 +280,24 @@ try {
   process.exit(1);
 }
 
-const tournaments = parsed.map(parseOcrFile).sort((a, b) => {
-  const ak = `${a.date.split(".").reverse().join("-")} ${a.time}`;
-  const bk = `${b.date.split(".").reverse().join("-")} ${b.time}`;
-  return ak.localeCompare(bk);
-});
+async function main() {
+  const tournaments = (await Promise.all(parsed.map(parseOcrFile))).sort((a, b) => {
+    const ak = `${a.date.split(".").reverse().join("-")} ${a.time}`;
+    const bk = `${b.date.split(".").reverse().join("-")} ${b.time}`;
+    return ak.localeCompare(bk);
+  });
 
-if (tournaments.every((tournament) => !tournament.rows.length)) {
-  console.error("OCR returned no player rows. In Codex sandbox this usually means the command needs filesystem/system OCR approval.");
-  process.exit(1);
+  if (tournaments.every((tournament) => !tournament.rows.length)) {
+    console.error("OCR returned no player rows. In Codex sandbox this usually means the command needs filesystem/system OCR approval.");
+    process.exit(1);
+  }
+
+  process.stdout.write(formatDraft(tournaments));
+  process.stdout.write("\n");
+  if (result.stderr) process.stderr.write(result.stderr);
 }
 
-process.stdout.write(formatDraft(tournaments));
-process.stdout.write("\n");
-if (result.stderr) process.stderr.write(result.stderr);
+main().catch((err) => {
+  console.error(err && err.stack ? err.stack : err);
+  process.exit(1);
+});

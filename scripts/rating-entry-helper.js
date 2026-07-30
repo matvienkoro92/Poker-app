@@ -8,6 +8,13 @@ const { spawnSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILES = [
+  "summer-rating-images-league1.js",
+  "summer-rating-images-league2.js",
+  "summer-rating-meta.js",
+  "summer-rating-data-june.js",
+  "summer-rating-data-july.js",
+  "summer-rating-data-august.js",
+  "summer-rating-data.js",
   "spring-rating-images-league1.js",
   "spring-rating-images-league2.js",
   "spring-rating-meta.js",
@@ -22,14 +29,19 @@ const XPOKER_POINTS = { 1: 135, 2: 110, 3: 90, 4: 70, 5: 60, 6: 50, 7: 40, 8: 30
 const MONTH_FILES = {
   "03": { file: "spring-rating-data-march.js", varName: "SPRING_RATING_TOURNAMENTS_MARCH_BY_DATE" },
   "04": { file: "spring-rating-data-april.js", varName: "SPRING_RATING_TOURNAMENTS_APRIL_BY_DATE" },
-  "05": { file: "spring-rating-data-may.js", varName: "SPRING_RATING_TOURNAMENTS_MAY_BY_DATE" }
+  "05": { file: "spring-rating-data-may.js", varName: "SPRING_RATING_TOURNAMENTS_MAY_BY_DATE", season: "spring" },
+  "06": { file: "summer-rating-data-june.js", varName: "SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE", season: "summer" },
+  "07": { file: "summer-rating-data-july.js", varName: "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE", season: "summer" },
+  "08": { file: "summer-rating-data-august.js", varName: "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE", season: "summer" }
 };
+MONTH_FILES["03"].season = "spring";
+MONTH_FILES["04"].season = "spring";
 
 function usage(exitCode) {
   const out = exitCode ? console.error : console.log;
   out(`Usage:
   node scripts/rating-entry-helper.js snippet < input.txt
-  node scripts/rating-entry-helper.js import < input.txt
+  node scripts/rating-entry-helper.js import [--season=summer] < input.txt
   node scripts/rating-entry-helper.js validate [--strict]
 
 Input format for snippet:
@@ -55,7 +67,8 @@ Import command options:
   --no-check         Do not run validation and syntax checks after import
   --force           Recompress and overwrite existing generated screenshots
   --append          Append duplicate date/time/name/league entries instead of replacing
-  --target-kb=50    Target compressed screenshot size`);
+  --season=summer    Force spring or summer destination (normally inferred by month)
+  --target-kb=30    Target compressed screenshot size (default: 30 KB)`);
   process.exit(exitCode);
 }
 
@@ -102,7 +115,8 @@ function parsePlayerLine(line, warnings, lineNo) {
     warnings.push(`line ${lineNo}: negative reward skipped "${parts[2]}"`);
     return null;
   }
-  return { nick, place, reward };
+  const playerId = parts[3] ? String(parts[3]).replace(/\D+/g, "") : "";
+  return { nick, place, reward, playerId };
 }
 
 function pointsForPlayer(player) {
@@ -316,8 +330,9 @@ function parseArgs(argv) {
     append: false,
     build: true,
     check: true,
-    targetKb: 50,
-    width: 680
+    targetKb: 30,
+    width: 520,
+    season: ""
   };
   argv.forEach((arg) => {
     if (arg === "--dry-run") opts.dryRun = true;
@@ -325,6 +340,10 @@ function parseArgs(argv) {
     else if (arg === "--append") opts.append = true;
     else if (arg === "--no-build") opts.build = false;
     else if (arg === "--no-check") opts.check = false;
+    else if (arg.startsWith("--season=")) {
+      const season = arg.slice("--season=".length).toLowerCase();
+      if (season === "spring" || season === "summer") opts.season = season;
+    }
     else if (arg.startsWith("--target-kb=")) {
       const n = Number(arg.slice("--target-kb=".length));
       if (Number.isFinite(n) && n > 0) opts.targetKb = n;
@@ -355,7 +374,10 @@ function monthNameRu(month) {
   return {
     "03": "марта",
     "04": "апреля",
-    "05": "мая"
+    "05": "мая",
+    "06": "июня",
+    "07": "июля",
+    "08": "августа"
   }[String(month).padStart(2, "0")] || "";
 }
 
@@ -548,7 +570,10 @@ function loadObjectVar(filePath, varName) {
 function writeMonthData(dateStr, tournaments, opts) {
   const p = dateParts(dateStr);
   const cfg = MONTH_FILES[p.month];
-  if (!cfg) throw new Error(`Unsupported spring rating month for ${dateStr}`);
+  if (!cfg) throw new Error(`Unsupported rating month for ${dateStr}`);
+  if (opts.season && cfg.season !== opts.season) {
+    throw new Error(`${dateStr} belongs to ${cfg.season}, not ${opts.season}`);
+  }
   const filePath = path.join(ROOT, cfg.file);
   const current = loadObjectVar(filePath, cfg.varName);
   const merged = mergeTournamentLists(current[dateStr], tournaments, opts.append);
@@ -558,10 +583,12 @@ function writeMonthData(dateStr, tournaments, opts) {
   return { file: cfg.file, count: tournaments.length, total: merged.length };
 }
 
-function writeImageMap(league, dateStr, files, opts) {
+function writeImageMap(league, dateStr, files, opts, season) {
   if (!files.length) return null;
-  const fileName = `spring-rating-images-league${league}.js`;
-  const varName = `SPRING_RATING_IMAGES_LEAGUE${league}`;
+  const prefix = season === "summer" ? "summer" : "spring";
+  const varPrefix = prefix.toUpperCase();
+  const fileName = `${prefix}-rating-images-league${league}.js`;
+  const varName = `${varPrefix}_RATING_IMAGES_LEAGUE${league}`;
   const filePath = path.join(ROOT, fileName);
   const current = loadObjectVar(filePath, varName);
   const existing = Array.isArray(current[dateStr]) ? current[dateStr].slice() : [];
@@ -584,6 +611,41 @@ function updateSpringMeta(latestDate, opts) {
   const value = `${Number(p.day)} ${month}`;
   const next = text.replace(/var SPRING_RATING_UPDATED = "[^"]*";/, `var SPRING_RATING_UPDATED = ${q(value)};`);
   if (!opts.dryRun) fs.writeFileSync(filePath, next);
+  return value;
+}
+
+function replaceExact(fileName, pattern, replacement, opts) {
+  const filePath = path.join(ROOT, fileName);
+  const text = fs.readFileSync(filePath, "utf8");
+  if (!pattern.test(text)) throw new Error(`Cannot update date label in ${fileName}`);
+  const next = text.replace(pattern, replacement);
+  if (!opts.dryRun) fs.writeFileSync(filePath, next);
+}
+
+function updateSummerMeta(latestDate, opts) {
+  const p = dateParts(latestDate);
+  const month = monthNameRu(p.month);
+  if (!month) return null;
+  const shortValue = `${Number(p.day)} ${month}`;
+  const value = `обновлено ${shortValue}`;
+  replaceExact(
+    "summer-rating-meta.js",
+    /var SUMMER_RATING_UPDATED = "[^"]*";/,
+    `var SUMMER_RATING_UPDATED = ${q(value)};`,
+    opts
+  );
+  replaceExact(
+    "app-rating-summer-season.js",
+    /updatedLabel:\s*"обновлено [^"]*"/,
+    `updatedLabel: ${q(value)}`,
+    opts
+  );
+  replaceExact(
+    "app-rating-view-adapter.js",
+    /tabsUpdatedEl\.textContent = "обновлено [^"]*";/,
+    `tabsUpdatedEl.textContent = ${q(value)};`,
+    opts
+  );
   return value;
 }
 
@@ -713,18 +775,35 @@ async function importRatingInput() {
   const imageResults = [];
   Object.keys(prepared.byLeagueDate).sort().forEach((key) => {
     const [league, dateStr] = key.split("|");
-    imageResults.push(writeImageMap(Number(league), dateStr, prepared.byLeagueDate[key], opts));
+    const cfg = MONTH_FILES[dateParts(dateStr).month];
+    imageResults.push(writeImageMap(Number(league), dateStr, prepared.byLeagueDate[key], opts, cfg.season));
   });
 
-  const allSpringDates = new Set(Object.keys(loadData().SPRING_RATING_TOURNAMENTS_BY_DATE || {}));
-  Object.keys(byDate).forEach((dateStr) => allSpringDates.add(dateStr));
-  const latestDate = Array.from(allSpringDates).sort((a, b) => dateToStamp(a) - dateToStamp(b)).pop();
-  const meta = updateSpringMeta(latestDate, opts);
+  const seasons = new Set(Object.keys(byDate).map((dateStr) => MONTH_FILES[dateParts(dateStr).month].season));
+  if (seasons.size !== 1) throw new Error("One import batch must belong to a single season");
+  const activeSeason = Array.from(seasons)[0];
+  const loaded = loadData();
+  const seasonData = activeSeason === "summer"
+    ? loaded.SUMMER_RATING_TOURNAMENTS_BY_DATE || {}
+    : loaded.SPRING_RATING_TOURNAMENTS_BY_DATE || {};
+  const allSeasonDates = new Set(
+    Object.keys(seasonData).filter((dateStr) => {
+      const tournamentsForDate = seasonData[dateStr];
+      return Array.isArray(tournamentsForDate) && tournamentsForDate.length > 0;
+    })
+  );
+  Object.keys(byDate).forEach((dateStr) => allSeasonDates.add(dateStr));
+  const latestDate = Array.from(allSeasonDates).sort((a, b) => dateToStamp(a) - dateToStamp(b)).pop();
+  const meta = activeSeason === "summer"
+    ? updateSummerMeta(latestDate, opts)
+    : updateSpringMeta(latestDate, opts);
   let season = null;
-  const mayDataPath = path.join(ROOT, MONTH_FILES["05"].file);
-  const mayData = loadObjectVar(mayDataPath, MONTH_FILES["05"].varName);
-  const mayDates = Object.keys(mayData).concat(Object.keys(byDate).filter((d) => dateParts(d).month === "05"));
-  season = updateMaySeasonDates(Array.from(new Set(mayDates)), opts);
+  if (activeSeason === "spring") {
+    const mayDataPath = path.join(ROOT, MONTH_FILES["05"].file);
+    const mayData = loadObjectVar(mayDataPath, MONTH_FILES["05"].varName);
+    const mayDates = Object.keys(mayData).concat(Object.keys(byDate).filter((d) => dateParts(d).month === "05"));
+    season = updateMaySeasonDates(Array.from(new Set(mayDates)), opts);
+  }
 
   console.log(opts.dryRun ? "Dry run summary:" : "Import summary:");
   prepared.compressed.forEach((item) => {
@@ -735,6 +814,18 @@ async function importRatingInput() {
   imageResults.filter(Boolean).forEach((r) => console.log(`- images: ${r.file}, ${r.count} added/reused, ${r.total} total on date`));
   if (season) console.log(`- May calendar: ${season.label} (${season.count} dates)`);
   if (meta) console.log(`- updated label: ${meta}`);
+  const summary = tournaments.reduce((acc, t) => {
+    acc.tournaments++;
+    acc.players += t.players.length;
+    acc[`league${t.league}Tournaments`]++;
+    t.players.forEach((p) => {
+      acc[`league${t.league}Points`] += pointsForPlayer(p);
+    });
+    return acc;
+  }, { tournaments: 0, players: 0, league1Tournaments: 0, league2Tournaments: 0, league1Points: 0, league2Points: 0 });
+  console.log(`- verified: ${summary.tournaments} tournaments, ${summary.players} positive results`);
+  console.log(`- league 1: ${summary.league1Tournaments} tournaments, ${summary.league1Points} points`);
+  console.log(`- league 2: ${summary.league2Tournaments} tournaments, ${summary.league2Points} points`);
 
   if (!opts.dryRun && opts.check) {
     runChecked("npm", ["run", "rating:validate"]);
@@ -761,9 +852,12 @@ function validateData() {
   const data = loadData();
   const warnings = [];
   const spring = data.SPRING_RATING_TOURNAMENTS_BY_DATE || {};
+  const summer = data.SUMMER_RATING_TOURNAMENTS_BY_DATE || {};
   const images = [
     ["SPRING_RATING_IMAGES_LEAGUE1", data.SPRING_RATING_IMAGES_LEAGUE1 || {}],
     ["SPRING_RATING_IMAGES_LEAGUE2", data.SPRING_RATING_IMAGES_LEAGUE2 || {}],
+    ["SUMMER_RATING_IMAGES_LEAGUE1", data.SUMMER_RATING_IMAGES_LEAGUE1 || {}],
+    ["SUMMER_RATING_IMAGES_LEAGUE2", data.SUMMER_RATING_IMAGES_LEAGUE2 || {}],
     ["WINTER_RATING_IMAGES", data.WINTER_RATING_IMAGES || {}]
   ];
 
@@ -778,25 +872,25 @@ function validateData() {
     });
   });
 
-  Object.keys(spring).forEach((date) => {
-    const list = spring[date];
+  [["spring", spring], ["summer", summer]].forEach(([seasonName, seasonData]) => Object.keys(seasonData).forEach((date) => {
+    const list = seasonData[date];
     if (!Array.isArray(list)) {
-      warnings.push(`${date}: tournaments value is not an array`);
+      warnings.push(`${seasonName} ${date}: tournaments value is not an array`);
       return;
     }
     list.forEach((t, ti) => {
       const leagueMissing = t.league == null;
       const leagueBad = !leagueMissing && t.league !== 1 && t.league !== 2;
-      if (leagueBad) warnings.push(`${date} #${ti + 1}: league should be 1 or 2`);
+      if (leagueBad) warnings.push(`${seasonName} ${date} #${ti + 1}: league should be 1 or 2`);
       if (leagueMissing && strict && !Number.isFinite(Number(t.buyin))) {
-        warnings.push(`${date} #${ti + 1}: missing league and buyin, cannot infer league`);
+        warnings.push(`${seasonName} ${date} #${ti + 1}: missing league and buyin, cannot infer league`);
       }
-      if (!Array.isArray(t.players) || !t.players.length) warnings.push(`${date} #${ti + 1}: no players`);
+      if (!Array.isArray(t.players) || !t.players.length) warnings.push(`${seasonName} ${date} #${ti + 1}: no players`);
       (t.players || []).forEach((p, pi) => {
-        const where = `${date} #${ti + 1} player ${pi + 1}`;
+        const where = `${seasonName} ${date} #${ti + 1} player ${pi + 1}`;
         if (!p.nick) warnings.push(`${where}: empty nick`);
         if (!Number.isFinite(Number(p.place)) || Number(p.place) < 0) warnings.push(`${where}: bad place`);
-        if (!Number.isFinite(Number(p.reward)) || Number(p.reward) < 0) warnings.push(`${where}: bad reward`);
+        if (!Number.isFinite(Number(p.reward))) warnings.push(`${where}: bad reward`);
         if (strict && p.points != null) {
           const expected = pointsForPlayer({ place: Number(p.place), reward: Number(p.reward) });
           const actual = Number(p.points);
@@ -806,7 +900,7 @@ function validateData() {
         }
       });
     });
-  });
+  }));
 
   if (!warnings.length) {
     console.log("OK: rating data and referenced assets passed validation.");
