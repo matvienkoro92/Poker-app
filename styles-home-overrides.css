@@ -62,11 +62,12 @@ html[data-theme="gold"] body[data-view="home"] {
 
 .home-friend-news__ticker {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
   align-items: center;
   width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
+  min-height: 64px;
+  padding: 9px 14px;
   overflow: hidden;
   color: #e8eef8;
   background: linear-gradient(110deg, rgba(24, 31, 43, 0.98), rgba(15, 20, 29, 0.98));
@@ -77,6 +78,8 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news__badge {
+  grid-column: 1;
+  grid-row: 1 / 3;
   margin-right: 8px;
   color: #71db55;
   font-size: 10px;
@@ -84,16 +87,21 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news__label {
-  margin-right: 11px;
-  color: #93a2b7;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin: 0 0 2px;
+  color: #72f5ae;
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 900;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .home-friend-news__viewport {
+  grid-column: 2;
+  grid-row: 2;
   display: block;
   height: 24px;
   min-width: 0;
@@ -155,6 +163,8 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news__arrow {
+  grid-column: 3;
+  grid-row: 1 / 3;
   margin-left: 8px;
   color: #8fa0b7;
   font-size: 25px;
@@ -302,12 +312,33 @@ body.home-friend-news-modal-open {
 }
 
 @media (max-width: 520px) {
+  .home-friend-news-modal {
+    align-items: stretch;
+  }
+
+  .home-friend-news-modal__panel {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .home-friend-news-modal__header {
+    padding-top: max(20px, env(safe-area-inset-top));
+  }
+
+  .home-friend-news-modal__list {
+    flex: 1 1 auto;
+  }
+
   .home-friend-news__ticker {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 62px;
+    padding-block: 8px;
   }
 
   .home-friend-news__label {
-    display: none;
+    display: block;
   }
 }
 

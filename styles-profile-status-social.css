@@ -937,12 +937,30 @@
   align-items: center;
   flex-direction: column;
   color: inherit;
-  border: 0;
-  background: transparent;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
   cursor: pointer;
   text-align: center;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.profile-find-friend__player::before,
+.profile-find-friend__player::after {
+  display: none !important;
+  content: none !important;
+}
+
+.profile-find-friend__player:hover,
+.profile-find-friend__player:focus,
+.profile-find-friend__player:focus-visible,
+.profile-find-friend__player:active {
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .profile-find-friend__avatar,

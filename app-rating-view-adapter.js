@@ -1441,6 +1441,7 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
     if (rowDate && Number.isFinite(rowDate.getTime()) && rowDate.getTime() >= recentCutoff && rowDate.getTime() <= Date.now() + 86400000) {
       recentEvents.push({
         nickKey: key,
+        nick: String(row && row.nick || "").trim(),
         date: rowDate.toISOString(),
         dateLabel: String(row.date || ""),
         place: Number(row && row.place) || 0,
@@ -1461,6 +1462,8 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
     if (place <= 3 && String(row && row.season || "") !== "summer") snapshot.seasonCups += 1;
   });
   var monthly = {};
+  var friendNewsNow = new Date();
+  var currentMonthKey = String(friendNewsNow.getMonth() + 1).padStart(2, "0") + "." + friendNewsNow.getFullYear();
   pokerRatingAchievementAllTournamentRows().forEach(function (row) {
     var parts = String(row && row.date || "").split(".");
     var key = snapshotNickKey(row && row.nick);
@@ -1471,6 +1474,7 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
     monthly[monthKey][key] += Number(row && row.reward) || 0;
   });
   Object.keys(monthly).forEach(function (monthKey) {
+    if (monthKey === currentMonthKey) return;
     Object.keys(monthly[monthKey]).map(function (key) {
       return { key: key, reward: monthly[monthKey][key] };
     }).filter(function (row) {

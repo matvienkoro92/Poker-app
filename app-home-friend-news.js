@@ -3,9 +3,9 @@
 
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
-  var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v1";
-  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v1";
-  var FRIEND_IDS_KEY = "poker_home_friend_ids_v1";
+  var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v2";
+  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v3";
+  var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
   var ROTATE_MS = 4600;
@@ -103,9 +103,39 @@
   }
 
   function friendName(row) {
-    return String(row && (row.contactName || row.chatDisplayName || row.pokerPlusNickname || row.userName) || "Ваш друг")
+    return String(row && (row.pokerPlusNickname || row.pokerPlusName || row.contactName || row.chatDisplayName || row.userName) || "Ваш друг")
       .replace(/^@+/, "")
       .trim();
+  }
+
+  function friendPokerIdentity(row) {
+    var nick = String(row && row.pokerPlusNickname || "").replace(/^@+/, "").trim();
+    var name = String(row && (row.pokerPlusName || row.contactName || row.chatDisplayName) || "").replace(/^@+/, "").trim();
+    var p21Id = String(row && (row.p21Id || row.poker21Id || row.pokerPlusUserId) || "").trim();
+    var parts = [];
+    if (nick) parts.push(nick);
+    if (name && matchKey(name) !== matchKey(nick)) parts.push(name);
+    if (p21Id) parts.push("Poker21 ID " + p21Id);
+    return parts.join(" · ") || friendName(row);
+  }
+
+  function enrichFriendsWithPoker21(friends, publicRows) {
+    var byAccount = {};
+    (Array.isArray(publicRows) ? publicRows : []).forEach(function (row) {
+      [row && row.accountId, row && row.userId, row && row.dtId].forEach(function (id) {
+        id = String(id || "").trim();
+        if (id && !byAccount[id]) byAccount[id] = row;
+      });
+    });
+    return (friends || []).map(function (friend) {
+      var linked = byAccount[friendId(friend)];
+      if (!linked) return friend;
+      return Object.assign({}, friend, {
+        p21Id: linked.p21Id || linked.poker21Id || linked.pokerPlusUserId || friend.p21Id || "",
+        pokerPlusNickname: linked.pokerPlusNickname || linked.nickname || friend.pokerPlusNickname || "",
+        pokerPlusName: linked.name || linked.pokerPlusName || "",
+      });
+    });
   }
 
   function matchKey(value) {
@@ -178,7 +208,7 @@
           id: "friend:" + id,
           type: "friend",
           icon: "♣",
-          text: "Вы теперь друзья с " + friendName(friend),
+          text: "Вы теперь друзья с " + friendPokerIdentity(friend),
           at: new Date().toISOString(),
         });
       }
@@ -218,6 +248,7 @@
         { key: "raffleWins", title: "продвинулся в ачивке «Золотой билет»" },
         { key: "luckyMonths", title: "получил новую ачивку «Счастливчик месяца»" },
       ].forEach(function (metric) {
+        if (!Object.prototype.hasOwnProperty.call(before, metric.key)) return;
         var delta = Number(current[metric.key]) - Number(before[metric.key]);
         if (delta <= 0) return;
         savedEvents.unshift({
@@ -233,7 +264,7 @@
       var newMillionaireTier = Number(current.millionaireTier) || 0;
       var oldTotalReward = Number(before.totalReward) || 0;
       var newTotalReward = Number(current.totalReward) || 0;
-      if (newTotalReward > oldTotalReward) {
+      if (Object.prototype.hasOwnProperty.call(before, "totalReward") && newTotalReward > oldTotalReward) {
         savedEvents.unshift({
           id: "achievement:totalReward:" + id + ":" + newTotalReward,
           type: "achievement",
@@ -244,7 +275,7 @@
           target: "winter-rating",
         });
       }
-      if (newMillionaireTier > oldMillionaireTier) {
+      if (Object.prototype.hasOwnProperty.call(before, "millionaireTier") && newMillionaireTier > oldMillionaireTier) {
         savedEvents.unshift({
           id: "achievement:millionaire:" + id + ":" + newMillionaireTier,
           type: "achievement",
@@ -295,11 +326,12 @@
               : "";
       if (!action) return null;
       var detail = String(row && row.tournament || "").trim();
+      var displayName = String(row && row.nick || "").trim() || friendName(friend);
       return {
         id: "history:tournament:" + friendId(friend) + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
-        text: friendName(friend) + " " + action + (detail ? " · " + detail : ""),
+        text: displayName + " " + action + (detail ? " · " + detail : ""),
         at: row.date,
         target: "winter-rating",
       };
@@ -658,10 +690,15 @@
         tournamentSnapshotsReady(friends),
         cachedFetchJson(base + "/api/raffles" + suffix + joiner + "mode=achievements", "raffles:" + suffix, 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { raffles: [] }; }),
+        cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { levelRows: [] }; }),
       ]);
     }).then(function (results) {
       if (!results) return;
-      var friends = results[0] && Array.isArray(results[0].friends) ? results[0].friends : [];
+      var friends = enrichFriendsWithPoker21(
+        results[0] && Array.isArray(results[0].friends) ? results[0].friends : [],
+        results[6] && Array.isArray(results[6].levelRows) ? results[6].levelRows : []
+      );
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var sngRows = results[2] && Array.isArray(results[2].rows) ? results[2].rows : [];
       var choiceRows = results[3] && Array.isArray(results[3].rows) ? results[3].rows : [];
