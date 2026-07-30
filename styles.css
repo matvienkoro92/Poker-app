@@ -7,8 +7,8 @@
 @import url("./styles-download.css?v=3.858");
 @import url("./styles-home-legacy-tail.css?v=3.858");
 @import url("./styles-home-rating-promo-legacy.css?v=3.858");
-@import url("./styles-layout.css?v=3.860");
-@import url("./styles-home-overrides.css?v=3.864");
+@import url("./styles-layout.css?v=3.861");
+@import url("./styles-home-overrides.css?v=3.865");
 @import url("./styles-layout-touch-targets.css?v=3.858");
 @import url("./styles-home-rating-promo-late.css?v=3.858");
 
@@ -10509,7 +10509,7 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actio
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus {
-  margin-top: 8px !important;
+  margin-top: 20px !important;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
@@ -10804,6 +10804,7 @@ html body[data-view] #app .bonus-game-back {
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4),
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
   padding-inline: 10px;
+  border: 0;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before,

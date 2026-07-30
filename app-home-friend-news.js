@@ -937,11 +937,8 @@
   function init() {
     events = readRenderedEventsCache();
     mountWhenProfileReady();
-    window.addEventListener("poker-profile-friends-ready", function (event) {
-      var supplied = event && event.detail && Array.isArray(event.detail.friends)
-        ? event.detail.friends
-        : null;
-      load(supplied);
+    window.addEventListener("poker-profile-friends-ready", function () {
+      load();
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";

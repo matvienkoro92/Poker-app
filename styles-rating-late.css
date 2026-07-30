@@ -5379,12 +5379,29 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 /* Compact summer secondary actions with a section-aware copy-link button. */
-.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
-  grid-template-columns: max-content max-content 27px;
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
+  grid-template-columns: repeat(3, max-content);
   width: max-content;
+  height: 33px;
+  min-height: 33px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab {
+  width: auto;
+  min-height: 27px;
+  height: 27px;
+  padding-inline: 12px;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 27px;
+  width: min(300px, calc(100% - 20px));
   min-width: 0;
   padding: 2px;
   gap: 3px;
+  overflow: visible;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tab {
@@ -5406,11 +5423,33 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-section-copy .winter-rating__share-icon {
   display: inline-flex;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-section-copy svg {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-section-copy.winter-rating__share-btn--copied .winter-rating__share-icon {
+  opacity: 0;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-section-copy.winter-rating__share-btn--copied::after {
+  content: "✓";
+  position: absolute;
+  color: #2b1600;
+  font-size: 18px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-tabs-updated {
+  width: min(300px, calc(100% - 20px));
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs .winter-rating__spring-league-copy-feedback {
+  top: calc(100% + 20px);
 }
