@@ -1233,15 +1233,16 @@ add("Schedule keeps weekly, day and daily tournament order", () =>
   !has("scheduleFragment", "Rebuy (19:00)")
 );
 
-add("Player card exposes Poker21, status, stats and actions", () =>
+add("Player card exposes Poker21, status and actions without player stats", () =>
   hasAll("globalModalsChatRatingFragment", [
     'id="chatUserModal"',
     'id="chatUserModalP21"',
     'id="chatUserModalStatusScale"',
-    'id="chatUserModalPlayerStats"',
     'id="chatUserModalWriteBtn"',
     'id="chatUserModalVerifiedBadge"',
-  ])
+  ]) &&
+  !has("globalModalsChatRatingFragment", 'id="chatUserModalPlayerStats"') &&
+  !has("globalModalsChatRatingFragment", "Статистика игрока:")
 );
 
 add("Poker21 profile privacy/status controls are wired", () =>

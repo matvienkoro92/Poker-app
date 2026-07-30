@@ -14,6 +14,7 @@
   var activeIndex = 0;
   var lastFriendsSignature = "";
   var lastLoadAt = 0;
+  var loadSequence = 0;
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
 
   function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
@@ -634,8 +635,7 @@
   function render() {
     var root = el("homeFriendNews");
     var track = el("homeFriendNewsTrack");
-    var list = el("homeFriendNewsList");
-    if (!root || !track || !list) return;
+    if (!root || !track) return;
     root.hidden = false;
     if (!events.length) {
       events = [{
@@ -647,16 +647,24 @@
       }];
     }
     track.innerHTML = events.map(function (row) { return eventHtml(row, true); }).join("");
-    list.innerHTML = events[0].id === "empty"
-      ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
-      : modalEventsHtml(events);
+    renderModalList(events);
     showIndex(0, false);
     startRotation();
+  }
+
+  function renderModalList(rows) {
+    var list = el("homeFriendNewsList");
+    if (!list) return;
+    var snapshot = Array.isArray(rows) ? rows.slice() : [];
+    list.innerHTML = snapshot[0] && snapshot[0].id === "empty"
+      ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
+      : modalEventsHtml(snapshot);
   }
 
   function openModal() {
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
+    renderModalList(events);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
   }
@@ -717,6 +725,7 @@
       ? (suppliedFriends.map(friendId).filter(Boolean).sort().join("|") || "__empty__")
       : "";
     if (signature && signature === lastFriendsSignature && Date.now() - lastLoadAt < 30000) return;
+    var requestSequence = ++loadSequence;
     if (signature) lastFriendsSignature = signature;
     lastLoadAt = Date.now();
     var suffix = authSuffix();
@@ -725,6 +734,7 @@
       ? Promise.resolve({ ok: true, friends: suppliedFriends })
       : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); });
     friendsPromise.then(function (friendsPayload) {
+      if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       if (!friends.length) {
         events = [];
@@ -745,7 +755,7 @@
           .catch(function () { return { levelRows: [] }; }),
       ]);
     }).then(function (results) {
-      if (!results) return;
+      if (!results || requestSequence !== loadSequence) return;
       var friends = enrichFriendsWithPoker21(
         results[0] && Array.isArray(results[0].friends) ? results[0].friends : [],
         results[6] && Array.isArray(results[6].levelRows) ? results[6].levelRows : []
@@ -784,9 +794,8 @@
 
   function init() {
     mountWhenProfileReady();
-    window.addEventListener("poker-profile-friends-ready", function (event) {
-      var friends = event && event.detail && Array.isArray(event.detail.friends) ? event.detail.friends : [];
-      load(friends);
+    window.addEventListener("poker-profile-friends-ready", function () {
+      load();
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";

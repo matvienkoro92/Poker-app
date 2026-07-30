@@ -124,6 +124,7 @@ if (chatUserModalEl) {
   var modalRespectOpenVoters = document.getElementById("chatUserModalRespectOpenVoters");
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
   var modalGender = document.getElementById("chatUserModalGender");
+  var modalBirthBadge = document.getElementById("chatUserModalBirthBadge");
   var modalPlayerStats = document.getElementById("chatUserModalPlayerStats");
   var modalPlayerStatsSection = modalPlayerStats && modalPlayerStats.closest
     ? modalPlayerStats.closest(".chat-user-modal__player-stats")
@@ -357,10 +358,8 @@ if (chatUserModalEl) {
   }
   function chatUserModalPersonalParts(data) {
     var personalText = (data && data.personalInfo != null) ? String(data.personalInfo).trim() : "";
-    var birthText = chatUserModalFormatBirthDate(data && (data.profileBirthDate || data.birthDate));
     var specialtyText = chatUserModalSpecialtyLabel(data && (data.profileSpecialty || data.specialty));
     var personalParts = [];
-    if (birthText) personalParts.push("Дата рождения: " + birthText);
     if (specialtyText) personalParts.push("Специализация: " + specialtyText);
     if (personalText) personalParts.push(personalText);
     return personalParts;
@@ -443,28 +442,10 @@ if (chatUserModalEl) {
     return wrap;
   }
   function chatUserModalRenderBirthAdmin(data, id, openingSelfProfile) {
-    var wrap = chatUserModalEnsureBirthAdmin();
-    if (!wrap) return false;
-    var canEdit = !!(data && data.ok && data.isAdmin === true && !openingSelfProfile && !chatUserModalIsSelf(id));
-    wrap.hidden = !canEdit;
-    if (!canEdit) {
-      wrap._profileData = null;
-      wrap.removeAttribute("data-target-user-id");
-      wrap.removeAttribute("data-open-user-id");
-      return false;
-    }
-    var targetId = String((data && (data.userId || data.dtId || data.accountId)) || id || "").trim();
-    wrap._profileData = data;
-    wrap.setAttribute("data-target-user-id", targetId);
-    wrap.setAttribute("data-open-user-id", String(id || targetId || "").trim());
-    var input = wrap.querySelector("#chatUserModalBirthAdminInput");
-    var msg = wrap.querySelector("#chatUserModalBirthAdminMsg");
-    if (input) {
-      input.value = chatUserModalBirthDateValue(data && (data.profileBirthDate || data.birthDate));
-      try { input.max = new Date().toISOString().slice(0, 10); } catch (eBirthMax) {}
-    }
-    if (msg) msg.textContent = "";
-    return true;
+    var existing = document.getElementById("chatUserModalBirthAdmin");
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+    modalBirthAdmin = null;
+    return false;
   }
   function updateChatUserModalSpecialtyBadge(value) {
     if (!modalSpecialtyBadge) return;
@@ -633,6 +614,13 @@ if (chatUserModalEl) {
       modalGender.textContent = chatUserModalGenderText(chatUserModalProfileGender);
       modalGender.hidden = false;
     }
+  }
+  function syncChatUserModalBirthBadge(value) {
+    if (!modalBirthBadge) return;
+    var full = chatUserModalFormatBirthDate(value);
+    var parts = full ? full.split(".") : [];
+    modalBirthBadge.textContent = parts.length === 3 ? "ДР: " + parts[0] + "." + parts[1] : "";
+    modalBirthBadge.hidden = parts.length !== 3;
   }
   function syncChatUserModalRatingTab(nick) {
     chatUserModalRatingNick = String(nick || "").trim();
@@ -2522,6 +2510,7 @@ if (chatUserModalEl) {
     setChatUserModalAchievementsLoader(null);
     setChatUserModalProfileTab("main");
     syncChatUserModalGender("male");
+    syncChatUserModalBirthBadge("");
     var cachedBlockedByMe = false;
     try {
       cachedBlockedByMe = !!(window.__pokerChatDmBlockStateByPeer && window.__pokerChatDmBlockStateByPeer[String(id)] === true);
@@ -2623,6 +2612,7 @@ if (chatUserModalEl) {
           chatUserModalWriteProfileCache(id, data);
           if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
             updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
+            syncChatUserModalBirthBadge(data && (data.profileBirthDate || data.birthDate));
             var birthAdminVisible = chatUserModalRenderBirthAdmin(data, id, openingSelfProfile);
             chatUserModalApplyPersonalInfo(data, birthAdminVisible);
             if (data && data.ok) {
@@ -2649,6 +2639,7 @@ if (chatUserModalEl) {
         chatUserModalApplyPersonalInfo(data, birthAdminVisible);
         var modalStatusLevel = data && data.level != null ? data.level : (fallbackStatusLevel || null);
         if (data && data.ok) syncChatUserModalGender(data.profileGender || data.gender || data.sex || "male");
+        syncChatUserModalBirthBadge(data && (data.profileBirthDate || data.birthDate));
         if (!applyChatUserModalStatusLevel(modalStatusLevel) && modalLevelText) {
           modalLevelText.textContent = openingSelfProfile
             ? "Обновите свой уровень во вкладке Профиль Poker21"
@@ -2699,6 +2690,7 @@ if (chatUserModalEl) {
       .catch(function () {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
         syncChatUserModalGender("male");
+        syncChatUserModalBirthBadge("");
         if (modalPersonal) modalPersonal.textContent = "—";
         if (modalPlayerStats) renderChatUserModalPlayerStats(null);
         if (modalLastSeen) modalLastSeen.hidden = true;
