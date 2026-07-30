@@ -316,11 +316,11 @@
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
       var action = place === 1
-        ? "одержал победу"
+        ? "одержал победу" + (reward > 0 ? " — " + formatRub(reward) : "")
         : reward >= 100000
-          ? "оформил занос от 100К"
+          ? "оформил занос от 100К — " + formatRub(reward)
           : reward >= 50000
-            ? "оформил занос 50–99К"
+            ? "оформил занос 50–99К — " + formatRub(reward)
             : reward > 0
               ? "получил " + formatRub(reward) + " призовых"
               : "";

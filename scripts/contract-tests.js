@@ -5879,6 +5879,14 @@ async function testFriendsFlow(redis) {
   const friends = loadHandler("friends");
   const s = sessions();
   redis.h("poker_app:visitor_usernames").set("tg_1002", "peer");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "P21-1001");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100002", "P21-1002");
+  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({ nickname: "Poker21 User", totalCounter: { fee: 12000 } }));
+  redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({ nickname: "Poker21 Peer", totalCounter: { fee: 12000 } }));
 
   let r = await call(friends, req("POST", {}, {
     pwaSession: s.user,
@@ -5963,6 +5971,11 @@ async function testFriendsFlow(redis) {
   assert.strictEqual(r.statusCode, 200, "friend delete succeeds");
   assert.strictEqual(redis.s("poker_app:friendships:" + myAccountId).has(peerAccountId), false, "friend delete removes member");
   assert.strictEqual(redis.h("poker_app:friend_alias:" + myAccountId).has(peerAccountId), false, "friend delete removes alias");
+
+  redis.h("poker_app:pokerplus_user_ids").delete(myAccountId);
+  redis.h("poker_app:pokerplus_profiles").delete(myAccountId);
+  r = await call(friends, req("POST", {}, { pwaSession: s.user, targetUserId: peerAccountId }));
+  assert.strictEqual(r.statusCode, 403, "friend request requires Poker21 binding and level");
 }
 
 async function testChatPushSubscribeAndBroadcast(redis) {
