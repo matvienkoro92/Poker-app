@@ -299,12 +299,17 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news-modal__item {
+  --friend-news-accent: #6fd8ff;
+  --friend-news-rgb: 111, 216, 255;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
   min-height: 66px;
   padding: 9px 6px;
   border-bottom: 1px solid rgba(142, 160, 184, 0.12);
+  background:
+    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.11), rgba(var(--friend-news-rgb), 0.025) 42%, transparent 76%);
+  box-shadow: inset 3px 0 0 rgba(var(--friend-news-rgb), 0.66);
 }
 
 .home-friend-news-modal__icon {
@@ -312,8 +317,55 @@ html[data-theme="gold"] body[data-view="home"] {
   width: 30px;
   height: 30px;
   place-items: center;
-  background: rgba(112, 216, 255, 0.1);
+  color: var(--friend-news-accent);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.18), transparent 38%),
+    rgba(var(--friend-news-rgb), 0.13);
+  border: 1px solid rgba(var(--friend-news-rgb), 0.28);
   border-radius: 10px;
+  box-shadow: 0 5px 16px rgba(var(--friend-news-rgb), 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.home-friend-news-modal__icon svg,
+.home-friend-news__event-icon svg {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-friend-news-event--friend {
+  --friend-news-accent: #64e8b2;
+  --friend-news-rgb: 100, 232, 178;
+}
+
+.home-friend-news-event--level {
+  --friend-news-accent: #9f8cff;
+  --friend-news-rgb: 159, 140, 255;
+}
+
+.home-friend-news-event--rating {
+  --friend-news-accent: #66b7ff;
+  --friend-news-rgb: 102, 183, 255;
+}
+
+.home-friend-news-event--achievement {
+  --friend-news-accent: #ffc45d;
+  --friend-news-rgb: 255, 196, 93;
+}
+
+.home-friend-news-event--daily {
+  --friend-news-accent: #ff8f6b;
+  --friend-news-rgb: 255, 143, 107;
+}
+
+.home-friend-news-event--birthday {
+  --friend-news-accent: #ff7ea8;
+  --friend-news-rgb: 255, 126, 168;
 }
 
 .home-friend-news-modal__copy {

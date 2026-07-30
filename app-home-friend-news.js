@@ -4,7 +4,7 @@
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
   var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v2";
-  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v4";
+  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v5";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
@@ -217,6 +217,11 @@
     var previous = readJson(FRIEND_IDS_KEY, null);
     var next = {};
     var savedEvents = readJson(GENERATED_EVENTS_KEY, []);
+    if (previous) {
+      Object.keys(previous).forEach(function (id) {
+        if (previous[id]) next[id] = true;
+      });
+    }
     (friends || []).forEach(function (friend) {
       var id = friendId(friend);
       if (!id) return;
@@ -568,14 +573,28 @@
     return out;
   }
 
+  function eventIconSvg(type) {
+    var icons = {
+      friend: '<svg viewBox="0 0 24 24"><path d="M8.2 11.2a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z"/><path d="M2.6 19.5v-1.1c0-2.8 2.5-5 5.6-5 1.2 0 2.3.3 3.2.9"/><path d="M16.7 10.1v7.2M13.1 13.7h7.2"/></svg>',
+      level: '<svg viewBox="0 0 24 24"><path d="m12 3 4.3 4.3-2.2 2.2L12 7.4 9.9 9.5 7.7 7.3 12 3Z"/><path d="m12 9.3 4.3 4.3-2.2 2.2-2.1-2.1-2.1 2.1-2.2-2.2L12 9.3Z"/><path d="M5 20h14"/></svg>',
+      rating: '<svg viewBox="0 0 24 24"><path d="M5 18V13M12 18V9M19 18V5"/><path d="m4 8 5-4 4 3 6-5"/><path d="M16 2h3v3"/></svg>',
+      achievement: '<svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"/></svg>',
+      daily: '<svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="4.3"/><path d="m12 9.3.8 1.7 1.9.2-1.4 1.3.4 1.9-1.7-.9-1.7.9.4-1.9-1.4-1.3 1.9-.2.8-1.7Z"/></svg>',
+      birthday: '<svg viewBox="0 0 24 24"><path d="M4 12h16v8H4v-8ZM3 9h18v4H3V9Z"/><path d="M12 9v11M12 9H8.5a2.5 2.5 0 1 1 2.5-2.5L12 9Zm0 0h3.5A2.5 2.5 0 1 0 13 6.5L12 9Z"/></svg>',
+      empty: '<svg viewBox="0 0 24 24"><path d="M8.5 19h7M10 15h4M12 3a6 6 0 0 1 3.8 10.6c-.9.7-1.3 1.2-1.3 2.4h-5c0-1.2-.4-1.7-1.3-2.4A6 6 0 0 1 12 3Z"/></svg>',
+    };
+    return icons[type] || icons.achievement;
+  }
+
   function eventHtml(row, ticker) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
+      ' home-friend-news-event--' + esc(row.type) +
       '" data-home-news-target="' + esc(row.target || "") + '">' +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
-      ' home-friend-news--' + esc(row.type) + '" aria-hidden="true">' + esc(row.icon) + "</span>" +
+      ' home-friend-news--' + esc(row.type) + '" aria-hidden="true">' + eventIconSvg(row.type) + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong><small>" + esc(timeLabel) + "</small>") +
       "</span></span>";
