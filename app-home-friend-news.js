@@ -273,6 +273,39 @@
     return saveGeneratedEvents(savedEvents);
   }
 
+  function recentTournamentEvents(friends, snapshots) {
+    var byNick = {};
+    (friends || []).forEach(function (friend) {
+      var key = matchKey(friend && friend.pokerPlusNickname);
+      if (key && !byNick[key]) byNick[key] = friend;
+    });
+    return (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).map(function (row) {
+      var friend = byNick[String(row && row.nickKey || "")];
+      if (!friend) return null;
+      var reward = Number(row && row.reward) || 0;
+      var place = Number(row && row.place) || 0;
+      var action = place === 1
+        ? "одержал победу"
+        : reward >= 100000
+          ? "оформил занос от 100К"
+          : reward >= 50000
+            ? "оформил занос 50–99К"
+            : reward > 0
+              ? "получил " + formatRub(reward) + " призовых"
+              : "";
+      if (!action) return null;
+      var detail = String(row && row.tournament || "").trim();
+      return {
+        id: "history:tournament:" + friendId(friend) + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
+        type: place === 1 || reward >= 50000 ? "achievement" : "rating",
+        icon: place === 1 ? "◆" : "▲",
+        text: friendName(friend) + " " + action + (detail ? " · " + detail : ""),
+        at: row.date,
+        target: "winter-rating",
+      };
+    }).filter(Boolean).slice(0, 20);
+  }
+
   function tournamentSnapshotsReady(friends) {
     var nicks = (friends || []).map(function (friend) {
       return String(friend && friend.pokerPlusNickname || "").trim();
@@ -640,6 +673,7 @@
       events = collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         collectTournamentEvents(friends, tournamentSnapshots),
+        recentTournamentEvents(friends, tournamentSnapshots),
         winnerEvents(friends, winners),
         birthdayEvents(friends),
         achievementEvents(friends, sngRows, choiceRows)

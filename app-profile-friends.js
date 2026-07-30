@@ -914,11 +914,21 @@ function initProfileFriends() {
           : null;
         if (!player || !findFriendPlayers.contains(player)) return;
         event.preventDefault();
+        var playerNameEl = player.querySelector("strong");
+        var playerNameText = playerNameEl ? playerNameEl.textContent : "";
+        player.classList.add("profile-find-friend__player--opening");
+        player.setAttribute("aria-busy", "true");
+        if (playerNameEl) playerNameEl.textContent = "Открываю…";
         openFoundProfile({
           userId: player.getAttribute("data-find-friend-user-id") || "",
           name: player.getAttribute("data-find-friend-user-name") || "Игрок",
           avatarUrl: player.getAttribute("data-find-friend-avatar") || "",
-        }, player.getAttribute("data-find-friend-user-name") || "", true);
+        }, player.getAttribute("data-find-friend-user-name") || "", false);
+        window.setTimeout(function () {
+          player.classList.remove("profile-find-friend__player--opening");
+          player.removeAttribute("aria-busy");
+          if (playerNameEl && playerNameEl.textContent === "Открываю…") playerNameEl.textContent = playerNameText;
+        }, 1200);
       });
     }
 

@@ -1408,6 +1408,8 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
     if (key) requested[key] = true;
   });
   var snapshots = {};
+  var recentEvents = [];
+  var recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   Object.keys(requested).forEach(function (key) {
     snapshots[key] = {
       firstPlaces: 0,
@@ -1432,6 +1434,20 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
     snapshot.totalReward += reward;
     if (reward >= 100000) snapshot.bigWins100 += 1;
     else if (reward >= 50000) snapshot.bigWins50 += 1;
+    var dateParts = String(row && row.date || "").split(".");
+    var rowDate = dateParts.length === 3
+      ? new Date(Number(dateParts[2]), Number(dateParts[1]) - 1, Number(dateParts[0]), 12, 0, 0)
+      : null;
+    if (rowDate && Number.isFinite(rowDate.getTime()) && rowDate.getTime() >= recentCutoff && rowDate.getTime() <= Date.now() + 86400000) {
+      recentEvents.push({
+        nickKey: key,
+        date: rowDate.toISOString(),
+        dateLabel: String(row.date || ""),
+        place: Number(row && row.place) || 0,
+        reward: reward,
+        tournament: String(row && (row.tournamentLabel || row.time) || "").trim(),
+      });
+    }
   });
   Object.keys(snapshots).forEach(function (key) {
     snapshots[key].millionaireTier = Math.min(5, Math.floor(snapshots[key].totalReward / 1000000));
@@ -1474,6 +1490,9 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
       snapshots[key][leagueNum === 1 ? "league1Place" : "league2Place"] = index + 1;
     });
   });
+  snapshots.__recentEvents = recentEvents.sort(function (a, b) {
+    return new Date(b.date).getTime() - new Date(a.date).getTime() || b.reward - a.reward;
+  }).slice(0, 80);
   return snapshots;
 }
 
