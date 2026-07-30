@@ -16,6 +16,26 @@
   var lastLoadAt = 0;
   var loadSequence = 0;
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
+  var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
+
+  function readRenderedEventsCache() {
+    try {
+      var rows = JSON.parse(sessionStorage.getItem(RENDERED_EVENTS_CACHE_KEY) || "[]");
+      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return row && row.id && (row.type === "birthday" || isRecentEvent(row.at));
+      }).slice(0, MAX_EVENTS);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeRenderedEventsCache(rows) {
+    try {
+      sessionStorage.setItem(RENDERED_EVENTS_CACHE_KEY, JSON.stringify(
+        (Array.isArray(rows) ? rows : []).filter(function (row) { return row && row.id !== "empty"; }).slice(0, MAX_EVENTS)
+      ));
+    } catch (error) {}
+  }
 
   function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
     var now = Date.now();
@@ -737,8 +757,10 @@
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       if (!friends.length) {
-        events = [];
-        render();
+        if (!events.length || events[0].id === "empty") {
+          events = [];
+          render();
+        }
         return null;
       }
       return Promise.all([
@@ -788,11 +810,13 @@
         .filter(function (row, index, rows) {
           return rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
         }).slice(0, MAX_EVENTS);
+      writeRenderedEventsCache(events);
       render();
     }).catch(function () {});
   }
 
   function init() {
+    events = readRenderedEventsCache();
     mountWhenProfileReady();
     window.addEventListener("poker-profile-friends-ready", function () {
       load();
@@ -800,6 +824,10 @@
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";
       lastLoadAt = 0;
+      events = [];
+      try { sessionStorage.removeItem(RENDERED_EVENTS_CACHE_KEY); } catch (error) {}
+      render();
+      load();
     });
     setInterval(function () { load(); }, 5 * 60 * 1000);
   }
