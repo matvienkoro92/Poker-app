@@ -1398,6 +1398,97 @@ function pokerGetTournamentAchievementStatsReady(nick) {
 window.pokerGetTournamentAchievementStats = pokerGetTournamentAchievementStats;
 window.pokerGetTournamentAchievementStatsReady = pokerGetTournamentAchievementStatsReady;
 
+function pokerGetFriendNewsTournamentSnapshots(nicks) {
+  function snapshotNickKey(nick) {
+    return String(normalizeWinterNick(nick) || "").trim().toLowerCase().replace(/\s+/g, "");
+  }
+  var requested = {};
+  (Array.isArray(nicks) ? nicks : []).forEach(function (nick) {
+    var key = snapshotNickKey(nick);
+    if (key) requested[key] = true;
+  });
+  var snapshots = {};
+  Object.keys(requested).forEach(function (key) {
+    snapshots[key] = {
+      firstPlaces: 0,
+      bigWins50: 0,
+      bigWins100: 0,
+      totalReward: 0,
+      millionaireTier: 0,
+      top10Finishes: 0,
+      seasonCups: 0,
+      monthChampions: 0,
+      viceMonthChampions: 0,
+      league1Place: 0,
+      league2Place: 0,
+    };
+  });
+  pokerRatingAchievementAllTournamentRows().forEach(function (row) {
+    var key = snapshotNickKey(row && row.nick);
+    var snapshot = snapshots[key];
+    if (!snapshot) return;
+    var reward = Number(row && row.reward) || 0;
+    if (Number(row && row.place) === 1) snapshot.firstPlaces += 1;
+    snapshot.totalReward += reward;
+    if (reward >= 100000) snapshot.bigWins100 += 1;
+    else if (reward >= 50000) snapshot.bigWins50 += 1;
+  });
+  Object.keys(snapshots).forEach(function (key) {
+    snapshots[key].millionaireTier = Math.min(5, Math.floor(snapshots[key].totalReward / 1000000));
+  });
+  pokerRatingAchievementAllOverallRows().forEach(function (row) {
+    var key = snapshotNickKey(row && row.nick);
+    var snapshot = snapshots[key];
+    var place = Number(row && row.place) || 0;
+    if (!snapshot || !place) return;
+    if (place <= 10) snapshot.top10Finishes += 1;
+    if (place <= 3 && String(row && row.season || "") !== "summer") snapshot.seasonCups += 1;
+  });
+  var monthly = {};
+  pokerRatingAchievementAllTournamentRows().forEach(function (row) {
+    var parts = String(row && row.date || "").split(".");
+    var key = snapshotNickKey(row && row.nick);
+    if (parts.length !== 3 || !key || !snapshots[key]) return;
+    var monthKey = parts[1] + "." + parts[2];
+    if (!monthly[monthKey]) monthly[monthKey] = {};
+    if (!monthly[monthKey][key]) monthly[monthKey][key] = 0;
+    monthly[monthKey][key] += Number(row && row.reward) || 0;
+  });
+  Object.keys(monthly).forEach(function (monthKey) {
+    Object.keys(monthly[monthKey]).map(function (key) {
+      return { key: key, reward: monthly[monthKey][key] };
+    }).filter(function (row) {
+      return row.reward > 0;
+    }).sort(function (a, b) {
+      return b.reward - a.reward || a.key.localeCompare(b.key, "ru");
+    }).slice(0, 2).forEach(function (row, index) {
+      if (!snapshots[row.key]) return;
+      if (index === 0) snapshots[row.key].monthChampions += 1;
+      else snapshots[row.key].viceMonthChampions += 1;
+    });
+  });
+  [1, 2].forEach(function (leagueNum) {
+    getTournamentRatingOverallByLeagueForSeason("summer", leagueNum).forEach(function (row, index) {
+      var key = snapshotNickKey(row && row.nick);
+      if (!snapshots[key]) return;
+      snapshots[key][leagueNum === 1 ? "league1Place" : "league2Place"] = index + 1;
+    });
+  });
+  return snapshots;
+}
+
+function pokerGetFriendNewsTournamentSnapshotsReady(nicks) {
+  var ready = typeof window.pokerEnsureScriptDomains === "function"
+    ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).catch(function () { return false; })
+    : Promise.resolve(false);
+  return ready.then(function () {
+    return pokerGetFriendNewsTournamentSnapshots(nicks);
+  });
+}
+
+window.pokerGetFriendNewsTournamentSnapshots = pokerGetFriendNewsTournamentSnapshots;
+window.pokerGetFriendNewsTournamentSnapshotsReady = pokerGetFriendNewsTournamentSnapshotsReady;
+
 function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var fullSummary = modal._winterPlayerModalFullSummary;
   var showPoints = modal._winterPlayerModalShowPoints;
@@ -1975,6 +2066,7 @@ function initWinterRating() {
   var actionTabsEl = document.getElementById("winterRatingSpringActionTabs");
   var achievementsBtn = document.getElementById("springRatingAchievementsBtn");
   var prizesBtn = document.getElementById("springRatingPrizesBtn");
+  var sectionCopyBtn = document.getElementById("summerRatingSectionCopyBtn");
   var tabsUpdatedEl = document.getElementById("springRatingTabsUpdated");
   if (isSummerRatingMode) {
     if (ratingSeasonDataIsLoading(seasonConfig)) {
@@ -2011,6 +2103,10 @@ function initWinterRating() {
   if (prizesBtn) {
     prizesBtn.hidden = !isSummerRatingMode;
     prizesBtn.style.display = isSummerRatingMode ? "" : "none";
+  }
+  if (sectionCopyBtn) {
+    sectionCopyBtn.hidden = !isSummerRatingMode;
+    sectionCopyBtn.style.display = isSummerRatingMode ? "" : "none";
   }
   if (tabsUpdatedEl) {
     tabsUpdatedEl.hidden = !isSummerRatingMode;
@@ -2176,6 +2272,12 @@ function initWinterRating() {
     var leagues = springLeaguesEl.querySelectorAll(".winter-rating__spring-league--main");
     for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle("winter-rating__spring-main-tab--active", tabs[i].dataset.springMainLeague === targetLeague);
     for (var j = 0; j < leagues.length; j++) leagues[j].style.display = targetLeague !== "top" && leagues[j].getAttribute("data-spring-league") === targetLeague ? "" : "none";
+    if (sectionCopyBtn) {
+      sectionCopyBtn.dataset.springLeague = targetLeague;
+      sectionCopyBtn.setAttribute("aria-label", targetLeague === "top"
+        ? "Скопировать ссылку на рейтинг по дням"
+        : "Скопировать ссылку на Лигу " + targetLeague);
+    }
   }
   window.switchSpringRatingMainTab = switchSpringRatingMainTab;
   if (springMainTabsEl && springMainTabsEl.getAttribute("data-inited") !== "1") {
@@ -2249,13 +2351,14 @@ function initWinterRating() {
       if (!shareBtn || !shareBtn.dataset.springLeague) return;
       e.preventDefault();
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var link =
-        typeof buildMiniAppStartLink === "function"
-          ? buildMiniAppStartLink((typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + shareBtn.dataset.springLeague)
-          : "";
+      var sectionKey = shareBtn.dataset.springLeague;
+      var startApp = sectionKey === "top"
+        ? ((typeof isSummerRatingMode === "function" && isSummerRatingMode()) ? "summer_rating_days" : "spring_rating_days")
+        : (typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + sectionKey;
+      var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp) : "";
       var mode = shareBtn.getAttribute("data-rating-share-mode") || "copy";
       if (mode === "share") {
-        var leagueLabel = shareBtn.dataset.springLeague === "2" ? "Лига 2" : "Лига 1";
+        var leagueLabel = sectionKey === "top" ? "по дням" : (sectionKey === "2" ? "Лига 2" : "Лига 1");
         var seasonLabel = typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "Рейтинг лета 2026" : "Рейтинг весны 2026";
         var shareText = seasonLabel + ": " + leagueLabel;
         var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
@@ -2780,6 +2883,10 @@ function initWinterRating() {
         var label = leagueNum === 1 ? "Лига 1. Турниры от 500₽" : "Лига 2. Турниры от 100р до 499р";
         tournamentsEl.innerHTML = renderSpringLeagueDateCaption(label);
       }
+      if (ratingSeasonDataIsLoading(seasonConfig)) {
+        if (tableEl) tableEl.innerHTML = "<p class=\"winter-rating__spring-placeholder\" role=\"status\">Загружаю рейтинг…</p>";
+        return;
+      }
       if (tableEl) {
         var rows = getSpringRatingRowsForDateLeague(dateStr, leagueNum);
         tableEl.innerHTML = rows && rows.length ? renderWinterRatingTable(rows) : "<p class=\"winter-rating__spring-placeholder\">Нет данных за эту дату</p>";
@@ -3134,7 +3241,11 @@ function initWinterRating() {
       var renderModalContent = function () {
         if (renderSeq !== dateModalRenderSeq || !dateModal || dateModal.getAttribute("aria-hidden") === "true") return;
         var lwModal = panel.querySelector(".spring-rating-date-leagues");
-        if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") window.__pokerFillSpringDateLeagues(lwModal, dateStr, preferredLeague);
+        if (lwModal && typeof window.__pokerFillSpringDateLeagues === "function") {
+          // Fill both blocks before cloning so switching leagues in the modal is immediate.
+          window.__pokerFillSpringDateLeagues(lwModal, dateStr, 1);
+          window.__pokerFillSpringDateLeagues(lwModal, dateStr, 2);
+        }
         var clone = panel.cloneNode(true);
         clone.classList.remove("winter-rating__date-panel--hidden");
         dateModalBody.innerHTML = "";

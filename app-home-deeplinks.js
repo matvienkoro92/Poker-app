@@ -136,6 +136,13 @@ function pokerInitHomeDeepLinks(opts) {
       }, 120);
       return;
     }
+    if (startParam === "summer_rating_days" || startParam === "spring_rating_days") {
+      var daysView = startParam === "summer_rating_days" ? "summer-rating" : "spring-rating";
+      openViewThen(daysView, function () {
+        if (typeof window.switchSpringRatingMainTab === "function") window.switchSpringRatingMainTab("top");
+      }, 120);
+      return;
+    }
     if (startParam.indexOf("winter_rating_player_") === 0) {
       var playerNickW = decodeURIComponent(startParam.replace("winter_rating_player_", "").replace(/\+/g, " "));
       if (playerNickW) {

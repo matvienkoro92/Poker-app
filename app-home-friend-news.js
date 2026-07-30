@@ -3,12 +3,17 @@
 
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
+  var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v1";
+  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v1";
+  var FRIEND_IDS_KEY = "poker_home_friend_ids_v1";
   var MAX_EVENTS = 50;
+  var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
   var ROTATE_MS = 4600;
   var rotateTimer = null;
   var events = [];
   var activeIndex = 0;
   var lastFriendsSignature = "";
+  var lastLoadAt = 0;
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
 
   function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
@@ -70,10 +75,10 @@
     var friendsPanel = el("profileFriendsPanel");
     if (friendsPanel && !el("homeFriendNews")) {
       friendsPanel.insertAdjacentHTML("beforebegin",
-        '<section class="home-friend-news" id="homeFriendNews" data-profile-friends-panel aria-label="Обновления друзей" hidden>' +
+        '<section class="home-friend-news" id="homeFriendNews" data-profile-friends-panel aria-label="Новости друзей" hidden>' +
           '<button type="button" class="home-friend-news__ticker" id="homeFriendNewsOpen" aria-haspopup="dialog" aria-controls="homeFriendNewsModal">' +
             '<span class="home-friend-news__badge" aria-hidden="true">●</span>' +
-            '<span class="home-friend-news__label">Обновления друзей</span>' +
+            '<span class="home-friend-news__label">Новости друзей</span>' +
             '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeFriendNewsTrack" aria-live="polite"></span></span>' +
             '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
           "</button>" +
@@ -85,7 +90,7 @@
           '<button type="button" class="home-friend-news-modal__backdrop" data-home-friend-news-close aria-label="Закрыть новости"></button>' +
           '<section class="home-friend-news-modal__panel" role="dialog" aria-modal="true" aria-labelledby="homeFriendNewsModalTitle">' +
             '<header class="home-friend-news-modal__header"><div><span>Друзья и клуб</span>' +
-              '<h2 id="homeFriendNewsModalTitle">Обновления друзей</h2></div>' +
+              '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
               '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
             '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
           "</section>" +
@@ -101,6 +106,26 @@
     return String(row && (row.contactName || row.chatDisplayName || row.pokerPlusNickname || row.userName) || "Ваш друг")
       .replace(/^@+/, "")
       .trim();
+  }
+
+  function matchKey(value) {
+    var normalized = String(value == null ? "" : value).replace(/^@+/, "").trim().toLowerCase();
+    try { normalized = normalized.normalize("NFKC"); } catch (error) {}
+    return normalized.replace(/[\uFE0E\uFE0F]/g, "").replace(/\s+/g, "");
+  }
+
+  function eventTime(value) {
+    var time = new Date(value || 0).getTime();
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function formatRub(value) {
+    return Math.max(0, Math.round(Number(value) || 0)).toLocaleString("ru-RU") + " ₽";
+  }
+
+  function isRecentEvent(value) {
+    var time = eventTime(value);
+    return !!time && time <= Date.now() + 86400000 && Date.now() - time <= RECENT_EVENT_MS;
   }
 
   function relativeTime(value) {
@@ -134,25 +159,222 @@
     });
     writeJson(LEVELS_KEY, next);
     savedEvents = savedEvents.filter(function (row, index, rows) {
-      return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+      return row && isRecentEvent(row.at) && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
     }).slice(0, MAX_EVENTS);
     writeJson(LEVEL_EVENTS_KEY, savedEvents);
     return savedEvents;
   }
 
+  function collectNewFriendEvents(friends) {
+    var previous = readJson(FRIEND_IDS_KEY, null);
+    var next = {};
+    var savedEvents = readJson(GENERATED_EVENTS_KEY, []);
+    (friends || []).forEach(function (friend) {
+      var id = friendId(friend);
+      if (!id) return;
+      next[id] = true;
+      if (previous && !previous[id]) {
+        savedEvents.unshift({
+          id: "friend:" + id,
+          type: "friend",
+          icon: "♣",
+          text: "Вы теперь друзья с " + friendName(friend),
+          at: new Date().toISOString(),
+        });
+      }
+    });
+    writeJson(FRIEND_IDS_KEY, next);
+    return saveGeneratedEvents(savedEvents);
+  }
+
+  function saveGeneratedEvents(rows) {
+    var saved = (Array.isArray(rows) ? rows : []).filter(function (row, index, list) {
+      return row && isRecentEvent(row.at) && list.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+    }).slice(0, MAX_EVENTS);
+    writeJson(GENERATED_EVENTS_KEY, saved);
+    return saved;
+  }
+
+  function collectTournamentEvents(friends, snapshots) {
+    var previous = readJson(TOURNAMENT_SNAPSHOTS_KEY, null);
+    var next = {};
+    var savedEvents = readJson(GENERATED_EVENTS_KEY, []);
+    (friends || []).forEach(function (friend) {
+      var id = friendId(friend);
+      var nickKey = matchKey(friend && friend.pokerPlusNickname);
+      var current = nickKey && snapshots && snapshots[nickKey];
+      if (!id || !current) return;
+      next[id] = current;
+      var before = previous && previous[id];
+      if (!before) return;
+      [
+        { key: "bigWins50", title: "оформил новый занос 50–99К" },
+        { key: "bigWins100", title: "оформил новый занос от 100К" },
+        { key: "firstPlaces", title: "одержал новую победу в турнире" },
+        { key: "top10Finishes", title: "получил новую ачивку «Топ-10 рейтинга»" },
+        { key: "seasonCups", title: "получил новый сезонный кубок" },
+        { key: "monthChampions", title: "стал чемпионом месяца" },
+        { key: "viceMonthChampions", title: "стал вице-чемпионом месяца" },
+        { key: "raffleWins", title: "продвинулся в ачивке «Золотой билет»" },
+        { key: "luckyMonths", title: "получил новую ачивку «Счастливчик месяца»" },
+      ].forEach(function (metric) {
+        var delta = Number(current[metric.key]) - Number(before[metric.key]);
+        if (delta <= 0) return;
+        savedEvents.unshift({
+          id: "achievement:" + metric.key + ":" + id + ":" + Number(current[metric.key]),
+          type: "achievement",
+          icon: "◆",
+          text: friendName(friend) + " " + metric.title + (delta > 1 ? " (+" + delta + ")" : ""),
+          at: new Date().toISOString(),
+          target: "winter-rating",
+        });
+      });
+      var oldMillionaireTier = Number(before.millionaireTier) || 0;
+      var newMillionaireTier = Number(current.millionaireTier) || 0;
+      var oldTotalReward = Number(before.totalReward) || 0;
+      var newTotalReward = Number(current.totalReward) || 0;
+      if (newTotalReward > oldTotalReward) {
+        savedEvents.unshift({
+          id: "achievement:totalReward:" + id + ":" + newTotalReward,
+          type: "achievement",
+          icon: "◆",
+          text: friendName(friend) + " продвинулся в ачивке «Миллионер клуба»: " +
+            formatRub(oldTotalReward) + " → " + formatRub(newTotalReward),
+          at: new Date().toISOString(),
+          target: "winter-rating",
+        });
+      }
+      if (newMillionaireTier > oldMillionaireTier) {
+        savedEvents.unshift({
+          id: "achievement:millionaire:" + id + ":" + newMillionaireTier,
+          type: "achievement",
+          icon: "◆",
+          text: friendName(friend) + " открыл " + newMillionaireTier + " уровень ачивки «Миллионер клуба»",
+          at: new Date().toISOString(),
+          target: "winter-rating",
+        });
+      }
+      [1, 2].forEach(function (league) {
+        var key = league === 1 ? "league1Place" : "league2Place";
+        var oldPlace = Number(before[key]) || 0;
+        var newPlace = Number(current[key]) || 0;
+        if (!oldPlace || !newPlace || newPlace >= oldPlace) return;
+        savedEvents.unshift({
+          id: "rating:league" + league + ":" + id + ":" + newPlace,
+          type: "rating",
+          icon: "▲",
+          text: friendName(friend) + " поднялся в Лиге " + league + ": " + oldPlace + " → " + newPlace + " место",
+          at: new Date().toISOString(),
+          target: "winter-rating",
+        });
+      });
+    });
+    writeJson(TOURNAMENT_SNAPSHOTS_KEY, next);
+    return saveGeneratedEvents(savedEvents);
+  }
+
+  function tournamentSnapshotsReady(friends) {
+    var nicks = (friends || []).map(function (friend) {
+      return String(friend && friend.pokerPlusNickname || "").trim();
+    }).filter(Boolean);
+    if (!nicks.length) return Promise.resolve({});
+    function read() {
+      return typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function"
+        ? window.pokerGetFriendNewsTournamentSnapshotsReady(nicks)
+        : Promise.resolve({});
+    }
+    if (typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function") return read();
+    if (typeof window.pokerEnsureScriptDomains === "function") {
+      return Promise.resolve(window.pokerEnsureScriptDomains(["app"])).then(read).catch(function () { return {}; });
+    }
+    return Promise.resolve({});
+  }
+
+  function applyRaffleSnapshots(friends, snapshots, raffles) {
+    var candidates = (friends || []).map(function (friend) {
+      return {
+        friend: friend,
+        nickKey: matchKey(friend && friend.pokerPlusNickname),
+        keys: [
+          friend && friend.userId,
+          friend && friend.accountId,
+          friend && friend.dtId,
+          friend && friend.chatUserId,
+          friend && friend.pokerPlusNickname,
+          friend && friend.chatDisplayName,
+          friend && friend.userName,
+        ].map(matchKey).filter(Boolean),
+      };
+    });
+    var monthly = {};
+    candidates.forEach(function (candidate) {
+      if (snapshots[candidate.nickKey]) {
+        snapshots[candidate.nickKey].raffleWins = 0;
+        snapshots[candidate.nickKey].luckyMonths = 0;
+      }
+    });
+    (Array.isArray(raffles) ? raffles : []).forEach(function (raffle) {
+      if (!raffle || raffle.status === "cancelled") return;
+      var date = new Date(raffle.drawnAt || raffle.completedAt || raffle.endDate || raffle.createdAt || 0);
+      var month = Number.isFinite(date.getTime()) ? date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") : "";
+      (Array.isArray(raffle.winners) ? raffle.winners : []).forEach(function (winner) {
+        var state = String(winner && winner.winnerReadyState || "").toLowerCase();
+        if (!winner || winner.winnerReadyExpired === true || winner.winnerBurned === true || state === "missed" || state === "burned") return;
+        var winnerKeys = [
+          winner.userId, winner.accountId, winner.dtId, winner.memberId, winner.p21Id,
+          winner.poker21Id, winner.pokerPlusId, winner.pokerPlusUserId,
+          winner.pokerPlusNickname, winner.poker21Nickname, winner.ratingNick,
+          winner.nickname, winner.nick, winner.name, winner.telegramUsername,
+        ].map(matchKey).filter(Boolean);
+        var candidate = candidates.find(function (item) {
+          return item.keys.some(function (key) { return winnerKeys.indexOf(key) !== -1; });
+        });
+        var leaderKey = candidate ? "friend:" + friendId(candidate.friend) : "winner:" + (winnerKeys[0] || "");
+        if (!leaderKey || leaderKey === "winner:") return;
+        if (month) {
+          if (!monthly[month]) monthly[month] = {};
+          monthly[month][leaderKey] = (monthly[month][leaderKey] || 0) + 1;
+        }
+        if (candidate && snapshots[candidate.nickKey]) snapshots[candidate.nickKey].raffleWins += 1;
+      });
+    });
+    Object.keys(monthly).forEach(function (month) {
+      Object.keys(monthly[month]).map(function (key) {
+        return { key: key, count: monthly[month][key] };
+      }).sort(function (a, b) {
+        return b.count - a.count || a.key.localeCompare(b.key);
+      }).slice(0, 3).forEach(function (leader) {
+        if (leader.key.indexOf("friend:") !== 0) return;
+        var id = leader.key.slice(7);
+        var candidate = candidates.find(function (item) { return friendId(item.friend) === id; });
+        if (candidate && snapshots[candidate.nickKey]) snapshots[candidate.nickKey].luckyMonths += 1;
+      });
+    });
+    return snapshots;
+  }
+
   function winnerEvents(friends, winners) {
     var byId = {};
+    var byName = {};
     (friends || []).forEach(function (friend) {
       var ids = [friend && friend.userId, friend && friend.accountId, friend && friend.dtId, friend && friend.chatUserId];
       ids.forEach(function (id) {
         id = String(id || "").trim();
         if (id) byId[id] = friend;
       });
+      [friend && friend.pokerPlusNickname, friend && friend.chatDisplayName, friend && friend.userName].forEach(function (name) {
+        var key = matchKey(name);
+        if (key && !byName[key]) byName[key] = friend;
+      });
     });
     return (winners || []).map(function (winner) {
       var friend = byId[String(winner && winner.id || "").trim()];
-      if (!friend) return null;
-      var prize = String(winner.prize || "").trim();
+      if (!friend) {
+        var winnerNames = [winner && winner.pokerPlusNickname, winner && winner.pokerPlusName, winner && winner.displayName];
+        for (var ni = 0; ni < winnerNames.length && !friend; ni += 1) friend = byName[matchKey(winnerNames[ni])];
+      }
+      if (!friend || !isRecentEvent(winner && winner.lastWonAt)) return null;
+      var prize = String((winner && (winner.lastPrize || winner.bestPrize || winner.prize)) || "").trim();
       return {
         id: "daily:" + String(winner.id || "") + ":" + String(winner.lastWonAt || winner.bestPrize || prize),
         type: "daily",
@@ -203,7 +425,7 @@
         friend && friend.pokerPlusNickname,
         friend && friend.chatDisplayName,
         friend && friend.userName,
-      ].map(function (value) { return String(value || "").replace(/^@+/, "").trim().toLowerCase(); }).filter(Boolean);
+      ].map(matchKey).filter(Boolean);
       friendKeys.push({ friend: friend, keys: keys });
     });
     function matchingFriend(row) {
@@ -216,7 +438,7 @@
         row && row.pokerPlusNickname,
         row && row.nick,
         row && row.name,
-      ].map(function (value) { return String(value || "").replace(/^@+/, "").trim().toLowerCase(); }).filter(Boolean);
+      ].map(matchKey).filter(Boolean);
       var match = friendKeys.find(function (candidate) {
         return candidate.keys.some(function (key) { return keys.indexOf(key) !== -1; });
       });
@@ -224,6 +446,8 @@
     }
     var out = [];
     (sngRows || []).forEach(function (season) {
+      var completedAt = String((season && (season.completedAt || season.updatedAt)) || "").trim();
+      if (!isRecentEvent(completedAt)) return;
       (Array.isArray(season && season.winners) ? season.winners : []).forEach(function (winner) {
         var friend = matchingFriend(winner);
         var place = Math.max(0, Number(winner && winner.place) || 0);
@@ -235,11 +459,15 @@
           type: "achievement",
           icon: "◆",
           text: friendName(friend) + " получил новую ачивку: " + title,
-          at: season.completedAt || season.updatedAt || "",
+          at: completedAt,
         });
       });
     });
     (choiceRows || []).forEach(function (period) {
+      var month = String(period && (period.month || period.monthKey || period.period) || "").trim();
+      var completedAt = String(period && (period.completedAt || period.updatedAt) || "").trim();
+      var eventAt = completedAt || (month ? month + "-01T00:00:00.000Z" : "");
+      if (!isRecentEvent(eventAt)) return;
       var winners = Array.isArray(period && period.winners) ? period.winners
         : Array.isArray(period && period.top) ? period.top
           : Array.isArray(period && period.players) ? period.players : [];
@@ -247,13 +475,12 @@
         var friend = matchingFriend(winner);
         var place = Math.max(0, Number(winner && winner.place) || 0);
         if (!friend || place !== 1) return;
-        var month = String(period.month || period.monthKey || period.period || "").trim();
         out.push({
           id: "achievement:choice:" + friendId(friend) + ":" + String(month || period.id || winner.description || "top"),
           type: "achievement",
           icon: "◆",
           text: friendName(friend) + " получил новую ачивку: выбор клуба",
-          at: period.completedAt || period.updatedAt || (month ? month + "-01T00:00:00.000Z" : ""),
+          at: eventAt,
         });
       });
     });
@@ -373,8 +600,9 @@
     var signature = suppliedFriends
       ? (suppliedFriends.map(friendId).filter(Boolean).sort().join("|") || "__empty__")
       : "";
-    if (signature && signature === lastFriendsSignature) return;
+    if (signature && signature === lastFriendsSignature && Date.now() - lastLoadAt < 30000) return;
     if (signature) lastFriendsSignature = signature;
+    lastLoadAt = Date.now();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
     var friendsPromise = suppliedFriends
@@ -394,6 +622,9 @@
           .catch(function () { return { rows: [] }; }),
         cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
+        tournamentSnapshotsReady(friends),
+        cachedFetchJson(base + "/api/raffles" + suffix + joiner + "mode=achievements", "raffles:" + suffix, 5 * 60 * 1000, { cache: "default" })
+          .catch(function () { return { raffles: [] }; }),
       ]);
     }).then(function (results) {
       if (!results) return;
@@ -401,7 +632,14 @@
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var sngRows = results[2] && Array.isArray(results[2].rows) ? results[2].rows : [];
       var choiceRows = results[3] && Array.isArray(results[3].rows) ? results[3].rows : [];
+      var tournamentSnapshots = applyRaffleSnapshots(
+        friends,
+        results[4] || {},
+        results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
+      );
       events = collectLevelEvents(friends).concat(
+        collectNewFriendEvents(friends),
+        collectTournamentEvents(friends, tournamentSnapshots),
         winnerEvents(friends, winners),
         birthdayEvents(friends),
         achievementEvents(friends, sngRows, choiceRows)
@@ -409,9 +647,11 @@
         .sort(function (a, b) {
           var aBirthday = a.type === "birthday" ? Number(a.upcomingDays) : null;
           var bBirthday = b.type === "birthday" ? Number(b.upcomingDays) : null;
-          if (aBirthday === 0 && bBirthday !== 0) return -1;
-          if (bBirthday === 0 && aBirthday !== 0) return 1;
-          return new Date(b.at || 0).getTime() - new Date(a.at || 0).getTime();
+          var aGroup = aBirthday === 0 ? 0 : (a.type === "birthday" ? 2 : 1);
+          var bGroup = bBirthday === 0 ? 0 : (b.type === "birthday" ? 2 : 1);
+          if (aGroup !== bGroup) return aGroup - bGroup;
+          if (aGroup === 2) return aBirthday - bBirthday;
+          return eventTime(b.at) - eventTime(a.at);
         })
         .filter(function (row, index, rows) {
           return rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
@@ -428,7 +668,9 @@
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";
+      lastLoadAt = 0;
     });
+    setInterval(function () { load(); }, 5 * 60 * 1000);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });

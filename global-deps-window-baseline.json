@@ -683,6 +683,8 @@
     "app-rating-view-adapter.js:__pokerSummerRatingInitialAssetsPromise",
     "app-rating-view-adapter.js:openWinterRatingDatePanel",
     "app-rating-view-adapter.js:pokerEnsureGlobalModalsHtml",
+    "app-rating-view-adapter.js:pokerGetFriendNewsTournamentSnapshots",
+    "app-rating-view-adapter.js:pokerGetFriendNewsTournamentSnapshotsReady",
     "app-rating-view-adapter.js:pokerGetRatingPlayerTotalReward",
     "app-rating-view-adapter.js:pokerGetSummerRatingPlayerArt",
     "app-rating-view-adapter.js:pokerGetTournamentAchievementStats",

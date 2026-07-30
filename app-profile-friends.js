@@ -850,6 +850,16 @@ function initProfileFriends() {
   function renderFindFriendPlayers(friends) {
     if (!findFriendPlayers) return;
     loadProfileSearchSuggestRows().then(function (rows) {
+      var linkedCountEl = document.getElementById("profileFindFriendLinkedCount");
+      if (linkedCountEl) {
+        var linkedAccounts = {};
+        rows.forEach(function (row) {
+          var accountId = String((row && row.accountId) || "").trim();
+          var p21Id = String((row && row.p21Id) || "").trim();
+          if (accountId && p21Id) linkedAccounts[accountId] = true;
+        });
+        linkedCountEl.textContent = "(" + Object.keys(linkedAccounts).length + ")";
+      }
       var excluded = {};
       (Array.isArray(friends) ? friends : []).forEach(function (row) {
         [row && row.userId, row && row.accountId, row && row.dtId, row && row.chatUserId].forEach(function (id) {

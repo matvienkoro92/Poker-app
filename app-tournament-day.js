@@ -771,13 +771,13 @@ function renderHomeTournamentWeekList(activeWeekday) {
 }
 
 function syncHomeTournamentBonusAvailability(activeWeekday) {
-  var bonusesSection = document.querySelector(".home-tournament-bonuses");
+  var bonusSections = document.querySelectorAll(".home-tournament-bonuses");
   var isFreeroll = Number(activeWeekday) === 6;
-  if (bonusesSection) {
+  bonusSections.forEach(function (bonusesSection) {
     bonusesSection.hidden = isFreeroll;
     bonusesSection.style.display = isFreeroll ? "none" : "";
     bonusesSection.setAttribute("aria-hidden", isFreeroll ? "true" : "false");
-  }
+  });
   var league2Active = activeWeekday === 2;
   var leagueNum = league2Active ? 2 : 1;
   var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
@@ -800,7 +800,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
 
 function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   var bonusEl = document.querySelector(".home-tournament-bonus--bubble-buyin");
-  var gridEl = document.querySelector(".home-tournament-bonuses__grid");
+  var gridEl = document.querySelector(".home-tournament-bonuses__grid--lower");
   var amountEl = document.getElementById("homeTournamentBubbleBuyinAmount");
   var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
   if (!amountEl || !labelEl) return;

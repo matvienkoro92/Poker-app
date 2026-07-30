@@ -10746,6 +10746,72 @@ html body[data-view] #app .bonus-game-back {
   font-size: clamp(9px, 1.4vw, 12px);
 }
 
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper {
+  margin-top: 0;
+  margin-bottom: -4px;
+  padding-bottom: 4px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses--upper
+  ~ .tournament-day-home-wrap
+  .tournament-day-block--home {
+  margin-top: 0;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper
+  .home-tournament-bonus {
+  grid-column: auto !important;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--lower,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--lower.home-tournament-bonuses__grid--has-bubble {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--lower {
+  margin-top: -8px;
+  padding-top: 6px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--lower
+  .home-tournament-bonus {
+  grid-column: auto !important;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--lower
+  .home-tournament-bonus[data-home-tournament-bonus] {
+  --bonus-accent: 104, 198, 164;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--lower
+  .home-tournament-bonus--bubble-buyin {
+  --bonus-accent: 131, 164, 255;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n + 4),
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus--bubble-buyin {
+  padding-inline: 10px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonus:nth-child(n)::before {
+  content: none;
+  display: none;
+}
+
 @media (max-width: 560px) {
   .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses {
     padding: 12px 8px 10px;
