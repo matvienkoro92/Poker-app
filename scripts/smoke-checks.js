@@ -111,10 +111,12 @@ const files = {
   stylesPlayerCrm: read("styles-player-crm.css"),
   appPlayerCrmRegistrations: read("app-player-crm-registrations.js"),
   appPlayerCrmViewportShell: read("app-player-crm-viewport-shell.js"),
+  appPlayerCrmRuntimeCore: read("app-player-crm-runtime-core.js"),
   appPlayerCrmRuntime: read("app-player-crm-runtime.js"),
   appPlayerCrm: read("app-player-crm.js"),
   appAdminReports: read("app-admin-reports.js"),
   appAdminReportsCalculationsLogic: read("app-admin-reports-calculations-logic.js"),
+  appAdminReportsCalculations: read("app-admin-reports-calculations.js"),
   appRating: read("app-rating.js"),
   appRatingViewAdapter: read("app-rating-view-adapter.js"),
   appRatingSpringRuntime: read("app-rating-spring-runtime.js"),
@@ -2938,7 +2940,51 @@ add("CRM calculations render report and raffle totals without runtime errors", (
     "var sentRakeback = Number(totals.sentRakeback);",
     "var crmRakeback = Number(totals.rakeback);",
     "var rakebackDifference = Number.isFinite(sentRakeback)",
-    "results[0].statsSummary && results[0].statsSummary.raffles",
+    "rafflePayload.statsSummary && rafflePayload.statsSummary.raffles",
+    "manualReturnedTicketAmount",
+    "calculationReportsRequestSeq",
+    "calculationDraftRequestSeq",
+    "calculationDraftGroup",
+    'window.pokerAdminMenuAccessToken("calculations")',
+    "calculationWeekStatsAvailability",
+    "#adminReportCalcRakeCard input, #adminReportCalcFigures input",
+  ])
+);
+
+add("CRM automatic week totals have no destructive save action", () =>
+  !files.globalModalsAdminFragment.includes('data-admin-report-calc-save="week"') &&
+  !files.globalModalsAdminFragment.includes('data-admin-report-calc-edit="week"')
+);
+
+add("CRM calculations rakeback link has one keyboard-accessible handler", () =>
+  hasAll("globalModalsAdminFragment", [
+    "data-admin-report-open-rakeback",
+    'role="button"',
+    'tabindex="0"',
+  ]) &&
+  !files.globalModalsAdminFragment.includes("onclick=") &&
+  hasAll("appAdminReportsCalculationsLogic", [
+    "calculation draft sync unavailable",
+  ]) &&
+  hasAll("appAdminReportsCalculations", [
+    "function openRakebackOverlay(trigger)",
+    'event.key !== "Enter" && event.key !== " "',
+  ])
+);
+
+add("CRM statistics never reuse failed or stale period details", () =>
+  hasAll("appPlayerCrmRuntimeCore", [
+    'data.source === "redis-error"',
+    'data.source === "no-redis"',
+    "dailyPokerStatsError",
+    "dailyPokerWinnersRequestKey",
+    "raffleRecipientsRequestKey",
+    "state.dailyPokerStats = null;",
+  ]) &&
+  hasAll("appPlayerCrmStats", [
+    "statsWarningCodes",
+    "Часть источников статистики временно не загрузилась",
+    "Значения этой карточки скрыты",
   ])
 );
 

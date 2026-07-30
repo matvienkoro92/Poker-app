@@ -5,8 +5,11 @@
       var calculationArchiveRequestBase = "";
       var calculationArchiveRequestQuery = "";
       var calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
+      var calculationWeekStatsAvailability = { raffles: null, dailyPoker: null };
       var calculationPeriodReportsCache = {};
       var calculationPeriodRequestSeq = 0;
+      var calculationReportsRequestSeq = 0;
+      var calculationDraftRequestSeq = 0;
       var calculationInitialLoadRetryTimer = null;
       var calculationInitialLoadRetryCount = 0;
 
@@ -193,9 +196,15 @@
         var figuresRafflesTicketsEl = document.getElementById("adminReportFiguresRafflesTickets");
         var figuresRafflesCashEl = document.getElementById("adminReportFiguresRafflesCash");
         var figuresDailyPokerEl = document.getElementById("adminReportFiguresDailyPoker");
-        if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
-        if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
-        if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
+        if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = calculationWeekStatsAvailability.raffles === false
+          ? "—"
+          : formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
+        if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = calculationWeekStatsAvailability.raffles === false
+          ? "—"
+          : formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
+        if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = calculationWeekStatsAvailability.dailyPoker === false
+          ? "—"
+          : formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
@@ -214,7 +223,10 @@
               : kind === "raffleCash"
                 ? calculationWeekStatsTotals.raffleCashReturn
                 : calculationWeekStatsTotals.dailyPokerReturn;
-            output.textContent = "Авто: " + formatReportRubleNumber(base);
+            var available = kind === "dailyPoker"
+              ? calculationWeekStatsAvailability.dailyPoker
+              : calculationWeekStatsAvailability.raffles;
+            output.textContent = available === false ? "Авто: —" : "Авто: " + formatReportRubleNumber(base);
           });
         }
         var figuresExpensesTotal =
@@ -229,12 +241,15 @@
         var figuresExpensesTotalEl = document.getElementById("adminReportFiguresExpensesTotal");
         var figuresReturnsTotalEl = document.getElementById("adminReportFiguresReturnsTotal");
         var figuresRemainderEl = document.getElementById("adminReportFiguresRemainder");
-        if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = formatReportNegativeDisplay(figuresExpensesTotal);
-        if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = formatReportRubleNumber(figuresBackingReturn);
-        if (figuresRemainderEl) figuresRemainderEl.textContent = formatReportRubleNumber(figuresRemainder);
+        var calculationStatsComplete =
+          calculationWeekStatsAvailability.raffles !== false &&
+          calculationWeekStatsAvailability.dailyPoker !== false;
+        if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = calculationStatsComplete ? formatReportNegativeDisplay(figuresExpensesTotal) : "—";
+        if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = calculationStatsComplete ? formatReportRubleNumber(figuresBackingReturn) : "—";
+        if (figuresRemainderEl) figuresRemainderEl.textContent = calculationStatsComplete ? formatReportRubleNumber(figuresRemainder) : "—";
         if (figuresRemainderEl && figuresRemainderEl.parentElement) {
-          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", figuresRemainder < 0);
-          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--positive", figuresRemainder >= 0);
+          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", calculationStatsComplete && figuresRemainder < 0);
+          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--positive", calculationStatsComplete && figuresRemainder >= 0);
         }
         var approxAgentsRake = getFiguresExtraRakeTotal();
         var approxIssuedRake = getIssuedRakebackReportRakeTotal();
@@ -274,7 +289,7 @@
             getFiguresExtraAmountTotal() +
             figuresBackingReturn +
             (includeApproxRakeback ? approxRakeback : 0);
-          figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
+          figuresGrandTotalEl.textContent = calculationStatsComplete ? formatReportRubleNumber(grand) : "—";
         }
         updateCalculationGrandTotal();
       }
@@ -520,11 +535,18 @@
 
       function loadCalculationWeekStats(base, q, week) {
         var requestSeq = ++calculationPeriodRequestSeq;
+        calculationWeekStatsAvailability = { raffles: null, dailyPoker: null };
         var businessDateShiftMs = -3 * 60 * 60 * 1000;
         var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
         raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffles");
+        var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
+          ? window.pokerAdminMenuAccessToken("calculations")
+          : "";
+        if (calculationsAccessToken) {
+          raffleUrl = appendCalculationQueryParam(raffleUrl, "menuAccessToken", calculationsAccessToken);
+        }
         var dailyPokerUrl = base.replace(/\/$/, "") + "/api/promo/daily-poker/winners" + q;
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "limit", "1");
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "summary", "1");
@@ -541,25 +563,37 @@
           fetchStats(raffleUrl, { cache: "no-store" }, 15000).then(function (response) {
             if (!response || !response.ok) throw new Error("raffle stats failed");
             return response.json();
-          }).catch(function () { return {}; }),
+          }).then(function (data) {
+            return { ok: true, data: data };
+          }).catch(function () { return { ok: false, data: {} }; }),
           fetchStats(dailyPokerUrl, { cache: "no-store" }, 15000).then(function (response) {
             if (!response || !response.ok) throw new Error("daily poker stats failed");
             return response.json();
-          }).catch(function () { return {}; }),
+          }).then(function (data) {
+            return { ok: true, data: data };
+          }).catch(function () { return { ok: false, data: {} }; }),
           ])
           .then(function (results) {
             if (requestSeq !== calculationPeriodRequestSeq) return;
-            var raffleStats = results[0] && (
-              results[0].raffles ||
-              results[0].statsSummary && results[0].statsSummary.raffles
+            var rafflePayload = results[0] && results[0].data || {};
+            var dailyPokerStats = results[1] && results[1].data || {};
+            var raffleStats = rafflePayload && (
+              rafflePayload.raffles ||
+              rafflePayload.statsSummary && rafflePayload.statsSummary.raffles
             );
-            var dailyPokerStats = results[1];
+            calculationWeekStatsAvailability = {
+              raffles: !!(results[0] && results[0].ok),
+              dailyPoker: !!(results[1] && results[1].ok),
+            };
             calculationWeekStatsTotals = {
               raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
               raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
               raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
               dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
-              raffleTicketsReturn: Number(raffleStats && raffleStats.returnedTicketAmount) || 0,
+              raffleTicketsReturn: Math.max(0,
+                (Number(raffleStats && raffleStats.returnedTicketAmount) || 0) -
+                (Number(raffleStats && raffleStats.manualReturnedTicketAmount) || 0)
+              ),
               raffleCashReturn: Number(raffleStats && (raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount)) || 0,
               dailyPokerReturn: Number(dailyPokerStats && dailyPokerStats.bonusBalanceReturned) || 0,
             };
@@ -567,6 +601,7 @@
           })
           .catch(function () {
             if (requestSeq !== calculationPeriodRequestSeq) return;
+            calculationWeekStatsAvailability = { raffles: false, dailyPoker: false };
             calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
             updateFiguresTotals({ syncExtras: false });
           });
@@ -598,12 +633,19 @@
       function applyCalculationSummaryStats(data) {
         var raffleStats = data && data.raffles;
         var dailyPokerStats = data && data.dailyPoker;
+        calculationWeekStatsAvailability = {
+          raffles: raffleStats ? true : null,
+          dailyPoker: dailyPokerStats ? true : null,
+        };
         calculationWeekStatsTotals = {
           raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
           raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
           raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
           dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
-          raffleTicketsReturn: Number(raffleStats && raffleStats.returnedTicketAmount) || 0,
+          raffleTicketsReturn: Math.max(0,
+            (Number(raffleStats && raffleStats.returnedTicketAmount) || 0) -
+            (Number(raffleStats && raffleStats.manualReturnedTicketAmount) || 0)
+          ),
           raffleCashReturn: Number(raffleStats && (raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount)) || 0,
           dailyPokerReturn: Number(dailyPokerStats && dailyPokerStats.bonusBalanceReturned) || 0,
         };
@@ -652,6 +694,7 @@
 
       function loadCalculationsReports() {
         if (!canViewCalculationsReports()) return;
+        var reportsRequestSeq = ++calculationReportsRequestSeq;
         var week = getCalculationWeekMeta();
         if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
         var useAllReports = !!(week && week.key && week.key !== "current_week");
@@ -686,13 +729,22 @@
         bindCalculationArchiveDeferredLoader();
         if (useAllReports && Array.isArray(cachedPeriodReports)) {
           fetchCalculationSummary(base, q, "all", week).then(function (data) {
+            if (reportsRequestSeq !== calculationReportsRequestSeq) return;
             applyCalculationSummaryStats(data);
             loadCalculationWeekStats(base, q, week);
-          }).catch(function () {});
+          }).catch(function () {
+            if (reportsRequestSeq !== calculationReportsRequestSeq) return;
+            loadCalculationWeekStats(base, q, week);
+          });
           return;
         }
         fetchCalculationSummary(base, q, useAllReports ? "all" : "currentWeek", week)
+          .catch(function () {
+            if (reportsRequestSeq !== calculationReportsRequestSeq) return null;
+            return fetchCalculationReports(base, q, useAllReports ? "all" : "currentWeek");
+          })
           .then(function (data) {
+            if (reportsRequestSeq !== calculationReportsRequestSeq) return null;
             applyCalculationSummaryStats(data);
             // Raffle aggregation is the slowest part of the calculation view.
             // Let the report totals render first and hydrate raffle figures in
@@ -707,6 +759,7 @@
             return fetchCalculationReports(base, q, "all");
           })
           .then(function (data) {
+            if (reportsRequestSeq !== calculationReportsRequestSeq || !data) return;
             var items = (data && data.ok && Array.isArray(data.reports)) ? data.reports : [];
             if (useAllReports && periodCacheKey) calculationPeriodReportsCache[periodCacheKey] = Array.isArray(items) ? items : [];
             else calculationReportsCache = Array.isArray(items) ? items : [];
@@ -738,6 +791,7 @@
             }
           })
           .catch(function () {
+            if (reportsRequestSeq !== calculationReportsRequestSeq) return;
             if (!currentCache.length) setCalculationTotalsWithCurrentRakeback({}, getCalculationWeekMeta());
             renderCalculationArchive(calculationArchiveReportsCache);
           });
@@ -786,10 +840,9 @@
         var statusEl = getCalculationGroupStatusEl(group);
         if (!statusEl) return;
         statusEl.textContent = text || "";
-        if (calculationsStatusTimer) clearTimeout(calculationsStatusTimer);
         if (text) {
-          calculationsStatusTimer = setTimeout(function () {
-            if (statusEl) statusEl.textContent = "";
+          setTimeout(function () {
+            if (statusEl && statusEl.textContent === text) statusEl.textContent = "";
           }, 1800);
         }
       }
@@ -850,10 +903,18 @@
 
       function setFiguresLocked(locked) {
         figuresSavedLocked = !!locked;
-        var figuresInputsRoot = document.getElementById("adminReportCalcRakeCard") || figuresRoot;
+        var figuresInputsRoot = calculationsRoot || figuresRoot;
         if (figuresInputsRoot) {
-          figuresInputsRoot.querySelectorAll("#adminReportCalcFigures input, #adminReportFiguresLower input").forEach(function (input) {
-            input.readOnly = input === figuresApproxRomanRakeInput ? false : figuresSavedLocked;
+          figuresInputsRoot.querySelectorAll(
+            "#adminReportCalcRakeCard input, #adminReportCalcFigures input"
+          ).forEach(function (input) {
+            var type = String(input.type || "").toLowerCase();
+            if (type === "checkbox" || type === "radio") {
+              input.disabled = figuresSavedLocked;
+              return;
+            }
+            var alwaysReadonly = input.hasAttribute("data-admin-report-figures-extra-amount");
+            input.readOnly = alwaysReadonly || figuresSavedLocked;
           });
         }
         if (figuresDateInput) figuresDateInput.disabled = figuresSavedLocked;
@@ -872,9 +933,11 @@
         } catch (e) {}
       }
 
-      function requestServerCalculationDraft(action, draft) {
+      function requestServerCalculationDraft(action, draft, group) {
         var base = typeof getAdminReportApiBase === "function" ? getAdminReportApiBase() : "";
-        if (!base || typeof buildAuthBody !== "function") return Promise.resolve(null);
+        if (!base || typeof buildAuthBody !== "function") {
+          return Promise.reject(new Error("calculation draft sync unavailable"));
+        }
         var calculationRangeMeta = getCalculationWeekMeta();
         var calculationRangeStart = calculationRangeMeta.draftKey != null ? calculationRangeMeta.draftKey : calculationRangeMeta.start;
         var payload = {
@@ -882,6 +945,7 @@
           weekStart: String(calculationRangeStart != null ? calculationRangeStart : ""),
         };
         if (draft) payload.calculationDraft = draft;
+        if (group) payload.calculationDraftGroup = String(group);
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
         return fetchDraft(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
           method: "POST",
@@ -895,7 +959,10 @@
       }
 
       function loadServerCalculationDraft() {
+        var requestSeq = ++calculationDraftRequestSeq;
+        var expectedDraftKey = getCalculationDraftKey();
         return requestServerCalculationDraft("calculation_draft_load").then(function (data) {
+          if (requestSeq !== calculationDraftRequestSeq || getCalculationDraftKey() !== expectedDraftKey) return false;
           var stored = data && data.calculationDraft;
           var draft = stored && stored.draft;
           if (!draft || typeof draft !== "object") {
@@ -918,8 +985,8 @@
         });
       }
 
-      function saveServerCalculationDraft(draft) {
-        return requestServerCalculationDraft("calculation_draft_save", draft);
+      function saveServerCalculationDraft(draft, group) {
+        return requestServerCalculationDraft("calculation_draft_save", draft, group);
       }
 
       function collectCalculationsDraft() {
@@ -1079,6 +1146,7 @@
       function saveCalculationsDraft(group) {
         group = group || "cash";
         var draft = collectCalculationsDraft();
+        var expectedDraftKey = getCalculationDraftKey();
         try {
           if (window.localStorage) {
             window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(draft));
@@ -1087,7 +1155,8 @@
           setCalculationsStatus(group, "Локально не сохранено");
         }
         setCalculationsStatus(group, "Сохраняю…");
-        saveServerCalculationDraft(draft).then(function () {
+        saveServerCalculationDraft(draft, group).then(function () {
+          if (getCalculationDraftKey() !== expectedDraftKey) return;
           setCalculationGroupLocked(group, true);
           setCalculationsStatus(group, "Сохранено");
         }).catch(function () {
@@ -1103,6 +1172,7 @@
 
       function saveFiguresDraft() {
         var draft = collectCalculationsDraft();
+        var expectedDraftKey = getCalculationDraftKey();
         try {
           if (window.localStorage) {
             window.localStorage.setItem(getCalculationDraftKey(), JSON.stringify(draft));
@@ -1111,7 +1181,8 @@
           setFiguresStatus("Локально не сохранено");
         }
         setFiguresStatus("Сохраняю…");
-        saveServerCalculationDraft(draft).then(function () {
+        saveServerCalculationDraft(draft, "figures").then(function () {
+          if (getCalculationDraftKey() !== expectedDraftKey) return;
           setFiguresLocked(true);
           setFiguresStatus("Сохранено");
         }).catch(function () {
@@ -1126,6 +1197,9 @@
 
       function resetHydration() {
         calculationsDraftHydrated = false;
+        calculationDraftRequestSeq += 1;
+        calculationReportsRequestSeq += 1;
+        calculationPeriodRequestSeq += 1;
       }
 
       return {

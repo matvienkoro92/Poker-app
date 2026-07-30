@@ -787,6 +787,35 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(reportAccessRes.body.allowed, true, "report admin access probe confirms access");
   reportAccessRes = await call(reportHandler, req("GET", { pwaSession: nonBonusAdminToken, access: "1" }));
   assert.strictEqual(reportAccessRes.statusCode, 403, "ordinary user report access probe is denied");
+  const calculationWeekStart = "1785121200000";
+  let calculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman1ReportToken,
+    action: "calculation_draft_save",
+    weekStart: calculationWeekStart,
+    calculationDraftGroup: "cash",
+    calculationDraft: { cash: ["100", "200"], rake: ["stale-rake"] },
+  }));
+  assert.strictEqual(calculationDraftRes.statusCode, 200, "calculation cash group saves");
+  calculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman1ReportToken,
+    action: "calculation_draft_save",
+    weekStart: calculationWeekStart,
+    calculationDraftGroup: "figures",
+    calculationDraft: { cash: ["stale-cash"], rake: ["300", "400"], raffleTicketsReturn: "50" },
+  }));
+  assert.strictEqual(calculationDraftRes.statusCode, 200, "calculation figures group saves");
+  assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.cash, ["100", "200"], "figures save preserves cash saved by another group");
+  assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.rake, ["300", "400"], "figures save updates rake fields");
+  calculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: roman1ReportToken,
+    action: "calculation_draft_save",
+    weekStart: calculationWeekStart,
+    calculationDraftGroup: "winloss",
+    calculationDraft: { roomWinLoss: ["10", "-20"], rake: ["stale-rake"] },
+  }));
+  assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.cash, ["100", "200"], "win/loss save preserves cash group");
+  assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.rake, ["300", "400"], "win/loss save preserves figures group");
+  assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.roomWinLoss, ["10", "-20"], "win/loss save updates only its group");
   let shiftReportRes = await call(reportHandler, req("POST", {}, {
     pwaSession: roman1ReportToken,
     date: "01.06.2026",
@@ -1174,6 +1203,13 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.body.statsSummary.raffles.uniqueWinners, 2, "CRM keeps the unique raffle winner count from stored winners");
   assert.deepStrictEqual(r.body.players, [], "CRM core response omits the heavy player collection");
   assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
+  const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
+  const calculationRafflesRequest = req("GET", { pwaSession: s.admin, mode: "raffles" });
+  calculationRafflesRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
+    "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffles";
+  r = await call(crm, calculationRafflesRequest);
+  assert.strictEqual(r.statusCode, 200, "calculations access token loads protected raffle totals");
+  assert.strictEqual(r.body.raffles.uniqueParticipants, 9, "calculations raffle response includes external participants");
 
   const heavyRequest = req("GET", { pwaSession: s.admin, mode: "players" });
   heavyRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=players";

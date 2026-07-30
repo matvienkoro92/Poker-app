@@ -25,15 +25,18 @@
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
     dailyPokerStatsRangeKey: "",
+    dailyPokerStatsError: "",
     dailyPokerStatsPending: false,
     dailyPokerDebitsSort: "date",
     dailyPokerModalOpen: false,
     dailyPokerModalTab: "issued",
     dailyPokerWinnersLoading: false,
     dailyPokerWinners: null,
+    dailyPokerWinnersRequestKey: "",
     rafflesModalOpen: false,
     rafflesModalTab: "issued",
     raffleRecipientsLoading: false,
+    raffleRecipientsRequestKey: "",
     raffleRecipientsSort: "tickets",
     blockedUsers: [],
     blockedSearch: "",
@@ -66,6 +69,7 @@
     campaigns: [],
     sourceAnalytics: [],
     statsSummary: null,
+    crmWarnings: [],
     weekReport: null,
     weekReportLoading: false,
     weekReportLoadedAt: 0,
@@ -2310,6 +2314,7 @@
       return;
     }
     state.dailyPokerStatsLoading = true;
+    state.dailyPokerStatsError = "";
     state.dailyPokerStatsPending = false;
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
@@ -2327,7 +2332,7 @@
     fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=1&summary=1" + rangeQuery, { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
-        if (!data || data.ok === false) return;
+        if (!data || data.ok === false) throw new Error("daily-poker-stats");
         var stats = data.spinStats && typeof data.spinStats === "object" ? data.spinStats : data;
         state.dailyPokerStats = {
           uniquePlayers: Math.max(0, Number(stats.totalUniquePlayers != null ? stats.totalUniquePlayers : data.totalUniquePlayers) || 0),
@@ -2349,7 +2354,16 @@
         };
         state.dailyPokerStatsRangeKey = rangeKey;
       })
-      .catch(function () {})
+      .catch(function () {
+        var currentRange = selectedPeriodRange();
+        var currentRangeKey = currentRange && currentRange.from && currentRange.to
+          ? currentRange.from + ":" + currentRange.to
+          : "all";
+        if (rangeKey !== currentRangeKey) return;
+        state.dailyPokerStats = null;
+        state.dailyPokerStatsRangeKey = "";
+        state.dailyPokerStatsError = "Не удалось загрузить статистику «Крутки дня».";
+      })
       .then(function () {
         state.dailyPokerStatsLoading = false;
         if (state.loaded) renderStats();
@@ -2487,12 +2501,19 @@
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
     var range = selectedPeriodRange();
+    var requestKey = range && range.from && range.to ? range.from + ":" + range.to : "all";
+    state.dailyPokerWinnersRequestKey = requestKey;
     var rangeQuery = range && range.from && range.to ? "&from=" + encodeURIComponent(range.from) + "&to=" + encodeURIComponent(range.to) : "";
     fetch(base + "/api/promo/daily-poker/winners" + q + sep + "limit=300" + rangeQuery, { cache: "no-store" })
       .then(function (response) { return response.json(); })
-      .then(function (data) { if (data && data.ok !== false) state.dailyPokerWinners = data; })
+      .then(function (data) {
+        var currentRange = selectedPeriodRange();
+        var currentKey = currentRange && currentRange.from && currentRange.to ? currentRange.from + ":" + currentRange.to : "all";
+        if (state.dailyPokerWinnersRequestKey === requestKey && currentKey === requestKey && data && data.ok !== false) state.dailyPokerWinners = data;
+      })
       .catch(function () {})
       .then(function () {
+        if (state.dailyPokerWinnersRequestKey !== requestKey) return;
         state.dailyPokerWinnersLoading = false;
         renderDailyPokerModal();
       });
@@ -2586,15 +2607,21 @@
     var base = getApiBaseSafe();
     if (!base) return;
     state.raffleRecipientsLoading = true;
+    var range = selectedPeriodRange();
+    var requestKey = range && range.from && range.to ? range.from + ":" + range.to : "all";
+    state.raffleRecipientsRequestKey = requestKey;
     renderRafflesModal();
     fetch(base + "/api/player-crm" + crmQuery({ mode: "raffles" }), { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
-        if (!data || data.ok === false || !data.raffles) return;
+        var currentRange = selectedPeriodRange();
+        var currentKey = currentRange && currentRange.from && currentRange.to ? currentRange.from + ":" + currentRange.to : "all";
+        if (state.raffleRecipientsRequestKey !== requestKey || currentKey !== requestKey || !data || data.ok === false || !data.raffles) return;
         state.statsSummary.raffles = data.raffles;
       })
       .catch(function () {})
       .then(function () {
+        if (state.raffleRecipientsRequestKey !== requestKey) return;
         state.raffleRecipientsLoading = false;
         renderRafflesModal();
       });
@@ -2625,7 +2652,7 @@
   }
 
   function applyCrmData(data, heavyOnly) {
-    if (!data || !data.ok || !Array.isArray(data.players)) return false;
+    if (!data || !data.ok || !Array.isArray(data.players) || data.source === "redis-error" || data.source === "no-redis") return false;
     if (!heavyOnly) {
       state.players = data.players;
       state.playersPending = data.playersPending === true;
@@ -2636,6 +2663,7 @@
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
       state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
       state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : null;
+      state.crmWarnings = Array.isArray(data.crmWarnings) ? data.crmWarnings.slice() : [];
       state.permissions = data.permissions || null;
       state.pushConfigured = data.pushConfigured === true;
       state.source = data.source || "api";
@@ -2649,6 +2677,7 @@
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : state.campaigns;
       state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : state.sourceAnalytics;
       state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : state.statsSummary;
+      state.crmWarnings = Array.isArray(data.crmWarnings) ? data.crmWarnings.slice() : state.crmWarnings;
       state.permissions = data.permissions || state.permissions;
       state.pushConfigured = data.pushConfigured === true || state.pushConfigured === true;
       state.source = data.source || state.source;

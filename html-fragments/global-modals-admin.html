@@ -415,11 +415,6 @@
                 <section class="admin-report-calculations__column" id="adminReportCalcCurrentWeekCard">
                   <div class="admin-report-calculations__section-head">
                     <h3 class="admin-report-calculations__title">Текущая неделя</h3>
-                    <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
-                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" data-admin-report-calc-save="week" title="Сохранить неделю" aria-label="Сохранить неделю">✓</button>
-                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" data-admin-report-calc-edit="week" title="Редактировать неделю" aria-label="Редактировать неделю" hidden>✎</button>
-                      <span class="admin-report-calculations__status" data-admin-report-calc-status="week"></span>
-                    </div>
                   </div>
                   <p class="admin-report-calculations__week" id="adminReportCalcWeekLabel"></p>
                   <div class="admin-report-calculations__week-grid">
@@ -536,7 +531,7 @@
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback role="button" tabindex="0" aria-label="Открыть вкладку рейкбека" onclick="var m=this.closest('#adminReportModal'),p=m&&m.querySelector('[data-admin-report-panel=&quot;rakeback&quot;]');if(p){p.classList.add('admin-report-panel--rakeback-overlay');p.setAttribute('role','dialog');p.setAttribute('aria-modal','true');}if(window.pokerOpenAdminReportRakebackOverlay){window.pokerOpenAdminReportRakebackOverlay();}">
+                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback role="button" tabindex="0" aria-label="Открыть вкладку рейкбека">
                   <span>РБ в CRM текущей недели</span>
                   <output id="adminReportFiguresRakeback">0</output>
                   <small class="admin-report-calculations__reconciliation">

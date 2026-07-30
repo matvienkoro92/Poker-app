@@ -34,6 +34,9 @@ function initPlayerCrmStatsRuntime(deps) {
     var deposits = pd.reduce(function (sum, x) { return sum + x.deposits; }, 0);
     var messages = pd.reduce(function (sum, x) { return sum + x.messages; }, 0);
     var summary = state.statsSummary && typeof state.statsSummary === "object" ? state.statsSummary : null;
+    var statsWarningCodes = (Array.isArray(state.crmWarnings) ? state.crmWarnings : []).filter(function (code) {
+      return ["redis-base", "exact-analytics", "raffle-stats", "crm-events", "crm-touches"].indexOf(String(code || "")) >= 0;
+    });
     var summaryRegistrationCounts = summary && summary.registrationCounts && typeof summary.registrationCounts === "object" ? summary.registrationCounts : null;
     var periodPlayers = playersInSelectedPeriodByDate("registeredAt");
     function hasPeriodDate(value) {
@@ -190,6 +193,12 @@ function initPlayerCrmStatsRuntime(deps) {
           : "За " + esc(periodLabel()) + " нет исторических дневных данных по части счётчиков, поэтому дашборд показывает нули только по датированным событиям этого периода.") +
         "</div>"
       : "";
+    var sourceWarning = statsWarningCodes.length
+      ? "<div class=\"player-crm__notice player-crm__notice--warning\">Часть источников статистики временно не загрузилась. Показатели могут быть неполными — обнови вкладку перед использованием цифр.</div>"
+      : "";
+    if (state.dailyPokerStatsError) {
+      sourceWarning += "<div class=\"player-crm__notice player-crm__notice--warning\">" + esc(state.dailyPokerStatsError) + " Значения этой карточки скрыты, чтобы не показывать устаревшие данные.</div>";
+    }
     var dailyPokerSource = state.dailyPokerStats && typeof state.dailyPokerStats === "object" ? state.dailyPokerStats : null;
     var dailyPokerStats = dailyPokerSource;
     var dailyPokerDebitedUsers = dailyPokerSource && Array.isArray(dailyPokerSource.debitedUsers) ? dailyPokerSource.debitedUsers.slice() : [];
@@ -495,6 +504,7 @@ function initPlayerCrmStatsRuntime(deps) {
     if (trackingNoticeEl) trackingNoticeEl.innerHTML = exactTrackingNotice;
     el.innerHTML =
       (trackingNoticeEl ? "" : exactTrackingNotice) +
+      sourceWarning +
       periodWarning +
       (currentEl ? "" : currentSection) +
       "<div class=\"player-crm__period-metrics player-crm__period-metrics--three\" style=\"display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;width:100%!important;min-width:0!important\" aria-label=\"Показатели за выбранный период\">" +

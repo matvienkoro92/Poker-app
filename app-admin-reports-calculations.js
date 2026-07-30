@@ -124,19 +124,23 @@
 
       if (modal && modal.dataset.calculationsRakebackOverlayBound !== "1") {
         modal.dataset.calculationsRakebackOverlayBound = "1";
+        function openRakebackOverlay(trigger) {
+          if (!trigger || !modal.contains(trigger)) return false;
+          var panel = modal.querySelector('[data-admin-report-panel="rakeback"]');
+          if (panel) {
+            panel.classList.add("admin-report-panel--rakeback-overlay");
+            panel.setAttribute("role", "dialog");
+            panel.setAttribute("aria-modal", "true");
+          }
+          if (typeof window.pokerOpenAdminReportRakebackOverlay === "function") {
+            window.pokerOpenAdminReportRakebackOverlay();
+          }
+          return true;
+        }
         modal.addEventListener("click", function (event) {
           var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
-          if (trigger && modal.contains(trigger)) {
+          if (openRakebackOverlay(trigger)) {
             event.preventDefault();
-            var panel = modal.querySelector('[data-admin-report-panel="rakeback"]');
-            if (panel) {
-              panel.classList.add("admin-report-panel--rakeback-overlay");
-              panel.setAttribute("role", "dialog");
-              panel.setAttribute("aria-modal", "true");
-            }
-            if (typeof window.pokerOpenAdminReportRakebackOverlay === "function") {
-              window.pokerOpenAdminReportRakebackOverlay();
-            }
             return;
           }
           var close = event.target && event.target.closest ? event.target.closest("[data-admin-report-rakeback-overlay-close]") : null;
@@ -148,6 +152,12 @@
             openPanel.removeAttribute("aria-modal");
           }
         }, true);
+        modal.addEventListener("keydown", function (event) {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
+          if (!openRakebackOverlay(trigger)) return;
+          event.preventDefault();
+        });
       }
 
       bindList(elements.cashInputs, "input", function () {
