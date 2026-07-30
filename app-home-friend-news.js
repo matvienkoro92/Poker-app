@@ -372,7 +372,7 @@
         actorId: friendId(friend),
         actorNick: String(friend && friend.pokerPlusNickname || displayName).trim(),
       };
-    }).filter(Boolean).slice(0, 20);
+    }).filter(Boolean).slice(0, MAX_EVENTS);
   }
 
   function tournamentSnapshotsReady(friends) {
@@ -820,8 +820,11 @@
   function init() {
     events = readRenderedEventsCache();
     mountWhenProfileReady();
-    window.addEventListener("poker-profile-friends-ready", function () {
-      load();
+    window.addEventListener("poker-profile-friends-ready", function (event) {
+      var supplied = event && event.detail && Array.isArray(event.detail.friends)
+        ? event.detail.friends
+        : null;
+      load(supplied);
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";
@@ -831,6 +834,7 @@
       render();
       load();
     });
+    load();
     setInterval(function () { load(); }, 5 * 60 * 1000);
   }
 

@@ -2841,6 +2841,46 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Keep profile identity visually level with the full action stack. */
+.chat-user-modal__top {
+  align-items: stretch;
+}
+.chat-user-modal__top > .chat-user-modal__header {
+  align-self: stretch;
+  min-height: 100%;
+}
+.chat-user-modal__top > .chat-user-modal__header .chat-user-modal__title-block {
+  align-self: stretch;
+  justify-content: center;
+  gap: 6px;
+}
+@media (max-width: 560px) {
+  .chat-user-modal__top > .chat-user-modal__header {
+    margin-top: 0;
+  }
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__avatar,
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__avatar--placeholder {
+    width: 64px;
+    height: 64px;
+  }
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__title-block {
+    gap: 5px;
+  }
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__profile-badges {
+    margin-top: 1px;
+  }
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__last-seen {
+    margin-top: 1px;
+  }
+}
+@media (max-width: 380px) {
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__avatar,
+  .chat-user-modal__top > .chat-user-modal__header .chat-user-modal__avatar--placeholder {
+    width: 56px;
+    height: 56px;
+  }
+}
 [data-theme="light"] .chat-user-modal__last-seen {
   color: rgba(71, 85, 105, 0.88);
 }

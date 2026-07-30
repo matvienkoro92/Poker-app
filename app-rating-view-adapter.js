@@ -1409,7 +1409,7 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
   });
   var snapshots = {};
   var recentEvents = [];
-  var recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  var recentCutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
   Object.keys(requested).forEach(function (key) {
     snapshots[key] = {
       firstPlaces: 0,
@@ -1496,7 +1496,7 @@ function pokerGetFriendNewsTournamentSnapshots(nicks) {
   });
   snapshots.__recentEvents = recentEvents.sort(function (a, b) {
     return new Date(b.date).getTime() - new Date(a.date).getTime() || b.reward - a.reward;
-  }).slice(0, 80);
+  }).slice(0, 500);
   return snapshots;
 }
 
