@@ -4,7 +4,7 @@
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
   var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v2";
-  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v3";
+  var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v4";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
@@ -14,6 +14,8 @@
   var activeIndex = 0;
   var lastFriendsSignature = "";
   var lastLoadAt = 0;
+  var ratingFriends = [];
+  var ratingSnapshots = {};
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
 
   function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
@@ -92,7 +94,13 @@
             '<header class="home-friend-news-modal__header"><div><span>Друзья и клуб</span>' +
               '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
               '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
-            '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
+            '</header>' +
+            '<nav class="home-friend-news-modal__tabs" aria-label="Разделы друзей">' +
+              '<button type="button" class="home-friend-news-modal__tab home-friend-news-modal__tab--active" data-friend-news-tab="news">Новости</button>' +
+              '<button type="button" class="home-friend-news-modal__tab" data-friend-news-tab="rating">Рейтинг друзей</button>' +
+            '</nav>' +
+            '<div class="home-friend-news-modal__list" id="homeFriendNewsList" data-friend-news-panel="news"></div>' +
+            '<div class="home-friend-rating" id="homeFriendRating" data-friend-news-panel="rating" hidden></div>' +
           "</section>" +
         "</div>");
     }
@@ -158,21 +166,32 @@
     return !!time && time <= Date.now() + 86400000 && Date.now() - time <= RECENT_EVENT_MS;
   }
 
-  function relativeTime(value) {
+  function eventDateLabel(value, includeYear) {
     var time = new Date(value || 0).getTime();
     if (!time) return "";
     var eventDate = new Date(time);
     var nowDate = new Date();
-    var dateLabel = eventDate.toLocaleDateString("ru-RU", {
+    return eventDate.toLocaleDateString("ru-RU", {
       day: "numeric",
       month: "long",
-      year: eventDate.getFullYear() === nowDate.getFullYear() ? undefined : "numeric",
+      year: includeYear || eventDate.getFullYear() !== nowDate.getFullYear() ? "numeric" : undefined,
     });
+  }
+
+  function eventDayKey(value) {
+    var date = new Date(value || 0);
+    if (!Number.isFinite(date.getTime())) return "unknown";
+    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+  }
+
+  function relativeTime(value) {
+    var time = new Date(value || 0).getTime();
+    if (!time) return "";
     var delta = Math.max(0, Date.now() - time);
-    if (delta < 3600000) return dateLabel + " · " + Math.max(1, Math.floor(delta / 60000)) + " мин назад";
-    if (delta < 86400000) return dateLabel + " · " + Math.floor(delta / 3600000) + " ч назад";
-    if (delta < 172800000) return dateLabel + " · вчера";
-    return dateLabel;
+    if (delta < 3600000) return Math.max(1, Math.floor(delta / 60000)) + " мин назад";
+    if (delta < 86400000) return Math.floor(delta / 3600000) + " ч назад";
+    if (delta < 172800000) return "вчера";
+    return eventDateLabel(value, false);
   }
 
   function collectLevelEvents(friends) {
@@ -250,8 +269,6 @@
         { key: "firstPlaces", title: "одержал новую победу в турнире" },
         { key: "top10Finishes", title: "получил новую ачивку «Топ-10 рейтинга»" },
         { key: "seasonCups", title: "получил новый сезонный кубок" },
-        { key: "monthChampions", title: "стал чемпионом месяца" },
-        { key: "viceMonthChampions", title: "стал вице-чемпионом месяца" },
         { key: "raffleWins", title: "продвинулся в ачивке «Золотой билет»" },
         { key: "luckyMonths", title: "получил новую ачивку «Счастливчик месяца»" },
       ].forEach(function (metric) {
@@ -425,6 +442,54 @@
     return snapshots;
   }
 
+  function applySpecialAchievementSnapshots(friends, snapshots, sngRows, choiceRows) {
+    var candidates = (friends || []).map(function (friend) {
+      var nickKey = matchKey(friend && friend.pokerPlusNickname);
+      if (snapshots[nickKey]) {
+        snapshots[nickKey].sngAchievements = 0;
+        snapshots[nickKey].clubChoiceWins = 0;
+        snapshots[nickKey].clubLevel = Math.max(0, Number(friend && friend.statusLevel) || 0);
+      }
+      return {
+        friend: friend,
+        nickKey: nickKey,
+        keys: [
+          friend && friend.userId, friend && friend.accountId, friend && friend.dtId,
+          friend && friend.chatUserId, friend && friend.p21Id,
+          friend && friend.pokerPlusNickname, friend && friend.chatDisplayName,
+        ].map(matchKey).filter(Boolean),
+      };
+    });
+    function candidateFor(row) {
+      var keys = [
+        row && row.userId, row && row.accountId, row && row.dtId, row && row.p21Id,
+        row && row.pokerPlusUserId, row && row.pokerPlusNickname,
+        row && row.nick, row && row.name,
+      ].map(matchKey).filter(Boolean);
+      return candidates.find(function (candidate) {
+        return candidate.keys.some(function (key) { return keys.indexOf(key) !== -1; });
+      });
+    }
+    (Array.isArray(sngRows) ? sngRows : []).forEach(function (season) {
+      (Array.isArray(season && season.winners) ? season.winners : []).forEach(function (winner) {
+        var place = Math.max(0, Number(winner && winner.place) || 0);
+        var candidate = place > 0 && place <= 2 ? candidateFor(winner) : null;
+        if (candidate && snapshots[candidate.nickKey]) snapshots[candidate.nickKey].sngAchievements += 1;
+      });
+    });
+    (Array.isArray(choiceRows) ? choiceRows : []).forEach(function (period) {
+      var winners = Array.isArray(period && period.winners) ? period.winners
+        : Array.isArray(period && period.top) ? period.top
+          : Array.isArray(period && period.players) ? period.players : [];
+      winners.forEach(function (winner) {
+        if (Number(winner && winner.place) !== 1) return;
+        var candidate = candidateFor(winner);
+        if (candidate && snapshots[candidate.nickKey]) snapshots[candidate.nickKey].clubChoiceWins += 1;
+      });
+    });
+    return snapshots;
+  }
+
   function winnerEvents(friends, winners) {
     var byId = {};
     var byName = {};
@@ -561,8 +626,7 @@
 
   function eventHtml(row, ticker) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
-      ? new Date(row.at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) +
-        " · через " + Number(row.upcomingDays) + " дн."
+      ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       '" data-home-news-target="' + esc(row.target || "") + '">' +
@@ -571,6 +635,98 @@
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong><small>" + esc(timeLabel) + "</small>") +
       "</span></span>";
+  }
+
+  function modalEventsHtml(rows) {
+    var lastDay = "";
+    return (rows || []).map(function (row) {
+      var day = eventDayKey(row && row.at);
+      var header = day !== lastDay
+        ? '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(row && row.at, true)) + "</span></div>"
+        : "";
+      lastDay = day;
+      return header + eventHtml(row, false);
+    }).join("");
+  }
+
+  function friendRatingHtml(friends, snapshots) {
+    function leagueHtml(league) {
+      var placeKey = league === 1 ? "league1Place" : "league2Place";
+      var pointsKey = league === 1 ? "league1Points" : "league2Points";
+      var rewardKey = league === 1 ? "league1Reward" : "league2Reward";
+      var rows = (friends || []).map(function (friend) {
+        var snapshot = snapshots && snapshots[matchKey(friend && friend.pokerPlusNickname)];
+        var place = Number(snapshot && snapshot[placeKey]) || 0;
+        return place ? { friend: friend, snapshot: snapshot, place: place } : null;
+      }).filter(Boolean).sort(function (a, b) {
+        return a.place - b.place;
+      });
+      var content = rows.length ? rows.map(function (row, index) {
+        var points = Number(row.snapshot[pointsKey]) || 0;
+        var reward = Number(row.snapshot[rewardKey]) || 0;
+        return '<article class="home-friend-rating__row">' +
+          '<span class="home-friend-rating__rank">' + (index + 1) + "</span>" +
+          '<span class="home-friend-rating__player"><strong>' + esc(friendPokerIdentity(row.friend)) + "</strong>" +
+            '<small>' + row.place + " место в Лиге " + league + "</small></span>" +
+          '<span class="home-friend-rating__stats"><strong>' + points.toLocaleString("ru-RU") + " б.</strong>" +
+            '<small>' + formatRub(reward) + "</small></span>" +
+        "</article>";
+      }).join("") : '<div class="home-friend-rating__empty">Среди друзей пока нет участников этой лиги</div>';
+      return '<section class="home-friend-rating__league">' +
+        '<h3>Лига ' + league + '<small>' + rows.length + " игроков</small></h3>" +
+        content +
+      "</section>";
+    }
+    function comparisonsHtml() {
+      var metrics = [
+        { key: "clubLevel", title: "Уровень клуба", unit: "ур." },
+        { key: "firstPlaces", title: "Король турниров", unit: "побед" },
+        { key: "bigWins50", title: "Заносы 50–99К", unit: "заносов" },
+        { key: "bigWins100", title: "Заносы от 100К", unit: "заносов" },
+        { key: "totalReward", title: "Миллионер клуба", money: true },
+        { key: "top10Finishes", title: "Топ‑10 рейтинга", unit: "раз" },
+        { key: "seasonCups", title: "Сезонные кубки", unit: "кубков" },
+        { key: "sngAchievements", title: "СНГ Лига чемпионов", unit: "наград" },
+        { key: "clubChoiceWins", title: "Выбор клуба", unit: "побед" },
+        { key: "raffleWins", title: "Золотой билет", unit: "побед" },
+        { key: "luckyMonths", title: "Счастливчик месяца", unit: "раз" },
+      ];
+      return '<section class="home-friend-achievement-ratings"><h3>Сравнение по ачивкам</h3>' +
+        metrics.map(function (metric) {
+          var rows = (friends || []).map(function (friend) {
+            var snapshot = snapshots && snapshots[matchKey(friend && friend.pokerPlusNickname)];
+            var value = Number(snapshot && snapshot[metric.key]) || 0;
+            return value > 0 ? { friend: friend, value: value } : null;
+          }).filter(Boolean).sort(function (a, b) {
+            return b.value - a.value || friendName(a.friend).localeCompare(friendName(b.friend), "ru");
+          }).slice(0, 10);
+          var rowsHtml = rows.length ? rows.map(function (row, index) {
+            var value = metric.money ? formatRub(row.value) : row.value.toLocaleString("ru-RU") + " " + metric.unit;
+            return '<div class="home-friend-achievement-ratings__row">' +
+              '<span>' + (index + 1) + "</span><strong>" + esc(friendName(row.friend)) + "</strong><b>" + esc(value) + "</b>" +
+            "</div>";
+          }).join("") : '<div class="home-friend-achievement-ratings__empty">Пока нет данных</div>';
+          return '<article class="home-friend-achievement-ratings__card"><h4>' + esc(metric.title) + "</h4>" + rowsHtml + "</article>";
+        }).join("") +
+      "</section>";
+    }
+    return leagueHtml(1) + leagueHtml(2) + comparisonsHtml();
+  }
+
+  function setFriendNewsTab(tab) {
+    tab = tab === "rating" ? "rating" : "news";
+    var modal = el("homeFriendNewsModal");
+    if (!modal) return;
+    Array.prototype.forEach.call(modal.querySelectorAll("[data-friend-news-tab]"), function (button) {
+      var active = button.getAttribute("data-friend-news-tab") === tab;
+      button.classList.toggle("home-friend-news-modal__tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    Array.prototype.forEach.call(modal.querySelectorAll("[data-friend-news-panel]"), function (panel) {
+      panel.hidden = panel.getAttribute("data-friend-news-panel") !== tab;
+    });
+    var title = el("homeFriendNewsModalTitle");
+    if (title) title.textContent = tab === "rating" ? "Рейтинг среди друзей" : "Новости друзей";
   }
 
   function showIndex(index, animate) {
@@ -592,7 +748,8 @@
     var root = el("homeFriendNews");
     var track = el("homeFriendNewsTrack");
     var list = el("homeFriendNewsList");
-    if (!root || !track || !list) return;
+    var rating = el("homeFriendRating");
+    if (!root || !track || !list || !rating) return;
     root.hidden = false;
     if (!events.length) {
       events = [{
@@ -606,7 +763,8 @@
     track.innerHTML = events.map(function (row) { return eventHtml(row, true); }).join("");
     list.innerHTML = events[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
-      : events.map(function (row) { return eventHtml(row, false); }).join("");
+      : modalEventsHtml(events);
+    rating.innerHTML = friendRatingHtml(ratingFriends, ratingSnapshots);
     showIndex(0, false);
     startRotation();
   }
@@ -635,6 +793,11 @@
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
       modal.addEventListener("click", function (event) {
+      var tab = event.target.closest("[data-friend-news-tab]");
+      if (tab) {
+        setFriendNewsTab(tab.getAttribute("data-friend-news-tab"));
+        return;
+      }
       if (event.target.closest("[data-home-friend-news-close]")) {
         closeModal();
         return;
@@ -684,6 +847,8 @@
     friendsPromise.then(function (friendsPayload) {
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       if (!friends.length) {
+        ratingFriends = [];
+        ratingSnapshots = {};
         events = [];
         render();
         return null;
@@ -715,6 +880,9 @@
         results[4] || {},
         results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
       );
+      applySpecialAchievementSnapshots(friends, tournamentSnapshots, sngRows, choiceRows);
+      ratingFriends = friends;
+      ratingSnapshots = tournamentSnapshots;
       events = collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         collectTournamentEvents(friends, tournamentSnapshots),
