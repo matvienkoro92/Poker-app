@@ -4153,6 +4153,7 @@ async function testProfileUserLookup(redis) {
   redis.h("poker_app:visitor_chat_display_names").set("ID100002", "Peer Display");
   redis.h("poker_app:pokerplus_user_ids").set("ID100002", "P21-1002");
   redis.h("poker_app:pokerplus_stats_visible").set("ID100002", "1");
+  redis.h("poker_app:email_originals").set("ID100002", "peer-private@example.test");
   redis.h("poker_app:pokerplus_profiles").set("ID100002", JSON.stringify({
     totalCounter: {
       fee: 100,
@@ -4187,6 +4188,7 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(r.body.chatDisplayName, "Peer Display", "lookup returns display name");
   assert.strictEqual(r.body.profileBirthDate, "1992-04-05", "lookup returns immutable birth date");
   assert.strictEqual(r.body.profileSpecialty, "cash", "lookup returns poker specialty");
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(r.body, "email"), false, "public player lookup never exposes email");
   assert.strictEqual(r.body.pokerPlusStatsVisible, true, "lookup returns visible PokerPlus stats flag");
   assert.deepStrictEqual(
     r.body.pokerPlusStats,
