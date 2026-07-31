@@ -2383,6 +2383,16 @@ function initWinterRating() {
         ? ((typeof isSummerRatingMode === "function" && isSummerRatingMode()) ? "summer_rating_days" : "spring_rating_days")
         : (typeof getRatingSeasonStartAppPrefix === "function" ? getRatingSeasonStartAppPrefix("league") : "spring_rating_league_") + sectionKey;
       var link = typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp) : "";
+      if (!link) {
+        try {
+          var fallbackUrl = new URL(window.location.href);
+          fallbackUrl.hash = "";
+          fallbackUrl.searchParams.set("startapp", startApp);
+          link = fallbackUrl.toString();
+        } catch (copyUrlError) {
+          link = window.location.href;
+        }
+      }
       var mode = shareBtn.getAttribute("data-rating-share-mode") || "copy";
       if (mode === "share") {
         var leagueLabel = sectionKey === "top" ? "по дням" : (sectionKey === "2" ? "Лига 2" : "Лига 1");
@@ -2402,11 +2412,16 @@ function initWinterRating() {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (copied) {
           showSpringLeagueCopyFeedback(shareBtn);
+          if (tg && tg.showToast) tg.showToast("Ссылка скопирована");
         } else if (tg && tg.showAlert) {
           tg.showAlert("Ссылка: " + link);
         } else {
           alert("Ссылка: " + link);
         }
+      }).catch(function () {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
+        else alert("Ссылка: " + link);
       });
     });
   }

@@ -532,8 +532,19 @@ if (chatUserModalEl) {
     var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
     var commentsHtml = comments.length
       ? comments.map(function (comment) {
-          return '<div class="chat-user-modal__news-comment"><strong>' + escapeHtml(comment.author || "Игрок") +
-            '</strong><p>' + escapeHtml(comment.text || "") + "</p></div>";
+          var authorName = String(comment.author || "Игрок");
+          var authorAvatar = String(comment.authorAvatar || "");
+          var authorProfileId = String(comment.authorProfileId || comment.memberId || "");
+          return '<div class="chat-user-modal__news-comment">' +
+            '<button type="button" class="chat-user-modal__news-comment-author" data-profile-event-author' +
+              ' data-user-id="' + escapeHtml(authorProfileId) + '"' +
+              ' data-user-name="' + escapeHtml(authorName) + '"' +
+              ' data-user-avatar="' + escapeHtml(authorAvatar) + '">' +
+              (authorAvatar
+                ? '<img src="' + escapeHtml(authorAvatar) + '" alt="">'
+                : '<span aria-hidden="true">' + escapeHtml((authorName || "И").charAt(0).toUpperCase()) + "</span>") +
+              "<strong>" + escapeHtml(authorName) + "</strong>" +
+            '</button><p>' + escapeHtml(comment.text || "") + "</p></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
@@ -670,6 +681,20 @@ if (chatUserModalEl) {
   }
   function handleChatUserModalNewsInteraction(event) {
     var target = event.target;
+    var authorButton = target && target.closest ? target.closest("[data-profile-event-author]") : null;
+    if (authorButton) {
+      event.preventDefault();
+      var authorId = authorButton.getAttribute("data-user-id");
+      if (authorId && typeof window.openChatUserModalById === "function") {
+        closeChatUserModalNews();
+        window.openChatUserModalById(
+          authorId,
+          authorButton.getAttribute("data-user-name") || "Игрок",
+          authorButton.getAttribute("data-user-avatar") || ""
+        );
+      }
+      return;
+    }
     var item = target && target.closest ? target.closest("[data-profile-event-id]") : null;
     var eventId = item && item.getAttribute("data-profile-event-id");
     if (!eventId) return;

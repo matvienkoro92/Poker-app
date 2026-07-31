@@ -2811,11 +2811,27 @@
 .chat-user-modal__top-actions .chat-user-modal__friend-btn,
 .chat-user-modal__top-actions .chat-user-modal__remove-friend {
   grid-column: 1;
-  min-height: 38px;
-  height: 38px;
-  padding: 8px 12px;
+  min-height: 44px;
+  height: auto;
+  padding: 8px 7px;
   font-size: 12px;
-  white-space: nowrap;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.chat-user-modal__top-actions .chat-user-modal__write-btn {
+  color: #effff5;
+  border-color: rgba(74, 222, 128, 0.62);
+  background:
+    linear-gradient(180deg, rgba(34, 197, 94, 0.96), rgba(21, 128, 61, 0.98));
+  box-shadow:
+    0 7px 18px rgba(22, 163, 74, 0.24),
+    inset 0 1px 0 rgba(220, 252, 231, 0.28);
+}
+.chat-user-modal__top-actions .chat-user-modal__write-btn:hover {
+  background:
+    linear-gradient(180deg, rgba(47, 211, 108, 0.98), rgba(22, 145, 68, 0.98));
 }
 .chat-user-modal__top-actions .chat-user-modal__block-btn {
   grid-column: 1;
@@ -3567,19 +3583,54 @@
   border-radius: 11px;
   background: rgba(5, 10, 17, 0.56);
 }
-.chat-user-modal__news-comment strong {
+.chat-user-modal__news-comment-author {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.chat-user-modal__news-comment-author img,
+.chat-user-modal__news-comment-author > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 201, 91, 0.45);
+  border-radius: 50%;
+  background: #101925;
   color: #ffd98b;
-  font-size: 12px;
+  object-fit: cover;
+  font-size: 13px;
+  font-weight: 950;
+}
+.chat-user-modal__news-comment-author strong {
+  overflow: hidden;
+  color: #ffd98b;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-user-modal__news-comment-author:active {
+  opacity: 0.72;
 }
 .chat-user-modal__news-comment p,
 .chat-user-modal__news-comments-empty {
-  margin: 3px 0 0;
+  margin: 5px 0 0 38px;
   color: #dbe5f4;
   font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .chat-user-modal__news-comments-empty {
+  margin-left: 0;
   color: #8ea0b8;
 }
 .chat-user-modal__news-comment-form {
