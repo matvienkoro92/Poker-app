@@ -181,7 +181,15 @@
   }
 
   function apiBase() {
-    try { return typeof getApiBase === "function" ? getApiBase() : ""; } catch (error) { return ""; }
+    try {
+      if (typeof getApiBase === "function") {
+        var configured = String(getApiBase() || "").replace(/\/$/, "");
+        if (configured) return configured;
+      }
+      return window.location && window.location.origin ? String(window.location.origin).replace(/\/$/, "") : "";
+    } catch (error) {
+      return window.location && window.location.origin ? String(window.location.origin).replace(/\/$/, "") : "";
+    }
   }
 
   function openNewsPlayerProfile(id, name, avatar) {
@@ -1668,8 +1676,9 @@
     var preservedClubEvents = clubEvents.slice();
     var base = apiBase();
     if (!base) {
-      clubNewsLoading = false;
+      clubNewsLoading = true;
       renderClubNews();
+      scheduleClubNewsRetry();
       return;
     }
     if (clubNewsLoadPromise) return clubNewsLoadPromise;
@@ -1679,10 +1688,13 @@
     var joiner = suffix ? "&" : "?";
     var request = Promise.all([
       cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels", 5 * 60 * 1000, { cache: "default" })
-        .catch(function () { return { levelRows: [] }; }),
+        .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100", "club-news-daily:" + suffix, 60 * 1000, { cache: "default" })
-        .catch(function () { return { winners: [] }; }),
+        .catch(function () { return { winners: [], failed: true }; }),
     ]).then(function (results) {
+      if ((results[0] && results[0].failed) || (results[1] && results[1].failed)) {
+        throw new Error("club news source unavailable");
+      }
       var players = (results[0] && Array.isArray(results[0].levelRows) ? results[0].levelRows : []).map(function (row) {
         return Object.assign({}, row, {
           userId: row && (row.userId || row.accountId || row.dtId) || "",
