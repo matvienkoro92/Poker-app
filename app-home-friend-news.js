@@ -26,6 +26,12 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v1";
+  var clubNewsLoading = true;
+  var clubNewsLoaded = false;
+  var clubNewsLoadPromise = null;
+  var clubNewsRetryTimer = 0;
+  var clubNewsRetryCount = 0;
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -61,6 +67,27 @@
     try {
       sessionStorage.setItem(RENDERED_EVENTS_CACHE_KEY, JSON.stringify(
         (Array.isArray(rows) ? rows : []).filter(function (row) { return row && row.id !== "empty"; }).slice(0, MAX_EVENTS)
+      ));
+    } catch (error) {}
+  }
+
+  function readClubEventsCache() {
+    try {
+      var rows = JSON.parse(sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]");
+      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+        return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isPreviousCalendarDay(row.at);
+      }).slice(0, MAX_EVENTS);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeClubEventsCache(rows) {
+    try {
+      sessionStorage.setItem(CLUB_EVENTS_CACHE_KEY, JSON.stringify(
+        (Array.isArray(rows) ? rows : []).filter(function (row) {
+          return row && row.id !== "club-empty" && row.id !== "club-loading";
+        }).slice(0, MAX_EVENTS)
       ));
     } catch (error) {}
   }
@@ -1008,19 +1035,20 @@
     var root = el("homeClubNews");
     var track = el("homeClubNewsTrack");
     if (!root || !track) return;
-    if (!clubEvents.length) {
-      clubEvents = [{
-        id: "club-empty",
+    var displayRows = clubEvents;
+    if (!displayRows.length) {
+      displayRows = [{
+        id: clubNewsLoading && !clubNewsLoaded ? "club-loading" : "club-empty",
         type: "empty",
-        text: "За вчера новостей клуба нет",
+        text: clubNewsLoading && !clubNewsLoaded ? "Загружаем новости клуба…" : "За вчера новостей клуба нет",
         at: "",
       }];
     }
     root.hidden = false;
-    track.innerHTML = clubEvents.map(function (row) { return eventHtml(row, true); }).join("");
+    track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true); }).join("");
     showClubIndex(0, false);
     clearInterval(clubRotateTimer);
-    if (clubEvents.length > 1) {
+    if (displayRows.length > 1) {
       clubRotateTimer = setInterval(function () { showClubIndex(clubActiveIndex + 1, true); }, ROTATE_MS);
     }
   }
@@ -1049,6 +1077,12 @@
     var list = el("homeFriendNewsList");
     if (!list) return;
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
+    if (newsModalMode === "club" && clubNewsLoading && !hasRealRows) {
+      list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
+        '<span aria-hidden="true"></span><strong>Загружаем новости клуба…</strong>' +
+        '<small>Собираем все события за вчера</small></div>';
+      return;
+    }
     if (friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
       list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
         '<span aria-hidden="true"></span><strong>Загружаем новости всех друзей…</strong>' +
@@ -1095,6 +1129,7 @@
   }
 
   function openClubModal() {
+    if (!clubEvents.length) loadClubNews(true);
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     newsModalMode = "club";
@@ -1340,15 +1375,28 @@
     });
   }
 
-  function loadClubNews() {
+  function scheduleClubNewsRetry() {
+    if (clubNewsRetryTimer || clubEvents.length || clubNewsRetryCount >= 12) return;
+    clubNewsRetryCount += 1;
+    clubNewsRetryTimer = window.setTimeout(function () {
+      clubNewsRetryTimer = 0;
+      loadClubNews(true);
+    }, Math.min(4000, 350 * Math.pow(1.45, clubNewsRetryCount - 1)));
+  }
+
+  function loadClubNews(force) {
     var base = apiBase();
     if (!base) {
+      clubNewsLoading = false;
       renderClubNews();
       return;
     }
+    if (clubNewsLoadPromise) return clubNewsLoadPromise;
+    clubNewsLoading = true;
+    renderClubNews();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
-    Promise.all([
+    var request = Promise.all([
       cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [] }; }),
       cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100", "club-news-daily:" + suffix, 60 * 1000, { cache: "default" })
@@ -1363,6 +1411,7 @@
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       return clubTournamentSnapshotsReady().then(function (snapshots) {
+        var sourceReady = Number(snapshots && snapshots.__sourceRowCount) > 0;
         var knownNicks = {};
         players.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
         (snapshots && snapshots.__recentEvents || []).forEach(function (row) {
@@ -1372,7 +1421,7 @@
           knownNicks[key] = true;
           players.push({ userId: "rating:" + key, pokerPlusNickname: nick, pokerPlusName: nick });
         });
-        clubEvents = attachFriendAvatars(
+        var nextClubEvents = attachFriendAvatars(
           recentTournamentEvents(players, snapshots || {}).concat(
             recentTournamentAchievementEvents(players, snapshots || {}),
             winnerEvents(players, winners)
@@ -1385,16 +1434,34 @@
         }).filter(function (row, index, rows) {
           return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
         }).slice(0, MAX_EVENTS);
+        if (nextClubEvents.length) {
+          clubEvents = nextClubEvents;
+          clubNewsLoaded = true;
+          clubNewsRetryCount = 0;
+          writeClubEventsCache(clubEvents);
+        } else if (sourceReady) {
+          clubEvents = [];
+          clubNewsLoaded = true;
+        }
+        clubNewsLoading = !sourceReady;
         renderClubNews();
+        if (!sourceReady) scheduleClubNewsRetry();
       });
     }).catch(function () {
-      clubEvents = [];
+      clubNewsLoading = true;
       renderClubNews();
+      scheduleClubNewsRetry();
+    }).finally(function () {
+      if (clubNewsLoadPromise === request) clubNewsLoadPromise = null;
     });
+    clubNewsLoadPromise = request;
+    return request;
   }
 
   function init() {
     events = readRenderedEventsCache();
+    clubEvents = readClubEventsCache();
+    clubNewsLoaded = clubEvents.length > 0;
     mountWhenProfileReady();
     loadClubNews();
     window.addEventListener("poker-profile-friends-ready", function (event) {

@@ -1518,10 +1518,13 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
     ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).catch(function () { return false; })
     : Promise.resolve(false);
   return ready.then(function () {
-    var nicks = pokerRatingAchievementAllTournamentRows().map(function (row) {
+    var allRows = pokerRatingAchievementAllTournamentRows();
+    var nicks = allRows.map(function (row) {
       return row && row.nick;
     }).filter(Boolean);
-    return pokerGetFriendNewsTournamentSnapshots(nicks);
+    var snapshots = pokerGetFriendNewsTournamentSnapshots(nicks);
+    snapshots.__sourceRowCount = allRows.length;
+    return snapshots;
   });
 }
 
