@@ -2239,6 +2239,74 @@ body.profile-avatar-choice-open {
   color: #8ea0b8;
   font-size: 12px;
 }
+.view[data-view="profile"] .profile-own-wall__month-empty {
+  min-height: 120px;
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler {
+  border-top: 1px solid rgba(197, 139, 47, 0.42);
+  background: rgba(4, 8, 15, 0.36);
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler > summary {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 22px;
+  color: #ffe3a3;
+  font-size: 17px;
+  font-weight: 950;
+  cursor: pointer;
+  list-style: none;
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler > summary::-webkit-details-marker {
+  display: none;
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler > summary::after {
+  content: "⌄";
+  color: #ffbd39;
+  font-size: 24px;
+  transition: transform 0.18s ease;
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler[open] > summary::after {
+  transform: rotate(180deg);
+}
+.view[data-view="profile"] .profile-own-wall__month-spoiler > summary small {
+  margin-left: auto;
+  color: #91a2ba;
+  font-size: 13px;
+}
+.view[data-view="profile"] .profile-own-wall__day {
+  margin: 0;
+}
+.view[data-view="profile"] .profile-own-wall__day-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 18px 12px;
+  text-align: center;
+}
+.view[data-view="profile"] .profile-own-wall__day-date::before,
+.view[data-view="profile"] .profile-own-wall__day-date::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(197, 139, 47, 0.58));
+}
+.view[data-view="profile"] .profile-own-wall__day-date::after {
+  background: linear-gradient(90deg, rgba(197, 139, 47, 0.58), transparent);
+}
+.view[data-view="profile"] .profile-own-wall__day-date > span {
+  flex: 0 0 auto;
+  padding: 7px 15px;
+  border: 1px solid rgba(197, 139, 47, 0.52);
+  border-radius: 999px;
+  background: rgba(197, 139, 47, 0.12);
+  color: #ffe3a3;
+  font-size: 14px;
+  font-weight: 950;
+}
 @media (max-width: 760px) {
   .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
     grid-template-columns: 1fr;
@@ -3093,6 +3161,33 @@ body.profile-avatar-choice-open {
   }
 }
 
+/* Personal wall posts use a larger, waist-up crop of the rating character. */
+.view[data-view="profile"] .profile-own-wall .chat-user-modal__news-item--personal .chat-user-modal__news-icon--avatar {
+  width: 68px;
+  height: 68px;
+  align-self: start;
+  overflow: hidden;
+  border-radius: 50% !important;
+}
+
+.view[data-view="profile"] .profile-own-wall .chat-user-modal__news-item--personal .chat-user-modal__news-icon--avatar img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 24%;
+  transform: scale(1.75);
+  transform-origin: 50% 28%;
+}
+
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-own-wall .chat-user-modal__news-item--personal .chat-user-modal__news-icon--avatar {
+    width: 60px;
+    height: 60px;
+  }
+}
+
 /* Scale long action labels to the actual button width without wrapping or clipping. */
 .view[data-view="profile"] .profile-public-showcase__level-actions.profile-status__refresh-action {
   container-type: inline-size;
@@ -3846,6 +3941,7 @@ body.profile-avatar-choice-open {
     align-items: start !important;
     column-gap: 16px !important;
     row-gap: 8px !important;
+    min-height: 0 !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
@@ -3854,7 +3950,7 @@ body.profile-avatar-choice-open {
 
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__avatar-wrap {
     grid-column: 1 !important;
-    grid-row: 1 / span 2 !important;
+    grid-row: 2 !important;
     width: 96px !important;
     height: 96px !important;
     align-self: start !important;
@@ -3867,9 +3963,10 @@ body.profile-avatar-choice-open {
 
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block {
     display: flex !important;
-    grid-column: 2 !important;
+    grid-column: 1 / -1 !important;
     grid-row: 1 !important;
-    align-self: end !important;
+    align-self: start !important;
+    width: 100% !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__self-actions {

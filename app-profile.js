@@ -90,6 +90,59 @@ function profileOwnWallPersonalAvatarUrl() {
   return profilePublicCardAvatarUrl();
 }
 
+function profileOwnWallRowHtml(row) {
+  var ownAvatar = row.personal ? profileOwnWallPersonalAvatarUrl() : "";
+  var controls = row.personal
+    ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
+      '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
+    : "";
+  return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
+    '<span class="chat-user-modal__news-icon' + (ownAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
+      (ownAvatar ? '<img src="' + profileEscapeHtml(ownAvatar) + '" alt="">' : (row.personal ? "✎" : "♠")) + "</span>" +
+    '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
+      (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "") +
+      (row.image ? '<img class="chat-user-modal__wall-image" src="' + profileEscapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
+      '<small class="profile-own-wall__date">' + profileEscapeHtml(profileOwnWallDate(row.at)) + (row.editedAt ? " · изменено" : "") + "</small>" + controls +
+    "</span></article>";
+}
+
+function profileOwnWallMonthKey(value) {
+  var date = new Date(value || 0);
+  return Number.isFinite(date.getTime()) ? date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") : "";
+}
+
+function profileOwnWallMonthTitle(date) {
+  var title = date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
+function profileOwnWallDayKey(value) {
+  var date = new Date(value || 0);
+  if (!Number.isFinite(date.getTime())) return "";
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+}
+
+function profileOwnWallDayGroupsHtml(rows) {
+  var groups = [];
+  (rows || []).forEach(function (row) {
+    var key = profileOwnWallDayKey(row && row.at);
+    var group = groups.find(function (candidate) { return candidate.key === key; });
+    if (!group) {
+      group = { key: key, at: row && row.at, rows: [] };
+      groups.push(group);
+    }
+    group.rows.push(row);
+  });
+  return groups.map(function (group) {
+    return '<section class="chat-user-modal__news-day profile-own-wall__day">' +
+      '<div class="chat-user-modal__news-date profile-own-wall__day-date"><span>' +
+        profileEscapeHtml(profileOwnWallDate(group.at)) +
+      '</span></div><div class="chat-user-modal__news-day-list">' +
+        group.rows.map(profileOwnWallRowHtml).join("") +
+      "</div></section>";
+  }).join("");
+}
+
 function renderProfileOwnWall() {
   var root = document.getElementById("profileOwnWall");
   var list = document.getElementById("profileOwnWallList");
@@ -110,21 +163,25 @@ function renderProfileOwnWall() {
       '</strong>' + (profileOwnWallState.tab === "personal" ? "<span>Напишите первую личную запись.</span>" : "") + "</div>";
     return;
   }
-  list.innerHTML = rows.map(function (row) {
-    var ownAvatar = row.personal ? profileOwnWallPersonalAvatarUrl() : "";
-    var controls = row.personal
-      ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
-        '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
-      : "";
-    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
-      '<span class="chat-user-modal__news-icon' + (ownAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
-        (ownAvatar ? '<img src="' + profileEscapeHtml(ownAvatar) + '" alt="">' : (row.personal ? "✎" : "♠")) + "</span>" +
-      '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
-        (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "") +
-        (row.image ? '<img class="chat-user-modal__wall-image" src="' + profileEscapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
-        '<small class="profile-own-wall__date">' + profileEscapeHtml(profileOwnWallDate(row.at)) + (row.editedAt ? " · изменено" : "") + "</small>" + controls +
-      "</span></article>";
-  }).join("");
+  if (profileOwnWallState.tab === "personal") {
+    list.innerHTML = rows.map(profileOwnWallRowHtml).join("");
+    return;
+  }
+  var currentDate = new Date();
+  var previousDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+  var currentKey = profileOwnWallMonthKey(currentDate);
+  var previousKey = profileOwnWallMonthKey(previousDate);
+  var currentRows = rows.filter(function (row) { return profileOwnWallMonthKey(row.at) === currentKey; });
+  var previousRows = rows.filter(function (row) { return profileOwnWallMonthKey(row.at) === previousKey; });
+  if (count) count.textContent = currentRows.length + previousRows.length + " событий";
+  var currentHtml = currentRows.length
+    ? profileOwnWallDayGroupsHtml(currentRows)
+    : '<div class="chat-user-modal__wall-empty profile-own-wall__month-empty"><strong>В этом месяце событий пока нет</strong></div>';
+  var previousHtml = previousRows.length
+    ? '<details class="profile-own-wall__month-spoiler"><summary><span>' + profileEscapeHtml(profileOwnWallMonthTitle(previousDate)) +
+      '</span><small>' + previousRows.length + ' событий</small></summary><div>' + profileOwnWallDayGroupsHtml(previousRows) + "</div></details>"
+    : "";
+  list.innerHTML = currentHtml + previousHtml;
 }
 
 function refreshProfileOwnWall(force) {

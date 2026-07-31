@@ -921,6 +921,40 @@
     });
   }
 
+  function showReactionUsers(feedback, emoji) {
+    var rows = (Array.isArray(feedback && feedback.reactors) ? feedback.reactors : []).filter(function (row) {
+      return row && row.emoji === emoji;
+    });
+    var old = document.querySelector(".profile-reaction-users");
+    if (old) old.remove();
+    var overlay = document.createElement("div");
+    overlay.className = "profile-reaction-users";
+    overlay.innerHTML = '<div class="profile-reaction-users__dialog" role="dialog" aria-modal="true" aria-label="Кто поставил реакцию">' +
+      '<button type="button" class="profile-reaction-users__close" aria-label="Закрыть">×</button>' +
+      '<h3>' + esc(emoji) + ' Кто поставил реакцию</h3><div class="profile-reaction-users__list">' +
+      (rows.length ? rows.map(function (row) {
+        var name = String(row.name || "Игрок");
+        return '<button type="button" class="profile-reaction-users__person" data-reaction-profile-id="' + esc(row.profileId || "") +
+          '" data-reaction-profile-name="' + esc(name) + '" data-reaction-profile-avatar="' + esc(row.avatar || "") + '">' +
+          (row.avatar ? '<img src="' + esc(row.avatar) + '" alt="">' : '<span>' + esc(name.charAt(0).toUpperCase()) + "</span>") +
+          "<strong>" + esc(name) + "</strong></button>";
+      }).join("") : '<p class="profile-reaction-users__empty">Пока никого</p>') +
+      "</div></div>";
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay || event.target.closest(".profile-reaction-users__close")) {
+        overlay.remove();
+        return;
+      }
+      var person = event.target.closest("[data-reaction-profile-id]");
+      if (!person) return;
+      var profileId = person.getAttribute("data-reaction-profile-id");
+      overlay.remove();
+      if (profileId) handoffNewsModalToPlayer(profileId, person.getAttribute("data-reaction-profile-name") || "Игрок", person.getAttribute("data-reaction-profile-avatar") || "");
+    });
+  }
+  window.pokerShowProfileReactionUsers = showReactionUsers;
+
   function eventFeedbackHtml(row) {
     var rowId = String(row && row.id || "");
     var feedback = eventFeedback[rowId] || {};
@@ -930,13 +964,21 @@
       return '<button type="button" class="chat-user-modal__news-reaction' +
         (feedback.myReaction === emoji ? " chat-user-modal__news-reaction--mine" : "") +
         '" data-home-news-reaction="' + esc(emoji) + '">' + esc(emoji) +
-        (count ? "<span>" + count + "</span>" : "") + "</button>";
+        (count ? '<span data-home-news-reaction-users="' + esc(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
     var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
     var commentsHtml = comments.length ? comments.map(function (comment) {
       var name = String(comment.author || "Игрок");
       var avatar = String(comment.authorAvatar || "");
       var profileId = String(comment.authorProfileId || comment.memberId || "");
+      var commentReactions = comment.reactions || {};
+      var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
+        var count = Math.max(0, Number(commentReactions[emoji]) || 0);
+        return '<button type="button" class="chat-user-modal__comment-reaction' +
+          (comment.myReaction === emoji ? " chat-user-modal__comment-reaction--mine" : "") +
+          '" data-home-comment-reaction="' + esc(emoji) + '" data-comment-id="' + esc(comment.id || "") + '">' +
+          esc(emoji) + (count ? '<span data-home-comment-reaction-users="' + esc(emoji) + '">' + count + "</span>" : "") + "</button>";
+      }).join("");
       return '<div class="chat-user-modal__news-comment">' +
         '<button type="button" class="chat-user-modal__news-comment-author" data-home-news-comment-author' +
           ' data-user-id="' + esc(profileId) + '" data-user-name="' + esc(name) +
@@ -944,7 +986,7 @@
           (avatar ? '<img src="' + esc(avatar) + '" alt="">' :
             '<span aria-hidden="true">' + esc((name || "И").charAt(0).toUpperCase()) + "</span>") +
           "<strong>" + esc(name) + "</strong></button>" +
-        "<p>" + esc(comment.text || "") + "</p></div>";
+        "<p>" + esc(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
     }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     return '<span class="chat-user-modal__news-actions"><span class="chat-user-modal__news-actions-label">Реакция</span>' +
       reactionButtons +
@@ -1070,7 +1112,7 @@
       displayRows = [{
         id: clubNewsLoading ? "club-loading" : "club-empty",
         type: "empty",
-        text: clubNewsLoading ? "Загружаем новости клуба…" : "За вчера новостей клуба нет",
+        text: clubNewsLoading ? "Загрузка новостей клуба…" : "За последний игровой день новостей клуба нет",
         at: "",
       }];
     }
@@ -1213,7 +1255,26 @@
         var item = event.target.closest("[data-home-news-event-id]");
         var eventId = item && item.getAttribute("data-home-news-event-id");
         var reaction = event.target.closest("[data-home-news-reaction]");
+        var commentReaction = event.target.closest("[data-home-comment-reaction]");
+        if (eventId && commentReaction) {
+          var commentId = commentReaction.getAttribute("data-comment-id");
+          var comment = ((eventFeedback[eventId] || {}).comments || []).find(function (row) { return String(row.id) === String(commentId); });
+          var commentUsersTrigger = event.target.closest("[data-home-comment-reaction-users]");
+          if (commentUsersTrigger) {
+            showReactionUsers(comment || {}, commentUsersTrigger.getAttribute("data-home-comment-reaction-users"));
+            return;
+          }
+          feedbackRequest({ action: "comment-reaction", eventId: eventId, commentId: commentId, emoji: commentReaction.getAttribute("data-home-comment-reaction") })
+            .then(function (data) { eventFeedback[eventId] = data.feedback || {}; renderModalList(activeModalEvents()); })
+            .catch(function (error) { if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию"); });
+          return;
+        }
         if (eventId && reaction) {
+          var usersTrigger = event.target.closest("[data-home-news-reaction-users]");
+          if (usersTrigger) {
+            showReactionUsers(eventFeedback[eventId] || {}, usersTrigger.getAttribute("data-home-news-reaction-users"));
+            return;
+          }
           feedbackRequest({ action: "reaction", eventId: eventId, emoji: reaction.getAttribute("data-home-news-reaction") })
             .then(function (data) {
               eventFeedback[eventId] = data.feedback || {};
@@ -1449,7 +1510,9 @@
       ),
       allPlayers
     ).filter(function (row) {
-      return isPreviousCalendarDay(row && row.at);
+      if (!row) return false;
+      if (String(row.id || "").indexOf("daily:") === 0) return isPreviousCalendarDay(row.at);
+      return true;
     }).sort(function (a, b) {
       return eventTime(b && b.at) - eventTime(a && a.at);
     }).filter(function (row, index, rows) {
@@ -1505,7 +1568,10 @@
       var latestStamp = latestParts.length === 3
         ? Number(latestParts[2]) * 10000 + Number(latestParts[1]) * 100 + Number(latestParts[0])
         : 0;
-      var sourceReady = latestStamp >= previousCalendarDayStamp();
+      // The generated snapshot already contains only the latest available
+      // tournament day. Show it immediately; remote requests only enrich
+      // profile ids, avatars and daily-poker events in the background.
+      var sourceReady = clubNewsStaticRows().length > 0 || latestStamp >= previousCalendarDayStamp();
         if (nextClubEvents.length) {
           clubEvents = nextClubEvents;
           clubNewsLoaded = true;

@@ -534,7 +534,7 @@ if (chatUserModalEl) {
       return '<button type="button" class="chat-user-modal__news-reaction' +
         (feedback.myReaction === emoji ? " chat-user-modal__news-reaction--mine" : "") +
         '" data-profile-event-reaction="' + escapeHtml(emoji) + '" aria-label="Поставить реакцию ' + escapeHtml(emoji) + '">' +
-        escapeHtml(emoji) + (count ? "<span>" + count + "</span>" : "") + "</button>";
+        escapeHtml(emoji) + (count ? '<span data-profile-event-reaction-users="' + escapeHtml(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
     var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
     var commentsHtml = comments.length
@@ -542,6 +542,14 @@ if (chatUserModalEl) {
           var authorName = String(comment.author || "Игрок");
           var authorAvatar = String(comment.authorAvatar || "");
           var authorProfileId = String(comment.authorProfileId || comment.memberId || "");
+          var commentReactions = comment.reactions || {};
+          var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
+            var count = Math.max(0, Number(commentReactions[emoji]) || 0);
+            return '<button type="button" class="chat-user-modal__comment-reaction' +
+              (comment.myReaction === emoji ? " chat-user-modal__comment-reaction--mine" : "") +
+              '" data-profile-comment-reaction="' + escapeHtml(emoji) + '" data-comment-id="' + escapeHtml(comment.id || "") + '">' +
+              escapeHtml(emoji) + (count ? '<span data-profile-comment-reaction-users="' + escapeHtml(emoji) + '">' + count + "</span>" : "") + "</button>";
+          }).join("");
           return '<div class="chat-user-modal__news-comment">' +
             '<button type="button" class="chat-user-modal__news-comment-author" data-profile-event-author' +
               ' data-user-id="' + escapeHtml(authorProfileId) + '"' +
@@ -551,7 +559,7 @@ if (chatUserModalEl) {
                 ? '<img src="' + escapeHtml(authorAvatar) + '" alt="">'
                 : '<span aria-hidden="true">' + escapeHtml((authorName || "И").charAt(0).toUpperCase()) + "</span>") +
               "<strong>" + escapeHtml(authorName) + "</strong>" +
-            '</button><p>' + escapeHtml(comment.text || "") + "</p></div>";
+            '</button><p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     var wallControls = type === "personal" && chatUserModalWallCanManage
@@ -829,9 +837,29 @@ if (chatUserModalEl) {
     var item = target && target.closest ? target.closest("[data-profile-event-id]") : null;
     var eventId = item && item.getAttribute("data-profile-event-id");
     if (!eventId) return;
+    var commentReaction = target.closest("[data-profile-comment-reaction]");
+    if (commentReaction) {
+      event.preventDefault();
+      var commentId = commentReaction.getAttribute("data-comment-id");
+      var comment = ((chatUserModalNewsFeedback[eventId] || {}).comments || []).find(function (row) { return String(row.id) === String(commentId); });
+      var commentUsersTrigger = target.closest("[data-profile-comment-reaction-users]");
+      if (commentUsersTrigger && typeof window.pokerShowProfileReactionUsers === "function") {
+        window.pokerShowProfileReactionUsers(comment || {}, commentUsersTrigger.getAttribute("data-profile-comment-reaction-users"));
+        return;
+      }
+      chatUserModalFeedbackRequest({ action: "comment-reaction", eventId: eventId, commentId: commentId, emoji: commentReaction.getAttribute("data-profile-comment-reaction") })
+        .then(function (data) { updateChatUserModalNewsFeedback(eventId, data.feedback); })
+        .catch(function (error) { if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию"); });
+      return;
+    }
     var reaction = target.closest("[data-profile-event-reaction]");
     if (reaction) {
       event.preventDefault();
+      var usersTrigger = target.closest("[data-profile-event-reaction-users]");
+      if (usersTrigger && typeof window.pokerShowProfileReactionUsers === "function") {
+        window.pokerShowProfileReactionUsers(chatUserModalNewsFeedback[eventId] || {}, usersTrigger.getAttribute("data-profile-event-reaction-users"));
+        return;
+      }
       chatUserModalFeedbackRequest({
         action: "reaction",
         eventId: eventId,
