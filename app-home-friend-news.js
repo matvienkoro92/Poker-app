@@ -154,14 +154,14 @@
 
   function openNewsPlayerProfile(id, name, avatar) {
     id = String(id || "").trim();
-    if (!id) return;
+    if (!id) return false;
     if (typeof window.pokerOpenChatUserModalSafe === "function") {
       window.pokerOpenChatUserModalSafe(id, name || "Игрок", avatar || "");
-      return;
+      return true;
     }
     if (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true) {
       window.openChatUserModalById(id, name || "Игрок", avatar || "");
-      return;
+      return true;
     }
     if (typeof window.pokerEnsureScriptDomains === "function") {
       Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () {
@@ -169,6 +169,31 @@
           window.openChatUserModalById(id, name || "Игрок", avatar || "");
         }
       }).catch(function () {});
+      return true;
+    }
+    return false;
+  }
+
+  function handoffNewsModalToPlayer(id, name, avatar) {
+    var settled = false;
+    var timeoutId = 0;
+    function profileOpened() {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("poker:chat-user-modal-open", profileOpened);
+      closeModal();
+    }
+    document.addEventListener("poker:chat-user-modal-open", profileOpened);
+    timeoutId = window.setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener("poker:chat-user-modal-open", profileOpened);
+    }, 15000);
+    if (!openNewsPlayerProfile(id, name, avatar)) {
+      settled = true;
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("poker:chat-user-modal-open", profileOpened);
     }
   }
 
@@ -1039,9 +1064,12 @@
         var author = event.target.closest("[data-home-news-comment-author]");
         if (author) {
           var authorId = author.getAttribute("data-user-id");
-          if (authorId && typeof window.openChatUserModalById === "function") {
-            closeModal();
-            window.openChatUserModalById(authorId, author.getAttribute("data-user-name") || "Игрок", author.getAttribute("data-user-avatar") || "");
+          if (authorId) {
+            handoffNewsModalToPlayer(
+              authorId,
+              author.getAttribute("data-user-name") || "Игрок",
+              author.getAttribute("data-user-avatar") || ""
+            );
           }
           return;
         }
@@ -1066,9 +1094,8 @@
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
-        if (playerId && typeof window.openChatUserModalById === "function") {
-          closeModal();
-          window.openChatUserModalById(
+        if (playerId) {
+          handoffNewsModalToPlayer(
             playerId,
             playerCard.getAttribute("data-home-news-player-name") || "Игрок",
             playerCard.getAttribute("data-home-news-player-avatar") || ""
