@@ -26,7 +26,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v1";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v2";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
@@ -340,16 +340,25 @@
     return (rows || []).map(function (row) {
       if (!row || row.playerAccent) return row;
       var text = String(row.text || "");
-      var actor = candidates.find(function (candidate) {
-        if (candidate.id && String(row.actorId || "") === candidate.id) return true;
-        if (candidate.nickKey && matchKey(row.actorNick) === candidate.nickKey) return true;
-        return candidate.nick && text.indexOf(candidate.nick) !== -1;
+      var actorNickKey = matchKey(row.actorNick);
+      var actor = actorNickKey && candidates.find(function (candidate) {
+        return candidate.nickKey && actorNickKey === candidate.nickKey;
       });
+      if (!actor) {
+        actor = candidates.find(function (candidate) {
+          return candidate.id && String(row.actorId || "") === candidate.id;
+        });
+      }
+      if (!actor) {
+        actor = candidates.find(function (candidate) {
+          return candidate.nick && text.indexOf(candidate.nick) !== -1;
+        });
+      }
       if (!actor) return row;
       var color = playerNewsColor(actor.nickKey || actor.nick || actor.id);
       return Object.assign({}, row, {
         actorAvatar: actor.avatar || row.actorAvatar || "",
-        actorId: row.actorId || actor.id,
+        actorId: actorNickKey && actor.nickKey === actorNickKey ? (actor.id || row.actorId) : (row.actorId || actor.id),
         actorNick: row.actorNick || actor.nick,
         playerAccent: color.accent,
         playerRgb: color.rgb,
@@ -434,12 +443,6 @@
     var now = new Date();
     var previous = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
     return eventDayKey(date) === eventDayKey(previous);
-  }
-
-  function previousCalendarDayStamp() {
-    var now = new Date();
-    var previous = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-    return previous.getFullYear() * 10000 + (previous.getMonth() + 1) * 100 + previous.getDate();
   }
 
   function eventDateLabel(value, includeYear) {
@@ -573,7 +576,9 @@
         at: row.date,
         target: "winter-rating",
         actorId: friendId(friend),
-        actorNick: String(friend && friend.pokerPlusNickname || displayName).trim(),
+        // Keep the snapshot nickname authoritative. The matched profile row
+        // may be stale and must not silently change which player opens.
+        actorNick: displayName,
       };
     }).filter(Boolean).slice(0, MAX_EVENTS);
   }
@@ -600,7 +605,7 @@
         at: row && row.date,
         target: "winter-rating",
         actorId: friendId(friend),
-        actorNick: String(friend && friend.pokerPlusNickname || name).trim(),
+        actorNick: name,
       };
       if (place === 1) {
         out.push(Object.assign({}, shared, {
@@ -1028,6 +1033,11 @@
         (count ? '<span data-home-news-reaction-users="' + esc(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
     var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
+    var clubKindHtml = newsModalMode === "club"
+      ? '<span class="home-friend-news-modal__kind home-friend-news-modal__kind--' +
+        (String(rowId).indexOf("daily:") === 0 ? "daily" : "mtt") + '">' +
+        (String(rowId).indexOf("daily:") === 0 ? "КРУТКА ДНЯ" : "ВЫИГРЫШ В МТТ") + "</span>"
+      : "";
     var commentsHtml = comments.length ? comments.map(function (comment) {
       var name = String(comment.author || "Игрок");
       var avatar = String(comment.authorAvatar || "");
@@ -1058,7 +1068,7 @@
         (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
         '" data-home-news-comments>💬 <b>Комментировать</b>' +
         (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
-      "</button></span>" +
+      "</button>" + clubKindHtml + "</span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -1393,7 +1403,13 @@
         if (playerId) {
           var playerName = playerCard.getAttribute("data-home-news-player-name") || "Игрок";
           var linkedProfile = clubProfileByNick[matchKey(playerName)];
-          if (String(playerId).indexOf("rating:") === 0 && linkedProfile) playerId = linkedProfile.id || playerId;
+          // Club event snapshots can contain a stale or mismatched actor id.
+          // The visible poker nickname is the authoritative identity here.
+          if (newsModalMode === "club" && linkedProfile && linkedProfile.id) {
+            playerId = linkedProfile.id;
+          } else if (String(playerId).indexOf("rating:") === 0 && linkedProfile) {
+            playerId = linkedProfile.id || playerId;
+          }
           handoffNewsModalToPlayer(
             playerId,
             playerName,
@@ -1608,40 +1624,34 @@
       ),
       allPlayers
     ).filter(function (row) {
-      if (!row) return false;
-      if (String(row.id || "").indexOf("daily:") === 0) return isPreviousCalendarDay(row.at);
-      return true;
+      return row && isPreviousCalendarDay(row.at);
     }).sort(function (a, b) {
-      return eventTime(b && b.at) - eventTime(a && a.at);
+      var aDaily = String(a && a.id || "").indexOf("daily:") === 0 ? 1 : 0;
+      var bDaily = String(b && b.id || "").indexOf("daily:") === 0 ? 1 : 0;
+      return aDaily - bDaily || eventTime(b && b.at) - eventTime(a && a.at);
     }).filter(function (row, index, rows) {
       return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
     }).slice(0, MAX_EVENTS);
   }
 
   function stableClubEvents(nextRows, previousRows) {
-    var rows = (Array.isArray(nextRows) ? nextRows : []).slice();
+    var rows = (Array.isArray(nextRows) ? nextRows : []).filter(function (row) {
+      return row && isPreviousCalendarDay(row.at);
+    });
     (Array.isArray(previousRows) ? previousRows : []).forEach(function (row) {
       if (!row || String(row.id || "").indexOf("daily:") !== 0 || !isPreviousCalendarDay(row.at)) return;
       if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
       if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
     });
     return rows.sort(function (a, b) {
-      return eventTime(b && b.at) - eventTime(a && a.at);
+      var aDaily = String(a && a.id || "").indexOf("daily:") === 0 ? 1 : 0;
+      var bDaily = String(b && b.id || "").indexOf("daily:") === 0 ? 1 : 0;
+      return aDaily - bDaily || eventTime(b && b.at) - eventTime(a && a.at);
     }).slice(0, MAX_EVENTS);
   }
 
   function loadClubNews(force) {
     var preservedClubEvents = clubEvents.slice();
-    var immediateEvents = stableClubEvents(buildClubEventsFromRows([], []), preservedClubEvents);
-    if (immediateEvents.length) {
-      clubEvents = immediateEvents;
-      clubNewsLoading = false;
-      clubNewsLoaded = true;
-      clubNewsRetryCount = 0;
-      writeClubEventsCache(clubEvents);
-      renderClubNews();
-      if (newsModalMode === "club") renderModalList(clubEvents);
-    }
     var base = apiBase();
     if (!base) {
       clubNewsLoading = false;
@@ -1674,27 +1684,16 @@
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var nextClubEvents = stableClubEvents(buildClubEventsFromRows(players, winners), preservedClubEvents);
-      var data = window.POKER_CLUB_NEWS_DATA || {};
-      var latestParts = String(data.latestDate || "").split(".");
-      var latestStamp = latestParts.length === 3
-        ? Number(latestParts[2]) * 10000 + Number(latestParts[1]) * 100 + Number(latestParts[0])
-        : 0;
-      // The generated snapshot already contains only the latest available
-      // tournament day. Show it immediately; remote requests only enrich
-      // profile ids, avatars and daily-poker events in the background.
-      var sourceReady = clubNewsStaticRows().length > 0 || latestStamp >= previousCalendarDayStamp();
-        if (nextClubEvents.length) {
-          clubEvents = nextClubEvents;
-          clubNewsLoaded = true;
-          clubNewsRetryCount = 0;
-          writeClubEventsCache(clubEvents);
-        } else if (sourceReady) {
-          clubEvents = [];
-          clubNewsLoaded = true;
-        }
-        clubNewsLoading = !sourceReady;
-        renderClubNews();
-        if (!sourceReady) scheduleClubNewsRetry();
+      // Publish one complete snapshot only after both remote sources settle.
+      // This prevents static tournament rows from flashing first and daily
+      // poker events from jumping into the list a moment later.
+      clubEvents = nextClubEvents;
+      clubNewsLoaded = true;
+      clubNewsLoading = false;
+      clubNewsRetryCount = 0;
+      writeClubEventsCache(clubEvents);
+      renderClubNews();
+      if (newsModalMode === "club") renderModalList(clubEvents);
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();
