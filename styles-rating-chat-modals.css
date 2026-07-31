@@ -3756,9 +3756,28 @@
   gap: 7px;
 }
 .chat-user-modal__news-comment {
+  position: relative;
   padding: 8px 10px;
   border-radius: 11px;
   background: rgba(5, 10, 17, 0.56);
+}
+
+.chat-user-modal__news-comment-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 107, 107, 0.55);
+  border-radius: 50%;
+  background: rgba(73, 16, 20, 0.72);
+  color: #ff9a9a;
+  font: 800 25px/30px Arial, sans-serif;
+  cursor: pointer;
+}
+
+.chat-user-modal__news-comment-delete:disabled {
+  opacity: 0.45;
 }
 .chat-user-modal__news-comment-author {
   display: inline-flex;

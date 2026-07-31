@@ -548,12 +548,13 @@ if (chatUserModalEl) {
           var commentReactions = comment.reactions || {};
           var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
             var count = Math.max(0, Number(commentReactions[emoji]) || 0);
+            if (!count) return "";
             return '<button type="button" class="chat-user-modal__comment-reaction' +
               (comment.myReaction === emoji ? " chat-user-modal__comment-reaction--mine" : "") +
               '" data-profile-comment-reaction="' + escapeHtml(emoji) + '" data-comment-id="' + escapeHtml(comment.id || "") + '">' +
               escapeHtml(emoji) + (count ? '<span data-profile-comment-reaction-users="' + escapeHtml(emoji) + '">' + count + "</span>" : "") + "</button>";
           }).join("");
-          return '<div class="chat-user-modal__news-comment">' +
+          return '<div class="chat-user-modal__news-comment" data-profile-comment-id="' + escapeHtml(comment.id || "") + '">' +
             '<button type="button" class="chat-user-modal__news-comment-author" data-profile-event-author' +
               ' data-user-id="' + escapeHtml(authorProfileId) + '"' +
               ' data-user-name="' + escapeHtml(authorName) + '"' +
@@ -562,7 +563,10 @@ if (chatUserModalEl) {
                 ? '<img src="' + escapeHtml(authorAvatar) + '" alt="">'
                 : '<span aria-hidden="true">' + escapeHtml((authorName || "И").charAt(0).toUpperCase()) + "</span>") +
               "<strong>" + escapeHtml(authorName) + "</strong>" +
-            '</button><p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
+            '</button>' +
+            (comment.isMine ? '<button type="button" class="chat-user-modal__news-comment-delete" data-profile-comment-delete="' +
+              escapeHtml(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
+            '<p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     var wallControls = type === "personal" && chatUserModalWallCanManage
@@ -788,6 +792,29 @@ if (chatUserModalEl) {
     chatUserModalNewsFeedback[eventId] = feedback || {};
     renderChatUserModalNewsRows();
   }
+  function sendChatUserModalOptimisticReaction(eventId, emoji, commentId) {
+    var current = chatUserModalNewsFeedback[eventId] || {};
+    var snapshot = JSON.parse(JSON.stringify(current));
+    var target = current;
+    if (commentId) {
+      target = (Array.isArray(current.comments) ? current.comments : []).find(function (row) {
+        return String(row.id) === String(commentId);
+      });
+    }
+    if (!target) return Promise.resolve();
+    target.reactions = target.reactions || {};
+    var previous = String(target.myReaction || "");
+    if (previous) target.reactions[previous] = Math.max(0, (Number(target.reactions[previous]) || 0) - 1);
+    target.myReaction = previous === emoji ? "" : emoji;
+    if (target.myReaction) target.reactions[emoji] = (Number(target.reactions[emoji]) || 0) + 1;
+    updateChatUserModalNewsFeedback(eventId, current);
+    return chatUserModalFeedbackRequest({ action: commentId ? "comment-reaction" : "reaction", eventId: eventId, commentId: commentId || "", emoji: emoji })
+      .then(function (data) { updateChatUserModalNewsFeedback(eventId, data.feedback); })
+      .catch(function (error) {
+        updateChatUserModalNewsFeedback(eventId, snapshot);
+        if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
+      });
+  }
   function handleChatUserModalNewsInteraction(event) {
     if (chatUserModalNewsLongPressTriggered) {
       chatUserModalNewsLongPressTriggered = false;
@@ -846,6 +873,20 @@ if (chatUserModalEl) {
     var item = target && target.closest ? target.closest("[data-profile-event-id]") : null;
     var eventId = item && item.getAttribute("data-profile-event-id");
     if (!eventId) return;
+    var deleteComment = target.closest("[data-profile-comment-delete]");
+    if (deleteComment) {
+      event.preventDefault();
+      var deleteCommentId = deleteComment.getAttribute("data-profile-comment-delete");
+      if (!window.confirm("Удалить комментарий?")) return;
+      deleteComment.disabled = true;
+      chatUserModalFeedbackRequest({ action: "delete-comment", eventId: eventId, commentId: deleteCommentId })
+        .then(function (data) { updateChatUserModalNewsFeedback(eventId, data.feedback); })
+        .catch(function (error) {
+          deleteComment.disabled = false;
+          if (typeof alertText === "function") alertText(error.message || "Не удалось удалить комментарий");
+        });
+      return;
+    }
     var commentReaction = target.closest("[data-profile-comment-reaction]");
     if (commentReaction) {
       event.preventDefault();
@@ -856,9 +897,7 @@ if (chatUserModalEl) {
         window.pokerShowProfileReactionUsers(comment || {}, commentUsersTrigger.getAttribute("data-profile-comment-reaction-users"));
         return;
       }
-      chatUserModalFeedbackRequest({ action: "comment-reaction", eventId: eventId, commentId: commentId, emoji: commentReaction.getAttribute("data-profile-comment-reaction") })
-        .then(function (data) { updateChatUserModalNewsFeedback(eventId, data.feedback); })
-        .catch(function (error) { if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию"); });
+      sendChatUserModalOptimisticReaction(eventId, commentReaction.getAttribute("data-profile-comment-reaction"), commentId);
       return;
     }
     var reaction = target.closest("[data-profile-event-reaction]");
@@ -869,15 +908,7 @@ if (chatUserModalEl) {
         window.pokerShowProfileReactionUsers(chatUserModalNewsFeedback[eventId] || {}, usersTrigger.getAttribute("data-profile-event-reaction-users"));
         return;
       }
-      chatUserModalFeedbackRequest({
-        action: "reaction",
-        eventId: eventId,
-        emoji: reaction.getAttribute("data-profile-event-reaction"),
-      }).then(function (data) {
-        updateChatUserModalNewsFeedback(eventId, data.feedback);
-      }).catch(function (error) {
-        if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
-      });
+      sendChatUserModalOptimisticReaction(eventId, reaction.getAttribute("data-profile-event-reaction"), "");
       return;
     }
     if (target.closest("[data-profile-event-comments]")) {
@@ -3374,21 +3405,20 @@ if (chatUserModalEl) {
   if (modalNews) {
     modalNews.addEventListener("pointerdown", function (event) {
       var item = event.target.closest("[data-profile-event-id]");
-      if (!item || event.target.closest("button, input, textarea, .chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+      var comment = event.target.closest("[data-profile-comment-id]");
+      if (!item || event.target.closest("button, input, textarea")) return;
+      if (!comment && event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
       clearTimeout(chatUserModalNewsLongPressTimer);
       chatUserModalNewsLongPressTriggered = false;
       var eventId = item.getAttribute("data-profile-event-id");
+      var commentId = comment && comment.getAttribute("data-profile-comment-id");
       chatUserModalNewsLongPressTimer = window.setTimeout(function () {
         chatUserModalNewsLongPressTriggered = true;
         if (typeof window.pokerOpenProfileReactionPicker !== "function") return;
         window.pokerOpenProfileReactionPicker(function (emoji) {
-          chatUserModalFeedbackRequest({ action: "reaction", eventId: eventId, emoji: emoji }).then(function (data) {
-            updateChatUserModalNewsFeedback(eventId, data.feedback);
-          }).catch(function (error) {
-            if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
-          });
+          sendChatUserModalOptimisticReaction(eventId, emoji, commentId);
         });
-      }, 520);
+      }, 280);
     });
     ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
       modalNews.addEventListener(type, function () { clearTimeout(chatUserModalNewsLongPressTimer); });

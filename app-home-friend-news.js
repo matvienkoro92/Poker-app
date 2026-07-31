@@ -755,6 +755,8 @@
       }
       if (!friend || !isRecentEvent(winner && winner.lastWonAt)) return null;
       var prize = String((winner && (winner.lastPrize || winner.bestPrize || winner.prize)) || "").trim();
+      var prizeRub = Number(String(prize).replace(/[^\d.,-]/g, "").replace(/\s/g, "").replace(",", ".")) || 0;
+      if (prizeRub === 50) return null;
       return {
         id: "daily:" + String(winner.id || "") + ":" + String(winner.lastWonAt || winner.bestPrize || prize),
         type: "daily",
@@ -923,6 +925,39 @@
     });
   }
 
+  function optimisticFeedbackReaction(eventId, emoji, commentId) {
+    var current = eventFeedback[eventId] || {};
+    var snapshot = JSON.parse(JSON.stringify(current));
+    var target = current;
+    if (commentId) {
+      target = (Array.isArray(current.comments) ? current.comments : []).find(function (row) {
+        return String(row.id) === String(commentId);
+      });
+    }
+    if (!target) return snapshot;
+    target.reactions = target.reactions || {};
+    var previous = String(target.myReaction || "");
+    if (previous) target.reactions[previous] = Math.max(0, (Number(target.reactions[previous]) || 0) - 1);
+    target.myReaction = previous === emoji ? "" : emoji;
+    if (target.myReaction) target.reactions[emoji] = (Number(target.reactions[emoji]) || 0) + 1;
+    eventFeedback[eventId] = current;
+    renderModalList(activeModalEvents());
+    return snapshot;
+  }
+
+  function sendOptimisticReaction(eventId, emoji, commentId) {
+    var snapshot = optimisticFeedbackReaction(eventId, emoji, commentId);
+    return feedbackRequest({ action: commentId ? "comment-reaction" : "reaction", eventId: eventId, commentId: commentId || "", emoji: emoji })
+      .then(function (data) {
+        eventFeedback[eventId] = data.feedback || {};
+        renderModalList(activeModalEvents());
+      }).catch(function (error) {
+        eventFeedback[eventId] = snapshot || {};
+        renderModalList(activeModalEvents());
+        if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
+      });
+  }
+
   function showReactionUsers(feedback, emoji) {
     var rows = (Array.isArray(feedback && feedback.reactors) ? feedback.reactors : []).filter(function (row) {
       return row && row.emoji === emoji;
@@ -1000,18 +1035,21 @@
       var commentReactions = comment.reactions || {};
       var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
         var count = Math.max(0, Number(commentReactions[emoji]) || 0);
+        if (!count) return "";
         return '<button type="button" class="chat-user-modal__comment-reaction' +
           (comment.myReaction === emoji ? " chat-user-modal__comment-reaction--mine" : "") +
           '" data-home-comment-reaction="' + esc(emoji) + '" data-comment-id="' + esc(comment.id || "") + '">' +
           esc(emoji) + (count ? '<span data-home-comment-reaction-users="' + esc(emoji) + '">' + count + "</span>" : "") + "</button>";
       }).join("");
-      return '<div class="chat-user-modal__news-comment">' +
+      return '<div class="chat-user-modal__news-comment" data-home-comment-id="' + esc(comment.id || "") + '">' +
         '<button type="button" class="chat-user-modal__news-comment-author" data-home-news-comment-author' +
           ' data-user-id="' + esc(profileId) + '" data-user-name="' + esc(name) +
           '" data-user-avatar="' + esc(avatar) + '">' +
           (avatar ? '<img src="' + esc(avatar) + '" alt="">' :
             '<span aria-hidden="true">' + esc((name || "И").charAt(0).toUpperCase()) + "</span>") +
           "<strong>" + esc(name) + "</strong></button>" +
+        (comment.isMine ? '<button type="button" class="chat-user-modal__news-comment-delete" data-home-comment-delete="' +
+          esc(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
         "<p>" + esc(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
     }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     return '<span class="chat-user-modal__news-actions">' +
@@ -1267,21 +1305,19 @@
       modal.dataset.friendNewsBound = "1";
       modal.addEventListener("pointerdown", function (event) {
         var item = event.target.closest("[data-home-news-event-id]");
-        if (!item || event.target.closest("button, input, textarea, .chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        var comment = event.target.closest("[data-home-comment-id]");
+        if (!item || event.target.closest("button, input, textarea")) return;
+        if (!comment && event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
         clearTimeout(homeNewsLongPressTimer);
         homeNewsLongPressTriggered = false;
         var eventId = item.getAttribute("data-home-news-event-id");
+        var commentId = comment && comment.getAttribute("data-home-comment-id");
         homeNewsLongPressTimer = window.setTimeout(function () {
           homeNewsLongPressTriggered = true;
           openReactionPicker(function (emoji) {
-            feedbackRequest({ action: "reaction", eventId: eventId, emoji: emoji }).then(function (data) {
-              eventFeedback[eventId] = data.feedback || {};
-              renderModalList(activeModalEvents());
-            }).catch(function (error) {
-              if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
-            });
+            sendOptimisticReaction(eventId, emoji, commentId);
           });
-        }, 520);
+        }, 280);
       });
       ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
         modal.addEventListener(type, function () { clearTimeout(homeNewsLongPressTimer); });
@@ -1311,6 +1347,19 @@
         }
         var item = event.target.closest("[data-home-news-event-id]");
         var eventId = item && item.getAttribute("data-home-news-event-id");
+        var deleteComment = event.target.closest("[data-home-comment-delete]");
+        if (eventId && deleteComment) {
+          var deleteCommentId = deleteComment.getAttribute("data-home-comment-delete");
+          if (!window.confirm("Удалить комментарий?")) return;
+          deleteComment.disabled = true;
+          feedbackRequest({ action: "delete-comment", eventId: eventId, commentId: deleteCommentId })
+            .then(function (data) { eventFeedback[eventId] = data.feedback || {}; renderModalList(activeModalEvents()); })
+            .catch(function (error) {
+              deleteComment.disabled = false;
+              if (typeof alertText === "function") alertText(error.message || "Не удалось удалить комментарий");
+            });
+          return;
+        }
         var reaction = event.target.closest("[data-home-news-reaction]");
         var commentReaction = event.target.closest("[data-home-comment-reaction]");
         if (eventId && commentReaction) {
@@ -1321,9 +1370,7 @@
             showReactionUsers(comment || {}, commentUsersTrigger.getAttribute("data-home-comment-reaction-users"));
             return;
           }
-          feedbackRequest({ action: "comment-reaction", eventId: eventId, commentId: commentId, emoji: commentReaction.getAttribute("data-home-comment-reaction") })
-            .then(function (data) { eventFeedback[eventId] = data.feedback || {}; renderModalList(activeModalEvents()); })
-            .catch(function (error) { if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию"); });
+          sendOptimisticReaction(eventId, commentReaction.getAttribute("data-home-comment-reaction"), commentId);
           return;
         }
         if (eventId && reaction) {
@@ -1332,13 +1379,7 @@
             showReactionUsers(eventFeedback[eventId] || {}, usersTrigger.getAttribute("data-home-news-reaction-users"));
             return;
           }
-          feedbackRequest({ action: "reaction", eventId: eventId, emoji: reaction.getAttribute("data-home-news-reaction") })
-            .then(function (data) {
-              eventFeedback[eventId] = data.feedback || {};
-              renderModalList(activeModalEvents());
-            }).catch(function (error) {
-              if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
-            });
+          sendOptimisticReaction(eventId, reaction.getAttribute("data-home-news-reaction"), "");
           return;
         }
         if (eventId && event.target.closest("[data-home-news-comments]")) {
@@ -1577,8 +1618,21 @@
     }).slice(0, MAX_EVENTS);
   }
 
+  function stableClubEvents(nextRows, previousRows) {
+    var rows = (Array.isArray(nextRows) ? nextRows : []).slice();
+    (Array.isArray(previousRows) ? previousRows : []).forEach(function (row) {
+      if (!row || String(row.id || "").indexOf("daily:") !== 0 || !isPreviousCalendarDay(row.at)) return;
+      if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
+      if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
+    });
+    return rows.sort(function (a, b) {
+      return eventTime(b && b.at) - eventTime(a && a.at);
+    }).slice(0, MAX_EVENTS);
+  }
+
   function loadClubNews(force) {
-    var immediateEvents = buildClubEventsFromRows([], []);
+    var preservedClubEvents = clubEvents.slice();
+    var immediateEvents = stableClubEvents(buildClubEventsFromRows([], []), preservedClubEvents);
     if (immediateEvents.length) {
       clubEvents = immediateEvents;
       clubNewsLoading = false;
@@ -1619,7 +1673,7 @@
         clubProfileByNick[key] = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(key) };
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
-      var nextClubEvents = buildClubEventsFromRows(players, winners);
+      var nextClubEvents = stableClubEvents(buildClubEventsFromRows(players, winners), preservedClubEvents);
       var data = window.POKER_CLUB_NEWS_DATA || {};
       var latestParts = String(data.latestDate || "").split(".");
       var latestStamp = latestParts.length === 3
