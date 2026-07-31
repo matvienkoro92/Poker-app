@@ -3575,13 +3575,17 @@
   font-weight: 900;
 }
 .chat-user-modal__news-reaction--mine {
-  border-color: var(--player-news-accent);
-  background: rgba(var(--player-news-rgb), 0.42);
-  color: #fff;
+  border-color: #8bd7ff !important;
+  background: linear-gradient(180deg, #258de0, #1264b8) !important;
+  color: #fff !important;
   transform: translateY(-1px);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.2),
-    0 0 18px rgba(var(--player-news-rgb), 0.42);
+    inset 0 0 0 2px rgba(255, 255, 255, 0.28),
+    0 0 20px rgba(56, 189, 248, 0.62) !important;
+}
+.chat-user-modal__news-reaction--mine > span {
+  background: rgba(3, 31, 67, 0.46) !important;
+  color: #fff !important;
 }
 .chat-user-modal__news-reaction > span[title="Кто поставил"] {
   min-width: 18px;
@@ -3593,7 +3597,7 @@
 .profile-reaction-users {
   position: fixed;
   inset: 0;
-  z-index: 10040;
+  z-index: 2147483646;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -3659,6 +3663,42 @@
   color: #91a2ba;
   text-align: center;
 }
+.profile-reaction-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(1, 5, 12, 0.34);
+  backdrop-filter: blur(3px);
+}
+.profile-reaction-picker__panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(139, 215, 255, 0.52);
+  border-radius: 999px;
+  background: rgba(7, 14, 25, 0.98);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.52), 0 0 22px rgba(56, 189, 248, 0.18);
+}
+.profile-reaction-picker__panel button {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid rgba(255, 214, 120, 0.32);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.94);
+  font-size: 27px;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+.profile-reaction-picker__panel button:hover,
+.profile-reaction-picker__panel button:focus-visible {
+  background: rgba(37, 141, 224, 0.42);
+  transform: scale(1.12);
+}
 .chat-user-modal__comment-reactions {
   display: flex;
   align-items: center;
@@ -3680,9 +3720,14 @@
   font-size: 13px;
 }
 .chat-user-modal__comment-reaction--mine {
-  border-color: var(--player-news-accent);
-  background: rgba(var(--player-news-rgb), 0.42);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 12px rgba(var(--player-news-rgb), 0.32);
+  border-color: #8bd7ff !important;
+  background: linear-gradient(180deg, #258de0, #1264b8) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24), 0 0 14px rgba(56, 189, 248, 0.54) !important;
+}
+.chat-user-modal__comment-reaction--mine > span {
+  background: rgba(3, 31, 67, 0.46) !important;
+  color: #fff !important;
 }
 .chat-user-modal__comment-reaction > span {
   min-width: 15px;
@@ -3722,11 +3767,16 @@
   align-items: center;
   gap: 8px;
   padding: 0;
-  border: 0;
-  background: transparent;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: inherit;
   font: inherit;
   cursor: pointer;
+  box-shadow: none !important;
+  outline: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .chat-user-modal__news-comment-author img,
 .chat-user-modal__news-comment-author > span {

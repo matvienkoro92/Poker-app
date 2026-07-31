@@ -33,6 +33,8 @@
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
+  var homeNewsLongPressTimer = 0;
+  var homeNewsLongPressTriggered = false;
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -955,12 +957,36 @@
   }
   window.pokerShowProfileReactionUsers = showReactionUsers;
 
+  function openReactionPicker(onSelect) {
+    var old = document.querySelector(".profile-reaction-picker");
+    if (old) old.remove();
+    var picker = document.createElement("div");
+    picker.className = "profile-reaction-picker";
+    picker.innerHTML = '<div class="profile-reaction-picker__panel" role="dialog" aria-label="Выберите реакцию">' +
+      ["❤️", "🔥", "👏"].map(function (emoji) {
+        return '<button type="button" data-picker-reaction="' + esc(emoji) + '">' + esc(emoji) + "</button>";
+      }).join("") + "</div>";
+    document.body.appendChild(picker);
+    picker.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-picker-reaction]");
+      if (button) {
+        var emoji = button.getAttribute("data-picker-reaction");
+        picker.remove();
+        onSelect(emoji);
+      } else if (event.target === picker) {
+        picker.remove();
+      }
+    });
+  }
+  window.pokerOpenProfileReactionPicker = openReactionPicker;
+
   function eventFeedbackHtml(row) {
     var rowId = String(row && row.id || "");
     var feedback = eventFeedback[rowId] || {};
     var reactions = feedback.reactions || {};
     var reactionButtons = ["❤️", "🔥", "👏"].map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
+      if (!count) return "";
       return '<button type="button" class="chat-user-modal__news-reaction' +
         (feedback.myReaction === emoji ? " chat-user-modal__news-reaction--mine" : "") +
         '" data-home-news-reaction="' + esc(emoji) + '">' + esc(emoji) +
@@ -988,7 +1014,7 @@
           "<strong>" + esc(name) + "</strong></button>" +
         "<p>" + esc(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
     }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
-    return '<span class="chat-user-modal__news-actions"><span class="chat-user-modal__news-actions-label">Реакция</span>' +
+    return '<span class="chat-user-modal__news-actions">' +
       reactionButtons +
       '<button type="button" class="chat-user-modal__news-comment-toggle' +
         (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
@@ -1046,11 +1072,15 @@
       group.rows.push(row);
     });
     return groups.map(function (group) {
+      var count = group.rows.length;
+      var mod10 = count % 10;
+      var mod100 = count % 100;
+      var countWord = mod10 === 1 && mod100 !== 11 ? "запись" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "записи" : "записей");
       return '<section class="home-friend-news-modal__day-group">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         '<div class="home-friend-news-modal__day-events">' +
           group.rows.map(function (row) { return eventHtml(row, false); }).join("") +
-        "</div>" +
+        '</div><div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
       "</section>";
     }).join("");
   }
@@ -1235,7 +1265,34 @@
     }
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
+      modal.addEventListener("pointerdown", function (event) {
+        var item = event.target.closest("[data-home-news-event-id]");
+        if (!item || event.target.closest("button, input, textarea, .chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        clearTimeout(homeNewsLongPressTimer);
+        homeNewsLongPressTriggered = false;
+        var eventId = item.getAttribute("data-home-news-event-id");
+        homeNewsLongPressTimer = window.setTimeout(function () {
+          homeNewsLongPressTriggered = true;
+          openReactionPicker(function (emoji) {
+            feedbackRequest({ action: "reaction", eventId: eventId, emoji: emoji }).then(function (data) {
+              eventFeedback[eventId] = data.feedback || {};
+              renderModalList(activeModalEvents());
+            }).catch(function (error) {
+              if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
+            });
+          });
+        }, 520);
+      });
+      ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+        modal.addEventListener(type, function () { clearTimeout(homeNewsLongPressTimer); });
+      });
       modal.addEventListener("click", function (event) {
+        if (homeNewsLongPressTriggered) {
+          homeNewsLongPressTriggered = false;
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         if (event.target.closest("[data-home-friend-news-close]")) {
           closeModal();
           return;

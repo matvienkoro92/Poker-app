@@ -375,6 +375,17 @@ html[data-theme="gold"] body[data-view="home"] {
 .home-friend-news-modal__day-events .home-friend-news-modal__item:last-child {
   border-bottom: 0;
 }
+.home-friend-news-modal__day-count {
+  padding: 10px 14px 0;
+  color: #91a2ba;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+.home-friend-news-modal__day-count strong {
+  color: #ffe0a3;
+  font-weight: 950;
+}
 
 .home-friend-news-modal--club .home-friend-news-modal__day-events {
   display: grid;
