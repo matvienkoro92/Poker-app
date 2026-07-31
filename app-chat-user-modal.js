@@ -539,7 +539,9 @@ if (chatUserModalEl) {
         '" data-profile-event-reaction="' + escapeHtml(emoji) + '" aria-label="Поставить реакцию ' + escapeHtml(emoji) + '">' +
         escapeHtml(emoji) + (count ? '<span data-profile-event-reaction-users="' + escapeHtml(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
-    var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
+    var comments = Array.isArray(feedback.comments) ? feedback.comments.slice().sort(function (a, b) {
+      return String(a && a.at || "").localeCompare(String(b && b.at || ""));
+    }) : [];
     var commentsHtml = comments.length
       ? comments.map(function (comment) {
           var authorName = String(comment.author || "Игрок");

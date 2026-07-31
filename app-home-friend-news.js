@@ -37,6 +37,7 @@
   var clubProfileByNick = {};
   var homeNewsLongPressTimer = 0;
   var homeNewsLongPressTriggered = false;
+  var newsProfileReturnState = null;
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -224,24 +225,67 @@
   function handoffNewsModalToPlayer(id, name, avatar) {
     var settled = false;
     var timeoutId = 0;
+    var list = el("homeFriendNewsList");
+    newsProfileReturnState = {
+      mode: newsModalMode,
+      scrollTop: list ? list.scrollTop : 0,
+    };
+    setNewsProfileLoading(true, name);
+
+    function restoreNewsAfterProfile() {
+      document.removeEventListener("poker:chat-user-modal-close", restoreNewsAfterProfile);
+      var state = newsProfileReturnState;
+      newsProfileReturnState = null;
+      if (!state) return;
+      newsModalMode = state.mode === "club" ? "club" : "friends";
+      syncNewsModalHeading();
+      var rows = activeModalEvents();
+      renderModalList(rows);
+      var modal = el("homeFriendNewsModal");
+      if (modal) modal.hidden = false;
+      document.body.classList.add("home-friend-news-modal-open");
+      window.requestAnimationFrame(function () {
+        var restoredList = el("homeFriendNewsList");
+        if (restoredList) restoredList.scrollTop = Number(state.scrollTop) || 0;
+      });
+    }
+
+    function cancelHandoff() {
+      setNewsProfileLoading(false);
+      newsProfileReturnState = null;
+      document.removeEventListener("poker:chat-user-modal-close", restoreNewsAfterProfile);
+    }
+
     function profileOpened() {
       if (settled) return;
       settled = true;
       window.clearTimeout(timeoutId);
       document.removeEventListener("poker:chat-user-modal-open", profileOpened);
+      setNewsProfileLoading(false);
       closeModal();
     }
     document.addEventListener("poker:chat-user-modal-open", profileOpened);
+    document.addEventListener("poker:chat-user-modal-close", restoreNewsAfterProfile);
     timeoutId = window.setTimeout(function () {
       if (settled) return;
       settled = true;
       document.removeEventListener("poker:chat-user-modal-open", profileOpened);
+      cancelHandoff();
     }, 15000);
     if (!openNewsPlayerProfile(id, name, avatar)) {
       settled = true;
       window.clearTimeout(timeoutId);
       document.removeEventListener("poker:chat-user-modal-open", profileOpened);
+      cancelHandoff();
     }
+  }
+
+  function setNewsProfileLoading(active, name) {
+    var overlay = el("homeNewsProfileLoading");
+    if (!overlay) return;
+    var label = el("homeNewsProfileLoadingName");
+    if (label) label.textContent = active && name ? String(name) : "";
+    overlay.hidden = !active;
   }
 
   function ensureDom() {
@@ -277,6 +321,11 @@
               '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
               '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
             '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
+            '<div class="home-news-profile-loading" id="homeNewsProfileLoading" hidden role="status" aria-live="polite">' +
+              '<span class="home-news-profile-loading__spinner" aria-hidden="true"></span>' +
+              '<strong>Загрузка профиля…</strong>' +
+              '<span id="homeNewsProfileLoadingName"></span>' +
+            '</div>' +
           "</section>" +
         "</div>");
     }
@@ -1094,13 +1143,15 @@
         '" data-home-news-reaction="' + esc(emoji) + '">' + esc(emoji) +
         (count ? '<span data-home-news-reaction-users="' + esc(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
-    var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
+    var comments = Array.isArray(feedback.comments) ? feedback.comments.slice().sort(function (a, b) {
+      return String(a && a.at || "").localeCompare(String(b && b.at || ""));
+    }) : [];
     var activeReply = eventCommentReplies[rowId] || null;
     var draft = String(eventCommentDrafts[rowId] || "");
     var clubKindHtml = newsModalMode === "club"
       ? '<span class="home-friend-news-modal__kind home-friend-news-modal__kind--' +
         (String(rowId).indexOf("daily:") === 0 ? "daily" : "mtt") + '">' +
-        (String(rowId).indexOf("daily:") === 0 ? "КРУТКА ДНЯ" : '<span aria-hidden="true">🏆</span> ВЫИГРЫШ В МТТ') + "</span>"
+        (String(rowId).indexOf("daily:") === 0 ? '<span aria-hidden="true">🎰</span> КРУТКА ДНЯ' : '<span aria-hidden="true">🏆</span> ВЫИГРЫШ В МТТ') + "</span>"
       : "";
     var commentsHtml = comments.length ? comments.map(function (comment) {
       var name = String(comment.author || "Игрок");
