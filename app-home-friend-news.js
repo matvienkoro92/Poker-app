@@ -28,7 +28,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v4";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v8";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
@@ -486,14 +486,17 @@
 
   function isCurrentClubEvent(row) {
     if (!row || !row.at) return false;
-    if (isDailyClubEvent(row)) return isPreviousCalendarDay(row.at);
     var tournamentDay = clubTournamentDayKey();
+    if (isDailyClubEvent(row)) {
+      return tournamentDay ? eventDayKey(row.at) === tournamentDay : isPreviousCalendarDay(row.at);
+    }
     return tournamentDay ? eventDayKey(row.at) === tournamentDay : isRecentEvent(row.at);
   }
 
   function compareClubEvents(a, b) {
     var sourceOrder = Number(isDailyClubEvent(a)) - Number(isDailyClubEvent(b));
-    return sourceOrder || eventTime(b && b.at) - eventTime(a && a.at);
+    var amountOrder = Math.max(0, Number(b && b.prizeAmount) || 0) - Math.max(0, Number(a && a.prizeAmount) || 0);
+    return sourceOrder || amountOrder || eventTime(b && b.at) - eventTime(a && a.at);
   }
 
   function eventDateLabel(value, includeYear) {
@@ -625,6 +628,7 @@
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
         text: displayName + " " + action + (detail ? " · " + detail : ""),
+        prizeAmount: reward,
         at: row.date,
         target: "winter-rating",
         actorId: friendId(friend),
@@ -655,6 +659,7 @@
       var shared = {
         type: "achievement",
         icon: "◆",
+        prizeAmount: reward,
         at: row && row.date,
         target: "winter-rating",
         actorId: friendId(friend),
@@ -811,16 +816,20 @@
         var winnerNames = [winner && winner.pokerPlusNickname, winner && winner.pokerPlusName, winner && winner.displayName];
         for (var ni = 0; ni < winnerNames.length && !friend; ni += 1) friend = byName[matchKey(winnerNames[ni])];
       }
-      if (!friend || !isRecentEvent(winner && winner.lastWonAt)) return null;
-      var prize = String((winner && (winner.lastPrize || winner.bestPrize || winner.prize)) || "").trim();
+      var premiumHandAt = String(winner && winner.lastPremiumHandAt || "").trim();
+      if (!friend || !isRecentEvent(premiumHandAt)) return null;
+      var prize = String(winner && winner.lastPremiumHandPrize || "").trim();
+      var handRank = String(winner && winner.lastPremiumHandRank || "").trim();
+      var handName = String(winner && winner.lastPremiumHandName || "Выигрышную комбинацию").trim();
       var prizeRub = Number(String(prize).replace(/[^\d.,-]/g, "").replace(/\s/g, "").replace(",", ".")) || 0;
-      if (prizeRub === 50) return null;
+      if (["full_house", "four_of_a_kind", "straight_flush", "royal_flush"].indexOf(handRank) === -1 || !prize || prizeRub <= 0) return null;
       return {
-        id: "daily:" + String(winner.id || "") + ":" + String(winner.lastWonAt || winner.bestPrize || prize),
+        id: "daily:" + String(winner.id || "") + ":premium-hand:" + handRank + ":" + premiumHandAt,
         type: "daily",
         icon: "★",
-        text: friendName(friend) + " выиграл" + (prize ? " " + prize : "") + " в Крутке дня",
-        at: winner.lastWonAt || "",
+        text: friendName(friend) + " выиграл " + prize + " за комбинацию «" + handName + "» в Крутке дня",
+        prizeAmount: prizeRub,
+        at: premiumHandAt,
         target: "daily-poker",
       };
     }).filter(Boolean);
@@ -1810,10 +1819,17 @@
     renderClubNews();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
+    var tournamentDay = clubTournamentDayKey();
+    var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
     var request = Promise.all([
       cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [], failed: true }; }),
-      cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100", "club-news-daily:" + suffix, 60 * 1000, { cache: "default" })
+      cachedFetchJson(
+        base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100" + dailyRangeQuery,
+        "club-news-daily:" + (tournamentDay || "latest") + ":" + suffix,
+        60 * 1000,
+        { cache: "default" }
+      )
         .catch(function () { return { winners: [], failed: true }; }),
     ]).then(function (results) {
       if ((results[0] && results[0].failed) || (results[1] && results[1].failed)) {
