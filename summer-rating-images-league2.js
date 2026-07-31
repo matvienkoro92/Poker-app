@@ -297,24 +297,29 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-19-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-19-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-19-07-2026-league2-ok-21h.jpg",
-    "rating-compressed-preview/rating-19-07-2026-league2-energetiktournament-22h.jpg"
+    "rating-compressed-preview/rating-19-07-2026-league2-energetiktournament-22h.jpg",
+    "rating-compressed-preview/rating-19-07-2026-league2-magic-bounty-50k-11h.jpg"
   ],
   "20.07.2026": [
     "rating-compressed-preview/rating-20-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-20-07-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-20-07-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-20-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-20-07-2026-league2-bounty-200-40k-gtd-14h.jpg"
   ],
   "21.07.2026": [
     "rating-compressed-preview/rating-21-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-21-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-21-07-2026-league2-turnir-vtornika-18h.jpg",
     "rating-compressed-preview/rating-21-07-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-21-07-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-21-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-21-07-2026-league2-deep-night-15k-02h.jpg"
   ],
   "22.07.2026": [
     "rating-compressed-preview/rating-22-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-22-07-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-22-07-2026-league2-turnir-sredy-18h.jpg"
+    "rating-compressed-preview/rating-22-07-2026-league2-turnir-sredy-18h.jpg",
+    "rating-compressed-preview/rating-22-07-2026-league2-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-22-07-2026-league2-hyper-turbo-300-20h.jpg"
   ],
   "23.07.2026": [
     "rating-compressed-preview/rating-23-07-2026-league2-tournament-rebuy-14h.jpg",
@@ -323,26 +328,36 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-23-07-2026-league2-tournament-plo6-20h.jpg"
   ],
   "24.07.2026": [
-    "rating-compressed-preview/rating-24-07-2026-league2-tournament-rebuy-14h.jpg"
+    "rating-compressed-preview/rating-24-07-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-24-07-2026-league2-bounty-200-40k-gtd-14h.jpg",
+    "rating-compressed-preview/rating-24-07-2026-league2-new-plo5-300-19h.jpg"
   ],
   "25.07.2026": [
     "rating-compressed-preview/rating-25-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-25-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-25-07-2026-league2-mok-17h-2.jpg",
     "rating-compressed-preview/rating-25-07-2026-league2-subbotnij-sat-1m56-18h.jpg",
-    "rating-compressed-preview/rating-25-07-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-25-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-magic-bounty-50k-11h.jpg",
+    "rating-compressed-preview/rating-25-07-2026-league2-hyper-turbo-300-20h.jpg"
   ],
   "26.07.2026": [
     "rating-compressed-preview/rating-26-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-26-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-26-07-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-26-07-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-26-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-magic-bounty-50k-11h.jpg",
+    "rating-compressed-preview/rating-26-07-2026-league2-plo4-20k-16h.jpg"
   ],
   "27.07.2026": [
     "rating-compressed-preview/rating-27-07-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-27-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-27-07-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-27-07-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-27-07-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-kg-plo6-2-09h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-new-plo5-300-19h.jpg",
+    "rating-compressed-preview/rating-27-07-2026-league2-hyper-turbo-300-20h.jpg"
   ],
   "28.07.2026": [
     "rating-compressed-preview/rating-28-07-2026-league2-mok-17h.jpg",

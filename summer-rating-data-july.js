@@ -4390,6 +4390,20 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 90
         }
       ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 1,
+          "reward": 13209,
+          "points": 135
+        }
+      ]
     }
   ],
   "20.07.2026": [
@@ -4630,6 +4644,26 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 40K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 3,
+          "reward": 2646,
+          "points": 90
+        },
+        {
+          "nick": "XP3276334",
+          "place": 11,
+          "reward": 911,
+          "points": 0
+        }
+      ]
     }
   ],
   "21.07.2026": [
@@ -4852,6 +4886,20 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "funtik",
+          "place": 2,
+          "reward": 4193,
+          "points": 110
+        }
+      ]
     }
   ],
   "22.07.2026": [
@@ -5024,6 +5072,34 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "place": 8,
           "reward": 2007.9999999999998,
           "points": 30
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 6383,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Lorenco",
+          "place": 3,
+          "reward": 7973.999999999999,
+          "points": 90
         }
       ]
     }
@@ -5464,6 +5540,40 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 40
         }
       ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 40K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 3,
+          "reward": 4167,
+          "points": 90
+        },
+        {
+          "nick": "Malek3084",
+          "place": 6,
+          "reward": 2051,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "NEW PLO5 300",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 8,
+          "reward": 526,
+          "points": 30
+        }
+      ]
     }
   ],
   "25.07.2026": [
@@ -5746,6 +5856,34 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "B5510B",
+          "place": 5,
+          "reward": 1655,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 3546,
+          "points": 90
+        }
+      ]
     }
   ],
   "26.07.2026": [
@@ -5932,6 +6070,54 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "place": 2,
           "reward": 11441,
           "points": 110
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "Deep Night 15k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "funtik",
+          "place": 2,
+          "reward": 3876,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50k",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 10317,
+          "points": 135
+        },
+        {
+          "nick": "B5510B",
+          "place": 9,
+          "reward": 126,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 20K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 7,
+          "reward": 1141,
+          "points": 40
         }
       ]
     }
@@ -6234,6 +6420,48 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "place": 3,
           "reward": 24219,
           "points": 90
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 7951.000000000001,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "NEW PLO5 300",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 6,
+          "reward": 1507,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ферапонт",
+          "place": 4,
+          "reward": 5591,
+          "points": 70
         }
       ]
     }
