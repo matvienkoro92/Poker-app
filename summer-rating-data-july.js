@@ -1884,8 +1884,18 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 800,
       "league": 1,
       "players": [
-        { "nick": "Киса", "place": 1, "reward": 14400, "points": 135 },
-        { "nick": "Hakas", "place": 5, "reward": 2000, "points": 60 }
+        {
+          "nick": "Киса",
+          "place": 1,
+          "reward": 14400,
+          "points": 135
+        },
+        {
+          "nick": "Hakas",
+          "place": 5,
+          "reward": 2000,
+          "points": 60
+        }
       ]
     },
     {
@@ -1894,10 +1904,30 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 100,
       "league": 2,
       "players": [
-        { "nick": "Stepchik", "place": 1, "reward": 2200, "points": 135 },
-        { "nick": "WildBoar", "place": 2, "reward": 1430, "points": 110 },
-        { "nick": "мистерFox", "place": 3, "reward": 590, "points": 90 },
-        { "nick": "Mary", "place": 5, "reward": 400, "points": 60 }
+        {
+          "nick": "Stepchik",
+          "place": 1,
+          "reward": 2200,
+          "points": 135
+        },
+        {
+          "nick": "WildBoar",
+          "place": 2,
+          "reward": 1430,
+          "points": 110
+        },
+        {
+          "nick": "мистерFox",
+          "place": 3,
+          "reward": 590,
+          "points": 90
+        },
+        {
+          "nick": "Mary",
+          "place": 5,
+          "reward": 400,
+          "points": 60
+        }
       ]
     },
     {
@@ -1906,8 +1936,18 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 300,
       "league": 2,
       "players": [
-        { "nick": "itachi", "place": 2, "reward": 11655, "points": 110 },
-        { "nick": "Hakas", "place": 3, "reward": 350, "points": 90 }
+        {
+          "nick": "itachi",
+          "place": 2,
+          "reward": 11655,
+          "points": 110
+        },
+        {
+          "nick": "Hakas",
+          "place": 3,
+          "reward": 350,
+          "points": 90
+        }
       ]
     },
     {
@@ -1916,11 +1956,36 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 500,
       "league": 1,
       "players": [
-        { "nick": "🦈Shark-Eyed🦈", "place": 2, "reward": 37300, "points": 110 },
-        { "nick": "kriak", "place": 4, "reward": 8830, "points": 70 },
-        { "nick": "Надзор", "place": 3, "reward": 7620, "points": 90 },
-        { "nick": "@Felix", "place": 6, "reward": 4380, "points": 50 },
-        { "nick": "<Amaliya>", "place": 14, "reward": 2570, "points": 0 }
+        {
+          "nick": "🦈Shark-Eyed🦈",
+          "place": 2,
+          "reward": 37300,
+          "points": 110
+        },
+        {
+          "nick": "kriak",
+          "place": 4,
+          "reward": 8830,
+          "points": 70
+        },
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 7620,
+          "points": 90
+        },
+        {
+          "nick": "@Felix",
+          "place": 6,
+          "reward": 4380,
+          "points": 50
+        },
+        {
+          "nick": "<Amaliya>",
+          "place": 14,
+          "reward": 2570,
+          "points": 0
+        }
       ]
     },
     {
@@ -1929,7 +1994,12 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 100,
       "league": 2,
       "players": [
-        { "nick": "zagrebnagreb", "place": 5, "reward": 300, "points": 60 }
+        {
+          "nick": "zagrebnagreb",
+          "place": 5,
+          "reward": 300,
+          "points": 60
+        }
       ]
     },
     {
@@ -1938,9 +2008,24 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 800,
       "league": 1,
       "players": [
-        { "nick": "Waaar", "place": 1, "reward": 19500, "points": 135 },
-        { "nick": "Пряник", "place": 2, "reward": 11260, "points": 110 },
-        { "nick": "ПокерМанки", "place": 3, "reward": 5800, "points": 90 }
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 19500,
+          "points": 135
+        },
+        {
+          "nick": "Пряник",
+          "place": 2,
+          "reward": 11260,
+          "points": 110
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 5800,
+          "points": 90
+        }
       ]
     },
     {
@@ -1949,8 +2034,78 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "buyin": 200,
       "league": 2,
       "players": [
-        { "nick": "MilkyWay77", "place": 2, "reward": 4630, "points": 110 },
-        { "nick": "мистерFox", "place": 3, "reward": 1890, "points": 90 }
+        {
+          "nick": "MilkyWay77",
+          "place": 2,
+          "reward": 4630,
+          "points": 110
+        },
+        {
+          "nick": "мистерFox",
+          "place": 3,
+          "reward": 1890,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 🌊 1/2 KO🎯15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 3,
+          "reward": 20.65,
+          "points": 90
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 2,
+          "reward": 17.67,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 109.06,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New – Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 7,
+          "reward": 26.1,
+          "points": 40
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 4,
+          "reward": 25.35,
+          "points": 70
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 8,
+          "reward": 8.21,
+          "points": 30
+        }
       ]
     }
   ],
@@ -2088,6 +2243,68 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "place": 8,
           "reward": 115,
           "points": 30
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 176.75,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏇 Bounty 🥊 100k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 1,
+          "reward": 455.07,
+          "points": 135
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 22,
+          "reward": 12.78,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "PLO4 PKO 🥊 20K🏆",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RikAnrak",
+          "place": 1,
+          "reward": 115.56,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 107.31,
+          "points": 60
         }
       ]
     }
