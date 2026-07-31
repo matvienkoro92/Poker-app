@@ -32,6 +32,7 @@
   var clubNewsLoadPromise = null;
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
+  var clubProfileByNick = {};
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -286,13 +287,36 @@
   }
 
   function friendAvatar(row) {
-    return String(row && (
+    var value = String(row && (
       row.avatarUrl ||
       row.avatar ||
       row.photoUrl ||
       row.pokerPlusAvatarUrl ||
       row.profileAvatarUrl
     ) || "").trim();
+    var presets = {
+      tiger: "./assets/avatar-tiger.jpg", raccoon: "./assets/avatar-raccoon.jpg", skull: "./assets/avatar-skull.jpg",
+      phoenix: "./assets/avatar-phoenix.jpg", octopus: "./assets/avatar-octopus.jpg", cat: "./assets/avatar-cat.jpg",
+      robot: "./assets/avatar-robot.jpg", bulldog: "./assets/avatar-bulldog.jpg", monkey: "./assets/daily-poker-monkey.webp",
+      fox: "./assets/avatar-fox.jpg", chip: "./assets/avatar-chip.jpg", koala: "./assets/avatar-koala.jpg",
+      raven: "./assets/avatar-raven.jpg", crocodile: "./assets/avatar-crocodile.jpg", rabbit: "./assets/avatar-rabbit.jpg",
+      chameleon: "./assets/avatar-chameleon.jpg", panda: "./assets/avatar-panda.jpg", wolf: "./assets/avatar-wolf.jpg",
+      owl: "./assets/avatar-owl.jpg", bat: "./assets/avatar-bat.jpg", gorilla: "./assets/avatar-gorilla.jpg",
+    };
+    return value.indexOf("preset:") === 0 ? (presets[value.slice(7)] || "") : value;
+  }
+
+  function clubNewsFallbackAvatar(value) {
+    var avatars = [
+      "./assets/avatar-tiger.jpg", "./assets/avatar-raccoon.jpg", "./assets/avatar-phoenix.jpg",
+      "./assets/avatar-octopus.jpg", "./assets/avatar-cat.jpg", "./assets/avatar-robot.jpg",
+      "./assets/daily-poker-monkey.webp", "./assets/avatar-fox.jpg", "./assets/avatar-koala.jpg",
+      "./assets/avatar-raven.jpg", "./assets/avatar-panda.jpg", "./assets/avatar-wolf.jpg",
+    ];
+    var source = matchKey(value) || "player";
+    var hash = 0;
+    for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    return avatars[hash % avatars.length];
   }
 
   function playerNewsColor(value) {
@@ -320,7 +344,7 @@
         return candidate.nick && text.indexOf(candidate.nick) !== -1;
       });
       if (!actor) return row;
-      var color = playerNewsColor(actor.id || actor.nickKey || actor.nick);
+      var color = playerNewsColor(actor.nickKey || actor.nick || actor.id);
       return Object.assign({}, row, {
         actorAvatar: actor.avatar || row.actorAvatar || "",
         actorId: row.actorId || actor.id,
@@ -1108,8 +1132,10 @@
   function syncNewsModalHeading() {
     var title = el("homeFriendNewsModalTitle");
     var eyebrow = el("homeFriendNewsModalEyebrow");
+    var modal = el("homeFriendNewsModal");
     if (title) title.textContent = newsModalMode === "club" ? "Новости клуба за вчера" : "Новости друзей";
     if (eyebrow) eyebrow.textContent = newsModalMode === "club" ? "Клуб · события дня" : "Друзья и клуб";
+    if (modal) modal.classList.toggle("home-friend-news-modal--club", newsModalMode === "club");
   }
 
   function loadActiveModalFeedback(rows) {
@@ -1206,10 +1232,13 @@
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerId) {
+          var playerName = playerCard.getAttribute("data-home-news-player-name") || "Игрок";
+          var linkedProfile = clubProfileByNick[matchKey(playerName)];
+          if (String(playerId).indexOf("rating:") === 0 && linkedProfile) playerId = linkedProfile.id || playerId;
           handoffNewsModalToPlayer(
             playerId,
-            playerCard.getAttribute("data-home-news-player-name") || "Игрок",
-            playerCard.getAttribute("data-home-news-player-avatar") || ""
+            playerName,
+            linkedProfile && linkedProfile.avatar || playerCard.getAttribute("data-home-news-player-avatar") || ""
           );
           return;
         }
@@ -1405,7 +1434,12 @@
       var key = matchKey(nick);
       if (!key || knownNicks[key]) return;
       knownNicks[key] = true;
-      allPlayers.push({ userId: "rating:" + key, pokerPlusNickname: nick, pokerPlusName: nick });
+      allPlayers.push({
+        userId: "rating:" + key,
+        pokerPlusNickname: nick,
+        pokerPlusName: nick,
+        avatarUrl: clubNewsFallbackAvatar(nick),
+      });
     });
     var snapshots = { __recentEvents: sourceRows };
     return attachFriendAvatars(
@@ -1457,6 +1491,12 @@
           pokerPlusNickname: row && (row.pokerPlusNickname || row.ratingNick || row.nickname || row.nick) || "",
           pokerPlusName: row && (row.pokerPlusName || row.name || row.displayName) || "",
         });
+      });
+      clubProfileByNick = {};
+      players.forEach(function (row) {
+        var key = matchKey(row && row.pokerPlusNickname);
+        if (!key) return;
+        clubProfileByNick[key] = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(key) };
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var nextClubEvents = buildClubEventsFromRows(players, winners);

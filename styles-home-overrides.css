@@ -376,6 +376,20 @@ html[data-theme="gold"] body[data-view="home"] {
   border-bottom: 0;
 }
 
+.home-friend-news-modal--club .home-friend-news-modal__day-events {
+  display: grid;
+  gap: 7px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item {
+  overflow: hidden;
+  border: 1px solid rgba(142, 160, 184, 0.16);
+  border-radius: 14px;
+}
+
 .home-friend-news-modal__item {
   --friend-news-accent: #6fd8ff;
   --friend-news-rgb: 111, 216, 255;
