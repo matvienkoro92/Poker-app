@@ -34,6 +34,144 @@ function setProfileTab(tab) {
   }
   if (activeTab === "poker21") initProfilePoker21Tabs();
   if (activeTab === "achievements") refreshProfileAchievementsShowcase();
+  if (activeTab === "club") setTimeout(refreshProfileOwnWall, 0);
+}
+
+var profileOwnWallState = { tab: "tournaments", tournaments: [], posts: [], accountId: "", loading: false };
+
+function profileOwnWallRequest(payload) {
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(payload) : payload;
+  return fetch(base + "/api/profile-wall", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (response) {
+    return response.json().then(function (data) {
+      if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка");
+      return data;
+    });
+  });
+}
+
+function profileOwnWallDate(value) {
+  var date = new Date(value || 0);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })
+    : "";
+}
+
+function profileOwnWallRows() {
+  if (profileOwnWallState.tab === "personal") {
+    return profileOwnWallState.posts.map(function (post) {
+      return { id: post.id, text: post.text, at: post.createdAt, pinned: !!post.pinned, editedAt: post.editedAt, personal: true };
+    });
+  }
+  return profileOwnWallState.tournaments;
+}
+
+function renderProfileOwnWall() {
+  var root = document.getElementById("profileOwnWall");
+  var list = document.getElementById("profileOwnWallList");
+  var count = document.getElementById("profileOwnWallCount");
+  var composer = document.getElementById("profileOwnWallComposer");
+  if (!root || !list) return;
+  var rows = profileOwnWallRows();
+  root.querySelectorAll("[data-profile-wall-tab]").forEach(function (button) {
+    var active = button.getAttribute("data-profile-wall-tab") === profileOwnWallState.tab;
+    button.classList.toggle("chat-user-modal__wall-tab--active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  if (composer) composer.hidden = profileOwnWallState.tab !== "personal";
+  if (count) count.textContent = rows.length + (profileOwnWallState.tab === "personal" ? " записей" : " событий");
+  if (!rows.length) {
+    list.innerHTML = '<div class="chat-user-modal__wall-empty"><strong>' +
+      (profileOwnWallState.tab === "personal" ? "На стене пока пусто" : "Турнирных событий пока нет") +
+      '</strong>' + (profileOwnWallState.tab === "personal" ? "<span>Напишите первую личную запись.</span>" : "") + "</div>";
+    return;
+  }
+  list.innerHTML = rows.map(function (row) {
+    var controls = row.personal
+      ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
+        '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
+      : "";
+    return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
+      '<span class="chat-user-modal__news-icon" aria-hidden="true">' + (row.personal ? "✎" : "♠") + "</span>" +
+      '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
+        "<strong>" + profileEscapeHtml(row.text || "") + "</strong>" +
+        '<small class="profile-own-wall__date">' + profileEscapeHtml(profileOwnWallDate(row.at)) + (row.editedAt ? " · изменено" : "") + "</small>" + controls +
+      "</span></article>";
+  }).join("");
+}
+
+function refreshProfileOwnWall() {
+  var root = document.getElementById("profileOwnWall");
+  if (!root || profileOwnWallState.loading || typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+  profileOwnWallState.loading = true;
+  var identity = {
+    userId: profilePublicCardMemberIdFromAuth() || profilePublicCardFallbackDtId(),
+    ratingNick: profilePublicShowcaseLatestRatingNick || profilePublicCardDisplayName(),
+    name: profilePublicCardDisplayName(),
+    avatarUrl: profilePublicCardAvatarUrl(),
+  };
+  var tournamentPromise = typeof window.pokerGetPlayerNews === "function"
+    ? Promise.resolve(window.pokerGetPlayerNews(identity))
+    : Promise.resolve([]);
+  Promise.all([
+    profileOwnWallRequest({ action: "list", targetUserId: identity.userId }),
+    tournamentPromise.catch(function () { return []; }),
+  ]).then(function (results) {
+    profileOwnWallState.posts = Array.isArray(results[0].posts) ? results[0].posts : [];
+    profileOwnWallState.accountId = String(results[0].accountId || "");
+    profileOwnWallState.tournaments = Array.isArray(results[1]) ? results[1] : [];
+    renderProfileOwnWall();
+  }).catch(function () {
+    renderProfileOwnWall();
+  }).finally(function () {
+    profileOwnWallState.loading = false;
+  });
+}
+
+function initProfileOwnWall() {
+  var root = document.getElementById("profileOwnWall");
+  if (!root || root.dataset.bound === "1") return;
+  root.dataset.bound = "1";
+  root.addEventListener("click", function (event) {
+    var tab = event.target.closest("[data-profile-wall-tab]");
+    if (tab) {
+      profileOwnWallState.tab = tab.getAttribute("data-profile-wall-tab") === "personal" ? "personal" : "tournaments";
+      renderProfileOwnWall();
+      return;
+    }
+    var edit = event.target.closest("[data-profile-wall-edit]");
+    var pin = event.target.closest("[data-profile-wall-pin]");
+    if (!edit && !pin) return;
+    var id = (edit || pin).getAttribute(edit ? "data-profile-wall-edit" : "data-profile-wall-pin");
+    var post = profileOwnWallState.posts.find(function (row) { return String(row.id) === String(id); });
+    if (!post) return;
+    var nextText = post.text;
+    if (edit) {
+      nextText = window.prompt("Редактировать запись", post.text);
+      if (nextText == null || !String(nextText).trim()) return;
+    }
+    profileOwnWallRequest({ action: edit ? "edit" : "pin", postId: id, text: nextText }).then(function (data) {
+      profileOwnWallState.posts = data.posts || [];
+      renderProfileOwnWall();
+    });
+  });
+  var composer = document.getElementById("profileOwnWallComposer");
+  if (composer) composer.addEventListener("submit", function (event) {
+    event.preventDefault();
+    var input = document.getElementById("profileOwnWallText");
+    var text = String(input && input.value || "").trim();
+    if (!text) return;
+    profileOwnWallRequest({ action: "create", text: text }).then(function (data) {
+      profileOwnWallState.posts = data.posts || [];
+      if (input) input.value = "";
+      renderProfileOwnWall();
+    });
+  });
+  refreshProfileOwnWall();
 }
 
 function setProfilePoker21Tab(tab) {
@@ -86,6 +224,7 @@ function initProfileTabs() {
   initProfilePublicCardButton();
   initProfilePublicShowcase();
   initProfileAchievementsShowcase();
+  initProfileOwnWall();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
     setTimeout(function () {

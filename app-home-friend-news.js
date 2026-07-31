@@ -791,6 +791,32 @@
     return out;
   }
 
+  function personalPostEvents(friends, posts) {
+    var byId = {};
+    (friends || []).forEach(function (friend) {
+      [friendId(friend), friend && friend.accountId, friend && friend.dtId].forEach(function (id) {
+        id = String(id || "").trim();
+        if (id) byId[id] = friend;
+      });
+    });
+    return (Array.isArray(posts) ? posts : []).map(function (post) {
+      var accountId = String(post && post.accountId || "").trim();
+      var friend = byId[accountId];
+      var text = String(post && post.text || "").trim();
+      if (!friend || !text || !isRecentEvent(post.createdAt)) return null;
+      return {
+        id: "wall:" + accountId + ":" + String(post.id || ""),
+        type: "personal",
+        icon: "✎",
+        text: friendName(friend) + " написал: " + text,
+        at: post.createdAt,
+        actorId: friendId(friend) || accountId,
+        actorNick: friendName(friend),
+        actorAvatar: friendAvatar(friend),
+      };
+    }).filter(Boolean);
+  }
+
   function eventIconSvg(type) {
     var icons = {
       friend: '<svg viewBox="0 0 24 24"><path d="M8.2 11.2a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z"/><path d="M2.6 19.5v-1.1c0-2.8 2.5-5 5.6-5 1.2 0 2.3.3 3.2.9"/><path d="M16.7 10.1v7.2M13.1 13.7h7.2"/></svg>',
@@ -799,6 +825,7 @@
       achievement: '<svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"/></svg>',
       daily: '<svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="4.3"/><path d="m12 9.3.8 1.7 1.9.2-1.4 1.3.4 1.9-1.7-.9-1.7.9.4-1.9-1.4-1.3 1.9-.2.8-1.7Z"/></svg>',
       birthday: '<svg viewBox="0 0 24 24"><path d="M4 12h16v8H4v-8ZM3 9h18v4H3V9Z"/><path d="M12 9v11M12 9H8.5a2.5 2.5 0 1 1 2.5-2.5L12 9Zm0 0h3.5A2.5 2.5 0 1 0 13 6.5L12 9Z"/></svg>',
+      personal: '<svg viewBox="0 0 24 24"><path d="M5 4h14v13H9l-4 3V4Z"/><path d="M8 8h8M8 12h6"/></svg>',
       empty: '<svg viewBox="0 0 24 24"><path d="M8.5 19h7M10 15h4M12 3a6 6 0 0 1 3.8 10.6c-.9.7-1.3 1.2-1.3 2.4h-5c0-1.2-.4-1.7-1.3-2.4A6 6 0 0 1 12 3Z"/></svg>',
     };
     return icons[type] || icons.achievement;
@@ -1200,6 +1227,14 @@
           .catch(function () { return { raffles: [] }; }),
         cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { levelRows: [] }; }),
+        fetch(base + "/api/profile-wall", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(typeof pokerApiAuthJsonBody === "function"
+            ? pokerApiAuthJsonBody({ action: "friend-feed" })
+            : { action: "friend-feed" }),
+        }).then(function (response) { return response.json(); })
+          .catch(function () { return { posts: [] }; }),
       ]);
     }).then(function (results) {
       if (!results || requestSequence !== loadSequence) return;
@@ -1217,6 +1252,7 @@
       );
       events = attachFriendAvatars(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
+        personalPostEvents(friends, results[7] && results[7].posts),
         collectTournamentEvents(friends, tournamentSnapshots),
         recentTournamentEvents(friends, tournamentSnapshots),
         recentTournamentAchievementEvents(friends, tournamentSnapshots),

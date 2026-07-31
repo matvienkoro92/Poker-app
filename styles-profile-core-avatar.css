@@ -2197,6 +2197,56 @@ body.profile-avatar-choice-open {
     inset 0 0 0 1px rgba(255, 232, 166, 0.08),
     0 0 24px rgba(255, 118, 0, 0.12);
 }
+.view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 0.72fr);
+  align-items: start;
+  gap: 22px;
+}
+.view[data-view="profile"] .profile-public-showcase__self-actions {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 4px;
+}
+.view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.view[data-view="profile"] .profile-public-showcase__self-actions #profileHeroCity.profile-hero-city {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-top: 0 !important;
+}
+.view[data-view="profile"] .profile-own-wall {
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(197, 139, 47, 0.68);
+  border-radius: 24px;
+  background: #101925;
+  color: #eef4ff;
+}
+.view[data-view="profile"] .profile-own-wall .chat-user-modal__news-heading {
+  padding: 20px 22px 14px;
+}
+.view[data-view="profile"] .profile-own-wall__list {
+  padding-bottom: 14px;
+}
+.view[data-view="profile"] .profile-own-wall__date {
+  margin-top: 5px;
+  color: #8ea0b8;
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+    grid-template-columns: 1fr;
+  }
+  .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
+    justify-content: flex-start;
+  }
+}
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__rating-art {
   grid-column: 1;
   grid-row: 1;

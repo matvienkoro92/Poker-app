@@ -139,7 +139,13 @@ if (chatUserModalEl) {
   var modalNewsDialog = document.getElementById("chatUserModalNewsDialog");
   var modalNewsTitle = document.getElementById("chatUserModalNewsTitle");
   var modalNewsFullList = document.getElementById("chatUserModalNewsFullList");
+  var modalWallComposer = document.getElementById("chatUserModalWallComposer");
+  var modalWallText = document.getElementById("chatUserModalWallText");
   var chatUserModalNewsRows = [];
+  var chatUserModalWallPosts = [];
+  var chatUserModalWallCanManage = false;
+  var chatUserModalWallAccountId = "";
+  var chatUserModalWallTab = "tournaments";
   var chatUserModalNewsSeq = 0;
   var chatUserModalNewsFeedback = {};
   var chatUserModalNewsCommentsOpen = {};
@@ -511,6 +517,7 @@ if (chatUserModalEl) {
       achievement: '<svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"/></svg>',
       daily: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>',
       birthday: '<svg viewBox="0 0 24 24"><path d="M4 12h16v8H4v-8ZM3 9h18v4H3V9Z"/><path d="M12 9v11M12 9H8.5a2.5 2.5 0 1 1 2.5-2.5L12 9Zm0 0h3.5A2.5 2.5 0 1 0 13 6.5L12 9Z"/></svg>',
+      personal: '<svg viewBox="0 0 24 24"><path d="M5 4h14v13H9l-4 3V4Z"/><path d="M8 8h8M8 12h6"/></svg>',
     };
     return icons[type] || icons.achievement;
   }
@@ -547,10 +554,22 @@ if (chatUserModalEl) {
             '</button><p>' + escapeHtml(comment.text || "") + "</p></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
+    var wallControls = type === "personal" && chatUserModalWallCanManage
+      ? '<span class="chat-user-modal__wall-controls">' +
+          '<button type="button" data-wall-edit="' + escapeHtml(row.postId || "") + '">Редактировать</button>' +
+          '<button type="button" data-wall-pin="' + escapeHtml(row.postId || "") + '">' +
+            (row.pinned ? "Открепить" : "Закрепить") +
+          "</button>" +
+        "</span>"
+      : "";
+    var pinBadge = type === "personal" && row.pinned
+      ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>'
+      : "";
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
       '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
       '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
-      '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong>" +
+      '<span class="chat-user-modal__news-copy">' + pinBadge + '<strong>' + escapeHtml(row && row.text || "") + "</strong>" +
+        (row && row.editedAt ? '<small class="chat-user-modal__wall-edited">изменено</small>' : "") + wallControls +
         '<span class="chat-user-modal__news-actions"><span class="chat-user-modal__news-actions-label">Реакция</span>' + reactionButtons +
           '<button type="button" class="chat-user-modal__news-comment-toggle' +
             (chatUserModalNewsCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
@@ -601,20 +620,101 @@ if (chatUserModalEl) {
     if (modalNewsAll) modalNewsAll.hidden = true;
     if (modalNews) modalNews.hidden = false;
   }
+  function chatUserModalWallRows() {
+    return chatUserModalWallPosts.map(function (post) {
+      return {
+        id: "wall:" + String(chatUserModalWallAccountId || chatUserModalUserId || "") + ":" + String(post.id || ""),
+        postId: String(post.id || ""),
+        type: "personal",
+        text: String(post.text || ""),
+        at: post.createdAt,
+        editedAt: post.editedAt,
+        pinned: !!post.pinned,
+      };
+    });
+  }
+  function chatUserModalWallEmpty() {
+    return '<div class="chat-user-modal__wall-empty">' +
+      (chatUserModalWallCanManage
+        ? "<strong>На стене пока пусто</strong><span>Напишите первую личную запись.</span>"
+        : "<strong>Личных записей пока нет</strong>") +
+    "</div>";
+  }
+  function chatUserModalActiveRows() {
+    return chatUserModalWallTab === "personal" ? chatUserModalWallRows() : chatUserModalNewsRows;
+  }
+  function syncChatUserModalWallTabs() {
+    document.querySelectorAll("[data-wall-tab]").forEach(function (button) {
+      var active = button.getAttribute("data-wall-tab") === chatUserModalWallTab;
+      button.classList.toggle("chat-user-modal__wall-tab--active", active);
+      button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    if (modalWallComposer) modalWallComposer.hidden = !(chatUserModalWallTab === "personal" && chatUserModalWallCanManage);
+  }
+  function renderChatUserModalWall() {
+    var rows = chatUserModalActiveRows();
+    var content = rows.length ? chatUserModalNewsGroups(rows) : chatUserModalWallEmpty();
+    if (modalNewsList) modalNewsList.innerHTML = rows.length > 5 ? chatUserModalNewsGroups(rows.slice(0, 5)) : content;
+    if (modalNewsCount) modalNewsCount.textContent = rows.length + (chatUserModalWallTab === "personal" ? " записей" : " событий");
+    if (modalNewsAll) modalNewsAll.hidden = !rows.length;
+    if (modalNews) modalNews.hidden = false;
+    if (modalNewsDialog && !modalNewsDialog.hidden && modalNewsFullList) modalNewsFullList.innerHTML = content;
+    syncChatUserModalWallTabs();
+  }
+  function chatUserModalWallRequest(payload) {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(payload) : payload;
+    return fetch(base + "/api/profile-wall", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then(function (response) {
+      return response.json().then(function (data) {
+        if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка");
+        return data;
+      });
+    });
+  }
+  function loadChatUserModalWall(seq) {
+    return chatUserModalWallRequest({
+      action: "list",
+      targetUserId: chatUserModalUserId,
+    }).then(function (data) {
+      if (seq !== chatUserModalNewsSeq) return;
+      chatUserModalWallPosts = Array.isArray(data.posts) ? data.posts : [];
+      chatUserModalWallCanManage = data.canManage === true;
+      chatUserModalWallAccountId = String(data.accountId || "");
+      renderChatUserModalWall();
+      var ids = chatUserModalWallRows().map(function (row) { return row.id; });
+      if (ids.length) {
+        chatUserModalFeedbackRequest({ action: "list", eventIds: ids }).then(function (feedbackData) {
+          if (seq !== chatUserModalNewsSeq) return;
+          Object.assign(chatUserModalNewsFeedback, feedbackData.feedback || {});
+          renderChatUserModalWall();
+        }).catch(function () {});
+      }
+    }).catch(function () {
+      if (seq !== chatUserModalNewsSeq) return;
+      chatUserModalWallPosts = [];
+      chatUserModalWallCanManage = chatUserModalEl.classList.contains("chat-user-modal--self");
+      renderChatUserModalWall();
+    });
+  }
   function applyChatUserModalNewsRows(rows, seq) {
     if (seq !== chatUserModalNewsSeq) return false;
     var nextRows = Array.isArray(rows) ? rows : [];
     if (!nextRows.length) return false;
     chatUserModalNewsRows = nextRows;
-    if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
-    if (modalNewsCount) modalNewsCount.textContent = chatUserModalNewsRows.length + " событий";
-    if (modalNewsAll) modalNewsAll.hidden = false;
-    if (modalNews) modalNews.hidden = false;
+    renderChatUserModalWall();
     return true;
   }
   function resetChatUserModalNews() {
     chatUserModalNewsSeq += 1;
     chatUserModalNewsRows = [];
+    chatUserModalWallPosts = [];
+    chatUserModalWallCanManage = false;
+    chatUserModalWallAccountId = "";
+    chatUserModalWallTab = "tournaments";
     chatUserModalNewsFeedback = {};
     chatUserModalNewsCommentsOpen = {};
     if (modalNews) modalNews.hidden = true;
@@ -624,8 +724,9 @@ if (chatUserModalEl) {
   function loadChatUserModalNews(identity) {
     var seq = ++chatUserModalNewsSeq;
     showChatUserModalNewsLoading();
+    loadChatUserModalWall(seq);
     if (typeof window.pokerGetPlayerNews !== "function") {
-      if (modalNews) modalNews.hidden = true;
+      renderChatUserModalWall();
       return;
     }
     var cachedRows = typeof window.pokerReadCachedPlayerNews === "function"
@@ -638,20 +739,14 @@ if (chatUserModalEl) {
       },
     })).then(function (rows) {
       if (seq !== chatUserModalNewsSeq) return;
-      if (!applyChatUserModalNewsRows(rows, seq)) {
-        if (modalNews) modalNews.hidden = true;
-        return;
-      }
+      if (!applyChatUserModalNewsRows(rows, seq)) renderChatUserModalWall();
       loadChatUserModalNewsFeedback();
     }).catch(function () {
-      if (seq === chatUserModalNewsSeq && modalNews) modalNews.hidden = true;
+      if (seq === chatUserModalNewsSeq) renderChatUserModalWall();
     });
   }
   function renderChatUserModalNewsRows() {
-    if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
-    if (modalNewsDialog && !modalNewsDialog.hidden && modalNewsFullList) {
-      modalNewsFullList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows);
-    }
+    renderChatUserModalWall();
   }
   function chatUserModalFeedbackRequest(payload) {
     var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -681,6 +776,39 @@ if (chatUserModalEl) {
   }
   function handleChatUserModalNewsInteraction(event) {
     var target = event.target;
+    var wallTab = target && target.closest ? target.closest("[data-wall-tab]") : null;
+    if (wallTab) {
+      chatUserModalWallTab = wallTab.getAttribute("data-wall-tab") === "personal" ? "personal" : "tournaments";
+      renderChatUserModalWall();
+      return;
+    }
+    var editButton = target && target.closest ? target.closest("[data-wall-edit]") : null;
+    var pinButton = target && target.closest ? target.closest("[data-wall-pin]") : null;
+    if (editButton || pinButton) {
+      event.preventDefault();
+      var postId = (editButton || pinButton).getAttribute(editButton ? "data-wall-edit" : "data-wall-pin");
+      var post = chatUserModalWallPosts.find(function (row) { return String(row.id) === String(postId); });
+      if (!post) return;
+      var nextText = post.text;
+      if (editButton) {
+        nextText = window.prompt("Редактировать запись", post.text);
+        if (nextText == null || !String(nextText).trim()) return;
+      }
+      (editButton || pinButton).disabled = true;
+      chatUserModalWallRequest({
+        action: editButton ? "edit" : "pin",
+        targetUserId: chatUserModalUserId,
+        postId: postId,
+        text: nextText,
+      }).then(function (data) {
+        chatUserModalWallPosts = data.posts || [];
+        renderChatUserModalWall();
+      }).catch(function (error) {
+        (editButton || pinButton).disabled = false;
+        if (typeof alertText === "function") alertText(error.message || "Не удалось изменить запись");
+      });
+      return;
+    }
     var authorButton = target && target.closest ? target.closest("[data-profile-event-author]") : null;
     if (authorButton) {
       event.preventDefault();
@@ -719,6 +847,27 @@ if (chatUserModalEl) {
     }
   }
   function handleChatUserModalNewsSubmit(event) {
+    if (event.target === modalWallComposer) {
+      event.preventDefault();
+      var wallText = String(modalWallText && modalWallText.value || "").trim();
+      if (!wallText) return;
+      var publishButton = modalWallComposer.querySelector("button[type=submit]");
+      if (publishButton) publishButton.disabled = true;
+      chatUserModalWallRequest({
+        action: "create",
+        targetUserId: chatUserModalUserId,
+        text: wallText,
+      }).then(function (data) {
+        chatUserModalWallPosts = data.posts || [];
+        if (modalWallText) modalWallText.value = "";
+        if (publishButton) publishButton.disabled = false;
+        renderChatUserModalWall();
+      }).catch(function (error) {
+        if (publishButton) publishButton.disabled = false;
+        if (typeof alertText === "function") alertText(error.message || "Не удалось опубликовать запись");
+      });
+      return;
+    }
     var form = event.target && event.target.closest ? event.target.closest(".chat-user-modal__news-comment-form") : null;
     if (!form) return;
     event.preventDefault();
@@ -738,13 +887,13 @@ if (chatUserModalEl) {
     });
   }
   function openChatUserModalNews() {
-    if (!modalNewsDialog || !chatUserModalNewsRows.length) return;
-    if (modalNewsTitle) modalNewsTitle.textContent = "События · " + String(chatUserModalRatingNick || chatUserModalUserName || "игрок");
-    if (modalNewsFullList) modalNewsFullList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows);
+    if (!modalNewsDialog) return;
+    if (modalNewsTitle) modalNewsTitle.textContent = "Стена · " + String(chatUserModalRatingNick || chatUserModalUserName || "игрок");
     // Keep the full event dialog outside the scrollable profile card.
     // Otherwise mobile WebKit positions and clips the fixed dialog inside that card.
     if (modalNewsDialog.parentNode !== document.body) document.body.appendChild(modalNewsDialog);
     modalNewsDialog.hidden = false;
+    renderChatUserModalWall();
     if (modalNewsFullList) modalNewsFullList.scrollTop = 0;
   }
   function closeChatUserModalNews() {

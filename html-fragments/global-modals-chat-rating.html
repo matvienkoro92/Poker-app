@@ -115,9 +115,17 @@
           </div>
           <section class="chat-user-modal__news" id="chatUserModalNews" data-chat-user-profile-panel="main" hidden>
             <div class="chat-user-modal__news-heading">
-              <span>Последние события</span>
+              <span>Стена</span>
               <small id="chatUserModalNewsCount"></small>
             </div>
+            <div class="chat-user-modal__wall-tabs" role="tablist" aria-label="Разделы стены">
+              <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-wall-tab="tournaments">Турниры</button>
+              <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи</button>
+            </div>
+            <form class="chat-user-modal__wall-composer" id="chatUserModalWallComposer" hidden>
+              <textarea id="chatUserModalWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
+              <div><button type="submit" id="chatUserModalWallPublish">Опубликовать</button></div>
+            </form>
             <div class="chat-user-modal__news-list" id="chatUserModalNewsList"></div>
             <button type="button" class="chat-user-modal__news-all" id="chatUserModalNewsAll">Посмотреть все <span aria-hidden="true">›</span></button>
           </section>
@@ -125,9 +133,13 @@
             <button type="button" class="chat-user-modal__news-backdrop" data-chat-user-news-close aria-label="Закрыть события игрока"></button>
             <section class="chat-user-modal__news-panel" role="dialog" aria-modal="true" aria-labelledby="chatUserModalNewsTitle">
               <header class="chat-user-modal__news-panel-header">
-                <div><span>Профиль игрока</span><h3 id="chatUserModalNewsTitle">События игрока</h3></div>
+                <div><span>Профиль игрока</span><h3 id="chatUserModalNewsTitle">Стена игрока</h3></div>
                 <button type="button" class="chat-user-modal__news-close" data-chat-user-news-close aria-label="Закрыть">×</button>
               </header>
+              <div class="chat-user-modal__wall-tabs chat-user-modal__wall-tabs--dialog" role="tablist" aria-label="Разделы стены">
+                <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-wall-tab="tournaments">Турниры</button>
+                <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи</button>
+              </div>
               <div class="chat-user-modal__news-full-list" id="chatUserModalNewsFullList"></div>
             </section>
           </div>

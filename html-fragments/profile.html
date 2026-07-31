@@ -44,6 +44,9 @@
                       <span class="profile-public-showcase__age-badge" id="profilePublicAgeBadge" hidden></span>
                       <span class="profile-public-showcase__city-badge" id="profilePublicCityBadge" hidden></span>
                     </div>
+                  </div>
+                </div>
+                <div class="profile-public-showcase__self-actions" aria-label="Настройки своего профиля">
                     <div class="profile-public-showcase__identity-controls">
                       <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
                         <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
@@ -69,7 +72,6 @@
                     </label>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
-                  </div>
                 </div>
               </div>
               <div class="profile-chat-name profile-chat-name--editor profile-public-showcase__name-editor" id="profileChatNameEditor" hidden>
@@ -116,6 +118,21 @@
                   </section>
                 </div>
               </div>
+            </section>
+            <section class="profile-own-wall" id="profileOwnWall" data-profile-club-panel aria-labelledby="profileOwnWallTitle">
+              <div class="chat-user-modal__news-heading">
+                <span id="profileOwnWallTitle">Стена</span>
+                <small id="profileOwnWallCount">Загрузка…</small>
+              </div>
+              <div class="chat-user-modal__wall-tabs" role="tablist" aria-label="Разделы стены">
+                <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-profile-wall-tab="tournaments">Турниры</button>
+                <button type="button" class="chat-user-modal__wall-tab" data-profile-wall-tab="personal">Личные записи</button>
+              </div>
+              <form class="chat-user-modal__wall-composer" id="profileOwnWallComposer" hidden>
+                <textarea id="profileOwnWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
+                <div><button type="submit">Опубликовать</button></div>
+              </form>
+              <div class="chat-user-modal__news-list profile-own-wall__list" id="profileOwnWallList"></div>
             </section>
             <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
             <section class="profile-friends profile-friends--loading" id="profileFriendsPanel" data-profile-friends-panel aria-label="Друзья" aria-busy="true">
